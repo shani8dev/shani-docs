@@ -1,0 +1,22 @@
+{
+  "name": "Shanios Docs",
+  "short_name": "ShaniDocs",
+  "description": "Technical documentation for Shanios.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#161514",
+  "theme_color": "#161514",
+  "lang": "en-IN",
+  "icons": [
+    {
+      "src": "https://shani.dev/assets/images/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "reference",
+    "technology"
+  ]
+}
