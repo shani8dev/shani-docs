@@ -440,13 +440,15 @@ async function loadDoc(slug) {
 
 // ── Doc Renderer ──────────────────────────────────────────────────
 function parseFm(raw) {
-  const m = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+  const m = raw.replace(/^\uFEFF/, '').match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!m) return { fm: {}, body: raw };
   const fm = {};
   m[1].split(/\r?\n/).forEach(line => {
     const i = line.indexOf(':');
     if (i < 1) return;
-    fm[line.slice(0, i).trim()] = line.slice(i + 1).trim().replace(/^['"`]|['"`]$/g, '');
+    const rawVal = line.slice(i + 1).trim();
+    // Strip only the outermost matching quote pair — preserves URLs with colons
+    fm[line.slice(0, i).trim()] = rawVal.replace(/^(['"`])([\s\S]*)\1$/, '$2');
   });
   return { fm, body: m[2] };
 }
@@ -540,7 +542,10 @@ function renderDoc(slug, raw) {
         ${prev ? `<button class="doc-footer__btn" onclick="navigate('${prev.slug}')"><i class="fa-solid fa-arrow-left"></i> ${esc(prev.title)}</button>` : ''}
         ${next ? `<button class="doc-footer__btn" onclick="navigate('${next.slug}')"><i class="fa-solid fa-arrow-right"></i> ${esc(next.title)}</button>` : ''}
       </div>
-      <span class="doc-footer__edit"><i class="fa-brands fa-github"></i> <a href="https://github.com/${esc(CONFIG.GITHUB_USER)}/${esc(CONFIG.GITHUB_REPO)}" target="_blank" rel="noopener">View on GitHub</a></span>
+      <div style="display:flex;align-items:center;gap:.6rem">
+        <button class="doc-footer__btn doc-footer__btn--print" onclick="window.print()" title="Print this page"><i class="fa-solid fa-print"></i> Print</button>
+        <span class="doc-footer__edit"><i class="fa-brands fa-github"></i> <a href="https://github.com/${esc(CONFIG.GITHUB_USER)}/${esc(CONFIG.GITHUB_REPO)}" target="_blank" rel="noopener">View on GitHub</a></span>
+      </div>
     </footer>`;
 
   // FIX: Wire TOC links to scroll .content instead of using native hash navigation
@@ -609,17 +614,21 @@ function renderDoc(slug, raw) {
 }
 
 // ── Callouts ─────────────────────────────────────────────────────
+// NOTE: Callouts are now processed by the marked blockquote renderer inside
+// buildMarkedHtml. This function is kept as a passthrough for any HTML that
+// still needs post-processing (e.g. cached HTML from older renders).
 function processCallouts(html) {
+  // Only process blockquotes that weren't already converted by the renderer
   return html.replace(
     /<blockquote>\s*<p>\[!(NOTE|TIP|WARNING|DANGER|IMPORTANT|CAUTION)\]([\s\S]*?)<\/p>\s*<\/blockquote>/gi,
     (_, type, body) => {
       const map = {
-        NOTE:      ['note',    'fa-solid fa-circle-info',          'Note'],
-        TIP:       ['tip',     'fa-solid fa-lightbulb',            'Tip'],
-        WARNING:   ['warning', 'fa-solid fa-triangle-exclamation', 'Warning'],
-        DANGER:    ['danger',  'fa-solid fa-circle-xmark',         'Danger'],
-        IMPORTANT: ['important', 'fa-solid fa-star',                'Important'],
-        CAUTION:   ['caution',  'fa-solid fa-shield-exclamation',  'Caution'],
+        NOTE:      ['note',      'fa-solid fa-circle-info',          'Note'],
+        TIP:       ['tip',       'fa-solid fa-lightbulb',            'Tip'],
+        WARNING:   ['warning',   'fa-solid fa-triangle-exclamation', 'Warning'],
+        DANGER:    ['danger',    'fa-solid fa-circle-xmark',         'Danger'],
+        IMPORTANT: ['important', 'fa-solid fa-star',                 'Important'],
+        CAUTION:   ['caution',   'fa-solid fa-shield-exclamation',   'Caution'],
       };
       const [cls, icon, label] = map[type.toUpperCase()] || map.NOTE;
       return `<div class="callout callout--${cls}" role="note">
@@ -752,6 +761,9 @@ function initBackToTop() {
 }
 
 // ── Theme ─────────────────────────────────────────────────────────
+const PRISM_DARK  = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css';
+const PRISM_LIGHT = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css';
+
 function initTheme() {
   const btn  = $('#theme-btn');
   const icon = $('#theme-icon');
@@ -759,11 +771,12 @@ function initTheme() {
     document.documentElement.setAttribute('data-theme', t);
     State.theme = t;
     localStorage.setItem(key('theme'), t);
-    if (icon) icon.className = t === 'dark' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+    // Moon = shown in dark mode (click to go light); Sun = shown in light mode (click to go dark)
+    if (icon) icon.className = t === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
     const prism = $('#prism-theme');
-    if (prism) prism.href = t === 'dark'
-      ? 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css'
-      : 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css';
+    if (prism) prism.href = t === 'dark' ? PRISM_DARK : PRISM_LIGHT;
+    // Re-apply Monaco editor theme if editor is open
+    if (typeof AdminEditor !== 'undefined') AdminEditor._applyMonacoTheme(t);
   };
   apply(State.theme);
   btn?.addEventListener('click', () => apply(State.theme === 'dark' ? 'light' : 'dark'));
@@ -886,7 +899,11 @@ function applyBranding() {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────
-function slugify(text) { return text.toLowerCase().replace(/[^\w\s-]/g,'').replace(/\s+/g,'-').replace(/^-+|-+$/g,''); }
+function slugify(text) {
+  return text.toLowerCase()
+    .replace(/[^\p{L}\p{N}\s-]/gu, '').trim()
+    .replace(/[\s_]+/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
+}
 function slugToTitle(slug) { return slug.split('/').pop().split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '); }
 function getGroupTitle(slug) {
   for (const item of CONFIG.NAV_TREE) {
@@ -906,13 +923,88 @@ function getSiblings(slug) {
   return { prev: idx > 0 ? flat[idx - 1] : null, next: idx < flat.length - 1 ? flat[idx + 1] : null };
 }
 
+// ── Media shortcode processor ─────────────────────────────────────
+const _mediaBlocks = {};
+function _mediaToken(html) {
+  const key = `MBLOCK_${Object.keys(_mediaBlocks).length}_END`;
+  _mediaBlocks[key] = html;
+  return '\n\n' + key + '\n\n';
+}
+function _capPipe(raw) {
+  const pipe = raw.lastIndexOf('|');
+  return pipe === -1
+    ? { val: raw.trim(), caption: '' }
+    : { val: raw.slice(0, pipe).trim(), caption: raw.slice(pipe + 1).trim() };
+}
+function _processShortcodes(text) {
+  Object.keys(_mediaBlocks).forEach(k => delete _mediaBlocks[k]);
+  // ::youtube[id|caption]
+  text = text.replace(/::youtube\[([^\]]+)\]/g, (_, raw) => {
+    const { val, caption } = _capPipe(raw);
+    const fig = caption ? `<figcaption>${caption}</figcaption>` : '';
+    return _mediaToken(`<figure class="media-embed"><div class="media-embed__ratio"><iframe src="https://www.youtube-nocookie.com/embed/${esc(val)}" title="${caption || 'YouTube video'}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>${fig}</figure>`);
+  });
+  // ::vimeo[id|caption]
+  text = text.replace(/::vimeo\[([^\]]+)\]/g, (_, raw) => {
+    const { val, caption } = _capPipe(raw);
+    const fig = caption ? `<figcaption>${caption}</figcaption>` : '';
+    return _mediaToken(`<figure class="media-embed"><div class="media-embed__ratio"><iframe src="https://player.vimeo.com/video/${esc(val)}?dnt=1" title="${caption || 'Vimeo video'}" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>${fig}</figure>`);
+  });
+  // ::video[url|caption]
+  text = text.replace(/::video\[([^\]]+)\]/g, (_, raw) => {
+    const { val, caption } = _capPipe(raw);
+    const ext  = val.split('?')[0].split('.').pop().toLowerCase();
+    const mime = { mp4: 'video/mp4', webm: 'video/webm', ogg: 'video/ogg', mov: 'video/mp4' }[ext] || 'video/mp4';
+    const fig  = caption ? `<figcaption>${caption}</figcaption>` : '';
+    return _mediaToken(`<figure class="media-figure media-figure--video"><video controls preload="metadata" playsinline><source src="${esc(val)}" type="${mime}">Your browser doesn't support HTML video.</video>${fig}</figure>`);
+  });
+  // ::audio[url|caption]
+  text = text.replace(/::audio\[([^\]]+)\]/g, (_, raw) => {
+    const { val, caption } = _capPipe(raw);
+    const fig = caption ? `<figcaption>${caption}</figcaption>` : '';
+    return _mediaToken(`<figure class="media-figure media-figure--audio"><audio controls preload="metadata"><source src="${esc(val)}">Your browser doesn't support HTML audio.</audio>${fig}</figure>`);
+  });
+  return text;
+}
+function _restoreShortcodes(html) {
+  html = html.replace(/<p>(MBLOCK_\d+_END)<\/p>/g, (_, token) => _mediaBlocks[token] || '');
+  html = html.replace(/MBLOCK_\d+_END/g, token => _mediaBlocks[token] || '');
+  return html;
+}
+
+// ── KaTeX math renderer ───────────────────────────────────────────
+function renderMath(html) {
+  if (typeof katex === 'undefined') return html;
+  const parts = html.split(/(<pre[\s\S]*?<\/pre>|<code[\s\S]*?<\/code>)/);
+  return parts.map((part, i) => {
+    if (i % 2 === 1) return part;
+    // Display math: $$...$$
+    part = part.replace(/\$\$([\s\S]+?)\$\$/g, (match, expr) => {
+      try { return katex.renderToString(expr.trim(), { displayMode: true, throwOnError: false }); }
+      catch { return match; }
+    });
+    // Inline math: $...$
+    part = part.replace(/(?<!\$)\$([^\n$]+?)\$(?!\$)/g, (match, expr) => {
+      try { return katex.renderToString(expr.trim(), { displayMode: false, throwOnError: false }); }
+      catch { return match; }
+    });
+    return part;
+  }).join('');
+}
+
 /**
  * Shared Markdown → sanitized HTML renderer (used by renderDoc + updatePreview).
- * Avoids duplicating the marked renderer + DOMPurify setup in two places.
+ * Includes: heading anchors, external link detection, figure captions,
+ *           KaTeX math, GitHub-style callouts, media shortcodes.
  */
 function buildMarkedHtml(body) {
   if (typeof marked === 'undefined') return `<pre>${esc(body)}</pre>`;
+
+  body = _processShortcodes(body);
+
   const renderer = new marked.Renderer();
+
+  // Syntax-highlighted code blocks
   renderer.code = (tokenOrCode, lang) => {
     const code     = (tokenOrCode && typeof tokenOrCode === 'object') ? tokenOrCode.text : tokenOrCode;
     const language = ((tokenOrCode && typeof tokenOrCode === 'object') ? tokenOrCode.lang : lang) || '';
@@ -922,12 +1014,87 @@ function buildMarkedHtml(body) {
       : esc(code);
     return `<pre class="language-${esc(language || 'text')}"><code class="language-${esc(language || 'text')}">${highlighted}</code></pre>`;
   };
+
+  // Headings with anchor links
+  renderer.heading = (textOrToken, level) => {
+    const text  = (textOrToken && typeof textOrToken === 'object') ? (textOrToken.text || '') : textOrToken;
+    const depth = (textOrToken && typeof textOrToken === 'object') ? textOrToken.depth : level;
+    const plain = text.replace(/<[^>]+>/g, '').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
+    const id    = slugify(plain);
+    return `<h${depth} id="${id}">${text}<a class="heading-anchor" href="#${id}" aria-hidden="true">#</a></h${depth}>\n`;
+  };
+
+  // External links open in new tab
+  renderer.link = (hrefOrToken, title, linkText) => {
+    const href = (hrefOrToken && typeof hrefOrToken === 'object') ? hrefOrToken.href  : hrefOrToken;
+    const ttl  = (hrefOrToken && typeof hrefOrToken === 'object') ? hrefOrToken.title : title;
+    const txt  = (hrefOrToken && typeof hrefOrToken === 'object') ? hrefOrToken.text  : linkText;
+    const isExternal = href && !href.startsWith('#') && !href.startsWith('/');
+    const t   = ttl ? ` title="${ttl}"` : '';
+    const ext = isExternal ? ' target="_blank" rel="noopener noreferrer"' : '';
+    return `<a href="${href}"${t}${ext}>${txt}</a>`;
+  };
+
+  // Images wrapped in <figure> with optional <figcaption>
+  renderer.image = (srcOrToken, title, alt) => {
+    const src     = (srcOrToken && typeof srcOrToken === 'object') ? srcOrToken.href : srcOrToken;
+    const ttl     = (srcOrToken && typeof srcOrToken === 'object') ? srcOrToken.title : title;
+    const altText = (srcOrToken && typeof srcOrToken === 'object') ? srcOrToken.text  : alt;
+    const t       = ttl ? ` title="${ttl}"` : '';
+    const caption = altText || ttl;
+    const fig     = caption ? `<figcaption>${caption}</figcaption>` : '';
+    return `<figure class="media-figure"><img src="${src}" alt="${altText || ''}"${t} loading="lazy">${fig}</figure>`;
+  };
+
+  // GitHub-style callouts via blockquote [!TYPE]
+  renderer.blockquote = (quoteOrToken) => {
+    const quote = (quoteOrToken && typeof quoteOrToken === 'object')
+      ? (quoteOrToken.body || quoteOrToken.text || '')
+      : quoteOrToken;
+    const match = quote.match(/^<p>\[!(NOTE|TIP|WARNING|CAUTION|IMPORTANT|DANGER)\]([\s\S]*)/i);
+    if (match) {
+      const type = match[1].toUpperCase();
+      const map  = {
+        NOTE:      ['note',      'fa-solid fa-circle-info',          'Note'],
+        TIP:       ['tip',       'fa-solid fa-lightbulb',            'Tip'],
+        WARNING:   ['warning',   'fa-solid fa-triangle-exclamation', 'Warning'],
+        CAUTION:   ['caution',   'fa-solid fa-shield-exclamation',   'Caution'],
+        IMPORTANT: ['important', 'fa-solid fa-star',                 'Important'],
+        DANGER:    ['danger',    'fa-solid fa-circle-xmark',         'Danger'],
+      };
+      const [cls, icon, label] = map[type] || map.NOTE;
+      const body = match[2].replace(/<\/p>$/, '').replace(/^(\s*<br\s*\/?>\s*)/i, '').trim();
+      return `<div class="callout callout--${cls}" role="note"><i class="${icon} callout__icon" aria-label="${label}"></i><div class="callout__body"><strong class="callout__title">${label}</strong><div>${body}</div></div></div>\n`;
+    }
+    return `<blockquote>${quote}</blockquote>\n`;
+  };
+
   if (typeof marked.use === 'function') {
     marked.use({ gfm: true, breaks: false, renderer });
   } else {
     marked.setOptions({ gfm: true, breaks: false, renderer });
   }
-  return DOMPurify.sanitize(marked.parse(body));
+
+  let html = marked.parse(body);
+  html = renderMath(html);
+
+  if (typeof DOMPurify !== 'undefined') {
+    html = DOMPurify.sanitize(html, {
+      ADD_TAGS: ['pre', 'code', 'span', 'video', 'audio', 'source', 'iframe',
+                 'details', 'summary', 'figure', 'figcaption',
+                 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td',
+                 'math', 'annotation', 'semantics', 'mrow', 'mi', 'mn',
+                 'mo', 'msup', 'msub', 'mfrac', 'mspace', 'mtext'],
+      ADD_ATTR: ['class', 'id', 'src', 'controls', 'autoplay', 'loop', 'muted',
+                 'playsinline', 'width', 'height', 'allow', 'allowfullscreen',
+                 'frameborder', 'loading', 'type', 'checked', 'disabled',
+                 'target', 'rel', 'title', 'alt', 'scope', 'align',
+                 'encoding', 'display', 'style', 'aria-hidden', 'preload',
+                 'poster', 'dnt', 'download', 'aria-label'],
+    });
+  }
+
+  return _restoreShortcodes(html);
 }
 
 /**
@@ -956,12 +1123,9 @@ const AdminEditor = (() => {
   let _slug         = null;
   let _sha          = '';
   let _rawMd        = '';
-  let _activeTab    = 'docs';
   let _editTarget   = null;
   let _liveNavTree  = [];
-  let _allDocs      = [];
-  let _socialLinks  = [];
-  let _viewMode     = 'editor'; // monaco view mode
+  let _viewMode     = 'split'; // monaco view mode — split by default so preview is immediately visible
 
   // ── CSS injected once ─────────────────────────────────────────
   function injectStyles() {
@@ -1425,6 +1589,8 @@ const AdminEditor = (() => {
         scrollBeyondLastLine: false, padding: { top: 12, bottom: 12 },
       });
       _monacoReady = true;
+      // Apply the default split view so preview is visible from the start
+      setViewMode(_viewMode);
       _monacoEditor.onDidChangeModelContent(() => { onChange(); updateWc(); });
       _monacoEditor.onDidChangeCursorPosition(e => {
         const pos = e.position;
@@ -1578,7 +1744,6 @@ const AdminEditor = (() => {
       const { sha } = await GH.getFile(`docs/${slug}.md`);
       if (!sha) throw new Error('File not found');
       await GH.deleteFile(`docs/${slug}.md`, sha, `docs: delete ${slug}`);
-      _allDocs = _allDocs.filter(d => d.slug !== slug);
       if (_slug === slug) { _slug = null; if (_monacoEditor) _monacoEditor.setValue(''); setStatus('deleted', 'info'); }
       toast(`Deleted ${slug}`);
       // Invalidate cache
@@ -1601,10 +1766,6 @@ const AdminEditor = (() => {
       const putResult = await GH.putFile(`docs/${_slug}.md`, raw, msg, sha || _sha || undefined);
       _sha = putResult?.content?.sha || '';
       sessionStorage.removeItem(`wdraft_${_slug}`);
-      if (!_allDocs.find(d => d.slug === _slug)) {
-        _allDocs.push({ slug: _slug, path: `docs/${_slug}.md` });
-        _allDocs.sort((a, b) => a.slug.localeCompare(b.slug));
-      }
       State.docCache[_slug] = raw;
       setStatus('saved', 'ok');
       toast('✓ Committed to GitHub!');
@@ -2176,9 +2337,9 @@ const AdminEditor = (() => {
           </div>
           <div class="admin-toolbar__sep"></div>
           <div class="view-toggle">
-            <button class="atbtn is-active" id="admin-pane-editor" title="Editor" onclick="AdminEditor._setViewMode('editor')"><i class="fa-solid fa-pen" style="font-size:.62rem"></i></button>
-            <button class="atbtn" id="admin-pane-split"   title="Split"   onclick="AdminEditor._setViewMode('split')"><i class="fa-solid fa-table-columns" style="font-size:.62rem"></i></button>
-            <button class="atbtn" id="admin-pane-preview" title="Preview" onclick="AdminEditor._setViewMode('preview')"><i class="fa-solid fa-eye" style="font-size:.62rem"></i></button>
+            <button class="atbtn" id="admin-pane-editor" title="Editor only (Ctrl+1)" onclick="AdminEditor._setViewMode('editor')"><i class="fa-solid fa-pen" style="font-size:.62rem"></i></button>
+            <button class="atbtn is-active" id="admin-pane-split"   title="Split (Ctrl+2)"   onclick="AdminEditor._setViewMode('split')"><i class="fa-solid fa-table-columns" style="font-size:.62rem"></i></button>
+            <button class="atbtn" id="admin-pane-preview" title="Preview only (Ctrl+3)" onclick="AdminEditor._setViewMode('preview')"><i class="fa-solid fa-eye" style="font-size:.62rem"></i></button>
           </div>
           <div class="admin-toolbar__spacer"></div>
           <span class="admin-status-pill info" id="admin-status">${hasDraft ? 'draft restored' : 'saved'}</span>
@@ -2401,6 +2562,17 @@ const AdminEditor = (() => {
 
     // Modals
     _closeModal: closeAdminModal,
+
+    // Theme — exposed so initTheme() can re-apply Monaco colors on toggle
+    _buildMonacoTheme: buildMonacoTheme,
+    _applyMonacoTheme: (t) => {
+      if (typeof monaco === 'undefined' || !monaco.editor) return;
+      try {
+        monaco.editor.defineTheme('wiki-dark',  buildMonacoTheme('dark'));
+        monaco.editor.defineTheme('wiki-light', buildMonacoTheme('light'));
+        monaco.editor.setTheme(t === 'dark' ? 'wiki-dark' : 'wiki-light');
+      } catch(e) { /* not ready */ }
+    },
   };
 })();
 

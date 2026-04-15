@@ -124,9 +124,7 @@ SKIP LINK & UTILITY
 .btn:hover { border-color: var(--color-border-hover); color: var(--color-text); background: var(--color-bg-elevated); }
 .btn.primary { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-accent-text); }
 .btn.primary:hover { background: var(--color-accent-hover); border-color: var(--color-accent-hover); }
-.btn.like { color: var(--color-text-faint); }
-.btn.like:hover { border-color: var(--color-like); color: var(--color-like); }
-.btn.like.reacted { background: var(--color-like-bg); border-color: var(--color-like); color: var(--color-like); }
+
 /* ── Btn-icon ────────────────────────────────── */
 .btn-icon {
   width: 36px; height: 36px;
@@ -988,136 +986,6 @@ INLINE EDITOR — Edit toggle button
   background: var(--color-accent-bg);
 }
 
-/* ── Editor layout ───────────────────────────── */
-.editor-wrap {
-  display: flex; flex-direction: column; gap: 0; margin-top: 1rem;
-}
-/* Toolbar */
-.editor-toolbar {
-  display: flex; align-items: center; gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border); border-bottom: none;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
-  flex-wrap: wrap;
-}
-.editor-toolbar__group { display: flex; align-items: center; gap: 0.25rem; }
-.editor-toolbar__sep { width: 1px; height: 1.2rem; background: var(--color-border); margin: 0 0.25rem; }
-.editor-toolbar__btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 2rem; height: 2rem; border-radius: var(--radius-sm);
-  font-size: 0.8rem; color: var(--color-text-muted);
-  background: transparent; border: none; cursor: pointer;
-  transition: color 0.15s, background 0.15s; font-family: var(--font-sans);
-}
-.editor-toolbar__btn:hover { color: var(--color-text); background: var(--color-bg-card); }
-.editor-toolbar__label { font-size: 0.72rem; color: var(--color-text-faint); margin-left: auto; white-space: nowrap; }
-/* Pane container */
-.editor-panes {
-  display: grid;
-  grid-template-columns: 1fr 1fr;   /* FIX: default is split — both panes visible */
-  border: 1px solid var(--color-border);
-  border-radius: 0 0 var(--radius-md) var(--radius-md);
-  overflow: hidden; min-height: 480px; max-height: 75vh;
-}
-/* Fullscreen modes */
-.editor-panes.fullscreen-editor  { grid-template-columns: 1fr; }
-.editor-panes.fullscreen-preview { grid-template-columns: 1fr; }
-/* Textarea */
-.editor-textarea {
-  width: 100%; height: 100%; min-height: 480px;
-  padding: 1.25rem;
-  font-family: var(--font-mono); font-size: 0.83rem; line-height: 1.7;
-  color: var(--color-text); background: var(--color-bg-alt);
-  border: none; border-right: 1px solid var(--color-border);
-  resize: none; outline: none; tab-size: 2; overflow-y: auto;
-}
-.editor-textarea:focus { background: var(--color-bg-elevated); }
-.editor-panes.fullscreen-editor .editor-textarea  { border-right: none; }
-/* Preview pane — FIX: visible by default in split mode */
-.editor-preview {
-  padding: 1.25rem 1.5rem;
-  overflow-y: auto; height: 100%;
-  background: var(--color-bg);
-  font-size: 0.9rem;
-}
-/* Action bar */
-.editor-actions {
-  display: flex; align-items: center; gap: 0.75rem;
-  margin-top: 0.75rem; padding-top: 0.75rem;
-  border-top: 1px solid var(--color-border); flex-wrap: wrap;
-}
-.editor-actions__commit-input {
-  flex: 1; min-width: 200px;
-  padding: 0.45rem 0.75rem; border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-alt); color: var(--color-text); font-size: 0.82rem;
-}
-.editor-actions__commit-input:focus { outline: none; border-color: var(--color-accent); }
-.editor-actions__save {
-  display: inline-flex; align-items: center; gap: 0.4rem;
-  padding: 0.45rem 1rem; border-radius: var(--radius-sm);
-  background: var(--color-accent); color: var(--color-accent-text);
-  font-size: 0.82rem; font-weight: 600; border: none;
-  cursor: pointer; transition: background 0.15s; white-space: nowrap;
-}
-.editor-actions__save:hover { background: var(--color-accent-hover); }
-.editor-actions__save:disabled { opacity: 0.5; cursor: not-allowed; }
-.editor-actions__cancel {
-  padding: 0.45rem 0.75rem; border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background: transparent; color: var(--color-text-muted); font-size: 0.82rem;
-  cursor: pointer; transition: color 0.15s, border-color 0.15s;
-}
-.editor-actions__cancel:hover { color: var(--color-text); border-color: var(--color-border-hover); }
-/* Auth modal */
-.editor-auth-modal {
-  position: fixed; inset: 0; z-index: 500;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
-}
-.editor-auth-modal__box {
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: 2rem; width: min(480px,90vw);
-  box-shadow: var(--shadow-hover);
-}
-.editor-auth-modal__title {
-  font-family: var(--font-display); font-size: 1.25rem;
-  margin-bottom: 0.5rem; color: var(--color-text);
-}
-.editor-auth-modal__desc {
-  font-size: 0.82rem; color: var(--color-text-muted);
-  margin-bottom: 1.25rem; line-height: 1.6;
-}
-.editor-auth-modal__desc a { color: var(--color-accent); text-decoration: underline; }
-.editor-auth-modal__input {
-  width: 100%; padding: 0.6rem 0.85rem; border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border); background: var(--color-bg-alt);
-  color: var(--color-text); font-family: var(--font-mono); font-size: 0.82rem;
-  margin-bottom: 1rem;
-}
-.editor-auth-modal__input:focus { outline: none; border-color: var(--color-accent); }
-.editor-auth-modal__actions { display: flex; gap: 0.75rem; justify-content: flex-end; }
-.editor-auth-modal__save {
-  padding: 0.5rem 1.25rem; border-radius: var(--radius-sm);
-  background: var(--color-accent); color: var(--color-accent-text);
-  font-weight: 600; font-size: 0.85rem; border: none; cursor: pointer;
-}
-.editor-auth-modal__cancel {
-  padding: 0.5rem 1rem; border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background: transparent; color: var(--color-text-muted); font-size: 0.85rem; cursor: pointer;
-}
-/* Status badge */
-.editor-status {
-  font-size: 0.75rem; padding: 0.2rem 0.6rem;
-  border-radius: 99px; font-weight: 500;
-}
-.editor-status--saving { background: var(--color-accent-bg); color: var(--color-accent); }
-.editor-status--saved  { background: rgba(61,186,126,0.12); color: var(--color-success,#3dba7e); }
-.editor-status--error  { background: rgba(237,95,95,0.12);  color: var(--color-error,#ed5f5f); }
 
 /* ═══════════════════════════════════════════
 ADMIN PANEL — full inline editor UI
@@ -1128,61 +996,6 @@ ADMIN PANEL — full inline editor UI
   display: flex; align-items: center; justify-content: center;
   background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);
 }
-/* Main sliding panel */
-#admin-panel {
-  position: fixed; top: var(--topbar-h); right: 0; bottom: 0;
-  width: min(820px, 100vw);
-  background: var(--color-bg-alt);
-  border-left: 1px solid var(--color-border);
-  display: flex; flex-direction: column;
-  transform: translateX(100%);
-  transition: transform 0.3s var(--ease);
-  z-index: 300;
-  overflow: hidden;
-}
-#admin-panel.is-open { transform: translateX(0); }
-/* Panel header */
-.admin-panel__header {
-  display: flex; align-items: center; gap: 0.5rem;
-  padding: 0 0.75rem;
-  height: 44px; flex-shrink: 0;
-  background: var(--color-bg-card);
-  border-bottom: 1px solid var(--color-border);
-}
-.admin-panel__title {
-  font-size: 0.8rem; font-weight: 600; color: var(--color-text);
-  font-family: var(--font-mono); letter-spacing: 0.04em; flex: 1;
-}
-.admin-panel__close {
-  width: 28px; height: 28px;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: var(--radius-sm); color: var(--color-text-muted);
-  font-size: 0.8rem; flex-shrink: 0;
-  transition: background 0.15s, color 0.15s;
-}
-.admin-panel__close:hover { background: var(--color-bg-elevated); color: var(--color-text); }
-/* Tab bar */
-.admin-tabs {
-  display: flex; align-items: center;
-  background: var(--color-bg-card);
-  border-bottom: 1px solid var(--color-border);
-  padding: 0 0.75rem; flex-shrink: 0; gap: 0.25rem;
-  overflow-x: auto; scrollbar-width: none;
-}
-.admin-tabs::-webkit-scrollbar { display: none; }
-.admin-tab {
-  display: inline-flex; align-items: center; gap: 0.3rem;
-  padding: 0.55rem 0.75rem;
-  font-size: 0.78rem; font-weight: 500; color: var(--color-text-muted);
-  border-bottom: 2px solid transparent; white-space: nowrap;
-  cursor: pointer; transition: color 0.15s, border-color 0.15s;
-  margin-bottom: -1px;
-}
-.admin-tab:hover { color: var(--color-text); }
-.admin-tab.is-active { color: var(--color-accent); border-bottom-color: var(--color-accent); }
-/* Tab panes */
-.admin-tab-pane { display: none; flex: 1; overflow-y: auto; overflow-x: hidden; }
-.admin-tab-pane.is-active { display: flex; flex-direction: column; }
 /* Draft banner */
 #admin-draft-banner {
   display: flex; align-items: center; gap: 0.6rem;
@@ -1198,138 +1011,17 @@ ADMIN PANEL — full inline editor UI
   color: var(--color-warning,#e8a215); background: none; border: none;
   cursor: pointer; text-decoration: underline; padding: 0;
 }
-/* FM (front-matter) bar */
-#admin-fm-bar {
+/* FM (front-matter) bar — ID and class both target the same element */
+#admin-fm-bar,
+.admin-fm-bar {
   background: var(--color-bg-card);
   border-bottom: 1px solid var(--color-border);
   flex-shrink: 0; overflow: hidden;
   transition: max-height 0.25s var(--ease);
   max-height: 300px;
 }
-#admin-fm-bar.collapsed { max-height: 0; }
-.admin-fm-bar__inner {
-  padding: 0.75rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 0.5rem 0.75rem;
-}
-.admin-fm-field { display: flex; flex-direction: column; gap: 0.2rem; }
-.admin-fm-field label {
-  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em;
-  text-transform: uppercase; color: var(--color-text-faint);
-}
-.admin-fm-field input,
-.admin-fm-field select,
-.admin-fm-field textarea {
-  padding: 0.35rem 0.6rem;
-  background: var(--color-bg-alt);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  color: var(--color-text); font-size: 0.8rem;
-  font-family: var(--font-mono);
-  transition: border-color 0.15s;
-}
-.admin-fm-field input:focus,
-.admin-fm-field select:focus,
-.admin-fm-field textarea:focus {
-  outline: none; border-color: var(--color-accent);
-}
-/* Doc list (Files tab) */
-.admin-doc-list {
-  flex: 1; overflow-y: auto;
-  padding: 0.5rem;
-}
-.admin-doc-list__search {
-  width: 100%; padding: 0.4rem 0.65rem;
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  color: var(--color-text); font-size: 0.82rem;
-  margin-bottom: 0.5rem;
-}
-.admin-doc-list__search:focus { outline: none; border-color: var(--color-accent); }
-.admin-doc-item {
-  display: flex; align-items: center; gap: 0.5rem;
-  padding: 0.45rem 0.6rem; border-radius: var(--radius-sm);
-  font-size: 0.82rem; color: var(--color-text-muted);
-  cursor: pointer; transition: background 0.15s, color 0.15s;
-}
-.admin-doc-item:hover { background: var(--color-bg-elevated); color: var(--color-text); }
-.admin-doc-item.is-active { background: var(--color-accent-bg); color: var(--color-accent); }
-.admin-doc-item__icon { font-size: 0.7rem; flex-shrink: 0; color: var(--color-text-faint); }
-.admin-doc-item__slug { flex: 1; font-family: var(--font-mono); font-size: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.admin-doc-item__del {
-  opacity: 0; font-size: 0.7rem; color: var(--color-error);
-  padding: 0.1rem 0.25rem; border-radius: var(--radius-sm);
-  transition: opacity 0.15s, background 0.15s; flex-shrink: 0;
-}
-.admin-doc-item:hover .admin-doc-item__del { opacity: 1; }
-.admin-doc-item__del:hover { background: rgba(237,95,95,0.12); }
-/* Nav editor (Nav tab) */
-.admin-nav-editor { padding: 0.75rem; flex: 1; overflow-y: auto; }
-.admin-nav-group {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  margin-bottom: 0.5rem; overflow: hidden;
-}
-.admin-nav-group__header {
-  display: flex; align-items: center; gap: 0.4rem;
-  padding: 0.45rem 0.65rem;
-  background: var(--color-bg-elevated);
-  border-bottom: 1px solid var(--color-border);
-  font-size: 0.8rem; font-weight: 600; color: var(--color-text);
-  cursor: pointer;
-}
-.admin-nav-group__header:hover { background: var(--color-bg-card); }
-.admin-nav-leaf-list { padding: 0.25rem 0.5rem 0.35rem; }
-.admin-nav-leaf-item {
-  display: flex; align-items: center; gap: 0.4rem;
-  padding: 0.3rem 0.4rem; border-radius: var(--radius-sm);
-  font-size: 0.78rem; color: var(--color-text-muted);
-}
-.admin-nav-leaf-item:hover { background: var(--color-bg-elevated); color: var(--color-text); }
-.admin-nav-actions {
-  display: flex; gap: 0.35rem; padding: 0 0.75rem 0.75rem; flex-wrap: wrap;
-}
-/* Config editor (Config tab) */
-.admin-config-editor { padding: 0.75rem; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; }
-.admin-config-section {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-}
-.admin-config-section__title {
-  padding: 0.5rem 0.75rem;
-  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em;
-  text-transform: uppercase; color: var(--color-text-faint);
-  background: var(--color-bg-elevated);
-  border-bottom: 1px solid var(--color-border);
-}
-.admin-config-section__body {
-  padding: 0.65rem 0.75rem;
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 0.5rem 0.75rem;
-}
-.admin-config-field { display: flex; flex-direction: column; gap: 0.2rem; }
-.admin-config-field label {
-  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.06em;
-  text-transform: uppercase; color: var(--color-text-faint);
-}
-.admin-config-field input,
-.admin-config-field select,
-.admin-config-field textarea {
-  padding: 0.35rem 0.6rem;
-  background: var(--color-bg-alt);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  color: var(--color-text); font-size: 0.8rem;
-  transition: border-color 0.15s;
-}
-.admin-config-field input:focus,
-.admin-config-field select:focus,
-.admin-config-field textarea:focus { outline: none; border-color: var(--color-accent); }
+#admin-fm-bar.collapsed,
+.admin-fm-bar.collapsed { max-height: 0; }
 /* Admin modals */
 /* Admin modals - display:none/flex controlled by JS injectStyles() */
 .admin-modal-backdrop {
@@ -1369,81 +1061,27 @@ ADMIN PANEL — full inline editor UI
 .admin-modal__field input:focus,
 .admin-modal__field select:focus,
 .admin-modal__field textarea:focus { outline: none; border-color: var(--color-accent); }
+.admin-modal__header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.8rem 1rem; border-bottom: 1px solid var(--color-border); flex-shrink: 0;
+}
+.admin-modal__close {
+  background: none; border: none; color: var(--color-text-faint); cursor: pointer;
+  font-size: 0.88rem; padding: 0.18rem 0.28rem; border-radius: 3px;
+}
+.admin-modal__close:hover { color: var(--color-text); }
+.admin-modal__body {
+  padding: 1rem; overflow-y: auto; flex: 1; display: flex;
+  flex-direction: column; gap: 0.65rem;
+}
+.admin-modal__footer {
+  padding: 0.65rem 1rem; border-top: 1px solid var(--color-border);
+  display: flex; justify-content: flex-end; gap: 0.4rem; flex-shrink: 0;
+}
 .admin-modal__actions {
   display: flex; gap: 0.6rem; justify-content: flex-end;
   margin-top: 1.25rem;
 }
-/* Admin panel overlay (dim main content) */
-#admin-panel-overlay {
-  display: none; position: fixed;
-  top: var(--topbar-h); left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.3); z-index: 299;
-}
-#admin-panel-overlay.is-visible { display: block; }
-/* Monaco editor host */
-#admin-monaco-host {
-  width: 100%; height: 100%; min-height: 300px;
-}
-/* ── Editor tab (Edit pane inside admin panel) ── */
-.admin-editor-pane {
-  display: flex; flex-direction: column; flex: 1; overflow: hidden;
-}
-html[data-theme="light"] .editor-textarea { background: #f6f5f3; color: #2c2a28; }
-
-/* ═══════════════════════════════════════════
-NAV EDITOR UI (Drag & Drop)
-═══════════════════════════════════════════ */
-.nav-editor-wrap {
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  margin-top: 1rem;
-  overflow: hidden;
-}
-.nav-editor-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0.6rem 0.75rem;
-  background: var(--color-bg-elevated);
-  border-bottom: 1px solid var(--color-border);
-  font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--color-text-faint);
-}
-.nav-editor-header__actions { display: flex; gap: 0.5rem; }
-.nav-editor-btn {
-  padding: 0.2rem 0.5rem; background: var(--color-bg-card); border: 1px solid var(--color-border);
-  border-radius: 3px; color: var(--color-text-muted); font-size: 0.7rem; cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-.nav-editor-btn:hover { background: var(--color-accent-bg); color: var(--color-accent); border-color: var(--color-accent); }
-.nav-editor-tree { padding: 0.5rem; min-height: 200px; max-height: 60vh; overflow-y: auto; }
-.nav-tree-item {
-  position: relative; display: flex; align-items: center;
-  padding: 0.35rem 0.4rem; margin-bottom: 2px;
-  border-radius: var(--radius-sm); background: var(--color-bg-card);
-  border: 1px solid transparent; transition: background 0.15s, border-color 0.15s;
-}
-.nav-tree-item:hover { border-color: var(--color-border-hover); }
-.nav-tree-item.drag-over { border-color: var(--color-accent); background: var(--color-accent-bg); }
-.nav-tree-item.dragging { opacity: 0.5; }
-.nav-tree-handle {
-  cursor: grab; color: var(--color-text-faint); margin-right: 0.4rem;
-  padding: 0.2rem; font-size: 0.7rem; user-select: none;
-}
-.nav-tree-handle:active { cursor: grabbing; }
-.nav-tree-item__icon { color: var(--color-accent); margin-right: 0.4rem; width: 16px; text-align: center; font-size: 0.8rem; }
-.nav-tree-item__title { flex: 1; font-size: 0.82rem; color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.nav-tree-item__slug { font-size: 0.65rem; color: var(--color-text-faint); margin-right: 0.5rem; font-family: var(--font-mono); max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.nav-tree-item__actions { display: flex; gap: 0.25rem; opacity: 0; transition: opacity 0.15s; }
-.nav-tree-item:hover .nav-tree-item__actions { opacity: 1; }
-.nav-tree-action-btn {
-  width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
-  border-radius: 3px; border: none; background: none; color: var(--color-text-muted);
-  font-size: 0.7rem; cursor: pointer;
-}
-.nav-tree-action-btn:hover { background: var(--color-bg-elevated); color: var(--color-text); }
-.nav-tree-action-btn.danger:hover { color: var(--color-error); background: rgba(237,95,95,0.1); }
-.nav-tree-children { margin-left: 1.25rem; border-left: 1px solid var(--color-border); padding-left: 0.25rem; }
-
-
 /* ═══════════════════════════════════════════
 ADMIN SECTION LABEL (used throughout admin UI)
 ═══════════════════════════════════════════ */
@@ -1461,8 +1099,16 @@ ADMIN EDITOR AREA — Monaco wrap & preview
 }
 #admin-monaco-container { flex: 1; min-height: 0; }
 
+/* ── Edit area flex container ──────────────── */
+.admin-edit-area { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+
+/* ── Preview pane ──────────────────────────── */
+.admin-preview-pane { flex: 1; overflow-y: auto; border-left: 1px solid var(--color-border); background: var(--color-bg); }
+
 .admin-preview-inner { padding: 2rem; max-width: 1160px; font-size: 0.9rem; line-height: 1.7; }
-.admin-preview-inner h1 { font-size: 1.5rem; margin: 0 0 0.65rem; }
+.admin-preview-inner__title { font-size: 1.5rem; margin: 0 0 0.65rem; font-family: var(--font-display); }
+.admin-preview-inner h1,
+.admin-preview-inner__title { font-size: 1.5rem; margin: 0 0 0.65rem; font-family: var(--font-display); }
 .admin-preview-inner h2 { font-size: 1.2rem; margin: 1.4rem 0 0.45rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.28rem; }
 .admin-preview-inner h3 { font-size: 1rem; margin: 1.1rem 0 0.35rem; }
 .admin-preview-inner p { margin: 0 0 0.85rem; }
@@ -1477,13 +1123,72 @@ ADMIN EDITOR AREA — Monaco wrap & preview
   display: flex; flex-direction: column; overflow: hidden; min-height: 0; flex: 1;
   transition: margin-right 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.admin-editor-wrap.panel-open { margin-right: 300px; }
+
+/* ── Admin toolbar ─────────────────────────── */
+.admin-toolbar {
+  display: flex; align-items: center; gap: 0.25rem; padding: 0.38rem 0.75rem;
+  border-bottom: 1px solid var(--color-border); background: var(--color-bg-card);
+  flex-wrap: nowrap; overflow-x: auto; flex-shrink: 0; height: 44px;
+}
 .admin-toolbar::-webkit-scrollbar { height: 0; }
 .admin-toolbar__group { display: flex; align-items: center; gap: 0.18rem; }
 .admin-toolbar__sep { width: 1px; height: 16px; background: var(--color-border); margin: 0 0.1rem; flex-shrink: 0; }
 .admin-toolbar__spacer { flex: 1; }
-.atbtn.is-active { background: var(--color-accent-bg); color: var(--color-accent); }
+
+/* ── Toolbar button ────────────────────────── */
+.atbtn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.18rem;
+  padding: 0.22rem 0.38rem; border-radius: 4px; border: none; cursor: pointer;
+  font-size: 0.7rem; font-family: var(--font-sans); font-weight: 500;
+  background: none; color: var(--color-text-muted); transition: background 0.12s, color 0.12s;
+  min-width: 26px; height: 26px; flex-shrink: 0;
+}
+.atbtn:hover { background: var(--color-bg-elevated); color: var(--color-text); }
 .atbtn:disabled { opacity: 0.35; cursor: not-allowed; }
+.atbtn.is-active { background: var(--color-accent-bg); color: var(--color-accent); }
+
+/* ── View toggle group ─────────────────────── */
+.view-toggle { display: flex; background: var(--color-bg-alt); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 2px; gap: 2px; }
+.view-toggle .atbtn { border-radius: 3px; height: 22px; font-size: 0.66rem; }
+.view-toggle .atbtn.is-active { background: var(--color-bg-card); color: var(--color-text); }
+
+/* ── Status pill ───────────────────────────── */
+.admin-status-pill {
+  font-family: var(--font-mono); font-size: 0.68rem; padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm); background: var(--color-bg-alt); flex-shrink: 0;
+}
+.admin-status-pill.ok   { color: var(--color-success, #3dba7e); }
+.admin-status-pill.error { color: var(--color-error, #ed5f5f); }
+.admin-status-pill.info  { color: var(--color-text-muted); }
+.admin-status-pill.warn  { color: var(--color-warning, #e8a215); }
+
+/* ── Word count / cursor bar ───────────────── */
+.admin-wc-bar {
+  display: flex; align-items: center; gap: 0.85rem; padding: 0.25rem 0.75rem;
+  border-top: 1px solid var(--color-border); background: var(--color-bg-card);
+  font-family: var(--font-mono); font-size: 0.65rem; color: var(--color-text-faint); flex-shrink: 0;
+}
+
+/* ── FM bar (front-matter) class-based ─────── */
+.admin-fm-bar { border-bottom: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-accent) 2%, var(--color-bg)); flex-shrink: 0; }
+.admin-fm-bar__header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.32rem 0.85rem; cursor: pointer; user-select: none; min-height: 30px;
+}
+.admin-fm-bar__header:hover { background: color-mix(in srgb, var(--color-accent) 3%, transparent); }
+.admin-fm-bar__label { font-family: var(--font-mono); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-faint); display: flex; align-items: center; gap: 0.35rem; }
+.admin-fm-bar__toggle { background: none; border: none; color: var(--color-text-faint); cursor: pointer; padding: 0.12rem 0.28rem; border-radius: 3px; font-size: 0.62rem; transition: color 0.12s; }
+.admin-fm-bar__toggle:hover { color: var(--color-text); }
+.fm-chevron { transition: transform 0.18s; }
+.admin-fm-bar.collapsed .admin-fm-bar__body { display: none; }
+.admin-fm-bar.collapsed .fm-chevron { transform: rotate(-90deg); }
+.admin-fm-bar__body { padding: 0.55rem 0.85rem 0.7rem; }
+.admin-fm-row { display: flex; gap: 0.5rem; margin-bottom: 0.45rem; }
+.admin-fm-row > * { flex: 1; }
+
+/* ── Auth actions row ──────────────────────── */
+.admin-auth-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
+
 
 /* ── Admin panel overlay dim ─────────────────── */
 #admin-panel-overlay {
@@ -1544,17 +1249,6 @@ ADMIN EDITOR AREA — Monaco wrap & preview
 .admin-commit-bar__pr-wrap { display: flex; align-items: center; gap: 0.4rem; flex: 1; min-width: 0; animation: fadeIn .15s; }
 @keyframes fadeIn { from { opacity:0; transform:translateX(4px); } to { opacity:1; transform:none; } }
 #admin-pr-toggle.is-active { color: var(--color-secondary); border-color: color-mix(in srgb, var(--color-secondary) 40%, transparent); background: var(--color-secondary-bg); }
-.editor-admin-btn {
-  display: inline-flex; align-items: center; gap: 0.3rem;
-  padding: 0.28rem 0.6rem; border-radius: var(--radius-sm);
-  font-size: 0.72rem; font-weight: 500; cursor: pointer;
-  background: var(--color-bg-elevated); color: var(--color-text-muted);
-  border: 1px solid var(--color-border);
-  transition: border-color 0.15s, color 0.15s, background 0.15s;
-  white-space: nowrap; flex-shrink: 0;
-}
-.editor-admin-btn:hover { border-color: var(--color-accent); color: var(--color-accent); background: var(--color-accent-bg); }
-.editor-admin-btn.is-active { background: var(--color-accent-bg); color: var(--color-accent); border-color: var(--color-accent); }
 
 /* ═══════════════════════════════════════════
 RESPONSIVE
@@ -1580,7 +1274,6 @@ RESPONSIVE
   .content { height: auto; overflow: visible; }
   .content__inner { padding: 1.5rem 1rem 3rem; }
   .reading-progress { left: 0; }
-  .editor-panes { grid-template-columns: 1fr; max-height: none; }
 }
 @media (max-width: 480px) {
   .topbar__auspicious { display: none; }
@@ -1595,7 +1288,7 @@ PRINT
 @media print {
   .topbar, .sidebar, .sidebar-overlay, .reading-progress,
   .to-top, .toast, .doc-footer__nav, .code-copy-btn,
-  #page-loader, .editor-wrap, #admin-panel, #admin-auth-overlay { display: none !important; }
+  #page-loader, #admin-auth-overlay { display: none !important; }
   body {
     display: block !important; background: #fff !important;
     color: #111 !important; overflow: visible !important; height: auto !important;
@@ -1803,3 +1496,298 @@ body.edit-mode-active .content__inner {
 .nav-editor-btn:hover { background: var(--color-accent-bg); color: var(--color-accent); border-color: var(--color-accent); }
 .nav-editor-btn--accent { background: var(--color-accent-bg); color: var(--color-accent); border-color: rgba(255,127,80,0.30); border-color: color-mix(in srgb, var(--color-accent) 30%, transparent); }
 .nav-editor-btn--accent:hover { background: var(--color-accent); color: var(--color-accent-text); }
+
+/* ═══════════════════════════════════════════
+MEDIA EMBEDS — shortcodes ::youtube ::vimeo ::video ::audio
+Used by _processShortcodes() in script-docs.js
+═══════════════════════════════════════════ */
+.media-embed {
+  margin: 1.5em 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-alt);
+}
+.media-embed__ratio {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+}
+.media-embed__ratio iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+.media-embed figcaption {
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  color: var(--color-text-faint);
+  font-style: italic;
+  text-align: center;
+  border-top: 1px solid var(--color-border);
+}
+.media-figure {
+  margin: 1.5em 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.media-figure video,
+.media-figure audio {
+  display: block;
+  width: 100%;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.media-figure--video video { border-radius: var(--radius-md); }
+.media-figure--audio audio { border-radius: var(--radius-md); padding: 0.25rem; }
+.media-figure figcaption {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--color-text-faint);
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+/* ═══════════════════════════════════════════
+TOAST VARIANTS — all types from toast() helper
+═══════════════════════════════════════════ */
+.toast--success { border-color: var(--color-success); color: var(--color-success); }
+.toast--warning { border-color: var(--color-warning); color: var(--color-warning); }
+.toast--info    { color: var(--color-text-muted); }
+.toast--default { /* uses base .toast styles */ }
+
+/* ═══════════════════════════════════════════
+LIGHT THEME OVERRIDES
+Full variable set for data-theme="light"
+═══════════════════════════════════════════ */
+html[data-theme="light"] {
+  --color-bg:          #faf9f7;
+  --color-bg-alt:      #f2f0ec;
+  --color-bg-elevated: #ece9e4;
+  --color-bg-card:     #ffffff;
+  --color-text:        #1a1918;
+  --color-text-muted:  #5c5855;
+  --color-text-faint:  #9a9590;
+  --color-border:      #d8d4ce;
+  --color-border-hover:#a8a4a0;
+  --color-accent:      #b53109;
+  --color-accent-hover:#921f00;
+  --color-accent-bg:   rgba(181,49,9,0.08);
+  --color-accent-text: #ffffff;
+  --color-secondary:   #6b46c1;
+  --color-secondary-bg:rgba(107,70,193,0.08);
+  --color-callout-note:#2563eb;
+  --color-success:     #15803d;
+  --color-warning:     #a16207;
+  --color-error:       #b91c1c;
+  --color-like:        #be123c;
+  --color-like-bg:     rgba(190,18,60,0.08);
+  --shadow-hover:      0 8px 36px rgba(0,0,0,0.12);
+}
+html[data-theme="light"] .topbar  { background: var(--color-bg-card); }
+html[data-theme="light"] .sidebar { background: var(--color-bg-alt); }
+html[data-theme="light"] .doc-toc { background: var(--color-bg-alt); }
+html[data-theme="light"] #page-loader { background: var(--color-bg); }
+html[data-theme="light"] .callout--note      { background: rgba(37,99,235,0.07); }
+html[data-theme="light"] .callout--tip       { background: rgba(21,128,61,0.07); }
+html[data-theme="light"] .callout--warning   { background: rgba(161,98,7,0.07); }
+html[data-theme="light"] .callout--danger    { background: rgba(185,28,28,0.07); }
+html[data-theme="light"] .callout--important { background: rgba(107,70,193,0.07); }
+html[data-theme="light"] .callout--caution   { background: rgba(185,28,28,0.05); }
+html[data-theme="light"] .admin-auth-overlay,
+html[data-theme="light"] .admin-modal-backdrop,
+html[data-theme="light"] .shortcuts-modal   { background: rgba(0,0,0,0.35); }
+html[data-theme="light"] .wiki-home__card   { background: var(--color-bg-card); }
+
+/* ═══════════════════════════════════════════
+ADMIN COMMIT BAR — PR branch / toggle states
+═══════════════════════════════════════════ */
+#admin-pr-toggle {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  padding: 0.22rem 0.45rem;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+#admin-pr-toggle.is-active {
+  color: var(--color-secondary);
+  border-color: color-mix(in srgb, var(--color-secondary) 40%, transparent);
+  background: var(--color-secondary-bg);
+}
+.admin-commit-bar__pr-wrap {
+  display: flex; align-items: center; gap: 0.4rem;
+  flex: 1; min-width: 0;
+  animation: fadeIn 0.15s;
+}
+
+/* ═══════════════════════════════════════════
+PROSE — h5, h6 headings (not defined in base)
+═══════════════════════════════════════════ */
+.prose h5 {
+  font-size: 0.9rem; font-family: var(--font-sans); font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.prose h6 {
+  font-size: 0.85rem; font-family: var(--font-sans); font-weight: 600;
+  color: var(--color-text-muted);
+}
+.prose h5:hover .heading-anchor,
+.prose h6:hover .heading-anchor { opacity: 1; }
+
+/* ═══════════════════════════════════════════
+DOC TOC — h4 marker (h2/h3 already defined)
+═══════════════════════════════════════════ */
+.doc-toc__item--h4 > .doc-toc__link::before {
+  content: "· ";
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--color-text-faint);
+}
+
+/* ═══════════════════════════════════════════
+PROSE — GFM task-list checkboxes
+Marked with gfm:true produces these
+═══════════════════════════════════════════ */
+.prose input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none;
+  width: 14px; height: 14px;
+  border: 1.5px solid var(--color-border-hover);
+  border-radius: 3px;
+  background: var(--color-bg-elevated);
+  vertical-align: middle; margin-right: 0.4em;
+  cursor: default; flex-shrink: 0;
+  position: relative; top: -1px;
+}
+.prose input[type="checkbox"]:checked {
+  background: var(--color-accent); border-color: var(--color-accent);
+}
+.prose input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute; top: 1px; left: 3px;
+  width: 5px; height: 8px;
+  border: 2px solid var(--color-accent-text);
+  border-top: none; border-left: none;
+  transform: rotate(45deg);
+}
+.prose li:has(input[type="checkbox"]) {
+  list-style: none;
+  margin-left: -1.5rem;
+  display: flex; align-items: flex-start;
+}
+
+/* ═══════════════════════════════════════════
+PROSE — <details>/<summary> collapsibles
+Allowed by DOMPurify ADD_TAGS in buildMarkedHtml
+═══════════════════════════════════════════ */
+.prose details {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  margin: 1.5em 0;
+  background: var(--color-bg-alt);
+}
+.prose summary {
+  cursor: pointer; font-weight: 600; color: var(--color-text);
+  font-size: 0.9rem; list-style: none;
+  display: flex; align-items: center; gap: 0.5rem; user-select: none;
+}
+.prose summary::-webkit-details-marker { display: none; }
+.prose summary::before {
+  content: '▶'; font-size: 0.6rem; color: var(--color-accent);
+  transition: transform 0.2s; flex-shrink: 0;
+}
+.prose details[open] > summary::before { transform: rotate(90deg); }
+.prose details[open] > summary { margin-bottom: 0.75rem; }
+
+/* ═══════════════════════════════════════════
+PROSE — direct img (not wrapped in figure)
+═══════════════════════════════════════════ */
+.prose > img, .prose p > img {
+  max-width: 100%; height: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  display: block; margin: 0.5em 0;
+}
+
+/* ═══════════════════════════════════════════
+CONTENT SCROLLBAR — matches sidebar style
+═══════════════════════════════════════════ */
+.content {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+.content:hover { scrollbar-color: var(--color-border) transparent; }
+.content::-webkit-scrollbar { width: 5px; }
+.content::-webkit-scrollbar-thumb { background: transparent; border-radius: 3px; }
+.content:hover::-webkit-scrollbar-thumb { background: var(--color-border); }
+
+/* ═══════════════════════════════════════════
+ADMIN EDITOR AREA — height and mobile layout
+═══════════════════════════════════════════ */
+.admin-editor-area-wrap {
+  display: flex; flex-direction: column;
+  height: calc(100vh - var(--topbar-h));
+  min-height: 500px; overflow: hidden;
+}
+@media (max-width: 768px) {
+  .admin-editor-area-wrap { height: auto; min-height: 600px; }
+  .admin-edit-area { flex-direction: column; }
+  .admin-preview-pane {
+    border-left: none; border-top: 1px solid var(--color-border); min-height: 300px;
+  }
+  .admin-toolbar { height: auto; flex-wrap: wrap; }
+  .admin-commit-bar { flex-wrap: wrap; }
+  .admin-fm-row { flex-wrap: wrap; }
+  .admin-fm-row > * { flex: 1 1 140px; }
+}
+
+/* ═══════════════════════════════════════════
+ADMIN NAV — drag-and-drop states
+renderNavTreePanel uses draggable on groups
+═══════════════════════════════════════════ */
+.admin-nav-group[draggable="true"] { cursor: grab; }
+.admin-nav-group[draggable="true"]:active { cursor: grabbing; }
+.admin-nav-leaf.drop-target,
+.admin-nav-group.drop-target {
+  border: 2px dashed var(--color-accent) !important;
+  background: var(--color-accent-bg) !important;
+}
+
+/* nav-editor-btn danger variant */
+.nav-editor-btn--danger {
+  background: rgba(237,95,95,0.06);
+  color: var(--color-error, #ed5f5f);
+  border-color: rgba(237,95,95,0.2);
+}
+.nav-editor-btn--danger:hover {
+  background: rgba(237,95,95,0.14);
+  border-color: var(--color-error, #ed5f5f);
+  color: var(--color-error, #ed5f5f);
+}
+
+/* ═══════════════════════════════════════════
+EDIT-MODE TOPBAR TINT
+Also defined in injectStyles() but present here
+for completeness and pre-edit-mode rendering
+═══════════════════════════════════════════ */
+.edit-mode-active .topbar {
+  background: color-mix(in srgb, var(--color-accent) 6%, var(--color-bg-card));
+}
+
+/* ═══════════════════════════════════════════
+SIDEBAR OVERLAY — ensure hidden on desktop
+═══════════════════════════════════════════ */
+@media (min-width: 769px) {
+  .sidebar-overlay { display: none !important; }
+}
+
+/* ═══════════════════════════════════════════
+HOME — very small screen fixes
+═══════════════════════════════════════════ */
+@media (max-width: 360px) {
+  .wiki-home__cards { grid-template-columns: 1fr; }
+  .wiki-home__actions { flex-direction: column; align-items: flex-start; }
+}
