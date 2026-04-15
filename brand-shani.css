@@ -1,0 +1,93 @@
+/*
+brand-shani.css
+──────────────────────────────────────────────────────────────
+Shanios brand tokens — Warm Charcoal base + Coral/Violet accent
+Load this BEFORE style.css:
+style.css reads all tokens from here and provides fallbacks for any missing ones.
+──────────────────────────────────────────────────────────────
+*/
+/* ── Typefaces — Shanios editorial stack ────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800&family=DM+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+/* ── Dark mode (default) ────────────────────────────────────── */
+:root {
+  /* Fonts */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-sans:    'DM Sans', system-ui, sans-serif;
+  --font-mono:    'IBM Plex Mono', 'JetBrains Mono', Consolas, monospace;
+
+  /* Shape — sharp editorial feel */
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --radius-lg: 12px;
+
+  /* Layout */
+  --container:  1160px;
+  --max-prose:  1160px;
+
+  /* 🌑 Warm Charcoal — optimized for coral accent & long reading */
+  --color-bg:          #161514;
+  --color-bg-alt:      #1e1d1b;
+  --color-bg-elevated: #262422;
+  --color-bg-card:     #1b1a18;
+
+  /* Text */
+  --color-text:        #f5f4f2;
+  --color-text-muted:  #b0aaa4;
+  --color-text-faint:  #8a8580;
+  --color-border:      #2e2c29;
+  --color-border-hover:#4a4641;
+
+  /* Coral — vibrant, energetic, modern */
+  --color-accent:      #ff7f50;
+  --color-accent-hover:#ff6a33;
+  --color-accent-bg:   rgba(255, 127, 80, 0.12);
+  --color-accent-text: #161514;  /* dark text on coral — 7.3:1 AAA */
+
+  /* Violet — secondary accent (reading bar, important callouts) */
+  --color-secondary:    #9f72f5;   /* 5.0:1 AA on dark bg */
+  --color-secondary-bg: rgba(159, 114, 245, 0.1);
+
+  /* Status & UI colors — dark-mode values (light overrides below) */
+  --color-callout-note: #5a9cf7;  /* 6.04:1 AA on dark bg-alt */
+  --color-success:      #3dba7e;  /* 7.40:1 AA on dark bg */
+  --color-warning:      #e8a215;  /* 8.35:1 AA on dark bg */
+  --color-error:        #ed5f5f;  /* 5.56:1 AA on dark bg */
+  --color-like:         #e05c7a;  /* 5.19:1 AA on dark bg */
+  --color-like-bg:      rgba(224, 92, 122, 0.1);
+
+  --shadow-hover: 0 8px 36px rgba(22, 21, 20, 0.65);
+}
+
+/* ── Light mode ─────────────────────────────────────────────── */
+html[data-theme="light"] {
+  /* ☀️ Warm Editorial — seamless pair for Warm Charcoal dark */
+  --color-bg:          #faf9f7;
+  --color-bg-alt:      #f2f0ec;
+  --color-bg-elevated: #eae8e3;
+  --color-bg-card:     #ffffff;
+  --color-text:        #1c1b19;
+  --color-text-muted:  #5a5752;
+  --color-text-faint:  #6e6a63;
+  --color-border:      #e2dfd8;
+  --color-border-hover:#c8c4bb;
+
+  /* Coral — vivid red-orange, WCAG AA on light bg */
+  --color-accent:      #b53309;   /* darkened from #cc3d0e: passes AA (5.4:1) on all light surfaces */
+  --color-accent-hover:#9a2a05;
+  --color-accent-bg:   rgba(181, 51, 9, 0.09);
+  --color-accent-text: #ffffff;
+
+  --color-secondary:    #6d28d9;
+  --color-secondary-bg: rgba(109, 40, 217, 0.08);
+
+  /* Light-mode overrides: status + callout colors darkened for AA contrast on warm light surfaces */
+  --color-callout-note: #1d65d0;  /* #5a9cf7 base → fails on light; this → 4.8:1 AA */
+  --color-success:      #0f7a4a;  /* #3dba7e base → 2.2:1 fail; this → 4.7:1 AA */
+  --color-warning:      #8c6200;  /* #e8a215 base → 1.9:1 fail; this → 4.8:1 AA */
+  --color-error:        #b52f22;  /* #ed5f5f base → 3.1:1 fail; this → 5.4:1 AA */
+  --color-like:         #b82e52;  /* #e05c7a base → 3.1:1 fail; this → 5.2:1 AA */
+  --color-like-bg:      rgba(184, 46, 82, 0.1);
+
+  --shadow-hover: 0 8px 36px rgba(28, 27, 25, 0.08);
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Shanios Docs</title>
+  <meta name="robots" content="noindex">
+  <link rel="manifest" href="/manifest.json">
+  <script>
+    // GitHub Pages SPA redirect — encode path into hash-based URL
+    (function () {
+      var l = window.location;
+      var path   = l.pathname;
+      var search = l.search ? l.search.slice(1) : '';
+      var hash   = l.hash   ? l.hash.slice(1)   : '';
+      // Convert /docs/foo/bar → #doc/foo/bar  (wiki hash routing)
+      var docMatch = path.match(/^\/docs\/(.+?)(?:\.md)?$/);
+      var pageHash = '';
+      if (docMatch) {
+        pageHash = '#doc/' + docMatch[1];
+      } else if (path !== '/' && path !== '') {
+        pageHash = '#' + path.slice(1);
+      }
+      if (hash && !pageHash) pageHash = '#' + hash;
+      var redirect = l.protocol + '//' + l.hostname +
+        (l.port ? ':' + l.port : '') + '/' + pageHash;
+      l.replace(redirect);
+    })();
+  </script>
+  <script>
+    (function () {
+      var pfx = 'shanidocs_';
+      var t = localStorage.getItem(pfx + 'theme') ||
+              (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+</head>
+<body>
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+</body>
+</html>

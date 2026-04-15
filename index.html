@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+  <title>Shanios Docs</title>
+  <meta name="description" id="meta-desc" content="">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large">
+  <link rel="canonical"    id="canonical-url" href="">
+
+  <!-- ═══ OPEN GRAPH ══════════════════════════════════════════════════ -->
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="">
+  <meta property="og:description" id="og-desc"    content="">
+  <meta property="og:type"      id="og-type"      content="website">
+  <meta property="og:url"       id="og-url"       content="">
+  <meta property="og:image"     id="og-image"     content="">
+  <meta property="og:locale"    content="en_IN">
+
+  <!-- ═══ TWITTER ═════════════════════════════════════════════════════ -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="">
+  <meta name="twitter:title"       id="tw-title" content="">
+  <meta name="twitter:description" id="tw-desc"  content="">
+  <meta name="twitter:image"       id="tw-image" content="">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      var pfx = 'shanidocs_';
+      var t = localStorage.getItem(pfx + 'theme') ||
+              (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="#" class="topbar__logo" aria-label="Shanios Docs home">
+      <img src="" alt="Shanios" id="logo-img" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+      <!-- Auspicious text -->
+      <span class="topbar__auspicious">
+        <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+      </span>
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- Inline editor token settings -->
+      <button class="btn-icon" id="editor-settings-btn" aria-label="Configure GitHub token for inline editing" title="Inline editing settings">
+        <i class="fa-solid fa-key" style="font-size:0.8rem"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar — must be outside .content (overflow:auto creates new stacking context) -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article"></div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+</body>
+</html>

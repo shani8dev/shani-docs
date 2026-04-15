@@ -1,0 +1,80 @@
+# .github/workflows/build-manifest.yml
+#
+# ─────────────────────────────────────────────────────────────────
+#  Shanios Docs — auto-build docs/manifest.json + sitemap + PWA
+# ─────────────────────────────────────────────────────────────────
+#
+#  Q: Do I need to create any secrets?
+#  A: No. GitHub automatically provides secrets.GITHUB_TOKEN to every
+#     workflow. It has read+write access to this repo.
+#
+#  Q: When does this run?
+#  A: On every push to main that changes any .md file under docs/,
+#     or when you trigger it manually from the Actions tab.
+#
+#  Q: What does it produce?
+#  A:  docs/manifest.json  — slug + title + section index for all docs
+#                            (reserved for future full-text search; the
+#                             current engine builds its search index and
+#                             nav tree from nav-docs.js at runtime)
+#      sitemap.xml         — all doc URLs for SEO crawlers
+#                            (URLs use /docs/<slug> — the 404.html redirect
+#                             rewrites these to #doc/<slug> for the SPA)
+#      manifest.json       — PWA web app manifest (root)
+#
+#  Q: What about private repos / docs in a separate repo?
+#  A: Create a fine-grained PAT with "Contents: Read" on that repo,
+#     add it as secret DOCS_PAT, then change the checkout step below:
+#       token: ${{ secrets.DOCS_PAT }}
+#       repository: shani8dev/shani-docs
+# ─────────────────────────────────────────────────────────────────
+
+name: Build docs manifest
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**.md'
+      - 'config-docs.js'
+      - '.github/workflows/build-manifest.yml'
+  workflow_dispatch:   # allow manual trigger from the Actions tab
+
+permissions:
+  contents: write      # lets the workflow commit files back to the repo
+
+jobs:
+  build-manifest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout docs repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # ── If docs live in a SEPARATE private repo, uncomment below ──
+      # - name: Checkout docs repo
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: shani8dev/shani-docs
+      #     token: ${{ secrets.DOCS_PAT }}
+      #     path: docs
+
+      - name: Generate docs/manifest.json + sitemap + PWA manifest
+        run: node generate-manifest.js
+
+      - name: Commit generated files
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/manifest.json sitemap.xml manifest.json
+          git diff --staged --quiet && echo "nothing changed" || {
+            git commit -m "chore: rebuild docs manifest, sitemap & PWA [skip ci]"
+            git push
+          }
