@@ -161,6 +161,13 @@
     "draft": false
   },
   {
+    "slug": "software/android-waydroid",
+    "title": "Android (Waydroid)",
+    "updated": "2026-04-01",
+    "section": "Software & Apps",
+    "draft": false
+  },
+  {
     "slug": "software/appimage",
     "title": "AppImage",
     "updated": "2026-04-01",
@@ -184,6 +191,27 @@
   {
     "slug": "software/flatpak",
     "title": "Flatpak",
+    "updated": "2026-04-01",
+    "section": "Software & Apps",
+    "draft": false
+  },
+  {
+    "slug": "software/homebrew",
+    "title": "Homebrew",
+    "updated": "2026-04-01",
+    "section": "Software & Apps",
+    "draft": false
+  },
+  {
+    "slug": "software/nix",
+    "title": "Nix Package Manager",
+    "updated": "2026-04-01",
+    "section": "Software & Apps",
+    "draft": false
+  },
+  {
+    "slug": "software/virtual-machines",
+    "title": "Virtual Machines",
     "updated": "2026-04-01",
     "section": "Software & Apps",
     "draft": false

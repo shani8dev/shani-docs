@@ -144,6 +144,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://wiki.shani.dev/docs/software/android-waydroid</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://wiki.shani.dev/docs/software/appimage</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
@@ -163,6 +169,24 @@
   </url>
   <url>
     <loc>https://wiki.shani.dev/docs/software/flatpak</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://wiki.shani.dev/docs/software/homebrew</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://wiki.shani.dev/docs/software/nix</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://wiki.shani.dev/docs/software/virtual-machines</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
