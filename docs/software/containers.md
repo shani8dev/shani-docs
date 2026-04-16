@@ -4,62 +4,60 @@ section: Software & Apps
 updated: 2026-04-01
 ---
 
-# Containers
+# Containers on Shanios
 
-Shanios is a first-class container platform. Podman (rootless), Buildah, Skopeo, LXC, LXD, and Apptainer are all pre-installed. Container storage is in the dedicated `@containers` subvolume and persists across all OS updates.
+Shanios is a first-class container platform. **Podman** (rootless), **Buildah**, **Skopeo**, **LXC/LXD**, **Apptainer**, and **systemd-nspawn** are all pre-installed. Container storage is located in dedicated Btrfs subvolumes (e.g., `@containers`, `@machines`) ensuring your data persists across all OS updates and atomic rollbacks.
 
-## Podman (Rootless)
+## 📦 Podman (Default Runtime)
 
-Podman is the default container runtime. It runs without a daemon and without root.
+Podman is the default daemonless, rootless container runtime.
 
+### Basic Commands
 ```bash
-# Pull and run a container
+# Pull and run an interactive container
 podman run -it --rm ubuntu:24.04 bash
 
-# Run in background
+# Run a web server in the background
 podman run -d --name myapp -p 8080:80 nginx
 
-# List running containers
-podman ps
-
-# List all containers (including stopped)
-podman ps -a
+# List containers
+podman ps           # Running
+podman ps -a        # All (including stopped)
 
 # Stop and remove
 podman stop myapp
 podman rm myapp
 ```
 
-## podman-compose
-
+### Podman Compose
 ```bash
-# Run a compose file
+# Run a docker-compose.yml
 podman-compose up -d
 
 # View logs
 podman-compose logs -f
 
-# Stop
+# Teardown
 podman-compose down
 ```
 
-## Podman as systemd Service
-
+### Run Containers as Systemd Services
 ```bash
-# Generate a systemd unit from a running container
+# Generate a user systemd unit from a running container
 podman generate systemd --new --name myapp > ~/.config/systemd/user/myapp.service
 
-# Enable and start
+# Enable auto-start for the container
 systemctl --user enable --now myapp.service
 ```
 
-## Buildah — Build Container Images
+## 🛠 Buildah & Skopeo
 
+**Buildah**: Build OCI images without a daemon.
 ```bash
-# Build from Dockerfile/Containerfile
+# Build from Containerfile/Dockerfile
 buildah bud -t myimage:latest .
 
-# Build without a Dockerfile (script-driven)
+# Build without Dockerfile (scripted)
 ctr=$(buildah from ubuntu:24.04)
 buildah run $ctr -- apt-get update
 buildah run $ctr -- apt-get install -y curl
@@ -67,65 +65,115 @@ buildah commit $ctr myimage:latest
 buildah rm $ctr
 ```
 
-## Skopeo — Image Management
-
+**Skopeo**: Manage images directly in registries.
 ```bash
-# Copy an image between registries (no daemon needed)
+# Copy image between registries (no pull needed)
 skopeo copy docker://docker.io/nginx:latest docker://registry.example.com/nginx:latest
 
-# Inspect an image without pulling
+# Inspect image metadata
 skopeo inspect docker://docker.io/ubuntu:24.04
 
-# Delete a remote image
+# Delete remote tag
 skopeo delete docker://registry.example.com/old-image:tag
 ```
 
-## LXC / LXD — System Containers
+## 🐧 LXC / LXD (System Containers)
 
-LXC containers behave like lightweight VMs — full OS, init system, persistent.
+LXC containers provide a full OS environment with its own init system.
 
 ```bash
-# LXD: initialise on first use
+# Initialize LXD (create pools/networks)
 sudo lxd init
 
-# Launch an Ubuntu container
-lxc launch ubuntu:24.04 mycontainer
+# Launch a container
+lxc launch ubuntu:24.04 my-vm
 
-# Open a shell
-lxc exec mycontainer -- bash
+# Access shell
+lxc exec my-vm -- bash
 
-# List containers
-lxc list
+# Snapshotting (Instant with Btrfs)
+lxc snapshot my-vm backup-01
 
-# Stop and delete
-lxc stop mycontainer
-lxc delete mycontainer
+# Restore
+lxc restore my-vm backup-01
 ```
 
-## Apptainer (formerly Singularity)
+## 🐧 systemd-nspawn (Lightweight OS Containers)
 
-Apptainer is designed for HPC and scientific workloads — runs images without root.
+`systemd-nspawn` is ideal for lightweight build environments or testing other distributions without the overhead of full virtualization.
 
+### Create & Boot
 ```bash
-# Pull and run a Docker image
-apptainer run docker://ubuntu:24.04
+# Create a directory for the OS (must be empty)
+sudo mkdir -p /var/lib/machines/fedora-dev
 
-# Build an Apptainer image
-apptainer build myimage.sif ubuntu.def
+# Bootstrap Fedora (requires debootstrap or dnf)
+sudo dnf -y install dnf
+sudo dnf --releasever=39 --installroot=/var/lib/machines/fedora-dev -y group install "Core"
 
-# Run with GPU access
-apptainer run --nv myimage.sif
+# Boot the container
+sudo systemd-nspawn -bD /var/lib/machines/fedora-dev
 ```
 
-## Container Storage
+### Management with `machinectl`
+```bash
+# List active machines
+machinectl list
 
-All Podman container data lives in `~/.local/share/containers/` (rootless) and `/var/lib/containers/` (`@containers` subvolume for root). LXC/LXD data is in `@lxc` and `@lxd` subvolumes. All persist across OS updates and rollbacks.
+# Open shell in a running machine
+machinectl shell fedora-dev
+
+# Enable persistent boot (creates unit file)
+machinectl enable fedora-dev
+
+# Start/Stop/Restart
+sudo machinectl start fedora-dev
+sudo machinectl poweroff fedora-dev
+```
+
+### Configuration (`.nspawn` files)
+Place settings in `/etc/systemd/nspawn/machine.nspawn` to customize:
+```ini
+[Exec]
+Boot=yes
+User=developer
+
+[Network]
+VirtualEthernet=yes
+Bridge=br0
+```
+
+## 🧪 Apptainer (HPC / Science)
+
+Apptainer runs containers securely without root, often used in HPC clusters.
 
 ```bash
-# Disk usage
+# Pull Docker image to SIF format
+apptainer pull ubuntu.sif docker://ubuntu:24.04
+
+# Run the SIF
+apptainer run ubuntu.sif
+
+# Run with GPU support
+apptainer run --nv ubuntu.sif
+```
+
+## 📂 Container Storage
+
+Shanios stores container data in dedicated Btrfs subvolumes that are **excluded from system updates**:
+
+| Tool | Storage Location | Btrfs Subvolume |
+|------|------------------|-----------------|
+| **Podman (User)** | `~/.local/share/containers/` | (User Home) |
+| **Podman (Root)** | `/var/lib/containers/storage/` | `@containers` |
+| **LXD** | `/var/lib/lxd/` | `@lxd` |
+| **nspawn** | `/var/lib/machines/` | `@machines` |
+
+### Maintenance
+```bash
+# Check disk usage
 podman system df
-du -sh ~/.local/share/containers/
 
-# Prune unused images and containers
+# Prune unused images/containers
 podman system prune -a
 ```

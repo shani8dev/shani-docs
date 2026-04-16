@@ -100,7 +100,6 @@ node --version
 ## Host Integration
 
 Inside a Distrobox container:
-
 - `~` is the same as on the host — files are shared
 - `DISPLAY`, `WAYLAND_DISPLAY`, `DBUS_SESSION_BUS_ADDRESS` are forwarded — GUI apps work
 - PipeWire/PulseAudio socket is shared — audio works
@@ -114,7 +113,6 @@ host-spawn systemctl --user restart pipewire
 ```
 
 ## Tips
-
 - Install heavy build dependencies in Distrobox rather than Nix to keep the Nix store clean
 - For AUR packages, use the `arch` container — `yay` and `paru` work inside it
 - Container data (installed packages) lives in Podman storage (`@containers`), not your home directory — reinstalling a container resets its installed packages, but not your home files

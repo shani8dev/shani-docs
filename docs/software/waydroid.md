@@ -28,7 +28,7 @@ sudo waydroid-helper init
 # This requires an internet connection and takes a few minutes.
 ```
 
-After init completes, Waydroid appears in your app launcher. Android apps can be launched from there or via the terminal.
+After `init` completes, Waydroid appears in your app launcher. Android apps can be launched from there or via the terminal.
 
 ## Basic Usage
 
@@ -153,7 +153,6 @@ sudo waydroid init -f
 ```
 
 ## Tips
-
 - Waydroid requires a Wayland session — it does not work under XWayland or on X11-only desktops
 - For Google Play Store support, use a community GApps package (not included by default)
 - Battery and suspend management: stop the `waydroid-container` service when not in use to save power

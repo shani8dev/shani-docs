@@ -79,6 +79,7 @@ CONFIG.NAV_TREE = [
       { title: 'Homebrew', slug: 'software/homebrew' },
       { title: 'Virtual Machines', slug: 'software/vms' },
       { title: 'Android (Waydroid)', slug: 'software/waydroid' },
+      { title: 'Bottles (Windows Compatibility)', slug: 'software/bottles' },
     ]
   },
   {
