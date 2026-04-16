@@ -138,6 +138,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://wiki.shani.dev/docs/networking/kdeconnect</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://wiki.shani.dev/docs/networking/modemmanager</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
