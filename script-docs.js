@@ -1374,6 +1374,7 @@ const AdminEditor = (() => {
 
   // ── Auth modal ────────────────────────────────────────────────
   function showAuthModal(onSuccess) {
+    injectStyles(); // ensure .a-btn styles exist even before edit mode is entered
     const existing = document.getElementById('admin-auth-overlay');
     if (existing) existing.remove();
 
@@ -2796,11 +2797,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Year
   $$('[data-current-year]').forEach(el => el.textContent = new Date().getFullYear());
-
-  // Wire editor-settings-btn (token config)
-  $('#editor-settings-btn')?.addEventListener('click', () => {
-    if (window.AdminEditor?.showAuthModal) window.AdminEditor.showAuthModal(() => {});
-  });
 
   // Inject edit toggle into topbar (admin panel is no longer used)
   injectTopbarEditToggle();
