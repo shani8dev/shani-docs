@@ -84,17 +84,22 @@ CONFIG.NAV_TREE = [
   {
     title: 'Networking', icon: 'fa-solid fa-network-wired',
     children: [
-      { title: 'NetworkManager & VPN', slug: 'networking/networkmanager' },
-      { title: 'VPN Protocols', slug: 'networking/vpn' },
+      { title: 'NetworkManager & VPN', slug: 'networking/networkmanager-vpn' },
+      { title: 'Wireguard (Manual)', slug: 'networking/wireguard' },
+      { title: 'ModemManager', slug: 'networking/modemmanager-vpn' },
+      { title: 'avahi', slug: 'networking/avahi' },
       { title: 'dnsmasq', slug: 'networking/dnsmasq' },
-      { title: 'Caddy Web Server', slug: 'networking/caddy' },
+      { title: 'openresolv', slug: 'networking/opnresolv' },
+      { title: 'Remote Desktop', slug: 'networking/remote-desktop' },
       { title: 'Tailscale VPN', slug: 'networking/tailscale' },
       { title: 'Cloudflared Tunnels', slug: 'networking/cloudflared' },
-      { title: 'Firewall (firewalld)', slug: 'networking/firewall' },
+      { title: 'Firewall (firewalld)', slug: 'networking/firewalld' },
       { title: 'Fail2ban', slug: 'networking/fail2ban' },
-      { title: 'OpenSSH', slug: 'networking/ssh' },
+      { title: 'OpenSSH', slug: 'networking/openssh' },
+      { title: 'Sshfs', slug: 'networking/sshfs' },
       { title: 'NFS File Sharing', slug: 'networking/nfs' },
       { title: 'Samba (Windows)', slug: 'networking/samba' },
+      { title: 'Caddy Web Server', slug: 'networking/caddy' },          
     ]
   },
   {
