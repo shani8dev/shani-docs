@@ -85,24 +85,50 @@ CONFIG.NAV_TREE = [
   {
     title: 'Networking', icon: 'fa-solid fa-network-wired',
     children: [
+      // Connection & Tunneling
       { title: 'NetworkManager & VPN', slug: 'networking/networkmanager-vpn' },
+      { title: 'Tailscale VPN', slug: 'networking/tailscale' },
       { title: 'Wireguard (Manual)', slug: 'networking/wireguard' },
+      { title: 'Cloudflared Tunnels', slug: 'networking/cloudflared' },
       { title: 'ModemManager', slug: 'networking/modemmanager' },
-      { title: 'avahi', slug: 'networking/avahi' },
+      
+      // DNS & Service Discovery
       { title: 'dnsmasq', slug: 'networking/dnsmasq' },
       { title: 'openresolv', slug: 'networking/openresolv' },
+      { title: 'avahi (mDNS/Bonjour)', slug: 'networking/avahi' },
+      
+      // Remote Access & File/Block Sharing
+      { title: 'OpenSSH (sshd & ssh)', slug: 'networking/openssh' },
+      { title: 'Sshfs', slug: 'networking/sshfs' },
+      { title: 'NFS & rpcbind', slug: 'networking/nfs' },
+      { title: 'Samba (SMB/CIFS)', slug: 'networking/samba' },
+      { title: 'rsyncd', slug: 'networking/rsyncd' },
+      { title: 'nbd-server', slug: 'networking/nbd' },
       { title: 'Remote Desktop', slug: 'networking/remote-desktop' },
-      { title: 'Tailscale VPN', slug: 'networking/tailscale' },
-      { title: 'Cloudflared Tunnels', slug: 'networking/cloudflared' },
+      { title: 'KDE Connect', slug: 'networking/kdeconnect' },
+      
+      // Security, Auth & Monitoring
       { title: 'Firewall (firewalld)', slug: 'networking/firewalld' },
       { title: 'Fail2ban', slug: 'networking/fail2ban' },
-      { title: 'OpenSSH', slug: 'networking/openssh' },
-      { title: 'Sshfs', slug: 'networking/sshfs' },
-      { title: 'NFS File Sharing', slug: 'networking/nfs' },
-      { title: 'Samba (Windows)', slug: 'networking/samba' },
-      { title: 'KDE Connect', slug: 'networking/kdeconnect' },
-      { title: 'Caddy Web Server', slug: 'networking/caddy' },
-      { title: 'Backup (rclone/restic)', slug: 'networking/backup' },       
+      { title: 'snmpd', slug: 'networking/snmpd' },
+      { title: 'Kerberos', slug: 'networking/kerberos' },
+      { title: 'slapd (OpenLDAP)', slug: 'networking/slapd' },
+      
+      // Backup & Sync
+      { title: 'Backup (rclone/restic)', slug: 'networking/backup' },
+    ]
+  },
+  {
+    title: 'Self-Hosting & Servers', icon: 'fa-solid fa-server',
+    children: [
+      { title: 'Caddy Web Server', slug: 'servers/caddy' },
+      { title: 'Databases & Caches', slug: 'servers/databases' },
+      { title: 'Media & Entertainment', slug: 'servers/media' },
+      { title: 'Productivity & Files', slug: 'servers/productivity' },
+      { title: 'Developer Tools', slug: 'servers/devops' },
+      { title: 'Security & Identity', slug: 'servers/security' },
+      { title: 'Network & Analytics', slug: 'servers/networking' },
+      { title: 'Container Lifecycle', slug: 'servers/management' },
     ]
   },
   { title: 'Troubleshooting', icon: 'fa-solid fa-screwdriver-wrench',

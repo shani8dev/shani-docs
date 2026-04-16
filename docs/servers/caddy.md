@@ -10,16 +10,6 @@ updated: 2026-04-01
 
 ---
 
-## Installation
-
-Caddy is available in the official repositories.
-
-```bash
-sudo pacman -S caddy
-```
-
----
-
 ## Configuration Loading & Context
 
 It is important to understand where Caddy looks for its configuration file (`Caddyfile`) depending on how you launch it.
@@ -68,6 +58,19 @@ myapp.lan {
     reverse_proxy localhost:3000
 }
 
+# Multiple subdomains → different backend services
+api.example.com     { reverse_proxy localhost:8000 }
+dashboard.example.com { reverse_proxy localhost:9090 }
+
+# Load balance across replicas
+lb.example.com {
+    reverse_proxy localhost:3001 localhost:3002 localhost:3003 {
+        lb_policy round_robin
+        health_uri /health
+        health_interval 10s
+    }
+}
+
 # Static site hosting
 docs.example.com {
     root * /srv/http/docs
@@ -89,6 +92,24 @@ example.com {
     reverse_proxy 192.168.1.50:80
 }
 ```
+### Basic Auth & Security Headers
+```caddyfile
+# Generate bcrypt password hash first:
+# caddy hash-password --plaintext "yourpassword"
+
+secure.example.com {
+    basicauth {
+        admin $2a$14$YOUR_HASH_HERE
+    }
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        -Server
+    }
+    reverse_proxy localhost:8080
+}
+```
 
 ---
 
@@ -108,8 +129,9 @@ systemctl status caddy
 
 # View logs
 journalctl -u caddy -f
+# Validate syntax
+caddy validate --config /etc/caddy/Caddyfile
 ```
-
 ---
 
 ## Permissions & File Serving
@@ -179,3 +201,4 @@ sudo ufw allow 443/tcp
 | Container reverse proxy fails | Ensure host networking or port forwarding is correctly configured in Podman/Docker |
 
 > 💡 **Tip**: Use `caddy fmt --overwrite /etc/caddy/Caddyfile` to auto-format and validate your configuration before reloading.
+> 🔒 **Security Tip**: Always bind container ports to `127.0.0.1` (e.g., `-p 127.0.0.1:3000:3000`) and proxy them through Caddy. This ensures services are only accessible via HTTPS.

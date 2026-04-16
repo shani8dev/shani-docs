@@ -1,70 +1,74 @@
 ---
 title: OpenSSH
 section: Networking
-updated: 2026-04-01
+updated: 2026-04-16
 ---
 
 # OpenSSH — Remote Shell & File Transfer
 
-SSH server is **not enabled by default**. Enable it only when needed; prefer access via Tailscale rather than exposing port 22 publicly.
+SSH provides encrypted remote access. On Shanios, the SSH daemon (`sshd`) is not enabled by default. It is recommended to use SSH over Tailscale (`tailscale ssh`) or via Cloudflared tunnels rather than exposing port 22 directly to the public internet.
 
-## Enable SSH Server
+## Server Setup
 
+### 1. Enable SSH Server
 ```bash
 sudo systemctl enable --now sshd
+```
+*Tip: For on-demand access, you can use `sshd.socket` (socket activation) instead of `sshd.service`. This starts the SSH daemon only when a connection is attempted.*
 
-# Allow SSH in firewall (LAN only is safest)
-sudo firewall-cmd --add-service=ssh --permanent
+### 2. Hardening `/etc/ssh/sshd_config`
+For better security, modify `/etc/ssh/sshd_config`:
+
+```text
+# Disable password login (require keys)
+PasswordAuthentication no
+
+# Disable root login
+PermitRootLogin no
+
+# Optional: Change default port
+Port 2222
+
+# Restrict access to specific users
+AllowUsers youruser
+```
+Restart the service after changes: `sudo systemctl restart sshd`
+
+### 3. Firewall
+```bash
+# If using a custom port
+sudo firewall-cmd --add-port=2222/tcp --permanent
+# Or allow the default ssh service
+# sudo firewall-cmd --add-service=ssh --permanent
 sudo firewall-cmd --reload
 ```
 
-## Hardening `/etc/ssh/sshd_config`
+## Client Setup
 
+### 1. Generate Key Pair
+Run this on your **client** machine:
 ```bash
-sudo nano /etc/ssh/sshd_config
+ssh-keygen -t ed25519 -C "my-desktop"
 ```
 
-Key settings to set:
-
-```
-PasswordAuthentication no   # key-only auth
-PermitRootLogin no
-Port 2222                   # non-default port (optional)
-AllowUsers youruser         # restrict to specific users
-MaxAuthTries 3
-```
-
+### 2. Copy Key to Server
 ```bash
-sudo systemctl restart sshd
+ssh-copy-id -p 2222 user@shanios-ip
 ```
 
-## Key-Based Authentication
-
-```bash
-# Generate an ED25519 key pair on the CLIENT
-ssh-keygen -t ed25519 -C "mydesktop"
-
-# Copy public key to server
-ssh-copy-id user@hostname
-# or manually append ~/.ssh/id_ed25519.pub to server's ~/.ssh/authorized_keys
+### 3. Client Configuration
+Create `~/.ssh/config` on your client for easy access:
+```text
+Host shanios
+    HostName 192.168.1.100
+    User myuser
+    Port 2222
+    IdentityFile ~/.ssh/id_ed25519
+    IdentitiesOnly yes
 ```
+Now connect with simply: `ssh shanios`
 
-## Connecting & File Transfer
-
-```bash
-# Connect
-ssh user@hostname
-ssh -p 2222 user@hostname   # non-default port
-
-# Tunnel a local port via SSH
-ssh -L 8080:localhost:3000 user@hostname
-
-# Transfer files
-scp localfile.txt user@hostname:/home/user/
-rsync -avz /local/dir/ user@hostname:/remote/dir/
-
-# SFTP interactive session
-sftp user@hostname
-```
-
-> **Never expose SSH directly to the internet.** Use SSH over Tailscale (`tailscale ssh`), or tunnel it through Cloudflared. If public SSH is unavoidable: use key-only auth, disable PasswordAuthentication, change the default port, and enable Fail2ban.
+## Troubleshooting
+- **Logs:** `journalctl -u sshd`
+- **Connection Refused:** Check if `sshd` is running (`systemctl status sshd`) and verify `firewalld` settings.
+- **Permission Denied (publickey):** Check permissions on the server. The `~/.ssh` directory must be `700` and `~/.ssh/authorized_keys` must be `600`.
