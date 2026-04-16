@@ -56,6 +56,20 @@
     "draft": false
   },
   {
+    "slug": "faq",
+    "title": "FAQ",
+    "updated": "2026-05-13",
+    "section": "FAQ",
+    "draft": false
+  },
+  {
+    "slug": "gpu-containers",
+    "title": "GPU Acceleration & HPC Containers",
+    "updated": "2026-04-17",
+    "section": "Software & Apps",
+    "draft": false
+  },
+  {
     "slug": "install/first-boot",
     "title": "First Boot",
     "updated": "2026-04-01",
@@ -116,6 +130,13 @@
     "title": "What's Included",
     "updated": "2026-04-01",
     "section": "Introduction",
+    "draft": false
+  },
+  {
+    "slug": "network-diag",
+    "title": "Network Diagnostics & Tools",
+    "updated": "2026-04-01",
+    "section": "Troubleshooting",
     "draft": false
   },
   {
@@ -448,13 +469,6 @@
     "draft": false
   },
   {
-    "slug": "software/gpu-containers",
-    "title": "GPU Acceleration & HPC Containers",
-    "updated": "2026-04-17",
-    "section": "Software & Apps",
-    "draft": false
-  },
-  {
     "slug": "software/homebrew",
     "title": "Homebrew",
     "updated": "2026-04-01",
@@ -490,10 +504,10 @@
     "draft": false
   },
   {
-    "slug": "troubleshooting/networking",
-    "title": "Network Diagnostics & Tools",
-    "updated": "2026-04-01",
-    "section": "Troubleshooting",
+    "slug": "troubleshooting",
+    "title": "Troubleshooting Guide",
+    "updated": "2026-04-16",
+    "section": "System Management",
     "draft": false
   },
   {

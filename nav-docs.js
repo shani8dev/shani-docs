@@ -74,7 +74,6 @@ CONFIG.NAV_TREE = [
       { title: 'Snaps', slug: 'software/snaps' },
       { title: 'AppImage', slug: 'software/appimage' },
       { title: 'Containers', slug: 'software/containers' },
-      { title: 'GPU Acceleration (CUDA/ROCm/oneAPI)', slug: 'software/gpu-containers' },
       { title: 'Distrobox', slug: 'software/distrobox' },
       { title: 'Nix Package Mgr', slug: 'software/nix' },
       { title: 'Homebrew', slug: 'software/homebrew' },
@@ -138,12 +137,8 @@ CONFIG.NAV_TREE = [
       { title: 'Mail Servers & Clients', slug: 'servers/mail' },
     ]
   },
-  { title: 'Troubleshooting', icon: 'fa-solid fa-screwdriver-wrench',
-    children: [
-      { title: 'Network Diagnostics & Tools', slug: 'troubleshooting/networking' },
-    ]
-  },
+  { title: 'GPU Acceleration (CUDA/ROCm/oneAPI)', icon: 'fa-solid fa-microchip', slug: 'gpu-containers' },
+  { title: 'Network Diagnostics & Tools', icon: 'fa-solid fa-diagram-project', slug: 'network-diag' },
+  { title: 'Troubleshooting', icon: 'fa-solid fa-screwdriver-wrench', slug: 'troubleshooting' },
   { title: 'FAQ', icon: 'fa-solid fa-circle-question', slug: 'faq' },
-  { title: 'Glossary', icon: 'fa-solid fa-spell-check', slug: 'glossary' },
-  { title: 'Contribute', icon: 'fa-solid fa-code-pull-request', slug: 'contribute' },
 ];
