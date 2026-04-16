@@ -357,6 +357,13 @@
     "draft": false
   },
   {
+    "slug": "troubleshooting/networking",
+    "title": "Network Diagnostics & Tools",
+    "updated": "2026-04-01",
+    "section": "Troubleshooting",
+    "draft": false
+  },
+  {
     "slug": "updates/config",
     "title": "System Config",
     "updated": "2026-04-01",
