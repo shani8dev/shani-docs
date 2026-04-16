@@ -114,6 +114,18 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://wiki.shani.dev/docs/networking/backup</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://wiki.shani.dev/docs/networking/caddy</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://wiki.shani.dev/docs/networking/cloudflared</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>

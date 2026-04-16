@@ -126,6 +126,20 @@
     "draft": false
   },
   {
+    "slug": "networking/backup",
+    "title": "Backup & Recovery",
+    "updated": "2026-04-01",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/caddy",
+    "title": "Caddy",
+    "updated": "2026-04-01",
+    "section": "Networking",
+    "draft": false
+  },
+  {
     "slug": "networking/cloudflared",
     "title": "Cloudflared Tunnels",
     "updated": "2026-04-01",
