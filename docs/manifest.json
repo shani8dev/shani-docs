@@ -133,13 +133,6 @@
     "draft": false
   },
   {
-    "slug": "networking/caddy",
-    "title": "Caddy",
-    "updated": "2026-04-01",
-    "section": "Networking",
-    "draft": false
-  },
-  {
     "slug": "networking/cloudflared",
     "title": "Cloudflared Tunnels",
     "updated": "2026-04-01",
@@ -175,9 +168,23 @@
     "draft": false
   },
   {
+    "slug": "networking/kerberos",
+    "title": "Kerberos",
+    "updated": "2026-04-16",
+    "section": "Networking",
+    "draft": false
+  },
+  {
     "slug": "networking/modemmanager",
     "title": "ModemManager (Mobile)",
     "updated": "2026-04-01",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/nbd",
+    "title": "nbd-server",
+    "updated": "2026-04-16",
     "section": "Networking",
     "draft": false
   },
@@ -191,7 +198,7 @@
   {
     "slug": "networking/nfs",
     "title": "NFS File Sharing",
-    "updated": "2026-04-01",
+    "updated": "2026-04-16",
     "section": "Networking",
     "draft": false
   },
@@ -205,7 +212,7 @@
   {
     "slug": "networking/openssh",
     "title": "OpenSSH",
-    "updated": "2026-04-01",
+    "updated": "2026-04-16",
     "section": "Networking",
     "draft": false
   },
@@ -217,9 +224,30 @@
     "draft": false
   },
   {
+    "slug": "networking/rsyncd",
+    "title": "rsyncd",
+    "updated": "2026-04-16",
+    "section": "Networking",
+    "draft": false
+  },
+  {
     "slug": "networking/samba",
     "title": "Samba (Windows)",
-    "updated": "2026-04-01",
+    "updated": "2026-04-16",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/slapd",
+    "title": "slapd (OpenLDAP)",
+    "updated": "2026-04-16",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/snmpd",
+    "title": "snmpd",
+    "updated": "2026-04-16",
     "section": "Networking",
     "draft": false
   },
@@ -284,6 +312,62 @@
     "title": "TPM2 Enrollment",
     "updated": "2026-04-01",
     "section": "Security",
+    "draft": false
+  },
+  {
+    "slug": "servers/caddy",
+    "title": "Caddy",
+    "updated": "2026-04-01",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "servers/databases",
+    "title": "Databases & Caches",
+    "updated": "2026-04-16",
+    "section": "Self-Hosting & Servers",
+    "draft": false
+  },
+  {
+    "slug": "servers/devops",
+    "title": "Developer Tools",
+    "updated": "2026-04-16",
+    "section": "Self-Hosting & Servers",
+    "draft": false
+  },
+  {
+    "slug": "servers/management",
+    "title": "Container Lifecycle",
+    "updated": "2026-04-16",
+    "section": "Self-Hosting & Servers",
+    "draft": false
+  },
+  {
+    "slug": "servers/media",
+    "title": "Media & Entertainment",
+    "updated": "2026-04-16",
+    "section": "Self-Hosting & Servers",
+    "draft": false
+  },
+  {
+    "slug": "servers/networking",
+    "title": "Network & Analytics",
+    "updated": "2026-04-16",
+    "section": "Self-Hosting & Servers",
+    "draft": false
+  },
+  {
+    "slug": "servers/productivity",
+    "title": "Productivity & Files",
+    "updated": "2026-04-16",
+    "section": "Self-Hosting & Servers",
+    "draft": false
+  },
+  {
+    "slug": "servers/security",
+    "title": "Security & Identity",
+    "updated": "2026-04-16",
+    "section": "Self-Hosting & Servers",
     "draft": false
   },
   {
