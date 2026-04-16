@@ -87,7 +87,7 @@ CONFIG.NAV_TREE = [
     children: [
       { title: 'NetworkManager & VPN', slug: 'networking/networkmanager-vpn' },
       { title: 'Wireguard (Manual)', slug: 'networking/wireguard' },
-      { title: 'ModemManager', slug: 'networking/modemmanager-vpn' },
+      { title: 'ModemManager', slug: 'networking/modemmanager' },
       { title: 'avahi', slug: 'networking/avahi' },
       { title: 'dnsmasq', slug: 'networking/dnsmasq' },
       { title: 'openresolv', slug: 'networking/openresolv' },
@@ -105,7 +105,11 @@ CONFIG.NAV_TREE = [
       { title: 'Backup (rclone/restic)', slug: 'networking/backup' },       
     ]
   },
-  { title: 'Troubleshooting', icon: 'fa-solid fa-screwdriver-wrench', slug: 'troubleshooting' },
+  { title: 'Troubleshooting', icon: 'fa-solid fa-screwdriver-wrench', slug: 'troubleshooting' 
+    children: [
+      { title: 'Network Diagnostics & Tools', slug: 'troubleshooting/networking' },
+    ]
+  },
   { title: 'FAQ', icon: 'fa-solid fa-circle-question', slug: 'faq' },
   { title: 'Glossary', icon: 'fa-solid fa-spell-check', slug: 'glossary' },
   { title: 'Contribute', icon: 'fa-solid fa-code-pull-request', slug: 'contribute' },
