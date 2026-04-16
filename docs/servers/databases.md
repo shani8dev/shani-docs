@@ -6,10 +6,10 @@ updated: 2026-04-16
 
 # Databases & Caches
 
-This section covers relational databases, document stores, caching layers, and full-text search engines. All services run as rootless Podman containers with persistent volumes mounted using the `:Z` flag for proper security labeling on immutable systems.
+Relational, document, caching, and full-text search engines. All run rootless with persistent volumes mounted via `:Z`.
 
 ## MariaDB / MySQL
-**Purpose**: Open-source relational database widely used for web applications, CMS platforms, and legacy software stacks.
+**Purpose**: Open-source relational database for web apps, CMS platforms, and legacy software stacks.
 ```bash
 podman run -d \
   --name mariadb \
@@ -18,16 +18,14 @@ podman run -d \
   -e MYSQL_DATABASE=mydb \
   -e MYSQL_USER=myuser \
   -e MYSQL_PASSWORD=myuserpass \
-  -v mariadb_/var/lib/mysql \
+  -v mariadb_data:/var/lib/mysql \
   --restart unless-stopped \
   mariadb:11
-
-# Connect from host
-podman exec -it mariadb mariadb -u myuser -p mydb
 ```
+> **Connect**: `podman exec -it mariadb mariadb -u myuser -p mydb`
 
 ## PostgreSQL
-**Purpose**: Advanced, standards-compliant relational database known for complex queries, JSONB support, and extensibility. Ideal for modern web apps and analytics.
+**Purpose**: Advanced, standards-compliant relational database known for complex queries, JSONB support, and extensibility.
 ```bash
 podman run -d \
   --name postgres \
@@ -35,22 +33,12 @@ podman run -d \
   -e POSTGRES_USER=myuser \
   -e POSTGRES_PASSWORD=strongpassword \
   -e POSTGRES_DB=mydb \
-  -v postgres_/var/lib/postgresql/data \
+  -v postgres_data:/var/lib/postgresql/data \
   --restart unless-stopped \
   postgres:16-alpine
-
-# Connect
-podman exec -it postgres psql -U myuser -d mydb
-
-# pgAdmin web UI (optional)
-podman run -d \
-  --name pgadmin \
-  -p 127.0.0.1:5050:80 \
-  -e PGADMIN_DEFAULT_EMAIL=admin@example.com \
-  -e PGADMIN_DEFAULT_PASSWORD=admin \
-  --restart unless-stopped \
-  dpage/pgadmin4
 ```
+> **Connect**: `podman exec -it postgres psql -U myuser -d mydb`
+> **GUI**: `podman run -d --name pgadmin -p 127.0.0.1:5050:80 -e PGADMIN_DEFAULT_EMAIL=admin@example.com -e PGADMIN_DEFAULT_PASSWORD=admin --restart unless-stopped dpage/pgadmin4`
 
 ## Redis
 **Purpose**: High-performance in-memory data store used for caching, session management, message brokering, and real-time analytics.
@@ -58,20 +46,21 @@ podman run -d \
 podman run -d \
   --name redis \
   -p 127.0.0.1:6379:6379 \
-  -v redis_/data \
+  -v redis_data:/data \
   --restart unless-stopped \
   redis:7-alpine redis-server --appendonly yes
+```
+> **Test**: `podman exec -it redis redis-cli ping`
 
-# Connect and test
-podman exec -it redis redis-cli ping
-
-# Redis with password
+## KeyDB
+**Purpose**: Multithreaded Redis fork optimized for modern multi-core CPUs. Drop-in compatible with Redis clients.
+```bash
 podman run -d \
-  --name redis \
+  --name keydb \
   -p 127.0.0.1:6379:6379 \
-  -v redis_/data \
+  -v keydb_data:/data \
   --restart unless-stopped \
-  redis:7-alpine redis-server --appendonly yes --requirepass strongpassword
+  eqalpha/keydb:alpine
 ```
 
 ## MongoDB
@@ -82,12 +71,9 @@ podman run -d \
   -p 127.0.0.1:27017:27017 \
   -e MONGO_INITDB_ROOT_USERNAME=admin \
   -e MONGO_INITDB_ROOT_PASSWORD=strongpassword \
-  -v mongodb_/data/db \
+  -v mongodb_data:/data/db \
   --restart unless-stopped \
   mongo:7
-
-# Connect
-podman exec -it mongodb mongosh -u admin -p strongpassword --authenticationDatabase admin
 ```
 
 ## MeiliSearch
@@ -96,10 +82,37 @@ podman exec -it mongodb mongosh -u admin -p strongpassword --authenticationDatab
 podman run -d \
   --name meilisearch \
   -p 127.0.0.1:7700:7700 \
-  -v meilisearch_/meili_data \
+  -v meilisearch_data:/meili_data \
   -e MEILI_MASTER_KEY=changeme \
   --restart unless-stopped \
   getmeili/meilisearch:latest
+```
+
+## InfluxDB
+**Purpose**: High-performance time-series database. Optimized for metrics, IoT telemetry, and real-time analytics.
+```bash
+podman run -d \
+  --name influxdb \
+  -p 127.0.0.1:8086:8086 \
+  -v influxdb_data:/var/lib/influxdb2 \
+  -e DOCKER_INFLUXDB_INIT_MODE=setup \
+  -e DOCKER_INFLUXDB_INIT_USERNAME=admin \
+  -e DOCKER_INFLUXDB_INIT_PASSWORD=strongpassword \
+  --restart unless-stopped \
+  influxdb:2
+```
+
+## Elasticsearch
+**Purpose**: Distributed search and analytics engine powering log analysis, full-text search, and observability (ELK stack).
+```bash
+podman run -d \
+  --name elasticsearch \
+  -p 127.0.0.1:9200:9200 \
+  -v elasticsearch_data:/usr/share/elasticsearch/data \
+  -e discovery.type=single-node \
+  -e xpack.security.enabled=false \
+  --restart unless-stopped \
+  docker.elastic.co/elasticsearch/elasticsearch:8.15.0
 ```
 
 ## SQLite via Litestream
@@ -111,12 +124,6 @@ podman run -d \
   -v /home/user/litestream.yml:/etc/litestream.yml:ro,Z \
   --restart unless-stopped \
   litestream/litestream replicate
-
-# litestream.yml example:
-# dbs:
-#   - path: /data/app.db
-#     replicas:
-#       - url: s3://mybucket/app.db
 ```
 
 ## Adminer
@@ -153,6 +160,6 @@ services:
       MYSQL_DATABASE: myapp
       MYSQL_USER: appuser
       MYSQL_PASSWORD: apppass
-    volumes: [db_/var/lib/mysql]
-volumes: {db_ {}}
+    volumes: [db_data:/var/lib/mysql]
+volumes: {db_data: {}}
 ```
