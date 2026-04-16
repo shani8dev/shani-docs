@@ -105,7 +105,7 @@ CONFIG.NAV_TREE = [
       { title: 'Backup (rclone/restic)', slug: 'networking/backup' },       
     ]
   },
-  { title: 'Troubleshooting', icon: 'fa-solid fa-screwdriver-wrench', slug: 'troubleshooting' 
+  { title: 'Troubleshooting', icon: 'fa-solid fa-screwdriver-wrench',
     children: [
       { title: 'Network Diagnostics & Tools', slug: 'troubleshooting/networking' },
     ]
