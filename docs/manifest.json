@@ -315,10 +315,31 @@
     "draft": false
   },
   {
+    "slug": "servers/ai-llms",
+    "title": "AI & LLMs",
+    "updated": "2026-04-16",
+    "section": "Self-Hosting & Servers",
+    "draft": false
+  },
+  {
+    "slug": "servers/backup-sync",
+    "title": "Backups & Sync",
+    "updated": "2026-04-16",
+    "section": "Self-Hosting & Servers",
+    "draft": false
+  },
+  {
     "slug": "servers/caddy",
     "title": "Caddy",
     "updated": "2026-04-01",
     "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "servers/communication",
+    "title": "Communication",
+    "updated": "2026-04-16",
+    "section": "Self-Hosting & Servers",
     "draft": false
   },
   {
@@ -329,15 +350,29 @@
     "draft": false
   },
   {
-    "slug": "servers/devops",
+    "slug": "servers/devtools",
     "title": "Developer Tools",
     "updated": "2026-04-16",
     "section": "Self-Hosting & Servers",
     "draft": false
   },
   {
+    "slug": "servers/home-automation",
+    "title": "Home Automation",
+    "updated": "2026-04-16",
+    "section": "Self-Hosting & Servers",
+    "draft": false
+  },
+  {
+    "slug": "servers/mail",
+    "title": "Mail Servers",
+    "updated": "2026-04-16",
+    "section": "Self-Hosting & Servers",
+    "draft": false
+  },
+  {
     "slug": "servers/management",
-    "title": "Container Lifecycle",
+    "title": "Container Management & Lifecycle",
     "updated": "2026-04-16",
     "section": "Self-Hosting & Servers",
     "draft": false
@@ -366,6 +401,13 @@
   {
     "slug": "servers/security",
     "title": "Security & Identity",
+    "updated": "2026-04-16",
+    "section": "Self-Hosting & Servers",
+    "draft": false
+  },
+  {
+    "slug": "servers/vpn-tunnels",
+    "title": "VPN & Tunnels",
     "updated": "2026-04-16",
     "section": "Self-Hosting & Servers",
     "draft": false
@@ -402,6 +444,13 @@
     "slug": "software/flatpak",
     "title": "Flatpak",
     "updated": "2026-04-01",
+    "section": "Software & Apps",
+    "draft": false
+  },
+  {
+    "slug": "software/gpu-containers",
+    "title": "GPU Acceleration & HPC Containers",
+    "updated": "2026-04-17",
     "section": "Software & Apps",
     "draft": false
   },
