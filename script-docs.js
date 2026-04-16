@@ -2312,6 +2312,15 @@ const AdminEditor = (() => {
 
         <!-- Toolbar -->
         <div class="admin-toolbar" id="admin-toolbar">
+
+          <!-- ── Save / file actions ── -->
+          <div class="admin-toolbar__group">
+            <button class="atbtn" title="Download .md" onclick="AdminEditor._downloadMd()"><i class="fa-solid fa-download" style="font-size:.68rem"></i></button>
+            <button class="atbtn" title="Copy raw markdown" onclick="AdminEditor._copyMd()"><i class="fa-solid fa-clipboard" style="font-size:.68rem"></i></button>
+          </div>
+          <div class="admin-toolbar__sep"></div>
+
+          <!-- ── Inline format ── -->
           <div class="admin-toolbar__group">
             <button class="atbtn" title="Bold (Ctrl+B)" onclick="AdminEditor._wrap('**','**','bold text')"><b style="font-size:.85rem">B</b></button>
             <button class="atbtn" title="Italic (Ctrl+I)" onclick="AdminEditor._wrap('_','_','italic text')"><i style="font-size:.85rem">I</i></button>
@@ -2319,27 +2328,43 @@ const AdminEditor = (() => {
             <button class="atbtn" title="Inline code" onclick="AdminEditor._wrap('\`','\`','code')"><i class="fa-solid fa-code" style="font-size:.68rem"></i></button>
           </div>
           <div class="admin-toolbar__sep"></div>
+
+          <!-- ── Block / heading ── -->
           <div class="admin-toolbar__group">
-            <button class="atbtn" title="Heading 2" onclick="AdminEditor._linePrefix('## ')">H2</button>
-            <button class="atbtn" title="Heading 3" onclick="AdminEditor._linePrefix('### ')">H3</button>
+            <button class="atbtn" title="Heading 1" onclick="AdminEditor._linePrefix('# ')" style="font-size:.72rem;font-weight:700">H1</button>
+            <button class="atbtn" title="Heading 2" onclick="AdminEditor._linePrefix('## ')" style="font-size:.72rem;font-weight:700">H2</button>
+            <button class="atbtn" title="Heading 3" onclick="AdminEditor._linePrefix('### ')" style="font-size:.72rem;font-weight:700">H3</button>
+            <button class="atbtn" title="Blockquote" onclick="AdminEditor._linePrefix('> ')"><i class="fa-solid fa-quote-left" style="font-size:.68rem"></i></button>
             <button class="atbtn" title="Bullet list" onclick="AdminEditor._linePrefix('- ')"><i class="fa-solid fa-list" style="font-size:.68rem"></i></button>
             <button class="atbtn" title="Numbered list" onclick="AdminEditor._linePrefix('1. ')"><i class="fa-solid fa-list-ol" style="font-size:.68rem"></i></button>
-            <button class="atbtn" title="Blockquote" onclick="AdminEditor._linePrefix('> ')"><i class="fa-solid fa-quote-left" style="font-size:.68rem"></i></button>
+            <button class="atbtn" title="Task / checklist" onclick="AdminEditor._linePrefix('- [ ] ')"><i class="fa-regular fa-square-check" style="font-size:.68rem"></i></button>
+            <button class="atbtn" title="Horizontal rule" onclick="AdminEditor._insert('\\n---\\n')"><i class="fa-solid fa-minus" style="font-size:.68rem"></i></button>
           </div>
           <div class="admin-toolbar__sep"></div>
+
+          <!-- ── Rich inserts ── -->
           <div class="admin-toolbar__group">
-            <button class="atbtn" title="Link" onclick="AdminEditor._fmtLink()"><i class="fa-solid fa-link" style="font-size:.68rem"></i></button>
-            <button class="atbtn" title="Image" onclick="AdminEditor._fmtImage()"><i class="fa-solid fa-image" style="font-size:.68rem"></i></button>
-            <button class="atbtn" title="Code block" onclick="AdminEditor._fmtCodeBlock()"><i class="fa-solid fa-terminal" style="font-size:.68rem"></i></button>
-            <button class="atbtn" title="Table" onclick="AdminEditor._insert('\\n| Column 1 | Column 2 | Column 3 |\\n| --- | --- | --- |\\n| Cell | Cell | Cell |\\n')"><i class="fa-solid fa-table" style="font-size:.68rem"></i></button>
-            <button class="atbtn" title="NOTE callout" onclick="AdminEditor._insert('\\n> [!NOTE]\\n> Your note here.\\n')"><i class="fa-solid fa-circle-info" style="font-size:.68rem"></i></button>
-            <button class="atbtn" title="WARNING callout" onclick="AdminEditor._insert('\\n> [!WARNING]\\n> Your warning here.\\n')"><i class="fa-solid fa-triangle-exclamation" style="font-size:.68rem"></i></button>
+            <button class="atbtn" title="Insert link" onclick="AdminEditor._fmtLink()"><i class="fa-solid fa-link" style="font-size:.68rem"></i></button>
+            <button class="atbtn" title="Insert image" onclick="AdminEditor._fmtImage()"><i class="fa-solid fa-image" style="font-size:.68rem"></i></button>
+            <button class="atbtn" title="Insert code block" onclick="AdminEditor._fmtCodeBlock()"><i class="fa-solid fa-terminal" style="font-size:.68rem"></i></button>
+            <button class="atbtn" title="Insert table" onclick="AdminEditor._fmtTable()"><i class="fa-solid fa-table" style="font-size:.68rem"></i></button>
+            <button class="atbtn" title="Insert callout (Note, Tip, Warning, Caution…)" onclick="AdminEditor._fmtCallout()"><i class="fa-solid fa-circle-info" style="font-size:.68rem"></i></button>
+            <button class="atbtn" title="Insert math — KaTeX inline or block" onclick="AdminEditor._fmtMath()"><i class="fa-solid fa-square-root-variable" style="font-size:.68rem"></i></button>
           </div>
           <div class="admin-toolbar__sep"></div>
+
+          <!-- ── Shortcodes ── -->
+          <div class="admin-toolbar__group">
+            <button class="atbtn" title="Insert Table of Contents [[toc]]" onclick="AdminEditor._insert('\\n[[toc]]\\n')" style="font-size:.62rem;font-family:var(--font-mono);letter-spacing:.02em">TOC</button>
+            <button class="atbtn" title="Insert snippet / template" onclick="AdminEditor._fmtSnippet()"><i class="fa-solid fa-wand-magic-sparkles" style="font-size:.68rem"></i></button>
+          </div>
+          <div class="admin-toolbar__sep"></div>
+
+          <!-- ── View toggle ── -->
           <div class="view-toggle">
-            <button class="atbtn" id="admin-pane-editor" title="Editor only (Ctrl+1)" onclick="AdminEditor._setViewMode('editor')"><i class="fa-solid fa-pen" style="font-size:.62rem"></i></button>
-            <button class="atbtn is-active" id="admin-pane-split"   title="Split (Ctrl+2)"   onclick="AdminEditor._setViewMode('split')"><i class="fa-solid fa-table-columns" style="font-size:.62rem"></i></button>
-            <button class="atbtn" id="admin-pane-preview" title="Preview only (Ctrl+3)" onclick="AdminEditor._setViewMode('preview')"><i class="fa-solid fa-eye" style="font-size:.62rem"></i></button>
+            <button class="atbtn" id="admin-pane-editor" title="Editor only (Ctrl+1)" onclick="AdminEditor._setViewMode('editor')"><i class="fa-solid fa-pen" style="font-size:.62rem"></i> <span style="font-size:.62rem">Edit</span></button>
+            <button class="atbtn is-active" id="admin-pane-split"   title="Split (Ctrl+2)"   onclick="AdminEditor._setViewMode('split')"><i class="fa-solid fa-table-columns" style="font-size:.62rem"></i> <span style="font-size:.62rem">Split</span></button>
+            <button class="atbtn" id="admin-pane-preview" title="Preview only (Ctrl+3)" onclick="AdminEditor._setViewMode('preview')"><i class="fa-solid fa-eye" style="font-size:.62rem"></i> <span style="font-size:.62rem">Preview</span></button>
           </div>
           <div class="admin-toolbar__spacer"></div>
           <span class="admin-status-pill info" id="admin-status">${hasDraft ? 'draft restored' : 'saved'}</span>
@@ -2530,8 +2555,60 @@ const AdminEditor = (() => {
       monacoInsert(`\n![${alt}](${url})\n`);
     },
     _fmtCodeBlock: () => {
-      const lang = prompt('Language:', 'bash') || 'bash';
+      const lang = prompt('Language (bash, js, python, yaml, json, go…):', 'bash') || 'bash';
       monacoWrap(`\n\`\`\`${lang}\n`, `\n\`\`\`\n`, '# code here');
+    },
+
+    _fmtTable: () => {
+      const cols = parseInt(prompt('Number of columns:', '3') || '3');
+      const rows = parseInt(prompt('Number of data rows:', '2') || '2');
+      const c = Math.max(1, Math.min(cols, 10));
+      const r = Math.max(1, Math.min(rows, 20));
+      const header  = '| ' + Array.from({length: c}, (_, i) => `Column ${i + 1}`).join(' | ') + ' |';
+      const divider = '| ' + Array(c).fill('---').join(' | ') + ' |';
+      const row     = '| ' + Array(c).fill('Cell').join(' | ') + ' |';
+      monacoInsert(`\n${header}\n${divider}\n${Array(r).fill(row).join('\n')}\n`);
+    },
+
+    _fmtCallout: () => {
+      const types = ['NOTE','TIP','IMPORTANT','WARNING','CAUTION'];
+      const icons  = { NOTE:'ℹ️', TIP:'💡', IMPORTANT:'❗', WARNING:'⚠️', CAUTION:'🔴' };
+      const menu   = types.map((t, i) => `${i + 1} = ${t}`).join('\n');
+      const choice = prompt(`Callout type:\n${menu}\n\nEnter number (1–5):`, '1');
+      const idx    = Math.max(0, Math.min(parseInt(choice || '1') - 1, 4));
+      const type   = types[idx];
+      monacoInsert(`\n> [!${type}]\n> ${icons[type]} Your ${type.toLowerCase()} here.\n`);
+    },
+
+    _fmtMath: () => {
+      const mode = prompt('Math mode:\n1 = Inline  ($…$)\n2 = Block ($$…$$)\n\nEnter 1 or 2:', '2');
+      if (mode === '1') {
+        monacoWrap('$', '$', 'E = mc^2');
+      } else {
+        monacoInsert('\n$$\n\\frac{d}{dx}\\left(\\int_{0}^{x} f(u)\\,du\\right) = f(x)\n$$\n');
+      }
+    },
+
+    _fmtSnippet: () => {
+      const snippets = [
+        { label: 'Note admonition',         value: '\n> [!NOTE]\n> Add your note here.\n' },
+        { label: 'Warning admonition',       value: '\n> [!WARNING]\n> Add your warning here.\n' },
+        { label: 'Tip admonition',           value: '\n> [!TIP]\n> Add your tip here.\n' },
+        { label: 'Code block — bash',        value: '\n```bash\n# Your command here\n```\n' },
+        { label: 'Code block — yaml',        value: '\n```yaml\nkey: value\n```\n' },
+        { label: 'Steps / numbered list',    value: '\n1. First step\n2. Second step\n3. Third step\n' },
+        { label: 'Task checklist',           value: '\n- [x] Done item\n- [ ] Pending item\n- [ ] Another item\n' },
+        { label: 'Table 3×3',               value: '\n| Column 1 | Column 2 | Column 3 |\n| --- | --- | --- |\n| Cell | Cell | Cell |\n| Cell | Cell | Cell |\n' },
+        { label: 'Details / collapsible',    value: '\n<details>\n<summary>Click to expand</summary>\n\nContent goes here.\n\n</details>\n' },
+        { label: 'Math block (KaTeX)',        value: '\n$$\nE = mc^2\n$$\n' },
+        { label: 'TOC shortcode',            value: '\n[[toc]]\n' },
+        { label: 'Keyboard shortcut',        value: '<kbd>Ctrl</kbd> + <kbd>S</kbd>' },
+        { label: 'Front-matter template',    value: '---\ntitle: "My Doc"\ndescription: ""\nupdated: ""\n---\n\n' },
+      ];
+      const menu   = snippets.map((s, i) => `${i + 1}. ${s.label}`).join('\n');
+      const choice = prompt(`Choose a snippet:\n\n${menu}\n\nEnter number:`, '1');
+      const idx    = parseInt(choice || '1') - 1;
+      if (idx >= 0 && idx < snippets.length) monacoInsert(snippets[idx].value);
     },
 
     // FM bar
