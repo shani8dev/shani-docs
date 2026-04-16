@@ -119,6 +119,111 @@
     "draft": false
   },
   {
+    "slug": "networking/avahi",
+    "title": "Avahi (mDNS)",
+    "updated": "2026-04-01",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/cloudflared",
+    "title": "Cloudflared Tunnels",
+    "updated": "2026-04-01",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/dnsmasq",
+    "title": "dnsmasq (Local DNS)",
+    "updated": "2026-04-01",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/fail2ban",
+    "title": "Fail2ban",
+    "updated": "2026-04-01",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/firewalld",
+    "title": "Firewall (firewalld)",
+    "updated": "2026-04-01",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/modemmanager",
+    "title": "ModemManager (Mobile)",
+    "updated": "2026-04-01",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/networkmanager-vpn",
+    "title": "NetworkManager & VPN",
+    "updated": "2026-04-01",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/nfs",
+    "title": "NFS File Sharing",
+    "updated": "2026-04-01",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/openresolv",
+    "title": "openresolv (DNS)",
+    "updated": "2026-04-01",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/openssh",
+    "title": "OpenSSH",
+    "updated": "2026-04-01",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/remote-desktop",
+    "title": "Remote Desktop",
+    "updated": "2026-04-01",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/samba",
+    "title": "Samba (Windows)",
+    "updated": "2026-04-01",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/sshfs",
+    "title": "SSHFS",
+    "updated": "2026-04-01",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/tailscale",
+    "title": "Tailscale VPN",
+    "updated": "2026-04-01",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/wireguard",
+    "title": "WireGuard (Manual)",
+    "updated": "2026-04-01",
+    "section": "Networking",
+    "draft": false
+  },
+  {
     "slug": "overview",
     "title": "Overview",
     "updated": "2026-04-01",
@@ -158,13 +263,6 @@
     "title": "TPM2 Enrollment",
     "updated": "2026-04-01",
     "section": "Security",
-    "draft": false
-  },
-  {
-    "slug": "software/android-waydroid",
-    "title": "Android (Waydroid)",
-    "updated": "2026-04-01",
-    "section": "Software & Apps",
     "draft": false
   },
   {
@@ -210,8 +308,22 @@
     "draft": false
   },
   {
-    "slug": "software/virtual-machines",
+    "slug": "software/snaps",
+    "title": "Snaps",
+    "updated": "2026-04-01",
+    "section": "Software & Apps",
+    "draft": false
+  },
+  {
+    "slug": "software/vms",
     "title": "Virtual Machines",
+    "updated": "2026-04-01",
+    "section": "Software & Apps",
+    "draft": false
+  },
+  {
+    "slug": "software/waydroid",
+    "title": "Android (Waydroid)",
     "updated": "2026-04-01",
     "section": "Software & Apps",
     "draft": false
