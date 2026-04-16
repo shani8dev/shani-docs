@@ -154,6 +154,13 @@
     "draft": false
   },
   {
+    "slug": "networking/kdeconnect",
+    "title": "KDE Connect",
+    "updated": "2026-04-01",
+    "section": "Networking",
+    "draft": false
+  },
+  {
     "slug": "networking/modemmanager",
     "title": "ModemManager (Mobile)",
     "updated": "2026-04-01",
