@@ -23,8 +23,8 @@
  *                           current engine builds its search index and
  *                           nav tree from nav-docs.js at runtime)
  *   sitemap.xml          — all doc URLs for SEO crawlers
- *                          (URLs use /docs/<slug> — the 404.html redirect
- *                           rewrites these to #doc/<slug> for the SPA)
+ *                          (URLs use /doc/<slug> — the SPA router / 404.html
+ *                           fallback handles these path-style routes)
  *   manifest.json        — PWA web app manifest (root)
  *
  * Config is sourced from config-docs.js (regex extraction, no require()).
@@ -140,13 +140,14 @@ function build() {
     console.log(`\n  ✓ Written ${docs.length} doc(s) → docs/manifest.json`);
 
     // ── Generate sitemap.xml ──────────────────────────────────────
-    // URLs use /docs/<slug> — the 404.html SPA redirect rewrites them
-    // to the correct hash route (#doc/<slug>) for crawlers following links.
+    // URLs use /doc/<slug> — the SPA's history.pushState router handles
+    // these paths directly; the 404.html fallback also rewrites them for
+    // static hosts (GitHub Pages, Netlify) that don't support catch-all routes.
     const docUrls = docs
       .filter(d => !d.draft)
       .map(d => [
         '  <url>',
-        `    <loc>${escXml(WIKI_URL)}/docs/${escXml(d.slug)}</loc>`,
+        `    <loc>${escXml(WIKI_URL)}/doc/${escXml(d.slug)}</loc>`,
         d.updated ? `    <lastmod>${escXml(d.updated)}</lastmod>` : null,
         `    <changefreq>monthly</changefreq>`,
         `    <priority>0.8</priority>`,

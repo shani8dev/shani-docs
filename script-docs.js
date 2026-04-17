@@ -350,6 +350,10 @@ function renderNavTree(tree, activeSlug) {
 
 // ── Router ────────────────────────────────────────────────────────
 function getSlugFromHash() {
+  // Support path-style URLs: /doc/<slug>
+  const p = location.pathname;
+  if (p.startsWith('/doc/')) return decodeURIComponent(p.slice(5));
+  // Legacy hash fallback: #doc/<slug> or #/<slug>
   const h = location.hash.slice(1);
   if (h.startsWith('doc/')) return h.slice(4);
   if (h.startsWith('/'))    return h.slice(1);
@@ -364,7 +368,7 @@ function navigate(slug, pushState = true) {
   if (slug != null && slug === State.currentSlug && pushState) return;
   State.currentSlug = slug;
 
-  if (pushState) history.pushState({ slug }, '', slug ? `#doc/${slug}` : '#');
+  if (pushState) history.pushState({ slug }, '', slug ? `/doc/${slug}` : '/');
 
   renderNavTree(CONFIG.NAV_TREE, slug);
   closeSearch();

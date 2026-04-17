@@ -7,23 +7,20 @@
   <meta name="robots" content="noindex">
   <link rel="manifest" href="/manifest.json">
   <script>
-    // GitHub Pages SPA redirect — encode path into hash-based URL
+    // GitHub Pages SPA redirect — rewrite 404 paths back to index.html
+    // preserving the path so the SPA router (/doc/<slug>) can handle it.
     (function () {
       var l = window.location;
-      var path   = l.pathname;
-      var search = l.search ? l.search.slice(1) : '';
-      var hash   = l.hash   ? l.hash.slice(1)   : '';
-      // Convert /docs/foo/bar → #doc/foo/bar  (wiki hash routing)
+      var path = l.pathname;
+      // Normalise legacy /docs/<slug> → /doc/<slug>
       var docMatch = path.match(/^\/docs\/(.+?)(?:\.md)?$/);
-      var pageHash = '';
-      if (docMatch) {
-        pageHash = '#doc/' + docMatch[1];
-      } else if (path !== '/' && path !== '') {
-        pageHash = '#' + path.slice(1);
-      }
-      if (hash && !pageHash) pageHash = '#' + hash;
+      if (docMatch) path = '/doc/' + docMatch[1];
+      // Redirect to root, passing the intended path as a query param
+      // so index.html can restore it with history.replaceState.
       var redirect = l.protocol + '//' + l.hostname +
-        (l.port ? ':' + l.port : '') + '/' + pageHash;
+        (l.port ? ':' + l.port : '') +
+        '/?p=' + encodeURIComponent(path) +
+        (l.hash ? '&h=' + encodeURIComponent(l.hash.slice(1)) : '');
       l.replace(redirect);
     })();
   </script>
