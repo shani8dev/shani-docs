@@ -1,5 +1,5 @@
 /**
- * config-docs.js — Site settings for wiki.shani.dev
+ * config-docs.js — Site settings for docs.shani.dev
  * Contains only static configuration — identity, branding, GitHub source, UI flags.
  * Navigation tree lives in nav-docs.js (loaded after this file).
  * Load order: config-docs.js → nav-docs.js → script-docs.js
@@ -10,7 +10,7 @@ const CONFIG = {
   GITHUB_REPO: 'shani-docs',          // repo holding your .md docs
   GITHUB_BRANCH: 'main',
   // ── URLs ─────────────────────────────────────────────────────
-  WIKI_URL: 'https://wiki.shani.dev',
+  WIKI_URL: 'https://docs.shani.dev',
   // ── Site identity ────────────────────────────────────────────
   SITE_TITLE:       'Shanios Docs',
   SITE_TAGLINE:     'Technical Documentation',
@@ -20,7 +20,7 @@ const CONFIG = {
   FAVICON_URL:   'https://shani.dev/assets/images/logo.svg',
   LOGO_IMG_URL:  'https://shani.dev/assets/images/about.svg',
   LOGO_ALT:      'Shanios',
-  LOGO_WORDMARK: 'wiki',
+  LOGO_WORDMARK: 'docs',
   // ── Top bar ──────────────────────────────────────────────────
   AUSPICIOUS_TEXT:  '॥ श्री ॥',
   AUSPICIOUS_URL:   'https://shani.dev',

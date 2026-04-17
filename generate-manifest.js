@@ -55,7 +55,7 @@ function getConfig(key, fallback) {
 }
 
 // ── Config values (sourced from config-docs.js) ───────────────────
-const WIKI_URL        = getConfig('WIKI_URL',        'https://wiki.shani.dev');
+const WIKI_URL        = getConfig('WIKI_URL',        'https://docs.shani.dev');
 const SITE_TITLE      = getConfig('SITE_TITLE',      'Shanios Docs');
 const SITE_DESC       = getConfig('SITE_DESCRIPTION','Technical documentation for Shanios.');
 const LANG            = getConfig('LANG', getConfig('DATE_LOCALE', 'en-IN'));
