@@ -310,35 +310,35 @@
   {
     "slug": "security/features",
     "title": "Security Features",
-    "updated": "2026-04-01",
+    "updated": "2026-04-14",
     "section": "Security",
     "draft": false
   },
   {
     "slug": "security/gen-efi",
     "title": "gen-efi Reference",
-    "updated": "2026-04-01",
+    "updated": "2026-04-30",
     "section": "Security",
     "draft": false
   },
   {
     "slug": "security/luks",
-    "title": "LUKS After Install",
-    "updated": "2026-04-01",
+    "title": "LUKS Management",
+    "updated": "2026-05-09",
     "section": "Security",
     "draft": false
   },
   {
     "slug": "security/secure-boot",
     "title": "Secure Boot",
-    "updated": "2026-04-01",
+    "updated": "2026-04-30",
     "section": "Security",
     "draft": false
   },
   {
     "slug": "security/tpm2",
     "title": "TPM2 Enrollment",
-    "updated": "2026-04-01",
+    "updated": "2026-04-30",
     "section": "Security",
     "draft": false
   },
@@ -576,21 +576,21 @@
   {
     "slug": "updates/config",
     "title": "System Config",
-    "updated": "2026-04-01",
+    "updated": "2026-05-06",
     "section": "Updates & Config",
     "draft": false
   },
   {
     "slug": "updates/shell",
     "title": "Shell & Environment",
-    "updated": "2026-04-01",
+    "updated": "2026-04-22",
     "section": "Updates & Config",
     "draft": false
   },
   {
     "slug": "updates/system",
     "title": "System Updates",
-    "updated": "2026-04-01",
+    "updated": "2026-05-11",
     "section": "Updates & Config",
     "draft": false
   }
