@@ -154,6 +154,13 @@
     "draft": false
   },
   {
+    "slug": "networking/caddy",
+    "title": "Caddy",
+    "updated": "2026-04-01",
+    "section": "Networking",
+    "draft": false
+  },
+  {
     "slug": "networking/cloudflared",
     "title": "Cloudflared Tunnels",
     "updated": "2026-04-01",
@@ -338,49 +345,70 @@
   {
     "slug": "servers/ai-llms",
     "title": "AI & LLMs",
-    "updated": "2026-04-16",
+    "updated": "2026-04-22",
     "section": "Self-Hosting & Servers",
     "draft": false
   },
   {
     "slug": "servers/backups-sync",
     "title": "Backups & Sync",
-    "updated": "2026-04-16",
+    "updated": "2026-04-22",
     "section": "Self-Hosting & Servers",
     "draft": false
   },
   {
-    "slug": "servers/caddy",
-    "title": "Caddy",
-    "updated": "2026-04-01",
-    "section": "Networking",
+    "slug": "servers/business-intelligence",
+    "title": "Business Intelligence & Analytics",
+    "updated": "2026-04-22",
+    "section": "Self-Hosting & Servers",
     "draft": false
   },
   {
     "slug": "servers/communication",
     "title": "Communication",
-    "updated": "2026-04-16",
+    "updated": "2026-04-22",
     "section": "Self-Hosting & Servers",
     "draft": false
   },
   {
     "slug": "servers/databases",
     "title": "Databases & Caches",
-    "updated": "2026-04-16",
+    "updated": "2026-04-22",
     "section": "Self-Hosting & Servers",
     "draft": false
   },
   {
     "slug": "servers/devtools",
     "title": "Developer Tools",
-    "updated": "2026-04-16",
+    "updated": "2026-04-22",
+    "section": "Self-Hosting & Servers",
+    "draft": false
+  },
+  {
+    "slug": "servers/education",
+    "title": "Education & E-Learning",
+    "updated": "2026-04-22",
+    "section": "Self-Hosting & Servers",
+    "draft": false
+  },
+  {
+    "slug": "servers/finance",
+    "title": "Finance & Accounting",
+    "updated": "2026-04-22",
     "section": "Self-Hosting & Servers",
     "draft": false
   },
   {
     "slug": "servers/home-automation",
     "title": "Home Automation",
-    "updated": "2026-04-16",
+    "updated": "2026-04-22",
+    "section": "Self-Hosting & Servers",
+    "draft": false
+  },
+  {
+    "slug": "servers/iot",
+    "title": "IoT & Monitoring",
+    "updated": "2026-04-22",
     "section": "Self-Hosting & Servers",
     "draft": false
   },
@@ -394,42 +422,56 @@
   {
     "slug": "servers/management",
     "title": "Container Management & Lifecycle",
-    "updated": "2026-04-16",
+    "updated": "2026-04-22",
     "section": "Self-Hosting & Servers",
     "draft": false
   },
   {
     "slug": "servers/media",
     "title": "Media & Entertainment",
-    "updated": "2026-04-16",
+    "updated": "2026-04-22",
+    "section": "Self-Hosting & Servers",
+    "draft": false
+  },
+  {
+    "slug": "servers/medical",
+    "title": "Medical & Health",
+    "updated": "2026-04-22",
+    "section": "Self-Hosting & Servers",
+    "draft": false
+  },
+  {
+    "slug": "servers/monitoring",
+    "title": "Monitoring",
+    "updated": "2026-04-22",
     "section": "Self-Hosting & Servers",
     "draft": false
   },
   {
     "slug": "servers/networking",
     "title": "Network & Analytics",
-    "updated": "2026-04-16",
+    "updated": "2026-04-22",
     "section": "Self-Hosting & Servers",
     "draft": false
   },
   {
     "slug": "servers/productivity",
     "title": "Productivity & Files",
-    "updated": "2026-04-16",
+    "updated": "2026-04-22",
     "section": "Self-Hosting & Servers",
     "draft": false
   },
   {
     "slug": "servers/security",
     "title": "Security & Identity",
-    "updated": "2026-04-16",
+    "updated": "2026-04-22",
     "section": "Self-Hosting & Servers",
     "draft": false
   },
   {
     "slug": "servers/vpn-tunnels",
     "title": "VPN & Tunnels",
-    "updated": "2026-04-16",
+    "updated": "2026-04-22",
     "section": "Self-Hosting & Servers",
     "draft": false
   },

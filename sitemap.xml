@@ -138,6 +138,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://docs.shani.dev/doc/networking/caddy</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://docs.shani.dev/doc/networking/cloudflared</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
@@ -295,43 +301,61 @@
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/servers/ai-llms</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-04-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/servers/backups-sync</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-04-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://docs.shani.dev/doc/servers/caddy</loc>
-    <lastmod>2026-04-01</lastmod>
+    <loc>https://docs.shani.dev/doc/servers/business-intelligence</loc>
+    <lastmod>2026-04-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/servers/communication</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-04-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/servers/databases</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-04-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/servers/devtools</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://docs.shani.dev/doc/servers/education</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://docs.shani.dev/doc/servers/finance</loc>
+    <lastmod>2026-04-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/servers/home-automation</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://docs.shani.dev/doc/servers/iot</loc>
+    <lastmod>2026-04-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -343,37 +367,49 @@
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/servers/management</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-04-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/servers/media</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://docs.shani.dev/doc/servers/medical</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://docs.shani.dev/doc/servers/monitoring</loc>
+    <lastmod>2026-04-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/servers/networking</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-04-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/servers/productivity</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-04-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/servers/security</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-04-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/servers/vpn-tunnels</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-04-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
