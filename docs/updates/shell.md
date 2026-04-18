@@ -1,79 +1,64 @@
 ---
 title: Shell & Environment
 section: Updates & Config
-updated: 2026-04-01
+updated: 2026-04-22
 ---
 
 # Shell & Environment
 
-Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your home directory and persists across every OS update.
+Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your home directory and persists across every OS update and rollback.
 
 ## Default Shell Stack
 
 | Tool | Role |
 |------|------|
-| **Zsh 5.9** | Default shell for all users |
-| **Starship** | Cross-shell prompt with git, language runtime, and exit-code info |
+| **Zsh** | Default shell for all users |
+| **Starship** | Cross-shell prompt with git, language runtime, exit-code, and timing info |
 | **McFly** | Neural-network command history search (replaces Ctrl+R) |
-| **FZF** | Fuzzy finder — integrated for Ctrl+R, Ctrl+T (files), Alt+C (cd) |
-| **zsh-syntax-highlighting** | Fish-style inline syntax colouring |
-| **zsh-autosuggestions** | Ghost-text suggestions from history |
-| **zsh-history-substring-search** | Up/Down arrow searches history by prefix |
+| **FZF** | Fuzzy finder — integrated for Ctrl+T (files) and Alt+C (cd) |
+| **zsh-syntax-highlighting** | Fish-style inline syntax colouring (green = valid, red = invalid) |
+| **zsh-autosuggestions** | Ghost-text suggestions from history; press → or End to accept |
+| **zsh-history-substring-search** | Up/Down arrow searches history by substring, not just prefix |
+| **zsh-completions** | Tab completions for git, systemctl, podman, flatpak, nix-env, shani-deploy, and more |
 
-Bash 5.3 and Fish 4.5 are also installed if you prefer them.
+Bash and Fish are also installed if you prefer them.
 
 ## Changing Your Shell
 
 ```bash
-# Switch to bash
-chsh -s /bin/bash
-
-# Switch to fish
-chsh -s /usr/bin/fish
-
-# Switch back to zsh
-chsh -s /bin/zsh
+chsh -s /bin/bash    # switch to Bash
+chsh -s /bin/fish    # switch to Fish
+chsh -s /bin/zsh     # switch back to Zsh (default)
 ```
 
 Log out and back in for the change to take effect.
 
 ## Customising Zsh
 
-Your Zsh config lives in `~/.zshrc` (and optionally `~/.zshenv`, `~/.zprofile`). The default `~/.zshrc` sources the plugins and sets up FZF and McFly — edit it freely.
-
 ```bash
-# Edit your Zsh config
 nano ~/.zshrc
-
-# Reload without restarting the shell
-source ~/.zshrc
+source ~/.zshrc   # reload without restarting the shell
 ```
 
 ## Starship Prompt
 
-Starship configuration lives at `~/.config/starship.toml`. The default Shanios config shows: directory, git branch/status, language runtime versions, last exit code, and execution time.
+Starship shows by default: current directory, git branch/status, active Python virtualenv, Node.js version (in Node projects), Rust toolchain version (when `Cargo.toml` is present), exit code of last command (when non-zero), and command duration for long-running commands.
 
 ```bash
-# Edit prompt
 nano ~/.config/starship.toml
-
-# Starship documentation
 starship help
 ```
 
 ## McFly History Search
 
-McFly replaces `Ctrl+R` with a smarter history search that learns from your usage patterns.
+McFly replaces `Ctrl+R` with a context-aware, exit-code-aware history search that learns from your usage patterns. Everything runs on-device — no data leaves your system.
 
 ```bash
-# Press Ctrl+R to open McFly search
+# Press Ctrl+R to open McFly
 # Type to filter; Enter to select; Ctrl+C to cancel
 
-# McFly database location
+# McFly database location (grows more useful over time)
 ls ~/.local/share/mcfly/
-
-# Reset McFly history
-mcfly search --delete "command to remove"
 ```
 
 ## FZF Integration
@@ -83,58 +68,121 @@ FZF is integrated into Zsh for three keybindings:
 | Keybinding | Action |
 |-----------|--------|
 | `Ctrl+R` | History search (McFly takes precedence; FZF is fallback) |
-| `Ctrl+T` | Fuzzy file/dir finder — inserts selected path at cursor |
+| `Ctrl+T` | Fuzzy file finder — inserts selected path at cursor |
 | `Alt+C` | Fuzzy `cd` — jump to any subdirectory |
 
 ```bash
 # Use fzf in scripts
-selected=$(ls | fzf)
-
-# Preview files while selecting
+ls | fzf
 fzf --preview 'cat {}'
+
+# Select a git branch to checkout
+git branch | fzf | xargs git checkout
 ```
+
+## Pre-Installed CLI Tools
+
+### File Search and Navigation
+
+```bash
+rg "search term"           # ripgrep — fast recursive search
+rg --type py "import"      # search only Python files
+fd "filename"              # fd — modern find replacement
+fd -e py                   # find by extension
+```
+
+### File Viewing
+
+```bash
+bat file.py                # bat — cat with syntax highlighting
+eza -la --git              # eza — modern ls with git status
+```
+
+### System Monitoring
+
+```bash
+htop                       # interactive process viewer
+fastfetch                  # system information summary
+ncdu                       # interactive disk usage analyser
+```
+
+### Text Processing
+
+```bash
+echo '{"key": "value"}' | jq .    # jq — JSON processor
+```
+
+### Compression
+
+```bash
+7z a archive.7z file.txt
+tar xzf archive.tar.gz
+unzip archive.zip
+```
+
+## Shell Configuration Files
+
+```
+~/.zshrc                     — Zsh configuration (plugins, aliases, env vars)
+~/.bashrc                    — Bash configuration
+~/.profile                   — login shell config (shared between shells)
+~/.config/starship.toml      — Starship prompt configuration
+~/.local/share/mcfly/        — McFly history database
+~/.config/environment.d/     — session environment variables (Wayland/X)
+```
+
+All of these are in `@home` — never touched by OS updates or rollbacks.
 
 ## Environment Variables
 
-Set persistent environment variables in `~/.zshenv` (sourced for all Zsh invocations):
-
 ```bash
-# ~/.zshenv
-export EDITOR=nvim
-export BROWSER=vivaldi
-export XDG_DATA_HOME="$HOME/.local/share"
-```
+# Shell-specific (Zsh)
+nano ~/.zshrc
+export EDITOR=vim
+export PATH="$HOME/.local/bin:$PATH"
 
-For session-only variables (Wayland/X sessions), use `~/.config/environment.d/`:
-
-```bash
+# Session environment (Wayland/X sessions)
 # ~/.config/environment.d/my-vars.conf
 EDITOR=nvim
 MOZ_ENABLE_WAYLAND=1
+
+# System-wide
+sudo nano /etc/environment
 ```
 
 ## Nix Package Manager
 
-Nix is pre-installed on the dedicated `@nix` subvolume. Install CLI tools without root:
+Nix is pre-installed on the dedicated `@nix` subvolume. Install CLI tools without root — they survive all OS updates and rollbacks:
 
 ```bash
 # Add channel (required before first install)
 nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
 nix-channel --update
 
-# Install a package (available immediately in PATH)
+# Install packages
 nix-env -iA nixpkgs.ripgrep
 nix-env -iA nixpkgs.bat
-nix-env -iA nixpkgs.fd
+nix-env -iA nixpkgs.lazygit
+nix-env -iA nixpkgs.zoxide
 
 # List installed
 nix-env -q
 
 # Upgrade all
 nix-env -u '*'
-
-# Uninstall
-nix-env -e ripgrep
 ```
 
-Nix packages survive all OS updates and rollbacks because `@nix` is an independent subvolume.
+## Tmux
+
+Tmux is pre-installed:
+
+```bash
+tmux new -s work          # start named session
+Ctrl+B then %             # split horizontally
+Ctrl+B then "             # split vertically
+Ctrl+B then D             # detach (session keeps running)
+tmux ls                   # list sessions
+tmux attach -t work       # reattach
+```
+
+Configuration lives in `~/.tmux.conf`.

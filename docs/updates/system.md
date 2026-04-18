@@ -1,7 +1,7 @@
 ---
 title: System Updates
 section: Updates & Config
-updated: 2026-04-01
+updated: 2026-05-11
 ---
 
 # System Updates
@@ -10,57 +10,101 @@ Shanios updates are atomic — the running system is never modified. Updates are
 
 ## Automatic Updates
 
-The `shani-update.timer` unit checks for new releases periodically. When a new version is found, a GUI dialog (yad, zenity, or kdialog depending on your desktop) prompts for approval before downloading.
+`shani-update` is the user-facing update manager. It runs automatically via a desktop autostart entry at login (after a 15-second delay) and via a systemd user timer that fires 15 minutes after boot and then every 2 hours.
+
+On each run, `shani-update` works through a fixed priority sequence:
+1. **Fallback boot detection** — if the last boot failed and the system fell back, offers to roll back the broken slot
+2. **Reboot-needed check** — if a staged update is waiting, shows a restart dialog
+3. **Candidate boot check** — if you're running a freshly deployed slot, offers a rollback window
+4. **Update check** — fetches release metadata and, if a newer version is available, shows an install dialog
+
+When the user confirms an update, `shani-update` detects the available terminal emulator and launches `shani-deploy` inside it.
 
 ```bash
 # Check timer status
-systemctl status shani-update.timer
+systemctl --user status shani-update.timer
 
-# View update check logs
-journalctl -u shani-update.service --since today
+# View update manager logs
+cat ~/.cache/shani-update.log
+journalctl -t shani-update -n 50
+
+# Run an immediate interactive check
+shani-update
 ```
 
 ## Manual Update
 
 ```bash
-# Check if an update is available
-shani-deploy --check
+# Download, verify, and stage the update
+sudo shani-deploy
 
-# Download and apply the update (prompts for confirmation)
-shani-deploy --update
+# Simulate without making any changes (dry-run)
+sudo shani-deploy -d
 
-# Non-interactive update (for scripting)
-shani-deploy --update --yes
+# Force redeploy even if already on the latest version
+sudo shani-deploy -f
+
+# Verbose output
+sudo shani-deploy -v
 ```
 
 ## Update Process in Detail
 
-1. **Check** — compares current slot version against latest release manifest
-2. **Download** — fetches the compressed image from R2 CDN (SourceForge as fallback); aria2c provides resume support
-3. **Verify** — SHA256 checksum and GPG signature checked; refuses to proceed on failure
-4. **Snapshot** — Btrfs read-only snapshot taken of the current inactive slot (extra rollback point)
-5. **Extract** — new image written into the inactive slot
-6. **Sign** — `gen-efi` rebuilds and signs the new slot's UKI
-7. **Boot entry** — new slot set as next default with `+3-0` tries; current slot relabelled as Candidate
-8. **Notify** — reboot prompt shown; your session continues until you choose to reboot
+1. **Self-update check** — downloads newer version of `shani-deploy` itself if available and re-execs
+2. **Slot detection** — determines the active and candidate slots
+3. **Space check** — verifies at least 10 GB free on the Btrfs filesystem
+4. **Fetch metadata** — downloads the latest release manifest from the CDN (R2 primary, SourceForge fallback)
+5. **Download** — streams the image with resume support via `aria2c`, `wget`, or `curl`
+6. **SHA256 verify** — verifies checksum after download
+7. **GPG verify** — verifies signature against the Shani OS GPG key (`7B927BFFD4A9EAAA8B666B77DE217F3DA8014792`)
+8. **Snapshot** — takes a timestamped Btrfs snapshot of the inactive slot before writing
+9. **Extract** — pipes the verified image into `btrfs receive`
+10. **UKI generation** — runs `gen-efi configure <inactive-slot>` inside a chroot of the new slot
+11. **Boot entry update** — new slot set as next-boot default with `+3-0` boot count tries
+12. **Notify** — writes `/run/shanios/reboot-needed`; your session continues until you choose to reboot
+
+Nothing in your running OS is touched at any point.
 
 ## Rolling Back
 
 ```bash
-# Rollback to the previous slot
-pkexec shani-deploy --rollback
+# Roll back from the currently booted slot (restores the inactive slot from its last snapshot)
+sudo shani-deploy -r
+sudo reboot
 ```
 
-Or select the **(Candidate)** entry from the systemd-boot menu at startup (press Space or any key to show the menu).
+Or select the **(Candidate)** entry from the systemd-boot menu at startup (press Space to show the menu).
+
+**Important:** Run rollback from the OS copy you want to keep. If you are on `@blue` and want to revert `@green`, run rollback from `@blue`.
+
+## Update Channels
+
+```bash
+# Check current channel
+cat /etc/shani-channel
+
+# Switch default channel permanently
+sudo shani-deploy --set-channel stable   # monthly validated builds (default)
+sudo shani-deploy --set-channel latest   # more frequent, pre-QA releases
+
+# Use a channel for one run only
+sudo shani-deploy -t latest
+```
+
+## Boot Counting and Automatic Fallback
+
+After an update, the new slot is registered in systemd-boot with `+3-0` boot count tries. If the new slot fails to boot three times, systemd-boot automatically falls back to the previous slot — no user action required.
+
+On first login after a fallback, `shani-update` detects the mismatch and shows a dialog offering to roll back the failed slot.
 
 ## Storage Management
 
 ```bash
-# View disk usage breakdown (Btrfs-aware)
-shani-deploy --storage-info
+# Remove old backup snapshots and cached downloads
+sudo shani-deploy -c
 
-# Run bees deduplication pass
-shani-deploy --optimize
+# Run on-demand block deduplication (complements background bees deduplication)
+sudo shani-deploy -o
 
 # Check individual subvolume sizes
 sudo btrfs filesystem du -s --human-readable /
@@ -70,31 +114,31 @@ sudo btrfs filesystem du -s --human-readable /var/lib/flatpak
 
 ## Flatpak Auto-Updates
 
-Flatpak apps update separately from the OS, on their own timer:
+Flatpak apps update separately from the OS on their own timer:
 
 ```bash
-# Check Flatpak update timers
-systemctl status flatpak-update-system.timer
-systemctl status flatpak-update-user.timer
-
 # Manual Flatpak update
 flatpak update
 
 # View installed Flatpaks
 flatpak list --app
+
+# Check Flatpak update timers
+systemctl status flatpak-update-system.timer
+systemctl --user status flatpak-update-user.timer
 ```
 
 ## Firmware Updates (fwupd)
 
-Hardware firmware updates are handled by fwupd and the GNOME/KDE update integrations:
-
 ```bash
-# Check for firmware updates
 sudo fwupdmgr refresh
 sudo fwupdmgr get-updates
-
-# Apply firmware updates
 sudo fwupdmgr update
 ```
 
-> After a firmware update, re-enroll TPM2 if you are using automatic LUKS unlock. See [TPM2 Enrollment](../security/tpm2).
+> After a firmware update, PCR 0 changes. Re-enroll TPM2 if you are using automatic LUKS unlock:
+> ```bash
+> sudo gen-efi cleanup-tpm2
+> sudo gen-efi enroll-tpm2
+> ```
+> See [TPM2 Enrollment](../security/tpm2).
