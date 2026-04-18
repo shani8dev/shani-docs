@@ -201,11 +201,13 @@ podman run -d \
 ## Caddy Configuration
 
 ```caddyfile
-chat.example.com     { tls internal; reverse_proxy localhost:8448 }
+chat.example.com      { reverse_proxy localhost:8448 }
 mattermost.home.local { tls internal; reverse_proxy localhost:8065 }
-ntfy.home.local      { tls internal; reverse_proxy localhost:8090 }
-gotify.home.local    { tls internal; reverse_proxy localhost:8070 }
-jitsi.example.com    { reverse_proxy localhost:8080 }
+rocketchat.home.local { tls internal; reverse_proxy localhost:3000 }
+ntfy.home.local       { tls internal; reverse_proxy localhost:8090 }
+gotify.home.local     { tls internal; reverse_proxy localhost:8070 }
+jitsi.example.com     { reverse_proxy localhost:8080 }
+conduit.example.com   { reverse_proxy localhost:6167 }
 ```
 
 ---

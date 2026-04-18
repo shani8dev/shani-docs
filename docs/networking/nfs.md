@@ -1,67 +1,110 @@
 ---
 title: NFS File Sharing
 section: Networking
-updated: 2026-04-16
+updated: 2026-04-18
 ---
 
 # NFS — Network File System
 
-Native Linux file sharing at near-local disk speeds. Best for Linux-to-Linux sharing on a trusted LAN. NFS state is bind-mounted from `/data/varlib/nfs` and persists across updates.
+Native Linux file sharing at near-local disk speeds. Best for Linux-to-Linux sharing on a trusted LAN. NFS state is bind-mounted from `/data/varlib/nfs` and persists across OS updates.
+
+> **Prefer Samba** if you need to share with Windows or macOS clients. Use NFS for Linux-to-Linux shares where performance matters.
+
+---
 
 ## Server Setup
 
 ### 1. Enable NFS Server
+
 ```bash
 sudo systemctl enable --now nfs-server
 ```
 
 ### 2. Define Exports
-Edit `/etc/exports` to define which directories are shared and with what permissions.
+
+Edit `/etc/exports`:
+
 ```text
 # /etc/exports
-# Share syntax: /path/to/dir  allowed_clients(options)
+# Syntax: /path  allowed_clients(options)
 
-/home/user/shared  192.168.1.0/24(rw,sync,no_subtree_check,no_root_squash)
+# Read-write share for LAN clients
+/home/user/shared     192.168.1.0/24(rw,sync,no_subtree_check)
+
+# Read-only share (e.g. for media)
+/srv/media            192.168.1.0/24(ro,sync,no_subtree_check)
+
+# Single trusted host with full root access (backup/cluster use only)
+/var/backups          192.168.1.5(rw,sync,no_subtree_check,no_root_squash)
 ```
-**Common Options:**
-- **rw**: Read/write access.
-- **sync**: Data integrity (waits for write to disk).
-- **no_subtree_check**: Improves performance when exporting a subdirectory of a volume.
-- **no_root_squash**: **Security Warning**: Allows the remote root user to act as root on the share. Use only for trusted backups or cluster nodes.
-- **root_squash**: (Default) Maps remote root to `nfsnobody` for security.
 
-### 3. Apply & Check
+**Common export options:**
+
+| Option | Effect |
+|--------|--------|
+| `rw` | Read/write access (default: `ro`) |
+| `sync` | Wait for writes to commit to disk before replying (safer, slightly slower) |
+| `no_subtree_check` | Improves performance when exporting a subdirectory; recommended |
+| `root_squash` | **(Default)** Maps remote root UID to `nfsnobody` — prevents privilege escalation |
+| `no_root_squash` | ⚠️ Allows remote root to act as root on the share. Use only on trusted hosts |
+
+### 3. Apply & Verify
+
 ```bash
-# Refresh exports table
+# Re-read /etc/exports without restarting the server
 sudo exportfs -arv
 
-# Verify active exports
+# Check which exports are active
 showmount -e localhost
 ```
 
 ### 4. Firewall
+
 ```bash
-# Open standard NFS services
 sudo firewall-cmd --add-service=nfs --add-service=rpcbind --add-service=mountd --permanent
 sudo firewall-cmd --reload
 ```
 
+---
+
 ## Client — Mounting
 
 ### Temporary Mount
+
 ```bash
 sudo mkdir -p /mnt/remote
 sudo mount -t nfs 192.168.1.100:/home/user/shared /mnt/remote
+
+# Unmount
+sudo umount /mnt/remote
 ```
 
 ### Persistent Mount (`/etc/fstab`)
+
 ```text
-192.168.1.100:/home/user/shared  /mnt/remote  nfs  defaults,_netdev,nfsvers=4  0 0
+192.168.1.100:/home/user/shared  /mnt/remote  nfs  defaults,_netdev,nfsvers=4,timeo=14  0 0
 ```
-- **_netdev**: Ensures the mount is attempted only after the network interface is up.
-- **nfsvers=4**: Forces NFSv4, which is more firewall-friendly than v3.
+
+| Option | Effect |
+|--------|--------|
+| `_netdev` | Delays mount until the network interface is up |
+| `nfsvers=4` | Forces NFSv4 — more firewall-friendly and secure than v3 |
+| `timeo=14` | Timeout in tenths of a second before retrying (1.4 s); reduces boot hang if server is down |
+
+Apply without rebooting:
+
+```bash
+sudo mount -a
+```
+
+---
 
 ## Troubleshooting
-- **Permission Denied:** Ensure the client IP matches the allowed range in `/etc/exports` and that the underlying filesystem permissions on the host allow access.
-- **Stale File Handle:** The file on the server was deleted or moved while the client had it open. `umount -f /mnt/remote` and remount.
-- **Access denied by server:** Check `journalctl -u nfs-server` on the host.
+
+| Issue | Solution |
+|-------|----------|
+| `Permission denied` | Check the client IP is within the allowed range in `/etc/exports`; also verify Linux filesystem permissions on the export path |
+| `Stale file handle` | The exported path was deleted or the server restarted while the client had it open — `sudo umount -f /mnt/remote` and remount |
+| `Access denied by server` | Check `journalctl -u nfs-server` on the host for detailed errors |
+| Mount hangs at boot | Add `_netdev` and `timeo=14` to fstab options; ensure `nfs-server` is running on the host |
+| `showmount` fails from client | Open `rpcbind` and `mountd` firewall services on the server in addition to `nfs` |

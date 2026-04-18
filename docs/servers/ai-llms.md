@@ -197,6 +197,28 @@ curl -X POST http://localhost:8880/v1/audio/speech \
 
 ---
 
+## Tabby (AI Coding Assistant)
+
+**Purpose:** Self-hosted AI coding assistant server. Works as a drop-in alternative to GitHub Copilot — installs as a VS Code, JetBrains, or Vim extension and completes code inline as you type, using models running entirely on your hardware.
+
+```bash
+podman run -d \
+  --name tabby \
+  -p 127.0.0.1:8080:8080 \
+  -v /home/user/tabby/data:/data:Z \
+  --device /dev/dri \
+  --restart unless-stopped \
+  tabbyml/tabby:latest serve \
+    --model TabbyML/StarCoder-1B \
+    --device metal
+```
+
+> Replace `--device metal` with `--device cuda` for NVIDIA, or omit for CPU inference. Smaller models like `TabbyML/StarCoder-1B` run well on CPU for local use.
+
+**VS Code setup:** Install the [Tabby extension](https://marketplace.visualstudio.com/items?itemName=TabbyML.vscode-tabby), then point it at `http://tabby.home.local` in settings.
+
+---
+
 ## SearXNG (AI Web Search Integration)
 
 **Purpose:** Connect a local SearXNG instance to Open WebUI for grounded, real-time web search in AI chat. Queries leave your machine only to fetch results — never to a third-party AI API.
@@ -215,9 +237,11 @@ Expose your AI tools privately over HTTPS on your tailnet:
 ollama.home.local    { tls internal; reverse_proxy localhost:11434 }
 webui.home.local     { tls internal; reverse_proxy localhost:3000 }
 comfyui.home.local   { tls internal; reverse_proxy localhost:8188 }
+a1111.home.local     { tls internal; reverse_proxy localhost:7860 }
 localai.home.local   { tls internal; reverse_proxy localhost:8080 }
 whisper.home.local   { tls internal; reverse_proxy localhost:9000 }
 kokoro.home.local    { tls internal; reverse_proxy localhost:8880 }
+tabby.home.local     { tls internal; reverse_proxy localhost:8081 }
 ```
 
 ---
@@ -233,6 +257,7 @@ kokoro.home.local    { tls internal; reverse_proxy localhost:8880 }
 | Whisper transcription is inaccurate | Upgrade to a larger model by changing `ASR_MODEL=medium` or `ASR_MODEL=large` |
 | Port conflict on 8080 | LocalAI and several other tools default to 8080 — change the host port to `-p 127.0.0.1:8081:8080` |
 | Kokoro produces no audio | Ensure voices directory exists and contains `.pt` voice files; check container logs for model load errors |
+| Tabby extension not connecting | Verify `tabby.home.local` resolves on Tailscale; check the extension's server URL setting includes the correct port |
 | Open WebUI RAG not finding documents | Ensure the document was fully processed (green tick in Documents); re-upload if stuck on processing |
 
 > 🔒 **Security tip:** Always bind AI service ports to `127.0.0.1` and proxy through Caddy. These services have no built-in authentication — do not expose them directly to the internet.

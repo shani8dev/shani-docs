@@ -259,6 +259,19 @@ Configure recognisers (CompreFace, DeepStack, or CodeProject.AI) in the Double T
 
 ---
 
+## Caddy Configuration
+
+```caddyfile
+homeassistant.home.local  { tls internal; reverse_proxy localhost:8123 }
+zigbee.home.local         { tls internal; reverse_proxy localhost:8080 }
+esphome.home.local        { tls internal; reverse_proxy localhost:6052 }
+nodered.home.local        { tls internal; reverse_proxy localhost:1880 }
+frigate.home.local        { tls internal; reverse_proxy localhost:5000 }
+doubletake.home.local     { tls internal; reverse_proxy localhost:3000 }
+```
+
+---
+
 ## Troubleshooting
 
 | Issue | Solution |

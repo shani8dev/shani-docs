@@ -12,6 +12,7 @@ if (typeof CONFIG === 'undefined') {
 
 CONFIG.NAV_TREE = [
   { title: 'Overview', icon: 'fa-solid fa-house', slug: 'overview' },
+
   {
     title: 'Introduction', icon: 'fa-solid fa-book-open',
     children: [
@@ -22,6 +23,7 @@ CONFIG.NAV_TREE = [
       { title: "System Optimizations", slug: 'intro/optimizations' },
     ]
   },
+
   {
     title: 'Installation', icon: 'fa-solid fa-download',
     children: [
@@ -31,6 +33,7 @@ CONFIG.NAV_TREE = [
       { title: 'First Boot', slug: 'install/first-boot' },
     ]
   },
+
   {
     title: 'Concepts', icon: 'fa-solid fa-lightbulb',
     children: [
@@ -40,6 +43,7 @@ CONFIG.NAV_TREE = [
       { title: 'Persistence Strategy', slug: 'concepts/persistence' },
     ]
   },
+
   {
     title: 'Architecture', icon: 'fa-solid fa-diagram-project',
     children: [
@@ -49,6 +53,7 @@ CONFIG.NAV_TREE = [
       { title: 'Boot Process', slug: 'arch/boot' },
     ]
   },
+
   {
     title: 'Security', icon: 'fa-solid fa-shield-halved',
     children: [
@@ -59,6 +64,7 @@ CONFIG.NAV_TREE = [
       { title: 'gen-efi Reference', slug: 'security/gen-efi' },
     ]
   },
+
   {
     title: 'Updates & Config', icon: 'fa-solid fa-rotate',
     children: [
@@ -67,6 +73,7 @@ CONFIG.NAV_TREE = [
       { title: 'System Config', slug: 'updates/config' },
     ]
   },
+
   {
     title: 'Software & Apps', icon: 'fa-solid fa-cubes',
     children: [
@@ -82,61 +89,65 @@ CONFIG.NAV_TREE = [
       { title: 'Bottles (Windows Compatibility)', slug: 'software/bottles' },
     ]
   },
+
   {
     title: 'Networking', icon: 'fa-solid fa-network-wired',
     children: [
-      // Connection & Tunneling
       { title: 'NetworkManager & VPN', slug: 'networking/networkmanager-vpn' },
       { title: 'Tailscale VPN', slug: 'networking/tailscale' },
-      { title: 'Wireguard (Manual)', slug: 'networking/wireguard' },
+      { title: 'WireGuard (Manual)', slug: 'networking/wireguard' },
       { title: 'Cloudflared Tunnels', slug: 'networking/cloudflared' },
-      { title: 'ModemManager', slug: 'networking/modemmanager' },
-      
-      // DNS & Service Discovery
-      { title: 'dnsmasq', slug: 'networking/dnsmasq' },
-      { title: 'openresolv', slug: 'networking/openresolv' },
-      { title: 'avahi (mDNS/Bonjour)', slug: 'networking/avahi' },
-      
-      // Remote Access & File/Block Sharing
-      { title: 'OpenSSH (sshd & ssh)', slug: 'networking/openssh' },
-      { title: 'Sshfs', slug: 'networking/sshfs' },
-      { title: 'NFS & rpcbind', slug: 'networking/nfs' },
+      { title: 'ModemManager (Mobile Broadband)', slug: 'networking/modemmanager' },
+
+      { title: 'Caddy', slug: 'networking/caddy' },
+
+      { title: 'dnsmasq (Local DNS)', slug: 'networking/dnsmasq' },
+      { title: 'openresolv (DNS)', slug: 'networking/openresolv' },
+      { title: 'Avahi (mDNS)', slug: 'networking/avahi' },
+
+      { title: 'OpenSSH', slug: 'networking/openssh' },
+      { title: 'SSHFS', slug: 'networking/sshfs' },
+      { title: 'NFS File Sharing', slug: 'networking/nfs' },
       { title: 'Samba (SMB/CIFS)', slug: 'networking/samba' },
-      { title: 'rsyncd', slug: 'networking/rsyncd' },
-      { title: 'nbd-server', slug: 'networking/nbd' },
+      { title: 'rsyncd (rsync Daemon)', slug: 'networking/rsyncd' },
+      { title: 'nbd-server (Network Block Device)', slug: 'networking/nbd' },
       { title: 'Remote Desktop', slug: 'networking/remote-desktop' },
       { title: 'KDE Connect', slug: 'networking/kdeconnect' },
-      
-      // Security, Auth & Monitoring
+
       { title: 'Firewall (firewalld)', slug: 'networking/firewalld' },
       { title: 'Fail2ban', slug: 'networking/fail2ban' },
-      { title: 'snmpd', slug: 'networking/snmpd' },
+      { title: 'snmpd (SNMP)', slug: 'networking/snmpd' },
       { title: 'Kerberos', slug: 'networking/kerberos' },
       { title: 'slapd (OpenLDAP)', slug: 'networking/slapd' },
-      
-      // Backup & Sync
-      { title: 'Backup (rclone/restic)', slug: 'networking/backup' },
+      { title: 'Backup & Recovery', slug: 'networking/backup' },
     ]
   },
+
   {
     title: 'Self-Hosting & Servers', icon: 'fa-solid fa-server',
     children: [
-      { title: 'Caddy Web Server', slug: 'servers/caddy' },
-      { title: 'Databases & Caches', slug: 'servers/databases' },
-      { title: 'Media & Entertainment', slug: 'servers/media' },
-      { title: 'Productivity & Files', slug: 'servers/productivity' },
-      { title: 'Developer Tools', slug: 'servers/devtools' },
-      { title: 'Security & Identity', slug: 'servers/security' },
-      { title: 'Network & Analytics', slug: 'servers/networking' },
-      { title: 'Container Lifecycle', slug: 'servers/management' },
-      { title: 'VPN & Tunnels', slug: 'servers/vpn-tunnels' },
-      { title: 'Backups & Sync', slug: 'servers/backups-sync' },
-      { title: 'Home Automation', slug: 'servers/home-automation' },
-      { title: 'Communication', slug: 'servers/communication' },
       { title: 'AI & LLMs', slug: 'servers/ai-llms' },
-      { title: 'Mail Servers & Clients', slug: 'servers/mail' },
+      { title: 'Backups & Sync', slug: 'servers/backups-sync' },
+      { title: 'Business Intelligence & Analytics', slug: 'servers/business-intelligence' },
+      { title: 'Communication', slug: 'servers/communication' },
+      { title: 'Databases & Caches', slug: 'servers/databases' },
+      { title: 'Developer Tools', slug: 'servers/devtools' },
+      { title: 'Education & E-Learning', slug: 'servers/education' },
+      { title: 'Finance & Accounting', slug: 'servers/finance' },
+      { title: 'Home Automation', slug: 'servers/home-automation' },
+      { title: 'IoT & Monitoring', slug: 'servers/iot' },
+      { title: 'Mail Servers', slug: 'servers/mail' },
+      { title: 'Container Management & Lifecycle', slug: 'servers/management' },
+      { title: 'Media & Entertainment', slug: 'servers/media' },
+      { title: 'Medical & Health', slug: 'servers/medical' },
+      { title: 'Monitoring', slug: 'servers/monitoring' },
+      { title: 'Network & Analytics', slug: 'servers/networking' },
+      { title: 'Productivity & Files', slug: 'servers/productivity' },
+      { title: 'Security & Identity', slug: 'servers/security' },
+      { title: 'VPN & Tunnels', slug: 'servers/vpn-tunnels' },
     ]
   },
+
   { title: 'GPU Acceleration (CUDA/ROCm/oneAPI)', icon: 'fa-solid fa-microchip', slug: 'gpu-containers' },
   { title: 'Network Diagnostics & Tools', icon: 'fa-solid fa-diagram-project', slug: 'network-diag' },
   { title: 'Troubleshooting', icon: 'fa-solid fa-screwdriver-wrench', slug: 'troubleshooting' },

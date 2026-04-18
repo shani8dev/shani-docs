@@ -192,14 +192,27 @@ Configure apps to use SMTP host `localhost`, port `1025`. View emails at `http:/
 
 ---
 
+## Caddy Configuration
+
+```caddyfile
+git.home.local       { tls internal; reverse_proxy localhost:3000 }
+ci.home.local        { tls internal; reverse_proxy localhost:8000 }
+code.home.local      { tls internal; reverse_proxy localhost:8443 }
+coder.home.local     { tls internal; reverse_proxy localhost:3001 }
+registry.home.local  { tls internal; reverse_proxy localhost:5000 }
+mail.home.local      { tls internal; reverse_proxy localhost:8025 }
+```
+
+---
+
 ## Troubleshooting
 
 | Issue | Solution |
 |-------|----------|
 | Gitea SSH push fails | Confirm client is using `Port 2222` in `~/.ssh/config`; check `gitea` user has write access to the data volume |
 | Woodpecker agent not picking up jobs | Verify `WOODPECKER_AGENT_SECRET` matches on server and agent; check the agent has access to the Docker/Podman socket |
-
-
-
+| code-server blank after login | Verify `PASSWORD` env var is set; check the port is not in use by another service |
+| Private registry push rejected | Add `{ "insecure-registries": ["localhost:5000"] }` to `/etc/containers/registries.conf`; restart Podman |
+| Coder workspace fails to start | Confirm the Podman socket is mounted and accessible; check `CODER_ACCESS_URL` matches the URL you use to access it |
 | n8n webhook not triggering | Ensure `WEBHOOK_URL` is the publicly accessible URL; check that Caddy is proxying correctly |
 | code-server extension install fails | The container needs outbound internet access; verify network is not blocked by firewalld |

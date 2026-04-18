@@ -1,132 +1,171 @@
 ---
-title: Samba (Windows)
+title: Samba (SMB/CIFS)
 section: Networking
-updated: 2026-04-16
+updated: 2026-04-18
 ---
 
 # Samba — SMB/CIFS (Windows / macOS / Linux)
 
-Samba provides file and print services to SMB/CIFS clients. On Shanios, Samba's runtime state (locks, caches, `tdbsam` database) is bind-mounted from `/data/varlib/samba`, ensuring it persists across OS updates.
+Samba provides file and print sharing using the SMB/CIFS protocol, making your Shani OS machine appear as a Windows-compatible network share. It is pre-installed, and its runtime state (locks, caches, `tdbsam` database) is bind-mounted from `/data/varlib/samba`, ensuring it persists across OS updates.
+
+> **Prefer NFS** for Linux-to-Linux sharing. Use Samba when you need Windows or macOS compatibility.
+
+---
 
 ## Server Setup
 
 ### 1. Enable Services
-Samba consists of `smbd` (file sharing) and `nmbd` (NetBIOS name resolution).
+
+Samba consists of `smbd` (file sharing) and `nmbd` (NetBIOS name resolution for Windows discovery):
+
 ```bash
 sudo systemctl enable --now smb nmb
 ```
 
 ### 2. Configuration
-The default configuration below enables Home directory auto-sharing (`[homes]`), printer sharing, and standard security settings. 
 
 **File:** `/etc/samba/smb.conf`
+
 ```ini
 [global]
-   workgroup = WORKGROUP
-   dns proxy = no
-   log file = /var/log/samba/%m.log
-   max log size = 1000
-   client min protocol = SMB2
-   server min protocol = SMB2
-   server role = standalone server
-   passdb backend = tdbsam
-   obey pam restrictions = yes
-   unix password sync = yes
-   passwd program = /usr/bin/passwd %u
-   passwd chat = *New*UNIX*password* %n\n *ReType*new*UNIX*password* %n\n *passwd:*all*authentication*tokens*updated*successfully*
-   pam password change = yes
-   map to guest = Bad Password
-   usershare allow guests = yes
-   name resolve order = lmhosts bcast host wins
-   security = user
-   guest account = nobody
-   usershare path = /var/lib/samba/usershare
-   usershare max shares = 100
-   usershare owner only = yes
-   force create mode = 0070
-   force directory mode = 0070
+    workgroup = WORKGROUP
+    server role = standalone server
+    passdb backend = tdbsam
+    security = user
+    guest account = nobody
+
+    ; Enforce SMB2+ — SMB1 is disabled for security
+    client min protocol = SMB2
+    server min protocol = SMB2
+
+    ; Sync Samba password changes back to the Linux account
+    unix password sync = yes
+    passwd program = /usr/bin/passwd %u
+    pam password change = yes
+    obey pam restrictions = yes
+
+    ; Logging
+    log file = /var/log/samba/%m.log
+    max log size = 1000
+
+    ; User share support (GUI-created shares via Dolphin/Nautilus)
+    usershare path = /var/lib/samba/usershare
+    usershare max shares = 100
+    usershare owner only = yes
+    usershare allow guests = yes
 
 [homes]
-   comment = Home Directories
-   browseable = no
-   read only = yes
-   create mask = 0700
-   directory mask = 0700
-   valid users = %S
+    comment = Home Directories
+    browseable = no
+    read only = yes
+    create mask = 0700
+    directory mask = 0700
+    valid users = %S
 
 [printers]
-   comment = All Printers
-   browseable = no
-   path = /var/spool/samba
-   printable = yes
-   guest ok = no
-   read only = yes
-   create mask = 0700
+    comment = All Printers
+    browseable = no
+    path = /var/spool/samba
+    printable = yes
+    guest ok = no
+    read only = yes
+    create mask = 0700
 
 [print$]
-   comment = Printer Drivers
-   path = /var/lib/samba/printers
-   browseable = yes
-   read only = yes
-   guest ok = no
+    comment = Printer Drivers
+    path = /var/lib/samba/printers
+    browseable = yes
+    read only = yes
+    guest ok = no
 ```
 
-> 💡 **Validate Config:** Run `testparm` to check for syntax errors.
+> 💡 **Validate your config:** Run `testparm` after editing to catch syntax errors before restarting.
 
 ### 3. User Authentication
-Samba maintains its own password database. Even with `unix password sync = yes`, you must initially create the Samba user.
+
+Samba maintains its own password database. Even with `unix password sync = yes`, you must create the Samba password entry initially:
 
 ```bash
-# Create Samba password for your Linux user
+# Add a Samba password for an existing Linux user
 sudo smbpasswd -a youruser
+
+# Enable an existing Samba user (if previously disabled)
+sudo smbpasswd -e youruser
 ```
-*This grants access to your `\\server\youruser` share (via the `[homes]` section).*
+
+This grants access to the automatic `[homes]` share at `\\server-ip\youruser`.
 
 ### 4. Adding a Custom Share
-To share a specific folder (e.g., `/home/user/shared`), append the following to the **bottom** of `/etc/samba/smb.conf`:
+
+Append to the bottom of `/etc/samba/smb.conf`:
 
 ```ini
-[MySharedFolder]
-   comment = Shared Files
-   path = /home/user/shared
-   browseable = yes
-   read only = no
-   valid users = youruser
-   create mask = 0644
-   directory mask = 0755
+[SharedFiles]
+    comment = Shared Files
+    path = /home/user/shared
+    browseable = yes
+    read only = no
+    valid users = youruser
+    create mask = 0644
+    directory mask = 0755
 ```
-Then restart Samba: `sudo systemctl restart smb nmb`.
+
+Then restart Samba to apply:
+
+```bash
+sudo systemctl restart smb nmb
+```
 
 ### 5. Firewall
+
 ```bash
 sudo firewall-cmd --add-service=samba --permanent
 sudo firewall-cmd --reload
 ```
 
+---
+
 ## Client Usage
 
 ### Linux
-Mount a share manually:
+
+Temporary mount:
+
 ```bash
-sudo mount -t cifs //192.168.1.100/MySharedFolder /mnt/samba \
+sudo mount -t cifs //192.168.1.100/SharedFiles /mnt/samba \
   -o username=youruser,uid=$(id -u),gid=$(id -g),vers=3.0
 ```
 
-**Persistent Mount (`/etc/fstab`):**
-Create `~/.smbcredentials` (mode `600`):
+Persistent mount via `/etc/fstab` — first create `~/.smbcredentials` (mode `600`):
+
 ```text
 username=youruser
 password=yourpass
 ```
-Add to fstab:
+
+Then add to `/etc/fstab`:
+
 ```text
-//192.168.1.100/MySharedFolder /mnt/samba cifs credentials=/home/user/.smbcredentials,uid=1000,gid=1000,_netdev 0 0
+//192.168.1.100/SharedFiles  /mnt/samba  cifs  credentials=/home/user/.smbcredentials,uid=1000,gid=1000,_netdev,vers=3.0  0 0
 ```
 
 ### Windows
-In File Explorer address bar: `\\shanios-ip\MySharedFolder` or `\\shanios-ip\youruser`.
+
+In File Explorer address bar or Run dialog: `\\192.168.1.100\SharedFiles` or `\\192.168.1.100\youruser`
+
+### macOS
+
+Finder → Go → Connect to Server: `smb://192.168.1.100/SharedFiles`
+
+---
 
 ## Troubleshooting
-- **Discovery Issues:** Ensure `nmb` is running. Windows relies on NetBIOS/WSD for automatic discovery.
-- **Permission Denied:** Ensure Linux filesystem permissions allow the Samba user to access the path. Samba permissions (`read only = no`) act as a gate on top of file system permissions.
-- **Logs:** `journalctl -u smb` or `/var/log/samba/log.smbd`.
+
+| Issue | Solution |
+|-------|----------|
+| Share not appearing in Windows network browser | Ensure `nmb` is running; Windows uses NetBIOS/WSD for discovery — connecting directly by IP (`\\192.168.1.100`) always works |
+| `Permission denied` when accessing share | Check Linux filesystem permissions on the shared path — Samba permissions are layered on top; both must allow access |
+| `NT_STATUS_LOGON_FAILURE` | Wrong Samba password — reset with `sudo smbpasswd youruser` |
+| `mount error(13): Permission denied` on Linux | Add `sec=ntlmssp` to mount options; verify credentials in `.smbcredentials` |
+| Config changes not taking effect | Run `testparm` to validate, then `sudo systemctl restart smb nmb` |
+| View logs | `journalctl -u smb` or `/var/log/samba/log.smbd` |

@@ -234,6 +234,42 @@ Access at `http://localhost:51515`. Connect to a repository, configure sources, 
 
 ---
 
+## Garage (Distributed S3-Compatible Storage)
+
+**Purpose:** Lightweight, self-hosted distributed object storage. Designed to run on a cluster of modest machines or drives across multiple physical locations — a true geo-distributed MinIO alternative that runs well on low-power hardware. S3-compatible API means Restic, Rclone, and any other S3-aware tool works with it out of the box.
+
+```bash
+podman run -d \
+  --name garage \
+  -p 127.0.0.1:3900:3900 \
+  -p 127.0.0.1:3901:3901 \
+  -p 127.0.0.1:3902:3902 \
+  -v /home/user/garage/data:/var/lib/garage/data:Z \
+  -v /home/user/garage/meta:/var/lib/garage/meta:Z \
+  -v /home/user/garage/config.toml:/etc/garage.toml:ro,Z \
+  --restart unless-stopped \
+  dxflrs/garage:latest
+```
+
+**Minimal `config.toml`:**
+```toml
+metadata_dir = "/var/lib/garage/meta"
+data_dir = "/var/lib/garage/data"
+db_engine = "lmdb"
+replication_factor = 1
+
+[s3_api]
+s3_region = "garage"
+api_bind_addr = "0.0.0.0:3900"
+
+[admin]
+api_bind_addr = "0.0.0.0:3903"
+```
+
+> Garage is ideal when you want to spread backup storage across two home machines (e.g., a mini PC and an old laptop) for local redundancy without cloud costs.
+
+---
+
 ## Automated Backup with systemd
 
 Set up a daily backup timer that runs Restic and sends a notification via Ntfy:

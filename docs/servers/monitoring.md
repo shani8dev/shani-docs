@@ -366,6 +366,44 @@ podman run -d \
 
 ---
 
+## Gatus (Endpoint Monitoring)
+
+**Purpose:** Declarative, Git-friendly uptime and health monitoring. Define endpoints in YAML — HTTP, TCP, DNS, ICMP — with configurable conditions. Lighter than Uptime Kuma and easy to version-control. Ships a built-in status page.
+
+```bash
+podman run -d \
+  --name gatus \
+  -p 127.0.0.1:8088:8080 \
+  -v /home/user/gatus/config:/config:ro,Z \
+  --restart unless-stopped \
+  twinproduction/gatus:latest
+```
+
+**Example `config.yaml`:**
+```yaml
+endpoints:
+  - name: Jellyfin
+    url: http://host.containers.internal:8096/health
+    interval: 60s
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: ntfy
+        failure-threshold: 2
+        description: "Jellyfin is down"
+
+  - name: Nextcloud
+    url: https://files.home.local
+    interval: 5m
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 2000"
+```
+
+> Gatus integrates with ntfy, Slack, email, Telegram, and more for alert delivery. Its config file is easy to keep in Git alongside your other service configs.
+
+---
+
 ## Caddy Configuration
 
 ```caddyfile
@@ -379,6 +417,7 @@ dozzle.home.local      { tls internal; reverse_proxy localhost:8888 }
 hc.home.local          { tls internal; reverse_proxy localhost:8000 }
 speedtest.home.local   { tls internal; reverse_proxy localhost:8092 }
 smokeping.home.local   { tls internal; reverse_proxy localhost:8081 }
+gatus.home.local       { tls internal; reverse_proxy localhost:8088 }
 ```
 
 ---
@@ -396,5 +435,6 @@ smokeping.home.local   { tls internal; reverse_proxy localhost:8081 }
 | Uptime Kuma push monitors not firing | Verify the monitor URL is accessible from the container; check that ntfy topic/webhook URL is correct |
 | Dozzle shows no containers | Rootless Podman uses `/run/user/$(id -u)/podman/podman.sock` — not `/var/run/docker.sock` |
 | Beszel agent not reporting | Verify the public key from the hub is correctly pasted; check that port `45876` is reachable from the hub |
+| Gatus not sending alerts | Verify the alert integration config syntax; check `podman logs gatus` for connection errors to the alerting endpoint |
 | Healthchecks ping not received | Verify `SITE_ROOT` is the URL the script calls; check that the UUID matches the check in the UI |
 | Speedtest results missing | Check the container has outbound internet access; verify `APP_KEY` is set |

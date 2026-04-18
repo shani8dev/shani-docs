@@ -310,6 +310,12 @@ See the [Finance wiki](https://docs.shani.dev/doc/servers/finance#actual-budget)
 
 ---
 
+## Gitea / Forgejo (Version-Controlled Config)
+
+For teams who want to version-control their notes, runbooks, and wiki pages alongside code, Gitea is an excellent pairing with Outline or Obsidian. See the [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#gitea--forgejo) for the full setup.
+
+---
+
 ## n8n (Workflow Automation)
 
 **Purpose:** Visual workflow automation with 400+ integrations — webhooks, APIs, databases, AI tools, home automation, and more. Build multi-step automations without code using a drag-and-drop node editor. Self-hosted alternative to Zapier and Make. Pairs well with Nextcloud, Gitea, and Home Assistant for event-driven workflows across your entire self-hosted stack.

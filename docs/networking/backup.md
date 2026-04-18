@@ -1,20 +1,20 @@
 ---
 title: Backup & Recovery
-section: Networking
-updated: 2026-04-01
+section: Storage
+updated: 2026-04-18
 ---
 
 # Backup & Recovery
 
-Shanios protects the OS layer via atomic updates and Btrfs snapshots. However, **user data and container state** must be backed up independently to protect against drive failure, accidental deletion, or corruption.
+Shani OS protects the OS layer via atomic updates and Btrfs snapshots. However, **user data and container state** must be backed up independently to protect against drive failure, accidental deletion, or corruption.
 
-The recommended backup stack on Shanios is **Restic** (encrypted, incremental, deduplicated) combined with **Rclone** (cloud storage synchronization).
+The recommended backup stack on Shani OS is **Restic** (encrypted, incremental, deduplicated) combined with **Rclone** (cloud storage synchronisation). Both are pre-installed.
 
 ---
 
-## 📦 Backup Strategy
+## Backup Strategy
 
-Because Shanios uses dedicated Btrfs subvolumes, target these paths for backup:
+Because Shani OS uses dedicated Btrfs subvolumes, target these paths for backup:
 
 | Path | Subvolume | Priority | Notes |
 |------|-----------|----------|-------|
@@ -22,139 +22,220 @@ Because Shanios uses dedicated Btrfs subvolumes, target these paths for backup:
 | `/var/lib/containers` | `@containers` | 🟠 High | Podman/Distrobox images, volumes, layers |
 | `/var/lib/waydroid` | `@waydroid` | 🟠 High | Android apps, data, system image |
 | `/var/lib/lxd` | `@lxd` | 🟠 High | LXD system containers |
-| `/var/lib/flatpak` | `@flatpak` | 🟡 Medium | Flatpak runtimes & apps |
+| `/var/lib/flatpak` | `@flatpak` | 🟡 Medium | Flatpak runtimes & apps (re-installable) |
 
-> ⚠️ **Important**: Btrfs snapshots (`shani-deploy` rollbacks) are **not backups**. They reside on the same physical drive. Use Restic/Rclone to copy data to an **external drive or cloud**.
+> ⚠️ **Btrfs snapshots are not backups.** The rollback snapshots created by `shani-deploy` reside on the same physical drive. A drive failure destroys both the live data and all snapshots simultaneously. Use Restic + Rclone to copy data to an **external drive or cloud storage**.
 
 ---
 
-## 🔐 1. Restic — Encrypted Backups
+## 1. Restic — Encrypted Backups
 
-Restic is fast, secure, and cryptographically verifies all data. It deduplicates content, making backups highly space-efficient.
+Restic is fast, cryptographically secure, and content-addressed. Every file is deduplicated across snapshots — only new or changed blocks are stored. Restic verifies checksums on every operation.
 
-### Installation
+### Store the Repository Password Securely
+
+Never use a bare environment variable for the password in production scripts. Create a password file instead:
+
 ```bash
-sudo pacman -S restic
+mkdir -p ~/.config/restic
+printf 'YOUR_STRONG_PASSWORD' > ~/.config/restic/password
+chmod 600 ~/.config/restic/password
 ```
 
-### Initialize Repository
-Create a local repository (e.g., on an external USB drive):
+### Initialise a Local Repository (External Drive)
+
 ```bash
 mkdir -p /run/media/backup-disk/restic-repo
-restic init --repo /run/media/backup-disk/restic-repo
-# Set a strong password when prompted
+
+restic init \
+  --repo /run/media/backup-disk/restic-repo \
+  --password-file ~/.config/restic/password
 ```
 
-### Backup Command
-```bash
-export RESTIC_REPOSITORY="/run/media/backup-disk/restic-repo"
-export RESTIC_PASSWORD="YOUR_STRONG_PASSWORD"
+### Run a Backup
 
+```bash
 restic backup \
+  --repo /run/media/backup-disk/restic-repo \
+  --password-file ~/.config/restic/password \
   --exclude="**/.cache" \
   --exclude="**/node_modules" \
   --exclude="**/.local/share/Trash" \
+  --exclude="**/Steam/steamapps" \
   /home \
   /var/lib/containers \
   /var/lib/waydroid
 ```
 
 ### Snapshot Management
+
 ```bash
-# List snapshots
-restic snapshots
+# List all snapshots
+restic snapshots \
+  --repo /run/media/backup-disk/restic-repo \
+  --password-file ~/.config/restic/password
 
-# Show files in a snapshot
-restic ls <snapshot-id>
+# Browse files in the latest snapshot
+restic ls latest \
+  --repo /run/media/backup-disk/restic-repo \
+  --password-file ~/.config/restic/password
 
-# Restore data
-restic restore latest --target /tmp/restore-point
+# Restore everything from the latest snapshot
+restic restore latest \
+  --repo /run/media/backup-disk/restic-repo \
+  --password-file ~/.config/restic/password \
+  --target /tmp/restore-point
 
-# Clean up old backups (keep 7d, 4w, 6m, 1y)
-restic forget --keep-daily 7 --keep-weekly 4 --keep-monthly 6 --keep-yearly 1 --prune
+# Restore only a specific path
+restic restore latest \
+  --repo /run/media/backup-disk/restic-repo \
+  --password-file ~/.config/restic/password \
+  --include /home/user/Documents \
+  --target /tmp/restore-point
+
+# Prune old snapshots (keep 7 daily, 4 weekly, 6 monthly, 1 yearly)
+restic forget \
+  --repo /run/media/backup-disk/restic-repo \
+  --password-file ~/.config/restic/password \
+  --keep-daily 7 --keep-weekly 4 --keep-monthly 6 --keep-yearly 1 \
+  --prune
+
+# Verify repository integrity
+restic check \
+  --repo /run/media/backup-disk/restic-repo \
+  --password-file ~/.config/restic/password
 ```
 
 ---
 
-## ☁️ 2. Rclone — Cloud Storage Access
+## 2. Rclone — Cloud Storage Access
 
-Rclone syncs files to cloud providers (Google Drive, Backblaze B2, AWS S3, Dropbox, etc.) and can mount them as local filesystems.
-
-### Installation
-```bash
-sudo pacman -S rclone
-```
+Rclone syncs files to 70+ cloud providers and can mount them as local filesystems.
 
 ### Configuration
+
 ```bash
 rclone config
 ```
-Follow the interactive prompts to authenticate your provider. It creates a remote alias (e.g., `gdrive`, `b2`).
+
+Follow the interactive prompts to authenticate your provider. The wizard creates a remote alias (e.g., `gdrive`, `b2`, `r2`). Config is saved at `~/.config/rclone/rclone.conf`.
 
 ### Basic Usage
+
 ```bash
-# Sync local folder to cloud
+# One-way sync (mirrors source → destination, deletes extra files at destination)
 rclone sync ~/Documents gdrive:DocumentsBackup --progress
 
-# Mount cloud as local drive
-rclone mount gdrive: ~/Cloud --vfs-cache-mode writes --daemon
+# Copy (one-way, never deletes at destination)
+rclone copy ~/Documents gdrive:DocumentsBackup --progress
+
+# Check integrity (compare checksums)
+rclone check ~/Documents gdrive:DocumentsBackup
+
+# Mount cloud storage as a local filesystem
+rclone mount gdrive: ~/Cloud \
+  --vfs-cache-mode writes \
+  --daemon
 ```
 
 ---
 
-## 🔗 3. Restic + Rclone (Cloud Backups)
+## 3. Restic + Rclone — Encrypted Cloud Backups
 
-Combine both tools for **encrypted, deduplicated cloud backups**. Restic handles encryption & dedup; Rclone handles cloud transport.
+Combine both tools: Restic handles encryption and deduplication; Rclone handles transport to the cloud. Your data is encrypted **before** it ever leaves your machine — the cloud provider sees only opaque blobs.
 
-### Setup
+Works with any Rclone-supported backend: Google Drive, Backblaze B2, AWS S3, Cloudflare R2, Wasabi, SFTP, and more.
+
+### Initialise the Remote Repository
+
 ```bash
-# Initialize Restic on top of Rclone remote
-export RESTIC_REPOSITORY="rclone:mycloud:shanios-backups"
-export RESTIC_PASSWORD="YOUR_ENCRYPTION_PASSWORD"
+export RESTIC_REPOSITORY="rclone:gdrive:shanios-backups"
+export RESTIC_PASSWORD_FILE="$HOME/.config/restic/password"
 
 restic init
 ```
 
-### Automated Backup Script (`~/scripts/backup.sh`)
+### Backup Script (`~/scripts/backup.sh`)
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-export RESTIC_REPOSITORY="rclone:mycloud:shanios-backups"
+export RESTIC_REPOSITORY="rclone:gdrive:shanios-backups"
 export RESTIC_PASSWORD_FILE="$HOME/.config/restic/password"
 
-echo "🔒 Starting backup at $(date)"
+log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"; }
+
+# Signal failure to monitoring on any error
+trap 'curl -fsS --retry 3 "https://hc.home.local/ping/YOUR-UUID/fail" > /dev/null 2>&1 || true' ERR
+
+log "Starting backup"
 
 restic backup \
   --exclude="**/.cache" \
   --exclude="**/node_modules" \
-  /home /var/lib/containers /var/lib/waydroid
+  --exclude="**/.local/share/Trash" \
+  --exclude="**/Steam/steamapps" \
+  /home \
+  /var/lib/containers \
+  /var/lib/waydroid
 
-echo "🧹 Pruning old snapshots..."
-restic forget --keep-daily 7 --keep-weekly 4 --keep-monthly 3 --prune
+log "Pruning old snapshots"
+restic forget \
+  --keep-daily 7 --keep-weekly 4 --keep-monthly 3 \
+  --prune
 
-echo "✅ Backup complete at $(date)"
+log "Verifying repository"
+restic check
+
+log "Backup complete"
+
+# Ping dead man's switch (Healthchecks) on success
+curl -fsS --retry 3 "https://hc.home.local/ping/YOUR-UUID" > /dev/null 2>&1 || true
 ```
 
-Make executable: `chmod +x ~/scripts/backup.sh`
+```bash
+chmod +x ~/scripts/backup.sh
+```
+
+### Backblaze B2
+
+```bash
+# Run 'rclone config', choose type 'b2', enter your Account ID and Application Key
+export RESTIC_REPOSITORY="rclone:b2:your-bucket-name/restic"
+export RESTIC_PASSWORD_FILE="$HOME/.config/restic/password"
+restic init
+```
+
+### AWS S3 / Cloudflare R2 (native S3 backend — no Rclone layer needed)
+
+```bash
+export RESTIC_REPOSITORY="s3:https://s3.amazonaws.com/your-bucket/restic"
+export AWS_ACCESS_KEY_ID="your-key-id"
+export AWS_SECRET_ACCESS_KEY="your-secret"
+export RESTIC_PASSWORD_FILE="$HOME/.config/restic/password"
+restic init
+```
 
 ---
 
-## ⏱ 4. Automation (Systemd Timer)
+## 4. Automation (Systemd Timer)
 
-Run backups automatically in the background using a user systemd timer.
+Run backups automatically using a user-level systemd timer — no root required. Requires `loginctl enable-linger $USER` so the timer fires even when you are not logged in.
+
+```bash
+loginctl enable-linger $USER
+```
 
 **`~/.config/systemd/user/backup.service`**
 ```ini
 [Unit]
 Description=Restic Encrypted Backup
-Requires=network-online.target
 After=network-online.target
 
 [Service]
 Type=oneshot
 ExecStart=%h/scripts/backup.sh
-Environment="RESTIC_PASSWORD_FILE=%h/.config/restic/password"
 StandardOutput=journal
 StandardError=journal
 ```
@@ -162,29 +243,50 @@ StandardError=journal
 **`~/.config/systemd/user/backup.timer`**
 ```ini
 [Unit]
-Description=Run Backup Daily
+Description=Run Backup Daily at 3 AM
+
 [Timer]
-OnCalendar=daily
+OnCalendar=*-*-* 03:00:00
 Persistent=true
-RandomizedDelaySec=30min
+RandomizedDelaySec=15min
 
 [Install]
 WantedBy=timers.target
 ```
 
-**Enable & Start:**
+**Enable:**
 ```bash
 systemctl --user daemon-reload
 systemctl --user enable --now backup.timer
+
+# Confirm the timer is scheduled
+systemctl --user list-timers backup.timer
+
+# Run once immediately to test
+systemctl --user start backup.service
+
+# Watch output
+journalctl --user -u backup.service -f
 ```
 
 ---
 
-## 🛡 Best Practices for Shanios
+## 5. Monitoring Backup Health
 
-1. **Store passwords securely**: Use `RESTIC_PASSWORD_FILE` or a password manager instead of plaintext variables.
-2. **Test restores periodically**: Run `restic restore latest --target /tmp/test` to verify backup integrity.
-3. **Monitor journal logs**: `journalctl --user -u backup.service -f`
-4. **Exclude large caches**: `--exclude="**/.cache"` and `--exclude="**/node_modules"` drastically reduce backup size.
-5. **Container persistence**: Backing up `/var/lib/containers` preserves your Distrobox/Podman environments across hardware migrations.
-6. **3-2-1 Rule**: Keep 3 copies, on 2 different media, with 1 offsite (Restic+Rclone satisfies this natively).
+A backup that runs silently and fails is worse than no backup at all. Wire your timer to a **dead man's switch**: a monitoring service that alerts you when the expected ping does not arrive on schedule.
+
+The self-hosted option is **Healthchecks** — see the [Monitoring wiki](https://docs.shani.dev/doc/servers/monitoring#healthchecksio-cron-monitoring). For a no-setup option, [healthchecks.io](https://healthchecks.io) offers a free tier.
+
+The `trap ... ERR` and final `curl` lines in the backup script above handle both failure and success pings automatically.
+
+---
+
+## Best Practices
+
+1. **Password file, not env vars** — Use `RESTIC_PASSWORD_FILE` pointing to a `chmod 600` file. Never hardcode passwords in scripts committed to Git.
+2. **Test restores regularly** — Run `restic restore latest --target /tmp/test-restore` monthly. A backup you have never restored from is a backup you do not know works.
+3. **Follow the 3-2-1 rule** — Three copies, on two different media, with one offsite. Restic + Rclone to a cloud remote satisfies this natively.
+4. **Exclude large re-downloadable data** — Steam library, node_modules, `.cache`, and Trash add size without protecting irreplaceable data.
+5. **Back up container volumes, not images** — Images are re-pullable. Podman named volumes under `/var/lib/containers/storage/volumes` contain your actual application data.
+6. **Verify after prune** — Always run `restic check` after a `forget --prune` to confirm the repository is consistent.
+7. **Enable linger** — Run `loginctl enable-linger $USER` so user systemd timers fire at boot even without an active login session.

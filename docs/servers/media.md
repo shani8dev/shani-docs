@@ -290,6 +290,27 @@ podman run -d \
 
 ---
 
+## Caddy Configuration
+
+```caddyfile
+media.home.local       { tls internal; reverse_proxy localhost:8096 }
+plex.home.local        { tls internal; reverse_proxy localhost:32400 }
+music.home.local       { tls internal; reverse_proxy localhost:4533 }
+photos.home.local      { tls internal; reverse_proxy localhost:2283 }
+requests.home.local    { tls internal; reverse_proxy localhost:5055 }
+radarr.home.local      { tls internal; reverse_proxy localhost:7878 }
+sonarr.home.local      { tls internal; reverse_proxy localhost:8989 }
+lidarr.home.local      { tls internal; reverse_proxy localhost:8686 }
+prowlarr.home.local    { tls internal; reverse_proxy localhost:9696 }
+torrent.home.local     { tls internal; reverse_proxy localhost:8080 }
+youtube.home.local     { tls internal; reverse_proxy localhost:8088 }
+books.home.local       { tls internal; reverse_proxy localhost:5000 }
+audiobooks.home.local  { tls internal; reverse_proxy localhost:13378 }
+photoprism.example.com { reverse_proxy localhost:2342 }
+```
+
+---
+
 ## Troubleshooting
 
 | Issue | Solution |
