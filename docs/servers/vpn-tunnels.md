@@ -193,6 +193,66 @@ podman run -d \
 
 ---
 
+## Pangolin (Self-Hosted Tunnel Server)
+
+**Purpose**: Pangolin is a self-hosted tunnelled reverse proxy with identity-aware access control — a fully open-source alternative to Cloudflare Tunnel and Ngrok. It exposes local services to the internet through an encrypted WireGuard tunnel to a lightweight VPS, without opening any inbound ports on your home network. Unlike Cloudflared, Pangolin requires no third-party cloud — you own the entire path.
+
+Pangolin consists of two components:
+- **Pangolin** — the server, runs on a cheap VPS, receives tunnelled traffic and routes it to your services
+- **Newt** — the client agent, runs on your Shani OS machine, creates the tunnel back to Pangolin
+
+### 1. Server (on a VPS)
+
+Create `/home/user/pangolin/config/config.yml`:
+```yaml
+app:
+  dashboard_url: https://pangolin.yourdomain.com
+  base_domain: yourdomain.com
+  admin_email: admin@yourdomain.com
+  admin_password: changeme
+  log_level: info
+
+server:
+  external_port: 443
+  internal_port: 8080
+
+db:
+  encryption_key: "$(openssl rand -hex 32)"
+```
+
+```bash
+podman run -d \
+  --name pangolin \
+  -p 0.0.0.0:443:443 \
+  -p 0.0.0.0:51820:51820/udp \
+  -v /home/user/pangolin/config:/app/config:Z \
+  -v /home/user/pangolin/data:/app/data:Z \
+  --restart unless-stopped \
+  fosrl/pangolin:latest
+```
+
+Access the dashboard at `https://pangolin.yourdomain.com`. Create a site and copy the Newt token.
+
+### 2. Client Agent on Shani OS (Newt)
+
+```bash
+podman run -d \
+  --name newt \
+  -e PANGOLIN_URL=https://pangolin.yourdomain.com \
+  -e NEWT_ID=<your-newt-id> \
+  -e NEWT_SECRET=<your-newt-secret> \
+  --restart unless-stopped \
+  fosrl/newt:latest
+```
+
+Once the tunnel is up, define your exposed services in the Pangolin dashboard — map hostnames to local ports on your Shani OS machine. Pangolin handles TLS via Let's Encrypt automatically.
+
+- **Firewall on VPS**: Open `443/tcp` and `51820/udp`
+- **Firewall on Shani OS**: None required — Newt connects outbound only
+- **Identity-aware access**: Pangolin supports resource-level access control — restrict services to authenticated users without a separate SSO layer
+
+---
+
 ## OpenVPN + Web UI Alternatives
 
 **Purpose**: Legacy, highly configurable VPN standard. Ideal for specific cipher suites, client certificate management, or older device compatibility.
@@ -425,7 +485,8 @@ podman run -d \
 | **WG-Easy** | Home/SOHO WireGuard management | Low | ✅ Web | WireGuard |
 | **Headscale + Headplane** | Self-hosted Tailscale with dashboard | Medium | ✅ Web (Headplane) | WireGuard |
 | **Hysteria 2 + Dashboard** | High packet loss / censorship bypass | Medium | ⚠️ Experimental Web | QUIC (HTTP3) |
-| **Cloudflared** | Exposing services without port forwarding | Low | ✅ Web/Dashboard | HTTPS/TCP/UDP over TLS |
+| **Cloudflared** | Exposing services via Cloudflare, no port forwarding | Low | ✅ Web/Dashboard | HTTPS/TCP/UDP over TLS |
+| **Pangolin + Newt** | Self-hosted tunnel server, no third-party cloud | Medium | ✅ Web | WireGuard tunnel |
 | **OpenVPN + WebUI** | Legacy compatibility, cert-based auth | Medium | ⚠️ Community Web | UDP/TCP (SSL) |
 | **Pritunl** | Enterprise, SSO, multi-site, audit logging | Medium | ✅ Web | WireGuard, OpenVPN |
 | **Firezone** | Zero-trust access (ZTNA), granular policies | High | ✅ Web | WireGuard |
