@@ -1,0 +1,390 @@
+---
+title: Finance & Accounting
+section: Self-Hosting & Servers
+updated: 2026-04-22
+---
+
+# Finance & Accounting
+
+Self-hosted personal finance, double-entry bookkeeping, invoicing, budgeting, stock portfolio tracking, and cryptocurrency nodes. Keep your financial data on hardware you own.
+
+> **Why self-host finance tools?** Financial data is among the most sensitive data you produce. Cloud tools like Mint, YNAB, and QuickBooks Online have been acquired, shut down, or had data breaches. Running these tools locally means your transaction history, budget, and account balances are never transmitted to a third party.
+
+---
+
+## Firefly III (Personal Finance Manager)
+
+**Purpose:** The most feature-complete self-hosted personal finance manager. Uses double-entry bookkeeping — every transaction moves money between accounts, which means the books always balance. Supports bank accounts, credit cards, cash wallets, savings accounts, investments, and liabilities. Tracks income, expenses, transfers, budgets, categories, tags, and recurring transactions. Produces detailed reports and charts.
+
+```yaml
+# ~/firefly/compose.yml
+services:
+  firefly:
+    image: fireflyiii/core:latest
+    ports: ["127.0.0.1:8080:8080"]
+    environment:
+      APP_KEY: changeme-run-php-artisan-key-generate-or-openssl-rand-base64-32
+      APP_URL: https://firefly.home.local
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: firefly
+      DB_USERNAME: firefly
+      DB_PASSWORD: changeme
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      REDIS_HOST: redis
+      TZ: Asia/Kolkata
+      TRUSTED_PROXIES: "**"
+    volumes:
+      - /home/user/firefly/upload:/var/www/html/storage/upload:Z
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: firefly
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: firefly
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  # Firefly III Data Importer — imports from bank CSV and GoCardless/Nordigen
+  importer:
+    image: fireflyiii/data-importer:latest
+    ports: ["127.0.0.1:8081:8080"]
+    environment:
+      FIREFLY_III_URL: http://firefly:8080
+      VANITY_URL: https://firefly.home.local
+      FIREFLY_III_ACCESS_TOKEN: your-personal-access-token
+      TZ: Asia/Kolkata
+    depends_on: [firefly]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+**Key workflows:**
+- Create accounts (assets, liabilities, revenue, expense accounts)
+- Import transactions via the Data Importer from your bank's CSV export
+- Set up budgets with monthly limits per category
+- Configure recurring transactions for rent, subscriptions, salary
+- Use the Rules engine to auto-categorise transactions by description pattern
+
+**Caddy:**
+```caddyfile
+firefly.home.local   { tls internal; reverse_proxy localhost:8080 }
+importer.home.local  { tls internal; reverse_proxy localhost:8081 }
+```
+
+---
+
+## Actual Budget
+
+**Purpose:** Local-first envelope budgeting app using zero-based budgeting. You assign every pound or rupee a job — the budget is a plan, not just a record. All data is stored in your browser (SQLite in IndexedDB) and synced to a self-hosted server. Extremely fast, works offline, and the data is 100% yours.
+
+```bash
+podman run -d \
+  --name actual \
+  -p 127.0.0.1:5006:5006 \
+  -v /home/user/actual/data:/data:Z \
+  --restart unless-stopped \
+  actualbudget/actual-server:latest
+```
+
+Access at `http://localhost:5006`. Create a new budget file, import bank transactions via CSV, and assign income to budget categories each month.
+
+> Actual Budget is the best choice if you want a zero-based budgeting workflow (similar to YNAB) with completely local data and no subscription.
+
+---
+
+## Ghostfolio (Investment Portfolio Tracker)
+
+**Purpose:** Open-source wealth management and portfolio tracking. Tracks stocks, ETFs, cryptocurrencies, and other assets across multiple brokerage accounts. Shows portfolio performance, asset allocation, dividend history, XIRR, and fire number progress. Integrates with Yahoo Finance and CoinGecko for live prices.
+
+```yaml
+# ~/ghostfolio/compose.yml
+services:
+  ghostfolio:
+    image: ghostfolio/ghostfolio:latest
+    ports: ["127.0.0.1:3333:3333"]
+    environment:
+      DATABASE_URL: postgresql://ghostfolio:changeme@db:5432/ghostfolio?sslmode=prefer
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET_KEY: changeme-run-openssl-rand-base64-32
+      ACCESS_TOKEN_SALT: changeme-run-openssl-rand-base64-32
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ghostfolio
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: ghostfolio
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+Access at `http://localhost:3333`. Add activities (buy/sell transactions) and Ghostfolio calculates current value, cost basis, P&L, and charts portfolio performance over time.
+
+---
+
+## Invoice Ninja (Invoicing & Billing)
+
+**Purpose:** Full-featured invoicing, quotes, expenses, time tracking, and client management. Generates professional PDF invoices, accepts online payments (Stripe, PayPal, GoCardless), and handles recurring invoices. Essential for freelancers and small businesses who want to own their billing data.
+
+```yaml
+# ~/invoiceninja/compose.yml
+services:
+  app:
+    image: invoiceninja/invoiceninja:5
+    ports: ["127.0.0.1:8082:80"]
+    environment:
+      APP_URL: https://invoices.home.local
+      APP_KEY: changeme-base64-32-chars
+      DB_HOST: db
+      DB_DATABASE: ninja
+      DB_USERNAME: ninja
+      DB_PASSWORD: changeme
+      PHANTOMJS_PDF_GENERATION: "false"
+      PDF_GENERATOR: snappdf
+      QUEUE_CONNECTION: database
+    volumes:
+      - /home/user/invoiceninja/public:/var/www/app/public/storage:Z
+      - /home/user/invoiceninja/storage:/var/www/app/storage:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:10.11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: ninja
+      MYSQL_USER: ninja
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  db_data:
+```
+
+---
+
+## ERPNext Accounting (Full Business ERP)
+
+**Purpose:** When Invoice Ninja is not enough — ERPNext covers the full accounting cycle: chart of accounts, journals, purchase orders, sales orders, inventory, payroll, asset management, and multi-currency. The same Frappe stack used for school ERP (see the Education wiki) includes a complete double-entry accounting module. Suitable for small and medium businesses that want one system for everything.
+
+See the [Education wiki](https://docs.shani.dev/doc/servers/education#erpnext--frappe-school-erp) for the full ERPNext deployment. Install the `accounts` app instead of or alongside `education`.
+
+---
+
+## Hledger / Beancount (Plain Text Accounting)
+
+**Purpose:** Plain text double-entry accounting — your ledger is a `.journal` or `.beancount` file you edit with any text editor, version-controlled in Git. No database, no web UI required (though both have optional web interfaces). Beloved by programmers who want total control over their financial data.
+
+```bash
+# hledger — web interface
+podman run -d \
+  --name hledger \
+  -p 127.0.0.1:5000:5000 \
+  -v /home/user/finance/ledger.journal:/data/ledger.journal:ro,Z \
+  --restart unless-stopped \
+  dastapov/hledger \
+  hledger-web --file /data/ledger.journal --host 0.0.0.0
+
+# Example journal entry
+cat >> /home/user/finance/ledger.journal << 'EOF'
+2026-04-01 Salary
+  assets:bank:current    ₹75000
+  income:salary         -₹75000
+
+2026-04-05 Groceries
+  expenses:food:groceries  ₹2500
+  assets:bank:current     -₹2500
+EOF
+
+# Run reports
+podman run --rm \
+  -v /home/user/finance/ledger.journal:/data/ledger.journal:ro \
+  dastapov/hledger \
+  hledger -f /data/ledger.journal balance --tree
+```
+
+---
+
+## Bitcoin / Lightning Node (Umbrel-style)
+
+**Purpose:** Run a full Bitcoin node to validate your own transactions without trusting a third party, and a Lightning Network node for instant low-fee payments. Sovereignty over your Bitcoin — no relying on someone else's node.
+
+```yaml
+# ~/bitcoin/compose.yml
+services:
+  bitcoin:
+    image: lncm/bitcoind:v27.0
+    ports:
+      - "127.0.0.1:8332:8332"   # RPC
+      - "0.0.0.0:8333:8333"     # P2P (needs to be open for the network)
+    volumes:
+      - /home/user/bitcoin/data:/data/.bitcoin:Z
+    environment:
+      BITCOIN_DATA: /data/.bitcoin
+    command: >
+      bitcoind
+        -server=1
+        -rpcuser=bitcoin
+        -rpcpassword=changeme
+        -rpcallowip=127.0.0.1
+        -txindex=1
+        -prune=0
+    restart: unless-stopped
+
+  # LND — Lightning Network Daemon
+  lnd:
+    image: lightninglabs/lnd:v0.18.0-beta
+    ports:
+      - "127.0.0.1:10009:10009"  # gRPC
+      - "0.0.0.0:9735:9735"      # P2P
+    volumes:
+      - /home/user/lnd/data:/root/.lnd:Z
+    environment:
+      HOME: /root
+    command: >
+      lnd
+        --bitcoin.active
+        --bitcoin.mainnet
+        --bitcoin.node=bitcoind
+        --bitcoind.rpchost=bitcoin
+        --bitcoind.rpcuser=bitcoin
+        --bitcoind.rpcpass=changeme
+        --bitcoind.zmqpubrawblock=tcp://bitcoin:28332
+        --bitcoind.zmqpubrawtx=tcp://bitcoin:28333
+        --rpclisten=0.0.0.0:10009
+        --restlisten=0.0.0.0:8080
+    depends_on: [bitcoin]
+    restart: unless-stopped
+
+  # ThunderHub — Lightning node management UI
+  thunderhub:
+    image: apotdevin/thunderhub:latest
+    ports: ["127.0.0.1:3000:3000"]
+    environment:
+      ACCOUNT_CONFIG_PATH: /app/config/thubConfig.yaml
+    volumes:
+      - /home/user/thunderhub/config:/app/config:Z
+      - /home/user/lnd/data:/lnd:ro,Z
+    depends_on: [lnd]
+    restart: unless-stopped
+```
+
+> **Storage:** A full Bitcoin node requires ~700 GB of disk space for the full chain (as of 2026). Use `prune=550` (MB) in bitcoind config for a pruned node that verifies without storing the full history — sufficient for most use cases.
+
+**Firewall:**
+```bash
+sudo firewall-cmd --add-port=8333/tcp --permanent   # Bitcoin P2P
+sudo firewall-cmd --add-port=9735/tcp --permanent   # Lightning P2P
+sudo firewall-cmd --reload
+```
+
+---
+
+## Monero Node
+
+**Purpose:** Run a full Monero node for private, untraceable transactions. A local node provides full validation and better privacy than connecting through a third-party node.
+
+```bash
+podman run -d \
+  --name monero \
+  -p 127.0.0.1:18081:18081 \
+  -p 0.0.0.0:18080:18080 \
+  -v /home/user/monero/data:/home/monero/.bitmonero:Z \
+  --restart unless-stopped \
+  sethsimmons/simple-monerod:latest \
+    --rpc-restricted-bind-ip=0.0.0.0 \
+    --rpc-restricted-bind-port=18089 \
+    --no-igd \
+    --prune-blockchain
+
+# Firewall
+sudo firewall-cmd --add-port=18080/tcp --permanent && sudo firewall-cmd --reload
+```
+
+---
+
+## CryptoFolio / Rotki (Privacy-First Crypto Portfolio)
+
+**Purpose:** Rotki is a privacy-preserving crypto portfolio tracker that runs entirely locally. It connects to exchanges via API (read-only keys), calculates capital gains and losses, and generates tax reports — all on your machine, never uploading your portfolio to any server.
+
+```bash
+podman run -d \
+  --name rotki \
+  -p 127.0.0.1:4242:80 \
+  -v /home/user/rotki/data:/rotki/data:Z \
+  -v /home/user/rotki/logs:/rotki/logs:Z \
+  --restart unless-stopped \
+  rotki/rotki:latest
+```
+
+Access at `http://localhost:4242`. Connect exchanges (Binance, Coinbase, Kraken) via read-only API keys and import wallets by address.
+
+---
+
+## Choosing the Right Tool
+
+| Use Case | Recommended Tool |
+|----------|-----------------|
+| Personal finance / household budgeting (double-entry) | Firefly III |
+| Zero-based envelope budgeting (YNAB-style) | Actual Budget |
+| Investment portfolio & wealth tracking | Ghostfolio |
+| Freelancer invoicing & billing | Invoice Ninja |
+| Full business accounting & ERP | ERPNext |
+| Programmer / power-user ledger | hledger / Beancount |
+| Bitcoin sovereignty | Bitcoin Core + LND + ThunderHub |
+| Crypto portfolio + tax reports | Rotki |
+
+---
+
+## Caddy Configuration
+
+```caddyfile
+firefly.home.local    { tls internal; reverse_proxy localhost:8080 }
+importer.home.local   { tls internal; reverse_proxy localhost:8081 }
+budget.home.local     { tls internal; reverse_proxy localhost:5006 }
+portfolio.home.local  { tls internal; reverse_proxy localhost:3333 }
+invoices.home.local   { tls internal; reverse_proxy localhost:8082 }
+thunderhub.home.local { tls internal; reverse_proxy localhost:3000 }
+rotki.home.local      { tls internal; reverse_proxy localhost:4242 }
+```
+
+---
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Firefly III `No application encryption key` | Generate with `openssl rand -base64 32` and set as `APP_KEY`; must be exactly 32 bytes base64-encoded |
+| Firefly III importer can't connect | Generate a Personal Access Token in Firefly III (Profile → OAuth → Personal Access Tokens) and paste it into the importer's `FIREFLY_III_ACCESS_TOKEN` |
+| Actual Budget sync fails | Ensure the server URL in the app matches exactly — `http://` vs `https://` matters; check that the server container is running |
+| Ghostfolio prices not loading | Yahoo Finance rate-limits aggressive polling; wait a few minutes or check `podman logs ghostfolio` for 429 errors |
+| Invoice Ninja blank PDF | Ensure `PDF_GENERATOR=snappdf` is set; `snappdf` uses Chromium bundled in the container — check it's installed with `podman exec app snappdf` |
+| Bitcoin node stuck syncing | Initial block download takes days to weeks; check `podman logs bitcoin` for progress; ensure fast disk (SSD preferred over HDD) |
+| LND `unable to connect to bitcoind` | Verify ZMQ ports `28332`/`28333` are published in the bitcoind container; check the `--bitcoind.zmqpubrawblock` address |
+| Rotki exchange API error | Verify the API key has read-only permissions; some exchanges require IP whitelisting — add your server's Tailscale IP |
+| hledger web shows wrong data | Ensure the journal file path inside the container matches the volume mount; run `hledger check` to validate journal syntax |
+
+> 💡 **Backup tip:** Financial data deserves extra backup care. Run Restic backups of `/home/user/firefly`, `/home/user/actual`, and `/home/user/ghostfolio` daily to an encrypted offsite destination. A lost transaction history is hard to reconstruct.

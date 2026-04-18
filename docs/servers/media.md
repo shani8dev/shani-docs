@@ -1,15 +1,21 @@
 ---
 title: Media & Entertainment
 section: Self-Hosting & Servers
-updated: 2026-04-16
+updated: 2026-04-22
 ---
 
 # Media & Entertainment
 
-Streaming, automation, and personal library management.
+Self-hosted streaming servers, personal photo libraries, music servers, and download automation.
+
+> All containers bind to `127.0.0.1` by default. Proxy through Caddy for HTTPS and expose via Tailscale or Cloudflare Tunnel for remote access.
+
+---
 
 ## Jellyfin
-**Purpose**: Free, open-source media server with hardware transcoding, multi-user support, and client apps for all major platforms.
+
+**Purpose:** Free, open-source media server with hardware transcoding, multi-user accounts, parental controls, and native client apps for every platform (Android, iOS, Roku, Apple TV, Fire TV, web, Android TV).
+
 ```bash
 podman run -d \
   --name jellyfin \
@@ -17,28 +23,44 @@ podman run -d \
   -v /home/user/jellyfin/config:/config:Z \
   -v /home/user/jellyfin/cache:/cache:Z \
   -v /home/user/media:/media:ro,Z \
+  --device /dev/dri \
   --restart unless-stopped \
   jellyfin/jellyfin
 ```
-> Add `--device /dev/dri/renderD128` for Intel/AMD VA-API transcoding.
+
+> `--device /dev/dri` enables Intel/AMD VA-API hardware transcoding. Remove if you have no GPU.
+
+**Caddy:**
+```caddyfile
+media.home.local { tls internal; reverse_proxy localhost:8096 }
+```
+
+---
 
 ## Plex
-**Purpose**: Polished media server with hardware transcoding, live TV/DVR, and premium client apps across all platforms.
+
+**Purpose:** Polished media server with a premium client ecosystem, live TV/DVR support, and Plex Pass features (hardware transcoding, mobile sync, lyrics).
+
 ```bash
 podman run -d \
   --name plex \
   -p 127.0.0.1:32400:32400 \
-  -p 127.0.0.1:3005:3005 \
-  -p 127.0.0.1:8324:8324 \
   -v /home/user/plex/config:/config:Z \
   -v /home/user/media:/media:ro,Z \
-  --device /dev/dri/renderD128 \
+  --device /dev/dri \
+  -e PLEX_CLAIM=claim-xxxxxxxxxxxx \
   --restart unless-stopped \
   plexinc/pms-docker
 ```
 
+> Get your claim token from [plex.tv/claim](https://plex.tv/claim). It is only needed on first run.
+
+---
+
 ## Navidrome
-**Purpose**: Lightweight Subsonic-compatible music server. Streams your personal collection to mobile/desktop apps like DSub, Ultrasonic, and Symfonium.
+
+**Purpose:** Lightweight Subsonic-compatible music server. Streams your local music library to any Subsonic client — DSub, Symfonium, Ultrasonic, Feishin, and more.
+
 ```bash
 podman run -d \
   --name navidrome \
@@ -47,62 +69,19 @@ podman run -d \
   -v /home/user/Music:/music:ro,Z \
   -e ND_SCANSCHEDULE="@every 1h" \
   -e ND_LOGLEVEL=info \
+  -e ND_SESSIONTIMEOUT=24h \
   --restart unless-stopped \
   deluan/navidrome:latest
 ```
 
-## Jellyseerr
-**Purpose**: Media request manager for Plex/Jellyfin. Allows friends and family to request movies/shows through a polished UI.
-```bash
-podman run -d \
-  --name jellyseerr \
-  -p 127.0.0.1:5055:5055 \
-  -v /home/user/jellyseerr/config:/app/config:Z \
-  -e TZ=Europe/London \
-  --restart unless-stopped \
-  fallenbagel/jellyseerr:latest
-```
+Access at `http://localhost:4533`. Navidrome auto-scans on the schedule set by `ND_SCANSCHEDULE`.
 
-## The *Arr Stack (Automation)
-**Purpose**: Automate the discovery, downloading, and sorting of movies and TV series.
-```bash
-# Radarr (Movies)
-podman run -d \
-  --name radarr \
-  -p 127.0.0.1:7878:7878 \
-  -v /home/user/radarr:/config:Z \
-  -v /home/user/media/movies:/movies:Z \
-  -v /home/user/downloads:/downloads:Z \
-  -e PUID=$(id -u) -e PGID=$(id -g) \
-  --restart unless-stopped \
-  lscr.io/linuxserver/radarr:latest
-
-# Sonarr (TV Shows)
-podman run -d \
-  --name sonarr \
-  -p 127.0.0.1:8989:8989 \
-  -v /home/user/sonarr:/config:Z \
-  -v /home/user/media/tv:/tv:Z \
-  -v /home/user/downloads:/downloads:Z \
-  -e PUID=$(id -u) -e PGID=$(id -g) \
-  --restart unless-stopped \
-  lscr.io/linuxserver/sonarr:latest
-```
-
-## Pinchflat
-**Purpose**: Lightweight YouTube downloader/archiver. Fetches videos/channels automatically and serves them via a clean UI.
-```bash
-podman run -d \
-  --name pinchflat \
-  -p 127.0.0.1:8088:8088 \
-  -v /home/user/pinchflat/data:/app/data:Z \
-  -v /home/user/downloads:/downloads:Z \
-  --restart unless-stopped \
-  ghcr.io/pinchflat/pinchflat:latest
-```
+---
 
 ## Immich
-**Purpose**: High-performance, self-hosted Google Photos alternative. Features AI-powered facial recognition, object detection, mobile sync, and a polished web interface.
+
+**Purpose:** High-performance self-hosted Google Photos alternative. Automatic mobile backup, AI-powered face recognition and object detection, timeline browsing, shared albums, and a polished web and mobile UI.
+
 ```yaml
 # ~/immich/compose.yml
 services:
@@ -119,9 +98,17 @@ services:
       - /home/user/photos:/usr/src/app/upload:Z
     depends_on: [redis, database]
     restart: unless-stopped
+
+  immich-machine-learning:
+    image: ghcr.io/immich-app/immich-machine-learning:release
+    volumes:
+      - model_cache:/cache
+    restart: unless-stopped
+
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+
   database:
     image: tensorchord/pgvecto-rs:pg14-v0.2.0
     environment:
@@ -130,26 +117,131 @@ services:
       POSTGRES_DB: immich
     volumes: [pg_data:/var/lib/postgresql/data]
     restart: unless-stopped
+
 volumes:
   pg_data:
+  model_cache:
 ```
 
-## Stash
-**Purpose**: Self-hosted video library manager with metadata scraping, tagging, and streaming capabilities.
+```bash
+cd ~/immich && podman-compose up -d
+```
+
+Access at `http://localhost:2283`. Install the Immich mobile app and point it at your server for automatic photo backup.
+
+---
+
+## Jellyseerr
+
+**Purpose:** Media request manager for Jellyfin (and Plex). Lets family and friends request movies and shows through a polished UI — requests go straight to Radarr/Sonarr for automated downloading.
+
 ```bash
 podman run -d \
-  --name stash \
-  -p 127.0.0.1:9999:9999 \
-  -v /home/user/stash/config:/root/.stash:Z \
-  -v /home/user/media:/media:ro,Z \
+  --name jellyseerr \
+  -p 127.0.0.1:5055:5055 \
+  -v /home/user/jellyseerr/config:/app/config:Z \
+  -e TZ=Asia/Kolkata \
   --restart unless-stopped \
-  stashapp/stash
+  fallenbagel/jellyseerr:latest
 ```
 
-## Kavita / Audiobookshelf / Calibre-Web
-**Purpose**: Digital library servers for manga, comics, e-books, and audiobooks.
+---
+
+## The *Arr Stack (Download Automation)
+
+**Purpose:** Automate the discovery, downloading, and organisation of movies (Radarr), TV shows (Sonarr), music (Lidarr), and indexers (Prowlarr). Integrates with Jellyfin so your library stays current automatically.
+
 ```bash
-# Kavita
+# Radarr — movies
+podman run -d \
+  --name radarr \
+  -p 127.0.0.1:7878:7878 \
+  -v /home/user/radarr:/config:Z \
+  -v /home/user/media/movies:/movies:Z \
+  -v /home/user/downloads:/downloads:Z \
+  -e PUID=$(id -u) -e PGID=$(id -g) \
+  --restart unless-stopped \
+  lscr.io/linuxserver/radarr:latest
+
+# Sonarr — TV shows
+podman run -d \
+  --name sonarr \
+  -p 127.0.0.1:8989:8989 \
+  -v /home/user/sonarr:/config:Z \
+  -v /home/user/media/tv:/tv:Z \
+  -v /home/user/downloads:/downloads:Z \
+  -e PUID=$(id -u) -e PGID=$(id -g) \
+  --restart unless-stopped \
+  lscr.io/linuxserver/sonarr:latest
+
+# Lidarr — music
+podman run -d \
+  --name lidarr \
+  -p 127.0.0.1:8686:8686 \
+  -v /home/user/lidarr:/config:Z \
+  -v /home/user/Music:/music:Z \
+  -v /home/user/downloads:/downloads:Z \
+  -e PUID=$(id -u) -e PGID=$(id -g) \
+  --restart unless-stopped \
+  lscr.io/linuxserver/lidarr:latest
+
+# Prowlarr — indexer manager (connects to Radarr + Sonarr + Lidarr)
+podman run -d \
+  --name prowlarr \
+  -p 127.0.0.1:9696:9696 \
+  -v /home/user/prowlarr:/config:Z \
+  -e PUID=$(id -u) -e PGID=$(id -g) \
+  --restart unless-stopped \
+  lscr.io/linuxserver/prowlarr:latest
+```
+
+> Use the same `/downloads` volume mount across all *arr apps and your download client so they can hardlink files instead of copying.
+
+---
+
+## qBittorrent (Download Client)
+
+**Purpose:** Feature-rich torrent client with a web UI. Integrates with the *arr stack as a download client.
+
+```bash
+podman run -d \
+  --name qbittorrent \
+  -p 127.0.0.1:8080:8080 \
+  -p 6881:6881/tcp \
+  -p 6881:6881/udp \
+  -v /home/user/qbittorrent:/config:Z \
+  -v /home/user/downloads:/downloads:Z \
+  -e PUID=$(id -u) -e PGID=$(id -g) \
+  -e WEBUI_PORT=8080 \
+  --restart unless-stopped \
+  lscr.io/linuxserver/qbittorrent:latest
+```
+
+Access at `http://localhost:8080`. Default password is displayed in the container logs on first run.
+
+---
+
+## Pinchflat (YouTube Archiver)
+
+**Purpose:** Automatically download and archive YouTube channels, playlists, and individual videos. Clean web UI, scheduled fetching, and Jellyfin-friendly naming.
+
+```bash
+podman run -d \
+  --name pinchflat \
+  -p 127.0.0.1:8088:8088 \
+  -v /home/user/pinchflat/data:/app/data:Z \
+  -v /home/user/downloads/youtube:/downloads:Z \
+  --restart unless-stopped \
+  ghcr.io/kieraneglin/pinchflat:latest
+```
+
+---
+
+## Kavita (Comics, Manga & eBooks)
+
+**Purpose:** Digital library server for comics, manga, and e-books. Supports CBZ, CBR, PDF, EPUB, and more. Web reader, reading progress sync, and OPDS support for mobile apps.
+
+```bash
 podman run -d \
   --name kavita \
   -p 127.0.0.1:5000:5000 \
@@ -157,30 +249,32 @@ podman run -d \
   -v /home/user/books:/books:ro,Z \
   --restart unless-stopped \
   jvmilazz0/kavita:latest
+```
 
-# Audiobookshelf
+---
+
+## Audiobookshelf
+
+**Purpose:** Audiobook and podcast server with progress sync across devices, mobile apps (iOS and Android), and metadata management.
+
+```bash
 podman run -d \
   --name audiobookshelf \
   -p 127.0.0.1:13378:80 \
   -v /home/user/audiobooks:/audiobooks:Z \
   -v /home/user/podcasts:/podcasts:Z \
   -v /home/user/audiobookshelf/config:/config:Z \
+  -v /home/user/audiobookshelf/metadata:/metadata:Z \
   --restart unless-stopped \
   ghcr.io/advplyr/audiobookshelf:latest
-
-# Calibre-Web
-podman run -d \
-  --name calibre-web \
-  -p 127.0.0.1:8083:8083 \
-  -e PUID=1000 -e PGID=1000 \
-  -v /home/user/calibre-web/config:/config:Z \
-  -v /home/user/Calibre:/books:ro,Z \
-  --restart unless-stopped \
-  lscr.io/linuxserver/calibre-web:latest
 ```
 
+---
+
 ## PhotoPrism
-**Purpose**: AI-powered photo management with automatic tagging, geolocation mapping, duplicate detection, and timeline browsing.
+
+**Purpose:** AI-powered photo management with automatic subject tagging, geolocation mapping, duplicate detection, and a timeline browser. Good Immich alternative if you prefer a lighter-weight option without the machine learning stack.
+
 ```bash
 podman run -d \
   --name photoprism \
@@ -193,3 +287,18 @@ podman run -d \
   --restart unless-stopped \
   photoprism/photoprism:latest
 ```
+
+---
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Jellyfin transcoding is slow | Verify GPU passthrough: check `--device /dev/dri` is present and `renderD128` device exists on the host |
+| Media not appearing in Jellyfin | Trigger a manual library scan; check that the media path uses correct naming conventions (TMDB naming recommended) |
+| Radarr/Sonarr can't move files | Ensure `/downloads` and `/movies` or `/tv` are on the same volume — cross-device moves disable hardlinking |
+| Immich mobile backup not working | Ensure the server is reachable (Tailscale or Cloudflare Tunnel); check the app is pointed at the correct server URL including port |
+| Navidrome not finding music | Check volume mount path matches your actual music directory; confirm files are in a supported format (FLAC, MP3, AAC, OGG) |
+| Plex not claiming server | Ensure `PLEX_CLAIM` token is fresh (valid for 4 minutes); remove the variable after first startup |
+| qBittorrent can't connect from *arr | Verify the WebUI URL in Radarr/Sonarr uses `host.containers.internal` if they're in separate containers |
+| Lidarr can't find albums | Ensure your music files are correctly tagged (Artist, Album, Year) — MusicBrainz Picard is a good tagger |
