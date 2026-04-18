@@ -420,13 +420,20 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://docs.shani.dev/doc/software/apptainer</loc>
+    <lastmod>2026-05-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://docs.shani.dev/doc/software/bottles</loc>
+    <lastmod>2026-05-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/software/containers</loc>
-    <lastmod>2026-04-01</lastmod>
+    <lastmod>2026-05-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -449,6 +456,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://docs.shani.dev/doc/software/lxc-lxd</loc>
+    <lastmod>2026-05-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://docs.shani.dev/doc/software/nix</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
@@ -457,6 +470,12 @@
   <url>
     <loc>https://docs.shani.dev/doc/software/snaps</loc>
     <lastmod>2026-04-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://docs.shani.dev/doc/software/systemd-nspawn</loc>
+    <lastmod>2026-05-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

@@ -483,16 +483,23 @@
     "draft": false
   },
   {
+    "slug": "software/apptainer",
+    "title": "Apptainer (HPC Containers)",
+    "updated": "2026-05-07",
+    "section": "Software & Apps",
+    "draft": false
+  },
+  {
     "slug": "software/bottles",
-    "title": "Bottles",
-    "updated": "",
-    "section": "",
+    "title": "Bottles (Windows Compatibility)",
+    "updated": "2026-05-08",
+    "section": "Software & Apps",
     "draft": false
   },
   {
     "slug": "software/containers",
     "title": "Containers",
-    "updated": "2026-04-01",
+    "updated": "2026-05-07",
     "section": "Software & Apps",
     "draft": false
   },
@@ -518,6 +525,13 @@
     "draft": false
   },
   {
+    "slug": "software/lxc-lxd",
+    "title": "LXC and LXD",
+    "updated": "2026-05-07",
+    "section": "Software & Apps",
+    "draft": false
+  },
+  {
     "slug": "software/nix",
     "title": "Nix Package Manager",
     "updated": "2026-04-01",
@@ -528,6 +542,13 @@
     "slug": "software/snaps",
     "title": "Snaps",
     "updated": "2026-04-01",
+    "section": "Software & Apps",
+    "draft": false
+  },
+  {
+    "slug": "software/systemd-nspawn",
+    "title": "systemd-nspawn",
+    "updated": "2026-05-07",
     "section": "Software & Apps",
     "draft": false
   },
