@@ -74,21 +74,33 @@ CONFIG.NAV_TREE = [
     ]
   },
 
-  {
-    title: 'Software & Apps', icon: 'fa-solid fa-cubes',
-    children: [
-      { title: 'Flatpak', slug: 'software/flatpak' },
-      { title: 'Snaps', slug: 'software/snaps' },
-      { title: 'AppImage', slug: 'software/appimage' },
-      { title: 'Containers', slug: 'software/containers' },
-      { title: 'Distrobox', slug: 'software/distrobox' },
-      { title: 'Nix Package Mgr', slug: 'software/nix' },
-      { title: 'Homebrew', slug: 'software/homebrew' },
-      { title: 'Virtual Machines', slug: 'software/vms' },
-      { title: 'Android (Waydroid)', slug: 'software/waydroid' },
-      { title: 'Bottles (Windows Compatibility)', slug: 'software/bottles' },
-    ]
-  },
+ {
+   title: 'Software & Apps', icon: 'fa-solid fa-cubes',
+   children: [
+     // Package formats
+     { title: 'Flatpak', slug: 'software/flatpak' },
+     { title: 'Snaps', slug: 'software/snaps' },
+     { title: 'AppImage', slug: 'software/appimage' },
+
+     // Package managers
+     { title: 'Nix Package Manager', slug: 'software/nix' },
+     { title: 'Homebrew', slug: 'software/homebrew' },
+
+     // Containers & isolation
+     { title: 'Containers', slug: 'software/containers' },
+     { title: 'Distrobox', slug: 'software/distrobox' },
+     { title: 'Apptainer (HPC Containers)', slug: 'software/apptainer' },
+     { title: 'LXC and LXD', slug: 'software/lxc-lxd' },
+     { title: 'systemd-nspawn', slug: 'software/systemd-nspawn' },
+
+     // Virtualization
+     { title: 'Virtual Machines', slug: 'software/vms' },
+
+     // Compatibility layers
+     { title: 'Bottles (Windows Compatibility)', slug: 'software/bottles' },
+     { title: 'Android (Waydroid)', slug: 'software/waydroid' },
+   ]
+ },
 
   {
     title: 'Networking', icon: 'fa-solid fa-network-wired',

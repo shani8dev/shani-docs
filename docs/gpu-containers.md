@@ -19,21 +19,29 @@ nvidia-smi
 clinfo | grep -i nvidia   # Verify OpenCL platform
 ```
 
-### 2. Install Container Toolkit
+### 2. Install Container Toolkit and Generate CDI Spec
 
 ```bash
 sudo pacman -S nvidia-container-toolkit
+
+# Generate the CDI specification — required for Podman (especially rootless)
+sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
+
+# Verify devices were detected
+nvidia-ctk cdi list
+# Expected output: nvidia.com/gpu=0, nvidia.com/gpu=all, etc.
 ```
+
+The CDI spec must be regenerated after driver updates or GPU configuration changes.
 
 ### 3. Run a CUDA Container
 
-The toolkit automatically injects the correct libraries and devices.
+CDI mode requires `--security-opt=label=disable` with Podman.
 
 ```bash
 podman run --rm \
   --device nvidia.com/gpu=all \
-  -e NVIDIA_VISIBLE_DEVICES=all \
-  -e NVIDIA_DRIVER_CAPABILITIES=compute,utility \
+  --security-opt=label=disable \
   docker.io/nvidia/cuda:12.6.0-devel-ubuntu24.04 \
   python3 -c "import torch; print(torch.cuda.is_available())"
 ```
@@ -72,7 +80,7 @@ podman run --rm \
   --group-add video \
   --group-add render \
   -e HSA_OVERRIDE_GFX_VERSION=10.3.0 \
-  docker.io/rocm/pytorch:latest \
+  docker.io/rocm/dev-ubuntu-22.04:latest \
   python3 -c "import torch; print(torch.cuda.is_available())"
 ```
 
@@ -113,15 +121,15 @@ podman run --rm \
 
 ---
 
-## 📦 Distrobox: Interactive Development
+## 📦 Distrobox: Interactive Development (Recommended)
 
-Distrobox containers inherit host GPU drivers and `/dev` nodes automatically. This makes it ideal for IDEs, debugging, and interactive workflows where you want a persistent, mutable environment.
+Distrobox containers inherit host GPU drivers and `/dev` nodes automatically. This is the **recommended path** for interactive GPU development — IDEs, Jupyter notebooks, debugging, and persistent environments. Unlike raw Podman containers, Distrobox shares your home directory and does not require CDI configuration.
 
 ### NVIDIA
 
 ```bash
 distrobox create --name cuda-dev \
-  --image nvidia/cuda:12.6.0-devel-ubuntu24.04
+  --image nvidia/cuda:12.3.0-devel-ubuntu22.04
 
 distrobox enter cuda-dev
 
@@ -133,7 +141,7 @@ pip install torch --index-url https://download.pytorch.org/whl/cu121
 
 ```bash
 distrobox create --name rocm-dev \
-  --image rocm/dev-ubuntu-24.04:latest \
+  --image rocm/dev-ubuntu-22.04:latest \
   --additional-flags "--device=/dev/kfd --device=/dev/dri --group-add=video --group-add=render"
 
 distrobox enter rocm-dev

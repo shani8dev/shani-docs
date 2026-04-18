@@ -11,15 +11,15 @@ Shanios ships a full virtualisation stack pre-installed and ready to use. VM dis
 ## Pre-installed Stack
 
 - **libvirt** — VM management daemon (`libvirtd`), accessible via `virsh` and virt-manager
-- **QEMU/KVM** — hardware-accelerated virtualisation
+- **QEMU/KVM** — hardware-accelerated virtualisation (no system QEMU package; all VM tooling is delivered via Flatpak which bundles its own QEMU)
 - **systemd-nspawn** — lightweight OS containers managed as systemd units (stored in `@machines`)
 - **LXC/LXD** — full system containers with near-VM isolation (stored in `@lxc` / `@lxd`, `lxd.socket` enabled at boot)
-- **GNOME Boxes** — simple VM manager (pre-installed on GNOME edition via Flatpak)
-- **Virt-manager** — available via Flatpak for full libvirt GUI management
+- **GNOME Boxes** — simple VM manager, pre-installed on the GNOME edition as a Flatpak (`org.gnome.Boxes`)
+- **Virt-manager** — pre-installed on the KDE Plasma edition as a Flatpak (`org.virt_manager.virt-manager` + `org.virt_manager.virt_manager.Extension.Qemu`); install on GNOME edition via Flatpak
 
 ## GNOME Boxes
 
-The simplest way to run VMs on Shanios. Pre-installed on the GNOME edition.
+The simplest way to run VMs on Shanios. Pre-installed on the GNOME edition as a Flatpak. For advanced configuration (CPU pinning, GPU passthrough, custom XML), use virt-manager instead.
 
 ```bash
 # Open from the app launcher, or:
@@ -31,8 +31,9 @@ Boxes handles downloading ISOs, creating VMs, and managing snapshots — no manu
 ## Virt-Manager (Full libvirt GUI)
 
 ```bash
-# Install virt-manager via Flatpak
+# Pre-installed on KDE Plasma edition. Install on GNOME edition:
 flatpak install flathub org.virt_manager.virt-manager
+flatpak install flathub org.virt_manager.virt_manager.Extension.Qemu
 
 # Or use virsh from the terminal
 virsh list --all

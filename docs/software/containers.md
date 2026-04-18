@@ -1,18 +1,45 @@
 ---
 title: Containers
 section: Software & Apps
-updated: 2026-04-01
+updated: 2026-05-07
 ---
 
 # Containers on Shanios
 
-Shanios is a first-class container platform. **Podman** (rootless), **Buildah**, **Skopeo**, **LXC/LXD**, **Apptainer**, and **systemd-nspawn** are all pre-installed. Container storage is located in dedicated Btrfs subvolumes (e.g., `@containers`, `@machines`) ensuring your data persists across all OS updates and atomic rollbacks.
+Shanios is a first-class container platform. The following runtimes are pre-installed and ready to use:
 
-## 📦 Podman (Default Runtime)
+| Runtime | Best for | Wiki |
+|---|---|---|
+| **Podman** | OCI containers, services, databases, Docker-compatible workflows | This page |
+| **Distrobox** | Mutable Linux envs (apt/pacman/yay) with home dir sharing | [distrobox](distrobox.md) |
+| **LXC / LXD** | Full system containers with init, services, network stack | [lxc-lxd](lxc-lxd.md) |
+| **systemd-nspawn** | Lightweight full-system containers, no daemon | [systemd-nspawn](systemd-nspawn.md) |
+| **Apptainer** | HPC/cluster portable containers (SIF format) | [apptainer](apptainer.md) |
+| **GPU containers** | CUDA / ROCm / oneAPI compute via Distrobox or Podman | [gpu-containers](gpu-containers.md) |
 
-Podman is the default daemonless, rootless container runtime.
+Container storage lives in dedicated Btrfs subvolumes, completely independent of the OS slots:
+
+| Tool | Storage Location | Btrfs Subvolume |
+|------|-----------------|-----------------|
+| **Podman (user)** | `~/.local/share/containers/` | (in `@home`) |
+| **Podman (root)** | `/var/lib/containers/storage/` | `@containers` |
+| **Distrobox** | `/var/lib/containers/` | `@containers` |
+| **LXD** | `/var/lib/lxd/` | `@lxd` |
+| **LXC** | `/var/lib/lxc/` | `@lxc` |
+| **nspawn** | `/var/lib/machines/` | `@machines` |
+
+All subvolumes survive every OS update and atomic rollback untouched.
+
+---
+
+## Podman (Default Runtime)
+
+Podman is the default daemonless, rootless container runtime. Its CLI is identical to Docker's. `podman.socket` is socket-activated at boot. The `podman-docker` drop-in is pre-installed — existing `docker` commands work without modification.
+
+**Pods** (pre-installed on both editions) provides a graphical interface for managing containers, images, volumes, and networks.
 
 ### Basic Commands
+
 ```bash
 # Pull and run an interactive container
 podman run -it --rm ubuntu:24.04 bash
@@ -21,43 +48,88 @@ podman run -it --rm ubuntu:24.04 bash
 podman run -d --name myapp -p 8080:80 nginx
 
 # List containers
-podman ps           # Running
-podman ps -a        # All (including stopped)
+podman ps           # running
+podman ps -a        # all (including stopped)
 
-# Stop and remove
+# Logs
+podman logs myapp
+podman logs -f myapp
+
+# Stop, remove
 podman stop myapp
 podman rm myapp
+
+# Execute in a running container
+podman exec -it myapp bash
+
+# List images
+podman images
+```
+
+### Common Services
+
+```bash
+# PostgreSQL
+podman volume create postgres-data
+podman run -d \
+  --name postgres \
+  -e POSTGRES_PASSWORD=secret \
+  -e POSTGRES_DB=mydb \
+  -v postgres-data:/var/lib/postgresql/data \
+  -p 127.0.0.1:5432:5432 \
+  postgres:16
+
+# Redis
+podman run -d \
+  --name redis \
+  -p 127.0.0.1:6379:6379 \
+  redis:7-alpine redis-server --appendonly yes
 ```
 
 ### Podman Compose
+
 ```bash
 # Run a docker-compose.yml
 podman-compose up -d
-
-# View logs
 podman-compose logs -f
-
-# Teardown
 podman-compose down
+
+# Or via the docker drop-in
+docker compose up -d
 ```
 
-### Run Containers as Systemd Services
+### Auto-Start Containers at Login
+
 ```bash
-# Generate a user systemd unit from a running container
+# Generate a systemd user unit from a running container
 podman generate systemd --new --name myapp > ~/.config/systemd/user/myapp.service
 
-# Enable auto-start for the container
+# Enable
 systemctl --user enable --now myapp.service
+systemctl --user status myapp.service
 ```
 
-## 🛠 Buildah & Skopeo
+### Docker Compatibility
 
-**Buildah**: Build OCI images without a daemon.
+The `podman-docker` package provides `/usr/bin/docker` as a wrapper. For tools that use the Docker API socket:
+
 ```bash
-# Build from Containerfile/Dockerfile
+# Enable the Podman socket for Docker API compatibility
+systemctl --user start podman.socket
+export DOCKER_HOST=unix:///run/user/$UID/podman/podman.sock
+```
+
+---
+
+## Buildah & Skopeo
+
+**Buildah** builds OCI images without a daemon:
+
+```bash
+# Build from a Dockerfile/Containerfile
 buildah bud -t myimage:latest .
 
-# Build without Dockerfile (scripted)
+# Scripted build without a Dockerfile
 ctr=$(buildah from ubuntu:24.04)
 buildah run $ctr -- apt-get update
 buildah run $ctr -- apt-get install -y curl
@@ -65,115 +137,32 @@ buildah commit $ctr myimage:latest
 buildah rm $ctr
 ```
 
-**Skopeo**: Manage images directly in registries.
+**Skopeo** inspects and copies images between registries without pulling them:
+
 ```bash
-# Copy image between registries (no pull needed)
+# Copy between registries
 skopeo copy docker://docker.io/nginx:latest docker://registry.example.com/nginx:latest
 
-# Inspect image metadata
+# Inspect image metadata without pulling
 skopeo inspect docker://docker.io/ubuntu:24.04
 
-# Delete remote tag
+# Delete a remote tag
 skopeo delete docker://registry.example.com/old-image:tag
 ```
 
-## 🐧 LXC / LXD (System Containers)
+---
 
-LXC containers provide a full OS environment with its own init system.
+## Storage Efficiency
 
-```bash
-# Initialize LXD (create pools/networks)
-sudo lxd init
-
-# Launch a container
-lxc launch ubuntu:24.04 my-vm
-
-# Access shell
-lxc exec my-vm -- bash
-
-# Snapshotting (Instant with Btrfs)
-lxc snapshot my-vm backup-01
-
-# Restore
-lxc restore my-vm backup-01
-```
-
-## 🐧 systemd-nspawn (Lightweight OS Containers)
-
-`systemd-nspawn` is ideal for lightweight build environments or testing other distributions without the overhead of full virtualization.
-
-### Create & Boot
-```bash
-# Create a directory for the OS (must be empty)
-sudo mkdir -p /var/lib/machines/fedora-dev
-
-# Bootstrap Fedora (requires debootstrap or dnf)
-sudo dnf -y install dnf
-sudo dnf --releasever=39 --installroot=/var/lib/machines/fedora-dev -y group install "Core"
-
-# Boot the container
-sudo systemd-nspawn -bD /var/lib/machines/fedora-dev
-```
-
-### Management with `machinectl`
-```bash
-# List active machines
-machinectl list
-
-# Open shell in a running machine
-machinectl shell fedora-dev
-
-# Enable persistent boot (creates unit file)
-machinectl enable fedora-dev
-
-# Start/Stop/Restart
-sudo machinectl start fedora-dev
-sudo machinectl poweroff fedora-dev
-```
-
-### Configuration (`.nspawn` files)
-Place settings in `/etc/systemd/nspawn/machine.nspawn` to customize:
-```ini
-[Exec]
-Boot=yes
-User=developer
-
-[Network]
-VirtualEthernet=yes
-Bridge=br0
-```
-
-## 🧪 Apptainer (HPC / Science)
-
-Apptainer runs containers securely without root, often used in HPC clusters.
+Container images use content-addressed storage — layers shared between images are stored once. Btrfs zstd compression and the `bees` deduplication daemon apply at the block level on top of Podman's own layer sharing.
 
 ```bash
-# Pull Docker image to SIF format
-apptainer pull ubuntu.sif docker://ubuntu:24.04
-
-# Run the SIF
-apptainer run ubuntu.sif
-
-# Run with GPU support
-apptainer run --nv ubuntu.sif
-```
-
-## 📂 Container Storage
-
-Shanios stores container data in dedicated Btrfs subvolumes that are **excluded from system updates**:
-
-| Tool | Storage Location | Btrfs Subvolume |
-|------|------------------|-----------------|
-| **Podman (User)** | `~/.local/share/containers/` | (User Home) |
-| **Podman (Root)** | `/var/lib/containers/storage/` | `@containers` |
-| **LXD** | `/var/lib/lxd/` | `@lxd` |
-| **nspawn** | `/var/lib/machines/` | `@machines` |
-
-### Maintenance
-```bash
-# Check disk usage
+# Podman's view of disk usage
 podman system df
 
-# Prune unused images/containers
-podman system prune -a
+# Btrfs compressed view
+sudo compsize /var/lib/containers
+
+# Prune unused images, containers, volumes
+podman system prune -af --volumes
 ```

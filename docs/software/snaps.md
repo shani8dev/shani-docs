@@ -6,7 +6,7 @@ updated: 2026-04-01
 
 # Snaps
 
-Snap packages are sandboxed, self-contained applications published to the **Snap Store** by Canonical and third-party developers. Shanios ships with **snapd pre-installed and enabled** — `snapd.socket` and `snapd.apparmor.service` are active at boot, and all Snap data lives in the dedicated `@snapd` Btrfs subvolume mounted at `/var/lib/snapd`, surviving all system updates and rollbacks.
+Snap packages are sandboxed, self-contained applications published to the **Snap Store** by Canonical and third-party developers. Shanios ships with **snapd pre-installed and enabled** — `snapd.socket` is socket-activated (the daemon starts on-demand when first accessed, not at every boot) and `snapd.apparmor.service` is active at boot. All Snap data lives in the dedicated `@snapd` Btrfs subvolume mounted at `/var/lib/snapd`, surviving all system updates and rollbacks.
 
 ## How Snaps Work on Shanios
 

@@ -30,6 +30,19 @@ sudo waydroid-helper init
 
 After `init` completes, Waydroid appears in your app launcher. Android apps can be launched from there or via the terminal.
 
+## Google Play Store and ARM Apps
+
+The default Waydroid image is AOSP without Google services. For Play Store access, install GApps after initialisation:
+
+```bash
+pip install waydroid-script --break-system-packages
+sudo waydroid-script install gapps
+```
+
+After installing GApps, open the Play Store and sign in with your Google account. You may need to register your device ID at `google.com/android/uncertified` if the Play Store blocks downloads.
+
+**ARM app compatibility** is handled by `libhoudini` (Intel's ARM-to-x86 translation), included in the Shanios Waydroid setup. Most ARM-compiled Android apps run transparently.
+
 ## Basic Usage
 
 ```bash
@@ -85,10 +98,10 @@ The `python-pyclip` package enables clipboard sharing between Android apps and y
 
 ```bash
 # Android's shared storage is accessible on the host at:
-ls ~/.local/share/waydroid/data/media/0/
+ls ~/waydroid/data/media/0/
 
 # Copy files into Android
-cp myfile.pdf ~/.local/share/waydroid/data/media/0/Downloads/
+cp myfile.pdf ~/waydroid/data/media/0/Downloads/
 ```
 
 ## Performance Tips

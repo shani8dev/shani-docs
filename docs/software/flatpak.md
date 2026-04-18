@@ -6,7 +6,13 @@ updated: 2026-04-01
 
 # Flatpak
 
-Flatpak is the primary method for installing GUI applications on Shanios. Flathub is pre-configured and ready to use from first boot — no setup required.
+Flatpak is the primary method for installing GUI applications on Shanios. Flathub is pre-configured and ready to use from first boot — no setup required. Flatpak app data lives in the `@flatpak` Btrfs subvolume, which is shared between both `@blue` and `@green` OS slots — your installed apps are available regardless of which slot you have booted, and survive every OS update and rollback untouched.
+
+## Pre-Installed Apps
+
+Both editions ship with these apps pre-installed: **Vivaldi Browser**, **OnlyOffice Desktop Editors**, **Warehouse** (graphical Flatpak manager), **Flatseal** (sandbox permissions), **Pods** (Podman GUI), **BoxBuddy** (Distrobox GUI), and **Gear Lever** (AppImage manager).
+
+The GNOME edition additionally includes GNOME's core productivity and utility apps. The KDE Plasma edition additionally includes the full gaming stack (Steam, Heroic, Lutris, RetroArch, Bottles, and more), KDE productivity apps, and virt-manager with QEMU extension.
 
 ## Installing Apps
 
@@ -44,7 +50,7 @@ flatpak uninstall --unused
 
 ## Auto-Updates
 
-Flatpak apps update automatically via two systemd timers — one for system-wide installs, one for per-user:
+Flatpak apps update automatically via a systemd timer running every 12 hours — one for system-wide installs, one for per-user:
 
 ```bash
 # Check timer status
@@ -57,7 +63,7 @@ sudo systemctl disable flatpak-update-system.timer
 
 ## Permissions & Sandboxing
 
-Flatpak apps run in a sandbox. Use **Flatseal** (pre-installed) to manage permissions via GUI, or the CLI:
+Flatpak apps run in a sandbox. Use **Flatseal** (pre-installed) to manage permissions via GUI — it shows every permission for every installed app and lets you grant or revoke filesystem, network, device, and portal access per-app. Use the CLI for scripted overrides:
 
 ```bash
 # View permissions for an app
@@ -75,7 +81,7 @@ flatpak override --user --reset org.gimp.GIMP
 | Type | Path |
 |------|------|
 | App data | `~/.var/app/<app-id>/` |
-| System runtime | `/var/lib/flatpak/` (`@flatpak` subvolume) |
+| System runtime | `/var/lib/flatpak/` (`@flatpak` subvolume — shared between `@blue` and `@green`) |
 | User runtime | `~/.local/share/flatpak/` |
 
 The `@flatpak` subvolume is shared by both `@blue` and `@green` slots, so installed apps are available regardless of which slot you booted.
