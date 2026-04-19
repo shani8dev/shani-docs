@@ -1,7 +1,7 @@
 ---
 title: Overview
 section: Overview
-updated: 2026-04-01
+updated: 2026-04-27
 ---
 
 # Shanios Technical Documentation
@@ -12,7 +12,7 @@ Welcome to the Shanios technical documentation. This wiki provides comprehensive
 
 Shanios is an **immutable Linux desktop** built on Arch Linux. The OS core is permanently read-only — nothing running on your machine can modify it, not even root. It always keeps two complete, bootable copies of the OS on disk. You run on one; updates are prepared on the other. When you're ready, reboot into the new one. If anything goes wrong, reboot back. It ships in two editions — **GNOME** and **KDE Plasma** — and works out of the box with no post-install tweaking required.
 
-Current stable release: **2026.04.01** · GNOME edition ~5.4 GB · KDE Plasma edition ~7.6 GB · Both SHA256 + GPG signed.
+Current stable release: **2026.04.15** · GNOME edition ~5.4 GB · KDE Plasma edition ~7.6 GB · Both SHA256 + GPG signed.
 
 ## Five Core Ideas
 
@@ -25,3 +25,21 @@ Current stable release: **2026.04.01** · GNOME edition ~5.4 GB · KDE Plasma ed
 Built in India 🇮🇳 by [Shrinivas Vishnu Kumbhar](https://github.com/Shrinivasvkumbhar). Indian-language support (Devanagari, Tamil, Telugu, and more) is a first-class feature.
 
 **New to Shanios?** Visit [shani.dev](https://shani.dev) for a general introduction, download links, and feature overview. This wiki focuses on technical implementation and usage details.
+
+## Editions
+
+| Edition | Size | Best For |
+|---------|------|----------|
+| **GNOME** | ~5.4 GB | Most users — Windows/macOS switchers, office work, students, OEM deployments |
+| **KDE Plasma** | ~7.6 GB | Gamers and power users — full gaming stack pre-installed, virt-manager, full KDE suite |
+
+Both editions include the same underlying architecture, security stack, and immutable OS core.
+
+## Quick Links
+
+- [What is Shanios?](intro/what-is-shanios) — core concepts explained
+- [Getting Started](intro/getting-started) — download, verify, install, first boot
+- [Migrating from Traditional Linux](intro/migrating) — workflow mapping
+- [What's Included](intro/whats-included) — full software stack
+- [System Updates](updates/system) — update and rollback
+- [Security Features](security/features) — full security model

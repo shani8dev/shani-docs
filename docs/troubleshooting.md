@@ -1,69 +1,136 @@
 ---
 title: Troubleshooting Guide
 section: System Management
-updated: 2026-04-16
+updated: 2026-05-13
 ---
 
 # Troubleshooting Guide
 
-The most important thing to know about troubleshooting Shani OS is that the worst case is almost always **"rollback and reboot."** The architecture is built to make recovery fast, reliable, and non-destructive. This guide walks through common issues across boot, updates, applications, audio, display, networking, storage, and container layers.
+The most important thing to know about troubleshooting Shanios is that the worst case is almost always **"rollback and reboot."** The architecture is built to make recovery fast, reliable, and non-destructive.
 
-> 🔍 **The Golden Rule**: Before debugging anything after a system update, try rolling back first. It is always safe, always reversible, and takes under a minute:
+> **The Golden Rule:** Before debugging anything after a system update, try rolling back first. It is always safe, always reversible, and takes under a minute:
 > ```bash
 > sudo shani-deploy --rollback
-> # Then reboot
+> sudo reboot
 > ```
 > Your home directory, Flatpak apps, Nix packages, and containers are completely unaffected. Only the OS slot changes.
 
 To check which slot you are currently running:
+
 ```bash
-cat /data/current-slot
-# prints: blue  or  green
+cat /data/current-slot   # prints: blue  or  green
 ```
 
 ---
 
-## 🖥️ Boot Issues
+## Boot Problems
 
-### System boots to the wrong slot
+### System Won't Boot — Automatic Fallback
+
+If your system fails to reach the login prompt three times after an update, systemd-boot's boot-counting mechanism activates and falls back to the previous slot automatically. On the next successful login, `shani-update` detects the fallback and offers to clean the failed slot.
+
+To check what happened:
+
+```bash
+# Which slot are you actually running?
+cat /proc/cmdline | grep -o 'subvol=@[a-z]*'
+
+# What does the slot tracker say?
+cat /data/current-slot
+
+# Were there boot failures?
+ls /data/boot_failure /data/boot_hard_failure 2>/dev/null
+
+# Check the boot journal for errors
+journalctl -b 0 -p err --no-pager | head -40
+
+# Check the startup check output
+journalctl -b -1 -u startup-check.service
+```
+
+To restore the failed slot and try again:
+
+```bash
+sudo shani-deploy -r
+sudo reboot
+```
+
+### System Boots to the Wrong Slot
+
 After an update, the bootloader entry may not have updated correctly.
+
 1. Press `Space` or `Enter` at the systemd-boot splash screen to bring up the boot menu.
 2. Select the correct slot and boot.
 3. Repair the boot entry from the running system:
+
 ```bash
 cat /data/current-slot
 sudo shani-deploy --repair-boot
 ```
 
-### systemd-boot shows "Boot Failed" and reverts automatically
-This is the **boot-counting safety mechanism** working as designed. The new slot failed its startup check three times; systemd-boot fell back to the previous slot automatically.
-```bash
-# See boot journal from the previous failed attempt
-journalctl -b -1 --priority=err
+### Black Screen After Update (GPU / NVIDIA)
 
-# Check the startup check output
-journalctl -b -1 -u startup-check.service
-```
-If the issue persists, explicitly roll back to ensure the bootloader is fully reset:
+A black screen after a kernel or driver update usually means the NVIDIA module failed to load, or Secure Boot is rejecting the new UKI.
+
 ```bash
-sudo shani-deploy --rollback
+# Switch to a TTY (Ctrl+Alt+F2 or F3) and log in
+
+# Check if NVIDIA module loaded
+lsmod | grep nvidia
+dmesg | grep -i "nvidia\|NVRM" | tail -20
+
+# Check Secure Boot status
+mokutil --sb-state
+mokutil --list-enrolled | grep -i shani
+
+# If the MOK key isn't enrolled:
+sudo gen-efi enroll-mok
+sudo reboot
+# Accept the key in MokManager, then enable Secure Boot
 ```
 
-### Black screen after LUKS passphrase (with TPM2 enrolled)
-The TPM2-sealed key may have been invalidated by a firmware or Secure Boot state change. The system should fall back to passphrase entry — type your LUKS passphrase manually. After booting:
+If the display manager failed:
+
 ```bash
-# Re-enroll TPM2 with the current firmware state
+journalctl -u gdm -b 0 -n 50    # GNOME
+journalctl -u sddm -b 0 -n 50   # KDE
+```
+
+### Black Screen After LUKS Passphrase (TPM2 Enrolled)
+
+The TPM2-sealed key may have been invalidated by a firmware or Secure Boot state change. The system should fall back to passphrase entry automatically — type your LUKS passphrase manually. After booting:
+
+```bash
+sudo gen-efi cleanup-tpm2
 sudo gen-efi enroll-tpm2
 ```
-If TPM2 enrollment fails repeatedly after a firmware update, check that Secure Boot is still enabled and the MOK is intact:
+
+If TPM2 enrollment fails repeatedly after a firmware update, confirm Secure Boot is still enabled and the MOK is intact:
+
 ```bash
 mokutil --sb-state
 sbctl status
 ```
-> 📘 Full encryption recovery: [wiki.shani.dev — Encryption Issues](https://wiki.shani.dev#ts-luks)
 
-### System won't boot at all — emergency USB recovery
-Boot from a Shani OS USB drive and select the recovery option. From there:
+### Drops to Emergency Shell at Boot
+
+Usually a filesystem mount failure. The most common cause is a stale `/etc/fstab` or `/etc/crypttab` entry.
+
+```bash
+# From the emergency shell:
+journalctl -b 0 -p err | grep -i "mount\|fstab\|crypttab"
+
+# Check crypttab UUID (get the correct one)
+blkid | grep crypto_LUKS
+
+# Fix if needed
+sudo nano /etc/crypttab
+```
+
+### Emergency USB Recovery
+
+Boot from a Shanios USB and select the recovery option. From there:
+
 ```bash
 # Mount the Btrfs root
 mount -o subvol=@data /dev/nvme0n1p2 /mnt/data
@@ -77,43 +144,47 @@ mount -o subvol=@blue,ro /dev/nvme0n1p2 /mnt/blue
 # Examine boot logs from the failed system
 journalctl --directory=/mnt/data/journal
 ```
-> 📘 Full boot recovery walkthrough: [wiki.shani.dev — Boot Issues](https://wiki.shani.dev#ts-boot)
 
 ---
 
-## 🔄 Update Issues
+## Update Problems
 
-### Update fails: "Download interrupted" or "Checksum mismatch"
-`shani-deploy` uses `aria2c` for downloads with resume support. An interrupted download will resume automatically. A checksum mismatch means the download was corrupted — the tool will refuse to apply it and retry:
-```bash
-sudo shani-deploy update  # resumes or re-downloads as needed
+### shani-deploy Fails Mid-Download
 
-# Check storage before updating
-shani-deploy --storage-info
-```
-If the checksum continues to fail, clear the download cache:
+`shani-deploy` uses `aria2c` with resume support. Simply re-run the command — it resumes automatically. If the partial file is corrupted:
+
 ```bash
-sudo rm -rf /tmp/shani-deploy-cache/
-sudo shani-deploy update
+sudo shani-deploy -c    # clean download cache
+sudo shani-deploy       # re-download fresh
 ```
 
-### "Not enough space" during update
-```bash
-df -h
-sudo compsize /
+### "Not Enough Space" Error
 
-# Run garbage collection on Btrfs
+```bash
+# Check available space
+df -h /
+sudo btrfs filesystem usage /
+sudo compsize /              # compressed + deduplicated sizes
+
+# Clean up
+sudo shani-deploy -c         # remove slot backup snapshots and download cache
+flatpak uninstall --unused   # remove unused Flatpak runtimes
+podman system prune -af      # remove unused container images
+nix-collect-garbage -d       # remove old Nix generations
+
+# Fix Btrfs space imbalance
 sudo btrfs balance start -dusage=50 /
-
-# Delete old snapshots if they exist
-sudo btrfs subvolume list / | grep snapshot
-# sudo btrfs subvolume delete /path/to/old-snapshot
-
-# Trim the filesystem
-sudo fstrim -av
 ```
 
-### Update downloaded but slot won't activate
+### GPG Verification Fails
+
+```bash
+gpg --keyserver keys.openpgp.org --recv-keys 7B927BFFD4A9EAAA8B666B77DE217F3DA8014792
+sudo shani-deploy
+```
+
+### Update Downloaded but Slot Won't Activate
+
 ```bash
 shani-deploy --status
 
@@ -121,17 +192,17 @@ shani-deploy --status
 ls /boot/efi/EFI/shanios/
 
 # Manually regenerate UKI for a slot
-sudo gen-efi generate --slot green
-sudo gen-efi list  # confirm both entries exist
+sudo gen-efi configure green   # or blue
 ```
-> 📘 Full update troubleshooting: [wiki.shani.dev — Update Issues](https://wiki.shani.dev#ts-updates)
 
 ---
 
-## 📦 Application Issues
+## Application Problems
 
-### "I can't install a package with `pacman`"
-This is by design. The OS root is read-only — `pacman -S` to the base system is not supported and would be overwritten on the next update anyway. Use the appropriate layer:
+### Can't Install a Package with `pacman`
+
+This is by design — the OS root is read-only. Use the appropriate layer:
+
 ```bash
 # GUI apps → Flatpak
 flatpak install flathub app.name
@@ -144,142 +215,245 @@ distrobox create --name mydev --image archlinux:latest
 distrobox enter mydev
 # Full pacman, yay, everything works here
 ```
-> 📘 Migration table for every traditional workflow: [wiki.shani.dev — Migrating from Traditional Linux](https://wiki.shani.dev#key-concepts)
 
-### A Flatpak app fails to launch or behaves unexpectedly
+### A Flatpak App Fails to Launch or Behaves Unexpectedly
+
 ```bash
-# Check Flatpak logs
-flatpak run --verbose com.example.App 2>&1 | head -50
+# Run from terminal to see the error
+flatpak run com.example.App
 
-# Check if the app needs a portal permission
-flatpak permission-list
-
-# Reset an app's data (nuclear option)
-flatpak run --command=sh com.example.App  # inspect inside sandbox
+# Check for sandbox violations
+flatpak run --log-session-bus com.example.App 2>&1 | grep -i "deny\|error"
 
 # Uninstall and reinstall cleanly
 flatpak remove com.example.App
 flatpak install flathub com.example.App
 ```
 
-### A Flatpak app can't access files outside `~/Downloads`
-Flatpak apps are sandboxed. Use the Files portal (the GUI file picker) to grant access, or use **Flatseal** (available on Flathub) to manage permissions:
+### Flatpak App Can't Access Files
+
+Flatpak apps are sandboxed. Open **Flatseal** (pre-installed) to manage permissions, or from the terminal:
+
 ```bash
-# Flatseal is pre-installed — launch it from your app menu
+# Grant access to home directory
+flatpak override --user --filesystem=home com.example.App
+
+# Grant access to a specific path
+flatpak override --user --filesystem=/home/user/Documents com.example.App
 ```
-> 📘 Full Flatpak guide: [wiki.shani.dev — Flatpak](https://wiki.shani.dev#flatpak)
+
+### Flatpak Update Breaks an App
+
+```bash
+# Pin the app to its current version
+flatpak mask com.example.App
+
+# Unpin when the issue is resolved
+flatpak mask --remove com.example.App
+```
+
+### Microphone Not Working in Flatpak Apps
+
+```bash
+# Grant microphone permission
+flatpak override --user --device=all com.example.App
+# Or use Flatseal (pre-installed) for graphical permission management
+```
 
 ---
 
-## 🔊 Audio Issues
+## Audio Problems
 
-### No audio after boot
+### No Audio at Boot
+
 ```bash
-# Check if PipeWire is running
-systemctl --user status pipewire pipewire-pulse wireplumber
-
-# Restart the audio stack
+# Restart the full PipeWire stack
 systemctl --user restart pipewire pipewire-pulse wireplumber
 
-# Check available audio devices
+# Check that sinks exist
 pactl list sinks short
-aplay -l
-
-# Check WirePlumber device status
 wpctl status
+
+# Check status
+systemctl --user status pipewire pipewire-pulse wireplumber
 ```
 
-### Audio device not detected (Intel DSP laptops)
-Some Intel laptops use Intel SOF (Sound Open Firmware) DSP. The `sof-firmware` package is included in Shani OS. If audio is still not detected:
+### Audio Works But Sounds Distorted
+
+Usually a sample rate mismatch:
+
+```bash
+# Check current sample rate
+pactl list sinks | grep "Sample Spec"
+
+# Reset PipeWire config to defaults
+rm ~/.config/pipewire/pipewire.conf 2>/dev/null
+systemctl --user restart pipewire wireplumber
+```
+
+### No Audio on New Intel Laptop (SOF)
+
 ```bash
 # Check if SOF firmware loaded
-dmesg | grep -i sof
-
-# Check available soundcards
+dmesg | grep -i "sof\|sound open"
 cat /proc/asound/cards
 
-# Check PipeWire configuration
-systemctl --user status wireplumber
+# Check WirePlumber logs
 journalctl --user -u wireplumber -n 50
-```
-> 📘 Device-specific solutions: [wiki.shani.dev — Audio Issues](https://wiki.shani.dev#ts-audio)
-
-### Microphone not working in Flatpak apps
-```bash
-# Check if the app has microphone permission
-flatpak info --show-permissions com.example.App | grep -i mic
-
-# Grant microphone access via Flatseal or:
-flatpak override --user --device=all com.example.App
 ```
 
 ---
 
-## 🖼️ Display & Monitor Issues
+## Bluetooth Problems
 
-### External monitor not detected
+### Adapter Not Found
+
 ```bash
-# Check connected outputs
+hciconfig -a
+rfkill list bluetooth
+
+# Unblock if soft-blocked
+rfkill unblock bluetooth
+sudo systemctl restart bluetooth
+```
+
+### Device Pairs But Won't Connect
+
+```bash
+bluetoothctl remove XX:XX:XX:XX:XX:XX
+bluetoothctl scan on
+bluetoothctl pair XX:XX:XX:XX:XX:XX
+bluetoothctl trust XX:XX:XX:XX:XX:XX
+journalctl -u bluetooth -n 30
+```
+
+### Headphones Connected But No Audio
+
+```bash
+pactl list cards | grep -i bluetooth
+systemctl --user restart pipewire pipewire-pulse wireplumber
+pactl set-default-sink bluez_output.XX_XX_XX_XX_XX_XX.1
+```
+
+---
+
+## Encryption / TPM2 Problems
+
+### TPM2 Won't Unlock After Firmware Update
+
+PCR 0 changes when firmware is updated. You'll be prompted for your passphrase. After booting:
+
+```bash
+sudo gen-efi cleanup-tpm2
+sudo gen-efi enroll-tpm2
+```
+
+### TPM2 Won't Unlock After Secure Boot Change
+
+PCR 7 changes when Secure Boot settings change. Same fix:
+
+```bash
+sudo gen-efi cleanup-tpm2
+sudo gen-efi enroll-tpm2
+```
+
+### Forgot LUKS Passphrase
+
+If you have no backup passphrase, no keyfile, and no TPM2 enrollment, the data is **unrecoverable** — this is the intended LUKS2 security guarantee. Boot from the Shanios USB, reinstall, and restore from backups.
+
+If you have a backup keyfile:
+
+```bash
+# Boot from Shanios USB
+sudo cryptsetup open /dev/nvme0n1p2 shani_root --key-file /path/to/luks-keyfile
+sudo mount -o subvol=@home /dev/mapper/shani_root /mnt/home
+```
+
+See [LUKS Management](security/luks) for full recovery procedures.
+
+---
+
+## Display / GPU Problems
+
+### NVIDIA GPU Not Detected
+
+```bash
+nvidia-smi
+lsmod | grep nvidia
+dmesg | grep -i nvidia | head -20
+
+# Verify MOK enrollment
+mokutil --list-enrolled | grep -i shani
+
+# If MOK not enrolled:
+sudo gen-efi enroll-mok
+sudo reboot
+```
+
+### Hybrid GPU (Optimus) — Wrong GPU Used
+
+```bash
+# Force discrete GPU for a specific application
+prime-run application-name
+
+# In Steam launch options:
+# __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia %command%
+
+# Check which GPU is active
+glxinfo | grep "OpenGL renderer"
+```
+
+### External Monitor Not Detected
+
+```bash
 kscreen-doctor --outputs   # KDE
-gnome-randr                # GNOME (if installed via flatpak)
-
-# Check detected displays at kernel level
 xrandr --listmonitors      # under XWayland
-wlr-randr                  # Wayland (install via nix-env)
-
-# Check DRM/connector status
 cat /sys/class/drm/*/status
 ```
 
-### Fractional scaling looks blurry
-On Wayland, fractional scaling requires per-app support. For apps that look blurry:
-- **KDE**: System Settings → Display → Fractional Scaling → set rendering scale
-- **GNOME**: Settings → Displays → Scale
-- For XWayland apps, enable fractional scaling support in display settings (KDE Plasma 6.x: configured per-display)
+### Display Tearing (AMD/Intel)
 
-### Display tearing or poor frame pacing (AMD/Intel)
-- Check compositor VSync:
-  - **KDE**: System Settings → Display → Compositor → Tear-free rendering (enabled)
-  - **GNOME**: Verify Wayland is active: `echo $XDG_SESSION_TYPE` (should print: `wayland`)
-> 📘 Full display guide: [wiki.shani.dev — Display & Monitors](https://wiki.shani.dev#ts-display)
+Verify Wayland is active: `echo $XDG_SESSION_TYPE` (should print `wayland`). On KDE: System Settings → Display → Compositor → enable Tear-free rendering.
 
 ---
 
-## 🌐 Networking Issues
+## Networking Problems
 
-### Wi-Fi disconnects frequently
+### Wi-Fi Connection Not Remembered After Update
+
+Wi-Fi configurations persist in `/data/varlib/NetworkManager`. If they disappeared:
+
 ```bash
-# Check NetworkManager logs
+ls /data/varlib/NetworkManager/
+nmcli connection show
+
+# Check bind mount is active
+mount | grep NetworkManager
+
+sudo systemctl restart NetworkManager
+```
+
+### Wi-Fi Disconnects Frequently
+
+```bash
 journalctl -u NetworkManager -n 100
 
-# Disable power management on the Wi-Fi adapter (common fix)
+# Disable power management on the Wi-Fi adapter
 nmcli connection modify "Your Connection Name" wifi.powersave 2
-# 2 = disable, 3 = enable
-
-# Check adapter firmware
-dmesg | grep -i firmware | grep -i wifi
 ```
 
-### VPN connects but no traffic routes
+### Tailscale Disconnects After Update
+
+Tailscale state persists in `/data/varlib/tailscale` across OS updates. If it disconnects:
+
 ```bash
-# Check routing table
-ip route show table main
-ip route show table 220
-
-# Check DNS after VPN connection
-resolvectl status
-cat /etc/resolv.conf
-
-# For split-tunnel VPNs, check route metrics
-ip route show | grep -v dev lo
+sudo tailscale up
 ```
 
-### firewalld blocks an application unexpectedly
+### firewalld Blocks an Application Unexpectedly
+
 ```bash
-# Check current rules
 sudo firewall-cmd --list-all
-
-# Check which zone is active
 sudo firewall-cmd --get-active-zones
 
 # Allow a service
@@ -290,136 +464,155 @@ sudo firewall-cmd --reload
 sudo firewall-cmd --permanent --add-port=PORT/tcp
 sudo firewall-cmd --reload
 ```
-> 📘 Full networking guide: [Networking on Shani OS](/post/shani-os-networking-guide)
 
 ---
 
-## 💾 Storage Issues
+## Storage Problems
 
-### Disk filling up unexpectedly
+### Disk Filling Up Unexpectedly
+
 ```bash
-# Check overall disk usage
 df -h
-sudo compsize /    # compressed + deduplicated size
+sudo compsize /    # compressed + deduplicated sizes
 
-# Find large files and directories
+# Find large directories
 du -sh /home/* --max-depth=1
-du -sh /var/log/* 2>/dev/null
 
-# Check Btrfs subvolume sizes
-sudo btrfs subvolume list /
-sudo btrfs filesystem show
-
-# Clean Flatpak unused runtimes
+# Clean up
 flatpak uninstall --unused
-
-# Clean Nix store
 nix-collect-garbage -d
-nix-store --gc
-
-# Clean Podman images
 podman system prune -af
-
-# Clean Distrobox containers you no longer use
-distrobox list
-distrobox rm container-name
+distrobox list   # remove unused containers: distrobox rm container-name
 ```
 
-### Btrfs errors in dmesg
+### Btrfs Errors in dmesg
+
 ```bash
-# Check filesystem health
 sudo btrfs scrub start /
 sudo btrfs scrub status /
 
-# Run balance to fix space imbalance
+# Fix space imbalance
 sudo btrfs balance start -dusage=85 -musage=85 /
 
-# Check for errors
+# Read-only consistency check
 sudo btrfs check --readonly /dev/nvme0n1p2
 ```
-> 📘 Full storage guide: [wiki.shani.dev — Storage & Btrfs](https://wiki.shani.dev#ts-storage)
 
 ---
 
-## 📱 Waydroid Issues
+## Waydroid Problems
 
-### Waydroid fails to start
+### Waydroid Session Fails to Start
+
 ```bash
-# Check container service
 systemctl status waydroid-container.service
 journalctl -u waydroid-container.service -n 50
-
-# Check binder module is loaded
 lsmod | grep binder
 
-# Reinitialise
+# Re-initialise
 sudo waydroid-helper init
 ```
 
-### Play Store won't allow downloads after GApps install
-Google requires device certification for new Waydroid installs. Register your device:
+### Play Store Says Device Not Certified
+
+After installing GApps, Google requires device registration:
+
 ```bash
-# Get your Android ID
-adb connect $(waydroid status | grep IP | awk '{print $NF}')
 adb shell settings get secure android_id
 ```
-Then visit `google.com/android/uncertified` in a browser inside Waydroid and enter the Android ID. Wait 15 minutes before retrying the Play Store.
 
-### ARM apps crash immediately
-Most crashes are ARM-to-x86 translation failures via `libhoudini`. Check if an x86 APK is available from the developer. For apps that must run ARM-native, there is currently no workaround other than a physical device or a QEMU-based emulator.
-> 📘 Full Waydroid guide: [wiki.shani.dev — Android (Waydroid)](https://wiki.shani.dev#android)
+Visit `google.com/android/uncertified` in a browser and register the Android ID. Wait 15 minutes, then retry the Play Store.
+
+### App Crashes Immediately (ARM Translation)
+
+Most crashes are ARM-to-x86 translation failures via `libhoudini`. Check if an x86 APK is available from the developer. If not, a PWA (web app) is often a practical alternative.
 
 ---
 
-## ⚙️ OverlayFS `/etc` Customisations
+## OverlayFS / `/etc` Customisations
 
-Configuration changes in `/etc` persist via OverlayFS in `@data`. To see what you have changed:
+To see what `/etc` files you have customised:
+
 ```bash
-ls -la /data/overlay/etc/upper/
+find /data/overlay/etc/upper/ -type f | sort
 ```
 
-### Revert a specific file to OS default
+### Revert a Specific File to OS Default
+
 ```bash
-# Remove your override — the OS default (lower layer) becomes active again
 sudo rm /data/overlay/etc/upper/path/to/file
+# The OS default (lower layer) becomes active again immediately
 ```
 
-### Revert all `/etc` customisations (nuclear option)
+### Revert All `/etc` Customisations
+
 ```bash
 sudo rm -rf /data/overlay/etc/upper/*
 sudo reboot
 ```
-> 📘 OverlayFS explanation: [The Architecture Behind Shani OS](/post/shani-os-architecture-deep-dive#how-etc-stays-writable)
 
 ---
 
-## 📝 Gathering Logs for Bug Reports
+## General Diagnostics
+
+### Reading the System Journal
+
+```bash
+# All errors from the current boot
+journalctl -b 0 -p err --no-pager
+
+# All errors from the previous boot (useful after a crash or rollback)
+journalctl -b -1 -p err --no-pager
+
+# Follow logs in real time
+journalctl -f
+
+# Logs for a specific service
+journalctl -u service-name -b 0 -n 100
+
+# Filter by time
+journalctl --since "10 minutes ago"
+```
+
+### Checking What Changed
+
+```bash
+# What /etc files have you customised?
+find /data/overlay/etc/upper/ -type f | sort
+
+# What services are enabled?
+systemctl list-unit-files --state=enabled
+
+# What Flatpak overrides are active?
+flatpak override --user --show
+```
+
+### System Health Summary
+
+```bash
+# Full health check
+shani-health
+
+# Verbose with all details
+shani-health -v
+
+# Storage summary
+sudo shani-deploy --storage-info
+```
+
+---
+
+## Gathering Logs for Bug Reports
 
 When reporting a bug, include:
+
 ```bash
-# System information
-uname -r                            # kernel version
-cat /data/current-slot              # active slot
-shani-deploy --version              # shani-deploy version
-cat /etc/os-release                 # OS release info
-
-# Recent logs (replace -b 0 with -b -1 for previous boot)
-journalctl -b 0 --priority=err -n 100
-
-# For a specific service
-journalctl -b 0 -u service-name.service -n 200
-
-# Hardware info
+cat /etc/shani-version
+cat /data/current-slot
+shani-deploy --version
+shani-health --json
+journalctl -b 0 -p err --no-pager | tail -30
 lspci | grep -E "VGA|Audio|Network"
-lsusb
-
-# Btrfs state
-sudo btrfs filesystem df /
-sudo btrfs subvolume list /
 ```
 
 Report bugs at [github.com/shani8dev/shani-os/issues](https://github.com/shani8dev/shani-os/issues) or ask in the [Telegram community](https://t.me/shani8dev).
-
----
-
-> 🇮🇳 **Built in India** · **Immutable** · **Atomic** · **Zero Telemetry**

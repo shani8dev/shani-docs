@@ -6,7 +6,7 @@ updated: 2026-05-09
 
 # LUKS Management
 
-Full-disk encryption with LUKS2 must be enabled during the Shani OS installer — it is a single checkbox on the disk setup screen. There is no in-place conversion from an unencrypted installation.
+Full-disk encryption with LUKS2 must be enabled during the Shanios installer — it is a single checkbox on the disk setup screen. There is no in-place conversion from an unencrypted installation.
 
 ## If You Missed Encryption at Install
 
@@ -24,6 +24,23 @@ After reinstalling with encryption enabled, enroll TPM2 for passwordless unlock:
 
 ```bash
 sudo gen-efi enroll-tpm2
+```
+
+Attempting to encrypt an existing installation by hand requires: backing up all data, booting from USB, repartitioning, creating a LUKS container, recreating the Btrfs subvolume layout, restoring data, regenerating UKIs, and re-enrolling TPM2 — each step is an opportunity for data loss. The installer does all of this correctly in a few clicks.
+
+## Why LUKS2 with argon2id
+
+Shanios uses LUKS2 with the `argon2id` key derivation function. `argon2id` is memory-hard — it requires a large amount of RAM to compute, making GPU and ASIC brute-force attacks orders of magnitude more expensive than with older PBKDF2-based setups. LUKS2 also supports up to 32 keyslots, allowing a passphrase, keyfile, and TPM2-sealed key all active simultaneously.
+
+Default encryption parameters used by the installer:
+
+```
+Cipher:      aes-xts-plain64
+Key size:    512 bits
+PBKDF:       argon2id
+Memory cost: 1048576 KB (1 GB)
+Time cost:   4 iterations
+Parallelism: 4 threads
 ```
 
 ---
@@ -62,14 +79,16 @@ sudo cryptsetup luksAddKey /dev/nvme0n1p2
 
 ### Changing Your Passphrase
 
+LUKS does not have a "change passphrase" operation — add a new keyslot then remove the old one:
+
 ```bash
-# Add the new passphrase first (new keyslot)
+# Step 1: Add the new passphrase (new keyslot)
 sudo cryptsetup luksAddKey /dev/nvme0n1p2
 
-# Find the old keyslot number
+# Step 2: Find the old keyslot number
 sudo cryptsetup luksDump /dev/nvme0n1p2 | grep -A2 "Keyslot"
 
-# Remove the old keyslot
+# Step 3: Remove the old keyslot
 sudo cryptsetup luksKillSlot /dev/nvme0n1p2 <keyslot-number>
 ```
 
@@ -101,13 +120,15 @@ sudo cryptsetup luksDump /dev/nvme0n1p2 | grep -E "Keyslot|Token"
 
 ## Backing Up the LUKS Header
 
-The LUKS header holds all keyslots. If it is corrupted, the encrypted data is permanently unrecoverable. Back it up after any keyslot change:
+The LUKS header holds all keyslots. If it is corrupted, the encrypted data is **permanently and completely unrecoverable**. Back it up:
 
 ```bash
 sudo cryptsetup luksHeaderBackup /dev/nvme0n1p2 \
   --header-backup-file ~/luks-header-backup-$(date +%Y%m%d).img
 # Store off-device — external drive or encrypted cloud storage
 ```
+
+Back up again any time you add or remove a keyslot.
 
 Restoring:
 
@@ -121,7 +142,7 @@ sudo cryptsetup luksHeaderRestore /dev/nvme0n1p2 \
 ## TPM2 Auto-Unlock
 
 ```bash
-# Enroll — prompts for LUKS passphrase, optionally sets a PIN
+# Enroll — handles PCR policy selection automatically
 sudo gen-efi enroll-tpm2
 
 # After firmware updates or Secure Boot changes — re-enroll
@@ -132,7 +153,7 @@ sudo gen-efi enroll-tpm2
 sudo cryptsetup luksDump /dev/nvme0n1p2 | grep systemd-tpm2
 ```
 
-See [TPM2 Enrollment](../security/tpm2) for full details.
+See [TPM2 Enrollment](tpm2) for full details including PCR policy, PIN options, and troubleshooting.
 
 ---
 
@@ -143,7 +164,7 @@ See [TPM2 Enrollment](../security/tpm2) for full details.
 **Have a backup keyfile:**
 
 ```bash
-# Boot from Shani OS USB
+# Boot from Shanios USB
 sudo cryptsetup open /dev/nvme0n1p2 shani_root \
   --key-file /path/to/luks-keyfile
 sudo mount -o subvol=@home /dev/mapper/shani_root /mnt/home
@@ -152,7 +173,7 @@ sudo mount -o subvol=@home /dev/mapper/shani_root /mnt/home
 **Corrupted header, have a header backup:**
 
 ```bash
-# Boot from Shani OS USB
+# Boot from Shanios USB
 sudo cryptsetup luksHeaderRestore /dev/nvme0n1p2 \
   --header-backup-file luks-header-backup.img
 sudo cryptsetup open /dev/nvme0n1p2 shani_root

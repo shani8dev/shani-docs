@@ -1,7 +1,7 @@
 ---
 title: What is Shanios?
 section: Introduction
-updated: 2026-04-01
+updated: 2026-04-27
 ---
 
 # What is Shanios?
@@ -29,12 +29,12 @@ Shanios is an immutable Linux distribution that brings enterprise DevOps practic
 
 ### Traditional Consequences
 
-- ❌ A bad update can leave system unbootable
+- ❌ A bad update can leave the system unbootable
 - ❌ Dependency conflicts corrupt shared libraries
 - ❌ Rollback requires manual snapshot discipline
 - ❌ System state drifts from original install
 - ❌ Any exploited process can modify `/usr /bin`
-- ❌ No cryptographic verification of boot chain
+- ❌ No cryptographic verification of the boot chain
 
 ### Shanios Guarantees
 
@@ -44,3 +44,15 @@ Shanios is an immutable Linux distribution that brings enterprise DevOps practic
 - ✅ No system drift — root replaced wholesale each update
 - ✅ IMA/EVM runtime integrity measurement active
 - ✅ Six LSMs active simultaneously (AppArmor, Landlock…)
+
+## How This Feels in Practice
+
+The immutable root is transparent in daily use. You edit `/etc` files normally, install Flatpaks and Nix packages freely, run containers, and manage VMs — all exactly as you would on any Linux system. The difference is that updates never break a running system, rollback is always available, and an attacker who gains root access during a session cannot plant a persistent backdoor into system paths.
+
+The OS that passed build-time verification is the OS that runs, byte for byte, until the next deliberate `shani-deploy` update.
+
+## Built in India
+
+Shanios is built in India 🇮🇳 by [Shrinivas Vishnu Kumbhar](https://github.com/Shrinivasvkumbhar). Indian-language support — Devanagari, Tamil, Telugu, and more — is a first-class feature, pre-configured from first boot with IBus multi-language input.
+
+The entire codebase is public at [github.com/shani8dev](https://github.com/shani8dev). Every claim in this documentation is independently verifiable.

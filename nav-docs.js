@@ -17,6 +17,7 @@ CONFIG.NAV_TREE = [
     title: 'Introduction', icon: 'fa-solid fa-book-open',
     children: [
       { title: "What is Shanios?", slug: 'intro/what-is-shanios' },
+      { title: "Getting Started", slug: 'intro/getting-started' },
       { title: "Migrating from Traditional Linux", slug: 'intro/migrating' },
       { title: "What's Included", slug: 'intro/whats-included' },
       { title: "User Configuration", slug: 'intro/user-config' },
@@ -59,7 +60,7 @@ CONFIG.NAV_TREE = [
     children: [
       { title: 'Security Features', slug: 'security/features' },
       { title: 'Secure Boot', slug: 'security/secure-boot' },
-      { title: 'LUKS After Install', slug: 'security/luks' },
+      { title: 'LUKS Management', slug: 'security/luks' },
       { title: 'TPM2 Enrollment', slug: 'security/tpm2' },
       { title: 'gen-efi Reference', slug: 'security/gen-efi' },
     ]
@@ -69,38 +70,39 @@ CONFIG.NAV_TREE = [
     title: 'Updates & Config', icon: 'fa-solid fa-rotate',
     children: [
       { title: 'System Updates', slug: 'updates/system' },
+      { title: 'shani-health Reference', slug: 'updates/shani-health' },
       { title: 'Shell & Environment', slug: 'updates/shell' },
       { title: 'System Config', slug: 'updates/config' },
     ]
   },
 
- {
-   title: 'Software & Apps', icon: 'fa-solid fa-cubes',
-   children: [
-     // Package formats
-     { title: 'Flatpak', slug: 'software/flatpak' },
-     { title: 'Snaps', slug: 'software/snaps' },
-     { title: 'AppImage', slug: 'software/appimage' },
+  {
+    title: 'Software & Apps', icon: 'fa-solid fa-cubes',
+    children: [
+      // Package formats
+      { title: 'Flatpak', slug: 'software/flatpak' },
+      { title: 'Snaps', slug: 'software/snaps' },
+      { title: 'AppImage', slug: 'software/appimage' },
 
-     // Package managers
-     { title: 'Nix Package Manager', slug: 'software/nix' },
-     { title: 'Homebrew', slug: 'software/homebrew' },
+      // Package managers
+      { title: 'Nix Package Manager', slug: 'software/nix' },
+      { title: 'Homebrew', slug: 'software/homebrew' },
 
-     // Containers & isolation
-     { title: 'Containers', slug: 'software/containers' },
-     { title: 'Distrobox', slug: 'software/distrobox' },
-     { title: 'Apptainer (HPC Containers)', slug: 'software/apptainer' },
-     { title: 'LXC and LXD', slug: 'software/lxc-lxd' },
-     { title: 'systemd-nspawn', slug: 'software/systemd-nspawn' },
+      // Containers & isolation
+      { title: 'Containers', slug: 'software/containers' },
+      { title: 'Distrobox', slug: 'software/distrobox' },
+      { title: 'Apptainer (HPC Containers)', slug: 'software/apptainer' },
+      { title: 'LXC and LXD', slug: 'software/lxc-lxd' },
+      { title: 'systemd-nspawn', slug: 'software/systemd-nspawn' },
 
-     // Virtualization
-     { title: 'Virtual Machines', slug: 'software/vms' },
+      // Virtualization
+      { title: 'Virtual Machines', slug: 'software/vms' },
 
-     // Compatibility layers
-     { title: 'Bottles (Windows Compatibility)', slug: 'software/bottles' },
-     { title: 'Android (Waydroid)', slug: 'software/waydroid' },
-   ]
- },
+      // Compatibility layers
+      { title: 'Bottles (Windows Compatibility)', slug: 'software/bottles' },
+      { title: 'Android (Waydroid)', slug: 'software/waydroid' },
+    ]
+  },
 
   {
     title: 'Networking', icon: 'fa-solid fa-network-wired',
@@ -157,6 +159,13 @@ CONFIG.NAV_TREE = [
       { title: 'Productivity & Files', slug: 'servers/productivity' },
       { title: 'Security & Identity', slug: 'servers/security' },
       { title: 'VPN & Tunnels', slug: 'servers/vpn-tunnels' },
+    ]
+  },
+
+  {
+    title: 'Enterprise & OEM', icon: 'fa-solid fa-building',
+    children: [
+      { title: 'OEM & Fleet Deployment', slug: 'enterprise/fleet' },
     ]
   },
 

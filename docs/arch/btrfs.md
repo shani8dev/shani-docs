@@ -1,7 +1,7 @@
 ---
 title: Btrfs Deep Dive
 section: Architecture
-updated: 2026-04-01
+updated: 2026-04-27
 ---
 
 # Btrfs Deep Dive
@@ -68,17 +68,20 @@ sudo btrfs subvolume snapshot /home /data/snapshots/home-writable
 # List all subvolumes and snapshots
 sudo btrfs subvolume list /
 
+# Show details of a specific snapshot
+sudo btrfs subvolume show /data/snapshots/home-20260427
+
 # Delete an old snapshot to free space
 sudo btrfs subvolume delete /data/snapshots/home-20240601
 
-# Send snapshot to another drive (incremental backup)
+# Send snapshot to another drive (full backup)
 sudo btrfs send /data/snapshots/home-20250101 | sudo btrfs receive /mnt/backup/
 # Incremental send (only sends the diff)
 sudo btrfs send -p /data/snapshots/home-20250101 /data/snapshots/home-20250201 \
   | sudo btrfs receive /mnt/backup/
 ```
 
-> **Snapshots are not backups** if they live on the same disk — a disk failure loses both. Use `btrfs send` to an external drive, or `restic`/`rclone` for cloud storage.
+> **Snapshots are not backups** if they live on the same disk — a disk failure loses both. Use `btrfs send` to an external drive, or `restic`/`rclone` for cloud storage. See [Backup & Recovery](../networking/backup) for a complete backup strategy.
 
 ## Btrfs Manual Maintenance
 
@@ -131,3 +134,15 @@ sudo compsize /var/lib/flatpak
 # Full storage usage report
 sudo shani-deploy --storage-info
 ```
+
+## Automated Maintenance
+
+Shanios runs Btrfs maintenance automatically via systemd timers — no manual intervention required:
+
+| Timer | Action |
+|-------|--------|
+| `btrfs-scrub.timer` | Monthly scrubbing to detect and repair data corruption |
+| `btrfs-balance.timer` | Periodic filesystem balancing for optimal performance |
+| `btrfs-defrag.timer` | Automatic defragmentation on fragmented files |
+| `btrfs-trim.timer` | Regular TRIM operations for SSD optimization |
+| `beesd` daemon | Continuous background block-level deduplication across all Btrfs subvolumes |

@@ -1,16 +1,16 @@
 ---
 title: Atomic Updates
 section: Concepts
-updated: 2026-04-01
+updated: 2026-04-27
 ---
 
 # Atomic Updates
 
-Shanios uses an intelligent multi-layered update system with automatic checking, user notifications, and the `shani-deploy` tool for atomic system updates.
+Shanios uses an intelligent multi-layered update system with automatic checking, user notifications, and the `shani-deploy` tool for atomic system updates. Updates are all-or-nothing — the running system is never touched while an update is being prepared.
 
 ## Update Process Flow
 
-1. **Check** — `shani-update` timer runs automatically and finds a new release
+1. **Check** — `shani-update` timer runs automatically (15 min after boot, then every 2 hours) and finds a new release
 2. **Notify** — GUI dialog (yad/zenity/kdialog) prompts for user approval
 3. **Download** — R2 CDN primary, SourceForge fallback; resume support via aria2c/wget/curl
 4. **Verify** — SHA256 checksum + GPG signature; Btrfs snapshot of old slot taken as backup
@@ -19,6 +19,59 @@ Shanios uses an intelligent multi-layered update system with automatic checking,
 7. **Confirm** — Boot counters + `mark-boot-success` runs after login
 
 If boot fails, the system automatically falls back to the previous slot.
+
+## The Full Update Pipeline
+
+Here is every step `shani-deploy` runs internally, in order.
+
+### 1. Fetch and Verify
+
+```bash
+# Download version manifest from R2 CDN (with SourceForge fallback)
+# Download image — streamed with resume support
+# SHA256 verified after download
+# GPG signature verified against known public key (7B927BFFD4A9EAAA8B666B77DE217F3DA8014792)
+```
+
+Nothing is written to the OS subvolumes until both the checksum and signature verify. A corrupted or tampered image never touches your system. If the download is interrupted, it resumes from where it stopped.
+
+### 2. Snapshot the Inactive Slot
+
+```bash
+btrfs subvolume snapshot @green @green.$(date +%Y%m%d-%H%M%S)
+```
+
+This snapshot is created before any changes to the inactive slot. If something goes wrong during extraction, this snapshot is your recovery point.
+
+### 3. Extract the New Image
+
+```bash
+# Decompress and receive the btrfs send stream
+zstd -d --long=31 -T0 shanios-<version>-<profile>.zst -c | btrfs receive /mnt/temp_update
+
+# Swap the candidate slot
+btrfs subvolume delete @green
+btrfs subvolume snapshot /mnt/temp_update/shanios_base @green
+btrfs property set -f -ts @green ro true
+```
+
+`btrfs receive` reconstructs the subvolume from the send stream. The result is byte-for-byte identical to the subvolume that was snapshotted, signed, and shipped — not a package application or diff, but a complete verified reconstitution of exactly what passed build QA.
+
+### 4. Generate the UKI
+
+`gen-efi` generates and signs a new Unified Kernel Image for the updated slot, run inside a chroot of the candidate slot:
+
+```bash
+gen-efi configure green
+```
+
+The kernel cmdline embedded in the UKI is regenerated from the live disk state — current LUKS UUID, swap offset — and signed with the MOK keypair. The signed UKI is placed in the ESP and the bootloader is updated to set it as the next-boot default.
+
+### 5. Boot Counting
+
+The new entry gets a `+3-0` suffix: 3 tries allowed, 0 done. Each failed boot attempt decrements the tries-left counter. If it reaches zero, systemd-boot automatically falls back to the previous slot's UKI.
+
+If the new slot boots successfully, `bless-boot` calls `bootctl set-good`, stopping the countdown. The slot becomes the permanent default.
 
 ## Before / After
 
@@ -33,7 +86,6 @@ If boot fails, the system automatically falls back to the previous slot.
 
 - `@blue` ⏸️ Inactive — instant rollback available
 - `@green` ✅ Active (Updated!) — new system running
-- `@blue` preserved as instant rollback option
 - `startup-check` confirms success after login
 
 ## Automatic Rollback
@@ -45,9 +97,30 @@ The boot health pipeline:
 - `mark-boot-in-progress` — plants a flag at boot start
 - `bless-boot` — calls `bootctl set-good` early
 - `mark-boot-success` — writes `/data/boot-ok` once `multi-user.target` is reached
-- `check-boot-failure` (15-minute timer) — records the booted slot in `/data/boot_failure` if the system never reached a successful state
+- `check-boot-failure` (15-minute timer) — records the slot in `/data/boot_failure` if the system never reached a successful state
 
-## Manual Update
+## Release Channels
+
+`shani-deploy` supports two release channels:
+
+| Channel | Cadence | Use Case |
+|---------|---------|----------|
+| `stable` | Monthly | Default — recommended for all users |
+| `latest` | More frequent | Early access, testing |
+
+```bash
+# Check current channel
+cat /etc/shani-channel
+
+# Switch channel (persisted to /etc/shani-channel)
+sudo shani-deploy --set-channel stable
+sudo shani-deploy --set-channel latest
+
+# Use a channel for a single run without changing the default
+sudo shani-deploy -t latest
+```
+
+## Manual Commands
 
 ```bash
 # Check for updates
@@ -56,6 +129,11 @@ shani-deploy --check
 # Download and apply update
 shani-deploy --update
 
+# Roll back to the previous slot
+pkexec shani-deploy --rollback
+# or shorthand:
+sudo shani-deploy -r
+
 # View storage usage
 shani-deploy --storage-info
 
@@ -63,11 +141,8 @@ shani-deploy --storage-info
 shani-deploy --optimize
 ```
 
-## Manual Rollback
+You can also select the **(Candidate)** entry from the boot menu during startup to manually boot the previous slot.
 
-```bash
-# Roll back to the previous slot
-pkexec shani-deploy --rollback
-```
+## Storage Efficiency
 
-Or select the **(Candidate)** entry from the boot menu during startup.
+The dual-slot architecture is not as expensive on disk as it sounds. Btrfs Copy-on-Write shares unchanged data blocks between `@blue` and `@green` — only changed files consume additional space, typically around 18% overhead compared to a single-image system. On top of that, `bees` continuously deduplicates shared content across all subvolumes. Btrfs zstd compression typically reduces image footprint by a further 30–50%.
