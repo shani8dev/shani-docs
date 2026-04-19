@@ -413,6 +413,13 @@
     "draft": false
   },
   {
+    "slug": "servers/game-servers",
+    "title": "Game Servers",
+    "updated": "2026-04-22",
+    "section": "Self-Hosting & Servers",
+    "draft": false
+  },
+  {
     "slug": "servers/home-automation",
     "title": "Home Automation",
     "updated": "2026-04-22",
