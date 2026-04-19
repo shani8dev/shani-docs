@@ -16,15 +16,25 @@ Reliable, encrypted backup solutions and cloud synchronisation tools.
 
 **Purpose:** Fast, encrypted, deduplicated backups to any destination — local disk, SFTP, S3, Backblaze B2, REST server, and more. Each backup is a snapshot; you can restore any point in time. Restic verifies integrity on every backup run.
 
+```yaml
+# ~/restic/compose.yaml
+services:
+  restic:
+    image: restic/restic:latest
+    container_name: restic
+    volumes:
+      - /home/user/data:/data:ro,Z
+      - /home/user/backups:/backups:Z
+    environment:
+      RESTIC_PASSWORD: changeme
+      RESTIC_REPOSITORY: /backups
+    entrypoint: /bin/sh
+    command: -c "tail -f /dev/null"
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name restic \
-  -v /home/user/data:/data:ro,Z \
-  -v /home/user/backups:/backups:Z \
-  -e RESTIC_PASSWORD=changeme \
-  -e RESTIC_REPOSITORY=/backups \
-  --restart unless-stopped \
-  restic/restic:latest
+cd ~/restic && podman-compose up -d
 ```
 
 **Common operations:**
@@ -69,16 +79,23 @@ podman exec restic restic check
 
 **Purpose:** Automates Borg Backup — a highly efficient, deduplicated backup tool. Borgmatic wraps Borg with a simple YAML config, handles scheduling, pruning, and health check notifications automatically.
 
+```yaml
+# ~/borgmatic/compose.yaml
+services:
+  borgmatic:
+    image: b3vis/borgmatic
+    volumes:
+      - /home/user/data:/mnt/source:ro,Z
+      - /home/user/borgmatic/config:/etc/borgmatic.d:Z
+      - /home/user/borgmatic/repo:/mnt/borg:Z
+      - /home/user/borgmatic/.config/borg:/root/.config/borg:Z
+    environment:
+      TZ: Asia/Kolkata
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name borgmatic \
-  -v /home/user/data:/mnt/source:ro,Z \
-  -v /home/user/borgmatic/config:/etc/borgmatic.d:Z \
-  -v /home/user/borgmatic/repo:/mnt/borg:Z \
-  -v /home/user/borgmatic/.config/borg:/root/.config/borg:Z \
-  -e TZ=Asia/Kolkata \
-  --restart unless-stopped \
-  b3vis/borgmatic
+cd ~/borgmatic && podman-compose up -d
 ```
 
 **Example `config.yaml`:**
@@ -120,17 +137,25 @@ podman exec borgmatic borgmatic check
 
 **Purpose:** Web UI-driven incremental backup with scheduling, encryption, and support for 20+ cloud providers including Google Drive, OneDrive, Dropbox, and S3.
 
+```yaml
+# ~/duplicati/compose.yaml
+services:
+  duplicati:
+    image: lscr.io/linuxserver/duplicati
+    ports:
+      - 127.0.0.1:8200:8200
+    volumes:
+      - /home/user/duplicati/config:/config:Z
+      - /home/user/data:/source:ro,Z
+      - /home/user/backups:/backups:Z
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name duplicati \
-  -p 127.0.0.1:8200:8200 \
-  -v /home/user/duplicati/config:/config:Z \
-  -v /home/user/data:/source:ro,Z \
-  -v /home/user/backups:/backups:Z \
-  -e PUID=$(id -u) \
-  -e PGID=$(id -g) \
-  --restart unless-stopped \
-  lscr.io/linuxserver/duplicati
+cd ~/duplicati && podman-compose up -d
 ```
 
 Access at `http://localhost:8200`. Configure backup jobs, schedules, and encryption via the web UI. Supports AES-256 encryption — set a passphrase on every job.
@@ -141,13 +166,20 @@ Access at `http://localhost:8200`. Configure backup jobs, schedules, and encrypt
 
 **Purpose:** Sync, copy, and mount data across 70+ cloud providers. Supports encryption, bandwidth throttling, and incremental sync. Useful for offsite replication and archiving to cold storage.
 
+```yaml
+# ~/rclone/compose.yaml
+services:
+  rclone:
+    image: rclone/rclone:latest
+    volumes:
+      - /home/user/rclone/config:/config/rclone:Z
+      - /home/user/backups:/backups:Z
+    command: sync /backups remote:your-bucket --log-level INFO
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name rclone \
-  -v /home/user/rclone/config:/config/rclone:Z \
-  -v /home/user/backups:/backups:Z \
-  --restart unless-stopped \
-  rclone/rclone:latest sync /backups remote:your-bucket --log-level INFO
+cd ~/rclone && podman-compose up -d
 ```
 
 **Configure a remote (run interactively):**
@@ -184,16 +216,25 @@ podman exec rclone rclone mount remote:your-bucket /mnt/cloud --daemon
 
 **Purpose:** High-performance, S3-compatible object storage. Run it on a second machine (or external drive) as a local offsite backup target — Restic, Borgmatic, and Duplicati all support S3 natively.
 
+```yaml
+# ~/minio/compose.yaml
+services:
+  minio:
+    image: quay.io/minio/minio
+    ports:
+      - 127.0.0.1:9000:9000
+      - 127.0.0.1:9001:9001
+    volumes:
+      - /home/user/minio/data:/data:Z
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: changeme123
+    command: server /data --console-address :9001
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name minio \
-  -p 127.0.0.1:9000:9000 \
-  -p 127.0.0.1:9001:9001 \
-  -v /home/user/minio/data:/data:Z \
-  -e MINIO_ROOT_USER=admin \
-  -e MINIO_ROOT_PASSWORD=changeme123 \
-  --restart unless-stopped \
-  quay.io/minio/minio server /data --console-address ":9001"
+cd ~/minio && podman-compose up -d
 ```
 
 Access the web console at `http://localhost:9001`. Create a bucket and access keys, then point Restic or Rclone at `s3:http://localhost:9000/your-bucket`.
@@ -211,23 +252,28 @@ Access the web console at `http://localhost:9001`. Create a bucket and access ke
 
 **Purpose:** Modern, fast backup tool with a polished web UI, built-in deduplication, compression (zstd), and end-to-end encryption. Supports local, SFTP, S3, Backblaze B2, and Rclone as destinations. A strong alternative to Restic when you want a GUI.
 
+```yaml
+# ~/kopia/compose.yaml
+services:
+  kopia:
+    image: kopia/kopia:latest
+    ports:
+      - 127.0.0.1:51515:51515
+    volumes:
+      - /home/user/kopia/config:/app/config:Z
+      - /home/user/kopia/cache:/app/cache:Z
+      - /home/user/kopia/logs:/app/logs:Z
+      - /home/user/data:/data:ro,Z
+      - /home/user/backups:/backups:Z
+    environment:
+      KOPIA_PASSWORD: changeme
+      TZ: Asia/Kolkata
+    command: server start --insecure --address 0.0.0.0:51515 --server-username=admin --server-password=changeme
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name kopia \
-  -p 127.0.0.1:51515:51515 \
-  -v /home/user/kopia/config:/app/config:Z \
-  -v /home/user/kopia/cache:/app/cache:Z \
-  -v /home/user/kopia/logs:/app/logs:Z \
-  -v /home/user/data:/data:ro,Z \
-  -v /home/user/backups:/backups:Z \
-  -e KOPIA_PASSWORD=changeme \
-  -e TZ=Asia/Kolkata \
-  --restart unless-stopped \
-  kopia/kopia:latest server start \
-    --insecure \
-    --address 0.0.0.0:51515 \
-    --server-username=admin \
-    --server-password=changeme
+cd ~/kopia && podman-compose up -d
 ```
 
 Access at `http://localhost:51515`. Connect to a repository, configure sources, and set schedules through the UI.
@@ -238,17 +284,24 @@ Access at `http://localhost:51515`. Connect to a repository, configure sources, 
 
 **Purpose:** Lightweight, self-hosted distributed object storage. Designed to run on a cluster of modest machines or drives across multiple physical locations — a true geo-distributed MinIO alternative that runs well on low-power hardware. S3-compatible API means Restic, Rclone, and any other S3-aware tool works with it out of the box.
 
+```yaml
+# ~/garage/compose.yaml
+services:
+  garage:
+    image: dxflrs/garage:latest
+    ports:
+      - 127.0.0.1:3900:3900
+      - 127.0.0.1:3901:3901
+      - 127.0.0.1:3902:3902
+    volumes:
+      - /home/user/garage/data:/var/lib/garage/data:Z
+      - /home/user/garage/meta:/var/lib/garage/meta:Z
+      - /home/user/garage/config.toml:/etc/garage.toml:ro,Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name garage \
-  -p 127.0.0.1:3900:3900 \
-  -p 127.0.0.1:3901:3901 \
-  -p 127.0.0.1:3902:3902 \
-  -v /home/user/garage/data:/var/lib/garage/data:Z \
-  -v /home/user/garage/meta:/var/lib/garage/meta:Z \
-  -v /home/user/garage/config.toml:/etc/garage.toml:ro,Z \
-  --restart unless-stopped \
-  dxflrs/garage:latest
+cd ~/garage && podman-compose up -d
 ```
 
 **Minimal `config.toml`:**
@@ -274,13 +327,20 @@ api_bind_addr = "0.0.0.0:3903"
 
 **Purpose:** Streams SQLite WAL changes to S3-compatible object storage in real time — effectively giving SQLite continuous off-site replication with sub-second RPO. Any app using SQLite (including many lightweight self-hosted tools) gets disaster recovery without changing a line of code. Litestream runs as a sidecar: it watches the SQLite file and asynchronously replicates every write to your backup destination.
 
+```yaml
+# ~/litestream/compose.yaml
+services:
+  litestream:
+    image: litestream/litestream:latest
+    volumes:
+      - /home/user/app/data:/data:Z
+      - /home/user/litestream/litestream.yml:/etc/litestream.yml:ro,Z
+    command: replicate
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name litestream \
-  -v /home/user/app/data:/data:Z \
-  -v /home/user/litestream/litestream.yml:/etc/litestream.yml:ro,Z \
-  --restart unless-stopped \
-  litestream/litestream:latest replicate
+cd ~/litestream && podman-compose up -d
 ```
 
 **Example `litestream.yml`:**
@@ -360,3 +420,11 @@ systemctl --user enable --now backup.timer
 | Litestream restore returns empty DB | Verify the S3 bucket and path in `litestream.yml` match exactly; use `litestream snapshots` to list available restore points |
 
 > 💡 **Tip:** Test your restores periodically. A backup you have never restored from is a backup you do not know works.
+
+---
+
+## Caddy Configuration
+
+```caddyfile
+kopia.home.local { tls internal; reverse_proxy localhost:51515 }
+```

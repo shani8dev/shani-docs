@@ -52,21 +52,46 @@ sudo modprobe tun
 
 **Purpose:** Modern, high-performance VPN with state-of-the-art cryptography. WG-Easy adds a lightweight web UI for managing peers, generating QR codes, and controlling routes — no CLI required.
 
+```yaml
+# ~/wg-easy/compose.yaml
+services:
+  wg-easy:
+    image: ghcr.io/wg-easy/wg-easy
+    ports:
+      - "127.0.0.1:51821:51821"
+      - "0.0.0.0:51820:51820/udp"
+    volumes:
+      - /home/user/wgeasy:/etc/wireguard:Z
+    environment:
+      WG_HOST: vpn.example.com
+      PASSWORD: changeme
+      WG_DEFAULT_ADDRESS: 10.8.0.x
+      WG_DEFAULT_DNS: 1.1.1.1
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      net.ipv4.ip_forward: "1"
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name wg-easy \
-  -p 127.0.0.1:51821:51821 \
-  -p 0.0.0.0:51820:51820/udp \
-  -v /home/user/wgeasy:/etc/wireguard:Z \
-  -e WG_HOST=vpn.example.com \
-  -e PASSWORD=changeme \
-  -e WG_DEFAULT_ADDRESS=10.8.0.x \
-  -e WG_DEFAULT_DNS=1.1.1.1 \
-  --cap-add NET_ADMIN \
-  --cap-add SYS_MODULE \
-  --sysctl net.ipv4.ip_forward=1 \
-  --restart unless-stopped \
-  ghcr.io/wg-easy/wg-easy
+cd ~/wg-easy && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# View connected peers and their traffic stats
+curl http://localhost:51821/api/wireguard/client   -H "Cookie: $(curl -c - -X POST http://localhost:51821/api/session     -H 'Content-Type: application/json'     -d '{"password":"changeme"}' 2>/dev/null | grep -o 'connect.sid=[^;]*')"
+
+# View WireGuard interface status on the host
+sudo wg show
+
+# View logs
+podman logs -f wg-easy
+
+# Restart to apply config changes
+podman restart wg-easy
 ```
 
 - **Management UI:** `http://localhost:51821` (proxy through Caddy for HTTPS)
@@ -96,15 +121,24 @@ sudo tailscale up --advertise-routes=192.168.1.0/24
 ```
 
 Or run as a container:
+```yaml
+# ~/tailscale/compose.yaml
+services:
+  tailscale:
+    image: tailscale/tailscale
+    command: tailscaled --tun=userspace-networking --socks5-server=:1080
+    volumes:
+      - /home/user/tailscale:/var/lib:Z
+    devices:
+      - /dev/net/tun
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name tailscale \
-  -v /home/user/tailscale:/var/lib:Z \
-  --device /dev/net/tun \
-  --cap-add NET_ADMIN \
-  --cap-add NET_RAW \
-  --restart unless-stopped \
-  tailscale/tailscale tailscaled --tun=userspace-networking --socks5-server=:1080
+cd ~/tailscale && podman-compose up -d
 ```
 
 ### Headscale (Self-Hosted)
@@ -132,15 +166,22 @@ dns:
 ```
 
 **2. Run the container:**
+```yaml
+# ~/headscale/compose.yaml
+services:
+  headscale:
+    image: headscale/headscale:latest
+    ports:
+      - 127.0.0.1:8080:8080
+      - 127.0.0.1:9090:9090
+    volumes:
+      - /home/user/headscale/config:/etc/headscale:Z
+      - /home/user/headscale/data:/var/lib/headscale:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name headscale \
-  -p 127.0.0.1:8080:8080 \
-  -p 127.0.0.1:9090:9090 \
-  -v /home/user/headscale/config:/etc/headscale:Z \
-  -v /home/user/headscale/data:/var/lib/headscale:Z \
-  --restart unless-stopped \
-  headscale/headscale:latest
+cd ~/headscale && podman-compose up -d
 ```
 
 **3. Create a user and connect devices:**
@@ -160,13 +201,53 @@ podman exec headscale headscale nodes list
 
 ### Headplane (Web UI for Headscale)
 
+```yaml
+# ~/headplane/compose.yaml
+services:
+  headplane:
+    image: ghcr.io/tale/headplane:latest
+    ports:
+      - 127.0.0.1:3001:3000
+    volumes:
+      - /home/user/headscale/config:/etc/headscale:ro,Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name headplane \
-  -p 127.0.0.1:3001:3000 \
-  -v /home/user/headscale/config:/etc/headscale:ro,Z \
-  --restart unless-stopped \
-  ghcr.io/tale/headplane:latest
+cd ~/headplane && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# Create a user (namespace)
+podman exec headscale headscale users create myuser
+
+# List users
+podman exec headscale headscale users list
+
+# Generate a reusable pre-auth key (30 days)
+podman exec headscale headscale preauthkeys create --user myuser --reusable --expiration 30d
+
+# List pre-auth keys
+podman exec headscale headscale preauthkeys list --user myuser
+
+# List all connected nodes
+podman exec headscale headscale nodes list
+
+# Expire (force-disconnect) a node
+podman exec headscale headscale nodes expire --identifier NODE_ID
+
+# Delete a node
+podman exec headscale headscale nodes delete --identifier NODE_ID
+
+# Get debug info for a node
+podman exec headscale headscale nodes --output json list | python3 -m json.tool
+
+# Generate an API key for Headplane
+podman exec headscale headscale apikeys create
+
+# Check server version
+podman exec headscale headscale version
 ```
 
 ---
@@ -201,12 +282,19 @@ sudo systemctl enable --now cloudflared
 ```
 
 Or run as a container using a token from the Cloudflare Zero Trust dashboard:
+```yaml
+# ~/cloudflared/compose.yaml
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    volumes:
+      - /home/user/cloudflared/config:/etc/cloudflared:Z
+    command: tunnel --no-autoupdate run --token <your-token>
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name cloudflared \
-  -v /home/user/cloudflared/config:/etc/cloudflared:Z \
-  --restart unless-stopped \
-  cloudflare/cloudflared:latest tunnel --no-autoupdate run --token <your-token>
+cd ~/cloudflared && podman-compose up -d
 ```
 
 - **DNS:** Add a CNAME for each hostname pointing to `<tunnel-id>.cfargotunnel.com`
@@ -239,15 +327,22 @@ db:
   encryption_key: "your-32-char-hex-key"
 ```
 
+```yaml
+# ~/pangolin/compose.yaml
+services:
+  pangolin:
+    image: fosrl/pangolin:latest
+    ports:
+      - 0.0.0.0:443:443
+      - 0.0.0.0:51820:51820/udp
+    volumes:
+      - /home/user/pangolin/config:/app/config:Z
+      - /home/user/pangolin/data:/app/data:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name pangolin \
-  -p 0.0.0.0:443:443 \
-  -p 0.0.0.0:51820:51820/udp \
-  -v /home/user/pangolin/config:/app/config:Z \
-  -v /home/user/pangolin/data:/app/data:Z \
-  --restart unless-stopped \
-  fosrl/pangolin:latest
+cd ~/pangolin && podman-compose up -d
 ```
 
 Access the dashboard at `https://pangolin.yourdomain.com`, create a site, and copy the Newt credentials.
@@ -256,14 +351,20 @@ Access the dashboard at `https://pangolin.yourdomain.com`, create a site, and co
 
 ### 2. Newt Agent (on Shani OS)
 
+```yaml
+# ~/newt/compose.yaml
+services:
+  newt:
+    image: fosrl/newt:latest
+    environment:
+      PANGOLIN_URL: https://pangolin.yourdomain.com
+      NEWT_ID: <your-newt-id>
+      NEWT_SECRET: <your-newt-secret>
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name newt \
-  -e PANGOLIN_URL=https://pangolin.yourdomain.com \
-  -e NEWT_ID=<your-newt-id> \
-  -e NEWT_SECRET=<your-newt-secret> \
-  --restart unless-stopped \
-  fosrl/newt:latest
+cd ~/newt && podman-compose up -d
 ```
 
 ---
@@ -284,7 +385,7 @@ NetBird has three server components:
 ```bash
 # 1. Get the official compose stack
 curl -sSL https://raw.githubusercontent.com/netbirdio/netbird/main/infrastructure_files/docker-compose.yml \
-  -o ~/netbird/compose.yml
+  -o ~/netbird/compose.yaml
 curl -sSL https://raw.githubusercontent.com/netbirdio/netbird/main/infrastructure_files/.env.example \
   -o ~/netbird/.env
 
@@ -380,25 +481,39 @@ netbird.example.com {
 **Purpose:** Enterprise-grade VPN with a modern web UI. Supports WireGuard and OpenVPN, SSO, multi-site routing, and audit logging. Requires MongoDB.
 
 ### 1. MongoDB Backend
+```yaml
+# ~/pritunl-mongo/compose.yaml
+services:
+  pritunl-mongo:
+    image: mongo:6
+    ports:
+      - 127.0.0.1:27017:27017
+    volumes:
+      - /home/user/pritunl/mongo:/data/db:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name pritunl-mongo \
-  -p 127.0.0.1:27017:27017 \
-  -v /home/user/pritunl/mongo:/data/db:Z \
-  --restart unless-stopped \
-  mongo:6
+cd ~/pritunl-mongo && podman-compose up -d
 ```
 
 ### 2. Pritunl Server
+```yaml
+# ~/pritunl/compose.yaml
+services:
+  pritunl:
+    image: linuxserver/pritunl:latest
+    network_mode: host
+    volumes:
+      - /home/user/pritunl/config:/etc/pritunl:Z
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name pritunl \
-  --network host \
-  --cap-add NET_ADMIN \
-  --cap-add SYS_ADMIN \
-  -v /home/user/pritunl/config:/etc/pritunl:Z \
-  --restart unless-stopped \
-  linuxserver/pritunl:latest
+cd ~/pritunl && podman-compose up -d
 ```
 
 **Initial setup:**
@@ -416,10 +531,10 @@ podman run -d \
 **Purpose:** Zero-trust network access (ZTNA) built on WireGuard. Features SSO (OIDC/SAML), granular access policies, device posture checks, and a unified dashboard.
 
 ```yaml
-# ~/firezone/compose.yml
+# ~/firezone/compose.yaml
 services:
   db:
-    image: postgres:14-alpine
+    image: postgres:16-alpine
     environment:
       POSTGRES_USER: firezone
       POSTGRES_PASSWORD: strongpassword
@@ -498,15 +613,24 @@ firewall:
 
 ### 3. Run Container
 
+```yaml
+# ~/nebula/compose.yaml
+services:
+  nebula:
+    image: slacktechnologiesllc/nebula:latest
+    ports:
+      - 0.0.0.0:4242:4242/udp
+    volumes:
+      - /home/user/nebula:/etc/nebula:Z
+    devices:
+      - /dev/net/tun
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name nebula \
-  -p 0.0.0.0:4242:4242/udp \
-  -v /home/user/nebula:/etc/nebula:Z \
-  --device /dev/net/tun \
-  --cap-add NET_ADMIN \
-  --restart unless-stopped \
-  slacktechnologiesllc/nebula:latest
+cd ~/nebula && podman-compose up -d
 ```
 
 **Firewall:** `sudo firewall-cmd --add-port=4242/udp --permanent && sudo firewall-cmd --reload`
@@ -519,14 +643,21 @@ podman run -d \
 
 **Purpose:** Run a private ZeroTier network controller without using ZeroTier's central cloud servers. Manage virtual networks and peers on your own hardware.
 
+```yaml
+# ~/zerotier-controller/compose.yaml
+services:
+  zerotier-controller:
+    image: mgk/zerotier-controller:latest
+    ports:
+      - 127.0.0.1:9993:9993/udp
+      - 127.0.0.1:3180:3180/tcp
+    volumes:
+      - /home/user/zerotier-controller:/var/lib/ztnetwork:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name zerotier-controller \
-  -p 127.0.0.1:9993:9993/udp \
-  -p 127.0.0.1:3180:3180/tcp \
-  -v /home/user/zerotier-controller:/var/lib/ztnetwork:Z \
-  --restart unless-stopped \
-  mgk/zerotier-controller:latest
+cd ~/zerotier-controller && podman-compose up -d
 ```
 
 - **Dashboard:** `http://localhost:3180`
@@ -538,29 +669,25 @@ podman run -d \
 
 **Purpose:** Legacy, highly configurable VPN standard. Use when you need specific cipher suites, client certificate management, or compatibility with older devices.
 
+```yaml
+# ~/openvpn/compose.yaml
+services:
+  openvpn:
+    image: kylemanna/openvpn
+    ports:
+      - 0.0.0.0:1194:1194/udp
+    volumes:
+      - /home/user/openvpn:/etc/openvpn:Z
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      net.ipv4.ip_forward: 1
+    restart: unless-stopped
+```
+
 ```bash
-# Generate config and PKI (run once)
-podman run --rm \
-  -v /home/user/openvpn:/etc/openvpn \
-  kylemanna/openvpn ovpn_genconfig -u udp://vpn.example.com
-podman run --rm \
-  -v /home/user/openvpn:/etc/openvpn -it \
-  kylemanna/openvpn ovpn_initpki
-
-# Run the server
-podman run -d \
-  --name openvpn \
-  -p 0.0.0.0:1194:1194/udp \
-  -v /home/user/openvpn:/etc/openvpn:Z \
-  --cap-add NET_ADMIN \
-  --cap-add SYS_MODULE \
-  --sysctl net.ipv4.ip_forward=1 \
-  --restart unless-stopped \
-  kylemanna/openvpn
-
-# Generate and export a client config
-podman run --rm -v /home/user/openvpn:/etc/openvpn -it kylemanna/openvpn easyrsa build-client-full client1 nopass
-podman run --rm -v /home/user/openvpn:/etc/openvpn kylemanna/openvpn ovpn_getclient client1 > client1.ovpn
+cd ~/openvpn && podman-compose up -d
 ```
 
 ---
@@ -580,14 +707,22 @@ auth:
   password: "your-strong-password"
 ```
 
+```yaml
+# ~/hysteria/compose.yaml
+services:
+  hysteria:
+    image: ghcr.io/apernet/hysteria:latest
+    ports:
+      - 0.0.0.0:443:443/udp
+    volumes:
+      - /home/user/hysteria/config.yaml:/etc/hysteria/config.yaml:ro,Z
+      - /home/user/hysteria/certs:/etc/hysteria:ro,Z
+    command: server -c /etc/hysteria/config.yaml
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name hysteria \
-  -p 0.0.0.0:443:443/udp \
-  -v /home/user/hysteria/config.yaml:/etc/hysteria/config.yaml:ro,Z \
-  -v /home/user/hysteria/certs:/etc/hysteria:ro,Z \
-  --restart unless-stopped \
-  ghcr.io/apernet/hysteria:latest server -c /etc/hysteria/config.yaml
+cd ~/hysteria && podman-compose up -d
 ```
 
 ---
@@ -599,7 +734,7 @@ podman run -d \
 **Common use case:** Route qBittorrent through Mullvad so torrent traffic never uses your home IP.
 
 ```yaml
-# ~/gluetun/compose.yml
+# ~/gluetun/compose.yaml
 services:
   gluetun:
     image: qmcgaw/gluetun:latest
@@ -632,12 +767,34 @@ services:
     restart: unless-stopped
 ```
 
+```bash
+cd ~/gluetun && podman-compose up -d
+```
+
 > When `network_mode: service:gluetun` is set, the dependent container shares gluetun's network — all ports are exposed on the gluetun container, not the app container. The qBittorrent WebUI is reached at `http://localhost:8080` via gluetun's port mapping.
 
 **Check that traffic is routed through the VPN:**
 ```bash
 podman exec qbittorrent curl -s https://api.ipify.org
 # Should return the VPN exit IP, not your home IP
+```
+
+**Common operations:**
+```bash
+# Verify traffic is routed through VPN (should show VPN exit IP)
+podman exec qbittorrent curl -s https://api.ipify.org
+
+# Check Gluetun control server status
+curl http://localhost:8000/v1/openvpn/status 2>/dev/null ||   curl http://localhost:8000/v1/publicip/ip
+
+# View logs to debug connection issues
+podman logs -f gluetun
+
+# Force reconnect (pick a different VPN server)
+podman restart gluetun
+
+# List available servers for your provider (Mullvad example)
+podman exec gluetun cat /gluetun/servers.json | python3 -m json.tool | grep '"city"' | head -20
 ```
 
 **Supported providers include:** Mullvad, ProtonVPN, NordVPN, ExpressVPN, Private Internet Access, Surfshark, Windscribe, IVPN, AzireVPN, and any custom WireGuard/OpenVPN config.

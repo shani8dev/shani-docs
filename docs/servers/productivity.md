@@ -15,7 +15,7 @@ Self-hosted cloud storage, file sync, document management, task management, know
 **Purpose:** Comprehensive self-hosted cloud suite — file sync across all your devices, calendar, contacts, collaborative document editing (via Collabora or OnlyOffice), and a mobile app that feels like Google Drive. Replaces Dropbox, Google Drive, Google Calendar, and Google Contacts simultaneously.
 
 ```yaml
-# ~/nextcloud/compose.yml
+# ~/nextcloud/compose.yaml
 services:
   db:
     image: mariadb:11
@@ -67,6 +67,32 @@ files.home.local { tls internal; reverse_proxy localhost:8888 }
 podman exec -u www-data nextcloud php /var/www/html/cron.php
 ```
 
+**Common operations:**
+```bash
+# Run Nextcloud cron (add to systemd timer — every 5 minutes)
+podman exec -u www-data nextcloud php /var/www/html/cron.php
+
+# Run OCC commands (Nextcloud's admin CLI)
+podman exec -u www-data nextcloud php occ status
+podman exec -u www-data nextcloud php occ user:list
+podman exec -u www-data nextcloud php occ files:scan --all
+podman exec -u www-data nextcloud php occ maintenance:mode --on
+podman exec -u www-data nextcloud php occ maintenance:mode --off
+podman exec -u www-data nextcloud php occ upgrade
+podman exec -u www-data nextcloud php occ app:install photos
+podman exec -u www-data nextcloud php occ app:list
+podman exec -u www-data nextcloud php occ db:add-missing-indices
+
+# Add a trusted domain
+podman exec -u www-data nextcloud php occ config:system:set trusted_domains 2 --value=files.home.local
+
+# View Nextcloud logs
+podman exec -u www-data nextcloud php occ log:tail
+
+# Check background jobs are running
+podman exec -u www-data nextcloud php occ background:cron
+```
+
 **Recommended apps to install:** Nextcloud Office (Collabora), Contacts, Calendar, Notes, Passwords, Talk (video calls).
 
 ---
@@ -75,19 +101,27 @@ podman exec -u www-data nextcloud php /var/www/html/cron.php
 
 **Purpose:** Decentralised, peer-to-peer file sync with no central server. Devices sync directly with each other — encrypted, open-source, and completely private. Ideal for syncing folders across your laptop, phone, and server without a cloud account.
 
+```yaml
+# ~/syncthing/compose.yaml
+services:
+  syncthing:
+    image: syncthing/syncthing:latest
+    ports:
+      - 127.0.0.1:8384:8384
+      - 22000:22000/tcp
+      - 22000:22000/udp
+      - 21027:21027/udp
+    volumes:
+      - /home/user/syncthing/config:/var/syncthing/config:Z
+      - /home/user/sync:/var/syncthing/Sync:Z
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name syncthing \
-  -p 127.0.0.1:8384:8384 \
-  -p 22000:22000/tcp \
-  -p 22000:22000/udp \
-  -p 21027:21027/udp \
-  -v /home/user/syncthing/config:/var/syncthing/config:Z \
-  -v /home/user/sync:/var/syncthing/Sync:Z \
-  -e PUID=$(id -u) \
-  -e PGID=$(id -g) \
-  --restart unless-stopped \
-  syncthing/syncthing:latest
+cd ~/syncthing && podman-compose up -d
 ```
 
 **Firewall** (for syncing with external devices):
@@ -104,14 +138,21 @@ Access the web UI at `http://localhost:8384`. Add remote devices using their Dev
 
 **Purpose:** Lightweight web-based file manager. Browse, upload, download, rename, and edit files on your server from any browser. Useful for quick file access without needing an SSH client or a full Nextcloud setup.
 
+```yaml
+# ~/filebrowser/compose.yaml
+services:
+  filebrowser:
+    image: filebrowser/filebrowser:s6
+    ports:
+      - 127.0.0.1:8085:80
+    volumes:
+      - /home/user:/srv:Z
+      - /home/user/filebrowser.db:/database.db:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name filebrowser \
-  -p 127.0.0.1:8085:80 \
-  -v /home/user:/srv:Z \
-  -v /home/user/filebrowser.db:/database.db:Z \
-  --restart unless-stopped \
-  filebrowser/filebrowser:s6
+cd ~/filebrowser && podman-compose up -d
 ```
 
 Default login: admin / admin. Change the password immediately after first login.
@@ -123,7 +164,7 @@ Default login: admin / admin. Change the password immediately after first login.
 **Purpose:** Document management system with OCR. Scan paper documents, automatically index and tag their contents, and make everything full-text searchable. Drop a PDF into the consume folder and it is automatically processed and filed.
 
 ```yaml
-# ~/paperless/compose.yml
+# ~/paperless/compose.yaml
 services:
   broker:
     image: redis:7-alpine
@@ -160,6 +201,36 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/paperless && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# Trigger a manual document consumption scan
+curl -X POST http://localhost:8000/api/documents/post_document/   -H "Authorization: Token YOUR_API_TOKEN"   -F "document=@/path/to/file.pdf"
+
+# List recent documents
+curl http://localhost:8000/api/documents/?ordering=-created   -H "Authorization: Token YOUR_API_TOKEN" | python3 -m json.tool | head -50
+
+# Run management commands
+podman exec webserver python manage.py document_index reindex
+podman exec webserver python manage.py document_thumbnails
+podman exec webserver python manage.py check
+
+# Search documents from CLI
+curl "http://localhost:8000/api/documents/?query=invoice&format=json"   -H "Authorization: Token YOUR_API_TOKEN"
+
+# Create a superuser
+podman exec webserver python manage.py createsuperuser
+
+# Export all documents
+podman exec webserver python manage.py document_exporter /usr/src/paperless/export
+
+# View logs
+podman logs -f webserver
+```
+
 > Drop documents into `~/Documents/inbox` — Paperless will automatically OCR, index, and file them within minutes.
 
 ---
@@ -168,21 +239,42 @@ volumes:
 
 **Purpose:** Open-source Trello alternative. Real-time collaborative Kanban boards with cards, labels, checklists, due dates, and member assignments.
 
-```bash
-podman run -d \
-  --name planka \
-  -p 127.0.0.1:3000:3000 \
-  -v /home/user/planka/avatars:/app/public/user-avatars:Z \
-  -v /home/user/planka/background:/app/public/project-background-images:Z \
-  -v /home/user/planka/attachments:/app/private/attachments:Z \
-  -e DATABASE_URL=postgresql://planka:changeme@localhost:5432/planka \
-  -e SECRET_KEY=$(openssl rand -hex 64) \
-  -e BASE_URL=https://planka.home.local \
-  --restart unless-stopped \
-  ghcr.io/plankanban/planka:latest
+```yaml
+# ~/planka/compose.yaml
+services:
+  planka:
+    image: ghcr.io/plankanban/planka:latest
+    ports:
+      - 127.0.0.1:3000:3000
+    volumes:
+      - /home/user/planka/avatars:/app/public/user-avatars:Z
+      - /home/user/planka/background:/app/public/project-background-images:Z
+      - /home/user/planka/attachments:/app/private/attachments:Z
+    environment:
+      DATABASE_URL: postgresql://planka:changeme@db:5432/planka
+      SECRET_KEY: changeme-run-openssl-rand-hex-64
+      BASE_URL: https://planka.home.local
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: planka
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: planka
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
 ```
 
-> Requires a PostgreSQL instance. Run one using the command from the [Databases wiki](https://docs.shani.dev/doc/servers/databases).
+```bash
+cd ~/planka && podman-compose up -d
+```
+
+> Planka bundles PostgreSQL in the compose file above — no separate database service is needed.
 
 ---
 
@@ -191,7 +283,7 @@ podman run -d \
 **Purpose:** Self-hosted to-do app and project manager. Supports tasks, projects, teams, Kanban boards, Gantt charts, and CalDAV sync for task syncing with mobile apps. Clean alternative to Todoist.
 
 ```yaml
-# ~/vikunja/compose.yml
+# ~/vikunja/compose.yaml
 services:
   db:
     image: mariadb:11
@@ -221,6 +313,10 @@ services:
 volumes: {db_data: {}, vikunja_files: {}}
 ```
 
+```bash
+cd ~/vikunja && podman-compose up -d
+```
+
 ---
 
 ## Outline (Team Knowledge Base)
@@ -228,7 +324,7 @@ volumes: {db_data: {}, vikunja_files: {}}
 **Purpose:** Modern wiki and knowledge base with real-time collaborative editing, a clean Notion-like interface, and full Markdown support. Great for team documentation, runbooks, and personal notes.
 
 ```yaml
-# ~/outline/compose.yml
+# ~/outline/compose.yaml
 services:
   outline:
     image: outlinewiki/outline:latest
@@ -263,6 +359,10 @@ services:
 volumes: {pg_data: {}, outline_data: {}}
 ```
 
+```bash
+cd ~/outline && podman-compose up -d
+```
+
 > Outline requires an OIDC provider for login. Use Authentik or Zitadel configured with an Outline application.
 
 ---
@@ -271,16 +371,24 @@ volumes: {pg_data: {}, outline_data: {}}
 
 **Purpose:** Self-hosted recipe manager with web scraping (import recipes from any URL), meal planning, shopping list generation, and household sharing.
 
+```yaml
+# ~/mealie/compose.yaml
+services:
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie:latest
+    ports:
+      - 127.0.0.1:9925:9000
+    volumes:
+      - /home/user/mealie/data:/app/data:Z
+    environment:
+      BASE_URL: https://recipes.home.local
+      DEFAULT_EMAIL: admin@home.local
+      DEFAULT_PASSWORD: changeme
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name mealie \
-  -p 127.0.0.1:9925:9000 \
-  -e BASE_URL=https://recipes.home.local \
-  -e DEFAULT_EMAIL=admin@home.local \
-  -e DEFAULT_PASSWORD=changeme \
-  -v /home/user/mealie/data:/app/data:Z \
-  --restart unless-stopped \
-  ghcr.io/mealie-recipes/mealie:latest
+cd ~/mealie && podman-compose up -d
 ```
 
 ---
@@ -289,17 +397,37 @@ podman run -d \
 
 **Purpose:** Minimal, fast RSS and Atom feed reader. No tracking, no ads, no algorithmic recommendations — just the articles from sources you choose. Supports Fever and Google Reader APIs for mobile app compatibility (Reeder, NetNewsWire).
 
+```yaml
+# ~/miniflux/compose.yaml
+services:
+  miniflux:
+    image: miniflux/miniflux:latest
+    ports:
+      - 127.0.0.1:8090:8080
+    environment:
+      DATABASE_URL: postgres://miniflux:changeme@db/miniflux?sslmode=disable
+      RUN_MIGRATIONS: "1"
+      CREATE_ADMIN: "1"
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: changeme
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: miniflux
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: miniflux
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
 ```bash
-podman run -d \
-  --name miniflux \
-  -p 127.0.0.1:8090:8080 \
-  -e DATABASE_URL="postgres://miniflux:changeme@localhost/miniflux?sslmode=disable" \
-  -e RUN_MIGRATIONS=1 \
-  -e CREATE_ADMIN=1 \
-  -e ADMIN_USERNAME=admin \
-  -e ADMIN_PASSWORD=changeme \
-  --restart unless-stopped \
-  miniflux/miniflux:latest
+cd ~/miniflux && podman-compose up -d
 ```
 
 ---
@@ -320,16 +448,24 @@ For teams who want to version-control their notes, runbooks, and wiki pages alon
 
 **Purpose:** Visual workflow automation with 400+ integrations — webhooks, APIs, databases, AI tools, home automation, and more. Build multi-step automations without code using a drag-and-drop node editor. Self-hosted alternative to Zapier and Make. Pairs well with Nextcloud, Gitea, and Home Assistant for event-driven workflows across your entire self-hosted stack.
 
+```yaml
+# ~/n8n/compose.yaml
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    ports:
+      - 127.0.0.1:5678:5678
+    volumes:
+      - /home/user/n8n:/home/node/.n8n:Z
+    environment:
+      N8N_HOST: n8n.example.com
+      N8N_PROTOCOL: https
+      WEBHOOK_URL: https://n8n.example.com
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name n8n \
-  -p 127.0.0.1:5678:5678 \
-  -e N8N_HOST=n8n.example.com \
-  -e N8N_PROTOCOL=https \
-  -e WEBHOOK_URL=https://n8n.example.com \
-  -v /home/user/n8n:/home/node/.n8n:Z \
-  --restart unless-stopped \
-  docker.n8n.io/n8nio/n8n:latest
+cd ~/n8n && podman-compose up -d
 ```
 
 **Caddy:**
@@ -345,15 +481,23 @@ n8n.example.com { reverse_proxy localhost:5678 }
 
 **Purpose:** Web-based PDF Swiss Army knife. Merge, split, compress, convert, rotate, watermark, OCR, edit metadata, and more — all locally, no files uploaded to third-party services.
 
+```yaml
+# ~/stirling-pdf/compose.yaml
+services:
+  stirling-pdf:
+    image: frooodle/s-pdf:latest
+    ports:
+      - 127.0.0.1:8080:8080
+    volumes:
+      - /home/user/stirling/trainingData:/usr/share/tessdata:Z
+      - /home/user/stirling/extraConfigs:/configs:Z
+    environment:
+      DOCKER_ENABLE_SECURITY: false
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name stirling-pdf \
-  -p 127.0.0.1:8080:8080 \
-  -v /home/user/stirling/trainingData:/usr/share/tessdata:Z \
-  -v /home/user/stirling/extraConfigs:/configs:Z \
-  -e DOCKER_ENABLE_SECURITY=false \
-  --restart unless-stopped \
-  frooodle/s-pdf:latest
+cd ~/stirling-pdf && podman-compose up -d
 ```
 
 ---
@@ -363,7 +507,7 @@ podman run -d \
 **Purpose:** Modern, open-source publishing platform. Ghost is a focused writing and newsletter tool — clean editor, built-in membership and paid subscriptions (via Stripe), email newsletters, and a polished public-facing blog. The self-hosted alternative to Substack or Medium.
 
 ```yaml
-# ~/ghost/compose.yml
+# ~/ghost/compose.yaml
 services:
   ghost:
     image: ghost:5-alpine
@@ -398,6 +542,10 @@ volumes:
   db_data:
 ```
 
+```bash
+cd ~/ghost && podman-compose up -d
+```
+
 Access the admin panel at `http://localhost:2368/ghost`. Set up your site, configure the theme, and connect Stripe for paid memberships.
 
 **Caddy:**
@@ -412,7 +560,7 @@ blog.example.com { reverse_proxy localhost:2368 }
 **Purpose:** The world's most widely used CMS. Powers 40% of the web. Massive plugin ecosystem, thousands of themes, WooCommerce for e-commerce, and a huge talent pool. The right choice when you need maximum flexibility or have to integrate with existing WordPress tooling.
 
 ```yaml
-# ~/wordpress/compose.yml
+# ~/wordpress/compose.yaml
 services:
   wordpress:
     image: wordpress:6-php8.2-apache
@@ -444,6 +592,10 @@ volumes:
   db_data:
 ```
 
+```bash
+cd ~/wordpress && podman-compose up -d
+```
+
 > For better performance, add Redis object caching: deploy a Redis container and install the `Redis Object Cache` WordPress plugin, pointing it at `host.containers.internal:6379`.
 
 ---
@@ -453,7 +605,7 @@ volumes:
 **Purpose:** Simple, elegant wiki and documentation platform. Books, chapters, and pages organise content hierarchically. Supports Markdown and WYSIWYG editing, page revisions, search, diagrams (Draw.io integration), and LDAP/SAML SSO. Excellent for team runbooks, internal documentation, and knowledge bases.
 
 ```yaml
-# ~/bookstack/compose.yml
+# ~/bookstack/compose.yaml
 services:
   bookstack:
     image: lscr.io/linuxserver/bookstack:latest
@@ -486,6 +638,10 @@ volumes:
   db_data:
 ```
 
+```bash
+cd ~/bookstack && podman-compose up -d
+```
+
 Default login: `admin@admin.com` / `password`. Change immediately after first access.
 
 > **Choosing between BookStack, Outline, and Wiki.js:** BookStack is the most approachable with its book/chapter/page hierarchy. Outline has a Notion-like interface and requires OIDC. Wiki.js supports Git-backed storage and multi-database backends.
@@ -497,7 +653,7 @@ Default login: `admin@admin.com` / `password`. Change immediately after first ac
 **Purpose:** Powerful, extensible wiki with a Git-backed storage option — every page is a Markdown file committed to a Git repository. Supports 50+ authentication providers, 20+ rendering engines, and full-text search. Good choice when you want your wiki version-controlled.
 
 ```yaml
-# ~/wikijs/compose.yml
+# ~/wikijs/compose.yaml
 services:
   wikijs:
     image: ghcr.io/requarks/wiki:2
@@ -525,6 +681,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/wikijs && podman-compose up -d
+```
+
 Access at `http://localhost:3300` to complete the setup wizard. Enable the Git storage module to sync all pages to a Gitea repository.
 
 ---
@@ -534,7 +694,7 @@ Access at `http://localhost:3300` to complete the setup wizard. Enable the Git s
 **Purpose:** Real-time collaborative Markdown editor. Multiple people edit simultaneously — useful for meeting notes, shared documents, and technical writing. Each document gets a public shareable link. Think Google Docs but Markdown-based and self-hosted.
 
 ```yaml
-# ~/hedgedoc/compose.yml
+# ~/hedgedoc/compose.yaml
 services:
   hedgedoc:
     image: quay.io/hedgedoc/hedgedoc:latest
@@ -565,22 +725,34 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/hedgedoc && podman-compose up -d
+```
+
 ---
 
 ## CryptPad (Encrypted Collaborative Office)
 
 **Purpose:** Zero-knowledge, end-to-end encrypted collaboration suite. Documents, spreadsheets, presentations, kanban, code pads, and whiteboards — all encrypted client-side. The server never sees your content. The self-hosted alternative to Google Docs with privacy as the first principle.
 
+```yaml
+# ~/cryptpad/compose.yaml
+services:
+  cryptpad:
+    image: cryptpad/cryptpad:latest
+    ports:
+      - 127.0.0.1:3500:3000
+    volumes:
+      - /home/user/cryptpad/data:/cryptpad/data:Z
+      - /home/user/cryptpad/customize:/cryptpad/customize.dist:Z
+    environment:
+      CPAD_MAIN_DOMAIN: pad.home.local
+      CPAD_SANDBOX_DOMAIN: sandbox.home.local
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name cryptpad \
-  -p 127.0.0.1:3500:3000 \
-  -v /home/user/cryptpad/data:/cryptpad/data:Z \
-  -v /home/user/cryptpad/customize:/cryptpad/customize.dist:Z \
-  -e CPAD_MAIN_DOMAIN=pad.home.local \
-  -e CPAD_SANDBOX_DOMAIN=sandbox.home.local \
-  --restart unless-stopped \
-  cryptpad/cryptpad:latest
+cd ~/cryptpad && podman-compose up -d
 ```
 
 > CryptPad requires **two separate subdomains** — one for the main app and one for the sandbox iframe (security requirement). Configure both in Caddy and DNS.
@@ -597,16 +769,24 @@ sandbox.home.local { tls internal; reverse_proxy localhost:3500 }
 
 **Purpose:** Fast, self-hosted RSS and Atom feed aggregator. Multi-user, supports Google Reader and Fever APIs (for mobile apps like Reeder, NetNewsWire, and ReadKit), has a powerful filtering engine, and handles thousands of feeds reliably. A more feature-complete alternative to Miniflux.
 
+```yaml
+# ~/freshrss/compose.yaml
+services:
+  freshrss:
+    image: freshrss/freshrss:latest
+    ports:
+      - 127.0.0.1:8200:80
+    volumes:
+      - /home/user/freshrss/data:/var/www/FreshRSS/data:Z
+      - /home/user/freshrss/extensions:/var/www/FreshRSS/extensions:Z
+    environment:
+      TZ: Asia/Kolkata
+      CRON_MIN: 4,34
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name freshrss \
-  -p 127.0.0.1:8200:80 \
-  -v /home/user/freshrss/data:/var/www/FreshRSS/data:Z \
-  -v /home/user/freshrss/extensions:/var/www/FreshRSS/extensions:Z \
-  -e TZ=Asia/Kolkata \
-  -e CRON_MIN="4,34" \
-  --restart unless-stopped \
-  freshrss/freshrss:latest
+cd ~/freshrss && podman-compose up -d
 ```
 
 Access at `http://localhost:8200`. During setup, choose SQLite for simplicity or PostgreSQL for multi-user deployments. Enable the API in Settings → Authentication for mobile app access.
@@ -620,7 +800,7 @@ Access at `http://localhost:8200`. During setup, choose SQLite for simplicity or
 **Purpose:** Save articles from the web to read later — offline, without ads, in a clean reading view. Browser extensions and mobile apps (iOS, Android) let you save with one tap. Full-text search, tagging, and export to ePub/PDF. Self-hosted Pocket/Instapaper replacement.
 
 ```yaml
-# ~/wallabag/compose.yml
+# ~/wallabag/compose.yaml
 services:
   wallabag:
     image: wallabag/wallabag:latest
@@ -653,6 +833,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/wallabag && podman-compose up -d
+```
+
 Default login: `wallabag` / `wallabag`. Change immediately.
 
 ---
@@ -662,7 +846,7 @@ Default login: `wallabag` / `wallabag`. Change immediately.
 **Purpose:** Collaborative bookmark manager with automatic webpage archiving. When you save a link, Linkwarden takes a full-page screenshot and saves the HTML — so bookmarks never go dead. Tags, collections, full-text search, and public sharing.
 
 ```yaml
-# ~/linkwarden/compose.yml
+# ~/linkwarden/compose.yaml
 services:
   linkwarden:
     image: ghcr.io/linkwarden/linkwarden:latest
@@ -690,6 +874,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/linkwarden && podman-compose up -d
+```
+
 ---
 
 ## Monica (Personal CRM)
@@ -697,7 +885,7 @@ volumes:
 **Purpose:** Personal relationship manager. Track your contacts, log notes from conversations, set reminders for birthdays and follow-ups, record relationship history, and never forget important details about the people in your life. The self-hosted alternative to remembering things about people you care about.
 
 ```yaml
-# ~/monica/compose.yml
+# ~/monica/compose.yaml
 services:
   monica:
     image: monica:latest
@@ -728,6 +916,10 @@ volumes:
   db_data:
 ```
 
+```bash
+cd ~/monica && podman-compose up -d
+```
+
 **First run:**
 ```bash
 podman exec monica php artisan setup:production --force
@@ -740,7 +932,7 @@ podman exec monica php artisan setup:production --force
 **Purpose:** Lightweight Doodle alternative for scheduling meetings. Create a poll with date/time options, share the link, and let participants vote. No accounts required for respondents. Clean, fast, and self-contained.
 
 ```yaml
-# ~/rallly/compose.yml
+# ~/rallly/compose.yaml
 services:
   rallly:
     image: lukevella/rallly:latest
@@ -766,6 +958,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/rallly && podman-compose up -d
+```
+
 ---
 
 ## Kimai (Time Tracking)
@@ -773,7 +969,7 @@ volumes:
 **Purpose:** Open-source time tracking for freelancers and teams. Log time against projects and clients, generate invoices, track budgets, and export timesheets. The self-hosted Toggl/Harvest alternative.
 
 ```yaml
-# ~/kimai/compose.yml
+# ~/kimai/compose.yaml
 services:
   kimai:
     image: kimai/kimai2:apache
@@ -804,22 +1000,34 @@ volumes:
   db_data:
 ```
 
+```bash
+cd ~/kimai && podman-compose up -d
+```
+
 ---
 
 ## Grocy (Household Management)
 
 **Purpose:** Grocery and household management system. Track pantry stock, shopping lists, product expiry dates, meal planning, and chores. Integrates with barcode scanners for quick stock updates. Useful for reducing food waste and keeping a well-organised household.
 
+```yaml
+# ~/grocy/compose.yaml
+services:
+  grocy:
+    image: lscr.io/linuxserver/grocy:latest
+    ports:
+      - 127.0.0.1:9283:80
+    volumes:
+      - /home/user/grocy/data:/var/www/data:Z
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: Asia/Kolkata
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name grocy \
-  -p 127.0.0.1:9283:80 \
-  -v /home/user/grocy/data:/var/www/data:Z \
-  -e PUID=$(id -u) \
-  -e PGID=$(id -g) \
-  -e TZ=Asia/Kolkata \
-  --restart unless-stopped \
-  lscr.io/linuxserver/grocy:latest
+cd ~/grocy && podman-compose up -d
 ```
 
 Access at `http://localhost:9283`. Default credentials: `admin` / `admin`. Change in the settings.
@@ -833,7 +1041,7 @@ Access at `http://localhost:9283`. Default credentials: `admin` / `admin`. Chang
 **Purpose:** Self-hosted sync server for Joplin — the open-source, end-to-end encrypted note-taking app available on Linux, macOS, Windows, iOS, and Android. Joplin clients store notes locally and sync via your server — no cloud subscription required. Supports notebooks, tags, Markdown, attachments, and end-to-end encryption with your own key.
 
 ```yaml
-# ~/joplin/compose.yml
+# ~/joplin/compose.yaml
 services:
   joplin:
     image: joplin/server:latest
@@ -863,6 +1071,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/joplin && podman-compose up -d
+```
+
 Access at `http://localhost:22300`. Default admin credentials: `admin@localhost` / `admin` — change immediately. In the Joplin desktop or mobile app, go to Settings → Synchronisation → Joplin Server and enter your server URL with a user account.
 
 ---
@@ -872,7 +1084,7 @@ Access at `http://localhost:22300`. Default admin credentials: `admin@localhost`
 **Purpose:** Self-hosted, browser-based design and prototyping tool — a Figma alternative. Create UI mockups, design systems, interactive prototypes, and export assets, all in a collaborative environment where multiple users work on the same file simultaneously. Fully vector-based, exports SVG and CSS, and integrates with developer handoff workflows.
 
 ```yaml
-# ~/penpot/compose.yml
+# ~/penpot/compose.yaml
 services:
   penpot-frontend:
     image: penpotapp/frontend:latest
@@ -921,6 +1133,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/penpot && podman-compose up -d
+```
+
 Access at `http://localhost:9001`. Create a team workspace, invite collaborators, and design with real-time multiplayer editing.
 
 ---
@@ -929,14 +1145,22 @@ Access at `http://localhost:9001`. Create a team workspace, invite collaborators
 
 **Purpose:** Fast, Twitter-style self-hosted memo and personal knowledge base. Jot down fleeting notes, ideas, and links in a microblog-style feed — each memo is a short, tagged Markdown entry. No folders, no hierarchy — just a searchable, filterable stream. Much lighter than Outline or BookStack when you just need a scratchpad.
 
+```yaml
+# ~/memos/compose.yaml
+services:
+  memos:
+    image: neosmemo/memos:stable
+    ports:
+      - 127.0.0.1:5230:5230
+    volumes:
+      - /home/user/memos/data:/var/opt/memos:Z
+    environment:
+      TZ: Asia/Kolkata
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name memos \
-  -p 127.0.0.1:5230:5230 \
-  -v /home/user/memos/data:/var/opt/memos:Z \
-  -e TZ=Asia/Kolkata \
-  --restart unless-stopped \
-  neosmemo/memos:stable
+cd ~/memos && podman-compose up -d
 ```
 
 Access at `http://localhost:5230`. Create an account, start writing memos with `#tags` and Markdown. The REST API allows posting from scripts, CLI aliases, or mobile shortcuts — useful for quick capture from anywhere on your Tailscale network.
@@ -948,7 +1172,7 @@ Access at `http://localhost:5230`. Create an account, start writing memos with `
 **Purpose:** A modern, open-source alternative to Notion and Miro combined. AFFiNE merges a block-based document editor, a whiteboard canvas, and a database view into one tool. Pages can switch between document mode (writing) and edgeless mode (infinite canvas/whiteboard) without creating separate files. Self-hosted, offline-capable, and with real-time collaboration via WebSocket. A strong Notion replacement that keeps all data local.
 
 ```yaml
-# ~/affine/compose.yml
+# ~/affine/compose.yaml
 services:
   affine:
     image: ghcr.io/toeverything/affine-graphql:stable
@@ -990,6 +1214,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/affine && podman-compose up -d
+```
+
 Access at `http://localhost:3010`. Create a workspace, sign in, and start creating pages. Toggle between document and whiteboard mode with the view switcher.
 
 > **vs Outline:** AFFiNE is better for mixed document+canvas work and personal knowledge management. Outline is better for team wikis and structured documentation.
@@ -1006,7 +1234,7 @@ affine.home.local { tls internal; reverse_proxy localhost:3010 }
 **Purpose:** A self-hosted bookmark manager that uses a local LLM (via Ollama) to automatically tag and summarise every saved link. Paste a URL, and Hoarder fetches the page, extracts the content, generates tags, and writes a summary — making your bookmarks searchable and organised without any manual effort. Also saves full-page screenshots and supports highlights. A smarter replacement for Linkwarden or Wallabag when you want automatic organisation.
 
 ```yaml
-# ~/hoarder/compose.yml
+# ~/hoarder/compose.yaml
 services:
   web:
     image: ghcr.io/hoarder-app/hoarder:latest
@@ -1044,6 +1272,10 @@ volumes:
   meili_data:
 ```
 
+```bash
+cd ~/hoarder && podman-compose up -d
+```
+
 Access at `http://localhost:3055`. Create an account (signups are disabled after the first — set `DISABLE_SIGNUPS: "false"` to allow more users). Save bookmarks via the web UI, browser extension, or mobile share sheet.
 
 > Pull the `llava` multimodal model for screenshot understanding: `podman exec ollama ollama pull llava`. Without it, Hoarder still summarises text content using the text model.
@@ -1057,6 +1289,7 @@ hoarder.home.local { tls internal; reverse_proxy localhost:3055 }
 
 ## Caddy Configuration
 
+```caddyfile
 files.home.local     { tls internal; reverse_proxy localhost:8888 }
 sync.home.local      { tls internal; reverse_proxy localhost:8384 }
 docs.home.local      { tls internal; reverse_proxy localhost:8000 }

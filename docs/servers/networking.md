@@ -14,18 +14,63 @@ DNS filtering, privacy-friendly analytics, search engines, dashboards, latency m
 
 **Purpose:** Network-wide DNS ad and tracker blocker. Runs as your LAN's DNS server and blocks ads, telemetry, and malware domains for every device — phones, smart TVs, IoT — without installing anything on them.
 
+```yaml
+# ~/pihole/compose.yaml
+services:
+  pihole:
+    image: pihole/pihole:latest
+    ports:
+      - 127.0.0.1:8083:80
+      - 53:53/tcp
+      - 53:53/udp
+    volumes:
+      - /home/user/pihole/etc-pihole:/etc/pihole:Z
+      - /home/user/pihole/etc-dnsmasq.d:/etc/dnsmasq.d:Z
+    environment:
+      TZ: Asia/Kolkata
+      WEBPASSWORD: changeme
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name pihole \
-  -p 127.0.0.1:8083:80 \
-  -p 53:53/tcp \
-  -p 53:53/udp \
-  -e TZ=Asia/Kolkata \
-  -e WEBPASSWORD=changeme \
-  -v /home/user/pihole/etc-pihole:/etc/pihole:Z \
-  -v /home/user/pihole/etc-dnsmasq.d:/etc/dnsmasq.d:Z \
-  --restart unless-stopped \
-  pihole/pihole:latest
+cd ~/pihole && podman-compose up -d
+```
+
+**Firewall** (allow DNS from LAN):
+```bash
+sudo firewall-cmd --add-service=dns --permanent && sudo firewall-cmd --reload
+```
+```bash
+# Update gravity (blocklists) manually
+podman exec pihole pihole -g
+
+# View real-time query log
+podman exec pihole pihole -t
+
+# Enable/disable Pi-hole blocking
+podman exec pihole pihole enable
+podman exec pihole pihole disable 300  # disable for 300 seconds
+
+# Add a domain to whitelist
+podman exec pihole pihole -w example.com
+
+# Add a domain to blacklist
+podman exec pihole pihole -b ads.example.com
+
+# Remove from whitelist
+podman exec pihole pihole -w -d example.com
+
+# View stats summary
+podman exec pihole pihole -c
+
+# Flush logs
+podman exec pihole pihole flush
+
+# Restart DNS resolver
+podman exec pihole pihole restartdns
+
+# Show version info
+podman exec pihole pihole version
 ```
 
 > Set your router's DHCP DNS option to your server's LAN IP. All devices will automatically use Pi-hole.
@@ -41,16 +86,24 @@ pihole.home.local { tls internal; reverse_proxy localhost:8083 }
 
 **Purpose:** Pi-hole alternative with native DNS-over-HTTPS (DoH) and DNS-over-TLS (DoT) support, a cleaner UI, per-client rules, and built-in parental controls.
 
+```yaml
+# ~/adguardhome/compose.yaml
+services:
+  adguardhome:
+    image: adguard/adguardhome
+    ports:
+      - 53:53/tcp
+      - 53:53/udp
+      - 127.0.0.1:3000:3000
+      - 853:853/tcp
+    volumes:
+      - /home/user/adguard/work:/opt/adguardhome/work:Z
+      - /home/user/adguard/conf:/opt/adguardhome/conf:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name adguardhome \
-  -p 53:53/tcp -p 53:53/udp \
-  -p 127.0.0.1:3000:3000 \
-  -p 853:853/tcp \
-  -v /home/user/adguard/work:/opt/adguardhome/work:Z \
-  -v /home/user/adguard/conf:/opt/adguardhome/conf:Z \
-  --restart unless-stopped \
-  adguard/adguardhome
+cd ~/adguardhome && podman-compose up -d
 ```
 
 Access the setup wizard at `http://localhost:3000` on first run. After setup, the UI moves to port `80` (or the port you configure).
@@ -60,20 +113,45 @@ Access the setup wizard at `http://localhost:3000` on first run. After setup, th
 sudo firewall-cmd --add-port=853/tcp --permanent && sudo firewall-cmd --reload
 ```
 
+**Common operations:**
+```bash
+# View logs
+podman logs -f adguardhome
+
+# Test DNS resolution via AdGuard
+podman exec adguardhome nslookup google.com 127.0.0.1
+
+# Query statistics via API
+curl -u admin:changeme http://localhost:3000/control/stats
+
+# Update blocklists
+curl -X POST -u admin:changeme http://localhost:3000/control/filtering/refresh   -H "Content-Type: application/json" -d '{"whitelist":false}'
+
+# Add a custom DNS rewrite (internal domain)
+curl -X POST -u admin:changeme http://localhost:3000/control/rewrite/add   -H "Content-Type: application/json"   -d '{"domain":"myserver.home.local","answer":"192.168.1.10"}'
+```
+
 ---
 
 ## Unbound (Recursive DNS Resolver)
 
 **Purpose:** Validating, caching, recursive DNS resolver. Use it upstream of Pi-hole or AdGuard Home for DNSSEC validation and to eliminate your ISP's DNS from the picture entirely. Queries go directly to root nameservers.
 
+```yaml
+# ~/unbound/compose.yaml
+services:
+  unbound:
+    image: mvance/unbound
+    ports:
+      - 127.0.0.1:5335:53/tcp
+      - 127.0.0.1:5335:53/udp
+    volumes:
+      - /home/user/unbound/unbound.conf:/opt/unbound/etc/unbound/unbound.conf:ro,Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name unbound \
-  -p 127.0.0.1:5335:53/tcp \
-  -p 127.0.0.1:5335:53/udp \
-  -v /home/user/unbound/unbound.conf:/opt/unbound/etc/unbound/unbound.conf:ro,Z \
-  --restart unless-stopped \
-  mvance/unbound
+cd ~/unbound && podman-compose up -d
 ```
 
 In Pi-hole: Settings → DNS → Custom upstream DNS → `127.0.0.1#5335`. Disable all other upstream DNS entries.
@@ -119,6 +197,10 @@ volumes:
   db_data:
 ```
 
+```bash
+cd ~/npm && podman-compose up -d
+```
+
 Access the admin UI at `http://localhost:81`. Default credentials: `admin@example.com` / `changeme` — change immediately after first login. Add proxy hosts via Dashboard → Proxy Hosts → Add Proxy Host; enable Let's Encrypt in the SSL tab.
 
 ---
@@ -156,6 +238,10 @@ services:
       - /home/user/traefik/config:/config:Z
       - /home/user/traefik/certs:/certs:Z
     restart: unless-stopped
+```
+
+```bash
+cd ~/traefik && podman-compose up -d
 ```
 
 **Expose a service via labels (no Caddyfile edit required):**
@@ -216,16 +302,23 @@ traefik.home.local { tls internal; reverse_proxy localhost:8080 }
 
 **Purpose:** The gold-standard TCP and HTTP load balancer. HAProxy has been the backbone of GitHub, Reddit, and Stack Overflow for years. Unlike Traefik (label-driven, auto-discovery) or Caddy (config-file, developer-friendly), HAProxy is purpose-built for raw throughput, advanced health checking, and TCP-layer load balancing — useful for load balancing PostgreSQL replicas, MQTT brokers, Redis, or any non-HTTP protocol alongside web traffic.
 
+```yaml
+# ~/haproxy/compose.yaml
+services:
+  haproxy:
+    image: haproxy:3-alpine
+    ports:
+      - 0.0.0.0:80:80
+      - 0.0.0.0:443:443
+      - 127.0.0.1:9000:9000
+    volumes:
+      - /home/user/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro,Z
+      - /home/user/haproxy/certs:/etc/haproxy/certs:ro,Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name haproxy \
-  -p 0.0.0.0:80:80 \
-  -p 0.0.0.0:443:443 \
-  -p 127.0.0.1:9000:9000 \
-  -v /home/user/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro,Z \
-  -v /home/user/haproxy/certs:/etc/haproxy/certs:ro,Z \
-  --restart unless-stopped \
-  haproxy:3-alpine
+cd ~/haproxy && podman-compose up -d
 ```
 
 **Example `haproxy.cfg` — HTTP load balancing with health checks:**
@@ -313,14 +406,22 @@ Access the live stats page at `http://localhost:9000` to see connection counts, 
 
 **Purpose:** Privacy-respecting meta-search engine. Aggregates results from Google, Bing, DuckDuckGo, and 70+ other sources without tracking, logging, or profiling users. Run it on your server and use it as your default browser search engine.
 
+```yaml
+# ~/searxng/compose.yaml
+services:
+  searxng:
+    image: searxng/searxng:latest
+    ports:
+      - 127.0.0.1:8091:8080
+    volumes:
+      - /home/user/searxng/settings:/etc/searxng:Z
+    environment:
+      SEARXNG_BASE_URL: https://search.home.local
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name searxng \
-  -p 127.0.0.1:8091:8080 \
-  -v /home/user/searxng/settings:/etc/searxng:Z \
-  -e SEARXNG_BASE_URL=https://search.home.local \
-  --restart unless-stopped \
-  searxng/searxng:latest
+cd ~/searxng && podman-compose up -d
 ```
 
 ---
@@ -367,19 +468,27 @@ See the full setup in the [VPN & Tunnels wiki](https://docs.shani.dev/doc/server
 
 **Purpose:** Full-featured authoritative and recursive DNS server with a clean web UI. Goes further than Pi-hole and AdGuard Home — Technitium can host your own DNS zones (split-horizon DNS for `home.local`), act as a DHCP server, supports DNS-over-HTTPS/TLS/QUIC, has advanced conditional forwarding, and includes built-in ad-blocking. The right choice when you need proper DNS zone management alongside ad-blocking.
 
+```yaml
+# ~/technitium-dns/compose.yaml
+services:
+  technitium-dns:
+    image: technitium/dns-server:latest
+    ports:
+      - 53:53/udp
+      - 53:53/tcp
+      - 127.0.0.1:5380:5380
+      - 853:853/tcp
+      - 443:443/tcp
+    volumes:
+      - /home/user/technitium/config:/etc/dns:Z
+    environment:
+      DNS_SERVER_DOMAIN: dns.home.local
+      DNS_SERVER_ADMIN_PASSWORD: changeme
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name technitium-dns \
-  -p 53:53/udp \
-  -p 53:53/tcp \
-  -p 127.0.0.1:5380:5380 \
-  -p 853:853/tcp \
-  -p 443:443/tcp \
-  -v /home/user/technitium/config:/etc/dns:Z \
-  -e DNS_SERVER_DOMAIN=dns.home.local \
-  -e DNS_SERVER_ADMIN_PASSWORD=changeme \
-  --restart unless-stopped \
-  technitium/dns-server:latest
+cd ~/technitium-dns && podman-compose up -d
 ```
 
 Access the web UI at `http://localhost:5380`. Configure zones, forwarders, and blocklists in the admin panel.
@@ -444,6 +553,10 @@ services:
 
 volumes:
   db_data:
+```
+
+```bash
+cd ~/librenms && podman-compose up -d
 ```
 
 Access at `http://localhost:8100`. Add devices via Devices → Add Device, specifying SNMP community string and version.
@@ -511,6 +624,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/netbox && podman-compose up -d
+```
+
 Access at `http://localhost:8101`. Start by defining your IP prefixes and VLANs, then populate devices and rack positions.
 
 ---
@@ -519,20 +636,22 @@ Access at `http://localhost:8101`. Start by defining your IP prefixes and VLANs,
 
 **Purpose:** Real-time network traffic monitoring and analysis. Shows active flows, top talkers, protocol breakdown, geo-IP mapping, and historical traffic trends. Can integrate with nProbe for deep packet inspection and with pfSense/OPNsense via NetFlow/sFlow export.
 
+```yaml
+# ~/ntopng/compose.yaml
+services:
+  ntopng:
+    image: ntop/ntopng:stable
+    network_mode: host
+    volumes:
+      - /home/user/ntopng/data:/var/lib/ntopng:Z
+    environment:
+      NTOPNG_COMMUNITY: true
+    command: --interface=eth0 --http-port=3000 --data-dir=/var/lib/ntopng --community
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name ntopng \
-  -p 127.0.0.1:3000:3000 \
-  -v /home/user/ntopng/data:/var/lib/ntopng:Z \
-  -e NTOPNG_COMMUNITY=true \
-  --network host \
-  --restart unless-stopped \
-  ntop/ntopng:stable \
-    --interface=eth0 \
-    --http-port=3000 \
-    --data-dir=/var/lib/ntopng \
-    --disable-login=0 \
-    --community
+cd ~/ntopng && podman-compose up -d
 ```
 
 > Replace `eth0` with your primary network interface name (`ip link show`). `--network host` is required for ntopng to see actual traffic.
@@ -555,6 +674,10 @@ services:
     volumes:
       - /home/user/blocky/config.yml:/app/config.yml:ro,Z
     restart: unless-stopped
+```
+
+```bash
+cd ~/blocky && podman-compose up -d
 ```
 
 **Example `config.yml`:**

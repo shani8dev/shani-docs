@@ -14,17 +14,52 @@ Relational, document, caching, time-series, vector, graph, wide-column, streamin
 
 **Purpose:** Open-source relational database for web apps, CMS platforms, and legacy software stacks.
 
+```yaml
+# ~/mariadb/compose.yaml
+services:
+  mariadb:
+    image: mariadb:11
+    ports:
+      - 127.0.0.1:3306:3306
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: strongpassword
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: myuserpass
+    restart: unless-stopped
+
+volumes:
+  mariadb_data:
+```
+
 ```bash
-podman run -d \
-  --name mariadb \
-  -p 127.0.0.1:3306:3306 \
-  -e MYSQL_ROOT_PASSWORD=strongpassword \
-  -e MYSQL_DATABASE=mydb \
-  -e MYSQL_USER=myuser \
-  -e MYSQL_PASSWORD=myuserpass \
-  -v mariadb_data:/var/lib/mysql \
-  --restart unless-stopped \
-  mariadb:11
+cd ~/mariadb && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# Connect interactively
+podman exec -it mariadb mariadb -u myuser -pmyuserpass mydb
+
+# Run a query non-interactively
+podman exec mariadb mariadb -u myuser -pmyuserpass mydb -e "SHOW TABLES;"
+
+# Dump a database
+podman exec mariadb mariadb-dump -u root -pstrongpassword mydb > backup.sql
+
+# Restore from dump
+cat backup.sql | podman exec -i mariadb mariadb -u root -pstrongpassword mydb
+
+# List all databases
+podman exec mariadb mariadb -u root -pstrongpassword -e "SHOW DATABASES;"
+
+# Check running processes
+podman exec mariadb mariadb -u root -pstrongpassword -e "SHOW PROCESSLIST;"
+
+# Show table sizes
+podman exec mariadb mariadb -u root -pstrongpassword -e   "SELECT table_name, ROUND((data_length+index_length)/1024/1024,2) AS 'Size (MB)' FROM information_schema.tables WHERE table_schema='mydb' ORDER BY 2 DESC;"
 ```
 
 > **Connect**: `podman exec -it mariadb mariadb -u myuser -p mydb`
@@ -36,16 +71,27 @@ podman run -d \
 
 **Purpose:** Advanced, standards-compliant relational database known for complex queries, JSONB support, full-text search, and extensibility. Preferred database for most modern self-hosted apps.
 
+```yaml
+# ~/postgres/compose.yaml
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - 127.0.0.1:5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: strongpassword
+      POSTGRES_DB: mydb
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+```
+
 ```bash
-podman run -d \
-  --name postgres \
-  -p 127.0.0.1:5432:5432 \
-  -e POSTGRES_USER=myuser \
-  -e POSTGRES_PASSWORD=strongpassword \
-  -e POSTGRES_DB=mydb \
-  -v postgres_data:/var/lib/postgresql/data \
-  --restart unless-stopped \
-  postgres:16-alpine
+cd ~/postgres && podman-compose up -d
 ```
 
 > **Connect**: `podman exec -it postgres psql -U myuser -d mydb`
@@ -53,14 +99,48 @@ podman run -d \
 > **GUI**: pgAdmin (see below)
 
 **pgAdmin (PostgreSQL GUI):**
+```yaml
+# ~/pgadmin/compose.yaml
+services:
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - 127.0.0.1:5050:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name pgadmin \
-  -p 127.0.0.1:5050:80 \
-  -e PGADMIN_DEFAULT_EMAIL=admin@example.com \
-  -e PGADMIN_DEFAULT_PASSWORD=admin \
-  --restart unless-stopped \
-  dpage/pgadmin4
+cd ~/pgadmin && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# Connect interactively
+podman exec -it postgres psql -U myuser -d mydb
+
+# Run a query non-interactively
+podman exec postgres psql -U myuser -d mydb -c "SELECT count(*) FROM users;"
+
+# Dump a database
+podman exec postgres pg_dump -U myuser mydb > backup.sql
+
+# Restore from dump
+cat backup.sql | podman exec -i postgres psql -U myuser -d mydb
+
+# List databases
+podman exec postgres psql -U myuser -c "\l"
+
+# List tables in current DB
+podman exec postgres psql -U myuser -d mydb -c "\dt"
+
+# Check active connections
+podman exec postgres psql -U myuser -c "SELECT count(*) FROM pg_stat_activity;"
+
+# Show database sizes
+podman exec postgres psql -U myuser -c "SELECT pg_database.datname, pg_size_pretty(pg_database_size(pg_database.datname)) FROM pg_database ORDER BY pg_database_size(pg_database.datname) DESC;"
 ```
 
 ---
@@ -69,13 +149,58 @@ podman run -d \
 
 **Purpose:** High-performance in-memory data store used for caching, session management, message brokering, and real-time analytics. Used as a dependency by Nextcloud, Immich, Authentik, and many others.
 
+```yaml
+# ~/redis/compose.yaml
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - 127.0.0.1:6379:6379
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+```
+
 ```bash
-podman run -d \
-  --name redis \
-  -p 127.0.0.1:6379:6379 \
-  -v redis_data:/data \
-  --restart unless-stopped \
-  redis:7-alpine redis-server --appendonly yes
+cd ~/redis && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# Interactive CLI
+podman exec -it redis redis-cli
+
+# Ping server
+podman exec redis redis-cli ping
+
+# Set and get a key
+podman exec redis redis-cli set mykey "hello"
+podman exec redis redis-cli get mykey
+
+# Monitor all commands in real time
+podman exec redis redis-cli monitor
+
+# Show server info and stats
+podman exec redis redis-cli info
+
+# List all keys (careful on large datasets)
+podman exec redis redis-cli keys "*"
+
+# Show memory usage
+podman exec redis redis-cli info memory | grep used_memory_human
+
+# Flush all keys (destructive!)
+podman exec redis redis-cli flushall
+
+# Save snapshot now
+podman exec redis redis-cli bgsave
+
+# Show connected clients
+podman exec redis redis-cli client list
 ```
 
 > **Test**: `podman exec -it redis redis-cli ping`
@@ -87,13 +212,24 @@ podman run -d \
 
 **Purpose:** The Linux Foundation's open-source fork of Redis, created after the Redis licence change. Drop-in compatible with all Redis clients — just swap the image. Recommended if you want fully open-source Redis semantics under the BSD licence going forward.
 
+```yaml
+# ~/valkey/compose.yaml
+services:
+  valkey:
+    image: valkey/valkey:8-alpine
+    ports:
+      - 127.0.0.1:6379:6379
+    volumes:
+      - valkey_data:/data
+    command: valkey-server --appendonly yes
+    restart: unless-stopped
+
+volumes:
+  valkey_data:
+```
+
 ```bash
-podman run -d \
-  --name valkey \
-  -p 127.0.0.1:6379:6379 \
-  -v valkey_data:/data \
-  --restart unless-stopped \
-  valkey/valkey:8-alpine valkey-server --appendonly yes
+cd ~/valkey && podman-compose up -d
 ```
 
 > Valkey is wire-protocol compatible with Redis 7.2. Any Jedis, redis-py, or ioredis client connects without modification.
@@ -104,13 +240,23 @@ podman run -d \
 
 **Purpose:** Multithreaded Redis fork optimized for modern multi-core CPUs. Drop-in compatible with all Redis clients — just swap the image. Benchmark: KeyDB typically achieves 2–5× higher throughput than Redis on multi-core hosts.
 
+```yaml
+# ~/keydb/compose.yaml
+services:
+  keydb:
+    image: eqalpha/keydb:alpine
+    ports:
+      - 127.0.0.1:6379:6379
+    volumes:
+      - keydb_data:/data
+    restart: unless-stopped
+
+volumes:
+  keydb_data:
+```
+
 ```bash
-podman run -d \
-  --name keydb \
-  -p 127.0.0.1:6379:6379 \
-  -v keydb_data:/data \
-  --restart unless-stopped \
-  eqalpha/keydb:alpine
+cd ~/keydb && podman-compose up -d
 ```
 
 ---
@@ -119,24 +265,73 @@ podman run -d \
 
 **Purpose:** Flexible document database optimized for JSON-like storage, rapid development cycles, and unstructured data models.
 
-```bash
-podman run -d \
-  --name mongodb \
-  -p 127.0.0.1:27017:27017 \
-  -e MONGO_INITDB_ROOT_USERNAME=admin \
-  -e MONGO_INITDB_ROOT_PASSWORD=strongpassword \
-  -v mongodb_data:/data/db \
-  --restart unless-stopped \
-  mongo:7
+```yaml
+# ~/mongodb/compose.yaml
+services:
+  mongodb:
+    image: mongo:7
+    ports:
+      - 127.0.0.1:27017:27017
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: strongpassword
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
 ```
 
-> **GUI**: Mongo Express — `podman run -d --name mongo-express -p 127.0.0.1:8081:8081 -e ME_CONFIG_MONGODB_ADMINUSERNAME=admin -e ME_CONFIG_MONGODB_ADMINPASSWORD=strongpassword -e ME_CONFIG_MONGODB_URL="mongodb://admin:strongpassword@host.containers.internal:27017/" --restart unless-stopped mongo-express`
+```bash
+cd ~/mongodb && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# Connect with mongosh
+podman exec -it mongodb mongosh -u admin -p strongpassword --authenticationDatabase admin
+
+# List databases
+podman exec mongodb mongosh -u admin -p strongpassword --authenticationDatabase admin --eval "show dbs"
+
+# Run a query
+podman exec mongodb mongosh -u admin -p strongpassword --authenticationDatabase admin   --eval "db.getSiblingDB('mydb').mycollection.find().limit(5).pretty()"
+
+# Dump a database
+podman exec mongodb mongodump -u admin -p strongpassword --authenticationDatabase admin   --db mydb --out /tmp/dump
+
+# Restore from dump
+podman exec mongodb mongorestore -u admin -p strongpassword --authenticationDatabase admin   --db mydb /tmp/dump/mydb
+
+# Check replica set status (if configured)
+podman exec mongodb mongosh --eval "rs.status()"
+
+# Show collection stats
+podman exec mongodb mongosh -u admin -p strongpassword --authenticationDatabase admin   --eval "db.getSiblingDB('mydb').stats()"
+```
+
+> **GUI**: Add Mongo Express to your compose file:
+
+```yaml
+  mongo-express:
+    image: mongo-express
+    ports:
+      - "127.0.0.1:8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: strongpassword
+      ME_CONFIG_MONGODB_URL: "mongodb://admin:strongpassword@host.containers.internal:27017/"
+    restart: unless-stopped
+```
 
 ---
 
 ## Apache Kafka
 
 **Purpose:** Distributed event streaming platform. Kafka is the backbone of event-driven architectures, real-time data pipelines, log aggregation, and stream processing. Producers publish events to topics; consumers read them with durable, replayable, ordered delivery. Kafka handles millions of events per second and retains them for configurable durations.
+
+> **KRaft vs ZooKeeper:** Kafka 3.3+ supports KRaft mode (no ZooKeeper required). The compose below uses the ZooKeeper-based setup for compatibility, but new deployments should prefer KRaft — see the `confluentinc/cp-kafka` KRaft examples in the Confluent docs.
 
 ```yaml
 # ~/kafka/compose.yml
@@ -182,7 +377,9 @@ volumes:
   kafka_data:
 ```
 
-> **Alternative: KRaft mode (no ZooKeeper)** — Kafka 3.3+ supports KRaft for simplified operation. See the `confluentinc/cp-kafka` KRaft examples in the Confluent docs.
+```bash
+cd ~/kafka && podman-compose up -d
+```
 
 **Common operations:**
 ```bash
@@ -216,31 +413,30 @@ podman exec kafka kafka-consumer-groups \
 
 **Purpose:** Kafka-compatible event streaming platform written in C++. Runs without ZooKeeper, uses a fraction of the memory and CPU of Kafka, and starts in seconds. Ideal for development, smaller deployments, and self-hosted setups where Kafka's JVM overhead is undesirable.
 
-```bash
-podman run -d \
-  --name redpanda \
-  -p 127.0.0.1:9092:9092 \
-  -p 127.0.0.1:9644:9644 \
-  -p 127.0.0.1:8081:8081 \
-  -v /home/user/redpanda/data:/var/lib/redpanda/data:Z \
-  --restart unless-stopped \
-  redpandadata/redpanda:latest \
-  redpanda start \
-    --node-id 0 \
-    --kafka-addr 0.0.0.0:9092 \
-    --advertise-kafka-addr localhost:9092 \
-    --schema-registry-addr 0.0.0.0:8081 \
-    --rpc-addr 0.0.0.0:33145 \
-    --advertise-rpc-addr redpanda:33145 \
-    --mode dev-container
+```yaml
+# ~/redpanda/compose.yaml
+services:
+  redpanda:
+    image: redpandadata/redpanda:latest
+    ports:
+      - 127.0.0.1:9092:9092
+      - 127.0.0.1:9644:9644
+      - 127.0.0.1:8081:8081
+    volumes:
+      - /home/user/redpanda/data:/var/lib/redpanda/data:Z
+    command: redpanda start --node-id 0 --kafka-addr 0.0.0.0:9092 --advertise-kafka-addr localhost:9092 --schema-registry-addr 0.0.0.0:8081 --rpc-addr 0.0.0.0:33145 --advertise-rpc-addr redpanda:33145 --mode dev-container
+    restart: unless-stopped
+  redpanda-console:
+    image: docker.redpanda.com/redpandadata/console:latest
+    ports:
+      - 127.0.0.1:8080:8080
+    environment:
+      KAFKA_BROKERS: host.containers.internal:9092
+    restart: unless-stopped
+```
 
-# Redpanda Console (web UI)
-podman run -d \
-  --name redpanda-console \
-  -p 127.0.0.1:8080:8080 \
-  -e KAFKA_BROKERS=host.containers.internal:9092 \
-  --restart unless-stopped \
-  docker.redpanda.com/redpandadata/console:latest
+```bash
+cd ~/redpanda && podman-compose up -d
 ```
 
 > Redpanda is fully compatible with the Kafka API — any Kafka client (Confluent SDK, librdkafka, kafka-python) connects without modification.
@@ -251,20 +447,28 @@ podman run -d \
 
 **Purpose:** The leading native graph database. Stores data as nodes and relationships — ideal for social networks, recommendation engines, fraud detection, knowledge graphs, dependency trees, and any domain where connections between data points are as important as the data itself. Queried with the Cypher query language.
 
+```yaml
+# ~/neo4j/compose.yaml
+services:
+  neo4j:
+    image: neo4j:5
+    ports:
+      - 127.0.0.1:7474:7474
+      - 127.0.0.1:7687:7687
+    volumes:
+      - /home/user/neo4j/data:/data:Z
+      - /home/user/neo4j/logs:/logs:Z
+      - /home/user/neo4j/import:/var/lib/neo4j/import:Z
+    environment:
+      NEO4J_AUTH: neo4j/strongpassword
+      NEO4J_PLUGINS: ["apoc", "graph-data-science"]
+      NEO4J_dbms_memory_heap_initial__size: 512m
+      NEO4J_dbms_memory_heap_max__size: 2g
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name neo4j \
-  -p 127.0.0.1:7474:7474 \
-  -p 127.0.0.1:7687:7687 \
-  -v /home/user/neo4j/data:/data:Z \
-  -v /home/user/neo4j/logs:/logs:Z \
-  -v /home/user/neo4j/import:/var/lib/neo4j/import:Z \
-  -e NEO4J_AUTH=neo4j/strongpassword \
-  -e NEO4J_PLUGINS='["apoc", "graph-data-science"]' \
-  -e NEO4J_dbms_memory_heap_initial__size=512m \
-  -e NEO4J_dbms_memory_heap_max__size=2g \
-  --restart unless-stopped \
-  neo4j:5
+cd ~/neo4j && podman-compose up -d
 ```
 
 > **Browser UI**: `http://localhost:7474` — interactive graph explorer and Cypher query editor.
@@ -297,18 +501,26 @@ ORDER BY communityId
 
 **Purpose:** Wide-column NoSQL database designed for massive write throughput and linear horizontal scalability. No single point of failure. Ideal for IoT telemetry, event logs, time-series data at scale, and any workload where you need to write millions of rows per second across geographically distributed nodes.
 
+```yaml
+# ~/cassandra/compose.yaml
+services:
+  cassandra:
+    image: cassandra:5
+    ports:
+      - 127.0.0.1:9042:9042
+    volumes:
+      - /home/user/cassandra/data:/var/lib/cassandra:Z
+    environment:
+      CASSANDRA_CLUSTER_NAME: HomeCluster
+      CASSANDRA_DC: dc1
+      CASSANDRA_RACK: rack1
+      HEAP_NEWSIZE: 128m
+      MAX_HEAP_SIZE: 1g
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name cassandra \
-  -p 127.0.0.1:9042:9042 \
-  -v /home/user/cassandra/data:/var/lib/cassandra:Z \
-  -e CASSANDRA_CLUSTER_NAME=HomeCluster \
-  -e CASSANDRA_DC=dc1 \
-  -e CASSANDRA_RACK=rack1 \
-  -e HEAP_NEWSIZE=128m \
-  -e MAX_HEAP_SIZE=1g \
-  --restart unless-stopped \
-  cassandra:5
+cd ~/cassandra && podman-compose up -d
 ```
 
 **Connect and run CQL:**
@@ -340,20 +552,23 @@ SELECT * FROM sensor_readings WHERE device_id = <uuid> LIMIT 100;
 
 **Purpose:** Drop-in Cassandra replacement written in C++. Uses a shard-per-core architecture to eliminate the JVM, garbage collection pauses, and most Cassandra bottlenecks — delivering 10× better latency and throughput on the same hardware. Fully compatible with the CQL wire protocol and Cassandra client drivers.
 
-```bash
-podman run -d \
-  --name scylladb \
-  -p 127.0.0.1:9042:9042 \
-  -p 127.0.0.1:10000:10000 \
-  -v /home/user/scylladb/data:/var/lib/scylla:Z \
-  --cpuset-cpus 0-3 \
-  --restart unless-stopped \
-  scylladb/scylla:6 \
-    --developer-mode 1 \
-    --seeds scylladb
+```yaml
+# ~/scylladb/compose.yaml
+services:
+  scylladb:
+    image: scylladb/scylla:6
+    ports:
+      - 127.0.0.1:9042:9042
+      - 127.0.0.1:10000:10000
+    volumes:
+      - /home/user/scylladb/data:/var/lib/scylla:Z
+    cpuset: 0-3
+    command: --developer-mode 1 --seeds scylladb
+    restart: unless-stopped
+```
 
-# Connect with cqlsh (same as Cassandra)
-podman exec -it scylladb cqlsh
+```bash
+cd ~/scylladb && podman-compose up -d
 ```
 
 > ScyllaDB is the recommended replacement for Cassandra in new deployments. Any code written against the Cassandra CQL API runs unmodified against ScyllaDB.
@@ -364,22 +579,22 @@ podman exec -it scylladb cqlsh
 
 **Purpose:** Distributed SQL database with strong ACID guarantees, automatic sharding, and survivable multi-node operation. Wire-compatible with PostgreSQL — connect with `psql` or any Postgres driver. Ideal for applications that need horizontal write scaling or multi-region data residency while keeping SQL semantics.
 
+```yaml
+# ~/cockroachdb/compose.yaml
+services:
+  cockroachdb:
+    image: cockroachdb/cockroach:latest
+    ports:
+      - 127.0.0.1:26257:26257
+      - 127.0.0.1:8081:8080
+    volumes:
+      - /home/user/cockroachdb/data:/cockroach/cockroach-data:Z
+    command: start-single-node --insecure --http-addr=0.0.0.0:8080
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name cockroachdb \
-  -p 127.0.0.1:26257:26257 \
-  -p 127.0.0.1:8081:8080 \
-  -v /home/user/cockroachdb/data:/cockroach/cockroach-data:Z \
-  --restart unless-stopped \
-  cockroachdb/cockroach:latest start-single-node \
-    --insecure \
-    --http-addr=0.0.0.0:8080
-
-# Connect with cockroach SQL (PostgreSQL-compatible)
-podman exec -it cockroachdb cockroach sql --insecure
-
-# Or with psql
-psql -h localhost -p 26257 -U root defaultdb
+cd ~/cockroachdb && podman-compose up -d
 ```
 
 > The Admin UI is at `http://localhost:8081`. It shows query plans, node health, slow queries, and schema inspector in real time.
@@ -399,16 +614,27 @@ GRANT ALL ON DATABASE myapp TO myuser;
 
 **Purpose:** PostgreSQL extension that adds native time-series storage, hypertables, continuous aggregates, compression, and data retention policies. Query with standard SQL. Because it is just PostgreSQL, all your existing tools (pgAdmin, Grafana, ORMs) work without modification — you just get 100× faster time-series queries.
 
+```yaml
+# ~/timescaledb/compose.yaml
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    ports:
+      - 127.0.0.1:5433:5432
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: strongpassword
+      POSTGRES_DB: metrics
+    restart: unless-stopped
+
+volumes:
+  timescale_data:
+```
+
 ```bash
-podman run -d \
-  --name timescaledb \
-  -p 127.0.0.1:5433:5432 \
-  -e POSTGRES_USER=myuser \
-  -e POSTGRES_PASSWORD=strongpassword \
-  -e POSTGRES_DB=metrics \
-  -v timescale_data:/var/lib/postgresql/data \
-  --restart unless-stopped \
-  timescale/timescaledb:latest-pg16
+cd ~/timescaledb && podman-compose up -d
 ```
 
 **Set up a hypertable:**
@@ -450,14 +676,25 @@ FROM sensor_data GROUP BY bucket, device_id;
 
 **Purpose:** Lightning-fast, typo-tolerant full-text search engine designed for easy integration into web apps and dashboards. Simple REST API, no query language to learn.
 
+```yaml
+# ~/meilisearch/compose.yaml
+services:
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    ports:
+      - 127.0.0.1:7700:7700
+    volumes:
+      - meilisearch_data:/meili_data
+    environment:
+      MEILI_MASTER_KEY: changeme
+    restart: unless-stopped
+
+volumes:
+  meilisearch_data:
+```
+
 ```bash
-podman run -d \
-  --name meilisearch \
-  -p 127.0.0.1:7700:7700 \
-  -v meilisearch_data:/meili_data \
-  -e MEILI_MASTER_KEY=changeme \
-  --restart unless-stopped \
-  getmeili/meilisearch:latest
+cd ~/meilisearch && podman-compose up -d
 ```
 
 **Index documents and search:**
@@ -479,18 +716,29 @@ curl "http://localhost:7700/indexes/movies/search?q=inceptoin" \
 
 **Purpose:** High-performance time-series database. Optimised for metrics, IoT telemetry, and real-time analytics. Used with Home Assistant and Grafana dashboards.
 
+```yaml
+# ~/influxdb/compose.yaml
+services:
+  influxdb:
+    image: influxdb:2
+    ports:
+      - 127.0.0.1:8086:8086
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: strongpassword
+      DOCKER_INFLUXDB_INIT_ORG: home
+      DOCKER_INFLUXDB_INIT_BUCKET: metrics
+    restart: unless-stopped
+
+volumes:
+  influxdb_data:
+```
+
 ```bash
-podman run -d \
-  --name influxdb \
-  -p 127.0.0.1:8086:8086 \
-  -v influxdb_data:/var/lib/influxdb2 \
-  -e DOCKER_INFLUXDB_INIT_MODE=setup \
-  -e DOCKER_INFLUXDB_INIT_USERNAME=admin \
-  -e DOCKER_INFLUXDB_INIT_PASSWORD=strongpassword \
-  -e DOCKER_INFLUXDB_INIT_ORG=home \
-  -e DOCKER_INFLUXDB_INIT_BUCKET=metrics \
-  --restart unless-stopped \
-  influxdb:2
+cd ~/influxdb && podman-compose up -d
 ```
 
 ---
@@ -499,26 +747,44 @@ podman run -d \
 
 **Purpose:** Distributed search and analytics engine powering log analysis, full-text search, and observability (ELK stack).
 
+```yaml
+# ~/elasticsearch/compose.yaml
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
+    ports:
+      - 127.0.0.1:9200:9200
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: false
+      ES_JAVA_OPTS: -Xms512m -Xmx1g
+    restart: unless-stopped
+
+volumes:
+  elasticsearch_data:
+```
+
 ```bash
-podman run -d \
-  --name elasticsearch \
-  -p 127.0.0.1:9200:9200 \
-  -v elasticsearch_data:/usr/share/elasticsearch/data \
-  -e discovery.type=single-node \
-  -e xpack.security.enabled=false \
-  -e ES_JAVA_OPTS="-Xms512m -Xmx1g" \
-  --restart unless-stopped \
-  docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+cd ~/elasticsearch && podman-compose up -d
 ```
 
 **Kibana (Elasticsearch UI):**
+```yaml
+# ~/kibana/compose.yaml
+services:
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.17.0
+    ports:
+      - 127.0.0.1:5601:5601
+    environment:
+      ELASTICSEARCH_HOSTS: http://host.containers.internal:9200
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name kibana \
-  -p 127.0.0.1:5601:5601 \
-  -e ELASTICSEARCH_HOSTS=http://host.containers.internal:9200 \
-  --restart unless-stopped \
-  docker.elastic.co/kibana/kibana:8.15.0
+cd ~/kibana && podman-compose up -d
 ```
 
 ---
@@ -553,20 +819,31 @@ volumes:
   opensearch_data:
 ```
 
+```bash
+cd ~/opensearch && podman-compose up -d
+```
+
 ---
 
 ## Qdrant (Vector Database)
 
 **Purpose:** High-performance vector similarity search engine. Used with AI/LLM applications for semantic search, RAG (Retrieval-Augmented Generation) pipelines, and recommendation systems. Connect to Ollama and Open WebUI for document-aware AI chat. See the [AI & LLMs wiki](https://docs.shani.dev/doc/servers/ai-llms) for the Ollama and Open WebUI setup.
 
+```yaml
+# ~/qdrant/compose.yaml
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - 127.0.0.1:6333:6333
+      - 127.0.0.1:6334:6334
+    volumes:
+      - /home/user/qdrant/storage:/qdrant/storage:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name qdrant \
-  -p 127.0.0.1:6333:6333 \
-  -p 127.0.0.1:6334:6334 \
-  -v /home/user/qdrant/storage:/qdrant/storage:Z \
-  --restart unless-stopped \
-  qdrant/qdrant:latest
+cd ~/qdrant && podman-compose up -d
 ```
 
 > **REST API**: `http://localhost:6333`
@@ -601,6 +878,10 @@ volumes:
   weaviate_data:
 ```
 
+```bash
+cd ~/weaviate && podman-compose up -d
+```
+
 > Weaviate's `text2vec-ollama` module connects to your local Ollama for embeddings — no OpenAI API key needed.
 
 ---
@@ -617,12 +898,18 @@ See the [Backups & Sync wiki](https://docs.shani.dev/doc/servers/backups-sync#li
 
 **Purpose:** Lightweight, single-file database management interface supporting MySQL, PostgreSQL, SQLite, and Oracle. Useful for quick inspection without installing a full GUI.
 
+```yaml
+# ~/adminer/compose.yaml
+services:
+  adminer:
+    image: adminer
+    ports:
+      - 127.0.0.1:8089:8080
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name adminer \
-  -p 127.0.0.1:8089:8080 \
-  --restart unless-stopped \
-  adminer
+cd ~/adminer && podman-compose up -d
 ```
 
 ---
@@ -657,22 +944,34 @@ services:
 volumes: {db_data: {}}
 ```
 
+```bash
+cd ~/php-stack && podman-compose up -d
+```
+
 ---
 
 ## RabbitMQ (Message Broker)
 
 **Purpose:** The most widely deployed open-source message broker. Implements AMQP, MQTT, and STOMP. Use RabbitMQ when you need reliable task queues, fanout messaging, dead-letter exchanges, message acknowledgement, and per-message TTL — workloads where Kafka's log-based model is overkill and you need traditional queue semantics (messages consumed and deleted). Used by Celery, Sidekiq, and most web framework background job systems.
 
+```yaml
+# ~/rabbitmq/compose.yaml
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - 127.0.0.1:5672:5672
+      - 127.0.0.1:15672:15672
+    volumes:
+      - /home/user/rabbitmq/data:/var/lib/rabbitmq:Z
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: changeme
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name rabbitmq \
-  -p 127.0.0.1:5672:5672 \
-  -p 127.0.0.1:15672:15672 \
-  -v /home/user/rabbitmq/data:/var/lib/rabbitmq:Z \
-  -e RABBITMQ_DEFAULT_USER=admin \
-  -e RABBITMQ_DEFAULT_PASS=changeme \
-  --restart unless-stopped \
-  rabbitmq:3-management-alpine
+cd ~/rabbitmq && podman-compose up -d
 ```
 
 > **Management UI:** `http://localhost:15672` — browse queues, exchanges, bindings, and message rates in real time.
@@ -699,15 +998,23 @@ podman exec rabbitmq rabbitmqctl purge_queue my-queue
 
 **Purpose:** High-performance, cloud-native messaging system. Core NATS is a simple publish/subscribe with at-most-once delivery. JetStream (built-in) adds persistent streams, at-least-once delivery, key-value store, and object store — all in a single ~20 MB binary with no external dependencies. Much lighter than Kafka or RabbitMQ for most microservice messaging patterns.
 
+```yaml
+# ~/nats/compose.yaml
+services:
+  nats:
+    image: nats:alpine
+    ports:
+      - 127.0.0.1:4222:4222
+      - 127.0.0.1:8222:8222
+    volumes:
+      - /home/user/nats/data:/data:Z
+      - /home/user/nats/nats.conf:/etc/nats/nats.conf:ro,Z
+    command: -c /etc/nats/nats.conf
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name nats \
-  -p 127.0.0.1:4222:4222 \
-  -p 127.0.0.1:8222:8222 \
-  -v /home/user/nats/data:/data:Z \
-  -v /home/user/nats/nats.conf:/etc/nats/nats.conf:ro,Z \
-  --restart unless-stopped \
-  nats:alpine -c /etc/nats/nats.conf
+cd ~/nats && podman-compose up -d
 ```
 
 **Minimal `nats.conf` with JetStream:**
@@ -744,15 +1051,23 @@ podman run --rm natsio/nats-box \
 
 **Purpose:** Open-source typo-tolerant search engine optimised for instant, as-you-type results. Faster and simpler to operate than Elasticsearch or MeiliSearch for most use cases — zero configuration needed, sub-50ms queries on millions of documents, and a clean REST API. Ideal for e-commerce search, documentation search, and app-level search.
 
+```yaml
+# ~/typesense/compose.yaml
+services:
+  typesense:
+    image: typesense/typesense:latest
+    ports:
+      - 127.0.0.1:8108:8108
+    volumes:
+      - /home/user/typesense/data:/data:Z
+    environment:
+      TYPESENSE_DATA_DIR: /data
+      TYPESENSE_API_KEY: changeme
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name typesense \
-  -p 127.0.0.1:8108:8108 \
-  -v /home/user/typesense/data:/data:Z \
-  -e TYPESENSE_DATA_DIR=/data \
-  -e TYPESENSE_API_KEY=changeme \
-  --restart unless-stopped \
-  typesense/typesense:latest
+cd ~/typesense && podman-compose up -d
 ```
 
 **Create a collection and index documents:**
@@ -783,25 +1098,20 @@ curl "http://localhost:8108/collections/products/documents/search?q=latp&query_b
 
 **Purpose:** In-process analytical database — think SQLite but for analytics. Runs inside your application process, needs no server, and executes columnar OLAP queries directly on Parquet, CSV, and JSON files at speeds that beat most dedicated databases for local workloads. Ideal for data analysis scripts, Jupyter notebooks, and ETL pipelines where you don't want to spin up a full ClickHouse or Postgres instance.
 
+```yaml
+# ~/duckdb-api/compose.yaml
+services:
+  duckdb-api:
+    image: ghcr.io/tobilg/duckdb-api:latest
+    ports:
+      - 127.0.0.1:1294:1294
+    volumes:
+      - /home/user/duckdb:/duckdb:Z
+    restart: unless-stopped
+```
+
 ```bash
-# Run DuckDB interactively
-podman run --rm -it \
-  -v /home/user/data:/data:ro,Z \
-  datacatering/duckdb:latest
-
-# Query a Parquet file directly (no import needed)
-podman run --rm \
-  -v /home/user/data:/data:ro,Z \
-  datacatering/duckdb:latest \
-  duckdb -c "SELECT year, SUM(revenue) FROM '/data/sales.parquet' GROUP BY year ORDER BY year"
-
-# DuckDB REST API (MotherDuck alternative, self-hosted)
-podman run -d \
-  --name duckdb-api \
-  -p 127.0.0.1:1294:1294 \
-  -v /home/user/duckdb:/duckdb:Z \
-  --restart unless-stopped \
-  ghcr.io/tobilg/duckdb-api:latest
+cd ~/duckdb-api && podman-compose up -d
 ```
 
 > DuckDB can read directly from S3/MinIO, InfluxDB line protocol files, and PostgreSQL — making it a powerful ad-hoc query layer over your existing data stores without ETL.
@@ -812,17 +1122,21 @@ podman run -d \
 
 **Purpose:** A single database that acts as relational, document, graph, and time-series store simultaneously. One query language (SurrealQL — SQL-like) handles joins, graph traversals, computed fields, and live queries (WebSocket-based change streams). Useful when your data model doesn't fit neatly into relational or document paradigms, or when you want to avoid managing multiple specialised databases.
 
+```yaml
+# ~/surrealdb/compose.yaml
+services:
+  surrealdb:
+    image: surrealdb/surrealdb:latest
+    ports:
+      - 127.0.0.1:8000:8000
+    volumes:
+      - /home/user/surrealdb/data:/data:Z
+    command: start --log debug --user root --pass changeme file:/data/database.db
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name surrealdb \
-  -p 127.0.0.1:8000:8000 \
-  -v /home/user/surrealdb/data:/data:Z \
-  --restart unless-stopped \
-  surrealdb/surrealdb:latest start \
-    --log debug \
-    --user root \
-    --pass changeme \
-    file:/data/database.db
+cd ~/surrealdb && podman-compose up -d
 ```
 
 **Connect and run queries:**
@@ -848,14 +1162,22 @@ LIVE SELECT * FROM orders WHERE status = 'pending';
 
 **Purpose:** High-performance, multi-threaded in-memory data store with full Redis and Memcached API compatibility. Dragonfly uses a novel shared-nothing architecture that scales linearly with CPU cores — benchmarks show 25× higher throughput than Redis on a 16-core machine. Drop-in replacement: no code changes, same client libraries, same commands. Useful when a single Redis instance becomes a throughput bottleneck or when you want better memory efficiency (Dragonfly uses 30–40% less RAM than Redis for the same dataset).
 
+```yaml
+# ~/dragonfly/compose.yaml
+services:
+  dragonfly:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly
+    ports:
+      - 127.0.0.1:6380:6379
+    volumes:
+      - /home/user/dragonfly/data:/data:Z
+    ulimits:
+      memlock: -1
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name dragonfly \
-  -p 127.0.0.1:6380:6379 \
-  -v /home/user/dragonfly/data:/data:Z \
-  --ulimit memlock=-1 \
-  --restart unless-stopped \
-  docker.dragonflydb.io/dragonflydb/dragonfly
+cd ~/dragonfly && podman-compose up -d
 ```
 
 > Use port `6380` on the host to avoid conflicts with an existing Redis instance. Any Redis client connects to `localhost:6380` without modification. Test with: `podman exec dragonfly redis-cli -p 6379 ping`
@@ -888,6 +1210,10 @@ services:
 
 volumes:
   pg_data:
+```
+
+```bash
+cd ~/ferretdb && podman-compose up -d
 ```
 
 Connect with any MongoDB client: `mongosh mongodb://localhost:27018/mydb`

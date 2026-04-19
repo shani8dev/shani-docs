@@ -38,19 +38,27 @@ max_queued_messages 1000
 
 **Purpose:** Enterprise-grade MQTT 5.0 broker. Handles millions of concurrent connections, supports cluster mode, has a built-in SQL rule engine for message routing and transformation, and a web dashboard for managing clients, subscriptions, and rules. Use EMQX when Mosquitto's single-process model becomes a bottleneck or when you need the rule engine.
 
+```yaml
+# ~/emqx/compose.yaml
+services:
+  emqx:
+    image: emqx/emqx:5
+    ports:
+      - 127.0.0.1:1883:1883
+      - 127.0.0.1:8083:8083
+      - 127.0.0.1:8084:8084
+      - 127.0.0.1:8883:8883
+      - 127.0.0.1:18083:18083
+    volumes:
+      - /home/user/emqx/data:/opt/emqx/data:Z
+      - /home/user/emqx/log:/opt/emqx/log:Z
+    environment:
+      EMQX_NODE__NAME: emqx@127.0.0.1
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name emqx \
-  -p 127.0.0.1:1883:1883 \
-  -p 127.0.0.1:8083:8083 \
-  -p 127.0.0.1:8084:8084 \
-  -p 127.0.0.1:8883:8883 \
-  -p 127.0.0.1:18083:18083 \
-  -v /home/user/emqx/data:/opt/emqx/data:Z \
-  -v /home/user/emqx/log:/opt/emqx/log:Z \
-  -e EMQX_NODE__NAME=emqx@127.0.0.1 \
-  --restart unless-stopped \
-  emqx/emqx:5
+cd ~/emqx && podman-compose up -d
 ```
 
 > **Dashboard:** `http://localhost:18083` — default login `admin` / `public` (change immediately).
@@ -78,14 +86,41 @@ Node-RED is covered in the [Home Automation wiki](https://docs.shani.dev/doc/ser
 
 **Purpose:** Plugin-based metrics agent from InfluxData. Collects from 300+ input sources — MQTT topics, SNMP, Modbus, OPC-UA, system metrics, Docker stats, database queries, REST APIs, JVM, and more — and writes to 50+ output destinations including InfluxDB, Prometheus, TimescaleDB, and Kafka. The Swiss Army knife of metrics collection.
 
+```yaml
+# ~/telegraf/compose.yaml
+services:
+  telegraf:
+    image: telegraf:latest
+    network_mode: host
+    volumes:
+      - /home/user/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro,Z
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name telegraf \
-  --network host \
-  -v /home/user/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro,Z \
-  -v /var/run/docker.sock:/var/run/docker.sock:ro \
-  --restart unless-stopped \
-  telegraf:latest
+cd ~/telegraf && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# Test config and show what would be collected
+podman exec telegraf telegraf --config /etc/telegraf/telegraf.conf --test
+
+# Validate config
+podman exec telegraf telegraf --config /etc/telegraf/telegraf.conf --config-directory /etc/telegraf/telegraf.d --test --input-filter cpu
+
+# View logs
+podman logs -f telegraf
+
+# List available input plugins
+podman exec telegraf telegraf --input-list
+
+# List available output plugins
+podman exec telegraf telegraf --output-list
+
+# Reload config (restart container)
+podman restart telegraf
 ```
 
 **Example `telegraf.conf` — MQTT → InfluxDB pipeline:**
@@ -112,7 +147,7 @@ podman run -d \
   ignore_fs = ["tmpfs", "devtmpfs"]
 [[inputs.net]]
 
-# Docker container stats
+# Podman container stats (uses Podman socket mounted above)
 [[inputs.docker]]
   endpoint = "unix:///var/run/docker.sock"
 
@@ -152,23 +187,31 @@ The canonical IoT data storage and visualisation stack. See the [Databases wiki]
 
 **Purpose:** Pull-based metrics system. Prometheus scrapes HTTP `/metrics` endpoints on a schedule, stores the time-series data, and evaluates alerting rules. Alertmanager routes firing alerts to Slack, email, PagerDuty, ntfy, and more.
 
-```bash
-# Prometheus
-podman run -d \
-  --name prometheus \
-  -p 127.0.0.1:9090:9090 \
-  -v /home/user/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro,Z \
-  -v prometheus_data:/prometheus \
-  --restart unless-stopped \
-  prom/prometheus:latest
+```yaml
+# ~/prometheus/compose.yaml
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - 127.0.0.1:9090:9090
+    volumes:
+      - /home/user/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro,Z
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+  alertmanager:
+    image: prom/alertmanager:latest
+    ports:
+      - 127.0.0.1:9093:9093
+    volumes:
+      - /home/user/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro,Z
+    restart: unless-stopped
 
-# Alertmanager
-podman run -d \
-  --name alertmanager \
-  -p 127.0.0.1:9093:9093 \
-  -v /home/user/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro,Z \
-  --restart unless-stopped \
-  prom/alertmanager:latest
+volumes:
+  prometheus_data:
+```
+
+```bash
+cd ~/prometheus && podman-compose up -d
 ```
 
 **Example `prometheus.yml` with IoT scrape targets:**
@@ -241,14 +284,21 @@ receivers:
 
 **Purpose:** Bridges MQTT topics to Prometheus metrics. Subscribes to configured MQTT topics and exposes values as Prometheus gauge/counter metrics — lets Prometheus scrape data from any MQTT-publishing device.
 
-```bash
-podman run -d \
-  --name mqtt-exporter \
-  -p 127.0.0.1:9234:9234 \
-  -v /home/user/mqtt-exporter/config.yml:/config.yml:ro,Z \
-  --restart unless-stopped \
-  ghcr.io/hikhvar/mqtt2prometheus:latest -config /config.yml
+```yaml
+# ~/mqtt-exporter/compose.yaml
+services:
+  mqtt-exporter:
+    image: ghcr.io/hikhvar/mqtt2prometheus:latest
+    ports:
+      - 127.0.0.1:9234:9234
+    volumes:
+      - /home/user/mqtt-exporter/config.yml:/config.yml:ro,Z
+    command: -config /config.yml
+    restart: unless-stopped
+```
 
+```bash
+cd ~/mqtt-exporter && podman-compose up -d
 ```
 
 **Example `config.yml`:**
@@ -287,17 +337,20 @@ metrics:
 
 Modbus is the most widely used industrial protocol — PLCs, VFDs, energy meters, and sensors have spoken it for 40 years. Node-RED's Modbus palette handles both RTU (serial) and TCP variants.
 
-```bash
-# Install Modbus palette in Node-RED (via UI or CLI)
-podman exec node-red npm install node-red-contrib-modbus
+```yaml
+# ~/modbus-mqtt/compose.yaml
+services:
+  modbus-mqtt:
+    image: ghcr.io/cloud-solutions-group/modbus-mqtt-bridge:latest
+    volumes:
+      - /home/user/modbus-mqtt/config.json:/app/config.json:ro,Z
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    restart: unless-stopped
+```
 
-# Or use a standalone Modbus → MQTT bridge
-podman run -d \
-  --name modbus-mqtt \
-  -v /home/user/modbus-mqtt/config.json:/app/config.json:ro,Z \
-  --device /dev/ttyUSB0:/dev/ttyUSB0 \
-  --restart unless-stopped \
-  ghcr.io/cloud-solutions-group/modbus-mqtt-bridge:latest
+```bash
+cd ~/modbus-mqtt && podman-compose up -d
 ```
 
 **Example Modbus config (reading an energy meter):**
@@ -327,16 +380,18 @@ podman run -d \
 
 OPC-UA is the modern, secure replacement for OPC Classic. Supported by Siemens, Rockwell, Beckhoff, and most modern PLCs and SCADA systems.
 
-```bash
-# Node-RED OPC-UA palette
-podman exec node-red npm install node-red-contrib-opcua
+```yaml
+# ~/opcua-mqtt/compose.yaml
+services:
+  opcua-mqtt:
+    image: ghcr.io/united-manufacturing-hub/opcua-simulator:latest
+    volumes:
+      - /home/user/opcua-mqtt/config.yaml:/app/config.yaml:ro,Z
+    restart: unless-stopped
+```
 
-# Standalone OPC-UA → MQTT bridge
-podman run -d \
-  --name opcua-mqtt \
-  -v /home/user/opcua-mqtt/config.yaml:/app/config.yaml:ro,Z \
-  --restart unless-stopped \
-  ghcr.io/united-manufacturing-hub/opcua-simulator:latest
+```bash
+cd ~/opcua-mqtt && podman-compose up -d
 ```
 
 ---
@@ -389,31 +444,46 @@ Physical Sensors / ESP32 / Shelly / Tasmota
 
 **Purpose:** Self-hosted location sharing platform. The OwnTracks app (iOS and Android) publishes your GPS location to your own MQTT broker or HTTP endpoint — nobody else's server sees your location. Use it to track your own device over time, share location with family members privately, or trigger Home Assistant automations when you arrive home. A privacy-respecting replacement for Google Maps Timeline or Life360.
 
+```yaml
+# ~/owntracks-recorder/compose.yaml
+services:
+  owntracks-recorder:
+    image: owntracks/recorder:latest
+    ports:
+      - 127.0.0.1:8083:8083
+      - 127.0.0.1:8084:8084
+    volumes:
+      - /home/user/owntracks/store:/store:Z
+    environment:
+      OTR_HOST: host.containers.internal
+      OTR_PORT: 1883
+      OTR_USER: iot_user
+      OTR_PASS: yourpassword
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name owntracks-recorder \
-  -p 127.0.0.1:8083:8083 \
-  -p 127.0.0.1:8084:8084 \
-  -v /home/user/owntracks/store:/store:Z \
-  -e OTR_HOST=host.containers.internal \
-  -e OTR_PORT=1883 \
-  -e OTR_USER=iot_user \
-  -e OTR_PASS=yourpassword \
-  --restart unless-stopped \
-  owntracks/recorder:latest
+cd ~/owntracks-recorder && podman-compose up -d
 ```
 
 Access the web frontend at `http://localhost:8083`. OwnTracks Recorder connects to your Mosquitto broker and stores location history in a flat-file database.
 
 **OwnTracks Frontend (map UI):**
+```yaml
+# ~/owntracks-frontend/compose.yaml
+services:
+  owntracks-frontend:
+    image: owntracks/frontend:latest
+    ports:
+      - 127.0.0.1:8085:80
+    environment:
+      SERVER_HOST: host.containers.internal
+      SERVER_PORT: 8083
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name owntracks-frontend \
-  -p 127.0.0.1:8085:80 \
-  -e SERVER_HOST=host.containers.internal \
-  -e SERVER_PORT=8083 \
-  --restart unless-stopped \
-  owntracks/frontend:latest
+cd ~/owntracks-frontend && podman-compose up -d
 ```
 
 **App configuration (iOS/Android):**

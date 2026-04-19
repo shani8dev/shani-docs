@@ -14,14 +14,24 @@ System metrics, log aggregation, alerting, uptime tracking, container visibility
 
 **Purpose:** Pull-based metrics collection and time-series storage. Scrapes `/metrics` endpoints on a schedule, evaluates alerting rules, and feeds dashboards in Grafana. The foundation of the standard self-hosted observability stack.
 
+```yaml
+# ~/prometheus/compose.yaml
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - 127.0.0.1:9090:9090
+    volumes:
+      - /home/user/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro,Z
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:
+```
+
 ```bash
-podman run -d \
-  --name prometheus \
-  -p 127.0.0.1:9090:9090 \
-  -v /home/user/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro,Z \
-  -v prometheus_data:/prometheus \
-  --restart unless-stopped \
-  prom/prometheus:latest
+cd ~/prometheus && podman-compose up -d
 ```
 
 **Minimal `prometheus.yml`:**
@@ -49,29 +59,66 @@ scrape_configs:
 ```
 
 **Node Exporter — system metrics:**
+```yaml
+# ~/node-exporter/compose.yaml
+services:
+  node-exporter:
+    image: prom/node-exporter
+    network_mode: host
+    volumes:
+      - /proc:/host/proc:ro,rslave
+      - /sys:/host/sys:ro,rslave
+      - /:/rootfs:ro,rslave
+    command: --path.procfs=/host/proc --path.sysfs=/host/sys
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name node-exporter \
-  --network host \
-  -v /proc:/host/proc:ro,rslave \
-  -v /sys:/host/sys:ro,rslave \
-  -v /:/rootfs:ro,rslave \
-  --restart unless-stopped \
-  prom/node-exporter \
-  --path.procfs=/host/proc --path.sysfs=/host/sys
+cd ~/node-exporter && podman-compose up -d
 ```
 
 **cAdvisor — container metrics:**
+```yaml
+# ~/cadvisor/compose.yaml
+services:
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    ports:
+      - 127.0.0.1:8080:8080
+    volumes:
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name cadvisor \
-  -p 127.0.0.1:8080:8080 \
-  -v /run/user/$(id -u)/podman/podman.sock:/var/run/docker.sock:ro \
-  -v /:/rootfs:ro \
-  -v /var/run:/var/run:ro \
-  -v /sys:/sys:ro \
-  --restart unless-stopped \
-  gcr.io/cadvisor/cadvisor:latest
+cd ~/cadvisor && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# Check Prometheus targets status
+curl http://localhost:9090/api/v1/targets | python3 -m json.tool | grep -A3 health
+
+# Query a metric via API
+curl "http://localhost:9090/api/v1/query?query=up" | python3 -m json.tool
+
+# Reload config without restart
+curl -X POST http://localhost:9090/-/reload
+
+# Check config validity before reloading
+podman exec prometheus promtool check config /etc/prometheus/prometheus.yml
+
+# Check alert rules
+podman exec prometheus promtool check rules /etc/prometheus/alerts.yml
+
+# View current active alerts
+curl http://localhost:9090/api/v1/alerts | python3 -m json.tool
+
+# Show TSDB stats
+curl http://localhost:9090/api/v1/status/tsdb | python3 -m json.tool
 ```
 
 **Example alert rules (`alerts.yml`):**
@@ -110,13 +157,20 @@ groups:
 
 **Purpose:** Routes firing Prometheus alerts to notification channels — ntfy, Slack, email, PagerDuty, and more. Handles deduplication, grouping, silencing, and inhibition.
 
+```yaml
+# ~/alertmanager/compose.yaml
+services:
+  alertmanager:
+    image: prom/alertmanager:latest
+    ports:
+      - 127.0.0.1:9093:9093
+    volumes:
+      - /home/user/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro,Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name alertmanager \
-  -p 127.0.0.1:9093:9093 \
-  -v /home/user/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro,Z \
-  --restart unless-stopped \
-  prom/alertmanager:latest
+cd ~/alertmanager && podman-compose up -d
 ```
 
 **Example `alertmanager.yml` — route alerts to ntfy:**
@@ -148,16 +202,49 @@ inhibit_rules:
 
 **Purpose:** The standard visualisation layer for Prometheus, Loki, InfluxDB, and 50+ other data sources. Drag-and-drop dashboards, alerting, and team sharing.
 
+```yaml
+# ~/grafana/compose.yaml
+services:
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - 127.0.0.1:3001:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: changeme
+      GF_SERVER_ROOT_URL: https://grafana.home.local
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-piechart-panel,grafana-worldmap-panel
+    restart: unless-stopped
+
+volumes:
+  grafana_data:
+```
+
 ```bash
-podman run -d \
-  --name grafana \
-  -p 127.0.0.1:3001:3000 \
-  -v grafana_data:/var/lib/grafana \
-  -e GF_SECURITY_ADMIN_PASSWORD=changeme \
-  -e GF_SERVER_ROOT_URL=https://grafana.home.local \
-  -e GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-piechart-panel,grafana-worldmap-panel \
-  --restart unless-stopped \
-  grafana/grafana:latest
+cd ~/grafana && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# Install a plugin
+podman exec grafana grafana-cli plugins install grafana-clock-panel
+podman restart grafana
+
+# List installed plugins
+podman exec grafana grafana-cli plugins ls
+
+# Reset admin password
+podman exec grafana grafana-cli admin reset-admin-password newpassword
+
+# Check Grafana health
+curl http://localhost:3001/api/health
+
+# Export a dashboard as JSON (via API)
+curl -u admin:changeme http://localhost:3001/api/dashboards/uid/YOUR_UID | python3 -m json.tool
+
+# Import a dashboard from Grafana.com by ID
+# Go to Dashboards → Import → paste ID (e.g., 1860 for Node Exporter Full)
 ```
 
 **Useful dashboard imports** (Dashboard → Import → paste ID):
@@ -176,14 +263,22 @@ podman run -d \
 
 **Purpose:** Replaces Promtail, Grafana Agent, and OpenTelemetry Collector in a single binary. Scrapes metrics, ships logs to Loki, and forwards traces to Tempo. The recommended replacement for running separate collection agents.
 
+```yaml
+# ~/alloy/compose.yaml
+services:
+  alloy:
+    image: grafana/alloy:latest
+    ports:
+      - 127.0.0.1:12345:12345
+    volumes:
+      - /home/user/alloy/config.alloy:/etc/alloy/config.alloy:ro,Z
+      - /var/log:/var/log:ro
+    command: run /etc/alloy/config.alloy
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name alloy \
-  -p 127.0.0.1:12345:12345 \
-  -v /home/user/alloy/config.alloy:/etc/alloy/config.alloy:ro,Z \
-  -v /var/log:/var/log:ro \
-  --restart unless-stopped \
-  grafana/alloy:latest run /etc/alloy/config.alloy
+cd ~/alloy && podman-compose up -d
 ```
 
 ---
@@ -192,13 +287,20 @@ podman run -d \
 
 **Purpose:** Log aggregation system from Grafana Labs. Stores logs indexed by labels — cheap, fast, and queryable in Grafana alongside your metrics. Use Alloy (or the older Promtail) to ship container and system logs into Loki.
 
+```yaml
+# ~/loki/compose.yaml
+services:
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - 127.0.0.1:3100:3100
+    volumes:
+      - /home/user/loki:/loki:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name loki \
-  -p 127.0.0.1:3100:3100 \
-  -v /home/user/loki:/loki:Z \
-  --restart unless-stopped \
-  grafana/loki:latest
+cd ~/loki && podman-compose up -d
 ```
 
 **Ship container logs with Alloy** — add to your `config.alloy`:
@@ -228,21 +330,35 @@ loki.write "default" {
 
 **Purpose:** Real-time system and container metrics with zero configuration. Auto-discovers running containers, processes, databases, and services. Provides built-in anomaly detection, and exports to Prometheus for Grafana dashboards.
 
+```yaml
+# ~/netdata/compose.yaml
+services:
+  netdata:
+    image: netdata/netdata:latest
+    ports:
+      - 127.0.0.1:19999:19999
+    volumes:
+      - netdata_config:/etc/netdata
+      - netdata_lib:/var/lib/netdata
+      - netdata_cache:/var/cache/netdata
+      - /etc/passwd:/host/etc/passwd:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor=unconfined
+    restart: unless-stopped
+
+volumes:
+  netdata_cache:
+  netdata_config:
+  netdata_lib:
+```
+
 ```bash
-podman run -d \
-  --name netdata \
-  -p 127.0.0.1:19999:19999 \
-  --cap-add SYS_PTRACE \
-  --security-opt apparmor=unconfined \
-  -v netdata_config:/etc/netdata \
-  -v netdata_lib:/var/lib/netdata \
-  -v netdata_cache:/var/cache/netdata \
-  -v /etc/passwd:/host/etc/passwd:ro \
-  -v /proc:/host/proc:ro \
-  -v /sys:/host/sys:ro \
-  -v /run/user/$(id -u)/podman/podman.sock:/var/run/docker.sock:ro \
-  --restart unless-stopped \
-  netdata/netdata:latest
+cd ~/netdata && podman-compose up -d
 ```
 
 Access at `http://localhost:19999`. Good first option when you want metrics immediately without writing any configuration.
@@ -253,13 +369,35 @@ Access at `http://localhost:19999`. Good first option when you want metrics imme
 
 **Purpose:** Self-hosted uptime monitoring with beautiful status pages. Monitors HTTP/HTTPS endpoints, TCP ports, DNS resolution, MQTT topics, and Docker container health. Sends alerts via ntfy, Telegram, Slack, email, and 50+ integrations.
 
+```yaml
+# ~/uptime-kuma/compose.yaml
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:latest
+    ports:
+      - 127.0.0.1:3002:3001
+    volumes:
+      - /home/user/uptime-kuma:/app/data:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name uptime-kuma \
-  -p 127.0.0.1:3002:3001 \
-  -v /home/user/uptime-kuma:/app/data:Z \
-  --restart unless-stopped \
-  louislam/uptime-kuma:latest
+cd ~/uptime-kuma && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# Backup Uptime Kuma data
+cp -r /home/user/uptime-kuma /home/user/uptime-kuma.bak
+
+# View logs
+podman logs -f uptime-kuma
+
+# Check all monitors via API (requires API key from Settings → API Keys)
+curl -H "Authorization: Bearer YOUR_API_KEY" http://localhost:3002/api/v1/monitor
+
+# Restart after config change
+podman restart uptime-kuma
 ```
 
 Access at `http://localhost:3002`. Create monitors for each service you run. The built-in status page can be shared with users to communicate outages.
@@ -281,16 +419,27 @@ services:
     restart: unless-stopped
 ```
 
-**Agent on each monitored server:**
 ```bash
-podman run -d \
-  --name beszel-agent \
-  --network host \
-  -v /run/user/$(id -u)/podman/podman.sock:/var/run/docker.sock:ro \
-  -e PORT=45876 \
-  -e KEY="your-public-key-from-hub" \
-  --restart unless-stopped \
-  henrygd/beszel-agent:latest
+cd ~/beszel && podman-compose up -d
+```
+
+**Agent on each monitored server:**
+```yaml
+# ~/beszel-agent/compose.yaml
+services:
+  beszel-agent:
+    image: henrygd/beszel-agent:latest
+    network_mode: host
+    volumes:
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    environment:
+      PORT: 45876
+      KEY: your-public-key-from-hub
+    restart: unless-stopped
+```
+
+```bash
+cd ~/beszel-agent && podman-compose up -d
 ```
 
 ---
@@ -299,13 +448,20 @@ podman run -d \
 
 **Purpose:** Live container log viewer in the browser. Zero setup — mount the Podman socket and browse logs for any running container in real time. Supports log search, filtering, and multi-host aggregation.
 
+```yaml
+# ~/dozzle/compose.yaml
+services:
+  dozzle:
+    image: amir20/dozzle:latest
+    ports:
+      - 127.0.0.1:8888:8080
+    volumes:
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name dozzle \
-  -p 127.0.0.1:8888:8080 \
-  -v /run/user/$(id -u)/podman/podman.sock:/var/run/docker.sock:ro \
-  --restart unless-stopped \
-  amir20/dozzle:latest
+cd ~/dozzle && podman-compose up -d
 ```
 
 ---
@@ -314,15 +470,25 @@ podman run -d \
 
 **Purpose:** Dead man's switch for cron jobs and scheduled tasks. Your scripts ping a URL when they finish — Healthchecks alerts you if the ping doesn't arrive on schedule. Essential for monitoring backup jobs, data sync tasks, and other scheduled work.
 
+```yaml
+# ~/healthchecks/compose.yaml
+services:
+  healthchecks:
+    image: healthchecks/healthchecks:latest
+    ports:
+      - 127.0.0.1:8000:8000
+    environment:
+      SECRET_KEY: changeme-run-openssl-rand-base64-32
+      SITE_ROOT: https://hc.home.local
+      ALLOWED_HOSTS: hc.home.local,localhost
+      DEBUG: "False"
+    volumes:
+      - /home/user/healthchecks/data:/data:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name healthchecks \
-  -p 127.0.0.1:8000:8000 \
-  -e SECRET_KEY=$(openssl rand -base64 32) \
-  -e SITE_ROOT=https://hc.home.local \
-  -v /home/user/healthchecks/data:/data:Z \
-  --restart unless-stopped \
-  healthchecks/healthchecks:latest
+cd ~/healthchecks && podman-compose up -d
 ```
 
 **Use in a backup script:**
@@ -337,15 +503,25 @@ podman exec restic restic backup /data && \
 
 **Purpose:** Runs automated Ookla/LibreSpeed tests on a schedule and stores results with charts. Useful for documenting ISP performance over time and catching degradation before it becomes a problem.
 
+```yaml
+# ~/speedtest/compose.yaml
+services:
+  speedtest:
+    image: lscr.io/linuxserver/speedtest-tracker:latest
+    ports:
+      - 127.0.0.1:8092:80
+    environment:
+      APP_KEY: base64:changeme-run-openssl-rand-base64-32
+      DB_CONNECTION: sqlite
+      PUID: "1000"
+      PGID: "1000"
+    volumes:
+      - /home/user/speedtest/config:/config:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name speedtest \
-  -p 127.0.0.1:8092:80 \
-  -e APP_KEY=base64:$(openssl rand -base64 32) \
-  -e DB_CONNECTION=sqlite \
-  -v /home/user/speedtest/config:/config:Z \
-  --restart unless-stopped \
-  lscr.io/linuxserver/speedtest-tracker:latest
+cd ~/speedtest && podman-compose up -d
 ```
 
 ---
@@ -354,14 +530,21 @@ podman run -d \
 
 **Purpose:** Network latency and packet loss monitor. Sends probes to configurable targets (your ISP gateway, 1.1.1.1, a VPS) and plots RTT over time — excellent for diagnosing intermittent network issues.
 
+```yaml
+# ~/smokeping/compose.yaml
+services:
+  smokeping:
+    image: lscr.io/linuxserver/smokeping:latest
+    ports:
+      - 127.0.0.1:8081:80
+    volumes:
+      - /home/user/smokeping/config:/config:Z
+      - /home/user/smokeping/data:/data:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name smokeping \
-  -p 127.0.0.1:8081:80 \
-  -v /home/user/smokeping/config:/config:Z \
-  -v /home/user/smokeping/data:/data:Z \
-  --restart unless-stopped \
-  lscr.io/linuxserver/smokeping:latest
+cd ~/smokeping && podman-compose up -d
 ```
 
 ---
@@ -370,13 +553,20 @@ podman run -d \
 
 **Purpose:** Declarative, Git-friendly uptime and health monitoring. Define endpoints in YAML — HTTP, TCP, DNS, ICMP — with configurable conditions. Lighter than Uptime Kuma and easy to version-control. Ships a built-in status page.
 
+```yaml
+# ~/gatus/compose.yaml
+services:
+  gatus:
+    image: twinproduction/gatus:latest
+    ports:
+      - 127.0.0.1:8088:8080
+    volumes:
+      - /home/user/gatus/config:/config:ro,Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name gatus \
-  -p 127.0.0.1:8088:8080 \
-  -v /home/user/gatus/config:/config:ro,Z \
-  --restart unless-stopped \
-  twinproduction/gatus:latest
+cd ~/gatus && podman-compose up -d
 ```
 
 **Example `config.yaml`:**
@@ -408,16 +598,21 @@ endpoints:
 
 **Purpose:** Drop-in Prometheus replacement with 10× lower memory usage, better compression, and faster queries. Fully compatible with the Prometheus remote-write protocol and PromQL — point any Prometheus-scraping agent (Grafana Alloy, Telegraf, node-exporter) at VictoriaMetrics without code changes. Ideal when Prometheus starts consuming too much RAM or when you need long-term metric retention without downsampling.
 
+```yaml
+# ~/victoriametrics/compose.yaml
+services:
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:latest
+    ports:
+      - 127.0.0.1:8428:8428
+    volumes:
+      - /home/user/victoriametrics/data:/victoria-metrics-data:Z
+    command: --storageDataPath=/victoria-metrics-data --retentionPeriod=12 --selfScrapeInterval=10s
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name victoriametrics \
-  -p 127.0.0.1:8428:8428 \
-  -v /home/user/victoriametrics/data:/victoria-metrics-data:Z \
-  --restart unless-stopped \
-  victoriametrics/victoria-metrics:latest \
-    --storageDataPath=/victoria-metrics-data \
-    --retentionPeriod=12 \
-    --selfScrapeInterval=10s
+cd ~/victoriametrics && podman-compose up -d
 ```
 
 **Reconfigure Grafana to use VictoriaMetrics** instead of Prometheus:
@@ -438,16 +633,24 @@ remote_write:
 
 **Purpose:** Distributed tracing backend from Grafana Labs. Stores traces from OpenTelemetry, Jaeger, Zipkin, and other instrumented services, then lets you correlate them with your Prometheus metrics and Loki logs in the same Grafana dashboard. Essential when you need to trace a slow request through multiple microservices.
 
+```yaml
+# ~/tempo/compose.yaml
+services:
+  tempo:
+    image: grafana/tempo:latest
+    ports:
+      - 127.0.0.1:3200:3200
+      - 127.0.0.1:4317:4317
+      - 127.0.0.1:4318:4318
+    volumes:
+      - /home/user/tempo/config.yaml:/etc/tempo.yaml:ro,Z
+      - /home/user/tempo/data:/var/tempo:Z
+    command: -config.file=/etc/tempo.yaml
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name tempo \
-  -p 127.0.0.1:3200:3200 \
-  -p 127.0.0.1:4317:4317 \
-  -p 127.0.0.1:4318:4318 \
-  -v /home/user/tempo/config.yaml:/etc/tempo.yaml:ro,Z \
-  -v /home/user/tempo/data:/var/tempo:Z \
-  --restart unless-stopped \
-  grafana/tempo:latest -config.file=/etc/tempo.yaml
+cd ~/tempo && podman-compose up -d
 ```
 
 **Minimal `config.yaml`:**
@@ -520,6 +723,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/zabbix && podman-compose up -d
+```
+
 Default login: `Admin` / `zabbix`. Change immediately. Add hosts under Configuration → Hosts, assign templates (Linux by Zabbix agent, Network interfaces by SNMP, etc.).
 
 **Install Zabbix agent on monitored hosts:**
@@ -576,6 +783,10 @@ services:
     restart: unless-stopped
 ```
 
+```bash
+cd ~/signoz && podman-compose up -d
+```
+
 > Use the official `install.sh` script for production — it sets up all dependencies and volume mounts correctly. The manual compose above is illustrative.
 
 Access at `http://localhost:3301`. Instrument your apps with the OpenTelemetry SDK and point them at `http://localhost:4317` (gRPC) or `http://localhost:4318` (HTTP).
@@ -586,15 +797,22 @@ Access at `http://localhost:3301`. Instrument your apps with the OpenTelemetry S
 
 **Purpose:** Vendor-neutral telemetry pipeline for traces, metrics, and logs. Acts as a central hub that receives telemetry from your applications (via OTLP, Jaeger, Zipkin, or Prometheus scrape), processes and enriches it, then fans it out to multiple backends — Grafana Tempo, Loki, Prometheus, SigNoz, Jaeger, and cloud vendors simultaneously. If you run more than one observability backend, the Collector removes per-backend SDK lock-in from your application code.
 
+```yaml
+# ~/otel-collector/compose.yaml
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    ports:
+      - 127.0.0.1:4317:4317
+      - 127.0.0.1:4318:4318
+      - 127.0.0.1:8889:8889
+    volumes:
+      - /home/user/otel/otel-collector.yaml:/etc/otelcol-contrib/config.yaml:ro,Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name otel-collector \
-  -p 127.0.0.1:4317:4317 \
-  -p 127.0.0.1:4318:4318 \
-  -p 127.0.0.1:8889:8889 \
-  -v /home/user/otel/otel-collector.yaml:/etc/otelcol-contrib/config.yaml:ro,Z \
-  --restart unless-stopped \
-  otel/opentelemetry-collector-contrib:latest
+cd ~/otel-collector && podman-compose up -d
 ```
 
 **Example `otel-collector.yaml`:**
@@ -653,14 +871,22 @@ service:
 
 **Purpose:** Full-stack IT infrastructure monitoring with auto-discovery, agent-based checks, SNMP, hardware health (IPMI/iDRAC), service states, inventory, and a powerful notification engine. More approachable than Zabbix for users who want a polished setup wizard and less XML configuration. The free edition supports unlimited hosts with a full feature set for home lab and small-business use.
 
+```yaml
+# ~/checkmk/compose.yaml
+services:
+  checkmk:
+    image: checkmk/check-mk-free:latest
+    ports:
+      - 127.0.0.1:8095:5000
+    volumes:
+      - /home/user/checkmk/data:/omd/sites:Z
+    tmpfs:
+      - /omd/sites/cmk/tmp:uid=1000,gid=1000
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name checkmk \
-  -p 127.0.0.1:8095:5000 \
-  -v /home/user/checkmk/data:/omd/sites:Z \
-  --tmpfs /omd/sites/cmk/tmp:uid=1000,gid=1000 \
-  --restart unless-stopped \
-  checkmk/check-mk-free:latest
+cd ~/checkmk && podman-compose up -d
 ```
 
 Access at `http://localhost:8095/cmk`. The admin password is shown in the container startup logs (`podman logs checkmk`). 
@@ -682,14 +908,21 @@ sudo systemctl enable --now check-mk-agent.socket
 
 **Purpose:** A read-only, real-time web dashboard for Alertmanager. Where Alertmanager's own UI is minimal and hard to navigate during an incident, Karma shows all firing alerts across multiple Alertmanager instances in a clear, filterable card layout — grouped by labels, silenced alerts visible, and instant search across alert names, labels, and annotations. Indispensable when you have many alert rules and need to quickly triage what's actually firing.
 
+```yaml
+# ~/karma/compose.yaml
+services:
+  karma:
+    image: ghcr.io/prymitive/karma:latest
+    ports:
+      - 127.0.0.1:8094:8080
+    environment:
+      ALERTMANAGER_URI: http://host.containers.internal:9093
+      ALERTMANAGER_NAME: home
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name karma \
-  -p 127.0.0.1:8094:8080 \
-  -e ALERTMANAGER_URI=http://host.containers.internal:9093 \
-  -e ALERTMANAGER_NAME="home" \
-  --restart unless-stopped \
-  ghcr.io/prymitive/karma:latest
+cd ~/karma && podman-compose up -d
 ```
 
 Access at `http://localhost:8094`. Karma auto-refreshes every 30 seconds and shows all active alerts with their labels, annotations, and silence status.
@@ -741,7 +974,8 @@ services:
       - "127.0.0.1:1514:1514/udp" # Syslog UDP
     environment:
       GRAYLOG_PASSWORD_SECRET: changeme-run-openssl-rand-base64-48
-      # SHA2 of your admin password: echo -n yourpassword | sha256sum
+      # SHA2 of your admin password: echo -n yourpassword | sha256sum | cut -d' ' -f1
+      # The value below is the hash of 'admin' — CHANGE IT before deploying
       GRAYLOG_ROOT_PASSWORD_SHA2: "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"
       GRAYLOG_HTTP_EXTERNAL_URI: https://graylog.home.local/
       GRAYLOG_ELASTICSEARCH_HOSTS: http://opensearch:9200
@@ -758,19 +992,30 @@ volumes:
   os_data:
 ```
 
-> The default `GRAYLOG_ROOT_PASSWORD_SHA2` above is the SHA-256 hash of `admin`. Always replace it: `echo -n yourpassword | sha256sum | cut -d' ' -f1`
+```bash
+cd ~/graylog && podman-compose up -d
+```
+
+> The default `GRAYLOG_ROOT_PASSWORD_SHA2` above is the SHA-256 hash of `admin`. Always replace it with your own: `echo -n yourpassword | sha256sum | cut -d' ' -f1`
 
 Access at `http://localhost:9000`. Login with `admin` / your password. Create inputs under System → Inputs.
 
 **Send logs from other containers via GELF:**
+```yaml
+# ~/myapp/compose.yaml
+services:
+  myapp:
+    image: myapp:latest
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+        tag: "myapp"
+    restart: unless-stopped
+```
+
 ```bash
-# Add to any podman run command to forward logs to Graylog
-podman run -d \
-  --name myapp \
-  --log-driver=gelf \
-  --log-opt gelf-address=udp://localhost:12201 \
-  --log-opt tag=myapp \
-  myapp:latest
+cd ~/myapp && podman-compose up -d
 ```
 
 **Send Caddy access logs to Graylog via Syslog:**
@@ -819,15 +1064,23 @@ output.logstash:
 
 **Purpose:** Monitor any webpage for changes and get notified when content updates. Watches price drops, government notices, stock availability, documentation changes, job postings, or any content that changes over time. Supports CSS selectors for monitoring specific page elements, visual diffing, and notifications via ntfy, email, Telegram, Slack, Discord, and 80+ other services.
 
+```yaml
+# ~/changedetection/compose.yaml
+services:
+  changedetection:
+    image: ghcr.io/dgtlmoon/changedetection.io:latest
+    ports:
+      - 127.0.0.1:5000:5000
+    volumes:
+      - /home/user/changedetection/data:/datastore:Z
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name changedetection \
-  -p 127.0.0.1:5000:5000 \
-  -v /home/user/changedetection/data:/datastore:Z \
-  -e PUID=$(id -u) \
-  -e PGID=$(id -g) \
-  --restart unless-stopped \
-  ghcr.io/dgtlmoon/changedetection.io:latest
+cd ~/changedetection && podman-compose up -d
 ```
 
 Access at `http://localhost:5000`. Add URLs to watch, optionally set a CSS/XPath selector to target specific page elements, configure the check interval, and connect a notification service.

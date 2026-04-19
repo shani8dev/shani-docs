@@ -62,6 +62,10 @@ volumes:
   db_data:
 ```
 
+```bash
+cd ~/openmrs && podman-compose up -d
+```
+
 Access the backend at `http://localhost:8080/openmrs` and the React SPA frontend at `http://localhost:8081`.
 
 **Key OpenMRS modules to install:**
@@ -77,21 +81,47 @@ Access the backend at `http://localhost:8080/openmrs` and the React SPA frontend
 
 **Purpose:** Full-featured open-source EHR/EMR and practice management system for small to medium clinics. Includes patient demographics, scheduling, clinical notes (SOAP), e-prescribing, billing (ICD-10, CPT), lab orders, imaging, and a patient portal. More approachable for Western clinical workflows than OpenMRS.
 
+```yaml
+# ~/openemr/compose.yaml
+services:
+  openemr:
+    image: openemr/openemr:7.0.2
+    ports:
+      - 127.0.0.1:8083:80
+      - 127.0.0.1:8084:443
+    volumes:
+      - /home/user/openemr/sites:/var/www/localhost/htdocs/openemr/sites:Z
+      - /home/user/openemr/logs:/var/log:Z
+    environment:
+      MYSQL_HOST: host.containers.internal
+      MYSQL_ROOT_PASS: rootchangeme
+      MYSQL_USER: openemr
+      MYSQL_PASS: changeme
+      OE_USER: admin
+      OE_PASS: changeme
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name openemr \
-  -p 127.0.0.1:8083:80 \
-  -p 127.0.0.1:8084:443 \
-  -v /home/user/openemr/sites:/var/www/localhost/htdocs/openemr/sites:Z \
-  -v /home/user/openemr/logs:/var/log:Z \
-  -e MYSQL_HOST=host.containers.internal \
-  -e MYSQL_ROOT_PASS=rootchangeme \
-  -e MYSQL_USER=openemr \
-  -e MYSQL_PASS=changeme \
-  -e OE_USER=admin \
-  -e OE_PASS=changeme \
-  --restart unless-stopped \
-  openemr/openemr:7.0.2
+cd ~/openemr && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# View logs
+podman logs -f openemr
+
+# Run OpenEMR CLI commands
+podman exec openemr php /var/www/localhost/htdocs/openemr/library/oe_utils.php
+
+# Backup OpenEMR database
+podman exec openemr mysqldump -h host.containers.internal -u openemr -pchangeme openemr > openemr-backup.sql
+
+# Check FHIR API is responding
+curl http://localhost:8083/apis/default/fhir/metadata | python3 -m json.tool | head -20
+
+# Create an admin via CLI
+podman exec openemr php /var/www/localhost/htdocs/openemr/contrib/util/installModules.php
 ```
 
 Access at `http://localhost:8083`. The setup wizard runs on first visit.
@@ -109,20 +139,28 @@ Access at `http://localhost:8083`. The setup wizard runs on first visit.
 
 **Purpose:** Reference implementation of the HL7 FHIR (Fast Healthcare Interoperability Resources) standard. A FHIR server is the interoperability backbone of a modern health data stack — it stores and exposes clinical resources (Patient, Observation, Condition, MedicationRequest, Immunization, DiagnosticReport) in a standardised REST API that any FHIR-compatible app or device can consume.
 
+```yaml
+# ~/hapi-fhir/compose.yaml
+services:
+  hapi-fhir:
+    image: hapiproject/hapi:latest
+    ports:
+      - 127.0.0.1:8082:8080
+    volumes:
+      - /home/user/hapi-fhir/data:/data:Z
+    environment:
+      hapi.fhir.default_encoding: json
+      hapi.fhir.fhir_version: R4
+      spring.datasource.url: jdbc:postgresql://host.containers.internal:5432/hapifhir
+      spring.datasource.username: hapifhir
+      spring.datasource.password: changeme
+      spring.datasource.driverClassName: org.postgresql.Driver
+      spring.jpa.properties.hibernate.dialect: ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name hapi-fhir \
-  -p 127.0.0.1:8082:8080 \
-  -v /home/user/hapi-fhir/data:/data:Z \
-  -e hapi.fhir.default_encoding=json \
-  -e hapi.fhir.fhir_version=R4 \
-  -e spring.datasource.url=jdbc:postgresql://host.containers.internal:5432/hapifhir \
-  -e spring.datasource.username=hapifhir \
-  -e spring.datasource.password=changeme \
-  -e spring.datasource.driverClassName=org.postgresql.Driver \
-  -e spring.jpa.properties.hibernate.dialect=ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect \
-  --restart unless-stopped \
-  hapiproject/hapi:latest
+cd ~/hapi-fhir && podman-compose up -d
 ```
 
 > Create the PostgreSQL database first: `CREATE DATABASE hapifhir;`
@@ -142,6 +180,30 @@ curl "http://localhost:8082/fhir/Observation?subject=Patient/1"
 
 # FHIR capability statement
 curl http://localhost:8082/fhir/metadata
+```
+
+**Common operations:**
+```bash
+# Test the FHIR capability statement
+curl http://localhost:8082/fhir/metadata | python3 -m json.tool | head -30
+
+# Create a Patient resource
+curl -X POST http://localhost:8082/fhir/Patient   -H "Content-Type: application/fhir+json"   -d '{"resourceType":"Patient","name":[{"family":"Smith","given":["John"]}],"birthDate":"1985-04-15","gender":"male"}'
+
+# Search patients by name
+curl "http://localhost:8082/fhir/Patient?family=Smith"
+
+# Get all Observations for a patient
+curl "http://localhost:8082/fhir/Observation?subject=Patient/1"
+
+# Validate a resource
+curl -X POST "http://localhost:8082/fhir/Patient/\$validate"   -H "Content-Type: application/fhir+json"   -d '{"resourceType":"Patient","name":[{"family":"Test"}]}'
+
+# Count resources
+curl "http://localhost:8082/fhir/Patient?_summary=count"
+
+# View server logs
+podman logs -f hapi-fhir
 ```
 
 > OpenEMR, OpenMRS, and wearable sync tools (Apple Health, Google Fit, Garmin) can all export FHIR resources — centralise them in a self-hosted HAPI FHIR server as your personal health data hub.
@@ -181,6 +243,10 @@ services:
 
 volumes:
   pg_data:
+```
+
+```bash
+cd ~/medplum && podman-compose up -d
 ```
 
 ---
@@ -235,6 +301,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/tandoor && podman-compose up -d
+```
+
 ---
 
 ## Wger (Workout Manager)
@@ -279,6 +349,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/wger && podman-compose up -d
+```
+
 **Mobile apps:** wger has iOS and Android apps that sync to a self-hosted server via the REST API.
 
 ---
@@ -287,14 +361,21 @@ volumes:
 
 **Purpose:** Connects to hundreds of US health providers, insurance networks, and labs via SMART on FHIR and downloads your complete health records to your self-hosted server. One dashboard for all your medical history across every provider — visit notes, labs, imaging, prescriptions — stored locally.
 
+```yaml
+# ~/fasten-health/compose.yaml
+services:
+  fasten-health:
+    image: ghcr.io/fastenhealth/fasten-onprem:main
+    ports:
+      - 127.0.0.1:8090:8080
+    volumes:
+      - /home/user/fasten/db:/opt/fasten/db:Z
+      - /home/user/fasten/cache:/opt/fasten/cache:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name fasten-health \
-  -p 127.0.0.1:8090:8080 \
-  -v /home/user/fasten/db:/opt/fasten/db:Z \
-  -v /home/user/fasten/cache:/opt/fasten/cache:Z \
-  --restart unless-stopped \
-  ghcr.io/fastenhealth/fasten-onprem:main
+cd ~/fasten-health && podman-compose up -d
 ```
 
 Access at `http://localhost:8090`. Add providers under Sources → Add Source. Fasten uses the standardised SMART on FHIR authorisation flow — your credentials never touch the Fasten server, only your own instance.

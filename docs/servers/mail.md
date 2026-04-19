@@ -1,7 +1,7 @@
 ---
 title: Mail Servers
 section: Self-Hosting & Servers
-updated: 2026-04-16
+updated: 2026-04-22
 ---
 
 # Mail Servers
@@ -14,7 +14,7 @@ Production-ready email solutions for full data control and privacy.
 **Purpose**: Complete mail suite: Postfix, Dovecot, SOGo, Rspamd, ClamAV, admin UI, and ActiveSync.
 ```yaml
 # Clone: git clone https://github.com/mailcow/mailcow-dockerized
-# Edit mailcow.conf, then run: sudo docker compose up -d
+# Edit mailcow.conf, then run: podman-compose up -d
 ```
 Ports: `25`, `465/587`, `143/993`, `80/443`. Firewall: `sudo firewall-cmd --add-service=smtp --add-service=smtps --add-service=imap --add-service=imaps --add-service=http --add-service=https --permanent && reload`.
 
@@ -33,19 +33,57 @@ volumes: {pg_data: {}}
 
 ## Stalwart Mail Server
 **Purpose**: Next-gen, single-binary Rust mail server. JMAP, IMAP, SMTP, Sieve, webmail built-in. Extremely low resource usage.
+```yaml
+# ~/stalwart/compose.yaml
+services:
+  stalwart:
+    image: stalwartlabs/mail-server:latest
+    ports:
+      - 0.0.0.0:25:25       # SMTP — must be publicly reachable for inbound mail
+      - 0.0.0.0:465:465     # SMTPS (implicit TLS)
+      - 0.0.0.0:587:587     # SMTP submission (STARTTLS)
+      - 0.0.0.0:143:143     # IMAP
+      - 0.0.0.0:993:993     # IMAPS
+      - 127.0.0.1:8080:8080 # Admin web UI (proxied through Caddy)
+    volumes:
+      - /home/user/stalwart:/stalwart:Z
+    environment:
+      STALWART_SERVER__LISTENERS__HTTPS__ADDRESS: 0.0.0.0:8080
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name stalwart \
-  -p 127.0.0.1:25:25 \
-  -p 127.0.0.1:465:465 \
-  -p 127.0.0.1:587:587 \
-  -p 127.0.0.1:143:143 \
-  -p 127.0.0.1:993:993 \
-  -p 127.0.0.1:8080:8080 \
-  -v /home/user/stalwart:/stalwart:Z \
-  -e STALWART_SERVER__LISTENERS__HTTPS__ADDRESS=0.0.0.0:8080 \
-  --restart unless-stopped \
-  stalwartlabs/mail-server:latest
+cd ~/stalwart && podman-compose up -d
+```
+
+**Firewall:**
+```bash
+sudo firewall-cmd --add-service=smtp --add-service=smtps --add-service=imap --add-service=imaps --permanent && sudo firewall-cmd --reload
+```
+```bash
+# View logs
+podman logs -f stalwart
+
+# Add an admin domain
+podman exec stalwart stalwart-cli domain create example.com
+
+# Add a user account
+podman exec stalwart stalwart-cli account create user@example.com --secret changeme
+
+# List all accounts
+podman exec stalwart stalwart-cli account list
+
+# Generate DKIM key for a domain
+podman exec stalwart stalwart-cli dkim generate example.com
+
+# Test SMTP delivery
+podman exec stalwart stalwart-cli smtp test --to test@example.com
+
+# Check mail queue
+podman exec stalwart stalwart-cli queue list
+
+# Flush the mail queue
+podman exec stalwart stalwart-cli queue flush
 ```
 
 ## DNS & Deliverability Checklist
@@ -68,7 +106,7 @@ podman run -d \
 **Purpose:** High-performance self-hosted newsletter and mailing list manager. Send campaign and transactional emails, manage subscribers, run automated sequences, and track opens/clicks — all from a clean web UI. A self-hosted Mailchimp/ConvertKit alternative that handles millions of emails with a tiny resource footprint.
 
 ```yaml
-# ~/listmonk/compose.yml
+# ~/listmonk/compose.yaml
 services:
   listmonk:
     image: listmonk/listmonk:latest
@@ -91,6 +129,10 @@ services:
 
 volumes:
   pg_data:
+```
+
+```bash
+cd ~/listmonk && podman-compose up -d
 ```
 
 **Minimal `config.toml`:**
@@ -141,7 +183,7 @@ newsletter.example.com { reverse_proxy localhost:9000 }
 **Purpose:** Self-hosted email alias service. Create unlimited `random@yourdomain.com` aliases that forward to your real inbox. Aliases can send replies — your real address is never exposed. The self-hosted alternative to SimpleLogin.io, Apple Hide My Email, or DuckDuckGo Email Protection.
 
 ```yaml
-# ~/simplelogin/compose.yml
+# ~/simplelogin/compose.yaml
 services:
   app:
     image: simplelogin/app:latest
@@ -185,6 +227,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/simplelogin && podman-compose up -d
+```
+
 > Requires a public-facing mail server with MX, SPF, DKIM, and DMARC DNS records for the alias domain. Port 25 must be open and not blocked by your ISP — a VPS is strongly recommended.
 
 **Initialise:**
@@ -200,7 +246,7 @@ podman-compose run --rm app python init_app.py
 **Purpose:** Lighter-weight email aliasing server. Create aliases on custom domains, forward to your real inbox, and reply anonymously. Similar to SimpleLogin but simpler to operate.
 
 ```yaml
-# ~/anonaddy/compose.yml
+# ~/anonaddy/compose.yaml
 services:
   anonaddy:
     image: anonaddy/anonaddy:latest
@@ -237,6 +283,10 @@ services:
 volumes: {db_data: {}}
 ```
 
+```bash
+cd ~/anonaddy && podman-compose up -d
+```
+
 ---
 
 ## Postal (Transactional Email Server)
@@ -244,7 +294,7 @@ volumes: {db_data: {}}
 **Purpose:** Full-featured transactional email sending platform with delivery tracking, bounce handling, webhooks, and an HTTP API. Use Postal when your applications need to send sign-up confirmations, password resets, and notifications through your own infrastructure. The self-hosted SendGrid/Postmark alternative.
 
 ```yaml
-# ~/postal/compose.yml
+# ~/postal/compose.yaml
 services:
   postal:
     image: ghcr.io/postalserver/postal:latest
@@ -282,6 +332,10 @@ services:
 volumes: {db_data: {}, rabbit_data: {}}
 ```
 
+```bash
+cd ~/postal && podman-compose up -d
+```
+
 **Initialise and create admin:**
 ```bash
 podman-compose run --rm postal initialize
@@ -313,15 +367,38 @@ Web, desktop, mobile, and terminal clients for secure IMAP/SMTP access.
 ## Roundcube / SnappyMail / SOGo
 **Purpose**: Roundcube is a mature, plugin-rich webmail client. SnappyMail is a modern, lightweight fork. SOGo is a groupware with ActiveSync.
 ```yaml
-# ~/roundcube/compose.yml
+# ~/roundcube/compose.yaml
 services:
   roundcube: { image: roundcube/roundcubemail:latest, ports: ["127.0.0.1:8080:80"], environment: {ROUNDCUBE_DEFAULT_HOST: tls://mail.example.com}, depends_on: [db] }
   db: { image: postgres:15-alpine, environment: {POSTGRES_USER: roundcube, POSTGRES_PASSWORD: secret, POSTGRES_DB: roundcubemail}, volumes: [pg_data:/var/lib/postgresql/data] }
 volumes: {pg_data: {}}
 ```
+
 ```bash
-podman run -d --name snappymail -p 127.0.0.1:8888:8888 -v /home/user/snappymail/data:/var/lib/snappymail:Z --restart unless-stopped teohhanhui/snappymail
-podman run -d --name sogo -p 127.0.0.1:20000:20000 -v /home/user/sogo/config:/etc/sogo:Z -v /home/user/sogo/lib:/var/lib/sogo:Z --restart unless-stopped sogo/sogo
+cd ~/roundcube && podman-compose up -d
+```
+```yaml
+# ~/snappymail/compose.yaml
+services:
+  snappymail:
+    image: teohhanhui/snappymail
+    ports:
+      - 127.0.0.1:8888:8888
+    volumes:
+      - /home/user/snappymail/data:/var/lib/snappymail:Z
+    restart: unless-stopped
+  sogo:
+    image: sogo/sogo
+    ports:
+      - 127.0.0.1:20000:20000
+    volumes:
+      - /home/user/sogo/config:/etc/sogo:Z
+      - /home/user/sogo/lib:/var/lib/sogo:Z
+    restart: unless-stopped
+```
+
+```bash
+cd ~/snappymail && podman-compose up -d
 ```
 
 ## Thunderbird / KMail / Evolution

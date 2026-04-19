@@ -15,7 +15,7 @@ Self-hosted chat, push notifications, VoIP, and team collaboration platforms.
 **Purpose:** Federated, open-source real-time communication protocol. Powers Element, Schildi, FluffyChat, and other secure messengers. Messages are end-to-end encrypted, decentralised, and stored on your own server.
 
 ```yaml
-# ~/matrix/compose.yml
+# ~/matrix/compose.yaml
 services:
   synapse:
     image: matrixdotorg/synapse:latest
@@ -26,6 +26,10 @@ services:
       SYNAPSE_SERVER_NAME: chat.example.com
       SYNAPSE_REPORT_STATS: "no"
     restart: unless-stopped
+```
+
+```bash
+cd ~/matrix && podman-compose up -d
 ```
 
 **Generate initial config:**
@@ -42,6 +46,27 @@ podman run --rm \
 podman exec -it synapse register_new_matrix_user \
   http://localhost:8008 -c /data/homeserver.yaml \
   --admin -u admin -p changeme
+```
+
+**Common operations:**
+```bash
+# Create a new user
+podman exec -it synapse register_new_matrix_user   http://localhost:8008 -c /data/homeserver.yaml   -u newuser -p newpassword --no-admin
+
+# Make a user admin
+podman exec synapse   /bin/bash -c "cd /data && python -m synapse.app.admin_cmd -c homeserver.yaml   modify-user --make-admin @user:chat.example.com"
+
+# View server stats
+curl http://localhost:8448/_synapse/admin/v1/server_version   -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+
+# List all registered users
+curl http://localhost:8448/_synapse/admin/v2/users?from=0&limit=100   -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+
+# Reload config
+podman kill --signal=HUP synapse
+
+# Run database maintenance
+podman exec synapse python -m synapse.app.admin_cmd   -c /data/homeserver.yaml run-background-updates
 ```
 
 **Caddy:**
@@ -61,17 +86,25 @@ chat.example.com {
 
 **Purpose:** Slack alternative for developer and engineering teams. Threads, channels, file sharing, built-in code snippets, webhooks, and bot integrations. GDPR-compliant; all data stays on your server.
 
+```yaml
+# ~/mattermost/compose.yaml
+services:
+  mattermost:
+    image: mattermost/mattermost-team-edition
+    ports:
+      - 127.0.0.1:8065:8065
+    volumes:
+      - /home/user/mattermost/config:/mattermost/config:Z
+      - /home/user/mattermost/data:/mattermost/data:Z
+      - /home/user/mattermost/logs:/mattermost/logs:Z
+    environment:
+      MM_SQLSETTINGS_DRIVERNAME: postgres
+      MM_SQLSETTINGS_DATASOURCE: postgres://mattermost:changeme@host.containers.internal/mattermost?sslmode=disable
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name mattermost \
-  -p 127.0.0.1:8065:8065 \
-  -v /home/user/mattermost/config:/mattermost/config:Z \
-  -v /home/user/mattermost/data:/mattermost/data:Z \
-  -v /home/user/mattermost/logs:/mattermost/logs:Z \
-  -e MM_SQLSETTINGS_DRIVERNAME=postgres \
-  -e MM_SQLSETTINGS_DATASOURCE="postgres://mattermost:changeme@localhost/mattermost?sslmode=disable" \
-  --restart unless-stopped \
-  mattermost/mattermost-team-edition
+cd ~/mattermost && podman-compose up -d
 ```
 
 > Mattermost requires PostgreSQL. Run it from the [Databases wiki](https://docs.shani.dev/doc/servers/databases) first.
@@ -83,7 +116,7 @@ podman run -d \
 **Purpose:** Omnichannel communication platform with live chat, email, social media, and WhatsApp integration. Better than Mattermost for customer-facing teams; heavier resource footprint.
 
 ```yaml
-# ~/rocketchat/compose.yml
+# ~/rocketchat/compose.yaml
 services:
   rocketchat:
     image: rocket.chat:latest
@@ -105,20 +138,35 @@ volumes:
   mongo_data:
 ```
 
----
+```bash
+cd ~/rocketchat && podman-compose up -d
+```
+
+**Initialise the MongoDB replica set (required on first run):**
+```bash
+podman exec mongodb mongosh --eval "rs.initiate()"
+```
 
 ## Ntfy
 
 **Purpose:** Lightweight push notification server with a mobile app (iOS and Android), browser notifications, and pub/sub topics. Send alerts from any script, cron job, or service to your phone with a single `curl` command.
 
+```yaml
+# ~/ntfy/compose.yaml
+services:
+  ntfy:
+    image: binwiederhier/ntfy
+    ports:
+      - 127.0.0.1:8090:80
+    volumes:
+      - /home/user/ntfy/cache:/var/cache/ntfy:Z
+      - /home/user/ntfy/config:/etc/ntfy:Z
+    command: serve
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name ntfy \
-  -p 127.0.0.1:8090:80 \
-  -v /home/user/ntfy/cache:/var/cache/ntfy:Z \
-  -v /home/user/ntfy/config:/etc/ntfy:Z \
-  --restart unless-stopped \
-  binwiederhier/ntfy serve
+cd ~/ntfy && podman-compose up -d
 ```
 
 **Send a notification:**
@@ -135,6 +183,27 @@ curl \
   ntfy.sh/your-topic
 ```
 
+**Common operations:**
+```bash
+# Send a simple notification
+curl -d "Backup complete" ntfy.sh/your-topic
+
+# Send to self-hosted instance with priority and title
+curl   -H "Title: Home Server Alert"   -H "Priority: high"   -H "Tags: warning,computer"   -d "Disk usage is above 90%"   http://localhost:8090/your-topic
+
+# Send with attachment
+curl -T screenshot.png   -H "Filename: screenshot.png"   http://localhost:8090/your-topic
+
+# Subscribe and watch (long-poll)
+curl -s http://localhost:8090/your-topic/json
+
+# List published messages (last 10)
+curl http://localhost:8090/your-topic/json?poll=1
+
+# Create a user (on self-hosted with auth enabled)
+podman exec ntfy ntfy user add --role=admin myuser
+```
+
 > For private notifications, self-host Ntfy and set `AUTH_DEFAULT_ACCESS=deny-all` in the config, then create user accounts.
 
 ---
@@ -143,13 +212,20 @@ curl \
 
 **Purpose:** Simple self-hosted push notification server with REST API, WebSocket stream, and an Android app. All notifications stay on your server — no cloud routing.
 
+```yaml
+# ~/gotify/compose.yaml
+services:
+  gotify:
+    image: gotify/server
+    ports:
+      - 127.0.0.1:8070:80
+    volumes:
+      - /home/user/gotify/data:/app/data:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name gotify \
-  -p 127.0.0.1:8070:80 \
-  -v /home/user/gotify/data:/app/data:Z \
-  --restart unless-stopped \
-  gotify/server
+cd ~/gotify && podman-compose up -d
 ```
 
 Access at `http://localhost:8070`. Create an app token and use it in your scripts:
@@ -168,9 +244,9 @@ curl "http://localhost:8070/message?token=YOUR_APP_TOKEN" \
 **Purpose:** Self-hosted, open-source video conferencing. No accounts required, no time limits, end-to-end encryption. Drop-in replacement for Zoom or Google Meet for personal or small-team use. For education-specific virtual classrooms with whiteboards, breakout rooms, polling, and LMS integration, see [BigBlueButton in the Education wiki](https://docs.shani.dev/doc/servers/education#bigbluebutton-virtual-classroom).
 
 ```yaml
-# ~/jitsi/compose.yml — use the official quick-install from github.com/jitsi/docker-jitsi-meet
+# ~/jitsi/compose.yaml — use the official quick-install from github.com/jitsi/docker-jitsi-meet
 # Run: wget $(curl -s https://api.github.com/repos/jitsi/docker-jitsi-meet/releases/latest | grep 'tarball' | cut -d'"' -f4) -O jitsi.tar.gz
-# Extract and run: cp env.example .env && ./gen-passwords.sh && docker-compose up -d
+# Extract and run: cp env.example .env && ./gen-passwords.sh && podman-compose up -d
 ```
 
 Ports required: `80/tcp`, `443/tcp`, `10000/udp` (media). Caddy should proxy 80/443 and pass through the media port.
@@ -181,17 +257,25 @@ Ports required: `80/tcp`, `443/tcp`, `10000/udp` (media). Caddy should proxy 80/
 
 **Purpose:** A Matrix homeserver written in Rust. Uses significantly less RAM than Synapse (~50 MB vs ~500 MB). Ideal for personal or small family use where Synapse's federation features are not needed.
 
+```yaml
+# ~/conduit/compose.yaml
+services:
+  conduit:
+    image: matrixconduit/matrix-conduit:latest
+    ports:
+      - 127.0.0.1:6167:6167
+    volumes:
+      - /home/user/conduit/data:/var/lib/matrix-conduit:Z
+    environment:
+      CONDUIT_SERVER_NAME: chat.example.com
+      CONDUIT_DATABASE_BACKEND: rocksdb
+      CONDUIT_ALLOW_REGISTRATION: false
+      CONDUIT_TRUSTED_SERVERS: ["matrix.org"]
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name conduit \
-  -p 127.0.0.1:6167:6167 \
-  -v /home/user/conduit/data:/var/lib/matrix-conduit:Z \
-  -e CONDUIT_SERVER_NAME=chat.example.com \
-  -e CONDUIT_DATABASE_BACKEND=rocksdb \
-  -e CONDUIT_ALLOW_REGISTRATION=false \
-  -e CONDUIT_TRUSTED_SERVERS='["matrix.org"]' \
-  --restart unless-stopped \
-  matrixconduit/matrix-conduit:latest
+cd ~/conduit && podman-compose up -d
 ```
 
 > Choose Conduit for personal use on low-RAM hardware. Choose Synapse for full federation, bridges, and admin features.
@@ -203,7 +287,7 @@ podman run -d \
 **Purpose:** The gold-standard self-hosted community discussion platform. Threaded topics, real-time notifications, badges, trust levels, rich embeds, email-in replies, and an extensive plugin ecosystem. Used by GitHub, Rust, Docker, and thousands of open-source projects. If your community currently lives on a subreddit, Facebook group, or Google Group, Discourse is the self-hosted replacement.
 
 ```yaml
-# ~/discourse/compose.yml — use the official launcher (recommended)
+# ~/discourse/compose.yaml — use the official launcher (recommended)
 # git clone https://github.com/discourse/discourse_docker
 # cd discourse_docker && cp samples/standalone.yml containers/app.yml
 # Edit containers/app.yml, then:
@@ -211,24 +295,36 @@ podman run -d \
 # ./launcher start app
 ```
 
+```bash
+cd ~/discourse && podman-compose up -d
+```
+
 For a containerised quickstart with Podman:
 
+```yaml
+# ~/discourse/compose.yaml
+services:
+  discourse:
+    image: bitnami/discourse:latest
+    ports:
+      - 127.0.0.1:3100:3000
+    volumes:
+      - /home/user/discourse/data:/shared:Z
+    environment:
+      DISCOURSE_DB_HOST: host.containers.internal
+      DISCOURSE_DB_NAME: discourse
+      DISCOURSE_DB_USERNAME: discourse
+      DISCOURSE_DB_PASSWORD: changeme
+      DISCOURSE_REDIS_HOST: host.containers.internal
+      DISCOURSE_HOSTNAME: forum.example.com
+      DISCOURSE_DEVELOPER_EMAILS: admin@example.com
+      DISCOURSE_SMTP_ADDRESS: localhost
+      DISCOURSE_SMTP_PORT: 25
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name discourse \
-  -p 127.0.0.1:3100:3000 \
-  -v /home/user/discourse/data:/shared:Z \
-  -e DISCOURSE_DB_HOST=host.containers.internal \
-  -e DISCOURSE_DB_NAME=discourse \
-  -e DISCOURSE_DB_USERNAME=discourse \
-  -e DISCOURSE_DB_PASSWORD=changeme \
-  -e DISCOURSE_REDIS_HOST=host.containers.internal \
-  -e DISCOURSE_HOSTNAME=forum.example.com \
-  -e DISCOURSE_DEVELOPER_EMAILS=admin@example.com \
-  -e DISCOURSE_SMTP_ADDRESS=localhost \
-  -e DISCOURSE_SMTP_PORT=25 \
-  --restart unless-stopped \
-  bitnami/discourse:latest
+cd ~/discourse && podman-compose up -d
 ```
 
 > Discourse requires PostgreSQL and Redis. Run both from the [Databases wiki](https://docs.shani.dev/doc/servers/databases) first. It also requires outbound email (SMTP) for account activation — use Mailpit in development.
@@ -247,7 +343,7 @@ forum.example.com { reverse_proxy localhost:3100 }
 **Purpose:** Self-hosted, ActivityPub-federated microblogging. Your users have accounts like `@alice@social.example.com` and can follow and be followed by users on any other Mastodon, Misskey, or compatible ActivityPub server. Full Twitter/X replacement that federates with the global fediverse.
 
 ```yaml
-# ~/mastodon/compose.yml
+# ~/mastodon/compose.yaml
 services:
   db:
     image: postgres:16-alpine
@@ -306,6 +402,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/mastodon && podman-compose up -d
+```
+
 **Initial setup:**
 ```bash
 # Run DB migrations and create admin user
@@ -323,7 +423,7 @@ podman-compose run --rm web bundle exec rails mastodon:accounts:create \
 **Purpose:** Self-hosted Reddit alternative with ActivityPub federation. Communities, upvoting, threaded comments, cross-posting, moderation tools, and federation with the broader fediverse. Your instance can federate with other Lemmy and Kbin instances.
 
 ```yaml
-# ~/lemmy/compose.yml
+# ~/lemmy/compose.yaml
 services:
   lemmy:
     image: dessalines/lemmy:latest
@@ -356,6 +456,10 @@ services:
 
 volumes:
   pg_data:
+```
+
+```bash
+cd ~/lemmy && podman-compose up -d
 ```
 
 **Minimal `config.hjson`:**
@@ -395,7 +499,7 @@ lemmy.example.com {
 **Purpose:** Instagram alternative with ActivityPub federation. Share photos, stories, and reels with followers across the fediverse. Completely open-source and ad-free. Pixelfed accounts can follow Mastodon accounts and vice versa.
 
 ```yaml
-# ~/pixelfed/compose.yml
+# ~/pixelfed/compose.yaml
 services:
   app:
     image: pixelfed/pixelfed:latest
@@ -452,6 +556,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/pixelfed && podman-compose up -d
+```
+
 ---
 
 ## PeerTube (Federated Video Platform)
@@ -459,7 +567,7 @@ volumes:
 **Purpose:** Self-hosted YouTube alternative with ActivityPub federation. Upload and stream videos, live stream, create playlists, and federate with other PeerTube instances. Uses WebTorrent/HLS for peer-assisted streaming to reduce bandwidth costs. Viewers can subscribe to your channel from Mastodon.
 
 ```yaml
-# ~/peertube/compose.yml
+# ~/peertube/compose.yaml
 services:
   peertube:
     image: chocobozzz/peertube:production-bookworm
@@ -500,6 +608,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/peertube && podman-compose up -d
+```
+
 > PeerTube requires a public-facing HTTPS domain for federation and HLS video delivery. Open port `1935/tcp` in your firewall for live streaming ingestion.
 
 **Firewall:**
@@ -514,7 +626,7 @@ sudo firewall-cmd --add-port=1935/tcp --permanent && sudo firewall-cmd --reload
 **Purpose:** Conversation-threaded team messaging that keeps discussions organised at scale. Unlike Slack/Mattermost where channels become walls of noise, Zulip's topic model means every message lives in a named thread within a stream — you can catch up on only what matters. Used by many open-source communities as their primary async communication platform.
 
 ```yaml
-# ~/zulip/compose.yml
+# ~/zulip/compose.yaml
 services:
   zulip:
     image: zulip/docker-zulip:latest
@@ -548,7 +660,7 @@ services:
     restart: unless-stopped
 
   redis:
-    image: redis:alpine
+    image: redis:7-alpine
     restart: unless-stopped
 
   memcached:
@@ -566,22 +678,34 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/zulip && podman-compose up -d
+```
+
 ---
 
 ## Mumble (Low-Latency Voice Chat)
 
 **Purpose:** Open-source, low-latency voice over IP (VoIP) server. Designed for gaming and real-time voice communication — sub-10ms latency, positional audio, per-channel and per-user permission trees, and excellent audio quality. A self-hosted Discord voice alternative for teams who need reliable, private voice communication.
 
+```yaml
+# ~/mumble/compose.yaml
+services:
+  mumble:
+    image: mumblevoip/mumble-server:latest
+    ports:
+      - 64738:64738/tcp
+      - 64738:64738/udp
+    volumes:
+      - /home/user/mumble/data:/data:Z
+    environment:
+      SUPERUSER_PASSWORD: changeme
+      TZ: Asia/Kolkata
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name mumble \
-  -p 64738:64738/tcp \
-  -p 64738:64738/udp \
-  -v /home/user/mumble/data:/data:Z \
-  -e SUPERUSER_PASSWORD=changeme \
-  -e TZ=Asia/Kolkata \
-  --restart unless-stopped \
-  mumblevoip/mumble-server:latest
+cd ~/mumble && podman-compose up -d
 ```
 
 **Firewall:**
@@ -589,26 +713,47 @@ podman run -d \
 sudo firewall-cmd --add-port=64738/tcp --add-port=64738/udp --permanent && sudo firewall-cmd --reload
 ```
 
-Connect with any Mumble client (Mumble desktop, Mumla for Android). The server is accessible via your Tailscale IP — no public port forwarding needed for private use.
+> **Web-based access:** Run [Mumble Web](https://github.com/Johni0702/mumble-web) alongside the server for browser-based voice without installing a client:
 
-> **Web-based access:** Run [Mumble Web](https://github.com/Johni0702/mumble-web) alongside the server for browser-based voice without installing a client: `podman run -d --name mumble-web -p 127.0.0.1:64737:64737 -e MUMBLE_SERVER=host.containers.internal:64738 --restart unless-stopped johni0702/mumble-web`.
+```yaml
+# ~/mumble-web/compose.yaml
+services:
+  mumble-web:
+    image: johni0702/mumble-web
+    ports:
+      - "127.0.0.1:64737:64737"
+    environment:
+      MUMBLE_SERVER: host.containers.internal:64738
+    restart: unless-stopped
+```
+
+```bash
+cd ~/mumble-web && podman-compose up -d
+```
 
 ---
 
-## FreePBX / Asterisk (Self-Hosted VoIP PBX)
+## FreePBX (SIP PBX & VoIP Server)
 
-**Purpose:** Full-featured private branch exchange (PBX) running on Asterisk. Supports SIP trunks from VoIP providers (Twilio, Vonage, local SIP carriers), internal extensions, auto-attendants (IVR), voicemail to email, call recording, ring groups, and conferencing. Replace a commercial phone system with something entirely on your hardware — useful for home offices and small businesses.
+**Purpose:** Full-featured open-source PBX built on Asterisk. Manage SIP extensions, IVR menus, call routing, voicemail, and trunks from a web UI. Ideal for self-hosted office phone systems or home VoIP setups.
+
+```yaml
+# ~/freepbx/compose.yaml
+services:
+  freepbx:
+    image: tiredofit/freepbx:latest
+    network_mode: host
+    volumes:
+      - /home/user/freepbx/data:/data:Z
+    environment:
+      MYSQL_ROOT_PASSWORD: changeme
+      RTP_START: 10000
+      RTP_FINISH: 10200
+    restart: unless-stopped
+```
 
 ```bash
-podman run -d \
-  --name freepbx \
-  --network host \
-  -v /home/user/freepbx/data:/data:Z \
-  -e MYSQL_ROOT_PASSWORD=changeme \
-  -e RTP_START=10000 \
-  -e RTP_FINISH=10200 \
-  --restart unless-stopped \
-  tiredofit/freepbx:latest
+cd ~/freepbx && podman-compose up -d
 ```
 
 > `--network host` is required for SIP and RTP UDP traffic to work correctly. FreePBX uses ports `5060/udp` (SIP), `5061/tcp` (SIP-TLS), and the RTP range you configure for audio.
@@ -628,24 +773,32 @@ Access the admin UI at `http://localhost/admin`. Configure a SIP trunk under Con
 
 **Purpose:** The most private self-hosted messaging infrastructure available. SimpleX has no user IDs — not phone numbers, not usernames, not public keys. Messages are routed through SMP (SimpleX Messaging Protocol) relay servers; your server handles message queuing without knowing who is communicating with whom. Run your own relay so all message traffic stays on your hardware. Users connect to your relay by scanning a QR code or entering your server address in the SimpleX iOS/Android app.
 
-```bash
-# SMP Relay (message queuing)
-podman run -d \
-  --name simplex-smp \
-  -p 5223:5223 \
-  -v /home/user/simplex/smp:/etc/opt/simplex:Z \
-  -v /home/user/simplex/smp-data:/var/opt/simplex:Z \
-  --restart unless-stopped \
-  simplexchat/smp-server:latest
+```yaml
+# ~/simplex/compose.yaml
+services:
+  # SMP Relay (message queuing)
+  simplex-smp:
+    image: simplexchat/smp-server:latest
+    ports:
+      - "5223:5223"
+    volumes:
+      - /home/user/simplex/smp:/etc/opt/simplex:Z
+      - /home/user/simplex/smp-data:/var/opt/simplex:Z
+    restart: unless-stopped
 
-# XFTP Server (file transfers)
-podman run -d \
-  --name simplex-xftp \
-  -p 443:443 \
-  -v /home/user/simplex/xftp:/etc/opt/simplex-xftp:Z \
-  -v /home/user/simplex/xftp-data:/var/opt/simplex-xftp:Z \
-  --restart unless-stopped \
-  simplexchat/xftp-server:latest
+  # XFTP Server (file transfers)
+  simplex-xftp:
+    image: simplexchat/xftp-server:latest
+    ports:
+      - "443:443"
+    volumes:
+      - /home/user/simplex/xftp:/etc/opt/simplex-xftp:Z
+      - /home/user/simplex/xftp-data:/var/opt/simplex-xftp:Z
+    restart: unless-stopped
+```
+
+```bash
+cd ~/simplex && podman-compose up -d
 ```
 
 **Initialise the server (first run):**
@@ -675,7 +828,7 @@ sudo firewall-cmd --add-port=5223/tcp --permanent && sudo firewall-cmd --reload
 **Purpose:** Open-source customer support platform and live chat inbox. Embed a chat widget on any website, manage conversations across email, WhatsApp, Instagram, Twitter/X, Telegram, and LINE from a single inbox. Supports teams with agent assignments, canned responses, labels, and CSAT surveys. The self-hosted Intercom/Zendesk alternative.
 
 ```yaml
-# ~/chatwoot/compose.yml
+# ~/chatwoot/compose.yaml
 services:
   chatwoot:
     image: chatwoot/chatwoot:latest
@@ -734,6 +887,10 @@ services:
 
 volumes:
   pg_data:
+```
+
+```bash
+cd ~/chatwoot && podman-compose up -d
 ```
 
 **Prepare database and create admin:**

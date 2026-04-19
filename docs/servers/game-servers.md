@@ -18,21 +18,29 @@ Dedicated game servers for multiplayer gaming — hosted on your own hardware, o
 
 **Purpose:** The definitive self-hosted game server. Supports vanilla, Paper (performance-optimised), Fabric (mod loader), Forge (mod loader), and Spigot. The `itzg/minecraft-server` image is the community standard — it handles any server type via environment variables and supports auto-updating.
 
+```yaml
+# ~/minecraft/compose.yaml
+services:
+  minecraft:
+    image: itzg/minecraft-server:latest
+    ports:
+      - 25565:25565
+    volumes:
+      - /home/user/minecraft/data:/data:Z
+    environment:
+      EULA: TRUE
+      TYPE: PAPER
+      VERSION: LATEST
+      MEMORY: 4G
+      DIFFICULTY: normal
+      OPS: YourUsername
+      MOTD: Home Server
+      TZ: Asia/Kolkata
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name minecraft \
-  -p 25565:25565 \
-  -v /home/user/minecraft/data:/data:Z \
-  -e EULA=TRUE \
-  -e TYPE=PAPER \
-  -e VERSION=LATEST \
-  -e MEMORY=4G \
-  -e DIFFICULTY=normal \
-  -e OPS=YourUsername \
-  -e MOTD="Home Server" \
-  -e TZ=Asia/Kolkata \
-  --restart unless-stopped \
-  itzg/minecraft-server:latest
+cd ~/minecraft && podman-compose up -d
 ```
 
 **Common environment variables:**
@@ -74,26 +82,65 @@ podman exec minecraft rcon-cli say "Hello from server console"
 sudo firewall-cmd --add-port=25565/tcp --permanent && sudo firewall-cmd --reload
 ```
 
+**Common operations:**
+```bash
+# Access the server console via RCON
+podman exec minecraft rcon-cli help
+podman exec minecraft rcon-cli list
+podman exec minecraft rcon-cli say "Server restarting in 5 minutes"
+podman exec minecraft rcon-cli time set day
+podman exec minecraft rcon-cli weather clear
+
+# Save the world manually
+podman exec minecraft rcon-cli save-all
+
+# Make a player an operator
+podman exec minecraft rcon-cli op YourUsername
+
+# Ban a player
+podman exec minecraft rcon-cli ban GrieferName "griefing"
+
+# Kick a player
+podman exec minecraft rcon-cli kick GrieferName "Reason"
+
+# Show connected players
+podman exec minecraft rcon-cli list
+
+# View server logs
+podman logs -f minecraft
+
+# Backup the world directory
+tar -czf minecraft-world-$(date +%Y%m%d).tar.gz /home/user/minecraft/data/world
+```
+
 ---
 
 ## Minecraft Bedrock Edition
 
 **Purpose:** Bedrock-edition dedicated server for players on Windows 10/11, Xbox, PlayStation, Switch, iOS, and Android. Supports cross-platform play. Uses the same `itzg` image family.
 
+```yaml
+# ~/minecraft-bedrock/compose.yaml
+services:
+  minecraft-bedrock:
+    image: itzg/minecraft-bedrock-server:latest
+    ports:
+      - 19132:19132/udp
+      - 19133:19133/udp
+    volumes:
+      - /home/user/minecraft-bedrock/data:/data:Z
+    environment:
+      EULA: TRUE
+      SERVER_NAME: Home Bedrock Server
+      GAMEMODE: survival
+      DIFFICULTY: normal
+      MAX_PLAYERS: 10
+      TZ: Asia/Kolkata
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name minecraft-bedrock \
-  -p 19132:19132/udp \
-  -p 19133:19133/udp \
-  -v /home/user/minecraft-bedrock/data:/data:Z \
-  -e EULA=TRUE \
-  -e SERVER_NAME="Home Bedrock Server" \
-  -e GAMEMODE=survival \
-  -e DIFFICULTY=normal \
-  -e MAX_PLAYERS=10 \
-  -e TZ=Asia/Kolkata \
-  --restart unless-stopped \
-  itzg/minecraft-bedrock-server:latest
+cd ~/minecraft-bedrock && podman-compose up -d
 ```
 
 **Firewall:**
@@ -107,14 +154,22 @@ sudo firewall-cmd --add-port=19132/udp --add-port=19133/udp --permanent && sudo 
 
 **Purpose:** Run multiple Minecraft servers (e.g., a survival world, a creative world, a minigames server) behind a single IP and port. Players connect to the proxy and `/server survival` to switch between backends. Velocity is the modern, actively maintained replacement for BungeeCord.
 
+```yaml
+# ~/velocity/compose.yaml
+services:
+  velocity:
+    image: itzg/bungeecord:latest
+    ports:
+      - 25577:25577
+    volumes:
+      - /home/user/velocity/config:/config:Z
+    environment:
+      MEMORY: 512M
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name velocity \
-  -p 25577:25577 \
-  -v /home/user/velocity/config:/config:Z \
-  -e MEMORY=512M \
-  --restart unless-stopped \
-  itzg/bungeecord:latest
+cd ~/velocity && podman-compose up -d
 ```
 
 **Minimal `velocity.toml`:**
@@ -140,22 +195,30 @@ try = ["survival"]
 
 **Purpose:** Dedicated server for the Viking survival game. Fully configurable world name, password, and modding support via BepInEx. Automatically updates on container restart.
 
+```yaml
+# ~/valheim/compose.yaml
+services:
+  valheim:
+    image: lloesche/valheim-server:latest
+    ports:
+      - 2456:2456/udp
+      - 2457:2457/udp
+      - 2458:2458/udp
+    volumes:
+      - /home/user/valheim/data:/opt/valheim:Z
+      - /home/user/valheim/config:/config:Z
+    environment:
+      SERVER_NAME: Home Valheim
+      WORLD_NAME: Midgard
+      SERVER_PASS: changeme
+      SERVER_PUBLIC: false
+      UPDATE_ON_STARTUP: true
+      TZ: Asia/Kolkata
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name valheim \
-  -p 2456:2456/udp \
-  -p 2457:2457/udp \
-  -p 2458:2458/udp \
-  -v /home/user/valheim/data:/opt/valheim:Z \
-  -v /home/user/valheim/config:/config:Z \
-  -e SERVER_NAME="Home Valheim" \
-  -e WORLD_NAME="Midgard" \
-  -e SERVER_PASS=changeme \
-  -e SERVER_PUBLIC=false \
-  -e UPDATE_ON_STARTUP=true \
-  -e TZ=Asia/Kolkata \
-  --restart unless-stopped \
-  lloesche/valheim-server:latest
+cd ~/valheim && podman-compose up -d
 ```
 
 > Set `SERVER_PUBLIC=false` to hide from the public server list — players connect by direct IP. Set a password of at least 5 characters.
@@ -178,33 +241,40 @@ sudo firewall-cmd --add-port=2456-2458/udp --permanent && sudo firewall-cmd --re
 
 **Purpose:** Dedicated server for the 2D sandbox game. Supports vanilla and TModLoader (modded) builds, world selection, password protection, and server-side characters.
 
-```bash
-# Create a world first (run interactively)
-podman run -it --rm \
-  -v /home/user/terraria/data:/root/.local/share/Terraria:Z \
-  ryshe/terraria:latest \
-  -world /root/.local/share/Terraria/Worlds/MyWorld.wld \
-  -autocreate 2
+```yaml
+# ~/terraria/compose.yaml
+services:
+  terraria:
+    image: ryshe/terraria:latest
+    ports:
+      - 7777:7777
+    volumes:
+      - /home/user/terraria/data:/root/.local/share/Terraria:Z
+    environment:
+      world: /root/.local/share/Terraria/Worlds/MyWorld.wld
+    restart: unless-stopped
+```
 
-# Run the dedicated server
-podman run -d \
-  --name terraria \
-  -p 7777:7777 \
-  -v /home/user/terraria/data:/root/.local/share/Terraria:Z \
-  -e world=/root/.local/share/Terraria/Worlds/MyWorld.wld \
-  --restart unless-stopped \
-  ryshe/terraria:latest
+```bash
+cd ~/terraria && podman-compose up -d
 ```
 
 **TModLoader (modded Terraria):**
+```yaml
+# ~/tmodloader/compose.yaml
+services:
+  tmodloader:
+    image: jacobsmile/tmodloader1449:latest
+    ports:
+      - 7777:7777
+    volumes:
+      - /home/user/terraria/data:/root/.local/share/Terraria:Z
+      - /home/user/terraria/mods:/root/.local/share/Terraria/ModLoader/Mods:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name tmodloader \
-  -p 7777:7777 \
-  -v /home/user/terraria/data:/root/.local/share/Terraria:Z \
-  -v /home/user/terraria/mods:/root/.local/share/Terraria/ModLoader/Mods:Z \
-  --restart unless-stopped \
-  jacobsmile/tmodloader1449:latest
+cd ~/tmodloader && podman-compose up -d
 ```
 
 **Firewall:**
@@ -218,18 +288,26 @@ sudo firewall-cmd --add-port=7777/tcp --permanent && sudo firewall-cmd --reload
 
 **Purpose:** Dedicated server for the factory automation game. Supports headless operation, saves management, and mod synchronisation. Factorio's dedicated server is exceptionally well-engineered — it runs on ~500 MB RAM and handles 50+ players on modest hardware.
 
+```yaml
+# ~/factorio/compose.yaml
+services:
+  factorio:
+    image: factoriotools/factorio:stable
+    ports:
+      - 34197:34197/udp
+      - 27015:27015/tcp
+    volumes:
+      - /home/user/factorio/data:/factorio:Z
+    environment:
+      SAVE_NAME: my-factory
+      GENERATE_NEW_SAVE: true
+      USERNAME: your-factorio-username
+      TOKEN: your-factorio-token
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name factorio \
-  -p 34197:34197/udp \
-  -p 27015:27015/tcp \
-  -v /home/user/factorio/data:/factorio:Z \
-  -e SAVE_NAME=my-factory \
-  -e GENERATE_NEW_SAVE=true \
-  -e USERNAME=your-factorio-username \
-  -e TOKEN=your-factorio-token \
-  --restart unless-stopped \
-  factoriotools/factorio:stable
+cd ~/factorio && podman-compose up -d
 ```
 
 > Get your token from [factorio.com](https://factorio.com) → Profile → Token. This enables the server to appear on the server browser and handles authentication.
@@ -260,23 +338,46 @@ mkdir -p /home/user/factorio/data/mods
 sudo firewall-cmd --add-port=34197/udp --add-port=27015/tcp --permanent && sudo firewall-cmd --reload
 ```
 
+**Common operations:**
+```bash
+# View server logs
+podman logs -f factorio
+
+# Backup the save file
+cp /home/user/factorio/data/saves/my-factory.zip    /home/user/backups/factorio-$(date +%Y%m%d).zip
+
+# List available saves
+ls /home/user/factorio/data/saves/
+
+# Generate a new map with specific settings
+podman exec factorio /factorio/bin/x64/factorio   --create /factorio/saves/new-world   --map-gen-settings /factorio/data/map-gen-settings.json
+```
+
 ---
 
 ## Satisfactory
 
 **Purpose:** Dedicated server for the 3D open-world factory game. Supports persistent world saves, auto-updates via SteamCMD, and HTTPS API for server management.
 
+```yaml
+# ~/satisfactory/compose.yaml
+services:
+  satisfactory:
+    image: wolveix/satisfactory-server:latest
+    ports:
+      - 7777:7777/udp
+      - 7777:7777/tcp
+    volumes:
+      - /home/user/satisfactory/data:/home/steam/SatisfactoryDedicatedServer:Z
+    environment:
+      MAXPLAYERS: 4
+      STEAMBETA: false
+      TZ: Asia/Kolkata
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name satisfactory \
-  -p 7777:7777/udp \
-  -p 7777:7777/tcp \
-  -v /home/user/satisfactory/data:/home/steam/SatisfactoryDedicatedServer:Z \
-  -e MAXPLAYERS=4 \
-  -e STEAMBETA=false \
-  -e TZ=Asia/Kolkata \
-  --restart unless-stopped \
-  wolveix/satisfactory-server:latest
+cd ~/satisfactory && podman-compose up -d
 ```
 
 > First startup downloads the full game (~15 GB) via SteamCMD — allow 10–30 minutes depending on connection speed. Watch progress with `podman logs -f satisfactory`.
@@ -292,25 +393,33 @@ sudo firewall-cmd --add-port=7777/udp --add-port=7777/tcp --permanent && sudo fi
 
 **Purpose:** Dedicated server for Counter-Strike 2 (and CS:GO legacy). Supports custom maps, plugins via MetaMod + CounterStrikeSharp, and competitive/casual game modes.
 
+```yaml
+# ~/cs2/compose.yaml
+services:
+  cs2:
+    image: joedwards32/cs2:latest
+    ports:
+      - 27015:27015/tcp
+      - 27015:27015/udp
+      - 27020:27020/udp
+    volumes:
+      - /home/user/cs2/data:/home/steam/cs2-dedicated:Z
+    environment:
+      STEAMAPPID: 730
+      CS2_SERVERNAME: Home CS2 Server
+      CS2_CHEATS: 0
+      CS2_PORT: 27015
+      CS2_MAXPLAYERS: 12
+      CS2_GAMETYPE: 0
+      CS2_GAMEMODE: 1
+      CS2_MAPGROUP: mg_active
+      CS2_STARTMAP: de_dust2
+      CS2_RCON_PASSWORD: changeme
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name cs2 \
-  -p 27015:27015/tcp \
-  -p 27015:27015/udp \
-  -p 27020:27020/udp \
-  -v /home/user/cs2/data:/home/steam/cs2-dedicated:Z \
-  -e STEAMAPPID=730 \
-  -e CS2_SERVERNAME="Home CS2 Server" \
-  -e CS2_CHEATS=0 \
-  -e CS2_PORT=27015 \
-  -e CS2_MAXPLAYERS=12 \
-  -e CS2_GAMETYPE=0 \
-  -e CS2_GAMEMODE=1 \
-  -e CS2_MAPGROUP=mg_active \
-  -e CS2_STARTMAP=de_dust2 \
-  -e CS2_RCON_PASSWORD=changeme \
-  --restart unless-stopped \
-  joedwards32/cs2:latest
+cd ~/cs2 && podman-compose up -d
 ```
 
 > First run downloads the full server files (~30 GB) via SteamCMD. A fast disk is helpful here — NVMe significantly reduces startup time.
@@ -377,6 +486,10 @@ volumes:
   db_data:
 ```
 
+```bash
+cd ~/pterodactyl && podman-compose up -d
+```
+
 **Create admin user:**
 ```bash
 podman exec -it pterodactyl-panel-1 php artisan p:user:make
@@ -395,18 +508,25 @@ panel.home.local { tls internal; reverse_proxy localhost:80 }
 
 **Purpose:** Lightweight Minecraft-focused management panel. Simpler than Pterodactyl — designed specifically for Minecraft server management with a clean UI, auto-backup scheduling, RCON console, player stats, and CPU/RAM graphs per server. Ideal when you only run Minecraft and want something simpler than Pterodactyl.
 
+```yaml
+# ~/crafty/compose.yaml
+services:
+  crafty:
+    image: registry.gitlab.com/crafty-controller/crafty-4:latest
+    ports:
+      - 127.0.0.1:8000:8000
+      - 127.0.0.1:8443:8443
+      - 25500-25600:25500-25600
+    volumes:
+      - /home/user/crafty/backups:/var/opt/minecraft/backups:Z
+      - /home/user/crafty/logs:/var/opt/minecraft/logs:Z
+      - /home/user/crafty/servers:/var/opt/minecraft/servers:Z
+      - /home/user/crafty/config:/var/opt/minecraft/config:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name crafty \
-  -p 127.0.0.1:8000:8000 \
-  -p 127.0.0.1:8443:8443 \
-  -p 25500-25600:25500-25600 \
-  -v /home/user/crafty/backups:/var/opt/minecraft/backups:Z \
-  -v /home/user/crafty/logs:/var/opt/minecraft/logs:Z \
-  -v /home/user/crafty/servers:/var/opt/minecraft/servers:Z \
-  -v /home/user/crafty/config:/var/opt/minecraft/config:Z \
-  --restart unless-stopped \
-  registry.gitlab.com/crafty-controller/crafty-4:latest
+cd ~/crafty && podman-compose up -d
 ```
 
 Access at `https://localhost:8443`. Default login: `admin` / `crafty` — change immediately. Create servers from the panel and let Crafty download the correct server jar.

@@ -14,16 +14,51 @@ Infrastructure, CI/CD, monitoring, code hosting, and development utilities.
 
 **Purpose:** Lightweight, self-hosted Git servers with web UI, issue tracking, wikis, pull requests, and CI integration. Forgejo is a community-driven fork with identical CLI/API. Use Gitea/Forgejo as your private GitHub — complete with Actions-compatible CI.
 
+```yaml
+# ~/gitea/compose.yaml
+services:
+  gitea:
+    image: gitea/gitea:latest
+    ports:
+      - 127.0.0.1:3000:3000
+      - 127.0.0.1:2222:22
+    volumes:
+      - /home/user/gitea:/data:Z
+    environment:
+      USER_UID: "1000"
+      USER_GID: "1000"
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name gitea \
-  -p 127.0.0.1:3000:3000 \
-  -p 127.0.0.1:2222:22 \
-  -v /home/user/gitea:/data:Z \
-  -e USER_UID=$(id -u) \
-  -e USER_GID=$(id -g) \
-  --restart unless-stopped \
-  gitea/gitea:latest
+cd ~/gitea && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# Create an admin user via CLI
+podman exec -it gitea gitea admin user create   --username admin --password changeme --email admin@example.com --admin
+
+# Reset a user's password
+podman exec gitea gitea admin user change-password   --username myuser --password newpassword
+
+# List all users
+podman exec gitea gitea admin user list
+
+# Create an org
+podman exec gitea gitea admin user create   --username myorg --email org@example.com
+
+# Run database migrations
+podman exec gitea gitea migrate
+
+# Regenerate git hooks (after upgrade)
+podman exec gitea gitea admin regenerate hooks
+
+# View logs
+podman logs -f gitea
+
+# Generate admin access token for API use
+podman exec gitea gitea admin user generate-access-token   --username admin --token-name mytoken
 ```
 
 Configure SSH clients to use `Port 2222` for `git.home.local`. After first login, configure your instance under the Site Administration panel (admin → Site Administration).
@@ -54,7 +89,7 @@ services:
   woodpecker-agent:
     image: woodpeckerci/woodpecker-agent:latest
     volumes:
-      - /run/user/$(id -u)/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
       - woodpecker_agent:/var/lib/woodpecker
     environment:
       WOODPECKER_SERVER: woodpecker-server:9000
@@ -65,21 +100,33 @@ services:
 volumes: {woodpecker_data: {}, woodpecker_agent: {}}
 ```
 
+```bash
+cd ~/woodpecker && podman-compose up -d
+```
+
 ---
 
 ## code-server
 
 **Purpose:** VS Code running in the browser with full terminal, extensions, and language support. Accessible from any device on your tailnet — develop on your server from a tablet, Chromebook, or low-powered laptop.
 
+```yaml
+# ~/code-server/compose.yaml
+services:
+  code-server:
+    image: lscr.io/linuxserver/code-server:latest
+    ports:
+      - 127.0.0.1:8443:8443
+    volumes:
+      - /home/user/code-server:/home/coder:Z
+    environment:
+      PASSWORD: changeme
+      TZ: Asia/Kolkata
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name code-server \
-  -p 127.0.0.1:8443:8443 \
-  -v /home/user/code-server:/home/coder:Z \
-  -e PASSWORD=changeme \
-  -e TZ=Asia/Kolkata \
-  --restart unless-stopped \
-  lscr.io/linuxserver/code-server:latest
+cd ~/code-server && podman-compose up -d
 ```
 
 **Caddy:**
@@ -93,17 +140,25 @@ code.home.local { tls internal; reverse_proxy localhost:8443 }
 
 **Purpose:** Self-hosted cloud development environments. Each developer gets an isolated, pre-configured container workspace with their tooling, extensions, and dotfiles — reproducible from a Git repo. Coder is lighter and better for self-hosting; Gitpod requires more resources.
 
-```bash
 # Coder
-podman run -d \
-  --name coder \
-  -p 127.0.0.1:3001:3000 \
-  -v /home/user/coder:/var/lib/coder:Z \
-  -v /run/user/$(id -u)/podman/podman.sock:/var/run/docker.sock:ro \
-  -e CODER_ACCESS_URL=https://coder.home.local \
-  -e CODER_WILDCARD_ACCESS_URL="*.coder.home.local" \
-  --restart unless-stopped \
-  ghcr.io/coder/coder:latest
+```yaml
+# ~/coder/compose.yaml
+services:
+  coder:
+    image: ghcr.io/coder/coder:latest
+    ports:
+      - 127.0.0.1:3001:3000
+    volumes:
+      - /home/user/coder:/var/lib/coder:Z
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    environment:
+      CODER_ACCESS_URL: https://coder.home.local
+      CODER_WILDCARD_ACCESS_URL: *.coder.home.local
+    restart: unless-stopped
+```
+
+```bash
+cd ~/coder && podman-compose up -d
 ```
 
 ---
@@ -112,23 +167,28 @@ podman run -d \
 
 **Purpose:** High-performance web servers and reverse proxies. Nginx excels at static content and proxying; Apache provides `.htaccess` support. Use these when you need full server-level config, not just a reverse proxy.
 
-```bash
-# Nginx
-podman run -d \
-  --name nginx \
-  -p 127.0.0.1:8081:80 \
-  -v /home/user/www:/usr/share/nginx/html:ro,Z \
-  -v /home/user/nginx.conf:/etc/nginx/nginx.conf:ro,Z \
-  --restart unless-stopped \
-  nginx:alpine
+```yaml
+# ~/nginx/compose.yaml
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - 127.0.0.1:8081:80
+    volumes:
+      - /home/user/www:/usr/share/nginx/html:ro,Z
+      - /home/user/nginx.conf:/etc/nginx/nginx.conf:ro,Z
+    restart: unless-stopped
+  apache:
+    image: httpd:alpine
+    ports:
+      - 127.0.0.1:8082:80
+    volumes:
+      - /home/user/www:/usr/local/apache2/htdocs:ro,Z
+    restart: unless-stopped
+```
 
-# Apache HTTPD
-podman run -d \
-  --name apache \
-  -p 127.0.0.1:8082:80 \
-  -v /home/user/www:/usr/local/apache2/htdocs:ro,Z \
-  --restart unless-stopped \
-  httpd:alpine
+```bash
+cd ~/nginx && podman-compose up -d
 ```
 
 ---
@@ -137,14 +197,22 @@ podman run -d \
 
 **Purpose:** Store and serve your own container images. Useful for CI/CD pipelines that push images built by Woodpecker and pull them on deploy.
 
+```yaml
+# ~/registry/compose.yaml
+services:
+  registry:
+    image: registry:2
+    ports:
+      - 127.0.0.1:5000:5000
+    volumes:
+      - /home/user/registry/data:/var/lib/registry:Z
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: true
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name registry \
-  -p 127.0.0.1:5000:5000 \
-  -v /home/user/registry/data:/var/lib/registry:Z \
-  -e REGISTRY_STORAGE_DELETE_ENABLED=true \
-  --restart unless-stopped \
-  registry:2
+cd ~/registry && podman-compose up -d
 ```
 
 **Push an image to your registry:**
@@ -179,13 +247,19 @@ See the [Productivity wiki](https://docs.shani.dev/doc/servers/productivity#n8n-
 
 **Purpose:** SMTP catch-all for development. All outgoing emails from your apps land in Mailpit's web UI — nothing is actually delivered. Perfect for testing Nextcloud, Gitea, or any app that sends email.
 
+```yaml
+# ~/mailpit/compose.yaml
+services:
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - 127.0.0.1:1025:1025
+      - 127.0.0.1:8025:8025
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name mailpit \
-  -p 127.0.0.1:1025:1025 \
-  -p 127.0.0.1:8025:8025 \
-  --restart unless-stopped \
-  axllent/mailpit
+cd ~/mailpit && podman-compose up -d
 ```
 
 Configure apps to use SMTP host `localhost`, port `1025`. View emails at `http://localhost:8025`.
@@ -225,6 +299,10 @@ services:
 
 volumes:
   db_data:
+```
+
+```bash
+cd ~/matomo && podman-compose up -d
 ```
 
 Access at `http://localhost:8500` to complete the setup wizard. Add the tracking snippet to your sites.
@@ -270,6 +348,10 @@ volumes:
   db_data:
 ```
 
+```bash
+cd ~/leantime && podman-compose up -d
+```
+
 ---
 
 ## Twenty CRM (Modern Sales CRM)
@@ -308,6 +390,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/twenty && podman-compose up -d
+```
+
 **First run — run DB migrations:**
 ```bash
 podman exec twenty yarn database:migrate:prod
@@ -324,17 +410,28 @@ podman exec twenty yarn database:migrate:prod
 # git clone https://github.com/hcengineering/huly-selfhost
 # cd huly-selfhost && cp .env.template .env
 # Edit .env (set HOST to your domain), then:
-# docker compose up -d
+# podman-compose up -d
+```
+
+```bash
+cd ~/huly && podman-compose up -d
 ```
 
 For a quick local start:
+```yaml
+# ~/huly/compose.yaml
+services:
+  huly:
+    image: hardcoreeng/huly:latest
+    ports:
+      - 127.0.0.1:8087:8083
+    environment:
+      SERVER_SECRET: changeme
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name huly \
-  -p 127.0.0.1:8087:8083 \
-  -e SERVER_SECRET=changeme \
-  --restart unless-stopped \
-  hardcoreeng/huly:latest
+cd ~/huly && podman-compose up -d
 ```
 
 > Huly's full stack includes separate services for the backend, front-end, collaboration engine, and MinIO storage. Use the official `huly-selfhost` compose stack for production.
@@ -372,6 +469,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/docuseal && podman-compose up -d
+```
+
 Access at `http://localhost:3800`. Create a signing template, upload a PDF, add signature fields, and send via a one-time link or email.
 
 ---
@@ -405,20 +506,26 @@ services:
     shm_size: "256m"
 ```
 
+```bash
+cd ~/gitlab && podman-compose up -d
+```
+
 > GitLab requires at minimum 4 GB RAM — 8 GB recommended. First-start initialisation takes 3–5 minutes. Retrieve the initial root password with `podman exec gitlab cat /etc/gitlab/initial_root_password`.
 
 **Register a GitLab Runner:**
-```bash
-podman run -d \
-  --name gitlab-runner \
-  -v /home/user/gitlab-runner/config:/etc/gitlab-runner:Z \
-  -v /run/user/$(id -u)/podman/podman.sock:/var/run/docker.sock:ro \
-  --restart unless-stopped \
-  gitlab/gitlab-runner:latest
+```yaml
+# ~/gitlab-runner/compose.yaml
+services:
+  gitlab-runner:
+    image: gitlab/gitlab-runner:latest
+    volumes:
+      - /home/user/gitlab-runner/config:/etc/gitlab-runner:Z
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+```
 
-podman exec -it gitlab-runner gitlab-runner register \
-  --url https://gitlab.example.com \
-  --token <your-runner-token>
+```bash
+cd ~/gitlab-runner && podman-compose up -d
 ```
 
 ---
@@ -455,6 +562,10 @@ services:
 
 volumes:
   pg_data:
+```
+
+```bash
+cd ~/sonarqube && podman-compose up -d
 ```
 
 > SonarQube requires `vm.max_map_count=524288` and `fs.file-max=131072` on the host. Set them persistently: `echo 'vm.max_map_count=524288' | sudo tee -a /etc/sysctl.d/sonar.conf && sudo sysctl -p /etc/sysctl.d/sonar.conf`.
@@ -507,6 +618,10 @@ act -n
 # https: (comment out entire section — Caddy handles TLS)
 # harbor_admin_password: changeme
 # database.password: changeme
+```
+
+```bash
+cd ~/harbor && podman-compose up -d
 ```
 
 Access at `http://localhost:8180` after install. Default login: `admin` / your configured password.
@@ -610,6 +725,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/plane && podman-compose up -d
+```
+
 > Plane requires S3-compatible object storage for file attachments. Use the MinIO instance from the [Backups wiki](https://docs.shani.dev/doc/servers/backups-sync#minio-self-hosted-s3-backup-target) — create a `plane` bucket and access key.
 
 Access at `http://localhost:3009`. Create a workspace, invite members, and start creating projects.
@@ -623,6 +742,7 @@ plane.home.local { tls internal; reverse_proxy localhost:3009 }
 
 ## Caddy Configuration
 
+```caddyfile
 git.home.local       { tls internal; reverse_proxy localhost:3000 }
 ci.home.local        { tls internal; reverse_proxy localhost:8000 }
 code.home.local      { tls internal; reverse_proxy localhost:8443 }

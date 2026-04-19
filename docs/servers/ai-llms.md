@@ -18,32 +18,22 @@ Run large language models, vision pipelines, image generation, speech-to-text, a
 
 **Purpose:** Pull, run, and serve open-weight LLMs (Llama, Mistral, Phi, Gemma, Qwen, DeepSeek) via a simple REST API. Handles model storage, quantisation selection, and GPU offloading automatically.
 
-```bash
-podman run -d \
-  --name ollama \
-  -p 127.0.0.1:11434:11434 \
-  -v /home/user/ollama:/root/.ollama:Z \
-  --device /dev/dri \
-  --restart unless-stopped \
-  ollama/ollama
+```yaml
+# ~/ollama/compose.yaml
+services:
+  ollama:
+    image: ollama/ollama
+    ports:
+      - 127.0.0.1:11434:11434
+    volumes:
+      - /home/user/ollama:/root/.ollama:Z
+    devices:
+      - /dev/dri
+    restart: unless-stopped
 ```
 
-**Pull and run a model:**
 ```bash
-# Pull a model
-podman exec ollama ollama pull llama3.2
-
-# Pull a smaller/faster model
-podman exec ollama ollama pull phi4-mini
-
-# Run interactively
-podman exec -it ollama ollama run llama3.2
-
-# List downloaded models
-podman exec ollama ollama list
-
-# Show model info and parameters
-podman exec ollama ollama show llama3.2
+cd ~/ollama && podman-compose up -d
 ```
 
 **REST API example:**
@@ -59,20 +49,67 @@ curl http://localhost:11434/v1/chat/completions \
   -d '{"model":"llama3.2","messages":[{"role":"user","content":"Hello"}]}'
 ```
 
+**Common operations:**
+```bash
+# Pull a model
+podman exec ollama ollama pull llama3.2
+
+# Pull a smaller/faster model
+podman exec ollama ollama pull phi4-mini
+
+# Pull a specific quantisation
+podman exec ollama ollama pull llama3.2:3b-instruct-q4_K_M
+
+# Run a model interactively in the terminal
+podman exec -it ollama ollama run llama3.2
+
+# Run a one-shot prompt
+podman exec ollama ollama run llama3.2 "Summarise the theory of relativity in 2 sentences"
+
+# List downloaded models
+podman exec ollama ollama list
+
+# Show model info, parameters and template
+podman exec ollama ollama show llama3.2
+
+# Show currently loaded models and their VRAM usage
+podman exec ollama ollama ps
+
+# Remove a model
+podman exec ollama ollama rm llama3.2:latest
+
+# Copy a model (create an alias)
+podman exec ollama ollama cp llama3.2 my-custom-model
+
+# Check Ollama version
+podman exec ollama ollama version
+
+# List models via API
+curl http://localhost:11434/api/tags
+```
+
 ---
 
 ## Open WebUI
 
 **Purpose:** A polished, ChatGPT-style web interface for Ollama and any OpenAI-compatible API. Supports multiple models, conversation history, document RAG pipelines, image generation, voice input, web search, and user accounts with role-based access.
 
+```yaml
+# ~/open-webui/compose.yaml
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    ports:
+      - 127.0.0.1:3000:8080
+    volumes:
+      - /home/user/open-webui/data:/app/backend/data:Z
+    environment:
+      OLLAMA_BASE_URL: http://host.containers.internal:11434
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name open-webui \
-  -p 127.0.0.1:3000:8080 \
-  -v /home/user/open-webui/data:/app/backend/data:Z \
-  -e OLLAMA_BASE_URL=http://host.containers.internal:11434 \
-  --restart unless-stopped \
-  ghcr.io/open-webui/open-webui:main
+cd ~/open-webui && podman-compose up -d
 ```
 
 > Use `host.containers.internal` (not `localhost`) when Open WebUI needs to reach Ollama running in another container.
@@ -89,15 +126,24 @@ Access at `http://localhost:3000`. Proxy through Caddy for HTTPS: `webui.home.lo
 
 **Purpose:** A drop-in, OpenAI-compatible REST API server that runs any GGUF, GGML, or diffusion model locally. Connect tools that expect the OpenAI API — LangChain, AutoGen, LlamaIndex, Cursor — without sending data to OpenAI.
 
+```yaml
+# ~/localai/compose.yaml
+services:
+  localai:
+    image: localai/localai:latest
+    ports:
+      - 127.0.0.1:8080:8080
+    volumes:
+      - /home/user/localai/models:/models:Z
+    devices:
+      - /dev/dri
+    environment:
+      MODELS_PATH: /models
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name localai \
-  -p 127.0.0.1:8080:8080 \
-  -v /home/user/localai/models:/models:Z \
-  -e MODELS_PATH=/models \
-  --device /dev/dri \
-  --restart unless-stopped \
-  localai/localai:latest
+cd ~/localai && podman-compose up -d
 ```
 
 **Test the API:**
@@ -115,15 +161,23 @@ curl http://localhost:8080/v1/chat/completions \
 
 **Purpose:** A node-based workflow editor for Stable Diffusion (SDXL, SD1.5, Flux). Build and save image generation pipelines as JSON graphs. Supports ControlNet, LoRA, inpainting, upscaling, AnimateDiff, and video generation.
 
+```yaml
+# ~/comfyui/compose.yaml
+services:
+  comfyui:
+    image: ghcr.io/comfyanonymous/comfyui:latest
+    ports:
+      - 127.0.0.1:8188:8188
+    volumes:
+      - /home/user/comfyui/models:/root/.local/share/comfyui/models:Z
+      - /home/user/comfyui/output:/root/.local/share/comfyui/output:Z
+    devices:
+      - /dev/dri
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name comfyui \
-  -p 127.0.0.1:8188:8188 \
-  -v /home/user/comfyui/models:/root/.local/share/comfyui/models:Z \
-  -v /home/user/comfyui/output:/root/.local/share/comfyui/output:Z \
-  --device /dev/dri \
-  --restart unless-stopped \
-  ghcr.io/comfyanonymous/comfyui:latest
+cd ~/comfyui && podman-compose up -d
 ```
 
 Access at `http://localhost:8188`. Place model checkpoints in `~/comfyui/models/checkpoints/`. Download models from CivitAI or Hugging Face directly into this directory.
@@ -134,15 +188,23 @@ Access at `http://localhost:8188`. Place model checkpoints in `~/comfyui/models/
 
 **Purpose:** The original and most widely used Stable Diffusion interface. Rich plugin ecosystem, img2img, inpainting, ControlNet, and an extensive settings surface. Better for users who want a traditional form-based UI rather than ComfyUI's node graph.
 
+```yaml
+# ~/a1111/compose.yaml
+services:
+  a1111:
+    image: universalml/stable-diffusion-webui:latest
+    ports:
+      - 127.0.0.1:7860:7860
+    volumes:
+      - /home/user/a1111/models:/stable-diffusion-webui/models:Z
+      - /home/user/a1111/outputs:/stable-diffusion-webui/outputs:Z
+    devices:
+      - /dev/dri
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name a1111 \
-  -p 127.0.0.1:7860:7860 \
-  -v /home/user/a1111/models:/stable-diffusion-webui/models:Z \
-  -v /home/user/a1111/outputs:/stable-diffusion-webui/outputs:Z \
-  --device /dev/dri \
-  --restart unless-stopped \
-  universalml/stable-diffusion-webui:latest
+cd ~/a1111 && podman-compose up -d
 ```
 
 Access at `http://localhost:7860`. Compatible with the same checkpoint `.safetensors` files as ComfyUI — share the models directory between both.
@@ -153,14 +215,22 @@ Access at `http://localhost:7860`. Compatible with the same checkpoint `.safeten
 
 **Purpose:** Local, offline speech-to-text transcription using OpenAI's Whisper model. Supports 99 languages. Runs via a REST API — useful for transcription pipelines, voice notes, subtitle generation, and voice input in Open WebUI.
 
+```yaml
+# ~/whisper/compose.yaml
+services:
+  whisper:
+    image: onerahmet/openai-whisper-asr-webservice
+    ports:
+      - 127.0.0.1:9000:9000
+    volumes:
+      - /home/user/whisper/data:/data:Z
+    environment:
+      ASR_MODEL: base
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name whisper \
-  -p 127.0.0.1:9000:9000 \
-  -v /home/user/whisper/data:/data:Z \
-  -e ASR_MODEL=base \
-  --restart unless-stopped \
-  onerahmet/openai-whisper-asr-webservice
+cd ~/whisper && podman-compose up -d
 ```
 
 **Transcribe a file:**
@@ -176,13 +246,20 @@ Available models: `tiny`, `base`, `small`, `medium`, `large`, `large-v3`. Larger
 
 **Purpose:** High-quality, local text-to-speech synthesis using the Kokoro model. Produces natural-sounding speech with multiple voices and accents — useful for audiobook creation, accessibility tools, and voice assistants.
 
+```yaml
+# ~/kokoro/compose.yaml
+services:
+  kokoro:
+    image: ghcr.io/remsky/kokoro-fastapi-cpu:latest
+    ports:
+      - 127.0.0.1:8880:8880
+    volumes:
+      - /home/user/kokoro/voices:/app/voices:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name kokoro \
-  -p 127.0.0.1:8880:8880 \
-  -v /home/user/kokoro/voices:/app/voices:Z \
-  --restart unless-stopped \
-  ghcr.io/remsky/kokoro-fastapi-cpu:latest
+cd ~/kokoro && podman-compose up -d
 ```
 
 **Synthesise speech:**
@@ -201,16 +278,23 @@ curl -X POST http://localhost:8880/v1/audio/speech \
 
 **Purpose:** Self-hosted AI coding assistant server. Works as a drop-in alternative to GitHub Copilot — installs as a VS Code, JetBrains, or Vim extension and completes code inline as you type, using models running entirely on your hardware.
 
+```yaml
+# ~/tabby/compose.yaml
+services:
+  tabby:
+    image: tabbyml/tabby:latest
+    ports:
+      - 127.0.0.1:8081:8080
+    volumes:
+      - /home/user/tabby/data:/data:Z
+    devices:
+      - /dev/dri
+    command: serve --model TabbyML/StarCoder-1B --device cpu
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name tabby \
-  -p 127.0.0.1:8080:8080 \
-  -v /home/user/tabby/data:/data:Z \
-  --device /dev/dri \
-  --restart unless-stopped \
-  tabbyml/tabby:latest serve \
-    --model TabbyML/StarCoder-1B \
-    --device metal
+cd ~/tabby && podman-compose up -d
 ```
 
 > Replace `--device metal` with `--device cuda` for NVIDIA, or omit for CPU inference. Smaller models like `TabbyML/StarCoder-1B` run well on CPU for local use.
@@ -223,21 +307,29 @@ podman run -d \
 
 **Purpose:** A full-stack RAG and AI workspace designed for teams. Upload documents (PDFs, Word, text, URLs), create workspaces, and chat against them with any LLM — Ollama, OpenAI, Anthropic, or any OpenAI-compatible endpoint. Supports agents, web scraping, multi-user accounts with role-based access, API keys, and an embeddable chat widget. More feature-complete than Open WebUI's RAG pipeline for document-heavy use cases.
 
+```yaml
+# ~/anythingllm/compose.yaml
+services:
+  anythingllm:
+    image: mintplexlabs/anythingllm:latest
+    ports:
+      - 127.0.0.1:3001:3001
+    volumes:
+      - /home/user/anythingllm/storage:/app/server/storage:Z
+    environment:
+      STORAGE_DIR: /app/server/storage
+      LLM_PROVIDER: ollama
+      OLLAMA_BASE_PATH: http://host.containers.internal:11434
+      OLLAMA_MODEL_PREF: llama3.2
+      EMBEDDING_ENGINE: ollama
+      OLLAMA_EMBEDDING_MODEL_PREF: nomic-embed-text
+      VECTOR_DB: lancedb
+      JWT_SECRET: changeme-run-openssl-rand-hex-32
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name anythingllm \
-  -p 127.0.0.1:3001:3001 \
-  -v /home/user/anythingllm/storage:/app/server/storage:Z \
-  -e STORAGE_DIR=/app/server/storage \
-  -e LLM_PROVIDER=ollama \
-  -e OLLAMA_BASE_PATH=http://host.containers.internal:11434 \
-  -e OLLAMA_MODEL_PREF=llama3.2 \
-  -e EMBEDDING_ENGINE=ollama \
-  -e OLLAMA_EMBEDDING_MODEL_PREF=nomic-embed-text \
-  -e VECTOR_DB=lancedb \
-  -e JWT_SECRET=changeme-run-openssl-rand-hex-32 \
-  --restart unless-stopped \
-  mintplexlabs/anythingllm:latest
+cd ~/anythingllm && podman-compose up -d
 ```
 
 Access at `http://localhost:3001`. Create workspaces, upload documents, and start querying. Connect to any LLM provider in Settings → LLM Preference.
@@ -272,6 +364,10 @@ services:
 
 volumes:
   pg_data:
+```
+
+```bash
+cd ~/litellm && podman-compose up -d
 ```
 
 **Example `config.yaml`:**
@@ -351,6 +447,10 @@ services:
     restart: unless-stopped
 ```
 
+```bash
+cd ~/perplexica && podman-compose up -d
+```
+
 > Perplexica needs at least a 7B model for coherent answers. `llama3.2` or `mistral` work well. Pull the model first with `podman exec ollama ollama pull llama3.2`.
 
 ---
@@ -359,16 +459,24 @@ services:
 
 **Purpose:** Professional-grade Stable Diffusion interface with a node-based canvas, a polished linear workflow UI, ControlNet, IP-Adapter, regional prompting, and model management. A strong alternative to ComfyUI when you want more polish, and to A1111 when you need more power. Excellent for photographers and digital artists who want a native-feeling app experience.
 
+```yaml
+# ~/invokeai/compose.yaml
+services:
+  invokeai:
+    image: ghcr.io/invoke-ai/invokeai:latest
+    ports:
+      - 127.0.0.1:9090:9090
+    volumes:
+      - /home/user/invokeai/models:/invokeai/models:Z
+      - /home/user/invokeai/outputs:/invokeai/outputs:Z
+      - /home/user/invokeai/configs:/invokeai/configs:Z
+    devices:
+      - /dev/dri
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name invokeai \
-  -p 127.0.0.1:9090:9090 \
-  -v /home/user/invokeai/models:/invokeai/models:Z \
-  -v /home/user/invokeai/outputs:/invokeai/outputs:Z \
-  -v /home/user/invokeai/configs:/invokeai/configs:Z \
-  --device /dev/dri \
-  --restart unless-stopped \
-  ghcr.io/invoke-ai/invokeai:latest
+cd ~/invokeai && podman-compose up -d
 ```
 
 Access at `http://localhost:9090`. On first run, download models from the Model Manager — it supports HuggingFace Hub, CivitAI, and direct URLs. Compatible checkpoint files are shared with ComfyUI and A1111.
@@ -379,26 +487,29 @@ Access at `http://localhost:9090`. On first run, download models from the Model 
 
 **Purpose:** Fast, local neural text-to-speech synthesis. Piper is significantly lighter than Kokoro — a single voice model is 50–200 MB and runs in real time on CPU. Ideal for notifications, accessibility features, and voice synthesis when you don't need the premium audio quality of Kokoro.
 
-```bash
-podman run -d \
-  --name piper-tts \
-  -p 127.0.0.1:5000:5000 \
-  -v /home/user/piper/voices:/app/voices:Z \
-  --restart unless-stopped \
-  rhasspy/wyoming-piper \
-    --piper /usr/local/bin/piper \
-    --data-dir /app/voices \
-    --download-dir /app/voices \
-    --voice en_US-lessac-medium
+```yaml
+# ~/piper-tts/compose.yaml
+services:
+  piper-tts:
+    image: rhasspy/wyoming-piper
+    ports:
+      - 127.0.0.1:5000:5000
+    volumes:
+      - /home/user/piper/voices:/app/voices:Z
+    command: --piper /usr/local/bin/piper --data-dir /app/voices --download-dir /app/voices --voice en_US-lessac-medium
+    restart: unless-stopped
+  piper-rest:
+    image: ghcr.io/mush42/piper-rest-api:latest
+    ports:
+      - 127.0.0.1:5001:5000
+    volumes:
+      - /home/user/piper/voices:/voices:Z
+    command: --models-dir /voices
+    restart: unless-stopped
+```
 
-# Or use the REST API variant
-podman run -d \
-  --name piper-rest \
-  -p 127.0.0.1:5001:5000 \
-  -v /home/user/piper/voices:/voices:Z \
-  --restart unless-stopped \
-  ghcr.io/mush42/piper-rest-api:latest \
-    --models-dir /voices
+```bash
+cd ~/piper-tts && podman-compose up -d
 ```
 
 **Synthesise speech:**
@@ -418,16 +529,24 @@ echo "Hello from Piper" | \
 
 **Purpose:** Drag-and-drop UI for building LangChain and LlamaIndex pipelines — chatbots, RAG workflows, agents, and API endpoints — without writing code. Connect Ollama models, vector databases, document loaders, and output parsers visually, then expose them as REST endpoints or embed them as chat widgets.
 
+```yaml
+# ~/flowise/compose.yaml
+services:
+  flowise:
+    image: flowiseai/flowise
+    ports:
+      - 127.0.0.1:3003:3000
+    volumes:
+      - /home/user/flowise/data:/root/.flowise:Z
+    environment:
+      FLOWISE_USERNAME: admin
+      FLOWISE_PASSWORD: changeme
+      FLOWISE_SECRETKEY_OVERWRITE: changeme-run-openssl-rand-hex-32
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name flowise \
-  -p 127.0.0.1:3003:3000 \
-  -v /home/user/flowise/data:/root/.flowise:Z \
-  -e FLOWISE_USERNAME=admin \
-  -e FLOWISE_PASSWORD=changeme \
-  -e FLOWISE_SECRETKEY_OVERWRITE=changeme-run-openssl-rand-hex-32 \
-  --restart unless-stopped \
-  flowiseai/flowise
+cd ~/flowise && podman-compose up -d
 ```
 
 Access at `http://localhost:3003`. Build chains by dragging components onto the canvas — connect an Ollama LLM node, a Qdrant vector store, a PDF loader, and a conversational memory node to create a document Q&A chatbot in minutes.
@@ -467,6 +586,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/langfuse && podman-compose up -d
+```
+
 Access at `http://localhost:3004`. Create a project, copy the public/secret key pair, and add them to LiteLLM's `config.yaml` (`LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`) to start seeing traces immediately.
 
 ---
@@ -475,13 +598,20 @@ Access at `http://localhost:3004`. Create a project, copy the public/secret key 
 
 **Purpose:** Open WebUI Pipelines is a plugin server that extends Open WebUI with custom Python functions — rate limiting, content filtering, model routing, tool use (web search, calculators, code execution), and integration with external APIs. Pipelines run server-side as a sidecar to Open WebUI.
 
+```yaml
+# ~/pipelines/compose.yaml
+services:
+  pipelines:
+    image: ghcr.io/open-webui/pipelines:main
+    ports:
+      - 127.0.0.1:9099:9099
+    volumes:
+      - /home/user/pipelines:/app/pipelines:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name pipelines \
-  -p 127.0.0.1:9099:9099 \
-  -v /home/user/pipelines:/app/pipelines:Z \
-  --restart unless-stopped \
-  ghcr.io/open-webui/pipelines:main
+cd ~/pipelines && podman-compose up -d
 ```
 
 In Open WebUI: Settings → Connections → add OpenAI-compatible endpoint `http://host.containers.internal:9099` with API key `0p3n-w3bu!`. Installed pipelines appear as selectable models in the chat interface.
@@ -576,6 +706,10 @@ services:
 volumes: {pg_data: {}, qdrant_data: {}}
 ```
 
+```bash
+cd ~/dify && podman-compose up -d
+```
+
 Access at `http://localhost:5001`. On first visit, set up an admin account, then connect your LLM providers under Settings → Model Providers.
 
 **Key Dify features:**
@@ -592,15 +726,24 @@ Access at `http://localhost:5001`. On first visit, set up an admin account, then
 
 **Purpose:** An open-source implementation of OpenAI's Code Interpreter — a local agent that writes and executes Python, JavaScript, Shell, and other code to accomplish tasks. Point it at Ollama and it runs entirely offline. Ask it to "analyse this CSV and plot the top 10 by revenue" and it writes the code, runs it, and returns the result.
 
+```yaml
+# ~/open-interpreter/compose.yaml
+services:
+  open-interpreter:
+    image: openinterpreter/open-interpreter:latest
+    ports:
+      - 127.0.0.1:8265:8265
+    volumes:
+      - /home/user/open-interpreter/files:/files:Z
+    environment:
+      OLLAMA_HOST: http://host.containers.internal:11434
+      DEFAULT_MODEL: ollama/llama3.2
+    command: server
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name open-interpreter \
-  -p 127.0.0.1:8265:8265 \
-  -v /home/user/open-interpreter/files:/files:Z \
-  -e OLLAMA_HOST=http://host.containers.internal:11434 \
-  -e DEFAULT_MODEL=ollama/llama3.2 \
-  --restart unless-stopped \
-  openinterpreter/open-interpreter:latest server
+cd ~/open-interpreter && podman-compose up -d
 ```
 
 **Or run interactively:**

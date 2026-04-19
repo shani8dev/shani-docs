@@ -42,12 +42,18 @@ journalctl --user -u container-jellyfin.service -f
 
 Podman can automatically pull new images and recreate containers on a schedule. Add the label `io.containers.autoupdate=registry` to any container you want updated automatically:
 
+```yaml
+# ~/jellyfin/compose.yaml
+services:
+  jellyfin:
+    image: jellyfin/jellyfin
+    labels:
+      io.containers.autoupdate: registry
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name jellyfin \
-  --label io.containers.autoupdate=registry \
-  ... \
-  jellyfin/jellyfin
+cd ~/jellyfin && podman-compose up -d
 ```
 
 **Run or schedule the update:**
@@ -99,26 +105,40 @@ sudo shani-deploy --rollback
 
 Autoheal restarts any container that fails its health check — useful for services that hang without crashing outright:
 
+```yaml
+# ~/autoheal/compose.yaml
+services:
+  autoheal:
+    image: willfarrell/autoheal
+    volumes:
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    environment:
+      AUTOHEAL_CONTAINER_LABEL: all
+      AUTOHEAL_INTERVAL: 30
+      AUTOHEAL_START_PERIOD: 300
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name autoheal \
-  -v /run/user/$(id -u)/podman/podman.sock:/var/run/docker.sock:ro \
-  -e AUTOHEAL_CONTAINER_LABEL=all \
-  -e AUTOHEAL_INTERVAL=30 \
-  --restart unless-stopped \
-  willfarrell/autoheal
+cd ~/autoheal && podman-compose up -d
 ```
 
 Add health checks to containers you want monitored:
+```yaml
+# ~/jellyfin/compose.yaml
+services:
+  jellyfin:
+    image: jellyfin/jellyfin
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
+      interval: 30s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name jellyfin \
-  --health-cmd "curl -f http://localhost:8096/health || exit 1" \
-  --health-interval 30s \
-  --health-retries 3 \
-  --health-start-period 60s \
-  ... \
-  jellyfin/jellyfin
+cd ~/jellyfin && podman-compose up -d
 ```
 
 ---
@@ -127,14 +147,21 @@ podman run -d \
 
 **Purpose:** Modern, highly customisable application dashboard. Shows live status of all your services, system metrics, weather, RSS feeds, and bookmarks from a single page. Configured via YAML files and integrates directly with Docker/Podman via socket for automatic service discovery.
 
+```yaml
+# ~/homepage/compose.yaml
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    ports:
+      - 127.0.0.1:3001:3000
+    volumes:
+      - /home/user/homepage/config:/app/config:Z
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name homepage \
-  -p 127.0.0.1:3001:3000 \
-  -v /home/user/homepage/config:/app/config:Z \
-  -v /run/user/$(id -u)/podman/podman.sock:/var/run/docker.sock:ro \
-  --restart unless-stopped \
-  ghcr.io/gethomepage/homepage:latest
+cd ~/homepage && podman-compose up -d
 ```
 
 Access at `http://localhost:3001`. Configure services, bookmarks, and widgets in `/home/user/homepage/config/services.yaml`.
@@ -150,14 +177,24 @@ dashboard.home.local { tls internal; reverse_proxy localhost:3001 }
 
 **Purpose:** Full-featured graphical dashboard for managing containers, images, volumes, networks, and stacks. Supports Podman via socket. Best for users who want a single UI for everything.
 
+```yaml
+# ~/portainer/compose.yaml
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    ports:
+      - 127.0.0.1:9443:9443
+    volumes:
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - portainer_data:/data
+    restart: unless-stopped
+
+volumes:
+  portainer_data:
+```
+
 ```bash
-podman run -d \
-  --name portainer \
-  -p 127.0.0.1:9443:9443 \
-  -v /run/user/$(id -u)/podman/podman.sock:/var/run/docker.sock:ro \
-  -v portainer_data:/data \
-  --restart unless-stopped \
-  portainer/portainer-ce:latest
+cd ~/portainer && podman-compose up -d
 ```
 
 Access at `https://localhost:9443`.
@@ -168,15 +205,23 @@ Access at `https://localhost:9443`.
 
 **Purpose:** Lightweight, compose-stack-focused container manager. Stacks are stored as files and can be synced via Git. Simpler and faster than Portainer if you primarily use compose files.
 
+```yaml
+# ~/dockge/compose.yaml
+services:
+  dockge:
+    image: louislam/dockge:latest
+    ports:
+      - 127.0.0.1:5001:5001
+    volumes:
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /home/user/stacks:/home/runner/stacks:Z
+    environment:
+      DOCKGE_STACKS_DIR: /home/runner/stacks
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name dockge \
-  -p 127.0.0.1:5001:5001 \
-  -v /run/user/$(id -u)/podman/podman.sock:/var/run/docker.sock:ro \
-  -v /home/user/stacks:/home/runner/stacks:Z \
-  -e DOCKGE_STACKS_DIR=/home/runner/stacks \
-  --restart unless-stopped \
-  louislam/dockge:latest
+cd ~/dockge && podman-compose up -d
 ```
 
 Access at `http://localhost:5001`.
@@ -187,14 +232,21 @@ Access at `http://localhost:5001`.
 
 **Purpose:** Template-driven container manager with a clean dashboard and built-in app store. Good middle ground between the simplicity of Dockge and the full feature set of Portainer.
 
+```yaml
+# ~/yacht/compose.yaml
+services:
+  yacht:
+    image: selfhostedpro/yacht
+    ports:
+      - 127.0.0.1:8001:8000
+    volumes:
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /home/user/yacht/config:/config:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name yacht \
-  -p 127.0.0.1:8001:8000 \
-  -v /run/user/$(id -u)/podman/podman.sock:/var/run/docker.sock:ro \
-  -v /home/user/yacht/config:/config:Z \
-  --restart unless-stopped \
-  selfhostedpro/yacht
+cd ~/yacht && podman-compose up -d
 ```
 
 Default login: `admin@yacht.local` / `pass`. Change immediately after first login.
@@ -205,16 +257,24 @@ Default login: `admin@yacht.local` / `pass`. Change immediately after first logi
 
 **Purpose:** A newer, actively developed alternative to Portainer and Dockge. Komodo manages containers, compose stacks, and deployments across multiple servers from a single dashboard. Supports Git-backed stack deployments (push to Git → auto-deploy), resource monitoring, and a clean role-based UI. Good choice for multi-server homelabs.
 
+```yaml
+# ~/komodo/compose.yaml
+services:
+  komodo:
+    image: ghcr.io/moghtech/komodo:latest
+    ports:
+      - 127.0.0.1:9120:9120
+    volumes:
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /home/user/komodo/data:/data:Z
+    environment:
+      KOMODO_HOST: https://komodo.home.local
+      KOMODO_PASSKEY: changeme-run-openssl-rand-hex-32
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name komodo \
-  -p 127.0.0.1:9120:9120 \
-  -v /run/user/$(id -u)/podman/podman.sock:/var/run/docker.sock:ro \
-  -v /home/user/komodo/data:/data:Z \
-  -e KOMODO_HOST=https://komodo.home.local \
-  -e KOMODO_PASSKEY=changeme-run-openssl-rand-hex-32 \
-  --restart unless-stopped \
-  ghcr.io/moghtech/komodo:latest
+cd ~/komodo && podman-compose up -d
 ```
 
 **Caddy:**
@@ -241,6 +301,10 @@ services:
       TZ: Asia/Kolkata
       LOG_LEVEL: info
     restart: unless-stopped
+```
+
+```bash
+cd ~/diun && podman-compose up -d
 ```
 
 **Minimal `config.yml`:**
@@ -347,6 +411,7 @@ podman cp jellyfin:/config/config.xml ./jellyfin-config-backup.xml
 
 ## Caddy Configuration
 
+```caddyfile
 dashboard.home.local  { tls internal; reverse_proxy localhost:3001 }
 portainer.home.local  { tls internal; reverse_proxy localhost:9443 }
 dockge.home.local     { tls internal; reverse_proxy localhost:5001 }

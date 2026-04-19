@@ -70,6 +70,31 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/firefly && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# Run Laravel artisan commands
+podman exec firefly php artisan firefly-iii:upgrade-database
+podman exec firefly php artisan cache:clear
+podman exec firefly php artisan view:clear
+
+# Create an initial admin user (if setup isn't complete)
+podman exec firefly php artisan firefly-iii:create-first-user
+
+# Run cron job manually (for recurring transactions)
+podman exec firefly php artisan firefly-iii:cron
+
+# View logs
+podman logs -f firefly
+
+# Backup SQLite database (if using SQLite)
+podman exec firefly cp /var/www/html/storage/database/firefly.db /tmp/firefly-backup.db
+podman cp firefly:/tmp/firefly-backup.db ./firefly-backup.db
+```
+
 **Key workflows:**
 - Create accounts (assets, liabilities, revenue, expense accounts)
 - Import transactions via the Data Importer from your bank's CSV export
@@ -89,13 +114,20 @@ importer.home.local  { tls internal; reverse_proxy localhost:8081 }
 
 **Purpose:** Local-first envelope budgeting app using zero-based budgeting. You assign every pound or rupee a job — the budget is a plan, not just a record. All data is stored in your browser (SQLite in IndexedDB) and synced to a self-hosted server. Extremely fast, works offline, and the data is 100% yours.
 
+```yaml
+# ~/actual/compose.yaml
+services:
+  actual:
+    image: actualbudget/actual-server:latest
+    ports:
+      - 127.0.0.1:5006:5006
+    volumes:
+      - /home/user/actual/data:/data:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name actual \
-  -p 127.0.0.1:5006:5006 \
-  -v /home/user/actual/data:/data:Z \
-  --restart unless-stopped \
-  actualbudget/actual-server:latest
+cd ~/actual && podman-compose up -d
 ```
 
 Access at `http://localhost:5006`. Create a new budget file, import bank transactions via CSV, and assign income to budget categories each month.
@@ -138,6 +170,25 @@ services:
 
 volumes:
   pg_data:
+```
+
+```bash
+cd ~/ghostfolio && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# View logs
+podman logs -f ghostfolio
+
+# Run database migrations
+podman exec ghostfolio npx prisma migrate deploy
+
+# Refresh market data manually
+curl -X POST http://localhost:3333/api/v1/admin/gather/max   -H "Authorization: Bearer YOUR_API_KEY"
+
+# Export portfolio data
+curl http://localhost:3333/api/v1/export   -H "Authorization: Bearer YOUR_API_KEY" -o portfolio-export.json
 ```
 
 Access at `http://localhost:3333`. Add activities (buy/sell transactions) and Ghostfolio calculates current value, cost basis, P&L, and charts portfolio performance over time.
@@ -184,6 +235,10 @@ volumes:
   db_data:
 ```
 
+```bash
+cd ~/invoiceninja && podman-compose up -d
+```
+
 ---
 
 ## ERPNext Accounting (Full Business ERP)
@@ -198,32 +253,21 @@ See the [Education wiki](https://docs.shani.dev/doc/servers/education#erpnext--f
 
 **Purpose:** Plain text double-entry accounting — your ledger is a `.journal` or `.beancount` file you edit with any text editor, version-controlled in Git. No database, no web UI required (though both have optional web interfaces). Beloved by programmers who want total control over their financial data.
 
+```yaml
+# ~/hledger/compose.yaml
+services:
+  hledger:
+    image: dastapov/hledger
+    ports:
+      - 127.0.0.1:5000:5000
+    volumes:
+      - /home/user/finance/ledger.journal:/data/ledger.journal:ro,Z
+    command: hledger-web --file /data/ledger.journal --host 0.0.0.0
+    restart: unless-stopped
+```
+
 ```bash
-# hledger — web interface
-podman run -d \
-  --name hledger \
-  -p 127.0.0.1:5000:5000 \
-  -v /home/user/finance/ledger.journal:/data/ledger.journal:ro,Z \
-  --restart unless-stopped \
-  dastapov/hledger \
-  hledger-web --file /data/ledger.journal --host 0.0.0.0
-
-# Example journal entry
-cat >> /home/user/finance/ledger.journal << 'EOF'
-2026-04-01 Salary
-  assets:bank:current    ₹75000
-  income:salary         -₹75000
-
-2026-04-05 Groceries
-  expenses:food:groceries  ₹2500
-  assets:bank:current     -₹2500
-EOF
-
-# Run reports
-podman run --rm \
-  -v /home/user/finance/ledger.journal:/data/ledger.journal:ro \
-  dastapov/hledger \
-  hledger -f /data/ledger.journal balance --tree
+cd ~/hledger && podman-compose up -d
 ```
 
 ---
@@ -292,6 +336,10 @@ services:
     restart: unless-stopped
 ```
 
+```bash
+cd ~/bitcoin && podman-compose up -d
+```
+
 > **Storage:** A full Bitcoin node requires ~700 GB of disk space for the full chain (as of 2026). Use `prune=550` (MB) in bitcoind config for a pruned node that verifies without storing the full history — sufficient for most use cases.
 
 **Firewall:**
@@ -307,21 +355,22 @@ sudo firewall-cmd --reload
 
 **Purpose:** Run a full Monero node for private, untraceable transactions. A local node provides full validation and better privacy than connecting through a third-party node.
 
-```bash
-podman run -d \
-  --name monero \
-  -p 127.0.0.1:18081:18081 \
-  -p 0.0.0.0:18080:18080 \
-  -v /home/user/monero/data:/home/monero/.bitmonero:Z \
-  --restart unless-stopped \
-  sethsimmons/simple-monerod:latest \
-    --rpc-restricted-bind-ip=0.0.0.0 \
-    --rpc-restricted-bind-port=18089 \
-    --no-igd \
-    --prune-blockchain
+```yaml
+# ~/monero/compose.yaml
+services:
+  monero:
+    image: sethsimmons/simple-monerod:latest
+    ports:
+      - 127.0.0.1:18081:18081
+      - 0.0.0.0:18080:18080
+    volumes:
+      - /home/user/monero/data:/home/monero/.bitmonero:Z
+    command: --rpc-restricted-bind-ip=0.0.0.0 --rpc-restricted-bind-port=18089 --no-igd --prune-blockchain
+    restart: unless-stopped
+```
 
-# Firewall
-sudo firewall-cmd --add-port=18080/tcp --permanent && sudo firewall-cmd --reload
+```bash
+cd ~/monero && podman-compose up -d
 ```
 
 ---
@@ -330,14 +379,21 @@ sudo firewall-cmd --add-port=18080/tcp --permanent && sudo firewall-cmd --reload
 
 **Purpose:** Rotki is a privacy-preserving crypto portfolio tracker that runs entirely locally. It connects to exchanges via API (read-only keys), calculates capital gains and losses, and generates tax reports — all on your machine, never uploading your portfolio to any server.
 
+```yaml
+# ~/rotki/compose.yaml
+services:
+  rotki:
+    image: rotki/rotki:latest
+    ports:
+      - 127.0.0.1:4242:80
+    volumes:
+      - /home/user/rotki/data:/rotki/data:Z
+      - /home/user/rotki/logs:/rotki/logs:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name rotki \
-  -p 127.0.0.1:4242:80 \
-  -v /home/user/rotki/data:/rotki/data:Z \
-  -v /home/user/rotki/logs:/rotki/logs:Z \
-  --restart unless-stopped \
-  rotki/rotki:latest
+cd ~/rotki && podman-compose up -d
 ```
 
 Access at `http://localhost:4242`. Connect exchanges (Binance, Coinbase, Kraken) via read-only API keys and import wallets by address.
@@ -348,14 +404,22 @@ Access at `http://localhost:4242`. Connect exchanges (Binance, Coinbase, Kraken)
 
 **Purpose:** A personal finance tracker purpose-built for Indian users — imports transactions from Indian bank statement formats (SBI, HDFC, ICICI, Axis, Zerodha, Kuvera), handles INR natively, and supports Indian mutual funds and stock holdings. Built on hledger under the hood with a polished web UI for non-accountants. Ideal if you want double-entry bookkeeping accuracy without writing journal entries by hand.
 
+```yaml
+# ~/paisa/compose.yaml
+services:
+  paisa:
+    image: ananthakumaran/paisa:latest
+    ports:
+      - 127.0.0.1:7500:7500
+    volumes:
+      - /home/user/paisa:/root/paisa:Z
+    environment:
+      TZ: Asia/Kolkata
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name paisa \
-  -p 127.0.0.1:7500:7500 \
-  -v /home/user/paisa:/root/paisa:Z \
-  -e TZ=Asia/Kolkata \
-  --restart unless-stopped \
-  ananthakumaran/paisa:latest
+cd ~/paisa && podman-compose up -d
 ```
 
 Access at `http://localhost:7500`. On first run, Paisa creates a `~/.paisa/` directory. Import your ledger file or start fresh by adding accounts and importing bank CSVs via the UI.
@@ -421,6 +485,10 @@ services:
 
 volumes:
   pg_data:
+```
+
+```bash
+cd ~/kresus && podman-compose up -d
 ```
 
 Access at `http://localhost:9876`. Add your bank under Settings → Banks — Kresus uses Woob connectors to fetch transactions. Supported banks include most major European institutions (BNP Paribas, Société Générale, ING, Revolut, N26, and 300+ more).

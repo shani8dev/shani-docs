@@ -16,18 +16,26 @@ Password management, identity providers, secrets management, and threat detectio
 
 **Purpose:** Lightweight, Bitwarden-compatible password server. Your Bitwarden mobile app, browser extension, and desktop app all connect to your own server. Passwords, TOTP codes, secure notes, organisations, and sends — all on your hardware with no Bitwarden cloud subscription.
 
+```yaml
+# ~/vaultwarden/compose.yaml
+services:
+  vaultwarden:
+    image: vaultwarden/server:latest
+    ports:
+      - 127.0.0.1:8180:80
+      - 127.0.0.1:3012:3012
+    volumes:
+      - /home/user/vaultwarden/data:/data:Z
+    environment:
+      WEBSOCKET_ENABLED: "true"
+      ADMIN_TOKEN: changeme-run-openssl-rand-base64-48
+      SIGNUPS_ALLOWED: "false"
+      ROCKET_ENV: production
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name vaultwarden \
-  -p 127.0.0.1:8180:80 \
-  -p 127.0.0.1:3012:3012 \
-  -v /home/user/vaultwarden/data:/data:Z \
-  -e WEBSOCKET_ENABLED=true \
-  -e ADMIN_TOKEN=$(openssl rand -base64 48) \
-  -e SIGNUPS_ALLOWED=false \
-  -e ROCKET_ENV=production \
-  --restart unless-stopped \
-  vaultwarden/server:latest
+cd ~/vaultwarden && podman-compose up -d
 ```
 
 > Set `SIGNUPS_ALLOWED=false` after creating your account to prevent anyone else from registering.
@@ -45,6 +53,24 @@ vault.home.local {
 ```bash
 # Vaultwarden data directory contains the SQLite DB and attachments
 restic backup /home/user/vaultwarden/data
+```
+
+**Common operations:**
+```bash
+# View logs
+podman logs -f vaultwarden
+
+# Backup vault data (SQLite DB + attachments)
+tar -czf vaultwarden-backup-$(date +%Y%m%d).tar.gz /home/user/vaultwarden/data
+
+# Export all ciphers via the admin panel
+# Visit https://vault.home.local/admin → Import/Export
+
+# Test WebSocket connectivity
+curl -i http://localhost:3012/notifications/hub
+
+# Verify admin token works
+curl -X POST http://localhost:8180/admin   -d "token=YOUR_ADMIN_TOKEN"
 ```
 
 **Enable 2FA emergency access:** In the web vault, go to Settings → Two-step Login → add TOTP or WebAuthn key. If you lose access to your 2FA device, use the recovery code generated during setup.
@@ -70,6 +96,10 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+```
+
+```bash
+cd ~/authelia && podman-compose up -d
 ```
 
 **Minimal `configuration.yml`:**
@@ -101,6 +131,24 @@ storage:
 ```bash
 podman exec authelia authelia crypto hash generate argon2 --password 'yourpassword'
 # Add the hash to /home/user/authelia/config/users_database.yml
+```
+
+**Common operations:**
+```bash
+# Generate a password hash for users_database.yml
+podman exec authelia authelia crypto hash generate argon2 --password 'mypassword'
+
+# Validate config
+podman exec authelia authelia validate-config --config /config/configuration.yml
+
+# View logs
+podman logs -f authelia
+
+# Test authentication (dry run)
+curl -X POST http://localhost:9091/api/firstfactor   -H "Content-Type: application/json"   -d '{"username":"myuser","password":"mypassword","keepMeLoggedIn":false}'
+
+# Reload users database (no restart needed)
+podman kill --signal=HUP authelia
 ```
 
 **Caddy integration (protect any service):**
@@ -176,6 +224,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/authentik && podman-compose up -d
+```
+
 Access at `http://localhost:9000/if/flow/initial-setup/` to create the admin account.
 
 ---
@@ -215,7 +267,11 @@ volumes:
   pg_data:
 ```
 
-> Use `start` (not `start-dev`) for production. `start-dev` disables HTTPS enforcement and some caches.
+```bash
+cd ~/keycloak && podman-compose up -d
+```
+
+> ⚠️ **Production:** Replace `start-dev` with `start` before exposing Keycloak publicly. `start-dev` disables HTTPS enforcement, TLS verification, and production-grade caches — it is for initial setup only.
 
 ---
 
@@ -231,7 +287,8 @@ services:
     ports: ["127.0.0.1:8080:8080"]
     command: start-from-init --masterkeyFromEnv
     environment:
-      ZITADEL_MASTERKEY: changeme-exactly-32-chars-long!!
+      # Must be exactly 32 characters. Generate with: openssl rand -base64 24 | tr -d '=' | head -c 32
+      ZITADEL_MASTERKEY: changeme-exactly-32-chars-here
       ZITADEL_DATABASE_POSTGRES_HOST: db
       ZITADEL_DATABASE_POSTGRES_PORT: 5432
       ZITADEL_DATABASE_POSTGRES_DATABASE: zitadel
@@ -256,22 +313,34 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/zitadel && podman-compose up -d
+```
+
 ---
 
 ## CrowdSec
 
 **Purpose:** Collaborative intrusion prevention system. Analyses your logs for attack patterns, blocks malicious IPs via a firewall bouncer, and shares threat intelligence with the CrowdSec community network.
 
+```yaml
+# ~/crowdsec/compose.yaml
+services:
+  crowdsec:
+    image: crowdsecurity/crowdsec:latest
+    ports:
+      - 127.0.0.1:8080:8080
+    volumes:
+      - /home/user/crowdsec/config:/etc/crowdsec:Z
+      - /home/user/crowdsec/data:/var/lib/crowdsec/data:Z
+      - /var/log:/var/log:ro
+    environment:
+      GID: "1000"
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name crowdsec \
-  -p 127.0.0.1:8080:8080 \
-  -v /home/user/crowdsec/config:/etc/crowdsec:Z \
-  -v /home/user/crowdsec/data:/var/lib/crowdsec/data:Z \
-  -v /var/log:/var/log:ro \
-  -e GID=$(id -g) \
-  --restart unless-stopped \
-  crowdsecurity/crowdsec:latest
+cd ~/crowdsec && podman-compose up -d
 ```
 
 **Install the firewalld bouncer on the host:**
@@ -298,22 +367,61 @@ podman exec crowdsec cscli decisions delete --ip 1.2.3.4
 podman exec crowdsec cscli collections list
 ```
 
+**Common operations:**
+```bash
+# View active alerts
+podman exec crowdsec cscli alerts list
+
+# View current bans/decisions
+podman exec crowdsec cscli decisions list
+
+# Manually ban an IP for 24 hours
+podman exec crowdsec cscli decisions add --ip 1.2.3.4 --duration 24h --reason "manual ban"
+
+# Remove a ban
+podman exec crowdsec cscli decisions delete --ip 1.2.3.4
+
+# List installed collections (parsers + scenarios)
+podman exec crowdsec cscli collections list
+
+# Install a new collection (e.g., for Caddy)
+podman exec crowdsec cscli collections install crowdsecurity/caddy
+
+# Update hub (get latest scenarios and parsers)
+podman exec crowdsec cscli hub update
+podman exec crowdsec cscli hub upgrade
+
+# Show metrics
+podman exec crowdsec cscli metrics
+
+# View parsed log lines for debugging
+podman exec crowdsec cscli parsers inspect crowdsecurity/sshd-logs
+```
+
 ---
 
 ## Step-CA (Internal Certificate Authority)
 
 **Purpose:** Issues internal TLS certificates via ACME protocol. Configure Caddy and other services to use Step-CA for automatic cert provisioning on private domains — without trusting Let's Encrypt for internal services.
 
+```yaml
+# ~/step-ca/compose.yaml
+services:
+  step-ca:
+    image: smallstep/step-ca
+    ports:
+      - 127.0.0.1:8443:8443
+    volumes:
+      - /home/user/stepca:/home/step:Z
+    environment:
+      DOCKER_STEPCA_INIT_NAME: Home Server CA
+      DOCKER_STEPCA_INIT_DNS_NAMES: step-ca.home.local,localhost
+      DOCKER_STEPCA_INIT_REMOTE_MANAGEMENT: true
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name step-ca \
-  -p 127.0.0.1:8443:8443 \
-  -v /home/user/stepca:/home/step:Z \
-  -e DOCKER_STEPCA_INIT_NAME="Home Server CA" \
-  -e DOCKER_STEPCA_INIT_DNS_NAMES="step-ca.home.local,localhost" \
-  -e DOCKER_STEPCA_INIT_REMOTE_MANAGEMENT=true \
-  --restart unless-stopped \
-  smallstep/step-ca
+cd ~/step-ca && podman-compose up -d
 ```
 
 **Trust the CA on Shani OS:**
@@ -383,6 +491,10 @@ volumes:
   db_data:
 ```
 
+```bash
+cd ~/passbolt && podman-compose up -d
+```
+
 **Create the first admin user:**
 ```bash
 podman exec passbolt su -m -c \
@@ -402,17 +514,26 @@ pass.home.local { tls internal; reverse_proxy localhost:8290 }
 
 **Purpose:** The Linux Foundation's open-source fork of HashiCorp Vault. Stores and manages secrets, API keys, TLS certificates, and database credentials with fine-grained access control, audit logging, dynamic secret generation, and encryption-as-a-service. The right choice when Infisical's ENV-file model isn't granular enough — OpenBao treats every secret as an addressable path with its own policy.
 
+```yaml
+# ~/openbao/compose.yaml
+services:
+  openbao:
+    image: quay.io/openbao/openbao:latest
+    ports:
+      - 127.0.0.1:8200:8200
+    volumes:
+      - /home/user/openbao/data:/openbao/data:Z
+      - /home/user/openbao/config:/openbao/config:Z
+    environment:
+      VAULT_ADDR: http://0.0.0.0:8200
+    cap_add:
+      - IPC_LOCK
+    command: server -config=/openbao/config/openbao.hcl
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name openbao \
-  -p 127.0.0.1:8200:8200 \
-  -v /home/user/openbao/data:/openbao/data:Z \
-  -v /home/user/openbao/config:/openbao/config:Z \
-  -e VAULT_ADDR=http://0.0.0.0:8200 \
-  --cap-add IPC_LOCK \
-  --restart unless-stopped \
-  quay.io/openbao/openbao:latest server \
-    -config=/openbao/config/openbao.hcl
+cd ~/openbao && podman-compose up -d
 ```
 
 **Minimal `openbao.hcl`:**
@@ -506,6 +627,10 @@ services:
     ports: ["127.0.0.1:443:5601"]
     depends_on: [wazuh.indexer]
     restart: unless-stopped
+```
+
+```bash
+cd ~/wazuh && podman-compose up -d
 ```
 
 > The official `single-node` compose is the recommended deployment path — it handles certificate generation and service wiring. Download from `packages.wazuh.com`.
@@ -604,6 +729,10 @@ volumes:
   gpg_data_vol: {}
 ```
 
+```bash
+cd ~/greenbone && podman-compose up -d
+```
+
 Access the dashboard at `http://localhost:9392`. On first run, create a scan target (your server's LAN IP), run a full and fast scan, and review the findings.
 
 > Initial feed synchronisation takes 15–30 minutes. The container will show as loading until feeds are downloaded.
@@ -629,18 +758,26 @@ Access the dashboard at `http://localhost:9392`. On first run, create a scan tar
 
 **Purpose:** Monitors log files for repeated authentication failures and bans the source IP via firewall rules. Protects SSH, Caddy, Authelia, Vaultwarden, and any service that logs failed login attempts — automatically blocking brute-force attacks without manual intervention. Integrates with `firewalld` (used on Shani OS) natively.
 
+```yaml
+# ~/fail2ban/compose.yaml
+services:
+  fail2ban:
+    image: crazymax/fail2ban:latest
+    network_mode: host
+    volumes:
+      - /home/user/fail2ban/config:/data:Z
+      - /var/log:/var/log:ro
+      - /run/firewalld:/run/firewalld:Z
+    environment:
+      TZ: Asia/Kolkata
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name fail2ban \
-  --network host \
-  --cap-add NET_ADMIN \
-  --cap-add NET_RAW \
-  -v /home/user/fail2ban/config:/data:Z \
-  -v /var/log:/var/log:ro \
-  -v /run/firewalld:/run/firewalld:Z \
-  -e TZ=Asia/Kolkata \
-  --restart unless-stopped \
-  crazymax/fail2ban:latest
+cd ~/fail2ban && podman-compose up -d
 ```
 
 **Example jail config (`/home/user/fail2ban/config/jail.d/caddy.conf`):**
@@ -697,13 +834,21 @@ podman run --rm \
 ```
 
 **Run as a server for CI integration:**
+```yaml
+# ~/trivy-server/compose.yaml
+services:
+  trivy-server:
+    image: aquasec/trivy:latest
+    ports:
+      - 127.0.0.1:4954:4954
+    volumes:
+      - /home/user/trivy-cache:/root/.cache/trivy:Z
+    command: server --listen 0.0.0.0:4954
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name trivy-server \
-  -p 127.0.0.1:4954:4954 \
-  -v /home/user/trivy-cache:/root/.cache/trivy:Z \
-  --restart unless-stopped \
-  aquasec/trivy:latest server --listen 0.0.0.0:4954
+cd ~/trivy-server && podman-compose up -d
 ```
 
 Then scan from CI with: `trivy image --server http://trivy.home.local:4954 myapp:latest`
@@ -731,6 +876,10 @@ services:
       - /home/user/teleport/data:/var/lib/teleport:Z
     command: teleport start --config=/etc/teleport/teleport.yaml
     restart: unless-stopped
+```
+
+```bash
+cd ~/teleport && podman-compose up -d
 ```
 
 **Generate initial config:**
@@ -841,17 +990,24 @@ curl -L https://github.com/coreruleset/coreruleset/archive/refs/tags/v4.7.0.tar.
 ```
 
 **Run the custom Caddy image:**
+```yaml
+# ~/caddy/compose.yaml
+services:
+  caddy:
+    image: caddy-coraza
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /home/user/caddy/Caddyfile:/etc/caddy/Caddyfile:ro,Z
+      - /home/user/caddy/data:/data:Z
+      - /home/user/caddy/config:/config:Z
+      - /home/user/caddy/waf:/etc/coraza-waf:Z
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name caddy \
-  -p 80:80 \
-  -p 443:443 \
-  -v /home/user/caddy/Caddyfile:/etc/caddy/Caddyfile:ro,Z \
-  -v /home/user/caddy/data:/data:Z \
-  -v /home/user/caddy/config:/config:Z \
-  -v /home/user/caddy/waf:/etc/coraza-waf:Z \
-  --restart unless-stopped \
-  caddy-coraza
+cd ~/caddy && podman-compose up -d
 ```
 
 **Caddyfile with WAF enabled for a specific service:**
@@ -949,6 +1105,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/safeline && podman-compose up -d
+```
+
 Access the admin UI at `https://localhost:9443`. Add your upstream services as protected sites and configure detection sensitivity per service.
 
 ---
@@ -957,19 +1117,27 @@ Access the admin UI at `https://localhost:9443`. Add your upstream services as p
 
 **Purpose:** High-performance Network Intrusion Detection and Prevention System (IDS/IPS). Suricata inspects raw network traffic using the Emerging Threats and ETPRO rule sets to detect port scans, exploit attempts, C2 beaconing, DNS tunnelling, and malware traffic patterns — not just failed logins like Fail2ban and CrowdSec, but actual wire-level attack signatures. In IPS mode it drops malicious packets before they reach your services. In IDS mode it logs and alerts without blocking, which is safer to start with.
 
+```yaml
+# ~/suricata/compose.yaml
+services:
+  suricata:
+    image: jasonish/suricata:latest
+    network_mode: host
+    volumes:
+      - /home/user/suricata/config:/etc/suricata:Z
+      - /home/user/suricata/logs:/var/log/suricata:Z
+      - /home/user/suricata/rules:/var/lib/suricata/rules:Z
+    environment:
+      SURICATA_OPTIONS: -i eth0
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+      - SYS_NICE
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name suricata \
-  --network host \
-  --cap-add NET_ADMIN \
-  --cap-add NET_RAW \
-  --cap-add SYS_NICE \
-  -v /home/user/suricata/config:/etc/suricata:Z \
-  -v /home/user/suricata/logs:/var/log/suricata:Z \
-  -v /home/user/suricata/rules:/var/lib/suricata/rules:Z \
-  -e SURICATA_OPTIONS="-i eth0" \
-  --restart unless-stopped \
-  jasonish/suricata:latest
+cd ~/suricata && podman-compose up -d
 ```
 
 > Replace `eth0` with your primary interface (`ip link show`). `--network host` is required to see actual traffic.
@@ -1093,18 +1261,26 @@ AND remote_address != '';
 
 **Purpose:** OWASP's flagship dynamic application security testing (DAST) tool. ZAP proxies traffic between your browser and your apps, passively analysing every request, and can actively probe for SQLi, XSS, SSRF, broken auth, insecure redirects, and 100+ other vulnerabilities. Use it to audit your self-hosted services before exposing them publicly, and in CI/CD pipelines to catch regressions.
 
-```bash
 # Run as a daemon with REST API
-podman run -d \
-  --name zap \
-  -p 127.0.0.1:8088:8080 \
-  -v /home/user/zap:/zap/wrk:Z \
-  --restart unless-stopped \
-  ghcr.io/zaproxy/zaproxy:stable \
-  zap.sh -daemon -port 8080 -host 0.0.0.0 \
-    -config api.addrs.addr.name=.* \
-    -config api.addrs.addr.regex=true \
-    -config api.key=changeme
+```yaml
+# ~/zap/compose.yaml
+services:
+  zap:
+    image: ghcr.io/zaproxy/zaproxy:stable
+    ports:
+      - 127.0.0.1:8088:8080
+    volumes:
+      - /home/user/zap:/zap/wrk:Z
+    command: >
+      zap.sh -daemon -port 8080 -host 0.0.0.0
+      -config api.addrs.addr.name=.*
+      -config api.addrs.addr.regex=true
+      -config api.key=changeme
+    restart: unless-stopped
+```
+
+```bash
+cd ~/zap && podman-compose up -d
 ```
 
 **Scan types:**

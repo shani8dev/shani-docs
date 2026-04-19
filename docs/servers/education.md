@@ -16,23 +16,31 @@ Self-hosted learning management systems, school administration platforms, collab
 
 **Purpose:** The world's most widely deployed open-source Learning Management System (LMS). Supports courses, quizzes, assignments, forums, gradebooks, badges, SCORM packages, H5P interactive content, and deep analytics. Used by universities, schools, and enterprises worldwide.
 
+```yaml
+# ~/moodle/compose.yaml
+services:
+  moodle:
+    image: bitnami/moodle:latest
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - /home/user/moodle/data:/bitnami/moodle:Z
+      - /home/user/moodle/moodledata:/bitnami/moodledata:Z
+    environment:
+      MOODLE_DATABASE_HOST: host.containers.internal
+      MOODLE_DATABASE_PORT_NUMBER: 3306
+      MOODLE_DATABASE_USER: moodleuser
+      MOODLE_DATABASE_PASSWORD: changeme
+      MOODLE_DATABASE_NAME: moodle
+      MOODLE_SITE_NAME: "My Moodle"
+      MOODLE_USERNAME: admin
+      MOODLE_PASSWORD: changeme
+      MOODLE_EMAIL: admin@example.com
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name moodle \
-  -p 127.0.0.1:8080:8080 \
-  -v /home/user/moodle/data:/bitnami/moodle:Z \
-  -v /home/user/moodle/moodledata:/bitnami/moodledata:Z \
-  -e MOODLE_DATABASE_HOST=host.containers.internal \
-  -e MOODLE_DATABASE_PORT_NUMBER=3306 \
-  -e MOODLE_DATABASE_USER=moodleuser \
-  -e MOODLE_DATABASE_PASSWORD=changeme \
-  -e MOODLE_DATABASE_NAME=moodle \
-  -e MOODLE_SITE_NAME="My Moodle" \
-  -e MOODLE_USERNAME=admin \
-  -e MOODLE_PASSWORD=changeme \
-  -e MOODLE_EMAIL=admin@example.com \
-  --restart unless-stopped \
-  bitnami/moodle:latest
+cd ~/moodle && podman-compose up -d
 ```
 
 > Moodle requires a database. Run MariaDB first from the [Databases wiki](https://docs.shani.dev/doc/servers/databases).
@@ -50,6 +58,30 @@ podman run -d \
 podman exec moodle php /opt/bitnami/moodle/admin/cli/cron.php
 ```
 
+**Common operations:**
+```bash
+# Run Moodle cron (required — run every minute via systemd timer)
+podman exec -u www-data moodle php /bitnami/moodle/admin/cli/cron.php
+
+# Purge all caches
+podman exec -u www-data moodle php /bitnami/moodle/admin/cli/purge_caches.php
+
+# Upgrade Moodle database after version update
+podman exec -u www-data moodle php /bitnami/moodle/admin/cli/upgrade.php --non-interactive
+
+# Install a plugin from the plugins directory
+podman exec -u www-data moodle php /bitnami/moodle/admin/cli/install_plugin.php   --pluginzip=/tmp/myplugin.zip
+
+# Create a new user via CLI
+podman exec -u www-data moodle php /bitnami/moodle/admin/cli/create_user.php   --username=newuser --password=changeme --email=user@example.com --firstname=John --lastname=Doe
+
+# View logs
+podman logs -f moodle
+
+# Check Moodle status
+curl http://localhost:8080/admin/index.php
+```
+
 ---
 
 ## Canvas LMS
@@ -57,7 +89,7 @@ podman exec moodle php /opt/bitnami/moodle/admin/cli/cron.php
 **Purpose:** Enterprise-grade LMS used by hundreds of universities. Cleaner UI than Moodle, superior mobile apps, strong API, and first-class support for rubrics, SpeedGrader, outcome tracking, and video feedback. Higher resource requirements than Moodle.
 
 ```yaml
-# ~/canvas/compose.yml
+# ~/canvas/compose.yaml
 services:
   canvas:
     image: instructure/canvas-lms:latest
@@ -89,6 +121,10 @@ services:
 
 volumes:
   pg_data:
+```
+
+```bash
+cd ~/canvas && podman-compose up -d
 ```
 
 > Canvas is resource-heavy — plan for at least 4 GB RAM dedicated to the stack.
@@ -130,21 +166,18 @@ studio.example.com { reverse_proxy localhost:80 }
 
 **Purpose:** Open-source web conferencing designed specifically for education. Features include multi-user whiteboards, breakout rooms, polling, shared notes, learning analytics, recordings with automatic transcription, and deep LMS integration (Moodle, Canvas).
 
-```bash
-# BigBlueButton requires a dedicated VM or bare-metal install due to its architecture
-# For production use, the official automated installer is recommended:
-wget -qO- https://ubuntu.bigbluebutton.org/bbb-install-3.0.sh | bash -s -- \
-  -v ubuntu22.04 \
-  -s bbb.example.com \
-  -e admin@example.com \
-  -g   # Enable Greenlight (web interface)
+```yaml
+# ~/bbb-demo/compose.yaml
+services:
+  bbb-demo:
+    image: bigbluebutton/demo:latest
+    ports:
+      - 127.0.0.1:8090:8090
+    restart: unless-stopped
+```
 
-# For development/testing — lightweight Scalelite + BBB demo:
-podman run -d \
-  --name bbb-demo \
-  -p 127.0.0.1:8090:8090 \
-  --restart unless-stopped \
-  bigbluebutton/demo:latest
+```bash
+cd ~/bbb-demo && podman-compose up -d
 ```
 
 > BBB needs ports `443/tcp` and `16384-32768/udp` open for WebRTC media. It works best on a server with at least 8 GB RAM.
@@ -156,7 +189,7 @@ podman run -d \
 **Purpose:** A simple, polished web interface for BigBlueButton. Manages rooms, recordings, and user accounts — without the complexity of a full LMS. Ideal as a standalone virtual meeting room system for schools or teams.
 
 ```yaml
-# ~/greenlight/compose.yml
+# ~/greenlight/compose.yaml
 services:
   greenlight:
     image: bigbluebutton/greenlight:v3
@@ -182,6 +215,10 @@ volumes:
   pg_data:
 ```
 
+```bash
+cd ~/greenlight && podman-compose up -d
+```
+
 ---
 
 ## ERPNext / Frappe (School ERP)
@@ -189,7 +226,7 @@ volumes:
 **Purpose:** ERPNext includes a full **Education module** — student admissions, enrollment, fee management, timetables, attendance, assessments, certificates, and parent portals. Built on the Frappe framework, it is a complete school management system alongside a full-featured ERP (HR, payroll, accounts, inventory).
 
 ```yaml
-# ~/erpnext/compose.yml — use the official Frappe Docker setup
+# ~/erpnext/compose.yaml — use the official Frappe Docker setup
 # git clone https://github.com/frappe/frappe_docker
 # cd frappe_docker
 # cp example.env .env
@@ -220,7 +257,7 @@ services:
     restart: unless-stopped
 
   db:
-    image: mariadb:10.6
+    image: mariadb:10.11
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     environment:
       MYSQL_ROOT_PASSWORD: changeme
@@ -246,6 +283,10 @@ volumes:
   mariadb_data:
 ```
 
+```bash
+cd ~/erpnext && podman-compose up -d
+```
+
 **Create a new site:**
 ```bash
 podman exec backend bench new-site erp.example.com \
@@ -262,7 +303,7 @@ podman exec backend bench new-site erp.example.com \
 **Purpose:** Lightweight, purpose-built school information system. Timetables, attendance, gradebooks, student profiles, parent communication, notices, and planner — all in one. Lower resource footprint than ERPNext; easier to operate for a single school.
 
 ```yaml
-# ~/gibbon/compose.yml
+# ~/gibbon/compose.yaml
 services:
   gibbon:
     image: andrewm/gibbon:latest
@@ -280,7 +321,7 @@ services:
     restart: unless-stopped
 
   db:
-    image: mariadb:10.6
+    image: mariadb:10.11
     environment:
       MYSQL_DATABASE: gibbon
       MYSQL_USER: gibbon
@@ -293,6 +334,10 @@ volumes:
   db_data:
 ```
 
+```bash
+cd ~/gibbon && podman-compose up -d
+```
+
 Access at `http://localhost:8082`. Complete setup via the web installer on first run.
 
 ---
@@ -301,18 +346,26 @@ Access at `http://localhost:8082`. Complete setup via the web installer on first
 
 **Purpose:** Simple, accessible LMS targeted at schools and training centres in developing regions. Lower resource requirements than Moodle, easier to administer, and multilingual from the ground up. Supports courses, assignments, quizzes, certificates, and social learning tools.
 
+```yaml
+# ~/chamilo/compose.yaml
+services:
+  chamilo:
+    image: chamilo/chamilo:latest
+    ports:
+      - 127.0.0.1:8083:80
+    volumes:
+      - /home/user/chamilo/app:/var/www/html/app:Z
+      - /home/user/chamilo/web:/var/www/html/web:Z
+    environment:
+      CHAMILO_DATABASE_HOST: host.containers.internal
+      CHAMILO_DATABASE_USER: chamilo
+      CHAMILO_DATABASE_PASSWORD: changeme
+      CHAMILO_DATABASE_NAME: chamilo
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name chamilo \
-  -p 127.0.0.1:8083:80 \
-  -v /home/user/chamilo/app:/var/www/html/app:Z \
-  -v /home/user/chamilo/web:/var/www/html/web:Z \
-  -e CHAMILO_DATABASE_HOST=host.containers.internal \
-  -e CHAMILO_DATABASE_USER=chamilo \
-  -e CHAMILO_DATABASE_PASSWORD=changeme \
-  -e CHAMILO_DATABASE_NAME=chamilo \
-  --restart unless-stopped \
-  chamilo/chamilo:latest
+cd ~/chamilo && podman-compose up -d
 ```
 
 ---
@@ -321,17 +374,20 @@ podman run -d \
 
 **Purpose:** Open-source educational platform from Learning Equality, designed for low-bandwidth and offline use. Hosts Khan Academy content, ebooks, videos, and interactive exercises locally. Ideal for remote schools or learning environments without reliable internet access.
 
-```bash
-podman run -d \
-  --name kolibri \
-  -p 127.0.0.1:8090:8080 \
-  -v /home/user/kolibri/data:/root/.kolibri:Z \
-  --restart unless-stopped \
-  learningequality/kolibri:latest
+```yaml
+# ~/kolibri/compose.yaml
+services:
+  kolibri:
+    image: learningequality/kolibri:latest
+    ports:
+      - 127.0.0.1:8090:8080
+    volumes:
+      - /home/user/kolibri/data:/root/.kolibri:Z
+    restart: unless-stopped
+```
 
-# Import content channels (runs inside container)
-podman exec kolibri kolibri manage importchannel -- network <channel-token>
-podman exec kolibri kolibri manage importcontent -- network <channel-token>
+```bash
+cd ~/kolibri && podman-compose up -d
 ```
 
 > Kolibri can serve an entire classroom over Wi-Fi from a single Raspberry Pi or mini PC — no internet required after content import.
@@ -343,7 +399,7 @@ podman exec kolibri kolibri manage importcontent -- network <channel-token>
 **Purpose:** Self-hosted collaborative LaTeX document editor. Essential for academic writing, research papers, theses, and technical documentation. The Community Edition gives you the same real-time collaborative experience as Overleaf.com, running on your own server.
 
 ```yaml
-# ~/overleaf/compose.yml
+# ~/overleaf/compose.yaml
 services:
   sharelatex:
     image: sharelatex/sharelatex:latest
@@ -372,6 +428,10 @@ volumes:
   mongo_data:
 ```
 
+```bash
+cd ~/overleaf && podman-compose up -d
+```
+
 **Create an admin user:**
 ```bash
 podman exec sharelatex /bin/bash -c \
@@ -390,18 +450,24 @@ podman exec sharelatex tlmgr install scheme-full
 
 **Purpose:** Self-hosted synchronisation server for the Anki flashcard app (desktop and mobile). All your decks, scheduling data, and review history sync between devices through your own server — no AnkiWeb account required.
 
-```bash
-podman run -d \
-  --name anki-sync \
-  -p 127.0.0.1:27701:27701 \
-  -v /home/user/anki-sync/data:/data:Z \
-  -e SYNC_USER1=user:password \
-  --restart unless-stopped \
-  ghcr.io/ankitects/anki:latest anki-sync-server
+```yaml
+# ~/anki-sync/compose.yaml
+services:
+  anki-sync:
+    image: ghcr.io/ankitects/anki:latest
+    ports:
+      - 127.0.0.1:27701:27701
+    volumes:
+      - /home/user/anki-sync/data:/data:Z
+    environment:
+      SYNC_USER1: user:password
+      # Add more users: SYNC_USER2=alice:pass1 SYNC_USER3=bob:pass2
+    command: anki-sync-server
+    restart: unless-stopped
+```
 
-# Or with multiple users:
-# -e SYNC_USER1=alice:pass1
-# -e SYNC_USER2=bob:pass2
+```bash
+cd ~/anki-sync && podman-compose up -d
 ```
 
 **Configure Anki desktop:** Tools → Preferences → Network → Self-hosted sync server → enter your server URL.
@@ -413,7 +479,7 @@ podman run -d \
 **Purpose:** IT documentation and ticketing platform popular in school IT departments. Asset tracking, password vault, network documentation, and ticket management — all in one self-hosted tool.
 
 ```yaml
-# ~/itflow/compose.yml
+# ~/itflow/compose.yaml
 services:
   itflow:
     image: itflow/itflow:latest
@@ -431,7 +497,7 @@ services:
     restart: unless-stopped
 
   db:
-    image: mariadb:10.6
+    image: mariadb:10.11
     environment:
       MYSQL_DATABASE: itflow
       MYSQL_USER: itflow
@@ -444,21 +510,33 @@ volumes:
   db_data:
 ```
 
+```bash
+cd ~/itflow && podman-compose up -d
+```
+
 ---
 
 ## H5P (Interactive Learning Content)
 
 **Purpose:** Create rich, interactive HTML5 learning content — quizzes, drag-and-drop exercises, interactive videos, flashcards, branching scenarios, and 50+ other content types — without writing code. H5P content runs in the browser and integrates directly with Moodle, Canvas, and Open edX as a plugin. The standalone server lets you host H5P content independently and embed it in any website via iframes.
 
+```yaml
+# ~/h5p/compose.yaml
+services:
+  h5p:
+    image: tutor/h5p:latest
+    ports:
+      - 127.0.0.1:8100:8080
+    volumes:
+      - /home/user/h5p/content:/var/www/html/content:Z
+      - /home/user/h5p/libraries:/var/www/html/libraries:Z
+    environment:
+      H5P_EDITOR_DOMAIN: h5p.home.local
+    restart: unless-stopped
+```
+
 ```bash
-podman run -d \
-  --name h5p \
-  -p 127.0.0.1:8100:8080 \
-  -v /home/user/h5p/content:/var/www/html/content:Z \
-  -v /home/user/h5p/libraries:/var/www/html/libraries:Z \
-  -e H5P_EDITOR_DOMAIN=h5p.home.local \
-  --restart unless-stopped \
-  tutor/h5p:latest
+cd ~/h5p && podman-compose up -d
 ```
 
 Access at `http://localhost:8100`. Download H5P content types from the H5P Hub (built into the editor), create content, and embed it in any LMS or web page:
@@ -520,5 +598,6 @@ h5p.home.local         { tls internal; reverse_proxy localhost:8100 }
 | Anki sync `AuthFailed` | Verify username/password in `SYNC_USER1` matches exactly what the client sends; Anki is case-sensitive |
 
 > 💡 **Tip:** For Moodle and Canvas, enable Redis as a caching backend (set under `config.php` → `$CFG->cache_*`) to significantly improve page load times and handle more concurrent users.
+
 | H5P content type missing | Download content types from the H5P Hub inside the editor — libraries must be installed before content of that type can be created |
 | H5P iframe not loading | Ensure `H5P_EDITOR_DOMAIN` matches the domain used in the iframe src; check CSP headers aren't blocking the embed |
