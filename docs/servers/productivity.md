@@ -358,9 +358,705 @@ podman run -d \
 
 ---
 
+## Ghost (Publishing & Blogging)
+
+**Purpose:** Modern, open-source publishing platform. Ghost is a focused writing and newsletter tool — clean editor, built-in membership and paid subscriptions (via Stripe), email newsletters, and a polished public-facing blog. The self-hosted alternative to Substack or Medium.
+
+```yaml
+# ~/ghost/compose.yml
+services:
+  ghost:
+    image: ghost:5-alpine
+    ports: ["127.0.0.1:2368:2368"]
+    environment:
+      url: https://blog.example.com
+      database__client: mysql
+      database__connection__host: db
+      database__connection__user: ghost
+      database__connection__password: changeme
+      database__connection__database: ghost
+      mail__transport: SMTP
+      mail__options__host: localhost
+      mail__options__port: 25
+      NODE_ENV: production
+    volumes:
+      - /home/user/ghost/content:/var/lib/ghost/content:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: ghost
+      MYSQL_USER: ghost
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  db_data:
+```
+
+Access the admin panel at `http://localhost:2368/ghost`. Set up your site, configure the theme, and connect Stripe for paid memberships.
+
+**Caddy:**
+```caddyfile
+blog.example.com { reverse_proxy localhost:2368 }
+```
+
+---
+
+## WordPress
+
+**Purpose:** The world's most widely used CMS. Powers 40% of the web. Massive plugin ecosystem, thousands of themes, WooCommerce for e-commerce, and a huge talent pool. The right choice when you need maximum flexibility or have to integrate with existing WordPress tooling.
+
+```yaml
+# ~/wordpress/compose.yml
+services:
+  wordpress:
+    image: wordpress:6-php8.2-apache
+    ports: ["127.0.0.1:8100:80"]
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: changeme
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_HOME', 'https://site.example.com');
+        define('WP_SITEURL', 'https://site.example.com');
+    volumes:
+      - /home/user/wordpress/data:/var/www/html:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  db_data:
+```
+
+> For better performance, add Redis object caching: deploy a Redis container and install the `Redis Object Cache` WordPress plugin, pointing it at `host.containers.internal:6379`.
+
+---
+
+## BookStack (Documentation Wiki)
+
+**Purpose:** Simple, elegant wiki and documentation platform. Books, chapters, and pages organise content hierarchically. Supports Markdown and WYSIWYG editing, page revisions, search, diagrams (Draw.io integration), and LDAP/SAML SSO. Excellent for team runbooks, internal documentation, and knowledge bases.
+
+```yaml
+# ~/bookstack/compose.yml
+services:
+  bookstack:
+    image: lscr.io/linuxserver/bookstack:latest
+    ports: ["127.0.0.1:6875:80"]
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: Asia/Kolkata
+      APP_URL: https://docs.home.local
+      DB_HOST: db
+      DB_DATABASE: bookstack
+      DB_USERNAME: bookstack
+      DB_PASSWORD: changeme
+    volumes:
+      - /home/user/bookstack/config:/config:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: bookstack
+      MYSQL_USER: bookstack
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  db_data:
+```
+
+Default login: `admin@admin.com` / `password`. Change immediately after first access.
+
+> **Choosing between BookStack, Outline, and Wiki.js:** BookStack is the most approachable with its book/chapter/page hierarchy. Outline has a Notion-like interface and requires OIDC. Wiki.js supports Git-backed storage and multi-database backends.
+
+---
+
+## Wiki.js
+
+**Purpose:** Powerful, extensible wiki with a Git-backed storage option — every page is a Markdown file committed to a Git repository. Supports 50+ authentication providers, 20+ rendering engines, and full-text search. Good choice when you want your wiki version-controlled.
+
+```yaml
+# ~/wikijs/compose.yml
+services:
+  wikijs:
+    image: ghcr.io/requarks/wiki:2
+    ports: ["127.0.0.1:3300:3000"]
+    environment:
+      DB_TYPE: postgres
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: wiki
+      DB_USER: wiki
+      DB_PASS: changeme
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: wiki
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: wiki
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+Access at `http://localhost:3300` to complete the setup wizard. Enable the Git storage module to sync all pages to a Gitea repository.
+
+---
+
+## HedgeDoc (Collaborative Markdown)
+
+**Purpose:** Real-time collaborative Markdown editor. Multiple people edit simultaneously — useful for meeting notes, shared documents, and technical writing. Each document gets a public shareable link. Think Google Docs but Markdown-based and self-hosted.
+
+```yaml
+# ~/hedgedoc/compose.yml
+services:
+  hedgedoc:
+    image: quay.io/hedgedoc/hedgedoc:latest
+    ports: ["127.0.0.1:3400:3000"]
+    environment:
+      CMD_DOMAIN: notes.home.local
+      CMD_URL_ADDPORT: "false"
+      CMD_PROTOCOL_USESSL: "true"
+      CMD_DB_URL: postgres://hedgedoc:changeme@db:5432/hedgedoc
+      CMD_SESSION_SECRET: changeme-run-openssl-rand-hex-32
+      CMD_ALLOW_ANONYMOUS: "true"
+      CMD_ALLOW_ANONYMOUS_EDITS: "true"
+    volumes:
+      - /home/user/hedgedoc/uploads:/hedgedoc/public/uploads:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: hedgedoc
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: hedgedoc
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+---
+
+## CryptPad (Encrypted Collaborative Office)
+
+**Purpose:** Zero-knowledge, end-to-end encrypted collaboration suite. Documents, spreadsheets, presentations, kanban, code pads, and whiteboards — all encrypted client-side. The server never sees your content. The self-hosted alternative to Google Docs with privacy as the first principle.
+
+```bash
+podman run -d \
+  --name cryptpad \
+  -p 127.0.0.1:3500:3000 \
+  -v /home/user/cryptpad/data:/cryptpad/data:Z \
+  -v /home/user/cryptpad/customize:/cryptpad/customize.dist:Z \
+  -e CPAD_MAIN_DOMAIN=pad.home.local \
+  -e CPAD_SANDBOX_DOMAIN=sandbox.home.local \
+  --restart unless-stopped \
+  cryptpad/cryptpad:latest
+```
+
+> CryptPad requires **two separate subdomains** — one for the main app and one for the sandbox iframe (security requirement). Configure both in Caddy and DNS.
+
+**Caddy:**
+```caddyfile
+pad.home.local     { tls internal; reverse_proxy localhost:3500 }
+sandbox.home.local { tls internal; reverse_proxy localhost:3500 }
+```
+
+---
+
+## FreshRSS (RSS Reader)
+
+**Purpose:** Fast, self-hosted RSS and Atom feed aggregator. Multi-user, supports Google Reader and Fever APIs (for mobile apps like Reeder, NetNewsWire, and ReadKit), has a powerful filtering engine, and handles thousands of feeds reliably. A more feature-complete alternative to Miniflux.
+
+```bash
+podman run -d \
+  --name freshrss \
+  -p 127.0.0.1:8200:80 \
+  -v /home/user/freshrss/data:/var/www/FreshRSS/data:Z \
+  -v /home/user/freshrss/extensions:/var/www/FreshRSS/extensions:Z \
+  -e TZ=Asia/Kolkata \
+  -e CRON_MIN="4,34" \
+  --restart unless-stopped \
+  freshrss/freshrss:latest
+```
+
+Access at `http://localhost:8200`. During setup, choose SQLite for simplicity or PostgreSQL for multi-user deployments. Enable the API in Settings → Authentication for mobile app access.
+
+> Mobile apps: **Reeder 5** (iOS), **NetNewsWire** (iOS/macOS), **ReadKit**, and **Fluent Reader** all support the Fever or Google Reader API that FreshRSS exposes.
+
+---
+
+## Wallabag (Read-It-Later)
+
+**Purpose:** Save articles from the web to read later — offline, without ads, in a clean reading view. Browser extensions and mobile apps (iOS, Android) let you save with one tap. Full-text search, tagging, and export to ePub/PDF. Self-hosted Pocket/Instapaper replacement.
+
+```yaml
+# ~/wallabag/compose.yml
+services:
+  wallabag:
+    image: wallabag/wallabag:latest
+    ports: ["127.0.0.1:8250:80"]
+    environment:
+      SYMFONY__ENV__DATABASE_DRIVER: pdo_pgsql
+      SYMFONY__ENV__DATABASE_HOST: db
+      SYMFONY__ENV__DATABASE_PORT: 5432
+      SYMFONY__ENV__DATABASE_NAME: wallabag
+      SYMFONY__ENV__DATABASE_USER: wallabag
+      SYMFONY__ENV__DATABASE_PASSWORD: changeme
+      SYMFONY__ENV__SECRET: changeme-run-openssl-rand-hex-32
+      SYMFONY__ENV__DOMAIN_NAME: https://read.home.local
+      POPULATE_DATABASE: "True"
+    volumes:
+      - /home/user/wallabag/images:/var/www/wallabag/web/assets/images:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: wallabag
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: wallabag
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+Default login: `wallabag` / `wallabag`. Change immediately.
+
+---
+
+## Linkwarden (Bookmark Manager)
+
+**Purpose:** Collaborative bookmark manager with automatic webpage archiving. When you save a link, Linkwarden takes a full-page screenshot and saves the HTML — so bookmarks never go dead. Tags, collections, full-text search, and public sharing.
+
+```yaml
+# ~/linkwarden/compose.yml
+services:
+  linkwarden:
+    image: ghcr.io/linkwarden/linkwarden:latest
+    ports: ["127.0.0.1:3210:3000"]
+    environment:
+      DATABASE_URL: postgresql://linkwarden:changeme@db:5432/linkwarden
+      NEXTAUTH_SECRET: changeme-run-openssl-rand-hex-32
+      NEXTAUTH_URL: https://links.home.local
+      NEXT_PUBLIC_DISABLE_REGISTRATION: "true"
+    volumes:
+      - /home/user/linkwarden/data:/data/data:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: linkwarden
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: linkwarden
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+---
+
+## Monica (Personal CRM)
+
+**Purpose:** Personal relationship manager. Track your contacts, log notes from conversations, set reminders for birthdays and follow-ups, record relationship history, and never forget important details about the people in your life. The self-hosted alternative to remembering things about people you care about.
+
+```yaml
+# ~/monica/compose.yml
+services:
+  monica:
+    image: monica:latest
+    ports: ["127.0.0.1:8080:80"]
+    environment:
+      APP_KEY: base64:changeme-run-php-artisan-key-generate
+      APP_URL: https://crm.home.local
+      DB_HOST: db
+      DB_DATABASE: monica
+      DB_USERNAME: monica
+      DB_PASSWORD: changeme
+    volumes:
+      - /home/user/monica/storage:/var/www/html/storage:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: monica
+      MYSQL_USER: monica
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  db_data:
+```
+
+**First run:**
+```bash
+podman exec monica php artisan setup:production --force
+```
+
+---
+
+## Rallly (Scheduling & Polls)
+
+**Purpose:** Lightweight Doodle alternative for scheduling meetings. Create a poll with date/time options, share the link, and let participants vote. No accounts required for respondents. Clean, fast, and self-contained.
+
+```yaml
+# ~/rallly/compose.yml
+services:
+  rallly:
+    image: lukevella/rallly:latest
+    ports: ["127.0.0.1:3450:3000"]
+    environment:
+      DATABASE_URL: postgresql://rallly:changeme@db:5432/rallly
+      SECRET_PASSWORD: changeme-run-openssl-rand-hex-32
+      NEXT_PUBLIC_BASE_URL: https://schedule.home.local
+      SUPPORT_EMAIL: admin@home.local
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: rallly
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: rallly
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+---
+
+## Kimai (Time Tracking)
+
+**Purpose:** Open-source time tracking for freelancers and teams. Log time against projects and clients, generate invoices, track budgets, and export timesheets. The self-hosted Toggl/Harvest alternative.
+
+```yaml
+# ~/kimai/compose.yml
+services:
+  kimai:
+    image: kimai/kimai2:apache
+    ports: ["127.0.0.1:8300:8001"]
+    environment:
+      ADMINMAIL: admin@example.com
+      ADMINPASS: changeme
+      DATABASE_URL: mysql://kimai:changeme@db/kimai
+      MAILER_FROM: kimai@example.com
+      MAILER_URL: null://localhost
+    volumes:
+      - /home/user/kimai/data:/opt/kimai/var/data:Z
+      - /home/user/kimai/plugins:/opt/kimai/var/plugins:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: kimai
+      MYSQL_USER: kimai
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  db_data:
+```
+
+---
+
+## Grocy (Household Management)
+
+**Purpose:** Grocery and household management system. Track pantry stock, shopping lists, product expiry dates, meal planning, and chores. Integrates with barcode scanners for quick stock updates. Useful for reducing food waste and keeping a well-organised household.
+
+```bash
+podman run -d \
+  --name grocy \
+  -p 127.0.0.1:9283:80 \
+  -v /home/user/grocy/data:/var/www/data:Z \
+  -e PUID=$(id -u) \
+  -e PGID=$(id -g) \
+  -e TZ=Asia/Kolkata \
+  --restart unless-stopped \
+  lscr.io/linuxserver/grocy:latest
+```
+
+Access at `http://localhost:9283`. Default credentials: `admin` / `admin`. Change in the settings.
+
+> Grocy has companion Android and iOS apps for on-the-go barcode scanning — point them at your server URL.
+
+---
+
+## Joplin Server (Notes Sync Backend)
+
+**Purpose:** Self-hosted sync server for Joplin — the open-source, end-to-end encrypted note-taking app available on Linux, macOS, Windows, iOS, and Android. Joplin clients store notes locally and sync via your server — no cloud subscription required. Supports notebooks, tags, Markdown, attachments, and end-to-end encryption with your own key.
+
+```yaml
+# ~/joplin/compose.yml
+services:
+  joplin:
+    image: joplin/server:latest
+    ports: ["127.0.0.1:22300:22300"]
+    environment:
+      APP_BASE_URL: https://joplin.home.local
+      APP_PORT: 22300
+      DB_CLIENT: pg
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: joplin
+      POSTGRES_USER: joplin
+      POSTGRES_PASSWORD: changeme
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: joplin
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: joplin
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+Access at `http://localhost:22300`. Default admin credentials: `admin@localhost` / `admin` — change immediately. In the Joplin desktop or mobile app, go to Settings → Synchronisation → Joplin Server and enter your server URL with a user account.
+
+---
+
+## Penpot (Open-Source Design Tool)
+
+**Purpose:** Self-hosted, browser-based design and prototyping tool — a Figma alternative. Create UI mockups, design systems, interactive prototypes, and export assets, all in a collaborative environment where multiple users work on the same file simultaneously. Fully vector-based, exports SVG and CSS, and integrates with developer handoff workflows.
+
+```yaml
+# ~/penpot/compose.yml
+services:
+  penpot-frontend:
+    image: penpotapp/frontend:latest
+    ports: ["127.0.0.1:9001:80"]
+    environment:
+      PENPOT_FLAGS: enable-registration enable-login
+    restart: unless-stopped
+
+  penpot-backend:
+    image: penpotapp/backend:latest
+    environment:
+      PENPOT_FLAGS: enable-registration enable-login
+      PENPOT_PUBLIC_URI: https://design.home.local
+      PENPOT_DATABASE_URI: postgresql://penpot:changeme@db/penpot
+      PENPOT_REDIS_URI: redis://redis/0
+      PENPOT_STORAGE_BACKEND: fs
+      PENPOT_STORAGE_FS_DIRECTORY: /opt/data/assets
+      PENPOT_SECRET_KEY: changeme-run-openssl-rand-hex-32
+    volumes:
+      - /home/user/penpot/assets:/opt/data/assets:Z
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  penpot-exporter:
+    image: penpotapp/exporter:latest
+    environment:
+      PENPOT_PUBLIC_URI: https://design.home.local
+      PENPOT_REDIS_URI: redis://redis/0
+    depends_on: [redis]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: penpot
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: penpot
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+Access at `http://localhost:9001`. Create a team workspace, invite collaborators, and design with real-time multiplayer editing.
+
+---
+
+## Memos (Lightweight Personal Notes)
+
+**Purpose:** Fast, Twitter-style self-hosted memo and personal knowledge base. Jot down fleeting notes, ideas, and links in a microblog-style feed — each memo is a short, tagged Markdown entry. No folders, no hierarchy — just a searchable, filterable stream. Much lighter than Outline or BookStack when you just need a scratchpad.
+
+```bash
+podman run -d \
+  --name memos \
+  -p 127.0.0.1:5230:5230 \
+  -v /home/user/memos/data:/var/opt/memos:Z \
+  -e TZ=Asia/Kolkata \
+  --restart unless-stopped \
+  neosmemo/memos:stable
+```
+
+Access at `http://localhost:5230`. Create an account, start writing memos with `#tags` and Markdown. The REST API allows posting from scripts, CLI aliases, or mobile shortcuts — useful for quick capture from anywhere on your Tailscale network.
+
+---
+
+## AFFiNE (Collaborative Knowledge Base)
+
+**Purpose:** A modern, open-source alternative to Notion and Miro combined. AFFiNE merges a block-based document editor, a whiteboard canvas, and a database view into one tool. Pages can switch between document mode (writing) and edgeless mode (infinite canvas/whiteboard) without creating separate files. Self-hosted, offline-capable, and with real-time collaboration via WebSocket. A strong Notion replacement that keeps all data local.
+
+```yaml
+# ~/affine/compose.yml
+services:
+  affine:
+    image: ghcr.io/toeverything/affine-graphql:stable
+    ports: ["127.0.0.1:3010:3010"]
+    environment:
+      NODE_OPTIONS: "--import=./scripts/register.js"
+      AFFINE_CONFIG_PATH: /root/.affine/config
+      DATABASE_URL: postgresql://affine:changeme@db:5432/affine
+      REDIS_SERVER_HOST: redis
+    volumes:
+      - /home/user/affine/config:/root/.affine/config:Z
+      - /home/user/affine/storage:/root/.affine/storage:Z
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: affine
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: affine
+    volumes: [pg_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U affine"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+Access at `http://localhost:3010`. Create a workspace, sign in, and start creating pages. Toggle between document and whiteboard mode with the view switcher.
+
+> **vs Outline:** AFFiNE is better for mixed document+canvas work and personal knowledge management. Outline is better for team wikis and structured documentation.
+
+**Caddy:**
+```caddyfile
+affine.home.local { tls internal; reverse_proxy localhost:3010 }
+```
+
+---
+
+## Hoarder (AI-Powered Bookmark Manager)
+
+**Purpose:** A self-hosted bookmark manager that uses a local LLM (via Ollama) to automatically tag and summarise every saved link. Paste a URL, and Hoarder fetches the page, extracts the content, generates tags, and writes a summary — making your bookmarks searchable and organised without any manual effort. Also saves full-page screenshots and supports highlights. A smarter replacement for Linkwarden or Wallabag when you want automatic organisation.
+
+```yaml
+# ~/hoarder/compose.yml
+services:
+  web:
+    image: ghcr.io/hoarder-app/hoarder:latest
+    ports: ["127.0.0.1:3055:3000"]
+    environment:
+      NEXTAUTH_SECRET: changeme-run-openssl-rand-hex-32
+      NEXTAUTH_URL: https://hoarder.home.local
+      DATA_DIR: /data
+      MEILI_ADDR: http://meilisearch:7700
+      MEILI_MASTER_KEY: changeme
+      BROWSER_WEB_URL: http://chrome:9222
+      OLLAMA_BASE_URL: http://host.containers.internal:11434
+      INFERENCE_TEXT_MODEL: llama3.2
+      INFERENCE_IMAGE_MODEL: llava
+      DISABLE_SIGNUPS: "true"
+    volumes:
+      - /home/user/hoarder/data:/data:Z
+    depends_on: [meilisearch, chrome]
+    restart: unless-stopped
+
+  chrome:
+    image: gcr.io/zenika-hub/alpine-chrome:latest
+    command: chromium-browser --disable-gpu --headless --no-sandbox --remote-debugging-address=0.0.0.0 --remote-debugging-port=9222
+    restart: unless-stopped
+
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    environment:
+      MEILI_MASTER_KEY: changeme
+      MEILI_NO_ANALYTICS: "true"
+    volumes: [meili_data:/meili_data]
+    restart: unless-stopped
+
+volumes:
+  meili_data:
+```
+
+Access at `http://localhost:3055`. Create an account (signups are disabled after the first — set `DISABLE_SIGNUPS: "false"` to allow more users). Save bookmarks via the web UI, browser extension, or mobile share sheet.
+
+> Pull the `llava` multimodal model for screenshot understanding: `podman exec ollama ollama pull llava`. Without it, Hoarder still summarises text content using the text model.
+
+**Caddy:**
+```caddyfile
+hoarder.home.local { tls internal; reverse_proxy localhost:3055 }
+```
+
+---
+
 ## Caddy Configuration
 
-```caddyfile
 files.home.local     { tls internal; reverse_proxy localhost:8888 }
 sync.home.local      { tls internal; reverse_proxy localhost:8384 }
 docs.home.local      { tls internal; reverse_proxy localhost:8000 }
@@ -369,6 +1065,24 @@ wiki.home.local      { tls internal; reverse_proxy localhost:3000 }
 recipes.home.local   { tls internal; reverse_proxy localhost:9925 }
 pdf.home.local       { tls internal; reverse_proxy localhost:8080 }
 n8n.example.com      { reverse_proxy localhost:5678 }
+blog.example.com     { reverse_proxy localhost:2368 }
+site.example.com     { reverse_proxy localhost:8100 }
+bookstack.home.local { tls internal; reverse_proxy localhost:6875 }
+wikijs.home.local    { tls internal; reverse_proxy localhost:3300 }
+notes.home.local     { tls internal; reverse_proxy localhost:3400 }
+pad.home.local       { tls internal; reverse_proxy localhost:3500 }
+rss.home.local       { tls internal; reverse_proxy localhost:8200 }
+read.home.local      { tls internal; reverse_proxy localhost:8250 }
+links.home.local     { tls internal; reverse_proxy localhost:3210 }
+crm.home.local       { tls internal; reverse_proxy localhost:8080 }
+schedule.home.local  { tls internal; reverse_proxy localhost:3450 }
+time.home.local      { tls internal; reverse_proxy localhost:8300 }
+grocy.home.local     { tls internal; reverse_proxy localhost:9283 }
+joplin.home.local    { tls internal; reverse_proxy localhost:22300 }
+design.home.local    { tls internal; reverse_proxy localhost:9001 }
+affine.home.local    { tls internal; reverse_proxy localhost:3010 }
+hoarder.home.local   { tls internal; reverse_proxy localhost:3055 }
+memos.home.local     { tls internal; reverse_proxy localhost:5230 }
 ```
 
 ---
@@ -386,3 +1100,22 @@ n8n.example.com      { reverse_proxy localhost:5678 }
 | Outline blank on load | OIDC configuration is likely missing or wrong — check `SECRET_KEY` and `UTILS_SECRET` are both set and non-empty |
 | n8n webhook not triggering | Ensure `WEBHOOK_URL` is the publicly accessible URL; check that Caddy or the tunnel is proxying correctly |
 | Vikunja CalDAV not syncing | Ensure `VIKUNJA_SERVICE_FRONTENDURL` matches the URL your client connects to; CalDAV endpoint is at `/dav` |
+| Ghost `404` on homepage | Verify `url` in the Ghost environment matches the actual domain you're accessing |
+| WordPress white screen of death | Check PHP error logs with `podman logs wordpress`; often a plugin conflict — disable plugins from the DB if the admin panel is inaccessible |
+| BookStack blank after setup | Check `APP_URL` includes the correct scheme (`https://`); clear cache with `podman exec bookstack php artisan config:cache` |
+| Wiki.js page save fails | Ensure the PostgreSQL user has `CREATE` privileges; check `podman logs wikijs` for SQL errors |
+| HedgeDoc realtime not working | WebSocket proxying must be enabled — add `reverse_proxy` with `header_up Upgrade {http.request.header.Upgrade}` in Caddy |
+| CryptPad sandbox not loading | Ensure both domains (`pad.*` and `sandbox.*`) resolve and are proxied; CryptPad enforces same-origin policy via the sandbox domain |
+| FreshRSS feeds not updating | Check `CRON_MIN` is set; verify outbound internet access; check feed URLs are valid in the admin panel |
+| Wallabag import fails | Large imports time out — use the background queue: run `podman exec wallabag bin/console wallabag:import:redis-worker` |
+| Linkwarden archive not working | The archiving feature requires Chromium — ensure the container has network access to fetch pages |
+| Monica `APP_KEY` error | Generate with `podman exec monica php artisan key:generate --show` and set the result as `APP_KEY` |
+| Rallly invitees can't vote | Verify `NEXT_PUBLIC_BASE_URL` is accessible from outside your server; voters don't need accounts but do need to reach the URL |
+| Kimai time entries not saving | Check `DATABASE_URL` connection string; run `podman exec kimai bin/console kimai:update` after first startup |
+| Grocy barcode scanner not finding products | Grocy uses the Open Food Facts database — scan a barcode and manually add the product if it's not found automatically |
+| Joplin Server sync fails | Verify `APP_BASE_URL` matches the URL clients connect to; check the user account exists and has the correct password; ensure PostgreSQL is reachable |
+| Penpot blank canvas | Clear browser cache; verify the exporter container is running — it handles PDF/PNG export and some rendering tasks |
+| Memos notes not persisting | Ensure the `/var/opt/memos` volume is correctly mounted with write permissions; SQLite database lives there |
+| AFFiNE blank after startup | Wait 30–60 s for the database migrations to complete; check `podman logs affine` for PostgreSQL connection errors; ensure the DB health check passes before the app starts |
+| Hoarder bookmarks not summarising | Ensure Ollama is running and the `llama3.2` model is pulled; check `OLLAMA_BASE_URL` uses `host.containers.internal`; view task logs in the Hoarder admin panel |
+| Hoarder screenshots blank | The `chrome` container must be running and port `9222` reachable; check `podman logs chrome` for startup errors |

@@ -343,6 +343,273 @@ step ca certificate myservice.home.local myservice.crt myservice.key \
 
 ---
 
+## Passbolt (Team Password Manager)
+
+**Purpose:** Open-source, end-to-end encrypted password manager built for teams. Unlike Vaultwarden (which is Bitwarden-compatible and individual-focused), Passbolt is designed around sharing — granular permissions per password, group-based sharing, and an audit log of who accessed what. Uses OpenPGP for encryption. Ideal for IT teams sharing infrastructure credentials.
+
+```yaml
+# ~/passbolt/compose.yml
+services:
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: passbolt
+      MYSQL_USER: passbolt
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+  passbolt:
+    image: passbolt/passbolt:latest-ce
+    ports: ["127.0.0.1:8290:80", "127.0.0.1:8291:443"]
+    environment:
+      APP_FULL_BASE_URL: https://pass.home.local
+      DATASOURCES_DEFAULT_HOST: db
+      DATASOURCES_DEFAULT_USERNAME: passbolt
+      DATASOURCES_DEFAULT_PASSWORD: changeme
+      DATASOURCES_DEFAULT_DATABASE: passbolt
+      EMAIL_DEFAULT_FROM: passbolt@home.local
+      EMAIL_TRANSPORT_DEFAULT_HOST: localhost
+      EMAIL_TRANSPORT_DEFAULT_PORT: 25
+    volumes:
+      - /home/user/passbolt/gpg:/etc/passbolt/gpg:Z
+      - /home/user/passbolt/jwt:/etc/passbolt/jwt:Z
+    depends_on: [db]
+    command: ["/usr/bin/wait-for.sh", "-t", "0", "db:3306", "--", "/docker-entrypoint.sh"]
+    restart: unless-stopped
+
+volumes:
+  db_data:
+```
+
+**Create the first admin user:**
+```bash
+podman exec passbolt su -m -c \
+  "/var/www/passbolt/bin/cake passbolt register_user \
+   -u admin@home.local -f Admin -l User -r admin" \
+  -s /bin/sh www-data
+```
+
+**Caddy:**
+```caddyfile
+pass.home.local { tls internal; reverse_proxy localhost:8290 }
+```
+
+---
+
+## OpenBao (Secrets Management)
+
+**Purpose:** The Linux Foundation's open-source fork of HashiCorp Vault. Stores and manages secrets, API keys, TLS certificates, and database credentials with fine-grained access control, audit logging, dynamic secret generation, and encryption-as-a-service. The right choice when Infisical's ENV-file model isn't granular enough — OpenBao treats every secret as an addressable path with its own policy.
+
+```bash
+podman run -d \
+  --name openbao \
+  -p 127.0.0.1:8200:8200 \
+  -v /home/user/openbao/data:/openbao/data:Z \
+  -v /home/user/openbao/config:/openbao/config:Z \
+  -e VAULT_ADDR=http://0.0.0.0:8200 \
+  --cap-add IPC_LOCK \
+  --restart unless-stopped \
+  quay.io/openbao/openbao:latest server \
+    -config=/openbao/config/openbao.hcl
+```
+
+**Minimal `openbao.hcl`:**
+```hcl
+storage "raft" {
+  path    = "/openbao/data"
+  node_id = "node1"
+}
+
+listener "tcp" {
+  address     = "0.0.0.0:8200"
+  tls_disable = true  # Use TLS in production via Caddy
+}
+
+api_addr     = "http://localhost:8200"
+cluster_addr = "https://localhost:8201"
+ui           = true
+```
+
+**Initialise and unseal:**
+```bash
+export BAO_ADDR=http://localhost:8200
+
+# Initialise (generates unseal keys + root token)
+podman exec openbao bao operator init
+
+# Unseal with 3 of the 5 generated keys
+podman exec openbao bao operator unseal <key1>
+podman exec openbao bao operator unseal <key2>
+podman exec openbao bao operator unseal <key3>
+
+# Login with root token
+podman exec openbao bao login <root-token>
+
+# Write and read a secret
+podman exec openbao bao kv put secret/myapp db_password=changeme
+podman exec openbao bao kv get secret/myapp
+```
+
+> Store the unseal keys and root token in a secure location — losing them means losing access to all stored secrets permanently.
+
+**Caddy:**
+```caddyfile
+vault.home.local { tls internal; reverse_proxy localhost:8200 }
+```
+
+---
+
+## Wazuh (SIEM & Threat Detection)
+
+**Purpose:** Open-source Security Information and Event Management (SIEM) platform. Wazuh agents run on every server, collecting logs, monitoring file integrity, detecting rootkits, and scanning for vulnerabilities. The Wazuh server correlates events, applies detection rules, and generates alerts. OpenSearch and a Kibana-style dashboard visualise everything. A full-stack SOC-in-a-box for self-hosters who take security seriously.
+
+```yaml
+# ~/wazuh/compose.yml — use the official single-node compose
+# wget https://packages.wazuh.com/4.x/docker/single-node.tar.gz
+# tar -xvf single-node.tar.gz && cd single-node
+# docker-compose -f generate-indexer-certs.yml run --rm generator
+# docker-compose up -d
+
+# Minimal single-node overview:
+services:
+  wazuh.manager:
+    image: wazuh/wazuh-manager:4.8.0
+    ports:
+      - "127.0.0.1:55000:55000"  # API
+      - "0.0.0.0:1514:1514/udp"  # Agent
+      - "0.0.0.0:1515:1515"      # Enrollment
+    volumes:
+      - wazuh_api_configuration:/var/ossec/api/configuration
+      - wazuh_etc:/var/ossec/etc
+      - wazuh_logs:/var/ossec/logs
+      - wazuh_queue:/var/ossec/queue
+      - wazuh_var_multigroups:/var/ossec/var/multigroups
+      - wazuh_integrations:/var/ossec/integrations
+      - wazuh_active_response:/var/ossec/active-response/bin
+      - wazuh_agentless:/var/ossec/agentless
+      - wazuh_wodles:/var/ossec/wodles
+      - filebeat_etc:/etc/filebeat
+      - filebeat_var:/var/lib/filebeat
+    restart: unless-stopped
+
+  wazuh.indexer:
+    image: wazuh/wazuh-indexer:4.8.0
+    ports: ["127.0.0.1:9200:9200"]
+    volumes:
+      - wazuh-indexer-data:/var/lib/wazuh-indexer
+    restart: unless-stopped
+
+  wazuh.dashboard:
+    image: wazuh/wazuh-dashboard:4.8.0
+    ports: ["127.0.0.1:443:5601"]
+    depends_on: [wazuh.indexer]
+    restart: unless-stopped
+```
+
+> The official `single-node` compose is the recommended deployment path — it handles certificate generation and service wiring. Download from `packages.wazuh.com`.
+
+**Install agent on a monitored server:**
+```bash
+# On each server you want to monitor
+sudo rpm --import https://packages.wazuh.com/key/GPG-KEY-WAZUH
+sudo dnf install wazuh-agent
+sudo WAZUH_MANAGER=wazuh.home.local \
+  WAZUH_AGENT_NAME=myserver \
+  systemctl enable --now wazuh-agent
+```
+
+**Firewall (for agent communication):**
+```bash
+sudo firewall-cmd --add-port=1514/udp --add-port=1515/tcp --permanent
+sudo firewall-cmd --reload
+```
+
+---
+
+## Greenbone (Vulnerability Scanner)
+
+**Purpose:** Open-source vulnerability management. Greenbone Community Edition (OpenVAS) scans your hosts for known CVEs, misconfigurations, and exposed services, then produces prioritised reports. Run periodic scans of your home server and any other hosts on your network to catch vulnerabilities before attackers do.
+
+```yaml
+# ~/greenbone/compose.yml
+services:
+  vulnerability-tests:
+    image: greenbone/vulnerability-tests
+    volumes: [vt_data_vol:/mnt]
+    restart: unless-stopped
+
+  notus-data:
+    image: greenbone/notus-data
+    volumes: [notus_data_vol:/mnt]
+    restart: unless-stopped
+
+  nasl-data:
+    image: greenbone/nasl-data
+    volumes: [nasl_data_vol:/mnt]
+    restart: unless-stopped
+
+  redis-server:
+    image: greenbone/redis-server
+    volumes: [redis_socket_vol:/run/redis/]
+    restart: unless-stopped
+
+  pg-gvm:
+    image: greenbone/pg-gvm:stable
+    volumes: [psql_data_vol:/var/lib/postgresql, psql_socket_vol:/var/run/postgresql]
+    restart: unless-stopped
+
+  gvmd:
+    image: greenbone/gvmd:stable
+    volumes:
+      - gvmd_data_vol:/var/lib/gvm
+      - vt_data_vol:/var/lib/openvas/plugins
+      - notus_data_vol:/var/lib/notus
+      - psql_data_vol:/var/lib/postgresql
+      - psql_socket_vol:/var/run/postgresql
+      - gvmd_socket_vol:/run/gvmd
+      - ospd_openvas_socket_vol:/run/ospd
+    depends_on: [pg-gvm]
+    restart: unless-stopped
+
+  gsa:
+    image: greenbone/gsa:stable
+    ports: ["127.0.0.1:9392:80"]
+    volumes: [gvmd_socket_vol:/run/gvmd]
+    depends_on: [gvmd]
+    restart: unless-stopped
+
+  ospd-openvas:
+    image: greenbone/ospd-openvas:stable
+    cap_add: [NET_ADMIN, NET_RAW]
+    volumes:
+      - gpg_data_vol:/etc/openvas/gnupg
+      - vt_data_vol:/var/lib/openvas/plugins
+      - notus_data_vol:/var/lib/notus
+      - ospd_openvas_socket_vol:/run/ospd
+      - redis_socket_vol:/run/redis/
+    restart: unless-stopped
+
+volumes:
+  vt_data_vol: {}
+  notus_data_vol: {}
+  nasl_data_vol: {}
+  redis_socket_vol: {}
+  psql_data_vol: {}
+  psql_socket_vol: {}
+  gvmd_data_vol: {}
+  gvmd_socket_vol: {}
+  ospd_openvas_socket_vol: {}
+  gpg_data_vol: {}
+```
+
+Access the dashboard at `http://localhost:9392`. On first run, create a scan target (your server's LAN IP), run a full and fast scan, and review the findings.
+
+> Initial feed synchronisation takes 15–30 minutes. The container will show as loading until feeds are downloaded.
+
+---
+
 ## Comparison: Authelia vs Authentik vs Keycloak vs Zitadel
 
 | Feature | Authelia | Authentik | Keycloak | Zitadel |
@@ -358,6 +625,566 @@ step ca certificate myservice.home.local myservice.crt myservice.key \
 
 ---
 
+## Fail2ban (Intrusion Prevention)
+
+**Purpose:** Monitors log files for repeated authentication failures and bans the source IP via firewall rules. Protects SSH, Caddy, Authelia, Vaultwarden, and any service that logs failed login attempts — automatically blocking brute-force attacks without manual intervention. Integrates with `firewalld` (used on Shani OS) natively.
+
+```bash
+podman run -d \
+  --name fail2ban \
+  --network host \
+  --cap-add NET_ADMIN \
+  --cap-add NET_RAW \
+  -v /home/user/fail2ban/config:/data:Z \
+  -v /var/log:/var/log:ro \
+  -v /run/firewalld:/run/firewalld:Z \
+  -e TZ=Asia/Kolkata \
+  --restart unless-stopped \
+  crazymax/fail2ban:latest
+```
+
+**Example jail config (`/home/user/fail2ban/config/jail.d/caddy.conf`):**
+```ini
+[caddy-auth]
+enabled  = true
+port     = http,https
+filter   = caddy-auth
+logpath  = /var/log/caddy/access.log
+maxretry = 5
+bantime  = 1h
+findtime = 10m
+action   = firewallcmd-rich-rules[actiontype=<multiport>]
+```
+
+**Useful commands:**
+```bash
+# List banned IPs
+podman exec fail2ban fail2ban-client status caddy-auth
+
+# Unban an IP
+podman exec fail2ban fail2ban-client set caddy-auth unbanip 1.2.3.4
+
+# Test a filter against a log file
+podman exec fail2ban fail2ban-regex /var/log/caddy/access.log caddy-auth
+```
+
+> Fail2ban complements CrowdSec — CrowdSec uses community threat intelligence, Fail2ban reacts to your own logs. Run both for defence in depth.
+
+---
+
+## Trivy (Container & Code Security Scanner)
+
+**Purpose:** Comprehensive vulnerability scanner for container images, filesystems, Git repositories, and Kubernetes manifests. Detects known CVEs in OS packages, language libraries (pip, npm, go, cargo), misconfigurations (Dockerfile, Terraform, Helm), and secrets accidentally committed to code. Run it in CI/CD pipelines to gate deployments on security findings.
+
+```bash
+# Pull and run Trivy as a one-shot scanner (no persistent container needed)
+podman run --rm \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  -v /home/user/trivy-cache:/root/.cache/trivy:Z \
+  aquasec/trivy:latest image jellyfin/jellyfin:latest
+
+# Scan a local filesystem or Git repo
+podman run --rm \
+  -v /home/user/myproject:/repo:ro,Z \
+  -v /home/user/trivy-cache:/root/.cache/trivy:Z \
+  aquasec/trivy:latest fs /repo
+
+# Scan a running container's filesystem
+podman run --rm \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  -v /home/user/trivy-cache:/root/.cache/trivy:Z \
+  aquasec/trivy:latest image --input jellyfin
+```
+
+**Run as a server for CI integration:**
+```bash
+podman run -d \
+  --name trivy-server \
+  -p 127.0.0.1:4954:4954 \
+  -v /home/user/trivy-cache:/root/.cache/trivy:Z \
+  --restart unless-stopped \
+  aquasec/trivy:latest server --listen 0.0.0.0:4954
+```
+
+Then scan from CI with: `trivy image --server http://trivy.home.local:4954 myapp:latest`
+
+> Run Trivy as a weekly scheduled scan across all your container images to catch newly disclosed CVEs before attackers do. Pipe the JSON output to a Grafana dashboard or ntfy alert.
+
+---
+
+## Teleport (Zero-Trust Access Platform)
+
+**Purpose:** Self-hosted zero-trust access platform for SSH, Kubernetes, databases, and web applications. Teleport replaces VPN + bastion host setups with identity-aware, audited access — every session is recorded, every login requires a certificate issued for a short TTL, and access can be conditioned on MFA, device trust, and role-based policies. The self-hosted alternative to HashiCorp Boundary or commercial PAM solutions.
+
+```yaml
+# ~/teleport/compose.yml
+services:
+  teleport:
+    image: public.ecr.aws/gravitational/teleport:latest
+    ports:
+      - "0.0.0.0:3023:3023"   # SSH proxy
+      - "0.0.0.0:3024:3024"   # SSH tunnel
+      - "0.0.0.0:3025:3025"   # Auth server
+      - "0.0.0.0:3080:3080"   # HTTPS Web UI + API
+    volumes:
+      - /home/user/teleport/config:/etc/teleport:Z
+      - /home/user/teleport/data:/var/lib/teleport:Z
+    command: teleport start --config=/etc/teleport/teleport.yaml
+    restart: unless-stopped
+```
+
+**Generate initial config:**
+```bash
+podman run --rm \
+  -v /home/user/teleport/config:/etc/teleport:Z \
+  public.ecr.aws/gravitational/teleport:latest \
+  teleport configure \
+    --cluster-name=home.example.com \
+    --public-addr=teleport.example.com:3080 \
+    --data-dir=/var/lib/teleport \
+    -o /etc/teleport/teleport.yaml
+```
+
+**Minimal `teleport.yaml`:**
+```yaml
+teleport:
+  data_dir: /var/lib/teleport
+  log:
+    output: stderr
+    severity: INFO
+
+auth_service:
+  enabled: true
+  cluster_name: home.example.com
+  listen_addr: 0.0.0.0:3025
+  tokens:
+    - "node:your-join-token"
+
+ssh_service:
+  enabled: true
+  listen_addr: 0.0.0.0:3022
+
+proxy_service:
+  enabled: true
+  listen_addr: 0.0.0.0:3023
+  web_listen_addr: 0.0.0.0:3080
+  public_addr: teleport.example.com:3080
+  https_cert: /etc/teleport/certs/fullchain.pem
+  https_key: /etc/teleport/certs/privkey.pem
+```
+
+**Create the first admin user:**
+```bash
+podman exec teleport tctl users add admin --roles=editor,access --logins=root,user
+# Follow the invite URL printed to set a password and enrol MFA
+```
+
+**Add a server node (install Teleport agent on target host):**
+```bash
+# On the target server
+curl https://goteleport.com/static/install.sh | bash
+teleport node configure \
+  --auth-server=teleport.example.com:3025 \
+  --token=your-join-token \
+  --output=/etc/teleport.yaml
+systemctl enable --now teleport
+```
+
+**Connect via `tsh` (Teleport shell client):**
+```bash
+# Login
+tsh login --proxy=teleport.example.com:3080 --user=admin
+
+# List registered nodes
+tsh ls
+
+# SSH to a registered node
+tsh ssh root@my-server
+
+# Forward a database port
+tsh db connect my-postgres
+
+# Session is recorded and viewable in the web UI
+```
+
+**Firewall:**
+```bash
+sudo firewall-cmd --add-port=3023-3025/tcp --add-port=3080/tcp --permanent
+sudo firewall-cmd --reload
+```
+
+> For homelab use, Teleport Community Edition is free and covers SSH access, session recording, and web application proxy. Run it on a small public VPS (not on your home server) so it stays reachable even if your home connection goes down.
+
+---
+
+## Coraza WAF (Embedded WAF for Caddy)
+
+**Purpose:** OWASP-compliant Web Application Firewall embedded directly in Caddy as a plugin. Runs the OWASP Core Rule Set (CRS) — the industry-standard ruleset that blocks SQL injection, XSS, command injection, path traversal, and hundreds of other attack classes — without an extra reverse proxy hop. Coraza is the modern, Go-native successor to ModSecurity and the recommended WAF for Shani OS because it integrates with the Caddy you are already running.
+
+**Build a Caddy image with Coraza:**
+```bash
+podman build -t caddy-coraza - << 'EOF'
+FROM caddy:builder AS builder
+RUN xcaddy build \
+    --with github.com/corazawaf/coraza-caddy/v2
+
+FROM caddy:latest
+COPY --from=builder /usr/bin/caddy /usr/bin/caddy
+EOF
+```
+
+**Download the OWASP CRS ruleset:**
+```bash
+mkdir -p /home/user/caddy/waf/crs
+curl -L https://github.com/coreruleset/coreruleset/archive/refs/tags/v4.7.0.tar.gz \
+  | tar -xz -C /home/user/caddy/waf/crs --strip-components=1
+```
+
+**Run the custom Caddy image:**
+```bash
+podman run -d \
+  --name caddy \
+  -p 80:80 \
+  -p 443:443 \
+  -v /home/user/caddy/Caddyfile:/etc/caddy/Caddyfile:ro,Z \
+  -v /home/user/caddy/data:/data:Z \
+  -v /home/user/caddy/config:/config:Z \
+  -v /home/user/caddy/waf:/etc/coraza-waf:Z \
+  --restart unless-stopped \
+  caddy-coraza
+```
+
+**Caddyfile with WAF enabled for a specific service:**
+```caddyfile
+{
+  order coraza_waf first
+}
+
+app.example.com {
+  coraza_waf {
+    load_owasp_crs
+    directives `
+      Include /etc/coraza-waf/crs/crs-setup.conf.example
+      Include /etc/coraza-waf/crs/rules/*.conf
+      SecRuleEngine On
+      SecRequestBodyAccess On
+      SecResponseBodyAccess On
+      SecAuditEngine RelevantOnly
+      SecAuditLog /var/log/caddy/coraza-audit.log
+      SecAuditLogFormat JSON
+      SecDefaultAction "phase:2,log,auditlog,deny,status:403"
+    `
+  }
+  reverse_proxy localhost:8080
+}
+```
+
+**Tune detection sensitivity** — start at paranoia level 1 and raise gradually after reviewing false positives:
+```
+# In crs-setup.conf.example — set the paranoia level
+SecAction "id:900000,phase:1,nolog,pass,t:none,setvar:tx.paranoia_level=1"
+```
+
+**Suppress a rule causing false positives:**
+```
+SecRuleRemoveById 941100         # Remove a specific rule by ID
+SecRuleRemoveByTag "attack-sqli" # Remove all SQLi rules
+```
+
+> Set `SecRuleEngine DetectionOnly` while tuning — this logs violations without blocking, so you can identify false positives before going live. Switch to `SecRuleEngine On` once stable.
+
+---
+
+## SafeLine WAF (Standalone WAF with Web UI)
+
+**Purpose:** Self-contained WAF with a polished dashboard, sitting in front of your apps as its own reverse proxy. Built on nginx with a semantic detection engine. Easier to configure than Coraza for users who prefer a GUI. Use it when you want WAF + reverse proxy in one product rather than Coraza embedded in Caddy.
+
+```yaml
+# ~/safeline/compose.yml
+services:
+  safeline-mgt:
+    image: chaitin/safeline-mgt:latest
+    ports: ["127.0.0.1:9443:1443"]
+    environment:
+      MGT_PG: "host=safeline-pg port=5432 user=safeline password=changeme dbname=safeline_mgt sslmode=disable"
+      DISABLE_SIGNUP: "true"
+    volumes:
+      - /home/user/safeline/resources:/resources:Z
+      - /home/user/safeline/logs:/logs:Z
+      - /home/user/safeline/nginx:/etc/nginx:Z
+    depends_on: [safeline-pg]
+    restart: unless-stopped
+
+  safeline-tengine:
+    image: chaitin/safeline-tengine:latest
+    ports:
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
+    environment:
+      TCD_MGT_API: https://safeline-mgt:1443
+    volumes:
+      - /home/user/safeline/resources:/resources:Z
+      - /home/user/safeline/logs:/logs:Z
+      - /home/user/safeline/nginx:/etc/nginx:Z
+    depends_on: [safeline-mgt]
+    restart: unless-stopped
+
+  safeline-detector:
+    image: chaitin/safeline-detector:latest
+    volumes:
+      - /home/user/safeline/resources:/resources:Z
+      - /home/user/safeline/logs/detector:/logs/detector:Z
+    restart: unless-stopped
+
+  safeline-pg:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: safeline
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: safeline_mgt
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+Access the admin UI at `https://localhost:9443`. Add your upstream services as protected sites and configure detection sensitivity per service.
+
+---
+
+## Suricata (Network IDS/IPS)
+
+**Purpose:** High-performance Network Intrusion Detection and Prevention System (IDS/IPS). Suricata inspects raw network traffic using the Emerging Threats and ETPRO rule sets to detect port scans, exploit attempts, C2 beaconing, DNS tunnelling, and malware traffic patterns — not just failed logins like Fail2ban and CrowdSec, but actual wire-level attack signatures. In IPS mode it drops malicious packets before they reach your services. In IDS mode it logs and alerts without blocking, which is safer to start with.
+
+```bash
+podman run -d \
+  --name suricata \
+  --network host \
+  --cap-add NET_ADMIN \
+  --cap-add NET_RAW \
+  --cap-add SYS_NICE \
+  -v /home/user/suricata/config:/etc/suricata:Z \
+  -v /home/user/suricata/logs:/var/log/suricata:Z \
+  -v /home/user/suricata/rules:/var/lib/suricata/rules:Z \
+  -e SURICATA_OPTIONS="-i eth0" \
+  --restart unless-stopped \
+  jasonish/suricata:latest
+```
+
+> Replace `eth0` with your primary interface (`ip link show`). `--network host` is required to see actual traffic.
+
+**Update rules (Emerging Threats Open — free):**
+```bash
+podman exec suricata suricata-update update-sources
+podman exec suricata suricata-update enable-source et/open
+podman exec suricata suricata-update
+podman exec suricata kill -USR2 1  # Reload rules live
+```
+
+**Minimal `suricata.yaml` additions for homelab:**
+```yaml
+# /home/user/suricata/config/suricata.yaml
+outputs:
+  - eve-log:
+      enabled: yes
+      filename: /var/log/suricata/eve.json
+      types:
+        - alert
+        - dns
+        - http
+        - tls
+
+af-packet:
+  - interface: eth0
+    threads: auto
+    cluster-id: 99
+    cluster-type: cluster_flow
+    defrag: yes
+
+# IDS mode (detection only — safe to start)
+# For IPS mode, switch to nfqueue and set drop policy
+detect:
+  profile: medium
+  custom-values:
+    toclient-groups: 3
+    toserver-groups: 25
+```
+
+**Forward alerts to CrowdSec or ntfy:**
+```bash
+# Watch eve.json and forward critical alerts to ntfy
+tail -f /home/user/suricata/logs/eve.json | \
+  jq -c 'select(.event_type=="alert" and .alert.severity==1)' | \
+  while read -r line; do
+    curl -s -d "Suricata alert: $(echo $line | jq -r '.alert.signature')" \
+      http://localhost:8090/suricata-alerts
+  done
+```
+
+> Pair Suricata (network-level IDS) with Wazuh (host-level SIEM) and CrowdSec (IP reputation + blocking) for layered defence. Suricata sees what's happening on the wire; Wazuh sees what's happening inside your hosts.
+
+---
+
+## osquery (Host Intrusion Detection & Visibility)
+
+**Purpose:** Exposes your operating system as a relational database — you query running processes, network connections, installed packages, file integrity, users, cron jobs, kernel modules, and hardware as SQL tables. Use it for host-based intrusion detection, compliance checking, and forensics. Integrates with Wazuh, Kolide Fleet, and Grafana for continuous monitoring.
+
+```bash
+# Install osquery on the host (not containerised — needs host kernel access)
+sudo dnf install osquery
+
+sudo systemctl enable --now osqueryd
+```
+
+**Useful osquery queries:**
+```sql
+-- All processes listening on network ports
+SELECT pid, name, port, protocol FROM listening_ports
+JOIN processes USING (pid);
+
+-- Unusual cron jobs (not from system paths)
+SELECT command, path FROM crontab
+WHERE path NOT LIKE '/etc/%';
+
+-- SUID binaries (privilege escalation risk)
+SELECT path, permissions FROM file
+WHERE path LIKE '/usr/%' AND permissions LIKE '%s%';
+
+-- Recently modified files in /etc
+SELECT path, mtime FROM file
+WHERE path LIKE '/etc/%'
+AND mtime > (SELECT strftime('%s','now','-1 day'));
+
+-- Active network connections to non-LAN IPs
+SELECT pid, name, remote_address, remote_port
+FROM process_open_sockets
+JOIN processes USING (pid)
+WHERE remote_address NOT LIKE '192.168.%'
+AND remote_address NOT LIKE '127.%'
+AND remote_address != '';
+```
+
+**Configure continuous monitoring via `osquery.conf`:**
+```json
+{
+  "schedule": {
+    "listening_ports": {
+      "query": "SELECT pid, name, port FROM listening_ports JOIN processes USING (pid);",
+      "interval": 60
+    },
+    "new_suid_binaries": {
+      "query": "SELECT path FROM file WHERE path LIKE '/usr/%' AND permissions LIKE '%s%';",
+      "interval": 3600
+    }
+  },
+  "file_paths": {
+    "system_binaries": ["/usr/bin/%%", "/usr/sbin/%%"],
+    "config_files": ["/etc/%%"]
+  }
+}
+```
+
+> Results from scheduled queries are written to `/var/log/osquery/osqueryd.results.log`. Feed this to Loki (via Grafana Alloy) or Wazuh for centralised alerting.
+
+---
+
+## OWASP ZAP (Web Application Scanner)
+
+**Purpose:** OWASP's flagship dynamic application security testing (DAST) tool. ZAP proxies traffic between your browser and your apps, passively analysing every request, and can actively probe for SQLi, XSS, SSRF, broken auth, insecure redirects, and 100+ other vulnerabilities. Use it to audit your self-hosted services before exposing them publicly, and in CI/CD pipelines to catch regressions.
+
+```bash
+# Run as a daemon with REST API
+podman run -d \
+  --name zap \
+  -p 127.0.0.1:8088:8080 \
+  -v /home/user/zap:/zap/wrk:Z \
+  --restart unless-stopped \
+  ghcr.io/zaproxy/zaproxy:stable \
+  zap.sh -daemon -port 8080 -host 0.0.0.0 \
+    -config api.addrs.addr.name=.* \
+    -config api.addrs.addr.regex=true \
+    -config api.key=changeme
+```
+
+**Scan types:**
+```bash
+# Baseline scan — passive only, safe to run against production
+podman run --rm \
+  -v /home/user/zap/reports:/zap/wrk:Z \
+  ghcr.io/zaproxy/zaproxy:stable \
+  zap-baseline.py -t https://app.home.local \
+    -r /zap/wrk/baseline-report.html
+
+# Full active scan — probes for vulnerabilities, run against test/staging only
+podman run --rm \
+  -v /home/user/zap/reports:/zap/wrk:Z \
+  ghcr.io/zaproxy/zaproxy:stable \
+  zap-full-scan.py -t https://app.home.local \
+    -r /zap/wrk/full-report.html
+
+# API scan — OpenAPI/Swagger-aware
+podman run --rm \
+  -v /home/user/zap/reports:/zap/wrk:Z \
+  ghcr.io/zaproxy/zaproxy:stable \
+  zap-api-scan.py -t https://app.home.local/openapi.json \
+    -f openapi -r /zap/wrk/api-report.html
+```
+
+> Run baseline scans in CI/CD on every deployment to staging. Reserve full active scans for dedicated security review cycles — they generate significant traffic and may disrupt services.
+
+---
+
+## Nuclei (Fast CVE & Misconfiguration Scanner)
+
+**Purpose:** Template-based vulnerability scanner from ProjectDiscovery. Fires targeted HTTP/TCP/DNS probes from a large community library of templates covering known CVEs, exposed admin panels, default credentials, misconfigured headers, and OWASP Top 10 findings. Faster and broader than ZAP for sweeping many services — complement ZAP (deep single-app analysis) with Nuclei (wide multi-service sweeping).
+
+```bash
+# Update templates and scan a target
+podman run --rm \
+  -v /home/user/nuclei/templates:/root/nuclei-templates:Z \
+  -v /home/user/nuclei/output:/output:Z \
+  projectdiscovery/nuclei:latest \
+  -u https://app.home.local \
+  -severity critical,high,medium \
+  -o /output/scan.json -json \
+  -update-templates
+
+# Scan all your services from a target list
+podman run --rm \
+  -v /home/user/nuclei/templates:/root/nuclei-templates:Z \
+  -v /home/user/nuclei/output:/output:Z \
+  -v /home/user/nuclei/targets.txt:/targets.txt:ro \
+  projectdiscovery/nuclei:latest \
+  -l /targets.txt \
+  -t /root/nuclei-templates/http/ \
+  -o /output/results.json -json
+```
+
+**Useful template categories:**
+```bash
+-t /root/nuclei-templates/http/cves/              # Known CVEs by number
+-t /root/nuclei-templates/http/exposures/         # Exposed files and admin panels
+-t /root/nuclei-templates/http/misconfiguration/  # Security misconfigurations
+-t /root/nuclei-templates/http/default-logins/    # Default credentials
+-t /root/nuclei-templates/http/technologies/      # Technology fingerprinting
+```
+
+> Schedule a weekly Nuclei sweep across all exposed services with a systemd timer and pipe the JSON output to ntfy for critical/high findings. Keep a `targets.txt` file with every Caddy subdomain you expose.
+
+---
+
+## Caddy Configuration
+
+```caddyfile
+trivy.home.local      { tls internal; reverse_proxy localhost:4954 }
+teleport.example.com  { reverse_proxy localhost:3080 }
+zap.home.local        { tls internal; reverse_proxy localhost:8088 }
+safeline.home.local   { tls internal; reverse_proxy localhost:9443 }
+```
+
+---
+
 ## Troubleshooting
 
 | Issue | Solution |
@@ -370,11 +1197,38 @@ step ca certificate myservice.home.local myservice.crt myservice.key \
 | CrowdSec not blocking IPs | Confirm the firewall bouncer is installed and running on the host; check `cscli bouncers list` |
 | Step-CA cert not trusted by browser | Export and trust the root CA: `step ca root > root.crt && sudo trust anchor root.crt && sudo update-ca-trust` |
 | Vaultwarden admin panel 404 | The admin panel is at `/admin` — ensure `ADMIN_TOKEN` is set in the environment |
+| Passbolt blank after first load | Ensure `APP_FULL_BASE_URL` includes `https://` and matches your Caddy domain exactly |
+| Teleport node not joining | Verify the join token matches exactly and hasn't expired; check port `3025/tcp` is reachable from the node |
+| Teleport SSH connection refused | Ensure the Teleport agent is running on the target node (`systemctl status teleport`); check `tsh ls` shows the node as online |
+| Passbolt GPG key error | The `/etc/passbolt/gpg` volume must be writable; Passbolt generates its server key on first boot |
+| OpenBao sealed after restart | OpenBao must be manually unsealed after every restart; automate with a startup script using stored unseal keys in a secure location |
+| OpenBao `permission denied` | Each path requires an explicit policy; run `bao policy write myapp-policy policy.hcl` to grant access |
+| Wazuh agent not connecting | Verify port `1514/udp` and `1515/tcp` are open; check `WAZUH_MANAGER` env var points at the correct host |
+| Wazuh dashboard blank | Feed sync takes 15–30 min after first boot; check `podman logs wazuh.manager` for sync progress |
+| Greenbone scan shows no results | Wait for VT feed sync to complete (check `podman logs gvmd`); ensure the scan target IP is reachable |
+| Greenbone `ospd not running` | The `ospd-openvas` container needs `NET_ADMIN` and `NET_RAW` capabilities; verify they are in the compose file |
+| Fail2ban not banning IPs | Confirm `cap-add NET_ADMIN` and `NET_RAW` are set; verify the log path inside the container matches the volume mount; test the filter with `fail2ban-regex` |
+| Fail2ban banning legitimate users | Whitelist trusted IPs in `jail.d/` with `ignoreip = 127.0.0.1/8 192.168.1.0/24 100.64.0.0/10` (last range covers Tailscale) |
+| Trivy CVE database stale | The database auto-updates on each scan run; for the server mode, restart the container to force a refresh or set `--cache-ttl 1h` |
+| Trivy scan very slow on first run | The first run downloads the full vulnerability database (~200 MB); subsequent runs use the cache mounted at `/root/.cache/trivy` |
+| Coraza WAF blocking legitimate requests | Switch to `SecRuleEngine DetectionOnly`, review the audit log at `/var/log/caddy/coraza-audit.log`, suppress false positives with `SecRuleRemoveById`, then re-enable blocking |
+| Coraza Caddy build fails | Ensure the host has Go and `xcaddy` in the builder stage; verify the Coraza plugin version is compatible with the Caddy version |
+| SafeLine detector not starting | Check `podman logs safeline-detector` for shared memory errors; add `--shm-size 256m` to the container if needed; verify the `/resources` volume is writable |
+| Suricata not detecting traffic | Verify `--network host` is set and the correct interface name is used (`ip link show`); confirm `af-packet` interface in `suricata.yaml` matches |
+| Suricata rules not updating | Check internet access from the container; run `suricata-update list-sources` to confirm the source is registered; verify `/var/lib/suricata/rules` is writable |
+| osquery not starting | Confirm `osqueryd` is enabled (`systemctl status osqueryd`); check `/var/log/osquery/osqueryd.ERROR` for config parse errors |
+| osquery queries return no rows | Some tables require root or specific capabilities; run `sudo osqueryi` to test interactively |
+| ZAP scan returns no findings | Ensure the target is reachable from within the container; for internal services use `--network host`; verify the API key matches |
+| Nuclei templates out of date | Add `-update-templates` flag to the scan command, or run `nuclei -update-templates` explicitly before scanning |
 
 > 🔒 **Security checklist:**
 > - Disable Vaultwarden signups after creating your account
 > - Rotate the Vaultwarden `ADMIN_TOKEN` after initial setup
 > - Back up `/home/user/vaultwarden/data` daily — losing your password vault is catastrophic
 > - Use Authelia or Authentik in front of any service exposed via Cloudflare Tunnel or Pangolin
-> - Keep fail2ban (pre-installed on Shani OS) active and configured to watch Caddy logs
+> - Keep Fail2ban active and configured to watch Caddy logs
 > - Review CrowdSec decisions weekly to catch false positives before they affect real users
+> - Run a Nuclei sweep weekly across all exposed subdomains; schedule it via a systemd timer
+> - Run a ZAP baseline scan before making any service publicly accessible
+> - Start Suricata in IDS (detection-only) mode before switching to IPS (blocking) mode
+> - Run `osquery` on every server and feed results to Wazuh or Loki for centralised host visibility

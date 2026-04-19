@@ -59,6 +59,253 @@ podman run -d \
 
 > 💡 **Backup**: `restic backup /home/user/mailcow /home/user/mailu /home/user/stalwart`.
 
+---
+
+# Mailing Lists, Newsletters & Aliases
+
+## listmonk (Newsletter & Mailing Lists)
+
+**Purpose:** High-performance self-hosted newsletter and mailing list manager. Send campaign and transactional emails, manage subscribers, run automated sequences, and track opens/clicks — all from a clean web UI. A self-hosted Mailchimp/ConvertKit alternative that handles millions of emails with a tiny resource footprint.
+
+```yaml
+# ~/listmonk/compose.yml
+services:
+  listmonk:
+    image: listmonk/listmonk:latest
+    ports: ["127.0.0.1:9000:9000"]
+    command: "./listmonk --config /listmonk/config.toml"
+    volumes:
+      - /home/user/listmonk/config.toml:/listmonk/config.toml:ro,Z
+      - /home/user/listmonk/uploads:/listmonk/uploads:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: listmonk
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: listmonk
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+**Minimal `config.toml`:**
+```toml
+[app]
+address = "0.0.0.0:9000"
+admin_username = "admin"
+admin_password = "changeme"
+
+[db]
+host = "db"
+port = 5432
+user = "listmonk"
+password = "changeme"
+database = "listmonk"
+
+[smtp]
+[[smtp]]
+uuid = "smtp-1"
+enabled = true
+host = "localhost"
+port = 25
+auth_protocol = "none"
+max_conns = 10
+idle_timeout = "15s"
+wait_timeout = "5s"
+retry_failures = 2
+retry_wait = "5s"
+```
+
+**Initialise and start:**
+```bash
+podman-compose run --rm listmonk ./listmonk --config /listmonk/config.toml --install
+podman-compose up -d
+```
+
+Access at `http://localhost:9000`. Create subscriber lists, design email templates, schedule campaigns, and view delivery analytics.
+
+**Caddy:**
+```caddyfile
+newsletter.example.com { reverse_proxy localhost:9000 }
+```
+
+---
+
+## SimpleLogin (Email Aliasing)
+
+**Purpose:** Self-hosted email alias service. Create unlimited `random@yourdomain.com` aliases that forward to your real inbox. Aliases can send replies — your real address is never exposed. The self-hosted alternative to SimpleLogin.io, Apple Hide My Email, or DuckDuckGo Email Protection.
+
+```yaml
+# ~/simplelogin/compose.yml
+services:
+  app:
+    image: simplelogin/app:latest
+    ports: ["127.0.0.1:7777:7777"]
+    environment:
+      URL: https://sl.example.com
+      EMAIL_DOMAIN: sl.example.com
+      SUPPORT_EMAIL: support@sl.example.com
+      DB_URI: postgresql://sl:changeme@db:5432/sl
+      FLASK_SECRET: changeme-run-openssl-rand-hex-32
+      POSTFIX_SERVER: postfix
+    volumes:
+      - /home/user/simplelogin/data:/sl/upload:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  postfix:
+    image: simplelogin/postfix:latest
+    ports:
+      - "0.0.0.0:25:25"
+      - "0.0.0.0:465:465"
+    environment:
+      ALIASES_DEFAULT_DOMAIN: sl.example.com
+      DB_HOST: db
+      DB_USER: sl
+      DB_PASSWORD: changeme
+      DB_NAME: sl
+      FLASK_SECRET: changeme-run-openssl-rand-hex-32
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: sl
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: sl
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+> Requires a public-facing mail server with MX, SPF, DKIM, and DMARC DNS records for the alias domain. Port 25 must be open and not blocked by your ISP — a VPS is strongly recommended.
+
+**Initialise:**
+```bash
+podman-compose run --rm app flask db upgrade
+podman-compose run --rm app python init_app.py
+```
+
+---
+
+## addy.io (AnonAddy — Lightweight Email Aliasing)
+
+**Purpose:** Lighter-weight email aliasing server. Create aliases on custom domains, forward to your real inbox, and reply anonymously. Similar to SimpleLogin but simpler to operate.
+
+```yaml
+# ~/anonaddy/compose.yml
+services:
+  anonaddy:
+    image: anonaddy/anonaddy:latest
+    ports: ["127.0.0.1:8000:8000"]
+    environment:
+      APP_KEY: base64:changeme-run-php-artisan-key-generate
+      APP_URL: https://alias.example.com
+      DB_HOST: db
+      DB_DATABASE: anonaddy
+      DB_USERNAME: anonaddy
+      DB_PASSWORD: changeme
+      REDIS_HOST: redis
+      ANONADDY_DOMAIN: alias.example.com
+      ANONADDY_SECRET: changeme-run-openssl-rand-hex-32
+    volumes:
+      - /home/user/anonaddy/config:/config:Z
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: anonaddy
+      MYSQL_USER: anonaddy
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes: {db_data: {}}
+```
+
+---
+
+## Postal (Transactional Email Server)
+
+**Purpose:** Full-featured transactional email sending platform with delivery tracking, bounce handling, webhooks, and an HTTP API. Use Postal when your applications need to send sign-up confirmations, password resets, and notifications through your own infrastructure. The self-hosted SendGrid/Postmark alternative.
+
+```yaml
+# ~/postal/compose.yml
+services:
+  postal:
+    image: ghcr.io/postalserver/postal:latest
+    ports:
+      - "0.0.0.0:25:25"
+      - "127.0.0.1:5000:5000"
+    volumes:
+      - /home/user/postal/config:/config:Z
+    depends_on: [mariadb, rabbitmq]
+    restart: unless-stopped
+
+  worker:
+    image: ghcr.io/postalserver/postal:latest
+    command: worker
+    volumes:
+      - /home/user/postal/config:/config:Z
+    depends_on: [mariadb, rabbitmq]
+    restart: unless-stopped
+
+  mariadb:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: postal
+      MYSQL_USER: postal
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-alpine
+    volumes: [rabbit_data:/var/lib/rabbitmq]
+    restart: unless-stopped
+
+volumes: {db_data: {}, rabbit_data: {}}
+```
+
+**Initialise and create admin:**
+```bash
+podman-compose run --rm postal initialize
+podman-compose run --rm postal make-user
+```
+
+Access the web UI at `http://localhost:5000`. Create a mail server, configure DKIM keys, and retrieve SMTP credentials for your apps.
+
+---
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| listmonk `pq: role does not exist` | Run `./listmonk --install` first; the app does not auto-migrate the schema on startup |
+| listmonk emails not delivering | Verify SMTP config in `config.toml`; test with a one-subscriber campaign; check SPF/DKIM on your sending domain |
+| SimpleLogin alias forwarding fails | Verify MX records for the alias domain point at your server; check `podman logs postfix` for SMTP errors |
+| SimpleLogin `Flask secret mismatch` | Ensure `FLASK_SECRET` is identical in both `app` and `postfix` containers |
+| AnonAddy `APP_KEY` missing | Generate with `podman exec anonaddy php artisan key:generate --show` |
+| Postal `initialize` fails | Ensure MariaDB is fully started before running init; check root password matches across containers |
+| Postal DKIM not working | Generate keys in the Postal web UI and add the DNS TXT record for the returned selector |
+
+---
+
 # Mail Clients
 
 Web, desktop, mobile, and terminal clients for secure IMAP/SMTP access.

@@ -219,6 +219,404 @@ podman run -d \
 
 ---
 
+## AnythingLLM (Team RAG + Multi-Model Workspace)
+
+**Purpose:** A full-stack RAG and AI workspace designed for teams. Upload documents (PDFs, Word, text, URLs), create workspaces, and chat against them with any LLM — Ollama, OpenAI, Anthropic, or any OpenAI-compatible endpoint. Supports agents, web scraping, multi-user accounts with role-based access, API keys, and an embeddable chat widget. More feature-complete than Open WebUI's RAG pipeline for document-heavy use cases.
+
+```bash
+podman run -d \
+  --name anythingllm \
+  -p 127.0.0.1:3001:3001 \
+  -v /home/user/anythingllm/storage:/app/server/storage:Z \
+  -e STORAGE_DIR=/app/server/storage \
+  -e LLM_PROVIDER=ollama \
+  -e OLLAMA_BASE_PATH=http://host.containers.internal:11434 \
+  -e OLLAMA_MODEL_PREF=llama3.2 \
+  -e EMBEDDING_ENGINE=ollama \
+  -e OLLAMA_EMBEDDING_MODEL_PREF=nomic-embed-text \
+  -e VECTOR_DB=lancedb \
+  -e JWT_SECRET=changeme-run-openssl-rand-hex-32 \
+  --restart unless-stopped \
+  mintplexlabs/anythingllm:latest
+```
+
+Access at `http://localhost:3001`. Create workspaces, upload documents, and start querying. Connect to any LLM provider in Settings → LLM Preference.
+
+> **vs Open WebUI:** Use AnythingLLM when your primary use case is document Q&A across teams. Use Open WebUI when you want a chat-first interface with light RAG and broader model management.
+
+---
+
+## LiteLLM (Multi-Provider LLM Proxy)
+
+**Purpose:** A unified OpenAI-compatible proxy that sits in front of 100+ LLM providers — Ollama, Anthropic, OpenAI, Groq, Mistral, Bedrock, Azure, and more. Route requests to different models based on model name, load-balance across providers, set per-key spend limits, and get unified logging and cost tracking. Any tool that speaks the OpenAI API (Open WebUI, AnythingLLM, Cursor, Continue.dev) can use LiteLLM as a single endpoint.
+
+```yaml
+# ~/litellm/compose.yml
+services:
+  litellm:
+    image: ghcr.io/berriai/litellm:main-latest
+    ports: ["127.0.0.1:4000:4000"]
+    volumes:
+      - /home/user/litellm/config.yaml:/app/config.yaml:ro,Z
+    command: --config /app/config.yaml --port 4000 --num_workers 8
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: litellm
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: litellm
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+**Example `config.yaml`:**
+```yaml
+model_list:
+  - model_name: llama3.2
+    litellm_params:
+      model: ollama/llama3.2
+      api_base: http://host.containers.internal:11434
+
+  - model_name: phi4-mini
+    litellm_params:
+      model: ollama/phi4-mini
+      api_base: http://host.containers.internal:11434
+
+  - model_name: claude-sonnet
+    litellm_params:
+      model: anthropic/claude-sonnet-4-5
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  - model_name: gpt-4o
+    litellm_params:
+      model: openai/gpt-4o
+      api_key: os.environ/OPENAI_API_KEY
+
+litellm_settings:
+  drop_params: true
+  success_callback: ["langfuse"]
+
+general_settings:
+  master_key: sk-changeme
+  database_url: postgresql://litellm:changeme@db:5432/litellm
+```
+
+**Use LiteLLM from any OpenAI client:**
+```bash
+curl http://localhost:4000/v1/chat/completions \
+  -H "Authorization: Bearer sk-changeme" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "llama3.2", "messages": [{"role": "user", "content": "Hello"}]}'
+```
+
+---
+
+## Perplexica (AI Search Engine)
+
+**Purpose:** Open-source AI-powered search engine — think a self-hosted Perplexity.ai. It runs a SearXNG search under the hood, retrieves results, and uses a local LLM (via Ollama) to synthesise a cited, conversational answer. No query data sent to any third party.
+
+```yaml
+# ~/perplexica/compose.yml
+services:
+  searxng:
+    image: searxng/searxng:latest
+    volumes:
+      - /home/user/perplexica/searxng:/etc/searxng:Z
+    restart: unless-stopped
+
+  perplexica-backend:
+    image: itzcrazykns1337/perplexica:main
+    ports: ["127.0.0.1:3001:3001"]
+    environment:
+      SEARXNG_API_URL: http://searxng:8080
+      OLLAMA_API_URL: http://host.containers.internal:11434
+    volumes:
+      - /home/user/perplexica/uploads:/home/perplexica/uploads:Z
+      - /home/user/perplexica/config:/home/perplexica/config:Z
+    depends_on: [searxng]
+    restart: unless-stopped
+
+  perplexica-frontend:
+    image: itzcrazykns1337/perplexica:main
+    ports: ["127.0.0.1:3000:3000"]
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXT_PUBLIC_WS_URL: ws://localhost:3001
+    depends_on: [perplexica-backend]
+    restart: unless-stopped
+```
+
+> Perplexica needs at least a 7B model for coherent answers. `llama3.2` or `mistral` work well. Pull the model first with `podman exec ollama ollama pull llama3.2`.
+
+---
+
+## InvokeAI (Professional Stable Diffusion UI)
+
+**Purpose:** Professional-grade Stable Diffusion interface with a node-based canvas, a polished linear workflow UI, ControlNet, IP-Adapter, regional prompting, and model management. A strong alternative to ComfyUI when you want more polish, and to A1111 when you need more power. Excellent for photographers and digital artists who want a native-feeling app experience.
+
+```bash
+podman run -d \
+  --name invokeai \
+  -p 127.0.0.1:9090:9090 \
+  -v /home/user/invokeai/models:/invokeai/models:Z \
+  -v /home/user/invokeai/outputs:/invokeai/outputs:Z \
+  -v /home/user/invokeai/configs:/invokeai/configs:Z \
+  --device /dev/dri \
+  --restart unless-stopped \
+  ghcr.io/invoke-ai/invokeai:latest
+```
+
+Access at `http://localhost:9090`. On first run, download models from the Model Manager — it supports HuggingFace Hub, CivitAI, and direct URLs. Compatible checkpoint files are shared with ComfyUI and A1111.
+
+---
+
+## Piper TTS (Lightweight Text-to-Speech)
+
+**Purpose:** Fast, local neural text-to-speech synthesis. Piper is significantly lighter than Kokoro — a single voice model is 50–200 MB and runs in real time on CPU. Ideal for notifications, accessibility features, and voice synthesis when you don't need the premium audio quality of Kokoro.
+
+```bash
+podman run -d \
+  --name piper-tts \
+  -p 127.0.0.1:5000:5000 \
+  -v /home/user/piper/voices:/app/voices:Z \
+  --restart unless-stopped \
+  rhasspy/wyoming-piper \
+    --piper /usr/local/bin/piper \
+    --data-dir /app/voices \
+    --download-dir /app/voices \
+    --voice en_US-lessac-medium
+
+# Or use the REST API variant
+podman run -d \
+  --name piper-rest \
+  -p 127.0.0.1:5001:5000 \
+  -v /home/user/piper/voices:/voices:Z \
+  --restart unless-stopped \
+  ghcr.io/mush42/piper-rest-api:latest \
+    --models-dir /voices
+```
+
+**Synthesise speech:**
+```bash
+echo "Hello from Piper" | \
+  curl -X POST http://localhost:5001/api/tts \
+  -H "Content-Type: text/plain" \
+  --data-binary @- \
+  --output speech.wav
+```
+
+> Piper uses the Wyoming protocol — it integrates directly with Home Assistant's Assist voice pipeline for 100% local voice commands without cloud STT/TTS.
+
+---
+
+## Flowise (Visual LLM Pipeline Builder)
+
+**Purpose:** Drag-and-drop UI for building LangChain and LlamaIndex pipelines — chatbots, RAG workflows, agents, and API endpoints — without writing code. Connect Ollama models, vector databases, document loaders, and output parsers visually, then expose them as REST endpoints or embed them as chat widgets.
+
+```bash
+podman run -d \
+  --name flowise \
+  -p 127.0.0.1:3003:3000 \
+  -v /home/user/flowise/data:/root/.flowise:Z \
+  -e FLOWISE_USERNAME=admin \
+  -e FLOWISE_PASSWORD=changeme \
+  -e FLOWISE_SECRETKEY_OVERWRITE=changeme-run-openssl-rand-hex-32 \
+  --restart unless-stopped \
+  flowiseai/flowise
+```
+
+Access at `http://localhost:3003`. Build chains by dragging components onto the canvas — connect an Ollama LLM node, a Qdrant vector store, a PDF loader, and a conversational memory node to create a document Q&A chatbot in minutes.
+
+> **vs AnythingLLM:** Flowise gives you full control over the pipeline architecture via the visual editor. AnythingLLM is better when you just want to upload documents and chat.
+
+---
+
+## Langfuse (LLM Observability & Tracing)
+
+**Purpose:** Open-source observability platform for LLM applications. Traces every prompt, completion, token count, latency, and cost across your entire AI stack — Ollama, LiteLLM, OpenAI, Flowise, and AnythingLLM all support Langfuse callbacks. Essential for debugging RAG pipelines and monitoring production AI workloads.
+
+```yaml
+# ~/langfuse/compose.yml
+services:
+  langfuse:
+    image: langfuse/langfuse:latest
+    ports: ["127.0.0.1:3004:3000"]
+    environment:
+      DATABASE_URL: postgresql://langfuse:changeme@db:5432/langfuse
+      NEXTAUTH_URL: https://langfuse.home.local
+      NEXTAUTH_SECRET: changeme-run-openssl-rand-base64-32
+      SALT: changeme-run-openssl-rand-base64-16
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: langfuse
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: langfuse
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+Access at `http://localhost:3004`. Create a project, copy the public/secret key pair, and add them to LiteLLM's `config.yaml` (`LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`) to start seeing traces immediately.
+
+---
+
+## Open WebUI Pipelines (Tool Use & Custom Functions)
+
+**Purpose:** Open WebUI Pipelines is a plugin server that extends Open WebUI with custom Python functions — rate limiting, content filtering, model routing, tool use (web search, calculators, code execution), and integration with external APIs. Pipelines run server-side as a sidecar to Open WebUI.
+
+```bash
+podman run -d \
+  --name pipelines \
+  -p 127.0.0.1:9099:9099 \
+  -v /home/user/pipelines:/app/pipelines:Z \
+  --restart unless-stopped \
+  ghcr.io/open-webui/pipelines:main
+```
+
+In Open WebUI: Settings → Connections → add OpenAI-compatible endpoint `http://host.containers.internal:9099` with API key `0p3n-w3bu!`. Installed pipelines appear as selectable models in the chat interface.
+
+---
+
+## Dify (LLM Application Platform)
+
+**Purpose:** Full-stack LLM application development platform — build chatbots, agents, RAG pipelines, and AI workflows with a visual editor, then deploy them as API endpoints or embeddable widgets. Dify combines what Flowise and AnythingLLM do separately: a powerful workflow canvas *and* a complete RAG document pipeline *and* a deployment platform, all in one. Supports Ollama, OpenAI, Anthropic, Azure, Groq, and 30+ other providers.
+
+```yaml
+# ~/dify/compose.yml
+services:
+  api:
+    image: langgenius/dify-api:latest
+    environment:
+      DB_USERNAME: postgres
+      DB_PASSWORD: changeme
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: dify
+      REDIS_HOST: redis
+      CELERY_BROKER_URL: redis://redis:6379/1
+      SECRET_KEY: changeme-run-openssl-rand-base64-42
+      STORAGE_TYPE: local
+      STORAGE_LOCAL_PATH: /app/api/storage
+      SANDBOX_HOST: sandbox
+    volumes:
+      - /home/user/dify/storage:/app/api/storage:Z
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  worker:
+    image: langgenius/dify-api:latest
+    command: celery -A app.celery worker -P gevent -c 1 --loglevel INFO
+    environment:
+      DB_USERNAME: postgres
+      DB_PASSWORD: changeme
+      DB_HOST: db
+      DB_DATABASE: dify
+      REDIS_HOST: redis
+      CELERY_BROKER_URL: redis://redis:6379/1
+      SECRET_KEY: changeme-run-openssl-rand-base64-42
+      STORAGE_TYPE: local
+      STORAGE_LOCAL_PATH: /app/api/storage
+    volumes:
+      - /home/user/dify/storage:/app/api/storage:Z
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  web:
+    image: langgenius/dify-web:latest
+    ports: ["127.0.0.1:3005:3000"]
+    environment:
+      CONSOLE_API_URL: http://host.containers.internal:5001
+      APP_API_URL: http://host.containers.internal:5001
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports: ["127.0.0.1:5001:80"]
+    volumes:
+      - /home/user/dify/nginx/nginx.conf:/etc/nginx/nginx.conf:ro,Z
+    depends_on: [api, web]
+    restart: unless-stopped
+
+  sandbox:
+    image: langgenius/dify-sandbox:latest
+    environment:
+      API_KEY: changeme-sandbox-key
+      GIN_MODE: release
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: dify
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    volumes: [qdrant_data:/qdrant/storage]
+    restart: unless-stopped
+
+volumes: {pg_data: {}, qdrant_data: {}}
+```
+
+Access at `http://localhost:5001`. On first visit, set up an admin account, then connect your LLM providers under Settings → Model Providers.
+
+**Key Dify features:**
+- **Chatbot** — deploy a custom-knowledge chatbot from uploaded documents in minutes
+- **Workflow** — visual node editor for multi-step agent pipelines (fetch URL → summarise → send notification)
+- **Agent** — connect tools (web search, code execution, API calls) to an LLM for autonomous task completion
+- **API** — every app generates a REST API endpoint; use it from any external system
+
+> **vs Flowise:** Dify includes a full RAG knowledge base system, user management, and app publishing workflow that Flowise lacks. Use Flowise for pure LangChain pipeline prototyping; use Dify when you want to deploy production AI applications.
+
+---
+
+## Open Interpreter (Local Code Execution Agent)
+
+**Purpose:** An open-source implementation of OpenAI's Code Interpreter — a local agent that writes and executes Python, JavaScript, Shell, and other code to accomplish tasks. Point it at Ollama and it runs entirely offline. Ask it to "analyse this CSV and plot the top 10 by revenue" and it writes the code, runs it, and returns the result.
+
+```bash
+podman run -d \
+  --name open-interpreter \
+  -p 127.0.0.1:8265:8265 \
+  -v /home/user/open-interpreter/files:/files:Z \
+  -e OLLAMA_HOST=http://host.containers.internal:11434 \
+  -e DEFAULT_MODEL=ollama/llama3.2 \
+  --restart unless-stopped \
+  openinterpreter/open-interpreter:latest server
+```
+
+**Or run interactively:**
+```bash
+podman run -it --rm \
+  -v /home/user/open-interpreter/files:/files:Z \
+  -e OLLAMA_HOST=http://host.containers.internal:11434 \
+  openinterpreter/open-interpreter:latest \
+  --model ollama/llama3.2 \
+  --local
+```
+
+> For best results with code execution tasks, use a larger model — `llama3.1:70b` or `qwen2.5-coder:32b` produce significantly better code than 7B models.
+
+---
+
 ## SearXNG (AI Web Search Integration)
 
 **Purpose:** Connect a local SearXNG instance to Open WebUI for grounded, real-time web search in AI chat. Queries leave your machine only to fetch results — never to a third-party AI API.
@@ -242,6 +640,13 @@ localai.home.local   { tls internal; reverse_proxy localhost:8080 }
 whisper.home.local   { tls internal; reverse_proxy localhost:9000 }
 kokoro.home.local    { tls internal; reverse_proxy localhost:8880 }
 tabby.home.local     { tls internal; reverse_proxy localhost:8081 }
+anything.home.local  { tls internal; reverse_proxy localhost:3001 }
+litellm.home.local   { tls internal; reverse_proxy localhost:4000 }
+search.home.local    { tls internal; reverse_proxy localhost:3000 }
+invokeai.home.local  { tls internal; reverse_proxy localhost:9090 }
+flowise.home.local   { tls internal; reverse_proxy localhost:3003 }
+langfuse.home.local  { tls internal; reverse_proxy localhost:3004 }
+dify.home.local      { tls internal; reverse_proxy localhost:5001 }
 ```
 
 ---
@@ -259,5 +664,15 @@ tabby.home.local     { tls internal; reverse_proxy localhost:8081 }
 | Kokoro produces no audio | Ensure voices directory exists and contains `.pt` voice files; check container logs for model load errors |
 | Tabby extension not connecting | Verify `tabby.home.local` resolves on Tailscale; check the extension's server URL setting includes the correct port |
 | Open WebUI RAG not finding documents | Ensure the document was fully processed (green tick in Documents); re-upload if stuck on processing |
+| AnythingLLM workspace shows no responses | Verify `OLLAMA_BASE_PATH` uses `host.containers.internal`; ensure the chosen model is pulled in Ollama |
+| LiteLLM returns 400 for Ollama models | Ensure the model name in `config.yaml` matches exactly what `ollama list` shows; use `ollama/` prefix in litellm_params |
+| Perplexica shows blank results | SearXNG must be running and reachable; check that `SEARXNG_API_URL` resolves from the backend container |
+| InvokeAI model import fails | Ensure the models volume has write permissions; check that VRAM/RAM is sufficient for the selected model size |
+| Piper TTS no audio output | Verify the voice model `.onnx` file was downloaded into the voices directory; check `podman logs piper-tts` |
+| Flowise chains return empty responses | Verify Ollama URL uses `host.containers.internal`; check that the selected model is pulled; inspect the debug output in the Flowise canvas |
+| Langfuse shows no traces | Ensure `LANGFUSE_PUBLIC_KEY` and `LANGFUSE_SECRET_KEY` are set in LiteLLM or the calling app; check `podman logs langfuse` for DB connection errors |
+| Dify worker not processing documents | Ensure Celery worker container is running; check Redis connectivity; view worker logs with `podman logs dify-worker-1` |
+| Dify Qdrant connection error | The Qdrant service must be running before the API starts; check `QDRANT_HOST` env var points to the correct container name |
+| Open Interpreter refuses to execute code | By default the agent confirms before running code — pass `--auto_run` to skip confirmation; ensure the files volume has write permissions |
 
 > 🔒 **Security tip:** Always bind AI service ports to `127.0.0.1` and proxy through Caddy. These services have no built-in authentication — do not expose them directly to the internet.

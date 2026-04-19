@@ -607,29 +607,9 @@ volumes:
 
 ## SQLite via Litestream
 
-**Purpose:** Lightweight serverless database with continuous, incremental replication to S3-compatible storage for disaster recovery.
+**Purpose:** Streams SQLite WAL changes to S3-compatible storage in real time — continuous off-site replication with sub-second RPO for any app using SQLite, with no code changes required.
 
-```bash
-podman run -d \
-  --name litestream \
-  -v /home/user/app/db:/data:Z \
-  -v /home/user/litestream.yml:/etc/litestream.yml:ro,Z \
-  --restart unless-stopped \
-  litestream/litestream replicate
-```
-
-**Example `litestream.yml`:**
-```yaml
-dbs:
-  - path: /data/app.db
-    replicas:
-      - type: s3
-        bucket: my-bucket
-        path: litestream/app.db
-        access-key-id: YOUR_KEY
-        secret-access-key: YOUR_SECRET
-        endpoint: http://localhost:9000  # MinIO
-```
+See the [Backups & Sync wiki](https://docs.shani.dev/doc/servers/backups-sync#litestream-sqlite-continuous-replication) for the full Litestream setup, including `litestream.yml` configuration, MinIO integration, and restore procedure.
 
 ---
 
@@ -679,6 +659,243 @@ volumes: {db_data: {}}
 
 ---
 
+## RabbitMQ (Message Broker)
+
+**Purpose:** The most widely deployed open-source message broker. Implements AMQP, MQTT, and STOMP. Use RabbitMQ when you need reliable task queues, fanout messaging, dead-letter exchanges, message acknowledgement, and per-message TTL — workloads where Kafka's log-based model is overkill and you need traditional queue semantics (messages consumed and deleted). Used by Celery, Sidekiq, and most web framework background job systems.
+
+```bash
+podman run -d \
+  --name rabbitmq \
+  -p 127.0.0.1:5672:5672 \
+  -p 127.0.0.1:15672:15672 \
+  -v /home/user/rabbitmq/data:/var/lib/rabbitmq:Z \
+  -e RABBITMQ_DEFAULT_USER=admin \
+  -e RABBITMQ_DEFAULT_PASS=changeme \
+  --restart unless-stopped \
+  rabbitmq:3-management-alpine
+```
+
+> **Management UI:** `http://localhost:15672` — browse queues, exchanges, bindings, and message rates in real time.
+
+**Common operations:**
+```bash
+# List queues
+podman exec rabbitmq rabbitmqctl list_queues name messages consumers
+
+# Declare a queue and publish a test message
+podman exec rabbitmq rabbitmqadmin \
+  -u admin -p changeme \
+  publish exchange=amq.default routing_key=test payload='{"hello": "world"}'
+
+# Purge a queue
+podman exec rabbitmq rabbitmqctl purge_queue my-queue
+```
+
+> **Kafka vs RabbitMQ:** Use Kafka for high-throughput event streaming where consumers need to replay history. Use RabbitMQ for task queues, RPC patterns, and workloads where each message is processed once and then discarded.
+
+---
+
+## NATS (Lightweight Messaging)
+
+**Purpose:** High-performance, cloud-native messaging system. Core NATS is a simple publish/subscribe with at-most-once delivery. JetStream (built-in) adds persistent streams, at-least-once delivery, key-value store, and object store — all in a single ~20 MB binary with no external dependencies. Much lighter than Kafka or RabbitMQ for most microservice messaging patterns.
+
+```bash
+podman run -d \
+  --name nats \
+  -p 127.0.0.1:4222:4222 \
+  -p 127.0.0.1:8222:8222 \
+  -v /home/user/nats/data:/data:Z \
+  -v /home/user/nats/nats.conf:/etc/nats/nats.conf:ro,Z \
+  --restart unless-stopped \
+  nats:alpine -c /etc/nats/nats.conf
+```
+
+**Minimal `nats.conf` with JetStream:**
+```conf
+port: 4222
+http_port: 8222
+
+jetstream {
+  store_dir: /data
+  max_memory_store: 1GB
+  max_file_store: 10GB
+}
+
+authorization {
+  user: nats
+  password: changeme
+}
+```
+
+**Publish and subscribe (using nats CLI):**
+```bash
+# Subscribe (terminal 1)
+podman run --rm -it natsio/nats-box \
+  nats -s nats://nats:changeme@host.containers.internal:4222 sub "orders.>"
+
+# Publish (terminal 2)
+podman run --rm natsio/nats-box \
+  nats -s nats://nats:changeme@host.containers.internal:4222 pub "orders.new" '{"id":1}'
+```
+
+---
+
+## Typesense (Fast Search Engine)
+
+**Purpose:** Open-source typo-tolerant search engine optimised for instant, as-you-type results. Faster and simpler to operate than Elasticsearch or MeiliSearch for most use cases — zero configuration needed, sub-50ms queries on millions of documents, and a clean REST API. Ideal for e-commerce search, documentation search, and app-level search.
+
+```bash
+podman run -d \
+  --name typesense \
+  -p 127.0.0.1:8108:8108 \
+  -v /home/user/typesense/data:/data:Z \
+  -e TYPESENSE_DATA_DIR=/data \
+  -e TYPESENSE_API_KEY=changeme \
+  --restart unless-stopped \
+  typesense/typesense:latest
+```
+
+**Create a collection and index documents:**
+```bash
+# Create a collection (schema)
+curl http://localhost:8108/collections \
+  -H "X-TYPESENSE-API-KEY: changeme" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"products","fields":[{"name":"name","type":"string"},{"name":"price","type":"float"},{"name":"rating","type":"int32"}],"default_sorting_field":"rating"}'
+
+# Index documents
+curl http://localhost:8108/collections/products/documents/import \
+  -H "X-TYPESENSE-API-KEY: changeme" \
+  -H "Content-Type: text/plain" \
+  --data-binary '{"name":"Laptop","price":999.99,"rating":5}
+{"name":"Mouse","price":29.99,"rating":4}'
+
+# Search (typo-tolerant)
+curl "http://localhost:8108/collections/products/documents/search?q=latp&query_by=name" \
+  -H "X-TYPESENSE-API-KEY: changeme"
+```
+
+> **MeiliSearch vs Typesense:** Both are fast and typo-tolerant. Typesense has a stricter schema, better multi-tenancy, and faster faceting. MeiliSearch has a more flexible schema-optional API and better out-of-box relevancy tuning.
+
+---
+
+## DuckDB (Embedded OLAP)
+
+**Purpose:** In-process analytical database — think SQLite but for analytics. Runs inside your application process, needs no server, and executes columnar OLAP queries directly on Parquet, CSV, and JSON files at speeds that beat most dedicated databases for local workloads. Ideal for data analysis scripts, Jupyter notebooks, and ETL pipelines where you don't want to spin up a full ClickHouse or Postgres instance.
+
+```bash
+# Run DuckDB interactively
+podman run --rm -it \
+  -v /home/user/data:/data:ro,Z \
+  datacatering/duckdb:latest
+
+# Query a Parquet file directly (no import needed)
+podman run --rm \
+  -v /home/user/data:/data:ro,Z \
+  datacatering/duckdb:latest \
+  duckdb -c "SELECT year, SUM(revenue) FROM '/data/sales.parquet' GROUP BY year ORDER BY year"
+
+# DuckDB REST API (MotherDuck alternative, self-hosted)
+podman run -d \
+  --name duckdb-api \
+  -p 127.0.0.1:1294:1294 \
+  -v /home/user/duckdb:/duckdb:Z \
+  --restart unless-stopped \
+  ghcr.io/tobilg/duckdb-api:latest
+```
+
+> DuckDB can read directly from S3/MinIO, InfluxDB line protocol files, and PostgreSQL — making it a powerful ad-hoc query layer over your existing data stores without ETL.
+
+---
+
+## SurrealDB (Multi-Model Database)
+
+**Purpose:** A single database that acts as relational, document, graph, and time-series store simultaneously. One query language (SurrealQL — SQL-like) handles joins, graph traversals, computed fields, and live queries (WebSocket-based change streams). Useful when your data model doesn't fit neatly into relational or document paradigms, or when you want to avoid managing multiple specialised databases.
+
+```bash
+podman run -d \
+  --name surrealdb \
+  -p 127.0.0.1:8000:8000 \
+  -v /home/user/surrealdb/data:/data:Z \
+  --restart unless-stopped \
+  surrealdb/surrealdb:latest start \
+    --log debug \
+    --user root \
+    --pass changeme \
+    file:/data/database.db
+```
+
+**Connect and run queries:**
+```bash
+podman exec -it surrealdb surreal sql \
+  --conn http://localhost:8000 \
+  --user root --pass changeme \
+  --ns myns --db mydb
+
+# Create a record
+CREATE person:alice SET name = 'Alice', age = 30;
+
+# Graph traversal — people who follow each other
+SELECT ->follows->person.name AS following FROM person:alice;
+
+# Live query (streams changes as WebSocket)
+LIVE SELECT * FROM orders WHERE status = 'pending';
+```
+
+---
+
+## Dragonfly (Modern Redis/Memcached Replacement)
+
+**Purpose:** High-performance, multi-threaded in-memory data store with full Redis and Memcached API compatibility. Dragonfly uses a novel shared-nothing architecture that scales linearly with CPU cores — benchmarks show 25× higher throughput than Redis on a 16-core machine. Drop-in replacement: no code changes, same client libraries, same commands. Useful when a single Redis instance becomes a throughput bottleneck or when you want better memory efficiency (Dragonfly uses 30–40% less RAM than Redis for the same dataset).
+
+```bash
+podman run -d \
+  --name dragonfly \
+  -p 127.0.0.1:6380:6379 \
+  -v /home/user/dragonfly/data:/data:Z \
+  --ulimit memlock=-1 \
+  --restart unless-stopped \
+  docker.dragonflydb.io/dragonflydb/dragonfly
+```
+
+> Use port `6380` on the host to avoid conflicts with an existing Redis instance. Any Redis client connects to `localhost:6380` without modification. Test with: `podman exec dragonfly redis-cli -p 6379 ping`
+
+---
+
+## FerretDB (MongoDB-Compatible on PostgreSQL)
+
+**Purpose:** An open-source MongoDB-compatible proxy that translates the MongoDB wire protocol to PostgreSQL queries. Use it as a drop-in backend for MongoDB applications — all existing MongoDB drivers, ORMs, and tools (Mongoose, mongosh, MongoDB Compass) connect without changes, but data is stored in PostgreSQL where you can query it with SQL. Ideal for self-hosters who want MongoDB API compatibility without running a separate MongoDB instance.
+
+```yaml
+# ~/ferretdb/compose.yml
+services:
+  ferretdb:
+    image: ghcr.io/ferretdb/ferretdb:latest
+    ports: ["127.0.0.1:27018:27017"]
+    environment:
+      FERRETDB_POSTGRESQL_URL: postgres://ferretdb:changeme@db:5432/ferretdb
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ferretdb
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: ferretdb
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+Connect with any MongoDB client: `mongosh mongodb://localhost:27018/mydb`
+
+> **When to use FerretDB vs MongoDB:** Use FerretDB when you want MongoDB API compatibility with PostgreSQL's reliability, ACID guarantees, and operational simplicity. Use MongoDB directly for workloads that rely on change streams, full-text search, or aggregation pipelines not yet covered by FerretDB.
+
+---
+
 ## Choosing the Right Database
 
 | Use Case | Recommended Database |
@@ -686,18 +903,23 @@ volumes: {db_data: {}}
 | General-purpose relational, web apps | PostgreSQL |
 | Legacy PHP apps, WordPress | MariaDB |
 | Caching, sessions, pub/sub | Redis / Valkey |
-| High-throughput caching (multi-core) | KeyDB |
+| High-throughput caching (multi-core) | Dragonfly / KeyDB |
 | Document storage, flexible schema | MongoDB |
+| MongoDB API on PostgreSQL storage | FerretDB |
 | Event streaming, data pipelines | Kafka / Redpanda |
+| Task queues, worker jobs, RPC | RabbitMQ |
+| Lightweight pub/sub + KV + streams | NATS JetStream |
 | Graph data, social networks, recommendations | Neo4j |
 | IoT telemetry, time-series at scale | Cassandra / ScyllaDB |
 | Time-series with SQL & PostgreSQL tooling | TimescaleDB |
 | Horizontal SQL scaling, multi-region | CockroachDB |
-| Full-text search | MeiliSearch / Elasticsearch |
-| Open-source Elasticsearch alternative | OpenSearch |
+| Full-text search (simple, fast) | Typesense / MeiliSearch |
+| Full-text search (enterprise scale) | Elasticsearch / OpenSearch |
 | Vector/semantic search (AI/RAG) | Qdrant / Weaviate |
 | SQLite with replication | Litestream |
 | Metrics & IoT (line protocol) | InfluxDB |
+| Local OLAP / data analysis | DuckDB |
+| Multi-model (relational + graph + doc) | SurrealDB |
 
 ---
 
@@ -721,3 +943,11 @@ volumes: {db_data: {}}
 | TimescaleDB extension not found | Run `CREATE EXTENSION timescaledb;` in `psql` after first connection; it must be enabled per database |
 | Redpanda schema registry errors | Ensure the schema registry port `8081` is not blocked; schema registry is separate from the Kafka broker port `9092` |
 | Weaviate vectorisation fails | Verify Ollama is running and `TEXT2VEC_OLLAMA_APIENDPOINT` resolves; pull the embedding model: `podman exec ollama ollama pull nomic-embed-text` |
+| RabbitMQ management UI unreachable | Ensure port `15672` is exposed; management plugin is bundled in the `-management` image tag |
+| RabbitMQ messages not consumed | Check consumer acknowledgement mode — unacked messages stay in queue; verify the consumer is running and connected |
+| NATS JetStream not persisting | Ensure `store_dir` is set in config and the `/data` volume is mounted; `jetstream {}` block must be present |
+| Typesense collection not found | Collections must be explicitly created before indexing; verify the API key matches `TYPESENSE_API_KEY` |
+| DuckDB Parquet read error | Ensure the file path inside the container matches the volume mount; DuckDB requires read permissions on the file |
+| SurrealDB connection refused | Verify the `--conn` URL uses `http://` not `https://` for local connections; check the namespace and database exist |
+| Dragonfly `ulimit` warning on startup | Set `--ulimit memlock=-1` in the run command; Dragonfly requires unlimited locked memory for performance |
+| FerretDB command not supported | Check the [FerretDB compatibility list](https://docs.ferretdb.io/reference/supported-commands/) — some advanced MongoDB aggregation stages are not yet implemented |

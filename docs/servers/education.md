@@ -446,6 +446,33 @@ volumes:
 
 ---
 
+## H5P (Interactive Learning Content)
+
+**Purpose:** Create rich, interactive HTML5 learning content — quizzes, drag-and-drop exercises, interactive videos, flashcards, branching scenarios, and 50+ other content types — without writing code. H5P content runs in the browser and integrates directly with Moodle, Canvas, and Open edX as a plugin. The standalone server lets you host H5P content independently and embed it in any website via iframes.
+
+```bash
+podman run -d \
+  --name h5p \
+  -p 127.0.0.1:8100:8080 \
+  -v /home/user/h5p/content:/var/www/html/content:Z \
+  -v /home/user/h5p/libraries:/var/www/html/libraries:Z \
+  -e H5P_EDITOR_DOMAIN=h5p.home.local \
+  --restart unless-stopped \
+  tutor/h5p:latest
+```
+
+Access at `http://localhost:8100`. Download H5P content types from the H5P Hub (built into the editor), create content, and embed it in any LMS or web page:
+
+```html
+<iframe src="https://h5p.home.local/h5p/embed/1" 
+  width="800" height="450" frameborder="0" allowfullscreen>
+</iframe>
+```
+
+> For Moodle integration, install the H5P plugin from the Moodle Plugin Directory — no separate container needed. The standalone server is useful when you want to embed H5P content in non-LMS sites (WordPress, Ghost, custom apps).
+
+---
+
 ## Caddy Configuration
 
 ```caddyfile
@@ -457,6 +484,7 @@ erp.home.local         { tls internal; reverse_proxy localhost:8080 }
 kolibri.home.local     { tls internal; reverse_proxy localhost:8090 }
 overleaf.home.local    { tls internal; reverse_proxy localhost:5000 }
 anki.home.local        { tls internal; reverse_proxy localhost:27701 }
+h5p.home.local         { tls internal; reverse_proxy localhost:8100 }
 ```
 
 ---
@@ -492,3 +520,5 @@ anki.home.local        { tls internal; reverse_proxy localhost:27701 }
 | Anki sync `AuthFailed` | Verify username/password in `SYNC_USER1` matches exactly what the client sends; Anki is case-sensitive |
 
 > 💡 **Tip:** For Moodle and Canvas, enable Redis as a caching backend (set under `config.php` → `$CFG->cache_*`) to significantly improve page load times and handle more concurrent users.
+| H5P content type missing | Download content types from the H5P Hub inside the editor — libraries must be installed before content of that type can be created |
+| H5P iframe not loading | Ensure `H5P_EDITOR_DOMAIN` matches the domain used in the iframe src; check CSP headers aren't blocking the embed |

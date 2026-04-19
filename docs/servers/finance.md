@@ -344,6 +344,29 @@ Access at `http://localhost:4242`. Connect exchanges (Binance, Coinbase, Kraken)
 
 ---
 
+## Paisa (Indian Personal Finance Tracker)
+
+**Purpose:** A personal finance tracker purpose-built for Indian users — imports transactions from Indian bank statement formats (SBI, HDFC, ICICI, Axis, Zerodha, Kuvera), handles INR natively, and supports Indian mutual funds and stock holdings. Built on hledger under the hood with a polished web UI for non-accountants. Ideal if you want double-entry bookkeeping accuracy without writing journal entries by hand.
+
+```bash
+podman run -d \
+  --name paisa \
+  -p 127.0.0.1:7500:7500 \
+  -v /home/user/paisa:/root/paisa:Z \
+  -e TZ=Asia/Kolkata \
+  --restart unless-stopped \
+  ananthakumaran/paisa:latest
+```
+
+Access at `http://localhost:7500`. On first run, Paisa creates a `~/.paisa/` directory. Import your ledger file or start fresh by adding accounts and importing bank CSVs via the UI.
+
+**Caddy:**
+```caddyfile
+paisa.home.local { tls internal; reverse_proxy localhost:7500 }
+```
+
+---
+
 ## Choosing the Right Tool
 
 | Use Case | Recommended Tool |
@@ -354,8 +377,60 @@ Access at `http://localhost:4242`. Connect exchanges (Binance, Coinbase, Kraken)
 | Freelancer invoicing & billing | Invoice Ninja |
 | Full business accounting & ERP | ERPNext |
 | Programmer / power-user ledger | hledger / Beancount |
+| Indian bank imports & INR-native tracking | Paisa |
+| European bank auto-import via open banking | Kresus |
 | Bitcoin sovereignty | Bitcoin Core + LND + ThunderHub |
 | Crypto portfolio + tax reports | Rotki |
+
+---
+
+## Kresus (Open Banking Personal Finance)
+
+**Purpose:** Self-hosted personal finance manager with automatic bank import via open banking connectors (Woob). Kresus connects directly to hundreds of European banks and financial institutions, imports transactions automatically, and helps you categorise, budget, and analyse spending — no manual CSV exports required. A strong complement to Firefly III for users who want automatic bank synchronisation.
+
+```yaml
+# ~/kresus/compose.yml
+services:
+  kresus:
+    image: bnjbvr/kresus:latest
+    ports: ["127.0.0.1:9876:9876"]
+    environment:
+      LOCAL_USER_ID: 1000
+      KRESUS_SALT: changeme-run-openssl-rand-hex-32
+      KRESUS_SECRET: changeme-run-openssl-rand-hex-32
+      KRESUS_DB_TYPE: postgres
+      KRESUS_DB_HOST: db
+      KRESUS_DB_PORT: 5432
+      KRESUS_DB_NAME: kresus
+      KRESUS_DB_USERNAME: kresus
+      KRESUS_DB_PASSWORD: changeme
+      KRESUS_PYTHON_EXEC: python3
+    volumes:
+      - /home/user/kresus/data:/home/user/data:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: kresus
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: kresus
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+Access at `http://localhost:9876`. Add your bank under Settings → Banks — Kresus uses Woob connectors to fetch transactions. Supported banks include most major European institutions (BNP Paribas, Société Générale, ING, Revolut, N26, and 300+ more).
+
+> Kresus works best for European users with supported banks. For Indian banks, use Paisa. For US/global manual import, use Firefly III with the data importer.
+
+**Caddy:**
+```caddyfile
+kresus.home.local { tls internal; reverse_proxy localhost:9876 }
+```
 
 ---
 
@@ -369,6 +444,8 @@ portfolio.home.local  { tls internal; reverse_proxy localhost:3333 }
 invoices.home.local   { tls internal; reverse_proxy localhost:8082 }
 thunderhub.home.local { tls internal; reverse_proxy localhost:3000 }
 rotki.home.local      { tls internal; reverse_proxy localhost:4242 }
+paisa.home.local      { tls internal; reverse_proxy localhost:7500 }
+kresus.home.local     { tls internal; reverse_proxy localhost:9876 }
 ```
 
 ---
@@ -386,5 +463,7 @@ rotki.home.local      { tls internal; reverse_proxy localhost:4242 }
 | LND `unable to connect to bitcoind` | Verify ZMQ ports `28332`/`28333` are published in the bitcoind container; check the `--bitcoind.zmqpubrawblock` address |
 | Rotki exchange API error | Verify the API key has read-only permissions; some exchanges require IP whitelisting — add your server's Tailscale IP |
 | hledger web shows wrong data | Ensure the journal file path inside the container matches the volume mount; run `hledger check` to validate journal syntax |
+| Kresus bank not found | Check the Woob connector list at `https://weboob.org/modules` — some banks require an active Woob module; update the container for the latest connectors |
+| Kresus transactions not importing | Some bank connectors require 2FA — Kresus will prompt for the code during the first sync; check `podman logs kresus` for authentication errors |
 
 > 💡 **Backup tip:** Financial data deserves extra backup care. Run Restic backups of `/home/user/firefly`, `/home/user/actual`, and `/home/user/ghostfolio` daily to an encrypted offsite destination. A lost transaction history is hard to reconstruct.

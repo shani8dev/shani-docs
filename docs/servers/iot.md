@@ -385,6 +385,60 @@ Physical Sensors / ESP32 / Shelly / Tasmota
 
 ---
 
+## OwnTracks (Private Location Tracking)
+
+**Purpose:** Self-hosted location sharing platform. The OwnTracks app (iOS and Android) publishes your GPS location to your own MQTT broker or HTTP endpoint — nobody else's server sees your location. Use it to track your own device over time, share location with family members privately, or trigger Home Assistant automations when you arrive home. A privacy-respecting replacement for Google Maps Timeline or Life360.
+
+```bash
+podman run -d \
+  --name owntracks-recorder \
+  -p 127.0.0.1:8083:8083 \
+  -p 127.0.0.1:8084:8084 \
+  -v /home/user/owntracks/store:/store:Z \
+  -e OTR_HOST=host.containers.internal \
+  -e OTR_PORT=1883 \
+  -e OTR_USER=iot_user \
+  -e OTR_PASS=yourpassword \
+  --restart unless-stopped \
+  owntracks/recorder:latest
+```
+
+Access the web frontend at `http://localhost:8083`. OwnTracks Recorder connects to your Mosquitto broker and stores location history in a flat-file database.
+
+**OwnTracks Frontend (map UI):**
+```bash
+podman run -d \
+  --name owntracks-frontend \
+  -p 127.0.0.1:8085:80 \
+  -e SERVER_HOST=host.containers.internal \
+  -e SERVER_PORT=8083 \
+  --restart unless-stopped \
+  owntracks/frontend:latest
+```
+
+**App configuration (iOS/Android):**
+- Mode: HTTP
+- Host: `https://owntracks.home.local`
+- Port: 443
+- Username: your-name
+- Device ID: phone
+
+**Integrate with Home Assistant:**
+```yaml
+# configuration.yaml — add the OwnTracks integration
+device_tracker:
+  - platform: owntracks_http
+```
+
+Or use the built-in Home Assistant OwnTracks integration (Settings → Integrations → OwnTracks) which handles the HTTP endpoint automatically.
+
+**Caddy:**
+```caddyfile
+owntracks.home.local { tls internal; reverse_proxy localhost:8083 }
+```
+
+---
+
 ## Caddy Configuration
 
 ```caddyfile
@@ -393,6 +447,7 @@ grafana.home.local    { tls internal; reverse_proxy localhost:3001 }
 prometheus.home.local { tls internal; reverse_proxy localhost:9090 }
 alerts.home.local     { tls internal; reverse_proxy localhost:9093 }
 emqx.home.local       { tls internal; reverse_proxy localhost:18083 }
+owntracks.home.local  { tls internal; reverse_proxy localhost:8083 }
 ```
 
 ---
@@ -411,5 +466,6 @@ emqx.home.local       { tls internal; reverse_proxy localhost:18083 }
 | Alertmanager not sending alerts | Verify the receiver config syntax; test with `amtool alert add` and check logs with `podman logs alertmanager` |
 | EMQX dashboard inaccessible | Ensure port `18083` is bound to `127.0.0.1`; default credentials are `admin` / `public` — change them immediately |
 | Beszel agent not reporting | Verify the public key from the hub is correctly pasted into the agent; check that port `45876` is reachable from the hub |
+| OwnTracks app not reporting location | Verify the HTTP endpoint URL is correct in the app; check `podman logs owntracks-recorder` for connection errors; ensure Caddy is forwarding to port `8083` |
 
 > 💡 **Tip:** For sensor devices with unreliable Wi-Fi, set MQTT QoS to 1 (at least once) and enable `persistence true` in Mosquitto. Messages published when the broker is temporarily unreachable will be delivered when reconnected.

@@ -270,6 +270,45 @@ api_bind_addr = "0.0.0.0:3903"
 
 ---
 
+## Litestream (SQLite Continuous Replication)
+
+**Purpose:** Streams SQLite WAL changes to S3-compatible object storage in real time — effectively giving SQLite continuous off-site replication with sub-second RPO. Any app using SQLite (including many lightweight self-hosted tools) gets disaster recovery without changing a line of code. Litestream runs as a sidecar: it watches the SQLite file and asynchronously replicates every write to your backup destination.
+
+```bash
+podman run -d \
+  --name litestream \
+  -v /home/user/app/data:/data:Z \
+  -v /home/user/litestream/litestream.yml:/etc/litestream.yml:ro,Z \
+  --restart unless-stopped \
+  litestream/litestream:latest replicate
+```
+
+**Example `litestream.yml`:**
+```yaml
+dbs:
+  - path: /data/app.db
+    replicas:
+      - type: s3
+        bucket: my-litestream-backups
+        path: app
+        region: us-east-1
+        access-key-id: your-access-key
+        secret-access-key: your-secret-key
+        endpoint: http://host.containers.internal:9000  # MinIO
+```
+
+**Restore from replica:**
+```bash
+podman run --rm \
+  -v /home/user/app/data:/data:Z \
+  -v /home/user/litestream/litestream.yml:/etc/litestream.yml:ro,Z \
+  litestream/litestream:latest restore -o /data/app.db s3://my-litestream-backups/app
+```
+
+> Pair Litestream with Restic for defence in depth: Litestream gives you near-zero RPO for SQLite apps; Restic gives you encrypted, point-in-time snapshots for everything else.
+
+---
+
 ## Automated Backup with systemd
 
 Set up a daily backup timer that runs Restic and sends a notification via Ntfy:
@@ -317,5 +356,7 @@ systemctl --user enable --now backup.timer
 | Volume permissions error | Add `--userns=keep-id` to the Podman run command to preserve your UID inside the container |
 | Restic `repository is locked` | Run `podman exec restic restic unlock` — happens if a previous backup was interrupted |
 | Kopia web UI unreachable | Ensure `--insecure` is set (required without TLS cert); proxy through Caddy for HTTPS |
+| Litestream replication lag | Check `podman logs litestream` for WAL checkpoint errors; ensure the app's SQLite file is not opened exclusively |
+| Litestream restore returns empty DB | Verify the S3 bucket and path in `litestream.yml` match exactly; use `litestream snapshots` to list available restore points |
 
 > 💡 **Tip:** Test your restores periodically. A backup you have never restored from is a backup you do not know works.

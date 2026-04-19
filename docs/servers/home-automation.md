@@ -259,6 +259,244 @@ Configure recognisers (CompreFace, DeepStack, or CodeProject.AI) in the Double T
 
 ---
 
+## go2rtc (WebRTC Camera Gateway)
+
+**Purpose:** Universal camera streaming gateway. Takes any RTSP, RTMP, ONVIF, USB, or HTTP camera stream and re-serves it as WebRTC (browser-viewable), MSE, HLS, or RTSP. Zero-latency browser previews, multi-stream support, and deep Frigate and Home Assistant integration — go2rtc powers the camera streams in Frigate 0.13+ and Home Assistant's WebRTC camera card.
+
+```bash
+podman run -d \
+  --name go2rtc \
+  -p 127.0.0.1:1984:1984 \
+  -p 8554:8554 \
+  -p 8555:8555/tcp \
+  -p 8555:8555/udp \
+  -v /home/user/go2rtc/go2rtc.yaml:/config/go2rtc.yaml:ro,Z \
+  --restart unless-stopped \
+  alexxit/go2rtc
+```
+
+**Example `go2rtc.yaml`:**
+```yaml
+streams:
+  front-door: rtsp://admin:password@192.168.1.101:554/stream1
+  back-yard: rtsp://admin:password@192.168.1.102:554/h264Preview_01_main
+  doorbell: rtspx://192.168.1.103:7441/api/camera/proxy/...
+
+webrtc:
+  candidates:
+    - 192.168.1.10:8555  # your server's LAN IP
+
+api:
+  listen: ":1984"
+```
+
+Access the web UI at `http://localhost:1984` to view live streams in the browser. In Frigate config, set `go2rtc.streams` to reference the same stream names.
+
+---
+
+## Z-Wave JS UI (Z-Wave Device Bridge)
+
+**Purpose:** Full-featured Z-Wave device manager and MQTT bridge. Similar to Zigbee2MQTT but for Z-Wave — manages your Z-Wave USB controller (Aeotec Z-Stick, HUSBZB-1, Zooz ZST10), pairs devices, exposes them to Home Assistant via MQTT or WebSocket, and provides a visual mesh network map. Required for Z-Wave devices like Yale/Schlage smart locks, Fibaro sensors, and Qubino modules.
+
+```bash
+podman run -d \
+  --name zwave-js-ui \
+  -p 127.0.0.1:8091:8091 \
+  -p 127.0.0.1:3000:3000 \
+  -v /home/user/zwave-js-ui/store:/usr/src/app/store:Z \
+  --device /dev/ttyUSB1:/dev/ttyUSB1 \
+  -e TZ=Asia/Kolkata \
+  --restart unless-stopped \
+  zwavejs/zwave-js-ui:latest
+```
+
+> Find your Z-Wave stick: `ls /dev/ttyUSB*` after plugging it in (may be `ttyUSB0` or `ttyACM0` depending on the model).
+
+In Home Assistant: Settings → Devices & Services → Add Integration → Z-Wave JS → use WebSocket URL `ws://host.containers.internal:3000`.
+
+---
+
+## Scrypted (Camera Hub & NVR)
+
+**Purpose:** Camera management and NVR platform with a focus on HomeKit Secure Video integration. Supports 40+ camera brands, transcodes streams to HomeKit format, and integrates with Google Home, Alexa, Home Assistant, and Frigate. If you want your RTSP cameras to appear natively in Apple Home or Google Home, Scrypted is the bridge.
+
+```bash
+podman run -d \
+  --name scrypted \
+  --network host \
+  -v /home/user/scrypted/volume:/server/volume:Z \
+  --restart unless-stopped \
+  koush/scrypted
+```
+
+> `--network host` is required for mDNS discovery of cameras and HomeKit pairing. Access the UI at `https://localhost:10443` (self-signed cert on first run).
+
+**Caddy:**
+```caddyfile
+scrypted.home.local { tls internal; reverse_proxy localhost:10443 }
+```
+
+---
+
+## AppDaemon (Python Automation Engine)
+
+**Purpose:** Python scripting environment for Home Assistant automations. Write complex automation logic in Python instead of YAML — full access to Home Assistant's state machine, events, and services. Ideal for automations that require loops, data structures, external API calls, or logic that would be unwieldy in HA's built-in automation editor. Also includes HADashboard for building kiosk-style tablet wall panels.
+
+```bash
+podman run -d \
+  --name appdaemon \
+  -p 127.0.0.1:5050:5050 \
+  -v /home/user/appdaemon/config:/conf:Z \
+  -e HA_URL=http://host.containers.internal:8123 \
+  -e TOKEN=your-long-lived-access-token \
+  -e TZ=Asia/Kolkata \
+  --restart unless-stopped \
+  acockburn/appdaemon:latest
+```
+
+**Example app (`/conf/apps/notify_on_door.py`):**
+```python
+import appdaemon.plugins.hass.hassapi as hass
+
+class DoorNotifier(hass.Hass):
+    def initialize(self):
+        self.listen_state(self.door_opened, "binary_sensor.front_door", new="on")
+
+    def door_opened(self, entity, attribute, old, new, kwargs):
+        self.notify("Front door opened!", name="mobile_app_phone")
+        self.call_service("light/turn_on", entity_id="light.porch", brightness=255)
+```
+
+---
+
+## evcc (EV Charging Optimiser)
+
+**Purpose:** Electric vehicle charging automation — charges your EV using surplus solar power, off-peak tariff windows, or a combination of both. Integrates with 200+ EV chargers (go-e, Wallbox, ABB, etc.), inverters (SMA, Fronius, Huawei, Shelly EM), and energy meters. Displays a real-time dashboard showing solar yield, grid import/export, and charging state.
+
+```yaml
+# ~/evcc/compose.yml
+services:
+  evcc:
+    image: evcc/evcc:latest
+    ports: ["127.0.0.1:7070:7070"]
+    volumes:
+      - /home/user/evcc/evcc.yaml:/etc/evcc.yaml:ro,Z
+      - /home/user/evcc/data:/root/.evcc:Z
+    environment:
+      TZ: Asia/Kolkata
+    restart: unless-stopped
+```
+
+**Minimal `evcc.yaml`:**
+```yaml
+network:
+  schema: http
+  host: evcc.home.local
+  port: 7070
+
+interval: 30s
+
+meters:
+  - name: grid
+    type: template
+    template: shelly-3em
+    host: 192.168.1.50
+
+chargers:
+  - name: wallbox
+    type: template
+    template: go-e
+    host: 192.168.1.60
+
+vehicles:
+  - name: mycar
+    type: template
+    template: generic
+    title: My EV
+    capacity: 60  # kWh
+```
+
+Access at `http://localhost:7070`. Set charging mode to **PV** for solar-only charging, **MinPV** for guaranteed minimum current topped up by solar, or **Now** for maximum speed regardless of source.
+
+---
+
+## WLED (LED Controller)
+
+**Purpose:** Open-source firmware and web server for addressable LED strips (WS2812B, SK6812, WS2811, and more) running on ESP8266/ESP32. Flash WLED onto a cheap ESP32 board, wire it to your LED strip, and get a full web UI, Home Assistant integration via MQTT and native API, effects library (100+ built-in animations), segments, palettes, and a JSON API. No cloud — WLED runs entirely on the microcontroller and your LAN.
+
+WLED runs on the ESP32 microcontroller itself — not as a container on your server. Your server hosts the Home Assistant integration and optionally a WLED configuration backup.
+
+**Flash WLED onto an ESP32 (from your server):**
+```bash
+# Install esptool
+pip install esptool --break-system-packages
+
+# Download latest WLED firmware
+curl -LO https://github.com/Aircoookie/WLED/releases/latest/download/WLED_0.15.0_ESP32.bin
+
+# Flash (replace /dev/ttyUSB0 with your ESP32 port)
+esptool.py --port /dev/ttyUSB0 write_flash 0x0 WLED_0.15.0_ESP32.bin
+```
+
+**Or use the browser-based installer at [install.wled.me](https://install.wled.me)** — plug the ESP32 into any computer and flash directly from the browser without installing tools.
+
+**Wire the circuit:**
+```
+ESP32 GPIO2 (Data) ──► LED Strip Data In
+ESP32 GND           ──► LED Strip GND   ──► Power Supply GND
+5V Power Supply     ──► LED Strip VCC
+                                         (do NOT power strip from ESP32 5V)
+```
+
+> For more than ~30 LEDs, always use an external 5V power supply. A 60-LED strip at full white draws ~3.6A — far more than USB can provide.
+
+**Home Assistant integration:**
+
+Once WLED is on your network, Home Assistant auto-discovers it via mDNS. Accept the integration and your LED strip appears as a light entity with brightness, colour, and effect controls.
+
+**Manual WLED config backup (save to your server):**
+```bash
+# Export WLED config via its HTTP API
+curl http://192.168.1.XXX/cfg.json -o /home/user/wled/backups/strip-1-cfg.json
+curl http://192.168.1.XXX/presets.json -o /home/user/wled/backups/strip-1-presets.json
+```
+
+**Control via JSON API:**
+```bash
+# Set colour to warm white
+curl -X POST http://192.168.1.XXX/json/state \
+  -H "Content-Type: application/json" \
+  -d '{"on":true,"bri":200,"seg":[{"col":[[255,200,100]]}]}'
+
+# Set a built-in effect (effect ID 9 = "Colorloop")
+curl -X POST http://192.168.1.XXX/json/state \
+  -d '{"seg":[{"fx":9,"sx":128,"ix":200}]}'
+
+# Turn off
+curl -X POST http://192.168.1.XXX/json/state -d '{"on":false}'
+```
+
+**MQTT control (integrates with Mosquitto):**
+
+In WLED web UI → Config → Sync → MQTT:
+- Server: `192.168.1.X` (your Mosquitto host)
+- Port: `1883`
+- User/Password: your MQTT credentials
+- Topic: `wled/strip1`
+
+```bash
+# Control via MQTT
+podman exec mosquitto mosquitto_pub -u user -P password \
+  -t "wled/strip1" -m "ON"
+
+podman exec mosquitto mosquitto_pub -u user -P password \
+  -t "wled/strip1/col" -m "#FF6400"
+```
+
+> WLED is one of the most popular DIY smart home projects. A single ESP32 (~$4) + WS2812B strip (~$8/m) gives you full-colour, effect-capable smart lighting at a fraction of the cost of Philips Hue or LIFX.
+
+---
+
 ## Caddy Configuration
 
 ```caddyfile
@@ -268,6 +506,8 @@ esphome.home.local        { tls internal; reverse_proxy localhost:6052 }
 nodered.home.local        { tls internal; reverse_proxy localhost:1880 }
 frigate.home.local        { tls internal; reverse_proxy localhost:5000 }
 doubletake.home.local     { tls internal; reverse_proxy localhost:3000 }
+appdaemon.home.local      { tls internal; reverse_proxy localhost:5050 }
+evcc.home.local           { tls internal; reverse_proxy localhost:7070 }
 ```
 
 ---
@@ -285,3 +525,5 @@ doubletake.home.local     { tls internal; reverse_proxy localhost:3000 }
 | Home Assistant automations not triggering | Check logs (Settings → System → Logs); verify MQTT messages are arriving with `mosquitto_sub -t '#' -v` |
 | Matter pairing fails | Ensure both the Matter Server and Home Assistant are on the same LAN/VLAN; Matter devices need mDNS broadcast to work |
 | Double Take not recognising faces | Ensure Frigate is publishing snapshots to MQTT; check the face library has enough reference images per person (5+ recommended) |
+| WLED not discovered by Home Assistant | Ensure WLED and Home Assistant are on the same LAN/VLAN; mDNS must be allowed between them; try adding via IP manually in the WLED integration |
+| WLED LEDs flicker or show wrong colours | Check data wire connection quality; add a 300–500 Ohm resistor on the data line; ensure GND is shared between the ESP32 and LED strip power supply |

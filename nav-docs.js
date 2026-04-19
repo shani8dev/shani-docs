@@ -159,6 +159,7 @@ CONFIG.NAV_TREE = [
       { title: 'Productivity & Files', slug: 'servers/productivity' },
       { title: 'Security & Identity', slug: 'servers/security' },
       { title: 'VPN & Tunnels', slug: 'servers/vpn-tunnels' },
+      { title: 'Game Server', slug: 'servers/game-servers' },
     ]
   },
 

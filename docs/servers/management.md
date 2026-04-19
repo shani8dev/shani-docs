@@ -201,6 +201,69 @@ Default login: `admin@yacht.local` / `pass`. Change immediately after first logi
 
 ---
 
+## Komodo (Modern Container Manager)
+
+**Purpose:** A newer, actively developed alternative to Portainer and Dockge. Komodo manages containers, compose stacks, and deployments across multiple servers from a single dashboard. Supports Git-backed stack deployments (push to Git → auto-deploy), resource monitoring, and a clean role-based UI. Good choice for multi-server homelabs.
+
+```bash
+podman run -d \
+  --name komodo \
+  -p 127.0.0.1:9120:9120 \
+  -v /run/user/$(id -u)/podman/podman.sock:/var/run/docker.sock:ro \
+  -v /home/user/komodo/data:/data:Z \
+  -e KOMODO_HOST=https://komodo.home.local \
+  -e KOMODO_PASSKEY=changeme-run-openssl-rand-hex-32 \
+  --restart unless-stopped \
+  ghcr.io/moghtech/komodo:latest
+```
+
+**Caddy:**
+```caddyfile
+komodo.home.local { tls internal; reverse_proxy localhost:9120 }
+```
+
+---
+
+## Diun (Image Update Notifier)
+
+**Purpose:** Watches your running containers and notifies you when a new image version is available on the registry — before you auto-update. Supports ntfy, Slack, email, Telegram, and more. Useful for reviewing changelogs before pulling updates, especially for security-sensitive containers.
+
+```yaml
+# ~/diun/compose.yml
+services:
+  diun:
+    image: crazymax/diun:latest
+    volumes:
+      - /home/user/diun/data:/data:Z
+      - /home/user/diun/config.yml:/diun.yml:ro,Z
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    environment:
+      TZ: Asia/Kolkata
+      LOG_LEVEL: info
+    restart: unless-stopped
+```
+
+**Minimal `config.yml`:**
+```yaml
+watch:
+  workers: 5
+  schedule: "0 */6 * * *"
+  firstCheckNotif: false
+
+providers:
+  docker:
+    watchStopped: true
+
+notif:
+  ntfy:
+    endpoint: http://host.containers.internal:8090
+    topic: container-updates
+    priority: default
+    tags: ["docker", "update"]
+```
+
+---
+
 ## Cleanup & Maintenance
 
 ```bash
@@ -284,11 +347,11 @@ podman cp jellyfin:/config/config.xml ./jellyfin-config-backup.xml
 
 ## Caddy Configuration
 
-```caddyfile
 dashboard.home.local  { tls internal; reverse_proxy localhost:3001 }
 portainer.home.local  { tls internal; reverse_proxy localhost:9443 }
 dockge.home.local     { tls internal; reverse_proxy localhost:5001 }
 yacht.home.local      { tls internal; reverse_proxy localhost:8001 }
+komodo.home.local     { tls internal; reverse_proxy localhost:9120 }
 ```
 
 ---
@@ -306,3 +369,5 @@ yacht.home.local      { tls internal; reverse_proxy localhost:8001 }
 | Container keeps restarting | Check logs with `podman logs <container>`; look for startup errors or missing environment variables |
 | Autoheal not restarting unhealthy container | Verify the health check command exits with code 1 on failure; check autoheal logs with `podman logs autoheal` |
 | Homepage service offline indicators | The Docker socket must be mounted; check socket path for rootless Podman (`/run/user/$(id -u)/podman/podman.sock`) |
+| Komodo can't deploy stack | Ensure the Podman socket is mounted; verify `KOMODO_HOST` matches the URL you access it from |
+| Diun not sending notifications | Check the ntfy topic and endpoint in `config.yml`; run `podman logs diun` to verify registry polling is working |

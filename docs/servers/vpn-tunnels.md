@@ -592,6 +592,58 @@ podman run -d \
 
 ---
 
+## Gluetun (VPN Client Container)
+
+**Purpose:** Route any container's traffic through a commercial VPN provider — without installing a VPN client on the host. Gluetun supports 50+ providers (Mullvad, ProtonVPN, NordVPN, Private Internet Access, ExpressVPN, etc.) and acts as a network gateway container. Other containers join its network namespace via `network_mode: service:gluetun` — their traffic exits through the VPN tunnel transparently.
+
+**Common use case:** Route qBittorrent through Mullvad so torrent traffic never uses your home IP.
+
+```yaml
+# ~/gluetun/compose.yml
+services:
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    cap_add: [NET_ADMIN]
+    devices:
+      - /dev/net/tun
+    ports:
+      - "127.0.0.1:8080:8080"   # qBittorrent WebUI exposed via gluetun
+    environment:
+      VPN_SERVICE_PROVIDER: mullvad
+      VPN_TYPE: wireguard
+      WIREGUARD_PRIVATE_KEY: your-mullvad-wireguard-private-key
+      WIREGUARD_ADDRESSES: 10.64.222.21/32
+      SERVER_COUNTRIES: Netherlands
+    volumes:
+      - /home/user/gluetun:/gluetun:Z
+    restart: unless-stopped
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    network_mode: "service:gluetun"   # all qbittorrent traffic goes through gluetun
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      WEBUI_PORT: 8080
+    volumes:
+      - /home/user/qbittorrent:/config:Z
+      - /home/user/downloads:/downloads:Z
+    depends_on: [gluetun]
+    restart: unless-stopped
+```
+
+> When `network_mode: service:gluetun` is set, the dependent container shares gluetun's network — all ports are exposed on the gluetun container, not the app container. The qBittorrent WebUI is reached at `http://localhost:8080` via gluetun's port mapping.
+
+**Check that traffic is routed through the VPN:**
+```bash
+podman exec qbittorrent curl -s https://api.ipify.org
+# Should return the VPN exit IP, not your home IP
+```
+
+**Supported providers include:** Mullvad, ProtonVPN, NordVPN, ExpressVPN, Private Internet Access, Surfshark, Windscribe, IVPN, AzireVPN, and any custom WireGuard/OpenVPN config.
+
+---
+
 ## Troubleshooting
 
 | Issue | Solution |
@@ -608,5 +660,8 @@ podman run -d \
 | Nebula nodes can't reach each other | Verify `ca.crt` matches on all nodes; check `static_host_map` IPs resolve correctly |
 | MongoDB connection refused (Pritunl) | Confirm `pritunl-mongo` is running; use `--network host` so both containers share the same network namespace |
 | OpenVPN auth fails | Re-export the client config with `ovpn_getclient`; verify firewall allows `1194/udp` |
+| Gluetun VPN not connecting | Verify `WIREGUARD_PRIVATE_KEY` and `WIREGUARD_ADDRESSES` are correct; check `podman logs gluetun` for auth errors |
+| Gluetun leaking real IP | Ensure the app container uses `network_mode: service:gluetun` — any other network mode bypasses the tunnel |
+| qBittorrent WebUI unreachable via Gluetun | Port must be published on the `gluetun` container, not `qbittorrent`; the app container shares gluetun's network |
 
 > 🔒 **Security tip:** Always bind management UIs (`wg-easy`, `headplane`, `portainer`) to `127.0.0.1` and proxy through Caddy. Never expose control-plane interfaces directly to the internet. Rotate pre-auth keys periodically and use `fail2ban` on any publicly facing port.
