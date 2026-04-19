@@ -13,7 +13,7 @@
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/arch/btrfs</loc>
-    <lastmod>2026-04-01</lastmod>
+    <lastmod>2026-04-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -31,7 +31,7 @@
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/concepts/atomic-updates</loc>
-    <lastmod>2026-04-01</lastmod>
+    <lastmod>2026-04-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -50,6 +50,12 @@
   <url>
     <loc>https://docs.shani.dev/doc/concepts/persistence</loc>
     <lastmod>2026-04-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://docs.shani.dev/doc/enterprise/fleet</loc>
+    <lastmod>2026-04-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -90,8 +96,14 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://docs.shani.dev/doc/intro/getting-started</loc>
+    <lastmod>2026-04-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://docs.shani.dev/doc/intro/migrating</loc>
-    <lastmod>2026-04-01</lastmod>
+    <lastmod>2026-04-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -109,7 +121,7 @@
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/intro/what-is-shanios</loc>
-    <lastmod>2026-04-01</lastmod>
+    <lastmod>2026-04-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -133,7 +145,7 @@
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/networking/backup</loc>
-    <lastmod>2026-04-18</lastmod>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -265,13 +277,13 @@
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/overview</loc>
-    <lastmod>2026-04-01</lastmod>
+    <lastmod>2026-04-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/security/features</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -493,13 +505,19 @@
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/troubleshooting</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/updates/config</loc>
     <lastmod>2026-05-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://docs.shani.dev/doc/updates/shani-health</loc>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

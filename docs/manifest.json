@@ -9,7 +9,7 @@
   {
     "slug": "arch/btrfs",
     "title": "Btrfs Deep Dive",
-    "updated": "2026-04-01",
+    "updated": "2026-04-27",
     "section": "Architecture",
     "draft": false
   },
@@ -30,7 +30,7 @@
   {
     "slug": "concepts/atomic-updates",
     "title": "Atomic Updates",
-    "updated": "2026-04-01",
+    "updated": "2026-04-27",
     "section": "Concepts",
     "draft": false
   },
@@ -53,6 +53,13 @@
     "title": "Persistence Strategy",
     "updated": "2026-04-01",
     "section": "Concepts",
+    "draft": false
+  },
+  {
+    "slug": "enterprise/fleet",
+    "title": "OEM & Fleet Deployment",
+    "updated": "2026-04-27",
+    "section": "Enterprise",
     "draft": false
   },
   {
@@ -98,9 +105,16 @@
     "draft": false
   },
   {
+    "slug": "intro/getting-started",
+    "title": "Getting Started",
+    "updated": "2026-04-27",
+    "section": "Introduction",
+    "draft": false
+  },
+  {
     "slug": "intro/migrating",
     "title": "Migrating from Traditional Linux",
-    "updated": "2026-04-01",
+    "updated": "2026-04-19",
     "section": "Introduction",
     "draft": false
   },
@@ -121,7 +135,7 @@
   {
     "slug": "intro/what-is-shanios",
     "title": "What is Shanios?",
-    "updated": "2026-04-01",
+    "updated": "2026-04-27",
     "section": "Introduction",
     "draft": false
   },
@@ -149,8 +163,8 @@
   {
     "slug": "networking/backup",
     "title": "Backup & Recovery",
-    "updated": "2026-04-18",
-    "section": "Storage",
+    "updated": "2026-05-13",
+    "section": "Networking",
     "draft": false
   },
   {
@@ -303,14 +317,14 @@
   {
     "slug": "overview",
     "title": "Overview",
-    "updated": "2026-04-01",
+    "updated": "2026-04-27",
     "section": "Overview",
     "draft": false
   },
   {
     "slug": "security/features",
     "title": "Security Features",
-    "updated": "2026-04-14",
+    "updated": "2026-04-27",
     "section": "Security",
     "draft": false
   },
@@ -569,7 +583,7 @@
   {
     "slug": "troubleshooting",
     "title": "Troubleshooting Guide",
-    "updated": "2026-04-16",
+    "updated": "2026-05-13",
     "section": "System Management",
     "draft": false
   },
@@ -577,6 +591,13 @@
     "slug": "updates/config",
     "title": "System Config",
     "updated": "2026-05-06",
+    "section": "Updates & Config",
+    "draft": false
+  },
+  {
+    "slug": "updates/shani-health",
+    "title": "shani-health Reference",
+    "updated": "2026-05-13",
     "section": "Updates & Config",
     "draft": false
   },
