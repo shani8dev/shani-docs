@@ -2,28 +2,35 @@
   {
     "slug": "arch/boot",
     "title": "Boot Process",
-    "updated": "2026-04-01",
+    "updated": "2026-05-13",
     "section": "Architecture",
     "draft": false
   },
   {
     "slug": "arch/btrfs",
     "title": "Btrfs Deep Dive",
-    "updated": "2026-04-27",
+    "updated": "2026-05-13",
+    "section": "Architecture",
+    "draft": false
+  },
+  {
+    "slug": "arch/dracut-module",
+    "title": "Dracut Initramfs Module",
+    "updated": "2026-05-13",
     "section": "Architecture",
     "draft": false
   },
   {
     "slug": "arch/filesystem",
     "title": "Filesystem Structure",
-    "updated": "2026-04-01",
+    "updated": "2026-05-13",
     "section": "Architecture",
     "draft": false
   },
   {
     "slug": "arch/overlay",
     "title": "Overlay Filesystem",
-    "updated": "2026-04-01",
+    "updated": "2026-05-13",
     "section": "Architecture",
     "draft": false
   },
@@ -331,7 +338,7 @@
   {
     "slug": "security/gen-efi",
     "title": "gen-efi Reference",
-    "updated": "2026-04-30",
+    "updated": "2026-05-13",
     "section": "Security",
     "draft": false
   },
@@ -609,6 +616,13 @@
     "draft": false
   },
   {
+    "slug": "updates/shani-reset",
+    "title": "Factory Reset (shani-reset)",
+    "updated": "2026-05-13",
+    "section": "Updates & Config",
+    "draft": false
+  },
+  {
     "slug": "updates/shell",
     "title": "Shell & Environment",
     "updated": "2026-04-22",
@@ -618,7 +632,14 @@
   {
     "slug": "updates/system",
     "title": "System Updates",
-    "updated": "2026-05-11",
+    "updated": "2026-05-13",
+    "section": "Updates & Config",
+    "draft": false
+  },
+  {
+    "slug": "updates/user-setup",
+    "title": "User Provisioning (shani-user-setup)",
+    "updated": "2026-05-13",
     "section": "Updates & Config",
     "draft": false
   }

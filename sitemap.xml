@@ -7,25 +7,31 @@
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/arch/boot</loc>
-    <lastmod>2026-04-01</lastmod>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/arch/btrfs</loc>
-    <lastmod>2026-04-27</lastmod>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://docs.shani.dev/doc/arch/dracut-module</loc>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/arch/filesystem</loc>
-    <lastmod>2026-04-01</lastmod>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/arch/overlay</loc>
-    <lastmod>2026-04-01</lastmod>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -289,7 +295,7 @@
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/security/gen-efi</loc>
-    <lastmod>2026-04-30</lastmod>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -528,6 +534,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://docs.shani.dev/doc/updates/shani-reset</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://docs.shani.dev/doc/updates/shell</loc>
     <lastmod>2026-04-22</lastmod>
     <changefreq>monthly</changefreq>
@@ -535,7 +547,13 @@
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/updates/system</loc>
-    <lastmod>2026-05-11</lastmod>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://docs.shani.dev/doc/updates/user-setup</loc>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
