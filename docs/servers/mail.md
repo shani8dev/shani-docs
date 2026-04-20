@@ -24,7 +24,7 @@ Ports: `25`, `465/587`, `143/993`, `80/443`. Firewall: `sudo firewall-cmd --add-
 services:
   front: { image: mailu/nginx:2.0, ports: ["25:25", "465:465", "587:587", "143:143", "993:993", "80:80", "443:443"], volumes: [/home/user/mailu/data:/data:Z, /home/user/mailu/dkim:/dkim:Z, /home/user/mailu/certs:/certs:Z] }
   admin: { image: mailu/admin:2.0, environment: {HOSTNAME: mail.example.com, SECRET_KEY: $(openssl rand -hex 32)}, volumes: [/home/user/mailu/data:/data:Z], depends_on: [db] }
-  db: { image: postgres:15-alpine, environment: {POSTGRES_USER: mailu, POSTGRES_PASSWORD: secret, POSTGRES_DB: mailu}, volumes: [pg_data:/var/lib/postgresql/data] }
+  db: { image: postgres:16-alpine, environment: {POSTGRES_USER: mailu, POSTGRES_PASSWORD: secret, POSTGRES_DB: mailu}, volumes: [pg_data:/var/lib/postgresql/data] }
   imap: { image: mailu/dovecot:2.0, volumes: [/home/user/mailu/data:/data:Z] }
   smtp: { image: mailu/postfix:2.0, volumes: [/home/user/mailu/data:/data:Z] }
   antispam: { image: mailu/rspamd:2.0, volumes: [/home/user/mailu/filter:/var/lib/rspamd:Z] }
@@ -60,6 +60,8 @@ cd ~/stalwart && podman-compose up -d
 ```bash
 sudo firewall-cmd --add-service=smtp --add-service=smtps --add-service=imap --add-service=imaps --permanent && sudo firewall-cmd --reload
 ```
+
+**Common operations:**
 ```bash
 # View logs
 podman logs -f stalwart
@@ -369,8 +371,8 @@ Web, desktop, mobile, and terminal clients for secure IMAP/SMTP access.
 ```yaml
 # ~/roundcube/compose.yaml
 services:
-  roundcube: { image: roundcube/roundcubemail:latest, ports: ["127.0.0.1:8080:80"], environment: {ROUNDCUBE_DEFAULT_HOST: tls://mail.example.com}, depends_on: [db] }
-  db: { image: postgres:15-alpine, environment: {POSTGRES_USER: roundcube, POSTGRES_PASSWORD: secret, POSTGRES_DB: roundcubemail}, volumes: [pg_data:/var/lib/postgresql/data] }
+  roundcube: { image: roundcube/roundcubemail:latest, ports: ["127.0.0.1:8082:80"], environment: {ROUNDCUBE_DEFAULT_HOST: tls://mail.example.com}, depends_on: [db] }
+  db: { image: postgres:16-alpine, environment: {POSTGRES_USER: roundcube, POSTGRES_PASSWORD: secret, POSTGRES_DB: roundcubemail}, volumes: [pg_data:/var/lib/postgresql/data] }
 volumes: {pg_data: {}}
 ```
 

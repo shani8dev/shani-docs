@@ -416,7 +416,7 @@ services:
     restart: unless-stopped
 
   mongo:
-    image: mongo:6
+    image: mongo:7
     volumes: [mongo_data:/data/db]
     restart: unless-stopped
 

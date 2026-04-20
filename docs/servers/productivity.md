@@ -32,7 +32,7 @@ services:
     restart: unless-stopped
 
   nextcloud:
-    image: nextcloud:29
+    image: nextcloud:30
     ports: ["127.0.0.1:8888:80"]
     environment:
       MYSQL_HOST: db
@@ -122,6 +122,27 @@ services:
 
 ```bash
 cd ~/syncthing && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# View logs
+podman logs -f syncthing
+
+# Get device ID (needed to pair with other devices)
+podman exec syncthing syncthing --device-id
+
+# List paired devices and their status via API
+curl -s -H "X-API-Key: $(grep apikey /home/user/syncthing/config/config.xml | grep -oP '(?<=>)[^<]+')"   http://localhost:8384/rest/system/connections | python3 -m json.tool
+
+# Check folder sync status
+curl -s -H "X-API-Key: YOUR_API_KEY"   http://localhost:8384/rest/db/status?folder=default | python3 -m json.tool
+
+# Force a full rescan
+curl -X POST -H "X-API-Key: YOUR_API_KEY"   "http://localhost:8384/rest/db/scan?folder=default"
+
+# Get server version and stats
+curl -s http://localhost:8384/rest/system/version
 ```
 
 **Firewall** (for syncing with external devices):
@@ -328,7 +349,7 @@ cd ~/vikunja && podman-compose up -d
 services:
   outline:
     image: outlinewiki/outline:latest
-    ports: ["127.0.0.1:3000:3000"]
+    ports: ["127.0.0.1:3030:3000"]
     environment:
       DATABASE_URL: postgres://outline:changeme@db:5432/outline
       REDIS_URL: redis://redis:6379
@@ -428,6 +449,27 @@ volumes:
 
 ```bash
 cd ~/miniflux && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# Create additional users
+podman exec miniflux miniflux -create-admin
+
+# Refresh all feeds now
+podman exec miniflux miniflux -refresh-feeds
+
+# Run database migrations
+podman exec miniflux miniflux -migrate
+
+# Import OPML file
+curl -X POST http://localhost:8090/v1/import   -H "X-Auth-Token: YOUR_API_KEY"   -F "file=@subscriptions.opml"
+
+# Export subscriptions as OPML
+curl http://localhost:8090/v1/export   -H "X-Auth-Token: YOUR_API_KEY" -o subscriptions.opml
+
+# View logs
+podman logs -f miniflux
 ```
 
 ---
@@ -563,7 +605,7 @@ blog.example.com { reverse_proxy localhost:2368 }
 # ~/wordpress/compose.yaml
 services:
   wordpress:
-    image: wordpress:6-php8.2-apache
+    image: wordpress:6-php8.3-apache
     ports: ["127.0.0.1:8100:80"]
     environment:
       WORDPRESS_DB_HOST: db
@@ -889,7 +931,7 @@ cd ~/linkwarden && podman-compose up -d
 services:
   monica:
     image: monica:latest
-    ports: ["127.0.0.1:8080:80"]
+    ports: ["127.0.0.1:8094:80"]
     environment:
       APP_KEY: base64:changeme-run-php-artisan-key-generate
       APP_URL: https://crm.home.local
@@ -1294,7 +1336,7 @@ files.home.local     { tls internal; reverse_proxy localhost:8888 }
 sync.home.local      { tls internal; reverse_proxy localhost:8384 }
 docs.home.local      { tls internal; reverse_proxy localhost:8000 }
 tasks.home.local     { tls internal; reverse_proxy localhost:3456 }
-wiki.home.local      { tls internal; reverse_proxy localhost:3000 }
+wiki.home.local      { tls internal; reverse_proxy localhost:3030 }
 recipes.home.local   { tls internal; reverse_proxy localhost:9925 }
 pdf.home.local       { tls internal; reverse_proxy localhost:8080 }
 n8n.example.com      { reverse_proxy localhost:5678 }
@@ -1307,7 +1349,7 @@ pad.home.local       { tls internal; reverse_proxy localhost:3500 }
 rss.home.local       { tls internal; reverse_proxy localhost:8200 }
 read.home.local      { tls internal; reverse_proxy localhost:8250 }
 links.home.local     { tls internal; reverse_proxy localhost:3210 }
-crm.home.local       { tls internal; reverse_proxy localhost:8080 }
+crm.home.local       { tls internal; reverse_proxy localhost:8094 }
 schedule.home.local  { tls internal; reverse_proxy localhost:3450 }
 time.home.local      { tls internal; reverse_proxy localhost:8300 }
 grocy.home.local     { tls internal; reverse_proxy localhost:9283 }

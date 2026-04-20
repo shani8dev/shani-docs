@@ -64,6 +64,12 @@ CONFIG.NAV_TREE = [
       { title: 'LUKS Management', slug: 'security/luks' },
       { title: 'TPM2 Enrollment', slug: 'security/tpm2' },
       { title: 'gen-efi Reference', slug: 'security/gen-efi' },
+
+      { title: 'Audit (auditd)', slug: 'security/audit' },
+      { title: 'rkhunter (Rootkit Hunter)', slug: 'security/rkhunter' },
+      { title: 'Lynis (Security Auditing)', slug: 'security/lynis' },
+      { title: 'Firmware Updates (fwupd)', slug: 'security/fwupd' },
+      { title: 'Hardware Authentication', slug: 'security/hardware-auth' },
     ]
   },
 
@@ -73,7 +79,7 @@ CONFIG.NAV_TREE = [
       { title: 'System Updates', slug: 'updates/system' },
       { title: 'shani-health Reference', slug: 'updates/shani-health' },
       { title: 'Factory Reset (shani-reset)', slug: 'updates/shani-reset' },
-      { title: 'User Provisioning', slug: 'updates/user-setup' },
+      { title: 'User Provisioning (shani-user-setup)', slug: 'updates/user-setup' },
       { title: 'Shell & Environment', slug: 'updates/shell' },
       { title: 'System Config', slug: 'updates/config' },
     ]
@@ -82,26 +88,21 @@ CONFIG.NAV_TREE = [
   {
     title: 'Software & Apps', icon: 'fa-solid fa-cubes',
     children: [
-      // Package formats
       { title: 'Flatpak', slug: 'software/flatpak' },
       { title: 'Snaps', slug: 'software/snaps' },
       { title: 'AppImage', slug: 'software/appimage' },
 
-      // Package managers
       { title: 'Nix Package Manager', slug: 'software/nix' },
       { title: 'Homebrew', slug: 'software/homebrew' },
 
-      // Containers & isolation
       { title: 'Containers', slug: 'software/containers' },
       { title: 'Distrobox', slug: 'software/distrobox' },
       { title: 'Apptainer (HPC Containers)', slug: 'software/apptainer' },
       { title: 'LXC and LXD', slug: 'software/lxc-lxd' },
       { title: 'systemd-nspawn', slug: 'software/systemd-nspawn' },
 
-      // Virtualization
       { title: 'Virtual Machines', slug: 'software/vms' },
 
-      // Compatibility layers
       { title: 'Bottles (Windows Compatibility)', slug: 'software/bottles' },
       { title: 'Android (Waydroid)', slug: 'software/waydroid' },
     ]
@@ -119,7 +120,9 @@ CONFIG.NAV_TREE = [
       { title: 'Caddy', slug: 'networking/caddy' },
 
       { title: 'dnsmasq (Local DNS)', slug: 'networking/dnsmasq' },
+      { title: 'dnscrypt-proxy (Encrypted DNS)', slug: 'networking/dnscrypt-proxy' },
       { title: 'openresolv (DNS)', slug: 'networking/openresolv' },
+      { title: 'BIND (Authoritative DNS)', slug: 'networking/bind' },
       { title: 'Avahi (mDNS)', slug: 'networking/avahi' },
 
       { title: 'OpenSSH', slug: 'networking/openssh' },
@@ -136,7 +139,19 @@ CONFIG.NAV_TREE = [
       { title: 'snmpd (SNMP)', slug: 'networking/snmpd' },
       { title: 'Kerberos', slug: 'networking/kerberos' },
       { title: 'slapd (OpenLDAP)', slug: 'networking/slapd' },
-      { title: 'Backup & Recovery', slug: 'networking/backup' },
+
+      { title: 'Exim (Mail Transfer Agent)', slug: 'networking/exim' },
+      { title: 'arpwatch (ARP Monitor)', slug: 'networking/arpwatch' },
+      { title: 'gpsd (GPS Daemon)', slug: 'networking/gpsd' },
+      { title: 'apcupsd (UPS Daemon)', slug: 'networking/apcupsd' },
+    ]
+  },
+
+  {
+    title: 'System', icon: 'fa-solid fa-gear',
+    children: [
+      { title: 'cronie (Cron Scheduler)', slug: 'system/cronie' },
+      { title: 'Backup & Recovery', slug: 'system/backup' },
     ]
   },
 
@@ -162,7 +177,7 @@ CONFIG.NAV_TREE = [
       { title: 'Productivity & Files', slug: 'servers/productivity' },
       { title: 'Security & Identity', slug: 'servers/security' },
       { title: 'VPN & Tunnels', slug: 'servers/vpn-tunnels' },
-      { title: 'Game Server', slug: 'servers/game-servers' },
+      { title: 'Game Servers', slug: 'servers/game-servers' },
     ]
   },
 

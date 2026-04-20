@@ -1,6 +1,6 @@
 ---
 title: Backup & Recovery
-section: Networking
+section: System
 updated: 2026-05-13
 ---
 

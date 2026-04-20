@@ -370,6 +370,11 @@ volumes:
 cd ~/litellm && podman-compose up -d
 ```
 
+**First run — apply database migrations:**
+```bash
+podman exec litellm-litellm-1 litellm --database_url "postgresql://litellm:changeme@db:5432/litellm" migrate
+```
+
 **Example `config.yaml`:**
 ```yaml
 model_list:
@@ -427,7 +432,7 @@ services:
 
   perplexica-backend:
     image: itzcrazykns1337/perplexica:main
-    ports: ["127.0.0.1:3001:3001"]
+    ports: ["127.0.0.1:3008:3001"]
     environment:
       SEARXNG_API_URL: http://searxng:8080
       OLLAMA_API_URL: http://host.containers.internal:11434
@@ -439,10 +444,10 @@ services:
 
   perplexica-frontend:
     image: itzcrazykns1337/perplexica:main
-    ports: ["127.0.0.1:3000:3000"]
+    ports: ["127.0.0.1:3009:3000"]
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:3001
-      NEXT_PUBLIC_WS_URL: ws://localhost:3001
+      NEXT_PUBLIC_API_URL: http://localhost:3008
+      NEXT_PUBLIC_WS_URL: ws://localhost:3008
     depends_on: [perplexica-backend]
     restart: unless-stopped
 ```
@@ -666,13 +671,13 @@ services:
     image: langgenius/dify-web:latest
     ports: ["127.0.0.1:3005:3000"]
     environment:
-      CONSOLE_API_URL: http://host.containers.internal:5001
-      APP_API_URL: http://host.containers.internal:5001
+      CONSOLE_API_URL: http://host.containers.internal:5002
+      APP_API_URL: http://host.containers.internal:5002
     restart: unless-stopped
 
   nginx:
     image: nginx:alpine
-    ports: ["127.0.0.1:5001:80"]
+    ports: ["127.0.0.1:5002:80"]
     volumes:
       - /home/user/dify/nginx/nginx.conf:/etc/nginx/nginx.conf:ro,Z
     depends_on: [api, web]
@@ -710,7 +715,13 @@ volumes: {pg_data: {}, qdrant_data: {}}
 cd ~/dify && podman-compose up -d
 ```
 
-Access at `http://localhost:5001`. On first visit, set up an admin account, then connect your LLM providers under Settings → Model Providers.
+**First run — initialise the database:**
+```bash
+podman-compose run --rm api flask db upgrade
+podman-compose run --rm api flask db-commands migrate
+```
+
+Access at `http://localhost:5002`. On first visit, set up an admin account, then connect your LLM providers under Settings → Model Providers.
 
 **Key Dify features:**
 - **Chatbot** — deploy a custom-knowledge chatbot from uploaded documents in minutes
@@ -785,11 +796,11 @@ kokoro.home.local    { tls internal; reverse_proxy localhost:8880 }
 tabby.home.local     { tls internal; reverse_proxy localhost:8081 }
 anything.home.local  { tls internal; reverse_proxy localhost:3001 }
 litellm.home.local   { tls internal; reverse_proxy localhost:4000 }
-search.home.local    { tls internal; reverse_proxy localhost:3000 }
+search.home.local    { tls internal; reverse_proxy localhost:3009 }
 invokeai.home.local  { tls internal; reverse_proxy localhost:9090 }
 flowise.home.local   { tls internal; reverse_proxy localhost:3003 }
 langfuse.home.local  { tls internal; reverse_proxy localhost:3004 }
-dify.home.local      { tls internal; reverse_proxy localhost:5001 }
+dify.home.local      { tls internal; reverse_proxy localhost:5002 }
 ```
 
 ---

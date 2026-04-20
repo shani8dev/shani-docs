@@ -450,8 +450,8 @@ services:
   owntracks-recorder:
     image: owntracks/recorder:latest
     ports:
-      - 127.0.0.1:8083:8083
-      - 127.0.0.1:8084:8084
+      - 127.0.0.1:8086:8083
+      - 127.0.0.1:8087:8084
     volumes:
       - /home/user/owntracks/store:/store:Z
     environment:
@@ -466,7 +466,7 @@ services:
 cd ~/owntracks-recorder && podman-compose up -d
 ```
 
-Access the web frontend at `http://localhost:8083`. OwnTracks Recorder connects to your Mosquitto broker and stores location history in a flat-file database.
+Access the web frontend at `http://localhost:8086`. OwnTracks Recorder connects to your Mosquitto broker and stores location history in a flat-file database.
 
 **OwnTracks Frontend (map UI):**
 ```yaml
@@ -478,7 +478,7 @@ services:
       - 127.0.0.1:8085:80
     environment:
       SERVER_HOST: host.containers.internal
-      SERVER_PORT: 8083
+      SERVER_PORT: 8086
     restart: unless-stopped
 ```
 
@@ -504,7 +504,7 @@ Or use the built-in Home Assistant OwnTracks integration (Settings → Integrati
 
 **Caddy:**
 ```caddyfile
-owntracks.home.local { tls internal; reverse_proxy localhost:8083 }
+owntracks.home.local { tls internal; reverse_proxy localhost:8086 }
 ```
 
 ---
@@ -517,7 +517,7 @@ grafana.home.local    { tls internal; reverse_proxy localhost:3001 }
 prometheus.home.local { tls internal; reverse_proxy localhost:9090 }
 alerts.home.local     { tls internal; reverse_proxy localhost:9093 }
 emqx.home.local       { tls internal; reverse_proxy localhost:18083 }
-owntracks.home.local  { tls internal; reverse_proxy localhost:8083 }
+owntracks.home.local  { tls internal; reverse_proxy localhost:8086 }
 ```
 
 ---
@@ -536,6 +536,6 @@ owntracks.home.local  { tls internal; reverse_proxy localhost:8083 }
 | Alertmanager not sending alerts | Verify the receiver config syntax; test with `amtool alert add` and check logs with `podman logs alertmanager` |
 | EMQX dashboard inaccessible | Ensure port `18083` is bound to `127.0.0.1`; default credentials are `admin` / `public` — change them immediately |
 | Beszel agent not reporting | Verify the public key from the hub is correctly pasted into the agent; check that port `45876` is reachable from the hub |
-| OwnTracks app not reporting location | Verify the HTTP endpoint URL is correct in the app; check `podman logs owntracks-recorder` for connection errors; ensure Caddy is forwarding to port `8083` |
+| OwnTracks app not reporting location | Verify the HTTP endpoint URL is correct in the app; check `podman logs owntracks-recorder` for connection errors; ensure Caddy is forwarding to port `8086` |
 
 > 💡 **Tip:** For sensor devices with unreliable Wi-Fi, set MQTT QoS to 1 (at least once) and enable `persistence true` in Mosquitto. Messages published when the broker is temporarily unreachable will be delivered when reconnected.

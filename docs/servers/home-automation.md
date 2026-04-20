@@ -353,7 +353,7 @@ services:
   double-take:
     image: jakowenko/double-take
     ports:
-      - 127.0.0.1:3000:3000
+      - 127.0.0.1:3002:3000
     volumes:
       - /home/user/double-take/.storage:/.storage:Z
     restart: unless-stopped
@@ -420,7 +420,7 @@ services:
     image: zwavejs/zwave-js-ui:latest
     ports:
       - 127.0.0.1:8091:8091
-      - 127.0.0.1:3000:3000
+      - 127.0.0.1:3002:3000
     volumes:
       - /home/user/zwave-js-ui/store:/usr/src/app/store:Z
     devices:

@@ -697,6 +697,27 @@ volumes:
 cd ~/meilisearch && podman-compose up -d
 ```
 
+**Common operations:**
+```bash
+# Check server health
+curl http://localhost:7700/health -H "Authorization: Bearer changeme"
+
+# List all indexes
+curl http://localhost:7700/indexes -H "Authorization: Bearer changeme"
+
+# Get index stats
+curl http://localhost:7700/indexes/movies/stats -H "Authorization: Bearer changeme"
+
+# Delete an index
+curl -X DELETE http://localhost:7700/indexes/movies -H "Authorization: Bearer changeme"
+
+# Update search settings (custom ranking, stop words, synonyms)
+curl -X PATCH http://localhost:7700/indexes/movies/settings   -H "Authorization: Bearer changeme"   -H "Content-Type: application/json"   -d '{"rankingRules":["words","typo","proximity","attribute","sort","exactness"]}'
+
+# View running tasks
+curl http://localhost:7700/tasks -H "Authorization: Bearer changeme"
+```
+
 **Index documents and search:**
 ```bash
 # Add documents to an index
@@ -739,6 +760,28 @@ volumes:
 
 ```bash
 cd ~/influxdb && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# Open the InfluxDB CLI
+podman exec -it influxdb influx
+
+# List buckets
+podman exec influxdb influx bucket list
+
+# List organisations
+podman exec influxdb influx org list
+
+# Write a data point
+podman exec influxdb influx write   --bucket metrics --org home   --token "$(podman exec influxdb influx auth list --json | python3 -c "import sys,json;print(json.load(sys.stdin)[0]['token'])")"   'temperature,room=bedroom value=22.5'
+
+# Query data (Flux)
+podman exec influxdb influx query   --org home   'from(bucket:"metrics") |> range(start:-1h) |> filter(fn:(r) => r._measurement == "temperature")'
+
+# Create a backup
+podman exec influxdb influx backup /tmp/backup --org home
+podman cp influxdb:/tmp/backup ./influxdb-backup-$(date +%Y%m%d)
 ```
 
 ---
@@ -1017,6 +1060,24 @@ services:
 cd ~/nats && podman-compose up -d
 ```
 
+**Common operations:**
+```bash
+# Check server info (requires nats CLI)
+podman run --rm natsio/nats-box   nats -s nats://nats:changeme@host.containers.internal:4222 server info
+
+# List JetStream streams
+podman run --rm natsio/nats-box   nats -s nats://nats:changeme@host.containers.internal:4222 stream ls
+
+# View server monitoring (no auth required on HTTP port)
+curl http://localhost:8222/varz | python3 -m json.tool | head -30
+
+# View JetStream stats
+curl http://localhost:8222/jsz | python3 -m json.tool | head -20
+
+# Create a JetStream stream
+podman run --rm natsio/nats-box   nats -s nats://nats:changeme@host.containers.internal:4222   stream add ORDERS --subjects "orders.>" --storage file --replicas 1
+```
+
 **Minimal `nats.conf` with JetStream:**
 ```conf
 port: 4222
@@ -1070,6 +1131,27 @@ services:
 cd ~/typesense && podman-compose up -d
 ```
 
+**Common operations:**
+```bash
+# Check server health
+curl http://localhost:8108/health -H "X-TYPESENSE-API-KEY: changeme"
+
+# List all collections
+curl http://localhost:8108/collections -H "X-TYPESENSE-API-KEY: changeme"
+
+# Get collection stats
+curl http://localhost:8108/collections/products -H "X-TYPESENSE-API-KEY: changeme"
+
+# Delete a collection
+curl -X DELETE http://localhost:8108/collections/products -H "X-TYPESENSE-API-KEY: changeme"
+
+# Export all documents
+curl "http://localhost:8108/collections/products/documents/export"   -H "X-TYPESENSE-API-KEY: changeme" -o products-export.jsonl
+
+# Create an API key with read-only access
+curl http://localhost:8108/keys   -H "X-TYPESENSE-API-KEY: changeme"   -H "Content-Type: application/json"   -d '{"description":"Search-only key","actions":["documents:search"],"collections":["*"]}'
+```
+
 **Create a collection and index documents:**
 ```bash
 # Create a collection (schema)
@@ -1114,6 +1196,22 @@ services:
 cd ~/duckdb-api && podman-compose up -d
 ```
 
+**Common operations (via the REST API):**
+```bash
+# Run a query against a local file
+curl -X POST http://localhost:1294/query   -H "Content-Type: application/json"   -d '{"query": "SELECT 42 AS answer"}'
+
+# Query a Parquet file
+curl -X POST http://localhost:1294/query   -H "Content-Type: application/json"   -d '{"query": "SELECT * FROM read_parquet('"'"'/duckdb/data.parquet'"'"') LIMIT 10"}'
+
+# Query a CSV file
+curl -X POST http://localhost:1294/query   -H "Content-Type: application/json"   -d '{"query": "SELECT count(*) FROM read_csv_auto('"'"'/duckdb/data.csv'"'"')"}'
+
+# Or install and run the DuckDB CLI directly on the host for interactive use
+# dnf install duckdb  # or download from duckdb.org
+# duckdb /home/user/duckdb/mydb.duckdb
+```
+
 > DuckDB can read directly from S3/MinIO, InfluxDB line protocol files, and PostgreSQL — making it a powerful ad-hoc query layer over your existing data stores without ETL.
 
 ---
@@ -1137,6 +1235,22 @@ services:
 
 ```bash
 cd ~/surrealdb && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# Connect interactively
+podman exec -it surrealdb surreal sql   --conn http://localhost:8000   --user root --pass changeme   --ns myns --db mydb
+
+# Export a database
+podman exec surrealdb surreal export   --conn http://localhost:8000   --user root --pass changeme   --ns myns --db mydb /tmp/export.surql
+podman cp surrealdb:/tmp/export.surql ./surrealdb-$(date +%Y%m%d).surql
+
+# Import from export
+podman exec surrealdb surreal import   --conn http://localhost:8000   --user root --pass changeme   --ns myns --db mydb /tmp/export.surql
+
+# Check server version
+podman exec surrealdb surreal version
 ```
 
 **Connect and run queries:**
@@ -1180,6 +1294,27 @@ services:
 cd ~/dragonfly && podman-compose up -d
 ```
 
+**Common operations:**
+```bash
+# Connect with redis-cli (Dragonfly is fully compatible)
+podman exec -it dragonfly redis-cli -p 6379
+
+# Ping
+podman exec dragonfly redis-cli -p 6379 ping
+
+# Check info and memory usage
+podman exec dragonfly redis-cli -p 6379 info memory | grep used_memory_human
+
+# Monitor commands in real time
+podman exec dragonfly redis-cli -p 6379 monitor
+
+# Save snapshot
+podman exec dragonfly redis-cli -p 6379 bgsave
+
+# List all keys
+podman exec dragonfly redis-cli -p 6379 keys "*"
+```
+
 > Use port `6380` on the host to avoid conflicts with an existing Redis instance. Any Redis client connects to `localhost:6380` without modification. Test with: `podman exec dragonfly redis-cli -p 6379 ping`
 
 ---
@@ -1214,6 +1349,24 @@ volumes:
 
 ```bash
 cd ~/ferretdb && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# Connect with mongosh
+podman run --rm -it mongo:7 mongosh mongodb://localhost:27018/mydb
+
+# List databases
+podman run --rm mongo:7 mongosh mongodb://localhost:27018 --eval "show dbs"
+
+# Create a database and insert a document
+podman run --rm mongo:7 mongosh mongodb://localhost:27018/myapp   --eval 'db.users.insertOne({name: "Alice", role: "admin"})'
+
+# Query documents
+podman run --rm mongo:7 mongosh mongodb://localhost:27018/myapp   --eval 'db.users.find().pretty()'
+
+# Backup via mongodump
+podman run --rm   -v /home/user/ferretdb/backups:/backup   mongo:7 mongodump   --uri="mongodb://localhost:27018"   --out=/backup
 ```
 
 Connect with any MongoDB client: `mongosh mongodb://localhost:27018/mydb`

@@ -168,7 +168,7 @@ services:
     restart: unless-stopped
 
   postgres:
-    image: postgres:14-alpine
+    image: postgres:16-alpine
     environment:
       POSTGRES_USER: redash
       POSTGRES_PASSWORD: changeme

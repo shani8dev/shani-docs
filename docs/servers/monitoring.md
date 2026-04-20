@@ -303,6 +303,24 @@ services:
 cd ~/loki && podman-compose up -d
 ```
 
+**Common operations:**
+```bash
+# Check Loki is ready
+curl http://localhost:3100/ready
+
+# Query logs via the API (LogQL)
+curl "http://localhost:3100/loki/api/v1/query_range"   --data-urlencode 'query={job="containerlogs"}'   --data-urlencode 'start=1h ago' | python3 -m json.tool | head -30
+
+# List all label names
+curl http://localhost:3100/loki/api/v1/labels | python3 -m json.tool
+
+# Check ingestion stats
+curl http://localhost:3100/metrics | grep loki_ingester
+
+# Flush in-memory chunks to storage
+curl -X POST http://localhost:3100/flush
+```
+
 **Ship container logs with Alloy** — add to your `config.alloy`:
 ```hcl
 local.file_match "containers" {
@@ -440,6 +458,21 @@ services:
 
 ```bash
 cd ~/beszel-agent && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# Get the public key for agent configuration (from the hub UI)
+# Settings → Add Server → copy the public key shown
+
+# View hub logs
+podman logs -f beszel
+
+# View agent logs on a monitored server
+podman logs -f beszel-agent
+
+# Check agent is reachable (from hub server)
+curl -sk https://agent-ip:45876 || echo "Agent unreachable"
 ```
 
 ---
@@ -613,6 +646,27 @@ services:
 
 ```bash
 cd ~/victoriametrics && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# Check server health
+curl http://localhost:8428/health
+
+# Query metrics (MetricsQL / PromQL)
+curl "http://localhost:8428/api/v1/query?query=up"
+
+# Check storage stats
+curl http://localhost:8428/api/v1/status/tsdb | python3 -m json.tool | head -20
+
+# List all metric names
+curl http://localhost:8428/api/v1/label/__name__/values | python3 -m json.tool | head -20
+
+# Delete a time series (by label selector)
+curl -X POST "http://localhost:8428/api/v1/admin/tsdb/delete_series?match[]=up{job="old-job"}"
+
+# Snapshot for backup
+curl -X POST http://localhost:8428/snapshot/create
 ```
 
 **Reconfigure Grafana to use VictoriaMetrics** instead of Prometheus:
@@ -965,7 +1019,7 @@ services:
     restart: unless-stopped
 
   graylog:
-    image: graylog/graylog:6.1
+    image: graylog/graylog:6.2
     ports:
       - "127.0.0.1:9000:9000"     # Web UI
       - "127.0.0.1:12201:12201"   # GELF TCP

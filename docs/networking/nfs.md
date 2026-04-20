@@ -99,6 +99,66 @@ sudo mount -a
 
 ---
 
+## Disk Quotas (quota-tools)
+
+quota-tools enforces per-user and per-group disk usage limits on NFS-exported filesystems. Quotas are enforced on the **server** side — limits apply regardless of which client is writing.
+
+### Enable Quotas on the Server
+
+```bash
+# 1. Mount the filesystem with quota options in /etc/fstab
+#    Add usrquota and/or grpquota to the options field:
+#    /dev/sdb1  /srv/shared  ext4  defaults,usrquota,grpquota  0 2
+
+# 2. Remount to apply the new options
+sudo mount -o remount /srv/shared
+
+# 3. Initialise the quota database files
+sudo quotacheck -cug /srv/shared
+
+# 4. Enable quota enforcement
+sudo quotaon /srv/shared
+```
+
+### Set User Quotas
+
+```bash
+# Edit quotas for a specific user (opens an editor)
+sudo edquota -u alice
+
+# The editor shows soft/hard limits for blocks (KB) and inodes (file count):
+# Filesystem  blocks   soft   hard  inodes  soft  hard
+# /srv/shared  102400  900000 1000000   512  4500  5000
+#
+# soft = warning threshold; hard = absolute limit
+# grace period applies when usage is between soft and hard limits
+
+# Set the grace period (how long a user can exceed soft limit before hard limit kicks in)
+sudo edquota -t
+
+# Copy one user's quota settings to another user
+sudo edquota -p alice bob
+```
+
+### Reporting
+
+```bash
+# Show quota usage for all users on a filesystem
+sudo repquota /srv/shared
+
+# Show your own quota usage
+quota -s
+
+# Show quota for a specific user
+sudo quota -su alice
+```
+
+### NFS + Quotas
+
+NFS clients do not enforce quotas locally — writes that exceed a quota are rejected by the server with an `EDQUOT` (disk quota exceeded) error, which the client reports as "no space left on device".
+
+---
+
 ## Troubleshooting
 
 | Issue | Solution |

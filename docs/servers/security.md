@@ -451,6 +451,76 @@ step ca certificate myservice.home.local myservice.crt myservice.key \
 
 ---
 
+## Infisical (Secrets Management)
+
+**Purpose:** Open-source secrets manager — a self-hosted alternative to HashiCorp Vault and Doppler. Store API keys, database passwords, and environment variables centrally, sync them to containers and CI/CD pipelines via the CLI or SDKs.
+
+```yaml
+# ~/infisical/compose.yaml
+services:
+  infisical:
+    image: infisical/infisical:latest-postgres
+    ports:
+      - 127.0.0.1:8090:8080
+    environment:
+      ENCRYPTION_KEY: changeme-run-openssl-rand-hex-16
+      AUTH_SECRET: changeme-run-openssl-rand-base64-32
+      DB_CONNECTION_URI: postgresql://infisical:changeme@db:5432/infisical
+      REDIS_URL: redis://redis:6379
+      SITE_URL: https://secrets.home.local
+      TELEMETRY_ENABLED: "false"
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: infisical
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: infisical
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+```bash
+cd ~/infisical && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# View logs
+podman logs -f infisical
+
+# Install the Infisical CLI on the host
+curl -1sLf 'https://dl.cloudsmith.io/public/infisical/infisical-cli/setup.rpm.sh' | sudo bash
+sudo dnf install infisical
+
+# Login from the CLI
+infisical login --domain https://secrets.home.local
+
+# Pull secrets into a shell session
+infisical run --projectId YOUR_PROJECT_ID -- env
+
+# Export secrets to a .env file
+infisical export --projectId YOUR_PROJECT_ID --format dotenv > .env
+```
+
+Access at `http://localhost:8090`. Create an account on first visit, then create a project and add secrets via the web UI or CLI.
+
+**Caddy:**
+```caddyfile
+secrets.home.local { tls internal; reverse_proxy localhost:8090 }
+```
+
+---
+
 ## Passbolt (Team Password Manager)
 
 **Purpose:** Open-source, end-to-end encrypted password manager built for teams. Unlike Vaultwarden (which is Bitwarden-compatible and individual-focused), Passbolt is designed around sharing — granular permissions per password, group-based sharing, and an audit log of who accessed what. Uses OpenPGP for encryption. Ideal for IT teams sharing infrastructure credentials.
@@ -596,7 +666,7 @@ vault.home.local { tls internal; reverse_proxy localhost:8200 }
 # Minimal single-node overview:
 services:
   wazuh.manager:
-    image: wazuh/wazuh-manager:4.8.0
+    image: wazuh/wazuh-manager:4.9.1
     ports:
       - "127.0.0.1:55000:55000"  # API
       - "0.0.0.0:1514:1514/udp"  # Agent
@@ -616,14 +686,14 @@ services:
     restart: unless-stopped
 
   wazuh.indexer:
-    image: wazuh/wazuh-indexer:4.8.0
+    image: wazuh/wazuh-indexer:4.9.1
     ports: ["127.0.0.1:9200:9200"]
     volumes:
       - wazuh-indexer-data:/var/lib/wazuh-indexer
     restart: unless-stopped
 
   wazuh.dashboard:
-    image: wazuh/wazuh-dashboard:4.8.0
+    image: wazuh/wazuh-dashboard:4.9.1
     ports: ["127.0.0.1:443:5601"]
     depends_on: [wazuh.indexer]
     restart: unless-stopped
@@ -1353,6 +1423,7 @@ podman run --rm \
 ## Caddy Configuration
 
 ```caddyfile
+secrets.home.local    { tls internal; reverse_proxy localhost:8090 }
 trivy.home.local      { tls internal; reverse_proxy localhost:4954 }
 teleport.example.com  { reverse_proxy localhost:3080 }
 zap.home.local        { tls internal; reverse_proxy localhost:8088 }

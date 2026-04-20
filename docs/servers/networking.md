@@ -559,6 +559,24 @@ volumes:
 cd ~/librenms && podman-compose up -d
 ```
 
+**Common operations:**
+```bash
+# Add a device via CLI
+podman exec librenms lnms device:add 192.168.1.1 --v2c --community public
+
+# Run discovery and polling manually
+podman exec librenms lnms device:poll 192.168.1.1
+
+# Validate the install
+podman exec librenms lnms validate
+
+# View logs
+podman logs -f librenms
+
+# Generate an API token for integrations
+podman exec librenms lnms api-token:add mytoken --user admin
+```
+
 Access at `http://localhost:8100`. Add devices via Devices → Add Device, specifying SNMP community string and version.
 
 **Caddy:**
