@@ -161,6 +161,27 @@
     "draft": false
   },
   {
+    "slug": "networking/apache",
+    "title": "Apache HTTP Server",
+    "updated": "2026-04-20",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/apcupsd",
+    "title": "apcupsd (UPS Daemon)",
+    "updated": "2026-04-20",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/arpwatch",
+    "title": "arpwatch (ARP Monitor)",
+    "updated": "2026-04-20",
+    "section": "Networking",
+    "draft": false
+  },
+  {
     "slug": "networking/avahi",
     "title": "Avahi (mDNS)",
     "updated": "2026-04-18",
@@ -168,9 +189,9 @@
     "draft": false
   },
   {
-    "slug": "networking/backup",
-    "title": "Backup & Recovery",
-    "updated": "2026-05-13",
+    "slug": "networking/bind",
+    "title": "BIND (Authoritative DNS)",
+    "updated": "2026-04-20",
     "section": "Networking",
     "draft": false
   },
@@ -189,9 +210,23 @@
     "draft": false
   },
   {
+    "slug": "networking/dnscrypt-proxy",
+    "title": "dnscrypt-proxy (Encrypted DNS)",
+    "updated": "2026-04-20",
+    "section": "Networking",
+    "draft": false
+  },
+  {
     "slug": "networking/dnsmasq",
     "title": "dnsmasq (Local DNS)",
     "updated": "2026-04-18",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/exim",
+    "title": "Exim (Mail Transfer Agent)",
+    "updated": "2026-04-20",
     "section": "Networking",
     "draft": false
   },
@@ -206,6 +241,13 @@
     "slug": "networking/firewalld",
     "title": "Firewall (firewalld)",
     "updated": "2026-04-18",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/gpsd",
+    "title": "gpsd (GPS Daemon)",
+    "updated": "2026-04-20",
     "section": "Networking",
     "draft": false
   },
@@ -329,9 +371,30 @@
     "draft": false
   },
   {
+    "slug": "security/apparmor",
+    "title": "AppArmor (Mandatory Access Control)",
+    "updated": "2026-04-20",
+    "section": "Security",
+    "draft": false
+  },
+  {
+    "slug": "security/audit",
+    "title": "Audit (auditd)",
+    "updated": "2026-04-20",
+    "section": "Security",
+    "draft": false
+  },
+  {
     "slug": "security/features",
     "title": "Security Features",
     "updated": "2026-04-27",
+    "section": "Security",
+    "draft": false
+  },
+  {
+    "slug": "security/fwupd",
+    "title": "Firmware Updates (fwupd)",
+    "updated": "2026-04-20",
     "section": "Security",
     "draft": false
   },
@@ -343,9 +406,30 @@
     "draft": false
   },
   {
+    "slug": "security/hardware-auth",
+    "title": "Hardware Authentication",
+    "updated": "2026-04-20",
+    "section": "Security",
+    "draft": false
+  },
+  {
     "slug": "security/luks",
     "title": "LUKS Management",
     "updated": "2026-05-09",
+    "section": "Security",
+    "draft": false
+  },
+  {
+    "slug": "security/lynis",
+    "title": "Lynis (Security Auditing)",
+    "updated": "2026-04-20",
+    "section": "Security",
+    "draft": false
+  },
+  {
+    "slug": "security/rkhunter",
+    "title": "rkhunter (Rootkit Hunter)",
+    "updated": "2026-04-20",
     "section": "Security",
     "draft": false
   },
@@ -592,6 +676,20 @@
     "title": "Android (Waydroid)",
     "updated": "2026-04-01",
     "section": "Software & Apps",
+    "draft": false
+  },
+  {
+    "slug": "system/backup",
+    "title": "Backup & Recovery",
+    "updated": "2026-05-13",
+    "section": "System",
+    "draft": false
+  },
+  {
+    "slug": "system/cronie",
+    "title": "cronie (Cron Scheduler)",
+    "updated": "2026-04-20",
+    "section": "System",
     "draft": false
   },
   {
