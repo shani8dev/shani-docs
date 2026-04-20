@@ -108,40 +108,7 @@ The boot health pipeline:
 | `stable` | Monthly | Default — recommended for all users |
 | `latest` | More frequent | Early access, testing |
 
-```bash
-# Check current channel
-cat /etc/shani-channel
-
-# Switch channel (persisted to /etc/shani-channel)
-sudo shani-deploy --set-channel stable
-sudo shani-deploy --set-channel latest
-
-# Use a channel for a single run without changing the default
-sudo shani-deploy -t latest
-```
-
-## Manual Commands
-
-```bash
-# Check for updates
-shani-deploy --check
-
-# Download and apply update
-shani-deploy --update
-
-# Roll back to the previous slot
-pkexec shani-deploy --rollback
-# or shorthand:
-sudo shani-deploy -r
-
-# View storage usage
-shani-deploy --storage-info
-
-# Run deduplication pass
-shani-deploy --optimize
-```
-
-You can also select the **(Candidate)** entry from the boot menu during startup to manually boot the previous slot.
+For channel switching commands, manual update commands, rollback, and storage management, see [System Updates](../updates/system).
 
 ## Storage Efficiency
 

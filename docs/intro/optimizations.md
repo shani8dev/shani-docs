@@ -42,17 +42,10 @@ Shanios includes extensive performance, gaming, and reliability optimizations ou
 - **Increased File & Process Limits:** Default limits raised to 1,048,576 for open files (NOFILE) and processes (NPROC)
 - **Fast Shutdown:** Reduced timeout values (10s stop, 10s abort) — services that fail to stop gracefully are automatically killed
 
-## Security Hardening
-
-- **AppArmor:** Enabled by default to confine system services and applications
-- **firewalld:** Active firewall enabled by default, denying inbound connections while allowing essential services
-- **Kernel Hardening:** NMI watchdog disabled, unprivileged user namespaces enabled for containerization, Magic SysRq keys enabled for emergency recovery
-- **Blacklisted Kernel Modules:** PC speaker (pcspkr) and Intel Management Engine (mei, mei_me) disabled
-
 ## Boot & System Efficiency
 
 - **Plymouth (BGRT Theme):** Smooth graphical boot experience showing manufacturer's logo
-- **Journal Size Limit:** SystemD journal capped at 50MB to prevent excessive disk usage
+- **Journal Size Limit:** systemd journal capped at 50 MB to prevent excessive disk usage
 - **Reduced Kernel Messages:** Console printk level set to 3 (errors and critical messages only)
 - **Time Synchronization:** systemd-timesyncd enabled by default for automatic NTP synchronization
 - **Socket Activation:** Many services start on-demand — pcscd, lircd, gpsd, cups, avahi-daemon, saned
@@ -64,7 +57,7 @@ Shanios includes extensive performance, gaming, and reliability optimizations ou
 | `btrfs-scrub.timer` | Monthly scrubbing to detect and repair data corruption |
 | `btrfs-balance.timer` | Periodic filesystem balancing for optimal performance |
 | `btrfs-defrag.timer` | Automatic defragmentation on fragmented files |
-| `btrfs-trim.timer` | Regular TRIM operations for SSD optimization |
+| `btrfs-trim.timer` | Regular TRIM operations for SSD optimisation |
 | `beesd` daemon | Continuous background block-level deduplication across all Btrfs subvolumes |
 | `flatpak-update-system.timer` | System Flatpak auto-updates every 12 hours |
 | `flatpak-update-user.timer` | Per-user Flatpak auto-updates every 12 hours |
@@ -73,3 +66,5 @@ Shanios includes extensive performance, gaming, and reliability optimizations ou
 All maintenance operations are scheduled during low-usage periods and use minimal system resources.
 
 > **Note:** All these optimizations are pre-configured and active from first boot. No manual configuration, tweaking, or performance tuning required.
+
+> For the full security configuration — AppArmor, firewalld, kernel module blacklist, LSM stack, and hardening parameters — see [Security Features](../security/features).

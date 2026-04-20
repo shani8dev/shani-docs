@@ -126,7 +126,10 @@ kernel.unprivileged_bpf_disabled = 1   # restrict BPF
 
 Active from first boot. Default policy: deny inbound, allow outbound.
 
-Pre-configured rules for KDE Connect/GSConnect (device pairing, file transfer, notifications) and Waydroid (DNS, packet forwarding).
+Pre-configured rules applied at installation time:
+
+- **KDE Connect/GSConnect:** Ports opened in the public zone for device pairing, file transfer, notifications, and remote control
+- **Waydroid:** DNS (53/udp, 67/udp), packet forwarding enabled, `waydroid0` interface added to the trusted zone
 
 `fail2ban` runs to ban repeated authentication failures.
 

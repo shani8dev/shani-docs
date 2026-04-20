@@ -52,6 +52,7 @@ CONFIG.NAV_TREE = [
       { title: 'Filesystem Structure', slug: 'arch/filesystem' },
       { title: 'Overlay Filesystem', slug: 'arch/overlay' },
       { title: 'Boot Process', slug: 'arch/boot' },
+      { title: 'Dracut Initramfs Module', slug: 'arch/dracut-module' },
     ]
   },
 
@@ -71,6 +72,8 @@ CONFIG.NAV_TREE = [
     children: [
       { title: 'System Updates', slug: 'updates/system' },
       { title: 'shani-health Reference', slug: 'updates/shani-health' },
+      { title: 'Factory Reset (shani-reset)', slug: 'updates/shani-reset' },
+      { title: 'User Provisioning', slug: 'updates/user-setup' },
       { title: 'Shell & Environment', slug: 'updates/shell' },
       { title: 'System Config', slug: 'updates/config' },
     ]
