@@ -135,7 +135,7 @@ Prefer cron when:
 - The schedule is simple and the one-liner format is sufficient
 - You are adapting an existing cron-based script
 
-See the [Backup & Recovery page](https://docs.shani.dev/doc/networking/backup) for an example of a systemd user timer running a restic backup.
+See the [Backup & Recovery page](https://docs.shani.dev/doc/system/backup) for an example of a systemd user timer running a restic backup.
 
 ---
 

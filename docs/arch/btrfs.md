@@ -87,7 +87,7 @@ sudo btrfs send -p /data/snapshots/home-20250101 /data/snapshots/home-20250201 \
   | sudo btrfs receive /mnt/backup/
 ```
 
-> **Snapshots are not backups** if they live on the same disk — a disk failure loses both. Use `btrfs send` to an external drive, or `restic`/`rclone` for cloud storage. See [Backup & Recovery](../networking/backup) for a complete backup strategy.
+> **Snapshots are not backups** if they live on the same disk — a disk failure loses both. Use `btrfs send` to an external drive, or `restic`/`rclone` for cloud storage. See [Backup & Recovery](../system/backup) for a complete backup strategy.
 
 ## Btrfs Manual Maintenance
 
