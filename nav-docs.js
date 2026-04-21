@@ -115,6 +115,7 @@ CONFIG.NAV_TREE = [
       { title: 'WireGuard (Manual)', slug: 'networking/wireguard' },
       { title: 'OpenVPN', slug: 'networking/openvpn' },
       { title: 'Cloudflared Tunnels', slug: 'networking/cloudflared' },
+      { title: 'Caddy Web Server', slug: 'networking/caddy' },
 
       { title: 'ModemManager (Mobile Broadband)', slug: 'networking/modemmanager' },
 
