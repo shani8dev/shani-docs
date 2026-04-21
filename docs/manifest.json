@@ -232,16 +232,23 @@
   },
   {
     "slug": "networking/fail2ban",
-    "title": "Fail2ban",
-    "updated": "2026-04-18",
+    "title": "Fail2ban (Brute-Force Protection)",
+    "updated": "2026-04-20",
     "section": "Networking",
     "draft": false
   },
   {
     "slug": "networking/firewalld",
     "title": "Firewall (firewalld)",
-    "updated": "2026-04-18",
+    "updated": "2026-04-20",
     "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/gocryptfs",
+    "title": "Directory Encryption (gocryptfs)",
+    "updated": "2026-04-20",
+    "section": "Security",
     "draft": false
   },
   {
@@ -304,6 +311,13 @@
     "slug": "networking/openssh",
     "title": "OpenSSH",
     "updated": "2026-04-18",
+    "section": "Networking",
+    "draft": false
+  },
+  {
+    "slug": "networking/openvpn",
+    "title": "OpenVPN",
+    "updated": "2026-04-20",
     "section": "Networking",
     "draft": false
   },

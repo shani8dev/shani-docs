@@ -205,13 +205,19 @@
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/networking/fail2ban</loc>
-    <lastmod>2026-04-18</lastmod>
+    <lastmod>2026-04-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/networking/firewalld</loc>
-    <lastmod>2026-04-18</lastmod>
+    <lastmod>2026-04-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://docs.shani.dev/doc/networking/gocryptfs</loc>
+    <lastmod>2026-04-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -266,6 +272,12 @@
   <url>
     <loc>https://docs.shani.dev/doc/networking/openssh</loc>
     <lastmod>2026-04-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://docs.shani.dev/doc/networking/openvpn</loc>
+    <lastmod>2026-04-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
