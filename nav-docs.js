@@ -1,11 +1,7 @@
 /**
  * nav-docs.js — Navigation tree for wiki.shani.dev
- * Separated from config-docs.js so it can be edited independently.
- * Loaded before script-docs.js; the engine reads CONFIG.NAV_TREE from here.
- * Edit this file to add/remove/reorder sections and pages.
  */
 
-// Merge NAV_TREE into CONFIG (which is defined by config-docs.js loaded first)
 if (typeof CONFIG === 'undefined') {
   throw new Error('[Wiki Engine] No CONFIG found. Load config-docs.js before nav-docs.js.');
 }
@@ -39,8 +35,8 @@ CONFIG.NAV_TREE = [
     title: 'Concepts', icon: 'fa-solid fa-lightbulb',
     children: [
       { title: 'Immutability', slug: 'concepts/immutability' },
-      { title: 'Blue-Green Deployment', slug: 'concepts/blue-green' },
       { title: 'Atomic Updates', slug: 'concepts/atomic-updates' },
+      { title: 'Blue-Green Deployment', slug: 'concepts/blue-green' },
       { title: 'Persistence Strategy', slug: 'concepts/persistence' },
     ]
   },
@@ -48,10 +44,10 @@ CONFIG.NAV_TREE = [
   {
     title: 'Architecture', icon: 'fa-solid fa-diagram-project',
     children: [
-      { title: 'Btrfs Deep Dive', slug: 'arch/btrfs' },
-      { title: 'Filesystem Structure', slug: 'arch/filesystem' },
-      { title: 'Overlay Filesystem', slug: 'arch/overlay' },
       { title: 'Boot Process', slug: 'arch/boot' },
+      { title: 'Filesystem Structure', slug: 'arch/filesystem' },
+      { title: 'Btrfs Deep Dive', slug: 'arch/btrfs' },
+      { title: 'Overlay Filesystem', slug: 'arch/overlay' },
       { title: 'Dracut Initramfs Module', slug: 'arch/dracut-module' },
     ]
   },
@@ -62,9 +58,11 @@ CONFIG.NAV_TREE = [
       { title: 'Security Features', slug: 'security/features' },
       { title: 'Secure Boot', slug: 'security/secure-boot' },
       { title: 'LUKS Management', slug: 'security/luks' },
+      { title: 'Directory Encryption (gocryptfs)', slug: 'security/gocryptfs' },
       { title: 'TPM2 Enrollment', slug: 'security/tpm2' },
       { title: 'gen-efi Reference', slug: 'security/gen-efi' },
 
+      { title: 'AppArmor (Mandatory Access Control)', slug: 'security/apparmor' },
       { title: 'Audit (auditd)', slug: 'security/audit' },
       { title: 'rkhunter (Rootkit Hunter)', slug: 'security/rkhunter' },
       { title: 'Lynis (Security Auditing)', slug: 'security/lynis' },
@@ -77,11 +75,11 @@ CONFIG.NAV_TREE = [
     title: 'Updates & Config', icon: 'fa-solid fa-rotate',
     children: [
       { title: 'System Updates', slug: 'updates/system' },
+      { title: 'System Config', slug: 'updates/config' },
+      { title: 'Shell & Environment', slug: 'updates/shell' },
+      { title: 'User Provisioning (shani-user-setup)', slug: 'updates/user-setup' },
       { title: 'shani-health Reference', slug: 'updates/shani-health' },
       { title: 'Factory Reset (shani-reset)', slug: 'updates/shani-reset' },
-      { title: 'User Provisioning (shani-user-setup)', slug: 'updates/user-setup' },
-      { title: 'Shell & Environment', slug: 'updates/shell' },
-      { title: 'System Config', slug: 'updates/config' },
     ]
   },
 
@@ -112,12 +110,13 @@ CONFIG.NAV_TREE = [
     title: 'Networking', icon: 'fa-solid fa-network-wired',
     children: [
       { title: 'NetworkManager & VPN', slug: 'networking/networkmanager-vpn' },
+
       { title: 'Tailscale VPN', slug: 'networking/tailscale' },
       { title: 'WireGuard (Manual)', slug: 'networking/wireguard' },
+      { title: 'OpenVPN', slug: 'networking/openvpn' },
       { title: 'Cloudflared Tunnels', slug: 'networking/cloudflared' },
-      { title: 'ModemManager (Mobile Broadband)', slug: 'networking/modemmanager' },
 
-      { title: 'Caddy', slug: 'networking/caddy' },
+      { title: 'ModemManager (Mobile Broadband)', slug: 'networking/modemmanager' },
 
       { title: 'dnsmasq (Local DNS)', slug: 'networking/dnsmasq' },
       { title: 'dnscrypt-proxy (Encrypted DNS)', slug: 'networking/dnscrypt-proxy' },
@@ -131,11 +130,13 @@ CONFIG.NAV_TREE = [
       { title: 'Samba (SMB/CIFS)', slug: 'networking/samba' },
       { title: 'rsyncd (rsync Daemon)', slug: 'networking/rsyncd' },
       { title: 'nbd-server (Network Block Device)', slug: 'networking/nbd' },
+
       { title: 'Remote Desktop', slug: 'networking/remote-desktop' },
       { title: 'KDE Connect', slug: 'networking/kdeconnect' },
 
       { title: 'Firewall (firewalld)', slug: 'networking/firewalld' },
-      { title: 'Fail2ban', slug: 'networking/fail2ban' },
+      { title: 'Fail2ban (Brute-Force Protection)', slug: 'networking/fail2ban' },
+
       { title: 'snmpd (SNMP)', slug: 'networking/snmpd' },
       { title: 'Kerberos', slug: 'networking/kerberos' },
       { title: 'slapd (OpenLDAP)', slug: 'networking/slapd' },
