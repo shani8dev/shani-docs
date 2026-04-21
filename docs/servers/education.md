@@ -456,7 +456,7 @@ services:
   anki-sync:
     image: noxinc/anki-sync-server:latest   # Official Anki sync server; supports SYNC_USER1
     ports:
-      - 127.0.0.1:8080:8080
+      - 127.0.0.1:27701:8080
     volumes:
       - /home/user/anki-sync/data:/anki_data:Z
     environment:
@@ -559,7 +559,7 @@ greenlight.home.local  { tls internal; reverse_proxy localhost:5050 }
 erp.home.local         { tls internal; reverse_proxy localhost:8080 }
 kolibri.home.local     { tls internal; reverse_proxy localhost:8090 }
 overleaf.home.local    { tls internal; reverse_proxy localhost:5000 }
-anki.home.local        { tls internal; reverse_proxy localhost:8080 }
+anki.home.local        { tls internal; reverse_proxy localhost:27701 }
 h5p.home.local         { tls internal; reverse_proxy localhost:8100 }
 ```
 

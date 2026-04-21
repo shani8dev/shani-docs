@@ -446,7 +446,7 @@ services:
     restart: unless-stopped
 
   postgres:
-    image: pgvecto-rs/pgvecto-rs:pg16-v0.2.0
+    image: tensorchord/pgvecto-rs:pg16-v0.2.1
     environment:
       POSTGRES_USER: lemmy
       POSTGRES_PASSWORD: changeme
