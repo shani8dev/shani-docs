@@ -22,13 +22,15 @@ Run large language models, vision pipelines, image generation, speech-to-text, a
 # ~/ollama/compose.yaml
 services:
   ollama:
-    image: ollama/ollama
+    image: ollama/ollama          # AMD GPU: use ollama/ollama:rocm
     ports:
       - 127.0.0.1:11434:11434
     volumes:
       - /home/user/ollama:/root/.ollama:Z
     devices:
       - /dev/dri
+      # AMD GPU: also add /dev/kfd (required for ROCm)
+      # - /dev/kfd
     restart: unless-stopped
 ```
 
@@ -297,7 +299,7 @@ services:
 cd ~/tabby && podman-compose up -d
 ```
 
-> Replace `--device metal` with `--device cuda` for NVIDIA, or omit for CPU inference. Smaller models like `TabbyML/StarCoder-1B` run well on CPU for local use.
+> Replace `--device cpu` with `--device cuda` for NVIDIA, `--device rocm` for AMD, or keep `--device cpu` for CPU inference. (`--device metal` is macOS-only and not applicable here.) Smaller models like `TabbyML/StarCoder-1B` run well on CPU for local use.
 
 **VS Code setup:** Install the [Tabby extension](https://marketplace.visualstudio.com/items?itemName=TabbyML.vscode-tabby), then point it at `http://tabby.home.local` in settings.
 
@@ -390,7 +392,7 @@ model_list:
 
   - model_name: claude-sonnet
     litellm_params:
-      model: anthropic/claude-sonnet-4-5
+      model: anthropic/claude-sonnet-4-5-20250929
       api_key: os.environ/ANTHROPIC_API_KEY
 
   - model_name: gpt-4o
@@ -417,46 +419,30 @@ curl http://localhost:4000/v1/chat/completions \
 
 ---
 
-## Perplexica (AI Search Engine)
+## Vane (AI Search Engine)
 
-**Purpose:** Open-source AI-powered search engine — think a self-hosted Perplexity.ai. It runs a SearXNG search under the hood, retrieves results, and uses a local LLM (via Ollama) to synthesise a cited, conversational answer. No query data sent to any third party.
+**Purpose:** Open-source AI-powered search engine — a self-hosted Perplexity.ai alternative (formerly known as Perplexica, rebranded to Vane). Bundles SearXNG internally, retrieves live results, and uses a local LLM (via Ollama) to synthesise a cited, conversational answer. No query data sent to any third party.
 
 ```yaml
-# ~/perplexica/compose.yml
+# ~/vane/compose.yml
 services:
-  searxng:
-    image: searxng/searxng:latest
-    volumes:
-      - /home/user/perplexica/searxng:/etc/searxng:Z
-    restart: unless-stopped
-
-  perplexica-backend:
-    image: itzcrazykns1337/perplexica:main
-    ports: ["127.0.0.1:3008:3001"]
-    environment:
-      SEARXNG_API_URL: http://searxng:8080
-      OLLAMA_API_URL: http://host.containers.internal:11434
-    volumes:
-      - /home/user/perplexica/uploads:/home/perplexica/uploads:Z
-      - /home/user/perplexica/config:/home/perplexica/config:Z
-    depends_on: [searxng]
-    restart: unless-stopped
-
-  perplexica-frontend:
-    image: itzcrazykns1337/perplexica:main
+  vane:
+    image: itzcrazykns1337/vane:latest   # includes bundled SearXNG
     ports: ["127.0.0.1:3009:3000"]
-    environment:
-      NEXT_PUBLIC_API_URL: http://localhost:3008
-      NEXT_PUBLIC_WS_URL: ws://localhost:3008
-    depends_on: [perplexica-backend]
+    volumes:
+      - /home/user/vane/data:/home/vane/data:Z
     restart: unless-stopped
 ```
 
 ```bash
-cd ~/perplexica && podman-compose up -d
+cd ~/vane && podman-compose up -d
 ```
 
-> Perplexica needs at least a 7B model for coherent answers. `llama3.2` or `mistral` work well. Pull the model first with `podman exec ollama ollama pull llama3.2`.
+Access at `http://localhost:3009`. On first load, configure your AI provider (Ollama URL: `http://host.containers.internal:11434`, model: `llama3.2`) through the setup screen.
+
+> If you already run a separate SearXNG instance, use the slim image instead: `itzcrazykns1337/vane:slim-latest` and set `SEARXNG_API_URL: http://host.containers.internal:8090`.
+
+> Vane needs at least a 7B model for coherent answers. `llama3.2` or `mistral` work well. Pull the model first with `podman exec ollama ollama pull llama3.2`.
 
 ---
 
@@ -796,7 +782,7 @@ kokoro.home.local    { tls internal; reverse_proxy localhost:8880 }
 tabby.home.local     { tls internal; reverse_proxy localhost:8081 }
 anything.home.local  { tls internal; reverse_proxy localhost:3001 }
 litellm.home.local   { tls internal; reverse_proxy localhost:4000 }
-search.home.local    { tls internal; reverse_proxy localhost:3009 }
+vane.home.local      { tls internal; reverse_proxy localhost:3009 }
 invokeai.home.local  { tls internal; reverse_proxy localhost:9090 }
 flowise.home.local   { tls internal; reverse_proxy localhost:3003 }
 langfuse.home.local  { tls internal; reverse_proxy localhost:3004 }
@@ -820,7 +806,7 @@ dify.home.local      { tls internal; reverse_proxy localhost:5002 }
 | Open WebUI RAG not finding documents | Ensure the document was fully processed (green tick in Documents); re-upload if stuck on processing |
 | AnythingLLM workspace shows no responses | Verify `OLLAMA_BASE_PATH` uses `host.containers.internal`; ensure the chosen model is pulled in Ollama |
 | LiteLLM returns 400 for Ollama models | Ensure the model name in `config.yaml` matches exactly what `ollama list` shows; use `ollama/` prefix in litellm_params |
-| Perplexica shows blank results | SearXNG must be running and reachable; check that `SEARXNG_API_URL` resolves from the backend container |
+| Vane shows blank results | Check container logs with `podman logs vane-vane-1`; verify Ollama URL is set correctly in the web UI settings |
 | InvokeAI model import fails | Ensure the models volume has write permissions; check that VRAM/RAM is sufficient for the selected model size |
 | Piper TTS no audio output | Verify the voice model `.onnx` file was downloaded into the voices directory; check `podman logs piper-tts` |
 | Flowise chains return empty responses | Verify Ollama URL uses `host.containers.internal`; check that the selected model is pulled; inspect the debug output in the Flowise canvas |

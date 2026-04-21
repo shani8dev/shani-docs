@@ -454,15 +454,13 @@ podman exec sharelatex tlmgr install scheme-full
 # ~/anki-sync/compose.yaml
 services:
   anki-sync:
-    image: ghcr.io/ankitects/anki:latest
+    image: noxinc/anki-sync-server:latest   # Official Anki sync server; supports SYNC_USER1
     ports:
-      - 127.0.0.1:27701:27701
+      - 127.0.0.1:8080:8080
     volumes:
-      - /home/user/anki-sync/data:/data:Z
+      - /home/user/anki-sync/data:/anki_data:Z
     environment:
-      SYNC_USER1: user:password
-      # Add more users: SYNC_USER2=alice:pass1 SYNC_USER3=bob:pass2
-    command: anki-sync-server
+      SYNC_USER1: user:password             # Add more users: SYNC_USER2, SYNC_USER3, …
     restart: unless-stopped
 ```
 
@@ -561,7 +559,7 @@ greenlight.home.local  { tls internal; reverse_proxy localhost:5050 }
 erp.home.local         { tls internal; reverse_proxy localhost:8080 }
 kolibri.home.local     { tls internal; reverse_proxy localhost:8090 }
 overleaf.home.local    { tls internal; reverse_proxy localhost:5000 }
-anki.home.local        { tls internal; reverse_proxy localhost:27701 }
+anki.home.local        { tls internal; reverse_proxy localhost:8080 }
 h5p.home.local         { tls internal; reverse_proxy localhost:8100 }
 ```
 

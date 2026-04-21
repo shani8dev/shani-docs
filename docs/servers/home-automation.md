@@ -574,10 +574,11 @@ WLED runs on the ESP32 microcontroller itself — not as a container on your ser
 pip install esptool --break-system-packages
 
 # Download latest WLED firmware
+# Replace 0.15.0 with the latest version from https://github.com/Aircoookie/WLED/releases
 curl -LO https://github.com/Aircoookie/WLED/releases/latest/download/WLED_0.15.0_ESP32.bin
 
 # Flash (replace /dev/ttyUSB0 with your ESP32 port)
-esptool.py --port /dev/ttyUSB0 write_flash 0x0 WLED_0.15.0_ESP32.bin
+esptool.py --port /dev/ttyUSB0 write_flash 0x0 WLED_0.15.0_ESP32.bin  # update filename to match downloaded version
 ```
 
 **Or use the browser-based installer at [install.wled.me](https://install.wled.me)** — plug the ESP32 into any computer and flash directly from the browser without installing tools.

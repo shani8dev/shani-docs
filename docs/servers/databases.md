@@ -331,7 +331,7 @@ podman exec mongodb mongosh -u admin -p strongpassword --authenticationDatabase 
 
 **Purpose:** Distributed event streaming platform. Kafka is the backbone of event-driven architectures, real-time data pipelines, log aggregation, and stream processing. Producers publish events to topics; consumers read them with durable, replayable, ordered delivery. Kafka handles millions of events per second and retains them for configurable durations.
 
-> **KRaft mode only:** ZooKeeper was removed entirely in Kafka 4 / Confluent Platform 8.0 (November 2025). All new deployments must use KRaft — the compose below uses KRaft with no ZooKeeper dependency.
+> **KRaft mode only:** ZooKeeper was removed entirely in Kafka 4.0 (released March 18, 2025). All new deployments must use KRaft — the compose below uses KRaft with no ZooKeeper dependency.
 
 ```yaml
 # ~/kafka/compose.yml
@@ -787,7 +787,7 @@ podman cp influxdb:/tmp/backup ./influxdb-backup-$(date +%Y%m%d)
 # ~/elasticsearch/compose.yaml
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.18.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.3.3
     ports:
       - 127.0.0.1:9200:9200
     volumes:
@@ -811,7 +811,7 @@ cd ~/elasticsearch && podman-compose up -d
 # ~/kibana/compose.yaml
 services:
   kibana:
-    image: docker.elastic.co/kibana/kibana:8.18.0
+    image: docker.elastic.co/kibana/kibana:9.3.3
     ports:
       - 127.0.0.1:5601:5601
     environment:

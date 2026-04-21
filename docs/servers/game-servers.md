@@ -158,7 +158,7 @@ sudo firewall-cmd --add-port=19132/udp --add-port=19133/udp --permanent && sudo 
 # ~/velocity/compose.yaml
 services:
   velocity:
-    image: itzg/bungeecord:latest
+    image: itzg/mc-proxy:latest
     ports:
       - 25577:25577
     volumes:

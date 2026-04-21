@@ -188,10 +188,12 @@ volumes:
 cd ~/redash && podman-compose up -d
 ```
 
-**Initialise the database:**
+**Initialise the database (first run only):**
 ```bash
 podman-compose run --rm server create_db
 ```
+
+> **Version note:** Redash jumped from v10.1 to v25.1 in early 2025 (a 3-year release gap). The `:latest` tag will pull v25.x. If upgrading from v10.x, review the [release notes](https://github.com/getredash/redash/releases) — the scheduler service structure changed in v10.
 
 Access at `http://localhost:5000`.
 
@@ -386,7 +388,7 @@ services:
     restart: unless-stopped
 
   plausible_events_db:
-    image: clickhouse/clickhouse-server:24-alpine
+    image: clickhouse/clickhouse-server:latest
     volumes: [events_data:/var/lib/clickhouse]
     restart: unless-stopped
 

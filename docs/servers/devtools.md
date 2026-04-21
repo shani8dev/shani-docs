@@ -606,8 +606,9 @@ act -n
 ```yaml
 # ~/harbor/compose.yml — use the official installer (recommended)
 # Download from: https://github.com/goharbor/harbor/releases
-# wget https://github.com/goharbor/harbor/releases/download/v2.11.0/harbor-online-installer-v2.11.0.tgz
-# tar xzvf harbor-online-installer-v2.11.0.tgz
+# wget https://github.com/goharbor/harbor/releases/download/v2.13.0/harbor-online-installer-v2.13.0.tgz
+# Check https://github.com/goharbor/harbor/releases for the latest version
+# tar xzvf harbor-online-installer-v2.13.0.tgz
 # cd harbor && cp harbor.yml.tmpl harbor.yml
 # Edit harbor.yml: set hostname, disable https (let Caddy handle TLS), set admin_initial_password
 # Then: sudo ./install.sh --with-trivy

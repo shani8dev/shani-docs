@@ -280,7 +280,7 @@ cd ~/hledger && podman-compose up -d
 # ~/bitcoin/compose.yml
 services:
   bitcoin:
-    image: lncm/bitcoind:v27.0
+    image: lncm/bitcoind:latest
     ports:
       - "127.0.0.1:8332:8332"   # RPC
       - "0.0.0.0:8333:8333"     # P2P (needs to be open for the network)
@@ -300,7 +300,7 @@ services:
 
   # LND — Lightning Network Daemon
   lnd:
-    image: lightninglabs/lnd:v0.18.0-beta
+    image: lightninglabs/lnd:latest
     ports:
       - "127.0.0.1:10009:10009"  # gRPC
       - "0.0.0.0:9735:9735"      # P2P
@@ -340,7 +340,7 @@ services:
 cd ~/bitcoin && podman-compose up -d
 ```
 
-> **Storage:** A full Bitcoin node requires ~700 GB of disk space for the full chain (as of 2026). Use `prune=550` (MB) in bitcoind config for a pruned node that verifies without storing the full history — sufficient for most use cases.
+> **Storage:** A full Bitcoin node requires ~740 GB of disk space for the full chain (growing ~50–60 GB/year). Use `prune=550` (MB) in bitcoind config for a pruned node that verifies without storing the full history — sufficient for most use cases.
 
 **Firewall:**
 ```bash

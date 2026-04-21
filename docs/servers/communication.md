@@ -129,7 +129,7 @@ services:
     restart: unless-stopped
 
   mongodb:
-    image: mongo:6
+    image: mongo:7
     command: mongod --oplogSize 128 --replSet rs0
     volumes: [mongo_data:/data/db]
     restart: unless-stopped
