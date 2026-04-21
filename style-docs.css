@@ -10,7 +10,6 @@ RESET
 ══════════════════════════════════════════════ */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 html { font-size: 16px; scroll-behavior: smooth; text-size-adjust: 100%; }
-body { min-height: 100vh; }
 img  { max-width: 100%; height: auto; display: block; }
 a    { text-decoration: none; color: inherit; transition: color 0.2s; }
 button { cursor: pointer; border: none; background: none; font: inherit; }
@@ -27,6 +26,7 @@ DESIGN TOKENS / ENGINE CONSTANTS
 :root {
   --sidebar-w:    260px;
   --topbar-h:     52px;
+  --ausbar-h:     28px;
   --ease:         cubic-bezier(0.4, 0, 0.2, 1);
   --max-prose:    1160px;   /* prose column width */
   --content-max:  1160px;  /* full content area cap (home/section pages) */
@@ -73,14 +73,7 @@ DESIGN TOKENS / ENGINE CONSTANTS
 /* ═══════════════════════════════════════════
 BODY LAYOUT: auspicious-bar + topbar + sidebar + content
 ═══════════════════════════════════════════ */
-:root {
-  --ausbar-h: 28px;
-}
-
 body {
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   display: grid;
   grid-template-rows: var(--ausbar-h) var(--topbar-h) 1fr;
@@ -91,6 +84,8 @@ body {
     "sidebar content";
   height: 100vh;
   overflow: hidden;
+  /* Prevent iOS bounce on the body itself */
+  overscroll-behavior: none;
 }
 
 /* ═══════════════════════════════════════════
@@ -193,7 +188,6 @@ AUSPICIOUS BAR — slim always-visible top strip
   background: color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-card));
   border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 18%, var(--color-border));
   z-index: 110;
-  position: sticky; top: 0;
 }
 .auspicious-bar a {
   font-family: var(--font-mono);
@@ -217,7 +211,6 @@ TOP BAR
   background: var(--color-bg-card);
   border-bottom: 1px solid var(--color-border);
   z-index: 100;
-  position: sticky; top: 0;
 }
 /* topbar__menu-btn extends .btn-icon; only needs hidden-by-default + no-shrink */
 .topbar__menu-btn {
@@ -459,7 +452,7 @@ PROSE (rendered Markdown)
 .prose h1, .prose h2, .prose h3, .prose h4, .prose h5 {
   font-family: var(--font-display); font-weight: 700; line-height: 1.25;
   margin: 2em 0 0.6em; color: var(--color-text);
-  scroll-margin-top: calc(var(--topbar-h) + 1rem);
+  scroll-margin-top: calc(var(--ausbar-h) + var(--topbar-h) + 1rem);
   position: relative;
 }
 .prose h1 { font-size: 2rem; }
@@ -516,6 +509,7 @@ html[data-theme="light"] .prose mark { background: rgba(181,51,9,0.12); }
   border-radius: var(--radius-sm);
   padding: 0.1em 0.4em; color: var(--color-accent);
   white-space: nowrap;
+  word-break: break-all; /* fallback for very long tokens */
 }
 /* Keyboard keys */
 .prose kbd, kbd {
@@ -538,7 +532,8 @@ html[data-theme="light"] .prose mark { background: rgba(181,51,9,0.12); }
 }
 .prose pre code {
   background: none; border: none; padding: 0;
-  color: var(--prose-pre-color, #e2e0db); font-size: 0.84rem; white-space: pre;
+  color: var(--prose-pre-color, #e2e0db); font-size: 0.84rem;
+  white-space: pre; word-break: normal;
 }
 html[data-theme="light"] {
   --prose-pre-bg: #f0ede9;
@@ -598,8 +593,8 @@ html[data-theme="light"] .prose pre code { color: var(--prose-pre-color); }
 }
 /* Wide-image bleed helper */
 .prose .img-wide {
-  margin-left: calc(-2rem);
-  margin-right: calc(-2rem);
+  margin-left: -2rem;
+  margin-right: -2rem;
 }
 .prose .img-wide img { border-radius: var(--radius-sm); }
 @media (max-width: 768px) {
@@ -899,7 +894,10 @@ TOAST
   color: var(--color-text); box-shadow: var(--shadow-hover);
   opacity: 0; visibility: hidden;
   transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
-  z-index: 9999; white-space: nowrap;
+  z-index: 9999;
+  max-width: calc(100vw - 2rem);
+  white-space: normal;
+  text-align: center;
 }
 .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
 .toast--error { border-color: var(--color-error); color: var(--color-error); }
@@ -949,7 +947,7 @@ SIDEBAR OVERLAY (mobile)
 ═══════════════════════════════════════════ */
 .sidebar-overlay {
   display: none; position: fixed;
-  top: var(--topbar-h); left: 0; right: 0; bottom: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.5); z-index: 79;
 }
 .sidebar-overlay.is-visible { display: block; }
@@ -1031,8 +1029,7 @@ ADMIN PANEL — full inline editor UI
 }
 #admin-fm-bar.collapsed,
 .admin-fm-bar.collapsed { max-height: 0; }
-/* Admin modals */
-/* Admin modals - display:none/flex controlled by JS injectStyles() */
+/* Admin modals — display:none/flex controlled by JS injectStyles() */
 .admin-modal-backdrop {
   position: fixed; inset: 0; z-index: 700;
   display: none; align-items: center; justify-content: center;
@@ -1178,7 +1175,8 @@ ADMIN EDITOR AREA — Monaco wrap & preview
 }
 
 /* ── FM bar (front-matter) class-based ─────── */
-.admin-fm-bar { border-bottom: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-accent) 2%, var(--color-bg)); flex-shrink: 0; }
+/* background differs from #admin-fm-bar (uses color-mix tint); other props inherited from shared rule above */
+.admin-fm-bar { background: color-mix(in srgb, var(--color-accent) 2%, var(--color-bg)); }
 .admin-fm-bar__header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 0.32rem 0.85rem; cursor: pointer; user-select: none; min-height: 30px;
@@ -1216,7 +1214,7 @@ ADMIN EDITOR AREA — Monaco wrap & preview
   color: var(--color-accent); border: 1px dashed rgba(255,127,80,0.25);
   border-color: color-mix(in srgb, var(--color-accent) 25%, transparent);
 }
-.a-btn--new:hover { background: var(--color-accent-bg); border-color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 12%, transparent); }
+.a-btn--new:hover { border-color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 12%, transparent); }
 .a-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .a-btn-row { display: flex; gap: 0.4rem; flex-wrap: wrap; }
 .a-btn-row > .a-btn { flex: 1; justify-content: center; }
@@ -1268,25 +1266,97 @@ RESPONSIVE
       "ausbar"
       "topbar"
       "content";
-    overflow: auto; height: auto;
+    /* On mobile: let the content area scroll naturally */
+    height: 100dvh;
+    overflow: hidden;
   }
   .sidebar {
     position: fixed; top: calc(var(--ausbar-h) + var(--topbar-h)); left: 0; bottom: 0;
-    width: var(--sidebar-w); z-index: 80;
+    width: min(var(--sidebar-w), 85vw); z-index: 80;
     transform: translateX(-100%);
     box-shadow: 4px 0 24px rgba(0,0,0,0.4);
+    /* Sidebar must scroll independently */
+    overflow-y: auto; overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
   .sidebar.is-open { transform: translateX(0); }
   .sidebar-overlay.is-visible { display: block; }
   .topbar__menu-btn { display: flex; }
-  .content { height: auto; overflow: visible; }
+  /* Content area must scroll on mobile */
+  .content {
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    height: 100%;
+  }
   .content__inner { padding: 1.5rem 1rem 3rem; }
-  .reading-progress { left: 0; }
+  .reading-progress { left: 0; top: calc(var(--ausbar-h) + var(--topbar-h)); }
 }
 @media (max-width: 480px) {
   .wiki-home__cards { grid-template-columns: 1fr 1fr; }
   .doc-footer { flex-direction: column; }
-  .topbar__search-wrap { max-width: 160px; }
+  /* Search: don't shrink so small it becomes unusable; let actions wrap instead */
+  .topbar__search-wrap { max-width: 200px; }
+  /* Topbar: allow wrapping or hide less-critical actions */
+  .topbar__actions .btn-icon#font-decrease,
+  .topbar__actions .btn-icon#font-increase { display: none; }
+}
+
+/* ── Mobile prose & content overflow fixes ─────────────────── */
+@media (max-width: 768px) {
+  /* Prevent any element from blowing out the viewport width */
+  .prose {
+    overflow-x: hidden;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  /* Code blocks: ensure horizontal scroll on mobile, not layout break */
+  .prose pre {
+    padding: 1rem;
+    font-size: 0.8rem;
+    /* Must scroll, not overflow the content column */
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Tables: already display:block but need touch scroll */
+  .prose table {
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Table wrap containers from JS: ensure scroll */
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+  /* KaTeX math display: scroll don't overflow */
+  .prose .katex-display {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Doc TOC: full width, comfortable touch targets */
+  .doc-toc { padding: 0.75rem 1rem; }
+  .doc-toc__link { padding: 0.35rem 0; }
+  /* Wiki section article grid: single column */
+  .wiki-section__articles { grid-template-columns: 1fr; }
+  /* Section header: stack vertically on very small screens */
+  .wiki-section__header { flex-direction: column; }
+  /* Doc meta: stack cleanly */
+  .doc-meta { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+  .doc-meta__actions { margin-left: 0; }
+  /* Callouts: reduce padding */
+  .callout { padding: 0.75rem 1rem; }
+  /* Back-to-top: smaller, not in footer area */
+  .to-top { bottom: 1rem; right: 1rem; }
+  /* Search results: constrain to viewport */
+  .search-results { max-height: 60vh; }
+  /* Footer nav buttons: full width for easy tapping */
+  .doc-footer__nav { flex-direction: column; width: 100%; }
+  .doc-footer__btn { justify-content: center; }
+  /* Media embeds stay responsive */
+  .media-embed { margin: 1em 0; }
+  /* Shortcuts modal: full width on mobile */
+  .shortcuts-modal__card { max-width: 100%; }
 }
 
 /* ═══════════════════════════════════════════
