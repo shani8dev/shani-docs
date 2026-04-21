@@ -331,49 +331,42 @@ podman exec mongodb mongosh -u admin -p strongpassword --authenticationDatabase 
 
 **Purpose:** Distributed event streaming platform. Kafka is the backbone of event-driven architectures, real-time data pipelines, log aggregation, and stream processing. Producers publish events to topics; consumers read them with durable, replayable, ordered delivery. Kafka handles millions of events per second and retains them for configurable durations.
 
-> **KRaft vs ZooKeeper:** Kafka 3.3+ supports KRaft mode (no ZooKeeper required). The compose below uses the ZooKeeper-based setup for compatibility, but new deployments should prefer KRaft — see the `confluentinc/cp-kafka` KRaft examples in the Confluent docs.
+> **KRaft mode only:** ZooKeeper was removed entirely in Kafka 4 / Confluent Platform 8.0 (November 2025). All new deployments must use KRaft — the compose below uses KRaft with no ZooKeeper dependency.
 
 ```yaml
 # ~/kafka/compose.yml
 services:
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.6.0
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    volumes: [zk_data:/var/lib/zookeeper/data, zk_logs:/var/lib/zookeeper/log]
-    restart: unless-stopped
-
   kafka:
-    image: confluentinc/cp-kafka:7.6.0
+    image: confluentinc/cp-kafka:latest
     ports:
       - "127.0.0.1:9092:9092"
       - "127.0.0.1:29092:29092"
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://kafka:29092,CONTROLLER://kafka:9093,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_LOG_RETENTION_HOURS: 168
     volumes: [kafka_data:/var/lib/kafka/data]
-    depends_on: [zookeeper]
     restart: unless-stopped
 
   kafka-ui:
-    image: provectuslabs/kafka-ui:latest
+    image: ghcr.io/kafbat/kafka-ui:latest
     ports: ["127.0.0.1:8080:8080"]
     environment:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
-      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
     depends_on: [kafka]
     restart: unless-stopped
 
 volumes:
-  zk_data:
-  zk_logs:
   kafka_data:
 ```
 
@@ -794,7 +787,7 @@ podman cp influxdb:/tmp/backup ./influxdb-backup-$(date +%Y%m%d)
 # ~/elasticsearch/compose.yaml
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.18.0
     ports:
       - 127.0.0.1:9200:9200
     volumes:
@@ -818,7 +811,7 @@ cd ~/elasticsearch && podman-compose up -d
 # ~/kibana/compose.yaml
 services:
   kibana:
-    image: docker.elastic.co/kibana/kibana:8.17.0
+    image: docker.elastic.co/kibana/kibana:8.18.0
     ports:
       - 127.0.0.1:5601:5601
     environment:
@@ -1415,6 +1408,7 @@ Connect with any MongoDB client: `mongosh mongodb://localhost:27018/mydb`
 | Adminer shows no database | Connect to `host.containers.internal` (not `localhost`) when the database is in another container |
 | Kafka consumer lag growing | Check partition count vs consumer count — increase partitions or add consumer instances; verify no consumer is crashing |
 | Kafka topic not created | Ensure `KAFKA_AUTO_CREATE_TOPICS_ENABLE=true` or create manually with `kafka-topics --create` |
+| Kafka KRaft broker not starting | Ensure `CLUSTER_ID` is set (generate with `kafka-storage random-uuid`); verify `KAFKA_PROCESS_ROLES`, `KAFKA_NODE_ID`, and `KAFKA_CONTROLLER_QUORUM_VOTERS` are all consistent |
 | Neo4j heap OOM | Increase `NEO4J_dbms_memory_heap_max__size` — default is 512m; graph queries on large datasets need more |
 | Cassandra connection refused | Cassandra takes 30–60 s to start; check `podman logs cassandra` for `Starting listening for CQL clients` |
 | ScyllaDB low performance | Ensure `--cpuset-cpus` matches your actual CPU count; remove `--developer-mode 1` for production workloads |
