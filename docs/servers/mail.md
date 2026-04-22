@@ -22,12 +22,12 @@ Ports: `25`, `465/587`, `143/993`, `80/443`. Firewall: `sudo firewall-cmd --add-
 **Purpose**: Modular, Alpine-based stack with Roundcube/SnappyMail, easy to deploy via compose.
 ```yaml
 services:
-  front: { image: mailu/nginx:2.0, ports: ["25:25", "465:465", "587:587", "143:143", "993:993", "80:80", "443:443"], volumes: [/home/user/mailu/data:/data:Z, /home/user/mailu/dkim:/dkim:Z, /home/user/mailu/certs:/certs:Z] }
-  admin: { image: mailu/admin:2.0, environment: {HOSTNAME: mail.example.com, SECRET_KEY: $(openssl rand -hex 32)}, volumes: [/home/user/mailu/data:/data:Z], depends_on: [db] }
+  front: { image: ghcr.io/mailu/nginx:2024.06, ports: ["25:25", "465:465", "587:587", "143:143", "993:993", "80:80", "443:443"], volumes: [/home/user/mailu/data:/data:Z, /home/user/mailu/dkim:/dkim:Z, /home/user/mailu/certs:/certs:Z] }
+  admin: { image: ghcr.io/mailu/admin:2024.06, environment: {HOSTNAME: mail.example.com, SECRET_KEY: changeme-replace-with-openssl-rand-hex-32}, volumes: [/home/user/mailu/data:/data:Z], depends_on: [db] }
   db: { image: postgres:16-alpine, environment: {POSTGRES_USER: mailu, POSTGRES_PASSWORD: secret, POSTGRES_DB: mailu}, volumes: [pg_data:/var/lib/postgresql/data] }
-  imap: { image: mailu/dovecot:2.0, volumes: [/home/user/mailu/data:/data:Z] }
-  smtp: { image: mailu/postfix:2.0, volumes: [/home/user/mailu/data:/data:Z] }
-  antispam: { image: mailu/rspamd:2.0, volumes: [/home/user/mailu/filter:/var/lib/rspamd:Z] }
+  imap: { image: ghcr.io/mailu/dovecot:2024.06, volumes: [/home/user/mailu/data:/data:Z] }
+  smtp: { image: ghcr.io/mailu/postfix:2024.06, volumes: [/home/user/mailu/data:/data:Z] }
+  antispam: { image: ghcr.io/mailu/rspamd:2024.06, volumes: [/home/user/mailu/filter:/var/lib/rspamd:Z] }
 volumes: {pg_data: {}}
 ```
 
@@ -47,8 +47,6 @@ services:
       - 127.0.0.1:8080:8080 # Admin web UI (proxied through Caddy)
     volumes:
       - /home/user/stalwart:/stalwart:Z
-    environment:
-      STALWART_SERVER__LISTENERS__HTTPS__ADDRESS: 0.0.0.0:8080
     restart: unless-stopped
 ```
 
@@ -78,9 +76,6 @@ podman exec stalwart stalwart-cli account list
 # Generate DKIM key for a domain
 podman exec stalwart stalwart-cli dkim generate example.com
 
-# Test SMTP delivery
-podman exec stalwart stalwart-cli smtp test --to test@example.com
-
 # Check mail queue
 podman exec stalwart stalwart-cli queue list
 
@@ -97,7 +92,15 @@ podman exec stalwart stalwart-cli queue flush
 | `DKIM` | Cryptographic outbound signature | Generated via admin UI |
 | `DMARC` | Policy for failed auth | `v=DMARC1; p=reject; rua=mailto:dmarc@example.com` |
 
-> 💡 **Backup**: `restic backup /home/user/mailcow /home/user/mailu /home/user/stalwart`.
+## Backup
+
+Back up the data volumes for whichever servers you run:
+
+```bash
+restic backup /home/user/mailcow /home/user/mailu /home/user/stalwart
+```
+
+For Stalwart specifically, `/home/user/stalwart` contains the embedded RocksDB store, config, and DKIM keys — this single path is sufficient for a full restore.
 
 ---
 
@@ -150,24 +153,14 @@ port = 5432
 user = "listmonk"
 password = "changeme"
 database = "listmonk"
-
-[smtp]
-[[smtp]]
-uuid = "smtp-1"
-enabled = true
-host = "localhost"
-port = 25
-auth_protocol = "none"
-max_conns = 10
-idle_timeout = "15s"
-wait_timeout = "5s"
-retry_failures = 2
-retry_wait = "5s"
 ```
+
+> 💡 SMTP settings are configured through the web UI under **Settings → SMTP** — do not add an `[[smtp]]` block to `config.toml`; that syntax is removed in v5+.
 
 **Initialise and start:**
 ```bash
-podman-compose run --rm listmonk ./listmonk --config /listmonk/config.toml --install
+# --idempotent --yes makes install safe to re-run; no separate manual step needed on upgrades
+podman-compose run --rm listmonk ./listmonk --config /listmonk/config.toml --install --idempotent --yes
 podman-compose up -d
 ```
 
@@ -352,13 +345,15 @@ Access the web UI at `http://localhost:5000`. Create a mail server, configure DK
 
 | Issue | Solution |
 |-------|----------|
-| listmonk `pq: role does not exist` | Run `./listmonk --install` first; the app does not auto-migrate the schema on startup |
-| listmonk emails not delivering | Verify SMTP config in `config.toml`; test with a one-subscriber campaign; check SPF/DKIM on your sending domain |
+| listmonk `pq: role does not exist` | Run `./listmonk --install --idempotent --yes` first; add `--upgrade` on version bumps to migrate the schema |
+| listmonk emails not delivering | Verify SMTP config in the web UI under **Settings → SMTP**; test with a one-subscriber campaign; check SPF/DKIM on your sending domain |
 | SimpleLogin alias forwarding fails | Verify MX records for the alias domain point at your server; check `podman logs postfix` for SMTP errors |
 | SimpleLogin `Flask secret mismatch` | Ensure `FLASK_SECRET` is identical in both `app` and `postfix` containers |
 | AnonAddy `APP_KEY` missing | Generate with `podman exec anonaddy php artisan key:generate --show` |
 | Postal `initialize` fails | Ensure MariaDB is fully started before running init; check root password matches across containers |
 | Postal DKIM not working | Generate keys in the Postal web UI and add the DNS TXT record for the returned selector |
+| Stalwart OOM crash on incoming email | Upgrade to v0.15.5+ — CVE-2026-26312: malformed nested MIME messages cause memory exhaustion on older versions |
+| Stalwart — New Outlook (Store app) IMAP login fails | New Outlook for Windows has known TLS handshake issues with self-hosted IMAP servers; use Outlook Classic (Win32) or Thunderbird instead |
 
 ---
 

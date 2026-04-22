@@ -85,7 +85,7 @@ Access the backend at `http://localhost:8080/openmrs` and the React SPA frontend
 # ~/openemr/compose.yaml
 services:
   openemr:
-    image: openemr/openemr:7.0.2
+    image: openemr/openemr:7.0.3
     ports:
       - 127.0.0.1:8083:80
       - 127.0.0.1:8084:443

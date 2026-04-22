@@ -166,6 +166,19 @@ service.example.com {
 }
 ```
 
+> **PostgreSQL backend (multi-instance / HA):** The default `storage.local` uses SQLite, which is fine for a single instance. For multiple Authelia replicas or if you want a more robust backend, switch to PostgreSQL:
+> ```yaml
+> storage:
+>   postgres:
+>     host: host.containers.internal
+>     port: 5432
+>     database: authelia
+>     schema: public
+>     username: authelia
+>     password: changeme
+> ```
+> Add a `db` service using `postgres:16-alpine` to the compose stack (same pattern as Authentik below) and remove the `storage.local` block.
+
 ---
 
 ## Authentik
@@ -445,17 +458,6 @@ step ca certificate myservice.home.local myservice.crt myservice.key \
 **Purpose:** Open-source secrets manager — a self-hosted alternative to HashiCorp Vault and Doppler. Store API keys, database passwords, and environment variables centrally, sync them to containers and CI/CD pipelines via the CLI or SDKs.
 
 ```yaml
-# ~/infisical/compose.yml — see https://infisical.com/docs/self-hosting/docker-compose
-# Requires Postgres and Redis; use the official compose template for production
-```
-
----
-
-## Infisical (Secrets Management)
-
-**Purpose:** Open-source secrets manager — a self-hosted alternative to HashiCorp Vault and Doppler. Store API keys, database passwords, and environment variables centrally, sync them to containers and CI/CD pipelines via the CLI or SDKs.
-
-```yaml
 # ~/infisical/compose.yaml
 services:
   infisical:
@@ -666,7 +668,7 @@ vault.home.local { tls internal; reverse_proxy localhost:8200 }
 # Minimal single-node overview:
 services:
   wazuh.manager:
-    image: wazuh/wazuh-manager:4.9.1
+    image: wazuh/wazuh-manager:4.13.1
     ports:
       - "127.0.0.1:55000:55000"  # API
       - "0.0.0.0:1514:1514/udp"  # Agent
@@ -686,14 +688,14 @@ services:
     restart: unless-stopped
 
   wazuh.indexer:
-    image: wazuh/wazuh-indexer:4.9.1
+    image: wazuh/wazuh-indexer:4.13.1
     ports: ["127.0.0.1:9200:9200"]
     volumes:
       - wazuh-indexer-data:/var/lib/wazuh-indexer
     restart: unless-stopped
 
   wazuh.dashboard:
-    image: wazuh/wazuh-dashboard:4.9.1
+    image: wazuh/wazuh-dashboard:4.13.1
     ports: ["127.0.0.1:443:5601"]
     depends_on: [wazuh.indexer]
     restart: unless-stopped
@@ -1420,6 +1422,202 @@ podman run --rm \
 
 ---
 
+---
+
+## SOPS (Secrets in Git)
+
+**Purpose:** Encrypt secrets stored in YAML, JSON, ENV, and INI files so they can be safely committed to Git. Works with Age keys (recommended for self-hosting) or GPG. The practical complement to Infisical for GitOps workflows — your compose `.env` files and Kubernetes manifests stay in version control but remain encrypted at rest. Only the authorised key can decrypt them.
+
+**Install SOPS and Age:**
+```bash
+# Install SOPS
+sudo wget -O /usr/local/bin/sops \
+  https://github.com/getsops/sops/releases/latest/download/sops-v3.9.5.linux.amd64
+sudo chmod +x /usr/local/bin/sops
+
+# Install Age
+sudo pacman -S age    # Arch / Shani OS
+# or: sudo apt install age
+```
+
+**Generate an Age key pair:**
+```bash
+mkdir -p ~/.config/sops/age
+age-keygen -o ~/.config/sops/age/keys.txt
+# Outputs: public key  age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+**Configure SOPS to use your Age key (project-level `.sops.yaml`):**
+```yaml
+# .sops.yaml — commit this file to your repo root
+creation_rules:
+  - path_regex: .*\.enc\.yaml$
+    age: age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  - path_regex: .*\.env\.enc$
+    age: age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+**Encrypt and decrypt secrets:**
+```bash
+# Encrypt a .env file
+sops --encrypt .env > .env.enc
+# .env.enc is safe to commit; .env stays in .gitignore
+
+# Edit encrypted file in-place (decrypts, opens $EDITOR, re-encrypts on save)
+sops .env.enc
+
+# Decrypt to stdout for use in scripts
+sops --decrypt .env.enc
+
+# Decrypt to a file (e.g. before podman-compose)
+sops --decrypt .env.enc > .env && podman-compose up -d && rm .env
+```
+
+**Encrypt only specific keys in a YAML file:**
+```yaml
+# secrets.yaml (before encryption)
+db_password: mysecretpassword
+db_host: localhost          # not secret — encrypt selectively
+```
+```bash
+# Encrypt only db_password, leave db_host in plaintext
+sops --encrypt --encrypted-regex '^db_password$' secrets.yaml > secrets.enc.yaml
+```
+
+**Use in CI/CD (Woodpecker / Forgejo Actions):**
+```yaml
+# .woodpecker.yml
+steps:
+  deploy:
+    image: alpine
+    secrets: [SOPS_AGE_KEY]   # inject Age private key as CI secret
+    commands:
+      - apk add sops age
+      - export SOPS_AGE_KEY_FILE=/dev/stdin <<< "$SOPS_AGE_KEY"
+      - sops --decrypt .env.enc > .env
+      - podman-compose up -d
+```
+
+> ⚠️ **Key backup:** Your Age private key (`~/.config/sops/age/keys.txt`) is the only way to decrypt your secrets. Back it up to an offline location (password manager, encrypted USB). If you lose it, all SOPS-encrypted files are permanently unrecoverable.
+
+---
+
+## Semgrep CE (Static Analysis / SAST)
+
+**Purpose:** Open-source static application security testing (SAST) tool. Scans source code for security bugs, vulnerable patterns, and misconfigurations using a large library of community rules. Runs in CI pipelines alongside Trivy (container scanning) and ZAP (dynamic scanning) to catch issues at the code level before they ship. Supports 30+ languages — Python, JavaScript, Go, Java, Ruby, PHP, and more.
+
+```bash
+# Run as a one-shot scanner — no persistent container needed
+podman run --rm \
+  -v /home/user/myproject:/src:ro,Z \
+  returntocorp/semgrep:latest \
+  semgrep scan \
+    --config=auto \
+    --sarif \
+    --output /src/semgrep-results.sarif \
+    /src
+```
+
+**Run in Woodpecker / Forgejo Actions CI:**
+```yaml
+# .forgejo/workflows/security.yml
+steps:
+  - name: semgrep
+    image: returntocorp/semgrep:latest
+    commands:
+      - semgrep scan --config=auto --error .
+```
+
+**Scan with a specific ruleset:**
+```bash
+# OWASP top-10 rules
+podman run --rm -v $(pwd):/src:ro,Z returntocorp/semgrep:latest \
+  semgrep scan --config=p/owasp-top-ten /src
+
+# Secrets detection
+podman run --rm -v $(pwd):/src:ro,Z returntocorp/semgrep:latest \
+  semgrep scan --config=p/secrets /src
+```
+
+> Semgrep CE is the open-source core. The cloud Semgrep platform adds cross-file analysis and a UI, but the CLI tool produces actionable results entirely offline. Feed SARIF output into Defect Dojo (below) to triage findings centrally.
+
+---
+
+## Defect Dojo (Vulnerability Management)
+
+**Purpose:** Centralised vulnerability management platform. Aggregates security findings from Trivy, Semgrep, OWASP ZAP, Nuclei, Greenbone, and other scanners into one triage dashboard with deduplication, risk scoring, SLA tracking, and JIRA/Slack integration. The self-hosted alternative to paying for a dedicated AppSec platform.
+
+```yaml
+# ~/defectdojo/compose.yaml
+services:
+  django:
+    image: defectdojo/defectdojo-django:latest
+    ports:
+      - 127.0.0.1:8080:8080
+    environment:
+      DD_DATABASE_URL: postgresql://defectdojo:changeme@postgres:5432/defectdojo
+      DD_SECRET_KEY: changeme-run-openssl-rand-base64-42
+      DD_CREDENTIAL_AES_256_KEY: changeme-16chars
+      DD_ALLOWED_HOSTS: defectdojo.home.local
+      DD_CELERY_BROKER_URL: redis://redis:6379/0
+      DD_SOCIAL_AUTH_KEYCLOAK_ENABLED: "False"
+    volumes:
+      - /home/user/defectdojo/media:/app/media:Z
+    depends_on: [postgres, redis]
+    restart: unless-stopped
+
+  celeryworker:
+    image: defectdojo/defectdojo-django:latest
+    command: /entrypoint-celery-worker.sh
+    environment:
+      DD_DATABASE_URL: postgresql://defectdojo:changeme@postgres:5432/defectdojo
+      DD_SECRET_KEY: changeme-run-openssl-rand-base64-42
+      DD_CELERY_BROKER_URL: redis://redis:6379/0
+    depends_on: [postgres, redis]
+    restart: unless-stopped
+
+  nginx:
+    image: defectdojo/defectdojo-nginx:latest
+    ports:
+      - 127.0.0.1:8081:8080
+    depends_on: [django]
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: defectdojo
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: defectdojo
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+```bash
+cd ~/defectdojo && podman-compose up -d
+```
+
+**Initialise the database (first run):**
+```bash
+podman-compose run --rm django bash -c "python manage.py migrate && python manage.py createsuperuser"
+```
+
+Access at `http://localhost:8081`. Create a Product, then import scanner results under Findings → Import Scan Results — select the scanner type (Trivy, Semgrep SARIF, ZAP XML, Nuclei JSON) and upload the output file.
+
+**Caddy:**
+```caddyfile
+defectdojo.home.local { tls internal; reverse_proxy localhost:8081 }
+```
+
+---
+
 ## Caddy Configuration
 
 ```caddyfile
@@ -1467,6 +1665,8 @@ safeline.home.local   { tls internal; reverse_proxy localhost:9443 }
 | osquery queries return no rows | Some tables require root or specific capabilities; run `sudo osqueryi` to test interactively |
 | ZAP scan returns no findings | Ensure the target is reachable from within the container; for internal services use `--network host`; verify the API key matches |
 | Nuclei templates out of date | Add `-update-templates` flag to the scan command, or run `nuclei -update-templates` explicitly before scanning |
+| SOPS `age: no identity found` | Ensure `SOPS_AGE_KEY_FILE` points to your Age private key file, or set `SOPS_AGE_KEY` env var with the key contents |
+| SOPS decrypt fails with `mac check failed` | The encrypted file was modified outside SOPS (e.g. a Git merge conflict marker was introduced); restore the original encrypted file from Git history |
 
 > 🔒 **Security checklist:**
 > - Disable Vaultwarden signups after creating your account

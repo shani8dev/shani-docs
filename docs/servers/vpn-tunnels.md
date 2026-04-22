@@ -45,6 +45,9 @@ sudo modprobe tun
 | **ZeroTier** | ZeroTier network with self-hosted controller | Medium | ✅ | ZeroTier (UDP) |
 | **Hysteria 2** | High-loss / censored networks (QUIC) | Medium | ⚠️ Experimental | QUIC (HTTP/3) |
 | **OpenVPN** | Legacy compatibility, cert-based auth | Medium | ⚠️ Community | UDP/TCP |
+| **WireGuard Road Warrior** | Manual split-tunnel config for mobile clients | Medium | ❌ CLI | WireGuard |
+| **Outline VPN** | Simple Shadowsocks proxy for censorship resistance | Low | ✅ App | Shadowsocks |
+| **Xray / V2Ray** | Protocol-obfuscating proxy for censored networks | Medium | ❌ CLI | VLESS/VMESS/XTLS |
 
 ---
 
@@ -801,6 +804,220 @@ podman exec gluetun cat /gluetun/servers.json | python3 -m json.tool | grep '"ci
 
 ---
 
+## WireGuard Road Warrior (Manual Split-Tunnel Config)
+
+**Purpose:** A "road warrior" setup lets mobile or laptop clients connect to your home server from anywhere, routing only selected traffic through the VPN (split tunnel) rather than all traffic. Unlike WG-Easy, this is a fully manual config — useful when you want precise control over allowed IPs, DNS, and per-client routing without running a web UI.
+
+### 1. Server Config
+
+`/etc/wireguard/wg0.conf` on the **server**:
+```ini
+[Interface]
+Address = 10.10.0.1/24
+ListenPort = 51820
+PrivateKey = <server-private-key>
+
+# Allow VPN clients to reach the server LAN
+PostUp   = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+
+[Peer]
+# Mobile client — phone or laptop
+PublicKey = <client-public-key>
+AllowedIPs = 10.10.0.2/32
+```
+
+```bash
+# Generate server key pair
+wg genkey | tee server.key | wg pubkey > server.pub
+
+# Generate client key pair (on the client or server)
+wg genkey | tee client.key | wg pubkey > client.pub
+
+# Bring the interface up
+sudo wg-quick up wg0
+
+# Enable on boot
+sudo systemctl enable wg-quick@wg0
+```
+
+### 2. Client Config (Split Tunnel)
+
+`/etc/wireguard/wg0.conf` on the **client** (phone or laptop):
+```ini
+[Interface]
+Address = 10.10.0.2/24
+PrivateKey = <client-private-key>
+DNS = 10.10.0.1        # or your Pi-hole / Adguard address
+
+[Peer]
+PublicKey = <server-public-key>
+Endpoint = vpn.example.com:51820
+# Split tunnel — only route home LAN and VPN subnet through WireGuard
+# Change to 0.0.0.0/0 for full tunnel (all traffic)
+AllowedIPs = 10.10.0.0/24, 192.168.1.0/24
+PersistentKeepalive = 25
+```
+
+Generate a scannable QR code for the mobile WireGuard app:
+```bash
+sudo apt install qrencode   # or dnf install qrencode
+qrencode -t ansiutf8 < /etc/wireguard/client.conf
+```
+
+### 3. Run in a Container (Podman)
+
+For a fully containerised road warrior server without touching the host WireGuard stack:
+```yaml
+# ~/wireguard-rw/compose.yaml
+services:
+  wireguard:
+    image: lscr.io/linuxserver/wireguard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      net.ipv4.ip_forward: "1"
+    ports:
+      - "0.0.0.0:51820:51820/udp"
+    volumes:
+      - /home/user/wireguard-rw/config:/config:Z
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: Asia/Kolkata
+      SERVERURL: vpn.example.com
+      SERVERPORT: "51820"
+      PEERS: phone,laptop           # generates one config per peer name
+      PEERDNS: auto
+      ALLOWEDIPS: 10.13.13.0/24,192.168.1.0/24   # split tunnel
+      INTERNAL_SUBNET: 10.13.13.0
+    restart: unless-stopped
+```
+
+```bash
+cd ~/wireguard-rw && podman-compose up -d
+```
+
+Client configs and QR codes are generated automatically at `/home/user/wireguard-rw/config/peer_phone/` and `peer_laptop/`.
+
+- **Firewall:** `sudo firewall-cmd --add-port=51820/udp --permanent && sudo firewall-cmd --reload`
+
+> **Split tunnel vs full tunnel:** `AllowedIPs = 0.0.0.0/0` routes all traffic through the VPN (full tunnel — use for privacy on untrusted networks). `AllowedIPs = 10.13.13.0/24, 192.168.1.0/24` routes only the VPN subnet and home LAN (split tunnel — use when you only need access to home services without affecting other traffic).
+
+---
+
+## Outline VPN
+
+**Purpose:** Shadowsocks-based proxy server by Jigsaw (Google). Designed for ease of deployment and resistance to traffic fingerprinting — traffic is indistinguishable from regular HTTPS to deep packet inspection. Unlike WireGuard, Outline is proxy-based rather than a full network tunnel, making it suitable for censorship circumvention where WireGuard is blocked. Management is via the Outline Manager desktop app (Linux/macOS/Windows) which generates a one-line `docker run` command and per-user access keys.
+
+```yaml
+# ~/outline/compose.yaml
+# Note: Outline Manager generates an exact run command including ports and secrets.
+# Use its output directly. The compose below is a representative template.
+services:
+  outline:
+    image: quay.io/outline/shadowbox:stable
+    ports:
+      - "0.0.0.0:8080:8080/tcp"
+      - "0.0.0.0:8080:8080/udp"
+      - "0.0.0.0:9090:9090/tcp"    # management API (bind to 127.0.0.1 if behind a proxy)
+    volumes:
+      - /home/user/outline/persisted-state:/root/shadowbox/persisted-state:Z
+    environment:
+      SB_API_PORT: "9090"
+      SB_API_PREFIX: "your-random-prefix"   # generated by Outline Manager
+      SB_CERTIFICATE_FILE: /root/shadowbox/persisted-state/shadowbox-selfsigned.crt
+      SB_PRIVATE_KEY_FILE: /root/shadowbox/persisted-state/shadowbox-selfsigned.key
+    restart: unless-stopped
+```
+
+> **Recommended:** Use the **Outline Manager** desktop app to generate the exact command, copy the `docker run` output and convert it to compose. The Manager handles certificate generation, port selection, and API key management automatically.
+
+**Firewall:** Open the data port (default `8080/tcp` and `8080/udp`) and the management API port on your server.
+
+```bash
+sudo firewall-cmd --add-port=8080/tcp --add-port=8080/udp --permanent
+sudo firewall-cmd --reload
+```
+
+**Clients:** Distribute per-user access keys (ss:// URIs) generated by the Manager. Users install the Outline Client app on Android, iOS, Windows, macOS, or Linux.
+
+> Outline and Hysteria 2 solve different problems. Outline is optimised for **censorship circumvention** (traffic obfuscation). Hysteria 2 is optimised for **high-loss / high-latency networks** (QUIC transport). Use Outline where WireGuard is fingerprinted and blocked; use Hysteria 2 where packet loss degrades TCP-based protocols.
+
+---
+
+## Xray / V2Ray (Protocol-Obfuscating Proxy)
+
+**Purpose:** A suite of network proxy tools that wrap traffic in protocols designed to evade deep packet inspection — VLESS, VMESS, and XTLS over WebSocket or gRPC, disguised as ordinary HTTPS. Widely used alongside Hysteria 2 for censorship circumvention. Xray is the actively maintained fork of V2Ray with additional protocols (XTLS, VLESS, XHTTP) and better performance.
+
+**Use case vs WireGuard:** Xray is a proxy, not a VPN — it forwards traffic through an HTTPS tunnel that looks like web traffic. WireGuard is a full network tunnel with a distinct UDP fingerprint. In environments where WireGuard and Shadowsocks are actively blocked, Xray VLESS+XTLS over port 443 is significantly harder to detect.
+
+`/home/user/xray/config.json` (VLESS + XTLS-Reality — the modern recommended config):
+```json
+{
+  "inbounds": [{
+    "port": 443,
+    "protocol": "vless",
+    "settings": {
+      "clients": [{
+        "id": "your-uuid-here",
+        "flow": "xtls-rprx-vision"
+      }],
+      "decryption": "none"
+    },
+    "streamSettings": {
+      "network": "tcp",
+      "security": "reality",
+      "realitySettings": {
+        "dest": "www.google.com:443",
+        "serverNames": ["www.google.com"],
+        "privateKey": "your-reality-private-key",
+        "shortIds": ["your-short-id"]
+      }
+    }
+  }],
+  "outbounds": [{"protocol": "freedom"}]
+}
+```
+
+```yaml
+# ~/xray/compose.yaml
+services:
+  xray:
+    image: ghcr.io/xtls/xray-core:latest
+    ports:
+      - "0.0.0.0:443:443/tcp"
+    volumes:
+      - /home/user/xray/config.json:/etc/xray/config.json:ro,Z
+    command: run -config /etc/xray/config.json
+    restart: unless-stopped
+```
+
+```bash
+cd ~/xray && podman-compose up -d
+```
+
+**Generate a UUID and Reality keys:**
+```bash
+# Generate a UUID for the client ID
+podman run --rm ghcr.io/xtls/xray-core:latest uuid
+
+# Generate a Reality key pair
+podman run --rm ghcr.io/xtls/xray-core:latest x25519
+```
+
+**Clients:** [v2rayN](https://github.com/2dust/v2rayN) (Windows), [v2rayNG](https://github.com/2dust/v2rayNG) (Android), [Shadowrocket](https://apps.apple.com/app/shadowrocket/id932747118) (iOS), [Nekoray](https://github.com/MatsuriDayo/nekoray) (Linux/Windows). Share the connection config as a `vless://` URI or QR code.
+
+> **XTLS-Reality** (shown above) is the recommended modern config — it borrows a real TLS certificate fingerprint from a public site (`www.google.com`), making the server indistinguishable from that site even to active probers. Older VMESS+WS configs are simpler but more detectable.
+
+**Firewall:**
+```bash
+sudo firewall-cmd --add-port=443/tcp --permanent && sudo firewall-cmd --reload
+```
+
+---
+
 ## Troubleshooting
 
 | Issue | Solution |
@@ -820,5 +1037,11 @@ podman exec gluetun cat /gluetun/servers.json | python3 -m json.tool | grep '"ci
 | Gluetun VPN not connecting | Verify `WIREGUARD_PRIVATE_KEY` and `WIREGUARD_ADDRESSES` are correct; check `podman logs gluetun` for auth errors |
 | Gluetun leaking real IP | Ensure the app container uses `network_mode: service:gluetun` — any other network mode bypasses the tunnel |
 | qBittorrent WebUI unreachable via Gluetun | Port must be published on the `gluetun` container, not `qbittorrent`; the app container shares gluetun's network |
+| WireGuard client can't reach LAN | Ensure `AllowedIPs` includes the home subnet (e.g., `192.168.1.0/24`) and that `PostUp` iptables MASQUERADE rule is active on the server |
+| WireGuard road warrior QR not showing | Install `qrencode` on the server: `dnf install qrencode`; for the linuxserver container, peer QR PNGs are in `config/peer_<name>/peer_<name>.png` |
+| Outline Manager can't connect to server | The management API port (default `9090`) must be reachable; check firewall and that the `SB_API_PREFIX` in the environment matches the Manager's saved config |
+| Outline client times out | Ensure both TCP and UDP on the data port are open; Shadowsocks uses both; check ISP is not blocking the port |
+| Xray VLESS connection rejected | Verify the client UUID matches exactly; check that port 443 is open; confirm the Reality `serverNames` is reachable from the server itself |
+| Xray Reality `private key` error | Regenerate the key pair with `xray x25519` — the public key goes in the client config, private key stays on the server |
 
 > 🔒 **Security tip:** Always bind management UIs (`wg-easy`, `headplane`, `portainer`) to `127.0.0.1` and proxy through Caddy. Never expose control-plane interfaces directly to the internet. Rotate pre-auth keys periodically and use `fail2ban` on any publicly facing port.

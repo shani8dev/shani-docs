@@ -405,6 +405,189 @@ podman exec litestream litestream snapshots s3://my-litestream-backups/app
 
 ---
 
+## Restic REST Server (Self-Hosted Repository Server)
+
+**Purpose:** Run a Restic repository server on a local machine — any server on your LAN, a Raspberry Pi, or an old laptop. Restic clients back up directly to it over HTTPS without needing MinIO, S3, or any object-storage stack. This is the simplest way to get a centralised, self-hosted Restic destination: one server runs the REST backend, all your machines point at it.
+
+```yaml
+# ~/restic-rest-server/compose.yaml
+services:
+  rest-server:
+    image: restic/rest-server:latest
+    container_name: restic-rest-server
+    ports:
+      - "127.0.0.1:8000:8000"   # bind to 127.0.0.1; proxy through Caddy for TLS
+    volumes:
+      - /home/user/restic-rest-server/data:/data:Z
+      - /home/user/restic-rest-server/.htpasswd:/.htpasswd:ro,Z
+    environment:
+      OPTIONS: "--htpasswd-file /.htpasswd"
+    restart: unless-stopped
+```
+
+```bash
+cd ~/restic-rest-server && podman-compose up -d
+```
+
+**Create user credentials (htpasswd):**
+```bash
+# Install htpasswd (part of httpd-tools / apache2-utils)
+sudo dnf install httpd-tools
+
+# Create the password file with the first user
+htpasswd -B -c /home/user/restic-rest-server/.htpasswd backupuser
+
+# Add more users
+htpasswd -B /home/user/restic-rest-server/.htpasswd seconduser
+```
+
+**Point Restic at the REST server:**
+```bash
+# Initialise a repository for a specific user
+RESTIC_REPOSITORY=rest:http://localhost:8000/backupuser \
+RESTIC_PASSWORD=your-restic-encryption-password \
+restic init
+
+# Or via the container environment
+-e RESTIC_REPOSITORY=rest:https://restic.home.local/backupuser \
+-e RESTIC_PASSWORD=your-restic-encryption-password
+```
+
+**Caddy (add TLS — strongly recommended):**
+```caddyfile
+restic.home.local { tls internal; reverse_proxy localhost:8000 }
+```
+
+> **Multi-user repos:** Each user gets an isolated repository directory under `/data/<username>/`. The REST server enforces htpasswd auth — users can only access their own path. Enable `--append-only` mode to prevent clients from deleting snapshots: add it to `OPTIONS` in the environment.
+
+**Append-only mode (protect against ransomware deleting backups):**
+```yaml
+environment:
+  OPTIONS: "--htpasswd-file /.htpasswd --append-only"
+```
+
+---
+
+## Backblaze B2 (Concrete Config)
+
+**Purpose:** Backblaze B2 is one of the most cost-effective offsite backup destinations — S3-compatible, with costs well below AWS S3. Restic, Rclone, and Kopia all support it natively. The backups-sync page references B2 as a destination in passing; this section provides the complete working configuration.
+
+### Restic → B2
+
+```yaml
+# Add to your restic container environment, or export before running CLI commands
+environment:
+  RESTIC_REPOSITORY: "b2:your-bucket-name:/restic"
+  RESTIC_PASSWORD: "your-strong-encryption-password"
+  B2_ACCOUNT_ID: "your-b2-application-key-id"
+  B2_ACCOUNT_KEY: "your-b2-application-key"
+```
+
+```bash
+# Initialise
+podman exec restic restic init
+
+# Backup
+podman exec restic restic backup /data --compression max
+
+# Prune
+podman exec restic restic forget --keep-daily 7 --keep-weekly 4 --keep-monthly 12 --prune
+```
+
+> Create a B2 **Application Key** (not the master key) with access limited to a single bucket — use the B2 dashboard under App Keys → Add a New Application Key.
+
+### Rclone → B2
+
+Configure Rclone interactively (`rclone config`), choose `b2` as the backend, enter your key ID and application key. Then:
+
+```bash
+# Sync backups to B2
+podman exec rclone rclone sync /backups b2remote:your-bucket --transfers 4
+
+# Copy (no deletes)
+podman exec rclone rclone copy /backups b2remote:your-bucket
+```
+
+### Kopia → B2
+
+In the Kopia web UI (`http://localhost:51515`):
+1. **Connect to Repository → Backblaze B2**
+2. Enter bucket name, Key ID, and Application Key
+3. Set the repository password (encryption passphrase)
+4. Configure snapshot policies and schedules
+
+Or via CLI:
+```bash
+podman exec kopia kopia repository create b2 \
+  --bucket=your-bucket-name \
+  --key-id=your-key-id \
+  --key=your-application-key \
+  --password=your-kopia-password
+```
+
+### Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| `b2: 401 Unauthorized` | Check that the Application Key has `readFiles`, `writeFiles`, `deleteFiles` on the correct bucket |
+| Restic B2 backup very slow | B2 performs best with parallel uploads — Restic uses multiple goroutines by default; verify network is the bottleneck with `restic backup --verbose 2` |
+| Rclone B2 rate limit errors | Add `--b2-upload-concurrency 4` and `--transfers 4` to avoid hitting per-bucket concurrency limits |
+
+---
+
+## Cloudflare R2 (Zero-Egress S3-Compatible Target)
+
+**Purpose:** Cloudflare R2 is an S3-compatible object storage service with **zero egress fees** — you pay only for storage (~$0.015/GB/month) and write operations, never for downloads. This makes it particularly attractive as an offsite backup destination compared to AWS S3 or GCS, which charge for egress. Restic, Rclone, and Kopia all work with R2 via the S3-compatible API.
+
+### Setup
+
+1. In the Cloudflare dashboard: **R2 → Create Bucket** (choose a region close to you)
+2. **R2 → Manage R2 API Tokens → Create API Token** — select `Object Read & Write` for your bucket
+3. Note your **Account ID**, **Access Key ID**, and **Secret Access Key**
+
+### Restic → R2
+
+```yaml
+environment:
+  RESTIC_REPOSITORY: "s3:https://<account-id>.r2.cloudflarestorage.com/your-bucket"
+  RESTIC_PASSWORD: "your-strong-encryption-password"
+  AWS_ACCESS_KEY_ID: "your-r2-access-key-id"
+  AWS_SECRET_ACCESS_KEY: "your-r2-secret-access-key"
+```
+
+```bash
+podman exec restic restic init
+podman exec restic restic backup /data --compression max
+```
+
+### Rclone → R2
+
+Add to `rclone.conf` (or configure interactively with `rclone config`, choose `s3` backend, provider `Cloudflare`):
+```ini
+[r2]
+type = s3
+provider = Cloudflare
+access_key_id = your-r2-access-key-id
+secret_access_key = your-r2-secret-access-key
+endpoint = https://<account-id>.r2.cloudflarestorage.com
+```
+
+```bash
+podman exec rclone rclone sync /backups r2:your-bucket
+```
+
+### Kopia → R2
+
+In Kopia web UI → **Connect → S3 Compatible**:
+- **Endpoint:** `https://<account-id>.r2.cloudflarestorage.com`
+- **Bucket:** `your-bucket`
+- **Access Key ID / Secret:** R2 API token credentials
+- Leave region blank (R2 does not require a region)
+
+> **R2 vs B2:** R2 has no egress fees and is cheaper for workloads with frequent restores. B2 has a more mature ecosystem and better Restic/Rclone documentation. Both are good choices — use R2 if you restore frequently or want to avoid any egress costs.
+
+---
+
 ## Automated Backup with systemd
 
 Set up a daily backup timer that runs Restic and sends a notification via Ntfy:
@@ -457,6 +640,10 @@ systemctl --user enable --now backup.timer
 | Litestream: `yaml: unmarshal errors` after upgrade | Config format changed in 0.5.x — rename `replicas:` (array) to `replica:` (single object) per database |
 | Litestream S3 upload errors (`MalformedTrailerError`) | Upgrade to 0.5.4+ — earlier 0.5.x releases had an incompatibility with some S3-compatible providers (MinIO, B2, Spaces) due to aws-chunked encoding |
 | Restic `--compression` flag not recognised | Requires Restic 0.14+; update the image to `restic/restic:latest` |
+| REST server returns `403 Forbidden` | Verify the username/password in `RESTIC_REPOSITORY` URL matches the `.htpasswd` file; re-run `htpasswd` if unsure |
+| REST server `repository not found` | Run `restic init` targeting the REST server URL before the first backup |
+| R2 `SignatureDoesNotMatch` | Confirm the endpoint URL uses your Account ID: `https://<account-id>.r2.cloudflarestorage.com`; do not include the bucket in the endpoint |
+| R2 slow uploads | R2 enforces per-object size limits on multipart uploads; add `--s3-chunk-size 64M` in Rclone or ensure Restic packs are within limits |
 
 > 💡 **Tip:** Test your restores periodically. A backup you have never restored from is a backup you do not know works.
 
@@ -465,7 +652,8 @@ systemctl --user enable --now backup.timer
 ## Caddy Configuration
 
 ```caddyfile
-kopia.home.local { tls internal; reverse_proxy localhost:51515 }
+kopia.home.local   { tls internal; reverse_proxy localhost:51515 }
 duplicati.home.local { tls internal; reverse_proxy localhost:8200 }
-minio.home.local { tls internal; reverse_proxy localhost:9001 }
+minio.home.local   { tls internal; reverse_proxy localhost:9001 }
+restic.home.local  { tls internal; reverse_proxy localhost:8000 }
 ```

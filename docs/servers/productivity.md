@@ -254,6 +254,55 @@ podman logs -f webserver
 
 > Drop documents into `~/Documents/inbox` — Paperless will automatically OCR, index, and file them within minutes.
 
+### Share Documents via Email
+
+Paperless-ngx can send documents as email attachments directly from the UI or via automation. This requires configuring SMTP settings in the environment.
+
+**1. Add SMTP settings to the compose environment:**
+```yaml
+environment:
+  # ... existing vars ...
+  PAPERLESS_EMAIL_HOST: host.containers.internal   # or your SMTP relay / Mailrise
+  PAPERLESS_EMAIL_PORT: "25"
+  PAPERLESS_EMAIL_HOST_USER: ""            # blank for unauthenticated local relay
+  PAPERLESS_EMAIL_HOST_PASSWORD: ""
+  PAPERLESS_EMAIL_USE_TLS: "false"
+  PAPERLESS_EMAIL_USE_SSL: "false"
+  PAPERLESS_FROM_EMAIL: paperless@home.local
+```
+
+For an authenticated SMTP provider (e.g., Brevo, Mailgun, Gmail SMTP):
+```yaml
+  PAPERLESS_EMAIL_HOST: smtp.brevo.com
+  PAPERLESS_EMAIL_PORT: "587"
+  PAPERLESS_EMAIL_HOST_USER: your@email.com
+  PAPERLESS_EMAIL_HOST_PASSWORD: your-smtp-password
+  PAPERLESS_EMAIL_USE_TLS: "true"
+```
+
+**2. Configure a mail rule to send on consume (optional automation):**
+
+In the Paperless UI → **Settings → Mail Rules → Add Rule**:
+- Action: **Assign tags / correspondent** (or trigger a workflow)
+
+> Full email-out automation is available via the **Workflows** feature (Paperless-ngx 2.x+). Go to **Settings → Workflows → Add Workflow** → Trigger: *Document Added* → Action: *Send Email*.
+
+**3. Send a document manually from the UI:**
+
+Open any document → click the **⋮ menu → Share / Send** → enter a recipient address. Paperless attaches the original PDF and sends via the configured SMTP relay.
+
+**4. Send via API:**
+```bash
+# Share document ID 42 by email
+curl -X POST http://localhost:8000/api/documents/42/share_link/ \
+  -H "Authorization: Token YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"expiration": null}'
+# Returns a share link — paste into an email manually
+```
+
+> For a simple local SMTP relay without an external account, pair Paperless with **Mailrise** or **Maddy** (both documented in the Mail section) — configure Paperless to use `host.containers.internal:25` as the relay.
+
 ---
 
 ## Planka (Kanban Board)
@@ -527,7 +576,7 @@ n8n.example.com { reverse_proxy localhost:5678 }
 # ~/stirling-pdf/compose.yaml
 services:
   stirling-pdf:
-    image: frooodle/s-pdf:latest
+    image: stirlingtools/stirling-pdf:latest
     ports:
       - 127.0.0.1:8080:8080
     volumes:
@@ -1329,6 +1378,97 @@ hoarder.home.local { tls internal; reverse_proxy localhost:3055 }
 
 ---
 
+---
+
+## Excalidraw (Collaborative Whiteboard)
+
+**Purpose:** Self-hosted virtual whiteboard with a hand-drawn aesthetic. Sketch architecture diagrams, wireframes, flowcharts, and brainstorm maps — either solo or with your team in real-time. No account required; drawings are stored in the browser or exported as `.excalidraw` or SVG. Much simpler than Penpot for quick sketches and team whiteboarding sessions.
+
+```yaml
+# ~/excalidraw/compose.yaml
+services:
+  excalidraw:
+    image: excalidraw/excalidraw:latest
+    ports:
+      - 127.0.0.1:3700:80
+    restart: unless-stopped
+```
+
+```bash
+cd ~/excalidraw && podman-compose up -d
+```
+
+> Excalidraw is a pure frontend — no database, no persistent server state. All data lives in the browser's local storage or in exported files. For real-time collaboration, the official backend (`@excalidraw/excalidraw-room`) is a separate WebSocket service:
+
+```yaml
+# Add to the same compose.yaml for live collaboration
+  excalidraw-room:
+    image: excalidraw/excalidraw-room:latest
+    ports:
+      - 127.0.0.1:3701:80
+    restart: unless-stopped
+```
+
+**Caddy:**
+```caddyfile
+draw.home.local { tls internal; reverse_proxy localhost:3700 }
+```
+
+---
+
+## Cal.com (Scheduling & Booking)
+
+**Purpose:** Self-hosted Calendly alternative with a complete scheduling infrastructure. Define your availability, create booking pages for different meeting types, connect a CalDAV calendar, set buffer times and limits, and let invitees book a slot without back-and-forth emails. Supports team scheduling, round-robin assignment, collective bookings, and webhooks. Much richer than Rallly for full scheduling automation.
+
+```yaml
+# ~/calcom/compose.yaml
+services:
+  calcom:
+    image: calcom/cal.com:latest
+    ports:
+      - 127.0.0.1:3900:3000
+    environment:
+      DATABASE_URL: postgresql://calcom:changeme@db:5432/calcom
+      NEXTAUTH_URL: https://cal.example.com
+      NEXTAUTH_SECRET: changeme-run-openssl-rand-hex-32
+      CALCOM_LICENSE_KEY: ""   # leave blank for self-hosted Community Edition
+      EMAIL_FROM: noreply@example.com
+      EMAIL_SERVER_HOST: host.containers.internal
+      EMAIL_SERVER_PORT: "25"
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: calcom
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: calcom
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+```bash
+cd ~/calcom && podman-compose up -d
+```
+
+**Run DB migrations on first start:**
+```bash
+podman exec calcom npx prisma db push
+```
+
+Access at `http://localhost:3900`. Create your first user account, connect a calendar, and set your working hours.
+
+**Caddy:**
+```caddyfile
+cal.example.com { reverse_proxy localhost:3900 }
+```
+
+---
+
 ## Caddy Configuration
 
 ```caddyfile
@@ -1358,6 +1498,8 @@ design.home.local    { tls internal; reverse_proxy localhost:9001 }
 affine.home.local    { tls internal; reverse_proxy localhost:3010 }
 hoarder.home.local   { tls internal; reverse_proxy localhost:3055 }
 memos.home.local     { tls internal; reverse_proxy localhost:5230 }
+draw.home.local      { tls internal; reverse_proxy localhost:3700 }
+cal.example.com      { reverse_proxy localhost:3900 }
 ```
 
 ---
@@ -1370,6 +1512,8 @@ memos.home.local     { tls internal; reverse_proxy localhost:5230 }
 | Nextcloud file sync very slow | Ensure background cron jobs are running (`php cron.php` every 5 minutes via systemd timer) |
 | Syncthing devices not finding each other | Ensure ports 22000/tcp and 22000/udp are open in the firewall; verify both devices show the other as Connected |
 | Paperless not consuming documents | Check the consume directory path matches the volume mount; verify file permissions allow the container user to read the files |
+| Paperless email not sending | Verify `PAPERLESS_EMAIL_HOST` is reachable from inside the container; run `podman exec webserver python manage.py sendtestemail your@email.com` to test the SMTP config |
+| Paperless workflow email action missing | Workflow email actions require Paperless-ngx 2.x — update to `ghcr.io/paperless-ngx/paperless-ngx:latest` and run `python manage.py migrate` |
 | Miniflux database connection refused | Ensure PostgreSQL is running and the `DATABASE_URL` host/port is reachable from the container |
 | Planka `SECRET_KEY must be set` | Generate one with `openssl rand -hex 64` and set it in the environment |
 | Outline blank on load | OIDC configuration is likely missing or wrong — check `SECRET_KEY` and `UTILS_SECRET` are both set and non-empty |
@@ -1394,3 +1538,6 @@ memos.home.local     { tls internal; reverse_proxy localhost:5230 }
 | AFFiNE blank after startup | Wait 30–60 s for the database migrations to complete; check `podman logs affine` for PostgreSQL connection errors; ensure the DB health check passes before the app starts |
 | Hoarder bookmarks not summarising | Ensure Ollama is running and the `llama3.2` model is pulled; check `OLLAMA_BASE_URL` uses `host.containers.internal`; view task logs in the Hoarder admin panel |
 | Hoarder screenshots blank | The `chrome` container must be running and port `9222` reachable; check `podman logs chrome` for startup errors |
+| Excalidraw real-time collaboration not syncing | Confirm the `excalidraw-room` WebSocket container is running; the frontend must be configured with the room server URL in its environment |
+| Cal.com blank page after deploy | Run `podman exec calcom npx prisma db push` to apply DB migrations; check `NEXTAUTH_URL` exactly matches the URL you access it from |
+| Cal.com booking emails not sending | Verify `EMAIL_SERVER_HOST` and `EMAIL_SERVER_PORT` point at a working SMTP relay; check Cal.com logs for mailer errors |

@@ -1368,6 +1368,108 @@ Connect with any MongoDB client: `mongosh mongodb://localhost:27018/mydb`
 
 ---
 
+## PocketBase (SQLite Backend-as-a-Service)
+
+**Purpose:** Single-binary Go backend with a built-in SQLite database, REST and realtime subscriptions API, file storage, authentication (email/password, OAuth), and a clean admin dashboard. No separate database server needed. Perfect for lightweight apps, prototypes, or small-team internal tools that don't need the full PostgreSQL stack.
+
+```yaml
+# ~/pocketbase/compose.yaml
+services:
+  pocketbase:
+    image: ghcr.io/muchobien/pocketbase:latest
+    ports:
+      - 127.0.0.1:8090:8090
+    volumes:
+      - /home/user/pocketbase/pb_data:/pb_data:Z
+    restart: unless-stopped
+```
+
+```bash
+cd ~/pocketbase && podman-compose up -d
+```
+
+Access the admin UI at `http://localhost:8090/_/` to create your first admin account and define collections.
+
+**Caddy:**
+```caddyfile
+pb.home.local { tls internal; reverse_proxy localhost:8090 }
+```
+
+---
+
+## Supabase (Self-Hosted Firebase Alternative)
+
+**Purpose:** Full open-source Firebase/Supabase stack — PostgreSQL + Auth + Storage + Realtime subscriptions + Edge Functions + Studio UI in one compose stack. The most fully-featured self-hosted backend platform available. Use when you need a complete BaaS for a production app with no per-seat or per-row fees.
+
+```bash
+# Clone the official self-hosted stack
+git clone --depth 1 https://github.com/supabase/supabase
+cd supabase/docker
+
+# Copy and edit the env file
+cp .env.example .env
+# Edit .env: set POSTGRES_PASSWORD, JWT_SECRET, ANON_KEY, SERVICE_ROLE_KEY
+# (generate JWT secrets with: openssl rand -base64 32)
+
+podman-compose up -d
+```
+
+> The `.env.example` file contains detailed comments for every variable. At minimum set `POSTGRES_PASSWORD`, `JWT_SECRET`, `ANON_KEY`, and `SERVICE_ROLE_KEY`. The official repo includes a script to generate JWT keys: `node -e "require('./generate-keys')"`.
+
+Access the Supabase Studio UI at `http://localhost:3000`.
+
+**Caddy:**
+```caddyfile
+supabase.home.local { tls internal; reverse_proxy localhost:3000 }
+```
+
+---
+
+## NocoDB (Airtable on PostgreSQL)
+
+**Purpose:** Turns any existing PostgreSQL, MySQL, or SQLite database into an Airtable-style spreadsheet UI with forms, views (grid, gallery, Kanban), and a REST API — without touching your schema. Essential for giving non-technical team members a usable frontend over raw database tables.
+
+```yaml
+# ~/nocodb/compose.yaml
+services:
+  nocodb:
+    image: nocodb/nocodb:latest
+    ports:
+      - 127.0.0.1:8180:8080
+    environment:
+      NC_DB: pg://db:5432?u=nocodb&p=changeme&d=nocodb
+      NC_AUTH_JWT_SECRET: changeme-run-openssl-rand-hex-32
+    depends_on: [db]
+    volumes:
+      - /home/user/nocodb/data:/usr/app/data:Z
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: nocodb
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: nocodb
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+```bash
+cd ~/nocodb && podman-compose up -d
+```
+
+Access at `http://localhost:8180`. Connect to your existing databases under **Team & Settings → App Store → PostgreSQL** to layer a visual UI over them.
+
+**Caddy:**
+```caddyfile
+nocodb.home.local { tls internal; reverse_proxy localhost:8180 }
+```
+
+---
+
 ## Choosing the Right Database
 
 | Use Case | Recommended Database |
@@ -1392,6 +1494,9 @@ Connect with any MongoDB client: `mongosh mongodb://localhost:27018/mydb`
 | Metrics & IoT (line protocol) | InfluxDB |
 | Local OLAP / data analysis | DuckDB |
 | Multi-model (relational + graph + doc) | SurrealDB |
+| Lightweight app backend (SQLite + Auth + API) | PocketBase |
+| Full BaaS (PostgreSQL + Auth + Realtime + Storage) | Supabase |
+| Visual spreadsheet UI over existing DB | NocoDB |
 
 ---
 
@@ -1424,3 +1529,6 @@ Connect with any MongoDB client: `mongosh mongodb://localhost:27018/mydb`
 | SurrealDB connection refused | Verify the `--conn` URL uses `http://` not `https://` for local connections; check the namespace and database exist |
 | Dragonfly `ulimit` warning on startup | Set `--ulimit memlock=-1` in the run command; Dragonfly requires unlimited locked memory for performance |
 | FerretDB command not supported | Check the [FerretDB compatibility list](https://docs.ferretdb.io/reference/supported-commands/) — some advanced MongoDB aggregation stages are not yet implemented |
+| PocketBase admin blank on first load | Visit `http://localhost:8090/_/` (note the trailing slash) to trigger admin setup; the root path redirects there |
+| Supabase Studio not loading | Wait 60–90 s for all services to initialise; check `podman-compose logs` — Kong and GoTrue must be healthy before Studio loads |
+| NocoDB `Cannot read properties of undefined` on connect | Ensure `NC_DB` uses the `pg://` URI scheme with correct credentials; check the PostgreSQL container is fully started |

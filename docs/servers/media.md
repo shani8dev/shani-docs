@@ -175,7 +175,7 @@ services:
     restart: unless-stopped
 
   database:
-    image: tensorchord/pgvecto-rs:pg16-v0.2.0
+    image: ghcr.io/immich-app/postgres:16-vectorchord0.4.3-pgvectors0.2.0
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres

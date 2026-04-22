@@ -741,6 +741,163 @@ plane.home.local { tls internal; reverse_proxy localhost:3009 }
 
 ---
 
+## Forgejo Actions Runner
+
+**Purpose:** Native CI/CD runner for Forgejo (and Gitea) using the built-in Actions system. If you're already using Forgejo, this is the first runner to reach for — no separate Woodpecker server needed. Workflows live in `.forgejo/workflows/*.yml` (GitHub Actions-compatible syntax).
+
+```yaml
+# ~/forgejo-runner/compose.yaml
+services:
+  forgejo-runner:
+    image: code.forgejo.org/forgejo/runner:latest
+    volumes:
+      - /home/user/forgejo-runner:/data:Z
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    environment:
+      FORGEJO_INSTANCE_URL: https://git.home.local
+      FORGEJO_RUNNER_SECRET: changeme-from-forgejo-admin-panel
+    restart: unless-stopped
+```
+
+```bash
+cd ~/forgejo-runner && podman-compose up -d
+```
+
+**Register the runner in Forgejo:**
+1. Go to **Site Administration → Actions → Runners → Create new runner** in the Forgejo UI.
+2. Copy the registration token and set it as `FORGEJO_RUNNER_SECRET`.
+3. The runner registers itself on first start — refresh the Runners page to verify.
+
+**Example workflow** (`.forgejo/workflows/ci.yml`):
+```yaml
+on: [push]
+jobs:
+  test:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Hello from Forgejo Actions"
+```
+
+> 💡 Forgejo Actions runner uses the same `act` engine under the hood — most GitHub Actions marketplace actions work without modification.
+
+---
+
+## Renovate Bot
+
+**Purpose:** Automated dependency update pull requests for any repository. Renovate scans your repos for outdated container image tags, npm/pip/cargo packages, and GitHub Actions versions, then opens PRs with the exact diff. Self-hostable and works natively with Gitea and Forgejo. The self-hosted alternative to Dependabot.
+
+```yaml
+# ~/renovate/compose.yaml
+services:
+  renovate:
+    image: renovate/renovate:latest
+    environment:
+      RENOVATE_TOKEN: <your-gitea-personal-access-token>
+      RENOVATE_PLATFORM: gitea
+      RENOVATE_ENDPOINT: https://git.home.local
+      RENOVATE_AUTODISCOVER: "true"         # scan all repos the token can access
+      LOG_LEVEL: info
+    restart: "no"   # run once per invocation; use a timer for scheduling
+```
+
+**Run on demand or schedule with a systemd timer:**
+```bash
+# One-shot run
+cd ~/renovate && podman-compose run --rm renovate
+
+# Weekly timer
+cat > ~/.config/systemd/user/renovate.service << 'EOF'
+[Unit]
+Description=Renovate Dependency Updater
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/user/renovate
+ExecStart=podman-compose run --rm renovate
+EOF
+
+cat > ~/.config/systemd/user/renovate.timer << 'EOF'
+[Unit]
+Description=Weekly Renovate Run
+
+[Timer]
+OnCalendar=weekly
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
+systemctl --user enable --now renovate.timer
+```
+
+**Minimal `renovate.json` to add to each repo root:**
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:base"],
+  "automerge": false
+}
+```
+
+> 💡 Set `"automerge": true` for low-risk updates (patch versions) to have Renovate merge them automatically without your review.
+
+---
+
+## Windmill (Workflow & Script Automation)
+
+**Purpose:** Self-hosted alternative to n8n and Retool for code-heavy automations. Write scripts in Python, TypeScript, Bash, or Go; compose them into DAG workflows; build internal apps with a drag-and-drop UI; and schedule or trigger everything via webhook or cron — all version-controlled in Git. Significantly faster than n8n for automation tasks that are primarily code, not drag-and-drop.
+
+```yaml
+# ~/windmill/compose.yaml
+services:
+  windmill_server:
+    image: ghcr.io/windmill-labs/windmill:latest
+    ports:
+      - 127.0.0.1:8300:8000
+    environment:
+      DATABASE_URL: postgresql://windmill:changeme@db:5432/windmill
+      BASE_URL: https://windmill.home.local
+      MODE: server
+    depends_on: [db]
+    restart: unless-stopped
+
+  windmill_worker:
+    image: ghcr.io/windmill-labs/windmill:latest
+    environment:
+      DATABASE_URL: postgresql://windmill:changeme@db:5432/windmill
+      MODE: worker
+      WORKER_GROUP: default
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: windmill
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: windmill
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+```bash
+cd ~/windmill && podman-compose up -d
+```
+
+Access at `http://localhost:8300`. Default credentials: `admin@windmill.dev` / `changeme` (change immediately). Create scripts, build flows, and deploy internal apps from the UI.
+
+**Caddy:**
+```caddyfile
+windmill.home.local { tls internal; reverse_proxy localhost:8300 }
+```
+
+---
+
 ## Caddy Configuration
 
 ```caddyfile
@@ -759,6 +916,7 @@ gitlab.example.com   { reverse_proxy localhost:8929 }
 sonar.home.local     { tls internal; reverse_proxy localhost:9000 }
 harbor.home.local    { tls internal; reverse_proxy localhost:8180 }
 plane.home.local     { tls internal; reverse_proxy localhost:3009 }
+windmill.home.local  { tls internal; reverse_proxy localhost:8300 }
 ```
 
 ---
@@ -783,3 +941,6 @@ plane.home.local     { tls internal; reverse_proxy localhost:3009 }
 | GitLab 502 on first load | Wait 3–5 min for full initialisation; check `podman logs gitlab`; ensure `shm_size` is set to at least 256m |
 | GitLab Runner not picking up jobs | Verify the runner token matches; check runner tags match the job's `tags:` definition in `.gitlab-ci.yml` |
 | SonarQube exits immediately | Set `vm.max_map_count=524288` on the host with `sudo sysctl -w vm.max_map_count=524288`; add to `/etc/sysctl.d/` to persist across reboots |
+| Forgejo Actions runner not picking up jobs | Verify the registration token matches what's shown in **Site Administration → Actions → Runners**; confirm the Podman socket is mounted and accessible |
+| Renovate PR not created | Ensure the token has write access to the repos; check `podman logs` on the renovate container for API errors; verify `RENOVATE_PLATFORM=gitea` is set |
+| Windmill worker not executing jobs | Check `DATABASE_URL` is identical on server and worker; run `podman logs windmill_worker` for connection errors; ensure `MODE=worker` is set on the worker container |

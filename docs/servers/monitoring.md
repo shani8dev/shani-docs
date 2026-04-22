@@ -196,6 +196,80 @@ inhibit_rules:
     equal: [alertname, instance]
 ```
 
+**End-to-end Alertmanager → ntfy routing:**
+
+The webhook config above sends all alerts to a single ntfy topic. To route different alert severities to different topics — for example, critical alerts to a high-priority topic and warnings to a quieter one — use Alertmanager's `routes` tree and ntfy's HTTP title/priority headers via a shim or direct webhook format.
+
+The cleanest self-hosted approach is to use [alertmanager-ntfy](https://github.com/alexbakker/alertmanager-ntfy) as a thin webhook bridge:
+
+```yaml
+# ~/alertmanager-ntfy/compose.yaml
+services:
+  alertmanager-ntfy:
+    image: ghcr.io/alexbakker/alertmanager-ntfy:latest
+    ports: ["127.0.0.1:9095:8080"]
+    volumes:
+      - /home/user/alertmanager-ntfy/config.yaml:/config.yaml:ro,Z
+    restart: unless-stopped
+```
+
+```yaml
+# ~/alertmanager-ntfy/config.yaml
+ntfy:
+  base_url: http://host.containers.internal:8090
+  topic: alerts
+  # Priority mapped from Alertmanager severity label
+  priority_map:
+    critical: urgent
+    warning: default
+    info: low
+
+labels:
+  - name: severity
+```
+
+```bash
+cd ~/alertmanager-ntfy && podman-compose up -d
+```
+
+Update `alertmanager.yml` to point at the bridge and add severity-specific routes:
+
+```yaml
+route:
+  group_by: ['alertname', 'severity']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  receiver: ntfy-default
+  routes:
+    - match:
+        severity: critical
+      receiver: ntfy-critical
+      continue: false
+    - match:
+        severity: warning
+      receiver: ntfy-warning
+      continue: false
+
+receivers:
+  - name: ntfy-default
+    webhook_configs:
+      - url: http://host.containers.internal:9095/hook
+        send_resolved: true
+
+  - name: ntfy-critical
+    webhook_configs:
+      - url: http://host.containers.internal:9095/hook
+        send_resolved: true
+
+  - name: ntfy-warning
+    webhook_configs:
+      - url: http://host.containers.internal:9095/hook
+        send_resolved: true
+```
+
+> The bridge maps the `severity` label to ntfy priority levels automatically — `critical` → `urgent` (breaks through Do Not Disturb), `warning` → `default`, `info` → `low`. You can also route to different ntfy topics per receiver by setting `topic` per receiver in the bridge config.
+
 ---
 
 ## Grafana
@@ -798,6 +872,66 @@ sudo firewall-cmd --add-port=10051/tcp --permanent && sudo firewall-cmd --reload
 
 ---
 
+## Zabbix Proxy
+
+**Purpose:** A Zabbix proxy collects monitoring data on behalf of the Zabbix server and forwards it in batches. Essential for monitoring remote networks (branch offices, cloud VPCs, or off-site servers) where direct agent-to-server connections are impractical, and for reducing the load on the main Zabbix server in large environments. The proxy runs locally in the remote network, so only a single outbound connection is needed from that network to the Zabbix server.
+
+```yaml
+# ~/zabbix-proxy/compose.yml
+services:
+  proxy-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: zabbix
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: zabbix_proxy
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  zabbix-proxy:
+    image: zabbix/zabbix-proxy-pgsql:alpine-latest
+    ports: ["0.0.0.0:10051:10051"]
+    environment:
+      ZBX_SERVER_HOST: zabbix.home.local   # IP or hostname of the main Zabbix server
+      ZBX_SERVER_PORT: "10051"
+      ZBX_PROXYMODE: "0"                   # 0 = active (proxy pushes to server), 1 = passive
+      ZBX_HOSTNAME: remote-proxy-01        # must match the proxy name in the server UI
+      DB_SERVER_HOST: proxy-db
+      POSTGRES_USER: zabbix
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: zabbix_proxy
+    depends_on: [proxy-db]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+```bash
+cd ~/zabbix-proxy && podman-compose up -d
+```
+
+**Register the proxy in the Zabbix server UI:**
+1. Go to **Administration → Proxies → Create proxy**.
+2. Set the **Proxy name** to match `ZBX_HOSTNAME` above (`remote-proxy-01`).
+3. Set **Proxy mode** to **Active**.
+4. Save. The proxy will connect to the server and begin checking in.
+
+**Assign hosts to the proxy:**
+- Open any host under **Configuration → Hosts**.
+- Set the **Monitored by proxy** field to `remote-proxy-01`.
+- The Zabbix server will instruct the proxy to collect data for that host.
+
+**Firewall on the proxy host:**
+```bash
+# If using passive mode — server connects inbound to the proxy
+sudo firewall-cmd --add-port=10051/tcp --permanent && sudo firewall-cmd --reload
+```
+
+> In **active mode** (recommended), the proxy initiates the connection to the Zabbix server — no inbound firewall rules are needed on the proxy host. The server on port `10051` must be reachable from the proxy network. Use active mode whenever possible for remote-network deployments.
+
+---
+
 ## SigNoz (OpenTelemetry-Native Observability)
 
 **Purpose:** All-in-one observability platform built natively on OpenTelemetry. Combines metrics, traces, and logs in a single UI — without needing to run separate Prometheus + Tempo + Loki stacks. Best for teams already using OpenTelemetry instrumentation in their applications.
@@ -1019,7 +1153,7 @@ services:
     restart: unless-stopped
 
   graylog:
-    image: graylog/graylog:6.2
+    image: graylog/graylog:6.3
     ports:
       - "127.0.0.1:9000:9000"     # Web UI
       - "127.0.0.1:12201:12201"   # GELF TCP
@@ -1165,6 +1299,181 @@ changes.home.local { tls internal; reverse_proxy localhost:5000 }
 
 ---
 
+## OpenObserve (All-in-One Observability)
+
+**Purpose:** Rust-based unified observability platform — metrics, logs, and traces in a single binary with a built-in web UI. Claims ~140× lower storage cost than Elasticsearch for log ingestion. A compelling alternative to running the full Grafana + Loki + Tempo stack when you want one service instead of three. Accepts OpenTelemetry, Prometheus remote-write, and Loki-compatible log APIs.
+
+```yaml
+# ~/openobserve/compose.yaml
+services:
+  openobserve:
+    image: public.ecr.aws/zinclabs/openobserve:latest
+    ports:
+      - 127.0.0.1:5080:5080
+    volumes:
+      - /home/user/openobserve/data:/data:Z
+    environment:
+      ZO_ROOT_USER_EMAIL: admin@example.com
+      ZO_ROOT_USER_PASSWORD: changeme
+      ZO_DATA_DIR: /data
+    restart: unless-stopped
+```
+
+```bash
+cd ~/openobserve && podman-compose up -d
+```
+
+Access at `http://localhost:5080`. Log in with the credentials above. Ingest logs from Alloy or Promtail using the Loki-compatible endpoint (`/api/{org}/loki/api/v1/push`), send metrics via Prometheus remote-write (`/api/{org}/prometheus/api/v1/write`), and send traces via OTLP (`/api/{org}/traces`).
+
+**Caddy:**
+```caddyfile
+openobserve.home.local { tls internal; reverse_proxy localhost:5080 }
+```
+
+---
+
+## Netdata Cloud (Self-Hosted Hub)
+
+**Purpose:** Netdata Cloud is the aggregation hub that collects streams from multiple Netdata agents and presents them in a unified multi-host dashboard. The open-source self-hosted version (formerly called Netdata Cloud OSS or `netdata/netdata-cloud`) lets you correlate metrics from all your servers in one place, without sending data to netdata.cloud. The individual agent setup is covered in the main Netdata section; this covers running the hub to aggregate across machines.
+
+```yaml
+# ~/netdata-parent/compose.yaml
+# A Netdata "parent" node acts as a streaming hub for child agents.
+# Children stream metrics to the parent; the parent's UI shows all hosts.
+services:
+  netdata-parent:
+    image: netdata/netdata:latest
+    ports:
+      - 127.0.0.1:19998:19999
+    volumes:
+      - /home/user/netdata-parent/config:/etc/netdata:Z
+      - /home/user/netdata-parent/lib:/var/lib/netdata:Z
+      - /home/user/netdata-parent/cache:/var/cache/netdata:Z
+    environment:
+      NETDATA_CLAIM_TOKEN: ""   # leave blank for fully local hub
+    cap_add: [SYS_PTRACE, SYS_ADMIN]
+    restart: unless-stopped
+```
+
+```bash
+cd ~/netdata-parent && podman-compose up -d
+```
+
+**Configure child agents to stream to the parent:**
+
+On each child host, add a streaming destination to `/etc/netdata/stream.conf`:
+
+```ini
+# /etc/netdata/stream.conf on the CHILD agent
+[stream]
+  enabled = yes
+  destination = parent.home.local:19999
+  api key = xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx   # generate with: uuidgen
+```
+
+And on the parent, allow incoming streams in `/etc/netdata/stream.conf`:
+
+```ini
+# /etc/netdata/stream.conf on the PARENT hub
+[xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx]   # same UUID as child's api key
+  enabled = yes
+  default memory mode = dbengine
+```
+
+Restart both Netdata instances. The parent's dashboard at `http://localhost:19998` will show all streaming child nodes under the **Nodes** tab.
+
+**Caddy:**
+```caddyfile
+netdata-hub.home.local { tls internal; reverse_proxy localhost:19998 }
+```
+
+---
+
+## Parca (Continuous Profiling)
+
+**Purpose:** Always-on CPU and memory profiling for your running services — captures flamegraphs in production without manual sampling. Parca stores profiles over time so you can compare CPU usage before and after a code change or pinpoint a memory leak by diffing two time windows. It complements Prometheus (metrics), Loki (logs), and Tempo (traces) by adding the fourth pillar of observability: profiling.
+
+```yaml
+# ~/parca/compose.yaml
+services:
+  parca:
+    image: ghcr.io/parca-dev/parca:latest
+    ports:
+      - 127.0.0.1:7070:7070
+    volumes:
+      - /home/user/parca/parca.yaml:/etc/parca/parca.yaml:ro,Z
+    command: /parca --config-path=/etc/parca/parca.yaml
+    restart: unless-stopped
+
+  # Parca Agent — runs on each host you want to profile (needs privileged access)
+  parca-agent:
+    image: ghcr.io/parca-dev/parca-agent:latest
+    privileged: true
+    pid: host
+    network_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /sys/fs/bpf:/sys/fs/bpf
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    command: >
+      --node=homeserver
+      --remote-store-address=localhost:7070
+      --remote-store-insecure
+    restart: unless-stopped
+```
+
+```yaml
+# ~/parca/parca.yaml
+object_storage:
+  bucket:
+    type: FILESYSTEM
+    config:
+      directory: /var/lib/parca
+
+scrape_configs:
+  - job_name: parca-server
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:7070']
+```
+
+```bash
+cd ~/parca && podman-compose up -d
+```
+
+Access at `http://localhost:7070`. Select a profile type (CPU, memory allocations, goroutines for Go apps), choose a time range, and Parca renders an interactive flamegraph. Use the **Compare** view to diff two time windows to isolate regressions.
+
+**Instrument a Go application** to expose pprof profiles to Parca:
+```go
+import _ "net/http/pprof"  // registers /debug/pprof endpoints
+// ensure your app serves HTTP on a known port
+```
+
+Add it as a scrape target in `parca.yaml`:
+```yaml
+scrape_configs:
+  - job_name: my-go-app
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['host.containers.internal:6060']
+    profiling_config:
+      pprof_config:
+        memory:
+          enabled: true
+        cpu:
+          enabled: true
+          delta: true
+```
+
+> The Parca Agent uses eBPF to profile any process on the host without code changes — useful for profiling binaries that don't expose pprof endpoints (C, Rust, Node.js, etc.). It requires a kernel ≥ 5.3 with BTF support.
+
+**Caddy:**
+```caddyfile
+parca.home.local { tls internal; reverse_proxy localhost:7070 }
+```
+
+---
+
 ## Caddy Configuration
 
 ```caddyfile
@@ -1187,6 +1496,9 @@ signoz.home.local          { tls internal; reverse_proxy localhost:3301 }
 checkmk.home.local         { tls internal; reverse_proxy localhost:8095 }
 graylog.home.local         { tls internal; reverse_proxy localhost:9000 }
 changes.home.local         { tls internal; reverse_proxy localhost:5000 }
+openobserve.home.local     { tls internal; reverse_proxy localhost:5080 }
+netdata-hub.home.local     { tls internal; reverse_proxy localhost:19998 }
+parca.home.local           { tls internal; reverse_proxy localhost:7070 }
 ```
 
 ---
@@ -1219,3 +1531,9 @@ changes.home.local         { tls internal; reverse_proxy localhost:5000 }
 | Graylog GELF input not receiving logs | Verify the log driver is `gelf` and `gelf-address` uses `udp://` with the correct port; check firewall isn't blocking `12201/udp` |
 | Graylog OpenSearch connection refused | The `plugins.security.disabled: "true"` env var is required for OpenSearch 2.x without TLS; verify it is set |
 | Changedetection not detecting changes | Try adding a CSS selector to target the specific element rather than the full page; some sites require the Playwright-based browser fetcher for JavaScript-rendered content |
+| Zabbix Proxy not registering | Confirm `ZBX_HOSTNAME` in the proxy compose matches exactly the name created in the server UI under Administration → Proxies |
+| Zabbix Proxy child agents not reporting | In active proxy mode the proxy connects outbound to the server — verify port `10051/tcp` is reachable from the proxy host to the Zabbix server; also confirm the host is assigned to the correct proxy under Configuration → Hosts |
+| alertmanager-ntfy bridge not delivering | Verify the bridge container is running and the `url` in `alertmanager.yml` uses `host.containers.internal`; check `podman logs alertmanager-ntfy` for JSON parse errors; ensure the ntfy topic exists |
+| Netdata parent shows no child nodes | Confirm the `api key` UUID in both child and parent `stream.conf` match exactly; restart the child agent after editing; check `podman logs netdata-parent` for authentication errors |
+| Parca Agent missing profiles | eBPF requires kernel ≥ 5.3 with BTF — verify with `ls /sys/kernel/btf/vmlinux`; the agent container must run `privileged: true` with `pid: host`; check `podman logs parca-agent` for capability errors |
+| Parca no scrape targets appearing | Confirm the pprof endpoint on your app is reachable from the Parca container; check `parca.yaml` scrape_configs target addresses use `host.containers.internal` |

@@ -556,6 +556,95 @@ crafty.home.local { tls internal; reverse_proxy localhost:8443 }
 
 ---
 
+---
+
+## Palworld Dedicated Server
+
+**Purpose:** Dedicated server for Palworld — the open-world survival crafting game. The itzg-style LinuxGSM image auto-installs via SteamCMD and handles updates with a simple restart.
+
+```yaml
+# ~/palworld/compose.yaml
+services:
+  palworld:
+    image: thijsvanloef/palworld-server-docker:latest
+    ports:
+      - 0.0.0.0:8211:8211/udp   # game traffic
+      - 0.0.0.0:27015:27015/udp # Steam query
+    volumes:
+      - /home/user/palworld/data:/palworld:Z
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      PORT: "8211"
+      PLAYERS: "16"
+      MULTITHREADING: "true"
+      RCON_ENABLED: "true"
+      RCON_PORT: "25575"
+      ADMIN_PASSWORD: changeme
+      SERVER_PASSWORD: ""           # leave blank for public server
+      SERVER_NAME: "My Palworld Server"
+    restart: unless-stopped
+```
+
+```bash
+cd ~/palworld && podman-compose up -d
+```
+
+**Firewall:**
+```bash
+sudo firewall-cmd --add-port=8211/udp --add-port=27015/udp --permanent && sudo firewall-cmd --reload
+```
+
+**RCON (remote console):**
+```bash
+podman exec -it palworld rcon-cli --port 25575 --password changeme
+```
+
+Server data and save files live in `/home/user/palworld/data` — include this in your Restic backup job.
+
+---
+
+## Rust Dedicated Server
+
+**Purpose:** Dedicated server for Rust — the multiplayer survival game. Uses the official `LinuxGSM`-compatible image via `cm2network/steamcmd`. Wipes are scheduled automatically; the server broadcasts wipe warnings to players.
+
+```yaml
+# ~/rust/compose.yaml
+services:
+  rust:
+    image: didstopia/rust-server:latest
+    ports:
+      - 0.0.0.0:28015:28015/udp  # game traffic
+      - 0.0.0.0:28015:28015/tcp  # RCON
+      - 0.0.0.0:28016:28016/tcp  # RCON web
+      - 0.0.0.0:8080:8080/tcp    # map web UI (optional)
+    volumes:
+      - /home/user/rust/data:/steamcmd/rust:Z
+    environment:
+      RUST_SERVER_NAME: "My Rust Server"
+      RUST_SERVER_DESCRIPTION: "Self-hosted Rust"
+      RUST_SERVER_MAXPLAYERS: "50"
+      RUST_SERVER_WORLDSIZE: "3500"
+      RUST_SERVER_SEED: "12345"
+      RUST_SERVER_SAVE_INTERVAL: "600"
+      RUST_RCON_PASSWORD: changeme
+      RUST_UPDATE_ON_BOOT: "1"
+    restart: unless-stopped
+```
+
+```bash
+cd ~/rust && podman-compose up -d
+```
+
+**Firewall:**
+```bash
+sudo firewall-cmd --add-port=28015/udp --add-port=28015/tcp --add-port=28016/tcp --permanent && sudo firewall-cmd --reload
+```
+
+> First boot downloads the full Rust server (~8 GB via SteamCMD) — this can take 10–20 minutes. Monitor progress with `podman logs -f rust`. Map seed and world size cannot be changed without a full wipe.
+
+---
+
 ## Backups
 
 Game world data is irreplaceable — back it up with Restic on a schedule:
@@ -607,3 +696,7 @@ WantedBy=timers.target
 | Velocity players see wrong server | Ensure backend servers have `online-mode=false` and the matching `velocity-secret` set in `paper.yml` |
 
 > 💡 **Performance tip:** For Minecraft, use **Paper** instead of vanilla — it uses async chunk loading, mob AI optimisations, and dozens of performance patches. At 10+ players on modded servers, also look at **Aikar's JVM flags** which are available at aikar.co/2018/07/02/tuning-the-jvm-g1gc-garbage-collector-flags-for-minecraft.
+| Palworld server not appearing in list | Confirm `8211/udp` and `27015/udp` are open in firewall and router; Palworld uses UDP exclusively for game traffic |
+| Palworld save corruption after crash | Enable `RCON_ENABLED=true` and use `rcon-cli save` before stopping the container; avoid `podman kill` |
+| Rust server stuck at SteamCMD download | Large initial download (~8 GB) — normal; check disk space with `df -h`; if download hangs, restart the container |
+| Rust world not persisting after restart | Verify the `/steamcmd/rust` volume mount path; confirm `RUST_SERVER_SAVE_INTERVAL` is set and the data directory has write permissions |

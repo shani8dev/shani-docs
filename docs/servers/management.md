@@ -12,29 +12,46 @@ Best practices for running, updating, and maintaining self-hosted containers on 
 
 ## Systemd Integration
 
-Containers started with `--restart unless-stopped` restart after crashes but not after a clean reboot if systemd doesn't know about them. Generate native systemd user units for tight integration:
+Containers started with `--restart unless-stopped` restart after crashes but not after a clean reboot if systemd doesn't know about them. The modern approach on Podman 4.4+ is **Quadlet** — drop a `.container` file and systemd picks it up automatically:
 
 ```bash
-# 1. Generate a unit file from a running container
-podman generate systemd --name jellyfin --files --new
+# Create the Quadlet unit directory
+mkdir -p ~/.config/containers/systemd/
 
-# 2. Move it to the user systemd directory
-mkdir -p ~/.config/systemd/user
-mv container-jellyfin.service ~/.config/systemd/user/
+# Write a Quadlet unit for jellyfin (example)
+cat > ~/.config/containers/systemd/jellyfin.container << 'EOF'
+[Unit]
+Description=Jellyfin Media Server
 
-# 3. Reload and enable
+[Container]
+Image=jellyfin/jellyfin
+PublishPort=8096:8096
+Volume=/home/user/jellyfin/config:/config:Z
+Volume=/home/user/jellyfin/cache:/cache:Z
+Environment=TZ=Asia/Kolkata
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
+EOF
+
+# Reload and start — systemd auto-generates the service from the .container file
 systemctl --user daemon-reload
-systemctl --user enable --now container-jellyfin.service
+systemctl --user enable --now jellyfin
 
-# 4. Enable lingering — starts user services at boot even without an active login session
+# Enable lingering — starts user services at boot even without an active login session
 loginctl enable-linger $USER
 ```
 
 **Verify it's working:**
 ```bash
-systemctl --user status container-jellyfin.service
-journalctl --user -u container-jellyfin.service -f
+systemctl --user status jellyfin
+journalctl --user -u jellyfin -f
 ```
+
+> 💡 For compose-based stacks, continue using `podman-compose up -d` with `restart: unless-stopped`. Quadlet is most useful for single containers you want tight systemd integration with. `podman generate systemd` still works but is deprecated since Podman 4.4 and may be removed in a future release.
 
 ---
 
@@ -111,7 +128,7 @@ services:
   autoheal:
     image: willfarrell/autoheal
     volumes:
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro  # ${UID} resolves at shell invocation; run: export UID before podman-compose if it isn't set
     environment:
       AUTOHEAL_CONTAINER_LABEL: all
       AUTOHEAL_INTERVAL: 30
@@ -156,7 +173,7 @@ services:
       - 127.0.0.1:3001:3000
     volumes:
       - /home/user/homepage/config:/app/config:Z
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
     restart: unless-stopped
 ```
 
@@ -185,7 +202,7 @@ services:
     ports:
       - 127.0.0.1:9443:9443
     volumes:
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
       - portainer_data:/data
     restart: unless-stopped
 
@@ -213,7 +230,7 @@ services:
     ports:
       - 127.0.0.1:5001:5001
     volumes:
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
       - /home/user/stacks:/home/runner/stacks:Z
     environment:
       DOCKGE_STACKS_DIR: /home/runner/stacks
@@ -240,7 +257,7 @@ services:
     ports:
       - 127.0.0.1:8001:8000
     volumes:
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
       - /home/user/yacht/config:/config:Z
     restart: unless-stopped
 ```
@@ -265,7 +282,7 @@ services:
     ports:
       - 127.0.0.1:9120:9120
     volumes:
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
       - /home/user/komodo/data:/data:Z
     environment:
       KOMODO_HOST: https://komodo.home.local
@@ -296,7 +313,7 @@ services:
     volumes:
       - /home/user/diun/data:/data:Z
       - /home/user/diun/config.yml:/diun.yml:ro,Z
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
     environment:
       TZ: Asia/Kolkata
       LOG_LEVEL: info
@@ -435,4 +452,6 @@ komodo.home.local     { tls internal; reverse_proxy localhost:9120 }
 | Autoheal not restarting unhealthy container | Verify the health check command exits with code 1 on failure; check autoheal logs with `podman logs autoheal` |
 | Homepage service offline indicators | The Docker socket must be mounted; check socket path for rootless Podman (`/run/user/$(id -u)/podman/podman.sock`) |
 | Komodo can't deploy stack | Ensure the Podman socket is mounted; verify `KOMODO_HOST` matches the URL you access it from |
+| Komodo servers show offline after update | `KOMODO_PASSKEY` must be identical between core and any periphery agents; a mismatch shows all servers offline with no clear error message |
+| listmonk or Postal broken after auto-update | These apps require a DB migration after image updates — run `./listmonk --upgrade --yes` (listmonk) or `postal initialize` (Postal) before restarting; always back up the database first |
 | Diun not sending notifications | Check the ntfy topic and endpoint in `config.yml`; run `podman logs diun` to verify registry polling is working |
