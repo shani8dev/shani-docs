@@ -552,6 +552,14 @@
     "draft": false
   },
   {
+    "slug": "servers/clusters",
+    "title": "Clusters & High Availability",
+    "section": "Self-Hosting & Servers",
+    "updated": "2026-04-22",
+    "order": 999,
+    "draft": false
+  },
+  {
     "slug": "servers/communication",
     "title": "Communication",
     "section": "Self-Hosting & Servers",

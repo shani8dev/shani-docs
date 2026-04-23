@@ -490,6 +490,13 @@
   </url>
 
   <url>
+    <loc>https://docs.shani.dev/doc/servers/clusters</loc>
+    <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://docs.shani.dev/doc/servers/communication</loc>
     <lastmod>2026-04-22</lastmod>
     <changefreq>monthly</changefreq>
