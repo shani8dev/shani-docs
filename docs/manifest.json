@@ -576,6 +576,14 @@
     "draft": false
   },
   {
+    "slug": "servers/devops",
+    "title": "DevOps & Developer Infrastructure",
+    "section": "Self-Hosting & Servers",
+    "updated": "2026-04-22",
+    "order": 999,
+    "draft": false
+  },
+  {
     "slug": "servers/devtools",
     "title": "Developer Tools",
     "section": "Self-Hosting & Servers",
@@ -618,6 +626,14 @@
   {
     "slug": "servers/iot",
     "title": "IoT & Monitoring",
+    "section": "Self-Hosting & Servers",
+    "updated": "2026-04-22",
+    "order": 999,
+    "draft": false
+  },
+  {
+    "slug": "servers/kubernetes",
+    "title": "Kubernetes & Container Orchestration",
     "section": "Self-Hosting & Servers",
     "updated": "2026-04-22",
     "order": 999,
