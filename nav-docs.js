@@ -180,6 +180,7 @@ CONFIG.NAV_TREE = [
       { title: 'Security & Identity', slug: 'servers/security' },
       { title: 'VPN & Tunnels', slug: 'servers/vpn-tunnels' },
       { title: 'Game Servers', slug: 'servers/game-servers' },
+      { title: 'Clusters & High Availability', slug: 'servers/clusters' },
     ]
   },
 

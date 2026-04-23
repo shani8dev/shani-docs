@@ -6,7 +6,9 @@ updated: 2026-04-22
 
 # Monitoring
 
-System metrics, log aggregation, alerting, uptime tracking, container visibility, and network performance monitoring.
+System metrics, log aggregation, alerting, uptime tracking, container visibility, and network performance monitoring. All run rootless with bind-mount volumes labelled `:Z`. Named volumes omit `:Z` — Podman manages their labels automatically.
+
+For multi-node, replicated, and HA deployments (Elasticsearch cluster, OpenSearch cluster, VictoriaMetrics cluster) see the [Clusters wiki](https://docs.shani.dev/doc/servers/clusters).
 
 ---
 
@@ -116,9 +118,6 @@ podman exec prometheus promtool check rules /etc/prometheus/alerts.yml
 
 # View current active alerts
 curl http://localhost:9090/api/v1/alerts | python3 -m json.tool
-
-# Show TSDB stats
-curl http://localhost:9090/api/v1/status/tsdb | python3 -m json.tool
 ```
 
 **Example alert rules (`alerts.yml`):**
@@ -196,18 +195,17 @@ inhibit_rules:
     equal: [alertname, instance]
 ```
 
-**End-to-end Alertmanager → ntfy routing:**
+**Alertmanager → ntfy bridge (severity-aware routing):**
 
-The webhook config above sends all alerts to a single ntfy topic. To route different alert severities to different topics — for example, critical alerts to a high-priority topic and warnings to a quieter one — use Alertmanager's `routes` tree and ntfy's HTTP title/priority headers via a shim or direct webhook format.
-
-The cleanest self-hosted approach is to use [alertmanager-ntfy](https://github.com/alexbakker/alertmanager-ntfy) as a thin webhook bridge:
+Use [alertmanager-ntfy](https://github.com/alexbakker/alertmanager-ntfy) as a thin webhook bridge to map Prometheus severity labels to ntfy priority levels:
 
 ```yaml
 # ~/alertmanager-ntfy/compose.yaml
 services:
   alertmanager-ntfy:
     image: ghcr.io/alexbakker/alertmanager-ntfy:latest
-    ports: ["127.0.0.1:9095:8080"]
+    ports:
+      - 127.0.0.1:9095:8080
     volumes:
       - /home/user/alertmanager-ntfy/config.yaml:/config.yaml:ro,Z
     restart: unless-stopped
@@ -218,7 +216,6 @@ services:
 ntfy:
   base_url: http://host.containers.internal:8090
   topic: alerts
-  # Priority mapped from Alertmanager severity label
   priority_map:
     critical: urgent
     warning: default
@@ -232,7 +229,7 @@ labels:
 cd ~/alertmanager-ntfy && podman-compose up -d
 ```
 
-Update `alertmanager.yml` to point at the bridge and add severity-specific routes:
+Update `alertmanager.yml` to route by severity to the bridge:
 
 ```yaml
 route:
@@ -245,30 +242,26 @@ route:
     - match:
         severity: critical
       receiver: ntfy-critical
-      continue: false
     - match:
         severity: warning
       receiver: ntfy-warning
-      continue: false
 
 receivers:
   - name: ntfy-default
     webhook_configs:
       - url: http://host.containers.internal:9095/hook
         send_resolved: true
-
   - name: ntfy-critical
     webhook_configs:
       - url: http://host.containers.internal:9095/hook
         send_resolved: true
-
   - name: ntfy-warning
     webhook_configs:
       - url: http://host.containers.internal:9095/hook
         send_resolved: true
 ```
 
-> The bridge maps the `severity` label to ntfy priority levels automatically — `critical` → `urgent` (breaks through Do Not Disturb), `warning` → `default`, `info` → `low`. You can also route to different ntfy topics per receiver by setting `topic` per receiver in the bridge config.
+> The bridge maps the `severity` label to ntfy priority levels automatically — `critical` → `urgent` (breaks through Do Not Disturb), `warning` → `default`, `info` → `low`.
 
 ---
 
@@ -305,20 +298,14 @@ cd ~/grafana && podman-compose up -d
 podman exec grafana grafana-cli plugins install grafana-clock-panel
 podman restart grafana
 
-# List installed plugins
-podman exec grafana grafana-cli plugins ls
-
 # Reset admin password
 podman exec grafana grafana-cli admin reset-admin-password newpassword
 
 # Check Grafana health
 curl http://localhost:3001/api/health
 
-# Export a dashboard as JSON (via API)
+# Export a dashboard as JSON
 curl -u admin:changeme http://localhost:3001/api/dashboards/uid/YOUR_UID | python3 -m json.tool
-
-# Import a dashboard from Grafana.com by ID
-# Go to Dashboards → Import → paste ID (e.g., 1860 for Node Exporter Full)
 ```
 
 **Useful dashboard imports** (Dashboard → Import → paste ID):
@@ -383,13 +370,12 @@ cd ~/loki && podman-compose up -d
 curl http://localhost:3100/ready
 
 # Query logs via the API (LogQL)
-curl "http://localhost:3100/loki/api/v1/query_range"   --data-urlencode 'query={job="containerlogs"}'   --data-urlencode 'start=1h ago' | python3 -m json.tool | head -30
+curl "http://localhost:3100/loki/api/v1/query_range" \
+  --data-urlencode 'query={job="containerlogs"}' \
+  --data-urlencode 'start=1h ago' | python3 -m json.tool | head -30
 
 # List all label names
 curl http://localhost:3100/loki/api/v1/labels | python3 -m json.tool
-
-# Check ingestion stats
-curl http://localhost:3100/metrics | grep loki_ingester
 
 # Flush in-memory chunks to storage
 curl -X POST http://localhost:3100/flush
@@ -457,6 +443,55 @@ Access at `http://localhost:19999`. Good first option when you want metrics imme
 
 ---
 
+## Netdata Parent (Multi-Host Hub)
+
+**Purpose:** A Netdata "parent" node acts as a streaming hub for child agents. Children stream metrics to the parent; the parent's UI shows all hosts in a unified multi-host dashboard — without sending data to netdata.cloud.
+
+```yaml
+# ~/netdata-parent/compose.yaml
+services:
+  netdata-parent:
+    image: netdata/netdata:latest
+    ports:
+      - 127.0.0.1:19998:19999
+    volumes:
+      - /home/user/netdata-parent/config:/etc/netdata:Z
+      - /home/user/netdata-parent/lib:/var/lib/netdata:Z
+      - /home/user/netdata-parent/cache:/var/cache/netdata:Z
+    environment:
+      NETDATA_CLAIM_TOKEN: ""   # leave blank for fully local hub
+    cap_add: [SYS_PTRACE, SYS_ADMIN]
+    restart: unless-stopped
+```
+
+```bash
+cd ~/netdata-parent && podman-compose up -d
+```
+
+**Configure child agents to stream to the parent** (`/etc/netdata/stream.conf` on each child):
+```ini
+[stream]
+  enabled = yes
+  destination = parent.home.local:19999
+  api key = xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx   # generate with: uuidgen
+```
+
+**Allow incoming streams on the parent** (`/etc/netdata/stream.conf`):
+```ini
+[xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx]   # same UUID as child's api key
+  enabled = yes
+  default memory mode = dbengine
+```
+
+Restart both instances. The parent's dashboard at `http://localhost:19998` will show all streaming child nodes under the **Nodes** tab.
+
+**Caddy:**
+```caddyfile
+netdata-hub.home.local { tls internal; reverse_proxy localhost:19998 }
+```
+
+---
+
 ## Uptime Kuma
 
 **Purpose:** Self-hosted uptime monitoring with beautiful status pages. Monitors HTTP/HTTPS endpoints, TCP ports, DNS resolution, MQTT topics, and Docker container health. Sends alerts via ntfy, Telegram, Slack, email, and 50+ integrations.
@@ -487,12 +522,9 @@ podman logs -f uptime-kuma
 
 # Check all monitors via API (requires API key from Settings → API Keys)
 curl -H "Authorization: Bearer YOUR_API_KEY" http://localhost:3002/api/v1/monitor
-
-# Restart after config change
-podman restart uptime-kuma
 ```
 
-Access at `http://localhost:3002`. Create monitors for each service you run. The built-in status page can be shared with users to communicate outages.
+Access at `http://localhost:3002`. The built-in status page can be shared with users to communicate outages.
 
 ---
 
@@ -501,11 +533,12 @@ Access at `http://localhost:3002`. Create monitors for each service you run. The
 **Purpose:** Minimal, lightweight server monitoring with a central dashboard. Each server runs a tiny agent that reports CPU, RAM, disk, and network to the hub. Better than Netdata for monitoring multiple remote servers from one screen.
 
 ```yaml
-# ~/beszel/compose.yml — hub (central server)
+# ~/beszel/compose.yaml — hub (central server)
 services:
   beszel:
     image: henrygd/beszel:latest
-    ports: ["127.0.0.1:8090:8090"]
+    ports:
+      - 127.0.0.1:8090:8090
     volumes:
       - /home/user/beszel/data:/beszel_data:Z
     restart: unless-stopped
@@ -532,21 +565,6 @@ services:
 
 ```bash
 cd ~/beszel-agent && podman-compose up -d
-```
-
-**Common operations:**
-```bash
-# Get the public key for agent configuration (from the hub UI)
-# Settings → Add Server → copy the public key shown
-
-# View hub logs
-podman logs -f beszel
-
-# View agent logs on a monitored server
-podman logs -f beszel-agent
-
-# Check agent is reachable (from hub server)
-curl -sk https://agent-ip:45876 || echo "Agent unreachable"
 ```
 
 ---
@@ -697,13 +715,13 @@ endpoints:
       - "[RESPONSE_TIME] < 2000"
 ```
 
-> Gatus integrates with ntfy, Slack, email, Telegram, and more for alert delivery. Its config file is easy to keep in Git alongside your other service configs.
+> Gatus integrates with ntfy, Slack, email, Telegram, and more. Its config file is easy to keep in Git alongside your other service configs.
 
 ---
 
 ## VictoriaMetrics (Prometheus-Compatible, High Performance)
 
-**Purpose:** Drop-in Prometheus replacement with 10× lower memory usage, better compression, and faster queries. Fully compatible with the Prometheus remote-write protocol and PromQL — point any Prometheus-scraping agent (Grafana Alloy, Telegraf, node-exporter) at VictoriaMetrics without code changes. Ideal when Prometheus starts consuming too much RAM or when you need long-term metric retention without downsampling.
+**Purpose:** Drop-in Prometheus replacement with 10× lower memory usage, better compression, and faster queries. Fully compatible with the Prometheus remote-write protocol and PromQL — point any Prometheus-scraping agent (Grafana Alloy, Telegraf, node-exporter) at VictoriaMetrics without code changes. Ideal when Prometheus starts consuming too much RAM or when you need long-term metric retention.
 
 ```yaml
 # ~/victoriametrics/compose.yaml
@@ -730,23 +748,15 @@ curl http://localhost:8428/health
 # Query metrics (MetricsQL / PromQL)
 curl "http://localhost:8428/api/v1/query?query=up"
 
-# Check storage stats
-curl http://localhost:8428/api/v1/status/tsdb | python3 -m json.tool | head -20
-
 # List all metric names
 curl http://localhost:8428/api/v1/label/__name__/values | python3 -m json.tool | head -20
-
-# Delete a time series (by label selector)
-curl -X POST "http://localhost:8428/api/v1/admin/tsdb/delete_series?match[]=up{job="old-job"}"
 
 # Snapshot for backup
 curl -X POST http://localhost:8428/snapshot/create
 ```
 
 **Reconfigure Grafana to use VictoriaMetrics** instead of Prometheus:
-- Grafana → Connections → Data Sources → Prometheus
-- URL: `http://host.containers.internal:8428`
-- VictoriaMetrics speaks PromQL natively — all existing dashboards work unchanged.
+- Data Sources → Prometheus → URL: `http://host.containers.internal:8428`
 
 **Remote-write from Prometheus to VictoriaMetrics** (dual-write for migration):
 ```yaml
@@ -755,11 +765,13 @@ remote_write:
   - url: http://host.containers.internal:8428/api/v1/write
 ```
 
+For the horizontally scalable cluster variant (vminsert / vmselect / vmstorage), see the [Clusters wiki](https://docs.shani.dev/doc/servers/clusters).
+
 ---
 
 ## Grafana Tempo (Distributed Tracing)
 
-**Purpose:** Distributed tracing backend from Grafana Labs. Stores traces from OpenTelemetry, Jaeger, Zipkin, and other instrumented services, then lets you correlate them with your Prometheus metrics and Loki logs in the same Grafana dashboard. Essential when you need to trace a slow request through multiple microservices.
+**Purpose:** Distributed tracing backend from Grafana Labs. Stores traces from OpenTelemetry, Jaeger, Zipkin, and other instrumented services, then lets you correlate them with Prometheus metrics and Loki logs in the same Grafana dashboard.
 
 ```yaml
 # ~/tempo/compose.yaml
@@ -813,7 +825,7 @@ Connect Grafana to Tempo: Configuration → Data Sources → Tempo → URL: `htt
 **Purpose:** Enterprise-grade infrastructure monitoring with active and passive agent support. Zabbix agents run on monitored hosts and push detailed metrics — process lists, file monitoring, log parsing, custom scripts, and SNMP traps. Strong choice for monitoring Windows servers, network equipment, and bare-metal machines that don't expose Prometheus `/metrics` endpoints.
 
 ```yaml
-# ~/zabbix/compose.yml
+# ~/zabbix/compose.yaml
 services:
   postgres:
     image: postgres:16-alpine
@@ -821,12 +833,14 @@ services:
       POSTGRES_USER: zabbix
       POSTGRES_PASSWORD: changeme
       POSTGRES_DB: zabbix
-    volumes: [pg_data:/var/lib/postgresql/data]
+    volumes:
+      - zabbix_pg_data:/var/lib/postgresql/data
     restart: unless-stopped
 
   zabbix-server:
     image: zabbix/zabbix-server-pgsql:alpine-latest
-    ports: ["0.0.0.0:10051:10051"]
+    ports:
+      - 0.0.0.0:10051:10051
     environment:
       DB_SERVER_HOST: postgres
       POSTGRES_USER: zabbix
@@ -837,7 +851,8 @@ services:
 
   zabbix-web:
     image: zabbix/zabbix-web-nginx-pgsql:alpine-latest
-    ports: ["127.0.0.1:8400:8080"]
+    ports:
+      - 127.0.0.1:8400:8080
     environment:
       ZBX_SERVER_HOST: zabbix-server
       DB_SERVER_HOST: postgres
@@ -848,14 +863,14 @@ services:
     restart: unless-stopped
 
 volumes:
-  pg_data:
+  zabbix_pg_data:
 ```
 
 ```bash
 cd ~/zabbix && podman-compose up -d
 ```
 
-Default login: `Admin` / `zabbix`. Change immediately. Add hosts under Configuration → Hosts, assign templates (Linux by Zabbix agent, Network interfaces by SNMP, etc.).
+Default login: `Admin` / `zabbix`. Change immediately. Add hosts under Configuration → Hosts.
 
 **Install Zabbix agent on monitored hosts:**
 ```bash
@@ -874,10 +889,10 @@ sudo firewall-cmd --add-port=10051/tcp --permanent && sudo firewall-cmd --reload
 
 ## Zabbix Proxy
 
-**Purpose:** A Zabbix proxy collects monitoring data on behalf of the Zabbix server and forwards it in batches. Essential for monitoring remote networks (branch offices, cloud VPCs, or off-site servers) where direct agent-to-server connections are impractical, and for reducing the load on the main Zabbix server in large environments. The proxy runs locally in the remote network, so only a single outbound connection is needed from that network to the Zabbix server.
+**Purpose:** Collects monitoring data on behalf of the Zabbix server and forwards it in batches. Essential for monitoring remote networks where direct agent-to-server connections are impractical, and for reducing load on the main Zabbix server. The proxy runs locally in the remote network — only a single outbound connection is needed from that network to the Zabbix server.
 
 ```yaml
-# ~/zabbix-proxy/compose.yml
+# ~/zabbix-proxy/compose.yaml
 services:
   proxy-db:
     image: postgres:16-alpine
@@ -885,17 +900,19 @@ services:
       POSTGRES_USER: zabbix
       POSTGRES_PASSWORD: changeme
       POSTGRES_DB: zabbix_proxy
-    volumes: [pg_data:/var/lib/postgresql/data]
+    volumes:
+      - zabbix_proxy_pg_data:/var/lib/postgresql/data
     restart: unless-stopped
 
   zabbix-proxy:
     image: zabbix/zabbix-proxy-pgsql:alpine-latest
-    ports: ["0.0.0.0:10051:10051"]
+    ports:
+      - 0.0.0.0:10051:10051
     environment:
-      ZBX_SERVER_HOST: zabbix.home.local   # IP or hostname of the main Zabbix server
+      ZBX_SERVER_HOST: zabbix.home.local
       ZBX_SERVER_PORT: "10051"
-      ZBX_PROXYMODE: "0"                   # 0 = active (proxy pushes to server), 1 = passive
-      ZBX_HOSTNAME: remote-proxy-01        # must match the proxy name in the server UI
+      ZBX_PROXYMODE: "0"              # 0 = active (proxy pushes to server)
+      ZBX_HOSTNAME: remote-proxy-01   # must match the proxy name in the server UI
       DB_SERVER_HOST: proxy-db
       POSTGRES_USER: zabbix
       POSTGRES_PASSWORD: changeme
@@ -904,7 +921,7 @@ services:
     restart: unless-stopped
 
 volumes:
-  pg_data:
+  zabbix_proxy_pg_data:
 ```
 
 ```bash
@@ -914,43 +931,29 @@ cd ~/zabbix-proxy && podman-compose up -d
 **Register the proxy in the Zabbix server UI:**
 1. Go to **Administration → Proxies → Create proxy**.
 2. Set the **Proxy name** to match `ZBX_HOSTNAME` above (`remote-proxy-01`).
-3. Set **Proxy mode** to **Active**.
-4. Save. The proxy will connect to the server and begin checking in.
+3. Set **Proxy mode** to **Active**. Save.
 
-**Assign hosts to the proxy:**
-- Open any host under **Configuration → Hosts**.
-- Set the **Monitored by proxy** field to `remote-proxy-01`.
-- The Zabbix server will instruct the proxy to collect data for that host.
-
-**Firewall on the proxy host:**
-```bash
-# If using passive mode — server connects inbound to the proxy
-sudo firewall-cmd --add-port=10051/tcp --permanent && sudo firewall-cmd --reload
-```
-
-> In **active mode** (recommended), the proxy initiates the connection to the Zabbix server — no inbound firewall rules are needed on the proxy host. The server on port `10051` must be reachable from the proxy network. Use active mode whenever possible for remote-network deployments.
+> In **active mode** (recommended), the proxy initiates the connection to the Zabbix server — no inbound firewall rules are needed on the proxy host.
 
 ---
 
 ## SigNoz (OpenTelemetry-Native Observability)
 
-**Purpose:** All-in-one observability platform built natively on OpenTelemetry. Combines metrics, traces, and logs in a single UI — without needing to run separate Prometheus + Tempo + Loki stacks. Best for teams already using OpenTelemetry instrumentation in their applications.
+**Purpose:** All-in-one observability platform built natively on OpenTelemetry. Combines metrics, traces, and logs in a single UI — without needing to run separate Prometheus + Tempo + Loki stacks. Best for teams already using OpenTelemetry instrumentation.
 
 ```yaml
-# ~/signoz/compose.yml — use the official install script
-# git clone https://github.com/SigNoz/signoz
-# cd signoz/deploy && ./install.sh
-
-# Core services overview:
+# ~/signoz/compose.yaml
 services:
   clickhouse:
     image: clickhouse/clickhouse-server:24-alpine
-    volumes: [clickhouse_data:/var/lib/clickhouse]
+    volumes:
+      - signoz_clickhouse_data:/var/lib/clickhouse
     restart: unless-stopped
 
   query-service:
     image: signoz/query-service:latest
-    ports: ["127.0.0.1:8085:8085"]
+    ports:
+      - 127.0.0.1:8085:8085
     environment:
       ClickHouseUrl: tcp://clickhouse:9000
     depends_on: [clickhouse]
@@ -958,24 +961,28 @@ services:
 
   frontend:
     image: signoz/frontend:latest
-    ports: ["127.0.0.1:3301:3301"]
+    ports:
+      - 127.0.0.1:3301:3301
     depends_on: [query-service]
     restart: unless-stopped
 
   otel-collector:
     image: signoz/signoz-otel-collector:latest
     ports:
-      - "127.0.0.1:4317:4317"   # OTLP gRPC
-      - "127.0.0.1:4318:4318"   # OTLP HTTP
+      - 127.0.0.1:4317:4317   # OTLP gRPC
+      - 127.0.0.1:4318:4318   # OTLP HTTP
     depends_on: [clickhouse]
     restart: unless-stopped
+
+volumes:
+  signoz_clickhouse_data:
 ```
 
 ```bash
 cd ~/signoz && podman-compose up -d
 ```
 
-> Use the official `install.sh` script for production — it sets up all dependencies and volume mounts correctly. The manual compose above is illustrative.
+> Use the official `install.sh` script from the [SigNoz repo](https://github.com/SigNoz/signoz) for production — it sets up all dependencies and volume mounts correctly.
 
 Access at `http://localhost:3301`. Instrument your apps with the OpenTelemetry SDK and point them at `http://localhost:4317` (gRPC) or `http://localhost:4318` (HTTP).
 
@@ -983,7 +990,7 @@ Access at `http://localhost:3301`. Instrument your apps with the OpenTelemetry S
 
 ## OpenTelemetry Collector
 
-**Purpose:** Vendor-neutral telemetry pipeline for traces, metrics, and logs. Acts as a central hub that receives telemetry from your applications (via OTLP, Jaeger, Zipkin, or Prometheus scrape), processes and enriches it, then fans it out to multiple backends — Grafana Tempo, Loki, Prometheus, SigNoz, Jaeger, and cloud vendors simultaneously. If you run more than one observability backend, the Collector removes per-backend SDK lock-in from your application code.
+**Purpose:** Vendor-neutral telemetry pipeline for traces, metrics, and logs. Receives telemetry from your applications via OTLP, Jaeger, Zipkin, or Prometheus scrape; processes and enriches it; then fans it out to multiple backends simultaneously. Removes per-backend SDK lock-in from your application code.
 
 ```yaml
 # ~/otel-collector/compose.yaml
@@ -1057,7 +1064,7 @@ service:
 
 ## Checkmk Free (Agent-Based Infrastructure Monitoring)
 
-**Purpose:** Full-stack IT infrastructure monitoring with auto-discovery, agent-based checks, SNMP, hardware health (IPMI/iDRAC), service states, inventory, and a powerful notification engine. More approachable than Zabbix for users who want a polished setup wizard and less XML configuration. The free edition supports unlimited hosts with a full feature set for home lab and small-business use.
+**Purpose:** Full-stack IT infrastructure monitoring with auto-discovery, agent-based checks, SNMP, hardware health (IPMI/iDRAC), service states, inventory, and a powerful notification engine. More approachable than Zabbix for users who want a polished setup wizard. The free edition supports unlimited hosts with a full feature set for home lab and small-business use.
 
 ```yaml
 # ~/checkmk/compose.yaml
@@ -1077,24 +1084,23 @@ services:
 cd ~/checkmk && podman-compose up -d
 ```
 
-Access at `http://localhost:8095/cmk`. The admin password is shown in the container startup logs (`podman logs checkmk`). 
+Access at `http://localhost:8095/cmk`. The admin password is shown in the container startup logs (`podman logs checkmk`).
 
 **Install the agent on hosts to monitor:**
 ```bash
-# On the monitored host — download from your Checkmk server
 curl -o check-mk-agent.rpm \
   http://checkmk.home.local/cmk/check_mk/agents/check-mk-agent-2.3.0-1.noarch.rpm
 sudo rpm -i check-mk-agent.rpm
 sudo systemctl enable --now check-mk-agent.socket
 ```
 
-> Checkmk auto-discovers all running services (systemd units, listening ports, running processes) on registered agents — far less manual configuration than Prometheus exporters for system monitoring.
+> Checkmk auto-discovers all running services (systemd units, listening ports, running processes) on registered agents — far less manual configuration than Prometheus exporters.
 
 ---
 
 ## Karma (Alertmanager Dashboard)
 
-**Purpose:** A read-only, real-time web dashboard for Alertmanager. Where Alertmanager's own UI is minimal and hard to navigate during an incident, Karma shows all firing alerts across multiple Alertmanager instances in a clear, filterable card layout — grouped by labels, silenced alerts visible, and instant search across alert names, labels, and annotations. Indispensable when you have many alert rules and need to quickly triage what's actually firing.
+**Purpose:** Read-only, real-time web dashboard for Alertmanager. Shows all firing alerts across multiple Alertmanager instances in a clear, filterable card layout — grouped by labels, silenced alerts visible, and instant search across alert names, labels, and annotations. Indispensable when you have many alert rules and need to quickly triage what's firing.
 
 ```yaml
 # ~/karma/compose.yaml
@@ -1113,7 +1119,7 @@ services:
 cd ~/karma && podman-compose up -d
 ```
 
-Access at `http://localhost:8094`. Karma auto-refreshes every 30 seconds and shows all active alerts with their labels, annotations, and silence status.
+Access at `http://localhost:8094`. Karma auto-refreshes every 30 seconds.
 
 **Multiple Alertmanager instances:**
 ```bash
@@ -1123,20 +1129,19 @@ Access at `http://localhost:8094`. Karma auto-refreshes every 30 seconds and sho
 -e ALERTMANAGER_1_NAME=nas
 ```
 
-**Silence an alert from Karma:** Click any alert card → Silence → set duration and comment. Silences are pushed to Alertmanager and respected across your entire alerting pipeline.
-
 ---
 
 ## Graylog (Log Management & SIEM-Lite)
 
-**Purpose:** Centralised log management platform. Where Loki (in the Grafana stack) stores logs as compressed streams and queries them with LogQL, Graylog parses, indexes, and makes logs fully searchable via Elasticsearch/OpenSearch — every field in every message is indexed, so you can query `http_status:500 AND source:caddy` across millions of events in milliseconds. Supports GELF, Syslog, Beats, CEF, and raw TCP/UDP inputs. Includes alerting, dashboards, stream-based routing, and pipeline rules for enrichment. Use Graylog when you need structured, searchable log analysis rather than log tailing; use Loki+Grafana when you want lightweight log storage alongside metrics.
+**Purpose:** Centralised log management platform. Where Loki stores logs as compressed streams and queries them with LogQL, Graylog parses, indexes, and makes logs fully searchable via OpenSearch — every field in every message is indexed, so you can query `http_status:500 AND source:caddy` across millions of events in milliseconds. Use Graylog when you need structured, searchable log analysis; use Loki+Grafana when you want lightweight log storage alongside metrics.
 
 ```yaml
-# ~/graylog/compose.yml
+# ~/graylog/compose.yaml
 services:
   mongodb:
     image: mongo:6
-    volumes: [mongo_data:/data/db]
+    volumes:
+      - graylog_mongo_data:/data/db
     restart: unless-stopped
 
   opensearch:
@@ -1146,7 +1151,8 @@ services:
       discovery.type: single-node
       plugins.security.disabled: "true"
       action.auto_create_index: "false"
-    volumes: [os_data:/usr/share/opensearch/data]
+    volumes:
+      - graylog_os_data:/usr/share/opensearch/data
     ulimits:
       memlock: { soft: -1, hard: -1 }
       nofile: { soft: 65536, hard: 65536 }
@@ -1155,15 +1161,15 @@ services:
   graylog:
     image: graylog/graylog:6.3
     ports:
-      - "127.0.0.1:9000:9000"     # Web UI
-      - "127.0.0.1:12201:12201"   # GELF TCP
-      - "127.0.0.1:12201:12201/udp" # GELF UDP
-      - "127.0.0.1:1514:1514"     # Syslog TCP
-      - "127.0.0.1:1514:1514/udp" # Syslog UDP
+      - 127.0.0.1:9000:9000       # Web UI
+      - 127.0.0.1:12201:12201     # GELF TCP
+      - 127.0.0.1:12201:12201/udp # GELF UDP
+      - 127.0.0.1:1514:1514       # Syslog TCP
+      - 127.0.0.1:1514:1514/udp   # Syslog UDP
     environment:
       GRAYLOG_PASSWORD_SECRET: changeme-run-openssl-rand-base64-48
       # SHA2 of your admin password: echo -n yourpassword | sha256sum | cut -d' ' -f1
-      # The value below is the hash of 'admin' — CHANGE IT before deploying
+      # Value below is the hash of 'admin' — CHANGE IT before deploying
       GRAYLOG_ROOT_PASSWORD_SHA2: "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"
       GRAYLOG_HTTP_EXTERNAL_URI: https://graylog.home.local/
       GRAYLOG_ELASTICSEARCH_HOSTS: http://opensearch:9200
@@ -1176,34 +1182,24 @@ services:
     restart: unless-stopped
 
 volumes:
-  mongo_data:
-  os_data:
+  graylog_mongo_data:
+  graylog_os_data:
 ```
 
 ```bash
 cd ~/graylog && podman-compose up -d
 ```
 
-> The default `GRAYLOG_ROOT_PASSWORD_SHA2` above is the SHA-256 hash of `admin`. Always replace it with your own: `echo -n yourpassword | sha256sum | cut -d' ' -f1`
-
 Access at `http://localhost:9000`. Login with `admin` / your password. Create inputs under System → Inputs.
 
 **Send logs from other containers via GELF:**
 ```yaml
-# ~/myapp/compose.yaml
-services:
-  myapp:
-    image: myapp:latest
-    logging:
-      driver: gelf
-      options:
-        gelf-address: "udp://localhost:12201"
-        tag: "myapp"
-    restart: unless-stopped
-```
-
-```bash
-cd ~/myapp && podman-compose up -d
+# Add to any service's compose.yaml
+logging:
+  driver: gelf
+  options:
+    gelf-address: "udp://localhost:12201"
+    tag: "myapp"
 ```
 
 **Send Caddy access logs to Graylog via Syslog:**
@@ -1218,20 +1214,6 @@ cd ~/myapp && podman-compose up -d
 }
 ```
 
-**Useful Graylog pipeline rule — enrich Caddy logs with GeoIP:**
-```
-rule "Tag internal IPs"
-when
-  has_field("remote_addr")
-then
-  let ip = to_string($message.remote_addr);
-  if (cidr_match("192.168.0.0/16", ip) || cidr_match("10.0.0.0/8", ip),
-    set_field("source_type", "internal"),
-    set_field("source_type", "external")
-  );
-end
-```
-
 **Ship logs from any Linux host via Filebeat → Graylog:**
 ```yaml
 # /etc/filebeat/filebeat.yml on remote host
@@ -1244,13 +1226,13 @@ output.logstash:
   hosts: ["graylog.home.local:5044"]
 ```
 
-> **Graylog vs Loki:** Use Loki (via Grafana Alloy) for lightweight log tailing alongside Prometheus metrics. Use Graylog when you need full-text indexing, structured field search, complex pipeline transformations, and a dedicated log analysis UI — especially for security/compliance use cases alongside Wazuh.
+> **Graylog vs Loki:** Use Loki (via Grafana Alloy) for lightweight log tailing alongside Prometheus metrics. Use Graylog when you need full-text indexing, structured field search, and a dedicated log analysis UI.
 
 ---
 
 ## Changedetection.io (Website Change Monitor)
 
-**Purpose:** Monitor any webpage for changes and get notified when content updates. Watches price drops, government notices, stock availability, documentation changes, job postings, or any content that changes over time. Supports CSS selectors for monitoring specific page elements, visual diffing, and notifications via ntfy, email, Telegram, Slack, Discord, and 80+ other services.
+**Purpose:** Monitor any webpage for changes and get notified when content updates. Watches price drops, government notices, stock availability, documentation changes, and more. Supports CSS selectors, visual diffing, and notifications via ntfy, email, Telegram, Slack, Discord, and 80+ other services.
 
 ```yaml
 # ~/changedetection/compose.yaml
@@ -1271,26 +1253,12 @@ services:
 cd ~/changedetection && podman-compose up -d
 ```
 
-Access at `http://localhost:5000`. Add URLs to watch, optionally set a CSS/XPath selector to target specific page elements, configure the check interval, and connect a notification service.
+Access at `http://localhost:5000`. Add URLs to watch, optionally set a CSS/XPath selector, configure the check interval, and connect a notification service.
 
-**Send notifications via Ntfy:**
-
-In the web UI, go to Settings → Notifications → Add notification URL:
+**Send notifications via ntfy** (Settings → Notifications → Add notification URL):
 ```
 ntfy://host.containers.internal:8090/your-topic
 ```
-
-**Monitor a specific element (e.g., a price):**
-```
-URL: https://shop.example.com/product/123
-CSS Filter: span.price
-```
-
-**Common use cases:**
-- Price monitoring (add `CSS Filter` to target the price element)
-- Software release pages (watch GitHub releases pages)
-- Government tender or notification pages
-- "Out of stock" product pages — get notified when availability changes
 
 **Caddy:**
 ```caddyfile
@@ -1323,7 +1291,7 @@ services:
 cd ~/openobserve && podman-compose up -d
 ```
 
-Access at `http://localhost:5080`. Log in with the credentials above. Ingest logs from Alloy or Promtail using the Loki-compatible endpoint (`/api/{org}/loki/api/v1/push`), send metrics via Prometheus remote-write (`/api/{org}/prometheus/api/v1/write`), and send traces via OTLP (`/api/{org}/traces`).
+Access at `http://localhost:5080`. Ingest logs via the Loki-compatible endpoint (`/api/{org}/loki/api/v1/push`), send metrics via Prometheus remote-write, and send traces via OTLP.
 
 **Caddy:**
 ```caddyfile
@@ -1332,66 +1300,9 @@ openobserve.home.local { tls internal; reverse_proxy localhost:5080 }
 
 ---
 
-## Netdata Cloud (Self-Hosted Hub)
-
-**Purpose:** Netdata Cloud is the aggregation hub that collects streams from multiple Netdata agents and presents them in a unified multi-host dashboard. The open-source self-hosted version (formerly called Netdata Cloud OSS or `netdata/netdata-cloud`) lets you correlate metrics from all your servers in one place, without sending data to netdata.cloud. The individual agent setup is covered in the main Netdata section; this covers running the hub to aggregate across machines.
-
-```yaml
-# ~/netdata-parent/compose.yaml
-# A Netdata "parent" node acts as a streaming hub for child agents.
-# Children stream metrics to the parent; the parent's UI shows all hosts.
-services:
-  netdata-parent:
-    image: netdata/netdata:latest
-    ports:
-      - 127.0.0.1:19998:19999
-    volumes:
-      - /home/user/netdata-parent/config:/etc/netdata:Z
-      - /home/user/netdata-parent/lib:/var/lib/netdata:Z
-      - /home/user/netdata-parent/cache:/var/cache/netdata:Z
-    environment:
-      NETDATA_CLAIM_TOKEN: ""   # leave blank for fully local hub
-    cap_add: [SYS_PTRACE, SYS_ADMIN]
-    restart: unless-stopped
-```
-
-```bash
-cd ~/netdata-parent && podman-compose up -d
-```
-
-**Configure child agents to stream to the parent:**
-
-On each child host, add a streaming destination to `/etc/netdata/stream.conf`:
-
-```ini
-# /etc/netdata/stream.conf on the CHILD agent
-[stream]
-  enabled = yes
-  destination = parent.home.local:19999
-  api key = xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx   # generate with: uuidgen
-```
-
-And on the parent, allow incoming streams in `/etc/netdata/stream.conf`:
-
-```ini
-# /etc/netdata/stream.conf on the PARENT hub
-[xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx]   # same UUID as child's api key
-  enabled = yes
-  default memory mode = dbengine
-```
-
-Restart both Netdata instances. The parent's dashboard at `http://localhost:19998` will show all streaming child nodes under the **Nodes** tab.
-
-**Caddy:**
-```caddyfile
-netdata-hub.home.local { tls internal; reverse_proxy localhost:19998 }
-```
-
----
-
 ## Parca (Continuous Profiling)
 
-**Purpose:** Always-on CPU and memory profiling for your running services — captures flamegraphs in production without manual sampling. Parca stores profiles over time so you can compare CPU usage before and after a code change or pinpoint a memory leak by diffing two time windows. It complements Prometheus (metrics), Loki (logs), and Tempo (traces) by adding the fourth pillar of observability: profiling.
+**Purpose:** Always-on CPU and memory profiling for your running services — captures flamegraphs in production without manual sampling. Stores profiles over time so you can compare CPU usage before and after a code change or pinpoint a memory leak by diffing two time windows. Adds the fourth pillar of observability alongside metrics, logs, and traces.
 
 ```yaml
 # ~/parca/compose.yaml
@@ -1405,7 +1316,6 @@ services:
     command: /parca --config-path=/etc/parca/parca.yaml
     restart: unless-stopped
 
-  # Parca Agent — runs on each host you want to profile (needs privileged access)
   parca-agent:
     image: ghcr.io/parca-dev/parca-agent:latest
     privileged: true
@@ -1441,31 +1351,9 @@ scrape_configs:
 cd ~/parca && podman-compose up -d
 ```
 
-Access at `http://localhost:7070`. Select a profile type (CPU, memory allocations, goroutines for Go apps), choose a time range, and Parca renders an interactive flamegraph. Use the **Compare** view to diff two time windows to isolate regressions.
+Access at `http://localhost:7070`. Select a profile type (CPU, memory allocations), choose a time range, and Parca renders an interactive flamegraph. Use the **Compare** view to diff two time windows.
 
-**Instrument a Go application** to expose pprof profiles to Parca:
-```go
-import _ "net/http/pprof"  // registers /debug/pprof endpoints
-// ensure your app serves HTTP on a known port
-```
-
-Add it as a scrape target in `parca.yaml`:
-```yaml
-scrape_configs:
-  - job_name: my-go-app
-    scrape_interval: 10s
-    static_configs:
-      - targets: ['host.containers.internal:6060']
-    profiling_config:
-      pprof_config:
-        memory:
-          enabled: true
-        cpu:
-          enabled: true
-          delta: true
-```
-
-> The Parca Agent uses eBPF to profile any process on the host without code changes — useful for profiling binaries that don't expose pprof endpoints (C, Rust, Node.js, etc.). It requires a kernel ≥ 5.3 with BTF support.
+> The Parca Agent uses eBPF to profile any process on the host without code changes. Requires kernel ≥ 5.3 with BTF support — verify with `ls /sys/kernel/btf/vmlinux`.
 
 **Caddy:**
 ```caddyfile
@@ -1474,11 +1362,9 @@ parca.home.local { tls internal; reverse_proxy localhost:7070 }
 
 ---
 
-## Elasticsearch + ELK Stack
+## Elasticsearch + ELK Stack (Single-Node)
 
-**Purpose:** Distributed search and analytics engine — the `E` in the ELK stack (Elasticsearch + Logstash + Kibana). Stores, indexes, and searches structured and unstructured log data, metrics, and events at scale. The full ELK stack pairs Elasticsearch for storage/search, Logstash or Beats agents for ingestion, and Kibana for visualisation and alerting.
-
-### Single-Node (Development / Small Homelab)
+**Purpose:** Distributed search and analytics engine — the `E` in the ELK stack (Elasticsearch + Logstash + Kibana). Stores, indexes, and searches structured and unstructured log data at scale. For multi-node production clusters see the [Clusters wiki](https://docs.shani.dev/doc/servers/clusters).
 
 ```yaml
 # ~/elk/compose.yaml
@@ -1526,155 +1412,14 @@ volumes:
 ```
 
 ```bash
-cd ~/elk && podman-compose up -d
-```
-
-**Kibana:** `http://localhost:5601` — create index patterns under Stack Management → Index Patterns, then explore logs under Discover.
-
----
-
-### Multi-Node Cluster (Production / High Availability)
-
-A production ELK cluster separates roles across dedicated nodes: master nodes manage cluster state, data nodes store and query indices, coordinating nodes route client requests. The minimum recommended setup for HA is 3 master-eligible nodes (to avoid split-brain) and 2+ data nodes.
-
-```yaml
-# ~/elk-cluster/compose.yaml
-services:
-  # --- Master-eligible nodes (3 for quorum) ---
-  es01:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
-    ports: ["127.0.0.1:9200:9200"]
-    environment:
-      node.name: es01
-      cluster.name: homelab-logs
-      node.roles: master,data
-      discovery.seed_hosts: es02,es03
-      cluster.initial_master_nodes: es01,es02,es03
-      xpack.security.enabled: "false"
-      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
-      bootstrap.memory_lock: "true"
-    volumes: [es01_data:/usr/share/elasticsearch/data]
-    ulimits:
-      memlock: { soft: -1, hard: -1 }
-      nofile: { soft: 65536, hard: 65536 }
-    restart: unless-stopped
-
-  es02:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
-    environment:
-      node.name: es02
-      cluster.name: homelab-logs
-      node.roles: master,data
-      discovery.seed_hosts: es01,es03
-      cluster.initial_master_nodes: es01,es02,es03
-      xpack.security.enabled: "false"
-      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
-      bootstrap.memory_lock: "true"
-    volumes: [es02_data:/usr/share/elasticsearch/data]
-    ulimits:
-      memlock: { soft: -1, hard: -1 }
-      nofile: { soft: 65536, hard: 65536 }
-    restart: unless-stopped
-
-  es03:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
-    environment:
-      node.name: es03
-      cluster.name: homelab-logs
-      node.roles: master,data
-      discovery.seed_hosts: es01,es02
-      cluster.initial_master_nodes: es01,es02,es03
-      xpack.security.enabled: "false"
-      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
-      bootstrap.memory_lock: "true"
-    volumes: [es03_data:/usr/share/elasticsearch/data]
-    ulimits:
-      memlock: { soft: -1, hard: -1 }
-      nofile: { soft: 65536, hard: 65536 }
-    restart: unless-stopped
-
-  # --- Coordinating / ingest node (optional, improves write throughput) ---
-  es-ingest:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
-    environment:
-      node.name: es-ingest
-      cluster.name: homelab-logs
-      node.roles: ingest,coordinating   # no data, no master — just routes
-      discovery.seed_hosts: es01,es02,es03
-      cluster.initial_master_nodes: es01,es02,es03
-      xpack.security.enabled: "false"
-      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
-    ulimits:
-      memlock: { soft: -1, hard: -1 }
-      nofile: { soft: 65536, hard: 65536 }
-    restart: unless-stopped
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.13.4
-    ports: ["127.0.0.1:5601:5601"]
-    environment:
-      # Point at all nodes for HA — Kibana load-balances across them
-      ELASTICSEARCH_HOSTS: '["http://es01:9200","http://es02:9200","http://es03:9200"]'
-    depends_on: [es01, es02, es03]
-    restart: unless-stopped
-
-  logstash:
-    image: docker.elastic.co/logstash/logstash:8.13.4
-    ports:
-      - 127.0.0.1:5044:5044
-      - 127.0.0.1:5000:5000/tcp
-      - 127.0.0.1:5000:5000/udp
-    volumes:
-      - /home/user/elk-cluster/logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
-      - /home/user/elk-cluster/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
-    environment:
-      LS_JAVA_OPTS: "-Xms512m -Xmx512m"
-    depends_on: [es01]
-    restart: unless-stopped
-
-volumes:
-  es01_data:
-  es02_data:
-  es03_data:
-```
-
-```bash
-cd ~/elk-cluster && podman-compose up -d
-
-# Check cluster health
-curl http://localhost:9200/_cluster/health?pretty
-
-# List nodes and their roles
-curl http://localhost:9200/_cat/nodes?v
-```
-
-**Node roles reference:**
-
-| Role | Responsibilities |
-|------|-----------------|
-| `master` | Cluster state, index creation/deletion, shard allocation |
-| `data` | Store shards, handle search and indexing requests |
-| `ingest` | Pre-process documents via pipelines before indexing |
-| `coordinating` | Route requests, merge results — no data stored |
-| `ml` | Machine learning jobs (Elastic licence required) |
-
-> **Split-brain prevention:** Always deploy an odd number of master-eligible nodes (3 or 5). Elasticsearch automatically sets `discovery.zen.minimum_master_nodes` to `(n/2)+1`. With 3 masters, cluster survives loss of 1; with 5, loss of 2.
-
-**System prerequisites on the host (apply to all cluster nodes):**
-```bash
-# Required — Elasticsearch will fail to start without these
+# Required on the host before starting
 sudo sysctl -w vm.max_map_count=262144
 echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
 
-# Increase open file limits (if not using ulimits in compose)
-sudo bash -c 'echo "* soft nofile 65536\n* hard nofile 65536" >> /etc/security/limits.conf'
+cd ~/elk && podman-compose up -d
 ```
 
----
-
-### Logstash — Pipeline Configuration
-
-Logstash processes logs through input → filter → output pipelines. Drop `.conf` files into the pipeline directory.
+**Kibana:** `http://localhost:5601` — create index patterns under Stack Management → Index Patterns.
 
 **Minimal `logstash.yml`:**
 ```yaml
@@ -1712,7 +1457,7 @@ filter {
 
   if [fields][type] == "syslog" {
     grok {
-      match => { "message" => "%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}" }
+      match => { "message" => "%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}(?:\\[%{POSINT:syslog_pid}\\])?: %{GREEDYDATA:syslog_message}" }
     }
     date {
       match => ["syslog_timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss"]
@@ -1724,43 +1469,7 @@ output {
   elasticsearch {
     hosts => ["http://elasticsearch:9200"]
     index => "logs-%{[fields][type]}-%{+YYYY.MM.dd}"
-    # For cluster: hosts => ["http://es01:9200", "http://es02:9200", "http://es03:9200"]
   }
-}
-```
-
-**Pipeline: Syslog UDP → Elasticsearch (`syslog-to-es.conf`):**
-```ruby
-input {
-  udp {
-    port => 5000
-    codec => plain
-  }
-  tcp {
-    port => 5000
-    codec => plain
-  }
-}
-
-filter {
-  grok {
-    match => { "message" => "%{SYSLOGTIMESTAMP:timestamp} %{IPORHOST:host} %{PROG:program}(?:\[%{POSINT:pid}\])?: %{GREEDYDATA:log_message}" }
-  }
-  date {
-    match => ["timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss"]
-  }
-  mutate {
-    add_field => { "source_type" => "syslog" }
-  }
-}
-
-output {
-  elasticsearch {
-    hosts => ["http://elasticsearch:9200"]
-    index => "syslog-%{+YYYY.MM.dd}"
-  }
-  # Optionally echo to stdout for debugging:
-  # stdout { codec => rubydebug }
 }
 ```
 
@@ -1772,21 +1481,62 @@ curl http://localhost:9600/_node/pipelines?pretty
 # Check node stats (throughput, queue depth)
 curl http://localhost:9600/_node/stats?pretty | python3 -m json.tool | grep -A5 events
 
-# Reload pipelines without restart (if config.reload.automatic is enabled)
-curl -X POST http://localhost:9600/_node/pipelines/reload
-
 # Validate a pipeline config before deploying
-podman exec logstash logstash --config.test_and_exit -f /usr/share/logstash/pipeline/beats-to-es.conf
+podman exec logstash logstash --config.test_and_exit \
+  -f /usr/share/logstash/pipeline/beats-to-es.conf
+```
 
-# Tail Logstash logs
-podman logs -f logstash
+**Common Elasticsearch operations:**
+```bash
+# Cluster health
+curl http://localhost:9200/_cluster/health?pretty
+
+# List all indices with size and doc count
+curl "http://localhost:9200/_cat/indices?v&s=store.size:desc"
+
+# Delete an index
+curl -X DELETE http://localhost:9200/logs-2024.01.01
+
+# Check ILM policy status for an index
+curl http://localhost:9200/logs-000001/_ilm/explain?pretty
+```
+
+**Index Lifecycle Management (ILM) — auto-manage index ageing:**
+```bash
+curl -X PUT http://localhost:9200/_ilm/policy/logs-policy \
+  -H "Content-Type: application/json" -d '
+{
+  "policy": {
+    "phases": {
+      "hot": {
+        "min_age": "0ms",
+        "actions": {
+          "rollover": { "max_primary_shard_size": "50gb", "max_age": "1d" },
+          "set_priority": { "priority": 100 }
+        }
+      },
+      "warm": {
+        "min_age": "7d",
+        "actions": {
+          "shrink": { "number_of_shards": 1 },
+          "forcemerge": { "max_num_segments": 1 },
+          "set_priority": { "priority": 50 }
+        }
+      },
+      "delete": {
+        "min_age": "90d",
+        "actions": { "delete": {} }
+      }
+    }
+  }
+}'
 ```
 
 ---
 
-### Beats — Lightweight Log & Metric Shippers
+## Beats — Lightweight Log & Metric Shippers
 
-Beats are single-purpose, lightweight agents that run on monitored hosts and ship data to Logstash or Elasticsearch directly. No JVM — each Beat is a small Go binary.
+**Purpose:** Single-purpose, lightweight agents (Go binaries, no JVM) that run on monitored hosts and ship data to Logstash or Elasticsearch directly.
 
 | Beat | Ships | Use Case |
 |------|-------|----------|
@@ -1807,8 +1557,7 @@ services:
     volumes:
       - /home/user/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro,Z
       - /var/log:/var/log:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /run/user/1000/podman:/run/podman:ro
+      - /run/user/1000/podman/podman.sock:/run/podman/podman.sock:ro
       - filebeat_data:/usr/share/filebeat/data
     restart: unless-stopped
 
@@ -1828,13 +1577,6 @@ filebeat.inputs:
       type: syslog
     fields_under_root: true
 
-  - type: container
-    enabled: true
-    paths:
-      - /var/lib/docker/containers/*/*.log
-    fields:
-      type: container
-
   - type: log
     enabled: true
     paths:
@@ -1843,37 +1585,21 @@ filebeat.inputs:
       type: nginx
     fields_under_root: true
 
-# Output to Logstash
 output.logstash:
   hosts: ["host.containers.internal:5044"]
-
-# OR output directly to Elasticsearch (bypass Logstash)
-# output.elasticsearch:
-#   hosts: ["http://host.containers.internal:9200"]
-#   index: "filebeat-%{[agent.version]}-%{+yyyy.MM.dd}"
-
-# Monitoring (optional — sends Beat metrics to ES)
-# monitoring.enabled: true
-# monitoring.elasticsearch.hosts: ["http://host.containers.internal:9200"]
 
 processors:
   - add_host_metadata: ~
   - add_cloud_metadata: ~
-  - add_docker_metadata: ~
 
 logging.level: info
-logging.to_files: true
-logging.files:
-  path: /usr/share/filebeat/logs
-  name: filebeat
-  keepfiles: 7
 ```
 
 ```bash
 cd ~/filebeat && podman-compose up -d
 ```
 
-**Metricbeat — ship system and container metrics:**
+**Metricbeat — ship system metrics:**
 ```yaml
 # ~/metricbeat/compose.yaml
 services:
@@ -1886,243 +1612,31 @@ services:
       - /proc:/hostfs/proc:ro
       - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
       - /:/hostfs:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
       - /run/user/1000/podman/podman.sock:/run/podman/podman.sock:ro
     command: metricbeat -e --system.hostfs=/hostfs
     restart: unless-stopped
 ```
 
-```yaml
-# ~/metricbeat/metricbeat.yml
-metricbeat.modules:
-  - module: system
-    metricsets:
-      - cpu
-      - load
-      - memory
-      - network
-      - process
-      - process_summary
-      - diskio
-      - filesystem
-      - fsstat
-    enabled: true
-    period: 10s
-    processes: ['.*']
-    cpu.metrics: [percentages, normalized_percentages]
-    core.metrics: [percentages]
-
-  - module: docker
-    metricsets:
-      - container
-      - cpu
-      - diskio
-      - healthcheck
-      - info
-      - memory
-      - network
-    hosts: ["unix:///var/run/docker.sock"]
-    period: 10s
-
-  - module: nginx
-    metricsets: [stubstatus]
-    period: 10s
-    hosts: ["http://host.containers.internal:8080"]
-    server_status_path: /nginx_status
-
-output.elasticsearch:
-  hosts: ["http://host.containers.internal:9200"]
-  index: "metricbeat-%{[agent.version]}-%{+yyyy.MM.dd}"
-
-setup.kibana:
-  host: "http://host.containers.internal:5601"
-
-setup.dashboards.enabled: true   # auto-import Metricbeat dashboards into Kibana
-```
-
-```bash
-cd ~/metricbeat && podman-compose up -d
-```
-
-**Auditbeat — file integrity and audit monitoring:**
-```yaml
-# ~/auditbeat/compose.yaml
-services:
-  auditbeat:
-    image: docker.elastic.co/beats/auditbeat:8.13.4
-    user: root
-    pid: host
-    cap_add: [AUDIT_READ, AUDIT_WRITE, AUDIT_CONTROL]
-    volumes:
-      - /home/user/auditbeat/auditbeat.yml:/usr/share/auditbeat/auditbeat.yml:ro,Z
-    restart: unless-stopped
-```
-
-```yaml
-# ~/auditbeat/auditbeat.yml
-auditbeat.modules:
-  - module: auditd
-    audit_rules: |
-      -a always,exit -F arch=b64 -S execve -k exec
-      -w /etc/passwd -p wa -k identity
-      -w /etc/shadow -p wa -k identity
-      -w /home/user -p wa -k home_writes
-
-  - module: file_integrity
-    paths:
-      - /etc
-      - /usr/bin
-      - /usr/sbin
-      - /home/user/.ssh
-    recursive: true
-
-output.elasticsearch:
-  hosts: ["http://host.containers.internal:9200"]
-```
-
-```bash
-cd ~/auditbeat && podman-compose up -d
-```
-
 ---
 
-### Index Lifecycle Management (ILM)
+## OpenSearch (Single-Node)
 
-ILM automatically manages index ageing — moving indices from hot (fast SSDs, active writes) to warm (slower storage, no writes) to cold (compressed, rarely queried) and finally deleting them. Essential for long-running log clusters to prevent unbounded disk growth.
-
-**Create an ILM policy via the Elasticsearch API:**
-```bash
-curl -X PUT http://localhost:9200/_ilm/policy/logs-policy \
-  -H "Content-Type: application/json" -d '
-{
-  "policy": {
-    "phases": {
-      "hot": {
-        "min_age": "0ms",
-        "actions": {
-          "rollover": {
-            "max_primary_shard_size": "50gb",
-            "max_age": "1d"
-          },
-          "set_priority": { "priority": 100 }
-        }
-      },
-      "warm": {
-        "min_age": "7d",
-        "actions": {
-          "shrink": { "number_of_shards": 1 },
-          "forcemerge": { "max_num_segments": 1 },
-          "set_priority": { "priority": 50 }
-        }
-      },
-      "cold": {
-        "min_age": "30d",
-        "actions": {
-          "freeze": {},
-          "set_priority": { "priority": 0 }
-        }
-      },
-      "delete": {
-        "min_age": "90d",
-        "actions": {
-          "delete": {}
-        }
-      }
-    }
-  }
-}'
-```
-
-**Create an index template that applies the policy automatically:**
-```bash
-# Create a component template for settings
-curl -X PUT http://localhost:9200/_component_template/logs-settings \
-  -H "Content-Type: application/json" -d '
-{
-  "template": {
-    "settings": {
-      "number_of_shards": 1,
-      "number_of_replicas": 1,
-      "index.lifecycle.name": "logs-policy",
-      "index.lifecycle.rollover_alias": "logs"
-    }
-  }
-}'
-
-# Create an index template matching logs-* indices
-curl -X PUT http://localhost:9200/_index_template/logs-template \
-  -H "Content-Type: application/json" -d '
-{
-  "index_patterns": ["logs-*"],
-  "composed_of": ["logs-settings"],
-  "priority": 200
-}'
-
-# Bootstrap the first index and alias
-curl -X PUT http://localhost:9200/logs-000001 \
-  -H "Content-Type: application/json" -d '
-{
-  "aliases": {
-    "logs": { "is_write_index": true }
-  }
-}'
-```
-
----
-
-### Common Elasticsearch Operations
-
-```bash
-# Cluster health and node list
-curl http://localhost:9200/_cluster/health?pretty
-curl "http://localhost:9200/_cat/nodes?v&h=name,role,heap.percent,disk.used_percent,load_1m"
-
-# List all indices with size and doc count
-curl "http://localhost:9200/_cat/indices?v&s=store.size:desc"
-
-# Check shard allocation
-curl "http://localhost:9200/_cat/shards?v&h=index,shard,prirep,state,node,store"
-
-# Show unassigned shards (important for debugging cluster issues)
-curl "http://localhost:9200/_cat/shards?v&h=index,shard,prirep,state,unassigned.reason" | grep UNASSIGNED
-
-# Delete an index (careful!)
-curl -X DELETE http://localhost:9200/logs-2024.01.01
-
-# Force merge (reduce segment count — improves search on old indices)
-curl -X POST "http://localhost:9200/logs-*/_forcemerge?max_num_segments=1"
-
-# Get cluster settings
-curl http://localhost:9200/_cluster/settings?pretty
-
-# Set cluster-wide allocation filter (e.g., move all indices off a decommissioned node)
-curl -X PUT http://localhost:9200/_cluster/settings \
-  -H "Content-Type: application/json" \
-  -d '{"transient":{"cluster.routing.allocation.exclude._name":"es03"}}'
-
-# Check ILM policy status for an index
-curl http://localhost:9200/logs-000001/_ilm/explain?pretty
-```
-
----
-
-## OpenSearch (Apache 2.0 ELK Alternative)
-
-**Purpose:** Fully open-source fork of Elasticsearch 7.10 and Kibana under the Apache 2.0 licence — created by AWS when Elastic changed its licence. Drop-in API compatible: any Logstash output, Filebeat, or Metricbeat that targets Elasticsearch works against OpenSearch without changes. Preferred for self-hosters who want the full ELK-equivalent stack without Elastic's SSPL licence restrictions.
-
-### Single-Node
+**Purpose:** Fully open-source fork of Elasticsearch 7.10 under the Apache 2.0 licence. Drop-in API compatible — any Logstash output, Filebeat, or Metricbeat that targets Elasticsearch works against OpenSearch without changes. For multi-node production clusters see the [Clusters wiki](https://docs.shani.dev/doc/servers/clusters).
 
 ```yaml
-# ~/opensearch/compose.yml
+# ~/opensearch/compose.yaml
 services:
   opensearch:
     image: opensearchproject/opensearch:2
-    ports: ["127.0.0.1:9200:9200", "127.0.0.1:9600:9600"]
+    ports:
+      - 127.0.0.1:9200:9200
+      - 127.0.0.1:9600:9600
     environment:
       discovery.type: single-node
       DISABLE_SECURITY_PLUGIN: "true"
       OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx1g"
-    volumes: [opensearch_data:/usr/share/opensearch/data]
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
     ulimits:
       memlock: { soft: -1, hard: -1 }
       nofile: { soft: 65536, hard: 65536 }
@@ -2130,7 +1644,8 @@ services:
 
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:2
-    ports: ["127.0.0.1:5601:5601"]
+    ports:
+      - 127.0.0.1:5601:5601
     environment:
       OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
       DISABLE_SECURITY_DASHBOARDS_PLUGIN: "true"
@@ -2142,167 +1657,17 @@ volumes:
 ```
 
 ```bash
+sudo sysctl -w vm.max_map_count=262144
+echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
+
 cd ~/opensearch && podman-compose up -d
 ```
-
-### Multi-Node Cluster
-
-```yaml
-# ~/opensearch-cluster/compose.yml
-services:
-  os01:
-    image: opensearchproject/opensearch:2
-    environment:
-      cluster.name: os-logs
-      node.name: os01
-      discovery.seed_hosts: os02,os03
-      cluster.initial_cluster_manager_nodes: os01,os02,os03
-      DISABLE_SECURITY_PLUGIN: "true"
-      OPENSEARCH_JAVA_OPTS: "-Xms1g -Xmx1g"
-      bootstrap.memory_lock: "true"
-    volumes: [os01_data:/usr/share/opensearch/data]
-    ulimits:
-      memlock: { soft: -1, hard: -1 }
-      nofile: { soft: 65536, hard: 65536 }
-    restart: unless-stopped
-
-  os02:
-    image: opensearchproject/opensearch:2
-    environment:
-      cluster.name: os-logs
-      node.name: os02
-      discovery.seed_hosts: os01,os03
-      cluster.initial_cluster_manager_nodes: os01,os02,os03
-      DISABLE_SECURITY_PLUGIN: "true"
-      OPENSEARCH_JAVA_OPTS: "-Xms1g -Xmx1g"
-      bootstrap.memory_lock: "true"
-    volumes: [os02_data:/usr/share/opensearch/data]
-    ulimits:
-      memlock: { soft: -1, hard: -1 }
-      nofile: { soft: 65536, hard: 65536 }
-    restart: unless-stopped
-
-  os03:
-    image: opensearchproject/opensearch:2
-    environment:
-      cluster.name: os-logs
-      node.name: os03
-      discovery.seed_hosts: os01,os02
-      cluster.initial_cluster_manager_nodes: os01,os02,os03
-      DISABLE_SECURITY_PLUGIN: "true"
-      OPENSEARCH_JAVA_OPTS: "-Xms1g -Xmx1g"
-      bootstrap.memory_lock: "true"
-    volumes: [os03_data:/usr/share/opensearch/data]
-    ulimits:
-      memlock: { soft: -1, hard: -1 }
-      nofile: { soft: 65536, hard: 65536 }
-    restart: unless-stopped
-
-  opensearch-dashboards:
-    image: opensearchproject/opensearch-dashboards:2
-    ports: ["127.0.0.1:5601:5601"]
-    environment:
-      OPENSEARCH_HOSTS: '["http://os01:9200","http://os02:9200","http://os03:9200"]'
-      DISABLE_SECURITY_DASHBOARDS_PLUGIN: "true"
-    depends_on: [os01]
-    restart: unless-stopped
-
-  # Data Prepper — OpenSearch's native log processing pipeline (Logstash equivalent)
-  data-prepper:
-    image: opensearchproject/data-prepper:latest
-    ports:
-      - 127.0.0.1:21890:21890   # OTLP gRPC
-      - 127.0.0.1:2021:2021     # HTTP source
-      - 127.0.0.1:4900:4900     # Server API
-    volumes:
-      - /home/user/opensearch-cluster/data-prepper/pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml:ro,Z
-      - /home/user/opensearch-cluster/data-prepper/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml:ro,Z
-    depends_on: [os01]
-    restart: unless-stopped
-
-volumes:
-  os01_data:
-  os02_data:
-  os03_data:
-```
-
-**Data Prepper pipeline config (Logstash equivalent for OpenSearch):**
-```yaml
-# ~/opensearch-cluster/data-prepper/pipelines.yaml
-log-pipeline:
-  source:
-    http:
-      port: 2021
-  processor:
-    - grok:
-        match:
-          message: ['%{COMMONAPACHELOG}']
-    - date:
-        from_time_received: true
-        destination: "@timestamp"
-  sink:
-    - opensearch:
-        hosts: ["http://os01:9200", "http://os02:9200"]
-        insecure: true
-        index: logs-%{yyyy.MM.dd}
-
-otel-trace-pipeline:
-  source:
-    otel_trace_source:
-      port: 21890
-  processor:
-    - otel_traces: ~
-  sink:
-    - opensearch:
-        hosts: ["http://os01:9200"]
-        insecure: true
-        index: otel-traces-%{yyyy.MM.dd}
-```
-
-**OpenSearch ISM (Index State Management — equivalent to Elasticsearch ILM):**
-```bash
-# Create an ISM policy to roll over daily and delete after 30 days
-curl -X PUT http://localhost:9200/_plugins/_ism/policies/logs-policy \
-  -H "Content-Type: application/json" -d '
-{
-  "policy": {
-    "description": "Daily rollover, delete after 30d",
-    "default_state": "hot",
-    "states": [
-      {
-        "name": "hot",
-        "actions": [{ "rollover": { "min_index_age": "1d", "min_primary_shard_size": "25gb" } }],
-        "transitions": [{ "state_name": "delete", "conditions": { "min_index_age": "30d" } }]
-      },
-      {
-        "name": "delete",
-        "actions": [{ "delete": {} }],
-        "transitions": []
-      }
-    ],
-    "ism_template": [{ "index_patterns": ["logs-*"], "priority": 100 }]
-  }
-}'
-```
-
-```bash
-# Check cluster health
-curl http://localhost:9200/_cluster/health?pretty
-
-# List nodes
-curl "http://localhost:9200/_cat/nodes?v"
-
-# List indices
-curl "http://localhost:9200/_cat/indices?v&s=store.size:desc"
-```
-
-> **Filebeat → OpenSearch:** Filebeat ships to OpenSearch without changes — just point the output at the OpenSearch host. OpenSearch accepts the Elasticsearch Beats protocol natively.
 
 ---
 
 ## Fluent Bit (Lightweight Log Forwarder)
 
-**Purpose:** Ultra-lightweight (< 1 MB binary, ~1 MB RAM at idle) log and metrics forwarder written in C. The modern replacement for Fluentd in resource-constrained environments — Kubernetes sidecars, IoT edge nodes, and embedded systems. Collects from files, syslog, systemd journal, Docker, and container runtimes; filters and transforms in-flight; then ships to Elasticsearch, OpenSearch, Loki, ClickHouse, S3, Kafka, and 40+ other outputs. Faster and leaner than Logstash for simple forwarding pipelines.
+**Purpose:** Ultra-lightweight (< 1 MB binary, ~1 MB RAM at idle) log and metrics forwarder written in C. The modern replacement for Fluentd in resource-constrained environments. Collects from files, syslog, systemd journal, Docker, and container runtimes; then ships to Elasticsearch, OpenSearch, Loki, ClickHouse, S3, Kafka, and 40+ other outputs.
 
 ```yaml
 # ~/fluent-bit/compose.yaml
@@ -2310,9 +1675,9 @@ services:
   fluent-bit:
     image: fluent/fluent-bit:latest
     ports:
-      - 127.0.0.1:24224:24224/tcp    # Fluentd forward protocol (receive from other containers)
+      - 127.0.0.1:24224:24224/tcp
       - 127.0.0.1:24224:24224/udp
-      - 127.0.0.1:2020:2020          # HTTP monitoring API
+      - 127.0.0.1:2020:2020
     volumes:
       - /home/user/fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro,Z
       - /home/user/fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf:ro,Z
@@ -2321,7 +1686,7 @@ services:
     restart: unless-stopped
 ```
 
-**`fluent-bit.conf` — collect system logs and ship to Elasticsearch + Loki simultaneously:**
+**`fluent-bit.conf` — collect system logs and ship to Elasticsearch + Loki:**
 ```ini
 [SERVICE]
     Flush         5
@@ -2337,29 +1702,17 @@ services:
 [INPUT]
     Name              tail
     Path              /var/log/*.log
-    Path_Key          filename
     Tag               syslog.*
     Parser            syslog-rfc3164
     DB                /var/log/fluent-bit-syslog.db
     Mem_Buf_Limit     5MB
     Skip_Long_Lines   On
-    Refresh_Interval  10
 
 [INPUT]
     Name              systemd
     Tag               journal.*
     Systemd_Filter    _SYSTEMD_UNIT=caddy.service
-    Systemd_Filter    _SYSTEMD_UNIT=sshd.service
     Strip_Underscores On
-
-[INPUT]
-    Name   docker
-    Tag    container.*
-
-[FILTER]
-    Name   grep
-    Match  syslog.*
-    Regex  log  .+          # drop empty lines
 
 [FILTER]
     Name           record_modifier
@@ -2367,23 +1720,13 @@ services:
     Record         hostname ${HOSTNAME}
     Record         environment homelab
 
-[FILTER]
-    Name    lua
-    Match   container.*
-    script  /fluent-bit/etc/enrich.lua
-    call    add_metadata
-
 [OUTPUT]
     Name                es
     Match               *
     Host                host.containers.internal
     Port                9200
-    Index               fluent-logs
-    Type                _doc
     Logstash_Format     On
     Logstash_Prefix     fluent
-    Logstash_DateFormat %Y.%m.%d
-    Retry_Limit         5
     Suppress_Type_Name  On
 
 [OUTPUT]
@@ -2397,26 +1740,20 @@ services:
 
 **Common operations:**
 ```bash
-# Check pipeline stats (inputs, filters, outputs, retries)
+# Check pipeline stats
 curl http://localhost:2020/api/v1/metrics | python3 -m json.tool
 
-# Check uptime and memory
-curl http://localhost:2020/
-
-# Test config before deploying (dry run)
+# Test config before deploying
 podman exec fluent-bit fluent-bit --config /fluent-bit/etc/fluent-bit.conf --dry-run
-
-# View logs
-podman logs -f fluent-bit
 ```
 
-> **Fluent Bit vs Logstash vs Filebeat:** Use Fluent Bit when you need a tiny-footprint forwarder (perfect for shipping from every container/host to a central aggregator). Use Filebeat when you're already in the Elastic ecosystem and want native Kibana dashboards. Use Logstash when you need heavy-duty filtering, complex Grok patterns, multiple conditional outputs, or the Ruby filter for custom logic.
+> **Fluent Bit vs Logstash vs Filebeat:** Use Fluent Bit for a tiny-footprint forwarder (perfect for every container/host to a central aggregator). Use Filebeat when you're in the Elastic ecosystem. Use Logstash for heavy-duty filtering, complex Grok patterns, or multiple conditional outputs.
 
 ---
 
 ## Vector.dev (High-Performance Log & Metric Pipeline)
 
-**Purpose:** Rust-based observability data pipeline — collects logs, metrics, and traces; transforms them with a powerful built-in VRL (Vector Remap Language) scripting layer; and routes to any backend. Significantly higher throughput than Logstash or Fluent Bit on multi-core hardware, with end-to-end acknowledgements and disk-backed buffering so no data is lost on restart. A single Vector instance can replace Filebeat + Logstash, or Promtail + Grafana Alloy, in many setups.
+**Purpose:** Rust-based observability data pipeline. Collects logs, metrics, and traces; transforms them with a powerful built-in VRL (Vector Remap Language) scripting layer; and routes to any backend. Significantly higher throughput than Logstash or Fluent Bit on multi-core hardware, with end-to-end acknowledgements and disk-backed buffering. A single Vector instance can replace Filebeat + Logstash, or Promtail + Grafana Alloy, in many setups.
 
 ```yaml
 # ~/vector/compose.yaml
@@ -2424,8 +1761,8 @@ services:
   vector:
     image: timberio/vector:latest-alpine
     ports:
-      - 127.0.0.1:8686:8686    # Vector API (metrics, topology)
-      - 127.0.0.1:6000:6000    # Syslog input (TCP)
+      - 127.0.0.1:8686:8686    # Vector API
+      - 127.0.0.1:6000:6000    # Syslog TCP
       - 127.0.0.1:6001:6001/udp
     volumes:
       - /home/user/vector/vector.yaml:/etc/vector/vector.yaml:ro,Z
@@ -2437,33 +1774,23 @@ services:
 
 **`vector.yaml` — collect, enrich, and fan out to Elasticsearch and Loki:**
 ```yaml
-# ~/vector/vector.yaml
 api:
   enabled: true
   address: "0.0.0.0:8686"
 
 data_dir: /var/lib/vector
 
-# --- Sources ---
 sources:
   syslog_tcp:
     type: syslog
     address: "0.0.0.0:6000"
     mode: tcp
 
-  syslog_udp:
-    type: syslog
-    address: "0.0.0.0:6001"
-    mode: udp
-
   host_logs:
     type: file
     include:
       - /var/log/*.log
       - /var/log/caddy/*.log
-    read_from: beginning
-    fingerprint:
-      strategy: checksum
 
   docker_logs:
     type: docker_logs
@@ -2474,27 +1801,13 @@ sources:
     scrape_interval_secs: 15
     collectors: [cpu, disk, filesystem, load, memory, network]
 
-# --- Transforms ---
 transforms:
-  parse_nginx:
-    type: remap
-    inputs: [host_logs]
-    source: |
-      . = parse_nginx_log!(string!(.message), "combined")
-      .source_type = "nginx"
-      .parsed_at = now()
-
   enrich_all:
     type: remap
-    inputs: [syslog_tcp, syslog_udp, docker_logs]
+    inputs: [syslog_tcp, docker_logs]
     source: |
       .hostname = get_hostname!()
       .environment = "homelab"
-      if exists(.container_name) {
-        .log_source = "container"
-      } else {
-        .log_source = "host"
-      }
 
   filter_noise:
     type: filter
@@ -2502,27 +1815,25 @@ transforms:
     condition: |
       !includes(["debug", "trace"], downcase(string!(.level ?? "")))
 
-# --- Sinks ---
 sinks:
   elasticsearch_out:
     type: elasticsearch
-    inputs: [parse_nginx, filter_noise]
+    inputs: [filter_noise]
     endpoints: ["http://host.containers.internal:9200"]
     mode: bulk
     bulk:
       index: "vector-%Y.%m.%d"
     buffer:
       type: disk
-      max_size: 268435456   # 256 MB disk buffer — survives ES downtime
+      max_size: 268435456   # 256 MB
 
   loki_out:
     type: loki
-    inputs: [parse_nginx, filter_noise]
+    inputs: [filter_noise]
     endpoint: "http://host.containers.internal:3100"
     labels:
       job: vector
       host: "{{ hostname }}"
-      source: "{{ log_source }}"
     encoding:
       codec: json
     buffer:
@@ -2532,7 +1843,7 @@ sinks:
   prometheus_out:
     type: prometheus_exporter
     inputs: [host_metrics]
-    address: "0.0.0.0:9598"   # Prometheus scrapes this
+    address: "0.0.0.0:9598"
 ```
 
 **Common operations:**
@@ -2541,30 +1852,14 @@ sinks:
 curl http://localhost:8686/health
 curl http://localhost:8686/components | python3 -m json.tool
 
-# View throughput stats per component
-curl http://localhost:8686/metrics | grep vector_component
-
 # Validate config before deploying
 podman exec vector vector validate /etc/vector/vector.yaml
-
-# Reload config without restart
-podman exec vector vector top   # interactive monitoring
 
 # Test VRL expressions interactively
 podman run --rm -it timberio/vector:latest-alpine vector vrl
 ```
 
-**Add Vector as a Prometheus scrape target:**
-```yaml
-# In prometheus.yml scrape_configs
-- job_name: vector
-  static_configs:
-    - targets: ['host.containers.internal:9598']
-```
-
-> **Vector vs Fluent Bit vs Logstash:** Vector has the highest throughput and the most expressive transformation language (VRL). Fluent Bit has the smallest footprint for edge/sidecar deployments. Logstash has the richest plugin ecosystem and the best Kibana integration. For a new homelab log pipeline shipping to both Elasticsearch and Loki, Vector is the best starting point.
-
----
+> **Vector vs Fluent Bit vs Logstash:** Vector has the highest throughput and most expressive transformation language (VRL). Fluent Bit has the smallest footprint for edge/sidecar deployments. Logstash has the richest plugin ecosystem and best Kibana integration. For a new homelab log pipeline shipping to both Elasticsearch and Loki, Vector is the best starting point.
 
 ---
 
@@ -2576,6 +1871,7 @@ prometheus.home.local      { tls internal; reverse_proxy localhost:9090 }
 alerts.home.local          { tls internal; reverse_proxy localhost:9093 }
 karma.home.local           { tls internal; reverse_proxy localhost:8094 }
 netdata.home.local         { tls internal; reverse_proxy localhost:19999 }
+netdata-hub.home.local     { tls internal; reverse_proxy localhost:19998 }
 uptime.home.local          { tls internal; reverse_proxy localhost:3002 }
 beszel.home.local          { tls internal; reverse_proxy localhost:8090 }
 dozzle.home.local          { tls internal; reverse_proxy localhost:8888 }
@@ -2591,7 +1887,6 @@ checkmk.home.local         { tls internal; reverse_proxy localhost:8095 }
 graylog.home.local         { tls internal; reverse_proxy localhost:9000 }
 changes.home.local         { tls internal; reverse_proxy localhost:5000 }
 openobserve.home.local     { tls internal; reverse_proxy localhost:5080 }
-netdata-hub.home.local     { tls internal; reverse_proxy localhost:19998 }
 parca.home.local           { tls internal; reverse_proxy localhost:7070 }
 ```
 
@@ -2610,46 +1905,29 @@ parca.home.local           { tls internal; reverse_proxy localhost:7070 }
 | Uptime Kuma push monitors not firing | Verify the monitor URL is accessible from the container; check that ntfy topic/webhook URL is correct |
 | Dozzle shows no containers | Rootless Podman uses `/run/user/$(id -u)/podman/podman.sock` — not `/var/run/docker.sock` |
 | Beszel agent not reporting | Verify the public key from the hub is correctly pasted; check that port `45876` is reachable from the hub |
-| Gatus not sending alerts | Verify the alert integration config syntax; check `podman logs gatus` for connection errors to the alerting endpoint |
+| Gatus not sending alerts | Verify the alert integration config syntax; check `podman logs gatus` for connection errors |
 | Healthchecks ping not received | Verify `SITE_ROOT` is the URL the script calls; check that the UUID matches the check in the UI |
-| Speedtest results missing | Check the container has outbound internet access; verify `APP_KEY` is set |
-| VictoriaMetrics not receiving data | Verify the remote-write URL is `http://host.containers.internal:8428/api/v1/write`; check `podman logs victoriametrics` for parse errors |
-| Tempo traces not appearing | Ensure the OTel SDK in your app targets the correct endpoint (`4317` for gRPC, `4318` for HTTP); check `podman logs tempo` |
+| VictoriaMetrics not receiving data | Verify the remote-write URL is `http://host.containers.internal:8428/api/v1/write`; check `podman logs victoriametrics` |
+| Tempo traces not appearing | Ensure the OTel SDK targets the correct endpoint (`4317` for gRPC, `4318` for HTTP); check `podman logs tempo` |
 | OTel Collector dropping spans | Check `memory_limiter` isn't too aggressive; increase `limit_mib`; view pipeline stats at `http://localhost:8888/metrics` |
-| Checkmk agent not connecting | Ensure `check-mk-agent.socket` is active on the monitored host; verify TCP port `6556` is reachable from the Checkmk container |
+| Checkmk agent not connecting | Ensure `check-mk-agent.socket` is active on the monitored host; verify TCP port `6556` is reachable |
 | Zabbix agent not connecting | Verify `Server=` in `zabbix_agent2.conf` matches the Zabbix server IP; check port `10051/tcp` is open |
+| Zabbix Proxy not registering | Confirm `ZBX_HOSTNAME` in the proxy compose matches exactly the name in the server UI under Administration → Proxies |
 | SigNoz no data after deployment | Ensure the OTel collector is running and your app is sending to the correct port; check ClickHouse is healthy |
-| Karma shows no alerts | Verify `ALERTMANAGER_URI` is reachable from the container using `host.containers.internal`; check Alertmanager is running and has active alerts or silences |
-| Graylog web UI unreachable | Ensure `GRAYLOG_HTTP_EXTERNAL_URI` matches the URL you're accessing; check OpenSearch and MongoDB are healthy before Graylog starts |
-| Graylog `retention exceeded` on OpenSearch | Set an index rotation strategy: System → Indices → Default index set → edit rotation and retention period |
-| Graylog GELF input not receiving logs | Verify the log driver is `gelf` and `gelf-address` uses `udp://` with the correct port; check firewall isn't blocking `12201/udp` |
-| Graylog OpenSearch connection refused | The `plugins.security.disabled: "true"` env var is required for OpenSearch 2.x without TLS; verify it is set |
-| Changedetection not detecting changes | Try adding a CSS selector to target the specific element rather than the full page; some sites require the Playwright-based browser fetcher for JavaScript-rendered content |
-| Zabbix Proxy not registering | Confirm `ZBX_HOSTNAME` in the proxy compose matches exactly the name created in the server UI under Administration → Proxies |
-| Zabbix Proxy child agents not reporting | In active proxy mode the proxy connects outbound to the server — verify port `10051/tcp` is reachable from the proxy host to the Zabbix server; also confirm the host is assigned to the correct proxy under Configuration → Hosts |
-| alertmanager-ntfy bridge not delivering | Verify the bridge container is running and the `url` in `alertmanager.yml` uses `host.containers.internal`; check `podman logs alertmanager-ntfy` for JSON parse errors; ensure the ntfy topic exists |
-| Netdata parent shows no child nodes | Confirm the `api key` UUID in both child and parent `stream.conf` match exactly; restart the child agent after editing; check `podman logs netdata-parent` for authentication errors |
-| Parca Agent missing profiles | eBPF requires kernel ≥ 5.3 with BTF — verify with `ls /sys/kernel/btf/vmlinux`; the agent container must run `privileged: true` with `pid: host`; check `podman logs parca-agent` for capability errors |
-| Parca no scrape targets appearing | Confirm the pprof endpoint on your app is reachable from the Parca container; check `parca.yaml` scrape_configs target addresses use `host.containers.internal` |
-| Elasticsearch OOM-killed | Limit JVM heap with `ES_JAVA_OPTS="-Xms512m -Xmx1g"`; default is 50% of host RAM which can cause OOM on shared hosts |
-| Elasticsearch `max virtual memory areas vm.max_map_count [65530] is too low` | Run `sudo sysctl -w vm.max_map_count=262144` on the host and persist it in `/etc/sysctl.conf` — this is required for all ES/OpenSearch deployments |
-| Elasticsearch cluster status RED | Check unassigned shards: `curl localhost:9200/_cat/shards?v | grep UNASSIGNED`; often caused by a data node being down or `number_of_replicas` exceeding available data nodes |
-| Elasticsearch `master not discovered` on cluster start | Ensure `cluster.initial_master_nodes` lists all master-eligible node names exactly; remove this setting after first cluster formation or nodes will refuse to rejoin |
-| Elasticsearch split-brain / cluster not forming | Use exactly 3 or 5 master-eligible nodes; check that all nodes can reach each other on port `9300` (transport); verify `cluster.name` is identical across all nodes |
-| Elasticsearch ILM rollover not triggering | Ensure the write alias is created with `is_write_index: true` and the index name ends in a 6-digit number (`-000001`); check `GET logs-000001/_ilm/explain` for the reason |
-| Kibana `Kibana server is not ready yet` | Wait for Elasticsearch to fully start first; check `podman logs kibana` — usually a connectivity issue with the ES host URL |
-| Logstash `Pipeline aborted due to error` | Check `podman logs logstash`; most common causes are Grok pattern mismatch on the first event or Elasticsearch output unreachable; add `stdout { codec => rubydebug }` output temporarily to inspect parsed events |
-| Logstash high CPU on Grok | Grok is regex-based and slow on complex patterns; switch `_GREEDYDATA` patterns to structured parsers, use `dissect` filter for simple delimited formats, or pre-parse in Filebeat with `decode_json_fields` |
-| Logstash events stuck in queue | Check `curl localhost:9600/_node/stats` for `pipeline.events.in` vs `pipeline.events.out`; if output is slow, increase `pipeline.workers` or fix the downstream sink |
-| Filebeat `connection refused` to Logstash | Verify Logstash Beats input is on port `5044` and the container port is published; use `host.containers.internal:5044` not `localhost:5044` from Filebeat container |
-| Filebeat harvesting same lines repeatedly | Check `filebeat.yml` `db` path is on a persistent volume; without a state DB file, Filebeat re-reads from the beginning on every restart |
-| Metricbeat dashboards not appearing in Kibana | Run `podman exec metricbeat metricbeat setup --dashboards` after Kibana is healthy; also ensure `setup.kibana.host` points at the correct Kibana URL |
-| OpenSearch UNASSIGNED shards | Check `curl localhost:9200/_cat/shards?v`; for single-node clusters set `number_of_replicas: 0` — a single node cannot host replicas of its own primary shards |
-| OpenSearch `cluster_manager not discovered` | Same as Elasticsearch — `cluster.initial_cluster_manager_nodes` (OpenSearch renamed `master` to `cluster_manager`) must list all manager-eligible nodes on first boot only |
-| OpenSearch Data Prepper not connecting | Verify `insecure: true` is set in the sink config when TLS is disabled; check `podman logs data-prepper` for Java SSL handshake errors |
-| Fluent Bit `[error] no output plugin` | Verify the `[OUTPUT]` block name matches a supported plugin exactly; check `podman exec fluent-bit fluent-bit --help` for available plugins |
-| Fluent Bit losing events on container restart | Enable `storage.type filesystem` and set `storage.path` to a persistent volume; without this, all in-flight events in the memory buffer are lost on restart |
-| Fluent Bit Docker input not collecting logs | Ensure the Podman socket is mounted at `/var/run/docker.sock` inside the container; rootless Podman uses `/run/user/1000/podman/podman.sock` on the host |
-| Vector pipeline component showing errors | Run `curl localhost:8686/components` to see component health; check `podman logs vector` for VRL script parse errors; run `vector validate /etc/vector/vector.yaml` before deploying |
-| Vector disk buffer filling up | Increase `max_size` in the sink buffer config, or fix the downstream sink connectivity; Vector will apply backpressure to sources when the buffer is full rather than dropping events |
-| Vector VRL transformation error | Test VRL expressions interactively with `podman run --rm -it timberio/vector:latest-alpine vector vrl` before putting them in config |
+| Karma shows no alerts | Verify `ALERTMANAGER_URI` is reachable from the container using `host.containers.internal` |
+| Graylog web UI unreachable | Ensure `GRAYLOG_HTTP_EXTERNAL_URI` matches the URL you're accessing; check OpenSearch and MongoDB are healthy first |
+| Graylog GELF input not receiving logs | Verify the log driver uses `gelf` with `gelf-address: udp://`; check firewall isn't blocking `12201/udp` |
+| Graylog OpenSearch connection refused | The `plugins.security.disabled: "true"` env var is required for OpenSearch 2.x without TLS |
+| Changedetection not detecting changes | Try adding a CSS selector to target the specific element; some sites require the Playwright-based browser fetcher for JavaScript-rendered content |
+| alertmanager-ntfy bridge not delivering | Verify the bridge container is running and the `url` in `alertmanager.yml` uses `host.containers.internal`; check `podman logs alertmanager-ntfy` |
+| Netdata parent shows no child nodes | Confirm the `api key` UUID in both child and parent `stream.conf` match exactly; restart the child agent after editing |
+| Parca Agent missing profiles | eBPF requires kernel ≥ 5.3 with BTF — verify with `ls /sys/kernel/btf/vmlinux`; the agent must run `privileged: true` with `pid: host` |
+| Elasticsearch OOM-killed | Limit JVM heap with `ES_JAVA_OPTS="-Xms512m -Xmx1g"`; default is 50% of host RAM |
+| Elasticsearch `vm.max_map_count too low` | Run `sudo sysctl -w vm.max_map_count=262144` on the host and persist in `/etc/sysctl.conf` |
+| Kibana `Kibana server is not ready yet` | Wait for Elasticsearch to fully start first; check `podman logs kibana` |
+| Logstash `Pipeline aborted due to error` | Check `podman logs logstash`; most common causes are Grok pattern mismatch or Elasticsearch unreachable |
+| Filebeat `connection refused` to Logstash | Verify Logstash Beats input is on port `5044`; use `host.containers.internal:5044` not `localhost:5044` |
+| OpenSearch `cluster_manager not discovered` | `cluster.initial_cluster_manager_nodes` must list all manager-eligible nodes on first boot only |
+| Fluent Bit losing events on container restart | Enable `storage.type filesystem` on a persistent volume; without this, in-flight events are lost on restart |
+| Vector pipeline component showing errors | Run `curl localhost:8686/components` to see component health; run `vector validate /etc/vector/vector.yaml` before deploying |
+| Vector disk buffer filling up | Increase `max_size` in the sink buffer config, or fix the downstream sink connectivity; Vector applies backpressure rather than dropping events |
