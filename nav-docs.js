@@ -12,12 +12,12 @@ CONFIG.NAV_TREE = [
   {
     title: 'Introduction', icon: 'fa-solid fa-book-open',
     children: [
-      { title: "What is Shanios?", slug: 'intro/what-is-shanios' },
-      { title: "Getting Started", slug: 'intro/getting-started' },
-      { title: "Migrating from Traditional Linux", slug: 'intro/migrating' },
+      { title: 'What is Shanios?', slug: 'intro/what-is-shanios' },
+      { title: 'Getting Started', slug: 'intro/getting-started' },
+      { title: 'Migrating from Traditional Linux', slug: 'intro/migrating' },
       { title: "What's Included", slug: 'intro/whats-included' },
-      { title: "User Configuration", slug: 'intro/user-config' },
-      { title: "System Optimizations", slug: 'intro/optimizations' },
+      { title: 'User Configuration', slug: 'intro/user-config' },
+      { title: 'System Optimizations', slug: 'intro/optimizations' },
     ]
   },
 
@@ -61,7 +61,6 @@ CONFIG.NAV_TREE = [
       { title: 'Directory Encryption (gocryptfs)', slug: 'security/gocryptfs' },
       { title: 'TPM2 Enrollment', slug: 'security/tpm2' },
       { title: 'gen-efi Reference', slug: 'security/gen-efi' },
-
       { title: 'AppArmor (Mandatory Access Control)', slug: 'security/apparmor' },
       { title: 'Audit (auditd)', slug: 'security/audit' },
       { title: 'rkhunter (Rootkit Hunter)', slug: 'security/rkhunter' },
@@ -89,18 +88,14 @@ CONFIG.NAV_TREE = [
       { title: 'Flatpak', slug: 'software/flatpak' },
       { title: 'Snaps', slug: 'software/snaps' },
       { title: 'AppImage', slug: 'software/appimage' },
-
       { title: 'Nix Package Manager', slug: 'software/nix' },
       { title: 'Homebrew', slug: 'software/homebrew' },
-
       { title: 'Containers', slug: 'software/containers' },
       { title: 'Distrobox', slug: 'software/distrobox' },
       { title: 'Apptainer (HPC Containers)', slug: 'software/apptainer' },
       { title: 'LXC and LXD', slug: 'software/lxc-lxd' },
       { title: 'systemd-nspawn', slug: 'software/systemd-nspawn' },
-
       { title: 'Virtual Machines', slug: 'software/vms' },
-
       { title: 'Bottles (Windows Compatibility)', slug: 'software/bottles' },
       { title: 'Android (Waydroid)', slug: 'software/waydroid' },
     ]
@@ -110,38 +105,31 @@ CONFIG.NAV_TREE = [
     title: 'Networking', icon: 'fa-solid fa-network-wired',
     children: [
       { title: 'NetworkManager & VPN', slug: 'networking/networkmanager-vpn' },
-
       { title: 'Tailscale VPN', slug: 'networking/tailscale' },
       { title: 'WireGuard (Manual)', slug: 'networking/wireguard' },
       { title: 'OpenVPN', slug: 'networking/openvpn' },
       { title: 'Cloudflared Tunnels', slug: 'networking/cloudflared' },
       { title: 'Caddy Web Server', slug: 'networking/caddy' },
-
+      { title: 'Apache HTTP Server', slug: 'networking/apache' },
       { title: 'ModemManager (Mobile Broadband)', slug: 'networking/modemmanager' },
-
       { title: 'dnsmasq (Local DNS)', slug: 'networking/dnsmasq' },
       { title: 'dnscrypt-proxy (Encrypted DNS)', slug: 'networking/dnscrypt-proxy' },
       { title: 'openresolv (DNS)', slug: 'networking/openresolv' },
       { title: 'BIND (Authoritative DNS)', slug: 'networking/bind' },
       { title: 'Avahi (mDNS)', slug: 'networking/avahi' },
-
       { title: 'OpenSSH', slug: 'networking/openssh' },
       { title: 'SSHFS', slug: 'networking/sshfs' },
       { title: 'NFS File Sharing', slug: 'networking/nfs' },
       { title: 'Samba (SMB/CIFS)', slug: 'networking/samba' },
       { title: 'rsyncd (rsync Daemon)', slug: 'networking/rsyncd' },
       { title: 'nbd-server (Network Block Device)', slug: 'networking/nbd' },
-
       { title: 'Remote Desktop', slug: 'networking/remote-desktop' },
       { title: 'KDE Connect', slug: 'networking/kdeconnect' },
-
       { title: 'Firewall (firewalld)', slug: 'networking/firewalld' },
       { title: 'Fail2ban (Brute-Force Protection)', slug: 'networking/fail2ban' },
-
       { title: 'snmpd (SNMP)', slug: 'networking/snmpd' },
       { title: 'Kerberos', slug: 'networking/kerberos' },
       { title: 'slapd (OpenLDAP)', slug: 'networking/slapd' },
-
       { title: 'Exim (Mail Transfer Agent)', slug: 'networking/exim' },
       { title: 'arpwatch (ARP Monitor)', slug: 'networking/arpwatch' },
       { title: 'gpsd (GPS Daemon)', slug: 'networking/gpsd' },
@@ -166,10 +154,12 @@ CONFIG.NAV_TREE = [
       { title: 'Communication', slug: 'servers/communication' },
       { title: 'Databases & Caches', slug: 'servers/databases' },
       { title: 'Developer Tools', slug: 'servers/devtools' },
+      { title: 'DevOps & Developer Infrastructure', slug: 'servers/devops' },
       { title: 'Education & E-Learning', slug: 'servers/education' },
       { title: 'Finance & Accounting', slug: 'servers/finance' },
       { title: 'Home Automation', slug: 'servers/home-automation' },
       { title: 'IoT & Monitoring', slug: 'servers/iot' },
+      { title: 'Kubernetes & Container Orchestration', slug: 'servers/kubernetes' },
       { title: 'Mail Servers', slug: 'servers/mail' },
       { title: 'Container Management & Lifecycle', slug: 'servers/management' },
       { title: 'Media & Entertainment', slug: 'servers/media' },
@@ -191,8 +181,9 @@ CONFIG.NAV_TREE = [
     ]
   },
 
-  { title: 'GPU Acceleration (CUDA/ROCm/oneAPI)', icon: 'fa-solid fa-microchip', slug: 'gpu-containers' },
+  { title: 'GPU Acceleration & HPC Containers', icon: 'fa-solid fa-microchip', slug: 'gpu-containers' },
   { title: 'Network Diagnostics & Tools', icon: 'fa-solid fa-diagram-project', slug: 'network-diag' },
   { title: 'Troubleshooting', icon: 'fa-solid fa-screwdriver-wrench', slug: 'troubleshooting' },
   { title: 'FAQ', icon: 'fa-solid fa-circle-question', slug: 'faq' },
 ];
+

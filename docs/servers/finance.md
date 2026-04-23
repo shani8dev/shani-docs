@@ -264,41 +264,6 @@ Invoice Ninja supports Stripe, PayPal, and GoCardless as online payment gateways
 
 ---
 
-## ERPNext Accounting (Full Business ERP)
-
-**Purpose:** When Invoice Ninja is not enough — ERPNext covers the full accounting cycle: chart of accounts, journals, purchase orders, sales orders, inventory, payroll, asset management, and multi-currency. The same Frappe stack used for school ERP (see the Education wiki) includes a complete double-entry accounting module. Suitable for small and medium businesses that want one system for everything.
-
-See the [Education wiki](https://docs.shani.dev/doc/servers/education#erpnext--frappe-school-erp) for the full ERPNext deployment. Install the `accounts` app instead of or alongside `education`.
-
-### Manufacturing Module
-
-ERPNext includes a full **Manufacturing** module — Bill of Materials (BOM), Work Orders, Production Plans, Quality Inspections, and Job Cards. Enable it after deployment:
-
-1. In ERPNext → **Settings → Module Settings** → enable **Manufacturing**
-2. Navigate to **Manufacturing → Bill of Materials → New BOM** to define raw materials and finished goods
-3. Create **Work Orders** from Sales Orders to track production runs
-4. Use **Job Cards** to record time against each manufacturing operation
-
-Key manufacturing documents:
-- **BOM (Bill of Materials):** defines components and quantities for a finished item
-- **Work Order:** production instruction based on a BOM; tracks raw material consumption and finished goods output
-- **Production Plan:** generates Work Orders and purchase requests from sales orders or independent forecasts
-- **Quality Inspection:** attach inspection criteria to BOMs for incoming or outgoing goods checks
-
-### CRM Module
-
-ERPNext's **CRM** module covers the full sales pipeline alongside the accounting stack:
-
-1. Enable in **Module Settings → CRM**
-2. Lead → Opportunity → Quotation → Sales Order → Invoice is the standard flow
-3. **CRM → Lead** to capture inbound enquiries; convert to Opportunity when qualified
-4. **CRM → Opportunity** tracks deal stage, expected value, and close date
-5. **Quotation** (linked from Opportunity) generates a PDF proposal; one click converts it to a Sales Order
-
-> ERPNext CRM is not a standalone tool — it is deeply integrated with Sales Orders, Invoices, and Inventory. If you only need a CRM without ERP, consider **Twenty** or **Monica** (documented in the Productivity section) for lighter-weight contact and pipeline management.
-
----
-
 ## Hledger / Beancount (Plain Text Accounting)
 
 **Purpose:** Plain text double-entry accounting — your ledger is a `.journal` or `.beancount` file you edit with any text editor, version-controlled in Git. No database, no web UI required (though both have optional web interfaces). Beloved by programmers who want total control over their financial data.

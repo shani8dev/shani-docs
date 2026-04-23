@@ -523,18 +523,6 @@ podman logs -f miniflux
 
 ---
 
-## Actual Budget
-
-See the [Finance wiki](https://docs.shani.dev/doc/servers/finance#actual-budget) for the full Actual Budget setup.
-
----
-
-## Gitea / Forgejo (Version-Controlled Config)
-
-For teams who want to version-control their notes, runbooks, and wiki pages alongside code, Gitea is an excellent pairing with Outline or Obsidian. See the [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#gitea--forgejo) for the full setup.
-
----
-
 ## n8n (Workflow Automation)
 
 **Purpose:** Visual workflow automation with 400+ integrations — webhooks, APIs, databases, AI tools, home automation, and more. Build multi-step automations without code using a drag-and-drop node editor. Self-hosted alternative to Zapier and Make. Pairs well with Nextcloud, Gitea, and Home Assistant for event-driven workflows across your entire self-hosted stack.
@@ -1724,32 +1712,6 @@ taiga.home.local {
 
 ---
 
-## Gitea Wiki / Markdown CMS
-
-**Purpose:** Gitea and Forgejo include a built-in wiki for every repository — Markdown pages, version-controlled in a separate Git branch, editable via the web UI or any Git client. No additional service to run. For lightweight technical documentation tied to a project (API references, runbooks, architecture notes), the built-in wiki is often sufficient without standing up a full BookStack or Wiki.js instance.
-
-**Enable the wiki on a repository:**
-1. Repository → Settings → Features → tick **Wiki** → Save.
-2. Navigate to the **Wiki** tab on the repository page.
-3. Create your first page — Gitea creates a `wiki` Git repository at `https://gitea.home.local/user/repo.wiki.git`.
-
-**Clone and edit locally (full Git workflow):**
-```bash
-# Clone the wiki repo
-git clone https://gitea.home.local/user/repo.wiki.git
-cd repo.wiki
-
-# Create or edit pages (Markdown files)
-vim Home.md
-vim Architecture.md
-
-git add .
-git commit -m "Add architecture notes"
-git push
-```
-
-**Sidebar navigation (`_Sidebar.md`):**
-```markdown
 ## Contents
 - [[Home]]
 - [[Architecture]]

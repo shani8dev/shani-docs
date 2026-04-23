@@ -199,12 +199,6 @@ Access at `http://localhost:5000`.
 
 ---
 
-## Grafana
-
-Grafana is covered in the [Monitoring wiki](https://docs.shani.dev/doc/servers/monitoring#grafana). Connect it as a datasource to any database or BI backend covered here — PostgreSQL, ClickHouse, InfluxDB, and TimescaleDB all have first-class Grafana datasource plugins.
-
----
-
 ## Evidence.dev
 
 **Purpose:** Code-first BI tool — write SQL queries and Markdown in `.md` files, and Evidence renders them as a polished interactive report site. Version-controlled in Git, deployed as a static site. Ideal for analysts who prefer code over drag-and-drop and want reports that live in the same repo as the data pipelines that produce them.

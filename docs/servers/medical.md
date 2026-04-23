@@ -251,18 +251,6 @@ cd ~/medplum && podman-compose up -d
 
 ---
 
-## Nextcloud Health
-
-For personal health tracking without a full clinical system, Nextcloud's app ecosystem covers the basics:
-
-```bash
-podman exec -u www-data nextcloud php occ app:install health
-```
-
-The **Health** app tracks weight, blood pressure, temperature, heart rate, and menstrual cycles with charts and CSV export. Data lives entirely in your Nextcloud instance. See the [Productivity wiki](https://docs.shani.dev/doc/servers/productivity#nextcloud) for the Nextcloud setup.
-
----
-
 ## Tandoor (Recipe & Nutrition Tracking)
 
 **Purpose:** Self-hosted recipe manager with ingredient-level nutritional data, meal planning, and shopping list generation. Useful for health-focused users who want to log macros and nutrition against specific recipes. See also [Mealie in the Productivity wiki](https://docs.shani.dev/doc/servers/productivity#mealie-recipe-manager) for a lighter-weight recipe manager without the nutrition tracking focus.
@@ -381,14 +369,6 @@ cd ~/fasten-health && podman-compose up -d
 Access at `http://localhost:8090`. Add providers under Sources → Add Source. Fasten uses the standardised SMART on FHIR authorisation flow — your credentials never touch the Fasten server, only your own instance.
 
 > Fasten currently supports 1,000+ US health systems. Non-US users can manually import FHIR bundles exported from compatible EHR systems.
-
----
-
-## Healthchecks.io (Cron Monitoring)
-
-**Purpose:** Dead man's switch for scheduled tasks — backup jobs, data sync pipelines, and automated exports all ping a URL when they finish. If the ping doesn't arrive on schedule, you get alerted. Useful for ensuring your health data pipelines (FHIR imports, nightly backups) run reliably.
-
-See the [Monitoring wiki](https://docs.shani.dev/doc/servers/monitoring#healthchecksio-cron-monitoring) for the full setup.
 
 ---
 

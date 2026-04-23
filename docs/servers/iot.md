@@ -12,28 +12,6 @@ Sensor data pipelines, MQTT brokers, time-series ingestion, industrial protocols
 
 ---
 
-## MQTT Broker: Mosquitto
-
-Mosquitto setup is covered in the [Home Automation wiki](https://docs.shani.dev/doc/servers/home-automation#mosquitto-mqtt-broker). For IoT-specific configuration — WebSocket listener, TLS listener, and QoS tuning — add the following to your `mosquitto.conf`:
-
-```conf
-# WebSocket listener (for browser-based dashboards)
-listener 9001
-protocol websockets
-
-# TLS listener (for remote devices)
-listener 8883
-protocol mqtt
-cafile /mosquitto/config/ca.crt
-certfile /mosquitto/config/server.crt
-keyfile /mosquitto/config/server.key
-
-# Limit queues
-max_queued_messages 1000
-```
-
----
-
 ## EMQX (High-Scale MQTT Broker)
 
 **Purpose:** Enterprise-grade MQTT 5.0 broker. Handles millions of concurrent connections, supports cluster mode, has a built-in SQL rule engine for message routing and transformation, and a web dashboard for managing clients, subscriptions, and rules. Use EMQX when Mosquitto's single-process model becomes a bottleneck or when you need the rule engine.
@@ -73,12 +51,6 @@ SELECT
 FROM "home/+/sensors"
 ```
 Then add an InfluxDB action to write the matched fields as a measurement.
-
----
-
-## Node-RED (Visual IoT Wiring)
-
-Node-RED is covered in the [Home Automation wiki](https://docs.shani.dev/doc/servers/home-automation#node-red). Install the `node-red-contrib-influxdb` and `node-red-contrib-modbus` palettes from within Node-RED to extend it for IoT pipelines.
 
 ---
 
@@ -162,24 +134,6 @@ podman restart telegraf
 [[outputs.prometheus_client]]
   listen = ":9273"
 ```
-
----
-
-## InfluxDB + Grafana (Time-Series Stack)
-
-The canonical IoT data storage and visualisation stack. See the [Databases wiki](https://docs.shani.dev/doc/servers/databases#influxdb) for the InfluxDB setup and the [Monitoring wiki](https://docs.shani.dev/doc/servers/monitoring) for Grafana.
-
-**Connect Grafana to InfluxDB:**
-1. Grafana → Configuration → Data Sources → Add InfluxDB
-2. Query Language: Flux
-3. URL: `http://host.containers.internal:8086`
-4. Auth: Token → paste your InfluxDB token
-5. Organisation: `home`, Default Bucket: `iot`
-
-**Useful Grafana dashboard IDs for IoT:**
-- `12378` — InfluxDB 2.x system metrics
-- `11990` — MQTT statistics
-- `15141` — Home sensor dashboard template
 
 ---
 
@@ -393,24 +347,6 @@ services:
 ```bash
 cd ~/opcua-mqtt && podman-compose up -d
 ```
-
----
-
-## OpenDataBay / Grafana SCADA Dashboard
-
-**Purpose:** Build SCADA-style dashboards in Grafana using the SCADA panel plugin — P&ID diagrams, process flow animations, valve states, and setpoint controls visualised with industrial symbols.
-
-```bash
-# Install the SCADA plugin in Grafana
-podman exec grafana grafana-cli plugins install volkovlabs-form-panel
-podman exec grafana grafana-cli plugins install marcusolsson-dynamictext-panel
-podman exec grafana grafana-cli plugins install volkovlabs-echarts-panel
-
-# Restart Grafana to load plugins
-podman restart grafana
-```
-
----
 
 ---
 

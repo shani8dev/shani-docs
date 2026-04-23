@@ -757,14 +757,6 @@ podman run -it --rm \
 
 ---
 
-## SearXNG (AI Web Search Integration)
-
-**Purpose:** Connect a local SearXNG instance to Open WebUI for grounded, real-time web search in AI chat. Queries leave your machine only to fetch results — never to a third-party AI API.
-
-See the [Networking wiki](https://docs.shani.dev/doc/servers/networking#searxng) for the full SearXNG setup. Once running, enable it in Open WebUI: Settings → Web Search → provider: SearXNG, URL: `http://host.containers.internal:8090`.
-
----
-
 ## Caddy Configuration
 
 Expose your AI tools privately over HTTPS on your tailnet:

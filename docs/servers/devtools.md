@@ -225,24 +225,6 @@ Add `{ "insecure-registries": ["localhost:5000"] }` to `/etc/containers/registri
 
 ---
 
-## Prometheus + Grafana + Loki + Alertmanager
-
-See the [Monitoring wiki](https://docs.shani.dev/doc/servers/monitoring) for the full observability stack — Prometheus, Grafana, Loki, and Alertmanager.
-
-
-
-
----
-
-## n8n (Workflow Automation)
-
-**Purpose:** Visual workflow automation with 400+ integrations — webhooks, APIs, databases, home automation, AI. Self-hosted alternative to Zapier and Make.
-
-See the [Productivity wiki](https://docs.shani.dev/doc/servers/productivity#n8n-workflow-automation) for the full setup.
-
-
----
-
 ## Mailpit (Email Testing)
 
 **Purpose:** SMTP catch-all for development. All outgoing emails from your apps land in Mailpit's web UI — nothing is actually delivered. Perfect for testing Nextcloud, Gitea, or any app that sends email.
@@ -574,31 +556,6 @@ Access at `http://localhost:9000`. Default credentials: `admin` / `admin` (chang
 
 ---
 
-## act (Local GitHub Actions Runner)
-
-**Purpose:** Run GitHub Actions workflows locally for testing and development — no pushing to GitHub just to test CI changes. `act` reads your `.github/workflows/*.yml` files and runs them in containers on your machine. Supports most actions, secrets, and matrix builds.
-
-```bash
-# Install act
-curl -s https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
-
-# Run the default push event
-act
-
-# Run a specific job
-act -j build
-
-# Pass secrets
-act --secret-file .secrets
-
-# Dry run (list jobs without running)
-act -n
-```
-
-> For reproducible CI across Gitea/Forgejo workflows too, Woodpecker CI (covered above) is the server-side complement — `act` is for local iteration before pushing.
-
----
-
 ## Harbor (Enterprise Container Registry)
 
 **Purpose:** Cloud-native container registry with role-based access control, image vulnerability scanning (Trivy), image signing, replication between registries, and a web UI. A significant upgrade over the basic Docker Registry — Harbor gives you a proper private registry with security scanning built in. Ideal for CI/CD pipelines that push images built by Woodpecker or GitLab CI.
@@ -895,6 +852,414 @@ Access at `http://localhost:8300`. Default credentials: `admin@windmill.dev` / `
 ```caddyfile
 windmill.home.local { tls internal; reverse_proxy localhost:8300 }
 ```
+
+---
+
+---
+
+## Jenkins (Enterprise CI/CD)
+
+**Purpose:** The most widely deployed open-source CI/CD server. Thousands of plugins covering every build tool, cloud provider, test framework, and deployment target. Common in enterprise environments where GitLab CI, Woodpecker, or Forgejo Actions aren't an option. Use Jenkins when you need to integrate with an existing org-wide pipeline or when the job description explicitly requires it.
+
+```yaml
+# ~/jenkins/compose.yaml
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    ports:
+      - 127.0.0.1:8090:8080
+      - 127.0.0.1:50000:50000
+    volumes:
+      - /home/user/jenkins/data:/var/jenkins_home:Z
+    environment:
+      JAVA_OPTS: "-Djenkins.install.runSetupWizard=false"
+    restart: unless-stopped
+```
+
+```bash
+cd ~/jenkins && podman-compose up -d
+```
+
+**Get the initial admin password:**
+```bash
+podman exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+```
+
+**Common operations:**
+```bash
+# Install plugins via CLI (Jenkins CLI jar)
+podman exec jenkins java -jar /var/jenkins_home/war/WEB-INF/jenkins-cli.jar \
+  -s http://localhost:8080 install-plugin git workflow-aggregator blueocean
+
+# Restart Jenkins
+podman exec jenkins java -jar /var/jenkins_home/war/WEB-INF/jenkins-cli.jar \
+  -s http://localhost:8080 safe-restart
+
+# View logs
+podman logs -f jenkins
+
+# Reload configuration from disk
+podman exec jenkins java -jar /var/jenkins_home/war/WEB-INF/jenkins-cli.jar \
+  -s http://localhost:8080 reload-configuration
+```
+
+**Caddy:**
+```caddyfile
+jenkins.home.local { tls internal; reverse_proxy localhost:8090 }
+```
+
+> 💡 For greenfield projects prefer Woodpecker or Forgejo Actions — they're lighter and Podman-native. Use Jenkins when integrating with existing enterprise pipelines or when a job requires it specifically.
+
+---
+
+## JFrog Artifactory OSS (Universal Artifact Repository)
+
+**Purpose:** Universal artifact repository manager — store, proxy, and manage Maven, npm, PyPI, Docker, Helm, Go, Gradle, and generic binary artifacts from a single server. The self-hosted alternative to a paid Artifactory Cloud or GitHub Packages. Common in enterprise DevOps job descriptions alongside Jenkins or GitLab CI. OSS edition covers all common repository types.
+
+```yaml
+# ~/artifactory/compose.yaml
+services:
+  artifactory:
+    image: releases-docker.jfrog.io/jfrog/artifactory-oss:latest
+    ports:
+      - 127.0.0.1:8181:8082    # web UI and API
+      - 127.0.0.1:8182:8081    # legacy API
+    volumes:
+      - /home/user/artifactory/data:/var/opt/jfrog/artifactory:Z
+    environment:
+      JF_SHARED_DATABASE_TYPE: derby    # built-in; swap for PostgreSQL in prod
+    restart: unless-stopped
+```
+
+```bash
+cd ~/artifactory && podman-compose up -d
+```
+
+Default login: `admin` / `password`. **Change immediately on first login.**
+
+**Common operations:**
+```bash
+# Create a local repository via REST API
+curl -u admin:password -X PUT \
+  "http://localhost:8181/artifactory/api/repositories/my-docker-local" \
+  -H "Content-Type: application/json" \
+  -d '{"rclass":"local","packageType":"docker"}'
+
+# Push a Docker image to Artifactory
+podman tag myapp:latest localhost:8182/my-docker-local/myapp:latest
+podman push localhost:8182/my-docker-local/myapp:latest
+
+# Upload a generic artifact
+curl -u admin:password -T ./myapp.tar.gz \
+  "http://localhost:8181/artifactory/generic-local/myapp-1.0.tar.gz"
+
+# Search for artifacts
+curl -u admin:password \
+  "http://localhost:8181/artifactory/api/search/quick?name=myapp"
+```
+
+**With PostgreSQL (production):**
+```yaml
+services:
+  artifactory:
+    image: releases-docker.jfrog.io/jfrog/artifactory-oss:latest
+    ports:
+      - 127.0.0.1:8181:8082
+    volumes:
+      - /home/user/artifactory/data:/var/opt/jfrog/artifactory:Z
+    environment:
+      JF_SHARED_DATABASE_TYPE: postgresql
+      JF_SHARED_DATABASE_URL: "jdbc:postgresql://db:5432/artifactory"
+      JF_SHARED_DATABASE_USERNAME: artifactory
+      JF_SHARED_DATABASE_PASSWORD: changeme
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: artifactory
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: artifactory
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+**Caddy:**
+```caddyfile
+artifactory.home.local { tls internal; reverse_proxy localhost:8181 }
+```
+
+---
+
+## Nexus Repository OSS (Maven, npm, PyPI, Docker Proxy)
+
+**Purpose:** Self-hosted artifact repository for Java/Maven, npm, PyPI, Docker, Helm, Go, NuGet, and RubyGems. Commonly used as a **proxy/cache** — pull from Maven Central or npm Registry through Nexus, reducing external bandwidth and enabling offline builds. The most common artifact manager in Java-heavy enterprise shops.
+
+```yaml
+# ~/nexus/compose.yaml
+services:
+  nexus:
+    image: sonatype/nexus3:latest
+    ports:
+      - 127.0.0.1:8091:8081    # web UI
+      - 127.0.0.1:8092:8082    # Docker registry port (configure in Nexus UI)
+    volumes:
+      - /home/user/nexus/data:/nexus-data:Z
+    restart: unless-stopped
+```
+
+```bash
+cd ~/nexus && podman-compose up -d
+
+# Get the initial admin password
+podman exec nexus cat /nexus-data/admin.password
+```
+
+**Common operations:**
+```bash
+# Configure Maven to use Nexus proxy — add to ~/.m2/settings.xml:
+# <mirrors><mirror><id>nexus</id><url>http://localhost:8091/repository/maven-public/</url>
+#          <mirrorOf>*</mirrorOf></mirror></mirrors>
+
+# Configure npm to use Nexus proxy
+npm config set registry http://localhost:8091/repository/npm-proxy/
+
+# Push a Docker image to Nexus
+podman tag myapp:latest localhost:8092/myapp:latest
+podman push localhost:8092/myapp:latest
+
+# Upload a Maven artifact
+mvn deploy -DaltDeploymentRepository=nexus::default::http://localhost:8091/repository/maven-releases/
+
+# Clean up old blob store snapshots
+# Nexus UI → Administration → Tasks → Create: "Delete unused components and assets"
+```
+
+**Caddy:**
+```caddyfile
+nexus.home.local { tls internal; reverse_proxy localhost:8091 }
+```
+
+> ⚠️ Nexus requires at least 4 GB RAM for comfortable operation. Set `-Xms2703m -Xmx2703m` in the JVM options via the `INSTALL4J_ADD_VM_PARAMS` environment variable if you need to cap memory usage.
+
+---
+
+## Consul (Service Discovery & Service Mesh)
+
+**Purpose:** HashiCorp's service discovery, health checking, key-value store, and service mesh. Services register themselves with Consul; others look them up by name rather than IP. Used in job descriptions for teams running Nomad, bare-metal microservices, or multi-cloud infrastructure. Pairs naturally with OpenBao (Vault) for dynamic secrets.
+
+```yaml
+# ~/consul/compose.yaml
+services:
+  consul:
+    image: hashicorp/consul:latest
+    ports:
+      - 127.0.0.1:8500:8500    # HTTP API & web UI
+      - 127.0.0.1:8600:8600/udp  # DNS interface
+    volumes:
+      - /home/user/consul/data:/consul/data:Z
+    command: "agent -server -bootstrap-expect=1 -ui -client=0.0.0.0 -bind=0.0.0.0"
+    restart: unless-stopped
+```
+
+```bash
+cd ~/consul && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# Install Consul CLI via Nix
+nix-env -iA nixpkgs.consul
+
+# Check cluster members
+consul members
+
+# Register a service
+consul services register -name=myapp -port=8080
+
+# Watch for service changes
+consul watch -type=services
+
+# Read / write KV store
+consul kv put myapp/config/db_host "db.home.local"
+consul kv get myapp/config/db_host
+
+# Check service health
+consul health service myapp
+
+# DNS lookup via Consul (requires 8600/udp)
+dig @127.0.0.1 -p 8600 myapp.service.consul
+```
+
+**Caddy:**
+```caddyfile
+consul.home.local { tls internal; reverse_proxy localhost:8500 }
+```
+
+---
+
+## Nomad (Workload Orchestrator)
+
+**Purpose:** HashiCorp's flexible workload orchestrator — runs containers (Podman/Docker), VMs, Java JARs, raw binaries, and batch jobs. Simpler than Kubernetes for teams that don't need the full K8s ecosystem. Common in job descriptions at shops using the HashiCorp stack (Consul + Vault + Nomad). Pairs with Consul for service discovery and OpenBao for secrets.
+
+```yaml
+# ~/nomad/compose.yaml
+services:
+  nomad:
+    image: hashicorp/nomad:latest
+    ports:
+      - 127.0.0.1:4646:4646    # HTTP API & web UI
+      - 127.0.0.1:4647:4647    # RPC
+      - 127.0.0.1:4648:4648    # Serf (cluster gossip)
+    volumes:
+      - /home/user/nomad/data:/nomad/data:Z
+      - /home/user/nomad/config:/etc/nomad.d:Z
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    cap_add: [SYS_ADMIN]
+    privileged: true
+    command: "agent -dev -bind=0.0.0.0 -log-level=INFO"
+    restart: unless-stopped
+```
+
+```bash
+cd ~/nomad && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# Install Nomad CLI via Nix
+nix-env -iA nixpkgs.nomad
+
+# Check node status
+nomad node status
+
+# Submit a job
+nomad job run ~/nomad/jobs/nginx.nomad
+
+# Check job status
+nomad job status nginx
+
+# View allocation logs
+nomad alloc logs <alloc-id>
+
+# Scale a job
+nomad job scale nginx web 3
+
+# Stop a job
+nomad job stop nginx
+```
+
+**Example job file (`~/nomad/jobs/nginx.nomad`):**
+```hcl
+job "nginx" {
+  datacenters = ["dc1"]
+  type        = "service"
+
+  group "web" {
+    count = 1
+
+    network {
+      port "http" { static = 8099 }
+    }
+
+    task "nginx" {
+      driver = "docker"
+
+      config {
+        image = "nginx:alpine"
+        ports = ["http"]
+      }
+
+      resources {
+        cpu    = 100
+        memory = 128
+      }
+    }
+  }
+}
+```
+
+**Caddy:**
+```caddyfile
+nomad.home.local { tls internal; reverse_proxy localhost:4646 }
+```
+
+---
+
+## Backstage (Internal Developer Portal)
+
+**Purpose:** Spotify's open-source Internal Developer Platform. A single portal where developers discover services, APIs, documentation, pipelines, infrastructure, and runbooks — reducing cognitive load and onboarding time. Common in Platform Engineer and DevEx job descriptions. Integrates with Gitea/Forgejo, Kubernetes, ArgoCD, PagerDuty, Grafana, and hundreds of plugins.
+
+```yaml
+# ~/backstage/compose.yaml
+services:
+  backstage:
+    image: backstage/backstage:latest
+    ports:
+      - 127.0.0.1:7007:7007
+    volumes:
+      - /home/user/backstage/app-config.yaml:/app/app-config.production.yaml:ro,Z
+    environment:
+      NODE_ENV: production
+      APP_CONFIG_app_baseUrl: https://backstage.home.local
+      APP_CONFIG_backend_baseUrl: https://backstage.home.local
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: backstage
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: backstage
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+**Minimal `app-config.yaml`:**
+```yaml
+app:
+  title: Homelab Developer Portal
+  baseUrl: https://backstage.home.local
+
+backend:
+  baseUrl: https://backstage.home.local
+  database:
+    client: pg
+    connection:
+      host: db
+      port: 5432
+      user: backstage
+      password: changeme
+
+integrations:
+  gitea:
+    - host: git.home.local
+      token: ${GITEA_TOKEN}
+
+catalog:
+  locations:
+    - type: url
+      target: https://git.home.local/myorg/catalog/blob/main/catalog-info.yaml
+```
+
+```bash
+cd ~/backstage && podman-compose up -d
+```
+
+**Caddy:**
+```caddyfile
+backstage.home.local { tls internal; reverse_proxy localhost:7007 }
+```
+
+> 💡 Backstage is most valuable once you have 5+ services. Start small — register a few services with `catalog-info.yaml` files in their repos, then add plugins incrementally (ArgoCD, Kubernetes, TechDocs).
 
 ---
 

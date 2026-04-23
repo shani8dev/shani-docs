@@ -131,37 +131,6 @@ cd ~/canvas && podman-compose up -d
 
 ---
 
-## Open edX (Tutor)
-
-**Purpose:** The platform powering edX.org and hundreds of MOOCs. Full MOOC toolkit: video courses, peer-graded assignments, timed exams, discussion forums, certificates, and XBlocks for custom content types. **Tutor** is the recommended way to deploy it — a Docker-based wrapper that makes the famously complex edX deployment manageable.
-
-```bash
-# Install Tutor
-pip install "tutor[full]" --break-system-packages
-
-# Initialise (interactive — sets domain, admin account, etc.)
-tutor config save --interactive
-
-# Launch the full stack
-tutor local launch
-
-# Create a superuser
-tutor local run lms manage.py createsuperuser
-
-# Import a demo course
-tutor local do importdemocourse
-```
-
-> Tutor manages all containers, volumes, and configuration. Run `tutor local status` to see all services.
-
-**Caddy:**
-```caddyfile
-lms.example.com { reverse_proxy localhost:80 }
-studio.example.com { reverse_proxy localhost:80 }
-```
-
----
-
 ## BigBlueButton (Virtual Classroom)
 
 **Purpose:** Open-source web conferencing designed specifically for education. Features include multi-user whiteboards, breakout rooms, polling, shared notes, learning analytics, recordings with automatic transcription, and deep LMS integration (Moodle, Canvas).

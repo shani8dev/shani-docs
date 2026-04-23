@@ -1391,14 +1391,6 @@ podman cp surrealdb:/tmp/export.surql ./surrealdb-$(date +%Y%m%d).surql
 
 ---
 
-## SQLite via Litestream
-
-**Purpose:** Streams SQLite WAL changes to S3-compatible storage in real time — continuous off-site replication with sub-second RPO for any app using SQLite, with no code changes required.
-
-See the [Backups & Sync wiki](https://docs.shani.dev/doc/servers/backups-sync#litestream-sqlite-continuous-replication) for the full Litestream setup, including `litestream.yml` configuration, MinIO integration, and restore procedure.
-
----
-
 ## PocketBase (SQLite Backend-as-a-Service)
 
 **Purpose:** Single-binary Go backend with a built-in SQLite database, REST and realtime subscriptions API, file storage, authentication (email/password, OAuth), and a clean admin dashboard. No separate database server needed. Perfect for lightweight apps, prototypes, or small-team internal tools.

@@ -426,44 +426,6 @@ cd ~/searxng && podman-compose up -d
 
 ---
 
-## Plausible Analytics
-
-See the [Business Intelligence wiki](https://docs.shani.dev/doc/servers/business-intelligence#plausible-analytics-web-analytics) for the full Plausible setup.
-
----
-
-## Umami
-
-See the [Business Intelligence wiki](https://docs.shani.dev/doc/servers/business-intelligence#umami-simple-web-analytics) for the full Umami setup.
-
----
-
-## Homepage
-
-**Purpose:** Application dashboard showing live status of all your services, system metrics, and bookmarks. See the [Container Management wiki](https://docs.shani.dev/doc/servers/management#homepage-service-dashboard) for the full setup.
-
----
-
-## Speedtest Tracker
-
-See the [Monitoring wiki](https://docs.shani.dev/doc/servers/monitoring#speedtest-tracker) for the Speedtest Tracker setup.
-
----
-
-## SmokePing
-
-See the [Monitoring wiki](https://docs.shani.dev/doc/servers/monitoring#smokeping-latency--packet-loss) for the SmokePing setup.
-
----
-
-## Netbird (Open-Source WireGuard Mesh)
-
-**Purpose:** Open-source peer-to-peer VPN management platform. Works like Tailscale but self-hostable from top to bottom — management API, relay server, and dashboard all run on your own infrastructure. Uses WireGuard for direct device-to-device tunnels.
-
-See the full setup in the [VPN & Tunnels wiki](https://docs.shani.dev/doc/servers/vpn-tunnels).
-
----
-
 ## Technitium DNS Server
 
 **Purpose:** Full-featured authoritative and recursive DNS server with a clean web UI. Goes further than Pi-hole and AdGuard Home — Technitium can host your own DNS zones (split-horizon DNS for `home.local`), act as a DHCP server, supports DNS-over-HTTPS/TLS/QUIC, has advanced conditional forwarding, and includes built-in ad-blocking. The right choice when you need proper DNS zone management alongside ad-blocking.
@@ -730,22 +692,6 @@ ports:
 ```
 
 > **Pi-hole vs Blocky:** Use Pi-hole or AdGuard Home for a dashboard-heavy, click-to-manage experience. Use Blocky when you want a lean, config-file-driven blocker with better performance and no web UI overhead.
-
----
-
-## OwnTracks (Private Location Tracking)
-
-**Purpose:** Self-hosted GPS location sharing platform for iOS and Android — publishes to your own MQTT broker, triggers Home Assistant automations, and replaces Google Maps Timeline without sending data to any third party.
-
-See the [IoT wiki](https://docs.shani.dev/doc/servers/iot#owntracks-private-location-tracking) for the full setup, including the recorder, map frontend, and Home Assistant integration.
-
----
-
-## Changedetection.io (Website Change Monitor)
-
-**Purpose:** Monitor any webpage for changes and get notified — price drops, stock availability, software releases, government notices. Supports CSS selectors, visual diffing, and notifications via ntfy, email, Slack, Discord, and 80+ others.
-
-See the [Monitoring wiki](https://docs.shani.dev/doc/servers/monitoring#changedetectionio-website-change-monitor) for the full setup.
 
 ---
 
