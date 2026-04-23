@@ -234,7 +234,7 @@ services:
       - --log.level=INFO
       - --accesslog=true
     volumes:
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
       - /home/user/traefik/config:/config:Z
       - /home/user/traefik/certs:/certs:Z
     restart: unless-stopped

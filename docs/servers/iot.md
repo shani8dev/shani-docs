@@ -66,7 +66,7 @@ services:
     network_mode: host
     volumes:
       - /home/user/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro,Z
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
     restart: unless-stopped
 ```
 

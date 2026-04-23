@@ -88,7 +88,7 @@ services:
     ports:
       - 127.0.0.1:8080:8080
     volumes:
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
       - /:/rootfs:ro
       - /var/run:/var/run:ro
       - /sys:/sys:ro
@@ -422,7 +422,7 @@ services:
       - /etc/passwd:/host/etc/passwd:ro
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
     cap_add:
       - SYS_PTRACE
     security_opt:
@@ -556,7 +556,7 @@ services:
     image: henrygd/beszel-agent:latest
     network_mode: host
     volumes:
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
     environment:
       PORT: 45876
       KEY: your-public-key-from-hub
@@ -581,7 +581,7 @@ services:
     ports:
       - 127.0.0.1:8888:8080
     volumes:
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
     restart: unless-stopped
 ```
 
@@ -874,6 +874,16 @@ Default login: `Admin` / `zabbix`. Change immediately. Add hosts under Configura
 
 **Install Zabbix agent on monitored hosts:**
 ```bash
+# Option A: Install inside a Distrobox container (recommended on Shani OS)
+distrobox create --name zabbix-agent --image fedora:latest
+distrobox enter zabbix-agent -- bash -c "
+  sudo dnf install -y zabbix-agent2
+  sudo sed -i 's/Server=127.0.0.1/Server=zabbix.home.local/' /etc/zabbix/zabbix_agent2.conf
+  sudo systemctl enable --now zabbix-agent2
+"
+sudo firewall-cmd --add-port=10050/tcp --permanent && sudo firewall-cmd --reload
+
+# Option B: On a conventional Linux host (not Shani OS)
 sudo dnf install zabbix-agent2
 sudo sed -i 's/Server=127.0.0.1/Server=zabbix.home.local/' /etc/zabbix/zabbix_agent2.conf
 sudo systemctl enable --now zabbix-agent2
@@ -1324,7 +1334,7 @@ services:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - /sys/fs/bpf:/sys/fs/bpf
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
     command: >
       --node=homeserver
       --remote-store-address=localhost:7070
@@ -1414,7 +1424,7 @@ volumes:
 ```bash
 # Required on the host before starting
 sudo sysctl -w vm.max_map_count=262144
-echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
+echo "vm.max_map_count=262144" | sudo tee /etc/sysctl.d/99-elasticsearch.conf
 
 cd ~/elk && podman-compose up -d
 ```
@@ -1557,7 +1567,7 @@ services:
     volumes:
       - /home/user/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro,Z
       - /var/log:/var/log:ro
-      - /run/user/1000/podman/podman.sock:/run/podman/podman.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/run/podman/podman.sock:ro
       - filebeat_data:/usr/share/filebeat/data
     restart: unless-stopped
 
@@ -1612,7 +1622,7 @@ services:
       - /proc:/hostfs/proc:ro
       - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
       - /:/hostfs:ro
-      - /run/user/1000/podman/podman.sock:/run/podman/podman.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/run/podman/podman.sock:ro
     command: metricbeat -e --system.hostfs=/hostfs
     restart: unless-stopped
 ```
@@ -1658,7 +1668,7 @@ volumes:
 
 ```bash
 sudo sysctl -w vm.max_map_count=262144
-echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
+echo "vm.max_map_count=262144" | sudo tee /etc/sysctl.d/99-elasticsearch.conf
 
 cd ~/opensearch && podman-compose up -d
 ```
@@ -1682,7 +1692,7 @@ services:
       - /home/user/fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro,Z
       - /home/user/fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf:ro,Z
       - /var/log:/var/log:ro
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
     restart: unless-stopped
 ```
 
@@ -1768,7 +1778,7 @@ services:
       - /home/user/vector/vector.yaml:/etc/vector/vector.yaml:ro,Z
       - /var/log:/var/log:ro
       - /home/user/vector/data:/var/lib/vector:Z
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
     restart: unless-stopped
 ```
 
@@ -1794,7 +1804,7 @@ sources:
 
   docker_logs:
     type: docker_logs
-    docker_host: "unix:///var/run/docker.sock"
+    docker_host: "unix:///run/user/${UID}/podman/podman.sock"
 
   host_metrics:
     type: host_metrics
@@ -1923,7 +1933,7 @@ parca.home.local           { tls internal; reverse_proxy localhost:7070 }
 | Netdata parent shows no child nodes | Confirm the `api key` UUID in both child and parent `stream.conf` match exactly; restart the child agent after editing |
 | Parca Agent missing profiles | eBPF requires kernel ≥ 5.3 with BTF — verify with `ls /sys/kernel/btf/vmlinux`; the agent must run `privileged: true` with `pid: host` |
 | Elasticsearch OOM-killed | Limit JVM heap with `ES_JAVA_OPTS="-Xms512m -Xmx1g"`; default is 50% of host RAM |
-| Elasticsearch `vm.max_map_count too low` | Run `sudo sysctl -w vm.max_map_count=262144` on the host and persist in `/etc/sysctl.conf` |
+| Elasticsearch `vm.max_map_count too low` | Run `sudo sysctl -w vm.max_map_count=262144` on the host and persist in `/etc/sysctl.d/99-elasticsearch.conf` |
 | Kibana `Kibana server is not ready yet` | Wait for Elasticsearch to fully start first; check `podman logs kibana` |
 | Logstash `Pipeline aborted due to error` | Check `podman logs logstash`; most common causes are Grok pattern mismatch or Elasticsearch unreachable |
 | Filebeat `connection refused` to Logstash | Verify Logstash Beats input is on port `5044`; use `host.containers.internal:5044` not `localhost:5044` |

@@ -431,8 +431,8 @@ cd ~/restic-rest-server && podman-compose up -d
 
 **Create user credentials (htpasswd):**
 ```bash
-# Install htpasswd (part of httpd-tools / apache2-utils)
-sudo dnf install httpd-tools
+# Install htpasswd via Nix (part of the apacheHttpd package)
+nix-env -iA nixpkgs.apacheHttpd
 
 # Create the password file with the first user
 htpasswd -B -c /home/user/restic-rest-server/.htpasswd backupuser

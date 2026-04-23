@@ -121,7 +121,7 @@ volumes:
 ```bash
 # Required on every host node before starting
 sudo sysctl -w vm.max_map_count=262144
-echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
+echo "vm.max_map_count=262144" | sudo tee /etc/sysctl.d/99-elasticsearch.conf
 
 cd ~/elk-cluster && podman-compose up -d
 
@@ -232,7 +232,7 @@ volumes:
 
 ```bash
 sudo sysctl -w vm.max_map_count=262144
-echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
+echo "vm.max_map_count=262144" | sudo tee /etc/sysctl.d/99-elasticsearch.conf
 
 cd ~/opensearch-cluster && podman-compose up -d
 
@@ -1262,7 +1262,7 @@ podman exec etcd-cluster-etcd1-1 etcdctl \
 
 | Issue | Solution |
 |-------|----------|
-| Elasticsearch / OpenSearch `vm.max_map_count too low` | Run `sudo sysctl -w vm.max_map_count=262144` on the host and persist in `/etc/sysctl.conf` — required on all nodes |
+| Elasticsearch / OpenSearch `vm.max_map_count too low` | Run `sudo sysctl -w vm.max_map_count=262144` on the host and persist in `/etc/sysctl.d/99-elasticsearch.conf` — required on all nodes |
 | Elasticsearch cluster status RED | Check unassigned shards: `curl localhost:9200/_cat/shards?v \| grep UNASSIGNED`; caused by a data node being down or replicas exceeding available nodes |
 | Elasticsearch `master not discovered` on start | `cluster.initial_master_nodes` must list all master-eligible node names exactly; remove this setting after first cluster formation |
 | Elasticsearch split-brain | Use exactly 3 or 5 master-eligible nodes; verify all nodes can reach each other on port `9300`; confirm `cluster.name` is identical across nodes |

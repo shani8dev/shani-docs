@@ -358,7 +358,8 @@ cd ~/crowdsec && podman-compose up -d
 
 **Install the firewalld bouncer on the host:**
 ```bash
-sudo dnf install crowdsec-firewall-bouncer-iptables
+# Install via Nix
+nix-env -iA nixpkgs.crowdsec
 sudo systemctl enable --now crowdsec-firewall-bouncer
 ```
 
@@ -500,9 +501,8 @@ cd ~/infisical && podman-compose up -d
 # View logs
 podman logs -f infisical
 
-# Install the Infisical CLI on the host
-curl -1sLf 'https://dl.cloudsmith.io/public/infisical/infisical-cli/setup.rpm.sh' | sudo bash
-sudo dnf install infisical
+# Install the Infisical CLI on the host via Nix
+nix-env -iA nixpkgs.infisical
 
 # Login from the CLI
 infisical login --domain https://secrets.home.local
@@ -710,6 +710,14 @@ cd ~/wazuh && podman-compose up -d
 **Install agent on a monitored server:**
 ```bash
 # On each server you want to monitor
+# Option A: Install inside a Distrobox container (recommended on Shani OS)
+distrobox create --name wazuh-agent --image fedora:latest
+distrobox enter wazuh-agent -- bash -c "
+  sudo rpm --import https://packages.wazuh.com/key/GPG-KEY-WAZUH
+  sudo dnf install -y wazuh-agent
+"
+
+# Option B: On a conventional Linux host (not Shani OS)
 sudo rpm --import https://packages.wazuh.com/key/GPG-KEY-WAZUH
 sudo dnf install wazuh-agent
 sudo WAZUH_MANAGER=wazuh.home.local \

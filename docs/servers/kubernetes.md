@@ -10,18 +10,23 @@ Lightweight and production-grade Kubernetes distributions, cluster management, G
 
 > ⚠️ **Prerequisites**: Kubernetes requires `vm.max_map_count=524288` and sufficient RAM (2 GB minimum per node, 4 GB+ recommended). Some distributions need `br_netfilter` and IP forwarding enabled. CLI tools (`kubectl`, `helm`, `k9s`, etc.) install via **Nix** (primary) or **Snap** as a fallback — see the install one-liner in the disk layout section below. k3s and MicroK8s bundle their own `kubectl` — you only need a separate install for standalone or remote-cluster access.
 
+> **Shani OS install note:** `/usr/local` is part of the read-only OS root. The curl-based installers for k3s, k0s, and RKE2 default to writing their binaries there. All three support an environment variable to redirect the binary to `~/.local/bin` (which lives in `@home` and persists across OS updates) — the install commands below include this already. Add `~/.local/bin` to your `PATH` once in `~/.bashrc`:</p>
+> ```bash
+> echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
+> ```
+
 ---
 
 ## Choosing a Distribution
 
 | Distribution | Best For | RAM (min) | Install via | Notes |
 |---|---|---|---|---|
-| **k3s** | Single-node homelabs, edge | 512 MB | curl installer | Batteries-included, easiest to start |
-| **k0s** | Minimal, air-gapped | 1 GB | curl installer | Single binary, no external deps |
+| **k3s** | Single-node homelabs, edge | 512 MB | curl installer (`~/.local/bin`) | Batteries-included, easiest to start |
+| **k0s** | Minimal, air-gapped | 1 GB | curl installer (`~/.local/bin`) | Single binary, no external deps |
 | **MicroK8s** | Quick local cluster, addons | 2 GB | **Snap** | Canonical-maintained; DNS, ingress, registry as addons |
 | **minikube** | Local dev, driver choice | 2 GB | Nix or **Snap** | Runs via Podman driver on Shani OS |
 | **kind** | Lightweight dev/CI | 2 GB | Nix | Runs K8s inside Podman containers |
-| **RKE2** | Hardened, production | 4 GB | curl installer | CIS-benchmarked, STIG-ready |
+| **RKE2** | Hardened, production | 4 GB | curl installer (`~/.local/bin`) | CIS-benchmarked, STIG-ready |
 | **Talos** | Immutable infra, GitOps | 2 GB | talosctl | API-only, no SSH, extremely secure |
 
 ---
@@ -65,8 +70,13 @@ echo "vm.max_map_count=524288" | sudo tee /etc/sysctl.d/99-k8s.conf
 sudo modprobe br_netfilter
 echo "br_netfilter" | sudo tee /etc/modules-load.d/br_netfilter.conf
 
-# Install k3s (installs as a systemd service automatically, starts on boot)
-curl -sfL https://get.k3s.io | sh -
+# Install k3s
+# Shani OS has a read-only /usr/local — redirect the binary to ~/.local/bin (in @home)
+mkdir -p ~/.local/bin
+curl -sfL https://get.k3s.io | INSTALL_K3S_BIN_DIR=~/.local/bin sh -
+
+# Ensure ~/.local/bin is on your PATH (add to ~/.bashrc if not already present)
+export PATH="$HOME/.local/bin:$PATH"
 
 # Verify cluster is running
 sudo k3s kubectl get nodes
@@ -100,7 +110,8 @@ sudo firewall-cmd --reload
 sudo cat /var/lib/rancher/k3s/server/node-token
 
 # On each worker node
-curl -sfL https://get.k3s.io | K3S_URL=https://<server-ip>:6443 K3S_TOKEN=<token> sh -
+mkdir -p ~/.local/bin
+curl -sfL https://get.k3s.io | INSTALL_K3S_BIN_DIR=~/.local/bin K3S_URL=https://<server-ip>:6443 K3S_TOKEN=<token> sh -
 ```
 
 ### Common k3s Operations
@@ -114,10 +125,10 @@ kubectl get pods -A
 sudo journalctl -u k3s -f
 
 # Uninstall k3s (server)
-/usr/local/bin/k3s-uninstall.sh
+~/.local/bin/k3s-uninstall.sh
 
 # Uninstall k3s (agent/worker)
-/usr/local/bin/k3s-agent-uninstall.sh
+~/.local/bin/k3s-agent-uninstall.sh
 
 # Restart k3s
 sudo systemctl restart k3s
@@ -137,7 +148,9 @@ kubectl uncordon <node-name>
 
 ```bash
 # Download and install
-curl -sSLf https://get.k0s.sh | sudo sh
+# Shani OS has a read-only /usr/local — download the binary to ~/.local/bin (in @home)
+mkdir -p ~/.local/bin
+curl -sSLf https://get.k0s.sh | K0S_INSTALL_PATH=~/.local/bin sudo sh
 
 # Install as a systemd service and start
 sudo k0s install controller --single
@@ -217,8 +230,9 @@ microk8s start
 microk8s enable observability
 
 # Push an image to the built-in registry
-docker tag myapp:latest localhost:32000/myapp:latest
-docker push localhost:32000/myapp:latest
+# podman-docker shim is pre-installed on Shani OS, but use podman directly:
+podman tag myapp:latest localhost:32000/myapp:latest
+podman push localhost:32000/myapp:latest --tls-verify=false
 
 # Uninstall
 sudo snap remove microk8s
@@ -329,7 +343,9 @@ kind delete cluster --name homelab
 
 ```bash
 # Install on the server node
-curl -sfL https://get.rke2.io | sudo sh -
+# Shani OS has a read-only /usr/local — redirect the binary to ~/.local/bin (in @home)
+mkdir -p ~/.local/bin
+curl -sfL https://get.rke2.io | INSTALL_RKE2_BIN_DIR=~/.local/bin sudo sh -
 
 # Configure
 sudo mkdir -p /etc/rancher/rke2
@@ -347,7 +363,7 @@ sudo systemctl enable --now rke2-server
 sudo cp /etc/rancher/rke2/rke2.yaml ~/.kube/config
 sudo chown $USER ~/.kube/config
 chmod 600 ~/.kube/config
-export PATH=$PATH:/var/lib/rancher/rke2/bin
+export PATH="$HOME/.local/bin:/var/lib/rancher/rke2/bin:$PATH"
 ```
 
 ---

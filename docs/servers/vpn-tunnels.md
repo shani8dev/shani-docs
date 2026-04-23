@@ -861,7 +861,7 @@ PersistentKeepalive = 25
 
 Generate a scannable QR code for the mobile WireGuard app:
 ```bash
-sudo apt install qrencode   # or dnf install qrencode
+nix-env -iA nixpkgs.qrencode
 qrencode -t ansiutf8 < /etc/wireguard/client.conf
 ```
 
@@ -1038,7 +1038,7 @@ sudo firewall-cmd --add-port=443/tcp --permanent && sudo firewall-cmd --reload
 | Gluetun leaking real IP | Ensure the app container uses `network_mode: service:gluetun` — any other network mode bypasses the tunnel |
 | qBittorrent WebUI unreachable via Gluetun | Port must be published on the `gluetun` container, not `qbittorrent`; the app container shares gluetun's network |
 | WireGuard client can't reach LAN | Ensure `AllowedIPs` includes the home subnet (e.g., `192.168.1.0/24`) and that `PostUp` iptables MASQUERADE rule is active on the server |
-| WireGuard road warrior QR not showing | Install `qrencode` on the server: `dnf install qrencode`; for the linuxserver container, peer QR PNGs are in `config/peer_<name>/peer_<name>.png` |
+| WireGuard road warrior QR not showing | Install `qrencode` via Nix: `nix-env -iA nixpkgs.qrencode`; for the linuxserver container, peer QR PNGs are in `config/peer_<name>/peer_<name>.png` |
 | Outline Manager can't connect to server | The management API port (default `9090`) must be reachable; check firewall and that the `SB_API_PREFIX` in the environment matches the Manager's saved config |
 | Outline client times out | Ensure both TCP and UDP on the data port are open; Shadowsocks uses both; check ISP is not blocking the port |
 | Xray VLESS connection rejected | Verify the client UUID matches exactly; check that port 443 is open; confirm the Reality `serverNames` is reachable from the server itself |

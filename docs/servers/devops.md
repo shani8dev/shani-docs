@@ -578,7 +578,7 @@ terraform {
 }
 
 provider "docker" {
-  host = "unix:///run/user/1000/podman/podman.sock"
+  host = "unix:///run/user/${UID}/podman/podman.sock"
 }
 
 resource "docker_container" "nginx" {
@@ -999,8 +999,8 @@ podman restart grafana
 **Purpose:** Exposes your operating system as a relational database — you query running processes, network connections, installed packages, file integrity, users, cron jobs, kernel modules, and hardware as SQL tables. Use it for host-based intrusion detection, compliance checking, and forensics. Integrates with Wazuh, Kolide Fleet, and Grafana for continuous monitoring.
 
 ```bash
-# Install osquery on the host (not containerised — needs host kernel access)
-sudo dnf install osquery
+# Install osquery on the host via Nix (not containerised — needs host kernel access)
+nix-env -iA nixpkgs.osquery
 
 sudo systemctl enable --now osqueryd
 ```
@@ -1110,14 +1110,8 @@ podman run --rm \
 
 **Install SOPS and Age:**
 ```bash
-# Install SOPS
-sudo wget -O /usr/local/bin/sops \
-  https://github.com/getsops/sops/releases/latest/download/sops-v3.9.5.linux.amd64
-sudo chmod +x /usr/local/bin/sops
-
-# Install Age
-sudo pacman -S age    # Arch / Shani OS
-# or: sudo apt install age
+# Install both via Nix
+nix-env -iA nixpkgs.sops nixpkgs.age
 ```
 
 **Generate an Age key pair:**

@@ -89,7 +89,7 @@ services:
   woodpecker-agent:
     image: woodpeckerci/woodpecker-agent:latest
     volumes:
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
       - woodpecker_agent:/var/lib/woodpecker
     environment:
       WOODPECKER_SERVER: woodpecker-server:9000
@@ -150,7 +150,7 @@ services:
       - 127.0.0.1:3001:3000
     volumes:
       - /home/user/coder:/var/lib/coder:Z
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
     environment:
       CODER_ACCESS_URL: https://coder.home.local
       CODER_WILDCARD_ACCESS_URL: *.coder.home.local
@@ -502,7 +502,7 @@ services:
     image: gitlab/gitlab-runner:latest
     volumes:
       - /home/user/gitlab-runner/config:/etc/gitlab-runner:Z
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
     restart: unless-stopped
 ```
 
@@ -709,7 +709,7 @@ services:
     image: code.forgejo.org/forgejo/runner:latest
     volumes:
       - /home/user/forgejo-runner:/data:Z
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
     environment:
       FORGEJO_INSTANCE_URL: https://git.home.local
       FORGEJO_RUNNER_SECRET: changeme-from-forgejo-admin-panel
@@ -1118,7 +1118,7 @@ services:
     volumes:
       - /home/user/nomad/data:/nomad/data:Z
       - /home/user/nomad/config:/etc/nomad.d:Z
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
     cap_add: [SYS_ADMIN]
     privileged: true
     command: "agent -dev -bind=0.0.0.0 -log-level=INFO"

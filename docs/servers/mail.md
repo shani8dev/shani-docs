@@ -399,9 +399,9 @@ cd ~/snappymail && podman-compose up -d
 ```
 
 ## Thunderbird / KMail / Evolution
-**Purpose**: Feature-rich desktop clients with PGP, CalDAV, and Exchange/ActiveSync support. Install via Flatpak or `pacman`.
+**Purpose**: Feature-rich desktop clients with PGP, CalDAV, and Exchange/ActiveSync support. Install via Flatpak.
 - **Thunderbird**: `flatpak install flathub org.mozilla.Thunderbird`
-- **KMail**: `sudo pacman -S kmail kontact` (KDE)
+- **KMail**: `flatpak install flathub org.kde.kmail2` (KDE — or pre-installed on Shani OS KDE edition)
 - **Evolution**: `flatpak install flathub org.gnome.Evolution` (GNOME)
 
 ## FairEmail / K-9 Mail
