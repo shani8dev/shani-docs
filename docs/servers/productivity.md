@@ -1313,6 +1313,8 @@ Access at `http://localhost:3010`. Create a workspace, sign in, and start creati
 
 > **vs Outline:** AFFiNE is better for mixed document+canvas work and personal knowledge management. Outline is better for team wikis and structured documentation.
 
+> **Stable release:** AFFiNE has exited beta — the compose above uses `ghcr.io/toeverything/affine-graphql:stable`, which is the production-ready tag. The `latest` tag may include canary features that are not yet stable; prefer `stable` for homelab deployments.
+
 **Caddy:**
 ```caddyfile
 affine.home.local { tls internal; reverse_proxy localhost:3010 }
@@ -1469,6 +1471,390 @@ cal.example.com { reverse_proxy localhost:3900 }
 
 ---
 
+## Limesurvey (Self-Hosted Survey Platform)
+
+**Purpose:** Full-featured, self-hosted survey platform for creating questionnaires with advanced branching logic, quotas, conditions, and multilingual support. Supports a wide range of question types (matrix, ranking, sliders, file upload), exports results to CSV and SPSS, and handles anonymous or token-based respondents. Much more powerful than Rallly — use Rallly for lightweight scheduling polls, use Limesurvey when you need real survey methodology.
+
+```yaml
+# ~/limesurvey/compose.yaml
+services:
+  limesurvey:
+    image: martialblog/limesurvey:latest
+    ports:
+      - 127.0.0.1:8420:8080
+    environment:
+      DB_TYPE: mysql
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: limesurvey
+      DB_USERNAME: limesurvey
+      DB_PASSWORD: changeme
+      ADMIN_USER: admin
+      ADMIN_PASSWORD: changeme
+      ADMIN_NAME: Admin
+      ADMIN_EMAIL: admin@example.com
+      BASE_URL: https://survey.home.local
+      URL_FORMAT: path
+    volumes:
+      - /home/user/limesurvey/upload:/var/www/html/upload:Z
+      - /home/user/limesurvey/config:/var/www/html/application/config:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:10.11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: limesurvey
+      MYSQL_USER: limesurvey
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  db_data:
+```
+
+```bash
+cd ~/limesurvey && podman-compose up -d
+```
+
+Access at `http://localhost:8420/admin`. Log in with the admin credentials above.
+
+**Key workflows:**
+- **Create a survey:** Surveys → Create a new survey → add question groups and questions.
+- **Question types:** Single/multiple choice, free text, matrix, date, file upload, ranking, slider, and more.
+- **Branching logic:** Use **Conditions** on individual questions and **Relevance equations** for group-level skip logic.
+- **Quota management:** Set response limits per answer option under Survey → Quotas.
+- **Tokens:** Enable **Participants** to create a closed survey with invitation tokens — each token is single-use.
+- **Export:** Results → Export → CSV (for spreadsheets) or SPSS format (`.sav`) for statistical analysis.
+
+**Caddy:**
+```caddyfile
+survey.home.local { tls internal; reverse_proxy localhost:8420 }
+```
+
+---
+
+## Docusaurus (Docs-as-Code Site Generator)
+
+**Purpose:** Static documentation site generator from Meta, used by React, Webpack, Prettier, and hundreds of major OSS projects. Write docs in Markdown/MDX, version them with your code in Gitea/Forgejo, and publish a fast, searchable, professionally themed documentation site. Pairs perfectly with a Gitea CI pipeline — push to `main`, the site rebuilds automatically. Simpler and more docs-focused than WordPress or Ghost for technical documentation.
+
+```yaml
+# ~/docusaurus/compose.yaml — serves a pre-built Docusaurus site
+services:
+  docusaurus:
+    image: nginx:alpine
+    ports:
+      - 127.0.0.1:8421:80
+    volumes:
+      - /home/user/docusaurus/build:/usr/share/nginx/html:ro,Z
+    restart: unless-stopped
+```
+
+**Build the site on your workstation or in a Gitea Actions runner:**
+```bash
+# Scaffold a new docs site
+npx create-docusaurus@latest my-docs classic
+cd my-docs
+
+# Write docs in docs/*.md, configure docusaurus.config.js
+npm run build        # produces build/ directory
+rsync -av build/ user@server:/home/user/docusaurus/build/
+```
+
+**Minimal `docusaurus.config.js` for a self-hosted intranet:**
+```js
+const config = {
+  title: 'My Homelab Docs',
+  url: 'https://docs.home.local',
+  baseUrl: '/',
+  onBrokenLinks: 'throw',
+  presets: [
+    ['classic', {
+      docs: { routeBasePath: '/' },  // docs at root, no landing page
+      blog: false,
+      theme: { customCss: './src/css/custom.css' },
+    }],
+  ],
+};
+module.exports = config;
+```
+
+**Gitea Actions workflow to auto-deploy on push:**
+```yaml
+# .gitea/workflows/deploy-docs.yaml
+name: Deploy Docs
+on:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci && npm run build
+      - name: Deploy to server
+        run: rsync -av --delete build/ user@docs-server:/home/user/docusaurus/build/
+```
+
+**Caddy:**
+```caddyfile
+docs.home.local { tls internal; reverse_proxy localhost:8421 }
+```
+
+> Docusaurus supports Algolia DocSearch for full-text search in production. For a self-hosted alternative, use the [local search plugin](https://github.com/easyops-cn/docusaurus-search-local) which generates a client-side index at build time — no external service needed.
+
+---
+
+## Taiga (Agile Project Management)
+
+**Purpose:** Mature, full-featured Agile project management platform covering Scrum and Kanban workflows. Supports sprints, epics, user stories, tasks, issues, and a backlog — a true Jira alternative for teams that want open-source self-hosting. Complements Planka (which is lightweight Kanban-only) with proper Scrum ceremonies: sprint planning, backlog refinement, velocity tracking, and burndown charts.
+
+```yaml
+# ~/taiga/compose.yaml
+services:
+  taiga-db:
+    image: postgres:12.3
+    environment:
+      POSTGRES_DB: taiga
+      POSTGRES_USER: taiga
+      POSTGRES_PASSWORD: changeme
+    volumes: [taiga_db:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  taiga-back:
+    image: taigaio/taiga-back:latest
+    ports: ["127.0.0.1:8003:8000"]
+    environment:
+      TAIGA_SECRET_KEY: changeme-run-openssl-rand-hex-32
+      TAIGA_SITES_DOMAIN: taiga.home.local
+      TAIGA_SITES_SCHEME: https
+      POSTGRES_DB: taiga
+      POSTGRES_USER: taiga
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_HOST: taiga-db
+      RABBITMQ_USER: taiga
+      RABBITMQ_PASS: changeme
+      RABBITMQ_VHOST: taiga
+      RABBITMQ_HOST: taiga-rabbitmq
+      RABBITMQ_PORT: "5672"
+    depends_on: [taiga-db, taiga-rabbitmq]
+    volumes:
+      - /home/user/taiga/static:/taiga-back/static:Z
+      - /home/user/taiga/media:/taiga-back/media:Z
+    restart: unless-stopped
+
+  taiga-front:
+    image: taigaio/taiga-front:latest
+    ports: ["127.0.0.1:8004:80"]
+    environment:
+      TAIGA_URL: https://taiga.home.local
+      TAIGA_WEBSOCKETS_URL: wss://taiga.home.local
+    restart: unless-stopped
+
+  taiga-events:
+    image: taigaio/taiga-events:latest
+    environment:
+      RABBITMQ_USER: taiga
+      RABBITMQ_PASS: changeme
+      RABBITMQ_VHOST: taiga
+      RABBITMQ_HOST: taiga-rabbitmq
+      TAIGA_SECRET_KEY: changeme-run-openssl-rand-hex-32
+    depends_on: [taiga-rabbitmq]
+    restart: unless-stopped
+
+  taiga-async:
+    image: taigaio/taiga-back:latest
+    entrypoint: ["/taiga-back/docker/async_entrypoint.sh"]
+    environment:
+      TAIGA_SECRET_KEY: changeme-run-openssl-rand-hex-32
+      POSTGRES_DB: taiga
+      POSTGRES_USER: taiga
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_HOST: taiga-db
+      RABBITMQ_USER: taiga
+      RABBITMQ_PASS: changeme
+      RABBITMQ_VHOST: taiga
+      RABBITMQ_HOST: taiga-rabbitmq
+    depends_on: [taiga-db, taiga-rabbitmq]
+    restart: unless-stopped
+
+  taiga-rabbitmq:
+    image: rabbitmq:3.8-management-alpine
+    environment:
+      RABBITMQ_ERLANG_COOKIE: changeme
+      RABBITMQ_DEFAULT_USER: taiga
+      RABBITMQ_DEFAULT_PASS: changeme
+      RABBITMQ_DEFAULT_VHOST: taiga
+    restart: unless-stopped
+
+volumes:
+  taiga_db:
+```
+
+```bash
+cd ~/taiga && podman-compose up -d
+```
+
+Access the frontend at `http://localhost:8004`. On first load, register an admin account. Default project types include Scrum and Kanban — choose during project creation.
+
+**Key workflows:**
+- **Scrum:** Create a project → add User Stories to the backlog → plan sprints → track velocity per sprint on the dashboard.
+- **Kanban:** Create a Kanban project → manage the board swimlanes → set WIP limits per column.
+- **Epics:** Group related user stories under an Epic for high-level roadmap tracking.
+- **Issues:** Track bugs and support requests separately from user stories in the Issues module.
+
+**Caddy:**
+```caddyfile
+taiga.home.local {
+  tls internal
+  # Frontend
+  reverse_proxy /api/* localhost:8003
+  reverse_proxy /admin/* localhost:8003
+  reverse_proxy /static/* localhost:8003
+  reverse_proxy /media/* localhost:8003
+  reverse_proxy /* localhost:8004
+}
+```
+
+> **Planka vs Taiga:** Use Planka for simple personal Kanban boards with minimal setup. Use Taiga when you need Scrum sprints, epics, velocity charts, and a full agile workflow for a team.
+
+---
+
+## Gitea Wiki / Markdown CMS
+
+**Purpose:** Gitea and Forgejo include a built-in wiki for every repository — Markdown pages, version-controlled in a separate Git branch, editable via the web UI or any Git client. No additional service to run. For lightweight technical documentation tied to a project (API references, runbooks, architecture notes), the built-in wiki is often sufficient without standing up a full BookStack or Wiki.js instance.
+
+**Enable the wiki on a repository:**
+1. Repository → Settings → Features → tick **Wiki** → Save.
+2. Navigate to the **Wiki** tab on the repository page.
+3. Create your first page — Gitea creates a `wiki` Git repository at `https://gitea.home.local/user/repo.wiki.git`.
+
+**Clone and edit locally (full Git workflow):**
+```bash
+# Clone the wiki repo
+git clone https://gitea.home.local/user/repo.wiki.git
+cd repo.wiki
+
+# Create or edit pages (Markdown files)
+vim Home.md
+vim Architecture.md
+
+git add .
+git commit -m "Add architecture notes"
+git push
+```
+
+**Sidebar navigation (`_Sidebar.md`):**
+```markdown
+## Contents
+- [[Home]]
+- [[Architecture]]
+- [[API Reference]]
+- [[Deployment Runbook]]
+```
+
+**Cross-repository wiki as a standalone CMS:**
+
+For a shared knowledge base that isn't tied to a specific repo, create a dedicated repository called `wiki` or `docs` and use its built-in wiki:
+
+```bash
+# Create a bare wiki repository via Gitea API
+curl -X POST https://gitea.home.local/api/v1/user/repos \
+  -H "Authorization: token YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"wiki","private":true,"has_wiki":true}'
+```
+
+> The Gitea wiki doesn't support custom themes or plugins — it renders plain Markdown with a fixed layout. For structured, navigable documentation with nested categories and search, use BookStack or Wiki.js. For docs-as-code with a custom site, use Docusaurus.
+
+---
+
+## Docmost (Modern Wiki & Knowledge Base)
+
+**Purpose:** Actively developed, modern wiki and knowledge base with a clean block-based editor (similar to Notion). Supports nested pages, workspaces, real-time collaborative editing, comments, and permissions. Lighter and easier to self-host than Outline, with better out-of-the-box ergonomics — no mandatory OIDC setup, simpler environment variables, and a single-container option. A strong alternative when Outline feels heavyweight or requires too many dependencies.
+
+```yaml
+# ~/docmost/compose.yaml
+services:
+  docmost:
+    image: docmost/docmost:latest
+    ports:
+      - 127.0.0.1:3800:3000
+    environment:
+      APP_URL: https://wiki.home.local
+      APP_SECRET: changeme-run-openssl-rand-hex-32
+      DATABASE_URL: postgresql://docmost:changeme@db:5432/docmost
+      REDIS_URL: redis://redis:6379
+    volumes:
+      - /home/user/docmost/storage:/app/data/storage:Z
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: docmost
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: docmost
+    volumes: [pg_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U docmost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+```bash
+cd ~/docmost && podman-compose up -d
+```
+
+Access at `http://localhost:3800`. On first run, complete the setup wizard to create your workspace and first admin user.
+
+**Common operations:**
+```bash
+# View logs
+podman logs -f docmost
+
+# Run database migrations manually (after upgrade)
+podman exec docmost node ace migration:run
+
+# Backup storage (attachments and uploads)
+rsync -av /home/user/docmost/storage/ backup:/docmost-storage/
+```
+
+**Key features:**
+- Block-based editor with slash commands (`/` to insert headings, tables, code blocks, callouts, embeds)
+- Nested page hierarchy — pages can have unlimited child pages
+- Real-time multiplayer editing via WebSocket
+- Per-workspace and per-page permissions
+- Comments and inline mentions
+- Full-text search across all pages
+
+**Caddy:**
+```caddyfile
+wiki.home.local { tls internal; reverse_proxy localhost:3800 }
+```
+
+> **Docmost vs Outline:** Docmost requires fewer dependencies (no MinIO/S3 for storage — files go to the local volume), has no mandatory SSO requirement, and is faster to get running. Outline has a more mature ecosystem and stronger integrations. For a solo or small-team homelab wiki, Docmost is the easier starting point.
+
+---
+
 ## Caddy Configuration
 
 ```caddyfile
@@ -1500,6 +1886,10 @@ hoarder.home.local   { tls internal; reverse_proxy localhost:3055 }
 memos.home.local     { tls internal; reverse_proxy localhost:5230 }
 draw.home.local      { tls internal; reverse_proxy localhost:3700 }
 cal.example.com      { reverse_proxy localhost:3900 }
+survey.home.local    { tls internal; reverse_proxy localhost:8420 }
+docs-static.home.local { tls internal; reverse_proxy localhost:8421 }
+taiga.home.local     { tls internal; reverse_proxy localhost:8004 }
+wiki.home.local      { tls internal; reverse_proxy localhost:3800 }
 ```
 
 ---
@@ -1541,3 +1931,12 @@ cal.example.com      { reverse_proxy localhost:3900 }
 | Excalidraw real-time collaboration not syncing | Confirm the `excalidraw-room` WebSocket container is running; the frontend must be configured with the room server URL in its environment |
 | Cal.com blank page after deploy | Run `podman exec calcom npx prisma db push` to apply DB migrations; check `NEXTAUTH_URL` exactly matches the URL you access it from |
 | Cal.com booking emails not sending | Verify `EMAIL_SERVER_HOST` and `EMAIL_SERVER_PORT` point at a working SMTP relay; check Cal.com logs for mailer errors |
+| Limesurvey blank page after install | Ensure `BASE_URL` matches the exact URL you're accessing; check `podman logs limesurvey` for PHP errors; verify the MariaDB container is healthy |
+| Limesurvey email invitations not sending | Configure SMTP under Global Settings → Email settings in the admin panel; test with the built-in email test button |
+| Limesurvey CSV export missing data | Ensure the survey is set to store responses — check Survey → Settings → Responses → check `Save IP address` and `Save timings` options are as expected |
+| Docusaurus build fails | Run `npm run build` locally first to catch broken links and MDX syntax errors before deploying; check `onBrokenLinks` is set to `'throw'` to catch issues early |
+| Taiga frontend blank / API errors | Verify `TAIGA_URL` in the frontend env matches the domain you're accessing exactly; confirm `taiga-back` is reachable and healthy — check `podman logs taiga-back` |
+| Taiga websocket events not updating | The `taiga-events` service must be running and connected to RabbitMQ; check `podman logs taiga-events`; verify the `taiga-rabbitmq` container is healthy |
+| Taiga async tasks not processing | The `taiga-async` worker must be running alongside the backend — verify it shows as running with `podman ps`; check RabbitMQ queue depth at `http://localhost:15672` |
+| Docmost editor not saving | Verify Redis is running — real-time collaboration and caching depend on it; check `podman logs docmost` for Redis connection errors |
+| Docmost storage attachments missing after migration | The `/app/data/storage` volume must be preserved across upgrades; ensure the volume mount path hasn't changed in the compose file |

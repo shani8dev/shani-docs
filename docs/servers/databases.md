@@ -145,6 +145,92 @@ podman exec postgres psql -U myuser -c "SELECT pg_database.datname, pg_size_pret
 
 ---
 
+## pgvector (Vector Search in PostgreSQL)
+
+**Purpose:** PostgreSQL extension that adds a native vector column type and similarity search operators — enabling semantic search, RAG (Retrieval-Augmented Generation) pipelines, and embedding storage without running a separate vector database. If you're already using PostgreSQL, this is the lowest-friction path to vector search: one `CREATE EXTENSION`, one extra column type, and you're done. Use Qdrant or Weaviate when you need billion-scale vector search or advanced ANN indexing; use pgvector when your dataset is under ~10M vectors and you'd rather keep your stack simple.
+
+```yaml
+# ~/pgvector/compose.yaml
+services:
+  pgvector:
+    image: pgvector/pgvector:pg16
+    ports:
+      - 127.0.0.1:5432:5432
+    volumes:
+      - pgvector_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: strongpassword
+      POSTGRES_DB: mydb
+    restart: unless-stopped
+
+volumes:
+  pgvector_data:
+```
+
+```bash
+cd ~/pgvector && podman-compose up -d
+```
+
+> The `pgvector/pgvector:pg16` image is the official PostgreSQL 16 image with the extension pre-installed. You can also install the extension into an existing PostgreSQL instance:
+> ```bash
+> podman exec postgres psql -U myuser -d mydb -c "CREATE EXTENSION vector;"
+> ```
+
+**Set up a vector table and index:**
+```sql
+-- Enable the extension (once per database)
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- Create a table with a vector column (1536 dims for OpenAI, 768 for nomic-embed-text)
+CREATE TABLE documents (
+  id       BIGSERIAL PRIMARY KEY,
+  content  TEXT,
+  metadata JSONB,
+  embedding vector(768)
+);
+
+-- Create an HNSW index for fast approximate nearest-neighbour search
+CREATE INDEX ON documents USING hnsw (embedding vector_cosine_ops)
+  WITH (m = 16, ef_construction = 64);
+
+-- Insert a document with its embedding (use your app/Ollama to generate the vector)
+INSERT INTO documents (content, embedding)
+VALUES ('Self-hosting is great', '[0.01, 0.23, ...]'::vector);
+
+-- Semantic similarity search — find the 5 nearest neighbours
+SELECT id, content, 1 - (embedding <=> '[0.02, 0.21, ...]'::vector) AS similarity
+FROM documents
+ORDER BY embedding <=> '[0.02, 0.21, ...]'::vector
+LIMIT 5;
+```
+
+**Operators:**
+- `<=>` — cosine distance (most common for text embeddings)
+- `<->` — L2 (Euclidean) distance
+- `<#>` — negative inner product (for dot-product similarity)
+
+**Generate embeddings with Ollama and store them (Python example):**
+```python
+import psycopg2, requests
+
+def embed(text):
+    r = requests.post("http://localhost:11434/api/embeddings",
+                      json={"model": "nomic-embed-text", "prompt": text})
+    return r.json()["embedding"]
+
+conn = psycopg2.connect("postgresql://myuser:strongpassword@localhost:5432/mydb")
+cur = conn.cursor()
+text = "Self-hosting gives you full data ownership"
+vector = embed(text)
+cur.execute("INSERT INTO documents (content, embedding) VALUES (%s, %s)", (text, vector))
+conn.commit()
+```
+
+> See the [AI & LLMs wiki](https://docs.shani.dev/doc/servers/ai-llms) for the full Ollama setup. The `nomic-embed-text` model produces 768-dimensional vectors — adjust `vector(768)` to match your chosen model's output dimensions.
+
+---
+
 ## Redis
 
 **Purpose:** High-performance in-memory data store used for caching, session management, message brokering, and real-time analytics. Used as a dependency by Nextcloud, Immich, Authentik, and many others.
@@ -777,89 +863,6 @@ podman exec influxdb influx backup /tmp/backup --org home
 podman cp influxdb:/tmp/backup ./influxdb-backup-$(date +%Y%m%d)
 ```
 
----
-
-## Elasticsearch
-
-**Purpose:** Distributed search and analytics engine powering log analysis, full-text search, and observability (ELK stack).
-
-```yaml
-# ~/elasticsearch/compose.yaml
-services:
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.3.3
-    ports:
-      - 127.0.0.1:9200:9200
-    volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
-    environment:
-      discovery.type: single-node
-      xpack.security.enabled: false
-      ES_JAVA_OPTS: -Xms512m -Xmx1g
-    restart: unless-stopped
-
-volumes:
-  elasticsearch_data:
-```
-
-```bash
-cd ~/elasticsearch && podman-compose up -d
-```
-
-**Kibana (Elasticsearch UI):**
-```yaml
-# ~/kibana/compose.yaml
-services:
-  kibana:
-    image: docker.elastic.co/kibana/kibana:9.3.3
-    ports:
-      - 127.0.0.1:5601:5601
-    environment:
-      ELASTICSEARCH_HOSTS: http://host.containers.internal:9200
-    restart: unless-stopped
-```
-
-```bash
-cd ~/kibana && podman-compose up -d
-```
-
----
-
-## OpenSearch (AWS Elasticsearch Fork)
-
-**Purpose:** Fully open-source fork of Elasticsearch and Kibana under the Apache 2.0 licence. Drop-in API compatible with Elasticsearch 7.10. Preferred if you need the full ELK-equivalent stack without the Elastic licence restrictions.
-
-```yaml
-# ~/opensearch/compose.yml
-services:
-  opensearch:
-    image: opensearchproject/opensearch:2
-    ports: ["127.0.0.1:9200:9200", "127.0.0.1:9600:9600"]
-    environment:
-      discovery.type: single-node
-      DISABLE_SECURITY_PLUGIN: "true"
-      OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx1g"
-    volumes: [opensearch_data:/usr/share/opensearch/data]
-    restart: unless-stopped
-
-  opensearch-dashboards:
-    image: opensearchproject/opensearch-dashboards:2
-    ports: ["127.0.0.1:5601:5601"]
-    environment:
-      OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
-      DISABLE_SECURITY_DASHBOARDS_PLUGIN: "true"
-    depends_on: [opensearch]
-    restart: unless-stopped
-
-volumes:
-  opensearch_data:
-```
-
-```bash
-cd ~/opensearch && podman-compose up -d
-```
-
----
 
 ## Qdrant (Vector Database)
 
@@ -922,6 +925,93 @@ cd ~/weaviate && podman-compose up -d
 
 ---
 
+## Chroma (Lightweight Vector Database)
+
+**Purpose:** Simple, developer-friendly vector database focused on getting an AI/RAG application running in minutes. Chroma has a minimal Python and JavaScript SDK, an optional persistent server mode, and an opinionated API designed for LLM use cases — no schema definition, no query language, just `add`, `query`, and `delete`. The right choice when you're building an LLM-powered app and want vector storage with as little friction as possible. Scale up to Qdrant or Weaviate when you need production-grade indexing at tens of millions of vectors.
+
+```yaml
+# ~/chroma/compose.yaml
+services:
+  chroma:
+    image: chromadb/chroma:latest
+    ports:
+      - 127.0.0.1:8000:8000
+    volumes:
+      - /home/user/chroma/data:/chroma/chroma:Z
+    environment:
+      IS_PERSISTENT: "TRUE"
+      ANONYMIZED_TELEMETRY: "FALSE"
+    restart: unless-stopped
+```
+
+```bash
+cd ~/chroma && podman-compose up -d
+```
+
+**Common operations (via REST API):**
+```bash
+# Check server health
+curl http://localhost:8000/api/v1/heartbeat
+
+# List collections
+curl http://localhost:8000/api/v1/collections
+
+# Get server version
+curl http://localhost:8000/api/v1/version
+```
+
+**Use with the Python SDK:**
+```python
+import chromadb
+
+client = chromadb.HttpClient(host="localhost", port=8000)
+
+# Create a collection
+collection = client.get_or_create_collection(
+    name="my_docs",
+    metadata={"hnsw:space": "cosine"}   # cosine similarity
+)
+
+# Add documents (Chroma can embed them automatically with a local embedding function)
+collection.add(
+    ids=["doc1", "doc2", "doc3"],
+    documents=[
+        "Self-hosting gives you full control",
+        "Podman runs containers rootlessly",
+        "Caddy is a modern reverse proxy",
+    ],
+    metadatas=[{"source": "wiki"}, {"source": "wiki"}, {"source": "wiki"}]
+)
+
+# Query by text (returns nearest neighbours)
+results = collection.query(
+    query_texts=["how do I run containers without root?"],
+    n_results=2
+)
+print(results["documents"])
+```
+
+**Use with Ollama embeddings (LangChain):**
+```python
+from langchain_community.vectorstores import Chroma
+from langchain_community.embeddings import OllamaEmbeddings
+
+embedding = OllamaEmbeddings(model="nomic-embed-text", base_url="http://localhost:11434")
+
+vectorstore = Chroma(
+    collection_name="my_docs",
+    embedding_function=embedding,
+    client=chromadb.HttpClient(host="localhost", port=8000),
+)
+
+# Similarity search
+docs = vectorstore.similarity_search("rootless containers", k=3)
+```
+
+> **Chroma vs Qdrant vs pgvector:** Chroma is the fastest to integrate in a Python LLM app. Qdrant offers more indexing control, filtering, and production throughput. pgvector is best if you're already using PostgreSQL and want zero extra infrastructure.
+
+---
+
 ## SQLite via Litestream
 
 **Purpose:** Streams SQLite WAL changes to S3-compatible storage in real time — continuous off-site replication with sub-second RPO for any app using SQLite, with no code changes required.
@@ -947,6 +1037,39 @@ services:
 ```bash
 cd ~/adminer && podman-compose up -d
 ```
+
+Access at `http://localhost:8089`. Enter `host.containers.internal` as the server address when connecting to a database in another container.
+
+---
+
+## CloudBeaver (Universal Database GUI)
+
+**Purpose:** Web-based, multi-database IDE from the makers of DBeaver. Supports PostgreSQL, MySQL/MariaDB, SQLite, ClickHouse, MongoDB, Redis, and 40+ other databases — all from a single browser tab with no desktop app required. Offers a full SQL editor with autocomplete, ERD diagrams, data export/import, and role-based access controls. Useful when you want a shared, team-accessible database GUI rather than per-user desktop clients.
+
+```yaml
+# ~/cloudbeaver/compose.yaml
+services:
+  cloudbeaver:
+    image: dbeaver/cloudbeaver:latest
+    ports:
+      - 127.0.0.1:8978:8978
+    volumes:
+      - /home/user/cloudbeaver/workspace:/opt/cloudbeaver/workspace:Z
+    restart: unless-stopped
+```
+
+```bash
+cd ~/cloudbeaver && podman-compose up -d
+```
+
+Access at `http://localhost:8978`. Complete the initial setup wizard to create an admin account. Then add connections under **Connection → New Connection** — select the database type and enter `host.containers.internal` as the host when connecting to other containers on the same machine.
+
+**Caddy:**
+```caddyfile
+db-gui.home.local { tls internal; reverse_proxy localhost:8978 }
+```
+
+> **Adminer vs CloudBeaver:** Adminer is a single PHP file — zero config, instant start, ideal for one-off inspection. CloudBeaver is a full web IDE with saved connections, shared team access, query history, and ERD diagrams — better for regular development work across multiple databases and users.
 
 ---
 
@@ -1206,6 +1329,127 @@ curl -X POST http://localhost:1294/query   -H "Content-Type: application/json"  
 ```
 
 > DuckDB can read directly from S3/MinIO, InfluxDB line protocol files, and PostgreSQL — making it a powerful ad-hoc query layer over your existing data stores without ETL.
+
+---
+
+## ClickHouse (Columnar OLAP Database)
+
+**Purpose:** Open-source columnar database optimised for real-time analytical queries on large datasets — billions of rows, sub-second aggregations, and high-throughput ingestion. Used by SigNoz (traces), Plausible Analytics, PostHog, and many other self-hosted analytics platforms as their storage backend. ClickHouse excels at GROUP BY queries over time-series and event data where Postgres or TimescaleDB start to slow down. Unlike DuckDB (embedded/local files), ClickHouse is a persistent server that accepts concurrent writes and queries from multiple clients.
+
+```yaml
+# ~/clickhouse/compose.yaml
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    ports:
+      - 127.0.0.1:8123:8123    # HTTP interface
+      - 127.0.0.1:9000:9000    # Native TCP interface
+    volumes:
+      - /home/user/clickhouse/data:/var/lib/clickhouse:Z
+      - /home/user/clickhouse/logs:/var/log/clickhouse-server:Z
+      - /home/user/clickhouse/config.xml:/etc/clickhouse-server/config.d/custom.xml:ro,Z
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    restart: unless-stopped
+```
+
+```xml
+<!-- ~/clickhouse/config.xml — minimal custom config -->
+<clickhouse>
+  <listen_host>0.0.0.0</listen_host>
+  <max_connections>100</max_connections>
+  <users>
+    <default>
+      <password>changeme</password>
+      <networks><ip>::/0</ip></networks>
+      <profile>default</profile>
+      <quota>default</quota>
+    </default>
+  </users>
+</clickhouse>
+```
+
+```bash
+cd ~/clickhouse && podman-compose up -d
+```
+
+**Common operations:**
+```bash
+# Interactive SQL shell
+podman exec -it clickhouse clickhouse-client --password changeme
+
+# Run a query non-interactively
+podman exec clickhouse clickhouse-client --password changeme \
+  --query "SELECT version()"
+
+# Query via HTTP interface (useful for scripting)
+curl "http://localhost:8123/?query=SELECT+version()&password=changeme"
+
+# List databases
+podman exec clickhouse clickhouse-client --password changeme \
+  --query "SHOW DATABASES"
+
+# Show table sizes
+podman exec clickhouse clickhouse-client --password changeme --query "
+  SELECT database, table,
+    formatReadableSize(sum(bytes_on_disk)) AS size,
+    sum(rows) AS rows
+  FROM system.parts WHERE active
+  GROUP BY database, table
+  ORDER BY sum(bytes_on_disk) DESC"
+
+# Import CSV
+podman exec -i clickhouse clickhouse-client --password changeme \
+  --query "INSERT INTO mydb.events FORMAT CSV" < /path/to/events.csv
+
+# Export as Parquet
+podman exec clickhouse clickhouse-client --password changeme \
+  --query "SELECT * FROM mydb.events FORMAT Parquet" > events.parquet
+```
+
+**Create a table optimised for time-series event data:**
+```sql
+-- Connect: podman exec -it clickhouse clickhouse-client --password changeme
+
+CREATE DATABASE IF NOT EXISTS analytics;
+
+CREATE TABLE analytics.events (
+  event_time   DateTime,
+  session_id   String,
+  user_id      UInt64,
+  event_name   LowCardinality(String),
+  properties   String    -- JSON blob
+)
+ENGINE = MergeTree()
+PARTITION BY toYYYYMM(event_time)
+ORDER BY (event_name, event_time)
+TTL event_time + INTERVAL 1 YEAR;   -- auto-delete data older than 1 year
+
+-- Insert events
+INSERT INTO analytics.events VALUES
+  (now(), 'abc123', 42, 'page_view', '{"page": "/home"}'),
+  (now(), 'abc123', 42, 'button_click', '{"element": "signup"}');
+
+-- Aggregate query — event counts per hour for the last 24h
+SELECT
+  toStartOfHour(event_time) AS hour,
+  event_name,
+  count() AS cnt
+FROM analytics.events
+WHERE event_time >= now() - INTERVAL 24 HOUR
+GROUP BY hour, event_name
+ORDER BY hour, cnt DESC;
+```
+
+**Grafana datasource:**
+
+Add ClickHouse to Grafana using the [ClickHouse plugin](https://grafana.com/grafana/plugins/grafana-clickhouse-datasource/):
+- URL: `http://host.containers.internal:8123`
+- Username: `default`, Password: `changeme`
+
+> **DuckDB vs ClickHouse:** Use DuckDB for local, one-off analytics on files (CSV, Parquet, Postgres) — no server, no setup. Use ClickHouse when you need a persistent server that ingests data continuously from multiple sources and serves concurrent analytical queries at scale.
 
 ---
 
@@ -1489,14 +1733,21 @@ nocodb.home.local { tls internal; reverse_proxy localhost:8180 }
 | Horizontal SQL scaling, multi-region | CockroachDB |
 | Full-text search (simple, fast) | Typesense / MeiliSearch |
 | Full-text search (enterprise scale) | Elasticsearch / OpenSearch |
+| Log aggregation pipeline (heavy filtering) | Logstash |
+| Log shipping from hosts/containers | Filebeat / Fluent Bit |
+| High-throughput log+metric pipeline | Vector.dev |
 | Vector/semantic search (AI/RAG) | Qdrant / Weaviate |
+| Vector search in existing PostgreSQL | pgvector |
+| Vector search, LLM-app SDK simplicity | Chroma |
 | SQLite with replication | Litestream |
 | Metrics & IoT (line protocol) | InfluxDB |
-| Local OLAP / data analysis | DuckDB |
+| Local OLAP / data analysis on files | DuckDB |
+| High-throughput server-side OLAP / analytics | ClickHouse |
 | Multi-model (relational + graph + doc) | SurrealDB |
 | Lightweight app backend (SQLite + Auth + API) | PocketBase |
 | Full BaaS (PostgreSQL + Auth + Realtime + Storage) | Supabase |
 | Visual spreadsheet UI over existing DB | NocoDB |
+| Universal web-based DB GUI (multi-database) | CloudBeaver |
 
 ---
 
@@ -1507,7 +1758,6 @@ nocodb.home.local { tls internal; reverse_proxy localhost:8180 }
 | PostgreSQL `FATAL: password authentication failed` | Verify `POSTGRES_USER` and `POSTGRES_PASSWORD` match; recreate the volume if the DB was initialised with different credentials |
 | Redis `NOAUTH` error | Add `-e REDIS_PASSWORD=changeme` and `redis-server --requirepass changeme` to the command |
 | MongoDB `auth failed` | Ensure client uses `admin` database for auth: connection string should include `?authSource=admin` |
-| Elasticsearch OOM-killed | Limit JVM heap: add `-e ES_JAVA_OPTS="-Xms512m -Xmx512m"` — default is 50% of host RAM |
 | Qdrant collection not found | Collections are created via API or the web UI dashboard; Qdrant does not auto-create on insert |
 | InfluxDB can't accept writes | Verify the org name and bucket match `DOCKER_INFLUXDB_INIT_ORG` and `DOCKER_INFLUXDB_INIT_BUCKET` exactly |
 | Adminer shows no database | Connect to `host.containers.internal` (not `localhost`) when the database is in another container |
@@ -1532,3 +1782,12 @@ nocodb.home.local { tls internal; reverse_proxy localhost:8180 }
 | PocketBase admin blank on first load | Visit `http://localhost:8090/_/` (note the trailing slash) to trigger admin setup; the root path redirects there |
 | Supabase Studio not loading | Wait 60–90 s for all services to initialise; check `podman-compose logs` — Kong and GoTrue must be healthy before Studio loads |
 | NocoDB `Cannot read properties of undefined` on connect | Ensure `NC_DB` uses the `pg://` URI scheme with correct credentials; check the PostgreSQL container is fully started |
+| pgvector `type "vector" does not exist` | Run `CREATE EXTENSION IF NOT EXISTS vector;` in the target database; extension must be enabled per database, not globally |
+| pgvector HNSW index slow to build | Increase `ef_construction` and `m` for better recall at the cost of index build time; on large datasets run the index creation as `CREATE INDEX CONCURRENTLY` |
+| Chroma collection not persisting after restart | Ensure `IS_PERSISTENT: "TRUE"` is set and the `/chroma/chroma` volume is correctly mounted with write permissions |
+| Chroma `Connection refused` from Python | Verify `chromadb.HttpClient(host="localhost", port=8000)` — the default `chromadb.Client()` is in-memory only and doesn't connect to the server |
+| ClickHouse `Connection refused` on port 8123 | Ensure `<listen_host>0.0.0.0</listen_host>` is in the custom config; by default ClickHouse only binds to localhost |
+| ClickHouse insert errors on CSV import | Verify the CSV column order exactly matches the `INSERT INTO` column list; ClickHouse is strict about schema mismatch |
+| ClickHouse high memory on GROUP BY | Add `max_memory_usage` setting: `SET max_memory_usage = 4000000000;` (4 GB); or switch the aggregation to use external memory with `max_bytes_before_external_group_by` |
+| CloudBeaver blank on first load | Wait 30–60 s for workspace initialisation; check `podman logs cloudbeaver` for Java startup errors; the first boot is slow |
+| CloudBeaver can't connect to container databases | Use `host.containers.internal` instead of `localhost` for database hosts; set the port to the host-side mapped port, not the container-internal port |

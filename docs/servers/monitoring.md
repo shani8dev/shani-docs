@@ -1474,6 +1474,1100 @@ parca.home.local { tls internal; reverse_proxy localhost:7070 }
 
 ---
 
+## Elasticsearch + ELK Stack
+
+**Purpose:** Distributed search and analytics engine — the `E` in the ELK stack (Elasticsearch + Logstash + Kibana). Stores, indexes, and searches structured and unstructured log data, metrics, and events at scale. The full ELK stack pairs Elasticsearch for storage/search, Logstash or Beats agents for ingestion, and Kibana for visualisation and alerting.
+
+### Single-Node (Development / Small Homelab)
+
+```yaml
+# ~/elk/compose.yaml
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    ports:
+      - 127.0.0.1:9200:9200
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx1g"
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    restart: unless-stopped
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    ports:
+      - 127.0.0.1:5601:5601
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    depends_on: [elasticsearch]
+    restart: unless-stopped
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.13.4
+    ports:
+      - 127.0.0.1:5044:5044    # Beats input
+      - 127.0.0.1:5000:5000    # TCP/syslog input
+      - 127.0.0.1:9600:9600    # Logstash monitoring API
+    volumes:
+      - /home/user/elk/logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
+      - /home/user/elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
+    environment:
+      LS_JAVA_OPTS: "-Xms256m -Xmx512m"
+    depends_on: [elasticsearch]
+    restart: unless-stopped
+
+volumes:
+  es_data:
+```
+
+```bash
+cd ~/elk && podman-compose up -d
+```
+
+**Kibana:** `http://localhost:5601` — create index patterns under Stack Management → Index Patterns, then explore logs under Discover.
+
+---
+
+### Multi-Node Cluster (Production / High Availability)
+
+A production ELK cluster separates roles across dedicated nodes: master nodes manage cluster state, data nodes store and query indices, coordinating nodes route client requests. The minimum recommended setup for HA is 3 master-eligible nodes (to avoid split-brain) and 2+ data nodes.
+
+```yaml
+# ~/elk-cluster/compose.yaml
+services:
+  # --- Master-eligible nodes (3 for quorum) ---
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    ports: ["127.0.0.1:9200:9200"]
+    environment:
+      node.name: es01
+      cluster.name: homelab-logs
+      node.roles: master,data
+      discovery.seed_hosts: es02,es03
+      cluster.initial_master_nodes: es01,es02,es03
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+      bootstrap.memory_lock: "true"
+    volumes: [es01_data:/usr/share/elasticsearch/data]
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    restart: unless-stopped
+
+  es02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    environment:
+      node.name: es02
+      cluster.name: homelab-logs
+      node.roles: master,data
+      discovery.seed_hosts: es01,es03
+      cluster.initial_master_nodes: es01,es02,es03
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+      bootstrap.memory_lock: "true"
+    volumes: [es02_data:/usr/share/elasticsearch/data]
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    restart: unless-stopped
+
+  es03:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    environment:
+      node.name: es03
+      cluster.name: homelab-logs
+      node.roles: master,data
+      discovery.seed_hosts: es01,es02
+      cluster.initial_master_nodes: es01,es02,es03
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+      bootstrap.memory_lock: "true"
+    volumes: [es03_data:/usr/share/elasticsearch/data]
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    restart: unless-stopped
+
+  # --- Coordinating / ingest node (optional, improves write throughput) ---
+  es-ingest:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    environment:
+      node.name: es-ingest
+      cluster.name: homelab-logs
+      node.roles: ingest,coordinating   # no data, no master — just routes
+      discovery.seed_hosts: es01,es02,es03
+      cluster.initial_master_nodes: es01,es02,es03
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    restart: unless-stopped
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    ports: ["127.0.0.1:5601:5601"]
+    environment:
+      # Point at all nodes for HA — Kibana load-balances across them
+      ELASTICSEARCH_HOSTS: '["http://es01:9200","http://es02:9200","http://es03:9200"]'
+    depends_on: [es01, es02, es03]
+    restart: unless-stopped
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.13.4
+    ports:
+      - 127.0.0.1:5044:5044
+      - 127.0.0.1:5000:5000/tcp
+      - 127.0.0.1:5000:5000/udp
+    volumes:
+      - /home/user/elk-cluster/logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
+      - /home/user/elk-cluster/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
+    environment:
+      LS_JAVA_OPTS: "-Xms512m -Xmx512m"
+    depends_on: [es01]
+    restart: unless-stopped
+
+volumes:
+  es01_data:
+  es02_data:
+  es03_data:
+```
+
+```bash
+cd ~/elk-cluster && podman-compose up -d
+
+# Check cluster health
+curl http://localhost:9200/_cluster/health?pretty
+
+# List nodes and their roles
+curl http://localhost:9200/_cat/nodes?v
+```
+
+**Node roles reference:**
+
+| Role | Responsibilities |
+|------|-----------------|
+| `master` | Cluster state, index creation/deletion, shard allocation |
+| `data` | Store shards, handle search and indexing requests |
+| `ingest` | Pre-process documents via pipelines before indexing |
+| `coordinating` | Route requests, merge results — no data stored |
+| `ml` | Machine learning jobs (Elastic licence required) |
+
+> **Split-brain prevention:** Always deploy an odd number of master-eligible nodes (3 or 5). Elasticsearch automatically sets `discovery.zen.minimum_master_nodes` to `(n/2)+1`. With 3 masters, cluster survives loss of 1; with 5, loss of 2.
+
+**System prerequisites on the host (apply to all cluster nodes):**
+```bash
+# Required — Elasticsearch will fail to start without these
+sudo sysctl -w vm.max_map_count=262144
+echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
+
+# Increase open file limits (if not using ulimits in compose)
+sudo bash -c 'echo "* soft nofile 65536\n* hard nofile 65536" >> /etc/security/limits.conf'
+```
+
+---
+
+### Logstash — Pipeline Configuration
+
+Logstash processes logs through input → filter → output pipelines. Drop `.conf` files into the pipeline directory.
+
+**Minimal `logstash.yml`:**
+```yaml
+# ~/elk/logstash/config/logstash.yml
+http.host: "0.0.0.0"
+xpack.monitoring.enabled: false
+pipeline.workers: 2
+pipeline.batch.size: 125
+```
+
+**Pipeline: Beats → parse → Elasticsearch (`beats-to-es.conf`):**
+```ruby
+# ~/elk/logstash/pipeline/beats-to-es.conf
+input {
+  beats {
+    port => 5044
+  }
+}
+
+filter {
+  if [fields][type] == "nginx" {
+    grok {
+      match => { "message" => "%{COMBINEDAPACHELOG}" }
+    }
+    date {
+      match => ["timestamp", "dd/MMM/yyyy:HH:mm:ss Z"]
+    }
+    geoip {
+      source => "clientip"
+    }
+    mutate {
+      remove_field => ["message", "timestamp"]
+    }
+  }
+
+  if [fields][type] == "syslog" {
+    grok {
+      match => { "message" => "%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}" }
+    }
+    date {
+      match => ["syslog_timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss"]
+    }
+  }
+}
+
+output {
+  elasticsearch {
+    hosts => ["http://elasticsearch:9200"]
+    index => "logs-%{[fields][type]}-%{+YYYY.MM.dd}"
+    # For cluster: hosts => ["http://es01:9200", "http://es02:9200", "http://es03:9200"]
+  }
+}
+```
+
+**Pipeline: Syslog UDP → Elasticsearch (`syslog-to-es.conf`):**
+```ruby
+input {
+  udp {
+    port => 5000
+    codec => plain
+  }
+  tcp {
+    port => 5000
+    codec => plain
+  }
+}
+
+filter {
+  grok {
+    match => { "message" => "%{SYSLOGTIMESTAMP:timestamp} %{IPORHOST:host} %{PROG:program}(?:\[%{POSINT:pid}\])?: %{GREEDYDATA:log_message}" }
+  }
+  date {
+    match => ["timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss"]
+  }
+  mutate {
+    add_field => { "source_type" => "syslog" }
+  }
+}
+
+output {
+  elasticsearch {
+    hosts => ["http://elasticsearch:9200"]
+    index => "syslog-%{+YYYY.MM.dd}"
+  }
+  # Optionally echo to stdout for debugging:
+  # stdout { codec => rubydebug }
+}
+```
+
+**Common Logstash operations:**
+```bash
+# Check pipeline status
+curl http://localhost:9600/_node/pipelines?pretty
+
+# Check node stats (throughput, queue depth)
+curl http://localhost:9600/_node/stats?pretty | python3 -m json.tool | grep -A5 events
+
+# Reload pipelines without restart (if config.reload.automatic is enabled)
+curl -X POST http://localhost:9600/_node/pipelines/reload
+
+# Validate a pipeline config before deploying
+podman exec logstash logstash --config.test_and_exit -f /usr/share/logstash/pipeline/beats-to-es.conf
+
+# Tail Logstash logs
+podman logs -f logstash
+```
+
+---
+
+### Beats — Lightweight Log & Metric Shippers
+
+Beats are single-purpose, lightweight agents that run on monitored hosts and ship data to Logstash or Elasticsearch directly. No JVM — each Beat is a small Go binary.
+
+| Beat | Ships | Use Case |
+|------|-------|----------|
+| **Filebeat** | Log files | Application logs, access logs, syslog |
+| **Metricbeat** | System metrics | CPU, memory, disk, container stats |
+| **Packetbeat** | Network traffic | HTTP, DNS, MySQL, Redis protocol analysis |
+| **Auditbeat** | Audit events | File integrity monitoring, `auditd` events |
+| **Heartbeat** | Uptime | Active monitoring, HTTP/TCP/ICMP checks |
+| **Winlogbeat** | Windows Event Log | Windows security and application logs |
+
+**Filebeat — ship log files to Logstash:**
+```yaml
+# ~/filebeat/compose.yaml
+services:
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.13.4
+    user: root
+    volumes:
+      - /home/user/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro,Z
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /run/user/1000/podman:/run/podman:ro
+      - filebeat_data:/usr/share/filebeat/data
+    restart: unless-stopped
+
+volumes:
+  filebeat_data:
+```
+
+```yaml
+# ~/filebeat/filebeat.yml
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/*.log
+      - /var/log/caddy/*.log
+    fields:
+      type: syslog
+    fields_under_root: true
+
+  - type: container
+    enabled: true
+    paths:
+      - /var/lib/docker/containers/*/*.log
+    fields:
+      type: container
+
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/nginx/access.log
+    fields:
+      type: nginx
+    fields_under_root: true
+
+# Output to Logstash
+output.logstash:
+  hosts: ["host.containers.internal:5044"]
+
+# OR output directly to Elasticsearch (bypass Logstash)
+# output.elasticsearch:
+#   hosts: ["http://host.containers.internal:9200"]
+#   index: "filebeat-%{[agent.version]}-%{+yyyy.MM.dd}"
+
+# Monitoring (optional — sends Beat metrics to ES)
+# monitoring.enabled: true
+# monitoring.elasticsearch.hosts: ["http://host.containers.internal:9200"]
+
+processors:
+  - add_host_metadata: ~
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /usr/share/filebeat/logs
+  name: filebeat
+  keepfiles: 7
+```
+
+```bash
+cd ~/filebeat && podman-compose up -d
+```
+
+**Metricbeat — ship system and container metrics:**
+```yaml
+# ~/metricbeat/compose.yaml
+services:
+  metricbeat:
+    image: docker.elastic.co/beats/metricbeat:8.13.4
+    user: root
+    network_mode: host
+    volumes:
+      - /home/user/metricbeat/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro,Z
+      - /proc:/hostfs/proc:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /:/hostfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/run/podman/podman.sock:ro
+    command: metricbeat -e --system.hostfs=/hostfs
+    restart: unless-stopped
+```
+
+```yaml
+# ~/metricbeat/metricbeat.yml
+metricbeat.modules:
+  - module: system
+    metricsets:
+      - cpu
+      - load
+      - memory
+      - network
+      - process
+      - process_summary
+      - diskio
+      - filesystem
+      - fsstat
+    enabled: true
+    period: 10s
+    processes: ['.*']
+    cpu.metrics: [percentages, normalized_percentages]
+    core.metrics: [percentages]
+
+  - module: docker
+    metricsets:
+      - container
+      - cpu
+      - diskio
+      - healthcheck
+      - info
+      - memory
+      - network
+    hosts: ["unix:///var/run/docker.sock"]
+    period: 10s
+
+  - module: nginx
+    metricsets: [stubstatus]
+    period: 10s
+    hosts: ["http://host.containers.internal:8080"]
+    server_status_path: /nginx_status
+
+output.elasticsearch:
+  hosts: ["http://host.containers.internal:9200"]
+  index: "metricbeat-%{[agent.version]}-%{+yyyy.MM.dd}"
+
+setup.kibana:
+  host: "http://host.containers.internal:5601"
+
+setup.dashboards.enabled: true   # auto-import Metricbeat dashboards into Kibana
+```
+
+```bash
+cd ~/metricbeat && podman-compose up -d
+```
+
+**Auditbeat — file integrity and audit monitoring:**
+```yaml
+# ~/auditbeat/compose.yaml
+services:
+  auditbeat:
+    image: docker.elastic.co/beats/auditbeat:8.13.4
+    user: root
+    pid: host
+    cap_add: [AUDIT_READ, AUDIT_WRITE, AUDIT_CONTROL]
+    volumes:
+      - /home/user/auditbeat/auditbeat.yml:/usr/share/auditbeat/auditbeat.yml:ro,Z
+    restart: unless-stopped
+```
+
+```yaml
+# ~/auditbeat/auditbeat.yml
+auditbeat.modules:
+  - module: auditd
+    audit_rules: |
+      -a always,exit -F arch=b64 -S execve -k exec
+      -w /etc/passwd -p wa -k identity
+      -w /etc/shadow -p wa -k identity
+      -w /home/user -p wa -k home_writes
+
+  - module: file_integrity
+    paths:
+      - /etc
+      - /usr/bin
+      - /usr/sbin
+      - /home/user/.ssh
+    recursive: true
+
+output.elasticsearch:
+  hosts: ["http://host.containers.internal:9200"]
+```
+
+```bash
+cd ~/auditbeat && podman-compose up -d
+```
+
+---
+
+### Index Lifecycle Management (ILM)
+
+ILM automatically manages index ageing — moving indices from hot (fast SSDs, active writes) to warm (slower storage, no writes) to cold (compressed, rarely queried) and finally deleting them. Essential for long-running log clusters to prevent unbounded disk growth.
+
+**Create an ILM policy via the Elasticsearch API:**
+```bash
+curl -X PUT http://localhost:9200/_ilm/policy/logs-policy \
+  -H "Content-Type: application/json" -d '
+{
+  "policy": {
+    "phases": {
+      "hot": {
+        "min_age": "0ms",
+        "actions": {
+          "rollover": {
+            "max_primary_shard_size": "50gb",
+            "max_age": "1d"
+          },
+          "set_priority": { "priority": 100 }
+        }
+      },
+      "warm": {
+        "min_age": "7d",
+        "actions": {
+          "shrink": { "number_of_shards": 1 },
+          "forcemerge": { "max_num_segments": 1 },
+          "set_priority": { "priority": 50 }
+        }
+      },
+      "cold": {
+        "min_age": "30d",
+        "actions": {
+          "freeze": {},
+          "set_priority": { "priority": 0 }
+        }
+      },
+      "delete": {
+        "min_age": "90d",
+        "actions": {
+          "delete": {}
+        }
+      }
+    }
+  }
+}'
+```
+
+**Create an index template that applies the policy automatically:**
+```bash
+# Create a component template for settings
+curl -X PUT http://localhost:9200/_component_template/logs-settings \
+  -H "Content-Type: application/json" -d '
+{
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 1,
+      "index.lifecycle.name": "logs-policy",
+      "index.lifecycle.rollover_alias": "logs"
+    }
+  }
+}'
+
+# Create an index template matching logs-* indices
+curl -X PUT http://localhost:9200/_index_template/logs-template \
+  -H "Content-Type: application/json" -d '
+{
+  "index_patterns": ["logs-*"],
+  "composed_of": ["logs-settings"],
+  "priority": 200
+}'
+
+# Bootstrap the first index and alias
+curl -X PUT http://localhost:9200/logs-000001 \
+  -H "Content-Type: application/json" -d '
+{
+  "aliases": {
+    "logs": { "is_write_index": true }
+  }
+}'
+```
+
+---
+
+### Common Elasticsearch Operations
+
+```bash
+# Cluster health and node list
+curl http://localhost:9200/_cluster/health?pretty
+curl "http://localhost:9200/_cat/nodes?v&h=name,role,heap.percent,disk.used_percent,load_1m"
+
+# List all indices with size and doc count
+curl "http://localhost:9200/_cat/indices?v&s=store.size:desc"
+
+# Check shard allocation
+curl "http://localhost:9200/_cat/shards?v&h=index,shard,prirep,state,node,store"
+
+# Show unassigned shards (important for debugging cluster issues)
+curl "http://localhost:9200/_cat/shards?v&h=index,shard,prirep,state,unassigned.reason" | grep UNASSIGNED
+
+# Delete an index (careful!)
+curl -X DELETE http://localhost:9200/logs-2024.01.01
+
+# Force merge (reduce segment count — improves search on old indices)
+curl -X POST "http://localhost:9200/logs-*/_forcemerge?max_num_segments=1"
+
+# Get cluster settings
+curl http://localhost:9200/_cluster/settings?pretty
+
+# Set cluster-wide allocation filter (e.g., move all indices off a decommissioned node)
+curl -X PUT http://localhost:9200/_cluster/settings \
+  -H "Content-Type: application/json" \
+  -d '{"transient":{"cluster.routing.allocation.exclude._name":"es03"}}'
+
+# Check ILM policy status for an index
+curl http://localhost:9200/logs-000001/_ilm/explain?pretty
+```
+
+---
+
+## OpenSearch (Apache 2.0 ELK Alternative)
+
+**Purpose:** Fully open-source fork of Elasticsearch 7.10 and Kibana under the Apache 2.0 licence — created by AWS when Elastic changed its licence. Drop-in API compatible: any Logstash output, Filebeat, or Metricbeat that targets Elasticsearch works against OpenSearch without changes. Preferred for self-hosters who want the full ELK-equivalent stack without Elastic's SSPL licence restrictions.
+
+### Single-Node
+
+```yaml
+# ~/opensearch/compose.yml
+services:
+  opensearch:
+    image: opensearchproject/opensearch:2
+    ports: ["127.0.0.1:9200:9200", "127.0.0.1:9600:9600"]
+    environment:
+      discovery.type: single-node
+      DISABLE_SECURITY_PLUGIN: "true"
+      OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx1g"
+    volumes: [opensearch_data:/usr/share/opensearch/data]
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    restart: unless-stopped
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2
+    ports: ["127.0.0.1:5601:5601"]
+    environment:
+      OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
+      DISABLE_SECURITY_DASHBOARDS_PLUGIN: "true"
+    depends_on: [opensearch]
+    restart: unless-stopped
+
+volumes:
+  opensearch_data:
+```
+
+```bash
+cd ~/opensearch && podman-compose up -d
+```
+
+### Multi-Node Cluster
+
+```yaml
+# ~/opensearch-cluster/compose.yml
+services:
+  os01:
+    image: opensearchproject/opensearch:2
+    environment:
+      cluster.name: os-logs
+      node.name: os01
+      discovery.seed_hosts: os02,os03
+      cluster.initial_cluster_manager_nodes: os01,os02,os03
+      DISABLE_SECURITY_PLUGIN: "true"
+      OPENSEARCH_JAVA_OPTS: "-Xms1g -Xmx1g"
+      bootstrap.memory_lock: "true"
+    volumes: [os01_data:/usr/share/opensearch/data]
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    restart: unless-stopped
+
+  os02:
+    image: opensearchproject/opensearch:2
+    environment:
+      cluster.name: os-logs
+      node.name: os02
+      discovery.seed_hosts: os01,os03
+      cluster.initial_cluster_manager_nodes: os01,os02,os03
+      DISABLE_SECURITY_PLUGIN: "true"
+      OPENSEARCH_JAVA_OPTS: "-Xms1g -Xmx1g"
+      bootstrap.memory_lock: "true"
+    volumes: [os02_data:/usr/share/opensearch/data]
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    restart: unless-stopped
+
+  os03:
+    image: opensearchproject/opensearch:2
+    environment:
+      cluster.name: os-logs
+      node.name: os03
+      discovery.seed_hosts: os01,os02
+      cluster.initial_cluster_manager_nodes: os01,os02,os03
+      DISABLE_SECURITY_PLUGIN: "true"
+      OPENSEARCH_JAVA_OPTS: "-Xms1g -Xmx1g"
+      bootstrap.memory_lock: "true"
+    volumes: [os03_data:/usr/share/opensearch/data]
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    restart: unless-stopped
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2
+    ports: ["127.0.0.1:5601:5601"]
+    environment:
+      OPENSEARCH_HOSTS: '["http://os01:9200","http://os02:9200","http://os03:9200"]'
+      DISABLE_SECURITY_DASHBOARDS_PLUGIN: "true"
+    depends_on: [os01]
+    restart: unless-stopped
+
+  # Data Prepper — OpenSearch's native log processing pipeline (Logstash equivalent)
+  data-prepper:
+    image: opensearchproject/data-prepper:latest
+    ports:
+      - 127.0.0.1:21890:21890   # OTLP gRPC
+      - 127.0.0.1:2021:2021     # HTTP source
+      - 127.0.0.1:4900:4900     # Server API
+    volumes:
+      - /home/user/opensearch-cluster/data-prepper/pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml:ro,Z
+      - /home/user/opensearch-cluster/data-prepper/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml:ro,Z
+    depends_on: [os01]
+    restart: unless-stopped
+
+volumes:
+  os01_data:
+  os02_data:
+  os03_data:
+```
+
+**Data Prepper pipeline config (Logstash equivalent for OpenSearch):**
+```yaml
+# ~/opensearch-cluster/data-prepper/pipelines.yaml
+log-pipeline:
+  source:
+    http:
+      port: 2021
+  processor:
+    - grok:
+        match:
+          message: ['%{COMMONAPACHELOG}']
+    - date:
+        from_time_received: true
+        destination: "@timestamp"
+  sink:
+    - opensearch:
+        hosts: ["http://os01:9200", "http://os02:9200"]
+        insecure: true
+        index: logs-%{yyyy.MM.dd}
+
+otel-trace-pipeline:
+  source:
+    otel_trace_source:
+      port: 21890
+  processor:
+    - otel_traces: ~
+  sink:
+    - opensearch:
+        hosts: ["http://os01:9200"]
+        insecure: true
+        index: otel-traces-%{yyyy.MM.dd}
+```
+
+**OpenSearch ISM (Index State Management — equivalent to Elasticsearch ILM):**
+```bash
+# Create an ISM policy to roll over daily and delete after 30 days
+curl -X PUT http://localhost:9200/_plugins/_ism/policies/logs-policy \
+  -H "Content-Type: application/json" -d '
+{
+  "policy": {
+    "description": "Daily rollover, delete after 30d",
+    "default_state": "hot",
+    "states": [
+      {
+        "name": "hot",
+        "actions": [{ "rollover": { "min_index_age": "1d", "min_primary_shard_size": "25gb" } }],
+        "transitions": [{ "state_name": "delete", "conditions": { "min_index_age": "30d" } }]
+      },
+      {
+        "name": "delete",
+        "actions": [{ "delete": {} }],
+        "transitions": []
+      }
+    ],
+    "ism_template": [{ "index_patterns": ["logs-*"], "priority": 100 }]
+  }
+}'
+```
+
+```bash
+# Check cluster health
+curl http://localhost:9200/_cluster/health?pretty
+
+# List nodes
+curl "http://localhost:9200/_cat/nodes?v"
+
+# List indices
+curl "http://localhost:9200/_cat/indices?v&s=store.size:desc"
+```
+
+> **Filebeat → OpenSearch:** Filebeat ships to OpenSearch without changes — just point the output at the OpenSearch host. OpenSearch accepts the Elasticsearch Beats protocol natively.
+
+---
+
+## Fluent Bit (Lightweight Log Forwarder)
+
+**Purpose:** Ultra-lightweight (< 1 MB binary, ~1 MB RAM at idle) log and metrics forwarder written in C. The modern replacement for Fluentd in resource-constrained environments — Kubernetes sidecars, IoT edge nodes, and embedded systems. Collects from files, syslog, systemd journal, Docker, and container runtimes; filters and transforms in-flight; then ships to Elasticsearch, OpenSearch, Loki, ClickHouse, S3, Kafka, and 40+ other outputs. Faster and leaner than Logstash for simple forwarding pipelines.
+
+```yaml
+# ~/fluent-bit/compose.yaml
+services:
+  fluent-bit:
+    image: fluent/fluent-bit:latest
+    ports:
+      - 127.0.0.1:24224:24224/tcp    # Fluentd forward protocol (receive from other containers)
+      - 127.0.0.1:24224:24224/udp
+      - 127.0.0.1:2020:2020          # HTTP monitoring API
+    volumes:
+      - /home/user/fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro,Z
+      - /home/user/fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf:ro,Z
+      - /var/log:/var/log:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+```
+
+**`fluent-bit.conf` — collect system logs and ship to Elasticsearch + Loki simultaneously:**
+```ini
+[SERVICE]
+    Flush         5
+    Daemon        Off
+    Log_Level     info
+    Parsers_File  parsers.conf
+    HTTP_Server   On
+    HTTP_Listen   0.0.0.0
+    HTTP_Port     2020
+    storage.type  filesystem
+    storage.path  /var/log/fluent-bit-storage/
+
+[INPUT]
+    Name              tail
+    Path              /var/log/*.log
+    Path_Key          filename
+    Tag               syslog.*
+    Parser            syslog-rfc3164
+    DB                /var/log/fluent-bit-syslog.db
+    Mem_Buf_Limit     5MB
+    Skip_Long_Lines   On
+    Refresh_Interval  10
+
+[INPUT]
+    Name              systemd
+    Tag               journal.*
+    Systemd_Filter    _SYSTEMD_UNIT=caddy.service
+    Systemd_Filter    _SYSTEMD_UNIT=sshd.service
+    Strip_Underscores On
+
+[INPUT]
+    Name   docker
+    Tag    container.*
+
+[FILTER]
+    Name   grep
+    Match  syslog.*
+    Regex  log  .+          # drop empty lines
+
+[FILTER]
+    Name           record_modifier
+    Match          *
+    Record         hostname ${HOSTNAME}
+    Record         environment homelab
+
+[FILTER]
+    Name    lua
+    Match   container.*
+    script  /fluent-bit/etc/enrich.lua
+    call    add_metadata
+
+[OUTPUT]
+    Name                es
+    Match               *
+    Host                host.containers.internal
+    Port                9200
+    Index               fluent-logs
+    Type                _doc
+    Logstash_Format     On
+    Logstash_Prefix     fluent
+    Logstash_DateFormat %Y.%m.%d
+    Retry_Limit         5
+    Suppress_Type_Name  On
+
+[OUTPUT]
+    Name        loki
+    Match       *
+    Host        host.containers.internal
+    Port        3100
+    Labels      job=fluent-bit,host=${HOSTNAME}
+    Line_Format json
+```
+
+**Common operations:**
+```bash
+# Check pipeline stats (inputs, filters, outputs, retries)
+curl http://localhost:2020/api/v1/metrics | python3 -m json.tool
+
+# Check uptime and memory
+curl http://localhost:2020/
+
+# Test config before deploying (dry run)
+podman exec fluent-bit fluent-bit --config /fluent-bit/etc/fluent-bit.conf --dry-run
+
+# View logs
+podman logs -f fluent-bit
+```
+
+> **Fluent Bit vs Logstash vs Filebeat:** Use Fluent Bit when you need a tiny-footprint forwarder (perfect for shipping from every container/host to a central aggregator). Use Filebeat when you're already in the Elastic ecosystem and want native Kibana dashboards. Use Logstash when you need heavy-duty filtering, complex Grok patterns, multiple conditional outputs, or the Ruby filter for custom logic.
+
+---
+
+## Vector.dev (High-Performance Log & Metric Pipeline)
+
+**Purpose:** Rust-based observability data pipeline — collects logs, metrics, and traces; transforms them with a powerful built-in VRL (Vector Remap Language) scripting layer; and routes to any backend. Significantly higher throughput than Logstash or Fluent Bit on multi-core hardware, with end-to-end acknowledgements and disk-backed buffering so no data is lost on restart. A single Vector instance can replace Filebeat + Logstash, or Promtail + Grafana Alloy, in many setups.
+
+```yaml
+# ~/vector/compose.yaml
+services:
+  vector:
+    image: timberio/vector:latest-alpine
+    ports:
+      - 127.0.0.1:8686:8686    # Vector API (metrics, topology)
+      - 127.0.0.1:6000:6000    # Syslog input (TCP)
+      - 127.0.0.1:6001:6001/udp
+    volumes:
+      - /home/user/vector/vector.yaml:/etc/vector/vector.yaml:ro,Z
+      - /var/log:/var/log:ro
+      - /home/user/vector/data:/var/lib/vector:Z
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+```
+
+**`vector.yaml` — collect, enrich, and fan out to Elasticsearch and Loki:**
+```yaml
+# ~/vector/vector.yaml
+api:
+  enabled: true
+  address: "0.0.0.0:8686"
+
+data_dir: /var/lib/vector
+
+# --- Sources ---
+sources:
+  syslog_tcp:
+    type: syslog
+    address: "0.0.0.0:6000"
+    mode: tcp
+
+  syslog_udp:
+    type: syslog
+    address: "0.0.0.0:6001"
+    mode: udp
+
+  host_logs:
+    type: file
+    include:
+      - /var/log/*.log
+      - /var/log/caddy/*.log
+    read_from: beginning
+    fingerprint:
+      strategy: checksum
+
+  docker_logs:
+    type: docker_logs
+    docker_host: "unix:///var/run/docker.sock"
+
+  host_metrics:
+    type: host_metrics
+    scrape_interval_secs: 15
+    collectors: [cpu, disk, filesystem, load, memory, network]
+
+# --- Transforms ---
+transforms:
+  parse_nginx:
+    type: remap
+    inputs: [host_logs]
+    source: |
+      . = parse_nginx_log!(string!(.message), "combined")
+      .source_type = "nginx"
+      .parsed_at = now()
+
+  enrich_all:
+    type: remap
+    inputs: [syslog_tcp, syslog_udp, docker_logs]
+    source: |
+      .hostname = get_hostname!()
+      .environment = "homelab"
+      if exists(.container_name) {
+        .log_source = "container"
+      } else {
+        .log_source = "host"
+      }
+
+  filter_noise:
+    type: filter
+    inputs: [enrich_all]
+    condition: |
+      !includes(["debug", "trace"], downcase(string!(.level ?? "")))
+
+# --- Sinks ---
+sinks:
+  elasticsearch_out:
+    type: elasticsearch
+    inputs: [parse_nginx, filter_noise]
+    endpoints: ["http://host.containers.internal:9200"]
+    mode: bulk
+    bulk:
+      index: "vector-%Y.%m.%d"
+    buffer:
+      type: disk
+      max_size: 268435456   # 256 MB disk buffer — survives ES downtime
+
+  loki_out:
+    type: loki
+    inputs: [parse_nginx, filter_noise]
+    endpoint: "http://host.containers.internal:3100"
+    labels:
+      job: vector
+      host: "{{ hostname }}"
+      source: "{{ log_source }}"
+    encoding:
+      codec: json
+    buffer:
+      type: disk
+      max_size: 134217728   # 128 MB
+
+  prometheus_out:
+    type: prometheus_exporter
+    inputs: [host_metrics]
+    address: "0.0.0.0:9598"   # Prometheus scrapes this
+```
+
+**Common operations:**
+```bash
+# Check topology and component health
+curl http://localhost:8686/health
+curl http://localhost:8686/components | python3 -m json.tool
+
+# View throughput stats per component
+curl http://localhost:8686/metrics | grep vector_component
+
+# Validate config before deploying
+podman exec vector vector validate /etc/vector/vector.yaml
+
+# Reload config without restart
+podman exec vector vector top   # interactive monitoring
+
+# Test VRL expressions interactively
+podman run --rm -it timberio/vector:latest-alpine vector vrl
+```
+
+**Add Vector as a Prometheus scrape target:**
+```yaml
+# In prometheus.yml scrape_configs
+- job_name: vector
+  static_configs:
+    - targets: ['host.containers.internal:9598']
+```
+
+> **Vector vs Fluent Bit vs Logstash:** Vector has the highest throughput and the most expressive transformation language (VRL). Fluent Bit has the smallest footprint for edge/sidecar deployments. Logstash has the richest plugin ecosystem and the best Kibana integration. For a new homelab log pipeline shipping to both Elasticsearch and Loki, Vector is the best starting point.
+
+---
+
+---
+
 ## Caddy Configuration
 
 ```caddyfile
@@ -1537,3 +2631,25 @@ parca.home.local           { tls internal; reverse_proxy localhost:7070 }
 | Netdata parent shows no child nodes | Confirm the `api key` UUID in both child and parent `stream.conf` match exactly; restart the child agent after editing; check `podman logs netdata-parent` for authentication errors |
 | Parca Agent missing profiles | eBPF requires kernel ≥ 5.3 with BTF — verify with `ls /sys/kernel/btf/vmlinux`; the agent container must run `privileged: true` with `pid: host`; check `podman logs parca-agent` for capability errors |
 | Parca no scrape targets appearing | Confirm the pprof endpoint on your app is reachable from the Parca container; check `parca.yaml` scrape_configs target addresses use `host.containers.internal` |
+| Elasticsearch OOM-killed | Limit JVM heap with `ES_JAVA_OPTS="-Xms512m -Xmx1g"`; default is 50% of host RAM which can cause OOM on shared hosts |
+| Elasticsearch `max virtual memory areas vm.max_map_count [65530] is too low` | Run `sudo sysctl -w vm.max_map_count=262144` on the host and persist it in `/etc/sysctl.conf` — this is required for all ES/OpenSearch deployments |
+| Elasticsearch cluster status RED | Check unassigned shards: `curl localhost:9200/_cat/shards?v | grep UNASSIGNED`; often caused by a data node being down or `number_of_replicas` exceeding available data nodes |
+| Elasticsearch `master not discovered` on cluster start | Ensure `cluster.initial_master_nodes` lists all master-eligible node names exactly; remove this setting after first cluster formation or nodes will refuse to rejoin |
+| Elasticsearch split-brain / cluster not forming | Use exactly 3 or 5 master-eligible nodes; check that all nodes can reach each other on port `9300` (transport); verify `cluster.name` is identical across all nodes |
+| Elasticsearch ILM rollover not triggering | Ensure the write alias is created with `is_write_index: true` and the index name ends in a 6-digit number (`-000001`); check `GET logs-000001/_ilm/explain` for the reason |
+| Kibana `Kibana server is not ready yet` | Wait for Elasticsearch to fully start first; check `podman logs kibana` — usually a connectivity issue with the ES host URL |
+| Logstash `Pipeline aborted due to error` | Check `podman logs logstash`; most common causes are Grok pattern mismatch on the first event or Elasticsearch output unreachable; add `stdout { codec => rubydebug }` output temporarily to inspect parsed events |
+| Logstash high CPU on Grok | Grok is regex-based and slow on complex patterns; switch `_GREEDYDATA` patterns to structured parsers, use `dissect` filter for simple delimited formats, or pre-parse in Filebeat with `decode_json_fields` |
+| Logstash events stuck in queue | Check `curl localhost:9600/_node/stats` for `pipeline.events.in` vs `pipeline.events.out`; if output is slow, increase `pipeline.workers` or fix the downstream sink |
+| Filebeat `connection refused` to Logstash | Verify Logstash Beats input is on port `5044` and the container port is published; use `host.containers.internal:5044` not `localhost:5044` from Filebeat container |
+| Filebeat harvesting same lines repeatedly | Check `filebeat.yml` `db` path is on a persistent volume; without a state DB file, Filebeat re-reads from the beginning on every restart |
+| Metricbeat dashboards not appearing in Kibana | Run `podman exec metricbeat metricbeat setup --dashboards` after Kibana is healthy; also ensure `setup.kibana.host` points at the correct Kibana URL |
+| OpenSearch UNASSIGNED shards | Check `curl localhost:9200/_cat/shards?v`; for single-node clusters set `number_of_replicas: 0` — a single node cannot host replicas of its own primary shards |
+| OpenSearch `cluster_manager not discovered` | Same as Elasticsearch — `cluster.initial_cluster_manager_nodes` (OpenSearch renamed `master` to `cluster_manager`) must list all manager-eligible nodes on first boot only |
+| OpenSearch Data Prepper not connecting | Verify `insecure: true` is set in the sink config when TLS is disabled; check `podman logs data-prepper` for Java SSL handshake errors |
+| Fluent Bit `[error] no output plugin` | Verify the `[OUTPUT]` block name matches a supported plugin exactly; check `podman exec fluent-bit fluent-bit --help` for available plugins |
+| Fluent Bit losing events on container restart | Enable `storage.type filesystem` and set `storage.path` to a persistent volume; without this, all in-flight events in the memory buffer are lost on restart |
+| Fluent Bit Docker input not collecting logs | Ensure the Podman socket is mounted at `/var/run/docker.sock` inside the container; rootless Podman uses `/run/user/1000/podman/podman.sock` on the host |
+| Vector pipeline component showing errors | Run `curl localhost:8686/components` to see component health; check `podman logs vector` for VRL script parse errors; run `vector validate /etc/vector/vector.yaml` before deploying |
+| Vector disk buffer filling up | Increase `max_size` in the sink buffer config, or fix the downstream sink connectivity; Vector will apply backpressure to sources when the buffer is full rather than dropping events |
+| Vector VRL transformation error | Test VRL expressions interactively with `podman run --rm -it timberio/vector:latest-alpine vector vrl` before putting them in config |
