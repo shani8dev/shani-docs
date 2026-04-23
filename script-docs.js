@@ -615,6 +615,23 @@ function renderDoc(slug, raw) {
   if (State.fontSize !== 16) {
     content.querySelectorAll('.prose').forEach(el => el.style.fontSize = State.fontSize + 'px');
   }
+
+  // Scroll to anchor if the URL contains a hash (e.g. deep-linked via
+  // /doc/servers/kubernetes#rancher-multi-cluster-management-ui).
+  // Must run after DOM is painted, so defer with requestAnimationFrame.
+  const _anchor = location.hash.slice(1);
+  if (_anchor) {
+    requestAnimationFrame(() => {
+      const targetEl = content.querySelector('#' + CSS.escape(_anchor));
+      if (!targetEl) return;
+      const scroller = document.querySelector('.content');
+      if (!scroller) return;
+      const scrollerRect = scroller.getBoundingClientRect();
+      const targetRect   = targetEl.getBoundingClientRect();
+      const topbarH      = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--topbar-h') || '52');
+      scroller.scrollBy({ top: targetRect.top - scrollerRect.top - topbarH - 8, behavior: 'smooth' });
+    });
+  }
 }
 
 // ── Callouts ─────────────────────────────────────────────────────
