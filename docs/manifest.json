@@ -688,6 +688,14 @@
     "draft": false
   },
   {
+    "slug": "servers/openstack",
+    "title": "OpenStack & Private Cloud",
+    "section": "Self-Hosting & Servers",
+    "updated": "2026-04-25",
+    "order": 999,
+    "draft": false
+  },
+  {
     "slug": "servers/productivity",
     "title": "Productivity & Files",
     "section": "Self-Hosting & Servers",

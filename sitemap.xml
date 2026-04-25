@@ -609,6 +609,13 @@
   </url>
 
   <url>
+    <loc>https://docs.shani.dev/doc/servers/openstack</loc>
+    <lastmod>2026-04-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://docs.shani.dev/doc/servers/productivity</loc>
     <lastmod>2026-04-22</lastmod>
     <changefreq>monthly</changefreq>
