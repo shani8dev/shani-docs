@@ -1,10 +1,10 @@
 ---
-title: Network Diagnostics & Tools
-section: Troubleshooting
+title: Network Tools
+section: System
 updated: 2026-04-01
 ---
 
-# Network Diagnostics & Tools
+# Network Tools
 
 Shanios includes a comprehensive suite of networking utilities for diagnostics, monitoring, security, and file transfer. All tools listed here are pre-installed unless noted otherwise.
 

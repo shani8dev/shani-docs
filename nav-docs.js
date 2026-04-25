@@ -1,11 +1,3 @@
-/**
- * nav-docs.js — Navigation tree for wiki.shani.dev
- */
-
-if (typeof CONFIG === 'undefined') {
-  throw new Error('[Wiki Engine] No CONFIG found. Load config-docs.js before nav-docs.js.');
-}
-
 CONFIG.NAV_TREE = [
   { title: 'Overview', icon: 'fa-solid fa-house', slug: 'overview' },
 
@@ -105,7 +97,7 @@ CONFIG.NAV_TREE = [
       { title: 'Virtual Machines', slug: 'software/vms' },
       { title: 'Bottles (Windows Compatibility)', slug: 'software/bottles' },
       { title: 'Android (Waydroid)', slug: 'software/waydroid' },
-      { title: 'GPU Acceleration & HPC Containers', slug: 'gpu-containers' },
+      { title: 'GPU Acceleration & HPC Containers', slug: 'software/gpu-containers' },
     ]
   },
 
@@ -121,8 +113,6 @@ CONFIG.NAV_TREE = [
 
       { title: 'Caddy', slug: 'networking/caddy' },
       { title: 'Apache HTTP Server', slug: 'networking/apache' },
-
-      { title: 'ModemManager (Mobile Broadband)', slug: 'networking/modemmanager' },
 
       { title: 'dnsmasq (Local DNS)', slug: 'networking/dnsmasq' },
       { title: 'dnscrypt-proxy (Encrypted DNS)', slug: 'networking/dnscrypt-proxy' },
@@ -151,6 +141,7 @@ CONFIG.NAV_TREE = [
 
       { title: 'gpsd (GPS Daemon)', slug: 'networking/gpsd' },
       { title: 'apcupsd (UPS Daemon)', slug: 'networking/apcupsd' },
+      { title: 'ModemManager (Mobile Broadband)', slug: 'networking/modemmanager' },
     ]
   },
 
@@ -158,6 +149,12 @@ CONFIG.NAV_TREE = [
     title: 'System',
     icon: 'fa-solid fa-gear',
     children: [
+      { title: 'Systemd', slug: 'system/systemd' },
+      { title: 'Process Management', slug: 'system/process-management' },
+      { title: 'Users & Groups', slug: 'system/users-groups' },
+      { title: 'ch* Commands', slug: 'system/ch-commands' },
+      { title: 'Network Tools', slug: 'system/network-tools' },
+      { title: 'Virtual Networking', slug: 'system/virtual-networking' },
       { title: 'cronie (Cron Scheduler)', slug: 'system/cronie' },
       { title: 'Backup & Recovery', slug: 'system/backup' },
     ]
@@ -203,14 +200,13 @@ CONFIG.NAV_TREE = [
   },
 
   {
-    title: 'System Management',
+    title: 'Troubleshooting',
     icon: 'fa-solid fa-screwdriver-wrench',
     children: [
       { title: 'Troubleshooting Guide', slug: 'troubleshooting' },
-      { title: 'Network Diagnostics & Tools', slug: 'network-diag' },
     ]
   },
-
+  
   {
     title: 'FAQ',
     icon: 'fa-solid fa-circle-question',
