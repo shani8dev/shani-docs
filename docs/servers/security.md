@@ -834,6 +834,296 @@ Access the dashboard at `http://localhost:9392`. On first run, create a scan tar
 
 ---
 
+## LLDAP (Lightweight LDAP)
+
+**Purpose:** Minimal LDAP server written in Rust, purpose-built for self-hosters who need a user directory without the complexity of OpenLDAP or Keycloak. LLDAP exposes just enough LDAP to satisfy apps that require it (Nextcloud, Authentik, Gitea, Authelia) and includes a clean web UI for managing users and groups. If you want SSO via Authentik or Authelia but need a proper user store they can federate against, LLDAP is the lightest way to provide one.
+
+```yaml
+# ~/lldap/compose.yaml
+services:
+  lldap:
+    image: lldap/lldap:stable
+    ports:
+      - 127.0.0.1:3890:3890   # LDAP
+      - 127.0.0.1:17170:17170 # Web UI
+    volumes:
+      - /home/user/lldap/data:/data:Z
+    environment:
+      TZ: Asia/Kolkata
+      UID: "1000"
+      GID: "1000"
+      LLDAP_JWT_SECRET: changeme-run-openssl-rand-hex-32
+      LLDAP_KEY_SEED: changeme-run-openssl-rand-hex-32
+      LLDAP_LDAP_BASE_DN: dc=home,dc=local
+      LLDAP_LDAP_USER_PASS: adminpassword
+      LLDAP_LDAP_USER_EMAIL: admin@home.local
+    restart: unless-stopped
+```
+
+```bash
+cd ~/lldap && podman-compose up -d
+```
+
+Access the web UI at `http://localhost:17170`. Create users and groups via the dashboard.
+
+**Connect Authelia to LLDAP:**
+```yaml
+# In Authelia configuration.yml
+authentication_backend:
+  ldap:
+    implementation: custom
+    url: ldap://host.containers.internal:3890
+    base_dn: DC=home,DC=local
+    username_attribute: uid
+    additional_users_dn: OU=people
+    users_filter: (&({username_attribute}={input})(objectclass=person))
+    additional_groups_dn: OU=groups
+    groups_filter: (member={dn})
+    group_name_attribute: cn
+    mail_attribute: mail
+    display_name_attribute: displayName
+    user: uid=admin,ou=people,dc=home,dc=local
+    password: adminpassword
+```
+
+**Connect Nextcloud to LLDAP:**
+```bash
+podman exec nextcloud php occ app:enable user_ldap
+podman exec nextcloud php occ ldap:set-config "" ldapHost host.containers.internal
+podman exec nextcloud php occ ldap:set-config "" ldapPort 3890
+podman exec nextcloud php occ ldap:set-config "" ldapBase dc=home,dc=local
+podman exec nextcloud php occ ldap:set-config "" ldapAgentName uid=admin,ou=people,dc=home,dc=local
+podman exec nextcloud php occ ldap:set-config "" ldapAgentPassword adminpassword
+podman exec nextcloud php occ ldap:set-config "" ldapLoginFilter "(&(objectclass=person)(uid=%uid))"
+podman exec nextcloud php occ ldap:test-config ""
+```
+
+**Caddy:**
+```caddyfile
+lldap.home.local { tls internal; reverse_proxy localhost:17170 }
+```
+
+---
+
+## Pocket ID (Passkey-Only OIDC Provider)
+
+**Purpose:** Ultra-minimal OIDC provider that uses **passkeys only** — no passwords, no TOTP, no email codes. Users register a passkey (Face ID, Touch ID, Windows Hello, hardware key) and that's their credential. If your goal is SSO for internal services and you want the simplest possible setup without running Keycloak or Authentik, Pocket ID is a single binary with a SQLite database. Supports any OIDC-compatible app.
+
+```yaml
+# ~/pocket-id/compose.yaml
+services:
+  pocket-id:
+    image: ghcr.io/pocket-id/pocket-id:latest
+    ports:
+      - 127.0.0.1:1411:1411
+    volumes:
+      - /home/user/pocket-id/data:/app/data:Z
+    environment:
+      PUBLIC_APP_URL: https://auth.home.local
+      TRUST_PROXY: "true"
+    restart: unless-stopped
+```
+
+```bash
+cd ~/pocket-id && podman-compose up -d
+```
+
+Access at `http://localhost:1411`. On first run, create the admin account by visiting `/admin/setup`. Add OIDC clients for each app you want to protect.
+
+**Register a Gitea OIDC client:**
+
+In Pocket ID Admin → OIDC Clients → Add:
+- Callback URL: `https://git.home.local/user/oauth2/pocket-id/callback`
+
+Then in Gitea Admin → Authentication Sources → Add OAuth2:
+- Provider: OpenID Connect
+- Discovery URL: `https://auth.home.local/.well-known/openid-configuration`
+
+**Caddy:**
+```caddyfile
+auth.home.local { tls internal; reverse_proxy localhost:1411 }
+```
+
+> Pocket ID is the right choice when you want SSO for a small number of internal services, all users are trusted (family/team), and you want zero password management overhead. For external-facing or enterprise setups, use Authentik or Keycloak.
+
+---
+
+## Kanidm (Modern Rust Identity Server)
+
+**Purpose:** Modern, opinionated identity management server built in Rust. Provides LDAP, RADIUS, OAuth2/OIDC, and SSH key management with strong security defaults — accounts auto-lock on repeated failures, credential compromise detection is built in, and everything is append-only for auditability. Enforces MFA and passkeys by default rather than making them optional.
+
+```yaml
+# ~/kanidm/compose.yaml
+services:
+  kanidm:
+    image: kanidm/server:latest
+    ports:
+      - 127.0.0.1:8443:8443
+      - 127.0.0.1:3636:3636   # LDAPS
+    volumes:
+      - /home/user/kanidm/data:/data:Z
+      - /home/user/kanidm/server.toml:/data/server.toml:ro,Z
+    restart: unless-stopped
+```
+
+**Minimal `server.toml`:**
+```toml
+bindaddress = "0.0.0.0:8443"
+ldapbindaddress = "0.0.0.0:3636"
+origin = "https://idm.home.local"
+domain = "home.local"
+db_path = "/data/kanidm.db"
+tls_chain = "/data/chain.pem"
+tls_key = "/data/key.pem"
+log_level = "info"
+```
+
+```bash
+cd ~/kanidm && podman-compose up -d
+
+# Install Kanidm CLI via Nix
+nix-env -iA nixpkgs.kanidm
+
+# Log in as admin
+kanidm login -D idm_admin -H https://localhost:8443
+
+# Create a user and group
+kanidm account create -D idm_admin myuser "My User" myuser@home.local
+kanidm group create -D idm_admin homelab-users
+kanidm group add-members -D idm_admin homelab-users myuser
+
+# Create an OAuth2 client (e.g. Gitea)
+kanidm system oauth2 create -D idm_admin gitea "Gitea" https://git.home.local/user/oauth2/kanidm/callback
+kanidm system oauth2 show-basic-secret -D idm_admin gitea
+```
+
+**Caddy:**
+```caddyfile
+idm.home.local { tls internal; reverse_proxy localhost:8443 { transport http { tls_insecure_skip_verify } } }
+```
+
+---
+
+## Syft + Grype (SBOM & Vulnerability Scanning)
+
+**Purpose:** Syft generates a Software Bill of Materials (SBOM) — a complete inventory of every package, library, and binary in a container image or directory. Grype scans that SBOM against vulnerability databases (NVD, GitHub Advisory, OSV) to find known CVEs. The two-step Syft → Grype workflow is preferred when you want to store SBOMs as artefacts and scan them separately, or feed them to Dependency-Track for continuous monitoring.
+
+```bash
+# Install via Nix
+nix-env -iA nixpkgs.syft nixpkgs.grype
+```
+
+**Generate an SBOM:**
+```bash
+# SBOM for a container image (CycloneDX JSON)
+syft jellyfin/jellyfin:latest -o cyclonedx-json > jellyfin-sbom.cdx.json
+
+# SBOM for a local directory
+syft dir:/home/user/myapp -o spdx-json > myapp-sbom.spdx.json
+
+# Quick package list (table format)
+syft nginx:alpine -o table
+```
+
+**Scan for CVEs:**
+```bash
+# Scan an image directly
+grype jellyfin/jellyfin:latest
+
+# Scan a previously generated SBOM
+grype sbom:jellyfin-sbom.cdx.json
+
+# Fail CI on critical CVEs
+grype nginx:alpine --fail-on critical
+
+# JSON output for automation
+grype nginx:alpine -o json > nginx-vulns.json
+```
+
+**CI integration:**
+```yaml
+# .forgejo/workflows/sbom.yml
+steps:
+  - name: Generate SBOM
+    image: anchore/syft:latest
+    commands:
+      - syft . -o cyclonedx-json > sbom.cdx.json
+
+  - name: Scan CVEs
+    image: anchore/grype:latest
+    commands:
+      - grype sbom:sbom.cdx.json --fail-on critical
+```
+
+---
+
+## Dependency-Track (SBOM Management Platform)
+
+**Purpose:** Continuous SBOM analysis platform. Ingest SBOMs from Syft, Trivy, or your CI pipeline, and Dependency-Track continuously monitors them against NVD, OSV, GitHub Advisory, and VulnDB — alerting you when a new CVE is published that affects a component in any registered project. Unlike point-in-time CI scans, Dependency-Track gives ongoing visibility: a CVE disclosed today against a library ingested a month ago triggers an alert automatically.
+
+```yaml
+# ~/dependency-track/compose.yaml
+services:
+  dtrack-apiserver:
+    image: dependencytrack/apiserver:latest
+    ports:
+      - 127.0.0.1:8081:8080
+    volumes:
+      - /home/user/dependency-track/data:/data:Z
+    environment:
+      ALPINE_DATABASE_MODE: internal
+    restart: unless-stopped
+
+  dtrack-frontend:
+    image: dependencytrack/frontend:latest
+    ports:
+      - 127.0.0.1:8082:8080
+    environment:
+      API_BASE_URL: http://localhost:8081
+    depends_on: [dtrack-apiserver]
+    restart: unless-stopped
+```
+
+```bash
+cd ~/dependency-track && podman-compose up -d
+```
+
+Access at `http://localhost:8082`. Default credentials: `admin` / `admin` — change immediately.
+
+**Upload an SBOM via API:**
+```bash
+SBOM_B64=$(base64 -w 0 myapp-sbom.cdx.json)
+curl -X PUT http://localhost:8081/api/v1/bom \
+  -H "X-Api-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{\"projectName\":\"myapp\",\"projectVersion\":\"1.0\",\"autoCreate\":true,\"bom\":\"${SBOM_B64}\"}"
+```
+
+**CI — auto-upload SBOM on every build:**
+```yaml
+# .woodpecker.yml
+steps:
+  sbom:
+    image: anchore/syft:latest
+    commands:
+      - syft . -o cyclonedx-json > sbom.cdx.json
+  upload:
+    image: curlimages/curl:latest
+    secrets: [DTRACK_API_KEY]
+    commands:
+      - |
+        curl -X PUT http://dtrack.home.local/api/v1/bom \
+          -H "X-Api-Key: $DTRACK_API_KEY" -H "Content-Type: application/json" \
+          -d "{\"projectName\":\"${CI_REPO_NAME}\",\"projectVersion\":\"${CI_COMMIT_SHA:0:8}\",\"autoCreate\":true,\"bom\":\"$(base64 -w 0 sbom.cdx.json)\"}"
+```
+
+**Caddy:**
+```caddyfile
+dtrack.home.local { tls internal; reverse_proxy localhost:8082 }
+```
+
+---
+
 ## Fail2ban (Intrusion Prevention)
 
 **Purpose:** Monitors log files for repeated authentication failures and bans the source IP via firewall rules. Protects SSH, Caddy, Authelia, Vaultwarden, and any service that logs failed login attempts — automatically blocking brute-force attacks without manual intervention. Integrates with `firewalld` (used on Shani OS) natively.

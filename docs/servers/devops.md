@@ -24,6 +24,7 @@ CI/CD, code hosting, container orchestration, HA clusters, IaC, artifact managem
 - [Service Discovery & Orchestration](#service-discovery--orchestration)
 - [Developer Environments & Utilities](#developer-environments--utilities)
 - [Internal Platforms](#internal-platforms)
+- [Platform Engineering](#platform-engineering)
 
 ---
 
@@ -1258,6 +1259,381 @@ studio.example.com { reverse_proxy localhost:80 }
 ---
 
 
+## Platform Engineering
+
+Advanced Kubernetes-native tools for platform teams. These build on the foundation in the [Kubernetes wiki](https://docs.shani.dev/doc/servers/kubernetes).
+
+### Crossplane (Kubernetes-Native IaC)
+
+**Purpose:** Manage cloud infrastructure (AWS, GCP, Azure, DigitalOcean, Hetzner, and 200+ providers) as Kubernetes CRDs — the same `kubectl apply` workflow you use for apps. Crossplane is the cloud-native alternative to OpenTofu/Terraform for teams already running Kubernetes. Define a `PostgreSQLInstance` CRD and Crossplane provisions the actual RDS or Cloud SQL instance, tracks its state, and reconciles drift automatically.
+
+```bash
+# Install Crossplane on your k3s cluster
+helm repo add crossplane-stable https://charts.crossplane.io/stable
+helm install crossplane crossplane-stable/crossplane \
+  --namespace crossplane-system --create-namespace
+
+# Install provider (example: Hetzner Cloud)
+kubectl apply -f - <<EOF
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-hetzner
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/provider-hetzner:latest
+EOF
+
+# Check installed providers
+kubectl get providers
+```
+
+**Example Composite Resource (XR) — self-service PostgreSQL:**
+```yaml
+# ~/k8s/crossplane/postgres-xrd.yaml
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xpostgresqlinstances.db.shani.dev
+spec:
+  group: db.shani.dev
+  names:
+    kind: XPostgreSQLInstance
+    plural: xpostgresqlinstances
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                parameters:
+                  type: object
+                  properties:
+                    storageGB:
+                      type: integer
+```
+
+---
+
+### KEDA (Kubernetes Event-Driven Autoscaling)
+
+**Purpose:** Scale Kubernetes deployments to zero — and back — based on external event sources: queue depth (RabbitMQ, Kafka, NATS), cron schedules, Prometheus metrics, HTTP traffic, and 60+ other scalers. Unlike the built-in HPA (which scales on CPU/memory only), KEDA lets a worker Deployment scale from 0 to 50 pods when a Kafka topic has messages, then back to 0 when the queue is empty. Essential for cost-efficient batch processing and event-driven workloads.
+
+```bash
+# Install KEDA
+helm repo add kedacore https://kedacore.github.io/charts
+helm install keda kedacore/keda --namespace keda --create-namespace
+```
+
+**Example ScaledObject — scale on RabbitMQ queue depth:**
+```yaml
+# ~/k8s/keda-rabbitmq.yaml
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: worker-scaler
+  namespace: myapp
+spec:
+  scaleTargetRef:
+    name: worker-deployment
+  minReplicaCount: 0          # scale to zero when idle
+  maxReplicaCount: 20
+  triggers:
+    - type: rabbitmq
+      metadata:
+        host: amqp://user:pass@rabbitmq.myapp.svc:5672/
+        queueName: jobs
+        queueLength: "5"       # 1 pod per 5 messages
+```
+
+**Scale on Prometheus metric:**
+```yaml
+triggers:
+  - type: prometheus
+    metadata:
+      serverAddress: http://prometheus.monitoring.svc:9090
+      metricName: http_requests_pending
+      threshold: "100"
+      query: sum(http_requests_pending{job="myapp"})
+```
+
+```bash
+# Check ScaledObject status
+kubectl get scaledobjects -n myapp
+kubectl describe scaledobject worker-scaler -n myapp
+```
+
+---
+
+### Cilium + Hubble (eBPF CNI & Network Observability)
+
+**Purpose:** Cilium is a high-performance CNI plugin for Kubernetes built on eBPF — it enforces NetworkPolicies at kernel level (no iptables chains), provides transparent encryption between pods, load-balances services via XDP, and enables Layer 7 policy (HTTP-aware, gRPC-aware). Hubble is Cilium's built-in observability layer: a real-time flow explorer showing exactly which pods are talking to which, what HTTP paths are being called, and where traffic is being dropped by policy. Together they replace kube-proxy and give you a network map you can actually read.
+
+```bash
+# Install Cilium (replaces default CNI on k3s)
+# First, install k3s without flannel and kube-proxy:
+curl -sfL https://get.k3s.io | INSTALL_K3S_BIN_DIR=~/.local/bin sh -s - \
+  --flannel-backend=none \
+  --disable-kube-proxy \
+  --disable-network-policy
+
+# Install Cilium CLI
+nix-env -iA nixpkgs.cilium-cli
+
+# Install Cilium with Hubble
+cilium install --version 1.16.0
+cilium hubble enable --ui
+
+# Verify
+cilium status
+cilium connectivity test
+```
+
+**Hubble CLI — inspect live flows:**
+```bash
+# Install Hubble CLI
+nix-env -iA nixpkgs.hubble
+
+# Port-forward Hubble relay
+cilium hubble port-forward &
+
+# Watch all flows in the myapp namespace
+hubble observe --namespace myapp --follow
+
+# Watch HTTP flows only
+hubble observe --namespace myapp --protocol http --follow
+
+# Watch dropped flows (policy violations)
+hubble observe --verdict DROPPED --follow
+
+# Show flows between two services
+hubble observe --from-pod myapp/frontend --to-pod myapp/backend
+```
+
+**Example L7 NetworkPolicy (HTTP-aware):**
+```yaml
+# Allow frontend to call backend on GET /api only
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-frontend-to-backend
+  namespace: myapp
+spec:
+  endpointSelector:
+    matchLabels:
+      app: backend
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app: frontend
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+          rules:
+            http:
+              - method: GET
+                path: /api/.*
+```
+
+---
+
+### Kyverno (Kubernetes Policy Engine)
+
+**Purpose:** Kubernetes-native policy engine — write policies as YAML CRDs, not Rego. Kyverno validates, mutates, and generates resources as they enter the cluster. Use it to enforce security standards (no privileged containers, require resource limits, require labels), auto-inject sidecars, and auto-generate NetworkPolicies when a new namespace is created. Replaces OPA/Gatekeeper for teams who find Rego intimidating.
+
+```bash
+# Install Kyverno
+helm repo add kyverno https://kyverno.github.io/kyverno/
+helm install kyverno kyverno/kyverno --namespace kyverno --create-namespace
+```
+
+**Example policies:**
+```yaml
+# Require all pods to have resource limits
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-resource-limits
+spec:
+  validationFailureAction: Enforce
+  rules:
+    - name: check-limits
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+      validate:
+        message: "Resource limits are required for all containers."
+        pattern:
+          spec:
+            containers:
+              - resources:
+                  limits:
+                    memory: "?*"
+                    cpu: "?*"
+---
+# Auto-add a label to every new namespace
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: add-namespace-label
+spec:
+  rules:
+    - name: add-env-label
+      match:
+        any:
+          - resources:
+              kinds: [Namespace]
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            labels:
+              managed-by: kyverno
+---
+# Disallow privileged containers cluster-wide
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-privileged
+spec:
+  validationFailureAction: Enforce
+  rules:
+    - name: no-privileged
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+      validate:
+        message: "Privileged containers are not allowed."
+        pattern:
+          spec:
+            containers:
+              - =(securityContext):
+                  =(privileged): false
+```
+
+```bash
+# Check policy reports
+kubectl get policyreport -A
+kubectl describe clusterpolicyreport
+
+# Test a policy without enforcing
+kubectl apply -f policy.yaml --dry-run=server
+```
+
+---
+
+### Falco (Runtime Threat Detection)
+
+**Purpose:** CNCF-graduated runtime security tool. Falco uses eBPF to inspect every syscall made by every container in your cluster — detecting shell executions inside containers, unexpected file writes to `/etc`, outbound connections from unexpected processes, privilege escalation, and hundreds of other attack patterns in real time. Where Trivy and Semgrep scan for vulnerabilities before deployment, Falco catches what actually happens at runtime.
+
+```bash
+# Install Falco on k3s via Helm
+helm repo add falcosecurity https://falcosecurity.github.io/charts
+helm install falco falcosecurity/falco \
+  --namespace falco --create-namespace \
+  --set driver.kind=ebpf \
+  --set falcosidekick.enabled=true \
+  --set falcosidekick.config.slack.webhookurl="https://hooks.slack.com/..." \
+  --set falcosidekick.config.ntfy.hostport="http://ntfy.home.local" \
+  --set falcosidekick.config.ntfy.topic="falco-alerts"
+```
+
+**Example custom rules (`/etc/falco/rules.d/custom.yaml`):**
+```yaml
+- rule: Shell in Container
+  desc: A shell was spawned in a container
+  condition: >
+    spawned_process and container and
+    proc.name in (bash, sh, zsh, dash) and
+    not proc.pname in (bash, sh, zsh)
+  output: >
+    Shell spawned in container (user=%user.name container=%container.name
+    image=%container.image.repository:%container.image.tag
+    cmd=%proc.cmdline)
+  priority: WARNING
+  tags: [container, shell]
+
+- rule: Unexpected Outbound Connection
+  desc: Container made an outbound connection to an unexpected IP
+  condition: >
+    outbound and container and
+    not fd.sip in (192.168.0.0/16, 10.0.0.0/8) and
+    not proc.name in (curl, wget, apt-get)
+  output: >
+    Unexpected outbound (container=%container.name
+    ip=%fd.sip port=%fd.sport cmd=%proc.cmdline)
+  priority: WARNING
+```
+
+```bash
+# View Falco alerts in real time
+kubectl logs -n falco -l app.kubernetes.io/name=falco -f
+
+# Check Falcosidekick dashboard (forwards alerts to Slack, ntfy, etc.)
+kubectl port-forward -n falco svc/falco-falcosidekick-ui 2802:2802
+```
+
+---
+
+### OpenCost (Kubernetes Cost Monitoring)
+
+**Purpose:** Real-time Kubernetes cost visibility — which namespace, deployment, pod, or label is spending what, broken down by CPU, RAM, GPU, storage, and network. OpenCost integrates with cloud provider billing APIs (AWS, GCP, Azure, Hetzner) or uses custom on-prem pricing to calculate actual cost per workload. Essential for multi-tenant clusters where chargebacks or budget alerts matter.
+
+```bash
+# Install OpenCost (requires Prometheus)
+kubectl apply -f https://raw.githubusercontent.com/opencost/opencost/develop/kubernetes/opencost.yaml
+
+# Port-forward the UI
+kubectl port-forward -n opencost svc/opencost 9090:9090 9003:9003
+```
+
+**Or via Helm with custom on-prem pricing:**
+```yaml
+# ~/k8s/opencost-values.yaml
+opencost:
+  customPricing:
+    enabled: true
+    configmapName: custom-pricing
+    provider: custom
+    costModel:
+      CPU: "0.01"          # $ per CPU-hour
+      RAM: "0.005"         # $ per GB-hour
+      storage: "0.0001"    # $ per GB-hour
+      network: "0.0"
+```
+
+```bash
+helm install opencost opencost/opencost \
+  --namespace opencost --create-namespace \
+  -f ~/k8s/opencost-values.yaml
+```
+
+**Query the cost API:**
+```bash
+# Cost breakdown by namespace (last 7 days)
+curl "http://localhost:9003/allocation?window=7d&aggregate=namespace&accumulate=false" \
+  | python3 -m json.tool
+
+# Cost by deployment
+curl "http://localhost:9003/allocation?window=24h&aggregate=deployment"
+
+# Cost by label
+curl "http://localhost:9003/allocation?window=7d&aggregate=label:team"
+```
+
+**Add OpenCost to the Caddy block:**
+```caddyfile
+opencost.home.local { tls internal; reverse_proxy localhost:9090 }
+```
+
+---
+
 ## Caddy Configuration
 
 ```caddyfile
@@ -1296,6 +1672,7 @@ mail.home.local       { tls internal; reverse_proxy localhost:8025 }
 
 # Internal platform
 backstage.home.local  { tls internal; reverse_proxy localhost:7007 }
+opencost.home.local   { tls internal; reverse_proxy localhost:9090 }
 ```
 
 ---
@@ -1330,3 +1707,12 @@ backstage.home.local  { tls internal; reverse_proxy localhost:7007 }
 | k9s shows no resources | Check active namespace with `:ns`; switch context with `:ctx` |
 | Velero backup failing | Check `velero backup logs <n>`; ensure MinIO bucket exists; verify pod has network access to MinIO |
 | Sealed secret not decrypting | Do not delete the `sealed-secrets-key` secret in `kube-system`; back it up: `kubectl get secret -n kube-system sealed-secrets-key -o yaml` |
+| Crossplane provider stuck `Unhealthy` | Check `kubectl describe provider <name>`; verify the provider credentials secret exists in the `crossplane-system` namespace |
+| KEDA ScaledObject not scaling | Run `kubectl describe scaledobject <name>`; verify the trigger connection string is reachable from the KEDA operator pod; check `kubectl logs -n keda -l app=keda-operator` |
+| KEDA not scaling to zero | Ensure `minReplicaCount: 0` is set; some scalers (e.g. HTTP) require the `keda-add-ons-http` addon for scale-to-zero |
+| Cilium pods `CrashLoopBackOff` | Confirm k3s was started with `--flannel-backend=none --disable-kube-proxy`; run `cilium status` and `cilium connectivity test` |
+| Hubble observe shows no flows | Run `cilium hubble port-forward` first; confirm Hubble is enabled with `cilium hubble enable` |
+| Kyverno policy not enforcing | Check `validationFailureAction: Enforce` (not `Audit`); run `kubectl get policyreport -A` to see violations without enforcement |
+| Falco not detecting events | Verify eBPF driver is loaded: `kubectl logs -n falco -l app=falco`; on some kernels try `driver.kind=module` instead of `ebpf` |
+| Falco too many false positives | Tune rules by adding `and not container.image.repository in (known-image)` conditions; start with `priority: WARNING` before `ERROR` |
+| OpenCost shows $0 for all workloads | Set custom pricing in the ConfigMap; verify Prometheus is scraping `node-exporter` and `kube-state-metrics` correctly |

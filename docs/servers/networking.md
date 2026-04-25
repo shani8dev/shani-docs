@@ -695,6 +695,315 @@ ports:
 
 ---
 
+## PowerDNS + PowerDNS Admin (Authoritative DNS)
+
+**Purpose:** Authoritative DNS server for your own domains. While Pi-hole, AdGuard, and Technitium handle *resolving* DNS queries for your LAN, PowerDNS *answers* authoritative queries — it's what you run when you want `example.com` (or an internal zone like `home.local`) to be served from your own nameserver. PowerDNS Admin provides a web UI for managing zones and records. Common in homelabs that run their own internal PKI or split-horizon DNS.
+
+```yaml
+# ~/powerdns/compose.yaml
+services:
+  pdns:
+    image: powerdns/pdns-auth-49:latest
+    ports:
+      - 0.0.0.0:5300:53/tcp
+      - 0.0.0.0:5300:53/udp
+      - 127.0.0.1:8053:8081
+    volumes:
+      - /home/user/powerdns/pdns.conf:/etc/powerdns/pdns.conf:ro,Z
+    environment:
+      PDNS_AUTH_API_KEY: changeme
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: pdns
+      MYSQL_USER: pdns
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+  powerdns-admin:
+    image: powerdnsadmin/pda-legacy:latest
+    ports:
+      - 127.0.0.1:9191:80
+    environment:
+      SQLALCHEMY_DATABASE_URI: mysql://pdns:changeme@db/pdns
+      SECRET_KEY: changeme-run-openssl-rand-hex-32
+      PDNS_STATS_URL: http://pdns:8081/
+      PDNS_API_KEY: changeme
+      PDNS_VERSION: "4.9"
+    depends_on: [db, pdns]
+    restart: unless-stopped
+
+volumes:
+  db_data:
+```
+
+**Minimal `pdns.conf`:**
+```ini
+launch=gmysql
+gmysql-host=db
+gmysql-user=pdns
+gmysql-password=changeme
+gmysql-dbname=pdns
+gmysql-dnssec=yes
+
+api=yes
+api-key=changeme
+webserver=yes
+webserver-address=0.0.0.0
+webserver-port=8081
+webserver-allow-from=0.0.0.0/0
+
+local-port=53
+```
+
+**Initialise the database schema:**
+```bash
+podman exec pdns pdnsutil create-slave-zone home.local 127.0.0.1
+# Or use PowerDNS Admin web UI at http://localhost:9191 to create zones and records
+```
+
+**Common operations:**
+```bash
+# List all zones
+podman exec pdns pdnsutil list-all-zones
+
+# Add a zone
+podman exec pdns pdnsutil create-zone home.local ns1.home.local
+
+# Add an A record
+podman exec pdns pdnsutil add-record home.local myserver A 192.168.1.50
+
+# Check DNSSEC status
+podman exec pdns pdnsutil check-all-zones
+
+# Reload zone after manual DB edits
+podman exec pdns pdnsutil rectify-zone home.local
+
+# Test from host
+dig @127.0.0.1 -p 5300 myserver.home.local
+```
+
+**Caddy:**
+```caddyfile
+pdnsadmin.home.local { tls internal; reverse_proxy localhost:9191 }
+```
+
+---
+
+## Kea DHCP (Modern DHCP Server)
+
+**Purpose:** ISC Kea is the modern replacement for ISC DHCP (`dhcpd`). Provides DHCPv4 and DHCPv6 with a REST API, a lease database (PostgreSQL or MySQL), high-availability failover, host reservations, and a web UI via Stork. Run it alongside Technitium or PowerDNS to control both DHCP and DNS from your server, giving you reliable `hostname → IP` mappings for every device on your LAN.
+
+```yaml
+# ~/kea/compose.yaml
+services:
+  kea-dhcp4:
+    image: jonasal/kea-dhcp4:latest
+    network_mode: host          # Must see your LAN broadcast domain
+    volumes:
+      - /home/user/kea/kea-dhcp4.conf:/etc/kea/kea-dhcp4.conf:ro,Z
+      - /home/user/kea/leases:/var/lib/kea:Z
+    restart: unless-stopped
+```
+
+**Minimal `kea-dhcp4.conf`:**
+```json
+{
+  "Dhcp4": {
+    "interfaces-config": {
+      "interfaces": ["eth0"]
+    },
+    "lease-database": {
+      "type": "memfile",
+      "persist": true,
+      "name": "/var/lib/kea/dhcp4.leases"
+    },
+    "subnet4": [{
+      "id": 1,
+      "subnet": "192.168.1.0/24",
+      "pools": [{ "pool": "192.168.1.100 - 192.168.1.200" }],
+      "option-data": [
+        { "name": "routers",              "data": "192.168.1.1" },
+        { "name": "domain-name-servers",  "data": "192.168.1.10" },
+        { "name": "domain-search",        "data": "home.local" }
+      ],
+      "reservations": [
+        {
+          "hw-address": "aa:bb:cc:dd:ee:ff",
+          "ip-address":  "192.168.1.50",
+          "hostname":    "myserver"
+        }
+      ]
+    }],
+    "loggers": [{
+      "name": "kea-dhcp4",
+      "output_options": [{ "output": "stdout" }],
+      "severity": "INFO"
+    }]
+  }
+}
+```
+
+```bash
+cd ~/kea && podman-compose up -d
+
+# View current leases
+cat /home/user/kea/leases/dhcp4.leases
+
+# Firewall — allow DHCP
+sudo firewall-cmd --add-service=dhcp --permanent && sudo firewall-cmd --reload
+```
+
+> **Kea vs dnsmasq:** dnsmasq (bundled with Pi-hole) is excellent for simple setups. Kea is the right choice when you need HA failover, a REST API, PostgreSQL lease storage, or want to manage DHCP independently of your DNS blocker.
+
+---
+
+## phpIPAM (Lightweight IP Address Management)
+
+**Purpose:** Web-based IP address management tool. Track which IPs are assigned, to what device, who requested the allocation, and which subnets are full. phpIPAM is lighter than NetBox for teams who just need clean IPAM without the full network topology and asset management features. Integrates with PowerDNS for automatic PTR record updates when IPs are assigned.
+
+```yaml
+# ~/phpipam/compose.yaml
+services:
+  phpipam-web:
+    image: phpipam/phpipam-www:latest
+    ports:
+      - 127.0.0.1:8200:80
+    environment:
+      TZ: Asia/Kolkata
+      IPAM_DATABASE_HOST: db
+      IPAM_DATABASE_USER: phpipam
+      IPAM_DATABASE_PASS: changeme
+      IPAM_DATABASE_NAME: phpipam
+    volumes:
+      - /home/user/phpipam/logo:/phpipam/css/images/logo:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  phpipam-cron:
+    image: phpipam/phpipam-cron:latest
+    environment:
+      TZ: Asia/Kolkata
+      IPAM_DATABASE_HOST: db
+      IPAM_DATABASE_USER: phpipam
+      IPAM_DATABASE_PASS: changeme
+      IPAM_DATABASE_NAME: phpipam
+      SCAN_INTERVAL: 1h
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: phpipam
+      MYSQL_USER: phpipam
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  db_data:
+```
+
+```bash
+cd ~/phpipam && podman-compose up -d
+```
+
+Access at `http://localhost:8200`. On first run, select **Automatic database installation** and create the admin account. Then define your subnets and start allocating IPs.
+
+**Caddy:**
+```caddyfile
+ipam.home.local { tls internal; reverse_proxy localhost:8200 }
+```
+
+> **NetBox vs phpIPAM:** Use phpIPAM for pure IPAM (subnets, IPs, reservations). Use NetBox when you also need rack diagrams, cable management, VLAN documentation, and device inventory.
+
+---
+
+## Squid (Caching Proxy)
+
+**Purpose:** High-performance HTTP/HTTPS caching proxy. Squid caches web content so repeated requests are served from disk rather than the internet — saving bandwidth, reducing latency, and enabling content filtering by URL, domain, or MIME type. Useful in homelabs with metered internet connections, for caching container image pulls, or as a transparent proxy for auditing outbound HTTP traffic from containers.
+
+```yaml
+# ~/squid/compose.yaml
+services:
+  squid:
+    image: ubuntu/squid:latest
+    ports:
+      - 127.0.0.1:3128:3128
+    volumes:
+      - /home/user/squid/squid.conf:/etc/squid/squid.conf:ro,Z
+      - /home/user/squid/cache:/var/spool/squid:Z
+      - /home/user/squid/logs:/var/log/squid:Z
+    restart: unless-stopped
+```
+
+**Minimal `squid.conf`:**
+```
+# Allow LAN clients
+acl localnet src 192.168.0.0/16
+acl localnet src 10.0.0.0/8
+
+# Standard safe ports
+acl SSL_ports port 443
+acl Safe_ports port 80 443 21 70 210 280 488 591 777 1025-65535
+acl CONNECT method CONNECT
+
+http_access deny !Safe_ports
+http_access deny CONNECT !SSL_ports
+http_access allow localnet
+http_access allow localhost
+http_access deny all
+
+http_port 3128
+
+# Cache configuration
+cache_dir ufs /var/spool/squid 10000 16 256   # 10 GB cache
+maximum_object_size 512 MB
+cache_mem 512 MB
+maximum_object_size_in_memory 10 MB
+
+# Access log
+access_log /var/log/squid/access.log squid
+```
+
+```bash
+cd ~/squid && podman-compose up -d
+
+# Initialise the cache directory (first run)
+podman exec squid squid -z
+
+# View access log
+podman exec squid tail -f /var/log/squid/access.log
+
+# Force cache refresh for a URL
+podman exec squid squidclient -m PURGE http://example.com/
+
+# Check cache statistics
+podman exec squid squidclient mgr:info
+```
+
+**Use Squid as a proxy for container pulls:**
+```bash
+# Set Podman to pull via Squid
+export https_proxy=http://localhost:3128
+export http_proxy=http://localhost:3128
+podman pull nginx:alpine
+```
+
+**Caddy:**
+```caddyfile
+squid.home.local { tls internal; reverse_proxy localhost:3128 }
+```
+
+---
+
 ## Caddy Configuration
 
 ```caddyfile
@@ -708,6 +1017,8 @@ blocky.home.local      { tls internal; reverse_proxy localhost:4000 }
 traefik.home.local     { tls internal; reverse_proxy localhost:8080 }
 haproxy.home.local     { tls internal; reverse_proxy localhost:9000 }
 npm.home.local         { tls internal; reverse_proxy localhost:81 }
+pdnsadmin.home.local   { tls internal; reverse_proxy localhost:9191 }
+ipam.home.local        { tls internal; reverse_proxy localhost:8200 }
 ```
 
 ---
@@ -731,4 +1042,11 @@ npm.home.local         { tls internal; reverse_proxy localhost:81 }
 | NetBox worker not processing jobs | Ensure the `netbox-worker` container is running; check Redis is reachable; view logs with `podman logs netbox-worker` |
 | Ntopng shows no traffic | Ensure `--network host` is set and the correct interface is specified; verify the interface has traffic with `tcpdump -i eth0 -c 5` |
 | Blocky not blocking ads | Verify the blocklist URLs are reachable from the container on startup; check `podman logs blocky` for download errors; confirm client DNS points at the server |
+| PowerDNS zone not resolving | Run `pdnsutil check-zone home.local` and `pdnsutil rectify-zone home.local`; confirm the SOA record exists; test with `dig @127.0.0.1 -p 5300 home.local` |
+| PowerDNS Admin can't connect to API | Verify `PDNS_API_KEY` matches `api-key` in `pdns.conf`; ensure the `webserver` is enabled and `webserver-allow-from=0.0.0.0/0` is set |
+| Kea DHCP leases not assigned | Confirm `network_mode: host` is set; verify the interface name in `interfaces-config` matches your LAN interface (`ip link show`) |
+| Kea DHCP conflict with existing DHCP | Disable DHCP on your router before starting Kea; two DHCP servers on the same subnet cause unpredictable address assignment |
+| phpIPAM database installation fails | Ensure MariaDB is fully started (`podman logs db`); try refreshing the setup page after 30 seconds |
+| Squid `NONE/400 Bad Request` | Confirm the client is sending a proper HTTP proxy request; for HTTPS, the client must send a `CONNECT` request first |
+| Squid cache not filling | Verify the cache directory exists and is writable; run `squid -z` inside the container to initialise the cache structure |
 
