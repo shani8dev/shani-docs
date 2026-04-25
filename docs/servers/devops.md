@@ -2239,9 +2239,6 @@ umami.home.local { tls internal; reverse_proxy localhost:3005 }
 
 ---
 
-
----
-
 ## Hardware & Embedded
 
 ## WLED (LED Controller)
@@ -2322,9 +2319,6 @@ podman exec mosquitto mosquitto_pub -u user -P password \
 
 ---
 
-
----
-
 ## IoT & SCADA Tools
 
 ## OpenDataBay / Grafana SCADA Dashboard
@@ -2343,16 +2337,15 @@ podman restart grafana
 
 ---
 
----
-
-
----
-
 ## Security CLI Tools
+
+> Full setup, compose configs, and detailed usage for the tools below live in the [Security & Identity wiki](https://docs.shani.dev/doc/servers/security). This section covers the DevOps integration points — how these tools slot into CI/CD pipelines, GitOps workflows, and IaC automation.
 
 ## osquery (Host Intrusion Detection & Visibility)
 
-**Purpose:** Exposes your operating system as a relational database — you query running processes, network connections, installed packages, file integrity, users, cron jobs, kernel modules, and hardware as SQL tables. Use it for host-based intrusion detection, compliance checking, and forensics. Integrates with Wazuh, Kolide Fleet, and Grafana for continuous monitoring.
+**Purpose:** Exposes your operating system as a relational database — you query running processes, network connections, installed packages, file integrity, users, cron jobs, kernel modules, and hardware as SQL tables. Use it for host-based intrusion detection, compliance checking, and forensics. Integrates with Wazuh, Fleet, and Grafana for continuous monitoring.
+
+→ Full setup + SQL query library + Fleet compose: [Security wiki](https://docs.shani.dev/doc/servers/security#osquery-host-security-monitoring--query-language)
 
 ```bash
 # Install osquery on the host via Nix (not containerised — needs host kernel access)
@@ -2413,169 +2406,84 @@ AND remote_address != '';
 
 ---
 
-
----
-
 ## Nuclei (Fast CVE & Misconfiguration Scanner)
 
 **Purpose:** Template-based vulnerability scanner from ProjectDiscovery. Fires targeted HTTP/TCP/DNS probes from a large community library of templates covering known CVEs, exposed admin panels, default credentials, misconfigured headers, and OWASP Top 10 findings. Faster and broader than ZAP for sweeping many services — complement ZAP (deep single-app analysis) with Nuclei (wide multi-service sweeping).
 
-```bash
-# Update templates and scan a target
-podman run --rm \
-  -v /home/user/nuclei/templates:/root/nuclei-templates:Z \
-  -v /home/user/nuclei/output:/output:Z \
-  projectdiscovery/nuclei:latest \
-  -u https://app.home.local \
-  -severity critical,high,medium \
-  -o /output/scan.json -json \
-  -update-templates
+→ Full install, scan patterns, template reference, and CI gate: [Security wiki](https://docs.shani.dev/doc/servers/security#nuclei-fast-vulnerability--exposure-scanner)
 
-# Scan all your services from a target list
-podman run --rm \
-  -v /home/user/nuclei/templates:/root/nuclei-templates:Z \
-  -v /home/user/nuclei/output:/output:Z \
-  -v /home/user/nuclei/targets.txt:/targets.txt:ro \
-  projectdiscovery/nuclei:latest \
-  -l /targets.txt \
-  -t /root/nuclei-templates/http/ \
-  -o /output/results.json -json
+**CI gate (fail pipeline on critical findings):**
+```bash
+nuclei -l targets.txt -s critical,high -silent -j -o nuclei-report.json
+[ "$(jq '[.[] | select(.info.severity=="critical")] | length' nuclei-report.json)" -eq 0 ] \
+  || { echo "Critical findings detected!"; exit 1; }
 ```
 
-**Useful template categories:**
-```bash
--t /root/nuclei-templates/http/cves/              # Known CVEs by number
--t /root/nuclei-templates/http/exposures/         # Exposed files and admin panels
--t /root/nuclei-templates/http/misconfiguration/  # Security misconfigurations
--t /root/nuclei-templates/http/default-logins/    # Default credentials
--t /root/nuclei-templates/http/technologies/      # Technology fingerprinting
-```
-
-> Schedule a weekly Nuclei sweep across all exposed services with a systemd timer and pipe the JSON output to ntfy for critical/high findings. Keep a `targets.txt` file with every Caddy subdomain you expose.
-
----
-
----
-
+> Schedule a weekly Nuclei sweep across all exposed services with a systemd timer and pipe the JSON output to ntfy for critical/high findings. Keep a `targets.txt` with every Caddy subdomain you expose.
 
 ---
 
 ## SOPS (Secrets in Git)
 
-**Purpose:** Encrypt secrets stored in YAML, JSON, ENV, and INI files so they can be safely committed to Git. Works with Age keys (recommended for self-hosting) or GPG. The practical complement to Infisical for GitOps workflows — your compose `.env` files and Kubernetes manifests stay in version control but remain encrypted at rest. Only the authorised key can decrypt them.
+**Purpose:** Encrypt secrets stored in YAML, JSON, ENV, and INI files so they can be safely committed to Git. Works with Age keys (recommended) or GPG. The practical complement to Infisical for GitOps workflows — your compose `.env` files and Kubernetes manifests stay in version control but remain encrypted at rest.
 
-**Install SOPS and Age:**
+→ Full setup, key generation, `.sops.yaml` config, Flux CD integration, Ansible and Terraform workflows, and key rotation: [Security wiki](https://docs.shani.dev/doc/servers/security#sops--age-secrets-encryption-for-git)
+
+**Quick reference:**
 ```bash
-# Install both via Nix
+# Install
 nix-env -iA nixpkgs.sops nixpkgs.age
-```
 
-**Generate an Age key pair:**
-```bash
-mkdir -p ~/.config/sops/age
+# Generate key
 age-keygen -o ~/.config/sops/age/keys.txt
-# Outputs: public key  age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+export SOPS_AGE_KEY_FILE="$HOME/.config/sops/age/keys.txt"
+
+# Encrypt / edit / decrypt
+sops -e -i secrets.yaml          # encrypt in-place
+sops secrets.yaml                 # edit (decrypt → $EDITOR → re-encrypt)
+sops -d secrets.yaml | kubectl apply -f -   # decrypt to pipe
 ```
 
-**Configure SOPS to use your Age key (project-level `.sops.yaml`):**
+**Woodpecker CI — inject Age key from secret:**
 ```yaml
-# .sops.yaml — commit this file to your repo root
-creation_rules:
-  - path_regex: .*\.enc\.yaml$
-    age: age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-  - path_regex: .*\.env\.enc$
-    age: age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-```
-
-**Encrypt and decrypt secrets:**
-```bash
-# Encrypt a .env file
-sops --encrypt .env > .env.enc
-# .env.enc is safe to commit; .env stays in .gitignore
-
-# Edit encrypted file in-place (decrypts, opens $EDITOR, re-encrypts on save)
-sops .env.enc
-
-# Decrypt to stdout for use in scripts
-sops --decrypt .env.enc
-
-# Decrypt to a file (e.g. before podman-compose)
-sops --decrypt .env.enc > .env && podman-compose up -d && rm .env
-```
-
-**Encrypt only specific keys in a YAML file:**
-```yaml
-# secrets.yaml (before encryption)
-db_password: mysecretpassword
-db_host: localhost          # not secret — encrypt selectively
-```
-```bash
-# Encrypt only db_password, leave db_host in plaintext
-sops --encrypt --encrypted-regex '^db_password$' secrets.yaml > secrets.enc.yaml
-```
-
-**Use in CI/CD (Woodpecker / Forgejo Actions):**
-```yaml
-# .woodpecker.yml
 steps:
   deploy:
     image: alpine
-    secrets: [SOPS_AGE_KEY]   # inject Age private key as CI secret
+    secrets: [SOPS_AGE_KEY]
     commands:
       - apk add sops age
-      - export SOPS_AGE_KEY_FILE=/dev/stdin <<< "$SOPS_AGE_KEY"
-      - sops --decrypt .env.enc > .env
+      - echo "$SOPS_AGE_KEY" > /tmp/age.key
+      - export SOPS_AGE_KEY_FILE=/tmp/age.key
+      - sops -d .env.enc > .env
       - podman-compose up -d
+      - rm -f .env /tmp/age.key
 ```
-
-> ⚠️ **Key backup:** Your Age private key (`~/.config/sops/age/keys.txt`) is the only way to decrypt your secrets. Back it up to an offline location (password manager, encrypted USB). If you lose it, all SOPS-encrypted files are permanently unrecoverable.
-
----
-
 
 ---
 
 ## Semgrep CE (Static Analysis / SAST)
 
-**Purpose:** Open-source static application security testing (SAST) tool. Scans source code for security bugs, vulnerable patterns, and misconfigurations using a large library of community rules. Runs in CI pipelines alongside Trivy (container scanning) and ZAP (dynamic scanning) to catch issues at the code level before they ship. Supports 30+ languages — Python, JavaScript, Go, Java, Ruby, PHP, and more.
+**Purpose:** Open-source SAST tool. Scans source code for security bugs and misconfigurations using declarative rules. Runs in CI alongside Trivy (container scanning) and ZAP (dynamic scanning) to catch issues at the code level before they ship. Supports 30+ languages.
 
-```bash
-# Run as a one-shot scanner — no persistent container needed
-podman run --rm \
-  -v /home/user/myproject:/src:ro,Z \
-  returntocorp/semgrep:latest \
-  semgrep scan \
-    --config=auto \
-    --sarif \
-    --output /src/semgrep-results.sarif \
-    /src
-```
+→ Full ruleset reference, custom rule authoring, Defect Dojo SARIF integration, and comparison vs Checkov/tfsec: [Security wiki](https://docs.shani.dev/doc/servers/security#semgrep-sast--static-application-security-testing)
 
-**Run in Woodpecker / Forgejo Actions CI:**
+**CI gate (Woodpecker / Forgejo Actions):**
 ```yaml
-# .forgejo/workflows/security.yml
-steps:
-  - name: semgrep
-    image: returntocorp/semgrep:latest
-    commands:
-      - semgrep scan --config=auto --error .
+- name: sast-semgrep
+  image: returntocorp/semgrep:latest
+  commands:
+    - semgrep --config=p/security-audit --config=p/secrets
+        --severity=ERROR --error
+        --sarif --output=semgrep.sarif .
 ```
 
-**Scan with a specific ruleset:**
 ```bash
-# OWASP top-10 rules
-podman run --rm -v $(pwd):/src:ro,Z returntocorp/semgrep:latest \
-  semgrep scan --config=p/owasp-top-ten /src
-
-# Secrets detection
-podman run --rm -v $(pwd):/src:ro,Z returntocorp/semgrep:latest \
-  semgrep scan --config=p/secrets /src
+# Local scan
+nix-env -iA nixpkgs.semgrep
+semgrep --config=auto .                   # auto ruleset
+semgrep --config=p/owasp-top-ten .        # OWASP top 10
+semgrep --config=p/secrets .              # hardcoded credentials
 ```
-
-> Semgrep CE is the open-source core. The cloud Semgrep platform adds cross-file analysis and a UI, but the CLI tool produces actionable results entirely offline. Feed SARIF output into Defect Dojo (below) to triage findings centrally.
-
----
-
 
 ---
 
@@ -2616,60 +2524,148 @@ studio.example.com { reverse_proxy localhost:80 }
 
 ## Argo Rollouts (Progressive Delivery)
 
-**Purpose:** Canary and blue/green deployments for Kubernetes — a complement to ArgoCD. While ArgoCD manages GitOps sync, Argo Rollouts controls *how* new versions are rolled out: traffic-split canaries, blue/green with automatic promotion, analysis runs against Prometheus metrics, and instant rollback on failure.
+**Purpose:** Canary and blue/green deployments for Kubernetes. While ArgoCD manages GitOps sync, Argo Rollouts controls *how* new versions are rolled out — traffic-split canaries, blue/green with automatic promotion, analysis runs against Prometheus metrics, and instant rollback on failure.
+
+→ Full compose setup, canary/blue-green YAML examples, Prometheus analysis templates, and kubectl plugin usage: [Kubernetes wiki](https://docs.shani.dev/doc/servers/kubernetes#argo-rollouts-progressive-delivery)
 
 ```bash
-# Install Argo Rollouts on your k3s/k0s cluster
-kubectl apply -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
-
-# Install the kubectl plugin via Nix
+# Install CLI
 nix-env -iA nixpkgs.argo-rollouts
 
-# Watch a rollout
+# Essential commands
 kubectl argo rollouts get rollout my-app --watch
-
-# Promote a canary (advance to 100%)
-kubectl argo rollouts promote my-app
-
-# Abort and roll back
-kubectl argo rollouts abort my-app
-```
-
-**Example Rollout (canary — 20% then 100%):**
-```yaml
-# ~/k8s/rollout-example.yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Rollout
-metadata:
-  name: my-app
-spec:
-  replicas: 5
-  strategy:
-    canary:
-      steps:
-        - setWeight: 20
-        - pause: { duration: 5m }
-        - setWeight: 100
-      canaryService: my-app-canary
-      stableService: my-app-stable
-  selector:
-    matchLabels:
-      app: my-app
-  template:
-    metadata:
-      labels:
-        app: my-app
-    spec:
-      containers:
-        - name: my-app
-          image: myapp:latest
-```
-
-```bash
-kubectl apply -f ~/k8s/rollout-example.yaml
+kubectl argo rollouts promote my-app     # advance canary to 100%
+kubectl argo rollouts abort my-app       # instant rollback
 ```
 
 ---
+
+## DORA Metrics (Engineering Performance)
+
+DORA (DevOps Research & Assessment) metrics are the industry-standard framework for measuring software delivery performance. They appear explicitly in Platform Engineer, SRE, and DevOps lead job descriptions. There are four metrics:
+
+| Metric | What it measures | Elite benchmark |
+|--------|-----------------|-----------------|
+| **Deployment Frequency** | How often code ships to production | On-demand (multiple/day) |
+| **Lead Time for Changes** | Time from commit to production | < 1 hour |
+| **Change Failure Rate** | % of deployments causing incidents | 0–5% |
+| **Time to Restore Service (MTTR)** | How long to recover from a failure | < 1 hour |
+
+Teams in the **Elite** tier (per Dora's State of DevOps report) deploy on-demand, recover in under an hour, and have change failure rates below 5%. Most teams start in Low or Medium — the goal is steady movement toward Elite.
+
+### Collecting DORA Metrics with Grafana
+
+The DORA metrics come from combining data across your CI/CD system (deployments), incident management (failures and recovery), and version control (lead time).
+
+```yaml
+# ~/grafana-dora/compose.yaml — lightweight DORA data pipeline
+# Uses Grafana + Loki + a small exporter that parses CI logs
+
+services:
+  dora-exporter:
+    image: ghcr.io/liatrio/liatrio-otel-collector:latest
+    volumes:
+      - /home/user/dora-exporter/config.yaml:/etc/otelcol/config.yaml:ro,Z
+    environment:
+      GITHUB_TOKEN: ${GITHUB_TOKEN}          # or GITEA_TOKEN for self-hosted
+      GITEA_URL: http://git.home.local
+    ports:
+      - 127.0.0.1:8888:8888
+    restart: unless-stopped
+```
+
+**Prometheus recording rules for DORA (add to `alerts.yml`):**
+```yaml
+groups:
+  - name: dora_metrics
+    interval: 5m
+    rules:
+      # Deployment Frequency — count successful CI pipeline runs per day
+      - record: dora:deployment_frequency:rate24h
+        expr: |
+          increase(ci_pipeline_runs_total{status="success", branch="main"}[24h])
+
+      # Lead Time — histogram from git commit timestamp to deployment timestamp
+      # (requires CI system to emit commit_sha and deployment_timestamp labels)
+      - record: dora:lead_time_p50_hours
+        expr: |
+          histogram_quantile(0.50,
+            sum(rate(ci_lead_time_seconds_bucket[7d])) by (le)
+          ) / 3600
+
+      - record: dora:lead_time_p95_hours
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(ci_lead_time_seconds_bucket[7d])) by (le)
+          ) / 3600
+
+      # Change Failure Rate — ratio of rollback/hotfix deployments to total
+      - record: dora:change_failure_rate
+        expr: |
+          sum(increase(ci_pipeline_runs_total{status="success", trigger="rollback"}[7d]))
+          /
+          sum(increase(ci_pipeline_runs_total{status="success"}[7d]))
+
+      # MTTR — average incident duration from PagerDuty/Grafana OnCall webhook
+      - record: dora:mttr_hours_p50
+        expr: |
+          histogram_quantile(0.50,
+            sum(rate(incident_duration_seconds_bucket[30d])) by (le)
+          ) / 3600
+```
+
+**Grafana dashboard variables for DORA bands:**
+```json
+{
+  "panels": [{
+    "title": "Deployment Frequency",
+    "type": "stat",
+    "targets": [{"expr": "dora:deployment_frequency:rate24h"}],
+    "thresholds": {
+      "steps": [
+        {"color": "red",    "value": 0},
+        {"color": "yellow", "value": 1},
+        {"color": "green",  "value": 7}
+      ]
+    }
+  }]
+}
+```
+
+**What DORA tells you about your process:**
+
+- **Low Deployment Frequency** → batching too much per release, long review cycles, fear of deploying. Fix: smaller PRs, feature flags to decouple deploy from release, invest in automated testing confidence.
+
+- **High Lead Time** → long CI pipelines, large code review queues, manual gates. Fix: parallelise CI jobs, enforce PR size limits, automate quality gates (Trivy, Semgrep, Checkov) instead of manual review.
+
+- **High Change Failure Rate** → insufficient test coverage, deploying untested code, missing canary/rollback. Fix: Argo Rollouts canary strategy with Prometheus error-rate gates, automated rollback on SLO breach.
+
+- **High MTTR** → slow incident detection (alerting too noisy or missing), slow rollback (manual process, large blast radius). Fix: Grafana OnCall rotation, runbooks in every service repo, one-command rollback (`kubectl argo rollouts abort` / `git revert + push`).
+
+### Tracking DORA Without a Dedicated Tool
+
+For self-hosted stacks without a commercial DORA platform, derive the four metrics from what you already run:
+
+```bash
+# Deployment Frequency — count tagged releases to main in Gitea
+curl -s "http://git.home.local/api/v1/repos/myorg/myapp/releases?limit=50" \
+  -H "Authorization: token $GITEA_TOKEN" \
+  | jq '[.[] | select(.created_at > (now - 86400 | todate))] | length'
+
+# Lead Time — git log between commit and merge to main
+git log --merges --first-parent main \
+  --format="%H %at" --since="30 days ago" | head -20
+
+# MTTR — query Grafana OnCall incident durations via API
+curl -s "https://oncall.home.local/api/v1/incidents/?limit=100" \
+  -H "Authorization: $GRAFANA_ONCALL_TOKEN" \
+  | jq '[.results[] | .duration_seconds] | add / length / 3600 | . * 10 | round / 10'
+
+# Change Failure Rate — count hotfix/rollback branches merged to main
+git log --merges --first-parent main \
+  --format="%s" --since="30 days ago" \
+  | grep -c -i "hotfix\|rollback\|revert"
+```
 
 ---
 

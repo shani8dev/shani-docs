@@ -1876,6 +1876,511 @@ defectdojo.home.local { tls internal; reverse_proxy localhost:8081 }
 
 ---
 
+## osquery (Host Security Monitoring & Query Language)
+
+**Purpose:** Treats your OS as a relational database — query processes, network connections, users, kernel modules, cron jobs, loaded kernel extensions, open files, and hardware state using plain SQL. Used by security teams for threat hunting, compliance auditing, and incident response. Feeds into Wazuh, Elastic SIEM, and Splunk for centralised host visibility.
+
+```bash
+# Install osquery via Nix (installs osqueryi + osqueryd)
+nix-env -iA nixpkgs.osquery
+
+# Or via the official RPM/DEB on non-immutable systems
+# On Shani OS: Nix only (OS root is read-only)
+```
+
+**Interactive queries (`osqueryi`):**
+```sql
+-- Running processes and their open network connections
+SELECT p.pid, p.name, p.cmdline, lp.port, lp.protocol, lp.address
+FROM processes AS p JOIN listening_ports AS lp USING (pid)
+WHERE lp.port > 0;
+
+-- All users with a valid login shell (spot rogue accounts)
+SELECT username, uid, gid, description, directory, shell
+FROM users WHERE shell NOT LIKE '%nologin%' AND shell NOT LIKE '%false%';
+
+-- Currently established outbound connections (threat hunting)
+SELECT pid, remote_address, remote_port, local_port, state
+FROM process_open_sockets
+WHERE remote_address NOT IN ('0.0.0.0', '::')
+  AND state = 'ESTABLISHED';
+
+-- Cron jobs (detect persistence mechanisms)
+SELECT event, minute, hour, day_of_month, month, day_of_week, command, path
+FROM crontab;
+
+-- Loaded kernel modules (detect rootkits)
+SELECT name, size, used_by FROM kernel_modules ORDER BY name;
+
+-- Recently modified files in /etc (detect config tampering)
+SELECT path, mtime, atime, ctime, sha256
+FROM file
+WHERE path LIKE '/etc/%' AND mtime > (strftime('%s', 'now') - 3600);
+
+-- Listening ports and processes (quick attack surface audit)
+SELECT DISTINCT lp.port, lp.protocol, lp.address, p.name, p.cmdline
+FROM listening_ports AS lp JOIN processes AS p USING (pid)
+ORDER BY lp.port;
+
+-- Docker/Podman containers (detect container escapes)
+SELECT id, name, image, status, created
+FROM docker_containers;
+
+-- SSH authorized keys (audit backdoor keys)
+SELECT username, key_file, key, comment FROM user_ssh_keys;
+
+-- Installed packages (software inventory for CVE mapping)
+SELECT name, version, arch FROM deb_packages;   -- Debian/Ubuntu
+-- or
+SELECT name, version, arch FROM rpm_packages;   -- RHEL/Fedora
+
+-- Processes with root UID not launched by root
+SELECT pid, name, uid, gid, root, cmdline
+FROM processes WHERE uid = 0 AND parent != 1;
+```
+
+**Continuous monitoring with `osqueryd` (daemon mode):**
+```bash
+# /etc/osquery/osquery.conf
+{
+  "options": {
+    "logger_plugin": "filesystem",
+    "logger_path": "/var/log/osquery",
+    "disable_logging": "false",
+    "log_result_events": "true",
+    "schedule_splay_percent": "10",
+    "utc": "true"
+  },
+  "schedule": {
+    "process_events": {
+      "query": "SELECT pid, name, cmdline, uid, gid FROM process_events;",
+      "interval": 60
+    },
+    "listening_ports": {
+      "query": "SELECT pid, port, protocol, address FROM listening_ports;",
+      "interval": 300,
+      "removed": false
+    },
+    "socket_events": {
+      "query": "SELECT action, auid, family, remote_address, remote_port, local_address, local_port, path FROM socket_events WHERE action = 'connect';",
+      "interval": 60
+    },
+    "file_events": {
+      "query": "SELECT path, action, transaction_id FROM file_events WHERE path LIKE '/etc/%' OR path LIKE '/home/%/.ssh/%';",
+      "interval": 30
+    },
+    "users": {
+      "query": "SELECT uid, username, description, shell FROM users;",
+      "interval": 600,
+      "removed": false
+    }
+  },
+  "file_paths": {
+    "config_files": ["/etc/%%"],
+    "ssh_keys": ["/home/%/.ssh/%%"]
+  }
+}
+```
+
+```bash
+# Start osqueryd
+sudo systemctl enable --now osqueryd
+
+# View osquery logs
+sudo tail -f /var/log/osquery/osqueryd.results.log | python3 -m json.tool
+
+# Forward osquery logs to Wazuh (add to wazuh-agent config)
+# /var/ossec/etc/ossec.conf — add a localfile block:
+# <localfile>
+#   <log_format>json</log_format>
+#   <location>/var/log/osquery/osqueryd.results.log</location>
+# </localfile>
+```
+
+**Fleet (Multi-host osquery management UI):**
+```yaml
+# ~/fleet/compose.yaml
+services:
+  fleet:
+    image: fleetdm/fleet:latest
+    ports: ["127.0.0.1:8412:8080"]
+    environment:
+      FLEET_MYSQL_ADDRESS: mysql:3306
+      FLEET_MYSQL_DATABASE: fleet
+      FLEET_MYSQL_USERNAME: fleet
+      FLEET_MYSQL_PASSWORD: changeme
+      FLEET_REDIS_ADDRESS: redis:6379
+      FLEET_SERVER_ADDRESS: 0.0.0.0:8080
+      FLEET_LOGGING_JSON: "true"
+    depends_on: [mysql, redis]
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: fleet
+      MYSQL_USER: fleet
+      MYSQL_PASSWORD: changeme
+    volumes: [mysql_data:/var/lib/mysql]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+```
+
+```bash
+cd ~/fleet && podman-compose up -d
+# Initialise Fleet DB
+podman-compose run --rm fleet fleet prepare db --config /etc/fleet/fleet.yml
+```
+
+---
+
+## Nuclei (Fast Vulnerability & Exposure Scanner)
+
+**Purpose:** Template-based vulnerability scanner — runs 9,000+ community-maintained YAML templates against HTTP/HTTPS targets, detecting misconfigurations, CVEs, exposed panels, default credentials, path traversal, SSRF, CORS misconfig, and hundreds of other issues. Faster and more scriptable than OWASP ZAP for specific CVE checks and exposure detection. Feed results into Defect Dojo.
+
+```bash
+# Install via Nix
+nix-env -iA nixpkgs.nuclei
+
+# Or install the latest binary directly
+sh -c "$(curl -fsSL https://nuclei.projectdiscovery.io/install.sh)"
+
+# Update templates (run before first scan and weekly)
+nuclei -update-templates
+```
+
+**Common scan patterns:**
+```bash
+# Scan a single target with all templates
+nuclei -u https://app.example.com
+
+# Scan only for critical and high severity findings
+nuclei -u https://app.example.com -s critical,high
+
+# Scan for specific CVEs (e.g., recently published)
+nuclei -u https://app.example.com -tags cve -s critical,high
+
+# Scan multiple targets from a file
+nuclei -l targets.txt -s critical,high -o findings.json -j
+
+# Scan with specific technology templates (e.g., nginx, wordpress)
+nuclei -u https://example.com -tags nginx,apache
+
+# Scan for exposed admin panels and default credentials
+nuclei -u https://example.com -tags panel,default-login
+
+# Scan internal services (homelab sweep)
+nuclei -l internal-hosts.txt -tags misconfig,exposure,default-login \
+  -s medium,high,critical -o internal-scan.json -j
+
+# Run a fast sweep with concurrency controls
+nuclei -l targets.txt -c 20 -rate-limit 100 -timeout 10 \
+  -s high,critical -j -o output.json
+
+# Template-specific scan (single CVE check)
+nuclei -u https://example.com \
+  -t cves/2023/CVE-2023-44487.yaml   # HTTP/2 Rapid Reset
+
+# Silent mode + JSON (for CI pipeline output)
+nuclei -u https://staging.example.com \
+  -s critical,high -silent -j -o nuclei-report.json
+
+# Fail CI if any critical findings
+[ "$(jq '[.[] | select(.info.severity=="critical")] | length' nuclei-report.json)" -eq 0 ] \
+  || { echo "Critical findings detected!"; exit 1; }
+```
+
+**Woodpecker CI integration:**
+```yaml
+# .woodpecker.yml — add Nuclei scan after deployment to staging
+- name: security-scan
+  image: projectdiscovery/nuclei:latest
+  commands:
+    - nuclei -u https://staging.example.com
+        -s critical,high -silent -j -o /tmp/nuclei.json
+    - |
+      CRITS=$(jq '[.[] | select(.info.severity=="critical")] | length' /tmp/nuclei.json)
+      if [ "$CRITS" -gt 0 ]; then
+        echo "FAIL: $CRITS critical findings"; cat /tmp/nuclei.json | jq '.info.name, .info.severity, .matched-at'; exit 1
+      fi
+```
+
+**Key template categories for DevOps/homelab:**
+
+| Tag | What it detects |
+|-----|----------------|
+| `misconfig` | CORS, security header gaps, path traversal |
+| `default-login` | Admin/admin, admin/password on 1,000+ apps |
+| `exposure` | Exposed `.git`, `.env`, backup files, debug endpoints |
+| `cve` | Known CVEs with public PoCs |
+| `panel` | Admin panels exposed without auth |
+| `takeover` | Subdomain/dangling DNS takeover opportunities |
+| `tech` | Technology fingerprinting |
+| `ssl` | TLS misconfigurations, expired certs, weak ciphers |
+
+---
+
+## Semgrep (SAST — Static Application Security Testing)
+
+**Purpose:** Fast, pattern-based static analysis for code and IaC. Finds real bugs and security vulnerabilities in Python, Go, JavaScript, TypeScript, Java, Ruby, PHP, and 30+ other languages using declarative rules. Unlike compiler-aware SASTs (Checkmarx, Coverity), Semgrep is fast enough to run in CI on every push. Use for: OWASP A03 (injection), A05 (misconfiguration), A08 (integrity), and custom business logic rules. Output feeds into Defect Dojo as SARIF.
+
+```bash
+# Install via Nix
+nix-env -iA nixpkgs.semgrep
+
+# Or via pip
+pip install semgrep --break-system-packages
+```
+
+**Common scan patterns:**
+```bash
+# Scan with the auto ruleset (recommended default — curated OSS rules)
+semgrep --config=auto .
+
+# Scan with the security-focused OWASP ruleset
+semgrep --config=p/owasp-top-ten .
+
+# Scan with community Go rules (language-specific)
+semgrep --config=p/golang .
+
+# Scan with Python security rules
+semgrep --config=p/python .
+
+# CI scan — output SARIF for upload to GitHub/Defect Dojo
+semgrep --config=auto --sarif --output=semgrep.sarif .
+
+# CI scan — JSON output
+semgrep --config=p/security-audit --json --output=semgrep.json .
+
+# Only show error-severity findings (fail CI on these)
+semgrep --config=auto --severity=ERROR --error .
+
+# Scan IaC files (Terraform, Dockerfiles)
+semgrep --config=p/terraform --config=p/dockerfile .
+
+# Scan secrets (hardcoded API keys, tokens, passwords)
+semgrep --config=p/secrets .
+
+# Custom rule (inline — detect SQL string concatenation)
+semgrep --pattern 'query = "..." + $X' --lang python .
+```
+
+**Writing custom Semgrep rules:**
+```yaml
+# ~/.semgrep/custom-rules.yaml
+rules:
+  - id: hardcoded-db-password
+    patterns:
+      - pattern: |
+          DB_PASSWORD = "$PASS"
+      - pattern-not: |
+          DB_PASSWORD = os.environ[...]
+    message: "Hardcoded database password — use environment variables"
+    languages: [python]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-798"
+      owasp: "A02:2021"
+
+  - id: subprocess-shell-true
+    pattern: subprocess.run(..., shell=True, ...)
+    message: "shell=True with subprocess is a command injection risk — use a list"
+    languages: [python]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-78"
+
+  - id: jwt-none-alg
+    pattern: jwt.decode($TOKEN, options={"verify_signature": False, ...})
+    message: "JWT signature verification disabled — attacker can forge tokens"
+    languages: [python]
+    severity: ERROR
+```
+
+```bash
+# Run custom rules
+semgrep --config=~/.semgrep/custom-rules.yaml .
+
+# Combine auto with custom
+semgrep --config=auto --config=~/.semgrep/custom-rules.yaml .
+```
+
+**Woodpecker CI integration (SAST gate on every PR):**
+```yaml
+# .woodpecker.yml
+- name: sast-semgrep
+  image: returntocorp/semgrep:latest
+  commands:
+    - semgrep --config=p/security-audit --config=p/secrets
+        --severity=ERROR --error
+        --sarif --output=semgrep.sarif .
+  when:
+    event: [push, pull_request]
+```
+
+**Semgrep vs Checkov vs tfsec:**
+
+| Tool | Focus | Best for |
+|------|-------|---------|
+| Semgrep | Application code + IaC | Python/Go/JS bugs, injection, secrets in code |
+| Checkov | IaC (multi-framework) | Terraform, K8s YAML, Dockerfile, Helm policy |
+| tfsec | Terraform-only | Fast Terraform security gate |
+
+Use all three in CI: Semgrep for code, Checkov for IaC policy, tfsec for Terraform speed gate. Feed SARIF output from all three into Defect Dojo.
+
+---
+
+## SOPS + age (Secrets Encryption for Git)
+
+**Purpose:** SOPS (Secrets OPerationS) encrypts specific values in YAML/JSON/ENV/TOML/INI files — the keys remain readable (for diffs and reviews) but values are ciphertext. Committed to Git safely. `age` is the modern, simple encryption backend (replaces GPG). Used to store Kubernetes Secrets, Terraform variables, Ansible vault alternatives, and `.env` files in Git without exposing secrets. Works natively with FluxCD and ArgoCD via the KSOPS or flux-system plugins.
+
+```bash
+# Install SOPS + age via Nix
+nix-env -iA nixpkgs.sops nixpkgs.age
+```
+
+**Key setup:**
+```bash
+# Generate an age key pair (one per person/machine)
+age-keygen -o ~/.config/sops/age/keys.txt
+# Public key output: age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p
+
+# Set the env var so SOPS can find your private key
+export SOPS_AGE_KEY_FILE="$HOME/.config/sops/age/keys.txt"
+# Add to ~/.bashrc or ~/.zshrc to persist
+
+# Create a .sops.yaml in your repo root to define who can decrypt
+cat > .sops.yaml << 'EOF'
+creation_rules:
+  - path_regex: .*\.secrets\.yaml$
+    age: >-
+      age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p,
+      age1another_teammate_public_key_here
+  - path_regex: k8s/.*secrets.*\.yaml$
+    age: age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p
+EOF
+```
+
+**Encrypting and editing secrets:**
+```bash
+# Encrypt a new secrets file (SOPS reads .sops.yaml for the key config)
+sops --encrypt --in-place secrets.yaml
+# or equivalently (SOPS detects .sops.yaml automatically):
+sops -e -i secrets.yaml
+
+# Edit an encrypted file in-place (decrypts to $EDITOR, re-encrypts on save)
+sops secrets.yaml
+
+# Decrypt to stdout (pipe to kubectl apply)
+sops -d secrets.yaml | kubectl apply -f -
+
+# Decrypt to a file (for local testing — never commit the decrypted file!)
+sops -d secrets.yaml > /tmp/secrets-plain.yaml
+
+# Encrypt a single value on the command line
+sops -e --input-type raw --output-type raw <(echo "my-secret-value")
+
+# Encrypt a Kubernetes Secret manifest
+sops -e -i k8s/myapp-secret.yaml
+
+# Apply encrypted K8s secret directly
+sops -d k8s/myapp-secret.yaml | kubectl apply -f -
+```
+
+**Example encrypted YAML structure:**
+```yaml
+# app.secrets.yaml (after sops -e -i)
+database:
+    host: db.home.local          # not encrypted — key only
+    password: ENC[AES256_GCM,data:xyz123...,type:str]
+    port: 5432                   # not encrypted — not sensitive
+api_keys:
+    stripe: ENC[AES256_GCM,data:abc456...,type:str]
+    sendgrid: ENC[AES256_GCM,data:def789...,type:str]
+sops:
+    age:
+        - recipient: age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            ...
+```
+
+**SOPS with Flux CD (GitOps secrets decryption in-cluster):**
+```bash
+# Create a Flux decryption secret from your age private key
+cat ~/.config/sops/age/keys.txt | kubectl create secret generic sops-age \
+  --namespace=flux-system \
+  --from-file=age.agekey=/dev/stdin
+
+# Add a .sops.yaml to your GitOps repo root (as above)
+
+# Add a Kustomization with decryption enabled
+cat > k8s/flux-system/kustomization.yaml << 'EOF'
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: myapp
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./k8s/myapp
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+EOF
+```
+
+**SOPS with Ansible (replace ansible-vault):**
+```bash
+# Encrypt your vars file
+sops -e -i group_vars/all/vault.yaml
+
+# Decrypt before running playbook (or pipe directly)
+sops -d group_vars/all/vault.yaml > /tmp/vault-plain.yaml
+ansible-playbook -i inventory.ini playbook.yaml \
+  -e @/tmp/vault-plain.yaml; rm /tmp/vault-plain.yaml
+
+# Or use sops exec-env to inject vars as environment variables
+sops exec-env secrets.env ansible-playbook playbook.yaml
+```
+
+**SOPS with Terraform / OpenTofu:**
+```bash
+# Decrypt a .tfvars secrets file, pass to tofu
+sops -d prod.secrets.tfvars.enc > /tmp/prod.secrets.tfvars
+tofu apply -var-file=prod.secrets.tfvars -var-file=/tmp/prod.secrets.tfvars
+rm /tmp/prod.secrets.tfvars
+
+# Or use the terraform-sops provider
+# In main.tf:
+# data "sops_file" "secrets" { source_file = "secrets.sops.yaml" }
+# resource "..." { password = data.sops_file.secrets.data["db_password"] }
+```
+
+**`.gitignore` additions when using SOPS:**
+```gitignore
+# Never commit decrypted secrets — only commit *.sops.yaml or *.enc.yaml
+*-plain.yaml
+*-decrypted.yaml
+/tmp/*.yaml
+```
+
+> **Key rotation:** When a team member leaves, re-encrypt all SOPS files with their key removed from `.sops.yaml`. Run `sops updatekeys secrets.yaml` to rotate encryption without decrypting/re-encrypting manually — SOPS re-encrypts the data key for the new recipient set.
+
+---
+
 ## Caddy Configuration
 
 ```caddyfile
@@ -1884,6 +2389,8 @@ trivy.home.local      { tls internal; reverse_proxy localhost:4954 }
 teleport.example.com  { reverse_proxy localhost:3080 }
 zap.home.local        { tls internal; reverse_proxy localhost:8088 }
 safeline.home.local   { tls internal; reverse_proxy localhost:9443 }
+fleet.home.local      { tls internal; reverse_proxy localhost:8412 }
+defectdojo.home.local { tls internal; reverse_proxy localhost:8081 }
 ```
 
 ---
