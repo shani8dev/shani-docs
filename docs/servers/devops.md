@@ -62,6 +62,55 @@ podman exec gitea gitea admin user generate-access-token \
 
 Configure SSH clients to use `Port 2222` for `git.home.local`.
 
+**Gitea Classroom Patterns (Educational Use):**
+
+Use Gitea organisations to distribute assignment repositories to students — a lightweight alternative to GitHub Classroom.
+
+```bash
+# 1. Create a course organisation
+podman exec -it gitea gitea admin org create \
+  --name "cs101-spring-2026" --visibility public
+
+# 2. Fork the assignment template into the org for each student
+# Use Gitea API (repeat for each student username)
+GITEA_URL="http://localhost:3000"
+ADMIN_TOKEN="your-admin-token"
+TEMPLATE_REPO="instructor/assignment-1-template"
+
+for STUDENT in alice bob carol; do
+  curl -s -X POST "$GITEA_URL/api/v1/repos/$TEMPLATE_REPO/forks" \
+    -H "Authorization: token $ADMIN_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "{\"organization\": \"cs101-spring-2026\", \"name\": \"assignment-1-$STUDENT\"}"
+
+  # Add student as collaborator with write access
+  curl -s -X PUT \
+    "$GITEA_URL/api/v1/repos/cs101-spring-2026/assignment-1-$STUDENT/collaborators/$STUDENT" \
+    -H "Authorization: token $ADMIN_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d '{"permission": "write"}'
+done
+
+# 3. Clone all student repos for batch grading
+STUDENTS=(alice bob carol)
+for STUDENT in "${STUDENTS[@]}"; do
+  git clone "ssh://git@git.home.local:2222/cs101-spring-2026/assignment-1-$STUDENT.git" \
+    "grading/assignment-1-$STUDENT"
+done
+
+# 4. Run automated tests across all student repos
+for DIR in grading/assignment-1-*/; do
+  echo "=== Testing ${DIR} ==="
+  cd "$DIR" && python -m pytest tests/ --tb=short 2>&1 | tail -5; cd -
+done
+
+# 5. List all repos in the org via API
+curl -s "$GITEA_URL/api/v1/orgs/cs101-spring-2026/repos?limit=50" \
+  -H "Authorization: token $ADMIN_TOKEN" | python3 -m json.tool | grep '"full_name"'
+```
+
+> **Tip:** Enable Forgejo Actions on the org so student pushes automatically run tests. Add a `.forgejo/workflows/test.yml` to the template repo — it's cloned into every student fork automatically.
+
 ---
 
 ### GitLab CE
@@ -130,9 +179,220 @@ podman exec jenkins java -jar /var/jenkins_home/war/WEB-INF/jenkins-cli.jar \
 
 ---
 
-### Tekton (Kubernetes-Native CI/CD)
+### Tekton Chains (Supply Chain Security)
 
-**Purpose:** CNCF-graduated Kubernetes-native CI/CD. Pipelines, tasks, and triggers are Kubernetes CRDs — everything runs as Pods. Common in Platform Engineer roles and OpenShift environments.
+**Purpose:** Adds SLSA provenance generation on top of Tekton. After a TaskRun or PipelineRun completes, Chains automatically captures attestations about what was built, signs them with a cosign/KMS key, and stores them in an OCI registry or Rekor transparency log. Satisfies SLSA Level 2+ requirements without changing your existing Tekton pipelines.
+
+```bash
+# Install Tekton Chains
+kubectl apply -f https://storage.googleapis.com/tekton-releases/chains/latest/release.yaml
+
+# Configure signing (cosign key pair)
+cosign generate-key-pair k8s://tekton-chains/signing-secrets
+
+# Verify provenance for an image
+cosign verify-attestation --key cosign.pub myregistry/myimage:latest
+```
+
+---
+
+### Argo Workflows (Data & ML Pipelines)
+
+**Purpose:** Kubernetes-native workflow engine for data pipelines, ML training jobs, and batch processing — distinct from ArgoCD (which is GitOps CD). Argo Workflows runs DAG or step-based pipelines as Kubernetes Pods, with fan-out parallelism, artifact passing, retries, and a polished web UI. Common in MLOps stacks alongside Kubeflow.
+
+```bash
+# Install Argo Workflows
+kubectl create namespace argo
+kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/latest/download/install.yaml
+
+# Install the CLI via Nix
+nix-env -iA nixpkgs.argo
+
+# Submit a workflow
+argo submit -n argo --watch ~/k8s/workflow.yaml
+
+# List workflows
+argo list -n argo
+
+# Get workflow logs
+argo logs -n argo my-workflow
+```
+
+**Example workflow (parallel steps):**
+```yaml
+# ~/k8s/workflow.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: data-pipeline-
+spec:
+  entrypoint: main
+  templates:
+    - name: main
+      dag:
+        tasks:
+          - name: ingest
+            template: python-step
+            arguments:
+              parameters:
+                - name: cmd
+                  value: "python ingest.py"
+          - name: transform
+            template: python-step
+            dependencies: [ingest]
+            arguments:
+              parameters:
+                - name: cmd
+                  value: "python transform.py"
+    - name: python-step
+      inputs:
+        parameters:
+          - name: cmd
+      container:
+        image: python:3.12-slim
+        command: [sh, -c]
+        args: ["{{inputs.parameters.cmd}}"]
+```
+
+---
+
+### Kaniko (In-Cluster Image Building)
+
+**Purpose:** Builds OCI container images inside Kubernetes pods without requiring a Docker daemon or root privileges. Reads a Containerfile/Dockerfile and pushes the result directly to your registry — ideal for CI pipelines running inside k3s/RKE2 where you can't or don't want to mount the host Docker socket. Works well alongside Buildah (host-level) and Skopeo (registry operations).
+
+```yaml
+# ~/k8s/kaniko-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: build-myapp
+spec:
+  template:
+    spec:
+      containers:
+        - name: kaniko
+          image: gcr.io/kaniko-project/executor:latest
+          args:
+            - --context=git://git.home.local/myorg/myapp
+            - --dockerfile=Containerfile
+            - --destination=registry.home.local/myorg/myapp:latest
+            - --insecure-registry=registry.home.local
+          volumeMounts:
+            - name: regcred
+              mountPath: /kaniko/.docker
+      volumes:
+        - name: regcred
+          secret:
+            secretName: registry-credentials
+            items:
+              - key: .dockerconfigjson
+                path: config.json
+      restartPolicy: Never
+```
+
+```bash
+kubectl apply -f ~/k8s/kaniko-job.yaml
+kubectl logs -f job/build-myapp
+```
+
+---
+
+### OpenFeature + Flagd (Feature Flag Management)
+
+**Purpose:** OpenFeature is a vendor-neutral FHIR-like standard for feature flags — your application code calls the OpenFeature SDK and any backend (Flagd, LaunchDarkly, Unleash, CloudBees) can be swapped without code changes. Flagd is the lightweight, self-hosted reference backend: it reads flag definitions from a config file or Kubernetes CRDs, evaluates them with targeting rules, and serves them over gRPC or HTTP. Increasingly standard in platform engineering stacks.
+
+```yaml
+# ~/flagd/compose.yaml
+services:
+  flagd:
+    image: ghcr.io/open-feature/flagd:latest
+    ports:
+      - 127.0.0.1:8013:8013   # gRPC
+      - 127.0.0.1:8014:8014   # HTTP
+    volumes:
+      - /home/user/flagd/flags.json:/flags.json:ro,Z
+    command: start --uri file:///flags.json
+    restart: unless-stopped
+```
+
+```bash
+cd ~/flagd && podman-compose up -d
+```
+
+**Example `flags.json`:**
+```json
+{
+  "$schema": "https://flagd.dev/schema/v0/flags.json",
+  "flags": {
+    "new-checkout-flow": {
+      "state": "ENABLED",
+      "variants": { "on": true, "off": false },
+      "defaultVariant": "off",
+      "targeting": {
+        "if": [
+          { "in": [{ "var": "email" }, ["beta@example.com"]] },
+          "on", "off"
+        ]
+      }
+    }
+  }
+}
+```
+
+**Use from Python:**
+```python
+from openfeature import api
+from openfeature.provider.flagd import FlagdProvider
+
+api.set_provider(FlagdProvider())
+client = api.get_client()
+enabled = client.get_boolean_value("new-checkout-flow", False, {"email": "user@example.com"})
+```
+
+---
+
+### Score (Platform-Agnostic Workload Spec)
+
+**Purpose:** Score is a developer-centric workload specification format — like `docker-compose.yaml` but platform-agnostic. Developers write a `score.yaml` describing their workload (containers, resources, environment) once, and `score-compose` or `score-k8s` translates it to a `compose.yaml` or Kubernetes manifests respectively. Eliminates the need for developers to know Kubernetes YAML while keeping platform teams in control of how workloads are deployed.
+
+```bash
+# Install via Nix
+nix-env -iA nixpkgs.score-compose nixpkgs.score-k8s
+
+# Initialise a Score project
+score-compose init
+score-k8s init
+
+# Generate a compose.yaml from score.yaml
+score-compose generate score.yaml --output compose.yaml
+
+# Generate Kubernetes manifests from score.yaml
+score-k8s generate score.yaml --output manifests/
+```
+
+**Example `score.yaml`:**
+```yaml
+apiVersion: score.dev/v1b1
+metadata:
+  name: my-service
+containers:
+  web:
+    image: myapp:latest
+    variables:
+      DB_URL: ${resources.db.host}:${resources.db.port}/${resources.db.name}
+    ports:
+      - name: http
+        port: 8080
+resources:
+  db:
+    type: postgres
+```
+
+
+
+### Tekton Pipelines (Kubernetes-Native CI/CD)
+
+**Purpose:** CNCF-graduated Kubernetes-native CI/CD.
 
 ```bash
 # Install on your k3s/k0s cluster
@@ -215,6 +475,354 @@ class MyPipeline:
             .with_exec(["python", "-m", "pytest"])
         )
 ```
+
+---
+
+### GitHub Actions (Cloud CI/CD — github.com)
+
+**Purpose:** GitHub's native CI/CD system. Workflows are YAML files in `.github/workflows/` that trigger on push, pull request, schedule, or manual dispatch. Actions are the most-requested CI/CD system in DevOps job descriptions — understanding workflow syntax, reusable workflows, environments, secrets management, and caching is essential for any platform engineering role.
+
+> **Shani OS note:** `act` (below) runs GitHub Actions workflows locally using Podman. For self-hosted runners, see the [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools).
+
+**Workflow structure and triggers:**
+```yaml
+# .github/workflows/ci.yaml
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 2 * * 1'    # weekly at 2 AM Monday
+  workflow_dispatch:         # manual trigger from GitHub UI
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options: [staging, prod]
+```
+
+**Complete CI workflow (build, test, push image):**
+```yaml
+# .github/workflows/ci.yaml (continued)
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest tests/ --tb=short --junitxml=test-results.xml
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: test-results.xml
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=sha-
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+```
+
+### Dependency Caching in CI
+
+The `cache-from: type=gha` above caches Docker image layers. For faster dependency installs (pip, npm, Go modules), use `actions/cache` keyed on the lockfile hash — so the cache is invalidated only when dependencies actually change:
+
+```yaml
+# Python
+- uses: actions/cache@v4
+  with:
+    path: ~/.cache/pip
+    key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+    restore-keys: ${{ runner.os }}-pip-
+
+# Node.js
+- uses: actions/cache@v4
+  with:
+    path: ~/.npm
+    key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+    restore-keys: ${{ runner.os }}-node-
+
+# Go modules
+- uses: actions/cache@v4
+  with:
+    path: ~/go/pkg/mod
+    key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
+    restore-keys: ${{ runner.os }}-go-
+```
+
+The `restore-keys` fallback uses a partial cache (the most recent cache for this OS, even with a different lockfile hash) — a partial cache hit is still much faster than downloading all dependencies from scratch.
+```yaml
+# .github/workflows/deploy.yaml
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  deploy-staging:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.example.com
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to staging
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > kubeconfig
+          kubectl --kubeconfig kubeconfig set image deployment/myapp \
+            myapp=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }} \
+            -n staging
+
+  deploy-prod:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment:
+      name: production         # requires manual approval in GitHub Environments settings
+      url: https://example.com
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to production
+        run: |
+          echo "${{ secrets.KUBECONFIG_PROD }}" | base64 -d > kubeconfig
+          kubectl --kubeconfig kubeconfig set image deployment/myapp \
+            myapp=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }} \
+            -n production
+```
+
+**Reusable workflows (DRY — define once, call from many repos):**
+```yaml
+# .github/workflows/reusable-test.yaml  (in a shared repo)
+name: Reusable Test
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        required: false
+        default: '3.12'
+        type: string
+    secrets:
+      TEST_DB_URL:
+        required: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+      - run: pytest
+        env:
+          DATABASE_URL: ${{ secrets.TEST_DB_URL }}
+```
+
+```yaml
+# .github/workflows/ci.yaml  (in a consumer repo)
+jobs:
+  test:
+    uses: myorg/shared-workflows/.github/workflows/reusable-test.yaml@main
+    with:
+      python-version: '3.11'
+    secrets:
+      TEST_DB_URL: ${{ secrets.TEST_DB_URL }}
+```
+
+**Branching strategy — GitHub Flow (standard for CD teams):**
+```
+main ──────────────────────────────── (always deployable, protected)
+  ├── feature/add-login ─────────► PR ─► merge ─► auto-deploy staging
+  ├── fix/null-pointer ──────────► PR ─► merge ─► auto-deploy staging
+  └── release/v1.2 ─────────────► PR ─► merge ─► manual approve prod
+```
+
+**Branch protection rules (configure in GitHub Settings → Branches):**
+```yaml
+# Typical main branch protection:
+# - Require PR before merging (no direct push)
+# - Require status checks: ci/test, ci/lint, security/scan
+# - Require at least 1 approving review
+# - Dismiss stale reviews when new commits pushed
+# - Require branches to be up to date before merging
+# - Restrict who can push to matching branches: team:platform-engineers
+```
+
+**Terraform plan/apply with GitHub Actions (Infrastructure PR workflow):**
+```yaml
+# .github/workflows/terraform.yaml
+name: Terraform
+
+on:
+  pull_request:
+    paths: ['terraform/**']
+  push:
+    branches: [main]
+    paths: ['terraform/**']
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform/
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.9"
+
+      - name: Terraform Init
+        run: terraform init
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: tflint
+        uses: terraform-linters/setup-tflint@v4
+      - run: tflint --recursive
+
+      - name: Checkov security scan
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: terraform/
+          quiet: true
+          soft_fail: false
+
+      - name: Terraform Plan
+        if: github.event_name == 'pull_request'
+        run: terraform plan -no-color -out=tfplan
+        env:
+          TF_VAR_environment: ${{ github.base_ref }}
+
+      - name: Comment plan on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const plan = require('fs').readFileSync('tfplan.txt', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '```hcl\n' + plan + '\n```'
+            });
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve tfplan
+```
+
+**Secrets management in GitHub Actions:**
+```bash
+# Set repository secrets via CLI
+gh secret set KUBECONFIG --body "$(cat ~/.kube/config | base64)"
+gh secret set REGISTRY_PASSWORD < ~/.docker-password
+
+# Set environment-scoped secrets (staging vs prod isolation)
+gh secret set DATABASE_URL --env staging --body "postgres://..."
+gh secret set DATABASE_URL --env production --body "postgres://..."
+
+# List secrets (names only — values never shown)
+gh secret list
+gh secret list --env production
+```
+
+**Matrix builds (test across multiple versions):**
+```yaml
+jobs:
+  test:
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+        os: [ubuntu-latest, ubuntu-22.04]
+      fail-fast: false      # don't cancel other matrix jobs on failure
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+```
+
+**Self-hosted runner on Shani OS (route CI jobs to your own machine):**
+```yaml
+# ~/github-runner/compose.yaml
+services:
+  github-runner:
+    image: myoung34/github-runner:latest
+    environment:
+      REPO_URL: https://github.com/myorg/myrepo
+      RUNNER_TOKEN: <token-from-github-settings-actions-runners>
+      RUNNER_NAME: shani-runner-01
+      RUNNER_WORKDIR: /tmp/github-runner
+      LABELS: self-hosted,linux,shani-os
+    volumes:
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+```
+
+```bash
+cd ~/github-runner && podman-compose up -d
+```
+
+In your workflows, use `runs-on: [self-hosted, shani-os]` to route jobs to this runner.
 
 ---
 
@@ -612,6 +1220,217 @@ terraform {
 
 > Never commit `terraform.tfstate` to Git — it contains secrets in plaintext. Use the MinIO backend from the [Backups wiki](https://docs.shani.dev/doc/servers/backups-sync#minio-self-hosted-s3-backup-target).
 
+**Terraform Module Structure (modularization best practice):**
+```
+terraform/
+├── modules/
+│   ├── k8s-namespace/        # reusable module: creates namespace + RBAC + quota
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   ├── monitoring-stack/     # reusable module: deploys Prometheus + Grafana
+│   └── network/              # reusable module: VPC, subnets, firewall rules
+├── environments/
+│   ├── dev/
+│   │   ├── main.tf           # calls modules with dev-specific vars
+│   │   ├── terraform.tfvars  # dev values
+│   │   └── backend.tf        # remote state: s3://tofu-state/dev/terraform.tfstate
+│   ├── staging/
+│   └── prod/
+└── .terraform.lock.hcl       # provider version lock — always commit this
+```
+
+```hcl
+# modules/k8s-namespace/variables.tf
+variable "name"        { type = string }
+variable "environment" { type = string }
+variable "team"        { type = string }
+variable "cpu_limit"   { type = string; default = "4" }
+variable "mem_limit"   { type = string; default = "8Gi" }
+
+# modules/k8s-namespace/main.tf
+resource "kubernetes_namespace" "this" {
+  metadata {
+    name = var.name
+    labels = {
+      environment = var.environment
+      team        = var.team
+      managed-by  = "terraform"      # tagging policy: always present
+    }
+  }
+}
+
+resource "kubernetes_resource_quota" "this" {
+  metadata { name = "default-quota"; namespace = kubernetes_namespace.this.metadata[0].name }
+  spec {
+    hard = {
+      "limits.cpu"    = var.cpu_limit
+      "limits.memory" = var.mem_limit
+    }
+  }
+}
+
+# environments/prod/main.tf — consume the module
+module "myapp_ns" {
+  source      = "../../modules/k8s-namespace"
+  name        = "myapp"
+  environment = "prod"
+  team        = "platform"
+  cpu_limit   = "8"
+  mem_limit   = "16Gi"
+}
+```
+
+**Remote state with state locking (prevents concurrent apply conflicts):**
+```hcl
+# environments/prod/backend.tf
+terraform {
+  backend "s3" {
+    bucket                      = "tofu-state"
+    key                         = "prod/terraform.tfstate"
+    region                      = "us-east-1"
+    endpoint                    = "http://minio.home.local:9000"
+    access_key                  = "minioadmin"
+    secret_key                  = "changeme"
+    skip_credentials_validation = true
+    skip_metadata_api_check     = true
+    skip_region_validation      = true
+    force_path_style            = true
+
+    # State locking via DynamoDB (for AWS) or the S3 backend's built-in locking
+    # MinIO's S3 backend supports native state locking (no DynamoDB needed with OpenTofu 1.7+)
+    use_lockfile = true
+  }
+}
+```
+
+**Drift detection (detect infrastructure changes made outside Terraform):**
+```bash
+# Detect drift between state and real infrastructure
+tofu plan -detailed-exitcode
+# Exit code 0 = no changes; 1 = error; 2 = changes detected (drift)
+
+# Refresh state from real infrastructure (updates state without changing infra)
+tofu refresh
+
+# Import a resource created manually (bring it under Terraform management)
+tofu import kubernetes_namespace.myapp myapp
+
+# Automated drift detection via systemd timer
+cat > ~/.config/systemd/user/tofu-drift.service << 'EOF'
+[Unit]
+Description=OpenTofu Drift Detection
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/user/terraform/environments/prod
+ExecStart=/bin/bash -c 'tofu plan -detailed-exitcode 2>&1 | \
+  grep -E "(must be replaced|will be destroyed|has changed)" && \
+  curl -s -d "Terraform drift detected in prod" http://ntfy.home.local/infra-alerts || true'
+EOF
+
+cat > ~/.config/systemd/user/tofu-drift.timer << 'EOF'
+[Unit]
+Description=Daily Terraform Drift Check
+[Timer]
+OnCalendar=daily
+Persistent=true
+[Install]
+WantedBy=timers.target
+EOF
+
+systemctl --user enable --now tofu-drift.timer
+```
+
+**Policy guardrails with tflint + Checkov + tfsec:**
+```bash
+# Install tflint (Terraform linter — catches provider-specific mistakes)
+nix-env -iA nixpkgs.tflint
+
+# Install Checkov (security policy scanner for IaC — multi-framework)
+pip install checkov --break-system-packages
+
+# Install tfsec (focused Terraform security scanner, fast, no Python dep)
+nix-env -iA nixpkgs.tfsec
+
+# tflint: lint all modules
+tflint --recursive --format=compact
+
+# Checkov: security scan (fails on critical findings)
+checkov -d terraform/ \
+  --check CKV_K8S_8,CKV_K8S_9,CKV_K8S_14,CKV_K8S_35 \  # specific k8s checks
+  --soft-fail-on MEDIUM \                                  # warn on medium, fail on high/critical
+  -o cli
+
+# Common checks relevant to Kubernetes Terraform:
+# CKV_K8S_8  — containers must have readiness probes
+# CKV_K8S_9  — containers must have liveness probes
+# CKV_K8S_14 — image tag must not be 'latest'
+# CKV_K8S_35 — secrets must not be in environment variables
+# CKV_K8S_43 — image must use digest (not mutable tag)
+
+# tfsec: fast, Terraform-native security scan (good for CI gates)
+tfsec terraform/
+tfsec terraform/ --severity CRITICAL   # fail only on critical
+tfsec terraform/ --format json         # machine-readable output
+tfsec terraform/ --out results.json    # write to file for ingestion by Defect Dojo
+
+# Inline suppression (when a finding is intentional — add to the .tf resource):
+# #tfsec:ignore:aws-s3-enable-bucket-logging
+```
+
+> **Checkov vs tfsec:** Use both. Checkov covers Terraform, Kubernetes YAML, Dockerfiles, GitHub Actions, Helm charts, and CloudFormation in one tool. tfsec is Terraform-only but faster and catches different edge cases. Run tfsec as a fast pre-commit gate and Checkov as the full CI scan. Both integrate with Defect Dojo via JSON output.
+
+**Integrate in CI (Woodpecker / Forgejo Actions):**
+```yaml
+# .woodpecker.yml — add after the tofu plan step
+- name: iac-security-scan
+  image: bridgecrew/checkov
+  commands:
+    - checkov -d terraform/ -o cli -o json --output-file-path /dev/null,results.json
+    - "[ $(jq '.summary.failed' results.json) -eq 0 ] || exit 1"
+```
+
+**Tagging and naming policy (enforced via tflint rules):**
+```hcl
+# .tflint.hcl — project-level tflint config
+plugin "aws" { enabled = true; version = "0.32.0"; source = "github.com/terraform-linters/tflint-ruleset-aws" }
+plugin "kubernetes" { enabled = true }
+
+rule "terraform_required_tags" {
+  enabled = true
+  # Enforce that every resource has these tags:
+  required_tags = ["environment", "team", "managed-by", "cost-center"]
+}
+
+rule "terraform_naming_convention" {
+  enabled = true
+  # Enforce snake_case naming for all resources
+  format = "snake_case"
+}
+```
+
+**Promote changes across Dev → UAT → Prod:**
+```bash
+# Pattern: same module, different tfvars per environment
+# Dev:     tofu apply -var-file=dev.tfvars    (auto-applied on merge to develop)
+# UAT:     tofu apply -var-file=uat.tfvars    (requires PR approval)
+# Prod:    tofu apply -var-file=prod.tfvars   (requires second approval + plan review)
+
+# Workspace approach (alternative — single state tree, multiple workspaces):
+tofu workspace new dev
+tofu workspace new uat
+tofu workspace new prod
+tofu workspace select prod
+tofu plan -var-file=prod.tfvars
+tofu apply -var-file=prod.tfvars
+
+# Always plan before apply in prod
+tofu plan -out=prod.tfplan -var-file=prod.tfvars
+# (review prod.tfplan output)
+tofu apply prod.tfplan   # applies exactly what was planned — no surprises
+```
+
 ---
 
 ### Ansible (Configuration Management)
@@ -688,7 +1507,57 @@ ansible-playbook -i inventory.ini playbook.yaml --ask-vault-pass
 
 **AWX (Ansible Tower OSS — Web UI):**
 
-→ Compose setup: [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#ansible-configuration-management--automation)
+AWX provides a web UI, RBAC, job scheduling, inventory management, and notifications on top of Ansible. The recommended install method is the AWX Operator on Kubernetes, but a standalone Docker Compose setup is available for homelab use.
+
+```yaml
+# ~/awx/compose.yaml
+# AWX requires postgres and redis; the operator handles this on k8s
+# For a quick homelab setup, use the AWX operator on k3s instead:
+#   kubectl apply -f https://raw.githubusercontent.com/ansible/awx-operator/main/deploy/awx-operator.yaml
+# Then create an AWX custom resource — see AWX operator docs.
+# Direct compose: use the community awx-on-docker project:
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: awx
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: awx
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  awx_web:
+    image: ansible/awx:latest
+    ports: ["127.0.0.1:8052:8052"]
+    environment:
+      SECRET_KEY: "run: openssl rand -hex 32"
+      DATABASE_HOST: postgres
+      DATABASE_USER: awx
+      DATABASE_PASSWORD: changeme
+      DATABASE_NAME: awx
+      REDIS_HOST: redis
+      AWX_ADMIN_USER: admin
+      AWX_ADMIN_PASSWORD: changeme
+    depends_on: [postgres, redis]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+```bash
+cd ~/awx && podman-compose up -d
+# Access at http://localhost:8052 — default login: admin / changeme
+```
+
+**Caddy:**
+```caddyfile
+awx.home.local { tls internal; reverse_proxy localhost:8052 }
+```
 
 ---
 
@@ -714,6 +1583,118 @@ pulumi stack output
 
 ---
 
+### Terragrunt (OpenTofu / Terraform Wrapper)
+
+**Purpose:** Thin wrapper around OpenTofu/Terraform that solves two real problems at scale: **DRY remote state configuration** (define your MinIO backend once, inherit it across all modules) and **multi-module orchestration** (deploy 20 modules in dependency order with one command). Essential once you outgrow a single `main.tf` — typical use case is a `live/` directory tree where every folder is an independent tofu root with no copy-pasted backend blocks.
+
+```bash
+# Install via Nix
+nix-env -iA nixpkgs.terragrunt
+
+# Or via Snap
+snap install terragrunt --classic
+```
+
+**Recommended directory structure:**
+```
+live/
+├── terragrunt.hcl          ← root config: shared remote state + provider defaults
+├── homelab/
+│   ├── k8s-cluster/
+│   │   └── terragrunt.hcl  ← module config: inherits root, declares dependencies
+│   ├── dns/
+│   │   └── terragrunt.hcl
+│   └── namespaces/
+│       └── terragrunt.hcl
+└── prod/
+    └── ...
+```
+
+**Root `terragrunt.hcl` — define MinIO backend once:**
+```hcl
+# live/terragrunt.hcl
+remote_state {
+  backend = "s3"
+  generate = {
+    path      = "backend.tf"
+    if_exists = "overwrite_terragrunt"
+  }
+  config = {
+    bucket   = "tofu-state"
+    key      = "${path_relative_to_include()}/terraform.tfstate"
+    region   = "us-east-1"
+    endpoint = "http://minio.home.local:9000"
+    access_key                  = get_env("MINIO_ACCESS_KEY", "minioadmin")
+    secret_key                  = get_env("MINIO_SECRET_KEY", "changeme")
+    skip_credentials_validation = true
+    skip_metadata_api_check     = true
+    skip_region_validation      = true
+    force_path_style            = true
+  }
+}
+
+# Inject default provider config into every child module
+generate "provider" {
+  path      = "provider.tf"
+  if_exists = "overwrite_terragrunt"
+  contents  = <<EOF
+provider "hetzner" {
+  token = get_env("HCLOUD_TOKEN")
+}
+EOF
+}
+```
+
+**Child `terragrunt.hcl` — inherit root, declare dependency:**
+```hcl
+# live/homelab/namespaces/terragrunt.hcl
+include "root" {
+  path = find_in_parent_folders()   # walks up until it finds the root terragrunt.hcl
+}
+
+terraform {
+  source = "../../../modules//k8s-namespace"
+}
+
+dependency "cluster" {
+  config_path = "../k8s-cluster"
+  mock_outputs = {
+    cluster_endpoint = "https://127.0.0.1:6443"  # used in plan when cluster doesn't exist yet
+  }
+}
+
+inputs = {
+  cluster_endpoint = dependency.cluster.outputs.cluster_endpoint
+  namespaces       = ["monitoring", "apps", "security"]
+}
+```
+
+**Common commands:**
+```bash
+# Plan/apply a single module
+cd live/homelab/k8s-cluster && terragrunt plan
+cd live/homelab/k8s-cluster && terragrunt apply
+
+# Apply ALL modules in dependency order (the killer feature)
+cd live/homelab && terragrunt run-all apply
+
+# Destroy all modules in reverse dependency order
+cd live/homelab && terragrunt run-all destroy
+
+# Plan all — great for PRs to see the full blast radius
+cd live && terragrunt run-all plan
+
+# Only run modules that changed (compares to last apply state)
+terragrunt run-all apply --terragrunt-modules-that-include root.hcl
+
+# Graph the dependency tree
+terragrunt graph-dependencies | dot -Tpng > deps.png
+```
+
+> **OpenTofu + Terragrunt + MinIO** is the fully self-hosted, BSL-free equivalent of the Terraform Cloud / HCP Terraform stack. All state stays in your MinIO bucket; Terragrunt handles the DRY config and orchestration.
+
+---
+
 ### Packer (Machine Image Builder)
 
 **Purpose:** Build identical VM templates, cloud AMIs, container base images, or ISOs from a single HCL template. Common for teams using vSphere, AWS, Azure, or bare-metal.
@@ -728,6 +1709,269 @@ packer build myimage.pkr.hcl
 packer build -var "version=1.2.3" myimage.pkr.hcl
 PACKER_LOG=1 packer build myimage.pkr.hcl   # debug mode
 ```
+
+### Cloud Provider CLIs (AWS / GCP / Azure / Hetzner)
+
+**Purpose:** Command-line interfaces for managing cloud resources directly — provisioning VMs, managing object storage, configuring DNS, pulling logs, and scripting infrastructure tasks. On Shani OS all CLIs install via Nix; none require a system-level package manager.
+
+> **Homelab + cloud hybrid:** The most common Shani OS pattern is running core services on-prem and using a VPS (Hetzner, DigitalOcean, Vultr) for public-facing ingress, offsite backups, or a WireGuard exit node. Hetzner Cloud is the primary cloud provider referenced throughout these docs — best price/performance ratio in Europe with a clean API.
+
+**Hetzner Cloud CLI (`hcloud`) — primary:**
+```bash
+# Install via Nix
+nix-env -iA nixpkgs.hcloud
+
+# Authenticate (get token from Hetzner Cloud Console → Project → API Tokens)
+hcloud context create homelab
+# Paste token when prompted — stored in ~/.config/hcloud/cli.toml
+
+# Common operations
+hcloud server list
+hcloud server create --name vpn-node --type cx22 --image ubuntu-24.04 --location nbg1 \
+  --ssh-key ~/.ssh/id_ed25519.pub
+
+hcloud server ssh vpn-node
+hcloud server delete vpn-node
+
+# Volumes (persistent block storage)
+hcloud volume create --name data --size 50 --server vpn-node
+hcloud volume list
+
+# Firewall
+hcloud firewall create --name homelab-fw
+hcloud firewall add-rule homelab-fw --direction in --protocol tcp --port 22 --source-ips 0.0.0.0/0
+hcloud firewall apply-to-resource homelab-fw --type server --server vpn-node
+
+# Floating IPs (static public IP that survives server recreation)
+hcloud floating-ip create --type ipv4 --home-location nbg1
+hcloud floating-ip assign <ip-id> vpn-node
+
+# Private networks (connect VMs without public IPs)
+hcloud network create --name homelab-net --ip-range 10.0.0.0/16
+hcloud network add-subnet homelab-net --network-zone eu-central --type server --ip-range 10.0.1.0/24
+hcloud server attach-to-network vpn-node --network homelab-net --ip 10.0.1.1
+```
+
+**AWS CLI:**
+```bash
+# Install via Nix
+nix-env -iA nixpkgs.awscli2
+
+# Configure (credentials from IAM → Users → Security credentials)
+aws configure
+# Or use environment variables (preferred for CI):
+# AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION
+
+# Common operations
+aws s3 ls
+aws s3 cp backup.tar.gz s3://my-bucket/backups/
+aws s3 sync /home/user/data/ s3://my-bucket/data/ --delete
+
+# EC2
+aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId,State.Name,PublicIpAddress]' --output table
+aws ec2 start-instances --instance-ids i-1234567890abcdef0
+aws ec2 stop-instances --instance-ids i-1234567890abcdef0
+
+# SSM (connect without opening port 22)
+aws ssm start-session --target i-1234567890abcdef0
+
+# ECR (container registry)
+aws ecr get-login-password --region eu-west-1 | \
+  podman login --username AWS --password-stdin 123456789.dkr.ecr.eu-west-1.amazonaws.com
+
+# CloudWatch logs
+aws logs tail /aws/lambda/my-function --follow
+```
+
+**GCP CLI (`gcloud`):**
+```bash
+# Install via Nix
+nix-env -iA nixpkgs.google-cloud-sdk
+
+# Authenticate
+gcloud auth login
+gcloud config set project my-project-id
+
+# Common operations
+gcloud compute instances list
+gcloud compute ssh my-vm --zone europe-west1-b
+
+# GCS (Cloud Storage)
+gcloud storage ls
+gcloud storage cp backup.tar.gz gs://my-bucket/backups/
+gcloud storage rsync -r /home/user/data/ gs://my-bucket/data/
+
+# GCR (Artifact Registry)
+gcloud auth configure-docker europe-west1-docker.pkg.dev
+podman push europe-west1-docker.pkg.dev/my-project/my-repo/myapp:latest
+
+# Cloud Run
+gcloud run deploy myapp --image europe-west1-docker.pkg.dev/my-project/my-repo/myapp:latest \
+  --region europe-west1 --allow-unauthenticated
+```
+
+**Azure CLI:**
+```bash
+# Install via Nix
+nix-env -iA nixpkgs.azure-cli
+
+# Authenticate
+az login                          # browser-based
+az login --use-device-code        # for headless/SSH sessions
+
+# Common operations
+az vm list --output table
+az vm start --resource-group myRG --name myVM
+az vm stop  --resource-group myRG --name myVM
+
+# Azure Blob Storage
+az storage blob upload --account-name mystorageacct \
+  --container-name backups --name backup.tar.gz --file backup.tar.gz
+
+# ACR (container registry)
+az acr login --name myregistry
+podman push myregistry.azurecr.io/myapp:latest
+
+# AKS
+az aks get-credentials --resource-group myRG --name myAKS
+kubectl get nodes
+```
+
+---
+
+### cloud-init (VM Bootstrap Automation)
+
+**Purpose:** Industry-standard mechanism for bootstrapping cloud VMs and bare-metal nodes on first boot. A `user-data` YAML file is passed to the instance at creation time (via the cloud provider API or a local `nocloud` source) — cloud-init runs it once, before your configuration management tool takes over. Used to: create users and SSH keys, install base packages, write files, run bootstrap scripts, and configure the system for Ansible/OpenTofu to manage.
+
+> On Shani OS itself, cloud-init is not used (Shani uses its own atomic update mechanism). This section covers provisioning *other* machines from Shani OS — Hetzner VMs, bare-metal nodes, Proxmox VMs — using cloud-init user-data files you create and pass via `hcloud` or Proxmox.
+
+**Minimal user-data (Hetzner Ubuntu VM):**
+```yaml
+# ~/cloud-init/base-server.yaml
+#cloud-config
+
+# Create a non-root admin user
+users:
+  - name: ops
+    groups: [sudo, docker]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAA...your-public-key... ops@shani
+
+# Disable password auth entirely
+ssh_pwauth: false
+disable_root: true
+
+# Install base packages
+packages:
+  - curl
+  - git
+  - htop
+  - fail2ban
+  - ufw
+
+# Run once on first boot
+runcmd:
+  - ufw allow 22/tcp
+  - ufw allow 80/tcp
+  - ufw allow 443/tcp
+  - ufw --force enable
+  - systemctl enable --now fail2ban
+  - curl -fsSL https://get.docker.com | sh    # or install Podman
+
+# Write a file on the new VM
+write_files:
+  - path: /etc/motd
+    content: |
+      Managed by Shani homelab. Do not edit manually.
+    permissions: '0644'
+```
+
+**Provision a Hetzner VM with cloud-init:**
+```bash
+hcloud server create \
+  --name vpn-exit-01 \
+  --type cx22 \
+  --image ubuntu-24.04 \
+  --location nbg1 \
+  --ssh-key ~/.ssh/id_ed25519.pub \
+  --user-data-from-file ~/cloud-init/base-server.yaml
+
+# Watch the bootstrap complete (takes 60–90 seconds)
+hcloud server ssh vpn-exit-01 -- "cloud-init status --wait && journalctl -u cloud-init --no-pager"
+```
+
+**Provision a Proxmox VM with cloud-init (nocloud source):**
+```bash
+# Download a cloud image (Ubuntu 24.04 cloud-ready)
+wget https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
+
+# Create a VM template in Proxmox
+qm create 9000 --name ubuntu-template --memory 2048 --cores 2 --net0 virtio,bridge=vmbr0
+qm importdisk 9000 noble-server-cloudimg-amd64.img local-lvm
+qm set 9000 --scsihw virtio-scsi-pci --scsi0 local-lvm:vm-9000-disk-0
+qm set 9000 --ide2 local-lvm:cloudinit   # attach cloud-init drive
+qm set 9000 --boot c --bootdisk scsi0
+qm set 9000 --serial0 socket --vga serial0
+qm set 9000 --ipconfig0 ip=dhcp
+qm template 9000
+
+# Clone template and pass your user-data
+qm clone 9000 101 --name worker-01 --full
+qm set 101 --cicustom "user=local:snippets/base-server.yaml"
+qm set 101 --ipconfig0 "ip=192.168.1.101/24,gw=192.168.1.1"
+qm start 101
+```
+
+**WireGuard exit node via cloud-init (one-shot VPN provisioning):**
+```yaml
+# ~/cloud-init/wireguard-exit.yaml
+#cloud-config
+packages: [wireguard]
+
+write_files:
+  - path: /etc/wireguard/wg0.conf
+    permissions: '0600'
+    content: |
+      [Interface]
+      PrivateKey = <server-private-key>
+      Address = 10.8.0.1/24
+      ListenPort = 51820
+      PostUp   = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+      PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+
+      [Peer]
+      PublicKey = <client-public-key>
+      AllowedIPs = 10.8.0.2/32
+
+runcmd:
+  - sysctl -w net.ipv4.ip_forward=1
+  - echo "net.ipv4.ip_forward=1" >> /etc/sysctl.d/99-wireguard.conf
+  - systemctl enable --now wg-quick@wg0
+  - ufw allow 51820/udp
+  - ufw --force enable
+```
+
+```bash
+hcloud server create --name wg-exit-eu --type cx22 --image ubuntu-24.04 \
+  --location nbg1 --user-data-from-file ~/cloud-init/wireguard-exit.yaml
+```
+
+**Validate user-data before sending:**
+```bash
+# Install cloud-init validator
+pip install cloud-init --break-system-packages
+
+# Validate syntax
+cloud-init schema --config-file ~/cloud-init/base-server.yaml
+```
+
+---
+
+### Chef / Puppet
+
+> **Shani OS note:** Chef and Puppet use persistent agents installed on managed hosts — incompatible with Shani OS's immutable, read-only root. Use **Ansible** (agentless, SSH + Python) for configuration management on Shani OS. Chef/Puppet are listed here for awareness when working in enterprise environments that already use them; on Shani OS, Ansible with AWX is the supported path.
 
 ---
 
@@ -869,6 +2113,117 @@ job "nginx" {
 **Purpose:** Self-hosted Google Analytics replacement. Tracks pageviews, sessions, funnels, heatmaps, and e-commerce. GDPR-compliant by default.
 
 → Compose setup: [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#matomo-web-analytics)
+
+---
+
+### Plausible Analytics
+
+**Purpose:** Lightweight, privacy-first Google Analytics alternative. Cookie-free, GDPR-compliant out of the box, and embeds as a single 1 KB script. Far simpler to operate than Matomo — no session-replay or heatmaps, but pageviews, bounce rate, referrers, top pages, and UTM campaigns in a clean UI. Good fit for sites that need basic analytics without GDPR cookie banners.
+
+```yaml
+# ~/plausible/compose.yaml
+services:
+  plausible_db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: plausible_db
+      POSTGRES_USER: plausible
+      POSTGRES_PASSWORD: changeme
+    volumes: [db_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  plausible_events_db:
+    image: clickhouse/clickhouse-server:24-alpine
+    volumes:
+      - events_data:/var/lib/clickhouse
+      - /home/user/plausible/clickhouse/logs.xml:/etc/clickhouse-server/config.d/logs.xml:ro,Z
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    restart: unless-stopped
+
+  plausible:
+    image: ghcr.io/plausible/community-edition:v2
+    ports: ["127.0.0.1:8033:8000"]
+    environment:
+      BASE_URL: https://analytics.home.local
+      SECRET_KEY_BASE: "run: openssl rand -hex 64"
+      DATABASE_URL: postgres://plausible:changeme@plausible_db/plausible_db
+      CLICKHOUSE_DATABASE_URL: http://plausible_events_db:8123/plausible_events_db
+    depends_on: [plausible_db, plausible_events_db]
+    restart: unless-stopped
+
+volumes:
+  db_data:
+  events_data:
+```
+
+```bash
+cd ~/plausible && podman-compose up -d
+# Create admin account on first visit at https://analytics.home.local/register
+```
+
+**Caddy:**
+```caddyfile
+analytics.home.local { tls internal; reverse_proxy localhost:8033 }
+```
+
+**Embed tracking snippet** (add to your site's `<head>`):
+```html
+<script defer data-domain="mysite.home.local"
+  src="https://analytics.home.local/js/script.js"></script>
+```
+
+---
+
+### Umami (Minimal Cookie-Free Analytics)
+
+**Purpose:** The simplest self-hosted analytics option — even lighter than Plausible. Single container (plus a Postgres or MySQL DB), sub-second dashboard loads, and a clean event tracking API for custom button/form events. No cookies, no GDPR consent required. Best for personal sites, blogs, and internal tools where Matomo is overkill.
+
+```yaml
+# ~/umami/compose.yaml
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: changeme
+    volumes: [db_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    ports: ["127.0.0.1:3005:3000"]
+    environment:
+      DATABASE_URL: postgresql://umami:changeme@db:5432/umami
+      APP_SECRET: "run: openssl rand -hex 32"
+    depends_on: [db]
+    restart: unless-stopped
+
+volumes:
+  db_data:
+```
+
+```bash
+cd ~/umami && podman-compose up -d
+# Default login: admin / umami — change immediately
+```
+
+**Caddy:**
+```caddyfile
+umami.home.local { tls internal; reverse_proxy localhost:3005 }
+```
+
+**Custom event tracking:**
+```html
+<!-- Track a button click -->
+<button data-umami-event="signup-click">Sign Up</button>
+
+<!-- Track with extra properties -->
+<button data-umami-event="purchase" data-umami-event-plan="pro">Buy Pro</button>
+```
 
 ---
 
@@ -1259,6 +2614,134 @@ studio.example.com { reverse_proxy localhost:80 }
 ---
 
 
+## Argo Rollouts (Progressive Delivery)
+
+**Purpose:** Canary and blue/green deployments for Kubernetes — a complement to ArgoCD. While ArgoCD manages GitOps sync, Argo Rollouts controls *how* new versions are rolled out: traffic-split canaries, blue/green with automatic promotion, analysis runs against Prometheus metrics, and instant rollback on failure.
+
+```bash
+# Install Argo Rollouts on your k3s/k0s cluster
+kubectl apply -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+
+# Install the kubectl plugin via Nix
+nix-env -iA nixpkgs.argo-rollouts
+
+# Watch a rollout
+kubectl argo rollouts get rollout my-app --watch
+
+# Promote a canary (advance to 100%)
+kubectl argo rollouts promote my-app
+
+# Abort and roll back
+kubectl argo rollouts abort my-app
+```
+
+**Example Rollout (canary — 20% then 100%):**
+```yaml
+# ~/k8s/rollout-example.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: my-app
+spec:
+  replicas: 5
+  strategy:
+    canary:
+      steps:
+        - setWeight: 20
+        - pause: { duration: 5m }
+        - setWeight: 100
+      canaryService: my-app-canary
+      stableService: my-app-stable
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+        - name: my-app
+          image: myapp:latest
+```
+
+```bash
+kubectl apply -f ~/k8s/rollout-example.yaml
+```
+
+---
+
+---
+
+## GitOps End-to-End Workflow
+
+GitOps is not a tool — it's the principle that Git is the single source of truth for both application code and infrastructure state. Changes flow through Git, and automated systems reconcile the live environment to match what's in the repo. Here's how the full loop works:
+
+```
+Developer pushes code to feature branch
+  → CI runs tests (Woodpecker / Forgejo Actions / GitHub Actions)
+  → CI builds and pushes container image to registry (Gitea packages / GHCR)
+  → CI updates the image tag in the GitOps manifests repo (separate repo or path)
+  → ArgoCD / Flux detects the change in the manifests repo
+  → ArgoCD syncs — applies the new Deployment to the Kubernetes cluster
+  → Argo Rollouts performs a canary rollout (5% → 50% → 100% traffic)
+  → Prometheus checks error rate and latency during the canary window
+  → If metrics are healthy → promote. If degraded → automatic rollback.
+```
+
+**Separating app code from deployment config** is intentional. The application repo contains code; a GitOps repo (sometimes called an "environment repo") contains the Kubernetes manifests or Helm values that describe what's running where. This makes rollbacks a `git revert` and gives you a complete audit trail of every deployment.
+
+**Kustomize overlays** are the standard way to manage the dev/staging/prod variation without duplicating YAML:
+
+```
+k8s/
+├── base/
+│   ├── deployment.yaml      # image: myapp:latest
+│   ├── service.yaml
+│   └── kustomization.yaml
+└── overlays/
+    ├── dev/
+    │   ├── kustomization.yaml  # patches: image tag, replicas=1, resources reduced
+    │   └── patch.yaml
+    ├── staging/
+    │   ├── kustomization.yaml  # patches: image tag, replicas=2
+    │   └── patch.yaml
+    └── prod/
+        ├── kustomization.yaml  # patches: image tag, replicas=5, HPA enabled
+        └── patch.yaml
+```
+
+```yaml
+# k8s/overlays/prod/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+images:
+  - name: myapp
+    newTag: "v1.4.2"        # CI updates this line via `kustomize edit set image`
+patches:
+  - path: patch.yaml
+```
+
+ArgoCD watches a specific overlay path per environment — `overlays/prod` for production, `overlays/staging` for staging — and syncs each independently.
+
+---
+
+## Progressive Delivery
+
+Progressive delivery is the practice of releasing changes to a subset of users or traffic before rolling out fully. The three common strategies differ in how much risk they take on at once:
+
+**Blue/Green** — run two identical environments (blue = current, green = new version). Flip 100% of traffic from blue to green once green is verified healthy. Fast rollback: flip back to blue instantly. Expensive: requires 2× capacity at all times during the switchover.
+
+**Canary** — route a small percentage of traffic (e.g., 5%) to the new version while the rest stays on the old version. Monitor error rate and latency for the canary slice. Gradually increase the percentage. Automatically rollback if metrics degrade. More resource-efficient than blue/green; slower to complete a full rollout.
+
+**Feature Flags** — ship code to all users but control which users see the new behaviour in the application itself. The infrastructure concern (deployment) is decoupled from the product concern (release). Useful for A/B testing, gradual rollouts to user segments, and dark launches (ship to 0% users, ramp up independently of deployments).
+
+Argo Rollouts (documented in the Kubernetes wiki) implements blue/green and canary at the Kubernetes traffic level, integrating with Prometheus for automated analysis. For feature flags, see OpenFeature or Unleash.
+
+---
+
 ## Platform Engineering
 
 Advanced Kubernetes-native tools for platform teams. These build on the foundation in the [Kubernetes wiki](https://docs.shani.dev/doc/servers/kubernetes).
@@ -1634,6 +3117,215 @@ opencost.home.local { tls internal; reverse_proxy localhost:9090 }
 
 ---
 
+### LitmusChaos (Kubernetes Chaos Engineering)
+
+**Purpose:** CNCF sandbox project for chaos engineering on Kubernetes. Define `ChaosExperiment` CRDs that inject pod deletion, network latency, CPU hog, memory hog, disk fill, and node drain — then measure whether your system recovers within SLO. Run experiments in CI to catch resilience regressions before they hit prod. The self-hosted, Kubernetes-native alternative to Chaos Monkey (which is AWS/JVM-specific and not self-hostable).
+
+> **Chaos Monkey note:** Netflix's Chaos Monkey targets AWS Auto Scaling Groups and JVM services — not applicable to self-hosted Kubernetes. LitmusChaos is the correct tool for this environment.
+
+```bash
+# Install LitmusChaos on your k3s/k0s cluster
+helm repo add litmuschaos https://litmuschaos.github.io/litmus-helm/
+helm install chaos litmuschaos/litmus \
+  --namespace litmus --create-namespace \
+  --set portal.frontend.service.type=ClusterIP
+
+# Port-forward the Litmus Portal UI
+kubectl port-forward svc/chaos-litmus-frontend-service 9091:9091 -n litmus
+# Open http://localhost:9091 — default: admin / litmus
+```
+
+**Example ChaosEngine — pod delete experiment:**
+```yaml
+# ~/k8s/chaos-pod-delete.yaml
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: nginx-chaos
+  namespace: default
+spec:
+  appinfo:
+    appns: default
+    applabel: "app=nginx"
+    appkind: deployment
+  chaosServiceAccount: litmus-admin
+  experiments:
+    - name: pod-delete
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: "60"      # inject chaos for 60 seconds
+            - name: CHAOS_INTERVAL
+              value: "10"      # delete a pod every 10 seconds
+            - name: FORCE
+              value: "false"   # graceful delete (false) or SIGKILL (true)
+```
+
+```bash
+kubectl apply -f ~/k8s/chaos-pod-delete.yaml
+
+# Watch the experiment progress
+kubectl get chaosresult nginx-chaos-pod-delete -o yaml
+
+# Check the verdict (Pass/Fail based on probe success)
+kubectl get chaosresult nginx-chaos-pod-delete -o jsonpath='{.status.experimentStatus.verdict}'
+```
+
+**Add a Prometheus probe — fail the experiment if error rate exceeds SLO:**
+```yaml
+    - name: pod-delete
+      spec:
+        probe:
+          - name: check-error-rate
+            type: promProbe
+            mode: Continuous
+            runProperties:
+              probeTimeout: 5
+              interval: 2
+              attempt: 3
+            promProbe/inputs:
+              endpoint: http://prometheus.monitoring.svc:9090
+              query: 'sum(rate(http_requests_total{status=~"5.."}[1m])) / sum(rate(http_requests_total[1m]))'
+              comparator:
+                type: float
+                criteria: "<="
+                value: "0.01"   # fail if error rate exceeds 1%
+```
+
+**Caddy:**
+```caddyfile
+chaos.home.local { tls internal; reverse_proxy localhost:9091 }
+```
+
+---
+
+### Port (Internal Developer Portal)
+
+**Purpose:** A newer, actively maintained IDP (Internal Developer Platform) alternative to Backstage. Port uses a data model of "blueprints" (entity types) and "entities" (instances) that you define via a visual UI — no YAML files to maintain in Git. Integrates with GitHub, GitLab, Jira, PagerDuty, Kubernetes, ArgoCD, and more via webhooks and ingestion actions. Better suited than Backstage for teams who want a working portal in hours rather than days.
+
+> **Backstage vs Port:** Backstage is fully self-hosted and infinitely extensible but requires significant ongoing maintenance. Port is SaaS-hosted with a generous free tier; there is no self-hosted option. Use Backstage if you need full data sovereignty; use Port if you want a polished IDP with minimal ops overhead.
+
+```bash
+# Port is SaaS — no compose setup required.
+# Sign up at https://app.getport.io (free tier: unlimited users, unlimited blueprints)
+
+# Install the Port k8s exporter to auto-populate your portal from cluster state:
+helm repo add port-labs https://port-labs.github.io/helm-charts
+helm install port-k8s-exporter port-labs/port-k8s-exporter \
+  --create-namespace --namespace port-k8s-exporter \
+  --set secret.secrets.portClientId="YOUR_CLIENT_ID" \
+  --set secret.secrets.portClientSecret="YOUR_CLIENT_SECRET"
+
+# The exporter watches your cluster and syncs Deployments, Services,
+# Namespaces, ArgoCD Applications, and more into Port blueprints automatically.
+```
+
+---
+
+### Golden Paths (Platform Engineering Practice)
+
+**Purpose:** A golden path is a pre-built, opinionated template for creating a new service — it encodes your team's best practices (security, observability, CI/CD, IaC) so developers can scaffold a production-ready service in minutes without needing to know every underlying tool. Backstage and Port both provide golden path scaffolding; this section shows how to implement them without either.
+
+**Option A — Cookiecutter templates (simplest):**
+```bash
+# Install cookiecutter
+nix-env -iA nixpkgs.cookiecutter
+
+# Create a golden path template repo in Forgejo:
+# ~/golden-paths/python-service/
+# ├── cookiecutter.json          (prompts: service_name, team, port)
+# ├── {{cookiecutter.service_name}}/
+# │   ├── compose.yaml
+# │   ├── .woodpecker.yml        (pre-wired CI with Trivy + Checkov)
+# │   ├── terraform/             (namespace, RBAC, NetworkPolicy)
+# │   ├── k8s/                   (Deployment, Service, HPA, PodDisruptionBudget)
+# │   └── README.md
+
+# Scaffold a new service from the template:
+cookiecutter git+https://git.home.local/platform/golden-paths.git --directory python-service
+```
+
+**Option B — Forgejo template repositories:**
+```bash
+# In Forgejo: Settings → check "Template Repository" on any repo
+# Developers click "Use this template" to get a pre-wired repo with:
+# - .woodpecker.yml (CI pipeline with lint, test, Trivy scan, deploy stages)
+# - compose.yaml (service + healthcheck + labels for autoupdate + diun)
+# - k8s/ (Deployment, Service, HPA manifests)
+# - terraform/ (namespace + RBAC module)
+# - docs/runbook.md (incident response template — see below)
+```
+
+**Runbook and postmortem templates** — add these to every golden path repo:
+
+```markdown
+<!-- docs/runbook.md — include in every service golden path -->
+# Runbook: {{service_name}}
+
+## Symptoms → Actions
+
+| Symptom | First check | Fix |
+|---------|-------------|-----|
+| Service returns 5xx | `podman logs {{service_name}}` | Check DB connectivity; restart container |
+| High latency (p99 > 1s) | Grafana → Service dashboard → upstream latency panel | Scale up replicas; check dependency health |
+| OOMKilled | `kubectl describe pod` events | Increase memory limit in compose.yaml / k8s manifest |
+| Health check failing | `curl http://localhost:PORT/health` | Check environment variables; verify DB migration ran |
+
+## Escalation
+- Primary on-call: check Grafana OnCall schedule
+- Slack: #incidents channel
+- Postmortem: file within 48 hours of resolution (see postmortem.md)
+```
+
+```markdown
+<!-- docs/postmortem.md — blameless postmortem template -->
+# Postmortem: [Incident Title]
+
+**Date:** YYYY-MM-DD
+**Duration:** Xh Ym (detection → resolution)
+**Severity:** P1 / P2 / P3
+**Author(s):**
+
+## Summary
+One paragraph: what broke, for how long, and what was the user impact.
+
+## Timeline (UTC)
+| Time | Event |
+|------|-------|
+| HH:MM | Alert fired in Grafana OnCall |
+| HH:MM | On-call engineer acknowledged |
+| HH:MM | Root cause identified |
+| HH:MM | Fix deployed |
+| HH:MM | Service confirmed healthy |
+
+## Root Cause
+Technical explanation of what failed and why.
+
+## Contributing Factors
+- Missing/incorrect monitoring
+- Deployment without a health check gate
+- Untested failure mode
+
+## Impact
+- Services affected:
+- Users affected (estimated):
+- Data loss: Yes / No
+
+## What Went Well
+- Alerts fired quickly
+- Runbook was accurate
+
+## Action Items
+| Action | Owner | Due date |
+|--------|-------|----------|
+| Add integration test for this failure mode | @engineer | YYYY-MM-DD |
+| Add alert for leading indicator metric | @sre | YYYY-MM-DD |
+| Update runbook with new symptom | @oncall | YYYY-MM-DD |
+```
+
+---
+
 ## Caddy Configuration
 
 ```caddyfile
@@ -1667,7 +3359,8 @@ awx.home.local        { tls internal; reverse_proxy localhost:8052 }
 code.home.local       { tls internal; reverse_proxy localhost:8443 }
 coder.home.local      { tls internal; reverse_proxy localhost:3001 }
 windmill.home.local   { tls internal; reverse_proxy localhost:8300 }
-analytics.home.local  { tls internal; reverse_proxy localhost:8500 }
+analytics.home.local  { tls internal; reverse_proxy localhost:8033 }
+umami.home.local      { tls internal; reverse_proxy localhost:3005 }
 mail.home.local       { tls internal; reverse_proxy localhost:8025 }
 
 # Internal platform
@@ -1716,3 +3409,14 @@ opencost.home.local   { tls internal; reverse_proxy localhost:9090 }
 | Falco not detecting events | Verify eBPF driver is loaded: `kubectl logs -n falco -l app=falco`; on some kernels try `driver.kind=module` instead of `ebpf` |
 | Falco too many false positives | Tune rules by adding `and not container.image.repository in (known-image)` conditions; start with `priority: WARNING` before `ERROR` |
 | OpenCost shows $0 for all workloads | Set custom pricing in the ConfigMap; verify Prometheus is scraping `node-exporter` and `kube-state-metrics` correctly |
+| LitmusChaos experiment stuck in `Running` | Check `kubectl get chaosengine` and `kubectl describe chaosengine`; verify the `litmus-admin` ServiceAccount exists in the target namespace |
+| LitmusChaos probe verdict `Fail` unexpectedly | Confirm the Prometheus endpoint is reachable from within the cluster; check the PromQL query returns data with `kubectl exec -n litmus` |
+| tfsec scan exits non-zero in CI | Use `--severity HIGH` to only fail on high/critical; add inline `#tfsec:ignore:` annotations for accepted risks |
+| Checkov `ModuleNotFoundError` on Helm charts | Install `checkov[all]` extras: `pip install 'checkov[all]' --break-system-packages` |
+| cosign sign fails `UNAUTHORIZED` | Ensure the registry credentials are available: `podman login registry.home.local` before signing |
+| Kyverno blocks all pods after adding verify policy | Switch `validationFailureAction` to `Audit` first; check `kubectl get policyreport -A` to review violations before enforcing |
+| Terragrunt `Error: No parent terragrunt.hcl` | `find_in_parent_folders()` walks up the directory tree — ensure a root `terragrunt.hcl` exists above the current module directory |
+| Terragrunt `run-all` applies in wrong order | Define `dependency` blocks in child `terragrunt.hcl` files; Terragrunt builds the DAG from these — missing dependencies mean unordered execution |
+| `hcloud server create` returns auth error | Token may have read-only permissions; ensure the API token has read/write scope in Hetzner Cloud Console → Security → API Tokens |
+| cloud-init write_files not appearing | Verify `path` starts with `/` and `permissions` is a quoted string (`'0644'` not `0644`); check `journalctl -u cloud-init` on the VM for parse errors |
+| cloud-init `runcmd` not executing | `runcmd` runs as root; check `/var/log/cloud-init-output.log` on the VM; commands that exit non-zero abort subsequent commands unless wrapped in `|| true` |

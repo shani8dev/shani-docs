@@ -1227,6 +1227,189 @@ Then scan from CI with: `trivy image --server http://trivy.home.local:4954 myapp
 
 ---
 
+## Checkov + tfsec (IaC Security Scanning)
+
+**Purpose:** Static analysis for Infrastructure as Code files — Terraform, Kubernetes YAML, Dockerfiles, Helm charts, GitHub Actions, and Compose files. Catches misconfigurations before they reach production: containers running as root, missing resource limits, secrets in environment variables, public S3 buckets, overly permissive IAM, and hundreds of other checks. Part of a DevSecOps pipeline alongside Trivy (images) and Semgrep (code).
+
+```bash
+# Install Checkov via pip (multi-framework: Terraform, K8s, Dockerfile, Helm, GHA, Compose)
+pip install checkov --break-system-packages
+
+# Install tfsec via Nix (Terraform-focused, fast, no Python dep — good for pre-commit)
+nix-env -iA nixpkgs.tfsec
+```
+
+**Scan Terraform:**
+```bash
+# Full scan with CLI + JSON output
+checkov -d terraform/ -o cli -o json --output-file-path /dev/null,checkov-results.json
+
+# Fail only on HIGH and CRITICAL
+checkov -d terraform/ --soft-fail-on LOW,MEDIUM
+
+# Fast tfsec gate before checkov
+tfsec terraform/
+tfsec terraform/ --severity CRITICAL --format json --out tfsec-results.json
+```
+
+**Scan Kubernetes manifests and Helm charts:**
+```bash
+# Scan raw YAML manifests
+checkov -d k8s/ --framework kubernetes
+
+# Scan a Helm chart (renders first, then checks)
+checkov -d charts/myapp --framework helm
+
+# Specific checks relevant to K8s security hardening:
+# CKV_K8S_6   — do not admit root containers
+# CKV_K8S_8   — liveness probe must be defined
+# CKV_K8S_9   — readiness probe must be defined
+# CKV_K8S_14  — image tag must not be 'latest'
+# CKV_K8S_28  — do not allow privileged containers
+# CKV_K8S_30  — do not allow privilege escalation
+# CKV_K8S_35  — secrets must not be in environment variables
+# CKV_K8S_37  — minimise the admission of containers with added capabilities
+```
+
+**Scan Compose files:**
+```bash
+# Check compose.yaml for security issues (privileged mode, host network, writable mounts)
+checkov -f compose.yaml --framework dockerfile
+```
+
+**CI integration (Forgejo Actions / Woodpecker):**
+```yaml
+# .forgejo/workflows/iac-scan.yml
+on: [push]
+jobs:
+  iac-security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkov IaC scan
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          soft_fail: true          # set to false to block PRs on findings
+          output_format: cli,sarif
+          output_file_path: console,results.sarif
+
+      - name: tfsec scan
+        run: |
+          docker run --rm -v "$(pwd):/src" aquasec/tfsec /src/terraform \
+            --format json --out /src/tfsec.json || true
+```
+
+**Send findings to Defect Dojo:**
+```bash
+# After CI scan, upload JSON results to Defect Dojo for centralised triage
+curl -X POST https://defectdojo.home.local/api/v2/import-scan/ \
+  -H "Authorization: Token $DEFECTDOJO_API_TOKEN" \
+  -F "scan_type=Checkov Scan" \
+  -F "file=@checkov-results.json" \
+  -F "engagement=$ENGAGEMENT_ID" \
+  -F "product_name=infra"
+```
+
+> **Checkov vs tfsec:** Use both. Checkov is multi-framework (Terraform + K8s + Dockerfile + Helm + Compose + GHA) and integrates with Defect Dojo natively. tfsec is Terraform-only but faster — run it as a pre-commit gate, Checkov as the full CI scan. Both catch different findings; overlap is intentional.
+
+---
+
+## SLSA Provenance (Supply Chain Security)
+
+**Purpose:** SLSA (Supply chain Levels for Software Artifacts) is a framework for securing your build pipeline. SLSA Level 2 requires that every build produces a signed provenance attestation — a cryptographically signed record of *what was built, from what source, by what pipeline, on what system*. This prevents tampering between source and deployed image. On Shani OS the implementation path is: **Tekton Chains** (provenance generation) + **cosign** (signing) + **Rekor** (transparency log) + **Syft** (SBOM) + **Grype** (vulnerability check on the SBOM).
+
+```bash
+# Install cosign via Nix
+nix-env -iA nixpkgs.cosign
+
+# Generate a cosign key pair (store private key in OpenBao/Infisical)
+cosign generate-key-pair
+# Outputs: cosign.key (private — keep secret) and cosign.pub (public — commit to repo)
+
+# Sign an image after pushing to your registry
+cosign sign --key cosign.key registry.home.local/myapp:v1.2.3
+
+# Verify a signed image before deploying
+cosign verify --key cosign.pub registry.home.local/myapp:v1.2.3
+
+# Attach an SBOM to the image (pairs with Syft)
+syft registry.home.local/myapp:v1.2.3 -o cyclonedx-json > sbom.json
+cosign attach sbom --sbom sbom.json registry.home.local/myapp:v1.2.3
+
+# Verify the attached SBOM
+cosign verify-attestation --key cosign.pub registry.home.local/myapp:v1.2.3
+```
+
+**Tekton Chains (SLSA Level 2 provenance — requires k3s/k0s):**
+```bash
+# Install Tekton Pipelines first (see CI/CD section)
+kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
+
+# Install Tekton Chains
+kubectl apply -f https://storage.googleapis.com/tekton-releases/chains/latest/release.yaml
+
+# Configure Chains to sign with cosign and store provenance in the OCI registry
+kubectl patch configmap chains-config -n tekton-chains -p='{"data":{
+  "artifacts.oci.format": "simplesigning",
+  "artifacts.oci.storage": "oci",
+  "artifacts.taskrun.format": "slsa/v1",
+  "artifacts.taskrun.storage": "oci",
+  "signers.x509.fulcio.enabled": "false"
+}}'
+
+# Create a secret with your cosign key
+kubectl create secret generic signing-secrets \
+  --from-file=cosign.key=./cosign.key \
+  --from-literal=cosign.password="" \
+  -n tekton-chains
+
+# After any TaskRun that builds and pushes an image, Chains automatically:
+# 1. Captures the build inputs (git commit, Dockerfile, pipeline params)
+# 2. Signs the provenance with your cosign key
+# 3. Pushes the signed attestation alongside the image in the registry
+```
+
+**Verify provenance in a Kyverno policy (block unsigned images cluster-wide):**
+```yaml
+# ~/k8s/kyverno-verify-image.yaml
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-image-signature
+spec:
+  validationFailureAction: Enforce
+  rules:
+    - name: check-image-signature
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+      verifyImages:
+        - imageReferences:
+            - "registry.home.local/*"
+          attestors:
+            - entries:
+                - keys:
+                    publicKeys: |-
+                      -----BEGIN PUBLIC KEY-----
+                      <paste contents of cosign.pub here>
+                      -----END PUBLIC KEY-----
+```
+
+```bash
+kubectl apply -f ~/k8s/kyverno-verify-image.yaml
+
+# Test: try deploying an unsigned image — should be blocked
+kubectl run test --image=registry.home.local/myapp:unsigned
+# Error: image signature verification failed
+```
+
+> **SLSA levels in practice:** Level 1 = build script (you probably have this). Level 2 = hosted build + signed provenance (achievable with Tekton Chains + cosign). Level 3 = hardened build platform (Talos + isolated build pods). Start with Level 2 — cosign sign in CI + Kyverno enforce in the cluster — before pursuing Level 3.
+
+---
+
 ## Teleport (Zero-Trust Access Platform)
 
 **Purpose:** Self-hosted zero-trust access platform for SSH, Kubernetes, databases, and web applications. Teleport replaces VPN + bastion host setups with identity-aware, audited access — every session is recorded, every login requires a certificate issued for a short TTL, and access can be conditioned on MFA, device trust, and role-based policies. The self-hosted alternative to HashiCorp Boundary or commercial PAM solutions.
@@ -1705,11 +1888,181 @@ safeline.home.local   { tls internal; reverse_proxy localhost:9443 }
 
 ---
 
-## Troubleshooting
+## OWASP Top 10 Quick Reference
 
-| Issue | Solution |
-|-------|----------|
-| Vaultwarden WebSocket errors | Ensure the `/notifications/hub` path is proxied to port `3012` in Caddy |
+The OWASP Top 10 is the standard framework for web application security risk. Understanding what each category means helps you configure your scanning tools (ZAP, Semgrep, Trivy) with appropriate scope:
+
+| # | Category | What it means | How to address |
+|---|----------|--------------|----------------|
+| A01 | **Broken Access Control** | Users can act outside their intended permissions (IDOR, privilege escalation) | Enforce role-based access; deny by default; test all endpoints |
+| A02 | **Cryptographic Failures** | Sensitive data exposed due to weak/missing encryption | TLS everywhere; use modern cipher suites; never MD5/SHA1 for passwords |
+| A03 | **Injection** | Untrusted data interpreted as code (SQL, LDAP, command injection) | Parameterised queries; input validation; Semgrep SAST rules |
+| A04 | **Insecure Design** | Missing security controls at the design level | Threat modelling before building; security requirements in design docs |
+| A05 | **Security Misconfiguration** | Default credentials, unnecessary services, verbose error messages | Hardened defaults; remove unused services; ZAP scanner |
+| A06 | **Vulnerable Components** | Outdated libraries with known CVEs | Trivy scanning; Renovate for dependency updates; Dependabot |
+| A07 | **Auth & Session Failures** | Weak passwords, missing MFA, session fixation | Authelia/Authentik; strong session cookies; MFA everywhere |
+| A08 | **Software & Data Integrity** | Untrusted updates, CI/CD pipeline compromise | SLSA provenance; cosign image signing; Kyverno verification |
+| A09 | **Logging & Monitoring Failures** | Attacks go undetected due to insufficient logging | Audit logging; Graylog/OpenSearch; Grafana alerts on anomalies |
+| A10 | **Server-Side Request Forgery** | Server fetches attacker-controlled URLs, bypassing firewalls | Validate and restrict outbound URLs; network egress controls |
+
+ZAP (below) tests for A01, A02, A03, A05, A07, A10. Semgrep covers A03, A05, A08. Trivy covers A06.
+
+---
+
+## mTLS (Mutual TLS) with Caddy
+
+Standard TLS proves the server's identity to the client. **Mutual TLS (mTLS)** requires the client to also present a certificate, so the server can verify the client's identity. This is the foundation of zero-trust service-to-service authentication.
+
+Use cases on a homelab: restricting an internal API to specific clients (e.g., only your monitoring server can call `/metrics`), protecting admin endpoints without a username/password flow, or securing inter-service communication.
+
+**Generate a CA and client certificate with Step-CA:**
+```bash
+# Install step CLI
+nix-env -iA nixpkgs.step-cli
+
+# Create a local CA
+step certificate create "Home Lab CA" ca.crt ca.key --profile root-ca --no-password --insecure
+
+# Issue a client certificate valid for 1 year
+step certificate create "grafana-client" client.crt client.key \
+  --profile leaf --ca ca.crt --ca-key ca.key \
+  --not-after 8760h --no-password --insecure
+```
+
+**Configure Caddy to require a client certificate:**
+```caddyfile
+# ~/caddy/Caddyfile
+api.home.local {
+  tls internal
+  tls {
+    client_auth {
+      mode require_and_verify
+      trusted_ca_cert_file /etc/caddy/client-ca.crt
+    }
+  }
+  reverse_proxy localhost:8080
+}
+```
+
+```bash
+# Copy the CA cert into the Caddy config directory
+cp ca.crt ~/caddy/client-ca.crt
+cd ~/caddy && podman-compose restart
+```
+
+**Test with the client certificate:**
+```bash
+# Without cert — rejected
+curl https://api.home.local/health
+
+# With cert — allowed
+curl --cert client.crt --key client.key https://api.home.local/health
+```
+
+---
+
+## Pod Security Standards
+
+Pod Security Standards (PSS) replaced PodSecurityPolicies in Kubernetes 1.25. PSS defines three policy levels enforced at the namespace level via labels — no webhook or CRD required.
+
+| Level | What it restricts |
+|-------|------------------|
+| **Privileged** | No restrictions — for trusted system workloads |
+| **Baseline** | Blocks the most dangerous configurations (privileged containers, hostNetwork, hostPID) |
+| **Restricted** | Requires non-root user, drops all capabilities, enforces read-only root filesystem |
+
+```yaml
+# Label a namespace to enforce the restricted policy
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: production
+  labels:
+    pod-security.kubernetes.io/enforce: restricted     # reject violating pods
+    pod-security.kubernetes.io/warn: restricted        # warn even if not enforced
+    pod-security.kubernetes.io/audit: restricted       # log violations to audit log
+```
+
+```bash
+# Check which namespaces have PSS labels
+kubectl get namespaces -o json | jq -r '.items[] | select(.metadata.labels | has("pod-security.kubernetes.io/enforce")) | "\(.metadata.name): \(.metadata.labels["pod-security.kubernetes.io/enforce"])"'
+
+# Dry-run: what would be blocked in this namespace?
+kubectl label namespace myapp \
+  pod-security.kubernetes.io/enforce=restricted \
+  --dry-run=server
+```
+
+Start with `warn` mode on existing namespaces to discover violations without breaking anything, then migrate to `enforce` once pods are compliant. Use Kyverno policies (documented elsewhere in the Kubernetes wiki) for more granular control beyond what PSS provides.
+
+---
+
+## Secrets Rotation Workflow
+
+Rotating a secret without restarting every pod that uses it requires a coordinated flow between your secrets store and the Kubernetes secrets layer. With External Secrets Operator (ESO):
+
+1. **Rotate the secret in OpenBao or Infisical** — update the value in the secrets engine. The old value is no longer valid.
+
+2. **ESO syncs automatically** — ESO polls the external store on the `refreshInterval` (default: 1h, configurable per `ExternalSecret`). To force immediate sync:
+   ```bash
+   kubectl annotate externalsecret myapp-secret \
+     force-sync=$(date +%s) \
+     --overwrite -n myapp
+   ```
+
+3. **Kubernetes Secret is updated** — ESO updates the `Secret` object in Kubernetes with the new value.
+
+4. **Application picks up the new value** — depends on how the secret is consumed:
+   - **Volume mount** — Kubernetes updates the mounted file automatically within 60–90 seconds (kubelet sync period). The application must watch the file for changes or be restarted.
+   - **Environment variable** — environment variables are set at pod startup. The pod must be restarted to see the new value: `kubectl rollout restart deployment/myapp`
+   - **Reloader** — use [Reloader](https://github.com/stakater/Reloader) to automatically restart pods when their referenced Secret changes:
+     ```yaml
+     # Add annotation to your Deployment
+     annotations:
+       reloader.stakater.com/auto: "true"
+     ```
+
+The full flow from rotate to running with new value takes: ESO sync interval + Kubernetes propagation delay + pod restart time. Reduce `refreshInterval` on high-sensitivity secrets.
+
+---
+
+## Supply Chain Attack Vectors
+
+The SLSA provenance and cosign signing setup (documented above) defends against specific supply chain attacks. Understanding the vectors helps you prioritise:
+
+**Typosquatting** — a malicious image `ngiinx:latest` or package `lodahs` waiting for a typo. Mitigation: use a private registry mirror that only allows approved images; pin images to digests (`nginx@sha256:abc123`) not tags.
+
+**Dependency confusion** — an attacker publishes a public package with the same name as your internal private package, betting that the build tool resolves the public one. Mitigation: scope all internal packages (e.g., `@mycompany/utils`), configure package managers to only resolve scoped packages from your internal registry.
+
+**Base image poisoning** — a compromised upstream base image (`FROM node:20`) introduces malware before your build runs. Mitigation: pin base images to their digest; Trivy scan every build; use images from verified publishers; consider distroless bases (smaller surface).
+
+**CI/CD pipeline compromise** — an attacker gains write access to your CI system and injects malicious build steps. Mitigation: separate build credentials from deployment credentials; use OIDC short-lived tokens instead of long-lived secrets in CI; audit pipeline logs; use Tekton Chains for SLSA attestations.
+
+---
+
+## Vaultwarden Emergency Kit
+
+If you lose access to your Vaultwarden vault (lost 2FA device, forgotten master password), you need recovery options set up *before* the emergency. Bitwarden/Vaultwarden provides two:
+
+**Emergency Access** — grant a trusted contact the ability to request access to your vault. You have a configurable window (1–90 days) to deny the request. If you don't deny it, they gain read or takeover access. Set this up under *Settings → Emergency Access* while you have normal access.
+
+**Printed Recovery Code (Two-Factor Recovery)** — if you lose your 2FA device, you need a recovery code to bypass 2FA. In Vaultwarden: *Settings → Two-step Login → View Recovery Code*. Print this code or store it in a fireproof safe offline. Without this code and without your 2FA device, your vault is locked permanently — there is no admin bypass.
+
+```bash
+# Admin: view all users (confirm emergency access is configured)
+curl -H "Authorization: Bearer $VAULTWARDEN_ADMIN_TOKEN" \
+  http://localhost:8222/admin/users
+
+# Admin: if a user is completely locked out, disable 2FA for their account
+# Go to /admin → Users → [username] → Deactivate two-factor authentication
+# Then have the user set up 2FA again from scratch
+```
+
+Store recovery codes separately from the device and separately from the password manager itself. A paper copy in a fireproof safe, or a laminated card in a safety deposit box, are both valid options.
+
+---
+
+## Troubleshooting | Ensure the `/notifications/hub` path is proxied to port `3012` in Caddy |
 | Authelia redirect loop | Verify `session.domain` in Authelia config matches the root domain of your services |
 | Authentik worker not starting | Check that `AUTHENTIK_SECRET_KEY` is set and consistent across `server` and `worker` services |
 | Keycloak `HTTPS required` error | Either enable HTTPS or use `start-dev` mode for local testing only |

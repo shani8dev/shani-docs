@@ -101,9 +101,60 @@ podman restart wg-easy
 - **Client data:** persisted in `/home/user/wgeasy/`
 - **Firewall:** `sudo firewall-cmd --add-port=51820/udp --permanent && sudo firewall-cmd --reload`
 
----
+### How WireGuard Works
 
-## Tailscale / Headscale + Headplane
+WireGuard is fundamentally different from older VPN protocols (OpenVPN, IPSec) in both design and implementation.
+
+**Cryptography:** WireGuard uses a fixed, modern cryptographic suite — no negotiation, no cipher selection, no version mismatches:
+- **ChaCha20-Poly1305** — authenticated symmetric encryption (fast on CPUs without AES hardware acceleration)
+- **Curve25519** — elliptic-curve Diffie-Hellman key exchange
+- **BLAKE2s** — fast cryptographic hashing
+- **SipHash** — for routing table lookups
+
+**No handshake at connection time:** WireGuard peers are configured with each other's public keys in advance. The "tunnel" is stateless — there is no session establishment phase. Packets are just encrypted and sent. This makes WireGuard silent when idle (nothing to detect) and extremely fast to reconnect after a network change (roaming between WiFi and mobile data works seamlessly).
+
+**Kernel-space implementation:** WireGuard runs as a kernel module (or via a wireguard-go userspace implementation on unsupported platforms). This means packet processing happens without crossing the user/kernel boundary, giving it significantly better throughput than OpenVPN's userspace TLS stack.
+
+**Compared to OpenVPN:** OpenVPN is a PKI-based TLS VPN running in userspace. It supports dynamic certificate revocation, many cipher suites, and protocol obfuscation — useful in enterprise environments. WireGuard trades that flexibility for simplicity, speed, and a drastically smaller codebase (~4000 lines vs ~100,000+ for OpenVPN).
+
+### Kill Switch
+
+A kill switch ensures that if the VPN tunnel drops, traffic stops rather than falling back to your clearnet IP. Without it, a brief VPN disconnect leaks your real IP.
+
+```bash
+# Add to your WireGuard client config (wg0.conf)
+[Interface]
+PrivateKey = <your-private-key>
+Address = 10.8.0.2/32
+DNS = 10.8.0.1
+
+# Kill switch: block all traffic except through wg0
+PostUp = iptables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT
+PreDown = iptables -D OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT
+
+[Peer]
+...
+```
+
+This iptables rule allows only traffic marked by the WireGuard interface plus local traffic (LAN). All other outbound traffic is rejected at the kernel level. If WireGuard goes down, `PreDown` removes the rule and normal routing resumes.
+
+### Split DNS for VPN Clients
+
+When routing LAN traffic through WireGuard, DNS for `.home.local` domains must resolve to LAN IPs even from a remote client. Configure the WireGuard client to use your home DNS server for `.home.local` queries only:
+
+```ini
+# wg0.conf client config — split DNS
+[Interface]
+DNS = 192.168.1.10          # your home AdGuard Home / Pi-hole IP
+
+[Peer]
+AllowedIPs = 10.8.0.0/24, 192.168.1.0/24   # route LAN traffic through VPN
+# DNS queries for .home.local go to 192.168.1.10, which resolves them correctly
+```
+
+On Linux clients, `systemd-resolved` handles split DNS when `DNS=` is set in the WireGuard interface config. On macOS/Windows, the WireGuard GUI app respects the DNS setting from the config file.
+
+---
 
 **Purpose:** Zero-config mesh VPN built on WireGuard. Tailscale uses managed coordination; Headscale is the fully open-source self-hosted control server — giving you the same experience with no third-party dependency.
 
@@ -144,7 +195,49 @@ services:
 cd ~/tailscale && podman-compose up -d
 ```
 
-### Headscale (Self-Hosted)
+### Tailscale ACL Policies
+
+By default, all devices in a Tailscale network can reach all other devices. ACL policies (in HuJSON format) let you control exactly which devices can talk to which — essential for separating personal devices from servers, or restricting access to sensitive ports.
+
+Configure ACLs in the Tailscale admin console under **Access Controls**, or for Headscale via the `policy.hujson` config:
+
+```json
+{
+  // Tags are assigned to devices — servers get "tag:server", laptops get "tag:laptop"
+  "tagOwners": {
+    "tag:server": ["autogroup:admin"],
+    "tag:laptop": ["autogroup:admin"]
+  },
+
+  "acls": [
+    // Laptops can SSH to servers
+    {"action": "accept", "src": ["tag:laptop"], "dst": ["tag:server:22"]},
+    // Servers can reach each other on any port (internal service mesh)
+    {"action": "accept", "src": ["tag:server"], "dst": ["tag:server:*"]},
+    // Laptops can reach Grafana dashboard on servers
+    {"action": "accept", "src": ["tag:laptop"], "dst": ["tag:server:3001"]},
+    // All other traffic denied (implicit deny at end of list)
+  ],
+
+  // Tailscale SSH — which users can SSH to which tags
+  "ssh": [
+    {
+      "action": "accept",
+      "src": ["autogroup:admin"],
+      "dst": ["tag:server"],
+      "users": ["autogroup:nonroot"]
+    }
+  ]
+}
+```
+
+```bash
+# Apply policy to Headscale
+headscale policy set -f policy.hujson
+
+# Verify policy was applied
+headscale policy get
+```
 
 **1. Create config directory and config file:**
 ```bash

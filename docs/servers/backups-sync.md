@@ -645,6 +645,105 @@ systemctl --user enable --now backup.timer
 | R2 `SignatureDoesNotMatch` | Confirm the endpoint URL uses your Account ID: `https://<account-id>.r2.cloudflarestorage.com`; do not include the bucket in the endpoint |
 | R2 slow uploads | R2 enforces per-object size limits on multipart uploads; add `--s3-chunk-size 64M` in Rclone or ensure Restic packs are within limits |
 
+---
+
+## Recovery Concepts: RPO and RTO
+
+Every backup strategy should be defined against two metrics:
+
+**Recovery Point Objective (RPO)** — how much data loss is acceptable. If your RPO is 24 hours, a daily backup is sufficient. If your RPO is 1 hour, you need hourly backups or continuous replication (Litestream for SQLite, streaming replication for PostgreSQL). RPO answers: *how old can the data be when I restore?*
+
+**Recovery Time Objective (RTO)** — how long it takes to be back online after a failure. A cold restore from offsite Backblaze B2 might take 4 hours. Failover to a warm standby might take 5 minutes. RTO answers: *how long can I be down?*
+
+Define both before choosing backup tools. A personal homelab might tolerate RPO=24h, RTO=4h. A business-critical app might need RPO=15min, RTO=30min — which requires a completely different strategy.
+
+---
+
+## The 3-2-1-1-0 Rule
+
+The classic 3-2-1 rule (three copies, two media types, one offsite) has been extended for modern threat models:
+
+- **3** total copies of your data
+- **2** different storage media types (local disk + cloud, or NVMe + tape)
+- **1** copy offsite (Backblaze B2, Cloudflare R2, or a friend's server)
+- **1** copy offline or air-gapped (USB drive stored offline, Backblaze's Object Lock / immutable buckets)
+- **0** restore failures — verified by actually restoring
+
+The offline copy specifically addresses ransomware: if all your backups are network-accessible, ransomware can encrypt them too. An air-gapped copy (offline disk, or B2 with Object Lock enabled so backups can't be deleted for a set period) survives even a full ransomware event.
+
+---
+
+## Testing Your Restores
+
+A backup you have never restored from is a backup you don't know works. Run a restore test monthly — automate it so it actually happens:
+
+```bash
+#!/bin/bash
+# ~/.local/bin/restore-test.sh — run monthly via systemd timer
+set -euo pipefail
+
+TEST_DIR=$(mktemp -d)
+trap "rm -rf $TEST_DIR" EXIT
+
+echo "Starting restore test to $TEST_DIR..."
+
+# Restore latest Restic snapshot
+podman exec restic restic restore latest --target "$TEST_DIR"
+
+# Verify critical files exist and are non-empty
+FAILURES=0
+for FILE in data/app.db data/config.json; do
+  if [ -s "$TEST_DIR/$FILE" ]; then
+    echo "✅ $FILE — OK"
+  else
+    echo "❌ $FILE — MISSING or EMPTY"
+    FAILURES=$((FAILURES+1))
+  fi
+done
+
+# Report result
+if [ "$FAILURES" -eq 0 ]; then
+  curl -s -d "✅ Monthly restore test PASSED on $(hostname)" \
+    http://localhost:8090/your-ntfy-topic
+else
+  curl -s -d "❌ Monthly restore test FAILED — $FAILURES files missing" \
+    http://localhost:8090/your-ntfy-topic
+  exit 1
+fi
+```
+
+Add a systemd timer to run it monthly:
+```bash
+# ~/.config/systemd/user/restore-test.timer
+[Unit]
+Description=Monthly Backup Restore Test
+
+[Timer]
+OnCalendar=monthly
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+```
+
+```bash
+systemctl --user enable --now restore-test.timer
+```
+
+---
+
+## Encryption Key Management
+
+Restic uses `RESTIC_PASSWORD`, Borgmatic uses `encryption_passphrase`. These keys are the last line of defence for your backups — if you lose the key, the backup is permanently unrecoverable.
+
+The key cannot be stored in the same place as the backup. Common safe approaches:
+
+- **Password manager** (Bitwarden / Vaultwarden) — store the key there, backed up independently. Make sure your password manager vault is also backed up.
+- **Printed paper key** — print the passphrase and store it in a fireproof safe or safety deposit box. Low-tech but survives all digital failures.
+- **Separate encrypted key backup** — encrypt the key with a second passphrase and store it on a different service (e.g., backup your Restic password to a Bitwarden-encrypted note that itself has a printed emergency recovery code).
+
+Never put the backup encryption key in the same repository being encrypted, or on the same machine in plaintext. The whole point of encryption is that the backup is useless to an attacker without the key — that property disappears if the key lives next to the data.
+
 > 💡 **Tip:** Test your restores periodically. A backup you have never restored from is a backup you do not know works.
 
 ---

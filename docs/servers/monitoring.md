@@ -12,9 +12,62 @@ For multi-node, replicated, and HA deployments (Elasticsearch cluster, OpenSearc
 
 ---
 
-## Prometheus
+## Observability Philosophy
 
-**Purpose:** Pull-based metrics collection and time-series storage. Scrapes `/metrics` endpoints on a schedule, evaluates alerting rules, and feeds dashboards in Grafana. The foundation of the standard self-hosted observability stack.
+Before diving into tools, it helps to have a framework for what you're trying to observe. Two complementary models are widely used in practice.
+
+### The Four Golden Signals
+
+Coined by Google's SRE team, these four metrics cover nearly everything that matters about a running service:
+
+- **Latency** — how long does a request take? Track both successful and failed requests separately. A failed request that returns instantly is fast but still broken.
+- **Traffic** — how many requests per second? This establishes your baseline and helps you notice unusual spikes or drops.
+- **Errors** — what fraction of requests fail? Include both explicit errors (HTTP 5xx) and implicit failures (HTTP 200 with a corrupted response).
+- **Saturation** — how full is the system? CPU usage, memory pressure, disk I/O queue depth. Saturation often predicts problems before latency or errors spike.
+
+### SLI, SLO, SLA, and Error Budgets
+
+These terms define how reliability is measured and negotiated:
+
+- **SLI (Service Level Indicator)** — a specific metric that measures reliability. Example: "the fraction of HTTP requests that complete successfully in under 500ms."
+- **SLO (Service Level Objective)** — a target value for an SLI over a time window. Example: "the SLI above must be ≥ 99.9% over any 30-day rolling window."
+- **SLA (Service Level Agreement)** — a contractual commitment to an SLO, with consequences for violation. SLOs are internal; SLAs are external.
+- **Error Budget** — the amount of unreliability an SLO allows. 99.9% SLO over 30 days = 0.1% budget = 43.2 minutes of downtime/slowness per month.
+
+The error budget is the most useful concept for day-to-day decisions: if you've used half your budget two weeks into the month, you slow down deployments. If you have plenty of budget left, you can move faster. This replaces "can we deploy on Fridays?" with a data-driven answer.
+
+```yaml
+# Concrete SLI: 99th percentile latency below 500ms
+# SLO: this must hold 99.9% of the time over 30 days
+
+# Prometheus query for the SLI:
+histogram_quantile(0.99,
+  sum(rate(http_request_duration_seconds_bucket{job="myapi"}[5m])) by (le)
+) < 0.5
+
+# Error budget consumed (last 30 days):
+1 - (
+  sum(rate(http_requests_total{job="myapi", status!~"5.."}[30d]))
+  /
+  sum(rate(http_requests_total{job="myapi"}[30d]))
+)
+```
+
+Pyrra (below) provides a dashboard-based SLO management UI that calculates error budgets and burn rates automatically from Prometheus metrics.
+
+### The USE Method
+
+Complementing the four golden signals for **infrastructure** monitoring: for every resource (CPU, memory, disk, network), measure:
+
+- **Utilisation** — what percentage of the resource is being used?
+- **Saturation** — how much additional demand is queued (run queue length, memory swap)?
+- **Errors** — are there hardware errors, dropped packets, disk errors?
+
+Apply USE to every physical resource: CPU cores, memory, storage, network interfaces. Combine with the four golden signals (which apply to services) for complete coverage.
+
+---
+
+## Prometheus Scrapes `/metrics` endpoints on a schedule, evaluates alerting rules, and feeds dashboards in Grafana. The foundation of the standard self-hosted observability stack.
 
 ```yaml
 # ~/prometheus/compose.yaml
@@ -149,6 +202,40 @@ groups:
         annotations:
           summary: "Service {{ $labels.job }} is down"
 ```
+
+**Recording rules** pre-compute expensive or frequently used queries and store the result as a new metric. This makes dashboards and alert rules load faster, and lets you build higher-level metrics from raw ones:
+
+```yaml
+# prometheus/recording_rules.yml
+groups:
+  - name: recording
+    interval: 1m
+    rules:
+      # Pre-compute request rate per job — used by many dashboards
+      - record: job:http_requests_total:rate5m
+        expr: sum(rate(http_requests_total[5m])) by (job)
+
+      # Pre-compute error ratio per job — used by SLO alerts
+      - record: job:http_request_errors:ratio5m
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m])) by (job)
+          /
+          sum(rate(http_requests_total[5m])) by (job)
+
+      # Node CPU utilisation — expensive query, compute once
+      - record: instance:node_cpu_utilisation:rate5m
+        expr: |
+          1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) by (instance)
+```
+
+Add this file to your Prometheus config:
+```yaml
+rule_files:
+  - /etc/prometheus/alerts.yml
+  - /etc/prometheus/recording_rules.yml
+```
+
+Recording rule results are stored as time series with the `record:` name — query them just like any other metric: `job:http_requests_total:rate5m`. Naming convention: `level:metric:operations` (e.g., `job:http_requests_total:rate5m`).
 
 ---
 
@@ -315,6 +402,55 @@ curl -u admin:changeme http://localhost:3001/api/dashboards/uid/YOUR_UID | pytho
 - `15141` — Kafka overview
 - `10991` — RabbitMQ overview
 - `12378` — InfluxDB 2.x system metrics
+
+### Grafana Provisioning (Dashboards and Datasources as Code)
+
+Rather than configuring Grafana through the UI (which is lost if you recreate the container), provision datasources and dashboards from config files. Grafana reads these at startup and applies them automatically:
+
+```yaml
+# ~/grafana/compose.yaml — add provisioning volume mounts
+volumes:
+  - grafana_data:/var/lib/grafana
+  - /home/user/grafana/provisioning:/etc/grafana/provisioning:ro,Z
+  - /home/user/grafana/dashboards:/etc/grafana/dashboards:ro,Z
+```
+
+```yaml
+# ~/grafana/provisioning/datasources/prometheus.yaml
+apiVersion: 1
+datasources:
+  - name: Prometheus
+    type: prometheus
+    url: http://host.containers.internal:9090
+    isDefault: true
+    editable: false
+
+  - name: Loki
+    type: loki
+    url: http://host.containers.internal:3100
+    editable: false
+```
+
+```yaml
+# ~/grafana/provisioning/dashboards/main.yaml
+apiVersion: 1
+providers:
+  - name: default
+    type: file
+    disableDeletion: true      # prevent accidental deletion via UI
+    updateIntervalSeconds: 30  # hot-reload when dashboard JSON files change
+    options:
+      path: /etc/grafana/dashboards
+```
+
+Place exported dashboard JSON files in `~/grafana/dashboards/`. Grafana picks them up automatically — no browser interaction required. Export a dashboard via:
+
+```bash
+# Export dashboard JSON by UID
+curl -u admin:changeme http://localhost:3001/api/dashboards/uid/YOUR_UID \
+  | python3 -c "import sys,json; d=json.load(sys.stdin); print(json.dumps(d['dashboard'], indent=2))" \
+  > ~/grafana/dashboards/my-dashboard.json
+```
 
 > For BI-focused Grafana usage (connecting to databases, building analytical dashboards), see the [Business Intelligence wiki](https://docs.shani.dev/doc/servers/business-intelligence).
 
@@ -716,6 +852,272 @@ endpoints:
 ```
 
 > Gatus integrates with ntfy, Slack, email, Telegram, and more. Its config file is easy to keep in Git alongside your other service configs.
+
+---
+
+## Thanos (Prometheus Long-Term Storage, HA & Federation)
+
+**Purpose:** Thanos extends Prometheus to solve its three main production limitations: **retention** (Prometheus stores data locally; Thanos uploads blocks to object storage — MinIO, S3, GCS — for unlimited retention), **high availability** (Thanos Querier deduplicates data from multiple Prometheus replicas, so you can run 2+ Prometheus instances with identical configs), and **federation** (Thanos Query Frontend federates across multiple Prometheus clusters — query all environments from a single Grafana datasource). The standard choice for production Prometheus at scale.
+
+**Architecture overview:**
+```
+Prometheus ──► Thanos Sidecar ──► Object Store (MinIO)
+                    │
+                    ▼
+             Thanos Store Gateway ◄── Object Store (MinIO)
+                    │
+Thanos Ruler ──►    │
+                    ▼
+             Thanos Querier ◄── Grafana / PromQL clients
+                    │
+             Thanos Query Frontend (caching layer)
+                    │
+             Thanos Compactor (compaction + downsampling)
+```
+
+```yaml
+# ~/thanos/compose.yaml
+services:
+
+  # Sidecar: sits next to Prometheus, uploads TSDB blocks to object store
+  thanos-sidecar:
+    image: quay.io/thanos/thanos:latest
+    command:
+      - sidecar
+      - --tsdb.path=/prometheus
+      - --prometheus.url=http://host.containers.internal:9090
+      - --objstore.config-file=/etc/thanos/objstore.yaml
+      - --http-address=0.0.0.0:10902
+      - --grpc-address=0.0.0.0:10901
+    ports:
+      - "127.0.0.1:10901:10901"   # gRPC (Querier connects here)
+      - "127.0.0.1:10902:10902"   # HTTP status page
+    volumes:
+      - prometheus_data:/prometheus:ro
+      - /home/user/thanos/objstore.yaml:/etc/thanos/objstore.yaml:ro,Z
+    restart: unless-stopped
+
+  # Store Gateway: serves historical blocks from object storage to Querier
+  thanos-store:
+    image: quay.io/thanos/thanos:latest
+    command:
+      - store
+      - --objstore.config-file=/etc/thanos/objstore.yaml
+      - --http-address=0.0.0.0:10904
+      - --grpc-address=0.0.0.0:10903
+      - --data-dir=/var/thanos/store
+    ports:
+      - "127.0.0.1:10903:10903"   # gRPC
+      - "127.0.0.1:10904:10904"   # HTTP
+    volumes:
+      - thanos_store_data:/var/thanos/store
+      - /home/user/thanos/objstore.yaml:/etc/thanos/objstore.yaml:ro,Z
+    restart: unless-stopped
+
+  # Querier: deduplicates from Sidecar + Store Gateway, exposes PromQL endpoint
+  thanos-querier:
+    image: quay.io/thanos/thanos:latest
+    command:
+      - query
+      - --http-address=0.0.0.0:9091
+      - --grpc-address=0.0.0.0:10905
+      - --store=thanos-sidecar:10901           # real-time data from Prometheus
+      - --store=thanos-store:10903             # historical data from object store
+      - --query.replica-label=prometheus_replica
+    ports:
+      - "127.0.0.1:9091:9091"    # Querier UI + PromQL endpoint (point Grafana here)
+    depends_on: [thanos-sidecar, thanos-store]
+    restart: unless-stopped
+
+  # Query Frontend: caching + query splitting layer in front of Querier
+  thanos-query-frontend:
+    image: quay.io/thanos/thanos:latest
+    command:
+      - query-frontend
+      - --http-address=0.0.0.0:9092
+      - --query-frontend.downstream-url=http://thanos-querier:9091
+      - --query-range.split-interval=24h
+      - --query-range.max-retries-per-request=5
+      - --query-range.response-cache-config-file=/etc/thanos/cache.yaml
+    ports:
+      - "127.0.0.1:9092:9092"    # Use this as Grafana datasource URL for best performance
+    depends_on: [thanos-querier]
+    restart: unless-stopped
+
+  # Compactor: compacts and downsamples historical blocks (only one instance)
+  thanos-compactor:
+    image: quay.io/thanos/thanos:latest
+    command:
+      - compact
+      - --wait
+      - --objstore.config-file=/etc/thanos/objstore.yaml
+      - --data-dir=/var/thanos/compact
+      - --retention.resolution-raw=30d     # keep raw (15s) data for 30 days
+      - --retention.resolution-5m=180d     # keep 5m downsamples for 180 days
+      - --retention.resolution-1h=365d     # keep 1h downsamples for 1 year
+      - --http-address=0.0.0.0:10906
+    ports:
+      - "127.0.0.1:10906:10906"
+    volumes:
+      - thanos_compact_data:/var/thanos/compact
+      - /home/user/thanos/objstore.yaml:/etc/thanos/objstore.yaml:ro,Z
+    restart: unless-stopped
+
+  # Ruler: evaluates alerting and recording rules against Thanos query layer
+  thanos-ruler:
+    image: quay.io/thanos/thanos:latest
+    command:
+      - rule
+      - --data-dir=/var/thanos/ruler
+      - --eval-interval=30s
+      - --rule-file=/etc/thanos/rules/*.yaml
+      - --alertmanagers.url=http://host.containers.internal:9093
+      - --query=thanos-querier:9091
+      - --objstore.config-file=/etc/thanos/objstore.yaml
+      - --http-address=0.0.0.0:10908
+      - --grpc-address=0.0.0.0:10907
+      - --label=ruler_cluster="homelab"
+    ports:
+      - "127.0.0.1:10907:10907"
+      - "127.0.0.1:10908:10908"
+    volumes:
+      - thanos_ruler_data:/var/thanos/ruler
+      - /home/user/thanos/rules:/etc/thanos/rules:ro,Z
+      - /home/user/thanos/objstore.yaml:/etc/thanos/objstore.yaml:ro,Z
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:
+    external: true    # shared with the Prometheus container
+  thanos_store_data:
+  thanos_compact_data:
+  thanos_ruler_data:
+```
+
+**Object store config (`/home/user/thanos/objstore.yaml`) — MinIO backend:**
+```yaml
+type: S3
+config:
+  bucket: thanos-metrics
+  endpoint: minio.home.local:9000
+  access_key: minioadmin
+  secret_key: changeme
+  insecure: true             # use false + proper cert in production
+  signature_version2: false
+```
+
+```bash
+# Create the MinIO bucket first
+mc alias set local http://localhost:9000 minioadmin changeme
+mc mb local/thanos-metrics
+
+cd ~/thanos && podman-compose up -d
+```
+
+**Wire Prometheus to upload blocks (add to `prometheus.yml`):**
+```yaml
+# Enable TSDB block storage (required for Thanos Sidecar)
+# Thanos Sidecar reads from the same TSDB path Prometheus writes to.
+# Ensure prometheus_data volume is shared between prometheus and thanos-sidecar containers.
+
+# Remote-write to Thanos Receive (alternative architecture — push instead of sidecar):
+# remote_write:
+#   - url: http://thanos-receive:19291/api/v1/receive
+```
+
+**Point Grafana at Thanos Query Frontend:**
+
+In Grafana → Data Sources → Prometheus:
+- **URL:** `http://localhost:9092` (Query Frontend — cached, split queries)
+- Or `http://localhost:9091` (Querier — direct, no cache)
+
+**Multi-cluster federation:**
+```yaml
+# On the global Thanos Querier, add store endpoints from remote clusters:
+thanos-querier:
+  command:
+    - query
+    - --store=thanos-sidecar-cluster1:10901     # cluster 1 Sidecar
+    - --store=thanos-sidecar-cluster2:10901     # cluster 2 Sidecar
+    - --store=thanos-store:10903                # shared object store (historical)
+    - --query.replica-label=prometheus_replica
+    # Add as many --store flags as needed (one per Prometheus/Sidecar endpoint)
+```
+
+**HA setup (2× Prometheus, deduplicated by Thanos):**
+```yaml
+# Run two Prometheus instances with identical scrape configs but different replica labels:
+# prometheus-1: --storage.tsdb.path=/prometheus --web.listen-address=:9090
+# prometheus-2: --storage.tsdb.path=/prometheus --web.listen-address=:9090
+
+# In each Prometheus's external_labels:
+global:
+  external_labels:
+    cluster: homelab
+    prometheus_replica: prometheus-1   # change to prometheus-2 on second instance
+
+# Thanos Querier deduplicates using --query.replica-label=prometheus_replica
+# Result: you see one consistent time series even when one Prometheus restarts
+```
+
+**Compaction and downsampling explained:**
+```bash
+# Compactor runs continuously (--wait flag) and:
+# 1. Merges small 2h TSDB blocks into larger ones (reduces object store files)
+# 2. Downsamples raw data (15s → 5m → 1h resolution) for fast long-range queries
+# 3. Applies retention policies to delete old blocks
+
+# Check compactor status
+curl http://localhost:10906/metrics | grep thanos_compact
+
+# View blocks in object store
+podman run --rm -e AWS_ACCESS_KEY_ID=minioadmin -e AWS_SECRET_ACCESS_KEY=changeme \
+  quay.io/thanos/thanos:latest \
+  tools bucket ls \
+  --objstore.config="type: S3
+config:
+  bucket: thanos-metrics
+  endpoint: minio.home.local:9000
+  insecure: true"
+```
+
+**Ruler — alerting rules that evaluate across long-term data:**
+```yaml
+# /home/user/thanos/rules/alerts.yaml
+groups:
+  - name: long-term-alerts
+    interval: 5m
+    rules:
+      # Alert if any host has had >90% CPU for more than 1 hour total in the last day
+      - alert: HighCPULastDay
+        expr: |
+          sum_over_time(
+            (avg by(instance) (rate(node_cpu_seconds_total{mode!="idle"}[5m])) > 0.9)[24h:5m]
+          ) * 5 > 60
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.instance }} had high CPU for >1h in last 24h"
+```
+
+**Caddy:**
+```caddyfile
+thanos.home.local         { tls internal; reverse_proxy localhost:9092 }
+thanos-query.home.local   { tls internal; reverse_proxy localhost:9091 }
+thanos-compact.home.local { tls internal; reverse_proxy localhost:10906 }
+```
+
+**Troubleshooting Thanos:**
+
+| Issue | Solution |
+|-------|----------|
+| Sidecar `cannot read TSDB blocks` | Ensure `prometheus_data` volume is shared between Prometheus and Thanos Sidecar containers; mount as `:ro` on the Sidecar |
+| Querier shows gaps in data | Store Gateway may be lagging — check `thanos_objstore_*` metrics; compactor takes time to upload blocks (default 2h) |
+| Compactor `halted — conflict` | Only one Compactor can run at a time; check for a second running instance or a stale lock file in the MinIO bucket (`thanos/` prefix) |
+| `duplicate label set` error in Querier | Two store endpoints return the same series with the same labels — set `--query.replica-label` to the label that differentiates your Prometheus replicas |
+| Query Frontend `cache miss` for all queries | Cache config file may not be mounted correctly; start without `--query-range.response-cache-config-file` to confirm frontend works, then add caching |
+| Ruler alerts not firing | Verify Ruler's `--query` flag points to the Querier address; check Ruler logs for rule evaluation errors |
+| Blocks not appearing in Store Gateway | Blocks take up to 2h to upload (Sidecar uploads completed blocks only); force immediate upload by restarting the Sidecar |
 
 ---
 
@@ -1310,6 +1712,262 @@ openobserve.home.local { tls internal; reverse_proxy localhost:5080 }
 
 ---
 
+## Prometheus Pushgateway
+
+**Purpose:** An intermediary for short-lived jobs that cannot be scraped by Prometheus — batch jobs, cron tasks, and scripts that run and exit before Prometheus's scrape interval. The job pushes metrics to the Pushgateway on completion; Prometheus then scrapes the Pushgateway at its normal interval. Essential for monitoring backup jobs, ETL pipelines, and any workload where the process is already gone by the time Prometheus would scrape it.
+
+```yaml
+# ~/pushgateway/compose.yaml
+services:
+  pushgateway:
+    image: prom/pushgateway:latest
+    ports:
+      - 127.0.0.1:9091:9091
+    restart: unless-stopped
+```
+
+```bash
+cd ~/pushgateway && podman-compose up -d
+```
+
+**Add to `prometheus.yml`:**
+```yaml
+scrape_configs:
+  - job_name: pushgateway
+    honor_labels: true
+    static_configs:
+      - targets: ['host.containers.internal:9091']
+```
+
+**Push metrics from a script:**
+```bash
+# Push a single metric (backup job duration)
+cat <<EOF | curl --data-binary @- http://localhost:9091/metrics/job/restic_backup/instance/homeserver
+# HELP restic_backup_duration_seconds Duration of the last backup run
+# TYPE restic_backup_duration_seconds gauge
+restic_backup_duration_seconds 142.3
+# HELP restic_backup_success Whether the last backup succeeded (1=yes, 0=no)
+# TYPE restic_backup_success gauge
+restic_backup_success 1
+EOF
+
+# Delete a metric group after the job
+curl -X DELETE http://localhost:9091/metrics/job/restic_backup/instance/homeserver
+```
+
+**In a backup systemd service:**
+```bash
+# Wrap your backup command and push success/failure
+START=$(date +%s)
+podman exec restic restic backup /data && SUCCESS=1 || SUCCESS=0
+DURATION=$(($(date +%s) - START))
+cat <<EOF | curl --data-binary @- http://localhost:9091/metrics/job/restic_backup
+restic_backup_success $SUCCESS
+restic_backup_duration_seconds $DURATION
+EOF
+```
+
+**Caddy:**
+```caddyfile
+pushgateway.home.local { tls internal; reverse_proxy localhost:9091 }
+```
+
+---
+
+## Pyrra (SLO Management)
+
+**Purpose:** SLO (Service Level Objective) management for Prometheus. Define SLOs in YAML, and Pyrra generates the recording rules, alerting rules, and Grafana dashboards automatically. Calculates error budgets, burn rates, and multi-window alerts — the proper way to move from raw metric alerts to SLO-based alerting without writing complex PromQL by hand.
+
+```yaml
+# ~/pyrra/compose.yaml
+services:
+  pyrra-api:
+    image: ghcr.io/pyrra-dev/pyrra:latest
+    ports:
+      - 127.0.0.1:9099:9099
+    volumes:
+      - /home/user/pyrra/slos:/etc/pyrra:Z
+    command: filesystem --config-files=/etc/pyrra
+    restart: unless-stopped
+
+  pyrra-kubernetes:
+    image: ghcr.io/pyrra-dev/pyrra:latest
+    command: kubernetes
+    restart: unless-stopped
+```
+
+```bash
+cd ~/pyrra && podman-compose up -d
+```
+
+**Add to `prometheus.yml`:**
+```yaml
+scrape_configs:
+  - job_name: pyrra
+    static_configs:
+      - targets: ['host.containers.internal:9099']
+
+rule_files:
+  - /etc/prometheus/pyrra/*.yaml
+```
+
+**Example SLO definition (`/home/user/pyrra/slos/api-availability.yaml`):**
+```yaml
+apiVersion: pyrra.dev/v1alpha1
+kind: ServiceLevelObjective
+metadata:
+  name: api-availability
+  namespace: monitoring
+spec:
+  target: "99.9"
+  window: 4w
+  serviceLevel:
+    objectives:
+      - ratio:
+          errors:
+            metric: http_requests_total{job="myapi", code=~"5.."}
+          total:
+            metric: http_requests_total{job="myapi"}
+```
+
+Access Pyrra's UI at `http://localhost:9099` to view current SLO status, error budget remaining, and burn rate over time.
+
+**Caddy:**
+```caddyfile
+pyrra.home.local { tls internal; reverse_proxy localhost:9099 }
+```
+
+---
+
+## Grafana OnCall (On-Call Scheduling)
+
+**Purpose:** Self-hosted on-call scheduling and escalation platform — a PagerDuty/OpsGenie alternative. Define on-call schedules (weekly rotations, override shifts), escalation chains (page the primary → wait 5 min → page the secondary → alert the manager), and route Alertmanager or Grafana alerts through it. Integrates natively with Grafana and has mobile apps for iOS and Android.
+
+```yaml
+# ~/grafana-oncall/compose.yaml
+services:
+  engine:
+    image: grafana/oncall:latest
+    ports:
+      - 127.0.0.1:8080:8080
+    environment:
+      SECRET_KEY: changeme-run-openssl-rand-hex-32
+      DATABASE_TYPE: sqlite3
+      BROKER_TYPE: redis
+      BASE_URL: https://oncall.home.local
+      REDIS_URI: redis://redis:6379/0
+      DJANGO_SETTINGS_MODULE: settings.hobby
+    volumes:
+      - /home/user/oncall/data:/var/lib/oncall:Z
+    depends_on: [redis]
+    restart: unless-stopped
+
+  celery:
+    image: grafana/oncall:latest
+    command: ./celery_with_beat.sh
+    environment:
+      SECRET_KEY: changeme-run-openssl-rand-hex-32
+      DATABASE_TYPE: sqlite3
+      BROKER_TYPE: redis
+      BASE_URL: https://oncall.home.local
+      REDIS_URI: redis://redis:6379/0
+      DJANGO_SETTINGS_MODULE: settings.hobby
+    volumes:
+      - /home/user/oncall/data:/var/lib/oncall:Z
+    depends_on: [redis]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+```
+
+```bash
+cd ~/grafana-oncall && podman-compose up -d
+```
+
+Access at `http://localhost:8080`. Connect to Grafana under Settings → Plugins → Grafana OnCall, then configure integrations under Integrations → Alertmanager to receive alerts.
+
+**Caddy:**
+```caddyfile
+oncall.home.local { tls internal; reverse_proxy localhost:8080 }
+```
+
+---
+
+## Loki Alert Rules (Log-Based Alerting)
+
+**Purpose:** LogQL-based alerting fires Prometheus-compatible alerts based on log patterns — distinct from metric alerts. Use log alerts to fire when error rates in logs exceed a threshold, when a specific log pattern appears (like `FATAL` or `panic:`), or when a log stream goes silent (indicating a dead service). Loki alert rules are configured using the Loki Ruler and work alongside Alertmanager exactly like Prometheus rules.
+
+**Enable the ruler in Loki config:**
+```yaml
+# Add to your Loki config (if using the single-binary image)
+ruler:
+  storage:
+    type: local
+    local:
+      directory: /loki/rules
+  rule_path: /loki/rules-temp
+  alertmanager_url: http://host.containers.internal:9093
+  ring:
+    kvstore:
+      store: inmemory
+  enable_api: true
+```
+
+**Example rule files (`/home/user/loki/rules/homelab/rules.yaml`):**
+```yaml
+groups:
+  - name: log-alerts
+    rules:
+      # Fire when error rate in app logs exceeds 10/min for 5 minutes
+      - alert: HighErrorRate
+        expr: |
+          sum(rate({job="containerlogs", container="myapp"} |= "ERROR" [1m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate in myapp logs"
+          description: "More than 10 errors/min for 5 minutes"
+
+      # Fire when a specific fatal error appears
+      - alert: PanicDetected
+        expr: |
+          count_over_time({job="containerlogs"} |= "panic:" [5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Panic detected in container logs"
+
+      # Fire when a service produces no logs (dead service detection)
+      - alert: ServiceSilent
+        expr: |
+          absent(rate({job="containerlogs", container="myapp"}[10m]))
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "myapp has produced no logs for 10 minutes"
+```
+
+**Create the rules directory and restart Loki:**
+```bash
+mkdir -p /home/user/loki/rules/homelab
+# Place rule files there
+podman restart loki
+```
+
+**Query via API to verify rules are loaded:**
+```bash
+curl http://localhost:3100/loki/api/v1/rules | python3 -m json.tool
+```
+
+> Log-based and metric-based alerts both route through the same Alertmanager — you get a unified alert feed from both systems, deduplicated and routed to ntfy/Slack/email by the same `alertmanager.yml`.
+
+---
+
 ## Parca (Continuous Profiling)
 
 **Purpose:** Always-on CPU and memory profiling for your running services — captures flamegraphs in production without manual sampling. Stores profiles over time so you can compare CPU usage before and after a code change or pinpoint a memory leak by diffing two time windows. Adds the fourth pillar of observability alongside metrics, logs, and traces.
@@ -1873,6 +2531,220 @@ podman run --rm -it timberio/vector:latest-alpine vector vrl
 
 ---
 
+## k6 / Grafana k6 (Load Testing)
+
+**Purpose:** Open-source load testing tool with a JavaScript scripting API. Write realistic traffic simulations in JS, run them locally or in CI, and push metrics directly into your existing Prometheus stack via remote-write — then visualise results in Grafana with the official k6 dashboard. Native companion to the Prometheus + Grafana stack already documented here.
+
+```bash
+# Install k6 via Nix
+nix-env -iA nixpkgs.k6
+
+# Or via Snap
+snap install k6
+```
+
+**Basic load test script (`~/k6/smoke-test.js`):**
+```javascript
+import http from 'k6/http';
+import { check, sleep } from 'k6';
+
+export const options = {
+  stages: [
+    { duration: '1m', target: 20 },   // ramp up to 20 VUs
+    { duration: '3m', target: 20 },   // hold for 3 min
+    { duration: '1m', target: 0 },    // ramp down
+  ],
+  thresholds: {
+    http_req_failed: ['rate<0.01'],           // <1% errors
+    http_req_duration: ['p(95)<500'],         // 95th percentile < 500ms
+  },
+};
+
+export default function () {
+  const res = http.get('https://myapp.home.local/api/health');
+  check(res, { 'status is 200': (r) => r.status === 200 });
+  sleep(1);
+}
+```
+
+**Run locally:**
+```bash
+k6 run ~/k6/smoke-test.js
+
+# Run with more VUs and a duration override
+k6 run --vus 50 --duration 60s ~/k6/smoke-test.js
+```
+
+**Push results to Prometheus (remote-write to VictoriaMetrics or Prometheus):**
+```bash
+# Using the experimental Prometheus remote-write output
+K6_PROMETHEUS_RW_SERVER_URL=http://localhost:9090/api/v1/write \
+K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM=true \
+  k6 run --out=experimental-prometheus-rw ~/k6/smoke-test.js
+```
+
+**Run as a Podman container in CI (Woodpecker example):**
+```yaml
+# .woodpecker.yml
+steps:
+  load-test:
+    image: grafana/k6:latest
+    environment:
+      K6_PROMETHEUS_RW_SERVER_URL: http://prometheus.home.local:9090/api/v1/write
+    commands:
+      - k6 run --out=experimental-prometheus-rw /k6/smoke-test.js
+    volumes:
+      - /home/user/k6:/k6:ro
+```
+
+**Import the k6 Grafana dashboard:**
+
+In Grafana → Dashboards → Import → Dashboard ID **18030** (official k6 Prometheus dashboard). This gives you p50/p95/p99 latency, VU count, request rate, and error rate per test run, all correlated with your application metrics.
+
+---
+
+## Toxiproxy (Network Failure Simulation)
+
+**Purpose:** A programmable TCP proxy that injects network failures — latency, packet loss, bandwidth throttling, connection resets, and timeouts — between your services. Use Toxiproxy to test how your monitored services behave when dependencies are degraded: does Alertmanager fire? Do your Prometheus alerts have the right thresholds? Does your application retry correctly? Essential for chaos engineering and validating monitoring alert fidelity.
+
+```yaml
+# ~/toxiproxy/compose.yaml
+services:
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:latest
+    ports:
+      - "127.0.0.1:8474:8474"    # Toxiproxy REST API
+      - "127.0.0.1:15432:15432"  # proxied postgres (example)
+      - "127.0.0.1:16379:16379"  # proxied redis (example)
+    restart: unless-stopped
+```
+
+```bash
+cd ~/toxiproxy && podman-compose up -d
+
+# Install the CLI
+nix-env -iA nixpkgs.toxiproxy   # or: go install github.com/Shopify/toxiproxy/v2/cli/toxiproxy-cli@latest
+```
+
+**Create proxies for your services:**
+```bash
+# Proxy for Postgres (real Postgres at localhost:5432, proxied at localhost:15432)
+toxiproxy-cli create postgres --listen 0.0.0.0:15432 --upstream localhost:5432
+
+# Proxy for Redis
+toxiproxy-cli create redis --listen 0.0.0.0:16379 --upstream localhost:6379
+
+# List all proxies
+toxiproxy-cli list
+```
+
+**Inject failures via REST API or CLI:**
+```bash
+# Add 200ms latency to all Postgres connections
+toxiproxy-cli toxic add postgres --type latency --attribute latency=200 --attribute jitter=50
+
+# Simulate 30% packet loss on Redis
+toxiproxy-cli toxic add redis --type slicer --attribute average_size=1 --attribute delay_us=0
+
+# Bandwidth throttle to 100 KB/s (simulates slow link)
+toxiproxy-cli toxic add postgres --type bandwidth --attribute rate=100
+
+# Timeout — close connections after 2s of inactivity
+toxiproxy-cli toxic add postgres --type timeout --attribute timeout=2000
+
+# Remove a toxic
+toxiproxy-cli toxic remove postgres --toxicName latency_downstream
+
+# Take a proxy completely offline (simulates full outage)
+toxiproxy-cli toggle postgres
+```
+
+**Use in integration tests (Python example):**
+```python
+import requests
+
+TOXIPROXY_API = "http://localhost:8474"
+
+def add_latency(proxy_name, latency_ms):
+    requests.post(f"{TOXIPROXY_API}/proxies/{proxy_name}/toxics", json={
+        "type": "latency", "name": "db_slow",
+        "attributes": {"latency": latency_ms, "jitter": 10}
+    })
+
+def remove_toxic(proxy_name, toxic_name):
+    requests.delete(f"{TOXIPROXY_API}/proxies/{proxy_name}/toxics/{toxic_name}")
+
+# In your test:
+add_latency("postgres", 500)
+# ... run test that should degrade gracefully ...
+remove_toxic("postgres", "db_slow")
+```
+
+> Pair Toxiproxy with your Prometheus + Alertmanager stack: inject a fault, verify the correct alert fires within the expected `for:` duration, then check that it resolves when you remove the toxic. This validates your alert thresholds are calibrated to actual failure modes rather than theoretical ones.
+
+---
+
+## Netdata → Grafana Datasource Integration
+
+**Purpose:** Netdata (already documented above) exposes a Prometheus-compatible metrics endpoint — you can query it directly from Grafana as a datasource alongside your regular Prometheus instance. This gives you Netdata's per-second system metrics (CPU, RAM, disk I/O, network, containers) in the same Grafana dashboards as your application metrics, without running a separate Prometheus scrape job.
+
+**Step 1 — Enable Prometheus exporter in Netdata:**
+
+Netdata exposes Prometheus metrics at `/api/v1/allmetrics?format=prometheus` by default on port 19999. No configuration required — it's always on.
+
+```bash
+# Test the endpoint
+curl http://localhost:19999/api/v1/allmetrics?format=prometheus | head -30
+```
+
+**Step 2 — Add Netdata as a Prometheus datasource in Grafana:**
+
+In Grafana → Connections → Data Sources → Add → Prometheus:
+- **Name:** `Netdata`
+- **URL:** `http://netdata.home.local:19999/api/v1/allmetrics?format=prometheus`
+- **Scrape interval:** `1s` (Netdata collects at 1s resolution)
+- **Query timeout:** `30s`
+
+Or configure via provisioning YAML:
+```yaml
+# /home/user/grafana/provisioning/datasources/netdata.yaml
+apiVersion: 1
+datasources:
+  - name: Netdata
+    type: prometheus
+    access: proxy
+    url: http://host.containers.internal:19999/api/v1/allmetrics?format=prometheus
+    isDefault: false
+    jsonData:
+      timeInterval: "1s"
+```
+
+**Step 3 — Query Netdata metrics in Grafana panels:**
+```promql
+# CPU usage per core
+netdata_cpu_cpu_percentage_average{dimension="user"}
+
+# System RAM usage
+netdata_system_ram_MiB_average{dimension="used"}
+
+# Disk I/O
+rate(netdata_disk_io_kilobytes_persec_average[1m])
+
+# Network traffic per interface
+netdata_net_kilobits_persec_average{dimension="received"}
+
+# Container CPU (Netdata monitors all Podman containers)
+netdata_cgroups_cpu_percentage_average{chart=~"cgroup_.*"}
+```
+
+**Step 4 — Import a Netdata Grafana dashboard:**
+
+Go to Grafana → Dashboards → Import → Dashboard ID **7107** (Netdata System Overview). This gives you a full system health dashboard powered by Netdata's Prometheus endpoint.
+
+> **When to use which:** Keep Prometheus as your primary datasource for application metrics, SLO calculations, and alert evaluation. Use the Netdata datasource for host-level dashboards where 1-second resolution matters (disk spike analysis, container burst profiling). Both can be combined in a single Grafana dashboard row by row.
+
+---
+
 ## Caddy Configuration
 
 ```caddyfile
@@ -1880,6 +2752,9 @@ grafana.home.local         { tls internal; reverse_proxy localhost:3001 }
 prometheus.home.local      { tls internal; reverse_proxy localhost:9090 }
 alerts.home.local          { tls internal; reverse_proxy localhost:9093 }
 karma.home.local           { tls internal; reverse_proxy localhost:8094 }
+pushgateway.home.local     { tls internal; reverse_proxy localhost:9091 }
+pyrra.home.local           { tls internal; reverse_proxy localhost:9099 }
+oncall.home.local          { tls internal; reverse_proxy localhost:8080 }
 netdata.home.local         { tls internal; reverse_proxy localhost:19999 }
 netdata-hub.home.local     { tls internal; reverse_proxy localhost:19998 }
 uptime.home.local          { tls internal; reverse_proxy localhost:3002 }
@@ -1898,6 +2773,7 @@ graylog.home.local         { tls internal; reverse_proxy localhost:9000 }
 changes.home.local         { tls internal; reverse_proxy localhost:5000 }
 openobserve.home.local     { tls internal; reverse_proxy localhost:5080 }
 parca.home.local           { tls internal; reverse_proxy localhost:7070 }
+toxiproxy.home.local       { tls internal; reverse_proxy localhost:8474 }
 ```
 
 ---
@@ -1941,3 +2817,9 @@ parca.home.local           { tls internal; reverse_proxy localhost:7070 }
 | Fluent Bit losing events on container restart | Enable `storage.type filesystem` on a persistent volume; without this, in-flight events are lost on restart |
 | Vector pipeline component showing errors | Run `curl localhost:8686/components` to see component health; run `vector validate /etc/vector/vector.yaml` before deploying |
 | Vector disk buffer filling up | Increase `max_size` in the sink buffer config, or fix the downstream sink connectivity; Vector applies backpressure rather than dropping events |
+| k6 `experimental-prometheus-rw: connection refused` | Ensure Prometheus has `--web.enable-remote-write-receiver` flag or use VictoriaMetrics which accepts remote-write by default |
+| k6 thresholds not appearing in Grafana | Import dashboard ID **18030** and set the datasource to the Prometheus instance receiving k6 remote-write; confirm `K6_PROMETHEUS_RW_SERVER_URL` is reachable from where k6 runs |
+| Toxiproxy proxy not affecting traffic | Ensure your app connects to the Toxiproxy port (e.g., `15432`) rather than directly to Postgres (`5432`); use `toxiproxy-cli list` to verify the proxy is enabled |
+| Toxiproxy toxic added but latency not observed | Some toxics are directional — add the toxic to both `upstream` and `downstream` if needed; verify with `toxiproxy-cli inspect <proxy>` |
+| Netdata Grafana datasource returns no data | The Prometheus query format differs from native Prometheus — use `netdata_` prefixed metric names; verify with `curl http://netdata:19999/api/v1/allmetrics?format=prometheus | grep netdata_` |
+| Netdata metrics disappear after host restart | Netdata stores metrics in `/var/cache/netdata` — mount this as a volume (`/home/user/netdata/cache:/var/cache/netdata:Z`) to persist across container restarts |

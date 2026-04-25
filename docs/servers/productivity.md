@@ -14,6 +14,31 @@ Self-hosted cloud storage, file sync, document management, task management, know
 
 **Purpose:** Comprehensive self-hosted cloud suite — file sync across all your devices, calendar, contacts, collaborative document editing (via Collabora or OnlyOffice), and a mobile app that feels like Google Drive. Replaces Dropbox, Google Drive, Google Calendar, and Google Contacts simultaneously.
 
+### How WebDAV and CalDAV Work
+
+Nextcloud (and several other tools in this section) expose their file and calendar data via two HTTP-based protocols that are worth understanding:
+
+**WebDAV (Web Distributed Authoring and Versioning)** extends HTTP with additional methods (`PROPFIND`, `MKCOL`, `COPY`, `MOVE`, `LOCK`) that let clients browse, upload, download, and manage files over HTTPS — without a proprietary sync agent. Any WebDAV client (Nautilus, Finder, Cyberduck, rclone, Windows Explorer) can mount a WebDAV share as a filesystem. Nextcloud exposes WebDAV at:
+```
+https://files.home.local/remote.php/dav/files/<username>/
+```
+
+**CalDAV** is a similar extension for calendar data — it adds iCalendar (`.ics`) create/read/update/delete operations over HTTP. Any CalDAV-compatible calendar app (GNOME Calendar, Apple Calendar, Thunderbird, Android via DAVx⁵) syncs directly with your Nextcloud calendar. Nextcloud's CalDAV endpoint:
+```
+https://files.home.local/remote.php/dav/calendars/<username>/
+```
+
+**CardDAV** is the same concept for contacts (`.vcf` / vCard format). These three protocols together are why Nextcloud can replace an entire Google Workspace for file, calendar, and contacts sync — they're open standards, not proprietary APIs.
+
+**Mounting Nextcloud via rclone (WebDAV):**
+```bash
+# Configure in rclone config (type: webdav, vendor: nextcloud)
+rclone copy nextcloud:/Documents ~/local-backup/
+
+# Or mount as a local filesystem
+rclone mount nextcloud:/ ~/mnt/nextcloud/ --daemon
+```
+
 ```yaml
 # ~/nextcloud/compose.yaml
 services:
@@ -1856,9 +1881,42 @@ wiki.home.local      { tls internal; reverse_proxy localhost:3800 }
 
 ---
 
-## Troubleshooting
+---
 
-| Issue | Solution |
+## The S3 API: A Core Cloud Skill
+
+Several tools in this wiki (MinIO in backups-sync.md, Garage, Cloudflare R2) implement the **S3-compatible API** — originally Amazon S3's interface but now a de facto standard for object storage. Understanding this API is valuable independent of which storage backend you use.
+
+**Core operations:**
+
+| HTTP Method | S3 Operation | What it does |
+|------------|-------------|--------------|
+| `PUT /bucket/key` | PutObject | Upload a file |
+| `GET /bucket/key` | GetObject | Download a file |
+| `DELETE /bucket/key` | DeleteObject | Delete a file |
+| `GET /bucket?list-type=2` | ListObjectsV2 | List objects in a bucket |
+| `POST /bucket/key?uploads` | CreateMultipartUpload | Start a large upload |
+
+**Presigned URLs** — time-limited URLs that grant access to a specific object without requiring the requester to have credentials. The URL embeds an HMAC signature valid for a configured time window. Used for secure direct downloads or uploads from untrusted clients:
+
+```bash
+# Generate a presigned URL with MinIO client (mc)
+mc alias set local http://localhost:9000 admin changeme123
+mc share download local/my-bucket/report.pdf --expire=24h
+
+# Or with the AWS CLI (works against MinIO with --endpoint-url)
+aws s3 presign s3://my-bucket/report.pdf \
+  --endpoint-url http://localhost:9000 \
+  --expires-in 86400
+```
+
+**Multipart uploads** — large files (>100MB) are split into parts, uploaded in parallel, and assembled server-side. This is why Rclone's `--s3-chunk-size` flag exists — it controls the part size.
+
+Understanding the S3 API is useful because it's the interface Restic, Rclone, Kopia, Litestream, and most cloud-native tools use for object storage. The same client code works against AWS S3, MinIO, Garage, Cloudflare R2, and Backblaze B2 — just change the endpoint URL.
+
+---
+
+## Troubleshooting
 |-------|----------|
 | Nextcloud showing `Untrusted domain` | Add your domain to `NEXTCLOUD_TRUSTED_DOMAINS` env var or `config.php` `trusted_domains` array |
 | Nextcloud file sync very slow | Ensure background cron jobs are running (`php cron.php` every 5 minutes via systemd timer) |

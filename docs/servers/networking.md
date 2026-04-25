@@ -1004,6 +1004,300 @@ squid.home.local { tls internal; reverse_proxy localhost:3128 }
 
 ---
 
+## ddns-updater (Dynamic DNS)
+
+**Purpose:** Keeps your DNS records updated when your home/server IP changes. Polls your current public IP on a schedule and updates records via the APIs of 30+ providers — Cloudflare, Namecheap, DuckDNS, Gandi, Porkbun, Hetzner, and more. Essential if you're self-hosting from a residential or dynamic-IP connection without a static IP.
+
+```yaml
+# ~/ddns-updater/compose.yaml
+services:
+  ddns-updater:
+    image: qmcgaw/ddns-updater:latest
+    ports:
+      - 127.0.0.1:8000:8000
+    volumes:
+      - /home/user/ddns-updater/data:/updater/data:Z
+    environment:
+      PERIOD: 5m
+      UPDATE_COOLDOWN_PERIOD: 5m
+      PUBLICIP_FETCHERS: all
+      LOG_LEVEL: info
+      TZ: Asia/Kolkata
+    restart: unless-stopped
+```
+
+```bash
+cd ~/ddns-updater && podman-compose up -d
+```
+
+**Configure providers in `/home/user/ddns-updater/data/config.json`:**
+```json
+{
+  "settings": [
+    {
+      "provider": "cloudflare",
+      "zone_identifier": "your-zone-id",
+      "domain": "home.example.com",
+      "host": "@",
+      "ttl": 300,
+      "proxied": false,
+      "token": "your-cloudflare-api-token",
+      "ip_version": "ipv4"
+    },
+    {
+      "provider": "duckdns",
+      "domain": "myhome.duckdns.org",
+      "token": "your-duckdns-token",
+      "ip_version": "ipv4"
+    }
+  ]
+}
+```
+
+Access the status dashboard at `http://localhost:8000` — shows last update time, current IP, and success/failure per record.
+
+**Caddy:**
+```caddyfile
+ddns.home.local { tls internal; reverse_proxy localhost:8000 }
+```
+
+> **Tip:** Pair with a short TTL (300 seconds) on the DNS record so clients pick up the new IP quickly after a change.
+
+---
+
+## frp (Fast Reverse Proxy)
+
+**Purpose:** Expose services running behind NAT or a firewall to the internet via a VPS relay — without needing to open ports on your home router or ISP. You run `frps` (server) on a cheap VPS with a public IP, and `frpc` (client) on your home server. The client connects outbound to the VPS; all traffic to `vps-ip:port` is tunnelled back to your local service. A lightweight alternative to Cloudflare Tunnel or Pangolin when you need raw TCP/UDP forwarding or non-HTTP protocols.
+
+```yaml
+# On your VPS — ~/frps/compose.yaml
+services:
+  frps:
+    image: snowdreamtech/frps:latest
+    network_mode: host
+    volumes:
+      - /home/user/frps/frps.toml:/etc/frp/frps.toml:ro
+    restart: unless-stopped
+```
+
+**`frps.toml` on the VPS:**
+```toml
+bindPort = 7000           # frpc connects here
+vhostHTTPPort = 8080      # HTTP vhost traffic (optional)
+vhostHTTPSPort = 8443     # HTTPS vhost traffic (optional)
+
+auth.method = "token"
+auth.token = "changeme-strong-secret"
+
+webServer.addr = "127.0.0.1"
+webServer.port = 7500
+webServer.user = "admin"
+webServer.password = "changeme"
+```
+
+```yaml
+# On your home server — ~/frpc/compose.yaml
+services:
+  frpc:
+    image: snowdreamtech/frpc:latest
+    network_mode: host
+    volumes:
+      - /home/user/frpc/frpc.toml:/etc/frp/frpc.toml:ro
+    restart: unless-stopped
+```
+
+**`frpc.toml` on your home server:**
+```toml
+serverAddr = "your.vps.ip"
+serverPort = 7000
+
+auth.method = "token"
+auth.token = "changeme-strong-secret"
+
+# Expose a local HTTP service
+[[proxies]]
+name = "homelab-web"
+type = "http"
+localIP = "127.0.0.1"
+localPort = 80
+customDomains = ["home.example.com"]
+
+# Expose SSH
+[[proxies]]
+name = "homelab-ssh"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 22
+remotePort = 2222          # ssh -p 2222 user@your.vps.ip
+
+# Expose a raw TCP service (e.g. MQTT)
+[[proxies]]
+name = "mqtt"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 1883
+remotePort = 1883
+```
+
+```bash
+# Start on the VPS
+cd ~/frps && podman-compose up -d
+
+# Start on the home server
+cd ~/frpc && podman-compose up -d
+```
+
+**Firewall on the VPS:**
+```bash
+sudo firewall-cmd --add-port=7000/tcp --permanent   # frpc control
+sudo firewall-cmd --add-port=8080/tcp --permanent   # HTTP vhost
+sudo firewall-cmd --add-port=8443/tcp --permanent   # HTTPS vhost
+sudo firewall-cmd --add-port=2222/tcp --permanent   # SSH forwarding
+sudo firewall-cmd --reload
+```
+
+> **frp vs Cloudflare Tunnel:** Cloudflare Tunnel is zero-config and free, but traffic passes through Cloudflare's network and requires HTTP/HTTPS. frp works for any TCP/UDP protocol, traffic stays on your VPS, and you keep full control. Use frp when you need to forward MQTT, SSH, game server ports, or any non-HTTP service.
+
+---
+
+## FRRouting (BGP / OSPF / Dynamic Routing)
+
+**Purpose:** Full-featured open-source routing suite implementing BGP, OSPF, IS-IS, RIP, PIM, and BFD — the same protocols running on enterprise and ISP routers. On a homelab or small datacenter, FRR is most useful for: advertising your Tailscale/WireGuard subnets into BGP, running BGP between your Shani OS host and a pfSense/OPNsense router, implementing ECMP load-balancing between uplinks, or learning BGP/OSPF for job preparation. FRR runs as a container alongside your network stack — it doesn't require a separate router appliance.
+
+> **Shani OS note:** FRR needs `--network host` and `--cap-add NET_ADMIN,NET_RAW,SYS_ADMIN` to manipulate kernel routing tables. These capabilities are available to rootless Podman containers on Shani OS with `--privileged` or explicit `--cap-add`. The kernel routing changes FRR makes are real — they affect the host's routing table.
+
+```yaml
+# ~/frr/compose.yaml
+services:
+  frr:
+    image: frrouting/frr:latest
+    network_mode: host
+    cap_add: [NET_ADMIN, NET_RAW, SYS_ADMIN]
+    volumes:
+      - /home/user/frr/etc:/etc/frr:Z
+    restart: unless-stopped
+```
+
+```bash
+mkdir -p ~/frr/etc
+cd ~/frr && podman-compose up -d
+```
+
+**Initial FRR config files:**
+```bash
+# ~/frr/etc/daemons — enable only what you need
+cat > ~/frr/etc/daemons << 'EOF'
+zebra=yes      # core routing daemon — always required
+bgpd=yes       # enable for BGP
+ospfd=yes      # enable for OSPFv2
+ospf6d=no
+ripd=no
+ripngd=no
+isisd=no
+pimd=no
+bfdd=yes       # Bidirectional Forwarding Detection — fast link failure detection
+EOF
+
+# ~/frr/etc/vtysh.conf
+cat > ~/frr/etc/vtysh.conf << 'EOF'
+service integrated-vtysh-config
+EOF
+```
+
+**Connect to the FRR CLI (vtysh):**
+```bash
+podman exec -it frr vtysh
+```
+
+**Example: iBGP between Shani OS host and a pfSense/OPNsense router:**
+```
+# Inside vtysh:
+
+# Set the router ID (use host's LAN IP)
+configure terminal
+ router bgp 65001
+  bgp router-id 192.168.1.10
+  neighbor 192.168.1.1 remote-as 65001          ! pfSense/OPNsense LAN IP, same AS = iBGP
+  neighbor 192.168.1.1 description pfsense-router
+  !
+  address-family ipv4 unicast
+   network 10.8.0.0/24                           ! advertise WireGuard VPN subnet into BGP
+   network 100.64.0.0/10                         ! advertise Tailscale CGNAT range
+   neighbor 192.168.1.1 activate
+   neighbor 192.168.1.1 soft-reconfiguration inbound
+  exit-address-family
+ !
+ ip route 10.8.0.0/24 wg0                        ! static route so zebra knows the next-hop
+exit
+```
+
+**Example: BGP with a Hetzner cloud server (eBGP over WireGuard):**
+```
+configure terminal
+ router bgp 65001
+  bgp router-id 192.168.1.10
+  neighbor 10.8.0.2 remote-as 65002             ! Hetzner VM, different AS = eBGP
+  neighbor 10.8.0.2 ebgp-multihop 2             ! required when peering over a tunnel
+  neighbor 10.8.0.2 update-source wg0
+  !
+  address-family ipv4 unicast
+   network 192.168.1.0/24                        ! advertise homelab LAN to the cloud
+   neighbor 10.8.0.2 activate
+   neighbor 10.8.0.2 route-map EXPORT out
+  exit-address-family
+ !
+ route-map EXPORT permit 10
+  match ip address prefix-list HOMELAB
+ !
+ ip prefix-list HOMELAB seq 5 permit 192.168.1.0/24
+exit
+```
+
+**Example: OSPF for automatic route redistribution (all routers learn all subnets):**
+```
+configure terminal
+ router ospf
+  ospf router-id 192.168.1.10
+  network 192.168.1.0/24 area 0.0.0.0
+  network 10.8.0.0/24 area 0.0.0.0
+  passive-interface default           ! don't send OSPF hellos on all interfaces
+  no passive-interface eth0           ! only peer on the LAN interface
+  redistribute connected              ! inject directly connected routes
+exit
+```
+
+**Useful show commands (inside vtysh):**
+```
+show ip bgp summary          # peer status, uptime, prefixes received
+show ip bgp                  # full BGP table
+show ip route                # kernel routing table (zebra view)
+show ip route bgp            # only BGP-learned routes
+show ip ospf neighbor        # OSPF adjacency table
+show bfd peers               # BFD session status (sub-second failure detection)
+show running-config          # full current config
+write memory                 # save config to /etc/frr/frr.conf
+```
+
+**BFD (fast failover in under 1 second):**
+```
+configure terminal
+ bfd
+  peer 192.168.1.1
+   detect-multiplier 3
+   receive-interval 300
+   transmit-interval 300
+  !
+ exit
+ !
+ router bgp 65001
+  neighbor 192.168.1.1 bfd       ! attach BFD to the BGP peer
+exit
+```
+
+> **FRR vs a dedicated router VM:** FRR in a container is appropriate for BGP peering, route redistribution, and learning. For a full home router (DHCP, NAT, firewall, PPPoE), use OPNsense or pfSense on a dedicated machine or VM. FRR and OPNsense complement each other — OPNsense handles the internet edge, FRR handles internal routing between segments.
+
+---
+
 ## Caddy Configuration
 
 ```caddyfile
@@ -1019,13 +1313,150 @@ haproxy.home.local     { tls internal; reverse_proxy localhost:9000 }
 npm.home.local         { tls internal; reverse_proxy localhost:81 }
 pdnsadmin.home.local   { tls internal; reverse_proxy localhost:9191 }
 ipam.home.local        { tls internal; reverse_proxy localhost:8200 }
+ddns.home.local        { tls internal; reverse_proxy localhost:8000 }
 ```
 
 ---
 
-## Troubleshooting
+---
 
-| Issue | Solution |
+## Network Debugging Quick Reference
+
+These commands are the foundation of diagnosing connectivity, DNS, and firewall problems on any Linux host.
+
+```bash
+# Show all active connections and their state
+ss -s
+
+# Find what process is listening on a specific port
+ss -tlnp | grep :443
+ss -tlnp | grep :8080
+
+# Show all established TCP connections
+ss -tn state established
+
+# Trace the path to a host (TCP, bypasses ICMP blocks)
+traceroute -T -p 443 example.com
+
+# Capture packets on an interface (write to file for Wireshark)
+sudo tcpdump -i eth0 -n 'port 443' -w /tmp/capture.pcap
+sudo tcpdump -i eth0 -n 'host 1.1.1.1'
+sudo tcpdump -i podman1 -n 'port 5432'   # capture container traffic
+
+# DNS debugging — full recursive trace
+dig +trace example.com
+
+# Query a specific resolver
+dig @1.1.1.1 example.com
+dig @localhost example.com         # test your Pi-hole / AdGuard
+
+# Check if a port is reachable (without telnet)
+curl -v --connect-timeout 5 telnet://192.168.1.100:5432
+
+# Show listening ports and their process
+ss -tlnp
+# or: lsof -i -P -n | grep LISTEN
+```
+
+**TCP connection states to know:**
+
+- `ESTABLISHED` — active connection in use
+- `TIME_WAIT` — connection closed, waiting for delayed packets to expire (default 60–120s). High TIME_WAIT count on a busy server is normal but can exhaust ephemeral ports — tune `net.ipv4.tcp_tw_reuse` if needed.
+- `CLOSE_WAIT` — the remote end closed the connection but the local application hasn't called `close()` yet. Persistent CLOSE_WAIT usually indicates a bug in the application.
+- `SYN_SENT` — connection attempt in progress, SYN sent but SYN-ACK not yet received. Stuck connections here usually indicate the remote is unreachable or filtered by a firewall.
+
+---
+
+## TCP/IP Fundamentals
+
+### The TCP Three-Way Handshake
+
+Every TCP connection opens with a three-message exchange:
+
+1. **SYN** — client sends a segment with the SYN flag, picks an initial sequence number
+2. **SYN-ACK** — server acknowledges the client's SYN and sends its own SYN
+3. **ACK** — client acknowledges the server's SYN. Connection is now established.
+
+This is why connection setup has a minimum latency of 1.5× the round-trip time (RTT) — three messages across two RTTs. TLS 1.3 reduces this further with 0-RTT resumption for known sessions.
+
+### TCP vs UDP
+
+| Property | TCP | UDP |
+|----------|-----|-----|
+| Reliability | Guaranteed delivery, retransmission on loss | Best-effort, no retransmission |
+| Order | Ordered delivery | Out-of-order delivery possible |
+| Connection | Connection-oriented (handshake) | Connectionless |
+| Overhead | Higher (headers, ACKs, state) | Lower |
+| Use cases | HTTP, PostgreSQL, SSH — anything correctness-critical | DNS, VoIP, video streaming, WireGuard |
+
+WireGuard uses UDP specifically because the VPN layer handles its own reliability, and UDP's stateless nature makes it more resilient to brief packet loss and network changes (roaming between WiFi and mobile data).
+
+---
+
+## iptables and nftables Basics
+
+Firewalld (used throughout this wiki) is a high-level interface over `nftables` on modern Linux. Understanding the underlying layer helps when debugging unexpected traffic behaviour.
+
+```bash
+# List all current nft rules (the native tool on modern systems)
+sudo nft list ruleset
+
+# List iptables rules with packet/byte counts (legacy view of nftables)
+sudo iptables -L -n -v
+sudo iptables -t nat -L -n -v    # NAT rules — important for container port forwarding
+
+# Show firewalld zones and their services
+sudo firewall-cmd --list-all
+sudo firewall-cmd --list-all-zones
+
+# Temporarily allow a port (lost on next firewalld reload)
+sudo firewall-cmd --add-port=8080/tcp
+
+# Permanently allow a port
+sudo firewall-cmd --permanent --add-port=8080/tcp && sudo firewall-cmd --reload
+
+# Trace a packet through iptables (debug mode)
+sudo iptables -t raw -A PREROUTING -p tcp --dport 8080 -j TRACE
+sudo journalctl -k | grep TRACE   # see which rules the packet hits
+sudo iptables -t raw -D PREROUTING -p tcp --dport 8080 -j TRACE  # remove when done
+```
+
+---
+
+## How Container Networking Works
+
+Understanding what Podman does under the hood helps debug connectivity issues between containers and the host.
+
+**When you start a container with `-p 8080:80`:**
+
+1. Podman creates a **veth pair** — a virtual Ethernet cable with one end in the container's network namespace and one end on the host's bridge.
+2. The host end is connected to a **bridge device** (e.g., `podman1` or `cni-podman0`). The bridge acts like a virtual switch.
+3. Podman adds an **iptables NAT rule** to forward packets arriving on host port 8080 to the container's IP on port 80.
+4. A return NAT rule ensures response packets are masqueraded back through the host IP.
+
+```bash
+# See the bridge Podman created
+ip link show type bridge
+ip addr show podman1    # or cni-podman0
+
+# See veth pairs (one end in container, one on bridge)
+ip link show type veth
+
+# See Podman's NAT rules
+sudo iptables -t nat -L PODMAN -n -v
+
+# Find a container's IP address
+podman inspect jellyfin --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'
+
+# Ping a container from the host using its IP directly
+ping $(podman inspect jellyfin --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
+```
+
+**Why `host.containers.internal` exists:** when a container needs to reach a service on the host (e.g., a database not in a container), it can't use `localhost` — that resolves to its own network namespace. `host.containers.internal` is a special DNS name Podman provides that resolves to the host's IP as seen from the container.
+
+---
+
+## Troubleshooting
 |-------|----------|
 | Pi-hole not blocking ads on some devices | Verify the device's DNS is pointing at the server IP (not 1.1.1.1 hardcoded); check Pi-hole's query log to confirm queries are reaching it |
 | AdGuard DoT not working | Ensure `853/tcp` is open in firewalld; some clients need the full TLS hostname in the format `tls://server-ip` |
@@ -1049,4 +1480,17 @@ ipam.home.local        { tls internal; reverse_proxy localhost:8200 }
 | phpIPAM database installation fails | Ensure MariaDB is fully started (`podman logs db`); try refreshing the setup page after 30 seconds |
 | Squid `NONE/400 Bad Request` | Confirm the client is sending a proper HTTP proxy request; for HTTPS, the client must send a `CONNECT` request first |
 | Squid cache not filling | Verify the cache directory exists and is writable; run `squid -z` inside the container to initialise the cache structure |
+| ddns-updater not updating | Check `podman logs ddns-updater`; verify the API token has `Zone:Edit` permission in Cloudflare; check `config.json` syntax with `podman exec ddns-updater ddns-updater --help` |
+| ddns-updater shows wrong current IP | The `PUBLICIP_FETCHERS: all` strategy uses multiple sources and picks the majority result; if behind a corporate NAT you may need to set `PUBLICIP_HTTP_PROVIDERS` to a specific provider |
+| frp client can't connect to server | Check port `7000/tcp` is open on the VPS firewall; verify `auth.token` matches in both `frps.toml` and `frpc.toml`; check `podman logs frps` for `authentication failed` errors |
+| frp HTTP vhost not routing | Ensure the `customDomains` value resolves to your VPS IP; verify `vhostHTTPPort` in `frps.toml` matches the port you're testing; check that `type = "http"` (not `tcp`) is set in `frpc.toml` |
 
+| FRR container exits immediately | Check `~/frr/etc/daemons` exists and `zebra=yes` is set; FRR requires zebra regardless of which other daemons are enabled |
+| FRR `permission denied` on routing table | Ensure `cap_add: [NET_ADMIN, NET_RAW, SYS_ADMIN]` is in compose.yaml; verify `network_mode: host` is set |
+| BGP peer stuck in `Active` state | Confirm the peer IP is reachable (`ping` from within the container); check both sides have each other's router-id as neighbor; verify AS numbers match the expected iBGP/eBGP setup |
+| BGP routes received but not in kernel table | Check `show ip route bgp` vs `show ip bgp` — missing routes may be filtered by a route-map or have a lower admin distance than a static/connected route |
+| OSPF neighbor stuck in `Init` | Both sides must be in the same area and have matching hello/dead timers; check `passive-interface` isn't blocking the peering interface |
+| `hcloud` command not found after Nix install | Ensure `~/.nix-profile/bin` is on your `PATH`; run `source ~/.nix-profile/etc/profile.d/nix.sh` or add it to `~/.bashrc` |
+| AWS CLI `NoCredentialsError` | Run `aws configure` or export `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables |
+| cloud-init not running on Hetzner VM | Verify the user-data was passed correctly: `hcloud server describe <name>` shows `User Data: yes`; SSH in and check `cloud-init status` and `journalctl -u cloud-init` |
+| cloud-init schema validation fails | Common issues: missing `#cloud-config` header on line 1; YAML indentation errors; `runcmd` items must be lists (use `- command` not `command`) |

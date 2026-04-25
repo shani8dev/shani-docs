@@ -12,7 +12,23 @@ For multi-node, replicated, and HA deployments see the [Clusters wiki](https://d
 
 ---
 
-## MariaDB / MySQL
+## CAP Theorem Quick Reference
+
+The CAP theorem states that a distributed system can guarantee at most two of three properties: **Consistency** (all nodes see the same data at the same time), **Availability** (every request gets a response), and **Partition tolerance** (the system continues operating when network partitions occur). Since real networks always partition eventually, the real choice is between CP and AP.
+
+| Database | CAP Classification | What this means in practice |
+|----------|-------------------|------------------------------|
+| PostgreSQL (single node) | CA | No partition tolerance — not distributed. ACID guarantees fully. |
+| PostgreSQL + Patroni | CP | During failover election, the primary is unavailable. Consistency is never compromised. |
+| Redis (single) | CA | No partition tolerance. Synchronous but not distributed. |
+| Redis Sentinel | CP | Primary unavailable during failover election (~5s). |
+| Cassandra / ScyllaDB | AP | Always available. Eventual consistency — reads may return stale data. Tune with `QUORUM` consistency level to move toward CP. |
+| MongoDB Replica Set | CP | Primary unavailable during re-election. Strongly consistent by default. |
+| Kafka | AP | Brokers stay available; consumers may see stale offsets during partition. |
+| CockroachDB | CP | Strong consistency (serializable isolation) with partition tolerance. May be temporarily unavailable in split-brain. |
+| etcd | CP | Refuses requests if quorum is lost. Never returns stale data. |
+
+---
 
 **Purpose:** Open-source relational database for web apps, CMS platforms, and legacy software stacks.
 
@@ -101,6 +117,52 @@ cd ~/postgres && podman-compose up -d
 > **Connect**: `podman exec -it postgres psql -U myuser -d mydb`
 > **Backup**: `podman exec postgres pg_dump -U myuser mydb > backup.sql`
 > **GUI**: pgAdmin (see below)
+
+### JSON vs JSONB
+
+PostgreSQL has two JSON types with an important difference:
+
+- **`json`** stores the raw text of the JSON document, preserving whitespace and key order. Every query re-parses the text. Fast to write, slow to query.
+- **`jsonb`** stores a parsed binary representation, normalises key order, and supports GIN indexing. Slightly slower to write, much faster to query. Use `jsonb` for almost everything.
+
+```sql
+-- GIN index on jsonb — makes @>, ?, ?| operators fast
+CREATE INDEX ON documents USING GIN (metadata);
+
+-- Query: find all documents where metadata contains a specific key
+SELECT id FROM documents WHERE metadata ? 'author';
+
+-- Query: containment — metadata must contain this subset
+SELECT id FROM documents WHERE metadata @> '{"status": "published"}';
+```
+
+### PostgreSQL Index Types
+
+| Index Type | Best For | Notes |
+|-----------|----------|-------|
+| **B-tree** (default) | Equality and range queries (`=`, `<`, `>`, `BETWEEN`) | Works for most cases |
+| **Hash** | Equality only (`=`) | Faster than B-tree for pure equality, no range support |
+| **GIN** | `jsonb`, arrays, full-text search, `LIKE '%pattern%'` | Handles multiple values per row |
+| **BRIN** | Very large tables with naturally ordered data (timestamps, sequential IDs) | Tiny index, useful for append-only logs |
+| **GiST** | Geometric data, full-text search with ranking, range types | More flexible than GIN for some workloads |
+
+Use `EXPLAIN ANALYZE` to verify an index is being used:
+```sql
+EXPLAIN ANALYZE SELECT * FROM orders WHERE created_at > NOW() - INTERVAL '7 days';
+-- Look for "Index Scan" vs "Seq Scan" — a Seq Scan on a large table indicates a missing index
+```
+
+**Partial indexes** index only a subset of rows — useful for filtering on a common condition:
+```sql
+-- Only index active users — much smaller, faster for this specific query
+CREATE INDEX ON users (email) WHERE active = true;
+```
+
+**Covering indexes** include extra columns so the query can be satisfied from the index alone without touching the table:
+```sql
+-- Include username so queries that fetch both email+username don't need a table lookup
+CREATE INDEX ON users (email) INCLUDE (username);
+```
 
 **pgAdmin (PostgreSQL GUI):**
 ```yaml
@@ -237,7 +299,47 @@ conn.commit()
 
 ---
 
-## Redis
+## PgBouncer (PostgreSQL Connection Pooler)
+
+**Purpose:** PostgreSQL is process-based — every client connection spawns a separate backend process. Under high load (hundreds of concurrent connections from an application server), this becomes the bottleneck. PgBouncer sits between your app and PostgreSQL, maintaining a small pool of real database connections and multiplexing many application connections onto them.
+
+**Pool modes:**
+- **Transaction mode** (recommended) — a database connection is held only for the duration of a single transaction. Most efficient, but prepared statements and session-level features (`SET`, advisory locks) don't work across transactions.
+- **Session mode** — a database connection is held for the entire application session. Fully transparent to the app but uses more connections.
+- **Statement mode** — one database connection per SQL statement. Very aggressive; breaks multi-statement transactions.
+
+```yaml
+# ~/pgbouncer/compose.yaml
+services:
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    ports:
+      - 127.0.0.1:5432:5432    # apps connect here instead of directly to postgres
+    environment:
+      DB_HOST: host.containers.internal
+      DB_PORT: 5432
+      DB_USER: myuser
+      DB_PASSWORD: strongpassword
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 1000     # max app-side connections
+      DEFAULT_POOL_SIZE: 25     # actual connections to PostgreSQL
+      AUTH_TYPE: scram-sha-256
+    restart: unless-stopped
+```
+
+```bash
+cd ~/pgbouncer && podman-compose up -d
+```
+
+**Check pool status:**
+```bash
+# Connect to the PgBouncer admin interface
+psql -h localhost -p 5432 -U myuser pgbouncer -c "SHOW POOLS;"
+psql -h localhost -p 5432 -U myuser pgbouncer -c "SHOW STATS;"
+psql -h localhost -p 5432 -U myuser pgbouncer -c "SHOW CLIENTS;"
+```
+
+> Applications connect to PgBouncer on port 5432 exactly as they would connect directly to PostgreSQL — the pooling is completely transparent. Change only the host/port in your connection string.
 
 **Purpose:** High-performance in-memory data store used for caching, session management, message brokering, and real-time analytics. Used as a dependency by Nextcloud, Immich, Authentik, and many others.
 
@@ -298,9 +400,68 @@ podman exec redis redis-cli client list
 > **Test**: `podman exec -it redis redis-cli ping`
 > **Monitor**: `podman exec -it redis redis-cli monitor`
 
----
+### Redis Data Structures
 
-## Valkey
+Redis is not just a key-value store — it has five core data types, each suited to different use cases:
+
+**String** — the default. Any binary-safe value up to 512 MB. Used for caching, counters, rate limiting.
+```bash
+SET session:abc123 '{"user_id": 42}' EX 3600   # with 1-hour TTL
+INCR page_views:home                             # atomic counter
+```
+
+**List** — ordered, allows duplicates. Implemented as a doubly-linked list. Used for queues and activity feeds.
+```bash
+LPUSH jobs:email '{"to":"alice@example.com"}'   # push to head (producer)
+BRPOP jobs:email 30                              # blocking pop from tail (consumer, 30s timeout)
+```
+
+**Set** — unordered, unique members. Used for tags, unique visitors, friend lists.
+```bash
+SADD online_users user:42 user:99
+SISMEMBER online_users user:42                   # is user:42 online?
+SINTER premium_users active_users               # intersection: premium AND active
+```
+
+**Sorted Set** — unique members each with a float score. Members are ordered by score. Used for leaderboards, priority queues, rate limiting with sliding windows.
+```bash
+ZADD leaderboard 9850 "alice" 7200 "bob"
+ZRANGE leaderboard 0 9 REV WITHSCORES           # top 10, highest score first
+ZADD leaderboard INCR 100 "alice"               # add 100 to alice's score
+```
+
+**Hash** — field-value pairs within a single key. More memory-efficient than storing each field as a separate string key. Used for objects, user profiles, configuration.
+```bash
+HSET user:42 name "Alice" email "alice@example.com" role "admin"
+HGET user:42 email
+HGETALL user:42
+```
+
+**Pub/Sub vs Streams vs Lists for messaging:**
+- **Pub/Sub** (`SUBSCRIBE`, `PUBLISH`) — fire-and-forget. Messages are delivered to current subscribers only; no persistence, no acknowledgement.
+- **Lists** with `BRPOP` — simple work queue. One producer, one consumer per message. Good for tasks.
+- **Streams** (`XADD`, `XREADGROUP`) — persistent, consumer-group-aware event log. Replay, acknowledgement, multiple consumer groups. The closest Redis equivalent to Kafka.
+
+### Redis Persistence Modes
+
+Redis has two persistence mechanisms with fundamentally different trade-offs:
+
+**RDB (Redis Database Snapshot)** — point-in-time snapshots saved to disk periodically. Compact, fast to load on restart, but you lose all writes since the last snapshot if Redis crashes.
+
+**AOF (Append-Only File)** — every write command is appended to a log file. Configurable fsync policy: `always` (safe, slow), `everysec` (default, loses at most 1 second of data), `no` (fastest, OS decides).
+
+```bash
+# Enable AOF (what --appendonly yes does)
+redis-server --appendonly yes --appendfsync everysec
+
+# Enable RDB snapshots every 60 seconds if 1000 keys changed
+redis-server --save 60 1000
+
+# Use both (recommended for production)
+redis-server --appendonly yes --save 900 1 --save 300 10 --save 60 10000
+```
+
+**Trade-off summary:** RDB gives faster restarts and smaller files; AOF gives better durability. For a homelab cache, losing a few seconds of data on crash is usually acceptable — use AOF with `everysec`. For session storage or queues where losing data matters, use `always` or run both.
 
 **Purpose:** The Linux Foundation's open-source fork of Redis, created after the Redis licence change. Drop-in compatible with all Redis clients — just swap the image. Recommended if you want fully open-source Redis semantics under the BSD licence going forward.
 

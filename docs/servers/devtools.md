@@ -1286,11 +1286,144 @@ windmill.home.local  { tls internal; reverse_proxy localhost:8300 }
 
 ---
 
-## Troubleshooting
+## Gitea / Forgejo Webhooks
 
-| Issue | Solution |
-|-------|----------|
-| Gitea SSH push fails | Confirm client is using `Port 2222` in `~/.ssh/config`; check `gitea` user has write access to the data volume |
+Webhooks let Gitea/Forgejo notify external services when events happen in a repository — a push, a pull request, a tag. This is how CI/CD pipelines get triggered without polling.
+
+**Configuring a webhook in Gitea:**
+1. Go to **Repository → Settings → Webhooks → Add Webhook**
+2. Choose **Gitea** (for native events) or **HTTP** (for generic JSON)
+3. Set the **Payload URL** to your CI endpoint (e.g., `https://ci.home.local/api/webhooks`)
+4. Select which events trigger the hook (push, pull request, release)
+5. Gitea sends a signed HMAC-SHA256 payload — verify the `X-Gitea-Signature` header in your receiver
+
+**Trigger a Woodpecker pipeline on push:**
+```bash
+# Woodpecker registers its webhook automatically when you enable a repo in the UI
+# Verify the webhook appeared under Repository → Settings → Webhooks
+
+# Test manually (simulate a push event)
+curl -X POST https://ci.home.local/api/webhooks \
+  -H "X-Gitea-Event: push" \
+  -H "Content-Type: application/json" \
+  -d '{"ref": "refs/heads/main", "repository": {"full_name": "user/myrepo"}}'
+```
+
+---
+
+## Branch Protection and Merge Strategies
+
+**Branch protection** (Repository → Settings → Branches → Add Protected Branch) enforces quality gates before changes can land on important branches like `main`:
+
+- **Require status checks** — CI must pass before merging
+- **Require pull request reviews** — at least N reviewers must approve
+- **Restrict pushes** — only specific users or teams can push directly
+- **Require signed commits** — all commits must be GPG-signed
+
+**Merge strategies** affect what the git history looks like after a PR is merged:
+
+| Strategy | What happens | Best for |
+|----------|-------------|----------|
+| **Merge commit** | Preserves all commits + adds a merge commit | Full history traceability |
+| **Squash and merge** | All PR commits become a single commit on `main` | Clean history, easier `git bisect` |
+| **Rebase and merge** | Replays PR commits on top of `main`, no merge commit | Linear history, no merge commits |
+
+**Linear history enforcement** (Squash or Rebase only) makes `git log` readable and `git bisect` reliable. Choose one strategy per repository and enforce it via branch protection — mixing strategies produces a chaotic history.
+
+---
+
+## Secret Scanning
+
+Accidentally committed secrets (API keys, passwords, tokens) are one of the most common security incidents. Add secret scanning as a CI step to catch them before they land on `main`.
+
+**gitleaks** scans for known secret patterns (AWS keys, GitHub tokens, generic high-entropy strings):
+
+```yaml
+# .forgejo/workflows/secret-scan.yml
+name: Secret Scan
+on: [push, pull_request]
+
+jobs:
+  gitleaks:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0    # full history — gitleaks scans all commits, not just HEAD
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+Or as a pre-commit hook (runs locally before you can even push):
+```bash
+# Install pre-commit
+nix-env -iA nixpkgs.pre-commit
+
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.0
+    hooks:
+      - id: gitleaks
+```
+
+```bash
+pre-commit install   # installs the hook into .git/hooks/pre-commit
+```
+
+If gitleaks fires on a legitimate secret that's already been rotated and removed, add it to `.gitleaksignore` with a hash so future scans skip that specific finding.
+
+---
+
+## Container Image Build Patterns
+
+**Minimal base images** reduce attack surface by shipping fewer packages. Less software = fewer CVEs = smaller Trivy scan results.
+
+| Base image | Size | Use when |
+|-----------|------|----------|
+| `debian:bookworm-slim` | ~75 MB | Need a shell, standard tooling, apt packages |
+| `alpine:3` | ~7 MB | Shell + musl libc; some binaries need recompilation |
+| `gcr.io/distroless/static` | ~2 MB | Statically compiled binaries (Go, Rust) — no shell at all |
+| `scratch` | 0 bytes | Fully static binaries, maximum minimalism |
+
+**Distroless** images have no shell, no package manager, no `ls`, no `cat`. You can't `exec` into them for debugging — use `kubectl debug` with a sidecar image instead. The tradeoff is worth it for production: no shell means no shell exploitation.
+
+**Layer caching in multi-stage builds:** order your Dockerfile so the steps that change least frequently come first. Dependencies (which change rarely) before application code (which changes every commit):
+
+```dockerfile
+FROM golang:1.23 AS builder
+WORKDIR /src
+
+# Copy go.mod first — cached until dependencies change
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source second — cache is invalidated only when source changes
+COPY . .
+RUN go build -o /app ./cmd/server
+
+FROM gcr.io/distroless/static:nonroot
+COPY --from=builder /app /app
+USER nonroot:nonroot
+ENTRYPOINT ["/app"]
+```
+
+**Using `--cache-from` in CI** pulls the previously built image to warm the layer cache across pipeline runs:
+
+```yaml
+- name: Build
+  run: |
+    podman build \
+      --cache-from ghcr.io/myuser/myapp:cache \
+      --cache-to ghcr.io/myuser/myapp:cache \
+      -t ghcr.io/myuser/myapp:${{ github.sha }} .
+```
+
+---
+
+## Troubleshooting | Confirm client is using `Port 2222` in `~/.ssh/config`; check `gitea` user has write access to the data volume |
 | Woodpecker agent not picking up jobs | Verify `WOODPECKER_AGENT_SECRET` matches on server and agent; check the agent has access to the Docker/Podman socket |
 | code-server blank after login | Verify `PASSWORD` env var is set; check the port is not in use by another service |
 | Private registry push rejected | Add `{ "insecure-registries": ["localhost:5000"] }` to `/etc/containers/registries.conf`; restart Podman |

@@ -143,7 +143,19 @@ curl "http://localhost:9200/_cat/nodes?v&h=name,role,heap.percent,disk.used_perc
 
 ---
 
-## OpenSearch Cluster (3-Node)
+## How Quorum and Split-Brain Prevention Work
+
+Every distributed system in this wiki — Elasticsearch, etcd, Kafka, Patroni, Redis Sentinel — relies on the same underlying idea: a **quorum**.
+
+A cluster of N nodes requires ⌊N/2⌋ + 1 nodes to agree before making any decision (electing a leader, accepting a write, allocating a shard). With 3 nodes, quorum = 2. If 1 node fails, the remaining 2 can still reach agreement — the cluster stays available. If 2 nodes fail, the 1 remaining node can't form a quorum alone, so it refuses to make decisions rather than risk acting on stale or inconsistent data.
+
+**Why odd numbers:** A 4-node cluster has quorum = 3, so it can only tolerate 1 failure — same as a 3-node cluster, but at higher cost. Even-numbered clusters also create a risk of a 2-2 split where neither partition can reach quorum, leaving the whole system stuck. Odd numbers are not required, but they give you the best fault tolerance per node.
+
+**What split-brain means in practice:** If a network partition divides a cluster into two halves that can't communicate, and both halves could independently elect a leader and accept writes, you'd end up with two diverged datasets with no way to reconcile them. Quorum prevents this: only the partition with enough nodes to reach quorum can continue operating. The minority partition refuses to act.
+
+**Why Patroni uses etcd:** The leader election process requires a distributed consensus store that is itself fault-tolerant. Patroni nodes race to write a leader lock key in etcd. The node that succeeds becomes primary. The lock has a TTL (time-to-live); if the primary fails to renew it before expiry, etcd expires the key and a new election begins. The health check HAProxy hits (port 8008) is the Patroni REST API, not PostgreSQL directly — HAProxy asks Patroni "are you the primary?" rather than probing the database port.
+
+---
 
 **Purpose:** Apache 2.0-licensed ELK alternative. Drop-in API compatible with Elasticsearch — any Logstash output, Filebeat, or Metricbeat works without changes. Includes Data Prepper, OpenSearch's native log pipeline (Logstash equivalent).
 
@@ -403,9 +415,29 @@ podman exec kafka1 kafka-topics \
 
 > `KAFKA_MIN_INSYNC_REPLICAS: 2` means a producer with `acks=all` requires at least 2 replicas to acknowledge a write — preventing data loss if a node fails mid-write. The cluster tolerates the loss of 1 broker.
 
----
+### How Kafka Consumer Groups Work
 
-## PostgreSQL HA with Patroni
+A **consumer group** is a set of consumers that collectively read a topic. Kafka assigns each partition to exactly one consumer in the group at a time. If a topic has 6 partitions and your consumer group has 3 instances, each instance gets 2 partitions. If you scale to 6 instances, each gets 1. If you add a 7th, it sits idle — you can't have more active consumers than partitions.
+
+**Rebalancing** happens when a consumer joins or leaves the group. During a rebalance, all partition assignments are renegotiated — no consumer processes messages until the rebalance completes. This is the "rebalance storm" problem: if consumers join/leave frequently (e.g., due to crashlooping pods), the group never stabilises and consumer lag grows continuously.
+
+`max.poll.interval.ms` controls how long Kafka waits between calls to `poll()` before declaring a consumer dead and triggering a rebalance. If your processing logic is slow (e.g., calling an external API per message), increase this value — otherwise Kafka will evict the consumer mid-processing, causing messages to be redelivered.
+
+```bash
+# Check consumer group lag — how far behind each consumer is
+podman exec kafka1 kafka-consumer-groups \
+  --bootstrap-server kafka1:29092 \
+  --describe --group my-consumer-group
+
+# Reset offsets to re-process from beginning (use with caution)
+podman exec kafka1 kafka-consumer-groups \
+  --bootstrap-server kafka1:29092 \
+  --group my-consumer-group \
+  --topic my-topic \
+  --reset-offsets --to-earliest --execute
+```
+
+---
 
 **Purpose:** Patroni is the industry-standard PostgreSQL HA solution. It manages automatic failover: if the primary goes down, Patroni promotes a standby to primary within seconds. etcd stores cluster state and is used for distributed leader election.
 

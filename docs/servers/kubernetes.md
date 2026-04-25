@@ -408,6 +408,788 @@ helm show values ingress-nginx/ingress-nginx
 
 ---
 
+## Gateway API (Next-Generation Ingress)
+
+**Purpose:** The official successor to Kubernetes Ingress resources. Gateway API provides a richer, more expressive routing model — HTTP routes, gRPC routes, TCP routes, TLS termination, traffic splitting, and header-based routing — all as first-class CRDs rather than annotations. cert-manager, ingress-nginx v1.9+, Cilium, and most modern ingress controllers now support it. Deploy Gateway API alongside (or instead of) `Ingress` resources for new workloads.
+
+```bash
+# Install the Gateway API CRDs (standard channel)
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/latest/download/standard-install.yaml
+
+# For experimental features (GRPCRoute, TCPRoute, etc.)
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/latest/download/experimental-install.yaml
+```
+
+**Create a GatewayClass and Gateway (ingress-nginx example):**
+```yaml
+# ~/k8s/gateway.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: nginx
+spec:
+  controllerName: k8s.io/ingress-nginx
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: main
+  namespace: default
+spec:
+  gatewayClassName: nginx
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+    - name: https
+      port: 443
+      protocol: HTTPS
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: my-tls-secret
+```
+
+**HTTPRoute — route traffic to a service:**
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: myapp
+  namespace: default
+spec:
+  parentRefs:
+    - name: main
+  hostnames:
+    - "myapp.home.local"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: myapp
+          port: 80
+```
+
+```bash
+kubectl apply -f ~/k8s/gateway.yaml
+kubectl get gateways
+kubectl get httproutes
+```
+
+> **Gateway API vs Ingress:** Use Gateway API for new workloads — it is the upstream direction. Keep existing Ingress resources as-is unless migrating. Both can coexist in the same cluster.
+
+---
+
+## HPA — Horizontal Pod Autoscaler
+
+**Purpose:** Automatically scales the number of pod replicas in a Deployment or StatefulSet based on observed CPU utilisation, memory, or custom metrics. HPA is the primary scaling mechanism for stateless workloads — it adjusts replica count between a defined min and max as load changes. Pairs with KEDA (below) for event-driven scaling and VPA/Goldilocks for right-sizing resource requests.
+
+**CPU-based HPA (simplest — scales when average CPU > 70%):**
+```yaml
+# ~/k8s/hpa-cpu.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: myapp-hpa
+  namespace: myapp
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: myapp
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70    # scale up when avg CPU > 70%
+```
+
+**Memory + CPU combined HPA:**
+```yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: myapp-hpa
+  namespace: myapp
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: myapp
+  minReplicas: 2
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: AverageValue
+          averageValue: 512Mi
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60      # wait 60s before scaling up again
+      policies:
+        - type: Pods
+          value: 4
+          periodSeconds: 60               # add at most 4 pods per minute
+    scaleDown:
+      stabilizationWindowSeconds: 300     # wait 5m before scaling down (avoids flapping)
+      policies:
+        - type: Percent
+          value: 25
+          periodSeconds: 60               # remove at most 25% of pods per minute
+```
+
+**Custom metrics HPA (scale on Prometheus metric via KEDA or Prometheus Adapter):**
+```yaml
+# Requires either KEDA (recommended) or prometheus-adapter to be installed
+# KEDA approach — scale on HTTP request rate:
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: myapp-http-scaler
+  namespace: myapp
+spec:
+  scaleTargetRef:
+    name: myapp
+  minReplicaCount: 2
+  maxReplicaCount: 50
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus.monitoring.svc:9090
+        metricName: http_requests_per_second
+        threshold: "100"
+        query: |
+          sum(rate(http_requests_total{job="myapp"}[1m]))
+```
+
+**Imperative HPA (quick testing):**
+```bash
+# Create HPA imperatively
+kubectl autoscale deployment myapp --cpu-percent=70 --min=2 --max=10 -n myapp
+
+# Describe HPA — shows current replicas, targets, and last scale event
+kubectl describe hpa myapp-hpa -n myapp
+
+# Watch HPA in real time
+kubectl get hpa -n myapp -w
+
+# Check current metrics
+kubectl top pods -n myapp
+kubectl top nodes
+```
+
+**Prerequisites — metrics-server must be installed:**
+```bash
+# k3s: metrics-server is included by default
+# Other distributions:
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+# Verify
+kubectl get apiservice v1beta1.metrics.k8s.io
+kubectl top nodes
+```
+
+> **HPA requires resource requests set on containers.** HPA calculates utilisation as `current_usage / requested`. If `resources.requests.cpu` is unset, HPA cannot calculate CPU percentage and will show `<unknown>` for the metric. Always set requests — use Goldilocks (below) to find the right values.
+
+---
+
+## Kubernetes RBAC (Role-Based Access Control)
+
+**Purpose:** Controls who (ServiceAccounts, users, groups) can do what (verbs: get, list, watch, create, update, patch, delete) on which resources (pods, deployments, secrets, configmaps) in which scope (namespace-scoped via Role/RoleBinding, or cluster-wide via ClusterRole/ClusterRoleBinding). Mastering RBAC is required for any production Kubernetes role — it's how you give CI/CD pipelines minimal permissions, isolate tenant namespaces, and audit access.
+
+**Core concepts:**
+```
+Role / ClusterRole       — defines permissions (what verbs on what resources)
+RoleBinding              — binds a Role to a subject within a namespace
+ClusterRoleBinding       — binds a ClusterRole to a subject cluster-wide
+Subject                  — User, Group, or ServiceAccount
+```
+
+**Namespace-scoped Role (read-only access to pods and logs in one namespace):**
+```yaml
+# ~/k8s/rbac-readonly.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-reader
+  namespace: myapp
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pod-reader-binding
+  namespace: myapp
+subjects:
+  - kind: User
+    name: developer@example.com
+    apiGroup: rbac.authorization.k8s.io
+  - kind: Group
+    name: dev-team
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+```
+
+**CI/CD ServiceAccount (minimal deploy permissions for a pipeline):**
+```yaml
+# ~/k8s/rbac-cicd.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cicd-deployer
+  namespace: myapp
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: deployer
+  namespace: myapp
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets"]
+    verbs: ["get", "list", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["configmaps", "services"]
+    verbs: ["get", "list", "update", "patch", "create"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch", "delete"]   # delete to force rollout
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cicd-deployer-binding
+  namespace: myapp
+subjects:
+  - kind: ServiceAccount
+    name: cicd-deployer
+    namespace: myapp
+roleRef:
+  kind: Role
+  name: deployer
+  apiGroup: rbac.authorization.k8s.io
+```
+
+```bash
+kubectl apply -f ~/k8s/rbac-cicd.yaml
+
+# Extract a kubeconfig for the CI/CD ServiceAccount
+kubectl create token cicd-deployer -n myapp --duration=8760h
+# Use this token in GitHub Actions secrets as KUBECONFIG
+```
+
+**ClusterRole (cluster-wide — use sparingly):**
+```yaml
+# ~/k8s/rbac-cluster-readonly.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-viewer
+rules:
+  - apiGroups: [""]
+    resources: ["nodes", "namespaces", "persistentvolumes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets", "daemonsets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["nodes", "pods"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-viewer-binding
+subjects:
+  - kind: Group
+    name: platform-team       # matches OIDC group if using Dex or Keycloak
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: cluster-viewer
+  apiGroup: rbac.authorization.k8s.io
+```
+
+**Built-in ClusterRoles (use instead of creating your own when possible):**
+```bash
+# List all built-in ClusterRoles
+kubectl get clusterroles | grep -v system:
+
+# Useful built-ins:
+# view             — read-only access to most resources (namespace-scoped)
+# edit             — read/write most resources, cannot change RBAC
+# admin            — full namespace access, can manage RBAC within the namespace
+# cluster-admin    — superuser — avoid granting to CI/CD pipelines
+
+# Grant 'edit' to a user in a specific namespace
+kubectl create rolebinding myuser-edit \
+  --clusterrole=edit \
+  --user=developer@example.com \
+  --namespace=myapp
+```
+
+**Audit and debug RBAC:**
+```bash
+# Check what a ServiceAccount / user can do
+kubectl auth can-i create deployments --as=system:serviceaccount:myapp:cicd-deployer -n myapp
+kubectl auth can-i delete secrets --as=system:serviceaccount:myapp:cicd-deployer -n myapp
+
+# List all permissions for a ServiceAccount
+kubectl auth can-i --list --as=system:serviceaccount:myapp:cicd-deployer -n myapp
+
+# Who has access to secrets in a namespace?
+kubectl get rolebindings,clusterrolebindings -A -o json | \
+  python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+for item in d['items']:
+    for s in item.get('subjects',[]):
+        if item.get('roleRef',{}).get('name','').find('secret') != -1 or True:
+            print(item['metadata']['name'], s.get('name',''), item['roleRef']['name'])
+" | grep -i secret
+```
+
+**Namespace isolation with RBAC + NetworkPolicy (multi-tenant pattern):**
+```yaml
+# Each team gets their own namespace and ServiceAccount
+# with a Role scoped to that namespace only.
+# Combined with a NetworkPolicy that blocks cross-namespace traffic:
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-cross-namespace
+  namespace: team-a
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - podSelector: {}   # allow from same namespace
+  egress:
+    - to:
+        - podSelector: {}   # allow to same namespace
+    - ports:
+        - port: 53           # allow DNS
+          protocol: UDP
+```
+
+---
+
+## Karpenter (Node Autoscaling)
+
+**Purpose:** Node autoscaler that provisions exactly the right EC2/cloud VM instance type for pending pods — rather than pre-defining node groups. When a pod is unschedulable, Karpenter launches a new node with the cheapest/fastest fit, and terminates idle nodes aggressively. Most useful when running k3s agents on cloud VMs (Hetzner, AWS, DigitalOcean) and you want cost-efficient autoscaling.
+
+```bash
+# Install Karpenter (Helm — configure for your cloud provider)
+helm repo add karpenter https://charts.karpenter.sh
+helm repo update
+
+helm upgrade --install karpenter karpenter/karpenter \
+  --namespace karpenter --create-namespace \
+  --set settings.clusterName=homelab \
+  --set settings.interruptionQueue=homelab-karpenter
+```
+
+**NodePool — define acceptable node shapes:**
+```yaml
+# ~/k8s/karpenter-nodepool.yaml
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: default
+spec:
+  template:
+    spec:
+      requirements:
+        - key: kubernetes.io/arch
+          operator: In
+          values: [amd64]
+        - key: karpenter.k8s.aws/instance-category
+          operator: In
+          values: [c, m, r]
+      nodeClassRef:
+        group: karpenter.k8s.aws
+        kind: EC2NodeClass
+        name: default
+  limits:
+    cpu: 100
+  disruption:
+    consolidationPolicy: WhenEmptyOrUnderutilized
+    consolidateAfter: 1m
+```
+
+```bash
+kubectl apply -f ~/k8s/karpenter-nodepool.yaml
+# Watch Karpenter launch nodes as pending pods arrive
+kubectl logs -n karpenter -l app.kubernetes.io/name=karpenter -f
+```
+
+---
+
+## Talos Linux (Immutable Kubernetes OS)
+
+**Purpose:** Talos is a minimal, API-only, immutable Linux distribution purpose-built for Kubernetes. There is no SSH, no shell, no package manager — all cluster operations go through the `talosctl` API. This eliminates an entire class of security risks and makes clusters fully declarative. Ideal for homelab users who want a production-grade, GitOps-managed cluster.
+
+### Install
+
+```bash
+# Install talosctl via Nix
+nix-env -iA nixpkgs.talosctl
+
+# Download the Talos ISO for your hardware
+# https://github.com/siderolabs/talos/releases
+
+# Or use the factory image builder for custom hardware:
+# https://factory.talos.dev
+```
+
+**Bootstrap a single-node cluster:**
+```bash
+# Generate machine config
+talosctl gen config homelab https://<node-ip>:6443 \
+  --output-dir ~/talos-config/
+
+# Apply config to the node (boot from ISO first)
+talosctl apply-config --insecure \
+  --nodes <node-ip> \
+  --file ~/talos-config/controlplane.yaml
+
+# Bootstrap etcd (first control plane node only)
+talosctl bootstrap --nodes <node-ip> \
+  --talosconfig ~/talos-config/talosconfig
+
+# Get kubeconfig
+talosctl kubeconfig ~/.kube/config \
+  --nodes <node-ip> \
+  --talosconfig ~/talos-config/talosconfig
+
+# Verify
+kubectl get nodes
+```
+
+**Common operations:**
+```bash
+# Check node health
+talosctl health --nodes <node-ip> --talosconfig ~/talos-config/talosconfig
+
+# Read kernel logs
+talosctl dmesg --nodes <node-ip>
+
+# Upgrade Talos (zero-downtime, in-place)
+talosctl upgrade --nodes <node-ip> --image ghcr.io/siderolabs/installer:<version>
+
+# Upgrade Kubernetes
+talosctl upgrade-k8s --to 1.30.0 --nodes <node-ip>
+
+# Get a shell inside a pod (only way to interact with running workloads)
+kubectl exec -it <pod> -- /bin/sh
+```
+
+> Talos enforces immutability at the OS level — the root filesystem is read-only. All customisation is done via machine configs applied through `talosctl`.
+
+---
+
+## kubeadm (Upstream Reference Install)
+
+**Purpose:** The official upstream Kubernetes installation tool from the Kubernetes project. Every distribution (k3s, k0s, RKE2) is built on top of what kubeadm establishes. It's the most portable way to stand up a production Kubernetes cluster on bare metal or any cloud — no vendor magic, just vanilla upstream Kubernetes. Required knowledge for the CKA exam and many enterprise environments.
+
+```bash
+# On Shani OS, install kubeadm and its dependencies via Nix
+nix-env -iA nixpkgs.kubeadm nixpkgs.kubelet nixpkgs.kubectl
+
+# Enable required kernel modules
+sudo modprobe overlay
+sudo modprobe br_netfilter
+echo "overlay" | sudo tee /etc/modules-load.d/k8s.conf
+echo "br_netfilter" | sudo tee -a /etc/modules-load.d/k8s.conf
+
+# Set sysctl params
+cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+EOF
+sudo sysctl --system
+```
+
+**Initialise the control plane:**
+```bash
+sudo kubeadm init \
+  --pod-network-cidr=10.244.0.0/16 \
+  --apiserver-advertise-address=<node-ip>
+
+# Set up kubeconfig
+mkdir -p ~/.kube
+sudo cp /etc/kubernetes/admin.conf ~/.kube/config
+sudo chown $USER:$USER ~/.kube/config
+
+# Install a CNI (Flannel)
+kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+
+# Get the join command for worker nodes
+kubeadm token create --print-join-command
+```
+
+**Join a worker node:**
+```bash
+# Run the join command from the control plane output
+sudo kubeadm join <control-plane-ip>:6443 \
+  --token <token> \
+  --discovery-token-ca-cert-hash sha256:<hash>
+```
+
+**Common operations:**
+```bash
+# Check component status
+kubectl get componentstatuses
+kubeadm certs check-expiration
+
+# Renew certificates (before they expire)
+sudo kubeadm certs renew all
+
+# Upgrade the cluster
+sudo kubeadm upgrade plan
+sudo kubeadm upgrade apply v1.30.0
+
+# Reset a node (destructive — removes all cluster state)
+sudo kubeadm reset
+```
+
+---
+
+## Goldilocks (Resource Right-Sizing)
+
+**Purpose:** Goldilocks uses the Kubernetes Vertical Pod Autoscaler (VPA) in recommendation mode to analyse actual resource usage across your namespaces and suggest the right CPU/memory requests and limits for each container. The web dashboard shows current requests vs VPA recommendations and generates ready-to-paste `resources:` blocks for your Helm values files. Eliminates the guesswork of setting resource limits.
+
+```bash
+# Install the VPA (required by Goldilocks)
+kubectl apply -f https://github.com/kubernetes/autoscaler/releases/latest/download/vertical-pod-autoscaler.yaml
+
+# Install Goldilocks via Helm
+helm repo add fairwinds-stable https://charts.fairwinds.com/stable
+helm upgrade --install goldilocks fairwinds-stable/goldilocks \
+  --namespace goldilocks --create-namespace
+
+# Label a namespace to enable VPA recommendations
+kubectl label namespace myapp goldilocks.fairwinds.com/enabled=true
+
+# Port-forward the dashboard
+kubectl -n goldilocks port-forward svc/goldilocks-dashboard 8080:80
+# Open http://localhost:8080
+```
+
+The dashboard shows each deployment with three columns: current requests/limits, VPA lower bound recommendation, and VPA upper bound recommendation. Click any deployment to get a copy-pasteable Helm values block.
+
+> Goldilocks needs at least a few hours of real traffic to produce useful recommendations. It is safe to run in production — VPA is in recommendation mode only, it does not change your pods automatically.
+
+### VPA and HPA Together
+
+A common question is whether you can run VPA and HPA on the same Deployment simultaneously. The answer is: yes, but only if they are scaling on different metrics. If both HPA and VPA try to adjust CPU-based resource settings, they will fight each other in a control loop conflict.
+
+The safe combination: use HPA for replica count based on **custom or external metrics** (e.g., Kafka consumer lag via KEDA, request queue depth), and use VPA to set the right **resource requests** for each replica. This way HPA controls how many pods exist, and VPA controls how much CPU/memory each pod is allocated — orthogonal concerns with no conflict.
+
+Never run HPA on `cpu` or `memory` utilisation and VPA simultaneously on the same Deployment. Pick one for resource-based scaling.
+
+---
+
+## Pod Disruption Budgets
+
+A PodDisruptionBudget (PDB) ensures a minimum number of pods remain available during voluntary disruptions — node drains, cluster upgrades, rolling restarts. Without a PDB, a `kubectl drain` could evict all your pods at once.
+
+```yaml
+# ~/k8s/myapp-pdb.yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: myapp-pdb
+  namespace: myapp
+spec:
+  minAvailable: 2   # at least 2 pods must always be running
+  # Alternatively: maxUnavailable: 1 (at most 1 pod can be down at once)
+  selector:
+    matchLabels:
+      app: myapp
+```
+
+```bash
+kubectl apply -f myapp-pdb.yaml
+
+# Check PDB status
+kubectl get pdb -n myapp
+kubectl describe pdb myapp-pdb -n myapp
+```
+
+`minAvailable` and `maxUnavailable` accept either an integer (absolute count) or a percentage string (`"50%"`). Set `minAvailable` to one less than your replica count so single-pod drains always succeed, but a simultaneous two-node failure is blocked until the first pod reschedules.
+
+PDBs only protect against **voluntary** disruptions (drains, upgrades). They cannot prevent a node from crashing.
+
+---
+
+## Init Containers and Sidecar Containers
+
+**Init containers** run to completion before any of the main containers in a Pod start. They share the Pod's volumes and network but run sequentially, one at a time. Common uses:
+
+- Wait for a dependency to be ready (database, external service)
+- Run database migrations before the app starts
+- Fetch secrets or config files and write them to a shared volume
+
+```yaml
+# Database migration init container pattern
+spec:
+  initContainers:
+    - name: db-migrate
+      image: myapp:v1.4.2
+      command: ["python", "manage.py", "migrate", "--noinput"]
+      env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: myapp-secrets
+              key: database-url
+      # Shares the same volumes as main containers if needed
+  containers:
+    - name: myapp
+      image: myapp:v1.4.2
+      # Main app only starts after db-migrate exits with code 0
+```
+
+**Sidecar containers** run alongside the main container for the full lifetime of the Pod. Common uses: log shipping (Fluentbit), service mesh proxies (Envoy), metrics exporters, secret rotation agents.
+
+```yaml
+spec:
+  containers:
+    - name: myapp
+      image: myapp:latest
+    - name: log-shipper
+      image: fluent/fluent-bit:latest
+      volumeMounts:
+        - name: log-volume
+          mountPath: /var/log/app
+  volumes:
+    - name: log-volume
+      emptyDir: {}
+```
+
+---
+
+## StatefulSets
+
+Deployments are for stateless workloads — any pod is interchangeable with any other. StatefulSets are for stateful workloads — databases, message brokers, caches — where each pod has a stable identity that persists across restarts.
+
+**What StatefulSets provide that Deployments don't:**
+- **Stable network identity** — pods get predictable DNS names: `pod-0.myservice.namespace.svc.cluster.local`, `pod-1.myservice.namespace.svc.cluster.local`. These names are stable across pod restarts.
+- **Ordered deployment** — pods are created and deleted in order (0, 1, 2...). Useful for databases where you want the primary (pod-0) to be fully running before replicas start.
+- **PVC templates** — each pod gets its own PersistentVolumeClaim that is not deleted when the pod is deleted or rescheduled.
+
+```yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: data
+spec:
+  serviceName: postgres        # must match a Headless Service
+  replicas: 3
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:        # each pod gets its own PVC automatically
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 20Gi
+---
+# Headless Service — gives pods stable DNS names
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: data
+spec:
+  clusterIP: None             # headless — no load balancing, direct pod DNS
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+```
+
+**When to use StatefulSet vs Deployment:**
+- StatefulSet: PostgreSQL, Kafka, Elasticsearch, Redis Cluster, ZooKeeper — anything that needs stable identity or per-pod persistent storage.
+- Deployment: web servers, API services, workers — anything where pods are interchangeable and share storage via a PVC or don't need local state.
+
+---
+
+## Debugging with kubectl debug
+
+`kubectl exec` requires the container to have a shell. Distroless images (which have no shell, no utilities) make `exec` impossible. `kubectl debug` solves this by injecting an **ephemeral container** — a temporary debug container that shares the target pod's namespaces without modifying the running pod.
+
+```bash
+# Attach a busybox debug container to a running pod
+kubectl debug -it myapp-pod-xyz \
+  --image=busybox \
+  --target=myapp \
+  -n myapp
+
+# The --target flag shares the process namespace with the myapp container
+# You can see its processes with: ps aux
+# You can read its filesystem via: ls /proc/1/root/
+
+# Use a richer debug image
+kubectl debug -it myapp-pod-xyz \
+  --image=nicolaka/netshoot \
+  --target=myapp \
+  -n myapp
+# netshoot includes: curl, dig, tcpdump, ss, netstat, iperf3, and more
+
+# Debug a node directly (runs a privileged pod on the node)
+kubectl debug node/k3s-node1 \
+  --image=busybox \
+  -it -- chroot /host
+```
+
+`nicolaka/netshoot` is purpose-built for container network debugging — it has every networking tool you might need without bloating your production images.
+
+---
 ## ingress-nginx (Ingress Controller)
 
 **Purpose:** Route external HTTP/HTTPS traffic into your cluster. The most widely used ingress controller. Acts as the Kubernetes equivalent of Caddy or Nginx — define `Ingress` resources and it handles routing.
@@ -451,17 +1233,475 @@ kubectl apply -f ~/k8s/ingress-example.yaml
 
 ---
 
-## cert-manager (Automatic TLS)
 
-**Purpose:** Automatically provision and renew TLS certificates for your Ingress resources — from Let's Encrypt (ACME) or your own internal CA. The Kubernetes equivalent of Caddy's auto-HTTPS.
+## NGINX Gateway Fabric (NGF)
+
+**Purpose:** NGINX's implementation of the Kubernetes Gateway API. Unlike ingress-nginx (which uses `Ingress` resources and annotation-heavy config), NGF is built entirely on the Gateway API CRDs — `GatewayClass`, `Gateway`, `HTTPRoute`, `GRPCRoute` — making routing declarative, namespace-scoped, and annotation-free. A single NGF deployment handles external HTTPS (via Caddy), internal gRPC between pods, and cross-namespace routing from one Gateway resource. On Shani OS with k3s, Caddy on the host acts as the TLS terminator and forwards plain HTTP to NGF via a NodePort.
+
+### Architecture on Shani OS
+
+```
+Browser / client
+  │ HTTPS (tls internal — Step-CA cert from Caddy)
+  ▼
+Caddy (host, port 443)
+  │ HTTP → localhost:30080  (NodePort of nginx-gateway-nginx Service)
+  ▼
+nginx-gateway-nginx Service :30080 (NodePort)
+  │
+  ▼
+NGF (GatewayClass: nginx)
+  ├── HTTPRoute → app pods   (by hostname, e.g. myapp.home.local)
+  └── GRPCRoute → gRPC pods  (internal pod-to-pod via ClusterIP or same NodePort)
+```
+
+Key design points:
+- **Caddy terminates TLS** on the host — NGF receives plain HTTP on port 80. No cert-manager or `tls:` on the Gateway listener needed for homelab.
+- **NodePort 30080** — Caddy proxies `reverse_proxy localhost:30080`; `firewall-cmd` only needs to open the Caddy-facing port, not 30080 to the outside.
+- **One Gateway, one HTTP listener on port 80** — routing is by hostname only (`home.local` domains). Add new services by adding HTTPRoute manifests, no Caddy config changes needed.
+- **ReferenceGrants** — required for any HTTPRoute in the `nginx-gateway` namespace that points to a backend Service in another namespace (cross-namespace is denied by default).
+
+---
+
+### Prerequisites
 
 ```bash
+# Kernel and sysctl (k3s already sets most of these — verify)
+sudo sysctl -w vm.max_map_count=524288
+echo "vm.max_map_count=524288" | sudo tee /etc/sysctl.d/99-k8s.conf
+
+# Install kubectl + helm via Nix if not already present
+nix-env -iA nixpkgs.kubectl nixpkgs.kubernetes-helm
+
+# Install Gateway API CRDs — standard channel v1.4.1 (required by NGF v2.4.2)
+# Includes: GatewayClass, Gateway, HTTPRoute, GRPCRoute, ReferenceGrant
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.1/standard-install.yaml
+
+# Verify all 5 CRDs are Established before proceeding
+kubectl get crd | grep gateway.networking.k8s.io
+# Expected:
+# gatewayclasses.gateway.networking.k8s.io
+# gateways.gateway.networking.k8s.io
+# grpcroutes.gateway.networking.k8s.io
+# httproutes.gateway.networking.k8s.io
+# referencegrants.gateway.networking.k8s.io
+
+# Install NGF CRDs (9 nginx-specific CRDs — required before the Helm chart)
+kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v2.4.2/deploy/crds.yaml
+
+# Verify NGF CRDs
+kubectl get crd | grep gateway.nginx.org
+# nginxproxies, nginxgateways, authenticationfilters, clientsettingspolicies,
+# observabilitypolicies, proxysettingspolicies, ratelimitpolicies, upstreamsettingspolicies
+```
+
+---
+
+### Install NGF
+
+NGF ships as an OCI Helm chart — no `helm repo add` needed.
+
+```bash
+helm upgrade --install nginx-gateway-fabric \
+  oci://ghcr.io/nginx/charts/nginx-gateway-fabric \
+  --version 2.4.2 \
+  --namespace nginx-gateway \
+  --create-namespace \
+  --set nginxGateway.gatewayClassName=nginx \
+  --set nginxGateway.replicas=1 \
+  --set nginx.replicas=1 \
+  --set nginx.autoscaling.enable=false \
+  --wait
+```
+
+**Full values file for a Shani OS homelab (`~/k8s/ngf-values.yaml`):**
+```yaml
+nginxGateway:
+  gatewayClassName: nginx
+  replicas: 1
+  gwAPIExperimentalFeatures:
+    enable: false       # GRPCRoute is GA since v1.1.0 — experimental flag not needed
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+nginx:
+  replicas: 1
+  autoscaling:
+    enable: false       # single-node homelab — no HPA needed
+  container:
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+```
+
+```bash
+helm upgrade --install nginx-gateway-fabric \
+  oci://ghcr.io/nginx/charts/nginx-gateway-fabric \
+  --version 2.4.2 \
+  --namespace nginx-gateway \
+  --create-namespace \
+  -f ~/k8s/ngf-values.yaml \
+  --wait
+
+# Verify pods are running
+kubectl -n nginx-gateway get pods
+# nginx-gateway-fabric-*  (control plane)
+# nginx-gateway-nginx-*   (data plane — NGINX)
+
+# Check GatewayClass is Accepted
+kubectl get gatewayclass nginx
+# ACCEPTED should be True
+```
+
+---
+
+### Expose NGF via NodePort
+
+NGF creates a Service named `nginx-gateway-nginx` when it programs a Gateway. Patch it to NodePort so Caddy on the host can reach it.
+
+```bash
+# Patch the Service to NodePort with a fixed port (30080)
+kubectl -n nginx-gateway patch svc nginx-gateway-nginx \
+  --type='json' \
+  -p='[
+    {"op":"replace","path":"/spec/type","value":"NodePort"},
+    {"op":"add","path":"/spec/ports/0/nodePort","value":30080}
+  ]'
+
+# Verify
+kubectl -n nginx-gateway get svc nginx-gateway-nginx
+# PORT(S): 80:30080/TCP
+
+# Allow the NodePort through firewalld (only needed if other hosts must reach it directly)
+# Caddy on localhost reaches it without a firewall rule
+sudo firewall-cmd --add-port=30080/tcp --permanent && sudo firewall-cmd --reload
+```
+
+> **Tip:** Pin the NodePort in a `values.yaml` or patch it once and leave it. k3s preserves the NodePort across pod restarts and chart upgrades.
+
+---
+
+### Create the Gateway
+
+One Gateway, one HTTP listener on port 80. Caddy handles HTTPS; NGF handles routing by hostname.
+
+```yaml
+# ~/k8s/ngf-gateway.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: nginx-gateway
+  namespace: nginx-gateway
+spec:
+  gatewayClassName: nginx
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: All       # accept HTTPRoutes and GRPCRoutes from any namespace
+```
+
+```bash
+kubectl apply -f ~/k8s/ngf-gateway.yaml
+
+# Check the Gateway is Programmed
+kubectl -n nginx-gateway describe gateway nginx-gateway
+# Conditions: Programmed=True, Accepted=True
+```
+
+---
+
+### Caddy configuration
+
+Caddy on the Shani OS host terminates TLS and proxies all `*.home.local` traffic to NGF's NodePort. Add one entry per hostname — no changes to any Kubernetes manifests needed for new virtual hosts.
+
+```caddyfile
+# Each service that NGF routes — add a hostname here and an HTTPRoute in k8s
+
+myapp.home.local {
+  tls internal
+  reverse_proxy localhost:30080 {
+    header_up Host {host}   # pass the original Host header so NGF can match the HTTPRoute
+  }
+}
+
+argocd.home.local {
+  tls internal
+  reverse_proxy localhost:30080 {
+    header_up Host {host}
+  }
+}
+
+grafana.home.local {
+  tls internal
+  reverse_proxy localhost:30080 {
+    header_up Host {host}
+  }
+}
+```
+
+> **Why `header_up Host {host}`?** NGF matches HTTPRoutes by the `Host` header. Without this, Caddy rewrites the header to `localhost` and NGF returns 404 for every request.
+
+---
+
+### HTTPRoute — routing by hostname
+
+Each application gets an HTTPRoute in the `nginx-gateway` namespace. No Caddyfile change needed for new paths or services — just add an HTTPRoute.
+
+```yaml
+# ~/k8s/ngf-httproute-myapp.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: myapp-route
+  namespace: nginx-gateway
+spec:
+  parentRefs:
+    - name: nginx-gateway
+      namespace: nginx-gateway
+      sectionName: http         # bind to the 'http' listener
+  hostnames:
+    - myapp.home.local
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: myapp
+          namespace: myapp-ns   # cross-namespace — needs ReferenceGrant below
+          port: 8080
+```
+
+```yaml
+# ~/k8s/ngf-httproute-argocd.yaml — ArgoCD (runs --insecure, plain HTTP)
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: argocd-route
+  namespace: nginx-gateway
+spec:
+  parentRefs:
+    - name: nginx-gateway
+      namespace: nginx-gateway
+      sectionName: http
+  hostnames:
+    - argocd.home.local
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: argocd-server
+          namespace: argocd
+          port: 80
+```
+
+```bash
+kubectl apply -f ~/k8s/ngf-httproute-myapp.yaml
+kubectl apply -f ~/k8s/ngf-httproute-argocd.yaml
+
+# Verify routes are accepted
+kubectl -n nginx-gateway get httproute
+# ACCEPTED and RESOLVED should both be True
+```
+
+---
+
+### GRPCRoute — internal pod-to-pod gRPC
+
+For gRPC between services inside the cluster, pods call the `nginx-gateway-nginx` ClusterIP (or the NodePort for cross-node). NGF matches by hostname and routes to the backend.
+
+```yaml
+# ~/k8s/ngf-grpcroute.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: GRPCRoute
+metadata:
+  name: order-svc-grpc
+  namespace: nginx-gateway
+spec:
+  parentRefs:
+    - name: nginx-gateway
+      namespace: nginx-gateway
+      sectionName: http
+  hostnames:
+    - order-service.internal.home.local
+  rules:
+    - matches:
+        - method:
+            type: Exact
+            service: order.v1.OrderService  # gRPC service name from proto
+      backendRefs:
+        - name: order-service
+          namespace: services-ns
+          port: 9090
+```
+
+```bash
+kubectl apply -f ~/k8s/ngf-grpcroute.yaml
+kubectl -n nginx-gateway get grpcroute
+```
+
+---
+
+### ReferenceGrants — cross-namespace backend access
+
+HTTPRoutes and GRPCRoutes in `nginx-gateway` cannot reference Services in other namespaces unless a `ReferenceGrant` exists in the **target** namespace. Create one per application namespace.
+
+```yaml
+# ~/k8s/ngf-referencegrant.yaml
+# Apply this in EACH application namespace (change namespace: below)
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: allow-ngf-gateway
+  namespace: myapp-ns            # the namespace containing your Services
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: nginx-gateway   # routes in this namespace may reference backends here
+    - group: gateway.networking.k8s.io
+      kind: GRPCRoute
+      namespace: nginx-gateway
+  to:
+    - group: ""
+      kind: Service
+```
+
+```bash
+# Apply in each namespace
+for ns in argocd myapp-ns services-ns; do
+  kubectl apply -f ~/k8s/ngf-referencegrant.yaml -n $ns
+done
+
+# Verify
+kubectl get referencegrant -A
+```
+
+---
+
+### NGF-specific CRDs (policy extensions)
+
+All 9 NGF CRDs are installed via the `deploy/crds.yaml` manifest in the prerequisites step. They enable fine-grained per-route control:
+
+| CRD | Version | Purpose |
+|-----|---------|---------|
+| `NginxProxy` | v1alpha2 | Global NGINX config attached to GatewayClass |
+| `NginxGateway` | v1alpha1 | Per-gateway control-plane tuning |
+| `ClientSettingsPolicy` | v1alpha1 | Client→NGINX timeouts and body size limits |
+| `ProxySettingsPolicy` | v1alpha1 | NGINX→backend proxy connection tuning |
+| `ObservabilityPolicy` | v1alpha1+v1alpha2 | OpenTelemetry tracing per route |
+| `RateLimitPolicy` | v1alpha1 | Per-route rate limiting |
+| `UpstreamSettingsPolicy` | v1alpha1 | Load-balancing settings per route |
+| `AuthenticationFilter` | v1alpha1 | Basic Auth per route |
+
+**Example — rate limit a public route:**
+```yaml
+apiVersion: gateway.nginx.org/v1alpha1
+kind: RateLimitPolicy
+metadata:
+  name: myapp-ratelimit
+  namespace: nginx-gateway
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: myapp-route
+  policy:
+    rate: 100r/m          # 100 requests per minute
+    burst: 20
+    key: ${binary_remote_addr}
+    zoneSize: 10m
+    rejectCode: 429
+```
+
+---
+
+### Common operations
+
+```bash
+# Check GatewayClass is accepted
+kubectl get gatewayclass nginx
+# ACCEPTED: True
+
+# Check Gateway is Programmed and see addresses
+kubectl -n nginx-gateway describe gateway nginx-gateway
+
+# List all HTTPRoutes and their status
+kubectl get httproute -A
+
+# List all GRPCRoutes and their status
+kubectl get grpcroute -A
+
+# Check why a route is not resolving (look at Conditions)
+kubectl -n nginx-gateway describe httproute myapp-route
+
+# View NGF control plane logs
+kubectl -n nginx-gateway logs -l app.kubernetes.io/name=nginx-gateway-fabric -f
+
+# View NGINX data plane logs (access log, errors)
+kubectl -n nginx-gateway logs -l app.kubernetes.io/component=nginx -f
+
+# Check the global NginxProxy config (created by Helm as <release>-proxy-config)
+kubectl -n nginx-gateway get nginxproxy
+
+# Reload config — NGF reloads NGINX automatically on Route changes
+# Watch for successful reloads in the data plane logs:
+kubectl -n nginx-gateway logs -l app.kubernetes.io/component=nginx | grep "reload"
+
+# Upgrade NGF
+helm upgrade nginx-gateway-fabric \
+  oci://ghcr.io/nginx/charts/nginx-gateway-fabric \
+  --version 2.4.3 \           # bump version here
+  --namespace nginx-gateway \
+  -f ~/k8s/ngf-values.yaml
+
+# Uninstall
+helm uninstall nginx-gateway-fabric -n nginx-gateway
+kubectl delete -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v2.4.2/deploy/crds.yaml
+kubectl delete -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.1/standard-install.yaml
+```
+
+### Version compatibility
+
+| NGF | Gateway API CRDs | k3s / Kubernetes | Notes |
+|-----|-----------------|-----------------|-------|
+| v2.4.2 | v1.4.1 | k8s 1.29 – 1.34 | GRPCRoute GA, RateLimitPolicy added |
+| v2.3.0 | v1.4.0 | k8s 1.28 – 1.33 | First v1.4.x requirement |
+| v2.2.x | v1.2.x | k8s 1.27 – 1.32 | |
+
+> Always match the Gateway API bundle version to the NGF requirement. Installing a newer bundle than NGF expects is safe; an older one causes CRD missing errors at startup.
+
+---
+
+## cert-manager (Automatic TLS)
+
+**Purpose:** Automatically provision and renew TLS certificates for your Ingress resources — from Let's Encrypt (ACME) or your own internal CA (Step-CA). The Kubernetes equivalent of Caddy's auto-HTTPS. The most-installed Helm chart in Kubernetes after ingress controllers.
+
+```bash
+helm repo add cert-manager https://charts.jetstack.io
 helm upgrade --install cert-manager cert-manager/cert-manager \
   --namespace cert-manager --create-namespace \
   --set installCRDs=true
+
+# Verify all pods are running
+kubectl get pods -n cert-manager
 ```
 
-**Create a ClusterIssuer for Let's Encrypt:**
+**ClusterIssuer for Let's Encrypt (HTTP-01 — public domains):**
 ```yaml
 # ~/k8s/letsencrypt-issuer.yaml
 apiVersion: cert-manager.io/v1
@@ -477,22 +1717,77 @@ spec:
     solvers:
       - http01:
           ingress:
-            class: nginx
+            class: nginx   # or "nginx-gateway" for NGF
+```
+
+**ClusterIssuer for Let's Encrypt (DNS-01 via Cloudflare — wildcard certs):**
+```yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-dns
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: admin@example.com
+    privateKeySecretRef:
+      name: letsencrypt-dns-key
+    solvers:
+      - dns01:
+          cloudflare:
+            apiTokenSecretRef:
+              name: cloudflare-api-token
+              key: api-token
 ```
 
 ```bash
-kubectl apply -f ~/k8s/letsencrypt-issuer.yaml
+kubectl create secret generic cloudflare-api-token \
+  --namespace cert-manager \
+  --from-literal=api-token=<your-cloudflare-token>
+```
+
+**ClusterIssuer for internal Step-CA (home.local domains):**
+
+Use this when your cluster services are on `*.home.local` and you want certs from your own CA rather than Let's Encrypt. Requires Step-CA running and its root cert trusted by browsers (see security.md).
+
+```yaml
+# ~/k8s/step-ca-issuer.yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: step-ca-internal
+spec:
+  acme:
+    server: https://step-ca.home.local/acme/acme/directory
+    email: admin@home.local
+    privateKeySecretRef:
+      name: step-ca-acme-key
+    caBundle: <base64-encoded-step-ca-root-cert>  # kubectl get configmap -n cert-manager step-ca-root -o jsonpath='{.data.root\.crt}' | base64 -w0
+    solvers:
+      - http01:
+          ingress:
+            class: nginx
 ```
 
 **Annotate an Ingress to get a cert automatically:**
 ```yaml
-annotations:
-  cert-manager.io/cluster-issuer: "letsencrypt-prod"
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"   # or "step-ca-internal" for .home.local
 spec:
   tls:
-    - hosts:
-        - myapp.example.com
+    - hosts: [myapp.example.com]
       secretName: myapp-tls
+```
+
+**Check certificate status:**
+```bash
+kubectl get certificate -A
+kubectl describe certificate myapp-tls -n myapp
+
+# Force immediate renewal
+kubectl annotate certificate myapp-tls -n myapp \
+  cert-manager.io/renew-before=999h --overwrite
 ```
 
 ---
@@ -826,48 +2121,198 @@ kubectl -n monitoring port-forward svc/kube-prometheus-stack-grafana 3000:80
 
 ## Velero (Cluster Backup & Restore)
 
-**Purpose:** Back up and restore Kubernetes cluster resources and persistent volumes. Use Velero to snapshot your entire cluster state to S3-compatible storage (MinIO) — enabling full cluster disaster recovery.
+**Purpose:** Back up and restore Kubernetes cluster resources and persistent volumes. Use Velero to snapshot your entire cluster state to S3-compatible storage (MinIO) — enabling full cluster disaster recovery, namespace migration between clusters, and pre-upgrade safety snapshots.
 
 ```bash
 # Install Velero CLI via Nix
 nix-env -iA nixpkgs.velero
 
-# Install Velero with MinIO backend
-# Use the MinIO instance from the Backups wiki — create a 'velero' bucket and access key
+# Create a MinIO bucket named 'velero-backups' first (via MinIO console or mc)
+# Then create a credentials file:
+cat > ~/velero-credentials << 'EOF'
+[default]
+aws_access_key_id=minioadmin
+aws_secret_access_key=changeme
+EOF
+
+# Install Velero in the cluster with MinIO backend
 velero install \
   --provider aws \
   --plugins velero/velero-plugin-for-aws:latest \
   --bucket velero-backups \
   --secret-file ~/velero-credentials \
   --use-volume-snapshots=false \
+  --use-node-agent \
   --backup-location-config \
     region=minio,s3ForcePathStyle=true,s3Url=http://minio.home.local:9000
+
+# Verify installation
+velero version
+kubectl get pods -n velero
 ```
 
-**`~/velero-credentials`:**
-```ini
-[default]
-aws_access_key_id=minioadmin
-aws_secret_access_key=changeme
-```
-
-**Common operations:**
+**Common backup operations:**
 ```bash
-# Create a full cluster backup
-velero backup create homelab-backup --include-namespaces='*'
+# Full cluster backup
+velero backup create homelab-$(date +%Y%m%d) --include-namespaces='*'
 
-# Schedule daily backups at 2 AM
-velero schedule create daily-backup --schedule="0 2 * * *"
+# Namespace-scoped backup (faster for per-app backups)
+velero backup create myapp-backup --include-namespaces myapp
 
-# List backups
+# Backup with TTL (auto-deleted after 30 days)
+velero backup create homelab-$(date +%Y%m%d) \
+  --include-namespaces='*' \
+  --ttl 720h
+
+# List all backups
 velero backup get
 
-# Restore from backup
-velero restore create --from-backup homelab-backup
+# Describe a backup (check for errors/warnings)
+velero backup describe homelab-20260422 --details
 
-# Describe a backup (check for errors)
-velero backup describe homelab-backup --details
+# Download backup logs
+velero backup logs homelab-20260422
 ```
+
+**Scheduled backups (CRD approach — GitOps-friendly):**
+```yaml
+# ~/k8s/velero-schedule.yaml
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: daily-cluster-backup
+  namespace: velero
+spec:
+  schedule: "0 2 * * *"       # daily at 2 AM
+  template:
+    includedNamespaces:
+      - "*"
+    excludedNamespaces:
+      - kube-system
+      - velero
+    storageLocation: default
+    ttl: 720h                  # keep 30 days
+    snapshotVolumes: false
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: hourly-myapp-backup
+  namespace: velero
+spec:
+  schedule: "0 * * * *"
+  template:
+    includedNamespaces: [myapp]
+    ttl: 168h                  # keep 7 days
+    storageLocation: default
+```
+
+```bash
+kubectl apply -f ~/k8s/velero-schedule.yaml
+velero schedule get
+```
+
+**Restore operations:**
+```bash
+# Restore entire cluster from a backup
+velero restore create --from-backup homelab-20260422
+
+# Restore a single namespace (e.g., migrate myapp to a new cluster)
+velero restore create myapp-restore \
+  --from-backup homelab-20260422 \
+  --include-namespaces myapp
+
+# Restore to a different namespace
+velero restore create \
+  --from-backup homelab-20260422 \
+  --include-namespaces myapp \
+  --namespace-mappings myapp:myapp-restored
+
+# Watch restore progress
+velero restore describe myapp-restore --details
+velero restore logs myapp-restore
+```
+
+---
+
+## Argo Rollouts (Progressive Delivery)
+
+**Purpose:** Advanced deployment strategies for Kubernetes — canary releases, blue/green deployments, and analysis-gated rollouts. Argo Rollouts replaces standard Kubernetes `Deployment` objects with a `Rollout` CRD that supports traffic splitting, automated metric analysis (via Prometheus), and instant rollback. Pairs naturally with ArgoCD: ArgoCD syncs the desired `Rollout` spec; Argo Rollouts controls how traffic shifts during the deployment.
+
+```bash
+# Install Argo Rollouts
+kubectl create namespace argo-rollouts
+kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+
+# Install the kubectl plugin via Nix
+nix-env -iA nixpkgs.argo-rollouts
+```
+
+**Canary Rollout example:**
+```yaml
+# ~/k8s/rollout-canary.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: myapp
+  namespace: default
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+        - name: myapp
+          image: myapp:v2
+          ports:
+            - containerPort: 8080
+  strategy:
+    canary:
+      steps:
+        - setWeight: 20          # 20% traffic to new version
+        - pause: { duration: 5m } # wait 5 minutes
+        - setWeight: 50
+        - pause: {}              # manual gate — promote with kubectl argo rollouts promote
+        - setWeight: 100
+      canaryService: myapp-canary
+      stableService: myapp-stable
+```
+
+```bash
+kubectl apply -f ~/k8s/rollout-canary.yaml
+
+# Watch the rollout progress
+kubectl argo rollouts get rollout myapp --watch
+
+# Promote through a manual gate
+kubectl argo rollouts promote myapp
+
+# Abort and roll back
+kubectl argo rollouts abort myapp
+kubectl argo rollouts undo myapp
+```
+
+**Blue/Green example:**
+```yaml
+strategy:
+  blueGreen:
+    activeService: myapp-active
+    previewService: myapp-preview
+    autoPromotionEnabled: false   # require manual promotion
+    scaleDownDelaySeconds: 30
+```
+
+```bash
+# Promote the preview to active
+kubectl argo rollouts promote myapp
+```
+
+> Argo Rollouts integrates with ingress-nginx and Gateway API for traffic splitting — it patches the Ingress or HTTPRoute weights automatically as rollout steps progress.
 
 ---
 
@@ -948,7 +2393,7 @@ kubectl apply -f ~/k8s/namespace-quotas.yaml
 
 ## Secrets Management
 
-**Purpose:** Avoid storing plain secrets in Git. Use Sealed Secrets (encrypt secrets for Git storage) or External Secrets Operator (pull from Vault, AWS SSM, etc.).
+**Purpose:** Avoid storing plain secrets in Git. Use Sealed Secrets (encrypt secrets for Git storage) or External Secrets Operator (pull from OpenBao/Infisical/AWS SSM into native k8s Secrets).
 
 ### Sealed Secrets
 
@@ -969,6 +2414,110 @@ kubectl create secret generic mysecret \
 # Apply the sealed secret
 kubectl apply -f ~/k8s/mysecret-sealed.yaml
 ```
+
+---
+
+### External Secrets Operator (ESO)
+
+**Purpose:** Sync secrets from external secret stores — OpenBao, Infisical, AWS Secrets Manager, HashiCorp Vault, GCP Secret Manager, Azure Key Vault, and more — into native Kubernetes `Secret` objects. ESO watches `ExternalSecret` CRDs and reconciles them on a schedule; your pods consume plain `Secret` objects and never know the secret came from an external store. The natural companion to OpenBao (from security.md) and Infisical for a GitOps-safe secrets workflow.
+
+```bash
+# Install ESO via Helm
+helm repo add external-secrets https://charts.external-secrets.io
+helm install external-secrets external-secrets/external-secrets \
+  --namespace external-secrets --create-namespace \
+  --set installCRDs=true
+```
+
+**Connect ESO to OpenBao (Vault-compatible):**
+```yaml
+# ~/k8s/eso-openbao-store.yaml
+apiVersion: external-secrets.io/v1beta1
+kind: ClusterSecretStore
+metadata:
+  name: openbao
+spec:
+  provider:
+    vault:
+      server: "http://openbao.home.local:8200"
+      path: "secret"
+      version: "v2"
+      auth:
+        tokenSecretRef:
+          name: openbao-token
+          namespace: external-secrets
+          key: token
+```
+
+```bash
+# Create the token secret ESO uses to authenticate to OpenBao
+kubectl create secret generic openbao-token \
+  --namespace external-secrets \
+  --from-literal=token=<your-openbao-token>
+
+kubectl apply -f ~/k8s/eso-openbao-store.yaml
+```
+
+**Create an ExternalSecret — pull a database password from OpenBao into a k8s Secret:**
+```yaml
+# ~/k8s/myapp-external-secret.yaml
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: myapp-db-secret
+  namespace: myapp
+spec:
+  refreshInterval: 1h          # re-sync every hour
+  secretStoreRef:
+    name: openbao
+    kind: ClusterSecretStore
+  target:
+    name: myapp-db-credentials  # k8s Secret that gets created/updated
+    creationPolicy: Owner
+  data:
+    - secretKey: DB_PASSWORD    # key in the k8s Secret
+      remoteRef:
+        key: myapp/database     # path in OpenBao
+        property: password      # field within the secret
+    - secretKey: DB_USERNAME
+      remoteRef:
+        key: myapp/database
+        property: username
+```
+
+```bash
+kubectl apply -f ~/k8s/myapp-external-secret.yaml
+
+# Check sync status
+kubectl get externalsecret -n myapp
+kubectl describe externalsecret myapp-db-secret -n myapp
+```
+
+**Connect ESO to Infisical:**
+```yaml
+apiVersion: external-secrets.io/v1beta1
+kind: ClusterSecretStore
+metadata:
+  name: infisical
+spec:
+  provider:
+    infisical:
+      auth:
+        universalAuthCredentials:
+          clientId:
+            name: infisical-creds
+            namespace: external-secrets
+            key: clientId
+          clientSecret:
+            name: infisical-creds
+            namespace: external-secrets
+            key: clientSecret
+      secretsScope:
+        projectSlug: myproject
+        environmentSlug: prod
+```
+
+> **Pattern:** Store all secrets in OpenBao or Infisical. Reference them in k8s manifests via `ExternalSecret` CRDs. Never put plaintext values in Kubernetes YAML — even in private Git repos. ESO rotates the k8s Secret automatically when the upstream value changes (within the `refreshInterval`).
 
 ---
 
@@ -1033,6 +2582,14 @@ rancher.home.local  { tls internal; reverse_proxy localhost:8443 { transport htt
 k8s.home.local      { tls internal; reverse_proxy localhost:8443 { transport http { tls_insecure_skip_verify } } }
 grafana.home.local  { tls internal; reverse_proxy localhost:3000 }
 longhorn.home.local { tls internal; reverse_proxy localhost:8080 }
+
+# NGF-backed services — add header_up Host so NGF can match the HTTPRoute hostname
+# Each hostname here needs a matching HTTPRoute in the nginx-gateway namespace
+myapp.home.local {
+  tls internal
+  reverse_proxy localhost:30080 { header_up Host {host} }
+}
+
 ```
 
 ---
@@ -1077,3 +2634,18 @@ restic backup ~/.kube /home/user/k8s
 | k9s shows no resources | Check the active namespace with `:ns`; switch context with `:ctx`; ensure kubeconfig is loaded from `~/.kube/config` |
 | Dashboard `Unauthorized` | Token has expired — create a new one: `kubectl -n kubernetes-dashboard create token admin-user` |
 | Sealed secret not decrypting | The sealing key in `kube-system` must match the one used to seal — do not delete the `sealed-secrets-key` secret; back it up with `kubectl get secret -n kube-system sealed-secrets-key -o yaml` |
+| ExternalSecret stuck `SecretSyncedError` | Check `kubectl describe externalsecret <n>` — common causes: wrong path in `remoteRef.key`, token lacks read permissions in OpenBao, or the `ClusterSecretStore` can't reach the backend URL |
+| ESO not refreshing secret | Decrease `refreshInterval` for testing; check ESO operator logs: `kubectl logs -n external-secrets -l app.kubernetes.io/name=external-secrets` |
+| cert-manager Certificate stuck `Pending` | `kubectl describe certificate <n> -n <ns>` → look at the `CertificateRequest` and `Order` events; HTTP-01 needs port 80 publicly reachable; DNS-01 needs correct API token and propagation time |
+| cert-manager HTTP-01 challenge failing | The ACME solver creates a temporary Ingress — verify your ingress controller is running and the domain resolves publicly; check `kubectl get challenges -A` for error messages |
+| Argo Rollouts stuck at canary weight | Verify `canaryService` and `stableService` exist and match the Services in your namespace; check `kubectl argo rollouts get rollout myapp` for error messages |
+| Argo Rollouts canary not splitting traffic | ingress-nginx and Gateway API traffic splitting requires the corresponding annotation or HTTPRoute backend weights — check that the controller supports the Rollout's `trafficRouting` config |
+| NGF GatewayClass not Accepted | Check NGF control plane logs: `kubectl -n nginx-gateway logs -l app.kubernetes.io/name=nginx-gateway-fabric`; confirm Gateway API CRDs are installed at the correct version (`kubectl get crd | grep gateway.networking.k8s.io`) |
+| NGF returns 404 for all requests | The `Host` header is not being forwarded by Caddy — add `header_up Host {host}` inside the `reverse_proxy` block so NGF can match the HTTPRoute hostname |
+| NGF HTTPRoute not Accepted | Run `kubectl -n nginx-gateway describe httproute <n>`; common causes: `sectionName` doesn't match a listener name (`http`), `parentRef` namespace wrong, or backend namespace missing a ReferenceGrant |
+| NGF GRPCRoute not Accepted | Confirm the GRPCRoute CRD is installed (`kubectl get crd grpcroutes.gateway.networking.k8s.io`); verify `gwAPIExperimentalFeatures.enable: false` — GRPCRoute is GA and the experimental flag is not needed |
+| Cross-namespace route returning 503 | ReferenceGrant is missing or in the wrong namespace — it must be in the **target** (backend Service) namespace; run `kubectl get referencegrant -A` to verify |
+| NGF NodePort 30080 not reachable from Caddy | Confirm the Service was patched to NodePort: `kubectl -n nginx-gateway get svc nginx-gateway-nginx`; verify `PORT(S): 80:30080/TCP`; `curl http://localhost:30080` should return an NGF 404, not connection refused |
+| Caddy proxying to NGF but cert error in browser | Use `tls internal` (not bare `tls`) for `home.local` domains; ensure Step-CA is running and the root cert is trusted by the browser |
+| NGF data plane (NGINX) OOMKilled | Increase `nginx.container.resources.limits.memory` in the values file; start at `1Gi` for a homelab under real load |
+| ObservabilityPolicy CRD conflict on upgrade | `v1alpha1` must remain `storage: true` — do not change this when upgrading; if NGF crashes with `no kind registered for ObservabilityPolicy`, re-apply `deploy/crds.yaml` from the new version |
