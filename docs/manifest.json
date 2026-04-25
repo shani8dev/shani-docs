@@ -88,14 +88,6 @@
     "draft": false
   },
   {
-    "slug": "gpu-containers",
-    "title": "GPU Acceleration & HPC Containers",
-    "section": "Software & Apps",
-    "updated": "2026-04-17",
-    "order": 999,
-    "draft": false
-  },
-  {
     "slug": "install/first-boot",
     "title": "First Boot",
     "section": "Installation",
@@ -171,14 +163,6 @@
     "slug": "intro/whats-included",
     "title": "What's Included",
     "section": "Introduction",
-    "updated": "2026-04-01",
-    "order": 999,
-    "draft": false
-  },
-  {
-    "slug": "network-diag",
-    "title": "Network Diagnostics & Tools",
-    "section": "Troubleshooting",
     "updated": "2026-04-01",
     "order": 999,
     "draft": false
@@ -768,6 +752,14 @@
     "draft": false
   },
   {
+    "slug": "software/gpu-containers",
+    "title": "GPU Acceleration & HPC Containers",
+    "section": "Software & Apps",
+    "updated": "2026-04-17",
+    "order": 999,
+    "draft": false
+  },
+  {
     "slug": "software/homebrew",
     "title": "Homebrew",
     "section": "Software & Apps",
@@ -832,10 +824,58 @@
     "draft": false
   },
   {
+    "slug": "system/ch-commands",
+    "title": "ch* Commands",
+    "section": "System",
+    "updated": "2026-04-25",
+    "order": 999,
+    "draft": false
+  },
+  {
     "slug": "system/cronie",
     "title": "cronie (Cron Scheduler)",
     "section": "System",
     "updated": "2026-04-20",
+    "order": 999,
+    "draft": false
+  },
+  {
+    "slug": "system/network-tools",
+    "title": "Network Tools",
+    "section": "System",
+    "updated": "2026-04-01",
+    "order": 999,
+    "draft": false
+  },
+  {
+    "slug": "system/process-management",
+    "title": "Process Management",
+    "section": "System",
+    "updated": "2026-04-25",
+    "order": 999,
+    "draft": false
+  },
+  {
+    "slug": "system/systemd",
+    "title": "Systemd",
+    "section": "System",
+    "updated": "2026-04-25",
+    "order": 999,
+    "draft": false
+  },
+  {
+    "slug": "system/users-groups",
+    "title": "Users & Groups",
+    "section": "System",
+    "updated": "2026-04-25",
+    "order": 999,
+    "draft": false
+  },
+  {
+    "slug": "system/virtual-networking",
+    "title": "Virtual Networking",
+    "section": "Network",
+    "updated": "2026-04-25",
     "order": 999,
     "draft": false
   },
