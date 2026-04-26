@@ -103,6 +103,7 @@ Before any object is persisted to etcd, it passes through admission controllers.
 
 #### Persistent storage in Kubernetes — the CSI model
 Container Storage Interface (CSI) is the plugin standard for storage providers. A CSI driver (Longhorn, Rook-Ceph, AWS EBS, GCE PD) implements Create/Attach/Mount for volumes. PersistentVolumeClaims are requests for storage (size, access mode, storage class). The StorageClass determines which CSI driver handles provisioning and what parameters to use. Access modes: `ReadWriteOnce` (one node), `ReadWriteMany` (multiple nodes — requires NFS or Ceph FS), `ReadOnlyMany`. Velero backs up PVs by snapshotting them via CSI.
+
 ---
 
 ## Choosing a Distribution
