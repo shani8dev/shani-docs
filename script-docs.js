@@ -484,15 +484,14 @@ function renderDoc(slug, raw) {
     const items = [...headings].map(h => {
       const id = h.id || slugify(h.textContent);
       h.id = id;
-      // Inject anchor link
-      const anchor = document.createElement('a');
-      anchor.className = 'heading-anchor';
-      anchor.href = '#' + id;
-      anchor.setAttribute('aria-hidden', 'true');
-      anchor.textContent = '#';
-      h.appendChild(anchor);
+      // renderer.heading() already injected the anchor — do NOT append a second one.
+      // Extract label from text nodes only, skipping the '.heading-anchor' <a> element,
+      // so the TOC never shows a trailing '#' character.
+      const label = [...h.childNodes]
+        .filter(n => !(n.nodeType === Node.ELEMENT_NODE && n.classList.contains('heading-anchor')))
+        .map(n => n.textContent).join('').trim();
       return `<li class="doc-toc__item doc-toc__item--${h.tagName.toLowerCase()}">
-        <a href="#${id}" class="doc-toc__link">${esc(h.textContent.replace(/#\s*$/, '').trim())}</a></li>`;
+        <a href="#${id}" class="doc-toc__link">${esc(label)}</a></li>`;
     }).join('');
     tocHtml = `<nav class="doc-toc" aria-label="On this page">
       <div class="doc-toc__title">On this page</div>
