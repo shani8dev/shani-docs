@@ -1,14 +1,14 @@
 ---
-title: DevOps & Developer Infrastructure
+title: DevOps & Infrastructure
 section: Self-Hosting & Servers
 updated: 2026-04-22
 ---
 
 > **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
 
-# DevOps & Developer Infrastructure
+# DevOps & Infrastructure
 
-CI/CD, code hosting, container orchestration, HA clusters, IaC, artifact management, and developer tooling — all self-hosted on this system.
+CI/CD pipelines, infrastructure as code, cloud provider tooling, HA clusters, container image management, and platform engineering — all self-hosted on this system.
 
 > **Install convention:** CLI tools and dev runtimes install via **Nix** (primary) or **Snap** (fallback). GUI apps go via **Flatpak**. Services and servers run as rootless **Podman** containers. On immutable OS distributions the root filesystem is read-only — use Nix, Snap, or Distrobox rather than system package managers for user-space tooling.
 
@@ -1724,123 +1724,11 @@ For compose file and setup, see the [Developer Tools wiki → Windmill](https://
 
 ---
 
-### Matomo (Web Analytics)
+### Web Analytics (Plausible, Umami, Matomo)
 
-For compose file and setup, see the [Developer Tools wiki → Matomo](https://docs.shani.dev/doc/servers/devtools#matomo-web-analytics).
-
----
-
-### Plausible Analytics
-
-**Purpose:** Lightweight, privacy-first Google Analytics alternative. Cookie-free, GDPR-compliant out of the box, and embeds as a single 1 KB script. Far simpler to operate than Matomo — no session-replay or heatmaps, but pageviews, bounce rate, referrers, top pages, and UTM campaigns in a clean UI. Good fit for sites that need basic analytics without GDPR cookie banners.
-
-```yaml
-# ~/plausible/compose.yaml
-services:
-  plausible_db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: plausible_db
-      POSTGRES_USER: plausible
-      POSTGRES_PASSWORD: changeme
-    volumes: [db_data:/var/lib/postgresql/data]
-    restart: unless-stopped
-
-  plausible_events_db:
-    image: clickhouse/clickhouse-server:24-alpine
-    volumes:
-      - events_data:/var/lib/clickhouse
-      - /home/user/plausible/clickhouse/logs.xml:/etc/clickhouse-server/config.d/logs.xml:ro,Z
-    ulimits:
-      nofile:
-        soft: 262144
-        hard: 262144
-    restart: unless-stopped
-
-  plausible:
-    image: ghcr.io/plausible/community-edition:v2
-    ports: ["127.0.0.1:8033:8000"]
-    environment:
-      BASE_URL: https://analytics.home.local
-      SECRET_KEY_BASE: "run: openssl rand -hex 64"
-      DATABASE_URL: postgres://plausible:changeme@plausible_db/plausible_db
-      CLICKHOUSE_DATABASE_URL: http://plausible_events_db:8123/plausible_events_db
-    depends_on: [plausible_db, plausible_events_db]
-    restart: unless-stopped
-
-volumes:
-  db_data:
-  events_data:
-```
-
-```bash
-cd ~/plausible && podman-compose up -d
-# Create admin account on first visit at https://analytics.home.local/register
-```
-
-**Caddy:**
-```caddyfile
-analytics.home.local { tls internal; reverse_proxy localhost:8033 }
-```
-
-##### Embed tracking snippet
-
-(add to your site's `<head>`):
-```html
-<script defer data-domain="mysite.home.local"
-  src="https://analytics.home.local/js/script.js"></script>
-```
+For Plausible (privacy-first, cookie-free), Umami (minimal analytics), and Matomo (full session tracking), see the [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#matomo-web-analytics).
 
 ---
-
-### Umami (Minimal Cookie-Free Analytics)
-
-**Purpose:** The simplest self-hosted analytics option — even lighter than Plausible. Single container (plus a Postgres or MySQL DB), sub-second dashboard loads, and a clean event tracking API for custom button/form events. No cookies, no GDPR consent required. Best for personal sites, blogs, and internal tools where Matomo is overkill.
-
-```yaml
-# ~/umami/compose.yaml
-services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: umami
-      POSTGRES_USER: umami
-      POSTGRES_PASSWORD: changeme
-    volumes: [db_data:/var/lib/postgresql/data]
-    restart: unless-stopped
-
-  umami:
-    image: ghcr.io/umami-software/umami:postgresql-latest
-    ports: ["127.0.0.1:3005:3000"]
-    environment:
-      DATABASE_URL: postgresql://umami:changeme@db:5432/umami
-      APP_SECRET: "run: openssl rand -hex 32"
-    depends_on: [db]
-    restart: unless-stopped
-
-volumes:
-  db_data:
-```
-
-```bash
-cd ~/umami && podman-compose up -d
-# Default login: admin / umami — change immediately
-```
-
-**Caddy:**
-```caddyfile
-umami.home.local { tls internal; reverse_proxy localhost:3005 }
-```
-
-#### Custom event tracking
-```html
-<!-- Track a button click -->
-<button data-umami-event="signup-click">Sign Up</button>
-
-<!-- Track with extra properties -->
-<button data-umami-event="purchase" data-umami-event-plan="pro">Buy Pro</button>
-```
-
 ---
 
 ## Internal Platforms
@@ -1956,126 +1844,12 @@ podman restart grafana
 
 ## Security CLI Tools
 
-> Full setup, compose configs, and detailed usage for the tools below live in the [Security & Identity wiki](https://docs.shani.dev/doc/servers/security). This section covers the DevOps integration points — how these tools slot into CI/CD pipelines, GitOps workflows, and IaC automation.
-
-## osquery (Host Intrusion Detection & Visibility)
-
-→ Full install, useful queries, and continuous monitoring config: [Security wiki → osquery](https://docs.shani.dev/doc/servers/security#osquery-host-security-monitoring--query-language)
-
-```bash
-# Install osquery on the host via Nix (not containerised — needs host kernel access)
-nix-env -iA nixpkgs.osquery
-
-sudo systemctl enable --now osqueryd
-```
+> Security tooling (osquery, Nuclei, SOPS, Semgrep, Trivy) is covered in the [Security & Identity wiki](https://docs.shani.dev/doc/servers/security). This section covers only the DevOps integration points where security tools gate CI pipelines.
 
 ---
 
-## Nuclei (Fast CVE & Misconfiguration Scanner)
+> **Education platforms** (Open edX/Tutor) are documented in the [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools).
 
-→ Full install, scan patterns, template reference, and CI gate: [Security wiki → Nuclei](https://docs.shani.dev/doc/servers/security#nuclei-fast-vulnerability--exposure-scanner)
-
-#### CI gate (fail pipeline on critical findings)
-```bash
-nuclei -l targets.txt -s critical,high -silent -j -o nuclei-report.json
-[ "$(jq '[.[] | select(.info.severity=="critical")] | length' nuclei-report.json)" -eq 0 ] \
-  || { echo "Critical findings detected!"; exit 1; }
-```
-
-> Schedule a weekly Nuclei sweep across all exposed services with a systemd timer and pipe the JSON output to ntfy for critical/high findings. Keep a `targets.txt` with every Caddy subdomain you expose.
-
----
-
-## SOPS (Secrets in Git)
-
-→ Full setup, key management, and GitOps integration: [Security wiki → SOPS + age](https://docs.shani.dev/doc/servers/security#sops--age-secrets-encryption-for-git)
-
-#### Quick reference
-```bash
-# Install
-nix-env -iA nixpkgs.sops nixpkgs.age
-
-# Generate key
-age-keygen -o ~/.config/sops/age/keys.txt
-export SOPS_AGE_KEY_FILE="$HOME/.config/sops/age/keys.txt"
-
-# Encrypt / edit / decrypt
-sops -e -i secrets.yaml          # encrypt in-place
-sops secrets.yaml                 # edit (decrypt → $EDITOR → re-encrypt)
-sops -d secrets.yaml | kubectl apply -f -   # decrypt to pipe
-```
-
-#### Woodpecker CI — inject Age key from secret
-```yaml
-steps:
-  deploy:
-    image: alpine
-    secrets: [SOPS_AGE_KEY]
-    commands:
-      - apk add sops age
-      - echo "$SOPS_AGE_KEY" > /tmp/age.key
-      - export SOPS_AGE_KEY_FILE=/tmp/age.key
-      - sops -d .env.enc > .env
-      - podman-compose up -d
-      - rm -f .env /tmp/age.key
-```
-
----
-
-## Semgrep CE (Static Analysis / SAST)
-
-→ Full ruleset reference, custom rule authoring, Defect Dojo SARIF integration, and comparison vs Checkov/tfsec: [Security wiki → Semgrep](https://docs.shani.dev/doc/servers/security#semgrep-sast--static-application-security-testing)
-
-#### CI gate (Woodpecker / Forgejo Actions)
-```yaml
-- name: sast-semgrep
-  image: returntocorp/semgrep:latest
-  commands:
-    - semgrep --config=p/security-audit --config=p/secrets
-        --severity=ERROR --error
-        --sarif --output=semgrep.sarif .
-```
-
-```bash
-# Local scan
-nix-env -iA nixpkgs.semgrep
-semgrep --config=auto .                   # auto ruleset
-semgrep --config=p/owasp-top-ten .        # OWASP top 10
-semgrep --config=p/secrets .              # hardcoded credentials
-```
-
-## Education & Training Platforms
-
-## Open edX (Tutor)
-
-**Purpose:** The platform powering edX.org and hundreds of MOOCs. Full MOOC toolkit: video courses, peer-graded assignments, timed exams, discussion forums, certificates, and XBlocks for custom content types. **Tutor** is the recommended way to deploy it — a Docker-based wrapper that makes the famously complex edX deployment manageable.
-
-```bash
-# Install Tutor
-pip install "tutor[full]" --break-system-packages
-
-# Initialise (interactive — sets domain, admin account, etc.)
-tutor config save --interactive
-
-# Launch the full stack
-tutor local launch
-
-# Create a superuser
-tutor local run lms manage.py createsuperuser
-
-# Import a demo course
-tutor local do importdemocourse
-```
-
-> Tutor manages all containers, volumes, and configuration. Run `tutor local status` to see all services.
-
-**Caddy:**
-```caddyfile
-lms.example.com { reverse_proxy localhost:80 }
-studio.example.com { reverse_proxy localhost:80 }
-```
-
----
 
 ## Key Concepts
 

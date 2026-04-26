@@ -512,6 +512,7 @@ kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/latest/
 ```
 
 ###Create a GatewayClass and Gateway (ingress-nginx example):
+
 ```yaml
 # ~/k8s/gateway.yaml
 apiVersion: gateway.networking.k8s.io/v1
@@ -709,6 +710,7 @@ kubectl top nodes
 **Purpose:** Controls who (ServiceAccounts, users, groups) can do what (verbs: get, list, watch, create, update, patch, delete) on which resources (pods, deployments, secrets, configmaps) in which scope (namespace-scoped via Role/RoleBinding, or cluster-wide via ClusterRole/ClusterRoleBinding). Mastering RBAC is required for any production Kubernetes role — it's how you give CI/CD pipelines minimal permissions, isolate tenant namespaces, and audit access.
 
 #### Core concepts
+
 ```
 Role / ClusterRole       — defines permissions (what verbs on what resources)
 RoleBinding              — binds a Role to a subject within a namespace
@@ -801,6 +803,7 @@ kubectl create token cicd-deployer -n myapp --duration=8760h
 ```
 
 #### ClusterRole (cluster-wide — use sparingly)
+
 ```yaml
 # ~/k8s/rbac-cluster-readonly.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -995,6 +998,7 @@ kubectl get nodes
 ```
 
 #### Common operations
+
 ```bash
 # Check node health
 talosctl health --nodes <node-ip> --talosconfig ~/talos-config/talosconfig
@@ -1068,6 +1072,7 @@ sudo kubeadm join <control-plane-ip>:6443 \
 ```
 
 #### Common operations
+
 ```bash
 # Check component status
 kubectl get componentstatuses
@@ -1944,6 +1949,7 @@ spec:
 ```
 
 Access the Longhorn UI via port-forward:
+
 ```bash
 kubectl -n longhorn-system port-forward svc/longhorn-frontend 8080:80
 # Open http://localhost:8080
@@ -2010,6 +2016,7 @@ kubectl apply -f ~/k8s/argocd-app.yaml
 ```
 
 #### Caddy (expose ArgoCD externally)
+
 ```caddyfile
 argocd.home.local {
   tls internal
@@ -2150,6 +2157,7 @@ k9s --context k3s-homelab
 ```
 
 #### Key bindings inside k9s
+
 | Key | Action |
 |-----|--------|
 | `:pod` | Switch to pods view |
@@ -2267,6 +2275,7 @@ kubectl get pods -n velero
 ```
 
 #### Common backup operations
+
 ```bash
 # Full cluster backup
 velero backup create homelab-$(date +%Y%m%d) --include-namespaces='*'
@@ -2290,6 +2299,7 @@ velero backup logs homelab-20260422
 ```
 
 #### Scheduled backups (CRD approach — GitOps-friendly)
+
 ```yaml
 # ~/k8s/velero-schedule.yaml
 apiVersion: velero.io/v1
@@ -2328,6 +2338,7 @@ velero schedule get
 ```
 
 #### Restore operations
+
 ```bash
 # Restore entire cluster from a backup
 velero restore create --from-backup homelab-20260422
@@ -2536,6 +2547,7 @@ nix-env -iA nixpkgs.argo-rollouts
 ```
 
 #### Canary Rollout example
+
 ```yaml
 # ~/k8s/rollout-canary.yaml
 apiVersion: argoproj.io/v1alpha1
@@ -2585,6 +2597,7 @@ kubectl argo rollouts undo myapp
 ```
 
 #### Blue/Green example
+
 ```yaml
 strategy:
   blueGreen:
@@ -2608,6 +2621,7 @@ kubectl argo rollouts promote myapp
 **Purpose:** Restrict pod-to-pod and pod-to-external traffic. By default all pods can reach all pods — network policies enforce least-privilege network access. Requires a CNI that supports them (Calico, Cilium, Canal).
 
 #### Deny all ingress by default, allow only from same namespace
+
 ```yaml
 # ~/k8s/network-policy-default-deny.yaml
 apiVersion: networking.k8s.io/v1
@@ -2717,6 +2731,7 @@ helm install external-secrets external-secrets/external-secrets \
 ```
 
 #### Connect ESO to OpenBao (Vault-compatible)
+
 ```yaml
 # ~/k8s/eso-openbao-store.yaml
 apiVersion: external-secrets.io/v1beta1
@@ -2782,6 +2797,7 @@ kubectl describe externalsecret myapp-db-secret -n myapp
 ```
 
 #### Connect ESO to Infisical
+
 ```yaml
 apiVersion: external-secrets.io/v1beta1
 kind: ClusterSecretStore
@@ -3046,6 +3062,7 @@ services:
 ```
 
 #### Prometheus recording rules for DORA (add to `alerts.yml`)
+
 ```yaml
 groups:
   - name: dora_metrics
@@ -3086,6 +3103,7 @@ groups:
 ```
 
 #### Grafana dashboard variables for DORA bands
+
 ```json
 {
   "panels": [{
@@ -3234,6 +3252,7 @@ spec:
 ```
 
 #### Scale on Prometheus metric
+
 ```yaml
 triggers:
   - type: prometheus
@@ -3277,6 +3296,7 @@ cilium connectivity test
 ```
 
 #### Hubble CLI — inspect live flows
+
 ```bash
 # Install Hubble CLI
 nix-env -iA nixpkgs.hubble
@@ -3480,6 +3500,7 @@ kubectl port-forward -n opencost svc/opencost 9090:9090 9003:9003
 ```
 
 #### Or via Helm with custom on-prem pricing
+
 ```yaml
 # ~/k8s/opencost-values.yaml
 opencost:
@@ -3501,6 +3522,7 @@ helm install opencost opencost/opencost \
 ```
 
 #### Query the cost API
+
 ```bash
 # Cost breakdown by namespace (last 7 days)
 curl "http://localhost:9003/allocation?window=7d&aggregate=namespace&accumulate=false" \
@@ -3514,6 +3536,7 @@ curl "http://localhost:9003/allocation?window=7d&aggregate=label:team"
 ```
 
 #### Add OpenCost to the Caddy block
+
 ```caddyfile
 opencost.home.local { tls internal; reverse_proxy localhost:9090 }
 ```
@@ -3577,6 +3600,7 @@ kubectl get chaosresult nginx-chaos-pod-delete -o jsonpath='{.status.experimentS
 ```
 
 #### Add a Prometheus probe — fail the experiment if error rate exceeds SLO
+
 ```yaml
     - name: pod-delete
       spec:
@@ -3632,6 +3656,7 @@ helm install port-k8s-exporter port-labs/port-k8s-exporter \
 **Purpose:** A golden path is a pre-built, opinionated template for creating a new service — it encodes your team's best practices (security, observability, CI/CD, IaC) so developers can scaffold a production-ready service in minutes without needing to know every underlying tool. Backstage and Port both provide golden path scaffolding; this section shows how to implement them without either.
 
 #### Option A — Cookiecutter templates (simplest)
+
 ```bash
 # Install cookiecutter
 nix-env -iA nixpkgs.cookiecutter
@@ -3651,6 +3676,7 @@ cookiecutter git+https://git.home.local/platform/golden-paths.git --directory py
 ```
 
 #### Option B — Forgejo template repositories
+
 ```bash
 # In Forgejo: Settings → check "Template Repository" on any repo
 # Developers click "Use this template" to get a pre-wired repo with:

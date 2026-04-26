@@ -1,6 +1,6 @@
 ---
 
-title: Backups & Sync
+title: Backups & Storage
 section: Self-Hosting & Servers
 updated: 2026-04-21
 ---

@@ -8,7 +8,7 @@ updated: 2026-04-22
 
 # Developer Tools
 
-Infrastructure, CI/CD, monitoring, code hosting, and development utilities.
+Code hosting, CI runners, container registries, developer environments, project management, and web analytics.
 
 ---
 
@@ -1324,6 +1324,158 @@ backstage.home.local { tls internal; reverse_proxy localhost:7007 }
 ```
 
 > 💡 Backstage is most valuable once you have 5+ services. Start small — register a few services with `catalog-info.yaml` files in their repos, then add plugins incrementally (ArgoCD, Kubernetes, TechDocs).
+
+
+---
+
+## Web Analytics
+
+### Plausible Analytics
+
+**Purpose:** Lightweight, privacy-first Google Analytics alternative. Cookie-free, GDPR-compliant out of the box, and embeds as a single 1 KB script. Far simpler to operate than Matomo — no session-replay or heatmaps, but pageviews, bounce rate, referrers, top pages, and UTM campaigns in a clean UI. Good fit for sites that need basic analytics without GDPR cookie banners.
+
+```yaml
+# ~/plausible/compose.yaml
+services:
+  plausible_db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: plausible_db
+      POSTGRES_USER: plausible
+      POSTGRES_PASSWORD: changeme
+    volumes: [db_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  plausible_events_db:
+    image: clickhouse/clickhouse-server:24-alpine
+    volumes:
+      - events_data:/var/lib/clickhouse
+      - /home/user/plausible/clickhouse/logs.xml:/etc/clickhouse-server/config.d/logs.xml:ro,Z
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    restart: unless-stopped
+
+  plausible:
+    image: ghcr.io/plausible/community-edition:v2
+    ports: ["127.0.0.1:8033:8000"]
+    environment:
+      BASE_URL: https://analytics.home.local
+      SECRET_KEY_BASE: "run: openssl rand -hex 64"
+      DATABASE_URL: postgres://plausible:changeme@plausible_db/plausible_db
+      CLICKHOUSE_DATABASE_URL: http://plausible_events_db:8123/plausible_events_db
+    depends_on: [plausible_db, plausible_events_db]
+    restart: unless-stopped
+
+volumes:
+  db_data:
+  events_data:
+```
+
+```bash
+cd ~/plausible && podman-compose up -d
+# Create admin account on first visit at https://analytics.home.local/register
+```
+
+**Caddy:**
+```caddyfile
+analytics.home.local { tls internal; reverse_proxy localhost:8033 }
+```
+
+##### Embed tracking snippet
+
+(add to your site's `<head>`):
+```html
+<script defer data-domain="mysite.home.local"
+  src="https://analytics.home.local/js/script.js"></script>
+```
+
+---
+
+### Umami (Minimal Cookie-Free Analytics)
+
+**Purpose:** The simplest self-hosted analytics option — even lighter than Plausible. Single container (plus a Postgres or MySQL DB), sub-second dashboard loads, and a clean event tracking API for custom button/form events. No cookies, no GDPR consent required. Best for personal sites, blogs, and internal tools where Matomo is overkill.
+
+```yaml
+# ~/umami/compose.yaml
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: changeme
+    volumes: [db_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    ports: ["127.0.0.1:3005:3000"]
+    environment:
+      DATABASE_URL: postgresql://umami:changeme@db:5432/umami
+      APP_SECRET: "run: openssl rand -hex 32"
+    depends_on: [db]
+    restart: unless-stopped
+
+volumes:
+  db_data:
+```
+
+```bash
+cd ~/umami && podman-compose up -d
+# Default login: admin / umami — change immediately
+```
+
+**Caddy:**
+```caddyfile
+umami.home.local { tls internal; reverse_proxy localhost:3005 }
+```
+
+#### Custom event tracking
+```html
+<!-- Track a button click -->
+<button data-umami-event="signup-click">Sign Up</button>
+
+<!-- Track with extra properties -->
+<button data-umami-event="purchase" data-umami-event-plan="pro">Buy Pro</button>
+```
+
+---
+
+## Education & Training
+
+## Open edX (Tutor)
+
+**Purpose:** The platform powering edX.org and hundreds of MOOCs. Full MOOC toolkit: video courses, peer-graded assignments, timed exams, discussion forums, certificates, and XBlocks for custom content types. **Tutor** is the recommended way to deploy it — a Docker-based wrapper that makes the famously complex edX deployment manageable.
+
+```bash
+# Install Tutor
+pip install "tutor[full]" --break-system-packages
+
+# Initialise (interactive — sets domain, admin account, etc.)
+tutor config save --interactive
+
+# Launch the full stack
+tutor local launch
+
+# Create a superuser
+tutor local run lms manage.py createsuperuser
+
+# Import a demo course
+tutor local do importdemocourse
+```
+
+> Tutor manages all containers, volumes, and configuration. Run `tutor local status` to see all services.
+
+**Caddy:**
+```caddyfile
+lms.example.com { reverse_proxy localhost:80 }
+studio.example.com { reverse_proxy localhost:80 }
+```
+
+---
+
 
 ## Caddy Configuration
 
