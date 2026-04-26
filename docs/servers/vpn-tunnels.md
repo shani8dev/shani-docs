@@ -6,16 +6,13 @@ updated: 2026-04-22
 
 > **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
 
-
 # VPN & Tunnels
 
 All VPN and tunnel solutions on this system can run fully containerised. Rootless containers handle traffic routing but require specific capabilities (`NET_ADMIN`, `NET_RAW`), kernel modules (`tun`), and IP forwarding enabled on the host.
 
 ---
 
-## Job-Ready Concepts
-
-### VPN & Tunnels Interview Essentials
+## Key Concepts
 
 #### WireGuard vs OpenVPN vs IPSec — when interviewers ask
 WireGuard: modern (2015), small codebase (~4000 lines), fast, kernel-level, uses fixed modern crypto (ChaCha20, Curve25519). No backward compatibility negotiation — a feature, not a limitation. OpenVPN: mature (2001), large ecosystem, configurable cipher suites, userspace TLS so slower, supports TCP mode (useful when UDP is blocked). IPSec: the enterprise/router standard, complex to configure, built into most OSes natively.
@@ -37,7 +34,6 @@ Every VPN tunnel adds overhead to each packet (headers, encryption padding). Wir
 #### Split tunnel security implications
 With a split tunnel (`AllowedIPs = 192.168.1.0/24`), only traffic to the home LAN goes through the VPN — all other internet traffic goes directly from the client's ISP. This means: (1) DNS queries for non-`.home.local` domains don't use your Pi-hole, (2) your ISP can still see your general browsing, (3) a malicious website can't be blocked by your home DNS. A full tunnel (`AllowedIPs = 0.0.0.0/0`) routes everything through home, but adds latency and uses your home bandwidth. Choose based on the use case.
 
-
 #### Cloudflare Tunnel vs self-hosted reverse proxy — the trade-off
 Cloudflare Tunnel (cloudflared) exposes a local service to the internet without opening firewall ports or having a public IP. The tunnel connects outbound to Cloudflare's network, which terminates HTTPS for your domain. Trade-offs: you must trust Cloudflare to terminate your TLS (they see plaintext), your availability depends on Cloudflare's uptime, and all traffic passes through their network (latency + bandwidth cost for large transfers). For services that don't need to bypass Cloudflare, Pangolin (self-hosted) or a VPS-based reverse proxy (frp) gives you the same capability without the dependency.
 
@@ -49,7 +45,19 @@ A VPN (WireGuard, OpenVPN) controls who can reach the network; the application s
 
 #### Protocol obfuscation — when and why
 Standard WireGuard and OpenVPN traffic patterns are fingerprint-able by deep packet inspection (DPI). ISPs and national firewalls (GFW) identify and block them. Obfuscation tools (Xray/V2Ray with VLESS+XTLS-Reality, Hysteria2) make VPN traffic look like normal HTTPS, video streaming, or QUIC traffic. This is relevant for: (1) countries with internet censorship, (2) corporate networks that block non-HTTP outbound, (3) ISPs that throttle VPN traffic. Hysteria2 additionally uses QUIC's congestion control to improve performance on high-latency, high-loss links (satellite, mobile).
----
+
+#### WireGuard cryptography — what you're actually running
+WireGuard uses Curve25519 for key exchange (ECDH), ChaCha20-Poly1305 for symmetric encryption (authenticated, AEAD), and BLAKE2s for hashing. This is a modern, audited cryptographic stack — significantly simpler than OpenVPN's TLS negotiation (which can be misconfigured to use weak ciphers). Each peer has a 32-byte public key derived from its private key. Handshakes are silent — WireGuard never responds to unauthenticated packets, making it invisible to port scanners.
+
+#### Tailscale vs Headscale — what the control plane actually does
+WireGuard handles data-plane encryption; the control plane distributes public keys, allocates IP addresses, and implements NAT traversal. Tailscale's control plane is managed (tailscale.com servers). Headscale self-hosts the control plane — same WireGuard data plane, but your server handles key distribution and NAT traversal coordination. The trade-off: Headscale means no Tailscale SaaS dependency, but you run the coordination server, and some Tailscale features (MagicDNS via their resolvers, some client apps) may have reduced functionality.
+
+#### Key rotation and peer management at scale
+WireGuard has no built-in PKI — each peer is a static public key. At small scale (10 peers) this is manageable. At medium scale (50+ peers), use Headscale's API or Netbird's management plane to automate key distribution and rotation. Key compromise in WireGuard requires removing the peer's public key from all other peers' `AllowedPeers` lists — in a mesh of 50 nodes, this means 49 config updates. This is why a management plane (Headscale, Netbird, Innernet) is not optional at scale.
+
+#### VPN split tunneling — security implications
+Full tunnel routes all traffic through the VPN — protects DNS queries, prevents local network leakage, but adds latency and routes your ISP's traffic through your home server. Split tunnel routes only specific CIDRs through the VPN — your home LAN is accessible, but public traffic goes direct. Security risk: split tunnel exposes your traffic on the exit network (corporate WiFi, coffee shop) for non-VPN-routed traffic. DNS leak: even with split tunnel, ensure DNS queries for home resources go through the VPN resolver, not the local network's DNS.
+
 ---
 
 ---
@@ -1147,7 +1155,8 @@ services:
 cd ~/xray && podman-compose up -d
 ```
 
-**Generate a UUID and Reality keys:**
+##### Generate a UUID and Reality keys
+
 ```bash
 # Generate a UUID for the client ID
 podman run --rm ghcr.io/xtls/xray-core:latest uuid
@@ -1165,7 +1174,6 @@ podman run --rm ghcr.io/xtls/xray-core:latest x25519
 ```bash
 sudo firewall-cmd --add-port=443/tcp --permanent && sudo firewall-cmd --reload
 ```
-
 
 ## Troubleshooting
 

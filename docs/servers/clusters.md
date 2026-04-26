@@ -8,12 +8,11 @@ updated: 2026-04-22
 
 > **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal`. When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
 
-
 Multi-node, replicated, and highly available deployments. All compose files use rootless Podman with `:Z` volume labels on bind mounts. Named volumes omit `:Z` — Podman manages their labels automatically.
 
 ---
 
-## HA Concepts (Industry Context)
+## Key Concepts
 
 These patterns appear across every company that runs production infrastructure. Understanding them is the difference between someone who follows runbooks and someone who can write them.
 
@@ -32,7 +31,6 @@ Async replicas apply writes with a delay. During normal operation this might be 
 #### HAProxy health check model
 HAProxy doesn't connect to the database to check health — it hits a REST endpoint on the HA agent (Patroni port 8008). This is intentional: probing the database port only tells you TCP is open, not whether the node is a writable primary. The agent's REST endpoint knows cluster role and reports it explicitly. This REST-based health check pattern appears across many HA stacks (Consul health checks, Kubernetes liveness/readiness probes, AWS target group health checks).
 
-
 #### Quorum mathematics — why odd-numbered clusters
 A cluster with N nodes requires ⌊N/2⌋ + 1 nodes for quorum (a majority). With 3 nodes: quorum = 2, can tolerate 1 failure. With 5 nodes: quorum = 3, can tolerate 2 failures. With 4 nodes: quorum = 3, can still only tolerate 1 failure — same as 3 nodes but with more cost. Even-numbered clusters waste a node. A 2-node cluster can't achieve quorum after any single failure — this is why you should never run a 2-node etcd, Patroni, or Elasticsearch cluster in production.
 
@@ -50,6 +48,25 @@ Prometheus is single-node — one binary, local disk, bounded retention. Victori
 
 #### Cassandra consistent hashing and the ring
 Cassandra distributes data using consistent hashing — each node owns a range of the token ring (a 64-bit integer space). A row's partition key is hashed to a token, and the node owning that token range stores it. With `replication_factor=3`, the three consecutive nodes on the ring each store a copy. This means: (1) adding a node only moves ~1/N of data, not all of it, (2) there's no primary — any replica can serve reads/writes, (3) `CONSISTENCY QUORUM` requires a majority of replicas to agree, moving Cassandra toward CP at the cost of availability during node failures.
+
+#### CAP theorem — the distributed systems interview question
+Any distributed data store can provide at most two of three guarantees: Consistency (every read gets the most recent write), Availability (every request gets a non-error response), and Partition tolerance (the system continues despite network splits). Network partitions are unavoidable in real systems, so the real choice is CP vs AP. PostgreSQL with Patroni is CP — during a failover it stops accepting writes until a new leader is elected. Cassandra is AP — it stays writable during a partition but can return stale data. Knowing this tells you which database to choose for a given use case.
+
+#### Consistent hashing — how distributed caches and databases partition data
+Naive sharding (key mod N) breaks when you add or remove nodes — all keys need to be remapped. Consistent hashing places both nodes and keys on a ring; adding a node only moves 1/N of the keys to it. Redis Cluster uses hash slots (16384 fixed buckets) as a simpler consistent-hashing variant. Understanding this lets you explain why Redis Cluster rebalancing is less disruptive than naive partitioning and why adding a Cassandra node to a ring is a smooth operation.
+
+#### Split-brain consequences and prevention
+Split-brain occurs when two nodes both believe they are the primary and accept writes simultaneously, creating divergent data. Consequences: data loss on reconciliation, double-processing of transactions, or permanent inconsistency. Prevention mechanisms: quorum (requires majority vote to elect a primary), fencing (forcibly stop the old primary before promoting a new one), and epoch numbers (each primary has a monotonically increasing term; writes from a stale term are rejected). The pattern repeats across Patroni (etcd quorum + fencing), Kafka KRaft (Raft epochs), and Elasticsearch (voting configurations).
+
+#### Observability for distributed clusters
+Cluster health is not just "is the process running." Key metrics to monitor: (1) replication lag — how far behind are replicas? (2) leader stability — how often is leader election happening? Frequent elections indicate network instability; (3) quorum status — is the cluster operating at full quorum or in degraded mode? (4) partition count and distribution — are Kafka partitions evenly distributed, or is one broker hot? Tools: Kafka UI for Kafka, Patroni's REST API (`/patroni`) for PostgreSQL, `_cluster/health` for Elasticsearch. Alert on degraded status, not just down status.
+
+#### Replication factor vs availability — the maths
+In Kafka, a topic with `replication.factor=3` and `min.insync.replicas=2` can survive loss of 1 broker (writes still acknowledged by 2). In Cassandra, `REPLICATION_FACTOR=3` with `CONSISTENCY QUORUM` can survive 1 node failure. In Elasticsearch, `number_of_replicas=1` means each shard exists on 2 nodes — lose 1 node and the cluster stays green. The general formula: for fault tolerance of F failures, you need 2F+1 nodes with quorum writes, or F+1 nodes with full replication. Knowing this lets you size clusters correctly at interview: "we need to survive 1 AZ failure, so we need 3 replicas across 3 AZs."
+
+#### When to use a message queue vs a database as a queue
+Using a relational database as a job queue (polling a `jobs` table) works at low scale but creates lock contention and high database load as throughput grows. Kafka is not a job queue — it's a log, and all consumers see all messages. RabbitMQ is a job queue — messages are consumed once, then deleted. Use a dedicated queue (RabbitMQ, NATS JetStream) when you have competing consumers (multiple workers processing jobs), require dead-letter handling, or need per-message TTL. Use a database queue only for low-volume (<100 jobs/second) workloads where simplicity matters more than throughput.
+
 ---
 
 ## Elasticsearch Cluster (3-Node)
@@ -299,7 +316,8 @@ curl http://localhost:9200/_cluster/health?pretty
 curl "http://localhost:9200/_cat/nodes?v"
 ```
 
-**Data Prepper pipeline config:**
+##### Data Prepper pipeline config
+
 ```yaml
 # ~/opensearch-cluster/data-prepper/pipelines.yaml
 log-pipeline:
@@ -332,7 +350,8 @@ otel-trace-pipeline:
         index: otel-traces-%{yyyy.MM.dd}
 ```
 
-**OpenSearch ISM — daily rollover, delete after 30 days:**
+##### OpenSearch ISM — daily rollover, delete after 30 days
+
 ```bash
 curl -X PUT http://localhost:9200/_plugins/_ism/policies/logs-policy \
   -H "Content-Type: application/json" -d '
@@ -466,7 +485,7 @@ podman exec kafka1 kafka-topics \
 
 A **consumer group** is a set of consumers that collectively read a topic. Kafka assigns each partition to exactly one consumer in the group at a time. If a topic has 6 partitions and your consumer group has 3 instances, each instance gets 2 partitions. If you scale to 6 instances, each gets 1. If you add a 7th, it sits idle — you can't have more active consumers than partitions.
 
-**Rebalancing** happens when a consumer joins or leaves the group. During a rebalance, all partition assignments are renegotiated — no consumer processes messages until the rebalance completes. This is the "rebalance storm" problem: if consumers join/leave frequently (e.g., due to crashlooping pods), the group never stabilises and consumer lag grows continuously.
+**Rebalancing:** happens when a consumer joins or leaves the group. During a rebalance, all partition assignments are renegotiated — no consumer processes messages until the rebalance completes. This is the "rebalance storm" problem: if consumers join/leave frequently (e.g., due to crashlooping pods), the group never stabilises and consumer lag grows continuously.
 
 `max.poll.interval.ms` controls how long Kafka waits between calls to `poll()` before declaring a consumer dead and triggering a rebalance. If your processing logic is slow (e.g., calling an external API per message), increase this value — otherwise Kafka will evict the consumer mid-processing, causing messages to be redelivered.
 

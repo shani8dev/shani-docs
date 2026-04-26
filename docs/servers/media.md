@@ -12,9 +12,7 @@ Self-hosted streaming servers, personal photo libraries, music servers, and down
 
 ---
 
----
-
-## Job-Ready Concepts
+## Key Concepts
 
 #### Video transcoding — codecs, containers, and hardware acceleration
 A video file has two layers: a container (MKV, MP4, AVI — the wrapper format) and codec (H.264, H.265/HEVC, AV1 — the compression algorithm). Jellyfin transcodes on-the-fly when a client can't decode the source codec natively (a Roku doesn't decode H.265; it needs an H.264 stream). Transcoding is CPU-intensive — a single 1080p H.265 → H.264 transcode saturates 2–4 CPU cores. Hardware transcoding (Intel Quick Sync via `/dev/dri`, NVIDIA NVENC, AMD VCE) offloads this to dedicated silicon, supporting 10–20 simultaneous streams on the same hardware that would support 1–2 in software. The key operational decision: ensure clients support direct play (no transcoding) by choosing a codec supported by your device ecosystem. H.264 + AAC in MKV direct plays on virtually everything.
@@ -33,7 +31,6 @@ A 1080p H.264 stream at 8 Mbps consumed 8 hours per day = ~28 GB/month per viewe
 
 #### Digital rights management (DRM) and Plex/Jellyfin differences
 Plex Pass is required for hardware transcoding and features like mobile sync — this is a commercial layer on top of open-source foundations. Jellyfin is fully open-source with no paid tier, and includes hardware transcoding in the base installation. Neither Plex nor Jellyfin can transcode DRM-protected content (Netflix, Disney+) — they are for personal media libraries of content you own. This distinction matters for recommending the right tool: if a user asks about ripping Blu-rays and streaming them, Jellyfin with MakeMKV-ripped files is the workflow. Streaming licensed content from Netflix-equivalent services still requires those services' apps.
-
 
 ## Jellyfin
 
@@ -87,6 +84,18 @@ curl "http://localhost:8096/System/Info?api_key=YOUR_API_KEY"
 ```caddyfile
 media.home.local { tls internal; reverse_proxy localhost:8096 }
 ```
+
+#### Transcoding vs direct play vs direct stream
+Three modes in Jellyfin/Plex: **Direct play** — the client supports the exact codec and container; no server processing. **Direct stream** — the container is rewrapped (remuxed) but the video codec is passed through unchanged; low CPU. **Transcoding** — the server decodes and re-encodes to a format the client supports; CPU or GPU-intensive. Target direct play wherever possible — it uses no server resources. The main causes of forced transcoding: client doesn't support HEVC/H.265, audio codec not supported (TrueHD, Atmos), or subtitle format (image-based PGS/VOBSUB forces video transcode because subtitles must be burned in). Hardware transcoding (Intel QSV, AMD VCE, NVIDIA NVENC) reduces CPU load by 10–20× for transcoding workloads.
+
+#### The *arr stack and Usenet vs BitTorrent
+The *arr stack (Radarr, Sonarr, Lidarr, Readarr) provides automated media acquisition: search indexers, match against quality profiles, send to a download client, and import to your library. Usenet (SABnzbd) is binary newsgroups — centralised, fast (full ISP bandwidth), requires a Usenet provider subscription and an NZB indexer. BitTorrent (qBittorrent) is peer-to-peer — free, but slower and requires a VPN or seedbox for privacy in most jurisdictions. Prowlarr manages all indexers centrally for the *arr stack. The automation pipeline: new release appears on indexer → Radarr/Sonarr picks it up → sends to download client → client downloads → *arr imports and renames → Jellyfin picks it up via library scan.
+
+#### Storage planning for media libraries
+Video bitrates: 1080p H.264 Blu-ray rip ~15–25 GB, 1080p x265 ~4–8 GB, 4K HDR x265 ~40–80 GB, 4K remux ~60–100 GB. Music: FLAC ~300 MB/album, MP3 320kbps ~100 MB/album. A modest 500-film 1080p library at 8 GB average = 4 TB. Plan for 2–3× growth headroom. RAID is not a backup — it protects against disk failure but not accidental deletion, ransomware, or controller failure. Run RAID + Restic to offsite. ZFS with snapshots provides additional protection against silent data corruption (bit rot) via checksums.
+
+#### Metadata, NFO files, and library management
+Jellyfin and Plex fetch metadata (posters, backdrops, descriptions, cast) from TMDB, TVDB, and MusicBrainz. Correct file naming is essential: `Movie Name (2023)/Movie Name (2023).mkv` for films; `Show Name/Season 01/Show Name S01E01.mkv` for TV. NFO files are sidecar XML files that store metadata locally — useful when an API source has wrong data or for content not in public databases. Unmanic automates post-processing: watch a directory, transcode new files to a target format (H.265), and handle the replace-in-place workflow safely with Jellyfin library refresh hooks.
 
 ---
 
@@ -779,7 +788,8 @@ services:
 cd ~/kometa && podman-compose up -d
 ```
 
-**Minimal `config.yml`:**
+##### Minimal `config.yml`
+
 ```yaml
 # /home/user/kometa/config/config.yml
 plex:

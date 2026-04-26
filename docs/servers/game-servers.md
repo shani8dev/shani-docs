@@ -14,9 +14,7 @@ Dedicated game servers for multiplayer gaming — hosted on your own hardware, o
 
 ---
 
----
-
-## Job-Ready Concepts
+## Key Concepts
 
 #### Dedicated server architecture — authoritative vs peer-to-peer
 A dedicated server is an authoritative game server: it holds the canonical game state and all clients send inputs to it and receive state updates from it. This prevents cheating (clients never compute the final state themselves) and enables server-side validation. Peer-to-peer (P2P) games let clients communicate directly — cheaper to host but vulnerable to cheaters who manipulate their local state. Most modern multiplayer games (Minecraft, CS2, Valheim) use dedicated server architecture. The server runs the game simulation at a fixed tick rate (Minecraft: 20 TPS, CS2: 64 or 128 tick); clients predict and interpolate between server state updates.
@@ -32,7 +30,6 @@ Pterodactyl (and Docker/Podman generally) provides isolation between game server
 
 #### Game save data and backup strategy
 Game world files are stateful and typically not hot-copyable — copying a Minecraft `world/` directory while the server is writing can produce a corrupt save. The correct pattern: (1) trigger a server-side save command via RCON (`save-all`, `save-off`, then copy, then `save-on`), or (2) stop the container, copy, restart. For automated backups, this is exactly the pre-backup hook pattern used in Borgmatic and Restic. Valheim and Factorio checkpoint saves more safely but still benefit from this quiesce-then-copy approach. In a Pterodactyl setup, the backup system handles this by sending the appropriate RCON commands before copying.
-
 
 ## Minecraft Java Edition
 
@@ -78,7 +75,8 @@ cd ~/minecraft && podman-compose up -d
 | `SEED` | any string | World generation seed |
 | `MODE` | `survival`, `creative`, `adventure` | Game mode |
 
-**Install mods (Fabric/Forge):**
+##### Install mods (Fabric/Forge)
+
 ```bash
 # Drop .jar mod files into the mods directory
 mkdir -p /home/user/minecraft/data/mods
@@ -132,6 +130,15 @@ podman logs -f minecraft
 # Backup the world directory
 tar -czf minecraft-world-$(date +%Y%m%d).tar.gz /home/user/minecraft/data/world
 ```
+
+#### Tickrate, simulation rate, and networking overhead
+A game server's tickrate is how many times per second it simulates the world and sends state updates to clients. 20 tick (Minecraft default) means one update every 50ms. 64 tick (CS:GO matchmaking) means 15ms updates. 128 tick means 7.8ms. Higher tickrate means more accurate hit detection and smoother movement, but proportionally more CPU and bandwidth per player. At 20 players, a 128-tick server uses ~3× the bandwidth of a 20-tick server. For casual play, 20 tick is fine; for competitive shooters, 64–128 tick is expected.
+
+#### Persistent world state and checkpoint saves
+Games with persistent worlds (Valheim, Minecraft, Terraria) save world state to disk on a schedule and on clean shutdown. The risk: if the server crashes mid-save, the save file can be corrupted. Mitigation: (1) the server writes to a `.tmp` file then atomically renames it — check if your game does this; (2) keep rolling backups (last 5 saves) so you can roll back to the last good state; (3) Restic running on the save directory with hourly snapshots gives you point-in-time recovery. For Valheim, the world files are in `~/.config/unity3d/IronGate/Valheim/worlds_local/`.
+
+#### Firewall and DDoS considerations for public game servers
+Game servers on public IPs are routinely port-scanned and occasionally DDoS'd. Mitigations: (1) use a VPS as a WireGuard relay — your home IP is never exposed, traffic enters through the VPS and tunnels to your home server; (2) fail2ban with game-specific filters blocks repeat connection abusers; (3) Cloudflare Spectrum (paid) proxies UDP-based game traffic through Cloudflare's DDoS mitigation network; (4) rate-limit connections at the firewall level — legitimate clients reconnect, bots move on. Never expose RCON to the public internet — always restrict to localhost or VPN addresses.
 
 ---
 
@@ -192,7 +199,8 @@ services:
 cd ~/velocity && podman-compose up -d
 ```
 
-**Minimal `velocity.toml`:**
+##### Minimal `velocity.toml`
+
 ```toml
 bind = "0.0.0.0:25577"
 motd = "&aHome Network"
@@ -243,7 +251,8 @@ cd ~/valheim && podman-compose up -d
 
 > Set `SERVER_PUBLIC=false` to hide from the public server list — players connect by direct IP. Set a password of at least 5 characters.
 
-**Install BepInEx mods:**
+##### Install BepInEx mods
+
 ```bash
 # Create BepInEx plugins directory
 mkdir -p /home/user/valheim/config/BepInEx/plugins
@@ -510,7 +519,8 @@ volumes:
 cd ~/pterodactyl && podman-compose up -d
 ```
 
-**Create admin user:**
+##### Create admin user
+
 ```bash
 podman exec -it pterodactyl-panel-1 php artisan p:user:make
 ```
@@ -573,8 +583,6 @@ crafty.home.local { tls internal; reverse_proxy localhost:8443 }
 | Pterodactyl Panel | TCP | 80, 443 |
 | Pterodactyl Wings | TCP | 8080, 2022 |
 | Crafty Controller | TCP | 8443 |
-
----
 
 ---
 

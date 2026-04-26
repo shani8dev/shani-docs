@@ -14,9 +14,7 @@ Run large language models, vision pipelines, image generation, speech-to-text, a
 
 ---
 
----
-
-## Job-Ready Concepts
+## Key Concepts
 
 #### Transformer architecture and why it matters for inference
 Large language models are transformer networks. The key operational facts: inference is memory-bandwidth-bound, not compute-bound — the GPU spends most of its time moving weights from VRAM to compute units. This is why quantisation (reducing weight precision from float16 to int4) gives a 4× memory reduction with minimal quality loss. VRAM capacity determines the maximum model size; VRAM bandwidth determines tokens-per-second. A 7B model at float16 needs ~14 GB VRAM; at Q4_K_M quantisation, ~4 GB. Knowing this lets you choose the right model-hardware combination and explain why a 3090 (24 GB) outperforms a 4090 (24 GB) for inference at saturated VRAM.
@@ -38,7 +36,6 @@ Three ways to specialise an LLM: (1) Prompting — add instructions and examples
 
 #### LLM safety and output reliability patterns
 LLMs are probabilistic — they can hallucinate, produce inconsistent JSON, and fail silently. Production patterns: (1) Structured output — instruct the model to respond in JSON and validate with Pydantic/Zod; use grammar-constrained decoding (llama.cpp supports this) to enforce schemas at the token level. (2) Retry with reflection — if the model's output fails validation, feed the error back as a correction prompt. (3) Guardrails — validate inputs for prompt injection (user tries to override system instructions) and outputs for PII or policy violations (Langfuse can hook into this pipeline). (4) Temperature — set to 0 for deterministic tasks (classification, extraction), higher for creative generation.
-
 
 ## Ollama
 
@@ -64,13 +61,16 @@ services:
 cd ~/ollama && podman-compose up -d
 ```
 
-**REST API example:**
+##### REST API example
+
 ```bash
 curl http://localhost:11434/api/generate \
   -d '{"model":"llama3.2","prompt":"What is immutable Linux?","stream":false}'
 ```
 
-**OpenAI-compatible API** (drop-in replacement for any OpenAI client):
+##### OpenAI-compatible API
+
+(drop-in replacement for any OpenAI client):
 ```bash
 curl http://localhost:11434/v1/chat/completions \
   -H "Content-Type: application/json" \
@@ -146,7 +146,9 @@ cd ~/open-webui && podman-compose up -d
 
 Access at `http://localhost:3000`. Proxy through Caddy for HTTPS: `webui.home.local { tls internal; reverse_proxy localhost:3000 }`.
 
-**Connect to external APIs** (Anthropic, OpenAI, Groq) alongside local models by adding connections under Settings → Connections. You can mix local Ollama models with cloud APIs in the same interface.
+##### Connect to external APIs
+
+(Anthropic, OpenAI, Groq) alongside local models by adding connections under Settings → Connections. You can mix local Ollama models with cloud APIs in the same interface.
 
 ---
 
@@ -174,7 +176,8 @@ services:
 cd ~/localai && podman-compose up -d
 ```
 
-**Test the API:**
+##### Test the API
+
 ```bash
 curl http://localhost:8080/v1/chat/completions \
   -H "Content-Type: application/json" \
@@ -261,7 +264,8 @@ services:
 cd ~/whisper && podman-compose up -d
 ```
 
-**Transcribe a file:**
+##### Transcribe a file
+
 ```bash
 curl -F "audio_file=@recording.mp3" http://localhost:9000/asr
 ```
@@ -327,7 +331,9 @@ cd ~/tabby && podman-compose up -d
 
 > Replace `--device cpu` with `--device cuda` for NVIDIA, `--device rocm` for AMD, or keep `--device cpu` for CPU inference. (`--device metal` is macOS-only and not applicable here.) Smaller models like `TabbyML/StarCoder-1B` run well on CPU for local use.
 
-**VS Code setup:** Install the [Tabby extension](https://marketplace.visualstudio.com/items?itemName=TabbyML.vscode-tabby), then point it at `http://tabby.home.local` in settings.
+##### VS Code setup
+
+Install the [Tabby extension](https://marketplace.visualstudio.com/items?itemName=TabbyML.vscode-tabby), then point it at `http://tabby.home.local` in settings.
 
 ---
 
@@ -398,12 +404,14 @@ volumes:
 cd ~/litellm && podman-compose up -d
 ```
 
-**First run — apply database migrations:**
+##### First run — apply database migrations
+
 ```bash
 podman exec litellm-litellm-1 litellm --database_url "postgresql://litellm:changeme@db:5432/litellm" migrate
 ```
 
-**Example `config.yaml`:**
+##### Example `config.yaml`
+
 ```yaml
 model_list:
   - model_name: llama3.2
@@ -435,7 +443,8 @@ general_settings:
   database_url: postgresql://litellm:changeme@db:5432/litellm
 ```
 
-**Use LiteLLM from any OpenAI client:**
+##### Use LiteLLM from any OpenAI client
+
 ```bash
 curl http://localhost:4000/v1/chat/completions \
   -H "Authorization: Bearer sk-changeme" \
@@ -727,7 +736,8 @@ volumes: {pg_data: {}, qdrant_data: {}}
 cd ~/dify && podman-compose up -d
 ```
 
-**First run — initialise the database:**
+##### First run — initialise the database
+
 ```bash
 podman-compose run --rm api flask db upgrade
 podman-compose run --rm api flask db-commands migrate

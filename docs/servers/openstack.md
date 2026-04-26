@@ -6,7 +6,6 @@ updated: 2026-04-25
 
 > **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
 
-
 # OpenStack & Private Cloud
 
 Deploy a full OpenStack cloud on this system — from a minimal all-in-one development setup to a multi-node private cloud with compute, networking, storage, and identity services. All compose files use rootless Podman with `:Z` volume labels on bind mounts. Named volumes omit `:Z` — Podman manages their labels automatically.
@@ -17,11 +16,9 @@ Deploy a full OpenStack cloud on this system — from a minimal all-in-one devel
 
 ---
 
-## Job-Ready Concepts
+## Key Concepts
 
-### OpenStack Interview Essentials
-
-**OpenStack vs Kubernetes — what's the difference?** OpenStack manages *virtual machines and infrastructure* (compute, networking, storage, identity). Kubernetes manages *containerised workloads*. They're complementary: many production environments run Kubernetes on top of OpenStack VMs (Magnum does this automatically). In cloud provider terms, OpenStack = the IaaS layer (like AWS EC2/VPC/EBS); Kubernetes = the PaaS layer (like EKS/GKE).
+**OpenStack vs Kubernetes — what's the difference?:** OpenStack manages *virtual machines and infrastructure* (compute, networking, storage, identity). Kubernetes manages *containerised workloads*. They're complementary: many production environments run Kubernetes on top of OpenStack VMs (Magnum does this automatically). In cloud provider terms, OpenStack = the IaaS layer (like AWS EC2/VPC/EBS); Kubernetes = the PaaS layer (like EKS/GKE).
 
 #### Nova vs Neutron vs Cinder — the three most commonly asked
 - **Nova** (compute): manages VM lifecycle — boot, stop, resize, migrate, snapshot. The core of OpenStack.
@@ -48,7 +45,6 @@ Heat is OpenStack's native orchestration — HOT (Heat Orchestration Template) f
 #### Ceph as the OpenStack storage backbone
 Ceph RBD (RADOS Block Device) is the preferred backend for Cinder volumes, Glance images, and Nova ephemeral disks in production OpenStack. All three services share the same Ceph cluster with separate pools. Benefits: thin provisioning, snapshots, cloning (fast VM spawning from images), no shared storage requirement for live migration (each VM's disk is a Ceph RBD image stored in the cluster, not on the compute node).
 
-
 #### OpenStack deployment model — services are just APIs
 Every OpenStack service is a REST API backed by a message queue (RabbitMQ). Nova receives a boot request → puts a message on the queue → nova-compute picks it up → calls the hypervisor. This async model is why OpenStack scales: you can have hundreds of compute nodes all consuming the same queue. The downside: debugging requires following a message through multiple service logs. `openstack server create` returning immediately doesn't mean the VM is running — poll `openstack server show` for status.
 
@@ -60,7 +56,16 @@ Security groups in OpenStack (Neutron) are stateful firewalls attached to VM por
 
 #### Glance images and image formats
 Glance stores VM images (qcow2, raw, vmdk). qcow2 is the standard format — thin-provisioned, supports snapshots, compresses well. raw is faster at runtime (no format overhead) but larger. When an image is used to boot a VM, Nova (with Ceph backend) clones the Glance image in Ceph as a copy-on-write RBD volume — VM boots in seconds regardless of image size. Always upload images in qcow2 format; the backend handles conversion.
----
+
+#### Ceph integration — the backbone of production OpenStack storage
+Most production OpenStack deployments use Ceph as the unified storage backend: Cinder (block storage) uses RBD (RADOS Block Device), Glance (image service) stores images in Ceph object storage, and Nova (compute) boots instances directly from Ceph-backed volumes via copy-on-write clones — a VM boots in seconds regardless of image size because only modified blocks are written. The Ceph cluster is separate from OpenStack compute nodes; they communicate via the Ceph client library embedded in libvirt/QEMU. This architecture makes live migration trivial (no data to move — the new host just attaches to the same Ceph volume) and enables snapshotting at the storage layer.
+
+#### Keystone token types and service discovery
+Keystone issues tokens (currently Fernet format — signed, non-persistent) that services use to authenticate API calls. The service catalog embedded in the token lists the endpoint URLs for every OpenStack service — compute, storage, networking, identity. When `nova list` runs, it first contacts Keystone to get a token and the catalog, then calls the Nova endpoint from the catalog. Every OpenStack service validates tokens against Keystone on every API call. This central identity model means a Keystone outage takes down the entire cloud's API layer — HA Keystone deployment is non-negotiable in production.
+
+#### Neutron ML2 plugin architecture — why OpenStack networking is complex
+Neutron's Modular Layer 2 (ML2) plugin separates the type driver (what kind of network: VLAN, VXLAN, flat) from the mechanism driver (how it's implemented: OVS, OVN, SR-IOV). OVN (Open Virtual Network) is the current recommended mechanism driver — it replaces the older OVS agent model with a centralised database (OVSDB) that distributes flow rules to all compute nodes without requiring a Neutron agent on each. The complexity comes from the abstraction layers: Neutron networks → Neutron subnets → Neutron ports → OVN logical switches → OVS flow rules on the hypervisor. When debugging, work down the stack: check the Neutron API first, then OVN database (`ovn-nbctl show`), then OVS flows (`ovs-ofctl dump-flows`).
+
 ---
 
 ---
@@ -211,7 +216,8 @@ sudo microstack.openstack image create \
 
 **Purpose:** The reference OpenStack development environment. Installs directly from Git, making it easy to test patches, contribute upstream, or explore bleeding-edge features. **Not for production** — DevStack is a single-node setup designed to be torn down and rebuilt. Run it inside a Distrobox container to keep the host clean.
 
-**Run DevStack inside a Distrobox Ubuntu container:**
+##### Run DevStack inside a Distrobox Ubuntu container
+
 ```bash
 # Create an Ubuntu 24.04 Distrobox container for DevStack
 distrobox create --name devstack --image ubuntu:24.04
@@ -350,7 +356,8 @@ enable_swift: "no"
 enable_magnum: "no"
 ```
 
-**Bootstrap and deploy:**
+##### Bootstrap and deploy
+
 ```bash
 source ~/kolla-venv/bin/activate
 
@@ -431,7 +438,8 @@ kolla-ansible -i ~/inventory-aio destroy --yes-i-really-really-mean-it
 
 ## OpenStack CLI Tools
 
-**Install via Nix (primary):**
+##### Install via Nix (primary)
+
 ```bash
 # OpenStackClient — unified CLI for all services
 nix-env -iA nixpkgs.python312Packages.openstackclient
@@ -1103,7 +1111,6 @@ openstack stack update -t ~/heat/webserver.yaml webserver-stack
 # Delete the stack (removes all resources)
 openstack stack delete webserver-stack
 ```
-
 
 ## Caddy Configuration
 

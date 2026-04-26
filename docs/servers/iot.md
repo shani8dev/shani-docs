@@ -12,9 +12,7 @@ Sensor data pipelines, MQTT brokers, time-series ingestion, industrial protocols
 
 ---
 
----
-
-## Job-Ready Concepts
+## Key Concepts
 
 #### MQTT protocol internals — brokers, topics, QoS
 MQTT is a publish-subscribe protocol where a broker (Mosquitto, EMQX) routes messages between publishers and subscribers using topic hierarchies (`factory/line1/sensor/temperature`). Wildcard subscriptions: `+` matches a single level (`home/+/temperature` matches all rooms), `#` matches all remaining levels (`home/#` matches everything under home). QoS 0 (fire-and-forget) has no delivery guarantee — correct for high-frequency sensor readings where losing one reading is acceptable. QoS 1 (at-least-once) retransmits until acknowledged — correct for commands or alerts. QoS 2 (exactly-once) uses a four-way handshake — rarely used due to overhead. Retained messages: the broker stores the last retained message per topic and delivers it to new subscribers immediately — essential for device state (current temperature) that must be available without waiting for the next publish cycle.
@@ -30,7 +28,6 @@ Modbus (1979) is the most widely deployed industrial protocol. Modbus RTU runs o
 
 #### Edge computing and the IoT data pipeline
 The full IoT pipeline from sensor to dashboard: Device → MQTT broker → Telegraf/Node-RED (transform, filter, enrich) → InfluxDB/TimescaleDB (store) → Grafana (visualise) → Prometheus/Alertmanager (alert). Edge computing moves the transformation step closer to the device — a Raspberry Pi running Node-RED at the factory edge aggregates 100 PLCs locally and sends only summary data to the cloud, reducing bandwidth and adding resilience (local processing continues during internet outages). This architecture pattern — edge gateway aggregating local devices, centralised cloud receiving summaries — is a standard IoT reference architecture asked about in IoT engineering and cloud architecture interviews.
-
 
 ## EMQX (High-Scale MQTT Broker)
 
@@ -61,7 +58,9 @@ cd ~/emqx && podman-compose up -d
 
 > **Dashboard:** `http://localhost:18083` — default login `admin` / `public` (change immediately).
 
-**EMQX Rule Engine example** — route sensor messages to InfluxDB:
+##### EMQX Rule Engine example
+
+— route sensor messages to InfluxDB:
 ```sql
 -- In the EMQX dashboard → Rules → Create
 SELECT
@@ -71,6 +70,18 @@ SELECT
 FROM "home/+/sensors"
 ```
 Then add an InfluxDB action to write the matched fields as a measurement.
+
+#### Time-series data retention and downsampling
+Raw sensor data (1-second resolution) grows quickly — 100 sensors at 1s intervals produces 8.6M data points per day. InfluxDB's retention policies and continuous queries (or TimescaleDB's `time_bucket` + materialized views) automatically aggregate old data: keep 30 days at 1s, 1 year at 1m, forever at 1h. This keeps storage bounded without losing long-term trends. Grafana displays all resolutions seamlessly via variable time ranges.
+
+#### Device security and firmware management
+IoT devices are frequently the weakest security link: default credentials, no TLS, no update mechanism. Minimum viable security: (1) VLAN-isolate IoT devices from your main network — they can only reach the MQTT broker, not the internet or other LAN hosts; (2) use unique credentials per device (ESPHome generates device-specific API keys); (3) disable cloud callbacks where possible (Tuya local mode, WLED); (4) OTA firmware updates should be signed — ESPHome supports MD5 hash verification; (5) expose no IoT device management interface to the internet.
+
+#### MQTT topic design patterns
+A well-designed topic hierarchy makes routing, filtering, and ACLs straightforward. Convention: `location/device-type/device-id/measurement`. Example: `home/sensor/bedroom-1/temperature`. Wildcard subscriptions: `home/sensor/+/temperature` subscribes to all temperature readings; `home/#` subscribes to everything. Design topics with routing in mind — the broker's ACL system grants/denies access per topic prefix. Avoid putting sensitive data (user IDs, exact location) in topic names since they're visible in broker logs.
+
+#### Edge vs cloud processing — when to compute locally
+Processing at the edge (ESPHome doing threshold detection, Node-RED doing aggregation) reduces bandwidth, adds resilience (automation works during internet outage), and improves latency (local decisions in <10ms vs 100ms+ cloud roundtrip). Rule of thumb: decisions that affect physical actuators (lights, locks, HVAC) should run locally. Archival, analytics, and ML inference can run in the cloud or on a home server. The hybrid model — local for control, server for analytics — is the production pattern for serious home automation setups.
 
 ---
 
@@ -115,7 +126,8 @@ podman exec telegraf telegraf --output-list
 podman restart telegraf
 ```
 
-**Example `telegraf.conf` — MQTT → InfluxDB pipeline:**
+##### Example `telegraf.conf` — MQTT → InfluxDB pipeline
+
 ```toml
 [agent]
   interval = "10s"
@@ -188,7 +200,8 @@ volumes:
 cd ~/prometheus && podman-compose up -d
 ```
 
-**Example `prometheus.yml` with IoT scrape targets:**
+##### Example `prometheus.yml` with IoT scrape targets
+
 ```yaml
 global:
   scrape_interval: 15s
@@ -216,7 +229,8 @@ scrape_configs:
       - targets: ['host.containers.internal:9234']
 ```
 
-**Example alert rules (`alerts.yml`):**
+##### Example alert rules (`alerts.yml`)
+
 ```yaml
 groups:
   - name: iot
@@ -275,7 +289,8 @@ services:
 cd ~/mqtt-exporter && podman-compose up -d
 ```
 
-**Example `config.yml`:**
+##### Example `config.yml`
+
 ```yaml
 mqtt:
   server: tcp://localhost:1883
@@ -327,7 +342,8 @@ services:
 cd ~/modbus-mqtt && podman-compose up -d
 ```
 
-**Example Modbus config (reading an energy meter):**
+##### Example Modbus config (reading an energy meter)
+
 ```json
 {
   "mqtt": {
@@ -449,7 +465,8 @@ cd ~/owntracks-frontend && podman-compose up -d
 - Username: your-name
 - Device ID: phone
 
-**Integrate with Home Assistant:**
+##### Integrate with Home Assistant
+
 ```yaml
 # configuration.yaml — add the OwnTracks integration
 device_tracker:

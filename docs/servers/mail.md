@@ -12,7 +12,7 @@ Production-ready email solutions for full data control and privacy.
 
 ---
 
-## How Email Actually Works
+## Key Concepts
 
 Understanding the protocol stack is essential for any sysadmin or DevOps role — interviewers expect you to trace a message end-to-end.
 
@@ -39,10 +39,28 @@ A *relay* (SendGrid, AWS SES, Mailgun) accepts your mail and delivers it under t
 #### IP warming
 When sending from a new IP, receiving servers rate-limit or reject you until your IP builds a reputation. Start with low volumes, ramp up over weeks, and monitor bounce/spam complaint rates. This is a real operational concern for any newsletter or transactional mail setup.
 
+#### SPF, DKIM, and DMARC — the deliverability trilogy
+**SPF:** a DNS TXT record that lists IPs authorised to send mail for your domain. `-all` hard-rejects unlisted senders; `~all` soft-fails. Interviewers ask the difference. **DKIM:** signs outbound messages with a private key on your server; the public key lives in DNS at `selector._domainkey.yourdomain.com`. Recipients verify the signature — this confirms the body wasn't tampered with in transit. DKIM survives forwarding; SPF does not. **DMARC:** ties SPF and DKIM together. `p=none` monitors, `p=quarantine` sends to spam, `p=reject` drops. The `rua=` tag sends aggregate XML reports — parse these to find misconfigured senders. All three must pass *and* be aligned (same domain) for full DMARC compliance. This is the single most common configuration gap in self-hosted mail setups.
+
+#### Why self-hosted mail is hard — the reputation problem
+SMTP on port 25 is the only protocol where destination servers can silently reject you based on who you are rather than what you send. New IP addresses have no sending reputation. Residential IPs are usually on block lists by default. Even a correctly configured server (SPF + DKIM + DMARC + PTR) may see inbox delivery rates of 60–70% initially. Mitigations: use a transactional email relay (SendGrid, AWS SES, Mailgun) for outbound critical mail while building IP reputation, monitor deliverability with mail-tester.com, and use a dedicated IP that you control. Most self-hosters are better served by self-hosting only inbound mail and using a relay for outbound.
+
+#### Greylisting, rate limiting, and spam scoring
+Greylisting: temporarily reject any first-time sender with a "try again later" response. Legitimate MTAs retry; spam bots often don't. Rspamd implements this with the `greylisting` module. Rate limiting: restrict how many messages a single IP or authenticated user can send per hour — prevents your server from being used as a spam relay if an account is compromised. Spam scoring: Rspamd assigns a composite score based on SPF/DKIM/DMARC results, Bayes classification, URL reputation, header analysis, and neural networks. A score above the threshold sends to spam; above the reject threshold drops the message.
+
+#### Email storage formats — Maildir vs mbox
+Dovecot defaults to Maildir: each message is a separate file in a directory structure. Safe for concurrent access (no file locking), easy to back up (rsync works), and failures only affect individual files. The older mbox format stores all messages in one file — one corruption corrupts all messages, concurrent writes require locking. Maildir is the correct choice for any modern mail server.
+
+#### MX records, PTR records, and reverse DNS — why they all matter
+The MX record points to your mail server's hostname (`mail.yourdomain.com`). That hostname must resolve via A record to your server's IP. Crucially, the IP must also have a PTR record (reverse DNS) that resolves back to the same hostname — this is set with your VPS or ISP provider, not in your own DNS zone. A mismatch between forward and reverse DNS is one of the most common causes of outbound mail rejection. Many receiving servers check: does the IP's PTR match the EHLO hostname in the SMTP conversation? If not, the message is rejected or flagged.
+
+#### Transactional vs bulk email — separate infrastructure
+Transactional email (password resets, order confirmations, account notifications) must reach the inbox reliably — these directly affect user experience. Bulk email (newsletters, marketing) can tolerate higher spam rates and should be sent from a different IP/domain so that spam complaints from bulk sends don't damage the deliverability reputation of your transactional mail. Even self-hosters benefit from this separation: use Listmonk with a dedicated subdomain (`newsletter.yourdomain.com`) and separate sending credentials from your main `yourdomain.com` transactional flow.
+
 ---
 
 ## Mailcow (Full-Featured)
-**Purpose**: Complete mail suite: Postfix, Dovecot, SOGo, Rspamd, ClamAV, admin UI, and ActiveSync.
+**Purpose:** Complete mail suite: Postfix, Dovecot, SOGo, Rspamd, ClamAV, admin UI, and ActiveSync.
 ```yaml
 # Clone: git clone https://github.com/mailcow/mailcow-dockerized
 # Edit mailcow.conf, then run: podman-compose up -d
@@ -58,7 +76,7 @@ sudo firewall-cmd --reload
 ```
 
 ## Mailu (Lightweight & Modular)
-**Purpose**: Modular, Alpine-based stack with Roundcube/SnappyMail, easy to deploy via compose.
+**Purpose:** Modular, Alpine-based stack with Roundcube/SnappyMail, easy to deploy via compose.
 ```yaml
 services:
   front:
@@ -97,7 +115,7 @@ volumes:
 ```
 
 ## Stalwart Mail Server
-**Purpose**: Next-gen, single-binary Rust mail server. JMAP, IMAP, SMTP, Sieve, webmail built-in. Extremely low resource usage.
+**Purpose:** Next-gen, single-binary Rust mail server. JMAP, IMAP, SMTP, Sieve, webmail built-in. Extremely low resource usage.
 ```yaml
 # ~/stalwart/compose.yaml
 services:
@@ -166,11 +184,11 @@ podman exec stalwart stalwart-cli queue flush
 
 ### What these actually do (industry context)
 
-**SPF** lists the IPs permitted to send as your domain. `-all` means hard-reject anything unlisted. Know the difference between `~all` (softfail — delivered but flagged) and `-all` (hardfail — rejected outright). Interviewers ask this.
+**SPF:** lists the IPs permitted to send as your domain. `-all` means hard-reject anything unlisted. Know the difference between `~all` (softfail — delivered but flagged) and `-all` (hardfail — rejected outright). Interviewers ask this.
 
-**DKIM** signs outbound messages with a private key stored on your server. The public key lives in DNS at `selector._domainkey.example.com`. Recipients verify the signature to confirm the message body was not tampered with in transit. DKIM can pass even when SPF fails (e.g. forwarded mail), which is why DMARC *alignment* — not just individual pass/fail — is what actually matters for deliverability.
+**DKIM:** signs outbound messages with a private key stored on your server. The public key lives in DNS at `selector._domainkey.example.com`. Recipients verify the signature to confirm the message body was not tampered with in transit. DKIM can pass even when SPF fails (e.g. forwarded mail), which is why DMARC *alignment* — not just individual pass/fail — is what actually matters for deliverability.
 
-**DMARC** ties SPF and DKIM together and instructs receivers what to do when *both* fail: `p=none` (monitor only), `p=quarantine` (spam folder), or `p=reject` (drop). The `rua=` tag sends aggregate XML reports to your inbox — parse these to identify misconfigured senders on your domain.
+**DMARC:** ties SPF and DKIM together and instructs receivers what to do when *both* fail: `p=none` (monitor only), `p=quarantine` (spam folder), or `p=reject` (drop). The `rua=` tag sends aggregate XML reports to your inbox — parse these to identify misconfigured senders on your domain.
 
 ### SMTP debugging (essential sysadmin skill)
 
@@ -276,7 +294,8 @@ volumes:
 cd ~/listmonk && podman-compose up -d
 ```
 
-**Minimal `config.toml`:**
+##### Minimal `config.toml`
+
 ```toml
 [app]
 address = "0.0.0.0:9000"
@@ -293,7 +312,8 @@ database = "listmonk"
 
 > 💡 SMTP settings are configured through the web UI under **Settings → SMTP** — do not add an `[[smtp]]` block to `config.toml`; that syntax is removed in v5+.
 
-**Initialise and start:**
+##### Initialise and start
+
 ```bash
 # --idempotent --yes makes install safe to re-run; no separate manual step needed on upgrades
 podman-compose run --rm listmonk ./listmonk --config /listmonk/config.toml --install --idempotent --yes
@@ -470,7 +490,8 @@ volumes:
 cd ~/postal && podman-compose up -d
 ```
 
-**Initialise and create admin:**
+##### Initialise and create admin
+
 ```bash
 podman-compose run --rm postal initialize
 podman-compose run --rm postal make-user
@@ -503,7 +524,7 @@ Access the web UI at `http://localhost:5000`. Create a mail server, configure DK
 Web, desktop, mobile, and terminal clients for secure IMAP/SMTP access.
 
 ## Roundcube
-**Purpose**: Mature, plugin-rich webmail client.
+**Purpose:** Mature, plugin-rich webmail client.
 ```yaml
 # ~/roundcube/compose.yaml
 services:
@@ -531,7 +552,7 @@ cd ~/roundcube && podman-compose up -d
 ```
 
 ## SnappyMail & SOGo
-**Purpose**: SnappyMail is a modern lightweight webmail fork. SOGo is a groupware server with CalDAV, CardDAV, and ActiveSync support — they serve different purposes and should be deployed separately.
+**Purpose:** SnappyMail is a modern lightweight webmail fork. SOGo is a groupware server with CalDAV, CardDAV, and ActiveSync support — they serve different purposes and should be deployed separately.
 
 ```yaml
 # ~/snappymail/compose.yaml
@@ -564,13 +585,13 @@ cd ~/sogo && podman-compose up -d
 ```
 
 ## Thunderbird / KMail / Evolution
-**Purpose**: Feature-rich desktop clients with PGP, CalDAV, and Exchange/ActiveSync support. Install via Flatpak.
+**Purpose:** Feature-rich desktop clients with PGP, CalDAV, and Exchange/ActiveSync support. Install via Flatpak.
 - **Thunderbird**: `flatpak install flathub org.mozilla.Thunderbird`
 - **KMail**: `flatpak install flathub org.kde.kmail2` (KDE — or pre-installed on Shani OS KDE edition)
 - **Evolution**: `flatpak install flathub org.gnome.Evolution` (GNOME)
 
 ## FairEmail / K-9 Mail
-**Purpose**: Privacy-focused Android clients. K-9 will become official Thunderbird Mobile. Enable IMAP IDLE for push-like sync.
+**Purpose:** Privacy-focused Android clients. K-9 will become official Thunderbird Mobile. Enable IMAP IDLE for push-like sync.
 - **FairEmail**: F-Droid or Play Store
 - **K-9**: F-Droid or Play Store
 

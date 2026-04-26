@@ -6,7 +6,6 @@ updated: 2026-04-22
 
 > **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
 
-
 # Security & Identity
 
 Password management, identity providers, secrets management, and threat detection.
@@ -15,9 +14,7 @@ Password management, identity providers, secrets management, and threat detectio
 
 ---
 
-## Job-Ready Concepts
-
-### Security Interview Essentials
+## Key Concepts
 
 #### Zero Trust principles
 "Never trust, always verify." Traditional perimeter security trusts anything inside the network. Zero trust verifies every request regardless of source — inside or outside the network — using identity, device posture, and minimal-privilege access. Implementation: mTLS between services, short-lived certificates (not long-lived API keys), device posture checks (is the OS patched?), least-privilege RBAC, and session recording for privileged access (Teleport).
@@ -59,7 +56,6 @@ Three vectors to understand: (1) Source — code in your repo (Semgrep SAST, sec
 #### Vulnerability severity levels (CVSS)
 CVSS (Common Vulnerability Scoring System) scores 0–10. Critical 9.0–10.0, High 7.0–8.9, Medium 4.0–6.9, Low 0.1–3.9. For triaging: fix Criticals within 24h, Highs within 7 days. Tools (Trivy, Grype, Nuclei) report these severities. In Defect Dojo you set SLA targets per severity.
 
-
 #### Identity provider architecture — LDAP vs OIDC vs SAML
 Three generations of identity federation. LDAP (Lightweight Directory Access Protocol) is the enterprise standard for directory services — Active Directory is LDAP. Applications authenticate by doing a bind to the LDAP server. OIDC (OpenID Connect) is the modern web standard, built on OAuth2 — applications redirect users to an IdP (Authentik, Keycloak), receive a JWT, and verify it locally. SAML is the enterprise web SSO standard (older than OIDC, XML-based) — you'll encounter it when integrating with corporate SSO. Most modern self-hosted apps support OIDC; legacy apps often only support LDAP. Authentik and Keycloak speak all three.
 
@@ -77,7 +73,6 @@ Scanning finds vulnerabilities; management decides what to do with them. The wor
 
 #### Passkeys and WebAuthn — replacing passwords
 WebAuthn (the standard behind passkeys) uses public-key cryptography for authentication. The private key never leaves the device (stored in secure enclave or hardware key). Login: the server sends a challenge, the device signs it with the private key, the server verifies with the stored public key. This eliminates: phishing (the signature is bound to the origin domain), credential stuffing (no reusable password), and password database breaches (only public keys are stored). Pocket ID and Kanidm are purpose-built for passkey-only auth. Vaultwarden supports WebAuthn for 2FA.
----
 ---
 
 ---
@@ -119,7 +114,8 @@ vault.home.local {
 }
 ```
 
-**Backup your vault data:**
+##### Backup your vault data
+
 ```bash
 # Vaultwarden data directory contains the SQLite DB and attachments
 restic backup /home/user/vaultwarden/data
@@ -143,7 +139,9 @@ curl -i http://localhost:3012/notifications/hub
 curl -X POST http://localhost:8180/admin   -d "token=YOUR_ADMIN_TOKEN"
 ```
 
-**Enable 2FA emergency access:** In the web vault, go to Settings → Two-step Login → add TOTP or WebAuthn key. If you lose access to your 2FA device, use the recovery code generated during setup.
+##### Enable 2FA emergency access
+
+In the web vault, go to Settings → Two-step Login → add TOTP or WebAuthn key. If you lose access to your 2FA device, use the recovery code generated during setup.
 
 ---
 
@@ -172,7 +170,8 @@ services:
 cd ~/authelia && podman-compose up -d
 ```
 
-**Minimal `configuration.yml`:**
+##### Minimal `configuration.yml`
+
 ```yaml
 # /home/user/authelia/config/configuration.yml
 jwt_secret: changeme-run-openssl-rand-base64-32
@@ -197,7 +196,8 @@ storage:
     path: /config/db.sqlite3
 ```
 
-**Create a user:**
+##### Create a user
+
 ```bash
 podman exec authelia authelia crypto hash generate argon2 --password 'yourpassword'
 # Add the hash to /home/user/authelia/config/users_database.yml
@@ -426,7 +426,8 @@ services:
 cd ~/crowdsec && podman-compose up -d
 ```
 
-**Install the firewalld bouncer on the host:**
+##### Install the firewalld bouncer on the host
+
 ```bash
 # Install via Nix
 nix-env -iA nixpkgs.crowdsec
@@ -678,7 +679,8 @@ services:
 cd ~/openbao && podman-compose up -d
 ```
 
-**Minimal `openbao.hcl`:**
+##### Minimal `openbao.hcl`
+
 ```hcl
 storage "raft" {
   path    = "/openbao/data"
@@ -695,7 +697,8 @@ cluster_addr = "https://localhost:8201"
 ui           = true
 ```
 
-**Initialise and unseal:**
+##### Initialise and unseal
+
 ```bash
 export BAO_ADDR=http://localhost:8200
 
@@ -777,7 +780,8 @@ cd ~/wazuh && podman-compose up -d
 
 > The official `single-node` compose is the recommended deployment path — it handles certificate generation and service wiring. Download from `packages.wazuh.com`.
 
-**Install agent on a monitored server:**
+##### Install agent on a monitored server
+
 ```bash
 # On each server you want to monitor
 # Option A: Install inside a Distrobox container (recommended on this system)
@@ -1000,7 +1004,7 @@ cd ~/pocket-id && podman-compose up -d
 
 Access at `http://localhost:1411`. On first run, create the admin account by visiting `/admin/setup`. Add OIDC clients for each app you want to protect.
 
-**Register a Gitea OIDC client:**
+##### Register a Gitea OIDC client
 
 In Pocket ID Admin → OIDC Clients → Add:
 - Callback URL: `https://git.home.local/user/oauth2/pocket-id/callback`
@@ -1036,7 +1040,8 @@ services:
     restart: unless-stopped
 ```
 
-**Minimal `server.toml`:**
+##### Minimal `server.toml`
+
 ```toml
 bindaddress = "0.0.0.0:8443"
 ldapbindaddress = "0.0.0.0:3636"
@@ -1083,7 +1088,8 @@ idm.home.local { tls internal; reverse_proxy localhost:8443 { transport http { t
 nix-env -iA nixpkgs.syft nixpkgs.grype
 ```
 
-**Generate an SBOM:**
+##### Generate an SBOM
+
 ```bash
 # SBOM for a container image (CycloneDX JSON)
 syft jellyfin/jellyfin:latest -o cyclonedx-json > jellyfin-sbom.cdx.json
@@ -1220,7 +1226,8 @@ services:
 cd ~/fail2ban && podman-compose up -d
 ```
 
-**Example jail config (`/home/user/fail2ban/config/jail.d/caddy.conf`):**
+##### Example jail config (`/home/user/fail2ban/config/jail.d/caddy.conf`)
+
 ```ini
 [caddy-auth]
 enabled  = true
@@ -1273,7 +1280,8 @@ podman run --rm \
   aquasec/trivy:latest image --input jellyfin
 ```
 
-**Run as a server for CI integration:**
+##### Run as a server for CI integration
+
 ```yaml
 # ~/trivy-server/compose.yaml
 services:
@@ -1441,7 +1449,8 @@ kubectl create secret generic signing-secrets \
 # 3. Pushes the signed attestation alongside the image in the registry
 ```
 
-**Verify provenance in a Kyverno policy (block unsigned images cluster-wide):**
+##### Verify provenance in a Kyverno policy (block unsigned images cluster-wide)
+
 ```yaml
 # ~/k8s/kyverno-verify-image.yaml
 apiVersion: kyverno.io/v1
@@ -1505,7 +1514,8 @@ services:
 cd ~/teleport && podman-compose up -d
 ```
 
-**Generate initial config:**
+##### Generate initial config
+
 ```bash
 podman run --rm \
   -v /home/user/teleport/config:/etc/teleport:Z \
@@ -1517,7 +1527,8 @@ podman run --rm \
     -o /etc/teleport/teleport.yaml
 ```
 
-**Minimal `teleport.yaml`:**
+##### Minimal `teleport.yaml`
+
 ```yaml
 teleport:
   data_dir: /var/lib/teleport
@@ -1605,14 +1616,16 @@ COPY --from=builder /usr/bin/caddy /usr/bin/caddy
 EOF
 ```
 
-**Download the OWASP CRS ruleset:**
+##### Download the OWASP CRS ruleset
+
 ```bash
 mkdir -p /home/user/caddy/waf/crs
 curl -L https://github.com/coreruleset/coreruleset/archive/refs/tags/v4.7.0.tar.gz \
   | tar -xz -C /home/user/caddy/waf/crs --strip-components=1
 ```
 
-**Run the custom Caddy image:**
+##### Run the custom Caddy image
+
 ```yaml
 # ~/caddy/compose.yaml
 services:
@@ -1658,7 +1671,9 @@ app.example.com {
 }
 ```
 
-**Tune detection sensitivity** — start at paranoia level 1 and raise gradually after reviewing false positives:
+##### Tune detection sensitivity
+
+— start at paranoia level 1 and raise gradually after reviewing false positives:
 ```
 # In crs-setup.conf.example — set the paranoia level
 SecAction "id:900000,phase:1,nolog,pass,t:none,setvar:tx.paranoia_level=1"
@@ -1773,7 +1788,8 @@ podman exec suricata suricata-update
 podman exec suricata kill -USR2 1  # Reload rules live
 ```
 
-**Minimal `suricata.yaml` additions for homelab:**
+##### Minimal `suricata.yaml` additions for homelab
+
 ```yaml
 # /home/user/suricata/config/suricata.yaml
 outputs:
@@ -1932,7 +1948,8 @@ volumes:
 cd ~/defectdojo && podman-compose up -d
 ```
 
-**Initialise the database (first run):**
+##### Initialise the database (first run)
+
 ```bash
 podman-compose run --rm django bash -c "python manage.py migrate && python manage.py createsuperuser"
 ```
@@ -2364,7 +2381,8 @@ sops -e -i k8s/myapp-secret.yaml
 sops -d k8s/myapp-secret.yaml | kubectl apply -f -
 ```
 
-**Example encrypted YAML structure:**
+##### Example encrypted YAML structure
+
 ```yaml
 # app.secrets.yaml (after sops -e -i)
 database:
@@ -2449,7 +2467,6 @@ rm /tmp/prod.secrets.tfvars
 
 > **Key rotation:** When a team member leaves, re-encrypt all SOPS files with their key removed from `.sops.yaml`. Run `sops updatekeys secrets.yaml` to rotate encryption without decrypting/re-encrypting manually — SOPS re-encrypts the data key for the new recipient set.
 
-
 ## Caddy Configuration
 
 ```caddyfile
@@ -2491,7 +2508,8 @@ Standard TLS proves the server's identity to the client. **Mutual TLS (mTLS)** r
 
 Use cases on a homelab: restricting an internal API to specific clients (e.g., only your monitoring server can call `/metrics`), protecting admin endpoints without a username/password flow, or securing inter-service communication.
 
-**Generate a CA and client certificate with Step-CA:**
+##### Generate a CA and client certificate with Step-CA
+
 ```bash
 # Install step CLI
 nix-env -iA nixpkgs.step-cli
@@ -2505,7 +2523,8 @@ step certificate create "grafana-client" client.crt client.key \
   --not-after 8760h --no-password --insecure
 ```
 
-**Configure Caddy to require a client certificate:**
+##### Configure Caddy to require a client certificate
+
 ```caddyfile
 # ~/caddy/Caddyfile
 api.home.local {
@@ -2526,7 +2545,8 @@ cp ca.crt ~/caddy/client-ca.crt
 cd ~/caddy && podman-compose restart
 ```
 
-**Test with the client certificate:**
+##### Test with the client certificate
+
 ```bash
 # Without cert — rejected
 curl https://api.home.local/health
@@ -2606,13 +2626,13 @@ The full flow from rotate to running with new value takes: ESO sync interval + K
 
 The SLSA provenance and cosign signing setup (documented above) defends against specific supply chain attacks. Understanding the vectors helps you prioritise:
 
-**Typosquatting** — a malicious image `ngiinx:latest` or package `lodahs` waiting for a typo. Mitigation: use a private registry mirror that only allows approved images; pin images to digests (`nginx@sha256:abc123`) not tags.
+**Typosquatting:** — a malicious image `ngiinx:latest` or package `lodahs` waiting for a typo. Mitigation: use a private registry mirror that only allows approved images; pin images to digests (`nginx@sha256:abc123`) not tags.
 
-**Dependency confusion** — an attacker publishes a public package with the same name as your internal private package, betting that the build tool resolves the public one. Mitigation: scope all internal packages (e.g., `@mycompany/utils`), configure package managers to only resolve scoped packages from your internal registry.
+**Dependency confusion:** — an attacker publishes a public package with the same name as your internal private package, betting that the build tool resolves the public one. Mitigation: scope all internal packages (e.g., `@mycompany/utils`), configure package managers to only resolve scoped packages from your internal registry.
 
-**Base image poisoning** — a compromised upstream base image (`FROM node:20`) introduces malware before your build runs. Mitigation: pin base images to their digest; Trivy scan every build; use images from verified publishers; consider distroless bases (smaller surface).
+**Base image poisoning:** — a compromised upstream base image (`FROM node:20`) introduces malware before your build runs. Mitigation: pin base images to their digest; Trivy scan every build; use images from verified publishers; consider distroless bases (smaller surface).
 
-**CI/CD pipeline compromise** — an attacker gains write access to your CI system and injects malicious build steps. Mitigation: separate build credentials from deployment credentials; use OIDC short-lived tokens instead of long-lived secrets in CI; audit pipeline logs; use Tekton Chains for SLSA attestations.
+**CI/CD pipeline compromise:** — an attacker gains write access to your CI system and injects malicious build steps. Mitigation: separate build credentials from deployment credentials; use OIDC short-lived tokens instead of long-lived secrets in CI; audit pipeline logs; use Tekton Chains for SLSA attestations.
 
 ---
 
@@ -2620,9 +2640,9 @@ The SLSA provenance and cosign signing setup (documented above) defends against 
 
 If you lose access to your Vaultwarden vault (lost 2FA device, forgotten master password), you need recovery options set up *before* the emergency. Bitwarden/Vaultwarden provides two:
 
-**Emergency Access** — grant a trusted contact the ability to request access to your vault. You have a configurable window (1–90 days) to deny the request. If you don't deny it, they gain read or takeover access. Set this up under *Settings → Emergency Access* while you have normal access.
+**Emergency Access:** — grant a trusted contact the ability to request access to your vault. You have a configurable window (1–90 days) to deny the request. If you don't deny it, they gain read or takeover access. Set this up under *Settings → Emergency Access* while you have normal access.
 
-**Printed Recovery Code (Two-Factor Recovery)** — if you lose your 2FA device, you need a recovery code to bypass 2FA. In Vaultwarden: *Settings → Two-step Login → View Recovery Code*. Print this code or store it in a fireproof safe offline. Without this code and without your 2FA device, your vault is locked permanently — there is no admin bypass.
+**Printed Recovery Code (Two-Factor Recovery):** — if you lose your 2FA device, you need a recovery code to bypass 2FA. In Vaultwarden: *Settings → Two-step Login → View Recovery Code*. Print this code or store it in a fireproof safe offline. Without this code and without your 2FA device, your vault is locked permanently — there is no admin bypass.
 
 ```bash
 # Admin: view all users (confirm emergency access is configured)

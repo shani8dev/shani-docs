@@ -6,7 +6,6 @@ updated: 2026-04-22
 
 > **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
 
-
 # DevOps & Developer Infrastructure
 
 CI/CD, code hosting, container orchestration, HA clusters, IaC, artifact management, and developer tooling — all self-hosted on this system.
@@ -65,7 +64,9 @@ For compose file, server/agent setup, and Gitea OAuth integration, see the [Deve
 
 For compose file and registration steps, see the [Developer Tools wiki → Forgejo Actions Runner](https://docs.shani.dev/doc/servers/devtools#forgejo-actions-runner).
 
-**Example workflow** (`.forgejo/workflows/ci.yml`):
+##### Example workflow
+
+(`.forgejo/workflows/ci.yml`):
 ```yaml
 on: [push]
 jobs:
@@ -81,7 +82,6 @@ jobs:
 ### Jenkins
 
 For compose file, initial setup, and common CLI operations, see the [Developer Tools wiki → Jenkins](https://docs.shani.dev/doc/servers/devtools#jenkins-enterprise-cicd).
-
 
 ### OpenFeature + Flagd (Feature Flag Management)
 
@@ -105,7 +105,8 @@ services:
 cd ~/flagd && podman-compose up -d
 ```
 
-**Example `flags.json`:**
+##### Example `flags.json`
+
 ```json
 {
   "$schema": "https://flagd.dev/schema/v0/flags.json",
@@ -125,7 +126,8 @@ cd ~/flagd && podman-compose up -d
 }
 ```
 
-**Use from Python:**
+##### Use from Python
+
 ```python
 from openfeature import api
 from openfeature.provider.flagd import FlagdProvider
@@ -156,7 +158,8 @@ score-compose generate score.yaml --output compose.yaml
 score-k8s generate score.yaml --output manifests/
 ```
 
-**Example `score.yaml`:**
+##### Example `score.yaml`
+
 ```yaml
 apiVersion: score.dev/v1b1
 metadata:
@@ -197,7 +200,8 @@ dagger init --sdk=python
 dagger call build --source=.
 ```
 
-**Example `main.py`:**
+##### Example `main.py`
+
 ```python
 import dagger
 from dagger import dag, function, object_type
@@ -593,7 +597,6 @@ act -n
 
 **Purpose:** Automated dependency update PRs — outdated container image tags, npm/pip/cargo packages, Actions versions. Works natively with Gitea and Forgejo.
 
-
 #### Schedule with a systemd timer
 ```bash
 cat > ~/.config/systemd/user/renovate.service << 'EOF'
@@ -621,7 +624,8 @@ EOF
 systemctl --user enable --now renovate.timer
 ```
 
-**Minimal `renovate.json`:**
+##### Minimal `renovate.json`
+
 ```json
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
@@ -738,7 +742,6 @@ skopeo sync --src docker --dest dir nginx:alpine /tmp/mirror/
 
 For compose file and setup, see the [Developer Tools wiki → Mailpit](https://docs.shani.dev/doc/servers/devtools#mailpit-email-testing).
 
-
 ---
 
 ## Kubernetes & Orchestration
@@ -798,7 +801,8 @@ tofu validate
 tofu import aws_instance.web i-1234567890abcdef0
 ```
 
-**Example `main.tf` — manage a Podman container:**
+##### Example `main.tf` — manage a Podman container
+
 ```hcl
 terraform {
   required_providers {
@@ -1089,7 +1093,8 @@ ansible all -i inventory.ini -m copy -a "src=./config.conf dest=/etc/myapp/confi
 ansible-playbook -i inventory.ini playbook.yaml --check --diff
 ```
 
-**Example playbook:**
+##### Example playbook
+
 ```yaml
 ---
 - name: Configure web servers
@@ -1468,7 +1473,8 @@ kubectl get nodes
 
 > On Shani OS itself, cloud-init is not used (Shani uses its own atomic update mechanism). This section covers provisioning *other* machines from Shani OS — Hetzner VMs, bare-metal nodes, Proxmox VMs — using cloud-init user-data files you create and pass via `hcloud` or Proxmox.
 
-**Minimal user-data (Hetzner Ubuntu VM):**
+##### Minimal user-data (Hetzner Ubuntu VM)
+
 ```yaml
 # ~/cloud-init/base-server.yaml
 #cloud-config
@@ -1667,7 +1673,8 @@ nomad alloc logs <alloc-id>
 nomad job scale nginx web 3
 ```
 
-**Example job file:**
+##### Example job file
+
 ```hcl
 job "nginx" {
   datacenters = ["dc1"]
@@ -1720,7 +1727,6 @@ For compose file and setup, see the [Developer Tools wiki → Windmill](https://
 ### Matomo (Web Analytics)
 
 For compose file and setup, see the [Developer Tools wiki → Matomo](https://docs.shani.dev/doc/servers/devtools#matomo-web-analytics).
-
 
 ---
 
@@ -1777,7 +1783,9 @@ cd ~/plausible && podman-compose up -d
 analytics.home.local { tls internal; reverse_proxy localhost:8033 }
 ```
 
-**Embed tracking snippet** (add to your site's `<head>`):
+##### Embed tracking snippet
+
+(add to your site's `<head>`):
 ```html
 <script defer data-domain="mysite.home.local"
   src="https://analytics.home.local/js/script.js"></script>
@@ -1866,7 +1874,9 @@ curl -LO https://github.com/Aircoookie/WLED/releases/latest/download/WLED_0.15.0
 esptool.py --port /dev/ttyUSB0 write_flash 0x0 WLED_0.15.0_ESP32.bin  # update filename to match downloaded version
 ```
 
-**Or use the browser-based installer at [install.wled.me](https://install.wled.me)** — plug the ESP32 into any computer and flash directly from the browser without installing tools.
+##### Or use the browser-based installer at [install.wled.me](https://install.wled.me)
+
+— plug the ESP32 into any computer and flash directly from the browser without installing tools.
 
 #### Wire the circuit
 ```
@@ -1882,7 +1892,8 @@ ESP32 GND           ──► LED Strip GND   ──► Power Supply GND
 
 Once WLED is on your network, Home Assistant auto-discovers it via mDNS. Accept the integration and your LED strip appears as a light entity with brightness, colour, and effect controls.
 
-**Manual WLED config backup (save to your server):**
+##### Manual WLED config backup (save to your server)
+
 ```bash
 # Export WLED config via its HTTP API
 curl http://192.168.1.XXX/cfg.json -o /home/user/wled/backups/strip-1-cfg.json
@@ -2033,7 +2044,6 @@ semgrep --config=p/owasp-top-ten .        # OWASP top 10
 semgrep --config=p/secrets .              # hardcoded credentials
 ```
 
-
 ## Education & Training Platforms
 
 ## Open edX (Tutor)
@@ -2064,10 +2074,6 @@ tutor local do importdemocourse
 lms.example.com { reverse_proxy localhost:80 }
 studio.example.com { reverse_proxy localhost:80 }
 ```
-
----
-
-
 
 ---
 
@@ -2110,8 +2116,6 @@ Rolling back means deploying the previous known-good version. Roll-forward means
 
 #### Environment parity
 Dev, staging, and prod should be as similar as possible in config, dependencies, and infrastructure shape. Differences cause "works on staging" bugs. Using the same Helm chart with different `values.yaml` per environment (or Kustomize overlays) is the standard approach to maintaining parity while allowing necessary differences (replica count, resource limits, domain names).
-
-
 
 #### Terraform state — the source of truth for your infrastructure
 Terraform's state file (`terraform.tfstate`) maps your configuration to real infrastructure resources. It tracks resource IDs, attributes, and dependencies. Without state, Terraform can't know what it has already created. Problems with local state: (1) it can't be shared across a team, (2) it's lost if the machine is lost. Remote state (S3/MinIO backend with DynamoDB/Redis locking) is mandatory for team use — it enables state locking (prevents concurrent applies), versioning (rollback if state is corrupted), and separation from the code. `terraform import` adds existing resources to state; `terraform state rm` removes resources from tracking without destroying them.

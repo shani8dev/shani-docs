@@ -12,9 +12,7 @@ Smart home hubs, IoT bridges, camera NVRs, and automation pipelines — all runn
 
 ---
 
----
-
-## Job-Ready Concepts
+## Key Concepts
 
 #### MQTT — the IoT messaging backbone
 MQTT (Message Queuing Telemetry Transport) is a publish-subscribe protocol designed for constrained devices on unreliable networks. A device (ESP32, Shelly plug, Zigbee sensor via zigbee2mqtt) publishes a message to a topic (`home/livingroom/temperature`); any subscriber (Home Assistant, Node-RED, Telegraf) receives it. The broker (Mosquitto, EMQX) routes messages without the publisher knowing who reads them. Key concepts: QoS levels (0 = fire-and-forget, 1 = at-least-once with acknowledgement, 2 = exactly-once), retained messages (the broker stores the last message on a topic, so new subscribers immediately get the current state), and will messages (sent by the broker when a client disconnects unexpectedly — useful for device-offline detection). MQTT is ubiquitous in IoT engineering roles.
@@ -33,7 +31,6 @@ ESPHome compiles YAML device definitions to C++ and flashes them to ESP32/ESP826
 
 #### WebRTC and zero-latency camera streams
 go2rtc introduces the difference between streaming protocols: RTSP (Real-Time Streaming Protocol, used by IP cameras) has 2–10 second latency due to buffering. WebRTC (used by browsers and go2rtc) achieves sub-second latency by using UDP with SRTP (Secure Real-time Transport Protocol) and a direct peer connection to the browser. HLS (HTTP Live Streaming) has the lowest compatibility requirements but highest latency (5–30 seconds). For home security applications, WebRTC is required for live view of camera streams; HLS is acceptable for recorded playback. Frigate uses go2rtc internally for its live view.
-
 
 ## Home Assistant
 
@@ -60,7 +57,8 @@ cd ~/homeassistant && podman-compose up -d
 
 Access at `http://localhost:8123`. On first run, Home Assistant automatically discovers many devices on your network.
 
-**Backup your config:**
+##### Backup your config
+
 ```bash
 # The built-in backup tool (Settings → System → Backups) creates .tar archives
 # Back them up offsite with Restic
@@ -192,7 +190,8 @@ podman logs -f zigbee2mqtt
 
 > Find your coordinator: `ls /dev/tty*` or `dmesg | grep tty` after plugging it in.
 
-**Minimal `configuration.yaml`:**
+##### Minimal `configuration.yaml`
+
 ```yaml
 homeassistant: true
 mqtt:
@@ -231,7 +230,8 @@ services:
 cd ~/esphome && podman-compose up -d
 ```
 
-**Example device config (temperature + humidity sensor):**
+##### Example device config (temperature + humidity sensor)
+
 ```yaml
 # /home/user/esphome/config/bedroom-sensor.yaml
 esphome:
@@ -340,7 +340,8 @@ services:
 cd ~/frigate && podman-compose up -d
 ```
 
-**Minimal `config.yml`:**
+##### Minimal `config.yml`
+
 ```yaml
 mqtt:
   enabled: true
@@ -415,7 +416,8 @@ services:
 cd ~/go2rtc && podman-compose up -d
 ```
 
-**Example `go2rtc.yaml`:**
+##### Example `go2rtc.yaml`
+
 ```yaml
 streams:
   front-door: rtsp://admin:password@192.168.1.101:554/stream1
@@ -517,7 +519,8 @@ services:
 cd ~/appdaemon && podman-compose up -d
 ```
 
-**Example app (`/conf/apps/notify_on_door.py`):**
+##### Example app (`/conf/apps/notify_on_door.py`)
+
 ```python
 import appdaemon.plugins.hass.hassapi as hass
 
@@ -554,7 +557,8 @@ services:
 cd ~/evcc && podman-compose up -d
 ```
 
-**Minimal `evcc.yaml`:**
+##### Minimal `evcc.yaml`
+
 ```yaml
 network:
   schema: http

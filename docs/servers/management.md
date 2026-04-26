@@ -10,7 +10,7 @@ Best practices for running, updating, and maintaining self-hosted containers on 
 
 ---
 
-## Container Concepts (Industry Context)
+## Key Concepts
 
 These concepts apply identically whether you're using Podman on Shani OS, Docker on Ubuntu, or Kubernetes at work. Podman is OCI-compliant and drop-in compatible with Docker — `alias docker=podman` works for the vast majority of workflows.
 
@@ -60,7 +60,6 @@ services:
 
 This maps to cgroup v2 constraints — the same mechanism Kubernetes `requests`/`limits` uses under the hood.
 
-
 #### Container update strategies — why Watchtower/Diun instead of `latest`
 Pinning image tags (`image: nginx:1.27.2`) is safer than `latest` — `latest` changes without warning and can break working deployments. But pinned tags go stale. The production pattern: pin tags in compose files, use Renovate or Diun to detect new versions, review the changelog, then update intentionally. `latest` is acceptable in a homelab dev environment where breakage is tolerable; never in production.
 
@@ -72,6 +71,19 @@ Pulled images accumulate on disk. Unused images (not referenced by any container
 
 #### Health checks and auto-healing
 A health check (`HEALTHCHECK` in Dockerfile, or `healthcheck:` in compose) lets the container runtime know if the application inside is actually functioning, not just that the process is running. If a health check fails N consecutive times, the container is marked `unhealthy`. `restart: unless-stopped` only restarts on crash — for health-check-based restarts, use `autoheal` (a container that watches for unhealthy status and restarts) or Kubernetes liveness probes, which restart containers that fail the check.
+
+#### Container image registries — pull-through cache and private registry
+A pull-through cache (Harbor, Zot) proxies Docker Hub and other registries — when you pull `nginx:latest`, your cache checks locally first, then fetches and caches from Docker Hub. Benefits: (1) Docker Hub rate limits (100 pulls/6h for anonymous, 200/6h authenticated) stop affecting your CI; (2) offline operation; (3) faster pulls on the LAN. A private registry stores your own built images. Harbor combines both: cache for upstream images and private registry for your own, with vulnerability scanning via Trivy built in.
+
+#### Container update strategies — Watchtower vs Renovate vs manual
+Three approaches: (1) **Watchtower/Diun** — watch for new upstream image tags and auto-pull/restart. Fast, zero-config, but opaque (you may not know what changed). Appropriate for single-user homelabs where uptime matters more than change control. (2) **Renovate** — creates PRs in your GitOps repo when a new image tag is published. You review the changelog, approve, and the pipeline deploys. Appropriate for production. (3) **Manual** — check release notes, update compose files, run `podman-compose pull && podman-compose up -d`. Most controlled, most work. The hybrid: Watchtower for minor patch versions, Renovate PRs for minor/major versions.
+
+#### systemd and Podman integration — the production pattern
+Podman generates systemd unit files (`podman generate systemd`) that start containers as services, handle restarts, and integrate with `systemctl`. Quadlet (Podman 4.4+) is the modern replacement — write a declarative `.container` file in `~/.config/containers/systemd/` and systemd manages the container lifecycle. Benefits over bare compose: containers start on boot, restart on failure, log to journald (available via `journalctl`), and participate in systemd dependencies. This is how production Podman deployments work on systems without Kubernetes.
+
+#### Resource constraints — why cgroups matter for shared hosts
+Without resource limits, a single misbehaving container can exhaust host CPU, memory, or disk I/O and bring down all co-located services. Podman and Docker both use cgroups for enforcement: `--memory 512m` kills the container if it exceeds 512 MB RAM; `--cpus 0.5` limits it to half a CPU core. In compose: `mem_limit: 512m`, `cpus: 0.5`. Always set limits on containers that handle untrusted input (web servers, parsers) or that are known to leak memory over time (Java services, browsers in headless mode).
+
 ---
 
 ## Systemd Integration
@@ -109,7 +121,8 @@ systemctl --user enable --now jellyfin
 loginctl enable-linger $USER
 ```
 
-**Verify it's working:**
+##### Verify it's working
+
 ```bash
 systemctl --user status jellyfin
 journalctl --user -u jellyfin -f
@@ -137,7 +150,8 @@ services:
 cd ~/jellyfin && podman-compose up -d
 ```
 
-**Run or schedule the update:**
+##### Run or schedule the update
+
 ```bash
 # Update all labelled containers now
 podman auto-update
@@ -149,7 +163,7 @@ podman auto-update --dry-run
 podman auto-update --rollback
 ```
 
-**Set up a weekly systemd timer using Podman's built-in service:**
+##### Set up a weekly systemd timer using Podman's built-in service
 
 Podman ships `podman-auto-update.service` — just enable the accompanying timer:
 
@@ -383,7 +397,8 @@ services:
 cd ~/diun && podman-compose up -d
 ```
 
-**Minimal `config.yml`:**
+##### Minimal `config.yml`
+
 ```yaml
 watch:
   workers: 5
@@ -426,7 +441,8 @@ podman rmi <image-name>
 podman volume prune
 ```
 
-**Set up a monthly cleanup timer:**
+##### Set up a monthly cleanup timer
+
 ```bash
 cat > ~/.config/systemd/user/podman-cleanup.service << 'EOF'
 [Unit]

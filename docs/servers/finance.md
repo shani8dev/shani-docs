@@ -12,9 +12,7 @@ Self-hosted personal finance, double-entry bookkeeping, invoicing, budgeting, st
 
 ---
 
----
-
-## Job-Ready Concepts
+## Key Concepts
 
 #### Double-entry bookkeeping — the foundation
 Every financial transaction involves at least two entries: a debit to one account and a credit to another of equal value. The books always balance: Assets = Liabilities + Equity. In Firefly III and hledger, every transaction explicitly moves money between accounts. This model makes inconsistency impossible — you cannot spend money without a source account, and income must credit somewhere. Contrast with single-entry systems (a simple spreadsheet of income and expenses) which can't catch errors or produce a balance sheet. Any role in fintech, accounting software, or financial data engineering requires understanding this model.
@@ -33,7 +31,6 @@ Most jurisdictions tax cryptocurrency as a capital asset — each disposal (sale
 
 #### ISO 20022 and financial messaging standards
 ISO 20022 is the emerging global standard for financial messaging (replacing SWIFT MT messages). It uses XML or JSON to describe payments, securities, and foreign exchange transactions with rich structured data. This migration (most major payment networks are switching by 2025–2026) affects any fintech system that processes interbank payments. For engineering roles at payment processors, banks, or fintech platforms: understanding that ISO 20022 carries more data per message (purpose of payment, LEI identifiers, structured remittance information) than its predecessors is increasingly expected baseline knowledge.
-
 
 ## Firefly III (Personal Finance Manager)
 

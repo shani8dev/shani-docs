@@ -6,16 +6,13 @@ updated: 2026-04-22
 
 > **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
 
-
 # Productivity & Files
 
 Self-hosted cloud storage, file sync, document management, task management, knowledge bases, and personal finance tools.
 
 ---
 
-## Job-Ready Concepts
-
-### Productivity Tools & Platform Engineering Interview Essentials
+## Key Concepts
 
 #### Internal Developer Platforms (IDPs) — what they solve
 Without an IDP, every developer needs to know: how to provision infrastructure (Terraform), how to set up CI/CD (Woodpecker/GitHub Actions), how to configure observability (Prometheus + Grafana), how to manage secrets (OpenBao), and how to deploy (Helm + ArgoCD). An IDP (Backstage, Port) wraps all of this in a self-service UI with golden path templates. A developer fills in a form and gets a GitHub repo, CI pipeline, Kubernetes namespace, database, and Grafana dashboard — all wired together. This is what "platform engineering" means in practice.
@@ -32,7 +29,6 @@ A webhook is an HTTP POST that an event source sends to a configured URL when so
 #### S3-compatible storage in the modern stack
 Understanding the S3 API is a core DevOps skill because it's used by: Velero (Kubernetes backups), Restic/Kopia (file backups), Thanos (Prometheus long-term storage), Loki (log storage), MLflow (model artifacts), and dozens of other tools. The key operations: PutObject, GetObject, DeleteObject, ListObjectsV2. Presigned URLs (time-limited, signature-authenticated URLs for direct client access) come up in interview questions about secure file sharing.
 
-
 #### Self-hosted vs SaaS trade-offs — the honest framing
 Self-hosting gives you data sovereignty, no per-seat pricing, and customisation. The real costs: operational overhead (updates, backups, uptime), security responsibility (you patch the CVEs, not the vendor), and feature gaps (SaaS products have larger engineering teams). The right answer depends on data sensitivity (medical/legal → self-host), team size (one person managing 20 self-hosted apps is a maintenance burden), and internet reliability (self-hosted services go down when your home internet does).
 
@@ -46,7 +42,19 @@ n8n is a self-hosted Zapier/Make alternative: visual, node-based automation flow
 
 #### Documentation as institutional memory
 The half-life of tribal knowledge is the tenure of the person who holds it. A wiki (BookStack, Outline, Wiki.js) only provides value if it's kept current and actually consulted. Two practices that work: (1) runbooks linked from Grafana alerts — the person paged opens the alert and sees the runbook URL immediately, so runbooks get used and therefore get maintained; (2) ADRs committed alongside code — the PR that adds a service also adds a doc/adr explaining why.
----
+
+#### Internal developer portals — what Backstage actually solves
+Software catalog sprawl: in a company with 50+ microservices, no one knows who owns what, what's deployed where, what APIs exist, or where the runbooks are. Backstage solves this with a software catalog (every service has a `catalog-info.yaml` with owner, links, dependencies) and a TechDocs site (markdown documentation auto-published from the service repo). Plugins add live data: which Kubernetes pods are running for this service, the latest CI build status, Datadog SLOs, PagerDuty on-call. The business value: onboarding time drops from weeks to days when every new engineer can discover services, owners, and documentation from one place.
+
+#### Knowledge management — why wikis fail and how to fix them
+Wikis fail because they rot: content goes stale, nobody maintains it, and eventually nobody trusts it. Practices that work: (1) link runbooks directly from Grafana alerts — the person paged opens the alert and sees the runbook URL immediately, so runbooks get used and therefore maintained; (2) ADRs (Architecture Decision Records) committed alongside code — the PR that adds a service also adds `docs/decisions/001-why-postgres.md`; (3) treat documentation as code — PRs required for doc changes, linting for broken links, last-modified dates visible on every page. The failure mode to avoid: a wiki that's separate from the workflow is a wiki nobody reads.
+
+#### Webhook-driven automation — the integration pattern
+Webhooks are HTTP POST requests sent by a system when an event occurs. Gitea sends a webhook on every push; Grafana sends one when an alert fires; Stripe sends one when a payment succeeds. n8n, Huginn, and custom endpoints receive these webhooks and trigger workflows. The pattern: system event → webhook POST → automation platform → actions (send Slack message, create Jira ticket, trigger deployment, update spreadsheet). This is the foundation of event-driven integration — cheaper and simpler than polling APIs on a schedule. Webhook security: always validate the HMAC signature in the payload header before processing.
+
+#### S3-compatible storage as a universal integration layer
+MinIO's S3-compatible API means any tool that supports S3 works with your self-hosted storage: backup tools (Restic, Kopia), analytics platforms (Trino, DuckDB, Spark), ML frameworks (MLflow artifact store), logging pipelines (Loki, Thanos), and CI artifact storage (Woodpecker). The S3 API has become the universal object storage interface — knowing how to configure IAM-style bucket policies, lifecycle rules, and versioning in MinIO transfers directly to AWS S3 skills, and vice versa.
+
 ---
 
 ---
@@ -59,19 +67,20 @@ The half-life of tribal knowledge is the tenure of the person who holds it. A wi
 
 Nextcloud (and several other tools in this section) expose their file and calendar data via two HTTP-based protocols that are worth understanding:
 
-**WebDAV (Web Distributed Authoring and Versioning)** extends HTTP with additional methods (`PROPFIND`, `MKCOL`, `COPY`, `MOVE`, `LOCK`) that let clients browse, upload, download, and manage files over HTTPS — without a proprietary sync agent. Any WebDAV client (Nautilus, Finder, Cyberduck, rclone, Windows Explorer) can mount a WebDAV share as a filesystem. Nextcloud exposes WebDAV at:
+**WebDAV (Web Distributed Authoring and Versioning):** extends HTTP with additional methods (`PROPFIND`, `MKCOL`, `COPY`, `MOVE`, `LOCK`) that let clients browse, upload, download, and manage files over HTTPS — without a proprietary sync agent. Any WebDAV client (Nautilus, Finder, Cyberduck, rclone, Windows Explorer) can mount a WebDAV share as a filesystem. Nextcloud exposes WebDAV at:
 ```
 https://files.home.local/remote.php/dav/files/<username>/
 ```
 
-**CalDAV** is a similar extension for calendar data — it adds iCalendar (`.ics`) create/read/update/delete operations over HTTP. Any CalDAV-compatible calendar app (GNOME Calendar, Apple Calendar, Thunderbird, Android via DAVx⁵) syncs directly with your Nextcloud calendar. Nextcloud's CalDAV endpoint:
+**CalDAV:** is a similar extension for calendar data — it adds iCalendar (`.ics`) create/read/update/delete operations over HTTP. Any CalDAV-compatible calendar app (GNOME Calendar, Apple Calendar, Thunderbird, Android via DAVx⁵) syncs directly with your Nextcloud calendar. Nextcloud's CalDAV endpoint:
 ```
 https://files.home.local/remote.php/dav/calendars/<username>/
 ```
 
-**CardDAV** is the same concept for contacts (`.vcf` / vCard format). These three protocols together are why Nextcloud can replace an entire Google Workspace for file, calendar, and contacts sync — they're open standards, not proprietary APIs.
+**CardDAV:** is the same concept for contacts (`.vcf` / vCard format). These three protocols together are why Nextcloud can replace an entire Google Workspace for file, calendar, and contacts sync — they're open standards, not proprietary APIs.
 
-**Mounting Nextcloud via rclone (WebDAV):**
+##### Mounting Nextcloud via rclone (WebDAV)
+
 ```bash
 # Configure in rclone config (type: webdav, vendor: nextcloud)
 rclone copy nextcloud:/Documents ~/local-backup/
@@ -127,7 +136,8 @@ cd ~/nextcloud && podman-compose up -d
 files.home.local { tls internal; reverse_proxy localhost:8888 }
 ```
 
-**Run background jobs (required for performance):**
+##### Run background jobs (required for performance)
+
 ```bash
 # Add to a systemd timer — every 5 minutes
 podman exec -u www-data nextcloud php /var/www/html/cron.php
@@ -212,7 +222,7 @@ curl -X POST -H "X-API-Key: YOUR_API_KEY"   "http://localhost:8384/rest/db/scan?
 curl -s http://localhost:8384/rest/system/version
 ```
 
-**Firewall** (for syncing with external devices):
+**Firewall:** (for syncing with external devices):
 ```bash
 sudo firewall-cmd --add-port=22000/tcp --add-port=22000/udp --add-port=21027/udp --permanent
 sudo firewall-cmd --reload
@@ -1066,7 +1076,8 @@ volumes:
 cd ~/monica && podman-compose up -d
 ```
 
-**First run:**
+##### First run
+
 ```bash
 podman exec monica php artisan setup:production --force
 ```
@@ -1435,8 +1446,6 @@ hoarder.home.local { tls internal; reverse_proxy localhost:3055 }
 
 ---
 
----
-
 ## Excalidraw (Collaborative Whiteboard)
 
 **Purpose:** Self-hosted virtual whiteboard with a hand-drawn aesthetic. Sketch architecture diagrams, wireframes, flowcharts, and brainstorm maps — either solo or with your team in real-time. No account required; drawings are stored in the browser or exported as `.excalidraw` or SVG. Much simpler than Penpot for quick sketches and team whiteboarding sessions.
@@ -1512,7 +1521,8 @@ volumes:
 cd ~/calcom && podman-compose up -d
 ```
 
-**Run DB migrations on first start:**
+##### Run DB migrations on first start
+
 ```bash
 podman exec calcom npx prisma db push
 ```
@@ -1618,7 +1628,8 @@ npm run build        # produces build/ directory
 rsync -av build/ user@server:/home/user/docusaurus/build/
 ```
 
-**Minimal `docusaurus.config.js` for a self-hosted intranet:**
+##### Minimal `docusaurus.config.js` for a self-hosted intranet
+
 ```js
 const config = {
   title: 'My Homelab Docs',
@@ -1875,7 +1886,6 @@ wiki.home.local { tls internal; reverse_proxy localhost:3800 }
 
 > **Docmost vs Outline:** Docmost requires fewer dependencies (no MinIO/S3 for storage — files go to the local volume), has no mandatory SSO requirement, and is faster to get running. Outline has a more mature ecosystem and stronger integrations. For a solo or small-team homelab wiki, Docmost is the easier starting point.
 
-
 ## Caddy Configuration
 
 ```caddyfile
@@ -1929,7 +1939,7 @@ Several tools in this wiki (MinIO in backups-sync.md, Garage, Cloudflare R2) imp
 | `GET /bucket?list-type=2` | ListObjectsV2 | List objects in a bucket |
 | `POST /bucket/key?uploads` | CreateMultipartUpload | Start a large upload |
 
-**Presigned URLs** — time-limited URLs that grant access to a specific object without requiring the requester to have credentials. The URL embeds an HMAC signature valid for a configured time window. Used for secure direct downloads or uploads from untrusted clients:
+**Presigned URLs:** — time-limited URLs that grant access to a specific object without requiring the requester to have credentials. The URL embeds an HMAC signature valid for a configured time window. Used for secure direct downloads or uploads from untrusted clients:
 
 ```bash
 # Generate a presigned URL with MinIO client (mc)
@@ -1942,7 +1952,7 @@ aws s3 presign s3://my-bucket/report.pdf \
   --expires-in 86400
 ```
 
-**Multipart uploads** — large files (>100MB) are split into parts, uploaded in parallel, and assembled server-side. This is why Rclone's `--s3-chunk-size` flag exists — it controls the part size.
+**Multipart uploads:** — large files (>100MB) are split into parts, uploaded in parallel, and assembled server-side. This is why Rclone's `--s3-chunk-size` flag exists — it controls the part size.
 
 Understanding the S3 API is useful because it's the interface Restic, Rclone, Kopia, Litestream, and most cloud-native tools use for object storage. The same client code works against AWS S3, MinIO, Garage, Cloudflare R2, and Backblaze B2 — just change the endpoint URL.
 

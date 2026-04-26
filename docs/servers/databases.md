@@ -28,7 +28,6 @@ The CAP theorem states that a distributed system can guarantee at most two of th
 | CockroachDB | CP | Strong consistency (serializable isolation) with partition tolerance. May be temporarily unavailable in split-brain. |
 | etcd | CP | Refuses requests if quorum is lost. Never returns stale data. |
 
-
 #### ACID vs BASE — the reliability spectrum
 ACID (Atomicity, Consistency, Isolation, Durability) is the contract of traditional relational databases: every transaction either fully commits or fully rolls back, leaving the database in a consistent state, isolated from concurrent transactions, and durable on disk. BASE (Basically Available, Soft state, Eventually consistent) is the contract of distributed systems like Cassandra and early DynamoDB: the system is always available, but data may be temporarily inconsistent across nodes and will converge eventually. Most modern systems let you tune where on this spectrum you operate — Cassandra's `CONSISTENCY QUORUM` leans toward ACID; `CONSISTENCY ONE` leans toward BASE.
 
@@ -60,7 +59,7 @@ SQL `LIKE '%query%'` does a sequential scan, can't rank by relevance, and doesn'
 Partitioning splits a single table into multiple storage segments on one node — PostgreSQL table partitioning by date, MySQL partitioning by range. This improves query performance (only scan the relevant partition) and maintenance (drop old partitions instead of DELETE). Sharding distributes data across multiple nodes — each shard is a separate database server handling a subset of data. Sharding is for horizontal scale beyond what one node can handle. The challenge: cross-shard queries (join data on shard 1 with data on shard 2) require application-level handling or a distributed query layer (Citus, CockroachDB). The rule: partition first (cheap, always useful), shard only when necessary (expensive operationally).
 ---
 
-## Job-Ready Concepts
+## Key Concepts
 
 #### SQL vs NoSQL — the real distinction
 The choice isn't binary. The real question is: what access patterns does your application need? Relational databases (PostgreSQL, MariaDB) excel at complex joins, ad-hoc queries, and strong consistency. Document stores (MongoDB) excel when records are self-contained and schema flexibility matters. Wide-column stores (Cassandra, ScyllaDB) excel at write-heavy time-series workloads where queries always include a partition key. Use the wrong tool and you're fighting the data model on every query.
@@ -86,6 +85,18 @@ Schema changes that break running app code during deployment cause downtime. Saf
 
 #### Portability note
 Compose examples use rootless **Podman** and `host.containers.internal`. When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service).
+
+#### WAL (Write-Ahead Log) — the foundation of database durability
+Before any change is written to the actual data files, it's appended to the WAL (also called redo log in MySQL, binlog in some contexts). On crash, the database replays the WAL to recover uncommitted transactions. This is what makes PostgreSQL and MySQL ACID-compliant. The WAL also powers streaming replication (standbys replay the primary's WAL) and point-in-time recovery (replay WAL from a base backup to any point in time). Understanding WAL is essential for explaining how replication, backup, and crash recovery work in interviews.
+
+#### VACUUM and autovacuum in PostgreSQL
+PostgreSQL uses MVCC (Multi-Version Concurrency Control) — old row versions are kept visible to concurrent transactions rather than being immediately overwritten. Dead tuples (old versions no longer needed) accumulate over time and must be reclaimed by VACUUM. autovacuum runs in the background and handles this automatically, but it can fall behind on high-churn tables. Symptoms of autovacuum lag: table bloat (physical size >> logical data size), slow sequential scans, and eventually transaction ID wraparound (a hard limit at 2 billion transactions that can cause database shutdown). Monitor `pg_stat_user_tables.n_dead_tup` and `autovacuum_count`.
+
+#### Database connection limits and pooling tiers
+PostgreSQL has a `max_connections` setting (default 100). Each connection is a backend process using ~5–10 MB RAM. At 200 connections you're using 1–2 GB just for connection overhead. The pooling stack: application → PgBouncer (transaction-mode pooling, 1000s of app connections → 20–50 real connections) → PostgreSQL. Transaction-mode pooling means a connection is only held for the duration of a single transaction — prepared statements and `SET` session variables don't work across transactions in this mode. Session-mode pooling is safer but provides less multiplexing benefit. For Kubernetes workloads, PgBouncer as a sidecar or as a shared service both work.
+
+#### Schema migration tools — Flyway vs Liquibase vs Alembic
+Schema migrations must be versioned, reproducible, and trackable. **Flyway**: SQL-first, simple, versioned files (`V1__create_users.sql`), Java or CLI. **Liquibase**: XML/YAML/JSON changesets with rollback support; more complex but supports diff-based migration generation. **Alembic** (Python): generates migration files from SQLAlchemy model diffs — developer-friendly but requires careful review since auto-generated migrations can miss edge cases. All three maintain a migration history table in the database. The rule: every schema change goes through a migration file committed to Git, never run directly against production.
 
 ---
 
@@ -213,13 +224,13 @@ EXPLAIN ANALYZE SELECT * FROM orders WHERE created_at > NOW() - INTERVAL '7 days
 -- Look for "Index Scan" vs "Seq Scan" — a Seq Scan on a large table indicates a missing index
 ```
 
-**Partial indexes** index only a subset of rows — useful for filtering on a common condition:
+**Partial indexes:** index only a subset of rows — useful for filtering on a common condition:
 ```sql
 -- Only index active users — much smaller, faster for this specific query
 CREATE INDEX ON users (email) WHERE active = true;
 ```
 
-**Covering indexes** include extra columns so the query can be satisfied from the index alone without touching the table:
+**Covering indexes:** include extra columns so the query can be satisfied from the index alone without touching the table:
 ```sql
 -- Include username so queries that fetch both email+username don't need a table lookup
 CREATE INDEX ON users (email) INCLUDE (username);
@@ -306,7 +317,8 @@ cd ~/pgvector && podman-compose up -d
 > podman exec postgres psql -U myuser -d mydb -c "CREATE EXTENSION vector;"
 > ```
 
-**Set up a vector table and index:**
+##### Set up a vector table and index
+
 ```sql
 -- Enable the extension (once per database)
 CREATE EXTENSION IF NOT EXISTS vector;
@@ -339,7 +351,8 @@ LIMIT 5;
 - `<->` — L2 (Euclidean) distance
 - `<#>` — negative inner product (for dot-product similarity)
 
-**Generate embeddings with Ollama and store them (Python example):**
+##### Generate embeddings with Ollama and store them (Python example)
+
 ```python
 import psycopg2, requests
 
@@ -467,33 +480,33 @@ podman exec redis redis-cli client list
 
 Redis is not just a key-value store — it has five core data types, each suited to different use cases:
 
-**String** — the default. Any binary-safe value up to 512 MB. Used for caching, counters, rate limiting.
+**String:** — the default. Any binary-safe value up to 512 MB. Used for caching, counters, rate limiting.
 ```bash
 SET session:abc123 '{"user_id": 42}' EX 3600   # with 1-hour TTL
 INCR page_views:home                             # atomic counter
 ```
 
-**List** — ordered, allows duplicates. Implemented as a doubly-linked list. Used for queues and activity feeds.
+**List:** — ordered, allows duplicates. Implemented as a doubly-linked list. Used for queues and activity feeds.
 ```bash
 LPUSH jobs:email '{"to":"alice@example.com"}'   # push to head (producer)
 BRPOP jobs:email 30                              # blocking pop from tail (consumer, 30s timeout)
 ```
 
-**Set** — unordered, unique members. Used for tags, unique visitors, friend lists.
+**Set:** — unordered, unique members. Used for tags, unique visitors, friend lists.
 ```bash
 SADD online_users user:42 user:99
 SISMEMBER online_users user:42                   # is user:42 online?
 SINTER premium_users active_users               # intersection: premium AND active
 ```
 
-**Sorted Set** — unique members each with a float score. Members are ordered by score. Used for leaderboards, priority queues, rate limiting with sliding windows.
+**Sorted Set:** — unique members each with a float score. Members are ordered by score. Used for leaderboards, priority queues, rate limiting with sliding windows.
 ```bash
 ZADD leaderboard 9850 "alice" 7200 "bob"
 ZRANGE leaderboard 0 9 REV WITHSCORES           # top 10, highest score first
 ZADD leaderboard INCR 100 "alice"               # add 100 to alice's score
 ```
 
-**Hash** — field-value pairs within a single key. More memory-efficient than storing each field as a separate string key. Used for objects, user profiles, configuration.
+**Hash:** — field-value pairs within a single key. More memory-efficient than storing each field as a separate string key. Used for objects, user profiles, configuration.
 ```bash
 HSET user:42 name "Alice" email "alice@example.com" role "admin"
 HGET user:42 email
@@ -509,9 +522,9 @@ HGETALL user:42
 
 Redis has two persistence mechanisms with fundamentally different trade-offs:
 
-**RDB (Redis Database Snapshot)** — point-in-time snapshots saved to disk periodically. Compact, fast to load on restart, but you lose all writes since the last snapshot if Redis crashes.
+**RDB (Redis Database Snapshot):** — point-in-time snapshots saved to disk periodically. Compact, fast to load on restart, but you lose all writes since the last snapshot if Redis crashes.
 
-**AOF (Append-Only File)** — every write command is appended to a log file. Configurable fsync policy: `always` (safe, slow), `everysec` (default, loses at most 1 second of data), `no` (fastest, OS decides).
+**AOF (Append-Only File):** — every write command is appended to a log file. Configurable fsync policy: `always` (safe, slow), `everysec` (default, loses at most 1 second of data), `no` (fastest, OS decides).
 
 ```bash
 # Enable AOF (what --appendonly yes does)
@@ -811,7 +824,9 @@ podman exec kafka kafka-consumer-groups \
   --bootstrap-server localhost:29092 --describe --group my-group
 ```
 
-**Access Kafka UI** at `http://localhost:8080` for a web-based view of topics, consumer groups, and message browsing.
+##### Access Kafka UI
+
+at `http://localhost:8080` for a web-based view of topics, consumer groups, and message browsing.
 
 ---
 
@@ -925,7 +940,8 @@ services:
 cd ~/nats && podman-compose up -d
 ```
 
-**Minimal `nats.conf` with JetStream:**
+##### Minimal `nats.conf` with JetStream
+
 ```conf
 port: 4222
 http_port: 8222
@@ -994,7 +1010,8 @@ cd ~/neo4j && podman-compose up -d
 > **Browser UI**: `http://localhost:7474` — interactive graph explorer and Cypher query editor.
 > **Bolt driver**: `bolt://localhost:7687`
 
-**Example Cypher queries:**
+##### Example Cypher queries
+
 ```cypher
 -- Create nodes and a relationship
 CREATE (alice:Person {name: 'Alice', age: 30})-[:KNOWS]->(bob:Person {name: 'Bob', age: 25})
@@ -1008,7 +1025,7 @@ WHERE NOT (me)-[:KNOWS]-(fof) AND fof <> me
 RETURN fof.name, count(*) AS mutual ORDER BY mutual DESC
 ```
 
-**APOC** adds 450+ utility procedures for data import, refactoring, and graph algorithms — included via `NEO4J_PLUGINS` above.
+**APOC:** adds 450+ utility procedures for data import, refactoring, and graph algorithms — included via `NEO4J_PLUGINS` above.
 
 ---
 
@@ -1038,7 +1055,8 @@ services:
 cd ~/cassandra && podman-compose up -d
 ```
 
-**Connect and run CQL:**
+##### Connect and run CQL
+
 ```bash
 podman exec -it cassandra cqlsh
 
@@ -1114,7 +1132,8 @@ cd ~/cockroachdb && podman-compose up -d
 
 > The Admin UI is at `http://localhost:8081` — shows query plans, node health, slow queries, and schema inspector.
 
-**Create a database and user:**
+##### Create a database and user
+
 ```sql
 CREATE DATABASE myapp;
 CREATE USER myuser WITH PASSWORD 'strongpassword';
@@ -1152,7 +1171,8 @@ volumes:
 cd ~/timescaledb && podman-compose up -d
 ```
 
-**Set up a hypertable:**
+##### Set up a hypertable
+
 ```sql
 -- Connect: psql -h localhost -p 5433 -U myuser -d metrics
 
@@ -1558,7 +1578,8 @@ podman exec -i clickhouse clickhouse-client --password changeme \
   --query "INSERT INTO mydb.events FORMAT CSV" < /path/to/events.csv
 ```
 
-**Create a table optimised for event data:**
+##### Create a table optimised for event data
+
 ```sql
 CREATE DATABASE IF NOT EXISTS analytics;
 

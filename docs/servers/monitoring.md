@@ -6,7 +6,6 @@ updated: 2026-04-22
 
 > **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
 
-
 # Monitoring
 
 System metrics, log aggregation, alerting, uptime tracking, container visibility, and network performance monitoring. All run rootless with bind-mount volumes labelled `:Z`. Named volumes omit `:Z` — Podman manages their labels automatically.
@@ -15,9 +14,7 @@ For multi-node, replicated, and HA deployments (Elasticsearch cluster, OpenSearc
 
 ---
 
-## Job-Ready Concepts
-
-### Observability Interview Essentials
+## Key Concepts
 
 #### The three pillars (now four) of observability
 - **Metrics** — numeric time-series data (CPU %, request rate, error count). Cheap to store, fast to query. Prometheus + Grafana.
@@ -58,7 +55,6 @@ Structured logs (`{"level":"error","msg":"DB timeout","user_id":42,"latency_ms":
 #### Understanding Grafana variables and templating
 Dashboard variables let one dashboard serve multiple services (`$service`), environments (`$environment`), or time ranges. They're backed by Prometheus label queries. A variable `$namespace` with query `label_values(kube_pod_info, namespace)` gives a dropdown of all Kubernetes namespaces. This is a core Grafana skill for platform teams building shared observability tooling.
 
-
 #### Distributed tracing — spans, traces, and why they matter
 A trace represents a single request as it flows through multiple services. It's composed of spans — each span represents one operation (HTTP call, DB query, cache lookup) with a start time, duration, and attributes. Spans are linked by a trace ID propagated in headers (`traceparent` in W3C format, `X-B3-TraceId` in Zipkin format). Without tracing, diagnosing latency in a microservices architecture means correlating logs across 10 services by timestamp — error-prone and slow. With tracing (Tempo + OTel), you click on a slow request in Grafana and see exactly which service and which operation contributed the latency. The key metric: P99 latency per span, not just the total.
 
@@ -76,8 +72,6 @@ Chaos engineering tests whether a system actually survives the failures it's des
 
 #### Log aggregation architectures — push vs pull, and the pipeline
 Three approaches: (1) **Agent-based push** — Alloy/Fluent Bit runs on each host, tails log files, and pushes to Loki/Elasticsearch. Low latency, agent adds resource overhead. (2) **Syslog forwarding** — services write to syslog, rsyslog/syslog-ng forwards centrally. Works for systemd services without any agent. (3) **Direct SDK** — applications write structured logs directly to Loki's push API. Pipeline tools (Vector.dev) add buffering, transformation (parse, filter, enrich), and fan-out (logs go to both Loki and an S3 archive). The key design decision: parse logs at the source (less data transmitted, structured from the start) vs at the destination (simpler agents, parsing can be changed without redeployment).
----
-
 ---
 
 ## Observability Philosophy
@@ -157,7 +151,8 @@ volumes:
 cd ~/prometheus && podman-compose up -d
 ```
 
-**Minimal `prometheus.yml`:**
+##### Minimal `prometheus.yml`
+
 ```yaml
 global:
   scrape_interval: 15s
@@ -241,7 +236,8 @@ podman exec prometheus promtool check rules /etc/prometheus/alerts.yml
 curl http://localhost:9090/api/v1/alerts | python3 -m json.tool
 ```
 
-**Example alert rules (`alerts.yml`):**
+##### Example alert rules (`alerts.yml`)
+
 ```yaml
 groups:
   - name: host
@@ -271,7 +267,9 @@ groups:
           summary: "Service {{ $labels.job }} is down"
 ```
 
-**Recording rules** pre-compute expensive or frequently used queries and store the result as a new metric. This makes dashboards and alert rules load faster, and lets you build higher-level metrics from raw ones:
+##### Recording rules
+
+pre-compute expensive or frequently used queries and store the result as a new metric. This makes dashboards and alert rules load faster, and lets you build higher-level metrics from raw ones:
 
 ```yaml
 # prometheus/recording_rules.yml
@@ -327,7 +325,8 @@ services:
 cd ~/alertmanager && podman-compose up -d
 ```
 
-**Example `alertmanager.yml` — route alerts to ntfy:**
+##### Example `alertmanager.yml` — route alerts to ntfy
+
 ```yaml
 route:
   group_by: ['alertname', 'severity']
@@ -463,7 +462,9 @@ curl http://localhost:3001/api/health
 curl -u admin:changeme http://localhost:3001/api/dashboards/uid/YOUR_UID | python3 -m json.tool
 ```
 
-**Useful dashboard imports** (Dashboard → Import → paste ID):
+##### Useful dashboard imports
+
+(Dashboard → Import → paste ID):
 - `1860` — Node Exporter Full (complete server metrics)
 - `14282` — PostgreSQL overview
 - `11835` — Redis dashboard
@@ -585,7 +586,9 @@ curl http://localhost:3100/loki/api/v1/labels | python3 -m json.tool
 curl -X POST http://localhost:3100/flush
 ```
 
-**Ship container logs with Alloy** — add to your `config.alloy`:
+##### Ship container logs with Alloy
+
+— add to your `config.alloy`:
 ```hcl
 local.file_match "containers" {
   path_targets = [{
@@ -672,7 +675,9 @@ services:
 cd ~/netdata-parent && podman-compose up -d
 ```
 
-**Configure child agents to stream to the parent** (`/etc/netdata/stream.conf` on each child):
+##### Configure child agents to stream to the parent
+
+(`/etc/netdata/stream.conf` on each child):
 ```ini
 [stream]
   enabled = yes
@@ -680,7 +685,9 @@ cd ~/netdata-parent && podman-compose up -d
   api key = xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx   # generate with: uuidgen
 ```
 
-**Allow incoming streams on the parent** (`/etc/netdata/stream.conf`):
+##### Allow incoming streams on the parent
+
+(`/etc/netdata/stream.conf`):
 ```ini
 [xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx]   # same UUID as child's api key
   enabled = yes
@@ -898,7 +905,8 @@ services:
 cd ~/gatus && podman-compose up -d
 ```
 
-**Example `config.yaml`:**
+##### Example `config.yaml`
+
 ```yaml
 endpoints:
   - name: Jellyfin
@@ -1093,7 +1101,7 @@ cd ~/thanos && podman-compose up -d
 #   - url: http://thanos-receive:19291/api/v1/receive
 ```
 
-**Point Grafana at Thanos Query Frontend:**
+##### Point Grafana at Thanos Query Frontend
 
 In Grafana → Data Sources → Prometheus:
 - **URL:** `http://localhost:9092` (Query Frontend — cached, split queries)
@@ -1225,10 +1233,14 @@ curl http://localhost:8428/api/v1/label/__name__/values | python3 -m json.tool |
 curl -X POST http://localhost:8428/snapshot/create
 ```
 
-**Reconfigure Grafana to use VictoriaMetrics** instead of Prometheus:
+##### Reconfigure Grafana to use VictoriaMetrics
+
+instead of Prometheus:
 - Data Sources → Prometheus → URL: `http://host.containers.internal:8428`
 
-**Remote-write from Prometheus to VictoriaMetrics** (dual-write for migration):
+##### Remote-write from Prometheus to VictoriaMetrics
+
+(dual-write for migration):
 ```yaml
 # In prometheus.yml
 remote_write:
@@ -1263,7 +1275,8 @@ services:
 cd ~/tempo && podman-compose up -d
 ```
 
-**Minimal `config.yaml`:**
+##### Minimal `config.yaml`
+
 ```yaml
 server:
   http_listen_port: 3200
@@ -1342,7 +1355,8 @@ cd ~/zabbix && podman-compose up -d
 
 Default login: `Admin` / `zabbix`. Change immediately. Add hosts under Configuration → Hosts.
 
-**Install Zabbix agent on monitored hosts:**
+##### Install Zabbix agent on monitored hosts
+
 ```bash
 # Option A: Install inside a Distrobox container (recommended on this system)
 distrobox create --name zabbix-agent --image fedora:latest
@@ -1408,7 +1422,7 @@ volumes:
 cd ~/zabbix-proxy && podman-compose up -d
 ```
 
-**Register the proxy in the Zabbix server UI:**
+##### Register the proxy in the Zabbix server UI
 1. Go to **Administration → Proxies → Create proxy**.
 2. Set the **Proxy name** to match `ZBX_HOSTNAME` above (`remote-proxy-01`).
 3. Set **Proxy mode** to **Active**. Save.
@@ -1490,7 +1504,8 @@ services:
 cd ~/otel-collector && podman-compose up -d
 ```
 
-**Example `otel-collector.yaml`:**
+##### Example `otel-collector.yaml`
+
 ```yaml
 receivers:
   otlp:
@@ -1566,7 +1581,8 @@ cd ~/checkmk && podman-compose up -d
 
 Access at `http://localhost:8095/cmk`. The admin password is shown in the container startup logs (`podman logs checkmk`).
 
-**Install the agent on hosts to monitor:**
+##### Install the agent on hosts to monitor
+
 ```bash
 curl -o check-mk-agent.rpm \
   http://checkmk.home.local/cmk/check_mk/agents/check-mk-agent-2.3.0-1.noarch.rpm
@@ -1735,7 +1751,9 @@ cd ~/changedetection && podman-compose up -d
 
 Access at `http://localhost:5000`. Add URLs to watch, optionally set a CSS/XPath selector, configure the check interval, and connect a notification service.
 
-**Send notifications via ntfy** (Settings → Notifications → Add notification URL):
+##### Send notifications via ntfy
+
+(Settings → Notifications → Add notification URL):
 ```
 ntfy://host.containers.internal:8090/your-topic
 ```
@@ -1879,7 +1897,8 @@ rule_files:
   - /etc/prometheus/pyrra/*.yaml
 ```
 
-**Example SLO definition (`/home/user/pyrra/slos/api-availability.yaml`):**
+##### Example SLO definition (`/home/user/pyrra/slos/api-availability.yaml`)
+
 ```yaml
 apiVersion: pyrra.dev/v1alpha1
 kind: ServiceLevelObjective
@@ -1967,7 +1986,8 @@ oncall.home.local { tls internal; reverse_proxy localhost:8080 }
 
 **Purpose:** LogQL-based alerting fires Prometheus-compatible alerts based on log patterns — distinct from metric alerts. Use log alerts to fire when error rates in logs exceed a threshold, when a specific log pattern appears (like `FATAL` or `panic:`), or when a log stream goes silent (indicating a dead service). Loki alert rules are configured using the Loki Ruler and work alongside Alertmanager exactly like Prometheus rules.
 
-**Enable the ruler in Loki config:**
+##### Enable the ruler in Loki config
+
 ```yaml
 # Add to your Loki config (if using the single-binary image)
 ruler:
@@ -1983,7 +2003,8 @@ ruler:
   enable_api: true
 ```
 
-**Example rule files (`/home/user/loki/rules/homelab/rules.yaml`):**
+##### Example rule files (`/home/user/loki/rules/homelab/rules.yaml`)
+
 ```yaml
 groups:
   - name: log-alerts
@@ -2020,7 +2041,8 @@ groups:
           summary: "myapp has produced no logs for 10 minutes"
 ```
 
-**Create the rules directory and restart Loki:**
+##### Create the rules directory and restart Loki
+
 ```bash
 mkdir -p /home/user/loki/rules/homelab
 # Place rule files there
@@ -2158,7 +2180,8 @@ cd ~/elk && podman-compose up -d
 #### Kibana
 `http://localhost:5601` — create index patterns under Stack Management → Index Patterns.
 
-**Minimal `logstash.yml`:**
+##### Minimal `logstash.yml`
+
 ```yaml
 # ~/elk/logstash/config/logstash.yml
 http.host: "0.0.0.0"
@@ -2636,7 +2659,8 @@ export default function () {
 }
 ```
 
-**Run locally:**
+##### Run locally
+
 ```bash
 k6 run ~/k6/smoke-test.js
 
@@ -2652,7 +2676,8 @@ K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM=true \
   k6 run --out=experimental-prometheus-rw ~/k6/smoke-test.js
 ```
 
-**Run as a Podman container in CI (Woodpecker example):**
+##### Run as a Podman container in CI (Woodpecker example)
+
 ```yaml
 # .woodpecker.yml
 steps:
@@ -2695,7 +2720,8 @@ cd ~/toxiproxy && podman-compose up -d
 nix-env -iA nixpkgs.toxiproxy   # or: go install github.com/Shopify/toxiproxy/v2/cli/toxiproxy-cli@latest
 ```
 
-**Create proxies for your services:**
+##### Create proxies for your services
+
 ```bash
 # Proxy for Postgres (real Postgres at localhost:5432, proxied at localhost:15432)
 toxiproxy-cli create postgres --listen 0.0.0.0:15432 --upstream localhost:5432

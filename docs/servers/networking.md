@@ -6,16 +6,13 @@ updated: 2026-04-22
 
 > **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
 
-
 # Network & Analytics
 
 DNS filtering, privacy-friendly analytics, search engines, dashboards, latency monitoring, and network utilities.
 
 ---
 
-## Job-Ready Concepts
-
-### Networking Interview Essentials
+## Key Concepts
 
 #### OSI model in practice
 Interviewers ask this to test whether you can reason about where a problem is occurring. Useful frames:
@@ -59,7 +56,6 @@ A VLAN (Virtual LAN) segments a physical switch into multiple logical networks. 
 #### MTU and fragmentation
 Maximum Transmission Unit — the largest packet a link will carry. Ethernet's standard MTU is 1500 bytes. VPN tunnels add overhead (WireGuard adds ~32–60 bytes), which reduces the effective inner MTU. Setting the wrong MTU causes silent data corruption or dropped connections for large packets. Fix: set MSS clamping (`--clamp-mss-to-pmtu` in WireGuard/iptables) or discover the path MTU with `ping -M do -s 1400`.
 
-
 #### Reverse proxy patterns — Caddy vs Nginx vs Traefik vs HAProxy
 Each serves a different primary use case. Caddy: automatic HTTPS (ACME), human-readable config, best for homelab and small deployments. Nginx: highest throughput, battle-tested, extensive module ecosystem, config is verbose. Traefik: auto-discovers routes from container labels — zero-config for Docker/Kubernetes, but harder to reason about in complex setups. HAProxy: the performance and reliability choice for TCP-level load balancing, used in front of databases and Kubernetes control planes. Know which layer each operates at: Caddy/Nginx/Traefik are L7 (HTTP); HAProxy works at L4 and L7.
 
@@ -74,7 +70,6 @@ A caching proxy (Squid) intercepts HTTP/HTTPS requests and serves cached respons
 
 #### Dynamic routing protocols — when BGP/OSPF matters
 Static routes work until you have more than a handful of subnets or multiple uplinks. OSPF is the internal routing protocol — routers share topology, calculate shortest paths, and converge automatically when a link fails. BGP is the external protocol — used to announce your IP space to an ISP, or to distribute routes between multiple sites. FRRouting brings both to Linux. In a homelab, BGP is used with MetalLB (announce LoadBalancer IPs to a router) or multi-site WireGuard (distribute subnet routes between locations).
----
 ---
 
 ---
@@ -105,7 +100,7 @@ services:
 cd ~/pihole && podman-compose up -d
 ```
 
-**Firewall** (allow DNS from LAN):
+**Firewall:** (allow DNS from LAN):
 ```bash
 sudo firewall-cmd --add-service=dns --permanent && sudo firewall-cmd --reload
 ```
@@ -177,7 +172,7 @@ cd ~/adguardhome && podman-compose up -d
 
 Access the setup wizard at `http://localhost:3000` on first run. After setup, the UI moves to port `80` (or the port you configure).
 
-**Firewall** (for DoT from external devices):
+**Firewall:** (for DoT from external devices):
 ```bash
 sudo firewall-cmd --add-port=853/tcp --permanent && sudo firewall-cmd --reload
 ```
@@ -390,7 +385,8 @@ services:
 cd ~/haproxy && podman-compose up -d
 ```
 
-**Example `haproxy.cfg` — HTTP load balancing with health checks:**
+##### Example `haproxy.cfg` — HTTP load balancing with health checks
+
 ```
 global
   log stdout format raw local0
@@ -729,7 +725,8 @@ services:
 cd ~/blocky && podman-compose up -d
 ```
 
-**Example `config.yml`:**
+##### Example `config.yml`
+
 ```yaml
 upstreams:
   groups:
@@ -811,7 +808,8 @@ volumes:
   db_data:
 ```
 
-**Minimal `pdns.conf`:**
+##### Minimal `pdns.conf`
+
 ```ini
 launch=gmysql
 gmysql-host=db
@@ -830,7 +828,8 @@ webserver-allow-from=0.0.0.0/0
 local-port=53
 ```
 
-**Initialise the database schema:**
+##### Initialise the database schema
+
 ```bash
 podman exec pdns pdnsutil create-slave-zone home.local 127.0.0.1
 # Or use PowerDNS Admin web UI at http://localhost:9191 to create zones and records
@@ -880,7 +879,8 @@ services:
     restart: unless-stopped
 ```
 
-**Minimal `kea-dhcp4.conf`:**
+##### Minimal `kea-dhcp4.conf`
+
 ```json
 {
   "Dhcp4": {
@@ -1013,7 +1013,8 @@ services:
     restart: unless-stopped
 ```
 
-**Minimal `squid.conf`:**
+##### Minimal `squid.conf`
+
 ```
 # Allow LAN clients
 acl localnet src 192.168.0.0/16
@@ -1099,7 +1100,8 @@ services:
 cd ~/ddns-updater && podman-compose up -d
 ```
 
-**Configure providers in `/home/user/ddns-updater/data/config.json`:**
+##### Configure providers in `/home/user/ddns-updater/data/config.json`
+
 ```json
 {
   "settings": [
@@ -1273,7 +1275,8 @@ service integrated-vtysh-config
 EOF
 ```
 
-**Connect to the FRR CLI (vtysh):**
+##### Connect to the FRR CLI (vtysh)
+
 ```bash
 podman exec -it frr vtysh
 ```
@@ -1364,7 +1367,6 @@ exit
 ```
 
 > **FRR vs a dedicated router VM:** FRR in a container is appropriate for BGP peering, route redistribution, and learning. For a full home router (DHCP, NAT, firewall, PPPoE), use OPNsense or pfSense on a dedicated machine or VM. FRR and OPNsense complement each other — OPNsense handles the internet edge, FRR handles internal routing between segments.
-
 
 ## Caddy Configuration
 

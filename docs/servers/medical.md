@@ -14,9 +14,7 @@ Self-hosted electronic health records, hospital information systems, FHIR server
 
 ---
 
----
-
-## Job-Ready Concepts
+## Key Concepts
 
 #### HL7 FHIR — the healthcare interoperability standard
 FHIR (Fast Healthcare Interoperability Resources) is the HL7 standard for exchanging healthcare data via REST APIs. Resources are the core concept: Patient, Observation, Condition, MedicationRequest, DiagnosticReport, Immunization, Appointment, and ~145 others, each with a defined JSON/XML schema. A FHIR server stores and retrieves these resources via standard REST operations (`GET /Patient/123`, `POST /Observation`). SMART on FHIR adds OAuth2 authentication for patient-facing apps — an app requests scopes (`patient/Observation.read`) and receives a token authorising access to specific resources for a specific patient. This is the architecture behind Apple Health's medical records import and any patient-portal integration in the US (required by the 21st Century Cures Act).
@@ -35,7 +33,6 @@ Telemedicine video consultations use WebRTC (the same protocol as Jitsi Meet) to
 
 #### EHR integration patterns — HL7 v2 and FHIR side by side
 Many clinical environments run legacy HL7 v2 messaging alongside modern FHIR. HL7 v2 is a pipe-delimited text format used since the 1980s for ADT (admit/discharge/transfer) messages, lab results (ORU), and orders (ORM). A complete integration engine (Mirth Connect, Rhapsody) translates between v2 and FHIR — extracting fields from a v2 ORM message and creating a FHIR ServiceRequest resource. For health IT engineering roles, being able to read a HL7 v2 message (`MSH|^~\&|...`), identify the message type from the MSH segment, and map fields to FHIR resources is a differentiating skill that most candidates lack.
-
 
 ## OpenMRS (Open Medical Records System)
 
@@ -97,6 +94,18 @@ Access the backend at `http://localhost:8080/openmrs` and the React SPA frontend
 - **Reporting** — patient cohort reports and aggregate statistics
 - **Allergies UI** — allergy tracking
 - **Atlas** — anonymised usage reporting for the global community (optional)
+
+#### FHIR resources and the RESTful API model
+FHIR structures clinical data as resources: Patient, Observation, Condition, MedicationRequest, DiagnosticReport, Encounter. Each resource is a JSON or XML document with a standard schema. The FHIR REST API maps directly to HTTP: `GET /Patient/{id}` retrieves a patient record; `POST /Observation` creates a new observation; `GET /Observation?subject=Patient/{id}&code=8480-6` searches for a patient's blood pressure readings using LOINC code 8480-6. The `_include` parameter joins related resources in one request (fetch a DiagnosticReport and its referenced Observation in one call). This RESTful model makes FHIR significantly more developer-friendly than HL7 v2 (pipe-delimited messages) or SOAP-based web services.
+
+#### Clinical decision support — CDS Hooks
+CDS Hooks is a standard for triggering external clinical decision support services at specific points in a clinical workflow: `patient-view` (clinician opens a patient chart), `order-select` (clinician selects a medication), `order-sign` (clinician signs an order). The EHR sends a JSON hook request to the CDS service; the service responds with cards — informational alerts, suggestions, or links — displayed in the EHR UI. This enables real-time drug interaction alerts, guideline reminders, and predictive risk scores without modifying the EHR itself. OpenMRS and HAPI FHIR support CDS Hooks.
+
+#### De-identification and the Safe Harbor method
+HIPAA's Safe Harbor de-identification method requires removing 18 specific identifiers: names, geographic subdivisions smaller than state, dates (other than year) for individuals over 89, phone numbers, fax numbers, email addresses, SSN, medical record numbers, health plan beneficiary numbers, account numbers, certificate/license numbers, VINs, device identifiers, URLs, IP addresses, biometric identifiers, full-face photos, and any other unique identifiers. After removal, the covered entity must have no actual knowledge the information could identify an individual. De-identified data is no longer PHI and can be used for research and analytics without patient consent. Synthetic data generation (Synthea) creates realistic but entirely fictional patient datasets useful for testing.
+
+#### Audit logging requirements in healthcare systems
+Every access to patient data must be logged for compliance (HIPAA, GDPR Article 9). Required fields: who accessed the record (user ID + role), which record was accessed (patient ID + resource type), from where (IP address, application), when (timestamp with timezone), and what action (read, write, delete). Logs must be tamper-evident (write to an append-only log store or SIEM like Wazuh), retained for 6 years under HIPAA, and regularly reviewed for anomalous access patterns (a nurse accessing 500 records in 10 minutes). OpenMRS includes an Audit Log module; HAPI FHIR server logs all REST interactions in a standard format.
 
 ---
 
@@ -188,7 +197,8 @@ cd ~/hapi-fhir && podman-compose up -d
 
 > Create the PostgreSQL database first: `CREATE DATABASE hapifhir;`
 
-**Test the FHIR API:**
+##### Test the FHIR API
+
 ```bash
 # Create a Patient resource
 curl -X POST http://localhost:8082/fhir/Patient \

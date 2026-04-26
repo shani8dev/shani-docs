@@ -12,9 +12,7 @@ Self-hosted learning management systems, school administration platforms, collab
 
 ---
 
----
-
-## Job-Ready Concepts
+## Key Concepts
 
 #### LMS architecture — SCORM, xAPI, and LTI
 The e-learning interoperability standards define how learning content and tools integrate. SCORM (Sharable Content Object Reference Model) packages courses as ZIP files with a manifest — any SCORM-compliant LMS (Moodle, Canvas) can import and track completion. xAPI (Tin Can) extends this to track any learning experience as subject-verb-object statements ("Alice completed Module 3") sent to a Learning Record Store (LRS). LTI (Learning Tools Interoperability) is the SSO standard for embedding third-party tools (H5P, Google Docs, Zoom) into an LMS with single sign-on and grade passback. LTI 1.3 uses OAuth2 for authentication. Any edtech role requires understanding these three acronyms and which standard solves which problem.
@@ -30,7 +28,6 @@ School scheduling systems (timetables, room bookings, events) use CalDAV as the 
 
 #### FHIR in education — student health records
 Schools managing student health data (medications, allergies, immunisations) in a regulated environment increasingly use FHIR (Fast Healthcare Interoperability Resources) for structured health data storage — the same standard used in medical settings. This matters at the intersection of edtech and healthtech, for example in special education systems that store IEP (Individualised Education Plan) health components. Any role building school health record integrations will encounter HL7 FHIR R4.
-
 
 ## Moodle
 
@@ -101,6 +98,18 @@ podman logs -f moodle
 # Check Moodle status
 curl http://localhost:8080/admin/index.php
 ```
+
+#### SCORM, xAPI, and the LMS content standard landscape
+**SCORM** (Sharable Content Object Reference Model) is the legacy e-learning packaging standard — a zip file with HTML, JS, and an XML manifest. The LMS launches SCORM content in an iFrame and receives completion/score data via a JavaScript API. Widely supported but limited: no mobile-first support, requires a browser, and tracking is binary (passed/failed). **xAPI** (Tin Can) is the modern replacement — sends structured JSON statements (`actor, verb, object` — "John completed Module 3") to a Learning Record Store (LRS). Moodle supports both. xAPI enables tracking outside the LMS (mobile apps, simulators, on-the-job activities).
+
+#### Moodle's grading system and gradebook design
+Moodle's gradebook aggregates activity grades into course totals using configurable aggregation methods: weighted mean of grades (each activity has a weight), natural weighting (based on max grade points), or highest grade. Grade categories allow grouping activities — "Assignments" (30%), "Quizzes" (40%), "Final Exam" (30%). Grade letters map percentages to letters. A common mistake: setting up a complex gradebook after students have submitted work. Design the gradebook before the course opens — retroactive changes cause visible anomalies in the gradebook.
+
+#### Single Sign-On in educational platforms
+Schools often run multiple systems (Moodle, Nextcloud, Gitea, BigBlueButton) that should share the same login. OIDC (via Authentik or Keycloak) is the modern standard: students log in once, and all SSO-enabled services accept the token. LTI (Learning Tools Interoperability) is the education-specific standard for embedding external tools directly inside Moodle — a quiz tool, a video platform, or a coding environment appears as a Moodle activity, grades flow back automatically, and the student never leaves the LMS. LTI 1.3 uses OAuth2/OIDC under the hood.
+
+#### Accessibility in e-learning — WCAG and ATAG
+WCAG (Web Content Accessibility Guidelines) 2.1 Level AA is the legal requirement in most jurisdictions for educational platforms receiving public funding. Key requirements relevant to LMSes: sufficient colour contrast (4.5:1 for body text), all functionality keyboard-accessible, all images have alt text, all videos have captions, forms have associated labels. Moodle 4.x is largely WCAG 2.1 AA compliant out of the box; third-party themes and plugins may not be. ATAG (Authoring Tool Accessibility Guidelines) additionally requires that the authoring tools (course editors) produce accessible content by default.
 
 ---
 
@@ -276,7 +285,8 @@ volumes:
 cd ~/erpnext && podman-compose up -d
 ```
 
-**Create a new site:**
+##### Create a new site
+
 ```bash
 podman exec backend bench new-site erp.example.com \
   --mariadb-root-password changeme \
@@ -421,14 +431,17 @@ volumes:
 cd ~/overleaf && podman-compose up -d
 ```
 
-**Create an admin user:**
+##### Create an admin user
+
 ```bash
 podman exec sharelatex /bin/bash -c \
   "cd /var/www/sharelatex && node modules/server-ce-scripts/scripts/create-user.js \
   --email=admin@example.com --admin"
 ```
 
-**Install full TeX Live** (optional, adds all LaTeX packages):
+##### Install full TeX Live
+
+(optional, adds all LaTeX packages):
 ```bash
 podman exec sharelatex tlmgr install scheme-full
 ```
@@ -457,7 +470,9 @@ services:
 cd ~/anki-sync && podman-compose up -d
 ```
 
-**Configure Anki desktop:** Tools → Preferences → Network → Self-hosted sync server → enter your server URL.
+##### Configure Anki desktop
+
+Tools → Preferences → Network → Self-hosted sync server → enter your server URL.
 
 ---
 
@@ -529,7 +544,7 @@ cd ~/h5p && podman-compose up -d
 Access at `http://localhost:8100`. Download H5P content types from the H5P Hub (built into the editor), create content, and embed it in any LMS or web page:
 
 ```html
-<iframe src="https://h5p.home.local/h5p/embed/1" 
+<iframe src="https://h5p.home.local/h5p/embed/1"
   width="800" height="450" frameborder="0" allowfullscreen>
 </iframe>
 ```

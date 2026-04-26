@@ -1,12 +1,11 @@
 ---
----
+
 title: Backups & Sync
 section: Self-Hosting & Servers
 updated: 2026-04-21
 ---
 
 > **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
-
 
 # Backups & Sync
 
@@ -16,16 +15,15 @@ Reliable, encrypted backup solutions and cloud synchronisation tools.
 
 ---
 
-## Recovery Concepts: RPO and RTO
+## Key Concepts
 
 Every backup strategy should be defined against two metrics:
 
-**Recovery Point Objective (RPO)** — how much data loss is acceptable. If your RPO is 24 hours, a daily backup is sufficient. If your RPO is 1 hour, you need hourly backups or continuous replication (Litestream for SQLite, streaming replication for PostgreSQL). RPO answers: *how old can the data be when I restore?*
+**Recovery Point Objective (RPO):** — how much data loss is acceptable. If your RPO is 24 hours, a daily backup is sufficient. If your RPO is 1 hour, you need hourly backups or continuous replication (Litestream for SQLite, streaming replication for PostgreSQL). RPO answers: *how old can the data be when I restore?*
 
-**Recovery Time Objective (RTO)** — how long it takes to be back online after a failure. A cold restore from offsite Backblaze B2 might take 4 hours. Failover to a warm standby might take 5 minutes. RTO answers: *how long can I be down?*
+**Recovery Time Objective (RTO):** — how long it takes to be back online after a failure. A cold restore from offsite Backblaze B2 might take 4 hours. Failover to a warm standby might take 5 minutes. RTO answers: *how long can I be down?*
 
 Define both before choosing backup tools. A personal homelab might tolerate RPO=24h, RTO=4h. A business-critical app might need RPO=15min, RTO=30min — which requires a completely different strategy.
-
 
 #### Deduplication and chunking — how Restic and Kopia work
 Content-defined chunking splits data into variable-size chunks based on a rolling hash of content (not fixed byte offsets). Identical chunks across different files or snapshots are stored once and referenced by hash (content-addressable storage). This is why backing up 10 snapshots of a 10 GB database doesn't cost 100 GB — unchanged blocks are deduplicated. Restic and Kopia both use this model. The implication: the first backup is slow (all data chunked and uploaded); subsequent backups are fast (only changed chunks).
@@ -43,6 +41,27 @@ Litestream watches SQLite's WAL (Write-Ahead Log) file for new frames and stream
 
 #### Encryption key management for backups
 The weakest link in encrypted backups is usually the key/password. Common mistakes: (1) storing the password in the same place as the backup (if B2 is compromised, both the backup and the password are gone), (2) no documented recovery procedure (future-you can't restore without it), (3) rotating the password without re-encrypting old snapshots (Restic doesn't automatically re-encrypt history). Best practice: password in your Vaultwarden, a printed copy in a fireproof safe, and a `restic key list` / `restic key add` workflow documented in your runbook.
+
+#### The 3-2-1-1-0 rule — the modern backup standard
+The original 3-2-1 rule (3 copies, 2 media types, 1 offsite) has been extended: add a 1 for one air-gapped or immutable copy (Object Lock on B2/R2, a disconnected drive), and 0 for zero unverified backups — every backup must be regularly tested with an actual restore. Ransomware operators now target backup systems first; immutable Object Lock means even a fully compromised host with valid credentials can't delete locked objects before the retention period expires.
+
+#### Why backup verification is the step everyone skips
+A backup that has never been tested is not a backup — it's a hope. Common failure modes: (1) the backup ran but the restore fails due to corruption; (2) the repository password was lost; (3) the snapshot exists but the target path was wrong and critical files are missing; (4) the restore succeeds but the restored app fails due to missing environment config. Schedule a quarterly restore drill: pick a random snapshot, restore to a separate directory, verify a sample of files, and time the process. This drill also produces your real RTO number, not an estimate.
+
+#### Backup scope — what people forget to include
+Application data is obvious. Commonly forgotten: (1) container volumes not explicitly mapped to a host path; (2) cron jobs and systemd timer definitions; (3) `/etc` config files modified after initial setup; (4) Podman secrets and environment variable files; (5) SSH keys and GPG keys; (6) TLS certificates and CA bundles from step-ca; (7) Restic repository passwords themselves (kept in Vaultwarden, but Vaultwarden also needs a backup). For a homelab, a single Restic job covering `/home/user` and the Vaultwarden export covers the majority of state.
+
+#### Bandwidth and cost optimisation for offsite backups
+Restic's deduplication means after the initial upload, daily incremental backups are small — typically 1–5% of total data size for typical homelab workloads. Cloudflare R2's zero egress fee makes it uniquely attractive for backup destinations where you might restore frequently. Backblaze B2 at $0.006/GB/month with free egress to Cloudflare CDN (via B2-Cloudflare partnership) is the cheapest option for large cold storage. For very large initial backups (>500 GB), seed locally first and sync the repository to the cloud — faster than uploading over a home connection.
+
+#### Snapshot vs continuous replication — choosing the right model
+Snapshot backups (Restic, Borgmatic, Kopia) capture state at a point in time. RPO equals your backup interval — daily snapshots mean up to 24 hours of data loss. Continuous replication (Litestream, PostgreSQL streaming replication) captures every write transaction in near real-time — RPO of seconds. The cost: continuous replication requires more storage (WAL segments), more network bandwidth, and a live replica. Practical guidance: use snapshots for everything; add continuous replication only for databases where you genuinely can't afford to lose an hour of data.
+
+#### Restic vs Kopia vs Borgmatic — choosing a backup tool
+All three deduplicate, encrypt, and support multiple backends. Key differences: **Restic** has the widest backend support (S3, B2, SFTP, REST, rclone) and the most documentation — the safe default. **Kopia** is faster for large datasets (parallel uploading, better compression), has a web UI, and supports maintenance policies. **Borgmatic** wraps Borg, which has the most efficient deduplication algorithm (variable-length chunking with rolling hash) — better than Restic's fixed-size chunks for certain workloads. All three use content-addressable storage; the choice mostly comes down to backend support and whether you need a UI.
+
+#### Testing restores — the restore drill checklist
+A backup that has never been tested is not a backup. Checklist for a quarterly restore drill: (1) pick a random snapshot from 2 weeks ago; (2) restore to a temp directory (`restic restore latest --target /tmp/restore-test`); (3) verify file count and spot-check 5 random files; (4) for database backups, restore to a test instance and run `SELECT COUNT(*)` on key tables; (5) record the time taken — this is your actual RTO; (6) verify the repository password is documented somewhere other than the backed-up machine itself.
 
 ---
 
@@ -107,14 +126,16 @@ podman exec restic restic check
 podman exec restic restic check --read-data
 ```
 
-**Backup to Backblaze B2 (offsite):**
+##### Backup to Backblaze B2 (offsite)
+
 ```bash
 -e RESTIC_REPOSITORY=b2:your-bucket-name:/backups \
 -e B2_ACCOUNT_ID=your-account-id \
 -e B2_ACCOUNT_KEY=your-account-key
 ```
 
-**Backup to SFTP (another machine on your network):**
+##### Backup to SFTP (another machine on your network)
+
 ```bash
 -e RESTIC_REPOSITORY=sftp:user@192.168.1.100:/backups
 ```
@@ -146,7 +167,8 @@ services:
 cd ~/borgmatic && podman-compose up -d
 ```
 
-**Example `config.yaml`:**
+##### Example `config.yaml`
+
 ```yaml
 # /home/user/borgmatic/config/config.yaml
 repositories:
@@ -167,7 +189,8 @@ healthchecks:
   ping_url: https://hc-ping.com/your-uuid
 ```
 
-**Manual operations:**
+##### Manual operations
+
 ```bash
 # Run a backup now
 podman exec borgmatic borgmatic create
@@ -230,7 +253,8 @@ services:
 cd ~/rclone && podman-compose up -d
 ```
 
-**Configure a remote (run interactively):**
+##### Configure a remote (run interactively)
+
 ```bash
 podman run --rm -it \
   -v /home/user/rclone/config:/config/rclone:Z \
@@ -252,7 +276,9 @@ podman exec rclone rclone check /backups remote:your-bucket
 podman exec rclone rclone mount remote:your-bucket /mnt/cloud --daemon
 ```
 
-**Encrypt a remote** (wrap any existing remote with Rclone Crypt):
+##### Encrypt a remote
+
+(wrap any existing remote with Rclone Crypt):
 ```bash
 # In interactive config, choose 'crypt' type, point at your existing remote
 # Results in: rclone copy /data cryptremote:
@@ -287,7 +313,8 @@ cd ~/minio && podman-compose up -d
 
 Access the web console at `http://localhost:9001`. Create a bucket and access keys, then point Restic or Rclone at `s3:http://localhost:9000/your-bucket`.
 
-**Point Restic at MinIO:**
+##### Point Restic at MinIO
+
 ```bash
 -e RESTIC_REPOSITORY=s3:http://localhost:9000/restic-backups \
 -e AWS_ACCESS_KEY_ID=your-access-key \
@@ -362,7 +389,8 @@ services:
 cd ~/garage && podman-compose up -d
 ```
 
-**Minimal `config.toml`:**
+##### Minimal `config.toml`
+
 ```toml
 metadata_dir = "/var/lib/garage/meta"
 data_dir = "/var/lib/garage/data"
@@ -408,7 +436,8 @@ services:
 cd ~/litestream && podman-compose up -d
 ```
 
-**Example `litestream.yml` (v0.5.x format):**
+##### Example `litestream.yml` (v0.5.x format)
+
 ```yaml
 dbs:
   - path: /data/app.db
@@ -463,7 +492,8 @@ services:
 cd ~/restic-rest-server && podman-compose up -d
 ```
 
-**Create user credentials (htpasswd):**
+##### Create user credentials (htpasswd)
+
 ```bash
 # Install htpasswd via Nix (part of the apacheHttpd package)
 nix-env -iA nixpkgs.apacheHttpd
@@ -475,7 +505,8 @@ htpasswd -B -c /home/user/restic-rest-server/.htpasswd backupuser
 htpasswd -B /home/user/restic-rest-server/.htpasswd seconduser
 ```
 
-**Point Restic at the REST server:**
+##### Point Restic at the REST server
+
 ```bash
 # Initialise a repository for a specific user
 RESTIC_REPOSITORY=rest:http://localhost:8000/backupuser \

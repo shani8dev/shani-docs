@@ -12,9 +12,7 @@ Self-hosted BI platforms, data visualisation tools, SQL explorers, and analytica
 
 ---
 
----
-
-## Job-Ready Concepts
+## Key Concepts
 
 #### OLAP vs OLTP — the fundamental access pattern split
 OLTP (Online Transaction Processing) databases (PostgreSQL, MySQL) are row-oriented — optimised for reading/writing single rows quickly. Each INSERT or SELECT retrieves entire rows. OLAP (Online Analytical Processing) databases (ClickHouse, DuckDB, Redshift) are column-oriented — data for one column is stored contiguously on disk. `SELECT AVG(revenue) FROM orders` reads only the revenue column, skipping all other fields. At 1 billion rows, this is a 10–100× query time difference. BI tools that query OLAP databases feel instant; the same queries against PostgreSQL time out. The architectural decision: use PostgreSQL for your app's operational data, replicate or ETL to ClickHouse/DuckDB for analytics.
@@ -33,7 +31,6 @@ BI tools often have access to sensitive data. Row-level security (RLS) restricts
 
 #### Metrics layers and semantic consistency
 Without a metrics layer, the same business metric is defined differently in 20 different Metabase queries — "monthly active users" means different things to different dashboards. A metrics layer (dbt metrics, Cube.js, LookML) defines metrics once and exposes them to all BI tools. The metric definition (SQL logic, time grain, filters) lives in one place; BI tools query the layer rather than raw tables. This is a standard concept in mature data organisations — the distinction between a "data analyst who builds dashboards" and a "analytics engineer who builds the semantic layer the dashboards query."
-
 
 ## Metabase
 
@@ -154,7 +151,7 @@ cd ~/superset && podman-compose up -d
 
 Access at `http://localhost:8088`.
 
-**SQL Lab** — the built-in IDE supports multi-tab SQL editing, query history, schema explorer, result export to CSV/Excel, and saved queries shared across the team. It is a full replacement for tools like DBeaver for query work.
+**SQL Lab:** — the built-in IDE supports multi-tab SQL editing, query history, schema explorer, result export to CSV/Excel, and saved queries shared across the team. It is a full replacement for tools like DBeaver for query work.
 
 ---
 
@@ -211,7 +208,8 @@ volumes:
 cd ~/redash && podman-compose up -d
 ```
 
-**Initialise the database (first run only):**
+##### Initialise the database (first run only)
+
 ```bash
 podman-compose run --rm server create_db
 ```
@@ -242,7 +240,8 @@ services:
 cd ~/evidence && podman-compose up -d
 ```
 
-**Example report page (`pages/sales.md`):**
+##### Example report page (`pages/sales.md`)
+
 ```markdown
 # Sales Overview
 
@@ -292,7 +291,8 @@ services:
 cd ~/clickhouse && podman-compose up -d
 ```
 
-**Connect and run queries:**
+##### Connect and run queries
+
 ```bash
 podman exec -it clickhouse clickhouse-client --user admin --password changeme
 

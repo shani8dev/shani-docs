@@ -6,16 +6,13 @@ updated: 2026-04-22
 
 > **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
 
-
 # Developer Tools
 
 Infrastructure, CI/CD, monitoring, code hosting, and development utilities.
 
 ---
 
-## Job-Ready Concepts
-
-### Developer Tools Interview Essentials
+## Key Concepts
 
 #### Git internals that come up in interviews
 - Every commit is a snapshot (not a diff), identified by a SHA-1 hash of its content, author, timestamp, and parent commit hash. This is why commits are immutable and content-addressable.
@@ -39,7 +36,6 @@ Layer caching is the key lever. Layers that change rarely (OS packages, language
 #### Inner loop vs outer loop development
 Inner loop = the tight cycle of edit-build-run on your laptop (code-server, hot reload, `tilt up`). Outer loop = the CI pipeline (Woodpecker, Forgejo Actions, GitHub Actions). Fast inner loops require good local tooling (kind, minikube, Tilt, Skaffold) so you're not waiting for CI. The goal: < 1 second feedback for syntax errors, < 10 seconds for unit tests, < 5 minutes for the full CI pipeline.
 
-
 #### Service discovery patterns (Consul)
 Services register with Consul on startup (name, address, port, health check endpoint). Clients query Consul's DNS (`service-name.service.consul`) or HTTP API to find a live instance — no hardcoded IPs. When a service fails its health check, Consul removes it from the registry automatically. This is how Nomad jobs find each other without environment variables or static config files. At work, you'll see this pattern in bare-metal microservice deployments, or as a sidecar in container environments that aren't on Kubernetes.
 
@@ -54,7 +50,19 @@ A quality gate is a pass/fail threshold on code quality metrics — if new code 
 
 #### Renovate vs Dependabot
 Both auto-generate PRs to update dependencies. Renovate is more configurable: custom update schedules, grouping multiple dependencies into a single PR, auto-merging patch updates that pass CI, and monorepo support. Dependabot is simpler and built into GitHub. At scale, unmanaged dependencies become the largest source of CVEs — automated dependency updates with CI checks are the lowest-effort high-impact security practice.
----
+
+#### Static analysis vs dynamic analysis — complementary, not interchangeable
+**SAST** (Static Application Security Testing — Semgrep, Bandit, CodeQL) analyses source code without running it. Fast, runs in CI pre-merge, catches: SQL injection patterns, hardcoded secrets, insecure function calls, type errors. Cannot find: business logic flaws, runtime configuration issues, or vulnerabilities that only manifest under specific data conditions. **DAST** (Dynamic Analysis — OWASP ZAP, Nuclei) tests a running application from the outside, simulating an attacker. Catches: authentication bypasses, injection in live endpoints, misconfigured headers, rate limiting gaps. Cannot see: server-side code. **SCA** (Software Composition Analysis — Trivy, Grype) scans dependency manifests for known CVEs. All three are needed for a complete security posture — they find different classes of issues.
+
+#### Git internals — what a commit actually is
+A Git commit is a SHA-1 hash of: the tree object (a snapshot of all file contents at that point), the parent commit hash(es), author, committer, and the commit message. The tree recursively contains blob objects (file contents) and subtree objects (directories) — all content-addressed by hash. This means: (1) commits are immutable — changing any byte changes the hash and all descendant hashes; (2) identical file contents across branches are stored once (deduplication); (3) `git checkout` is just setting HEAD to point at a different commit object. Understanding this explains why rebasing "rewrites history" (creates new commit objects with new hashes) and why force-pushing after a rebase is destructive for collaborators.
+
+#### Code review effectiveness — what to actually look for
+Automated tools (linters, SAST, tests) should catch style, security patterns, and regressions before human review. Human review should focus on: (1) correctness of business logic — does the code actually do what the ticket says? (2) edge cases — what happens with empty input, concurrent access, or network failure? (3) API design — will this interface age well or require breaking changes in 6 months? (4) observability — are there enough logs and metrics to debug this in production? Avoid bikeshedding on style (automated formatters) or subjective naming (agree on a convention once, then stop discussing it).
+
+#### Dependency management — why Renovate matters
+Unpatched dependencies are the most common source of CVEs in production systems (OWASP A06). Renovate creates automated PRs to update `package.json`, `requirements.txt`, `go.mod`, Helm chart versions, and Docker base image tags on a schedule. Unlike Dependabot (GitHub-only, no grouping), Renovate works with Gitea/Forgejo, supports grouping multiple updates into one PR (reducing PR noise), and supports auto-merge for patch versions that pass CI. A Renovate PR with passing tests and a green Trivy scan can be merged with minimal review — this is how teams keep dependencies current without manual effort.
+
 ---
 
 ---
@@ -425,7 +433,8 @@ volumes:
 cd ~/twenty && podman-compose up -d
 ```
 
-**First run — run DB migrations:**
+##### First run — run DB migrations
+
 ```bash
 podman exec twenty yarn database:migrate:prod
 ```
@@ -543,7 +552,8 @@ cd ~/gitlab && podman-compose up -d
 
 > GitLab requires at minimum 4 GB RAM — 8 GB recommended. First-start initialisation takes 3–5 minutes. Retrieve the initial root password with `podman exec gitlab cat /etc/gitlab/initial_root_password`.
 
-**Register a GitLab Runner:**
+##### Register a GitLab Runner
+
 ```yaml
 # ~/gitlab-runner/compose.yaml
 services:
@@ -646,7 +656,8 @@ podman push registry.home.local/myproject/myapp:latest
 podman pull registry.home.local/myproject/myapp:latest
 ```
 
-**Set up Woodpecker CI to push to Harbor:**
+##### Set up Woodpecker CI to push to Harbor
+
 ```yaml
 # .woodpecker.yml
 steps:
@@ -769,12 +780,14 @@ services:
 cd ~/forgejo-runner && podman-compose up -d
 ```
 
-**Register the runner in Forgejo:**
+##### Register the runner in Forgejo
 1. Go to **Site Administration → Actions → Runners → Create new runner** in the Forgejo UI.
 2. Copy the registration token and set it as `FORGEJO_RUNNER_SECRET`.
 3. The runner registers itself on first start — refresh the Runners page to verify.
 
-**Example workflow** (`.forgejo/workflows/ci.yml`):
+##### Example workflow
+
+(`.forgejo/workflows/ci.yml`):
 ```yaml
 on: [push]
 jobs:
@@ -807,7 +820,8 @@ services:
     restart: "no"   # run once per invocation; use a timer for scheduling
 ```
 
-**Run on demand or schedule with a systemd timer:**
+##### Run on demand or schedule with a systemd timer
+
 ```bash
 # One-shot run
 cd ~/renovate && podman-compose run --rm renovate
@@ -838,7 +852,8 @@ EOF
 systemctl --user enable --now renovate.timer
 ```
 
-**Minimal `renovate.json` to add to each repo root:**
+##### Minimal `renovate.json` to add to each repo root
+
 ```json
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
@@ -1200,7 +1215,8 @@ nomad job scale nginx web 3
 nomad job stop nginx
 ```
 
-**Example job file (`~/nomad/jobs/nginx.nomad`):**
+##### Example job file (`~/nomad/jobs/nginx.nomad`)
+
 ```hcl
 job "nginx" {
   datacenters = ["dc1"]
@@ -1270,7 +1286,8 @@ volumes:
   pg_data:
 ```
 
-**Minimal `app-config.yaml`:**
+##### Minimal `app-config.yaml`
+
 ```yaml
 app:
   title: Homelab Developer Portal
@@ -1307,7 +1324,6 @@ backstage.home.local { tls internal; reverse_proxy localhost:7007 }
 ```
 
 > 💡 Backstage is most valuable once you have 5+ services. Start small — register a few services with `catalog-info.yaml` files in their repos, then add plugins incrementally (ArgoCD, Kubernetes, TechDocs).
-
 
 ## Caddy Configuration
 
@@ -1359,14 +1375,14 @@ curl -X POST https://ci.home.local/api/webhooks \
 
 ## Branch Protection and Merge Strategies
 
-**Branch protection** (Repository → Settings → Branches → Add Protected Branch) enforces quality gates before changes can land on important branches like `main`:
+**Branch protection:** (Repository → Settings → Branches → Add Protected Branch) enforces quality gates before changes can land on important branches like `main`:
 
 - **Require status checks** — CI must pass before merging
 - **Require pull request reviews** — at least N reviewers must approve
 - **Restrict pushes** — only specific users or teams can push directly
 - **Require signed commits** — all commits must be GPG-signed
 
-**Merge strategies** affect what the git history looks like after a PR is merged:
+**Merge strategies:** affect what the git history looks like after a PR is merged:
 
 | Strategy | What happens | Best for |
 |----------|-------------|----------|
@@ -1374,7 +1390,7 @@ curl -X POST https://ci.home.local/api/webhooks \
 | **Squash and merge** | All PR commits become a single commit on `main` | Clean history, easier `git bisect` |
 | **Rebase and merge** | Replays PR commits on top of `main`, no merge commit | Linear history, no merge commits |
 
-**Linear history enforcement** (Squash or Rebase only) makes `git log` readable and `git bisect` reliable. Choose one strategy per repository and enforce it via branch protection — mixing strategies produces a chaotic history.
+**Linear history enforcement:** (Squash or Rebase only) makes `git log` readable and `git bisect` reliable. Choose one strategy per repository and enforce it via branch protection — mixing strategies produces a chaotic history.
 
 ---
 
@@ -1382,7 +1398,9 @@ curl -X POST https://ci.home.local/api/webhooks \
 
 Accidentally committed secrets (API keys, passwords, tokens) are one of the most common security incidents. Add secret scanning as a CI step to catch them before they land on `main`.
 
-**gitleaks** scans for known secret patterns (AWS keys, GitHub tokens, generic high-entropy strings):
+##### gitleaks
+
+scans for known secret patterns (AWS keys, GitHub tokens, generic high-entropy strings):
 
 ```yaml
 # .forgejo/workflows/secret-scan.yml
@@ -1425,7 +1443,7 @@ If gitleaks fires on a legitimate secret that's already been rotated and removed
 
 ## Container Image Build Patterns
 
-**Minimal base images** reduce attack surface by shipping fewer packages. Less software = fewer CVEs = smaller Trivy scan results.
+**Minimal base images:** reduce attack surface by shipping fewer packages. Less software = fewer CVEs = smaller Trivy scan results.
 
 | Base image | Size | Use when |
 |-----------|------|----------|
@@ -1434,7 +1452,7 @@ If gitleaks fires on a legitimate secret that's already been rotated and removed
 | `gcr.io/distroless/static` | ~2 MB | Statically compiled binaries (Go, Rust) — no shell at all |
 | `scratch` | 0 bytes | Fully static binaries, maximum minimalism |
 
-**Distroless** images have no shell, no package manager, no `ls`, no `cat`. You can't `exec` into them for debugging — use `kubectl debug` with a sidecar image instead. The tradeoff is worth it for production: no shell means no shell exploitation.
+**Distroless:** images have no shell, no package manager, no `ls`, no `cat`. You can't `exec` into them for debugging — use `kubectl debug` with a sidecar image instead. The tradeoff is worth it for production: no shell means no shell exploitation.
 
 #### Layer caching in multi-stage builds
 order your Dockerfile so the steps that change least frequently come first. Dependencies (which change rarely) before application code (which changes every commit):
@@ -1457,7 +1475,9 @@ USER nonroot:nonroot
 ENTRYPOINT ["/app"]
 ```
 
-**Using `--cache-from` in CI** pulls the previously built image to warm the layer cache across pipeline runs:
+##### Using `--cache-from` in CI
+
+pulls the previously built image to warm the layer cache across pipeline runs:
 
 ```yaml
 - name: Build

@@ -6,7 +6,6 @@ updated: 2026-04-22
 
 > **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
 
-
 # Kubernetes & Container Orchestration
 
 Lightweight and production-grade Kubernetes distributions, cluster management, GitOps, ingress, storage, and observability — all self-hosted on this system.
@@ -87,7 +86,6 @@ Both key-value stores. ConfigMaps are for non-sensitive configuration. Secrets a
 - **KEDA** — event-driven scaling including scale-to-zero
 - **Cluster Autoscaler / Karpenter** — adds/removes nodes based on pending pods
 
-
 #### RBAC mental model
 Every action in Kubernetes is: a *verb* (get, list, watch, create, update, patch, delete) on a *resource* (pods, deployments, secrets) in a *namespace*. A Role defines allowed verb+resource combinations. A RoleBinding binds a Role to a subject (User, Group, ServiceAccount). ClusterRole/ClusterRoleBinding apply cluster-wide. The principle of least privilege: CI/CD service accounts should have `create`/`update` on Deployments only, not `get` on Secrets. `kubectl auth can-i --list --as system:serviceaccount:default:myapp` shows what a service account can do.
 
@@ -132,12 +130,13 @@ k3s, k0s, and RKE2 are **system services** managed by systemd — their data liv
 ~/.config/helm/          ← Helm repos and release cache
 ```
 
-**Install all CLI tools — Nix (primary):**
+##### Install all CLI tools — Nix (primary)
+
 ```bash
 nix-env -iA nixpkgs.kubectl nixpkgs.kubernetes-helm nixpkgs.k9s nixpkgs.argocd nixpkgs.fluxcd nixpkgs.velero nixpkgs.kubeseal nixpkgs.kind nixpkgs.minikube
 ```
 
-**Snap alternatives** for `kubectl` and `helm` (auto-update, classic confinement):
+**Snap alternatives:** for `kubectl` and `helm` (auto-update, classic confinement):
 ```bash
 snap install kubectl --classic
 snap install helm --classic
@@ -172,7 +171,8 @@ export PATH="$HOME/.local/bin:$PATH"
 sudo k3s kubectl get nodes
 ```
 
-**Set up kubeconfig for your user:**
+##### Set up kubeconfig for your user
+
 ```bash
 mkdir -p ~/.kube
 sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
@@ -294,7 +294,8 @@ microk8s enable dashboard          # Kubernetes Dashboard
 microk8s enable metrics-server
 ```
 
-**Export kubeconfig to use with standard `kubectl`:**
+##### Export kubeconfig to use with standard `kubectl`
+
 ```bash
 microk8s config > ~/.kube/config
 chmod 600 ~/.kube/config
@@ -510,7 +511,7 @@ kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/latest/
 kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/latest/download/experimental-install.yaml
 ```
 
-**Create a GatewayClass and Gateway (ingress-nginx example):**
+###Create a GatewayClass and Gateway (ingress-nginx example):
 ```yaml
 # ~/k8s/gateway.yaml
 apiVersion: gateway.networking.k8s.io/v1
@@ -540,7 +541,8 @@ spec:
           - name: my-tls-secret
 ```
 
-**HTTPRoute — route traffic to a service:**
+##### HTTPRoute — route traffic to a service
+
 ```yaml
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -576,7 +578,8 @@ kubectl get httproutes
 
 **Purpose:** Automatically scales the number of pod replicas in a Deployment or StatefulSet based on observed CPU utilisation, memory, or custom metrics. HPA is the primary scaling mechanism for stateless workloads — it adjusts replica count between a defined min and max as load changes. Pairs with KEDA (below) for event-driven scaling and VPA/Goldilocks for right-sizing resource requests.
 
-**CPU-based HPA (simplest — scales when average CPU > 70%):**
+##### CPU-based HPA (simplest — scales when average CPU > 70%)
+
 ```yaml
 # ~/k8s/hpa-cpu.yaml
 apiVersion: autoscaling/v2
@@ -600,7 +603,8 @@ spec:
           averageUtilization: 70    # scale up when avg CPU > 70%
 ```
 
-**Memory + CPU combined HPA:**
+##### Memory + CPU combined HPA
+
 ```yaml
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -642,7 +646,8 @@ spec:
           periodSeconds: 60               # remove at most 25% of pods per minute
 ```
 
-**Custom metrics HPA (scale on Prometheus metric via KEDA or Prometheus Adapter):**
+##### Custom metrics HPA (scale on Prometheus metric via KEDA or Prometheus Adapter)
+
 ```yaml
 # Requires either KEDA (recommended) or prometheus-adapter to be installed
 # KEDA approach — scale on HTTP request rate:
@@ -666,7 +671,8 @@ spec:
           sum(rate(http_requests_total{job="myapp"}[1m]))
 ```
 
-**Imperative HPA (quick testing):**
+##### Imperative HPA (quick testing)
+
 ```bash
 # Create HPA imperatively
 kubectl autoscale deployment myapp --cpu-percent=70 --min=2 --max=10 -n myapp
@@ -682,7 +688,8 @@ kubectl top pods -n myapp
 kubectl top nodes
 ```
 
-**Prerequisites — metrics-server must be installed:**
+##### Prerequisites — metrics-server must be installed
+
 ```bash
 # k3s: metrics-server is included by default
 # Other distributions:
@@ -709,7 +716,8 @@ ClusterRoleBinding       — binds a ClusterRole to a subject cluster-wide
 Subject                  — User, Group, or ServiceAccount
 ```
 
-**Namespace-scoped Role (read-only access to pods and logs in one namespace):**
+##### Namespace-scoped Role (read-only access to pods and logs in one namespace)
+
 ```yaml
 # ~/k8s/rbac-readonly.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -743,7 +751,8 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ```
 
-**CI/CD ServiceAccount (minimal deploy permissions for a pipeline):**
+##### CI/CD ServiceAccount (minimal deploy permissions for a pipeline)
+
 ```yaml
 # ~/k8s/rbac-cicd.yaml
 apiVersion: v1
@@ -823,7 +832,8 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ```
 
-**Built-in ClusterRoles (use instead of creating your own when possible):**
+##### Built-in ClusterRoles (use instead of creating your own when possible)
+
 ```bash
 # List all built-in ClusterRoles
 kubectl get clusterroles | grep -v system:
@@ -841,7 +851,8 @@ kubectl create rolebinding myuser-edit \
   --namespace=myapp
 ```
 
-**Audit and debug RBAC:**
+##### Audit and debug RBAC
+
 ```bash
 # Check what a ServiceAccount / user can do
 kubectl auth can-i create deployments --as=system:serviceaccount:myapp:cicd-deployer -n myapp
@@ -862,7 +873,8 @@ for item in d['items']:
 " | grep -i secret
 ```
 
-**Namespace isolation with RBAC + NetworkPolicy (multi-tenant pattern):**
+##### Namespace isolation with RBAC + NetworkPolicy (multi-tenant pattern)
+
 ```yaml
 # Each team gets their own namespace and ServiceAccount
 # with a Role scoped to that namespace only.
@@ -903,7 +915,8 @@ helm upgrade --install karpenter karpenter/karpenter \
   --set settings.interruptionQueue=homelab-karpenter
 ```
 
-**NodePool — define acceptable node shapes:**
+##### NodePool — define acceptable node shapes
+
 ```yaml
 # ~/k8s/karpenter-nodepool.yaml
 apiVersion: karpenter.sh/v1
@@ -956,7 +969,8 @@ nix-env -iA nixpkgs.talosctl
 # https://factory.talos.dev
 ```
 
-**Bootstrap a single-node cluster:**
+##### Bootstrap a single-node cluster
+
 ```bash
 # Generate machine config
 talosctl gen config homelab https://<node-ip>:6443 \
@@ -1025,7 +1039,8 @@ EOF
 sudo sysctl --system
 ```
 
-**Initialise the control plane:**
+##### Initialise the control plane
+
 ```bash
 sudo kubeadm init \
   --pod-network-cidr=10.244.0.0/16 \
@@ -1043,7 +1058,8 @@ kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Doc
 kubeadm token create --print-join-command
 ```
 
-**Join a worker node:**
+##### Join a worker node
+
 ```bash
 # Run the join command from the control plane output
 sudo kubeadm join <control-plane-ip>:6443 \
@@ -1140,7 +1156,7 @@ PDBs only protect against **voluntary** disruptions (drains, upgrades). They can
 
 ## Init Containers and Sidecar Containers
 
-**Init containers** run to completion before any of the main containers in a Pod start. They share the Pod's volumes and network but run sequentially, one at a time. Common uses:
+**Init containers:** run to completion before any of the main containers in a Pod start. They share the Pod's volumes and network but run sequentially, one at a time. Common uses:
 
 - Wait for a dependency to be ready (database, external service)
 - Run database migrations before the app starts
@@ -1166,7 +1182,7 @@ spec:
       # Main app only starts after db-migrate exits with code 0
 ```
 
-**Sidecar containers** run alongside the main container for the full lifetime of the Pod. Common uses: log shipping (Fluentbit), service mesh proxies (Envoy), metrics exporters, secret rotation agents.
+**Sidecar containers:** run alongside the main container for the full lifetime of the Pod. Common uses: log shipping (Fluentbit), service mesh proxies (Envoy), metrics exporters, secret rotation agents.
 
 ```yaml
 spec:
@@ -1292,7 +1308,8 @@ helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
   --set controller.service.nodePorts.https=30443
 ```
 
-**Example Ingress resource:**
+##### Example Ingress resource
+
 ```yaml
 # ~/k8s/ingress-example.yaml
 apiVersion: networking.k8s.io/v1
@@ -1322,7 +1339,6 @@ kubectl apply -f ~/k8s/ingress-example.yaml
 ```
 
 ---
-
 
 ## NGINX Gateway Fabric (NGF)
 
@@ -1404,7 +1420,8 @@ helm upgrade --install nginx-gateway-fabric \
   --wait
 ```
 
-**Full values file for a Shani OS homelab (`~/k8s/ngf-values.yaml`):**
+##### Full values file for a Shani OS homelab (`~/k8s/ngf-values.yaml`)
+
 ```yaml
 nginxGateway:
   gatewayClassName: nginx
@@ -1698,7 +1715,8 @@ All 9 NGF CRDs are installed via the `deploy/crds.yaml` manifest in the prerequi
 | `UpstreamSettingsPolicy` | v1alpha1 | Load-balancing settings per route |
 | `AuthenticationFilter` | v1alpha1 | Basic Auth per route |
 
-**Example — rate limit a public route:**
+##### Example — rate limit a public route
+
 ```yaml
 apiVersion: gateway.nginx.org/v1alpha1
 kind: RateLimitPolicy
@@ -1791,7 +1809,8 @@ helm upgrade --install cert-manager cert-manager/cert-manager \
 kubectl get pods -n cert-manager
 ```
 
-**ClusterIssuer for Let's Encrypt (HTTP-01 — public domains):**
+##### ClusterIssuer for Let's Encrypt (HTTP-01 — public domains)
+
 ```yaml
 # ~/k8s/letsencrypt-issuer.yaml
 apiVersion: cert-manager.io/v1
@@ -1810,7 +1829,8 @@ spec:
             class: nginx   # or "nginx-gateway" for NGF
 ```
 
-**ClusterIssuer for Let's Encrypt (DNS-01 via Cloudflare — wildcard certs):**
+##### ClusterIssuer for Let's Encrypt (DNS-01 via Cloudflare — wildcard certs)
+
 ```yaml
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -1836,7 +1856,7 @@ kubectl create secret generic cloudflare-api-token \
   --from-literal=api-token=<your-cloudflare-token>
 ```
 
-**ClusterIssuer for internal Step-CA (home.local domains):**
+##### ClusterIssuer for internal Step-CA (home.local domains)
 
 Use this when your cluster services are on `*.home.local` and you want certs from your own CA rather than Let's Encrypt. Requires Step-CA running and its root cert trusted by browsers (see security.md).
 
@@ -1908,7 +1928,8 @@ kubectl patch storageclass longhorn -p '{"metadata": {"annotations": {"storagecl
 kubectl patch storageclass local-path -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}'
 ```
 
-**Example PVC using Longhorn:**
+##### Example PVC using Longhorn
+
 ```yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -1947,7 +1968,8 @@ kubectl -n argocd port-forward svc/argocd-server 8180:443
 # Open https://localhost:8180 — user: admin
 ```
 
-**Install the ArgoCD CLI:**
+##### Install the ArgoCD CLI
+
 ```bash
 nix-env -iA nixpkgs.argocd
 
@@ -1959,7 +1981,8 @@ argocd repo add https://git.home.local/myorg/k8s-manifests \
   --username gitea-user --password <token>
 ```
 
-**Create an Application pointing at your Git repo:**
+##### Create an Application pointing at your Git repo
+
 ```yaml
 # ~/k8s/argocd-app.yaml
 apiVersion: argoproj.io/v1alpha1
@@ -2040,7 +2063,8 @@ kubectl apply -k ~/k8s/overlays/production/
 kubectl kustomize ~/k8s/overlays/production/
 ```
 
-**Example structure:**
+##### Example structure
+
 ```
 ~/k8s/
 ├── base/
@@ -2152,7 +2176,8 @@ kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy
 # Open https://localhost:8443
 ```
 
-**Create an admin service account:**
+##### Create an admin service account
+
 ```yaml
 # ~/k8s/dashboard-admin.yaml
 apiVersion: v1
@@ -2325,7 +2350,6 @@ velero restore logs myapp-restore
 
 ---
 
-
 ## In-Cluster CI/CD
 
 These tools run natively inside the cluster — use them for CI pipelines and build jobs that leverage Kubernetes scheduling, parallelism, and pod isolation directly.
@@ -2349,7 +2373,8 @@ nix-env -iA nixpkgs.tekton-client
 kubectl -n tekton-pipelines port-forward svc/tekton-dashboard 9097:9097
 ```
 
-**Example Task + Pipeline:**
+##### Example Task + Pipeline
+
 ```yaml
 # ~/k8s/tekton-hello.yaml
 apiVersion: tekton.dev/v1
@@ -2417,7 +2442,8 @@ argo list -n argo
 argo logs -n argo my-workflow
 ```
 
-**Example workflow (parallel steps):**
+##### Example workflow (parallel steps)
+
 ```yaml
 # ~/k8s/workflow.yaml
 apiVersion: argoproj.io/v1alpha1
@@ -2719,7 +2745,8 @@ kubectl create secret generic openbao-token \
 kubectl apply -f ~/k8s/eso-openbao-store.yaml
 ```
 
-**Create an ExternalSecret — pull a database password from OpenBao into a k8s Secret:**
+##### Create an ExternalSecret — pull a database password from OpenBao into a k8s Secret
+
 ```yaml
 # ~/k8s/myapp-external-secret.yaml
 apiVersion: external-secrets.io/v1beta1
@@ -2831,7 +2858,6 @@ kubectl rollout history deployment/myapp -n myapp
 kubectl rollout undo deployment/myapp -n myapp  # roll back
 ```
 
-
 ---
 
 ## Caddy Configuration
@@ -2930,9 +2956,11 @@ Developer pushes code to feature branch
   → If metrics are healthy → promote. If degraded → automatic rollback.
 ```
 
-**Separating app code from deployment config** is intentional. The application repo contains code; a GitOps repo (sometimes called an "environment repo") contains the Kubernetes manifests or Helm values that describe what's running where. This makes rollbacks a `git revert` and gives you a complete audit trail of every deployment.
+**Separating app code from deployment config:** is intentional. The application repo contains code; a GitOps repo (sometimes called an "environment repo") contains the Kubernetes manifests or Helm values that describe what's running where. This makes rollbacks a `git revert` and gives you a complete audit trail of every deployment.
 
-**Kustomize overlays** are the standard way to manage the dev/staging/prod variation without duplicating YAML:
+##### Kustomize overlays
+
+are the standard way to manage the dev/staging/prod variation without duplicating YAML:
 
 ```
 k8s/
@@ -2973,11 +3001,11 @@ ArgoCD watches a specific overlay path per environment — `overlays/prod` for p
 
 Progressive delivery is the practice of releasing changes to a subset of users or traffic before rolling out fully. The three common strategies differ in how much risk they take on at once:
 
-**Blue/Green** — run two identical environments (blue = current, green = new version). Flip 100% of traffic from blue to green once green is verified healthy. Fast rollback: flip back to blue instantly. Expensive: requires 2× capacity at all times during the switchover.
+**Blue/Green:** — run two identical environments (blue = current, green = new version). Flip 100% of traffic from blue to green once green is verified healthy. Fast rollback: flip back to blue instantly. Expensive: requires 2× capacity at all times during the switchover.
 
-**Canary** — route a small percentage of traffic (e.g., 5%) to the new version while the rest stays on the old version. Monitor error rate and latency for the canary slice. Gradually increase the percentage. Automatically rollback if metrics degrade. More resource-efficient than blue/green; slower to complete a full rollout.
+**Canary:** — route a small percentage of traffic (e.g., 5%) to the new version while the rest stays on the old version. Monitor error rate and latency for the canary slice. Gradually increase the percentage. Automatically rollback if metrics degrade. More resource-efficient than blue/green; slower to complete a full rollout.
 
-**Feature Flags** — ship code to all users but control which users see the new behaviour in the application itself. The infrastructure concern (deployment) is decoupled from the product concern (release). Useful for A/B testing, gradual rollouts to user segments, and dark launches (ship to 0% users, ramp up independently of deployments).
+**Feature Flags:** — ship code to all users but control which users see the new behaviour in the application itself. The infrastructure concern (deployment) is decoupled from the product concern (release). Useful for A/B testing, gradual rollouts to user segments, and dark launches (ship to 0% users, ramp up independently of deployments).
 
 Argo Rollouts (documented in the Kubernetes wiki) implements blue/green and canary at the Kubernetes traffic level, integrating with Prometheus for automated analysis. For feature flags, see OpenFeature or Unleash.
 
@@ -3140,7 +3168,8 @@ EOF
 kubectl get providers
 ```
 
-**Example Composite Resource (XR) — self-service PostgreSQL:**
+##### Example Composite Resource (XR) — self-service PostgreSQL
+
 ```yaml
 # ~/k8s/crossplane/postgres-xrd.yaml
 apiVersion: apiextensions.crossplane.io/v1
@@ -3182,7 +3211,8 @@ helm repo add kedacore https://kedacore.github.io/charts
 helm install keda kedacore/keda --namespace keda --create-namespace
 ```
 
-**Example ScaledObject — scale on RabbitMQ queue depth:**
+##### Example ScaledObject — scale on RabbitMQ queue depth
+
 ```yaml
 # ~/k8s/keda-rabbitmq.yaml
 apiVersion: keda.sh/v1alpha1
@@ -3267,7 +3297,8 @@ hubble observe --verdict DROPPED --follow
 hubble observe --from-pod myapp/frontend --to-pod myapp/backend
 ```
 
-**Example L7 NetworkPolicy (HTTP-aware):**
+##### Example L7 NetworkPolicy (HTTP-aware)
+
 ```yaml
 # Allow frontend to call backend on GET /api only
 apiVersion: cilium.io/v2
@@ -3305,7 +3336,8 @@ helm repo add kyverno https://kyverno.github.io/kyverno/
 helm install kyverno kyverno/kyverno --namespace kyverno --create-namespace
 ```
 
-**Example policies:**
+##### Example policies
+
 ```yaml
 # Require all pods to have resource limits
 apiVersion: kyverno.io/v1
@@ -3397,7 +3429,8 @@ helm install falco falcosecurity/falco \
   --set falcosidekick.config.ntfy.topic="falco-alerts"
 ```
 
-**Example custom rules (`/etc/falco/rules.d/custom.yaml`):**
+##### Example custom rules (`/etc/falco/rules.d/custom.yaml`)
+
 ```yaml
 - rule: Shell in Container
   desc: A shell was spawned in a container
@@ -3505,7 +3538,8 @@ kubectl port-forward svc/chaos-litmus-frontend-service 9091:9091 -n litmus
 # Open http://localhost:9091 — default: admin / litmus
 ```
 
-**Example ChaosEngine — pod delete experiment:**
+##### Example ChaosEngine — pod delete experiment
+
 ```yaml
 # ~/k8s/chaos-pod-delete.yaml
 apiVersion: litmuschaos.io/v1alpha1
@@ -3627,7 +3661,9 @@ cookiecutter git+https://git.home.local/platform/golden-paths.git --directory py
 # - docs/runbook.md (incident response template — see below)
 ```
 
-**Runbook and postmortem templates** — add these to every golden path repo:
+##### Runbook and postmortem templates
+
+— add these to every golden path repo:
 
 ```markdown
 <!-- docs/runbook.md — include in every service golden path -->
@@ -3696,7 +3732,6 @@ Technical explanation of what failed and why.
 | Add alert for leading indicator metric | @sre | YYYY-MM-DD |
 | Update runbook with new symptom | @oncall | YYYY-MM-DD |
 ```
-
 
 ---
 

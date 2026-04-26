@@ -6,16 +6,13 @@ updated: 2026-04-22
 
 > **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
 
-
 # Communication
 
 Self-hosted chat, push notifications, VoIP, and team collaboration platforms.
 
 ---
 
----
-
-## Job-Ready Concepts
+## Key Concepts
 
 #### Federation and the fediverse — ActivityPub and Matrix
 Two independent federation protocols power the self-hosted social and communication ecosystem. Matrix (used by Synapse, Conduit) federates real-time messaging — your homeserver and another operator's homeserver exchange messages directly, with no central relay. ActivityPub (used by Mastodon, Lemmy, Pixelfed, PeerTube) federates social actions — follows, posts, likes — across servers. Both use a server-to-server API for federation and a client-to-server API for user clients. The critical concept for interviews: federation means data is distributed across many servers with no central authority — this creates challenges for moderation, key verification, and data retention that centralised platforms don't have.
@@ -34,7 +31,6 @@ SIP (Session Initiation Protocol) is the signalling protocol for VoIP — it neg
 
 #### Push notification architecture — APNS, FCM, and self-hosted alternatives
 Mobile push notifications (iOS: APNS, Android: FCM) require routing through Apple's and Google's servers — apps can't receive pushes without them. This is why truly server-side push requires a relay: ntfy and Gotify provide an app that maintains a persistent connection to your server and displays notifications without going through Google/Apple. The trade-off: ntfy has an Android app using websockets (no FCM dependency), but on iOS, background delivery still requires APNS. For privacy-focused deployment, understanding what requires a cloud relay versus what's fully local is important.
-
 
 ## Matrix / Synapse
 
@@ -58,7 +54,8 @@ services:
 cd ~/matrix && podman-compose up -d
 ```
 
-**Generate initial config:**
+##### Generate initial config
+
 ```bash
 podman run --rm \
   -v /home/user/synapse:/data:Z \
@@ -105,6 +102,18 @@ chat.example.com {
   }
 }
 ```
+
+#### Matrix architecture — homeservers, federation, and rooms
+Matrix is a decentralised protocol. Each user belongs to a homeserver (`@user:yourdomain.com`). Rooms are identified by IDs (`!roomid:originserver.com`) and can federate across homeservers — participants from `matrix.org`, `yourdomain.com`, and any other homeserver can all be in the same room. The homeserver stores all events its users participate in. Federation means your homeserver syncs room history with other participating homeservers. Synapse is the reference implementation; Conduit and Dendrite are lighter alternatives. The trade-off of self-hosting: you control your data and identity, but you're responsible for federation performance and storage growth.
+
+#### End-to-end encryption — what it actually protects
+E2EE (as in Signal protocol, Matrix Megolm) means messages are encrypted on the sender's device and decrypted only on recipients' devices. The server sees only ciphertext — it cannot read message contents, even under legal compulsion. What it does NOT protect: metadata (who talked to whom, when, how often), device compromise (if your phone is seized, messages are readable), or forward secrecy failures (if a long-term key leaks and past messages were recorded). Matrix's cross-signing and key verification UI is designed to let users verify that no man-in-the-middle has injected a malicious device into their room.
+
+#### Push notifications in self-hosted messaging
+Mobile devices wake up for push notifications via platform-specific channels: APNs for iOS, FCM for Android. A self-hosted Matrix homeserver needs a push gateway (the `sygnal` service) that translates Matrix push events to APNs/FCM API calls. This requires API credentials from Apple (APNs certificate) and Google (FCM project key). Without this, messages only arrive when the app is open. Element Call and other Matrix apps also use this path. The privacy-preserving alternative: Ntfy as a self-hosted push notification server (supports UnifiedPush, bypassing FCM for Android) — several Matrix clients support UnifiedPush.
+
+#### VoIP quality factors — jitter, latency, MOS score
+Voice over IP quality is measured by three factors: latency (one-way delay; below 150ms is imperceptible, above 300ms causes conversational overlap), jitter (variation in packet arrival time; should be below 30ms — a jitter buffer compensates but adds latency), and packet loss (above 1% causes audible artefacts; above 5% makes calls unusable). Mean Opinion Score (MOS) is a 1–5 subjective quality rating; codecs trade bandwidth for MOS: Opus at 24kbps scores ~4.0 (near toll quality); G.711 (PSTN-grade) scores ~4.4 at 64kbps. QoS (DSCP marking, priority queuing) on your router ensures VoIP packets are prioritised over bulk downloads.
 
 ---
 
@@ -168,7 +177,8 @@ volumes:
 cd ~/rocketchat && podman-compose up -d
 ```
 
-**Initialise the MongoDB replica set (required on first run):**
+##### Initialise the MongoDB replica set (required on first run)
+
 ```bash
 podman exec mongodb mongosh --eval "rs.initiate()"
 ```
@@ -482,7 +492,8 @@ volumes:
 cd ~/lemmy && podman-compose up -d
 ```
 
-**Minimal `config.hjson`:**
+##### Minimal `config.hjson`
+
 ```hjson
 {
   hostname: "lemmy.example.com"
@@ -821,7 +832,8 @@ services:
 cd ~/simplex && podman-compose up -d
 ```
 
-**Initialise the server (first run):**
+##### Initialise the server (first run)
+
 ```bash
 # Generate server config and fingerprint
 podman run --rm \
