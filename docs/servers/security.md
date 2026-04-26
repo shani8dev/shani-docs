@@ -4,6 +4,9 @@ section: Self-Hosting & Servers
 updated: 2026-04-22
 ---
 
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+
+
 # Security & Identity
 
 Password management, identity providers, secrets management, and threat detection.
@@ -438,7 +441,7 @@ services:
 cd ~/step-ca && podman-compose up -d
 ```
 
-**Trust the CA on Shani OS:**
+**Trust the CA on this system:**
 ```bash
 step ca root > /tmp/root_ca.crt
 sudo trust anchor /tmp/root_ca.crt
@@ -710,7 +713,7 @@ cd ~/wazuh && podman-compose up -d
 **Install agent on a monitored server:**
 ```bash
 # On each server you want to monitor
-# Option A: Install inside a Distrobox container (recommended on Shani OS)
+# Option A: Install inside a Distrobox container (recommended on this system)
 distrobox create --name wazuh-agent --image fedora:latest
 distrobox enter wazuh-agent -- bash -c "
   sudo rpm --import https://packages.wazuh.com/key/GPG-KEY-WAZUH
@@ -1126,7 +1129,7 @@ dtrack.home.local { tls internal; reverse_proxy localhost:8082 }
 
 ## Fail2ban (Intrusion Prevention)
 
-**Purpose:** Monitors log files for repeated authentication failures and bans the source IP via firewall rules. Protects SSH, Caddy, Authelia, Vaultwarden, and any service that logs failed login attempts — automatically blocking brute-force attacks without manual intervention. Integrates with `firewalld` (used on Shani OS) natively.
+**Purpose:** Monitors log files for repeated authentication failures and bans the source IP via firewall rules. Protects SSH, Caddy, Authelia, Vaultwarden, and any service that logs failed login attempts — automatically blocking brute-force attacks without manual intervention. Integrates with `firewalld` (used on this system) natively.
 
 ```yaml
 # ~/fail2ban/compose.yaml
@@ -2379,6 +2382,49 @@ rm /tmp/prod.secrets.tfvars
 
 > **Key rotation:** When a team member leaves, re-encrypt all SOPS files with their key removed from `.sops.yaml`. Run `sops updatekeys secrets.yaml` to rotate encryption without decrypting/re-encrypting manually — SOPS re-encrypts the data key for the new recipient set.
 
+
+---
+
+## Job-Ready Concepts
+
+### Security Interview Essentials
+
+**Zero Trust principles:** "Never trust, always verify." Traditional perimeter security trusts anything inside the network. Zero trust verifies every request regardless of source — inside or outside the network — using identity, device posture, and minimal-privilege access. Implementation: mTLS between services, short-lived certificates (not long-lived API keys), device posture checks (is the OS patched?), least-privilege RBAC, and session recording for privileged access (Teleport).
+
+**Principle of least privilege (PoLP):** Every user, process, and service gets only the permissions it needs — nothing more. In Kubernetes: ServiceAccounts with narrow Roles, not cluster-admin. In AWS: IAM roles scoped to specific S3 buckets and actions. In Linux: non-root containers, no `SYS_ADMIN` unless necessary. Violations are the root cause of most lateral movement after a breach.
+
+**Defence in depth:** Multiple layers of security so that no single failure compromises the entire system. Example stack: WAF (Coraza) → reverse proxy authentication (Authelia) → network segmentation (NetworkPolicy) → container sandboxing (seccomp, AppArmor) → runtime detection (Falco) → SIEM (Wazuh). An attacker who defeats one layer still faces the next.
+
+**OAuth2 flows — which to use when:**
+- **Authorization Code + PKCE** — for web and mobile apps where a user logs in. The current gold standard. PKCE prevents code interception.
+- **Client Credentials** — for machine-to-machine (service-to-service). No user involved. Use for CI/CD tokens and API-to-API calls.
+- **Device Code** — for CLI tools and devices without a browser (headless servers, smart TVs).
+- **Implicit flow** — deprecated. Do not use.
+
+**JWT structure and common mistakes:**
+A JWT has three base64url-encoded parts: `header.payload.signature`. The header declares the algorithm; the payload contains claims (sub, exp, iat, scopes); the signature verifies integrity. Common mistakes: (1) accepting `alg: none` — always reject this; (2) not verifying `exp` — always check expiry; (3) putting sensitive data in the payload — it's encoded, not encrypted (anyone can read it with base64 decode); (4) not rotating signing keys.
+
+**OWASP Top 10 in one line each (for interviews):**
+A01 Broken Access Control: users can access data/actions they shouldn't (IDOR, privilege escalation). A02 Cryptographic Failures: sensitive data exposed due to weak/missing encryption. A03 Injection: user input interpreted as code (SQL, command). A04 Insecure Design: security not considered in architecture. A05 Security Misconfiguration: default credentials, unnecessary services. A06 Vulnerable Components: outdated dependencies with CVEs. A07 Auth Failures: weak passwords, no MFA, session fixation. A08 Software Integrity: unsigned updates, compromised CI/CD pipeline. A09 Logging Failures: breaches go undetected. A10 SSRF: server fetches attacker-controlled URLs.
+
+**Hash functions vs encryption vs encoding:**
+- **Encoding** (base64, hex) — reversible transformation, no key, provides no security — just a format change
+- **Hashing** (SHA-256, bcrypt) — one-way, no key; used for integrity checks and password storage; bcrypt adds a work factor (slow by design)
+- **Symmetric encryption** (AES-256-GCM) — reversible with the same key; fast; used for data at rest
+- **Asymmetric encryption** (RSA, ECDSA) — public key encrypts/verifies, private key decrypts/signs; used for TLS, JWT signing, SSH keys
+
+**Supply chain security basics:** Three vectors to understand: (1) Source — code in your repo (Semgrep SAST, secret scanning). (2) Build — CI pipeline integrity (Tekton Chains SLSA provenance, cosign signing). (3) Dependency — third-party packages and base images (Trivy, Grype, Renovate, Dependency-Track). The 2020 SolarWinds attack and 2021 Log4Shell are canonical examples of each vector.
+
+**Secrets management anti-patterns:**
+- Hardcoded secrets in source code (most common, caught by Semgrep `p/secrets`)
+- Secrets in environment variables that get printed to logs
+- Long-lived API keys that never rotate
+- Sharing credentials across environments (staging DB password = prod DB password)
+- Secrets in Kubernetes manifests committed to Git without encryption (use SOPS + age or Sealed Secrets)
+
+**Vulnerability severity levels (CVSS):** CVSS (Common Vulnerability Scoring System) scores 0–10. Critical 9.0–10.0, High 7.0–8.9, Medium 4.0–6.9, Low 0.1–3.9. For triaging: fix Criticals within 24h, Highs within 7 days. Tools (Trivy, Grype, Nuclei) report these severities. In Defect Dojo you set SLA targets per severity.
+
+---
 ---
 
 ## Caddy Configuration
@@ -2569,7 +2615,11 @@ Store recovery codes separately from the device and separately from the password
 
 ---
 
-## Troubleshooting | Ensure the `/notifications/hub` path is proxied to port `3012` in Caddy |
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Vaultwarden WebSocket not working | Ensure the `/notifications/hub` path is proxied to port `3012` in Caddy |
 | Authelia redirect loop | Verify `session.domain` in Authelia config matches the root domain of your services |
 | Authentik worker not starting | Check that `AUTHENTIK_SECRET_KEY` is set and consistent across `server` and `worker` services |
 | Keycloak `HTTPS required` error | Either enable HTTPS or use `start-dev` mode for local testing only |

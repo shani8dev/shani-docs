@@ -4,11 +4,14 @@ section: Self-Hosting & Servers
 updated: 2026-04-22
 ---
 
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+
+
 # DevOps & Developer Infrastructure
 
-CI/CD, code hosting, container orchestration, HA clusters, IaC, artifact management, and developer tooling — all self-hosted on Shani OS.
+CI/CD, code hosting, container orchestration, HA clusters, IaC, artifact management, and developer tooling — all self-hosted on this system.
 
-> **Install convention on Shani OS:** CLI tools and dev runtimes install via **Nix** (primary) or **Snap** (fallback). GUI apps go via **Flatpak**. Services and servers run as rootless **Podman** containers. The OS root is read-only — never use `sudo apt install` or `sudo dnf install` for user-space tooling. See the [Software Ecosystem guide](https://blog.shani.dev/post/shani-os-software-ecosystem) for the full decision tree.
+> **Install convention:** CLI tools and dev runtimes install via **Nix** (primary) or **Snap** (fallback). GUI apps go via **Flatpak**. Services and servers run as rootless **Podman** containers. On immutable OS distributions the root filesystem is read-only — use Nix, Snap, or Distrobox rather than system package managers for user-space tooling.
 
 ---
 
@@ -34,7 +37,6 @@ CI/CD, code hosting, container orchestration, HA clusters, IaC, artifact managem
 
 **Purpose:** Lightweight self-hosted Git with web UI, issues, wikis, pull requests, and Actions-compatible CI. Forgejo is the community-driven fork with identical CLI/API.
 
-→ Compose setup: [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#gitea--forgejo)
 
 **Common CLI operations:**
 ```bash
@@ -117,7 +119,6 @@ curl -s "$GITEA_URL/api/v1/orgs/cs101-spring-2026/repos?limit=50" \
 
 **Purpose:** Full DevSecOps platform — Git, CI/CD pipelines, container registry, merge requests, issue tracking, package registry, Kubernetes integration, and secrets management. Heavier (~4–8 GB RAM) but includes everything in one container.
 
-→ Compose setup: [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#gitlab-ce)
 
 **First-start and operations:**
 ```bash
@@ -135,7 +136,6 @@ podman exec gitlab cat /etc/gitlab/initial_root_password
 
 **Purpose:** Simple, Gitea/Forgejo-native CI/CD. YAML pipelines live in `.woodpecker.yml` in the repo. Lightweight, fast, Drone-compatible.
 
-→ Compose setup: [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#woodpecker-ci)
 
 ---
 
@@ -143,7 +143,6 @@ podman exec gitlab cat /etc/gitlab/initial_root_password
 
 **Purpose:** Native CI runner for Forgejo using the built-in Actions system. GitHub Actions-compatible YAML syntax. First runner to reach for if you're already on Forgejo.
 
-→ Compose setup: [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#forgejo-actions-runner)
 
 **Example workflow** (`.forgejo/workflows/ci.yml`):
 ```yaml
@@ -162,7 +161,6 @@ jobs:
 
 **Purpose:** Most widely deployed open-source CI/CD server with thousands of plugins. Reach for Jenkins when integrating with an existing enterprise pipeline or when a job description specifically requires it. For greenfield projects, prefer Woodpecker or Forgejo Actions.
 
-→ Compose setup: [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#jenkins-enterprise-cicd)
 
 **Operations after first start:**
 ```bash
@@ -388,7 +386,7 @@ resources:
     type: postgres
 ```
 
-
+---
 
 ### Tekton Pipelines (Kubernetes-Native CI/CD)
 
@@ -482,7 +480,7 @@ class MyPipeline:
 
 **Purpose:** GitHub's native CI/CD system. Workflows are YAML files in `.github/workflows/` that trigger on push, pull request, schedule, or manual dispatch. Actions are the most-requested CI/CD system in DevOps job descriptions — understanding workflow syntax, reusable workflows, environments, secrets management, and caching is essential for any platform engineering role.
 
-> **Shani OS note:** `act` (below) runs GitHub Actions workflows locally using Podman. For self-hosted runners, see the [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools).
+> **Note:** `act` (below) runs GitHub Actions workflows locally using Podman. For self-hosted runners, see the [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools).
 
 **Workflow structure and triggers:**
 ```yaml
@@ -801,7 +799,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 ```
 
-**Self-hosted runner on Shani OS (route CI jobs to your own machine):**
+**Self-hosted runner on this system (route CI jobs to your own machine):**
 ```yaml
 # ~/github-runner/compose.yaml
 services:
@@ -853,7 +851,6 @@ act -n
 
 **Purpose:** Automated dependency update PRs — outdated container image tags, npm/pip/cargo packages, Actions versions. Works natively with Gitea and Forgejo.
 
-→ Compose setup: [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#renovate-bot)
 
 **Schedule with a systemd timer:**
 ```bash
@@ -897,7 +894,6 @@ systemctl --user enable --now renovate.timer
 
 **Purpose:** Static analysis for code quality and security — bugs, code smells, and OWASP/CWE vulnerabilities across 30+ languages. Integrates with Gitea, Forgejo, and GitLab CI as a PR quality gate.
 
-→ Compose setup: [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#sonarqube-code-quality--security)
 
 > Requires `vm.max_map_count=524288` and `fs.file-max=131072` on the host. Set persistently:
 > ```bash
@@ -913,7 +909,6 @@ systemctl --user enable --now renovate.timer
 
 **Purpose:** Store and serve your own OCI images for CI/CD pipelines.
 
-→ Compose setup: [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#private-container-registry)
 
 ```bash
 # Tag and push
@@ -929,7 +924,6 @@ Add `unqualified-search-registries = ["localhost:5000"]` to `/etc/containers/reg
 
 **Purpose:** Cloud-native registry with RBAC, Trivy vulnerability scanning, image signing, replication, and a web UI.
 
-→ Compose setup: [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#harbor-enterprise-container-registry)
 
 ```bash
 # Push images
@@ -1005,7 +999,6 @@ skopeo sync --src docker --dest dir nginx:alpine /tmp/mirror/
 
 **Purpose:** SMTP catch-all for development. All outgoing emails from your apps land in Mailpit's web UI — nothing is actually delivered.
 
-→ Compose setup: [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#mailpit-email-testing)
 
 ---
 
@@ -1022,7 +1015,7 @@ skopeo sync --src docker --dest dir nginx:alpine /tmp/mirror/
 | **k3s** | Single-node homelabs, edge | 512 MB | curl installer | Batteries-included, easiest to start |
 | **k0s** | Minimal, air-gapped | 1 GB | curl installer | Single binary, no external deps |
 | **MicroK8s** | Quick local cluster, addons | 2 GB | **Snap** | Canonical-maintained; DNS, ingress, registry as addons |
-| **minikube** | Local dev, driver choice | 2 GB | Nix or **Snap** | Runs via Podman driver on Shani OS |
+| **minikube** | Local dev, driver choice | 2 GB | Nix or **Snap** | Runs via Podman driver on this system |
 | **kind** | Lightweight dev/CI | 2 GB | Nix | Runs K8s inside Podman containers |
 | **RKE2** | Hardened, production | 4 GB | curl installer | CIS-benchmarked, STIG-ready |
 | **Talos** | Immutable infra, GitOps | 2 GB | talosctl | API-only, no SSH, extremely secure |
@@ -1068,7 +1061,7 @@ k9s --context k3s-homelab      # target a context
 ### Lens / OpenLens — Desktop Cluster IDE
 
 ```bash
-# Install via Flatpak (preferred on Shani OS)
+# Install via Flatpak (preferred on this system)
 flatpak install flathub dev.k8slens.OpenLens
 ```
 
@@ -1358,8 +1351,8 @@ tflint --recursive --format=compact
 
 # Checkov: security scan (fails on critical findings)
 checkov -d terraform/ \
-  --check CKV_K8S_8,CKV_K8S_9,CKV_K8S_14,CKV_K8S_35 \  # specific k8s checks
-  --soft-fail-on MEDIUM \                                  # warn on medium, fail on high/critical
+  --check CKV_K8S_8,CKV_K8S_9,CKV_K8S_14,CKV_K8S_35 \
+  --soft-fail-on MEDIUM \
   -o cli
 
 # Common checks relevant to Kubernetes Terraform:
@@ -1714,7 +1707,7 @@ PACKER_LOG=1 packer build myimage.pkr.hcl   # debug mode
 
 **Purpose:** Command-line interfaces for managing cloud resources directly — provisioning VMs, managing object storage, configuring DNS, pulling logs, and scripting infrastructure tasks. On Shani OS all CLIs install via Nix; none require a system-level package manager.
 
-> **Homelab + cloud hybrid:** The most common Shani OS pattern is running core services on-prem and using a VPS (Hetzner, DigitalOcean, Vultr) for public-facing ingress, offsite backups, or a WireGuard exit node. Hetzner Cloud is the primary cloud provider referenced throughout these docs — best price/performance ratio in Europe with a clean API.
+> **Homelab + cloud hybrid:** The most common this system pattern is running core services on-prem and using a VPS (Hetzner, DigitalOcean, Vultr) for public-facing ingress, offsite backups, or a WireGuard exit node. Hetzner Cloud is the primary cloud provider referenced throughout these docs — best price/performance ratio in Europe with a clean API.
 
 **Hetzner Cloud CLI (`hcloud`) — primary:**
 ```bash
@@ -1971,7 +1964,7 @@ cloud-init schema --config-file ~/cloud-init/base-server.yaml
 
 ### Chef / Puppet
 
-> **Shani OS note:** Chef and Puppet use persistent agents installed on managed hosts — incompatible with Shani OS's immutable, read-only root. Use **Ansible** (agentless, SSH + Python) for configuration management on Shani OS. Chef/Puppet are listed here for awareness when working in enterprise environments that already use them; on Shani OS, Ansible with AWX is the supported path.
+> **Note:** Chef and Puppet use persistent agents installed on managed hosts — incompatible with Shani OS's immutable, read-only root. Use **Ansible** (agentless, SSH + Python) for configuration management on this system. Chef/Puppet are listed here for awareness when working in enterprise environments that already use them; on this system, Ansible with AWX is the supported path.
 
 ---
 
@@ -1981,7 +1974,6 @@ cloud-init schema --config-file ~/cloud-init/base-server.yaml
 
 **Purpose:** Universal artifact repository — Maven, npm, PyPI, Docker, Helm, Go, Gradle, and generic binaries. The self-hosted alternative to GitHub Packages.
 
-→ Compose setup: [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#jfrog-artifactory-oss-universal-artifact-repository)
 
 ```bash
 # Push a Docker image
@@ -1999,7 +1991,6 @@ curl -u admin:password -T ./myapp.tar.gz \
 
 **Purpose:** Self-hosted artifact repository for Maven, npm, PyPI, Docker, Helm, NuGet, and RubyGems. Primarily used as a **proxy/cache** — pull from Maven Central or npm Registry through Nexus, reducing external bandwidth. Most common in Java-heavy enterprise shops.
 
-→ Compose setup: [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#nexus-repository-oss-maven-npm-pypi-docker-proxy)
 
 ```bash
 # Configure npm to proxy through Nexus
@@ -2020,7 +2011,6 @@ podman push localhost:8092/myapp:latest
 
 **Purpose:** Service discovery, health checking, key-value store, and service mesh. Used in HashiCorp stack shops (Consul + Nomad + OpenBao).
 
-→ Compose setup: [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#consul-service-discovery--service-mesh)
 
 ```bash
 # Install Consul CLI — Nix
@@ -2039,7 +2029,6 @@ dig @127.0.0.1 -p 8600 myapp.service.consul
 
 **Purpose:** HashiCorp's flexible orchestrator — runs containers (Podman/Docker), VMs, Java JARs, raw binaries, and batch jobs. Simpler than Kubernetes for shops using the full HashiCorp stack.
 
-→ Compose setup: [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#nomad-workload-orchestrator)
 
 ```bash
 # Install Nomad CLI — Nix
@@ -2088,7 +2077,6 @@ job "nginx" {
 
 **Purpose:** VS Code running in the browser with full terminal, extensions, and language support. Accessible from any device on your tailnet.
 
-→ Compose setup: [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#code-server)
 
 ---
 
@@ -2096,7 +2084,6 @@ job "nginx" {
 
 **Purpose:** Self-hosted cloud development environments. Each developer gets an isolated, pre-configured container workspace reproducible from a Git repo.
 
-→ Compose setup: [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#gitpod--coder-cloud-development-environments)
 
 ---
 
@@ -2104,7 +2091,6 @@ job "nginx" {
 
 **Purpose:** Self-hosted alternative to n8n and Retool for code-heavy automations. Write scripts in Python, TypeScript, Bash, or Go; compose them into DAG workflows; build internal apps.
 
-→ Compose setup: [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#windmill-workflow--script-automation)
 
 ---
 
@@ -2112,7 +2098,6 @@ job "nginx" {
 
 **Purpose:** Self-hosted Google Analytics replacement. Tracks pageviews, sessions, funnels, heatmaps, and e-commerce. GDPR-compliant by default.
 
-→ Compose setup: [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#matomo-web-analytics)
 
 ---
 
@@ -2233,7 +2218,6 @@ umami.home.local { tls internal; reverse_proxy localhost:3005 }
 
 **Purpose:** Spotify's open-source Internal Developer Platform. A single portal for discovering services, APIs, documentation, pipelines, and runbooks. Common in Platform Engineer and DevEx job descriptions. Integrates with Gitea/Forgejo, Kubernetes, ArgoCD, Grafana, and hundreds of plugins.
 
-→ Compose setup: [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#backstage-internal-developer-portal)
 
 > Backstage is most valuable once you have 5+ services. Start small — register services with `catalog-info.yaml` files in their repos, then add plugins incrementally.
 
@@ -2345,7 +2329,6 @@ podman restart grafana
 
 **Purpose:** Exposes your operating system as a relational database — you query running processes, network connections, installed packages, file integrity, users, cron jobs, kernel modules, and hardware as SQL tables. Use it for host-based intrusion detection, compliance checking, and forensics. Integrates with Wazuh, Fleet, and Grafana for continuous monitoring.
 
-→ Full setup + SQL query library + Fleet compose: [Security wiki](https://docs.shani.dev/doc/servers/security#osquery-host-security-monitoring--query-language)
 
 ```bash
 # Install osquery on the host via Nix (not containerised — needs host kernel access)
@@ -2427,7 +2410,6 @@ nuclei -l targets.txt -s critical,high -silent -j -o nuclei-report.json
 
 **Purpose:** Encrypt secrets stored in YAML, JSON, ENV, and INI files so they can be safely committed to Git. Works with Age keys (recommended) or GPG. The practical complement to Infisical for GitOps workflows — your compose `.env` files and Kubernetes manifests stay in version control but remain encrypted at rest.
 
-→ Full setup, key generation, `.sops.yaml` config, Flux CD integration, Ansible and Terraform workflows, and key rotation: [Security wiki](https://docs.shani.dev/doc/servers/security#sops--age-secrets-encryption-for-git)
 
 **Quick reference:**
 ```bash
@@ -3320,6 +3302,44 @@ Technical explanation of what failed and why.
 | Update runbook with new symptom | @oncall | YYYY-MM-DD |
 ```
 
+
+---
+
+## Job-Ready Concepts
+
+### The DevOps Interview Toolkit
+
+These concepts appear frequently in DevOps, Platform Engineering, and SRE interviews. Each is either tested directly or expected as background knowledge.
+
+**CI/CD Pipeline Stages — what interviewers mean:**
+A production pipeline typically has these gates in order: (1) **Lint/Format** — `tflint`, `black`, `eslint`; (2) **Unit Tests** — fast, no external deps; (3) **Build** — compile or build container image; (4) **SAST** — Semgrep, Checkov; (5) **Integration Tests** — spin up dependencies; (6) **Container Scan** — Trivy; (7) **Push** — tag and push to registry; (8) **Deploy to Staging** — Argo Rollouts canary; (9) **Smoke Tests**; (10) **Promote to Prod** — manual gate or auto on metrics. Being able to draw and explain this flow is expected.
+
+**Idempotency in automation:** An operation is idempotent if running it multiple times produces the same result as running it once. Ansible modules are idempotent — running `apt: name=nginx state=present` 100 times does not install nginx 100 times. Terraform is idempotent — re-applying the same config changes nothing if the state matches. Write all your automation with idempotency in mind: check before act, not act then check.
+
+**Immutable infrastructure:** Rather than patching running servers (mutable), you build a new image with the change applied and replace the running instance. Container-based workloads are inherently immutable — you don't patch a running container, you rebuild the image and redeploy. Shani OS is an immutable OS for the same reason: updates replace the root filesystem atomically.
+
+**GitOps vs traditional CD:** Traditional CD has the pipeline push changes to the cluster (`kubectl apply` from CI). GitOps inverts this — a reconciler inside the cluster (ArgoCD, Flux) watches a Git repo and *pulls* the desired state. Benefits: every change is a Git commit (full audit trail), the cluster can self-heal by re-syncing, and the pipeline never needs cluster credentials.
+
+**Trunk-based development vs feature branches:** Trunk-based development has everyone committing directly to `main` (or short-lived branches that merge in hours, not weeks). Feature flags gate incomplete work rather than long-lived branches. This reduces merge conflicts and keeps CI fast. Most high-performing teams (per DORA research) practice trunk-based development.
+
+**Shift-left security:** Moving security checks earlier in the development lifecycle — ideally before code is committed (pre-commit hooks, IDE plugins) rather than post-deployment. Semgrep in pre-commit is more shift-left than ZAP in staging. The earlier a finding, the cheaper it is to fix.
+
+**Ephemeral environments:** On-demand environments provisioned for a specific PR or feature, then destroyed. Every PR gets its own isolated test environment with a URL like `pr-123.staging.example.com`. Enables parallel testing with no environment contention. Typically provisioned via Kubernetes namespaces + Argo Rollouts or Helm + preview URLs from Ingress.
+
+**Blue/Green vs Canary vs Rolling — when to use each:**
+- **Rolling update** (Kubernetes default): replace pods one at a time. Zero downtime but brief period with mixed versions. Good for stateless workloads, low risk.
+- **Blue/Green**: maintain two identical environments, flip traffic instantly. Expensive (2× resources) but instant rollback. Good for scheduled maintenance windows or database migrations.
+- **Canary**: route 5–10% of traffic to new version, watch metrics, then promote. Best for high-traffic services where you want to catch regressions with real traffic before a full rollout.
+
+**Service mesh concepts (Istio/Linkerd):** A service mesh adds a sidecar proxy (Envoy for Istio, a lightweight proxy for Linkerd) to every pod. The sidecar intercepts all in/out traffic, enabling: mTLS between services without app code changes, traffic shifting (canary), circuit breaking, retries, and distributed tracing. The control plane (Istiod) pushes policy to all sidecars. This is separate from Cilium, which does similar things at the eBPF kernel level without sidecars.
+
+**On-call rotation essentials:** DORA's Time to Restore (MTTR) metric is directly tied to how well on-call is set up. The key components are: (1) alerting with high signal-to-noise (no alert fatigue — every page must be actionable), (2) runbooks linked from alerts, (3) a defined escalation chain, (4) postmortems after every incident. Grafana OnCall handles scheduling and escalation; your Prometheus alerts are the input.
+
+**Rollback vs roll-forward:** Rolling back means deploying the previous known-good version. Roll-forward means quickly patching the broken version and deploying again. For stateless services, rollback is easier — `kubectl argo rollouts undo` or `kubectl rollout undo`. For services with database migrations, rollback may be impossible if the migration isn't reversible — which is why forward-compatible migrations (add column, then backfill, then make non-null) are a standard practice.
+
+**Environment parity:** Dev, staging, and prod should be as similar as possible in config, dependencies, and infrastructure shape. Differences cause "works on staging" bugs. Using the same Helm chart with different `values.yaml` per environment (or Kustomize overlays) is the standard approach to maintaining parity while allowing necessary differences (replica count, resource limits, domain names).
+
+---
 ---
 
 ## Caddy Configuration

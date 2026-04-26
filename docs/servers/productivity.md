@@ -4,6 +4,9 @@ section: Self-Hosting & Servers
 updated: 2026-04-22
 ---
 
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+
+
 # Productivity & Files
 
 Self-hosted cloud storage, file sync, document management, task management, knowledge bases, and personal finance tools.
@@ -1737,13 +1740,6 @@ taiga.home.local {
 
 ---
 
-## Contents
-- [[Home]]
-- [[Architecture]]
-- [[API Reference]]
-- [[Deployment Runbook]]
-```
-
 **Cross-repository wiki as a standalone CMS:**
 
 For a shared knowledge base that isn't tied to a specific repo, create a dedicated repository called `wiki` or `docs` and use its built-in wiki:
@@ -1840,6 +1836,24 @@ wiki.home.local { tls internal; reverse_proxy localhost:3800 }
 
 > **Docmost vs Outline:** Docmost requires fewer dependencies (no MinIO/S3 for storage — files go to the local volume), has no mandatory SSO requirement, and is faster to get running. Outline has a more mature ecosystem and stronger integrations. For a solo or small-team homelab wiki, Docmost is the easier starting point.
 
+
+---
+
+## Job-Ready Concepts
+
+### Productivity Tools & Platform Engineering Interview Essentials
+
+**Internal Developer Platforms (IDPs) — what they solve:** Without an IDP, every developer needs to know: how to provision infrastructure (Terraform), how to set up CI/CD (Woodpecker/GitHub Actions), how to configure observability (Prometheus + Grafana), how to manage secrets (OpenBao), and how to deploy (Helm + ArgoCD). An IDP (Backstage, Port) wraps all of this in a self-service UI with golden path templates. A developer fills in a form and gets a GitHub repo, CI pipeline, Kubernetes namespace, database, and Grafana dashboard — all wired together. This is what "platform engineering" means in practice.
+
+**Document-as-code vs knowledge wiki:** "Docs-as-code" treats documentation like source code — Markdown files in Git, reviewed via PRs, versioned alongside the code they describe, rendered by a static site generator (Docusaurus). This contrasts with wikis (Confluence, BookStack) where docs live in a database, aren't version-controlled with code, and aren't part of the review process. Best practice: API docs and runbooks live in the code repo; architectural decision records (ADRs) also live in Git; long-form internal knowledge in a wiki.
+
+**Architecture Decision Records (ADRs):** Lightweight documents that capture the context, decision, and consequences of a significant technical decision. Stored in `docs/adr/` in the repo. Format: (1) Status (proposed/accepted/deprecated/superseded), (2) Context (what problem, what constraints), (3) Decision (what was chosen), (4) Consequences (trade-offs). ADRs let future engineers understand *why* a decision was made, not just *what* was decided. Essential for remote teams and long-lived systems.
+
+**Webhook-driven automation patterns:** A webhook is an HTTP POST that an event source sends to a configured URL when something happens. Gitea sends a webhook on push → Woodpecker CI starts a pipeline. GitHub sends a webhook on PR merge → n8n workflow updates a Jira ticket. Webhooks are stateless and fire-and-forget — the source doesn't wait for the receiver. For reliability, the receiver should acknowledge immediately (HTTP 200) and process asynchronously. Webhook security: always verify the HMAC-SHA256 signature in the `X-Gitea-Signature` or `X-Hub-Signature-256` header.
+
+**S3-compatible storage in the modern stack:** Understanding the S3 API is a core DevOps skill because it's used by: Velero (Kubernetes backups), Restic/Kopia (file backups), Thanos (Prometheus long-term storage), Loki (log storage), MLflow (model artifacts), and dozens of other tools. The key operations: PutObject, GetObject, DeleteObject, ListObjectsV2. Presigned URLs (time-limited, signature-authenticated URLs for direct client access) come up in interview questions about secure file sharing.
+
+---
 ---
 
 ## Caddy Configuration
@@ -1881,8 +1895,6 @@ wiki.home.local      { tls internal; reverse_proxy localhost:3800 }
 
 ---
 
----
-
 ## The S3 API: A Core Cloud Skill
 
 Several tools in this wiki (MinIO in backups-sync.md, Garage, Cloudflare R2) implement the **S3-compatible API** — originally Amazon S3's interface but now a de facto standard for object storage. Understanding this API is valuable independent of which storage backend you use.
@@ -1917,6 +1929,8 @@ Understanding the S3 API is useful because it's the interface Restic, Rclone, Ko
 ---
 
 ## Troubleshooting
+
+| Issue | Solution |
 |-------|----------|
 | Nextcloud showing `Untrusted domain` | Add your domain to `NEXTCLOUD_TRUSTED_DOMAINS` env var or `config.php` `trusted_domains` array |
 | Nextcloud file sync very slow | Ensure background cron jobs are running (`php cron.php` every 5 minutes via systemd timer) |

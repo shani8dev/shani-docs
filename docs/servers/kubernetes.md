@@ -4,13 +4,16 @@ section: Self-Hosting & Servers
 updated: 2026-04-22
 ---
 
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+
+
 # Kubernetes & Container Orchestration
 
-Lightweight and production-grade Kubernetes distributions, cluster management, GitOps, ingress, storage, and observability — all self-hosted on Shani OS.
+Lightweight and production-grade Kubernetes distributions, cluster management, GitOps, ingress, storage, and observability — all self-hosted on this system.
 
 > ⚠️ **Prerequisites**: Kubernetes requires `vm.max_map_count=524288` and sufficient RAM (2 GB minimum per node, 4 GB+ recommended). Some distributions need `br_netfilter` and IP forwarding enabled. CLI tools (`kubectl`, `helm`, `k9s`, etc.) install via **Nix** (primary) or **Snap** as a fallback — see the install one-liner in the disk layout section below. k3s and MicroK8s bundle their own `kubectl` — you only need a separate install for standalone or remote-cluster access.
 
-> **Shani OS install note:** `/usr/local` is part of the read-only OS root. The curl-based installers for k3s, k0s, and RKE2 default to writing their binaries there. All three support an environment variable to redirect the binary to `~/.local/bin` (which lives in `@home` and persists across OS updates) — the install commands below include this already. Add `~/.local/bin` to your `PATH` once in `~/.bashrc`:</p>
+> **Immutable OS note:** On systems with a read-only OS root (`/usr/local` may not be writable), The curl-based installers for k3s, k0s, and RKE2 default to writing their binaries there. All three support an environment variable to redirect the binary to `~/.local/bin` (which lives in `@home` and persists across OS updates) — the install commands below include this already. Add `~/.local/bin` to your `PATH` once in `~/.bashrc`:</p>
 > ```bash
 > echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
 > ```
@@ -24,7 +27,7 @@ Lightweight and production-grade Kubernetes distributions, cluster management, G
 | **k3s** | Single-node homelabs, edge | 512 MB | curl installer (`~/.local/bin`) | Batteries-included, easiest to start |
 | **k0s** | Minimal, air-gapped | 1 GB | curl installer (`~/.local/bin`) | Single binary, no external deps |
 | **MicroK8s** | Quick local cluster, addons | 2 GB | **Snap** | Canonical-maintained; DNS, ingress, registry as addons |
-| **minikube** | Local dev, driver choice | 2 GB | Nix or **Snap** | Runs via Podman driver on Shani OS |
+| **minikube** | Local dev, driver choice | 2 GB | Nix or **Snap** | Runs via Podman driver on this system |
 | **kind** | Lightweight dev/CI | 2 GB | Nix | Runs K8s inside Podman containers |
 | **RKE2** | Hardened, production | 4 GB | curl installer (`~/.local/bin`) | CIS-benchmarked, STIG-ready |
 | **Talos** | Immutable infra, GitOps | 2 GB | talosctl | API-only, no SSH, extremely secure |
@@ -181,7 +184,7 @@ sudo k0s reset
 
 ## MicroK8s (Snap — Addon-Driven Local Cluster)
 
-**Purpose:** Canonical's single-package Kubernetes distribution — installed entirely as a Snap. Ships with a built-in addon system: enable DNS, ingress, a private registry, the dashboard, Prometheus, and more with single commands. The fastest way to get a working cluster with extras on Shani OS without touching the OS root.
+**Purpose:** Canonical's single-package Kubernetes distribution — installed entirely as a Snap. Ships with a built-in addon system: enable DNS, ingress, a private registry, the dashboard, Prometheus, and more with single commands. The fastest way to get a working cluster with extras on this system without touching the OS root.
 
 ```bash
 # Install MicroK8s — Snap only, no Nix equivalent
@@ -230,7 +233,7 @@ microk8s start
 microk8s enable observability
 
 # Push an image to the built-in registry
-# podman-docker shim is pre-installed on Shani OS, but use podman directly:
+# podman-docker shim is pre-installed on this system, but use podman directly:
 podman tag myapp:latest localhost:32000/myapp:latest
 podman push localhost:32000/myapp:latest --tls-verify=false
 
@@ -251,7 +254,7 @@ sudo firewall-cmd --reload
 
 ## minikube (Local Dev — Podman Driver)
 
-**Purpose:** Single-node local Kubernetes for development and testing. Unlike kind (which uses containers), minikube can use multiple drivers — on Shani OS use the **Podman driver** to avoid needing a VM. Install via Nix or Snap.
+**Purpose:** Single-node local Kubernetes for development and testing. Unlike kind (which uses containers), minikube can use multiple drivers — on this system use the **Podman driver** to avoid needing a VM. Install via Nix or Snap.
 
 ```bash
 # Install via Nix (primary)
@@ -1238,7 +1241,7 @@ kubectl apply -f ~/k8s/ingress-example.yaml
 
 **Purpose:** NGINX's implementation of the Kubernetes Gateway API. Unlike ingress-nginx (which uses `Ingress` resources and annotation-heavy config), NGF is built entirely on the Gateway API CRDs — `GatewayClass`, `Gateway`, `HTTPRoute`, `GRPCRoute` — making routing declarative, namespace-scoped, and annotation-free. A single NGF deployment handles external HTTPS (via Caddy), internal gRPC between pods, and cross-namespace routing from one Gateway resource. On Shani OS with k3s, Caddy on the host acts as the TLS terminator and forwards plain HTTP to NGF via a NodePort.
 
-### Architecture on Shani OS
+### Architecture on this system
 
 ```
 Browser / client
@@ -2009,7 +2012,7 @@ podman logs rancher 2>&1 | grep "Bootstrap Password"
 **Purpose:** Desktop Kubernetes IDE with a visual cluster explorer, pod log viewer, resource editor, shell access, Prometheus metrics, and Helm release manager. Works with any cluster kubeconfig.
 
 ```bash
-# Install OpenLens via Flatpak (preferred on Shani OS)
+# Install OpenLens via Flatpak (preferred on this system)
 flatpak install flathub dev.k8slens.OpenLens
 ```
 
@@ -2022,7 +2025,7 @@ After install, add your kubeconfig — Lens auto-detects all contexts in `~/.kub
 **Purpose:** Fast, vim-keybinding terminal UI for navigating Kubernetes resources. Browse pods, deployments, namespaces, logs, events, and exec into containers — all without typing `kubectl` commands.
 
 ```bash
-# Install via Nix (preferred on Shani OS)
+# Install via Nix (preferred on this system)
 nix-env -iA nixpkgs.k9s
 
 # Launch (uses current kubeconfig context)
@@ -2570,6 +2573,78 @@ kubectl rollout history deployment/myapp -n myapp
 kubectl rollout undo deployment/myapp -n myapp  # roll back
 ```
 
+
+---
+
+## Job-Ready Concepts
+
+### Kubernetes Interview Essentials
+
+**Control plane components and what they do:**
+- **kube-apiserver** — the front door; all kubectl commands hit this. It validates, authenticates, and persists objects to etcd.
+- **etcd** — the distributed key-value store where all cluster state lives. Losing etcd without a backup = losing the cluster.
+- **kube-scheduler** — watches for unscheduled pods and assigns them to nodes based on resource requests, taints/tolerations, affinity rules.
+- **kube-controller-manager** — runs the reconciliation loops: Deployment controller, ReplicaSet controller, Node controller, etc.
+- **cloud-controller-manager** — talks to the cloud API to provision LoadBalancers, PersistentVolumes (EBS, GCE PD), etc.
+
+**Node components:**
+- **kubelet** — runs on every node, ensures the containers in a pod are running and healthy.
+- **kube-proxy** — maintains iptables/ipvs rules for Service routing on each node.
+- **Container runtime** — containerd, CRI-O, or Docker (via shim).
+
+**Why requests and limits matter:** `resources.requests` is what the scheduler uses to decide which node can fit the pod. `resources.limits` is enforced at runtime by cgroups — exceed the memory limit and the pod is OOMKilled. A common anti-pattern is setting no requests/limits at all (the scheduler has no information) or setting requests == limits for memory (prevents the kernel from reclaiming unused memory). The golden path: set requests to typical usage, limits to burst ceiling.
+
+**Taints and tolerations:** A taint marks a node as unsuitable for pods that don't explicitly tolerate it. A toleration allows a pod to be scheduled on a tainted node. Example use: taint GPU nodes with `gpu=true:NoSchedule`; only pods that tolerate `gpu=true` get scheduled there. Node affinity (`preferredDuringSchedulingIgnoredDuringExecution`) softly requests nodes with specific labels; `requiredDuringScheduling...` is a hard requirement.
+
+**What happens when you run `kubectl apply`:**
+1. kubectl sends a `PATCH` or `POST` to kube-apiserver
+2. API server authenticates (cert/token), authorises (RBAC), then admits (admission webhooks — Kyverno, OPA)
+3. Object is persisted to etcd
+4. The relevant controller's reconciliation loop detects the change (via informer/watch)
+5. The controller creates/updates child objects (ReplicaSet → Pods)
+6. Scheduler assigns pods to nodes
+7. kubelet on the node creates containers via the container runtime
+
+**Pod lifecycle states:**
+- `Pending` — scheduled but not yet running (pulling image or waiting for node)
+- `Running` — at least one container is running
+- `Succeeded` — all containers exited with code 0 (for Jobs)
+- `Failed` — all containers exited, at least one non-zero
+- `Unknown` — node communication lost
+- `CrashLoopBackOff` — container repeatedly crashes; kubelet backs off exponentially before restarting
+
+**Kubernetes networking model (four rules):**
+1. Every pod gets a unique cluster-routable IP — no port mapping needed between pods
+2. Pods on a node can communicate with all pods on all nodes without NAT
+3. Agents on a node can communicate with all pods on that node
+4. Pods don't know or care about their host IP
+
+**Service types:**
+- `ClusterIP` (default) — accessible only within the cluster
+- `NodePort` — exposes a static port on every node's IP (accessible from outside the cluster at `nodeIP:nodePort`)
+- `LoadBalancer` — provisions a cloud load balancer; in bare-metal clusters use MetalLB
+- `ExternalName` — CNAME to an external DNS name (no proxying)
+- `Headless` (clusterIP: None) — no stable IP, DNS returns pod IPs directly (used by StatefulSets)
+
+**ConfigMap vs Secret:**
+Both key-value stores. ConfigMaps are for non-sensitive configuration. Secrets are base64-encoded (not encrypted by default — use ESO + OpenBao or sealed-secrets for encryption at rest). Secrets can be consumed as environment variables or volume mounts; volume mounts are preferred so the secret can be rotated without restarting the pod.
+
+**What a container restart policy controls:** `Always` (default for Deployments), `OnFailure` (for Jobs — restart only on non-zero exit), `Never` (for batch jobs that should not retry).
+
+**Probes and why they matter:**
+- `livenessProbe` — if this fails, kubelet kills and restarts the container. Use for deadlock detection.
+- `readinessProbe` — if this fails, the pod is removed from Service endpoints. Traffic stops going to it. Use for startup delays and temporary unhealthiness.
+- `startupProbe` — disables liveness/readiness until it succeeds. Use for slow-starting apps to prevent premature liveness kills.
+
+**Kubernetes autoscaling recap:**
+- **HPA** — scales pod replicas based on CPU/memory or custom metrics
+- **VPA** — adjusts pod resource requests/limits (in recommendation mode via Goldilocks)
+- **KEDA** — event-driven scaling including scale-to-zero
+- **Cluster Autoscaler / Karpenter** — adds/removes nodes based on pending pods
+
+**CKA exam tips:** Know `kubectl` imperatives (`kubectl run`, `kubectl create deployment --dry-run=client -o yaml`), pod debugging (`kubectl describe pod`, `kubectl logs`, `kubectl exec`), and how to set up RBAC for a ServiceAccount in one namespace. The exam is all CLI — no GUIs.
+
+---
 ---
 
 ## Caddy Configuration

@@ -4,11 +4,14 @@ section: Self-Hosting & Servers
 updated: 2026-04-25
 ---
 
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+
+
 # OpenStack & Private Cloud
 
-Deploy a full OpenStack cloud on Shani OS — from a minimal all-in-one development setup to a multi-node private cloud with compute, networking, storage, and identity services. All compose files use rootless Podman with `:Z` volume labels on bind mounts. Named volumes omit `:Z` — Podman manages their labels automatically.
+Deploy a full OpenStack cloud on this system — from a minimal all-in-one development setup to a multi-node private cloud with compute, networking, storage, and identity services. All compose files use rootless Podman with `:Z` volume labels on bind mounts. Named volumes omit `:Z` — Podman manages their labels automatically.
 
-> **Install convention on Shani OS:** CLI tools and dev runtimes install via **Nix** (primary) or **Snap** (fallback). GUI apps go via **Flatpak**. Services run as rootless **Podman** containers. The OS root is read-only — never use `sudo apt install` or `sudo dnf install` for user-space tooling. See the [Software Ecosystem guide](https://blog.shani.dev/post/shani-os-software-ecosystem) for the full decision tree.
+> **Install convention:** CLI tools and dev runtimes install via **Nix** (primary) or **Snap** (fallback). GUI apps go via **Flatpak**. Services run as rootless **Podman** containers. On immutable OS distributions the root filesystem is read-only — use Nix, Snap, or Distrobox for user-space tooling.
 
 > ⚠️ **Resource requirements:** OpenStack is a full private cloud stack. Even an all-in-one Devstack node needs at least 8 GB RAM and 50 GB disk. A production multi-node setup needs 16 GB+ per controller node and 8 GB+ per compute node. For lightweight single-node use, [MicroStack](#microstack-snap--all-in-one) is the fastest path.
 
@@ -45,7 +48,7 @@ For a Shani OS homelab, **MicroStack** (learn/experiment) or **Kolla-Ansible** (
 
 ## MicroStack (Snap — All-in-One)
 
-**Purpose:** Canonical's single-Snap OpenStack distribution. Installs Nova (compute), Neutron (networking), Cinder (block storage), Glance (images), Keystone (identity), and Horizon (dashboard) in minutes. The fastest way to get a working OpenStack on Shani OS for learning, development, and homelab use.
+**Purpose:** Canonical's single-Snap OpenStack distribution. Installs Nova (compute), Neutron (networking), Cinder (block storage), Glance (images), Keystone (identity), and Horizon (dashboard) in minutes. The fastest way to get a working OpenStack on this system for learning, development, and homelab use.
 
 ```bash
 # Install MicroStack — Snap only, no Nix equivalent
@@ -231,7 +234,7 @@ sudo journalctl -u devstack@q-svc -f   # Neutron
 
 ## Kolla-Ansible (Production)
 
-**Purpose:** Deploy OpenStack using containerised services managed by Ansible. Kolla packages every OpenStack service as an OCI image; Kolla-Ansible orchestrates deployment, configuration, and upgrades. This is the recommended path for a production-grade multi-node private cloud on Shani OS.
+**Purpose:** Deploy OpenStack using containerised services managed by Ansible. Kolla packages every OpenStack service as an OCI image; Kolla-Ansible orchestrates deployment, configuration, and upgrades. This is the recommended path for a production-grade multi-node private cloud on this system.
 
 > **Architecture:** A typical small deployment has 1–3 controller nodes (Keystone, Nova-API, Neutron-Server, Glance, Cinder, Horizon, RabbitMQ, MariaDB, HAProxy) and 1–N compute nodes (Nova-Compute, Neutron-Agent). All-in-one deployments run everything on a single node.
 
@@ -556,7 +559,7 @@ OpenStack is composed of many loosely coupled services. These are the ones you'l
 
 ## Containerised Supporting Services
 
-Several OpenStack services have popular self-hosted equivalents that integrate directly via standard APIs. Use these on Shani OS alongside or instead of full OpenStack deployments.
+Several OpenStack services have popular self-hosted equivalents that integrate directly via standard APIs. Use these on this system alongside or instead of full OpenStack deployments.
 
 ### MinIO (OpenStack Swift-compatible Object Storage)
 
@@ -673,7 +676,7 @@ podman exec ceph-mon-1 ceph auth get-or-create \
   client.cinder mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=volumes, allow rx pool=images'
 ```
 
-> For a full production Ceph deployment on Shani OS, use **Ceph's own `cephadm` orchestrator** or the [Rook operator](https://rook.io) inside your k3s/RKE2 cluster.
+> For a full production Ceph deployment on this system, use **Ceph's own `cephadm` orchestrator** or the [Rook operator](https://rook.io) inside your k3s/RKE2 cluster.
 
 ---
 
@@ -1053,6 +1056,36 @@ openstack stack update -t ~/heat/webserver.yaml webserver-stack
 openstack stack delete webserver-stack
 ```
 
+
+---
+
+## Job-Ready Concepts
+
+### OpenStack Interview Essentials
+
+**OpenStack vs Kubernetes — what's the difference?** OpenStack manages *virtual machines and infrastructure* (compute, networking, storage, identity). Kubernetes manages *containerised workloads*. They're complementary: many production environments run Kubernetes on top of OpenStack VMs (Magnum does this automatically). In cloud provider terms, OpenStack = the IaaS layer (like AWS EC2/VPC/EBS); Kubernetes = the PaaS layer (like EKS/GKE).
+
+**Nova vs Neutron vs Cinder — the three most commonly asked:**
+- **Nova** (compute): manages VM lifecycle — boot, stop, resize, migrate, snapshot. The core of OpenStack.
+- **Neutron** (network): provides virtual networks, subnets, routers, security groups, floating IPs, and load balancers. More complex than Nova because networking is inherently stateful.
+- **Cinder** (block storage): persistent volumes for VMs, like EBS. Backends include LVM, Ceph RBD, NFS. A volume can be attached to one VM at a time (ReadWriteOnce).
+
+**Keystone's token model:** Keystone is the identity service. Every other OpenStack API requires a Keystone token in the `X-Auth-Token` header. Tokens are short-lived (default 1 hour) and contain the user's project, roles, and service endpoints. The service catalog (which endpoint to call for which service) is embedded in the token response — this is how clients discover Nova, Neutron, etc. without hard-coding URLs.
+
+**Tenant/project isolation:** OpenStack uses *projects* (formerly tenants) as the isolation boundary — quotas, networks, and volumes belong to a project. A user belongs to one or more projects with roles. `admin` role gives full control; `member` role is standard user access; `reader` role is read-only. This maps directly to AWS accounts or Kubernetes namespaces.
+
+**VM migration types:**
+- **Live migration**: move a running VM to another compute node with minimal downtime (seconds). Requires shared storage (Ceph RBD) or block-device live migration.
+- **Cold migration**: stop the VM, move the disk, restart on the new node. More reliable, more downtime.
+- **Evacuation**: force-migrate all VMs from a failed compute node (used when a node dies). Used in HA cluster maintenance.
+
+**Floating IP vs fixed IP:** A fixed IP is the VM's internal address on the tenant network (e.g., `10.0.0.5`). A floating IP is a public IP that can be associated with a VM's port and provides external access. Floating IPs are drawn from an external network pool. This is analogous to AWS Elastic IPs. NAT is used to map floating IP → fixed IP on the router.
+
+**Heat templates vs Terraform:** Heat is OpenStack's native orchestration — HOT (Heat Orchestration Template) format, YAML, declarative. Terraform/OpenTofu can also provision OpenStack resources via the OpenStack provider — and is more portable across clouds. For a pure OpenStack shop, Heat has the advantage of deep integration (auto-scaling groups, wait conditions, resource signals). For multi-cloud, Terraform is better.
+
+**Ceph as the OpenStack storage backbone:** Ceph RBD (RADOS Block Device) is the preferred backend for Cinder volumes, Glance images, and Nova ephemeral disks in production OpenStack. All three services share the same Ceph cluster with separate pools. Benefits: thin provisioning, snapshots, cloning (fast VM spawning from images), no shared storage requirement for live migration (each VM's disk is a Ceph RBD image stored in the cluster, not on the compute node).
+
+---
 ---
 
 ## Caddy Configuration

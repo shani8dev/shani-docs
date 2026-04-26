@@ -4,6 +4,9 @@ section: Self-Hosting & Servers
 updated: 2026-04-21
 ---
 
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+
+
 # Backups & Sync
 
 Reliable, encrypted backup solutions and cloud synchronisation tools.

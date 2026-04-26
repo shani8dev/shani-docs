@@ -4,6 +4,9 @@ section: Self-Hosting & Servers
 updated: 2026-04-22
 ---
 
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+
+
 # Monitoring
 
 System metrics, log aggregation, alerting, uptime tracking, container visibility, and network performance monitoring. All run rootless with bind-mount volumes labelled `:Z`. Named volumes omit `:Z` — Podman manages their labels automatically.
@@ -1276,7 +1279,7 @@ Default login: `Admin` / `zabbix`. Change immediately. Add hosts under Configura
 
 **Install Zabbix agent on monitored hosts:**
 ```bash
-# Option A: Install inside a Distrobox container (recommended on Shani OS)
+# Option A: Install inside a Distrobox container (recommended on this system)
 distrobox create --name zabbix-agent --image fedora:latest
 distrobox enter zabbix-agent -- bash -c "
   sudo dnf install -y zabbix-agent2
@@ -2743,6 +2746,47 @@ Go to Grafana → Dashboards → Import → Dashboard ID **7107** (Netdata Syste
 
 > **When to use which:** Keep Prometheus as your primary datasource for application metrics, SLO calculations, and alert evaluation. Use the Netdata datasource for host-level dashboards where 1-second resolution matters (disk spike analysis, container burst profiling). Both can be combined in a single Grafana dashboard row by row.
 
+
+---
+
+## Job-Ready Concepts
+
+### Observability Interview Essentials
+
+**The three pillars (now four) of observability:**
+- **Metrics** — numeric time-series data (CPU %, request rate, error count). Cheap to store, fast to query. Prometheus + Grafana.
+- **Logs** — structured or unstructured event records. Expensive at scale. Loki (label-indexed streams) or Elasticsearch (fully indexed).
+- **Traces** — records of a request as it flows through multiple services. Shows where latency is introduced. Tempo + OpenTelemetry.
+- **Profiles** (emerging) — continuous CPU/memory profiling of running processes. Parca + eBPF. The "fourth pillar."
+
+**Pull vs push model for metrics:**
+Prometheus uses a *pull* model — it scrapes `/metrics` endpoints on a schedule. This means you know what's being scraped and can see scrape errors in Prometheus itself. *Push* model (Pushgateway, InfluxDB's Telegraf) is used for short-lived jobs. Most interviewers will ask why Prometheus scrapes rather than having apps push to it: better target discovery, single place to detect unreachable targets, less firewall complexity.
+
+**Cardinality and why it matters:** Cardinality is the number of unique label combinations for a metric. `http_requests_total{method="GET", path="/api/users/123"}` where `path` contains user IDs creates millions of unique series. High cardinality is the number-one cause of Prometheus memory exhaustion. Always bound labels to a small, known set of values (`path="/api/users/:id"` not the literal ID).
+
+**Rate vs irate vs increase:**
+- `rate(metric[5m])` — per-second average rate over the last 5 minutes. Smooth, good for dashboards.
+- `irate(metric[5m])` — instantaneous rate based on last two data points. Spiky, good for detecting brief bursts.
+- `increase(metric[5m])` — total increase over the window (rate × duration). Good for "how many errors in the last 5 min".
+
+**Alert fatigue:** The condition where too many noisy/low-priority alerts cause on-call engineers to start ignoring pages. Symptoms: alerts that resolve themselves, alerts that require no action, duplicate alerts for the same underlying cause. Fix: alert only on symptoms (high error rate) not causes (CPU high), use inhibition rules, tune `for:` duration so brief spikes don't fire, use Karma dashboard for triage.
+
+**Multiwindow, multi-burn-rate alerts:** For SLO alerts, a single threshold alert (error rate > 1%) fires too often for minor blips and too slowly for catastrophic failures. The recommended pattern from the Google SRE book uses two windows: a fast window (e.g., 1h) catches rapid burns, a slow window (e.g., 6h) catches slow burns. Pyrra generates these automatically from SLO definitions.
+
+**OpenTelemetry SDK instrumentation:** Auto-instrumentation (via agents) adds traces and metrics to your app with zero code changes for common frameworks (Django, Express, Spring). Manual instrumentation wraps specific code sections in spans. The SDK exports to an OTel Collector, which fans out to Tempo (traces), Prometheus (metrics), and Loki (logs) — one SDK call, multiple backends.
+
+**Log levels and when to use them:**
+- `DEBUG` — verbose, only in dev; never leave on in production
+- `INFO` — normal operation events ("started", "processed 100 items")
+- `WARN` — recoverable unexpected condition that deserves attention
+- `ERROR` — operation failed; action required
+- `FATAL/CRITICAL` — service cannot continue; immediate page
+
+**Structured logging (JSON) vs unstructured:** Structured logs (`{"level":"error","msg":"DB timeout","user_id":42,"latency_ms":5000}`) are parseable by Loki, Graylog, and other tools without Grok patterns. Unstructured logs (`ERROR: DB timeout for user 42 after 5000ms`) require regex extraction, which is brittle. Always use structured logging in production services.
+
+**Understanding Grafana variables and templating:** Dashboard variables let one dashboard serve multiple services (`$service`), environments (`$environment`), or time ranges. They're backed by Prometheus label queries. A variable `$namespace` with query `label_values(kube_pod_info, namespace)` gives a dropdown of all Kubernetes namespaces. This is a core Grafana skill for platform teams building shared observability tooling.
+
+---
 ---
 
 ## Caddy Configuration

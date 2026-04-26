@@ -30,6 +30,8 @@ The CAP theorem states that a distributed system can guarantee at most two of th
 
 ---
 
+## MariaDB
+
 **Purpose:** Open-source relational database for web apps, CMS platforms, and legacy software stacks.
 
 ```yaml
@@ -341,6 +343,8 @@ psql -h localhost -p 5432 -U myuser pgbouncer -c "SHOW CLIENTS;"
 
 > Applications connect to PgBouncer on port 5432 exactly as they would connect directly to PostgreSQL — the pooling is completely transparent. Change only the host/port in your connection string.
 
+## Redis
+
 **Purpose:** High-performance in-memory data store used for caching, session management, message brokering, and real-time analytics. Used as a dependency by Nextcloud, Immich, Authentik, and many others.
 
 ```yaml
@@ -462,6 +466,8 @@ redis-server --appendonly yes --save 900 1 --save 300 10 --save 60 10000
 ```
 
 **Trade-off summary:** RDB gives faster restarts and smaller files; AOF gives better durability. For a homelab cache, losing a few seconds of data on crash is usually acceptable — use AOF with `everysec`. For session storage or queues where losing data matters, use `always` or run both.
+
+## Valkey
 
 **Purpose:** The Linux Foundation's open-source fork of Redis, created after the Redis licence change. Drop-in compatible with all Redis clients — just swap the image. Recommended if you want fully open-source Redis semantics under the BSD licence going forward.
 

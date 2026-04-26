@@ -4,6 +4,9 @@ section: Self-Hosting & Servers
 updated: 2026-04-22
 ---
 
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+
+
 # Network & Analytics
 
 DNS filtering, privacy-friendly analytics, search engines, dashboards, latency monitoring, and network utilities.
@@ -1164,7 +1167,7 @@ sudo firewall-cmd --reload
 
 **Purpose:** Full-featured open-source routing suite implementing BGP, OSPF, IS-IS, RIP, PIM, and BFD — the same protocols running on enterprise and ISP routers. On a homelab or small datacenter, FRR is most useful for: advertising your Tailscale/WireGuard subnets into BGP, running BGP between your Shani OS host and a pfSense/OPNsense router, implementing ECMP load-balancing between uplinks, or learning BGP/OSPF for job preparation. FRR runs as a container alongside your network stack — it doesn't require a separate router appliance.
 
-> **Shani OS note:** FRR needs `--network host` and `--cap-add NET_ADMIN,NET_RAW,SYS_ADMIN` to manipulate kernel routing tables. These capabilities are available to rootless Podman containers on Shani OS with `--privileged` or explicit `--cap-add`. The kernel routing changes FRR makes are real — they affect the host's routing table.
+> **Note:** FRR needs `--network host` and `--cap-add NET_ADMIN,NET_RAW,SYS_ADMIN` to manipulate kernel routing tables. These capabilities are available to rootless Podman containers on this system with `--privileged` or explicit `--cap-add`. The kernel routing changes FRR makes are real — they affect the host's routing table.
 
 ```yaml
 # ~/frr/compose.yaml
@@ -1296,6 +1299,49 @@ exit
 
 > **FRR vs a dedicated router VM:** FRR in a container is appropriate for BGP peering, route redistribution, and learning. For a full home router (DHCP, NAT, firewall, PPPoE), use OPNsense or pfSense on a dedicated machine or VM. FRR and OPNsense complement each other — OPNsense handles the internet edge, FRR handles internal routing between segments.
 
+
+---
+
+## Job-Ready Concepts
+
+### Networking Interview Essentials
+
+**OSI model in practice:** Interviewers ask this to test whether you can reason about where a problem is occurring. Useful frames:
+- Layer 3 (Network) problem: `ping` fails, wrong route, IP unreachable
+- Layer 4 (Transport) problem: TCP connection times out or is refused, wrong port, firewall blocking
+- Layer 7 (Application) problem: connection works but HTTP returns wrong status, TLS cert mismatch, wrong Host header
+
+**DNS resolution chain:** Browser checks local cache → OS cache → `/etc/hosts` → configured resolver (Pi-hole, AdGuard) → resolver queries root nameservers → TLD nameserver → authoritative nameserver → response cached at each layer with TTL. `dig +trace` shows the full chain.
+
+**Subnetting mental model:** A `/24` has 256 addresses (254 usable — first is network address, last is broadcast). A `/25` splits a `/24` in half (128 addresses each). Each bit you add to the prefix halves the subnet. Common subnets: `/32` (single host), `/30` (4 addr, 2 usable — point-to-point links), `/29` (8 addr), `/28` (16), `/27` (32), `/26` (64), `/25` (128), `/24` (256), `/16` (65,536).
+
+**NAT types and VPN implications:**
+- Full-cone NAT: any external host can reach the mapped port (rare, easy for VPNs)
+- Symmetric NAT: each outbound connection gets a different external port mapping (common on corporate networks — breaks WireGuard hole-punching, requires TURN relay)
+- Port-restricted cone NAT: most home routers; WireGuard hole-punching works with STUN
+
+**How HTTPS actually works (TLS 1.3 handshake):**
+1. Client sends `ClientHello` with supported cipher suites and a key share
+2. Server responds with `ServerHello`, its certificate, and its key share — in *one round trip* (TLS 1.3 optimisation)
+3. Both sides derive the session key from the key exchange (ECDHE)
+4. Client verifies the server's certificate against trusted CAs
+5. Encrypted application data flows
+
+**Reverse proxy vs forward proxy:** A reverse proxy sits in front of servers — clients talk to the proxy, which forwards to the backend (Caddy, Nginx, Traefik, HAProxy). The client often doesn't know there's a backend at all. A forward proxy sits in front of clients — clients send all traffic to the proxy, which forwards to the internet (Squid, corporate web proxy). VPNs act like forward proxies for encrypted traffic.
+
+**Load balancing algorithms:**
+- **Round robin** — requests distributed equally in turn
+- **Least connections** — new request goes to the backend with fewest active connections (better for varied request lengths)
+- **IP hash / source hash** — same client IP always goes to the same backend (sticky sessions without cookies)
+- **Weighted** — backends have weights; higher-weight servers get more traffic (useful for canary deployments or mixed instance sizes)
+
+**BGP (Border Gateway Protocol) basics for interviews:** BGP is the routing protocol of the internet — it exchanges reachability information between Autonomous Systems (ASes). Each AS has an AS number (ASN). iBGP (interior) routes within one AS; eBGP (exterior) routes between ASes. BGP is a path-vector protocol — it chooses routes based on AS-path length and policy attributes. Relevant in homelab with FRRouting, and in cloud when advertising VPC routes or Tailscale subnets into your network.
+
+**VLAN fundamentals:** A VLAN (Virtual LAN) segments a physical switch into multiple logical networks. Tagged frames (802.1Q) carry a VLAN ID in the Ethernet header. Trunk ports carry multiple VLANs; access ports carry one. Common segmentation: IoT VLAN (isolated), servers VLAN, management VLAN. VLANs don't cross routers without explicit routing or an SVR (Switched Virtual Router) interface.
+
+**MTU and fragmentation:** Maximum Transmission Unit — the largest packet a link will carry. Ethernet's standard MTU is 1500 bytes. VPN tunnels add overhead (WireGuard adds ~32–60 bytes), which reduces the effective inner MTU. Setting the wrong MTU causes silent data corruption or dropped connections for large packets. Fix: set MSS clamping (`--clamp-mss-to-pmtu` in WireGuard/iptables) or discover the path MTU with `ping -M do -s 1400`.
+
+---
 ---
 
 ## Caddy Configuration
@@ -1315,8 +1361,6 @@ pdnsadmin.home.local   { tls internal; reverse_proxy localhost:9191 }
 ipam.home.local        { tls internal; reverse_proxy localhost:8200 }
 ddns.home.local        { tls internal; reverse_proxy localhost:8000 }
 ```
-
----
 
 ---
 
@@ -1457,6 +1501,8 @@ ping $(podman inspect jellyfin --format '{{range .NetworkSettings.Networks}}{{.I
 ---
 
 ## Troubleshooting
+
+| Issue | Solution |
 |-------|----------|
 | Pi-hole not blocking ads on some devices | Verify the device's DNS is pointing at the server IP (not 1.1.1.1 hardcoded); check Pi-hole's query log to confirm queries are reaching it |
 | AdGuard DoT not working | Ensure `853/tcp` is open in firewalld; some clients need the full TLS hostname in the format `tls://server-ip` |

@@ -10,6 +10,22 @@ Multi-node, replicated, and highly available deployments. All compose files use 
 
 ---
 
+## HA Concepts (Industry Context)
+
+These patterns appear across every company that runs production infrastructure. Understanding them is the difference between someone who follows runbooks and someone who can write them.
+
+**Replication vs. clustering:** *Replication* copies data from one node to others (primary → replicas). *Clustering* distributes both data and responsibility across nodes. PostgreSQL streaming replication is replication; Cassandra ring is clustering. Many systems combine both — MongoDB replica sets replicate within each shard, while a sharded cluster distributes across shards.
+
+**Leader election:** When a primary fails, surviving nodes must agree on a new one without split-brain (two nodes both believing they are primary). This requires a consensus algorithm — Raft (etcd, Kafka KRaft) or Paxos variants. The protocol guarantees that only one node can be elected, even under network partition. You don't need to implement this; you need to understand *why* etcd is a dependency for Patroni, and *why* Kafka removed ZooKeeper.
+
+**Fencing (STONITH — Shoot The Other Node In The Head):** In bare-metal HA setups, when a primary node stops responding, the cluster can't be certain whether it crashed or just lost network connectivity. A fencing device (IPMI/BMC, PDU, or cloud API) forcibly powers off or reboots the unresponsive node before promoting a standby — preventing split-brain writes. On cloud and container deployments, fencing is usually handled by the orchestrator (Kubernetes, etcd TTLs, cloud instance termination APIs). Every infrastructure engineer will encounter this concept.
+
+**Replication lag:** Async replicas apply writes with a delay. During normal operation this might be milliseconds; under load it can grow to seconds or minutes. Reads from a replica during lag return stale data. This is the fundamental trade-off behind `readPreference=secondary` (MongoDB), reading from a Postgres standby, and `CONSISTENCY LOCAL_ONE` (Cassandra). Always know your acceptable staleness before sending reads to replicas.
+
+**HAProxy health check model:** HAProxy doesn't connect to the database to check health — it hits a REST endpoint on the HA agent (Patroni port 8008). This is intentional: probing the database port only tells you TCP is open, not whether the node is a writable primary. The agent's REST endpoint knows cluster role and reports it explicitly. This REST-based health check pattern appears across many HA stacks (Consul health checks, Kubernetes liveness/readiness probes, AWS target group health checks).
+
+---
+
 ## Elasticsearch Cluster (3-Node)
 
 **Purpose:** Production ELK cluster with 3 master-eligible/data nodes for quorum-based split-brain prevention. Survives loss of 1 node. Pair with the Logstash and Beats configs in the [Monitoring wiki](https://docs.shani.dev/doc/servers/monitoring).
@@ -156,6 +172,8 @@ A cluster of N nodes requires ⌊N/2⌋ + 1 nodes to agree before making any dec
 **Why Patroni uses etcd:** The leader election process requires a distributed consensus store that is itself fault-tolerant. Patroni nodes race to write a leader lock key in etcd. The node that succeeds becomes primary. The lock has a TTL (time-to-live); if the primary fails to renew it before expiry, etcd expires the key and a new election begins. The health check HAProxy hits (port 8008) is the Patroni REST API, not PostgreSQL directly — HAProxy asks Patroni "are you the primary?" rather than probing the database port.
 
 ---
+
+## OpenSearch Cluster (3-Node)
 
 **Purpose:** Apache 2.0-licensed ELK alternative. Drop-in API compatible with Elasticsearch — any Logstash output, Filebeat, or Metricbeat works without changes. Includes Data Prepper, OpenSearch's native log pipeline (Logstash equivalent).
 
@@ -438,6 +456,8 @@ podman exec kafka1 kafka-consumer-groups \
 ```
 
 ---
+
+## Patroni + etcd + HAProxy (PostgreSQL HA)
 
 **Purpose:** Patroni is the industry-standard PostgreSQL HA solution. It manages automatic failover: if the primary goes down, Patroni promotes a standby to primary within seconds. etcd stores cluster state and is used for distributed leader election.
 

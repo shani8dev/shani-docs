@@ -4,9 +4,12 @@ section: Self-Hosting & Servers
 updated: 2026-04-22
 ---
 
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+
+
 # VPN & Tunnels
 
-All VPN and tunnel solutions on Shani OS can run fully containerised. Rootless containers handle traffic routing but require specific capabilities (`NET_ADMIN`, `NET_RAW`), kernel modules (`tun`), and IP forwarding enabled on the host.
+All VPN and tunnel solutions on this system can run fully containerised. Rootless containers handle traffic routing but require specific capabilities (`NET_ADMIN`, `NET_RAW`), kernel modules (`tun`), and IP forwarding enabled on the host.
 
 ---
 
@@ -161,7 +164,7 @@ On Linux clients, `systemd-resolved` handles split DNS when `DNS=` is set in the
 ### Tailscale (Managed)
 
 ```bash
-# Tailscale is pre-installed on Shani OS — just run:
+# Tailscale is pre-installed on this system — just run:
 sudo tailscale up
 
 # Enable SSH over Tailscale
@@ -445,7 +448,7 @@ Access the dashboard at `https://pangolin.yourdomain.com`, create a site, and co
 
 **VPS firewall:** open `443/tcp` and `51820/udp`
 
-### 2. Newt Agent (on Shani OS)
+### 2. Newt Agent (on this system)
 
 ```yaml
 # ~/newt/compose.yaml
@@ -1109,6 +1112,30 @@ podman run --rm ghcr.io/xtls/xray-core:latest x25519
 sudo firewall-cmd --add-port=443/tcp --permanent && sudo firewall-cmd --reload
 ```
 
+
+---
+
+## Job-Ready Concepts
+
+### VPN & Tunnels Interview Essentials
+
+**WireGuard vs OpenVPN vs IPSec — when interviewers ask:**
+WireGuard: modern (2015), small codebase (~4000 lines), fast, kernel-level, uses fixed modern crypto (ChaCha20, Curve25519). No backward compatibility negotiation — a feature, not a limitation. OpenVPN: mature (2001), large ecosystem, configurable cipher suites, userspace TLS so slower, supports TCP mode (useful when UDP is blocked). IPSec: the enterprise/router standard, complex to configure, built into most OSes natively.
+
+**Mesh VPN topology vs hub-and-spoke:** Traditional VPNs are hub-and-spoke — all client traffic flows through a central VPN server. Mesh VPNs (Tailscale, NetBird, Nebula, ZeroTier) connect every peer directly to every other peer using STUN/TURN for NAT traversal. Advantages: lower latency (direct peer-to-peer), no single point of failure, no bandwidth bottleneck at the hub. Tailscale's control plane manages the key exchange; the data plane is direct WireGuard.
+
+**STUN vs TURN vs ICE:**
+- **STUN** (Session Traversal Utilities for NAT) — tells a client its public IP and port as seen from the internet. Used for hole-punching.
+- **TURN** (Traversal Using Relays around NAT) — a relay that proxies traffic when direct hole-punching fails (symmetric NAT). More expensive (all traffic flows through the relay).
+- **ICE** (Interactive Connectivity Establishment) — the negotiation protocol that tries STUN first, falls back to TURN. Used by WebRTC and mesh VPNs.
+
+**Zero-trust network access (ZTNA) vs VPN:** A traditional VPN grants access to the network — once connected, the user can typically reach everything on the network. ZTNA grants access to specific applications or resources, not the network itself. Firezone and Teleport implement ZTNA: you get access to `postgres.internal:5432` not to the entire `10.0.0.0/8` network. Better for the principle of least privilege.
+
+**Tunnel overhead and MTU:** Every VPN tunnel adds overhead to each packet (headers, encryption padding). WireGuard adds ~60 bytes. This reduces the effective inner MTU below the standard 1500 bytes — if you send a full-size 1500-byte packet through a WireGuard tunnel, the outer packet exceeds the link MTU and gets fragmented or dropped. Solutions: (1) set the WireGuard client MTU to 1420 (`MTU = 1420` in wg0.conf), (2) enable MSS clamping on the server's PostUp iptables rule to automatically tell TCP connections about the reduced MTU.
+
+**Split tunnel security implications:** With a split tunnel (`AllowedIPs = 192.168.1.0/24`), only traffic to the home LAN goes through the VPN — all other internet traffic goes directly from the client's ISP. This means: (1) DNS queries for non-`.home.local` domains don't use your Pi-hole, (2) your ISP can still see your general browsing, (3) a malicious website can't be blocked by your home DNS. A full tunnel (`AllowedIPs = 0.0.0.0/0`) routes everything through home, but adds latency and uses your home bandwidth. Choose based on the use case.
+
+---
 ---
 
 ## Troubleshooting

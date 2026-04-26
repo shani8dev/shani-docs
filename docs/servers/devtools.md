@@ -4,6 +4,9 @@ section: Self-Hosting & Servers
 updated: 2026-04-22
 ---
 
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+
+
 # Developer Tools
 
 Infrastructure, CI/CD, monitoring, code hosting, and development utilities.
@@ -855,8 +858,6 @@ windmill.home.local { tls internal; reverse_proxy localhost:8300 }
 
 ---
 
----
-
 ## Jenkins (Enterprise CI/CD)
 
 **Purpose:** The most widely deployed open-source CI/CD server. Thousands of plugins covering every build tool, cloud provider, test framework, and deployment target. Common in enterprise environments where GitLab CI, Woodpecker, or Forgejo Actions aren't an option. Use Jenkins when you need to integrate with an existing org-wide pipeline or when the job description explicitly requires it.
@@ -1261,6 +1262,32 @@ backstage.home.local { tls internal; reverse_proxy localhost:7007 }
 
 > 💡 Backstage is most valuable once you have 5+ services. Start small — register a few services with `catalog-info.yaml` files in their repos, then add plugins incrementally (ArgoCD, Kubernetes, TechDocs).
 
+
+---
+
+## Job-Ready Concepts
+
+### Developer Tools Interview Essentials
+
+**Git internals that come up in interviews:**
+- Every commit is a snapshot (not a diff), identified by a SHA-1 hash of its content, author, timestamp, and parent commit hash. This is why commits are immutable and content-addressable.
+- `git rebase` replays commits on top of a new base, creating new SHAs. `git merge` creates a merge commit. Neither is universally better — rebase gives a linear history, merge preserves branch topology.
+- `git cherry-pick` applies a single commit's changes to the current branch. Useful for backporting fixes.
+- `git bisect` does a binary search through commit history to find which commit introduced a bug. Requires a `git bisect good` / `git bisect bad` signal — often a test script.
+
+**Code review best practices:** Reviews should be < 400 lines of changed code per PR — larger PRs have significantly lower defect detection rates. The author's job is to make the reviewer's job easy: meaningful PR description, small atomic commits, tests included. The reviewer's job is to focus on correctness, not style (automated formatters handle style). LGTM without reading = the most common code review failure mode.
+
+**Testing pyramid:** Unit tests (many, fast, no I/O) → Integration tests (fewer, slower, hit real dependencies) → End-to-end / UI tests (fewest, slowest, full stack). Inverting the pyramid (many E2E, few unit tests) makes CI slow and brittle. A common interview question: "where do you add coverage?" — start with units for logic, integration for DB queries, E2E only for critical happy paths.
+
+**Static analysis vs dynamic analysis:**
+- Static analysis (Semgrep, ESLint, `mypy`) inspects code without running it. Fast, catches bugs early, zero runtime cost. Can have false positives.
+- Dynamic analysis (ZAP, Valgrind, sanitizers) runs the code and observes behaviour. Catches runtime bugs that static analysis misses (memory corruption, race conditions) but requires execution.
+
+**Container build performance:** Layer caching is the key lever. Layers that change rarely (OS packages, language runtime) go first; layers that change often (application code) go last. Using `--mount=type=cache` in BuildKit (or `podman build --layers`) caches package manager download directories (pip cache, npm cache) across builds, dramatically reducing build times for dependency-heavy projects.
+
+**Inner loop vs outer loop development:** Inner loop = the tight cycle of edit-build-run on your laptop (code-server, hot reload, `tilt up`). Outer loop = the CI pipeline (Woodpecker, Forgejo Actions, GitHub Actions). Fast inner loops require good local tooling (kind, minikube, Tilt, Skaffold) so you're not waiting for CI. The goal: < 1 second feedback for syntax errors, < 10 seconds for unit tests, < 5 minutes for the full CI pipeline.
+
+---
 ---
 
 ## Caddy Configuration
@@ -1423,7 +1450,11 @@ ENTRYPOINT ["/app"]
 
 ---
 
-## Troubleshooting | Confirm client is using `Port 2222` in `~/.ssh/config`; check `gitea` user has write access to the data volume |
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Gitea SSH push fails | Confirm client is using `Port 2222` in `~/.ssh/config`; check `gitea` user has write access to the data volume |
 | Woodpecker agent not picking up jobs | Verify `WOODPECKER_AGENT_SECRET` matches on server and agent; check the agent has access to the Docker/Podman socket |
 | code-server blank after login | Verify `PASSWORD` env var is set; check the port is not in use by another service |
 | Private registry push rejected | Add `{ "insecure-registries": ["localhost:5000"] }` to `/etc/containers/registries.conf`; restart Podman |

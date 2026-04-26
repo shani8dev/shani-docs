@@ -10,6 +10,52 @@ Best practices for running, updating, and maintaining self-hosted containers on 
 
 ---
 
+## Container Concepts (Industry Context)
+
+These concepts apply identically whether you're using Podman on Shani OS, Docker on Ubuntu, or Kubernetes at work. Podman is OCI-compliant and drop-in compatible with Docker — `alias docker=podman` works for the vast majority of workflows.
+
+**OCI (Open Container Initiative):** The open standard that defines what a container image is and how a runtime executes it. Docker, Podman, containerd, and CRI-O all implement OCI. This is why images built with `docker build` run unchanged under Podman and in Kubernetes.
+
+**Rootless vs. rootful containers:** Rootless containers run as your user, not root — a security boundary that limits what a compromised container can do to the host. Shani OS defaults to rootless Podman. In most corporate environments you'll encounter both: rootless for application workloads, rootful for system-level tools (network namespaces, privileged devices).
+
+**Image layers and the build cache:** Container images are layered — each `RUN`, `COPY`, and `ADD` instruction in a Dockerfile creates a new layer. Layers are cached. If your `COPY` instruction comes before a large `apt install`, every code change busts the cache and re-downloads packages. Order matters: stable instructions first, frequently changed ones last.
+
+**Container networking:** By default, containers on the same compose stack share a *bridge network* — they reach each other by service name (e.g. `db`, `redis`). The host reaches them only on published ports. *Host networking* (`network_mode: host`) skips isolation but is occasionally needed for performance-sensitive services. *Overlay networks* (Swarm, Kubernetes) span multiple hosts.
+
+**Secrets management:** Environment variables (`environment:` in compose) are readable by anyone who can run `podman inspect`. For production, use a secrets manager — Docker Swarm secrets, Kubernetes Secrets (ideally with external-secrets-operator + Vault), or Podman secrets (`podman secret create`). Never hardcode credentials in compose files that are committed to Git.
+
+```bash
+# Create a Podman secret
+printf 'mysecretpassword' | podman secret create db_password -
+
+# Reference it in a compose file
+# secrets:
+#   db_password:
+#     external: true
+# services:
+#   db:
+#     secrets: [db_password]
+```
+
+**Resource limits (cgroups):** Without limits, a runaway container can OOM the host. Always set limits on untrusted or production workloads:
+
+```yaml
+services:
+  app:
+    image: myapp:latest
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 128M
+```
+
+This maps to cgroup v2 constraints — the same mechanism Kubernetes `requests`/`limits` uses under the hood.
+
+---
+
 ## Systemd Integration
 
 Containers started with `--restart unless-stopped` restart after crashes but not after a clean reboot if systemd doesn't know about them. The modern approach on Podman 4.4+ is **Quadlet** — drop a `.container` file and systemd picks it up automatically:
@@ -76,7 +122,7 @@ cd ~/jellyfin && podman-compose up -d
 **Run or schedule the update:**
 ```bash
 # Update all labelled containers now
-podman auto-update --all
+podman auto-update
 
 # Dry run to preview what would update
 podman auto-update --dry-run
@@ -85,22 +131,15 @@ podman auto-update --dry-run
 podman auto-update --rollback
 ```
 
-**Set up a weekly systemd timer:**
+**Set up a weekly systemd timer using Podman's built-in service:**
+
+Podman ships `podman-auto-update.service` — just enable the accompanying timer:
+
 ```bash
-cat > ~/.config/systemd/user/podman-auto-update.timer << 'EOF'
-[Unit]
-Description=Weekly Podman Container Update
-
-[Timer]
-OnCalendar=weekly
-Persistent=true
-
-[Install]
-WantedBy=timers.target
-EOF
-
 systemctl --user enable --now podman-auto-update.timer
 ```
+
+> 💡 If the built-in timer is unavailable (older Podman), create one manually targeting the same service rather than running `podman auto-update` directly from `ExecStart` — this preserves rollback support.
 
 ---
 
@@ -128,13 +167,15 @@ services:
   autoheal:
     image: willfarrell/autoheal
     volumes:
-      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro  # ${UID} resolves at shell invocation; run: export UID before podman-compose if it isn't set
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
     environment:
       AUTOHEAL_CONTAINER_LABEL: all
       AUTOHEAL_INTERVAL: 30
       AUTOHEAL_START_PERIOD: 300
     restart: unless-stopped
 ```
+
+> Replace `1000` with your actual UID (`id -u`). Unlike compose stacks, the autoheal container needs a literal path here — `${UID}` is not expanded by the container runtime.
 
 ```bash
 cd ~/autoheal && podman-compose up -d
@@ -173,7 +214,7 @@ services:
       - 127.0.0.1:3001:3000
     volumes:
       - /home/user/homepage/config:/app/config:Z
-      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
     restart: unless-stopped
 ```
 
@@ -202,7 +243,7 @@ services:
     ports:
       - 127.0.0.1:9443:9443
     volumes:
-      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
       - portainer_data:/data
     restart: unless-stopped
 
@@ -230,7 +271,7 @@ services:
     ports:
       - 127.0.0.1:5001:5001
     volumes:
-      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
       - /home/user/stacks:/home/runner/stacks:Z
     environment:
       DOCKGE_STACKS_DIR: /home/runner/stacks
@@ -257,7 +298,7 @@ services:
     ports:
       - 127.0.0.1:8001:8000
     volumes:
-      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
       - /home/user/yacht/config:/config:Z
     restart: unless-stopped
 ```
@@ -282,7 +323,7 @@ services:
     ports:
       - 127.0.0.1:9120:9120
     volumes:
-      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
       - /home/user/komodo/data:/data:Z
     environment:
       KOMODO_HOST: https://komodo.home.local
@@ -313,7 +354,7 @@ services:
     volumes:
       - /home/user/diun/data:/data:Z
       - /home/user/diun/config.yml:/diun.yml:ro,Z
-      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
     environment:
       TZ: Asia/Kolkata
       LOG_LEVEL: info
@@ -376,6 +417,9 @@ Description=Monthly Podman Cleanup
 [Service]
 Type=oneshot
 ExecStart=podman system prune -f
+
+[Install]
+WantedBy=default.target
 EOF
 
 cat > ~/.config/systemd/user/podman-cleanup.timer << 'EOF'
@@ -390,6 +434,7 @@ Persistent=true
 WantedBy=timers.target
 EOF
 
+systemctl --user daemon-reload
 systemctl --user enable --now podman-cleanup.timer
 ```
 
@@ -422,6 +467,12 @@ systemctl --user enable --now podman.socket
 
 # Copy a file from a container to the host
 podman cp jellyfin:/config/config.xml ./jellyfin-config-backup.xml
+
+# Check effective resource limits on a running container
+podman inspect jellyfin | grep -A5 Memory
+
+# Show image layer history (understand what each layer adds)
+podman history jellyfin/jellyfin
 ```
 
 ---
@@ -444,14 +495,13 @@ komodo.home.local     { tls internal; reverse_proxy localhost:9120 }
 |-------|----------|
 | Service doesn't start after reboot | Verify `loginctl enable-linger $USER` was run; check `systemctl --user status <service>` |
 | `podman.sock: no such file` | Enable the Podman socket: `systemctl --user enable --now podman.socket` |
-| Container OOM-killed | Increase host RAM or add a memory limit: `--memory 2g --memory-swap 2g` to cap runaway containers |
+| Container OOM-killed | Add resource limits (`deploy.resources.limits.memory`) or increase host RAM; check `podman inspect` for current limits |
 | Auto-update not pulling new images | Confirm the `io.containers.autoupdate=registry` label is set; run `podman auto-update --dry-run` to verify |
-| Portainer can't connect to Podman | Verify the socket path: use `/run/user/$(id -u)/podman/podman.sock` for rootless containers |
+| Portainer / Komodo / Homepage can't connect to Podman | Use the literal socket path `/run/user/$(id -u)/podman/podman.sock`; verify with `systemctl --user status podman.socket` |
 | Disk full from container images | Run `podman system prune -a`; check `podman system df` for what's using space |
 | Container keeps restarting | Check logs with `podman logs <container>`; look for startup errors or missing environment variables |
 | Autoheal not restarting unhealthy container | Verify the health check command exits with code 1 on failure; check autoheal logs with `podman logs autoheal` |
-| Homepage service offline indicators | The Docker socket must be mounted; check socket path for rootless Podman (`/run/user/$(id -u)/podman/podman.sock`) |
-| Komodo can't deploy stack | Ensure the Podman socket is mounted; verify `KOMODO_HOST` matches the URL you access it from |
 | Komodo servers show offline after update | `KOMODO_PASSKEY` must be identical between core and any periphery agents; a mismatch shows all servers offline with no clear error message |
 | listmonk or Postal broken after auto-update | These apps require a DB migration after image updates — run `./listmonk --upgrade --yes` (listmonk) or `postal initialize` (Postal) before restarting; always back up the database first |
 | Diun not sending notifications | Check the ntfy topic and endpoint in `config.yml`; run `podman logs diun` to verify registry polling is working |
+| `${UID}` not expanding in compose socket path | Run `export UID` before `podman-compose`, or substitute your literal UID (e.g. `1000`) directly in the path |

@@ -4,6 +4,9 @@ section: Self-Hosting & Servers
 updated: 2026-04-22
 ---
 
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+
+
 # Communication
 
 Self-hosted chat, push notifications, VoIP, and team collaboration platforms.
@@ -169,30 +172,23 @@ services:
 cd ~/ntfy && podman-compose up -d
 ```
 
-**Send a notification:**
-```bash
-# Simple message
-curl -d "Backup complete" ntfy.sh/your-topic
-
-# With title, priority and emoji tag
-curl \
-  -H "Title: Home Server Alert" \
-  -H "Priority: high" \
-  -H "Tags: warning" \
-  -d "Disk usage is above 90%" \
-  ntfy.sh/your-topic
-```
-
 **Common operations:**
 ```bash
 # Send a simple notification
-curl -d "Backup complete" ntfy.sh/your-topic
+curl -d "Backup complete" http://localhost:8090/your-topic
 
 # Send to self-hosted instance with priority and title
-curl   -H "Title: Home Server Alert"   -H "Priority: high"   -H "Tags: warning,computer"   -d "Disk usage is above 90%"   http://localhost:8090/your-topic
+curl \
+  -H "Title: Home Server Alert" \
+  -H "Priority: high" \
+  -H "Tags: warning,computer" \
+  -d "Disk usage is above 90%" \
+  http://localhost:8090/your-topic
 
 # Send with attachment
-curl -T screenshot.png   -H "Filename: screenshot.png"   http://localhost:8090/your-topic
+curl -T screenshot.png \
+  -H "Filename: screenshot.png" \
+  http://localhost:8090/your-topic
 
 # Subscribe and watch (long-poll)
 curl -s http://localhost:8090/your-topic/json

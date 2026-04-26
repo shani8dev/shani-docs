@@ -10,25 +10,88 @@ Production-ready email solutions for full data control and privacy.
 
 > ⚠️ **Prerequisite**: Requires static public IP, reverse DNS (PTR), and correct DNS records (MX, SPF, DKIM, DMARC). Residential ISPs often block port 25. Use a VPS or outbound relay if needed.
 
+---
+
+## How Email Actually Works
+
+Understanding the protocol stack is essential for any sysadmin or DevOps role — interviewers expect you to trace a message end-to-end.
+
+**The three server roles:**
+
+| Role | Protocol | Port | What it does |
+|------|----------|------|-------------|
+| MTA (Mail Transfer Agent) | SMTP | 25 | Server-to-server delivery (Postfix, Exim, Stalwart) |
+| MSA (Mail Submission Agent) | SMTP submission | 587 / 465 | Authenticated client → server handoff |
+| MDA (Mail Delivery Agent) | IMAP / POP3 | 143/993, 110/995 | User retrieval from mailbox (Dovecot) |
+
+**Outbound delivery flow:**
+```
+Mail client (MUA)
+  → port 587 STARTTLS  →  Your MSA  (auth required)
+  → port 25 SMTP       →  Recipient's MTA  (DNS MX lookup)
+  → LMTP / maildir     →  Recipient's MDA
+  → port 993 IMAPS     →  Recipient's mail client
+```
+
+**Relay vs. direct delivery:** A *relay* (SendGrid, AWS SES, Mailgun) accepts your mail and delivers it under their IP reputation — useful when your IP is new or blocked. *Direct delivery* sends from your server straight to the recipient's MX — requires a clean IP, correct PTR, and passing SPF/DKIM checks.
+
+**IP warming:** When sending from a new IP, receiving servers rate-limit or reject you until your IP builds a reputation. Start with low volumes, ramp up over weeks, and monitor bounce/spam complaint rates. This is a real operational concern for any newsletter or transactional mail setup.
+
+---
+
 ## Mailcow (Full-Featured)
 **Purpose**: Complete mail suite: Postfix, Dovecot, SOGo, Rspamd, ClamAV, admin UI, and ActiveSync.
 ```yaml
 # Clone: git clone https://github.com/mailcow/mailcow-dockerized
 # Edit mailcow.conf, then run: podman-compose up -d
 ```
-Ports: `25`, `465/587`, `143/993`, `80/443`. Firewall: `sudo firewall-cmd --add-service=smtp --add-service=smtps --add-service=imap --add-service=imaps --add-service=http --add-service=https --permanent && reload`.
+Ports: `25`, `465/587`, `143/993`, `80/443`.
+
+**Firewall:**
+```bash
+sudo firewall-cmd --add-service=smtp --add-service=smtps \
+  --add-service=imap --add-service=imaps \
+  --add-service=http --add-service=https --permanent
+sudo firewall-cmd --reload
+```
 
 ## Mailu (Lightweight & Modular)
 **Purpose**: Modular, Alpine-based stack with Roundcube/SnappyMail, easy to deploy via compose.
 ```yaml
 services:
-  front: { image: ghcr.io/mailu/nginx:2024.06, ports: ["25:25", "465:465", "587:587", "143:143", "993:993", "80:80", "443:443"], volumes: [/home/user/mailu/data:/data:Z, /home/user/mailu/dkim:/dkim:Z, /home/user/mailu/certs:/certs:Z] }
-  admin: { image: ghcr.io/mailu/admin:2024.06, environment: {HOSTNAME: mail.example.com, SECRET_KEY: changeme-replace-with-openssl-rand-hex-32}, volumes: [/home/user/mailu/data:/data:Z], depends_on: [db] }
-  db: { image: postgres:16-alpine, environment: {POSTGRES_USER: mailu, POSTGRES_PASSWORD: secret, POSTGRES_DB: mailu}, volumes: [pg_data:/var/lib/postgresql/data] }
-  imap: { image: ghcr.io/mailu/dovecot:2024.06, volumes: [/home/user/mailu/data:/data:Z] }
-  smtp: { image: ghcr.io/mailu/postfix:2024.06, volumes: [/home/user/mailu/data:/data:Z] }
-  antispam: { image: ghcr.io/mailu/rspamd:2024.06, volumes: [/home/user/mailu/filter:/var/lib/rspamd:Z] }
-volumes: {pg_data: {}}
+  front:
+    image: ghcr.io/mailu/nginx:2024.06
+    ports: ["25:25", "465:465", "587:587", "143:143", "993:993", "80:80", "443:443"]
+    volumes:
+      - /home/user/mailu/data:/data:Z
+      - /home/user/mailu/dkim:/dkim:Z
+      - /home/user/mailu/certs:/certs:Z
+  admin:
+    image: ghcr.io/mailu/admin:2024.06
+    environment:
+      HOSTNAME: mail.example.com
+      SECRET_KEY: changeme-replace-with-openssl-rand-hex-32
+    volumes:
+      - /home/user/mailu/data:/data:Z
+    depends_on: [db]
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: mailu
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: mailu
+    volumes: [pg_data:/var/lib/postgresql/data]
+  imap:
+    image: ghcr.io/mailu/dovecot:2024.06
+    volumes: [/home/user/mailu/data:/data:Z]
+  smtp:
+    image: ghcr.io/mailu/postfix:2024.06
+    volumes: [/home/user/mailu/data:/data:Z]
+  antispam:
+    image: ghcr.io/mailu/rspamd:2024.06
+    volumes: [/home/user/mailu/filter:/var/lib/rspamd:Z]
+volumes:
+  pg_data:
 ```
 
 ## Stalwart Mail Server
@@ -56,7 +119,9 @@ cd ~/stalwart && podman-compose up -d
 
 **Firewall:**
 ```bash
-sudo firewall-cmd --add-service=smtp --add-service=smtps --add-service=imap --add-service=imaps --permanent && sudo firewall-cmd --reload
+sudo firewall-cmd --add-service=smtp --add-service=smtps \
+  --add-service=imap --add-service=imaps --permanent
+sudo firewall-cmd --reload
 ```
 
 **Common operations:**
@@ -83,7 +148,12 @@ podman exec stalwart stalwart-cli queue list
 podman exec stalwart stalwart-cli queue flush
 ```
 
-## DNS & Deliverability Checklist
+---
+
+## DNS & Deliverability
+
+### Record Reference
+
 | Record | Purpose | Example |
 |--------|---------|---------|
 | `MX` | Routes inbound email | `10 mail.example.com.` |
@@ -91,6 +161,70 @@ podman exec stalwart stalwart-cli queue flush
 | `SPF` | Authorizes sending IPs | `v=spf1 mx ip4:203.0.113.50 -all` |
 | `DKIM` | Cryptographic outbound signature | Generated via admin UI |
 | `DMARC` | Policy for failed auth | `v=DMARC1; p=reject; rua=mailto:dmarc@example.com` |
+
+### What these actually do (industry context)
+
+**SPF** lists the IPs permitted to send as your domain. `-all` means hard-reject anything unlisted. Know the difference between `~all` (softfail — delivered but flagged) and `-all` (hardfail — rejected outright). Interviewers ask this.
+
+**DKIM** signs outbound messages with a private key stored on your server. The public key lives in DNS at `selector._domainkey.example.com`. Recipients verify the signature to confirm the message body was not tampered with in transit. DKIM can pass even when SPF fails (e.g. forwarded mail), which is why DMARC *alignment* — not just individual pass/fail — is what actually matters for deliverability.
+
+**DMARC** ties SPF and DKIM together and instructs receivers what to do when *both* fail: `p=none` (monitor only), `p=quarantine` (spam folder), or `p=reject` (drop). The `rua=` tag sends aggregate XML reports to your inbox — parse these to identify misconfigured senders on your domain.
+
+### SMTP debugging (essential sysadmin skill)
+
+Test delivery without a mail client using `swaks`:
+
+```bash
+# Install
+sudo dnf install swaks
+
+# Test submission — port 587, authenticated, STARTTLS
+swaks --to recipient@example.com \
+      --from sender@yourdomain.com \
+      --server mail.yourdomain.com \
+      --port 587 --starttls \
+      --auth LOGIN \
+      --auth-user sender@yourdomain.com \
+      --auth-password changeme
+
+# Test direct MX delivery (simulates another mail server, no auth)
+swaks --to recipient@example.com \
+      --server $(dig +short MX example.com | awk '{print $2}')
+```
+
+Raw SMTP/IMAP session (useful on minimal servers with no tools installed):
+
+```bash
+# Verify SMTP banner and capability list
+telnet mail.example.com 25
+# EHLO yourdomain.com
+# QUIT
+
+# SMTPS handshake check (port 465, implicit TLS)
+openssl s_client -connect mail.example.com:465
+
+# IMAP login test (port 993)
+openssl s_client -connect mail.example.com:993
+# a1 LOGIN user@example.com password
+# a2 LIST "" "*"
+# a3 LOGOUT
+```
+
+### Reading mail logs
+
+The queue ID ties every log line for a single message together. Find it and grep for it:
+
+```bash
+# Follow live
+journalctl -u postfix -f
+
+# Trace one message end-to-end by queue ID
+journalctl -u postfix | grep ABC123DEF456
+```
+
+Key status values: `sent` (delivered), `bounced` (5xx permanent failure — fix DNS or auth), `deferred` (4xx temporary — will retry), `expired` (retry time exceeded, message discarded).
+
+---
 
 ## Backup
 
@@ -275,7 +409,8 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
 
-volumes: {db_data: {}}
+volumes:
+  db_data:
 ```
 
 ```bash
@@ -324,7 +459,9 @@ services:
     volumes: [rabbit_data:/var/lib/rabbitmq]
     restart: unless-stopped
 
-volumes: {db_data: {}, rabbit_data: {}}
+volumes:
+  db_data:
+  rabbit_data:
 ```
 
 ```bash
@@ -354,6 +491,8 @@ Access the web UI at `http://localhost:5000`. Create a mail server, configure DK
 | Postal DKIM not working | Generate keys in the Postal web UI and add the DNS TXT record for the returned selector |
 | Stalwart OOM crash on incoming email | Upgrade to v0.15.5+ — CVE-2026-26312: malformed nested MIME messages cause memory exhaustion on older versions |
 | Stalwart — New Outlook (Store app) IMAP login fails | New Outlook for Windows has known TLS handshake issues with self-hosted IMAP servers; use Outlook Classic (Win32) or Thunderbird instead |
+| Deferred mail piling up | Check queue for 5xx vs 4xx — 5xx means fix DNS/auth now; 4xx means wait and investigate rate limiting or blocklists |
+| Good mail landing in spam | Run through mail-tester.com or MXToolbox; verify PTR resolves correctly, SPF alignment passes, DKIM signature validates, DMARC is not `p=none` |
 
 ---
 
@@ -361,19 +500,37 @@ Access the web UI at `http://localhost:5000`. Create a mail server, configure DK
 
 Web, desktop, mobile, and terminal clients for secure IMAP/SMTP access.
 
-## Roundcube / SnappyMail / SOGo
-**Purpose**: Roundcube is a mature, plugin-rich webmail client. SnappyMail is a modern, lightweight fork. SOGo is a groupware with ActiveSync.
+## Roundcube
+**Purpose**: Mature, plugin-rich webmail client.
 ```yaml
 # ~/roundcube/compose.yaml
 services:
-  roundcube: { image: roundcube/roundcubemail:latest, ports: ["127.0.0.1:8082:80"], environment: {ROUNDCUBE_DEFAULT_HOST: tls://mail.example.com}, depends_on: [db] }
-  db: { image: postgres:16-alpine, environment: {POSTGRES_USER: roundcube, POSTGRES_PASSWORD: secret, POSTGRES_DB: roundcubemail}, volumes: [pg_data:/var/lib/postgresql/data] }
-volumes: {pg_data: {}}
+  roundcube:
+    image: roundcube/roundcubemail:latest
+    ports: ["127.0.0.1:8082:80"]
+    environment:
+      ROUNDCUBE_DEFAULT_HOST: tls://mail.example.com
+    depends_on: [db]
+    restart: unless-stopped
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: roundcube
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: roundcubemail
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+volumes:
+  pg_data:
 ```
 
 ```bash
 cd ~/roundcube && podman-compose up -d
 ```
+
+## SnappyMail & SOGo
+**Purpose**: SnappyMail is a modern lightweight webmail fork. SOGo is a groupware server with CalDAV, CardDAV, and ActiveSync support — they serve different purposes and should be deployed separately.
+
 ```yaml
 # ~/snappymail/compose.yaml
 services:
@@ -384,6 +541,11 @@ services:
     volumes:
       - /home/user/snappymail/data:/var/lib/snappymail:Z
     restart: unless-stopped
+```
+
+```yaml
+# ~/sogo/compose.yaml
+services:
   sogo:
     image: sogo/sogo
     ports:
@@ -396,6 +558,7 @@ services:
 
 ```bash
 cd ~/snappymail && podman-compose up -d
+cd ~/sogo && podman-compose up -d
 ```
 
 ## Thunderbird / KMail / Evolution
@@ -410,8 +573,9 @@ cd ~/snappymail && podman-compose up -d
 - **K-9**: F-Droid or Play Store
 
 ## Configuration & Security Tips
-- Always use IMAPS (`993`) and SMTPS (`465`/`587` with STARTTLS).
-- Disable plaintext auth. Use App Passwords if 2FA is enabled.
-- Enable IMAP IDLE for instant notifications.
-- Train server-side spam filters via "Mark as Spam/Not Spam".
-- Never store plain-text passwords in configs. Use GPG or client-native managers.
+- Always use IMAPS (`993`) and SMTPS (`465`/`587` with STARTTLS). Never allow plaintext on port 143/25 from clients.
+- Disable plaintext auth. Use App Passwords if 2FA is enabled on the account.
+- Enable IMAP IDLE for instant server-push notifications — avoids polling and reduces battery drain on mobile.
+- Train server-side spam filters via "Mark as Spam/Not Spam". Rspamd and SpamAssassin use Bayesian learning; your feedback improves accuracy over time.
+- Never store plain-text passwords in config files. Use GPG or client-native secret managers.
+- Thunderbird has native OpenPGP support since v78 — no Enigmail plugin needed. Use it for sensitive mail end-to-end.
