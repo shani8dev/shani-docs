@@ -1023,72 +1023,272 @@ kubectl exec -it <pod> -- /bin/sh
 
 ## kubeadm (Upstream Reference Install)
 
-**Purpose:** The official upstream Kubernetes installation tool from the Kubernetes project. Every distribution (k3s, k0s, RKE2) is built on top of what kubeadm establishes. It's the most portable way to stand up a production Kubernetes cluster on bare metal or any cloud — no vendor magic, just vanilla upstream Kubernetes.
+**Purpose:** The official Kubernetes installation tool from the Kubernetes project. Every distribution — k3s, k0s, RKE2 — is built on top of what kubeadm establishes. If you want vanilla upstream Kubernetes with no vendor customisation, full control over every component, or you are building for a CKA exam environment, kubeadm is the right path. It also gives you the deepest understanding of how Kubernetes actually works under the hood.
+
+> **When to choose kubeadm over k3s/RKE2:** kubeadm is best when you need exact upstream behaviour, when you are studying for CKA/CKS, or when your organisation requires a specific Kubernetes version without any distribution packaging. For homelab self-hosting, k3s is almost always easier and equally capable. kubeadm requires you to install and manage containerd, the CNI plugin, and the kubelet service manually — steps k3s and RKE2 handle automatically.
+
+##### Prerequisites — kernel modules and sysctl
 
 ```bash
-# On Shani OS, install kubeadm and its dependencies via Nix
-nix-env -iA nixpkgs.kubeadm nixpkgs.kubelet nixpkgs.kubectl
-
 # Enable required kernel modules
 sudo modprobe overlay
 sudo modprobe br_netfilter
+
+# Persist across reboots (in @data via OverlayFS on Shani OS)
 echo "overlay" | sudo tee /etc/modules-load.d/k8s.conf
 echo "br_netfilter" | sudo tee -a /etc/modules-load.d/k8s.conf
 
-# Set sysctl params
+# Required sysctl parameters
 cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-iptables  = 1
 net.bridge.bridge-nf-call-ip6tables = 1
 net.ipv4.ip_forward                 = 1
 EOF
 sudo sysctl --system
+
+# Verify
+lsmod | grep -e overlay -e br_netfilter
+sysctl net.ipv4.ip_forward
 ```
+
+##### Install containerd (container runtime)
+
+kubeadm does not bundle a container runtime — you install containerd separately.
+
+```bash
+# Install containerd via Nix and configure it as a system service
+nix-env -iA nixpkgs.containerd
+
+# Generate default config
+sudo mkdir -p /etc/containerd
+containerd config default | sudo tee /etc/containerd/config.toml
+
+# Enable SystemdCgroup (required for kubeadm clusters)
+sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
+
+# Start containerd
+sudo systemctl enable --now containerd
+
+# Verify
+sudo ctr version
+```
+
+##### Install kubeadm, kubelet, kubectl
+
+```bash
+# Install via Nix (primary)
+nix-env -iA nixpkgs.kubeadm nixpkgs.kubelet nixpkgs.kubectl
+
+# Enable kubelet (it will stay in a crash loop until kubeadm init — this is normal)
+sudo systemctl enable kubelet
+```
+
+---
 
 ##### Initialise the control plane
 
 ```bash
+# Single-control-plane init (most homelab and dev uses)
 sudo kubeadm init \
   --pod-network-cidr=10.244.0.0/16 \
-  --apiserver-advertise-address=<node-ip>
+  --apiserver-advertise-address=<node-ip> \
+  --cri-socket=unix:///run/containerd/containerd.sock
 
-# Set up kubeconfig
+# Set up kubeconfig for your user
 mkdir -p ~/.kube
 sudo cp /etc/kubernetes/admin.conf ~/.kube/config
 sudo chown $USER:$USER ~/.kube/config
+chmod 600 ~/.kube/config
 
-# Install a CNI (Flannel)
-kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
-
-# Get the join command for worker nodes
-kubeadm token create --print-join-command
+# Verify the control plane is running
+kubectl get nodes           # STATUS: NotReady — CNI not yet installed
+kubectl get pods -A         # coredns pods will be Pending — also needs CNI
 ```
 
-##### Join a worker node
+> **Why the node is NotReady after init:** kubelet cannot configure pod networking until a CNI plugin is installed. Install the CNI immediately after init.
+
+##### Install a CNI plugin
+
+Flannel is the simplest. Calico adds NetworkPolicy enforcement. Cilium adds eBPF and Hubble observability.
 
 ```bash
-# Run the join command from the control plane output
+# Option A — Flannel (simplest, no NetworkPolicy support)
+kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+
+# Option B — Calico (NetworkPolicy support, widely used in production)
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/calico.yaml
+
+# Option C — Cilium (eBPF, NetworkPolicy, Hubble observability)
+# See the Cilium section in Platform Engineering for install steps
+
+# After installing the CNI, the node and coredns pods should become Ready within ~60 seconds
+kubectl get nodes -w
+kubectl get pods -A -w
+```
+
+---
+
+##### Get the worker join command
+
+```bash
+# kubeadm prints this at the end of `init` — if you missed it, regenerate it:
+kubeadm token create --print-join-command
+
+# The output looks like:
+# sudo kubeadm join <control-plane-ip>:6443 \
+#   --token <token> \
+#   --discovery-token-ca-cert-hash sha256:<hash>
+```
+
+##### Join worker nodes
+
+Run on each worker node after installing containerd, kubeadm, and kubelet:
+
+```bash
+# Same prerequisites as the control plane (kernel modules, sysctl, containerd, kubelet)
+# Then run the join command:
 sudo kubeadm join <control-plane-ip>:6443 \
   --token <token> \
-  --discovery-token-ca-cert-hash sha256:<hash>
+  --discovery-token-ca-cert-hash sha256:<hash> \
+  --cri-socket=unix:///run/containerd/containerd.sock
+
+# Verify on the control plane
+kubectl get nodes
 ```
+
+---
+
+##### High availability control plane (3 control plane nodes)
+
+For production clusters, run 3 control plane nodes behind a load balancer. kubeadm supports this via the `--control-plane-endpoint` flag pointing to the load balancer IP/hostname.
+
+```bash
+# Init the first control plane node
+sudo kubeadm init \
+  --control-plane-endpoint "lb.home.local:6443" \
+  --upload-certs \
+  --pod-network-cidr=10.244.0.0/16
+
+# The output includes a second join command for additional control plane nodes:
+# sudo kubeadm join lb.home.local:6443 \
+#   --token <token> \
+#   --discovery-token-ca-cert-hash sha256:<hash> \
+#   --control-plane \
+#   --certificate-key <cert-key>
+
+# Run that command on the second and third control plane nodes
+# Then join worker nodes with the standard join command (no --control-plane flag)
+```
+
+---
+
+#### Certificate management
+
+Kubernetes control plane certificates expire after 1 year by default. Manage them proactively.
+
+```bash
+# Check expiry dates for all certs
+kubeadm certs check-expiration
+
+# Renew all certificates (run before expiry — does not require a restart)
+sudo kubeadm certs renew all
+
+# Renew a specific certificate
+sudo kubeadm certs renew apiserver
+sudo kubeadm certs renew scheduler.conf
+sudo kubeadm certs renew controller-manager.conf
+
+# After renewing, restart the control plane components
+sudo systemctl restart kubelet
+# Or kill the static pods (they restart automatically from manifests in /etc/kubernetes/manifests/)
+```
+
+> **Set a reminder:** kubeadm clusters provisioned for homelab use frequently break after exactly one year when certs expire. Add a calendar reminder or a systemd timer to run `kubeadm certs renew all` every 11 months.
+
+---
+
+#### Cluster upgrade
+
+kubeadm manages in-place cluster upgrades. Upgrade one minor version at a time — skipping versions is not supported.
+
+```bash
+# Check what versions are available to upgrade to
+sudo kubeadm upgrade plan
+
+# Upgrade the control plane (run on the control plane node)
+sudo kubeadm upgrade apply v1.31.0
+
+# Upgrade kubelet and kubectl on the control plane node
+# (update the Nix package, then restart)
+nix-env -iA nixpkgs.kubelet nixpkgs.kubectl
+sudo systemctl restart kubelet
+
+# Drain worker nodes one at a time, upgrade kubelet, uncordon
+kubectl drain <worker-node> --ignore-daemonsets --delete-emptydir-data
+# On the worker node:
+nix-env -iA nixpkgs.kubeadm nixpkgs.kubelet
+sudo kubeadm upgrade node
+sudo systemctl restart kubelet
+# Back on the control plane:
+kubectl uncordon <worker-node>
+```
+
+---
 
 #### Common operations
 
 ```bash
-# Check component status
+# Check control plane component health
 kubectl get componentstatuses
-kubeadm certs check-expiration
+kubectl get pods -n kube-system
 
-# Renew certificates (before they expire)
-sudo kubeadm certs renew all
+# View cluster-info
+kubectl cluster-info
 
-# Upgrade the cluster
-sudo kubeadm upgrade plan
-sudo kubeadm upgrade apply v1.30.0
+# Generate a new bootstrap token (for joining additional workers later)
+kubeadm token create
+kubeadm token list
 
-# Reset a node (destructive — removes all cluster state)
+# View the kubeadm config stored in the cluster
+kubectl -n kube-system get configmap kubeadm-config -o yaml
+
+# Reset a node — removes all Kubernetes state (destructive)
+# Run on the node you want to remove from the cluster first (drain it from control plane)
 sudo kubeadm reset
+sudo rm -rf /etc/cni/net.d ~/.kube
+# Then remove it from the cluster on the control plane:
+kubectl delete node <node-name>
 ```
+
+---
+
+#### Caddy — expose the Kubernetes Dashboard
+
+After installing the Kubernetes Dashboard (see its section above), proxy it through Caddy:
+
+```caddyfile
+k8s.home.local {
+  tls internal
+  reverse_proxy localhost:8443 {
+    transport http { tls_insecure_skip_verify }
+  }
+}
+```
+
+---
+
+#### Troubleshooting kubeadm
+
+| Issue | Cause | Fix |
+|-------|-------|-----|
+| `kubeadm init` fails: `[preflight] ... container runtime not running` | containerd is not running or using wrong socket | `sudo systemctl status containerd`; verify `--cri-socket` matches `/run/containerd/containerd.sock` |
+| Node stays `NotReady` after init | CNI not installed | `kubectl apply -f <cni-manifest>` immediately after init |
+| `coredns` pods stuck `Pending` | CNI not installed | Same as above — CoreDNS needs the CNI to schedule |
+| Worker fails to join: `token ... not found` | Bootstrap token expired (24h TTL) | Run `kubeadm token create --print-join-command` again on control plane |
+| `certificate has expired` errors | Annual cert expiry | `sudo kubeadm certs renew all && sudo systemctl restart kubelet` |
+| API server unreachable after upgrade | kubelet not restarted | `sudo systemctl restart kubelet` on the control plane |
+| `Unknown` node status | kubelet cannot reach API server | Check firewall: port 6443 must be open from worker to control plane |
+| `failed to pull image ... sandbox` | containerd misconfigured | Verify `SystemdCgroup = true` in `/etc/containerd/config.toml` |
 
 ---
 
