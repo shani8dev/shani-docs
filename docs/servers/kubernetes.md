@@ -3762,3 +3762,124 @@ Technical explanation of what failed and why.
 
 ---
 
+
+---
+
+## Cluster API (CAPI) — Declarative Cluster Lifecycle Management
+
+**Purpose:** Kubernetes extension for provisioning and managing Kubernetes clusters themselves using Kubernetes-style CRDs. Define a `Cluster` resource and CAPI provisions the control plane and worker nodes on your chosen infrastructure provider (Hetzner, AWS, vSphere, DigitalOcean). Replaces ad-hoc scripts with a declarative, GitOps-compatible cluster lifecycle model.
+
+```bash
+# Install clusterctl CLI
+nix-env -iA nixpkgs.clusterctl
+
+# Initialise CAPI on a management cluster (your k3s homelab cluster)
+clusterctl init --infrastructure hetzner
+
+# Generate a workload cluster manifest
+clusterctl generate cluster my-workload \
+  --kubernetes-version v1.30.0 \
+  --control-plane-machine-count 1 \
+  --worker-machine-count 2 \
+  > my-workload-cluster.yaml
+
+# Apply it
+kubectl apply -f my-workload-cluster.yaml
+
+# Watch cluster provisioning
+clusterctl describe cluster my-workload
+
+# Get kubeconfig for the new cluster
+clusterctl get kubeconfig my-workload > ~/.kube/my-workload.kubeconfig
+```
+
+---
+
+## Headlamp (Kubernetes Web UI)
+
+**Purpose:** Modern, extensible Kubernetes UI that runs in the browser or as a desktop app. Faster and more feature-complete than the official Kubernetes Dashboard, with plugin support, multi-cluster management, RBAC visualisation, and resource editing. A good alternative when k9s's terminal interface isn't appropriate.
+
+```yaml
+# ~/headlamp/compose.yaml
+services:
+  headlamp:
+    image: ghcr.io/headlamp-k8s/headlamp:latest
+    ports:
+      - 127.0.0.1:4466:4466
+    volumes:
+      - ~/.kube:/root/.kube:ro
+    command: -in-cluster=false -kubeconfig /root/.kube/config
+    restart: unless-stopped
+```
+
+```bash
+cd ~/headlamp && podman-compose up -d
+```
+
+**Caddy:**
+```caddyfile
+headlamp.home.local { tls internal; reverse_proxy localhost:4466 }
+```
+
+---
+
+## Kubectl Plugins (krew)
+
+```bash
+# Install krew (kubectl plugin manager) via Nix
+nix-env -iA nixpkgs.krew
+
+# Update plugin index
+kubectl krew update
+
+# Useful plugins for production use
+kubectl krew install ctx         # switch contexts fast: kubectl ctx
+kubectl krew install ns          # switch namespaces: kubectl ns myapp
+kubectl krew install neat        # clean up kubectl get -o yaml output
+kubectl krew install tree        # show resource ownership tree
+kubectl krew install whoami      # show current auth identity
+kubectl krew install node-shell  # shell into a node
+kubectl krew install df-pv       # disk usage of PersistentVolumes
+kubectl krew install images      # list all container images in cluster
+kubectl krew install konfig      # merge/split kubeconfig files
+
+# Common usage
+kubectl ctx k3s-homelab           # switch to k3s context
+kubectl ns monitoring             # switch to monitoring namespace
+kubectl tree deployment myapp     # show deployment → replicaset → pods tree
+kubectl neat get pod myapp-xyz    # clean YAML without managed fields noise
+kubectl df-pv                     # show PV disk usage across cluster
+```
+
+---
+
+## Keptn (Cloud-Native Application Lifecycle Orchestration)
+
+**Purpose:** Automates delivery and operations of cloud-native applications. Keptn provides event-driven orchestration for continuous deployment, SLO-based quality gates, automated remediation, and progressive delivery. Integrates with Argo Rollouts, Prometheus, and Dynatrace/Datadog for automated delivery pipeline control based on real metrics.
+
+```bash
+# Install Keptn CLI
+nix-env -iA nixpkgs.keptn
+
+# Install Keptn on your cluster
+helm repo add keptn https://charts.keptn.sh
+helm install keptn keptn/keptn --namespace keptn --create-namespace \
+  --set=control-plane.apiGatewayNginx.type=ClusterIP
+
+# Check components
+kubectl -n keptn get pods
+```
+
+---
+
+## Troubleshooting (additional)
+
+| Issue | Solution |
+|-------|----------|
+| HPA shows `<unknown>` for CPU target | `resources.requests.cpu` must be set on the container — HPA calculates utilisation as current / requested; without a request, the ratio is undefined |
+| VPA and HPA conflict | Never run VPA and HPA on the same Deployment scaling on the same metric (CPU/memory); use HPA for replicas on custom/external metrics and VPA for right-sizing requests |
+| PDB blocks node drain | `kubectl describe pdb` to check `minAvailable`; temporarily patch `minAvailable: 0` during planned maintenance if safe, then restore |
+| Init container stuck `Init:0/1` | `kubectl logs <pod> -c <init-container-name>` to see init container output; check dependencies it's waiting for |
+| StatefulSet pod stuck `Terminating` | Kubernetes waits for graceful shutdown; if stuck, check for finalizers: `kubectl get pod <pod> -o json | jq .metadata.finalizers` |
+| Headlamp shows no clusters | Ensure the kubeconfig is mounted read-only and the `server:` URL in the kubeconfig is reachable from inside the container |
+

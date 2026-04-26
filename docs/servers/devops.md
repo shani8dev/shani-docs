@@ -1989,3 +1989,119 @@ opencost.home.local   { tls internal; reverse_proxy localhost:9090 }
 | `hcloud server create` returns auth error | Token may have read-only permissions; ensure the API token has read/write scope in Hetzner Cloud Console → Security → API Tokens |
 | cloud-init write_files not appearing | Verify `path` starts with `/` and `permissions` is a quoted string (`'0644'` not `0644`); check `journalctl -u cloud-init` on the VM for parse errors |
 | cloud-init `runcmd` not executing | `runcmd` runs as root; check `/var/log/cloud-init-output.log` on the VM; commands that exit non-zero abort subsequent commands unless wrapped in `|| true` |
+
+---
+
+## Skaffold (Local Kubernetes Dev Loop)
+
+**Purpose:** Watches your source files, rebuilds container images on change, and redeploys to a local Kubernetes cluster (kind, minikube) automatically. Eliminates the manual `podman build → tag → push → kubectl apply` cycle during inner-loop development.
+
+```bash
+# Install via Nix
+nix-env -iA nixpkgs.skaffold
+
+# Initialise a skaffold.yaml in your project
+skaffold init
+
+# Start the dev loop (watches files, rebuilds, redeploys on save)
+skaffold dev
+
+# One-shot build and deploy
+skaffold run
+
+# Tear down everything skaffold deployed
+skaffold delete
+```
+
+##### Minimal `skaffold.yaml`
+
+```yaml
+apiVersion: skaffold/v4beta6
+kind: Config
+build:
+  artifacts:
+    - image: registry.home.local/myapp
+      docker:
+        dockerfile: Containerfile
+deploy:
+  kubectl:
+    manifests:
+      - k8s/*.yaml
+```
+
+---
+
+## Tilt (Fast Multi-Service Dev Workflow)
+
+**Purpose:** Like Skaffold but with a richer UI and a Python-like DSL (`Tiltfile`). Manages multiple services simultaneously — each gets its own build status, log stream, and live-update rules. Best for teams developing microservices locally on Kubernetes.
+
+```bash
+# Install via Nix
+nix-env -iA nixpkgs.tilt
+
+# Start Tilt
+tilt up
+
+# Tear down
+tilt down
+```
+
+##### Minimal `Tiltfile`
+
+```python
+docker_build('registry.home.local/api', './api')
+docker_build('registry.home.local/worker', './worker')
+
+k8s_yaml(['k8s/api.yaml', 'k8s/worker.yaml'])
+
+k8s_resource('api', port_forwards='8080:8080')
+k8s_resource('worker', port_forwards='9000:9000')
+```
+
+---
+
+## Atlantis (Terraform Pull Request Automation)
+
+**Purpose:** Runs `tofu plan` on every PR that touches Terraform files and posts the output as a PR comment. When you comment `atlantis apply`, it runs the apply. Replaces manual CI/CD for IaC — gives teams a reviewable plan before any infrastructure changes.
+
+```yaml
+# ~/atlantis/compose.yaml
+services:
+  atlantis:
+    image: ghcr.io/runatlantis/atlantis:latest
+    ports:
+      - 127.0.0.1:4141:4141
+    environment:
+      ATLANTIS_REPO_ALLOWLIST: "git.home.local/myorg/*"
+      ATLANTIS_GITEA_USER: atlantis-bot
+      ATLANTIS_GITEA_TOKEN: <gitea-personal-access-token>
+      ATLANTIS_GITEA_WEBHOOK_SECRET: changeme
+      ATLANTIS_PORT: 4141
+      ATLANTIS_ATLANTIS_URL: https://atlantis.home.local
+    volumes:
+      - /home/user/atlantis/repos:/atlantis:Z
+    restart: unless-stopped
+```
+
+```bash
+cd ~/atlantis && podman-compose up -d
+```
+
+**Caddy:**
+```caddyfile
+atlantis.home.local { tls internal; reverse_proxy localhost:4141 }
+```
+
+---
+
+## Key Concepts: DevOps Interviews
+
+#### The three ways of DevOps
+From *The Phoenix Project*: (1) **Flow** — make work visible, limit WIP, reduce batch size, and eliminate waste in the delivery pipeline. (2) **Feedback** — amplify feedback loops so problems are caught early and close to their source. (3) **Continual Learning** — build a culture of experimentation, learning from failure, and knowledge sharing. These map directly to DORA metrics: Flow → Deployment Frequency and Lead Time; Feedback → Change Failure Rate and MTTR; Learning → Postmortems.
+
+#### Container image layering and build performance
+Each `RUN`, `COPY`, and `ADD` instruction creates a new image layer. Layers are cached by their content hash — if a layer changes, all subsequent layers are invalidated. Best practice: put rarely changing steps (OS packages, runtime install) near the top; frequently changing steps (application code) near the bottom. Multi-stage builds reduce the final image size by copying only build artefacts — the build tools (gcc, npm) are discarded.
+
+#### GitOps vs push-based CD
+Push-based CD has the pipeline call `kubectl apply` with cluster credentials. GitOps inverts this — ArgoCD or Flux watches the Git repo from inside the cluster and pulls changes. Benefits: Git is the single source of truth (every change is auditable), the cluster can self-heal by re-syncing, and the CI pipeline never needs direct cluster credentials (lower blast radius if CI is compromised).
+

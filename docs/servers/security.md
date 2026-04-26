@@ -2707,3 +2707,250 @@ Store recovery codes separately from the device and separately from the password
 > - Run a ZAP baseline scan before making any service publicly accessible
 > - Start Suricata in IDS (detection-only) mode before switching to IPS (blocking) mode
 > - Run `osquery` on every server and feed results to Wazuh or Loki for centralised host visibility
+
+---
+
+## Caido (Web Security Testing Proxy)
+
+**Purpose:** Modern alternative to Burp Suite Community — HTTP/HTTPS interception proxy with a clean UI, replay, fuzzing, and workflow automation. Written in Rust, significantly faster than Burp for large responses. Free tier is generous for personal/homelab security audits. Use alongside OWASP ZAP (automated scanning) for manual request inspection and testing.
+
+```bash
+# Install Caido via the official installer
+curl -fsSL https://caido.io/install.sh | bash
+
+# Or download the AppImage and run directly
+# https://caido.io/download
+
+# Start Caido (defaults to http://localhost:8080 as proxy, http://localhost:7777 as UI)
+caido
+```
+
+---
+
+## Rekor (Software Transparency Log)
+
+**Purpose:** Sigstore's tamper-evident transparency log for software supply chain artefacts. Every cosign signature, SLSA provenance attestation, and SBOM attachment can be published to Rekor, creating an immutable, auditable record of what was signed and when. Clients verify that a signature appears in the log before trusting it — even if the signing key is compromised later, the time-stamp in Rekor proves when the signature was made.
+
+```yaml
+# ~/rekor/compose.yaml
+services:
+  rekor-server:
+    image: gcr.io/projectsigstore/rekor-server:latest
+    ports:
+      - 127.0.0.1:3000:3000
+    environment:
+      REKOR_TRILLIAN_LOG_SERVER_ADDRESS: trillian-log-server:8090
+      REKOR_ENABLE_RETRIEVE_API: "true"
+    depends_on: [trillian-log-server, trillian-log-signer, mysql]
+    restart: unless-stopped
+
+  trillian-log-server:
+    image: gcr.io/projectsigstore/trillian_log_server:latest
+    environment:
+      MYSQL_ADDR: mysql:3306
+      MYSQL_DB: trillian
+      MYSQL_USER: trillian
+      MYSQL_PASSWORD: changeme
+    depends_on: [mysql]
+    restart: unless-stopped
+
+  trillian-log-signer:
+    image: gcr.io/projectsigstore/trillian_log_signer:latest
+    environment:
+      MYSQL_ADDR: mysql:3306
+      MYSQL_DB: trillian
+      MYSQL_USER: trillian
+      MYSQL_PASSWORD: changeme
+    depends_on: [mysql]
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: trillian
+      MYSQL_USER: trillian
+      MYSQL_PASSWORD: changeme
+    volumes: [mysql_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+```
+
+```bash
+cd ~/rekor && podman-compose up -d
+
+# Sign an image and upload provenance to your local Rekor
+cosign sign --key cosign.key \
+  --rekor-url http://rekor.home.local:3000 \
+  registry.home.local/myapp:v1.2.3
+
+# Verify against your local Rekor
+cosign verify --key cosign.pub \
+  --rekor-url http://rekor.home.local:3000 \
+  registry.home.local/myapp:v1.2.3
+```
+
+**Caddy:**
+```caddyfile
+rekor.home.local { tls internal; reverse_proxy localhost:3000 }
+```
+
+---
+
+## Security Hardening Checklist
+
+A practical checklist for any new self-hosted service before exposing it:
+
+**Network layer:**
+- [ ] Caddy is the only listener on 80/443; service binds to `127.0.0.1` only
+- [ ] `firewalld` drops all inbound except 22, 80, 443 (and any intentional ports)
+- [ ] CrowdSec bouncer is active and watching Caddy logs
+- [ ] Fail2ban is watching Caddy/Authelia for brute-force
+
+**Authentication:**
+- [ ] Default credentials changed (check docs for defaults)
+- [ ] Admin registration disabled after first account created
+- [ ] MFA configured for any admin accounts
+- [ ] Authelia or Authentik placed in front if the app has weak auth
+
+**Secrets:**
+- [ ] No secrets in environment variables that get printed to logs
+- [ ] Compose files with secrets stored in SOPS-encrypted Git
+- [ ] Long-lived API tokens rotated; short-lived tokens used where possible
+
+**Container security:**
+- [ ] Container runs as non-root (check with `podman inspect --format '{{.Config.User}}'`)
+- [ ] No `privileged: true` unless absolutely necessary
+- [ ] Volumes mounted `:Z` for SELinux labelling
+- [ ] No `host.docker.sock` mounted unless the service explicitly needs container access
+
+**Monitoring:**
+- [ ] Service is in Uptime Kuma or Gatus for uptime monitoring
+- [ ] Logs forwarded to Loki or Graylog
+- [ ] Prometheus scraping if service exposes `/metrics`
+- [ ] Alertmanager rule for `service_down`
+
+**Backup:**
+- [ ] Data volume path identified and added to Restic backup config
+- [ ] Backup tested (restore smoke test)
+
+---
+
+## Gitleaks Pre-commit Configuration
+
+Full team configuration for preventing secret leaks across all common secret types:
+
+```toml
+# .gitleaks.toml — place in repo root
+title = "Gitleaks Config"
+
+[[rules]]
+id = "generic-api-key"
+description = "Generic API Key"
+regex = '''(?i)(api[_-]?key|apikey|api[_-]?secret)['":\s=]+['"]{0,1}([a-zA-Z0-9_\-]{20,})'''
+secretGroup = 2
+[rules.allowlist]
+  regexes = ['''EXAMPLE''', '''changeme''', '''placeholder''']
+
+[[rules]]
+id = "aws-access-key-id"
+description = "AWS Access Key ID"
+regex = '''(A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}'''
+
+[[rules]]
+id = "private-key"
+description = "Private key"
+regex = '''-----BEGIN (RSA|DSA|EC|OPENSSH|PGP) PRIVATE KEY'''
+
+[allowlist]
+  paths = [
+    '''.gitleaks.toml''',
+    '''vendor/''',
+    '''node_modules/''',
+    '''*.lock''',
+  ]
+  commits = [
+    # Add SHAs of commits with known false positives that have already been rotated
+  ]
+```
+
+```bash
+# Run gitleaks on entire git history
+gitleaks detect --source . --log-opts="--all"
+
+# Run on staged files only (fast pre-commit check)
+gitleaks protect --staged
+```
+
+---
+
+## Security Incident Response Playbook
+
+A lightweight IR playbook for a self-hosted homelab:
+
+### Detection
+1. Grafana OnCall / ntfy alert fires (Falco rule, Suricata signature, CrowdSec ban, Wazuh alert)
+2. Review the alert — is this a true positive?
+3. Escalate immediately if: shell spawned in container, unexpected outbound connection to external IP, rootkit indicators, mass file encryption (ransomware)
+
+### Containment
+```bash
+# Isolate a suspicious container
+podman stop <container-name>
+
+# Block a suspicious IP immediately
+sudo firewall-cmd --add-rich-rule='rule family=ipv4 source address=1.2.3.4 reject'
+
+# Revoke a compromised API token (example: Gitea)
+curl -X DELETE https://git.home.local/api/v1/user/keys/<key-id> \
+  -H "Authorization: token YOUR_ADMIN_TOKEN"
+
+# Check what processes are making outbound connections
+ss -tnp | grep ESTABLISHED
+osqueryi "SELECT pid, name, remote_address, remote_port FROM process_open_sockets WHERE remote_address NOT IN ('0.0.0.0', '::');"
+```
+
+### Evidence Collection
+```bash
+# Capture container filesystem snapshot before stopping
+podman export <container> > container-snapshot-$(date +%Y%m%d-%H%M).tar
+
+# Save relevant logs
+journalctl --since "2 hours ago" > /tmp/system-logs-$(date +%Y%m%d).txt
+podman logs <container> > /tmp/container-logs-$(date +%Y%m%d).txt
+
+# List all active connections at time of incident
+ss -tnp > /tmp/connections-$(date +%Y%m%d-%H%M).txt
+
+# List all running processes
+ps auxf > /tmp/processes-$(date +%Y%m%d-%H%M).txt
+```
+
+### Recovery
+1. Rotate all secrets the compromised service had access to
+2. Re-provision from a clean backup (verify backup predates compromise)
+3. Patch the exploited vulnerability before bringing service back online
+4. Write a blameless postmortem (template in productivity.md)
+
+---
+
+## Caddy (additional routes)
+
+```caddyfile
+rekor.home.local { tls internal; reverse_proxy localhost:3000 }
+```
+
+---
+
+## Troubleshooting (additional)
+
+| Issue | Solution |
+|-------|----------|
+| cosign sign fails `unauthorized` | Run `podman login registry.home.local` before signing; cosign uses the same credential store as the container runtime |
+| Rekor lookup fails for recent signatures | Rekor has eventual consistency — wait 30s after signing before verifying; check `podman logs rekor-server` for Trillian connection errors |
+| Caido proxy not intercepting HTTPS | Install the Caido CA certificate in your browser and OS trust store; the CA cert is downloadable from the Caido UI |
+| SOPS `mac check failed` after Git merge | Merge conflicts break the encrypted SOPS MAC — restore the file from Git (`git checkout HEAD -- secrets.yaml`) and re-apply your changes via `sops edit` |
+| Gitleaks false positive in CI | Add the SHA to the `allowlist.commits` array in `.gitleaks.toml`; or use an inline `gitleaks:allow` comment on the specific line |
+

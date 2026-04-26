@@ -2004,3 +2004,158 @@ Understanding the S3 API is useful because it's the interface Restic, Rclone, Ko
 | Taiga async tasks not processing | The `taiga-async` worker must be running alongside the backend — verify it shows as running with `podman ps`; check RabbitMQ queue depth at `http://localhost:15672` |
 | Docmost editor not saving | Verify Redis is running — real-time collaboration and caching depend on it; check `podman logs docmost` for Redis connection errors |
 | Docmost storage attachments missing after migration | The `/app/data/storage` volume must be preserved across upgrades; ensure the volume mount path hasn't changed in the compose file |
+
+---
+
+## Notesnook (End-to-End Encrypted Notes)
+
+**Purpose:** Privacy-focused, end-to-end encrypted note-taking app. Unlike Joplin (which requires a separate sync server), Notesnook is a polished all-in-one app — the web/desktop/mobile clients sync via the Notesnook cloud, but the server-side architecture is open-source and self-hostable. Good alternative to Joplin when you want a more modern UI without setting up a separate sync backend.
+
+> **Self-hosting Notesnook:** The server component is called `notesnook-sync-server` and is available on GitHub. Requires a MongoDB instance and environment-variable configuration. The compose setup is more complex than Joplin Server; use Joplin for straightforward homelab setups or Notesnook for teams that want the polished mobile apps.
+
+---
+
+## Etherpad (Simple Collaborative Text Editor)
+
+**Purpose:** The original real-time collaborative text editor. No accounts required by default — just share a pad URL and multiple users can type simultaneously. Simpler than HedgeDoc (which is Markdown-focused) or CryptPad (which is encrypted). Good for quick meeting notes, brainstorming sessions, and shared drafts.
+
+```yaml
+# ~/etherpad/compose.yaml
+services:
+  etherpad:
+    image: etherpad/etherpad:latest
+    ports:
+      - 127.0.0.1:9001:9001
+    environment:
+      DB_TYPE: postgres
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: etherpad
+      DB_USER: etherpad
+      DB_PASS: changeme
+      ADMIN_PASSWORD: changeme
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: etherpad
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: etherpad
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+```bash
+cd ~/etherpad && podman-compose up -d
+```
+
+**Caddy:**
+```caddyfile
+pad-simple.home.local { tls internal; reverse_proxy localhost:9001 }
+```
+
+---
+
+## Immich (Photo & Video Management)
+
+**Purpose:** Self-hosted Google Photos replacement. Automatic mobile backup, face recognition, smart albums, map view, and a clean mobile app for iOS and Android. The single most requested self-hosted app — it replaces iCloud Photo Library and Google Photos with zero cloud dependency.
+
+```yaml
+# ~/immich/compose.yaml
+services:
+  immich-server:
+    image: ghcr.io/immich-app/immich-server:release
+    ports:
+      - 127.0.0.1:2283:2283
+    environment:
+      DB_HOSTNAME: database
+      DB_DATABASE_NAME: immich
+      DB_USERNAME: postgres
+      DB_PASSWORD: changeme
+      REDIS_HOSTNAME: redis
+    volumes:
+      - /home/user/photos:/usr/src/app/upload:Z
+      - /etc/localtime:/etc/localtime:ro
+    depends_on: [database, redis]
+    restart: unless-stopped
+
+  immich-machine-learning:
+    image: ghcr.io/immich-app/immich-machine-learning:release
+    volumes:
+      - /home/user/immich/model-cache:/cache:Z
+    restart: unless-stopped
+
+  database:
+    image: tensorchord/pgvecto-rs:pg16-v0.2.0
+    environment:
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_USER: postgres
+      POSTGRES_DB: immich
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+```bash
+cd ~/immich && podman-compose up -d
+```
+
+**Caddy:**
+```caddyfile
+photos.home.local { tls internal; reverse_proxy localhost:2283 }
+```
+
+> Immich requires the `tensorchord/pgvecto-rs` Postgres image (not standard Postgres) for the vector search features used by face recognition and smart search. Do not substitute standard Postgres — it will fail at startup.
+
+---
+
+## Additional Caddy Routes
+
+```caddyfile
+pad-simple.home.local { tls internal; reverse_proxy localhost:9001 }
+photos.home.local     { tls internal; reverse_proxy localhost:2283 }
+```
+
+---
+
+## Choosing the Right Productivity Tool
+
+A decision guide for common use cases:
+
+| Need | Recommended | Why |
+|------|------------|-----|
+| Team wiki / runbooks | Docmost | Easiest setup, block editor, no mandatory SSO |
+| Structured docs-as-code | Docusaurus | Git-backed, versioned, full-text search at build time |
+| Figma replacement | Penpot | Full vector design + prototyping + dev handoff |
+| Quick whiteboard | Excalidraw | Zero setup, hand-drawn aesthetic, exports SVG |
+| Personal notes | Memos or Joplin | Memos = Twitter-style quick capture; Joplin = Notebook with E2E encryption |
+| Collaborative Notion-like | AFFiNE | Document + whiteboard in one, offline-capable |
+| Team project management | Plane or Huly | Plane = Linear-like; Huly = all-in-one hub |
+| Scrum / sprints | Taiga | Full Scrum with epics, velocity, backlog |
+| Simple Kanban | Planka | Lightweight Trello clone |
+| Photo backup | Immich | Google Photos replacement, face recognition |
+| Read-later | Wallabag | Full article archiving, clean reading view |
+| Smart bookmarks | Hoarder | AI tagging + summarisation via Ollama |
+
+---
+
+## Troubleshooting (additional)
+
+| Issue | Solution |
+|-------|----------|
+| Immich machine learning container OOM | Limit ML memory: set `MACHINE_LEARNING_WORKERS=1` and `MACHINE_LEARNING_WORKER_TIMEOUT=120`; face recognition needs ~2 GB RAM |
+| Immich photos not backing up from mobile | Ensure the Immich mobile app uses the correct server URL (include `https://` and no trailing slash); verify the server is reachable from your mobile network |
+| Etherpad pad not syncing | WebSocket must be proxied — add `header_up Upgrade {http.request.header.Upgrade}` in the Caddy reverse_proxy block |
+| AFFiNE collaboration not working | The WebSocket server must be reachable; confirm port 3010 is accessible from all clients and Caddy is proxying WebSocket upgrades |
+

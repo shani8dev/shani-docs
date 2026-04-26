@@ -1665,3 +1665,119 @@ pulls the previously built image to warm the layer cache across pipeline runs:
 | Forgejo Actions runner not picking up jobs | Verify the registration token matches what's shown in **Site Administration → Actions → Runners**; confirm the Podman socket is mounted and accessible |
 | Renovate PR not created | Ensure the token has write access to the repos; check `podman logs` on the renovate container for API errors; verify `RENOVATE_PLATFORM=gitea` is set |
 | Windmill worker not executing jobs | Check `DATABASE_URL` is identical on server and worker; run `podman logs windmill_worker` for connection errors; ensure `MODE=worker` is set on the worker container |
+
+---
+
+## Drawio / draw.io (Self-Hosted Diagram Editor)
+
+**Purpose:** Self-hosted version of diagrams.net — the most widely used open-source diagramming tool. Create architecture diagrams, flowcharts, ERDs, network maps, and UML without sending data to any cloud service. Integrates with Nextcloud, Confluence, and can export to SVG, PNG, and PDF.
+
+```yaml
+# ~/drawio/compose.yaml
+services:
+  drawio:
+    image: jgraph/drawio:latest
+    ports:
+      - 127.0.0.1:8710:8080
+    restart: unless-stopped
+```
+
+```bash
+cd ~/drawio && podman-compose up -d
+```
+
+**Caddy:**
+```caddyfile
+draw.home.local { tls internal; reverse_proxy localhost:8710 }
+```
+
+---
+
+## Gitea Classroom (Teaching & Learning)
+
+**Purpose:** Gitea's built-in Classroom feature (modelled after GitHub Classroom) lets instructors create assignment repositories, fork them per student, set deadlines, and review submissions. Pairs with Woodpecker CI for automatic grading pipelines.
+
+```bash
+# Enable in Site Administration → Gitea Configuration
+# Navigate to: /admin/self-check → enable classroom features
+
+# Create a classroom organisation
+# Users → Organisations → Create Organisation → enable "Classroom"
+
+# Assign a template repo to a classroom — students get a personal fork
+# Classroom → Create Assignment → select template repo
+```
+
+##### Automated grading with Woodpecker
+
+```yaml
+# .woodpecker.yml — in the template repo
+steps:
+  grade:
+    image: python:3.12-slim
+    commands:
+      - pip install pytest --quiet
+      - pytest tests/ --tb=short --json-report --json-report-file=grade-report.json
+      - python grader.py grade-report.json   # posts score to Gitea issue
+```
+
+---
+
+## Forgejo / Gitea Migration Patterns
+
+When migrating repositories between instances or from GitHub/GitLab, use the built-in migration tool or the API:
+
+```bash
+# Migrate a GitHub repo into Gitea via API
+curl -X POST https://git.home.local/api/v1/repos/migrate \
+  -H "Authorization: token YOUR_GITEA_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "clone_addr": "https://github.com/myorg/myrepo",
+    "repo_name": "myrepo",
+    "repo_owner": "myorg",
+    "mirror": false,
+    "private": true,
+    "issues": true,
+    "labels": true,
+    "milestones": true,
+    "releases": true,
+    "wiki": true
+  }'
+
+# Mirror a repo (keeps in sync with upstream)
+# Change "mirror": true above — Gitea will pull new commits periodically
+
+# Migrate all repos from a GitHub org (bash loop)
+ORG=myorg
+TOKEN=ghp_yourtoken
+curl -s "https://api.github.com/orgs/$ORG/repos?per_page=100" \
+  -H "Authorization: token $TOKEN" \
+  | jq -r '.[].clone_url' | while read url; do
+    repo=$(basename "$url" .git)
+    echo "Migrating $repo..."
+    curl -sX POST https://git.home.local/api/v1/repos/migrate \
+      -H "Authorization: token YOUR_GITEA_TOKEN" \
+      -H "Content-Type: application/json" \
+      -d "{\"clone_addr\":\"$url\",\"repo_name\":\"$repo\",\"repo_owner\":\"$ORG\",\"mirror\":false,\"private\":true}"
+  done
+```
+
+---
+
+## Additional Caddy Routes
+
+```caddyfile
+draw.home.local       { tls internal; reverse_proxy localhost:8710 }
+```
+
+---
+
+## Troubleshooting (additional)
+
+| Issue | Solution |
+|-------|----------|
+| Gitea migration stuck | Check the Gitea admin logs; large repos may time out — increase `timeout` in `app.ini` under `[migrations]` |
+| Woodpecker CI pipeline doesn't trigger | Verify the webhook is registered in Gitea (Repo → Settings → Webhooks) and that `WOODPECKER_HOST` is reachable from Gitea's network |
+| Forgejo Actions runner shows as offline | Re-register with a fresh token from Site Administration → Actions → Runners; tokens expire after first use |
+

@@ -2918,3 +2918,217 @@ toxiproxy.home.local       { tls internal; reverse_proxy localhost:8474 }
 | Toxiproxy toxic added but latency not observed | Some toxics are directional — add the toxic to both `upstream` and `downstream` if needed; verify with `toxiproxy-cli inspect <proxy>` |
 | Netdata Grafana datasource returns no data | The Prometheus query format differs from native Prometheus — use `netdata_` prefixed metric names; verify with `curl http://netdata:19999/api/v1/allmetrics?format=prometheus | grep netdata_` |
 | Netdata metrics disappear after host restart | Netdata stores metrics in `/var/cache/netdata` — mount this as a volume (`/home/user/netdata/cache:/var/cache/netdata:Z`) to persist across container restarts |
+
+---
+
+## Alerting Best Practices
+
+#### Alert on symptoms, not causes
+Alert on what the user experiences (high latency, error rate, service down) not on infrastructure metrics that may or may not be impacting users (CPU at 80% might be fine). A CPU alert that fires daily and never requires action is alert noise; an error-rate alert that fires rarely but always requires action is signal.
+
+#### Multi-window multi-burn-rate alerting (SLO-based)
+Instead of a simple threshold alert, use two windows that catch both fast and slow error budget burns:
+
+```yaml
+# alerts.yml — SLO burn rate alert (99.9% availability SLO)
+groups:
+  - name: slo_alerts
+    rules:
+      # Fast burn: 14.4× rate over 1h → will exhaust budget in 5 days
+      - alert: ErrorBudgetFastBurn
+        expr: |
+          (
+            job:http_request_errors:ratio5m > (14.4 * 0.001)
+            and
+            job:http_request_errors:ratio1h > (14.4 * 0.001)
+          )
+        for: 2m
+        labels:
+          severity: critical
+          slo: availability
+        annotations:
+          summary: "Fast error budget burn on {{ $labels.job }}"
+
+      # Slow burn: 3× rate over 6h → will exhaust budget in 24 days
+      - alert: ErrorBudgetSlowBurn
+        expr: |
+          (
+            job:http_request_errors:ratio5m > (3 * 0.001)
+            and
+            job:http_request_errors:ratio6h > (3 * 0.001)
+          )
+        for: 15m
+        labels:
+          severity: warning
+          slo: availability
+        annotations:
+          summary: "Slow error budget burn on {{ $labels.job }}"
+```
+
+#### Inhibition rules — reduce alert storms
+When a `ServiceDown` fires, suppress all `SlowResponse` and `HighErrorRate` alerts for the same instance — the downstream symptoms are causally related to the root cause:
+
+```yaml
+# alertmanager.yml
+inhibit_rules:
+  - source_match:
+      alertname: ServiceDown
+    target_match_re:
+      alertname: (SlowResponse|HighErrorRate|DiskNearlyFull)
+    equal: [instance]
+```
+
+---
+
+## Grafana Loki LogQL Reference
+
+LogQL is Loki's query language. Understanding its patterns is essential for building useful log dashboards.
+
+```logql
+# Filter by label
+{job="containerlogs", container="myapp"}
+
+# Filter by log content
+{job="containerlogs"} |= "ERROR"
+
+# Exclude pattern
+{job="containerlogs"} != "health check"
+
+# Regex match
+{job="containerlogs"} |~ "status=5[0-9]{2}"
+
+# Parse JSON logs and filter on a field
+{job="containerlogs"} | json | level="error"
+
+# Parse unstructured logs with logfmt
+{job="containerlogs"} | logfmt | status >= 500
+
+# Count error rate (metric query)
+sum(rate({job="containerlogs"} |= "ERROR" [5m])) by (container)
+
+# P99 latency from a structured log field
+quantile_over_time(0.99, {job="containerlogs"} | json | unwrap latency_ms [5m]) by (endpoint)
+
+# Top 5 containers by error count (last hour)
+topk(5,
+  sum(count_over_time({job="containerlogs"} |= "ERROR" [1h])) by (container)
+)
+```
+
+---
+
+## Prometheus Exporters Reference
+
+Common exporters you'll configure beyond node-exporter and cAdvisor:
+
+| Exporter | Port | What it exposes |
+|----------|------|-----------------|
+| `postgres_exporter` | 9187 | PostgreSQL query times, connections, replication lag |
+| `redis_exporter` | 9121 | Redis hits/misses, memory, commands/sec |
+| `mysql_exporter` | 9104 | MySQL queries, connections, slow queries |
+| `rabbitmq_exporter` | 9419 | Queue depth, message rates, consumer lag |
+| `kafka_exporter` | 9308 | Topic offsets, consumer group lag |
+| `blackbox_exporter` | 9115 | HTTP/TCP/ICMP probes from external perspective |
+| `snmp_exporter` | 9116 | Network device metrics via SNMP |
+| `nginx_exporter` | 9113 | Nginx request rates, active connections |
+| `cadvisor` | 8080 | Container CPU/memory/network/disk |
+| `process_exporter` | 9256 | Per-process CPU, memory, open files |
+
+#### Blackbox Exporter (external probing)
+
+```yaml
+# ~/blackbox/compose.yaml
+services:
+  blackbox:
+    image: prom/blackbox-exporter:latest
+    ports:
+      - 127.0.0.1:9115:9115
+    volumes:
+      - /home/user/blackbox/config.yml:/etc/blackbox_exporter/config.yml:ro,Z
+    restart: unless-stopped
+```
+
+```yaml
+# ~/blackbox/config.yml
+modules:
+  http_2xx:
+    prober: http
+    timeout: 5s
+    http:
+      valid_http_versions: [HTTP/1.1, HTTP/2.0]
+      valid_status_codes: []  # default: 2xx
+      follow_redirects: true
+  tcp_connect:
+    prober: tcp
+    timeout: 5s
+```
+
+```yaml
+# prometheus.yml — scrape blackbox for your services
+- job_name: blackbox
+  metrics_path: /probe
+  params:
+    module: [http_2xx]
+  static_configs:
+    - targets:
+        - https://nextcloud.home.local
+        - https://gitea.home.local
+        - https://grafana.home.local
+  relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: host.containers.internal:9115
+```
+
+---
+
+## DIUN (Docker Image Update Notifier)
+
+**Purpose:** Watches your running container images and notifies you when a newer version is available upstream — without automatically updating. Gives you visibility into available updates before Renovate creates a PR, and works for containers not managed by Renovate (e.g. manually run one-offs).
+
+```yaml
+# ~/diun/compose.yaml
+services:
+  diun:
+    image: crazymax/diun:latest
+    volumes:
+      - /home/user/diun:/data:Z
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    environment:
+      TZ: Asia/Kolkata
+      LOG_LEVEL: info
+      DIUN_WATCH_SCHEDULE: "0 8 * * 1"          # Weekly on Monday 8 AM
+      DIUN_PROVIDERS_DOCKER: "true"
+      DIUN_NOTIF_NTFY_ENDPOINT: http://host.containers.internal:8090
+      DIUN_NOTIF_NTFY_TOPIC: container-updates
+    restart: unless-stopped
+```
+
+```bash
+cd ~/diun && podman-compose up -d
+```
+
+---
+
+## Caddy (additional routes)
+
+```caddyfile
+blackbox.home.local { tls internal; reverse_proxy localhost:9115 }
+```
+
+---
+
+## Troubleshooting (additional)
+
+| Issue | Solution |
+|-------|----------|
+| Prometheus `scrape timeout` errors | Increase `scrape_timeout` in `prometheus.yml` (default 10s); check the target is not overloaded |
+| High cardinality causing Prometheus OOM | Run `topk(10, count by (__name__)({__name__=~".+"}))` to find high-cardinality metrics; drop labels at scrape time with `metric_relabel_configs` |
+| Loki `out of order` errors | Ensure log timestamps are monotonically increasing; use `allow_structured_metadata: true` in Loki config if timestamps are close together |
+| Grafana dashboard loads slowly | Enable query caching in Grafana data source settings; use recording rules in Prometheus to pre-compute expensive queries |
+| Alertmanager duplicate alerts | Add `group_by` labels that are common across duplicates; use `equal` in inhibition rules to match root cause and symptom alerts |
+| DIUN not detecting updated images | Verify the Podman socket is mounted and readable; check `DIUN_PROVIDERS_DOCKER` is `"true"`; inspect logs with `podman logs diun` |
+
