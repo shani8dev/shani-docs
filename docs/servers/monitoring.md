@@ -15,6 +15,59 @@ For multi-node, replicated, and HA deployments (Elasticsearch cluster, OpenSearc
 
 ---
 
+## Job-Ready Concepts
+
+### Observability Interview Essentials
+
+**The three pillars (now four) of observability:**
+- **Metrics** — numeric time-series data (CPU %, request rate, error count). Cheap to store, fast to query. Prometheus + Grafana.
+- **Logs** — structured or unstructured event records. Expensive at scale. Loki (label-indexed streams) or Elasticsearch (fully indexed).
+- **Traces** — records of a request as it flows through multiple services. Shows where latency is introduced. Tempo + OpenTelemetry.
+- **Profiles** (emerging) — continuous CPU/memory profiling of running processes. Parca + eBPF. The "fourth pillar."
+
+**Pull vs push model for metrics:**
+Prometheus uses a *pull* model — it scrapes `/metrics` endpoints on a schedule. This means you know what's being scraped and can see scrape errors in Prometheus itself. *Push* model (Pushgateway, InfluxDB's Telegraf) is used for short-lived jobs. Most interviewers will ask why Prometheus scrapes rather than having apps push to it: better target discovery, single place to detect unreachable targets, less firewall complexity.
+
+**Cardinality and why it matters:** Cardinality is the number of unique label combinations for a metric. `http_requests_total{method="GET", path="/api/users/123"}` where `path` contains user IDs creates millions of unique series. High cardinality is the number-one cause of Prometheus memory exhaustion. Always bound labels to a small, known set of values (`path="/api/users/:id"` not the literal ID).
+
+**Rate vs irate vs increase:**
+- `rate(metric[5m])` — per-second average rate over the last 5 minutes. Smooth, good for dashboards.
+- `irate(metric[5m])` — instantaneous rate based on last two data points. Spiky, good for detecting brief bursts.
+- `increase(metric[5m])` — total increase over the window (rate × duration). Good for "how many errors in the last 5 min".
+
+**Alert fatigue:** The condition where too many noisy/low-priority alerts cause on-call engineers to start ignoring pages. Symptoms: alerts that resolve themselves, alerts that require no action, duplicate alerts for the same underlying cause. Fix: alert only on symptoms (high error rate) not causes (CPU high), use inhibition rules, tune `for:` duration so brief spikes don't fire, use Karma dashboard for triage.
+
+**Multiwindow, multi-burn-rate alerts:** For SLO alerts, a single threshold alert (error rate > 1%) fires too often for minor blips and too slowly for catastrophic failures. The recommended pattern from the Google SRE book uses two windows: a fast window (e.g., 1h) catches rapid burns, a slow window (e.g., 6h) catches slow burns. Pyrra generates these automatically from SLO definitions.
+
+**OpenTelemetry SDK instrumentation:** Auto-instrumentation (via agents) adds traces and metrics to your app with zero code changes for common frameworks (Django, Express, Spring). Manual instrumentation wraps specific code sections in spans. The SDK exports to an OTel Collector, which fans out to Tempo (traces), Prometheus (metrics), and Loki (logs) — one SDK call, multiple backends.
+
+**Log levels and when to use them:**
+- `DEBUG` — verbose, only in dev; never leave on in production
+- `INFO` — normal operation events ("started", "processed 100 items")
+- `WARN` — recoverable unexpected condition that deserves attention
+- `ERROR` — operation failed; action required
+- `FATAL/CRITICAL` — service cannot continue; immediate page
+
+**Structured logging (JSON) vs unstructured:** Structured logs (`{"level":"error","msg":"DB timeout","user_id":42,"latency_ms":5000}`) are parseable by Loki, Graylog, and other tools without Grok patterns. Unstructured logs (`ERROR: DB timeout for user 42 after 5000ms`) require regex extraction, which is brittle. Always use structured logging in production services.
+
+**Understanding Grafana variables and templating:** Dashboard variables let one dashboard serve multiple services (`$service`), environments (`$environment`), or time ranges. They're backed by Prometheus label queries. A variable `$namespace` with query `label_values(kube_pod_info, namespace)` gives a dropdown of all Kubernetes namespaces. This is a core Grafana skill for platform teams building shared observability tooling.
+
+
+**Distributed tracing — spans, traces, and why they matter:** A trace represents a single request as it flows through multiple services. It's composed of spans — each span represents one operation (HTTP call, DB query, cache lookup) with a start time, duration, and attributes. Spans are linked by a trace ID propagated in headers (`traceparent` in W3C format, `X-B3-TraceId` in Zipkin format). Without tracing, diagnosing latency in a microservices architecture means correlating logs across 10 services by timestamp — error-prone and slow. With tracing (Tempo + OTel), you click on a slow request in Grafana and see exactly which service and which operation contributed the latency. The key metric: P99 latency per span, not just the total.
+
+**Continuous profiling — flamegraphs and eBPF:** A profiler samples what the CPU is executing thousands of times per second, building a statistical picture of where time is spent. A flamegraph visualises this as a call stack — the width of each frame is proportional to the time spent in that function. Parca uses eBPF to profile running processes with no code changes and near-zero overhead. Continuous profiling (running 24/7, not just during incidents) lets you correlate CPU spikes with deployments — "this function got 3x slower after the commit that added field validation." This is the "fourth pillar" of observability because it answers "why is the CPU high" when metrics only tell you that it is.
+
+**Thanos architecture — sidecar vs receive mode:** Thanos extends Prometheus with long-term storage and global query. Two deployment modes: (1) **Sidecar** — a Thanos sidecar runs next to each Prometheus instance, uploads TSDB blocks to object storage (S3/MinIO) after they're sealed (every 2h). The Store Gateway serves these blocks for long-range queries. Simple but adds 2h latency before data is queryable globally. (2) **Receive** — Prometheus remote-writes metrics to Thanos Receive in real-time. Global queryability immediately, but adds write path complexity and a potential bottleneck. For most setups: sidecar mode is simpler and sufficient. For multi-cluster global dashboards with sub-2h data: receive mode.
+
+**Load testing methodology — k6 concepts:** Load testing has three phases: (1) **Baseline** — what's the latency and error rate at 1 concurrent user? (2) **Load test** — ramp to expected production traffic, verify latency SLOs hold. (3) **Stress test** — push beyond expected load until the system breaks, to find the failure mode and capacity ceiling. k6 models load as virtual users (VUs) running test scripts. Key metrics: `http_req_duration` (latency), `http_req_failed` (error rate), `iterations` (throughput). The output feeds into Grafana dashboards (k6 has a Prometheus remote write output). Run load tests before every major release in CI with a pass/fail threshold on P95 latency.
+
+**Chaos engineering — intentional failure injection:** Chaos engineering tests whether a system actually survives the failures it's designed to handle. Toxiproxy injects network conditions (latency, packet loss, bandwidth limits, connection drops) between your services — you test that your circuit breaker trips when the database latency spikes to 2s, rather than discovering this in production. The practice: (1) define a steady state (normal error rate, latency), (2) hypothesise that the system survives failure X, (3) inject failure X, (4) verify steady state is maintained (or fix if not). Chaos engineering is not about breaking things randomly — it's a disciplined experiment that builds confidence in fault tolerance.
+
+**Log aggregation architectures — push vs pull, and the pipeline:** Three approaches: (1) **Agent-based push** — Alloy/Fluent Bit runs on each host, tails log files, and pushes to Loki/Elasticsearch. Low latency, agent adds resource overhead. (2) **Syslog forwarding** — services write to syslog, rsyslog/syslog-ng forwards centrally. Works for systemd services without any agent. (3) **Direct SDK** — applications write structured logs directly to Loki's push API. Pipeline tools (Vector.dev) add buffering, transformation (parse, filter, enrich), and fan-out (logs go to both Loki and an S3 archive). The key design decision: parse logs at the source (less data transmitted, structured from the start) vs at the destination (simpler agents, parsing can be changed without redeployment).
+---
+
+---
+
 ## Observability Philosophy
 
 Before diving into tools, it helps to have a framework for what you're trying to observe. Two complementary models are widely used in practice.
@@ -2746,47 +2799,6 @@ Go to Grafana → Dashboards → Import → Dashboard ID **7107** (Netdata Syste
 
 > **When to use which:** Keep Prometheus as your primary datasource for application metrics, SLO calculations, and alert evaluation. Use the Netdata datasource for host-level dashboards where 1-second resolution matters (disk spike analysis, container burst profiling). Both can be combined in a single Grafana dashboard row by row.
 
-
----
-
-## Job-Ready Concepts
-
-### Observability Interview Essentials
-
-**The three pillars (now four) of observability:**
-- **Metrics** — numeric time-series data (CPU %, request rate, error count). Cheap to store, fast to query. Prometheus + Grafana.
-- **Logs** — structured or unstructured event records. Expensive at scale. Loki (label-indexed streams) or Elasticsearch (fully indexed).
-- **Traces** — records of a request as it flows through multiple services. Shows where latency is introduced. Tempo + OpenTelemetry.
-- **Profiles** (emerging) — continuous CPU/memory profiling of running processes. Parca + eBPF. The "fourth pillar."
-
-**Pull vs push model for metrics:**
-Prometheus uses a *pull* model — it scrapes `/metrics` endpoints on a schedule. This means you know what's being scraped and can see scrape errors in Prometheus itself. *Push* model (Pushgateway, InfluxDB's Telegraf) is used for short-lived jobs. Most interviewers will ask why Prometheus scrapes rather than having apps push to it: better target discovery, single place to detect unreachable targets, less firewall complexity.
-
-**Cardinality and why it matters:** Cardinality is the number of unique label combinations for a metric. `http_requests_total{method="GET", path="/api/users/123"}` where `path` contains user IDs creates millions of unique series. High cardinality is the number-one cause of Prometheus memory exhaustion. Always bound labels to a small, known set of values (`path="/api/users/:id"` not the literal ID).
-
-**Rate vs irate vs increase:**
-- `rate(metric[5m])` — per-second average rate over the last 5 minutes. Smooth, good for dashboards.
-- `irate(metric[5m])` — instantaneous rate based on last two data points. Spiky, good for detecting brief bursts.
-- `increase(metric[5m])` — total increase over the window (rate × duration). Good for "how many errors in the last 5 min".
-
-**Alert fatigue:** The condition where too many noisy/low-priority alerts cause on-call engineers to start ignoring pages. Symptoms: alerts that resolve themselves, alerts that require no action, duplicate alerts for the same underlying cause. Fix: alert only on symptoms (high error rate) not causes (CPU high), use inhibition rules, tune `for:` duration so brief spikes don't fire, use Karma dashboard for triage.
-
-**Multiwindow, multi-burn-rate alerts:** For SLO alerts, a single threshold alert (error rate > 1%) fires too often for minor blips and too slowly for catastrophic failures. The recommended pattern from the Google SRE book uses two windows: a fast window (e.g., 1h) catches rapid burns, a slow window (e.g., 6h) catches slow burns. Pyrra generates these automatically from SLO definitions.
-
-**OpenTelemetry SDK instrumentation:** Auto-instrumentation (via agents) adds traces and metrics to your app with zero code changes for common frameworks (Django, Express, Spring). Manual instrumentation wraps specific code sections in spans. The SDK exports to an OTel Collector, which fans out to Tempo (traces), Prometheus (metrics), and Loki (logs) — one SDK call, multiple backends.
-
-**Log levels and when to use them:**
-- `DEBUG` — verbose, only in dev; never leave on in production
-- `INFO` — normal operation events ("started", "processed 100 items")
-- `WARN` — recoverable unexpected condition that deserves attention
-- `ERROR` — operation failed; action required
-- `FATAL/CRITICAL` — service cannot continue; immediate page
-
-**Structured logging (JSON) vs unstructured:** Structured logs (`{"level":"error","msg":"DB timeout","user_id":42,"latency_ms":5000}`) are parseable by Loki, Graylog, and other tools without Grok patterns. Unstructured logs (`ERROR: DB timeout for user 42 after 5000ms`) require regex extraction, which is brittle. Always use structured logging in production services.
-
-**Understanding Grafana variables and templating:** Dashboard variables let one dashboard serve multiple services (`$service`), environments (`$environment`), or time ranges. They're backed by Prometheus label queries. A variable `$namespace` with query `label_values(kube_pod_info, namespace)` gives a dropdown of all Kubernetes namespaces. This is a core Grafana skill for platform teams building shared observability tooling.
-
----
 ---
 
 ## Caddy Configuration

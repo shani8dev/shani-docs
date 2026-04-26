@@ -54,6 +54,14 @@ services:
 
 This maps to cgroup v2 constraints — the same mechanism Kubernetes `requests`/`limits` uses under the hood.
 
+
+**Container update strategies — why Watchtower/Diun instead of `latest`:** Pinning image tags (`image: nginx:1.27.2`) is safer than `latest` — `latest` changes without warning and can break working deployments. But pinned tags go stale. The production pattern: pin tags in compose files, use Renovate or Diun to detect new versions, review the changelog, then update intentionally. `latest` is acceptable in a homelab dev environment where breakage is tolerable; never in production.
+
+**Systemd and containers — the integration model:** On a non-Kubernetes host, systemd is the process supervisor. Podman generates systemd unit files (`podman generate systemd`) that start containers as system services, handle restart-on-failure, and integrate with `journalctl` for logs. Quadlet (Podman 4.4+) is the modern approach: drop a `.container` file in `/etc/containers/systemd/`, and systemd manages the container lifecycle natively. This is how production bare-metal container deployments work without Kubernetes overhead.
+
+**Image garbage collection:** Pulled images accumulate on disk. Unused images (not referenced by any container) should be pruned regularly. `podman image prune -a` removes all unused images; `podman system prune` removes unused images, containers, volumes, and networks. Automate this with a systemd timer or cron. On Kubernetes, kubelet performs image GC automatically when disk usage exceeds a threshold (configurable via `--image-gc-high-threshold`, default 85%).
+
+**Health checks and auto-healing:** A health check (`HEALTHCHECK` in Dockerfile, or `healthcheck:` in compose) lets the container runtime know if the application inside is actually functioning, not just that the process is running. If a health check fails N consecutive times, the container is marked `unhealthy`. `restart: unless-stopped` only restarts on crash — for health-check-based restarts, use `autoheal` (a container that watches for unhealthy status and restarts) or Kubernetes liveness probes, which restart containers that fail the check.
 ---
 
 ## Systemd Integration

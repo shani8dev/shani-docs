@@ -13,6 +13,39 @@ All VPN and tunnel solutions on this system can run fully containerised. Rootles
 
 ---
 
+## Job-Ready Concepts
+
+### VPN & Tunnels Interview Essentials
+
+**WireGuard vs OpenVPN vs IPSec — when interviewers ask:**
+WireGuard: modern (2015), small codebase (~4000 lines), fast, kernel-level, uses fixed modern crypto (ChaCha20, Curve25519). No backward compatibility negotiation — a feature, not a limitation. OpenVPN: mature (2001), large ecosystem, configurable cipher suites, userspace TLS so slower, supports TCP mode (useful when UDP is blocked). IPSec: the enterprise/router standard, complex to configure, built into most OSes natively.
+
+**Mesh VPN topology vs hub-and-spoke:** Traditional VPNs are hub-and-spoke — all client traffic flows through a central VPN server. Mesh VPNs (Tailscale, NetBird, Nebula, ZeroTier) connect every peer directly to every other peer using STUN/TURN for NAT traversal. Advantages: lower latency (direct peer-to-peer), no single point of failure, no bandwidth bottleneck at the hub. Tailscale's control plane manages the key exchange; the data plane is direct WireGuard.
+
+**STUN vs TURN vs ICE:**
+- **STUN** (Session Traversal Utilities for NAT) — tells a client its public IP and port as seen from the internet. Used for hole-punching.
+- **TURN** (Traversal Using Relays around NAT) — a relay that proxies traffic when direct hole-punching fails (symmetric NAT). More expensive (all traffic flows through the relay).
+- **ICE** (Interactive Connectivity Establishment) — the negotiation protocol that tries STUN first, falls back to TURN. Used by WebRTC and mesh VPNs.
+
+**Zero-trust network access (ZTNA) vs VPN:** A traditional VPN grants access to the network — once connected, the user can typically reach everything on the network. ZTNA grants access to specific applications or resources, not the network itself. Firezone and Teleport implement ZTNA: you get access to `postgres.internal:5432` not to the entire `10.0.0.0/8` network. Better for the principle of least privilege.
+
+**Tunnel overhead and MTU:** Every VPN tunnel adds overhead to each packet (headers, encryption padding). WireGuard adds ~60 bytes. This reduces the effective inner MTU below the standard 1500 bytes — if you send a full-size 1500-byte packet through a WireGuard tunnel, the outer packet exceeds the link MTU and gets fragmented or dropped. Solutions: (1) set the WireGuard client MTU to 1420 (`MTU = 1420` in wg0.conf), (2) enable MSS clamping on the server's PostUp iptables rule to automatically tell TCP connections about the reduced MTU.
+
+**Split tunnel security implications:** With a split tunnel (`AllowedIPs = 192.168.1.0/24`), only traffic to the home LAN goes through the VPN — all other internet traffic goes directly from the client's ISP. This means: (1) DNS queries for non-`.home.local` domains don't use your Pi-hole, (2) your ISP can still see your general browsing, (3) a malicious website can't be blocked by your home DNS. A full tunnel (`AllowedIPs = 0.0.0.0/0`) routes everything through home, but adds latency and uses your home bandwidth. Choose based on the use case.
+
+
+**Cloudflare Tunnel vs self-hosted reverse proxy — the trade-off:** Cloudflare Tunnel (cloudflared) exposes a local service to the internet without opening firewall ports or having a public IP. The tunnel connects outbound to Cloudflare's network, which terminates HTTPS for your domain. Trade-offs: you must trust Cloudflare to terminate your TLS (they see plaintext), your availability depends on Cloudflare's uptime, and all traffic passes through their network (latency + bandwidth cost for large transfers). For services that don't need to bypass Cloudflare, Pangolin (self-hosted) or a VPS-based reverse proxy (frp) gives you the same capability without the dependency.
+
+**NAT traversal and hole-punching:** When two peers are both behind NAT (typical home routers), neither can initiate a direct connection to the other because there's no public IP:port mapping. Hole-punching works by having both peers send UDP packets to each other simultaneously — each packet causes the NAT to create a mapping for the return direction, opening a bidirectional path. STUN servers facilitate this by telling each peer their external address. This fails with symmetric NAT (different external port for each destination), which requires a TURN relay. WireGuard-based mesh VPNs (Tailscale, NetBird) handle all of this automatically.
+
+**Access control at the VPN layer vs application layer:** A VPN (WireGuard, OpenVPN) controls who can reach the network; the application still controls what authenticated users can do. Zero-Trust tools (Firezone, Teleport) add a third layer: per-application access policies enforced at the gateway — user Alice can SSH to server A but not server B, even though both are on the same VPN subnet. This maps access control to identity (user + device) rather than just network position. Audit logs at the gateway layer (Teleport's session recording) are also available here, not possible with a plain VPN.
+
+**Protocol obfuscation — when and why:** Standard WireGuard and OpenVPN traffic patterns are fingerprint-able by deep packet inspection (DPI). ISPs and national firewalls (GFW) identify and block them. Obfuscation tools (Xray/V2Ray with VLESS+XTLS-Reality, Hysteria2) make VPN traffic look like normal HTTPS, video streaming, or QUIC traffic. This is relevant for: (1) countries with internet censorship, (2) corporate networks that block non-HTTP outbound, (3) ISPs that throttle VPN traffic. Hysteria2 additionally uses QUIC's congestion control to improve performance on high-latency, high-loss links (satellite, mobile).
+---
+---
+
+---
+
 ## Prerequisites
 
 Before running any VPN container, enable IP forwarding and load the TUN module:
@@ -1112,31 +1145,6 @@ podman run --rm ghcr.io/xtls/xray-core:latest x25519
 sudo firewall-cmd --add-port=443/tcp --permanent && sudo firewall-cmd --reload
 ```
 
-
----
-
-## Job-Ready Concepts
-
-### VPN & Tunnels Interview Essentials
-
-**WireGuard vs OpenVPN vs IPSec — when interviewers ask:**
-WireGuard: modern (2015), small codebase (~4000 lines), fast, kernel-level, uses fixed modern crypto (ChaCha20, Curve25519). No backward compatibility negotiation — a feature, not a limitation. OpenVPN: mature (2001), large ecosystem, configurable cipher suites, userspace TLS so slower, supports TCP mode (useful when UDP is blocked). IPSec: the enterprise/router standard, complex to configure, built into most OSes natively.
-
-**Mesh VPN topology vs hub-and-spoke:** Traditional VPNs are hub-and-spoke — all client traffic flows through a central VPN server. Mesh VPNs (Tailscale, NetBird, Nebula, ZeroTier) connect every peer directly to every other peer using STUN/TURN for NAT traversal. Advantages: lower latency (direct peer-to-peer), no single point of failure, no bandwidth bottleneck at the hub. Tailscale's control plane manages the key exchange; the data plane is direct WireGuard.
-
-**STUN vs TURN vs ICE:**
-- **STUN** (Session Traversal Utilities for NAT) — tells a client its public IP and port as seen from the internet. Used for hole-punching.
-- **TURN** (Traversal Using Relays around NAT) — a relay that proxies traffic when direct hole-punching fails (symmetric NAT). More expensive (all traffic flows through the relay).
-- **ICE** (Interactive Connectivity Establishment) — the negotiation protocol that tries STUN first, falls back to TURN. Used by WebRTC and mesh VPNs.
-
-**Zero-trust network access (ZTNA) vs VPN:** A traditional VPN grants access to the network — once connected, the user can typically reach everything on the network. ZTNA grants access to specific applications or resources, not the network itself. Firezone and Teleport implement ZTNA: you get access to `postgres.internal:5432` not to the entire `10.0.0.0/8` network. Better for the principle of least privilege.
-
-**Tunnel overhead and MTU:** Every VPN tunnel adds overhead to each packet (headers, encryption padding). WireGuard adds ~60 bytes. This reduces the effective inner MTU below the standard 1500 bytes — if you send a full-size 1500-byte packet through a WireGuard tunnel, the outer packet exceeds the link MTU and gets fragmented or dropped. Solutions: (1) set the WireGuard client MTU to 1420 (`MTU = 1420` in wg0.conf), (2) enable MSS clamping on the server's PostUp iptables rule to automatically tell TCP connections about the reduced MTU.
-
-**Split tunnel security implications:** With a split tunnel (`AllowedIPs = 192.168.1.0/24`), only traffic to the home LAN goes through the VPN — all other internet traffic goes directly from the client's ISP. This means: (1) DNS queries for non-`.home.local` domains don't use your Pi-hole, (2) your ISP can still see your general browsing, (3) a malicious website can't be blocked by your home DNS. A full tunnel (`AllowedIPs = 0.0.0.0/0`) routes everything through home, but adds latency and uses your home bandwidth. Choose based on the use case.
-
----
----
 
 ## Troubleshooting
 

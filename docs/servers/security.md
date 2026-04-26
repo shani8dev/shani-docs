@@ -15,6 +15,62 @@ Password management, identity providers, secrets management, and threat detectio
 
 ---
 
+## Job-Ready Concepts
+
+### Security Interview Essentials
+
+**Zero Trust principles:** "Never trust, always verify." Traditional perimeter security trusts anything inside the network. Zero trust verifies every request regardless of source — inside or outside the network — using identity, device posture, and minimal-privilege access. Implementation: mTLS between services, short-lived certificates (not long-lived API keys), device posture checks (is the OS patched?), least-privilege RBAC, and session recording for privileged access (Teleport).
+
+**Principle of least privilege (PoLP):** Every user, process, and service gets only the permissions it needs — nothing more. In Kubernetes: ServiceAccounts with narrow Roles, not cluster-admin. In AWS: IAM roles scoped to specific S3 buckets and actions. In Linux: non-root containers, no `SYS_ADMIN` unless necessary. Violations are the root cause of most lateral movement after a breach.
+
+**Defence in depth:** Multiple layers of security so that no single failure compromises the entire system. Example stack: WAF (Coraza) → reverse proxy authentication (Authelia) → network segmentation (NetworkPolicy) → container sandboxing (seccomp, AppArmor) → runtime detection (Falco) → SIEM (Wazuh). An attacker who defeats one layer still faces the next.
+
+**OAuth2 flows — which to use when:**
+- **Authorization Code + PKCE** — for web and mobile apps where a user logs in. The current gold standard. PKCE prevents code interception.
+- **Client Credentials** — for machine-to-machine (service-to-service). No user involved. Use for CI/CD tokens and API-to-API calls.
+- **Device Code** — for CLI tools and devices without a browser (headless servers, smart TVs).
+- **Implicit flow** — deprecated. Do not use.
+
+**JWT structure and common mistakes:**
+A JWT has three base64url-encoded parts: `header.payload.signature`. The header declares the algorithm; the payload contains claims (sub, exp, iat, scopes); the signature verifies integrity. Common mistakes: (1) accepting `alg: none` — always reject this; (2) not verifying `exp` — always check expiry; (3) putting sensitive data in the payload — it's encoded, not encrypted (anyone can read it with base64 decode); (4) not rotating signing keys.
+
+**OWASP Top 10 in one line each (for interviews):**
+A01 Broken Access Control: users can access data/actions they shouldn't (IDOR, privilege escalation). A02 Cryptographic Failures: sensitive data exposed due to weak/missing encryption. A03 Injection: user input interpreted as code (SQL, command). A04 Insecure Design: security not considered in architecture. A05 Security Misconfiguration: default credentials, unnecessary services. A06 Vulnerable Components: outdated dependencies with CVEs. A07 Auth Failures: weak passwords, no MFA, session fixation. A08 Software Integrity: unsigned updates, compromised CI/CD pipeline. A09 Logging Failures: breaches go undetected. A10 SSRF: server fetches attacker-controlled URLs.
+
+**Hash functions vs encryption vs encoding:**
+- **Encoding** (base64, hex) — reversible transformation, no key, provides no security — just a format change
+- **Hashing** (SHA-256, bcrypt) — one-way, no key; used for integrity checks and password storage; bcrypt adds a work factor (slow by design)
+- **Symmetric encryption** (AES-256-GCM) — reversible with the same key; fast; used for data at rest
+- **Asymmetric encryption** (RSA, ECDSA) — public key encrypts/verifies, private key decrypts/signs; used for TLS, JWT signing, SSH keys
+
+**Supply chain security basics:** Three vectors to understand: (1) Source — code in your repo (Semgrep SAST, secret scanning). (2) Build — CI pipeline integrity (Tekton Chains SLSA provenance, cosign signing). (3) Dependency — third-party packages and base images (Trivy, Grype, Renovate, Dependency-Track). The 2020 SolarWinds attack and 2021 Log4Shell are canonical examples of each vector.
+
+**Secrets management anti-patterns:**
+- Hardcoded secrets in source code (most common, caught by Semgrep `p/secrets`)
+- Secrets in environment variables that get printed to logs
+- Long-lived API keys that never rotate
+- Sharing credentials across environments (staging DB password = prod DB password)
+- Secrets in Kubernetes manifests committed to Git without encryption (use SOPS + age or Sealed Secrets)
+
+**Vulnerability severity levels (CVSS):** CVSS (Common Vulnerability Scoring System) scores 0–10. Critical 9.0–10.0, High 7.0–8.9, Medium 4.0–6.9, Low 0.1–3.9. For triaging: fix Criticals within 24h, Highs within 7 days. Tools (Trivy, Grype, Nuclei) report these severities. In Defect Dojo you set SLA targets per severity.
+
+
+**Identity provider architecture — LDAP vs OIDC vs SAML:** Three generations of identity federation. LDAP (Lightweight Directory Access Protocol) is the enterprise standard for directory services — Active Directory is LDAP. Applications authenticate by doing a bind to the LDAP server. OIDC (OpenID Connect) is the modern web standard, built on OAuth2 — applications redirect users to an IdP (Authentik, Keycloak), receive a JWT, and verify it locally. SAML is the enterprise web SSO standard (older than OIDC, XML-based) — you'll encounter it when integrating with corporate SSO. Most modern self-hosted apps support OIDC; legacy apps often only support LDAP. Authentik and Keycloak speak all three.
+
+**Certificate lifecycle management:** Certificates expire. Expired certificates cause outages. step-ca and cert-manager automate issuance and renewal — but you still need to understand the concepts. A CA (Certificate Authority) signs certificates with its private key. Clients trust certificates signed by CAs in their trust store. Short-lived certificates (24h–7 days, used by Teleport and service meshes) are more secure than long-lived ones (1 year) because there's less window for a compromised cert to be misused. Intermediate CAs (step-ca creates one automatically) limit blast radius if the root key is compromised.
+
+**SIEM, SOC, and log correlation:** A SIEM (Security Information and Event Management system — Wazuh, Elastic SIEM) collects logs from all sources, normalises them, and applies correlation rules to detect attack patterns. A single failed SSH login is noise; 1000 failed logins from one IP in 10 seconds is a brute-force attempt. SIEM rules encode this logic. A SOC (Security Operations Centre) is the team that watches the SIEM. For self-hosters: Wazuh agents on every host, log forwarding from containers, and alerting to a notification channel gives you >80% of enterprise SOC capability.
+
+**Container and Kubernetes hardening checklist:** The most common misconfigurations, in order of frequency: (1) running as root (`runAsNonRoot: true` fixes this), (2) `hostPID: true` / `hostNetwork: true` (gives container access to host namespaces — almost never needed), (3) `privileged: true` (full host access — equivalent to root on the node), (4) no seccomp profile (allows all ~300+ syscalls — use `RuntimeDefault`), (5) writable root filesystem (`readOnlyRootFilesystem: true` limits malware persistence), (6) no resource limits (a compromised container can consume all host resources).
+
+**Vulnerability management workflow:** Scanning finds vulnerabilities; management decides what to do with them. The workflow: scan (Trivy, Grype) → import to tracker (Defect Dojo) → triage by severity and exploitability → assign owner → fix (update dependency, apply patch, add WAF rule) → rescan to verify. Not all Criticals are equal: a Critical CVE in a library that's never called from your code path is lower priority than a High in your authentication path. Context matters. SLA targets (Critical: 24h, High: 7 days) provide an objective standard.
+
+**Passkeys and WebAuthn — replacing passwords:** WebAuthn (the standard behind passkeys) uses public-key cryptography for authentication. The private key never leaves the device (stored in secure enclave or hardware key). Login: the server sends a challenge, the device signs it with the private key, the server verifies with the stored public key. This eliminates: phishing (the signature is bound to the origin domain), credential stuffing (no reusable password), and password database breaches (only public keys are stored). Pocket ID and Kanidm are purpose-built for passkey-only auth. Vaultwarden supports WebAuthn for 2FA.
+---
+---
+
+---
+
 ## Vaultwarden
 
 **Purpose:** Lightweight, Bitwarden-compatible password server. Your Bitwarden mobile app, browser extension, and desktop app all connect to your own server. Passwords, TOTP codes, secure notes, organisations, and sends — all on your hardware with no Bitwarden cloud subscription.
@@ -2382,50 +2438,6 @@ rm /tmp/prod.secrets.tfvars
 
 > **Key rotation:** When a team member leaves, re-encrypt all SOPS files with their key removed from `.sops.yaml`. Run `sops updatekeys secrets.yaml` to rotate encryption without decrypting/re-encrypting manually — SOPS re-encrypts the data key for the new recipient set.
 
-
----
-
-## Job-Ready Concepts
-
-### Security Interview Essentials
-
-**Zero Trust principles:** "Never trust, always verify." Traditional perimeter security trusts anything inside the network. Zero trust verifies every request regardless of source — inside or outside the network — using identity, device posture, and minimal-privilege access. Implementation: mTLS between services, short-lived certificates (not long-lived API keys), device posture checks (is the OS patched?), least-privilege RBAC, and session recording for privileged access (Teleport).
-
-**Principle of least privilege (PoLP):** Every user, process, and service gets only the permissions it needs — nothing more. In Kubernetes: ServiceAccounts with narrow Roles, not cluster-admin. In AWS: IAM roles scoped to specific S3 buckets and actions. In Linux: non-root containers, no `SYS_ADMIN` unless necessary. Violations are the root cause of most lateral movement after a breach.
-
-**Defence in depth:** Multiple layers of security so that no single failure compromises the entire system. Example stack: WAF (Coraza) → reverse proxy authentication (Authelia) → network segmentation (NetworkPolicy) → container sandboxing (seccomp, AppArmor) → runtime detection (Falco) → SIEM (Wazuh). An attacker who defeats one layer still faces the next.
-
-**OAuth2 flows — which to use when:**
-- **Authorization Code + PKCE** — for web and mobile apps where a user logs in. The current gold standard. PKCE prevents code interception.
-- **Client Credentials** — for machine-to-machine (service-to-service). No user involved. Use for CI/CD tokens and API-to-API calls.
-- **Device Code** — for CLI tools and devices without a browser (headless servers, smart TVs).
-- **Implicit flow** — deprecated. Do not use.
-
-**JWT structure and common mistakes:**
-A JWT has three base64url-encoded parts: `header.payload.signature`. The header declares the algorithm; the payload contains claims (sub, exp, iat, scopes); the signature verifies integrity. Common mistakes: (1) accepting `alg: none` — always reject this; (2) not verifying `exp` — always check expiry; (3) putting sensitive data in the payload — it's encoded, not encrypted (anyone can read it with base64 decode); (4) not rotating signing keys.
-
-**OWASP Top 10 in one line each (for interviews):**
-A01 Broken Access Control: users can access data/actions they shouldn't (IDOR, privilege escalation). A02 Cryptographic Failures: sensitive data exposed due to weak/missing encryption. A03 Injection: user input interpreted as code (SQL, command). A04 Insecure Design: security not considered in architecture. A05 Security Misconfiguration: default credentials, unnecessary services. A06 Vulnerable Components: outdated dependencies with CVEs. A07 Auth Failures: weak passwords, no MFA, session fixation. A08 Software Integrity: unsigned updates, compromised CI/CD pipeline. A09 Logging Failures: breaches go undetected. A10 SSRF: server fetches attacker-controlled URLs.
-
-**Hash functions vs encryption vs encoding:**
-- **Encoding** (base64, hex) — reversible transformation, no key, provides no security — just a format change
-- **Hashing** (SHA-256, bcrypt) — one-way, no key; used for integrity checks and password storage; bcrypt adds a work factor (slow by design)
-- **Symmetric encryption** (AES-256-GCM) — reversible with the same key; fast; used for data at rest
-- **Asymmetric encryption** (RSA, ECDSA) — public key encrypts/verifies, private key decrypts/signs; used for TLS, JWT signing, SSH keys
-
-**Supply chain security basics:** Three vectors to understand: (1) Source — code in your repo (Semgrep SAST, secret scanning). (2) Build — CI pipeline integrity (Tekton Chains SLSA provenance, cosign signing). (3) Dependency — third-party packages and base images (Trivy, Grype, Renovate, Dependency-Track). The 2020 SolarWinds attack and 2021 Log4Shell are canonical examples of each vector.
-
-**Secrets management anti-patterns:**
-- Hardcoded secrets in source code (most common, caught by Semgrep `p/secrets`)
-- Secrets in environment variables that get printed to logs
-- Long-lived API keys that never rotate
-- Sharing credentials across environments (staging DB password = prod DB password)
-- Secrets in Kubernetes manifests committed to Git without encryption (use SOPS + age or Sealed Secrets)
-
-**Vulnerability severity levels (CVSS):** CVSS (Common Vulnerability Scoring System) scores 0–10. Critical 9.0–10.0, High 7.0–8.9, Medium 4.0–6.9, Low 0.1–3.9. For triaging: fix Criticals within 24h, Highs within 7 days. Tools (Trivy, Grype, Nuclei) report these severities. In Defect Dojo you set SLA targets per severity.
-
----
----
 
 ## Caddy Configuration
 

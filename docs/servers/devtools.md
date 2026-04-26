@@ -13,6 +13,43 @@ Infrastructure, CI/CD, monitoring, code hosting, and development utilities.
 
 ---
 
+## Job-Ready Concepts
+
+### Developer Tools Interview Essentials
+
+**Git internals that come up in interviews:**
+- Every commit is a snapshot (not a diff), identified by a SHA-1 hash of its content, author, timestamp, and parent commit hash. This is why commits are immutable and content-addressable.
+- `git rebase` replays commits on top of a new base, creating new SHAs. `git merge` creates a merge commit. Neither is universally better — rebase gives a linear history, merge preserves branch topology.
+- `git cherry-pick` applies a single commit's changes to the current branch. Useful for backporting fixes.
+- `git bisect` does a binary search through commit history to find which commit introduced a bug. Requires a `git bisect good` / `git bisect bad` signal — often a test script.
+
+**Code review best practices:** Reviews should be < 400 lines of changed code per PR — larger PRs have significantly lower defect detection rates. The author's job is to make the reviewer's job easy: meaningful PR description, small atomic commits, tests included. The reviewer's job is to focus on correctness, not style (automated formatters handle style). LGTM without reading = the most common code review failure mode.
+
+**Testing pyramid:** Unit tests (many, fast, no I/O) → Integration tests (fewer, slower, hit real dependencies) → End-to-end / UI tests (fewest, slowest, full stack). Inverting the pyramid (many E2E, few unit tests) makes CI slow and brittle. A common interview question: "where do you add coverage?" — start with units for logic, integration for DB queries, E2E only for critical happy paths.
+
+**Static analysis vs dynamic analysis:**
+- Static analysis (Semgrep, ESLint, `mypy`) inspects code without running it. Fast, catches bugs early, zero runtime cost. Can have false positives.
+- Dynamic analysis (ZAP, Valgrind, sanitizers) runs the code and observes behaviour. Catches runtime bugs that static analysis misses (memory corruption, race conditions) but requires execution.
+
+**Container build performance:** Layer caching is the key lever. Layers that change rarely (OS packages, language runtime) go first; layers that change often (application code) go last. Using `--mount=type=cache` in BuildKit (or `podman build --layers`) caches package manager download directories (pip cache, npm cache) across builds, dramatically reducing build times for dependency-heavy projects.
+
+**Inner loop vs outer loop development:** Inner loop = the tight cycle of edit-build-run on your laptop (code-server, hot reload, `tilt up`). Outer loop = the CI pipeline (Woodpecker, Forgejo Actions, GitHub Actions). Fast inner loops require good local tooling (kind, minikube, Tilt, Skaffold) so you're not waiting for CI. The goal: < 1 second feedback for syntax errors, < 10 seconds for unit tests, < 5 minutes for the full CI pipeline.
+
+
+**Service discovery patterns (Consul):** Services register with Consul on startup (name, address, port, health check endpoint). Clients query Consul's DNS (`service-name.service.consul`) or HTTP API to find a live instance — no hardcoded IPs. When a service fails its health check, Consul removes it from the registry automatically. This is how Nomad jobs find each other without environment variables or static config files. At work, you'll see this pattern in bare-metal microservice deployments, or as a sidecar in container environments that aren't on Kubernetes.
+
+**Nomad vs Kubernetes — when Nomad wins:** Kubernetes is the dominant orchestrator, but Nomad handles workloads K8s can't: raw binaries, Java JAR files, Batch jobs with complex scheduling, and VM workloads. Nomad's job spec is simpler and more flexible than K8s manifests — a single binary, no etcd dependency. Teams already using the HashiCorp stack (Vault, Consul, Terraform) choose Nomad for its tight integration. Know both; most large shops run Kubernetes but may have legacy Nomad clusters.
+
+**Artifact management — why it matters:** A container registry (Harbor, Nexus, Artifactory) isn't just storage — it's a security boundary. Pull-through proxy caches upstream images locally (faster builds, no DockerHub rate limits). Vulnerability scanning at push time (Trivy in Harbor) blocks vulnerable images from entering the pipeline. Image signing (cosign, Notary) provides provenance — the cluster can verify an image was built by your CI and not tampered with. In a regulated environment, pulling directly from DockerHub is a compliance finding.
+
+**SonarQube quality gates:** A quality gate is a pass/fail threshold on code quality metrics — if new code introduces a coverage drop below 80%, a critical bug, or a security hotspot, the gate fails and the CI pipeline stops. This enforces quality as a pipeline concern rather than a post-merge review. The key metrics: Reliability (bugs), Security (vulnerabilities + hotspots), Maintainability (code smells, duplications), and Coverage. In interviews, distinguish SonarQube (code quality) from Semgrep (security patterns) — they complement each other.
+
+**Renovate vs Dependabot:** Both auto-generate PRs to update dependencies. Renovate is more configurable: custom update schedules, grouping multiple dependencies into a single PR, auto-merging patch updates that pass CI, and monorepo support. Dependabot is simpler and built into GitHub. At scale, unmanaged dependencies become the largest source of CVEs — automated dependency updates with CI checks are the lowest-effort high-impact security practice.
+---
+---
+
+---
+
 ## Gitea & Forgejo
 
 **Purpose:** Lightweight, self-hosted Git servers with web UI, issue tracking, wikis, pull requests, and CI integration. Forgejo is a community-driven fork with identical CLI/API. Use Gitea/Forgejo as your private GitHub — complete with Actions-compatible CI.
@@ -1262,33 +1299,6 @@ backstage.home.local { tls internal; reverse_proxy localhost:7007 }
 
 > 💡 Backstage is most valuable once you have 5+ services. Start small — register a few services with `catalog-info.yaml` files in their repos, then add plugins incrementally (ArgoCD, Kubernetes, TechDocs).
 
-
----
-
-## Job-Ready Concepts
-
-### Developer Tools Interview Essentials
-
-**Git internals that come up in interviews:**
-- Every commit is a snapshot (not a diff), identified by a SHA-1 hash of its content, author, timestamp, and parent commit hash. This is why commits are immutable and content-addressable.
-- `git rebase` replays commits on top of a new base, creating new SHAs. `git merge` creates a merge commit. Neither is universally better — rebase gives a linear history, merge preserves branch topology.
-- `git cherry-pick` applies a single commit's changes to the current branch. Useful for backporting fixes.
-- `git bisect` does a binary search through commit history to find which commit introduced a bug. Requires a `git bisect good` / `git bisect bad` signal — often a test script.
-
-**Code review best practices:** Reviews should be < 400 lines of changed code per PR — larger PRs have significantly lower defect detection rates. The author's job is to make the reviewer's job easy: meaningful PR description, small atomic commits, tests included. The reviewer's job is to focus on correctness, not style (automated formatters handle style). LGTM without reading = the most common code review failure mode.
-
-**Testing pyramid:** Unit tests (many, fast, no I/O) → Integration tests (fewer, slower, hit real dependencies) → End-to-end / UI tests (fewest, slowest, full stack). Inverting the pyramid (many E2E, few unit tests) makes CI slow and brittle. A common interview question: "where do you add coverage?" — start with units for logic, integration for DB queries, E2E only for critical happy paths.
-
-**Static analysis vs dynamic analysis:**
-- Static analysis (Semgrep, ESLint, `mypy`) inspects code without running it. Fast, catches bugs early, zero runtime cost. Can have false positives.
-- Dynamic analysis (ZAP, Valgrind, sanitizers) runs the code and observes behaviour. Catches runtime bugs that static analysis misses (memory corruption, race conditions) but requires execution.
-
-**Container build performance:** Layer caching is the key lever. Layers that change rarely (OS packages, language runtime) go first; layers that change often (application code) go last. Using `--mount=type=cache` in BuildKit (or `podman build --layers`) caches package manager download directories (pip cache, npm cache) across builds, dramatically reducing build times for dependency-heavy projects.
-
-**Inner loop vs outer loop development:** Inner loop = the tight cycle of edit-build-run on your laptop (code-server, hot reload, `tilt up`). Outer loop = the CI pipeline (Woodpecker, Forgejo Actions, GitHub Actions). Fast inner loops require good local tooling (kind, minikube, Tilt, Skaffold) so you're not waiting for CI. The goal: < 1 second feedback for syntax errors, < 10 seconds for unit tests, < 5 minutes for the full CI pipeline.
-
----
----
 
 ## Caddy Configuration
 

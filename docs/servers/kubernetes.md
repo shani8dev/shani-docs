@@ -84,6 +84,18 @@ Both key-value stores. ConfigMaps are for non-sensitive configuration. Secrets a
 - **KEDA** — event-driven scaling including scale-to-zero
 - **Cluster Autoscaler / Karpenter** — adds/removes nodes based on pending pods
 
+
+**RBAC mental model:** Every action in Kubernetes is: a *verb* (get, list, watch, create, update, patch, delete) on a *resource* (pods, deployments, secrets) in a *namespace*. A Role defines allowed verb+resource combinations. A RoleBinding binds a Role to a subject (User, Group, ServiceAccount). ClusterRole/ClusterRoleBinding apply cluster-wide. The principle of least privilege: CI/CD service accounts should have `create`/`update` on Deployments only, not `get` on Secrets. `kubectl auth can-i --list --as system:serviceaccount:default:myapp` shows what a service account can do.
+
+**Network policies — default deny pattern:** By default, all pods can communicate with all pods. Network Policies are a whitelist — once you apply one to a pod, only explicitly allowed traffic is permitted. The production pattern: apply a default-deny-all policy to every namespace, then add explicit ingress/egress rules. This limits blast radius — a compromised pod in namespace `frontend` can't reach `postgres` in namespace `data` unless a policy explicitly allows it. Cilium and Calico enforce these at the kernel level (eBPF).
+
+**StatefulSets vs Deployments:** Deployments assume pods are stateless and interchangeable — they can be killed and replaced in any order. StatefulSets provide: stable pod names (`pod-0`, `pod-1`), stable DNS (`pod-0.svc.namespace.svc.cluster.local`), ordered startup/shutdown, and per-pod PersistentVolumeClaims. Use StatefulSets for databases, Kafka, ZooKeeper, and anything that needs stable identity. The tradeoff: rolling updates are slower (one pod at a time, waiting for readiness) and PVCs aren't automatically deleted when you scale down.
+
+**DORA metrics and what they mean for your team:** Four metrics measure software delivery performance: Deployment Frequency (how often you deploy), Lead Time for Changes (commit to production), Change Failure Rate (% of deployments causing incidents), and Time to Restore (MTTR when things break). Elite teams deploy multiple times per day with <1h lead time and <5% failure rate, recovering in under an hour. These aren't vanity metrics — low deployment frequency predicts burnout (big-bang releases); high change failure rate predicts firefighting culture.
+
+**Admission webhooks — the Kubernetes extension point:** Before any object is persisted to etcd, it passes through admission controllers. Mutating webhooks can modify the object (inject a sidecar, add labels, set default resource limits). Validating webhooks can reject it (block images without a signature, prevent privileged containers, require certain labels). Tools that use this: Kyverno (policy engine), OPA/Gatekeeper, Istio (sidecar injection), Linkerd (proxy injection). This is how platform teams enforce standards without editing every developer's manifests.
+
+**Persistent storage in Kubernetes — the CSI model:** Container Storage Interface (CSI) is the plugin standard for storage providers. A CSI driver (Longhorn, Rook-Ceph, AWS EBS, GCE PD) implements Create/Attach/Mount for volumes. PersistentVolumeClaims are requests for storage (size, access mode, storage class). The StorageClass determines which CSI driver handles provisioning and what parameters to use. Access modes: `ReadWriteOnce` (one node), `ReadWriteMany` (multiple nodes — requires NFS or Ceph FS), `ReadOnlyMany`. Velero backs up PVs by snapshotting them via CSI.
 ---
 
 ## Choosing a Distribution

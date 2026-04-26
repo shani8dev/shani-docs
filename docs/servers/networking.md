@@ -13,6 +13,60 @@ DNS filtering, privacy-friendly analytics, search engines, dashboards, latency m
 
 ---
 
+## Job-Ready Concepts
+
+### Networking Interview Essentials
+
+**OSI model in practice:** Interviewers ask this to test whether you can reason about where a problem is occurring. Useful frames:
+- Layer 3 (Network) problem: `ping` fails, wrong route, IP unreachable
+- Layer 4 (Transport) problem: TCP connection times out or is refused, wrong port, firewall blocking
+- Layer 7 (Application) problem: connection works but HTTP returns wrong status, TLS cert mismatch, wrong Host header
+
+**DNS resolution chain:** Browser checks local cache → OS cache → `/etc/hosts` → configured resolver (Pi-hole, AdGuard) → resolver queries root nameservers → TLD nameserver → authoritative nameserver → response cached at each layer with TTL. `dig +trace` shows the full chain.
+
+**Subnetting mental model:** A `/24` has 256 addresses (254 usable — first is network address, last is broadcast). A `/25` splits a `/24` in half (128 addresses each). Each bit you add to the prefix halves the subnet. Common subnets: `/32` (single host), `/30` (4 addr, 2 usable — point-to-point links), `/29` (8 addr), `/28` (16), `/27` (32), `/26` (64), `/25` (128), `/24` (256), `/16` (65,536).
+
+**NAT types and VPN implications:**
+- Full-cone NAT: any external host can reach the mapped port (rare, easy for VPNs)
+- Symmetric NAT: each outbound connection gets a different external port mapping (common on corporate networks — breaks WireGuard hole-punching, requires TURN relay)
+- Port-restricted cone NAT: most home routers; WireGuard hole-punching works with STUN
+
+**How HTTPS actually works (TLS 1.3 handshake):**
+1. Client sends `ClientHello` with supported cipher suites and a key share
+2. Server responds with `ServerHello`, its certificate, and its key share — in *one round trip* (TLS 1.3 optimisation)
+3. Both sides derive the session key from the key exchange (ECDHE)
+4. Client verifies the server's certificate against trusted CAs
+5. Encrypted application data flows
+
+**Reverse proxy vs forward proxy:** A reverse proxy sits in front of servers — clients talk to the proxy, which forwards to the backend (Caddy, Nginx, Traefik, HAProxy). The client often doesn't know there's a backend at all. A forward proxy sits in front of clients — clients send all traffic to the proxy, which forwards to the internet (Squid, corporate web proxy). VPNs act like forward proxies for encrypted traffic.
+
+**Load balancing algorithms:**
+- **Round robin** — requests distributed equally in turn
+- **Least connections** — new request goes to the backend with fewest active connections (better for varied request lengths)
+- **IP hash / source hash** — same client IP always goes to the same backend (sticky sessions without cookies)
+- **Weighted** — backends have weights; higher-weight servers get more traffic (useful for canary deployments or mixed instance sizes)
+
+**BGP (Border Gateway Protocol) basics for interviews:** BGP is the routing protocol of the internet — it exchanges reachability information between Autonomous Systems (ASes). Each AS has an AS number (ASN). iBGP (interior) routes within one AS; eBGP (exterior) routes between ASes. BGP is a path-vector protocol — it chooses routes based on AS-path length and policy attributes. Relevant in homelab with FRRouting, and in cloud when advertising VPC routes or Tailscale subnets into your network.
+
+**VLAN fundamentals:** A VLAN (Virtual LAN) segments a physical switch into multiple logical networks. Tagged frames (802.1Q) carry a VLAN ID in the Ethernet header. Trunk ports carry multiple VLANs; access ports carry one. Common segmentation: IoT VLAN (isolated), servers VLAN, management VLAN. VLANs don't cross routers without explicit routing or an SVR (Switched Virtual Router) interface.
+
+**MTU and fragmentation:** Maximum Transmission Unit — the largest packet a link will carry. Ethernet's standard MTU is 1500 bytes. VPN tunnels add overhead (WireGuard adds ~32–60 bytes), which reduces the effective inner MTU. Setting the wrong MTU causes silent data corruption or dropped connections for large packets. Fix: set MSS clamping (`--clamp-mss-to-pmtu` in WireGuard/iptables) or discover the path MTU with `ping -M do -s 1400`.
+
+
+**Reverse proxy patterns — Caddy vs Nginx vs Traefik vs HAProxy:** Each serves a different primary use case. Caddy: automatic HTTPS (ACME), human-readable config, best for homelab and small deployments. Nginx: highest throughput, battle-tested, extensive module ecosystem, config is verbose. Traefik: auto-discovers routes from container labels — zero-config for Docker/Kubernetes, but harder to reason about in complex setups. HAProxy: the performance and reliability choice for TCP-level load balancing, used in front of databases and Kubernetes control planes. Know which layer each operates at: Caddy/Nginx/Traefik are L7 (HTTP); HAProxy works at L4 and L7.
+
+**DNS-based service discovery:** DNS TTL is the core reliability lever. A low TTL (30–60s) means changes propagate fast but increases DNS query load. A high TTL (3600s) means failures persist until TTL expires. In internal DNS (Technitium, PowerDNS), keep TTLs low for services that change. Health-check-based DNS (Route53 health checks, PowerDNS with health checking) removes failing IPs from DNS automatically — a primitive but effective load balancing and failover mechanism.
+
+**DHCP and IPAM operational reality:** In a managed network, every IP assignment should be intentional. Static DHCP leases (assign a fixed IP based on MAC address) give services predictable addresses without manual configuration on each device. An IPAM tool (NetBox, phpIPAM) is the source of truth — it documents what IP belongs to what device, VLAN, and subnet. Without IPAM, IP conflicts are a matter of when, not if. DHCP servers (Kea, dnsmasq) should feed lease data back to IPAM automatically.
+
+**Caching proxy and bandwidth management:** A caching proxy (Squid) intercepts HTTP/HTTPS requests and serves cached responses. Benefits: reduced bandwidth (shared package mirrors, container image layers), content filtering, access logs, and enforced egress policies. In a homelab, a Squid proxy in front of package managers (apt, pip, npm) dramatically reduces external bandwidth. In enterprises, forward proxies are often mandatory — traffic that doesn't go through the proxy is blocked at the firewall.
+
+**Dynamic routing protocols — when BGP/OSPF matters:** Static routes work until you have more than a handful of subnets or multiple uplinks. OSPF is the internal routing protocol — routers share topology, calculate shortest paths, and converge automatically when a link fails. BGP is the external protocol — used to announce your IP space to an ISP, or to distribute routes between multiple sites. FRRouting brings both to Linux. In a homelab, BGP is used with MetalLB (announce LoadBalancer IPs to a router) or multi-site WireGuard (distribute subnet routes between locations).
+---
+---
+
+---
+
 ## Pi-hole
 
 **Purpose:** Network-wide DNS ad and tracker blocker. Runs as your LAN's DNS server and blocks ads, telemetry, and malware domains for every device — phones, smart TVs, IoT — without installing anything on them.
@@ -1299,50 +1353,6 @@ exit
 
 > **FRR vs a dedicated router VM:** FRR in a container is appropriate for BGP peering, route redistribution, and learning. For a full home router (DHCP, NAT, firewall, PPPoE), use OPNsense or pfSense on a dedicated machine or VM. FRR and OPNsense complement each other — OPNsense handles the internet edge, FRR handles internal routing between segments.
 
-
----
-
-## Job-Ready Concepts
-
-### Networking Interview Essentials
-
-**OSI model in practice:** Interviewers ask this to test whether you can reason about where a problem is occurring. Useful frames:
-- Layer 3 (Network) problem: `ping` fails, wrong route, IP unreachable
-- Layer 4 (Transport) problem: TCP connection times out or is refused, wrong port, firewall blocking
-- Layer 7 (Application) problem: connection works but HTTP returns wrong status, TLS cert mismatch, wrong Host header
-
-**DNS resolution chain:** Browser checks local cache → OS cache → `/etc/hosts` → configured resolver (Pi-hole, AdGuard) → resolver queries root nameservers → TLD nameserver → authoritative nameserver → response cached at each layer with TTL. `dig +trace` shows the full chain.
-
-**Subnetting mental model:** A `/24` has 256 addresses (254 usable — first is network address, last is broadcast). A `/25` splits a `/24` in half (128 addresses each). Each bit you add to the prefix halves the subnet. Common subnets: `/32` (single host), `/30` (4 addr, 2 usable — point-to-point links), `/29` (8 addr), `/28` (16), `/27` (32), `/26` (64), `/25` (128), `/24` (256), `/16` (65,536).
-
-**NAT types and VPN implications:**
-- Full-cone NAT: any external host can reach the mapped port (rare, easy for VPNs)
-- Symmetric NAT: each outbound connection gets a different external port mapping (common on corporate networks — breaks WireGuard hole-punching, requires TURN relay)
-- Port-restricted cone NAT: most home routers; WireGuard hole-punching works with STUN
-
-**How HTTPS actually works (TLS 1.3 handshake):**
-1. Client sends `ClientHello` with supported cipher suites and a key share
-2. Server responds with `ServerHello`, its certificate, and its key share — in *one round trip* (TLS 1.3 optimisation)
-3. Both sides derive the session key from the key exchange (ECDHE)
-4. Client verifies the server's certificate against trusted CAs
-5. Encrypted application data flows
-
-**Reverse proxy vs forward proxy:** A reverse proxy sits in front of servers — clients talk to the proxy, which forwards to the backend (Caddy, Nginx, Traefik, HAProxy). The client often doesn't know there's a backend at all. A forward proxy sits in front of clients — clients send all traffic to the proxy, which forwards to the internet (Squid, corporate web proxy). VPNs act like forward proxies for encrypted traffic.
-
-**Load balancing algorithms:**
-- **Round robin** — requests distributed equally in turn
-- **Least connections** — new request goes to the backend with fewest active connections (better for varied request lengths)
-- **IP hash / source hash** — same client IP always goes to the same backend (sticky sessions without cookies)
-- **Weighted** — backends have weights; higher-weight servers get more traffic (useful for canary deployments or mixed instance sizes)
-
-**BGP (Border Gateway Protocol) basics for interviews:** BGP is the routing protocol of the internet — it exchanges reachability information between Autonomous Systems (ASes). Each AS has an AS number (ASN). iBGP (interior) routes within one AS; eBGP (exterior) routes between ASes. BGP is a path-vector protocol — it chooses routes based on AS-path length and policy attributes. Relevant in homelab with FRRouting, and in cloud when advertising VPC routes or Tailscale subnets into your network.
-
-**VLAN fundamentals:** A VLAN (Virtual LAN) segments a physical switch into multiple logical networks. Tagged frames (802.1Q) carry a VLAN ID in the Ethernet header. Trunk ports carry multiple VLANs; access ports carry one. Common segmentation: IoT VLAN (isolated), servers VLAN, management VLAN. VLANs don't cross routers without explicit routing or an SVR (Switched Virtual Router) interface.
-
-**MTU and fragmentation:** Maximum Transmission Unit — the largest packet a link will carry. Ethernet's standard MTU is 1500 bytes. VPN tunnels add overhead (WireGuard adds ~32–60 bytes), which reduces the effective inner MTU. Setting the wrong MTU causes silent data corruption or dropped connections for large packets. Fix: set MSS clamping (`--clamp-mss-to-pmtu` in WireGuard/iptables) or discover the path MTU with `ping -M do -s 1400`.
-
----
----
 
 ## Caddy Configuration
 

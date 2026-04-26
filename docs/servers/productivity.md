@@ -13,6 +13,35 @@ Self-hosted cloud storage, file sync, document management, task management, know
 
 ---
 
+## Job-Ready Concepts
+
+### Productivity Tools & Platform Engineering Interview Essentials
+
+**Internal Developer Platforms (IDPs) — what they solve:** Without an IDP, every developer needs to know: how to provision infrastructure (Terraform), how to set up CI/CD (Woodpecker/GitHub Actions), how to configure observability (Prometheus + Grafana), how to manage secrets (OpenBao), and how to deploy (Helm + ArgoCD). An IDP (Backstage, Port) wraps all of this in a self-service UI with golden path templates. A developer fills in a form and gets a GitHub repo, CI pipeline, Kubernetes namespace, database, and Grafana dashboard — all wired together. This is what "platform engineering" means in practice.
+
+**Document-as-code vs knowledge wiki:** "Docs-as-code" treats documentation like source code — Markdown files in Git, reviewed via PRs, versioned alongside the code they describe, rendered by a static site generator (Docusaurus). This contrasts with wikis (Confluence, BookStack) where docs live in a database, aren't version-controlled with code, and aren't part of the review process. Best practice: API docs and runbooks live in the code repo; architectural decision records (ADRs) also live in Git; long-form internal knowledge in a wiki.
+
+**Architecture Decision Records (ADRs):** Lightweight documents that capture the context, decision, and consequences of a significant technical decision. Stored in `docs/adr/` in the repo. Format: (1) Status (proposed/accepted/deprecated/superseded), (2) Context (what problem, what constraints), (3) Decision (what was chosen), (4) Consequences (trade-offs). ADRs let future engineers understand *why* a decision was made, not just *what* was decided. Essential for remote teams and long-lived systems.
+
+**Webhook-driven automation patterns:** A webhook is an HTTP POST that an event source sends to a configured URL when something happens. Gitea sends a webhook on push → Woodpecker CI starts a pipeline. GitHub sends a webhook on PR merge → n8n workflow updates a Jira ticket. Webhooks are stateless and fire-and-forget — the source doesn't wait for the receiver. For reliability, the receiver should acknowledge immediately (HTTP 200) and process asynchronously. Webhook security: always verify the HMAC-SHA256 signature in the `X-Gitea-Signature` or `X-Hub-Signature-256` header.
+
+**S3-compatible storage in the modern stack:** Understanding the S3 API is a core DevOps skill because it's used by: Velero (Kubernetes backups), Restic/Kopia (file backups), Thanos (Prometheus long-term storage), Loki (log storage), MLflow (model artifacts), and dozens of other tools. The key operations: PutObject, GetObject, DeleteObject, ListObjectsV2. Presigned URLs (time-limited, signature-authenticated URLs for direct client access) come up in interview questions about secure file sharing.
+
+
+**Self-hosted vs SaaS trade-offs — the honest framing:** Self-hosting gives you data sovereignty, no per-seat pricing, and customisation. The real costs: operational overhead (updates, backups, uptime), security responsibility (you patch the CVEs, not the vendor), and feature gaps (SaaS products have larger engineering teams). The right answer depends on data sensitivity (medical/legal → self-host), team size (one person managing 20 self-hosted apps is a maintenance burden), and internet reliability (self-hosted services go down when your home internet does).
+
+**Nextcloud as a platform, not just file sync:** Nextcloud's app ecosystem makes it more than Dropbox. Talk (video calls + chat), Calendar (CalDAV), Contacts (CardDAV), Notes, Deck (Kanban), and Forms extend it toward a self-hosted Google Workspace. The key architecture decision: high-performance backend (Redis for caching, PostgreSQL over SQLite, preview generation workers) makes the difference between a slow clunky app and one that feels like a real SaaS product. External storage mounts (S3, SFTP, SMB) let you use Nextcloud as a unified frontend for data that lives elsewhere.
+
+**Workflow automation — n8n vs Zapier mental model:** n8n is a self-hosted Zapier/Make alternative: visual, node-based automation flows triggered by webhooks, schedules, or events. Each node is an action (HTTP request, database query, email send, Slack message). The key concept is the data flow between nodes — each node receives the previous node's output as JSON. Useful patterns: nightly report from Prometheus data → formatted Markdown → sent to Telegram; new row in Nextcloud spreadsheet → create task in Vikunja; RSS item with keyword → saved to Wallabag. For DevOps automation (CI/CD, Kubernetes), prefer purpose-built tools; n8n is best for glue code between productivity apps.
+
+**CalDAV and CardDAV — the open calendar/contacts standard:** These protocols (extensions of WebDAV) are how Nextcloud, Radicale, and Baikal expose calendars and contacts to any client (iOS, Android, Thunderbird, GNOME Calendar). Understanding them matters because: (1) any self-hosted calendar server can replace Google Calendar if your clients support CalDAV, (2) when debugging sync issues, the protocol is the same regardless of server, (3) event data lives in iCalendar format (.ics) — human-readable, version-controllable.
+
+**Documentation as institutional memory:** The half-life of tribal knowledge is the tenure of the person who holds it. A wiki (BookStack, Outline, Wiki.js) only provides value if it's kept current and actually consulted. Two practices that work: (1) runbooks linked from Grafana alerts — the person paged opens the alert and sees the runbook URL immediately, so runbooks get used and therefore get maintained; (2) ADRs committed alongside code — the PR that adds a service also adds a doc/adr explaining why.
+---
+---
+
+---
+
 ## Nextcloud
 
 **Purpose:** Comprehensive self-hosted cloud suite — file sync across all your devices, calendar, contacts, collaborative document editing (via Collabora or OnlyOffice), and a mobile app that feels like Google Drive. Replaces Dropbox, Google Drive, Google Calendar, and Google Contacts simultaneously.
@@ -1836,25 +1865,6 @@ wiki.home.local { tls internal; reverse_proxy localhost:3800 }
 
 > **Docmost vs Outline:** Docmost requires fewer dependencies (no MinIO/S3 for storage — files go to the local volume), has no mandatory SSO requirement, and is faster to get running. Outline has a more mature ecosystem and stronger integrations. For a solo or small-team homelab wiki, Docmost is the easier starting point.
 
-
----
-
-## Job-Ready Concepts
-
-### Productivity Tools & Platform Engineering Interview Essentials
-
-**Internal Developer Platforms (IDPs) — what they solve:** Without an IDP, every developer needs to know: how to provision infrastructure (Terraform), how to set up CI/CD (Woodpecker/GitHub Actions), how to configure observability (Prometheus + Grafana), how to manage secrets (OpenBao), and how to deploy (Helm + ArgoCD). An IDP (Backstage, Port) wraps all of this in a self-service UI with golden path templates. A developer fills in a form and gets a GitHub repo, CI pipeline, Kubernetes namespace, database, and Grafana dashboard — all wired together. This is what "platform engineering" means in practice.
-
-**Document-as-code vs knowledge wiki:** "Docs-as-code" treats documentation like source code — Markdown files in Git, reviewed via PRs, versioned alongside the code they describe, rendered by a static site generator (Docusaurus). This contrasts with wikis (Confluence, BookStack) where docs live in a database, aren't version-controlled with code, and aren't part of the review process. Best practice: API docs and runbooks live in the code repo; architectural decision records (ADRs) also live in Git; long-form internal knowledge in a wiki.
-
-**Architecture Decision Records (ADRs):** Lightweight documents that capture the context, decision, and consequences of a significant technical decision. Stored in `docs/adr/` in the repo. Format: (1) Status (proposed/accepted/deprecated/superseded), (2) Context (what problem, what constraints), (3) Decision (what was chosen), (4) Consequences (trade-offs). ADRs let future engineers understand *why* a decision was made, not just *what* was decided. Essential for remote teams and long-lived systems.
-
-**Webhook-driven automation patterns:** A webhook is an HTTP POST that an event source sends to a configured URL when something happens. Gitea sends a webhook on push → Woodpecker CI starts a pipeline. GitHub sends a webhook on PR merge → n8n workflow updates a Jira ticket. Webhooks are stateless and fire-and-forget — the source doesn't wait for the receiver. For reliability, the receiver should acknowledge immediately (HTTP 200) and process asynchronously. Webhook security: always verify the HMAC-SHA256 signature in the `X-Gitea-Signature` or `X-Hub-Signature-256` header.
-
-**S3-compatible storage in the modern stack:** Understanding the S3 API is a core DevOps skill because it's used by: Velero (Kubernetes backups), Restic/Kopia (file backups), Thanos (Prometheus long-term storage), Loki (log storage), MLflow (model artifacts), and dozens of other tools. The key operations: PutObject, GetObject, DeleteObject, ListObjectsV2. Presigned URLs (time-limited, signature-authenticated URLs for direct client access) come up in interview questions about secure file sharing.
-
----
----
 
 ## Caddy Configuration
 

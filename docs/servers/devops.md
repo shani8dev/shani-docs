@@ -13,6 +13,47 @@ CI/CD, code hosting, container orchestration, HA clusters, IaC, artifact managem
 
 > **Install convention:** CLI tools and dev runtimes install via **Nix** (primary) or **Snap** (fallback). GUI apps go via **Flatpak**. Services and servers run as rootless **Podman** containers. On immutable OS distributions the root filesystem is read-only — use Nix, Snap, or Distrobox rather than system package managers for user-space tooling.
 
+## Key Concepts
+
+**CI/CD Pipeline Stages:**
+A production pipeline typically has these gates in order: (1) **Lint/Format** — `tflint`, `black`, `eslint`; (2) **Unit Tests** — fast, no external deps; (3) **Build** — compile or build container image; (4) **SAST** — Semgrep, Checkov; (5) **Integration Tests** — spin up dependencies; (6) **Container Scan** — Trivy; (7) **Push** — tag and push to registry; (8) **Deploy to Staging** — Argo Rollouts canary; (9) **Smoke Tests**; (10) **Promote to Prod** — manual gate or auto on metrics.
+
+**Idempotency in automation:** An operation is idempotent if running it multiple times produces the same result as running it once. Ansible modules are idempotent — running `apt: name=nginx state=present` 100 times does not install nginx 100 times. Terraform is idempotent — re-applying the same config changes nothing if the state matches. Write all your automation with idempotency in mind: check before act, not act then check.
+
+**Immutable infrastructure:** Rather than patching running servers (mutable), you build a new image with the change applied and replace the running instance. Container-based workloads are inherently immutable — you don't patch a running container, you rebuild the image and redeploy. Shani OS is an immutable OS for the same reason: updates replace the root filesystem atomically.
+
+**GitOps vs traditional CD:** Traditional CD has the pipeline push changes to the cluster (`kubectl apply` from CI). GitOps inverts this — a reconciler inside the cluster (ArgoCD, Flux) watches a Git repo and *pulls* the desired state. Benefits: every change is a Git commit (full audit trail), the cluster can self-heal by re-syncing, and the pipeline never needs cluster credentials.
+
+**Trunk-based development vs feature branches:** Trunk-based development has everyone committing directly to `main` (or short-lived branches that merge in hours, not weeks). Feature flags gate incomplete work rather than long-lived branches. This reduces merge conflicts and keeps CI fast. Most high-performing teams (per DORA research) practice trunk-based development.
+
+**Shift-left security:** Moving security checks earlier in the development lifecycle — ideally before code is committed (pre-commit hooks, IDE plugins) rather than post-deployment. Semgrep in pre-commit is more shift-left than ZAP in staging. The earlier a finding, the cheaper it is to fix.
+
+**Ephemeral environments:** On-demand environments provisioned for a specific PR or feature, then destroyed. Every PR gets its own isolated test environment with a URL like `pr-123.staging.example.com`. Enables parallel testing with no environment contention. Typically provisioned via Kubernetes namespaces + Argo Rollouts or Helm + preview URLs from Ingress.
+
+**Blue/Green vs Canary vs Rolling — when to use each:**
+- **Rolling update** (Kubernetes default): replace pods one at a time. Zero downtime but brief period with mixed versions. Good for stateless workloads, low risk.
+- **Blue/Green**: maintain two identical environments, flip traffic instantly. Expensive (2× resources) but instant rollback. Good for scheduled maintenance windows or database migrations.
+- **Canary**: route 5–10% of traffic to new version, watch metrics, then promote. Best for high-traffic services where you want to catch regressions with real traffic before a full rollout.
+
+**Service mesh concepts (Istio/Linkerd):** A service mesh adds a sidecar proxy (Envoy for Istio, a lightweight proxy for Linkerd) to every pod. The sidecar intercepts all in/out traffic, enabling: mTLS between services without app code changes, traffic shifting (canary), circuit breaking, retries, and distributed tracing. The control plane (Istiod) pushes policy to all sidecars. This is separate from Cilium, which does similar things at the eBPF kernel level without sidecars.
+
+**On-call rotation essentials:** DORA's Time to Restore (MTTR) metric is directly tied to how well on-call is set up. The key components are: (1) alerting with high signal-to-noise (no alert fatigue — every page must be actionable), (2) runbooks linked from alerts, (3) a defined escalation chain, (4) postmortems after every incident. Grafana OnCall handles scheduling and escalation; your Prometheus alerts are the input.
+
+**Rollback vs roll-forward:** Rolling back means deploying the previous known-good version. Roll-forward means quickly patching the broken version and deploying again. For stateless services, rollback is easier — `kubectl argo rollouts undo` or `kubectl rollout undo`. For services with database migrations, rollback may be impossible if the migration isn't reversible — which is why forward-compatible migrations (add column, then backfill, then make non-null) are a standard practice.
+
+**Environment parity:** Dev, staging, and prod should be as similar as possible in config, dependencies, and infrastructure shape. Differences cause "works on staging" bugs. Using the same Helm chart with different `values.yaml` per environment (or Kustomize overlays) is the standard approach to maintaining parity while allowing necessary differences (replica count, resource limits, domain names).
+
+
+
+**Terraform state — the source of truth for your infrastructure:** Terraform's state file (`terraform.tfstate`) maps your configuration to real infrastructure resources. It tracks resource IDs, attributes, and dependencies. Without state, Terraform can't know what it has already created. Problems with local state: (1) it can't be shared across a team, (2) it's lost if the machine is lost. Remote state (S3/MinIO backend with DynamoDB/Redis locking) is mandatory for team use — it enables state locking (prevents concurrent applies), versioning (rollback if state is corrupted), and separation from the code. `terraform import` adds existing resources to state; `terraform state rm` removes resources from tracking without destroying them.
+
+**Ansible vs Terraform — what each is for:** Terraform is declarative and idempotent for infrastructure provisioning — it manages the lifecycle of resources (create, update, destroy) by reconciling desired state with actual state. Ansible is procedural and idempotent for configuration management — it runs tasks in sequence on existing hosts (install packages, write config files, restart services). The canonical split: Terraform provisions the VM; Ansible configures what's running on it. Both can overlap (Terraform has file provisioners; Ansible has cloud modules) but the mental models are different. Mixing them without a clear boundary creates maintenance nightmares.
+
+**Policy-as-code — making compliance automatic:** Policy-as-code tools (Checkov, tfsec, OPA/Rego, Kyverno) express infrastructure and Kubernetes policies as code that can be version-controlled, reviewed, and automatically enforced. Instead of a checklist that relies on humans, a Checkov rule blocks a Terraform plan that opens port 22 to 0.0.0.0/0. OPA Gatekeeper prevents a `kubectl apply` of a deployment with no resource limits. The shift: compliance moves from a post-deployment audit to a pre-deployment gate in the CI pipeline. Every IaC commit passes through policy checks before reaching production.
+
+**Terraform modules — reusable infrastructure components:** A module is a directory of Terraform files with defined inputs (variables) and outputs. Instead of copy-pasting the same VPC/subnet/security-group configuration across 10 environments, you write it once as a module and call it with different variable values. The public Terraform Registry hosts community modules (AWS VPC, GKE cluster, etc.). Internal modules (stored in your Git repo) encode your organisation's standards — a module that provisions a PostgreSQL instance always includes backup configuration, monitoring, and correct security groups, because those are baked in. Modules are the IaC equivalent of application libraries.
+---
+
 ---
 
 ## Table of Contents
@@ -2067,39 +2108,6 @@ studio.example.com { reverse_proxy localhost:80 }
 
 ---
 
-
-## Key Concepts
-
-**CI/CD Pipeline Stages:**
-A production pipeline typically has these gates in order: (1) **Lint/Format** — `tflint`, `black`, `eslint`; (2) **Unit Tests** — fast, no external deps; (3) **Build** — compile or build container image; (4) **SAST** — Semgrep, Checkov; (5) **Integration Tests** — spin up dependencies; (6) **Container Scan** — Trivy; (7) **Push** — tag and push to registry; (8) **Deploy to Staging** — Argo Rollouts canary; (9) **Smoke Tests**; (10) **Promote to Prod** — manual gate or auto on metrics.
-
-**Idempotency in automation:** An operation is idempotent if running it multiple times produces the same result as running it once. Ansible modules are idempotent — running `apt: name=nginx state=present` 100 times does not install nginx 100 times. Terraform is idempotent — re-applying the same config changes nothing if the state matches. Write all your automation with idempotency in mind: check before act, not act then check.
-
-**Immutable infrastructure:** Rather than patching running servers (mutable), you build a new image with the change applied and replace the running instance. Container-based workloads are inherently immutable — you don't patch a running container, you rebuild the image and redeploy. Shani OS is an immutable OS for the same reason: updates replace the root filesystem atomically.
-
-**GitOps vs traditional CD:** Traditional CD has the pipeline push changes to the cluster (`kubectl apply` from CI). GitOps inverts this — a reconciler inside the cluster (ArgoCD, Flux) watches a Git repo and *pulls* the desired state. Benefits: every change is a Git commit (full audit trail), the cluster can self-heal by re-syncing, and the pipeline never needs cluster credentials.
-
-**Trunk-based development vs feature branches:** Trunk-based development has everyone committing directly to `main` (or short-lived branches that merge in hours, not weeks). Feature flags gate incomplete work rather than long-lived branches. This reduces merge conflicts and keeps CI fast. Most high-performing teams (per DORA research) practice trunk-based development.
-
-**Shift-left security:** Moving security checks earlier in the development lifecycle — ideally before code is committed (pre-commit hooks, IDE plugins) rather than post-deployment. Semgrep in pre-commit is more shift-left than ZAP in staging. The earlier a finding, the cheaper it is to fix.
-
-**Ephemeral environments:** On-demand environments provisioned for a specific PR or feature, then destroyed. Every PR gets its own isolated test environment with a URL like `pr-123.staging.example.com`. Enables parallel testing with no environment contention. Typically provisioned via Kubernetes namespaces + Argo Rollouts or Helm + preview URLs from Ingress.
-
-**Blue/Green vs Canary vs Rolling — when to use each:**
-- **Rolling update** (Kubernetes default): replace pods one at a time. Zero downtime but brief period with mixed versions. Good for stateless workloads, low risk.
-- **Blue/Green**: maintain two identical environments, flip traffic instantly. Expensive (2× resources) but instant rollback. Good for scheduled maintenance windows or database migrations.
-- **Canary**: route 5–10% of traffic to new version, watch metrics, then promote. Best for high-traffic services where you want to catch regressions with real traffic before a full rollout.
-
-**Service mesh concepts (Istio/Linkerd):** A service mesh adds a sidecar proxy (Envoy for Istio, a lightweight proxy for Linkerd) to every pod. The sidecar intercepts all in/out traffic, enabling: mTLS between services without app code changes, traffic shifting (canary), circuit breaking, retries, and distributed tracing. The control plane (Istiod) pushes policy to all sidecars. This is separate from Cilium, which does similar things at the eBPF kernel level without sidecars.
-
-**On-call rotation essentials:** DORA's Time to Restore (MTTR) metric is directly tied to how well on-call is set up. The key components are: (1) alerting with high signal-to-noise (no alert fatigue — every page must be actionable), (2) runbooks linked from alerts, (3) a defined escalation chain, (4) postmortems after every incident. Grafana OnCall handles scheduling and escalation; your Prometheus alerts are the input.
-
-**Rollback vs roll-forward:** Rolling back means deploying the previous known-good version. Roll-forward means quickly patching the broken version and deploying again. For stateless services, rollback is easier — `kubectl argo rollouts undo` or `kubectl rollout undo`. For services with database migrations, rollback may be impossible if the migration isn't reversible — which is why forward-compatible migrations (add column, then backfill, then make non-null) are a standard practice.
-
-**Environment parity:** Dev, staging, and prod should be as similar as possible in config, dependencies, and infrastructure shape. Differences cause "works on staging" bugs. Using the same Helm chart with different `values.yaml` per environment (or Kustomize overlays) is the standard approach to maintaining parity while allowing necessary differences (replica count, resource limits, domain names).
-
-
----
 
 ## Caddy Configuration
 
