@@ -521,7 +521,7 @@
   },
   {
     "slug": "servers/backups-sync",
-    "title": "Backups & Sync",
+    "title": "Backups & Storage",
     "section": "Self-Hosting & Servers",
     "updated": "2026-04-21",
     "order": 999,
@@ -561,7 +561,7 @@
   },
   {
     "slug": "servers/devops",
-    "title": "DevOps & Developer Infrastructure",
+    "title": "DevOps & Infrastructure",
     "section": "Self-Hosting & Servers",
     "updated": "2026-04-22",
     "order": 999,
@@ -657,7 +657,7 @@
   },
   {
     "slug": "servers/monitoring",
-    "title": "Monitoring",
+    "title": "Monitoring & Observability",
     "section": "Self-Hosting & Servers",
     "updated": "2026-04-22",
     "order": 999,
@@ -665,7 +665,7 @@
   },
   {
     "slug": "servers/networking",
-    "title": "Network & Analytics",
+    "title": "Networking & Infrastructure",
     "section": "Self-Hosting & Servers",
     "updated": "2026-04-22",
     "order": 999,
