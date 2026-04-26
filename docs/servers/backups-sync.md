@@ -1,4 +1,5 @@
 ---
+---
 title: Backups & Sync
 section: Self-Hosting & Servers
 updated: 2026-04-21
@@ -26,18 +27,22 @@ Every backup strategy should be defined against two metrics:
 Define both before choosing backup tools. A personal homelab might tolerate RPO=24h, RTO=4h. A business-critical app might need RPO=15min, RTO=30min — which requires a completely different strategy.
 
 
-**Deduplication and chunking — how Restic and Kopia work:** Content-defined chunking splits data into variable-size chunks based on a rolling hash of content (not fixed byte offsets). Identical chunks across different files or snapshots are stored once and referenced by hash (content-addressable storage). This is why backing up 10 snapshots of a 10 GB database doesn't cost 100 GB — unchanged blocks are deduplicated. Restic and Kopia both use this model. The implication: the first backup is slow (all data chunked and uploaded); subsequent backups are fast (only changed chunks).
+#### Deduplication and chunking — how Restic and Kopia work
+Content-defined chunking splits data into variable-size chunks based on a rolling hash of content (not fixed byte offsets). Identical chunks across different files or snapshots are stored once and referenced by hash (content-addressable storage). This is why backing up 10 snapshots of a 10 GB database doesn't cost 100 GB — unchanged blocks are deduplicated. Restic and Kopia both use this model. The implication: the first backup is slow (all data chunked and uploaded); subsequent backups are fast (only changed chunks).
 
 **Backup encryption — what Restic actually does:** Restic encrypts every chunk before it leaves your machine using AES-256-CTR with a key derived from your repository password (using scrypt for key derivation). The storage backend (B2, R2, SFTP) never sees plaintext. The repository password is the only thing that can decrypt the data — losing it means permanent data loss. Best practice: store the password in a password manager AND a separate physical location (printed, in a safe). The encryption key is not recoverable by Restic, Backblaze, or Cloudflare.
 
-**Object storage concepts — buckets, versioning, and immutability:** Object storage (S3, B2, R2, MinIO, Garage) uses a flat namespace of key-value pairs (keys are the "file paths", values are bytes). There's no real directory structure — slashes in key names are a convention. Versioning keeps all previous versions of an object, enabling rollback. Object Lock (immutable buckets) prevents deletion or modification for a set retention period — this is the mechanism that makes backups ransomware-proof, since even compromised credentials can't delete locked objects. Always enable Object Lock on your backup buckets.
+#### Object storage concepts — buckets, versioning, and immutability
+Object storage (S3, B2, R2, MinIO, Garage) uses a flat namespace of key-value pairs (keys are the "file paths", values are bytes). There's no real directory structure — slashes in key names are a convention. Versioning keeps all previous versions of an object, enabling rollback. Object Lock (immutable buckets) prevents deletion or modification for a set retention period — this is the mechanism that makes backups ransomware-proof, since even compromised credentials can't delete locked objects. Always enable Object Lock on your backup buckets.
 
-**Push vs pull backup architectures:** Pull-based (Borgmatic, Restic via cron on the source server) — the source machine initiates the backup and pushes data to the repository. Simple, but requires outbound access from each source. Push-based (Restic REST Server, Bacula) — a central backup server pulls data from agents on each machine. Better for centrally managed fleets but requires inbound network access to each source. Hybrid: Borgmatic scheduled on each host pushes to a central Restic REST Server — centralised storage with decentralised execution.
+#### Push vs pull backup architectures
+Pull-based (Borgmatic, Restic via cron on the source server) — the source machine initiates the backup and pushes data to the repository. Simple, but requires outbound access from each source. Push-based (Restic REST Server, Bacula) — a central backup server pulls data from agents on each machine. Better for centrally managed fleets but requires inbound network access to each source. Hybrid: Borgmatic scheduled on each host pushes to a central Restic REST Server — centralised storage with decentralised execution.
 
-**Litestream continuous replication model:** Litestream watches SQLite's WAL (Write-Ahead Log) file for new frames and streams them to S3-compatible storage in near real-time (sub-second RPO). It doesn't take snapshots — it captures every write transaction. Recovery: download the base snapshot plus WAL frames and replay. This makes SQLite viable for production apps that previously required PostgreSQL for HA. The trade-off: Litestream adds ~1ms latency per write (WAL flush), and only one writer is allowed (SQLite's inherent limitation).
+#### Litestream continuous replication model
+Litestream watches SQLite's WAL (Write-Ahead Log) file for new frames and streams them to S3-compatible storage in near real-time (sub-second RPO). It doesn't take snapshots — it captures every write transaction. Recovery: download the base snapshot plus WAL frames and replay. This makes SQLite viable for production apps that previously required PostgreSQL for HA. The trade-off: Litestream adds ~1ms latency per write (WAL flush), and only one writer is allowed (SQLite's inherent limitation).
 
-**Encryption key management for backups:** The weakest link in encrypted backups is usually the key/password. Common mistakes: (1) storing the password in the same place as the backup (if B2 is compromised, both the backup and the password are gone), (2) no documented recovery procedure (future-you can't restore without it), (3) rotating the password without re-encrypting old snapshots (Restic doesn't automatically re-encrypt history). Best practice: password in your Vaultwarden, a printed copy in a fireproof safe, and a `restic key list` / `restic key add` workflow documented in your runbook.
----
+#### Encryption key management for backups
+The weakest link in encrypted backups is usually the key/password. Common mistakes: (1) storing the password in the same place as the backup (if B2 is compromised, both the backup and the password are gone), (2) no documented recovery procedure (future-you can't restore without it), (3) rotating the password without re-encrypting old snapshots (Restic doesn't automatically re-encrypt history). Best practice: password in your Vaultwarden, a printed copy in a fireproof safe, and a `restic key list` / `restic key add` workflow documented in your runbook.
 
 ---
 
@@ -68,7 +73,7 @@ services:
 cd ~/restic && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Initialise a new repository
 podman exec restic restic init
@@ -232,7 +237,7 @@ podman run --rm -it \
   rclone/rclone:latest config
 ```
 
-**Common sync commands:**
+#### Common sync commands
 ```bash
 # Sync (mirror source to destination — deletes extra files at destination)
 podman exec rclone rclone sync /backups remote:your-bucket
@@ -417,7 +422,7 @@ dbs:
       endpoint: http://host.containers.internal:9000  # MinIO
 ```
 
-**Restore from replica:**
+#### Restore from replica
 ```bash
 podman run --rm \
   -v /home/user/app/data:/data:Z \
@@ -425,7 +430,7 @@ podman run --rm \
   litestream/litestream:latest restore -o /data/app.db s3://my-litestream-backups/app
 ```
 
-**List available restore points:**
+#### List available restore points
 ```bash
 podman exec litestream litestream snapshots s3://my-litestream-backups/app
 ```
@@ -482,14 +487,14 @@ restic init
 -e RESTIC_PASSWORD=your-restic-encryption-password
 ```
 
-**Caddy (add TLS — strongly recommended):**
+#### Caddy (add TLS — strongly recommended)
 ```caddyfile
 restic.home.local { tls internal; reverse_proxy localhost:8000 }
 ```
 
 > **Multi-user repos:** Each user gets an isolated repository directory under `/data/<username>/`. The REST server enforces htpasswd auth — users can only access their own path. Enable `--append-only` mode to prevent clients from deleting snapshots: add it to `OPTIONS` in the environment.
 
-**Append-only mode (protect against ransomware deleting backups):**
+#### Append-only mode (protect against ransomware deleting backups)
 ```yaml
 environment:
   OPTIONS: "--htpasswd-file /.htpasswd --append-only"

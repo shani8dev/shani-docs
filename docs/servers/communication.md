@@ -13,6 +13,29 @@ Self-hosted chat, push notifications, VoIP, and team collaboration platforms.
 
 ---
 
+---
+
+## Job-Ready Concepts
+
+#### Federation and the fediverse — ActivityPub and Matrix
+Two independent federation protocols power the self-hosted social and communication ecosystem. Matrix (used by Synapse, Conduit) federates real-time messaging — your homeserver and another operator's homeserver exchange messages directly, with no central relay. ActivityPub (used by Mastodon, Lemmy, Pixelfed, PeerTube) federates social actions — follows, posts, likes — across servers. Both use a server-to-server API for federation and a client-to-server API for user clients. The critical concept for interviews: federation means data is distributed across many servers with no central authority — this creates challenges for moderation, key verification, and data retention that centralised platforms don't have.
+
+#### End-to-end encryption in messaging — what it protects and what it doesn't
+E2EE (used by Matrix with Olm/Megolm, Signal Protocol) encrypts messages on the sender's device and decrypts only on recipient devices — the server relays ciphertext and never sees plaintext. What it protects: message content from server operators, network observers, and data breaches. What it doesn't protect: metadata (who communicated with whom, when, how often), the server itself if the client is compromised, or key verification failures (man-in-the-middle if users don't verify key fingerprints). Matrix's cross-signing and verification process addresses the key verification problem. For security engineering roles, the distinction between transport encryption (TLS) and end-to-end encryption is a standard interview question.
+
+#### XMPP vs Matrix vs IRC — protocol generations
+IRC (1988) is stateless, no message history, no encryption in the base protocol. XMPP (1999) adds presence, federation, and a rich extension system (XEPs) but has a fragmented client ecosystem. Matrix (2014) was designed from the start for end-to-end encryption, rich media, bridges to other protocols, and a replicated history model (every homeserver stores a copy of room history it participates in). Matrix's replicated history is its key architectural difference — it provides resilience (the room continues even if the founding server goes offline) but at the cost of storage and complexity. Bridges (mautrix-whatsapp, mautrix-telegram) let Matrix users communicate with users on closed platforms.
+
+#### WebRTC and real-time media
+Jitsi Meet and Matrix video calls use WebRTC — the browser standard for real-time audio/video. WebRTC establishes peer-to-peer connections using ICE (Interactive Connectivity Establishment): STUN servers help peers discover their public IP/port; TURN servers relay media when direct P2P fails (symmetric NAT). For group calls, a Selective Forwarding Unit (SFU) like Jitsi's Videobridge receives each participant's stream and selectively forwards it to others — more efficient than full mesh P2P (N² streams) or MCU (transcodes everything). Jitsi Videobridge is an SFU. Understanding this architecture matters for any role involving real-time communication infrastructure.
+
+#### SIP and VoIP fundamentals
+SIP (Session Initiation Protocol) is the signalling protocol for VoIP — it negotiates calls (INVITE, 200 OK, BYE) but doesn't carry audio. RTP (Real-time Transport Protocol) carries the actual audio/video. FreePBX is an Asterisk frontend: Asterisk handles SIP signalling, codec negotiation, and RTP media. A SIP trunk connects your PBX to the PSTN (public telephone network) via a VoIP provider. A SIP extension is a phone or softphone registered to your PBX. Common codecs: G.711 (uncompressed, highest quality, most bandwidth), G.729 (compressed, lower bandwidth, slight quality loss), Opus (modern, variable bitrate, used in WebRTC). VoIP engineering roles test on SIP trace reading and NAT traversal.
+
+#### Push notification architecture — APNS, FCM, and self-hosted alternatives
+Mobile push notifications (iOS: APNS, Android: FCM) require routing through Apple's and Google's servers — apps can't receive pushes without them. This is why truly server-side push requires a relay: ntfy and Gotify provide an app that maintains a persistent connection to your server and displays notifications without going through Google/Apple. The trade-off: ntfy has an Android app using websockets (no FCM dependency), but on iOS, background delivery still requires APNS. For privacy-focused deployment, understanding what requires a cloud relay versus what's fully local is important.
+
+
 ## Matrix / Synapse
 
 **Purpose:** Federated, open-source real-time communication protocol. Powers Element, Schildi, FluffyChat, and other secure messengers. Messages are end-to-end encrypted, decentralised, and stored on your own server.
@@ -51,7 +74,7 @@ podman exec -it synapse register_new_matrix_user \
   --admin -u admin -p changeme
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Create a new user
 podman exec -it synapse register_new_matrix_user   http://localhost:8008 -c /data/homeserver.yaml   -u newuser -p newpassword --no-admin
@@ -172,7 +195,7 @@ services:
 cd ~/ntfy && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Send a simple notification
 curl -d "Backup complete" http://localhost:8090/your-topic
@@ -325,7 +348,8 @@ cd ~/discourse && podman-compose up -d
 
 > Discourse requires PostgreSQL and Redis. Run both from the [Databases wiki](https://docs.shani.dev/doc/servers/databases) first. It also requires outbound email (SMTP) for account activation — use Mailpit in development.
 
-**First-time setup:** Visit `http://localhost:3100/finish-installation` to create the admin account.
+#### First-time setup
+Visit `http://localhost:3100/finish-installation` to create the admin account.
 
 **Caddy:**
 ```caddyfile
@@ -402,7 +426,7 @@ volumes:
 cd ~/mastodon && podman-compose up -d
 ```
 
-**Initial setup:**
+#### Initial setup
 ```bash
 # Run DB migrations and create admin user
 podman-compose run --rm web bundle exec rails db:migrate
@@ -889,7 +913,7 @@ volumes:
 cd ~/chatwoot && podman-compose up -d
 ```
 
-**Prepare database and create admin:**
+#### Prepare database and create admin
 ```bash
 podman-compose run --rm chatwoot bundle exec rails db:chatwoot_prepare
 podman-compose run --rm chatwoot bundle exec rails db:seed

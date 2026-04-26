@@ -19,51 +19,63 @@ For multi-node, replicated, and HA deployments (Elasticsearch cluster, OpenSearc
 
 ### Observability Interview Essentials
 
-**The three pillars (now four) of observability:**
+#### The three pillars (now four) of observability
 - **Metrics** — numeric time-series data (CPU %, request rate, error count). Cheap to store, fast to query. Prometheus + Grafana.
 - **Logs** — structured or unstructured event records. Expensive at scale. Loki (label-indexed streams) or Elasticsearch (fully indexed).
 - **Traces** — records of a request as it flows through multiple services. Shows where latency is introduced. Tempo + OpenTelemetry.
 - **Profiles** (emerging) — continuous CPU/memory profiling of running processes. Parca + eBPF. The "fourth pillar."
 
-**Pull vs push model for metrics:**
+#### Pull vs push model for metrics
 Prometheus uses a *pull* model — it scrapes `/metrics` endpoints on a schedule. This means you know what's being scraped and can see scrape errors in Prometheus itself. *Push* model (Pushgateway, InfluxDB's Telegraf) is used for short-lived jobs. Most interviewers will ask why Prometheus scrapes rather than having apps push to it: better target discovery, single place to detect unreachable targets, less firewall complexity.
 
-**Cardinality and why it matters:** Cardinality is the number of unique label combinations for a metric. `http_requests_total{method="GET", path="/api/users/123"}` where `path` contains user IDs creates millions of unique series. High cardinality is the number-one cause of Prometheus memory exhaustion. Always bound labels to a small, known set of values (`path="/api/users/:id"` not the literal ID).
+#### Cardinality and why it matters
+Cardinality is the number of unique label combinations for a metric. `http_requests_total{method="GET", path="/api/users/123"}` where `path` contains user IDs creates millions of unique series. High cardinality is the number-one cause of Prometheus memory exhaustion. Always bound labels to a small, known set of values (`path="/api/users/:id"` not the literal ID).
 
-**Rate vs irate vs increase:**
+#### Rate vs irate vs increase
 - `rate(metric[5m])` — per-second average rate over the last 5 minutes. Smooth, good for dashboards.
 - `irate(metric[5m])` — instantaneous rate based on last two data points. Spiky, good for detecting brief bursts.
 - `increase(metric[5m])` — total increase over the window (rate × duration). Good for "how many errors in the last 5 min".
 
-**Alert fatigue:** The condition where too many noisy/low-priority alerts cause on-call engineers to start ignoring pages. Symptoms: alerts that resolve themselves, alerts that require no action, duplicate alerts for the same underlying cause. Fix: alert only on symptoms (high error rate) not causes (CPU high), use inhibition rules, tune `for:` duration so brief spikes don't fire, use Karma dashboard for triage.
+#### Alert fatigue
+The condition where too many noisy/low-priority alerts cause on-call engineers to start ignoring pages. Symptoms: alerts that resolve themselves, alerts that require no action, duplicate alerts for the same underlying cause. Fix: alert only on symptoms (high error rate) not causes (CPU high), use inhibition rules, tune `for:` duration so brief spikes don't fire, use Karma dashboard for triage.
 
-**Multiwindow, multi-burn-rate alerts:** For SLO alerts, a single threshold alert (error rate > 1%) fires too often for minor blips and too slowly for catastrophic failures. The recommended pattern from the Google SRE book uses two windows: a fast window (e.g., 1h) catches rapid burns, a slow window (e.g., 6h) catches slow burns. Pyrra generates these automatically from SLO definitions.
+#### Multiwindow, multi-burn-rate alerts
+For SLO alerts, a single threshold alert (error rate > 1%) fires too often for minor blips and too slowly for catastrophic failures. The recommended pattern from the Google SRE book uses two windows: a fast window (e.g., 1h) catches rapid burns, a slow window (e.g., 6h) catches slow burns. Pyrra generates these automatically from SLO definitions.
 
-**OpenTelemetry SDK instrumentation:** Auto-instrumentation (via agents) adds traces and metrics to your app with zero code changes for common frameworks (Django, Express, Spring). Manual instrumentation wraps specific code sections in spans. The SDK exports to an OTel Collector, which fans out to Tempo (traces), Prometheus (metrics), and Loki (logs) — one SDK call, multiple backends.
+#### OpenTelemetry SDK instrumentation
+Auto-instrumentation (via agents) adds traces and metrics to your app with zero code changes for common frameworks (Django, Express, Spring). Manual instrumentation wraps specific code sections in spans. The SDK exports to an OTel Collector, which fans out to Tempo (traces), Prometheus (metrics), and Loki (logs) — one SDK call, multiple backends.
 
-**Log levels and when to use them:**
+#### Log levels and when to use them
 - `DEBUG` — verbose, only in dev; never leave on in production
 - `INFO` — normal operation events ("started", "processed 100 items")
 - `WARN` — recoverable unexpected condition that deserves attention
 - `ERROR` — operation failed; action required
 - `FATAL/CRITICAL` — service cannot continue; immediate page
 
-**Structured logging (JSON) vs unstructured:** Structured logs (`{"level":"error","msg":"DB timeout","user_id":42,"latency_ms":5000}`) are parseable by Loki, Graylog, and other tools without Grok patterns. Unstructured logs (`ERROR: DB timeout for user 42 after 5000ms`) require regex extraction, which is brittle. Always use structured logging in production services.
+#### Structured logging (JSON) vs unstructured
+Structured logs (`{"level":"error","msg":"DB timeout","user_id":42,"latency_ms":5000}`) are parseable by Loki, Graylog, and other tools without Grok patterns. Unstructured logs (`ERROR: DB timeout for user 42 after 5000ms`) require regex extraction, which is brittle. Always use structured logging in production services.
 
-**Understanding Grafana variables and templating:** Dashboard variables let one dashboard serve multiple services (`$service`), environments (`$environment`), or time ranges. They're backed by Prometheus label queries. A variable `$namespace` with query `label_values(kube_pod_info, namespace)` gives a dropdown of all Kubernetes namespaces. This is a core Grafana skill for platform teams building shared observability tooling.
+#### Understanding Grafana variables and templating
+Dashboard variables let one dashboard serve multiple services (`$service`), environments (`$environment`), or time ranges. They're backed by Prometheus label queries. A variable `$namespace` with query `label_values(kube_pod_info, namespace)` gives a dropdown of all Kubernetes namespaces. This is a core Grafana skill for platform teams building shared observability tooling.
 
 
-**Distributed tracing — spans, traces, and why they matter:** A trace represents a single request as it flows through multiple services. It's composed of spans — each span represents one operation (HTTP call, DB query, cache lookup) with a start time, duration, and attributes. Spans are linked by a trace ID propagated in headers (`traceparent` in W3C format, `X-B3-TraceId` in Zipkin format). Without tracing, diagnosing latency in a microservices architecture means correlating logs across 10 services by timestamp — error-prone and slow. With tracing (Tempo + OTel), you click on a slow request in Grafana and see exactly which service and which operation contributed the latency. The key metric: P99 latency per span, not just the total.
+#### Distributed tracing — spans, traces, and why they matter
+A trace represents a single request as it flows through multiple services. It's composed of spans — each span represents one operation (HTTP call, DB query, cache lookup) with a start time, duration, and attributes. Spans are linked by a trace ID propagated in headers (`traceparent` in W3C format, `X-B3-TraceId` in Zipkin format). Without tracing, diagnosing latency in a microservices architecture means correlating logs across 10 services by timestamp — error-prone and slow. With tracing (Tempo + OTel), you click on a slow request in Grafana and see exactly which service and which operation contributed the latency. The key metric: P99 latency per span, not just the total.
 
-**Continuous profiling — flamegraphs and eBPF:** A profiler samples what the CPU is executing thousands of times per second, building a statistical picture of where time is spent. A flamegraph visualises this as a call stack — the width of each frame is proportional to the time spent in that function. Parca uses eBPF to profile running processes with no code changes and near-zero overhead. Continuous profiling (running 24/7, not just during incidents) lets you correlate CPU spikes with deployments — "this function got 3x slower after the commit that added field validation." This is the "fourth pillar" of observability because it answers "why is the CPU high" when metrics only tell you that it is.
+#### Continuous profiling — flamegraphs and eBPF
+A profiler samples what the CPU is executing thousands of times per second, building a statistical picture of where time is spent. A flamegraph visualises this as a call stack — the width of each frame is proportional to the time spent in that function. Parca uses eBPF to profile running processes with no code changes and near-zero overhead. Continuous profiling (running 24/7, not just during incidents) lets you correlate CPU spikes with deployments — "this function got 3x slower after the commit that added field validation." This is the "fourth pillar" of observability because it answers "why is the CPU high" when metrics only tell you that it is.
 
-**Thanos architecture — sidecar vs receive mode:** Thanos extends Prometheus with long-term storage and global query. Two deployment modes: (1) **Sidecar** — a Thanos sidecar runs next to each Prometheus instance, uploads TSDB blocks to object storage (S3/MinIO) after they're sealed (every 2h). The Store Gateway serves these blocks for long-range queries. Simple but adds 2h latency before data is queryable globally. (2) **Receive** — Prometheus remote-writes metrics to Thanos Receive in real-time. Global queryability immediately, but adds write path complexity and a potential bottleneck. For most setups: sidecar mode is simpler and sufficient. For multi-cluster global dashboards with sub-2h data: receive mode.
+#### Thanos architecture — sidecar vs receive mode
+Thanos extends Prometheus with long-term storage and global query. Two deployment modes: (1) **Sidecar** — a Thanos sidecar runs next to each Prometheus instance, uploads TSDB blocks to object storage (S3/MinIO) after they're sealed (every 2h). The Store Gateway serves these blocks for long-range queries. Simple but adds 2h latency before data is queryable globally. (2) **Receive** — Prometheus remote-writes metrics to Thanos Receive in real-time. Global queryability immediately, but adds write path complexity and a potential bottleneck. For most setups: sidecar mode is simpler and sufficient. For multi-cluster global dashboards with sub-2h data: receive mode.
 
-**Load testing methodology — k6 concepts:** Load testing has three phases: (1) **Baseline** — what's the latency and error rate at 1 concurrent user? (2) **Load test** — ramp to expected production traffic, verify latency SLOs hold. (3) **Stress test** — push beyond expected load until the system breaks, to find the failure mode and capacity ceiling. k6 models load as virtual users (VUs) running test scripts. Key metrics: `http_req_duration` (latency), `http_req_failed` (error rate), `iterations` (throughput). The output feeds into Grafana dashboards (k6 has a Prometheus remote write output). Run load tests before every major release in CI with a pass/fail threshold on P95 latency.
+#### Load testing methodology — k6 concepts
+Load testing has three phases: (1) **Baseline** — what's the latency and error rate at 1 concurrent user? (2) **Load test** — ramp to expected production traffic, verify latency SLOs hold. (3) **Stress test** — push beyond expected load until the system breaks, to find the failure mode and capacity ceiling. k6 models load as virtual users (VUs) running test scripts. Key metrics: `http_req_duration` (latency), `http_req_failed` (error rate), `iterations` (throughput). The output feeds into Grafana dashboards (k6 has a Prometheus remote write output). Run load tests before every major release in CI with a pass/fail threshold on P95 latency.
 
-**Chaos engineering — intentional failure injection:** Chaos engineering tests whether a system actually survives the failures it's designed to handle. Toxiproxy injects network conditions (latency, packet loss, bandwidth limits, connection drops) between your services — you test that your circuit breaker trips when the database latency spikes to 2s, rather than discovering this in production. The practice: (1) define a steady state (normal error rate, latency), (2) hypothesise that the system survives failure X, (3) inject failure X, (4) verify steady state is maintained (or fix if not). Chaos engineering is not about breaking things randomly — it's a disciplined experiment that builds confidence in fault tolerance.
+#### Chaos engineering — intentional failure injection
+Chaos engineering tests whether a system actually survives the failures it's designed to handle. Toxiproxy injects network conditions (latency, packet loss, bandwidth limits, connection drops) between your services — you test that your circuit breaker trips when the database latency spikes to 2s, rather than discovering this in production. The practice: (1) define a steady state (normal error rate, latency), (2) hypothesise that the system survives failure X, (3) inject failure X, (4) verify steady state is maintained (or fix if not). Chaos engineering is not about breaking things randomly — it's a disciplined experiment that builds confidence in fault tolerance.
 
-**Log aggregation architectures — push vs pull, and the pipeline:** Three approaches: (1) **Agent-based push** — Alloy/Fluent Bit runs on each host, tails log files, and pushes to Loki/Elasticsearch. Low latency, agent adds resource overhead. (2) **Syslog forwarding** — services write to syslog, rsyslog/syslog-ng forwards centrally. Works for systemd services without any agent. (3) **Direct SDK** — applications write structured logs directly to Loki's push API. Pipeline tools (Vector.dev) add buffering, transformation (parse, filter, enrich), and fan-out (logs go to both Loki and an S3 archive). The key design decision: parse logs at the source (less data transmitted, structured from the start) vs at the destination (simpler agents, parsing can be changed without redeployment).
+#### Log aggregation architectures — push vs pull, and the pipeline
+Three approaches: (1) **Agent-based push** — Alloy/Fluent Bit runs on each host, tails log files, and pushes to Loki/Elasticsearch. Low latency, agent adds resource overhead. (2) **Syslog forwarding** — services write to syslog, rsyslog/syslog-ng forwards centrally. Works for systemd services without any agent. (3) **Direct SDK** — applications write structured logs directly to Loki's push API. Pipeline tools (Vector.dev) add buffering, transformation (parse, filter, enrich), and fan-out (logs go to both Loki and an S3 archive). The key design decision: parse logs at the source (less data transmitted, structured from the start) vs at the destination (simpler agents, parsing can be changed without redeployment).
 ---
 
 ---
@@ -169,7 +181,7 @@ scrape_configs:
       - targets: ['host.containers.internal:8080']
 ```
 
-**Node Exporter — system metrics:**
+#### Node Exporter — system metrics
 ```yaml
 # ~/node-exporter/compose.yaml
 services:
@@ -188,7 +200,7 @@ services:
 cd ~/node-exporter && podman-compose up -d
 ```
 
-**cAdvisor — container metrics:**
+#### cAdvisor — container metrics
 ```yaml
 # ~/cadvisor/compose.yaml
 services:
@@ -197,7 +209,7 @@ services:
     ports:
       - 127.0.0.1:8080:8080
     volumes:
-      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
       - /:/rootfs:ro
       - /var/run:/var/run:ro
       - /sys:/sys:ro
@@ -208,7 +220,7 @@ services:
 cd ~/cadvisor && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Check Prometheus targets status
 curl http://localhost:9090/api/v1/targets | python3 -m json.tool | grep -A3 health
@@ -338,7 +350,7 @@ inhibit_rules:
     equal: [alertname, instance]
 ```
 
-**Alertmanager → ntfy bridge (severity-aware routing):**
+#### Alertmanager → ntfy bridge (severity-aware routing)
 
 Use [alertmanager-ntfy](https://github.com/alexbakker/alertmanager-ntfy) as a thin webhook bridge to map Prometheus severity labels to ntfy priority levels:
 
@@ -435,7 +447,7 @@ volumes:
 cd ~/grafana && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Install a plugin
 podman exec grafana grafana-cli plugins install grafana-clock-panel
@@ -556,7 +568,7 @@ services:
 cd ~/loki && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Check Loki is ready
 curl http://localhost:3100/ready
@@ -614,7 +626,7 @@ services:
       - /etc/passwd:/host/etc/passwd:ro
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
-      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
     cap_add:
       - SYS_PTRACE
     security_opt:
@@ -704,7 +716,7 @@ services:
 cd ~/uptime-kuma && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Backup Uptime Kuma data
 cp -r /home/user/uptime-kuma /home/user/uptime-kuma.bak
@@ -740,7 +752,7 @@ services:
 cd ~/beszel && podman-compose up -d
 ```
 
-**Agent on each monitored server:**
+#### Agent on each monitored server
 ```yaml
 # ~/beszel-agent/compose.yaml
 services:
@@ -748,7 +760,7 @@ services:
     image: henrygd/beszel-agent:latest
     network_mode: host
     volumes:
-      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
     environment:
       PORT: 45876
       KEY: your-public-key-from-hub
@@ -773,7 +785,7 @@ services:
     ports:
       - 127.0.0.1:8888:8080
     volumes:
-      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
     restart: unless-stopped
 ```
 
@@ -808,7 +820,7 @@ services:
 cd ~/healthchecks && podman-compose up -d
 ```
 
-**Use in a backup script:**
+#### Use in a backup script
 ```bash
 podman exec restic restic backup /data && \
   curl -fsS --retry 3 https://hc.home.local/ping/your-uuid
@@ -915,7 +927,7 @@ endpoints:
 
 **Purpose:** Thanos extends Prometheus to solve its three main production limitations: **retention** (Prometheus stores data locally; Thanos uploads blocks to object storage — MinIO, S3, GCS — for unlimited retention), **high availability** (Thanos Querier deduplicates data from multiple Prometheus replicas, so you can run 2+ Prometheus instances with identical configs), and **federation** (Thanos Query Frontend federates across multiple Prometheus clusters — query all environments from a single Grafana datasource). The standard choice for production Prometheus at scale.
 
-**Architecture overview:**
+#### Architecture overview
 ```
 Prometheus ──► Thanos Sidecar ──► Object Store (MinIO)
                     │
@@ -1050,7 +1062,7 @@ volumes:
   thanos_ruler_data:
 ```
 
-**Object store config (`/home/user/thanos/objstore.yaml`) — MinIO backend:**
+#### Object store config (`/home/user/thanos/objstore.yaml`) — MinIO backend
 ```yaml
 type: S3
 config:
@@ -1070,7 +1082,7 @@ mc mb local/thanos-metrics
 cd ~/thanos && podman-compose up -d
 ```
 
-**Wire Prometheus to upload blocks (add to `prometheus.yml`):**
+#### Wire Prometheus to upload blocks (add to `prometheus.yml`)
 ```yaml
 # Enable TSDB block storage (required for Thanos Sidecar)
 # Thanos Sidecar reads from the same TSDB path Prometheus writes to.
@@ -1087,7 +1099,7 @@ In Grafana → Data Sources → Prometheus:
 - **URL:** `http://localhost:9092` (Query Frontend — cached, split queries)
 - Or `http://localhost:9091` (Querier — direct, no cache)
 
-**Multi-cluster federation:**
+#### Multi-cluster federation
 ```yaml
 # On the global Thanos Querier, add store endpoints from remote clusters:
 thanos-querier:
@@ -1100,7 +1112,7 @@ thanos-querier:
     # Add as many --store flags as needed (one per Prometheus/Sidecar endpoint)
 ```
 
-**HA setup (2× Prometheus, deduplicated by Thanos):**
+#### HA setup (2× Prometheus, deduplicated by Thanos)
 ```yaml
 # Run two Prometheus instances with identical scrape configs but different replica labels:
 # prometheus-1: --storage.tsdb.path=/prometheus --web.listen-address=:9090
@@ -1116,7 +1128,7 @@ global:
 # Result: you see one consistent time series even when one Prometheus restarts
 ```
 
-**Compaction and downsampling explained:**
+#### Compaction and downsampling explained
 ```bash
 # Compactor runs continuously (--wait flag) and:
 # 1. Merges small 2h TSDB blocks into larger ones (reduces object store files)
@@ -1137,7 +1149,7 @@ config:
   insecure: true"
 ```
 
-**Ruler — alerting rules that evaluate across long-term data:**
+#### Ruler — alerting rules that evaluate across long-term data
 ```yaml
 # /home/user/thanos/rules/alerts.yaml
 groups:
@@ -1163,7 +1175,7 @@ thanos-query.home.local   { tls internal; reverse_proxy localhost:9091 }
 thanos-compact.home.local { tls internal; reverse_proxy localhost:10906 }
 ```
 
-**Troubleshooting Thanos:**
+#### Troubleshooting Thanos
 
 | Issue | Solution |
 |-------|----------|
@@ -1198,7 +1210,7 @@ services:
 cd ~/victoriametrics && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Check server health
 curl http://localhost:8428/health
@@ -1589,7 +1601,7 @@ cd ~/karma && podman-compose up -d
 
 Access at `http://localhost:8094`. Karma auto-refreshes every 30 seconds.
 
-**Multiple Alertmanager instances:**
+#### Multiple Alertmanager instances
 ```bash
 -e ALERTMANAGER_0_URI=http://host.containers.internal:9093 \
 -e ALERTMANAGER_0_NAME=homelab \
@@ -1660,7 +1672,7 @@ cd ~/graylog && podman-compose up -d
 
 Access at `http://localhost:9000`. Login with `admin` / your password. Create inputs under System → Inputs.
 
-**Send logs from other containers via GELF:**
+#### Send logs from other containers via GELF
 ```yaml
 # Add to any service's compose.yaml
 logging:
@@ -1670,7 +1682,7 @@ logging:
     tag: "myapp"
 ```
 
-**Send Caddy access logs to Graylog via Syslog:**
+#### Send Caddy access logs to Graylog via Syslog
 ```caddyfile
 {
   log {
@@ -1682,7 +1694,7 @@ logging:
 }
 ```
 
-**Ship logs from any Linux host via Filebeat → Graylog:**
+#### Ship logs from any Linux host via Filebeat → Graylog
 ```yaml
 # /etc/filebeat/filebeat.yml on remote host
 filebeat.inputs:
@@ -1786,7 +1798,7 @@ services:
 cd ~/pushgateway && podman-compose up -d
 ```
 
-**Add to `prometheus.yml`:**
+#### Add to `prometheus.yml`
 ```yaml
 scrape_configs:
   - job_name: pushgateway
@@ -1795,7 +1807,7 @@ scrape_configs:
       - targets: ['host.containers.internal:9091']
 ```
 
-**Push metrics from a script:**
+#### Push metrics from a script
 ```bash
 # Push a single metric (backup job duration)
 cat <<EOF | curl --data-binary @- http://localhost:9091/metrics/job/restic_backup/instance/homeserver
@@ -1811,7 +1823,7 @@ EOF
 curl -X DELETE http://localhost:9091/metrics/job/restic_backup/instance/homeserver
 ```
 
-**In a backup systemd service:**
+#### In a backup systemd service
 ```bash
 # Wrap your backup command and push success/failure
 START=$(date +%s)
@@ -1856,7 +1868,7 @@ services:
 cd ~/pyrra && podman-compose up -d
 ```
 
-**Add to `prometheus.yml`:**
+#### Add to `prometheus.yml`
 ```yaml
 scrape_configs:
   - job_name: pyrra
@@ -2015,7 +2027,7 @@ mkdir -p /home/user/loki/rules/homelab
 podman restart loki
 ```
 
-**Query via API to verify rules are loaded:**
+#### Query via API to verify rules are loaded
 ```bash
 curl http://localhost:3100/loki/api/v1/rules | python3 -m json.tool
 ```
@@ -2048,7 +2060,7 @@ services:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - /sys/fs/bpf:/sys/fs/bpf
-      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
     command: >
       --node=homeserver
       --remote-store-address=localhost:7070
@@ -2143,7 +2155,8 @@ echo "vm.max_map_count=262144" | sudo tee /etc/sysctl.d/99-elasticsearch.conf
 cd ~/elk && podman-compose up -d
 ```
 
-**Kibana:** `http://localhost:5601` — create index patterns under Stack Management → Index Patterns.
+#### Kibana
+`http://localhost:5601` — create index patterns under Stack Management → Index Patterns.
 
 **Minimal `logstash.yml`:**
 ```yaml
@@ -2154,7 +2167,7 @@ pipeline.workers: 2
 pipeline.batch.size: 125
 ```
 
-**Pipeline: Beats → parse → Elasticsearch (`beats-to-es.conf`):**
+#### Pipeline: Beats → parse → Elasticsearch (`beats-to-es.conf`)
 ```ruby
 # ~/elk/logstash/pipeline/beats-to-es.conf
 input {
@@ -2197,7 +2210,7 @@ output {
 }
 ```
 
-**Common Logstash operations:**
+#### Common Logstash operations
 ```bash
 # Check pipeline status
 curl http://localhost:9600/_node/pipelines?pretty
@@ -2210,7 +2223,7 @@ podman exec logstash logstash --config.test_and_exit \
   -f /usr/share/logstash/pipeline/beats-to-es.conf
 ```
 
-**Common Elasticsearch operations:**
+#### Common Elasticsearch operations
 ```bash
 # Cluster health
 curl http://localhost:9200/_cluster/health?pretty
@@ -2225,7 +2238,7 @@ curl -X DELETE http://localhost:9200/logs-2024.01.01
 curl http://localhost:9200/logs-000001/_ilm/explain?pretty
 ```
 
-**Index Lifecycle Management (ILM) — auto-manage index ageing:**
+#### Index Lifecycle Management (ILM) — auto-manage index ageing
 ```bash
 curl -X PUT http://localhost:9200/_ilm/policy/logs-policy \
   -H "Content-Type: application/json" -d '
@@ -2271,7 +2284,7 @@ curl -X PUT http://localhost:9200/_ilm/policy/logs-policy \
 | **Heartbeat** | Uptime | Active monitoring, HTTP/TCP/ICMP checks |
 | **Winlogbeat** | Windows Event Log | Windows security and application logs |
 
-**Filebeat — ship log files to Logstash:**
+#### Filebeat — ship log files to Logstash
 ```yaml
 # ~/filebeat/compose.yaml
 services:
@@ -2281,7 +2294,7 @@ services:
     volumes:
       - /home/user/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro,Z
       - /var/log:/var/log:ro
-      - /run/user/${UID}/podman/podman.sock:/run/podman/podman.sock:ro
+      - /run/user/1000/podman/podman.sock:/run/podman/podman.sock:ro
       - filebeat_data:/usr/share/filebeat/data
     restart: unless-stopped
 
@@ -2323,7 +2336,7 @@ logging.level: info
 cd ~/filebeat && podman-compose up -d
 ```
 
-**Metricbeat — ship system metrics:**
+#### Metricbeat — ship system metrics
 ```yaml
 # ~/metricbeat/compose.yaml
 services:
@@ -2336,7 +2349,7 @@ services:
       - /proc:/hostfs/proc:ro
       - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
       - /:/hostfs:ro
-      - /run/user/${UID}/podman/podman.sock:/run/podman/podman.sock:ro
+      - /run/user/1000/podman/podman.sock:/run/podman/podman.sock:ro
     command: metricbeat -e --system.hostfs=/hostfs
     restart: unless-stopped
 ```
@@ -2406,11 +2419,11 @@ services:
       - /home/user/fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro,Z
       - /home/user/fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf:ro,Z
       - /var/log:/var/log:ro
-      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
     restart: unless-stopped
 ```
 
-**`fluent-bit.conf` — collect system logs and ship to Elasticsearch + Loki:**
+#### `fluent-bit.conf` — collect system logs and ship to Elasticsearch + Loki
 ```ini
 [SERVICE]
     Flush         5
@@ -2462,7 +2475,7 @@ services:
     Line_Format json
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Check pipeline stats
 curl http://localhost:2020/api/v1/metrics | python3 -m json.tool
@@ -2492,11 +2505,11 @@ services:
       - /home/user/vector/vector.yaml:/etc/vector/vector.yaml:ro,Z
       - /var/log:/var/log:ro
       - /home/user/vector/data:/var/lib/vector:Z
-      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
     restart: unless-stopped
 ```
 
-**`vector.yaml` — collect, enrich, and fan out to Elasticsearch and Loki:**
+#### `vector.yaml` — collect, enrich, and fan out to Elasticsearch and Loki
 ```yaml
 api:
   enabled: true
@@ -2518,7 +2531,7 @@ sources:
 
   docker_logs:
     type: docker_logs
-    docker_host: "unix:///run/user/${UID}/podman/podman.sock"
+    docker_host: "unix:///run/user/1000/podman/podman.sock"
 
   host_metrics:
     type: host_metrics
@@ -2570,7 +2583,7 @@ sinks:
     address: "0.0.0.0:9598"
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Check topology and component health
 curl http://localhost:8686/health
@@ -2599,7 +2612,7 @@ nix-env -iA nixpkgs.k6
 snap install k6
 ```
 
-**Basic load test script (`~/k6/smoke-test.js`):**
+#### Basic load test script (`~/k6/smoke-test.js`)
 ```javascript
 import http from 'k6/http';
 import { check, sleep } from 'k6';
@@ -2631,7 +2644,7 @@ k6 run ~/k6/smoke-test.js
 k6 run --vus 50 --duration 60s ~/k6/smoke-test.js
 ```
 
-**Push results to Prometheus (remote-write to VictoriaMetrics or Prometheus):**
+#### Push results to Prometheus (remote-write to VictoriaMetrics or Prometheus)
 ```bash
 # Using the experimental Prometheus remote-write output
 K6_PROMETHEUS_RW_SERVER_URL=http://localhost:9090/api/v1/write \
@@ -2653,7 +2666,7 @@ steps:
       - /home/user/k6:/k6:ro
 ```
 
-**Import the k6 Grafana dashboard:**
+#### Import the k6 Grafana dashboard
 
 In Grafana → Dashboards → Import → Dashboard ID **18030** (official k6 Prometheus dashboard). This gives you p50/p95/p99 latency, VU count, request rate, and error rate per test run, all correlated with your application metrics.
 
@@ -2694,7 +2707,7 @@ toxiproxy-cli create redis --listen 0.0.0.0:16379 --upstream localhost:6379
 toxiproxy-cli list
 ```
 
-**Inject failures via REST API or CLI:**
+#### Inject failures via REST API or CLI
 ```bash
 # Add 200ms latency to all Postgres connections
 toxiproxy-cli toxic add postgres --type latency --attribute latency=200 --attribute jitter=50
@@ -2715,7 +2728,7 @@ toxiproxy-cli toxic remove postgres --toxicName latency_downstream
 toxiproxy-cli toggle postgres
 ```
 
-**Use in integration tests (Python example):**
+#### Use in integration tests (Python example)
 ```python
 import requests
 
@@ -2744,7 +2757,7 @@ remove_toxic("postgres", "db_slow")
 
 **Purpose:** Netdata (already documented above) exposes a Prometheus-compatible metrics endpoint — you can query it directly from Grafana as a datasource alongside your regular Prometheus instance. This gives you Netdata's per-second system metrics (CPU, RAM, disk I/O, network, containers) in the same Grafana dashboards as your application metrics, without running a separate Prometheus scrape job.
 
-**Step 1 — Enable Prometheus exporter in Netdata:**
+#### Step 1 — Enable Prometheus exporter in Netdata
 
 Netdata exposes Prometheus metrics at `/api/v1/allmetrics?format=prometheus` by default on port 19999. No configuration required — it's always on.
 
@@ -2753,7 +2766,7 @@ Netdata exposes Prometheus metrics at `/api/v1/allmetrics?format=prometheus` by 
 curl http://localhost:19999/api/v1/allmetrics?format=prometheus | head -30
 ```
 
-**Step 2 — Add Netdata as a Prometheus datasource in Grafana:**
+#### Step 2 — Add Netdata as a Prometheus datasource in Grafana
 
 In Grafana → Connections → Data Sources → Add → Prometheus:
 - **Name:** `Netdata`
@@ -2775,7 +2788,7 @@ datasources:
       timeInterval: "1s"
 ```
 
-**Step 3 — Query Netdata metrics in Grafana panels:**
+#### Step 3 — Query Netdata metrics in Grafana panels
 ```promql
 # CPU usage per core
 netdata_cpu_cpu_percentage_average{dimension="user"}
@@ -2793,7 +2806,7 @@ netdata_net_kilobits_persec_average{dimension="received"}
 netdata_cgroups_cpu_percentage_average{chart=~"cgroup_.*"}
 ```
 
-**Step 4 — Import a Netdata Grafana dashboard:**
+#### Step 4 — Import a Netdata Grafana dashboard
 
 Go to Grafana → Dashboards → Import → Dashboard ID **7107** (Netdata System Overview). This gives you a full system health dashboard powered by Netdata's Prometheus endpoint.
 

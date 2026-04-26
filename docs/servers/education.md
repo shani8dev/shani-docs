@@ -12,6 +12,26 @@ Self-hosted learning management systems, school administration platforms, collab
 
 ---
 
+---
+
+## Job-Ready Concepts
+
+#### LMS architecture — SCORM, xAPI, and LTI
+The e-learning interoperability standards define how learning content and tools integrate. SCORM (Sharable Content Object Reference Model) packages courses as ZIP files with a manifest — any SCORM-compliant LMS (Moodle, Canvas) can import and track completion. xAPI (Tin Can) extends this to track any learning experience as subject-verb-object statements ("Alice completed Module 3") sent to a Learning Record Store (LRS). LTI (Learning Tools Interoperability) is the SSO standard for embedding third-party tools (H5P, Google Docs, Zoom) into an LMS with single sign-on and grade passback. LTI 1.3 uses OAuth2 for authentication. Any edtech role requires understanding these three acronyms and which standard solves which problem.
+
+#### SIS vs LMS — the system boundary
+A Student Information System (SIS) manages administrative data — enrollment, timetables, attendance, grades, billing, transcripts. An LMS manages learning delivery — course content, quizzes, discussion forums, assignment submission. They're separate systems that integrate via an API or a standard like OneRoster (CSV/API for syncing roster data between SIS and LMS). ERPNext's Education module is a SIS. Moodle and Canvas are LMSes. Gibbon straddles both for smaller schools. In edtech engineering, the SIS is the source of truth for student identity; the LMS receives roster data from it and publishes grades back.
+
+#### Accessibility and WCAG compliance
+Web Content Accessibility Guidelines (WCAG) 2.1 AA is the standard accessibility target for educational content — legally required in many jurisdictions for public schools. Key criteria relevant to LMS content: sufficient colour contrast (4.5:1 for text), keyboard navigability, alt text for images, captions for videos, and semantic HTML structure. H5P interactive content has variable accessibility — some content types meet WCAG, others don't. Any edtech deployment serving students with disabilities must audit content types. Canvas has stronger built-in accessibility tools than Moodle; Moodle's accessibility depends heavily on the theme and plugins installed.
+
+#### CalDAV, CardDAV, and school scheduling
+School scheduling systems (timetables, room bookings, events) use CalDAV as the standard calendar protocol for exposing data to client apps (iOS Calendar, Google Calendar, Thunderbird). A school server exposes a CalDAV endpoint; student and staff apps subscribe to their personal calendar feeds. The key operational fact: CalDAV is a WebDAV extension — it's stateful HTTP with `PROPFIND`, `REPORT`, and `PUT` methods. Debugging CalDAV sync issues requires reading HTTP traces, not just checking the app. ERPNext and Moodle both expose CalDAV for course events.
+
+#### FHIR in education — student health records
+Schools managing student health data (medications, allergies, immunisations) in a regulated environment increasingly use FHIR (Fast Healthcare Interoperability Resources) for structured health data storage — the same standard used in medical settings. This matters at the intersection of edtech and healthtech, for example in special education systems that store IEP (Individualised Education Plan) health components. Any role building school health record integrations will encounter HL7 FHIR R4.
+
+
 ## Moodle
 
 **Purpose:** The world's most widely deployed open-source Learning Management System (LMS). Supports courses, quizzes, assignments, forums, gradebooks, badges, SCORM packages, H5P interactive content, and deep analytics. Used by universities, schools, and enterprises worldwide.
@@ -45,20 +65,20 @@ cd ~/moodle && podman-compose up -d
 
 > Moodle requires a database. Run MariaDB first from the [Databases wiki](https://docs.shani.dev/doc/servers/databases).
 
-**Recommended plugins to install via admin panel:**
+#### Recommended plugins to install via admin panel
 - **H5P** — rich interactive content (drag-and-drop, interactive videos, flashcards)
 - **BigBlueButton** — integrated live video conferencing and virtual classrooms
 - **Attendance** — mark and track student attendance per session
 - **Collapsed Topics** — cleaner course layout for large courses
 - **Boost Union** — enhanced Boost theme with extra customisation options
 
-**Cron job (required for Moodle background tasks):**
+#### Cron job (required for Moodle background tasks)
 ```bash
 # Add to a systemd timer — every minute
 podman exec moodle php /opt/bitnami/moodle/admin/cli/cron.php
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Run Moodle cron (required — run every minute via systemd timer)
 podman exec -u www-data moodle php /bitnami/moodle/admin/cli/cron.php

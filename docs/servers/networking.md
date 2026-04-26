@@ -17,51 +17,63 @@ DNS filtering, privacy-friendly analytics, search engines, dashboards, latency m
 
 ### Networking Interview Essentials
 
-**OSI model in practice:** Interviewers ask this to test whether you can reason about where a problem is occurring. Useful frames:
+#### OSI model in practice
+Interviewers ask this to test whether you can reason about where a problem is occurring. Useful frames:
 - Layer 3 (Network) problem: `ping` fails, wrong route, IP unreachable
 - Layer 4 (Transport) problem: TCP connection times out or is refused, wrong port, firewall blocking
 - Layer 7 (Application) problem: connection works but HTTP returns wrong status, TLS cert mismatch, wrong Host header
 
-**DNS resolution chain:** Browser checks local cache → OS cache → `/etc/hosts` → configured resolver (Pi-hole, AdGuard) → resolver queries root nameservers → TLD nameserver → authoritative nameserver → response cached at each layer with TTL. `dig +trace` shows the full chain.
+#### DNS resolution chain
+Browser checks local cache → OS cache → `/etc/hosts` → configured resolver (Pi-hole, AdGuard) → resolver queries root nameservers → TLD nameserver → authoritative nameserver → response cached at each layer with TTL. `dig +trace` shows the full chain.
 
-**Subnetting mental model:** A `/24` has 256 addresses (254 usable — first is network address, last is broadcast). A `/25` splits a `/24` in half (128 addresses each). Each bit you add to the prefix halves the subnet. Common subnets: `/32` (single host), `/30` (4 addr, 2 usable — point-to-point links), `/29` (8 addr), `/28` (16), `/27` (32), `/26` (64), `/25` (128), `/24` (256), `/16` (65,536).
+#### Subnetting mental model
+A `/24` has 256 addresses (254 usable — first is network address, last is broadcast). A `/25` splits a `/24` in half (128 addresses each). Each bit you add to the prefix halves the subnet. Common subnets: `/32` (single host), `/30` (4 addr, 2 usable — point-to-point links), `/29` (8 addr), `/28` (16), `/27` (32), `/26` (64), `/25` (128), `/24` (256), `/16` (65,536).
 
-**NAT types and VPN implications:**
+#### NAT types and VPN implications
 - Full-cone NAT: any external host can reach the mapped port (rare, easy for VPNs)
 - Symmetric NAT: each outbound connection gets a different external port mapping (common on corporate networks — breaks WireGuard hole-punching, requires TURN relay)
 - Port-restricted cone NAT: most home routers; WireGuard hole-punching works with STUN
 
-**How HTTPS actually works (TLS 1.3 handshake):**
+#### How HTTPS actually works (TLS 1.3 handshake)
 1. Client sends `ClientHello` with supported cipher suites and a key share
 2. Server responds with `ServerHello`, its certificate, and its key share — in *one round trip* (TLS 1.3 optimisation)
 3. Both sides derive the session key from the key exchange (ECDHE)
 4. Client verifies the server's certificate against trusted CAs
 5. Encrypted application data flows
 
-**Reverse proxy vs forward proxy:** A reverse proxy sits in front of servers — clients talk to the proxy, which forwards to the backend (Caddy, Nginx, Traefik, HAProxy). The client often doesn't know there's a backend at all. A forward proxy sits in front of clients — clients send all traffic to the proxy, which forwards to the internet (Squid, corporate web proxy). VPNs act like forward proxies for encrypted traffic.
+#### Reverse proxy vs forward proxy
+A reverse proxy sits in front of servers — clients talk to the proxy, which forwards to the backend (Caddy, Nginx, Traefik, HAProxy). The client often doesn't know there's a backend at all. A forward proxy sits in front of clients — clients send all traffic to the proxy, which forwards to the internet (Squid, corporate web proxy). VPNs act like forward proxies for encrypted traffic.
 
-**Load balancing algorithms:**
+#### Load balancing algorithms
 - **Round robin** — requests distributed equally in turn
 - **Least connections** — new request goes to the backend with fewest active connections (better for varied request lengths)
 - **IP hash / source hash** — same client IP always goes to the same backend (sticky sessions without cookies)
 - **Weighted** — backends have weights; higher-weight servers get more traffic (useful for canary deployments or mixed instance sizes)
 
-**BGP (Border Gateway Protocol) basics for interviews:** BGP is the routing protocol of the internet — it exchanges reachability information between Autonomous Systems (ASes). Each AS has an AS number (ASN). iBGP (interior) routes within one AS; eBGP (exterior) routes between ASes. BGP is a path-vector protocol — it chooses routes based on AS-path length and policy attributes. Relevant in homelab with FRRouting, and in cloud when advertising VPC routes or Tailscale subnets into your network.
+#### BGP (Border Gateway Protocol) basics for interviews
+BGP is the routing protocol of the internet — it exchanges reachability information between Autonomous Systems (ASes). Each AS has an AS number (ASN). iBGP (interior) routes within one AS; eBGP (exterior) routes between ASes. BGP is a path-vector protocol — it chooses routes based on AS-path length and policy attributes. Relevant in homelab with FRRouting, and in cloud when advertising VPC routes or Tailscale subnets into your network.
 
-**VLAN fundamentals:** A VLAN (Virtual LAN) segments a physical switch into multiple logical networks. Tagged frames (802.1Q) carry a VLAN ID in the Ethernet header. Trunk ports carry multiple VLANs; access ports carry one. Common segmentation: IoT VLAN (isolated), servers VLAN, management VLAN. VLANs don't cross routers without explicit routing or an SVR (Switched Virtual Router) interface.
+#### VLAN fundamentals
+A VLAN (Virtual LAN) segments a physical switch into multiple logical networks. Tagged frames (802.1Q) carry a VLAN ID in the Ethernet header. Trunk ports carry multiple VLANs; access ports carry one. Common segmentation: IoT VLAN (isolated), servers VLAN, management VLAN. VLANs don't cross routers without explicit routing or an SVR (Switched Virtual Router) interface.
 
-**MTU and fragmentation:** Maximum Transmission Unit — the largest packet a link will carry. Ethernet's standard MTU is 1500 bytes. VPN tunnels add overhead (WireGuard adds ~32–60 bytes), which reduces the effective inner MTU. Setting the wrong MTU causes silent data corruption or dropped connections for large packets. Fix: set MSS clamping (`--clamp-mss-to-pmtu` in WireGuard/iptables) or discover the path MTU with `ping -M do -s 1400`.
+#### MTU and fragmentation
+Maximum Transmission Unit — the largest packet a link will carry. Ethernet's standard MTU is 1500 bytes. VPN tunnels add overhead (WireGuard adds ~32–60 bytes), which reduces the effective inner MTU. Setting the wrong MTU causes silent data corruption or dropped connections for large packets. Fix: set MSS clamping (`--clamp-mss-to-pmtu` in WireGuard/iptables) or discover the path MTU with `ping -M do -s 1400`.
 
 
-**Reverse proxy patterns — Caddy vs Nginx vs Traefik vs HAProxy:** Each serves a different primary use case. Caddy: automatic HTTPS (ACME), human-readable config, best for homelab and small deployments. Nginx: highest throughput, battle-tested, extensive module ecosystem, config is verbose. Traefik: auto-discovers routes from container labels — zero-config for Docker/Kubernetes, but harder to reason about in complex setups. HAProxy: the performance and reliability choice for TCP-level load balancing, used in front of databases and Kubernetes control planes. Know which layer each operates at: Caddy/Nginx/Traefik are L7 (HTTP); HAProxy works at L4 and L7.
+#### Reverse proxy patterns — Caddy vs Nginx vs Traefik vs HAProxy
+Each serves a different primary use case. Caddy: automatic HTTPS (ACME), human-readable config, best for homelab and small deployments. Nginx: highest throughput, battle-tested, extensive module ecosystem, config is verbose. Traefik: auto-discovers routes from container labels — zero-config for Docker/Kubernetes, but harder to reason about in complex setups. HAProxy: the performance and reliability choice for TCP-level load balancing, used in front of databases and Kubernetes control planes. Know which layer each operates at: Caddy/Nginx/Traefik are L7 (HTTP); HAProxy works at L4 and L7.
 
-**DNS-based service discovery:** DNS TTL is the core reliability lever. A low TTL (30–60s) means changes propagate fast but increases DNS query load. A high TTL (3600s) means failures persist until TTL expires. In internal DNS (Technitium, PowerDNS), keep TTLs low for services that change. Health-check-based DNS (Route53 health checks, PowerDNS with health checking) removes failing IPs from DNS automatically — a primitive but effective load balancing and failover mechanism.
+#### DNS-based service discovery
+DNS TTL is the core reliability lever. A low TTL (30–60s) means changes propagate fast but increases DNS query load. A high TTL (3600s) means failures persist until TTL expires. In internal DNS (Technitium, PowerDNS), keep TTLs low for services that change. Health-check-based DNS (Route53 health checks, PowerDNS with health checking) removes failing IPs from DNS automatically — a primitive but effective load balancing and failover mechanism.
 
-**DHCP and IPAM operational reality:** In a managed network, every IP assignment should be intentional. Static DHCP leases (assign a fixed IP based on MAC address) give services predictable addresses without manual configuration on each device. An IPAM tool (NetBox, phpIPAM) is the source of truth — it documents what IP belongs to what device, VLAN, and subnet. Without IPAM, IP conflicts are a matter of when, not if. DHCP servers (Kea, dnsmasq) should feed lease data back to IPAM automatically.
+#### DHCP and IPAM operational reality
+In a managed network, every IP assignment should be intentional. Static DHCP leases (assign a fixed IP based on MAC address) give services predictable addresses without manual configuration on each device. An IPAM tool (NetBox, phpIPAM) is the source of truth — it documents what IP belongs to what device, VLAN, and subnet. Without IPAM, IP conflicts are a matter of when, not if. DHCP servers (Kea, dnsmasq) should feed lease data back to IPAM automatically.
 
-**Caching proxy and bandwidth management:** A caching proxy (Squid) intercepts HTTP/HTTPS requests and serves cached responses. Benefits: reduced bandwidth (shared package mirrors, container image layers), content filtering, access logs, and enforced egress policies. In a homelab, a Squid proxy in front of package managers (apt, pip, npm) dramatically reduces external bandwidth. In enterprises, forward proxies are often mandatory — traffic that doesn't go through the proxy is blocked at the firewall.
+#### Caching proxy and bandwidth management
+A caching proxy (Squid) intercepts HTTP/HTTPS requests and serves cached responses. Benefits: reduced bandwidth (shared package mirrors, container image layers), content filtering, access logs, and enforced egress policies. In a homelab, a Squid proxy in front of package managers (apt, pip, npm) dramatically reduces external bandwidth. In enterprises, forward proxies are often mandatory — traffic that doesn't go through the proxy is blocked at the firewall.
 
-**Dynamic routing protocols — when BGP/OSPF matters:** Static routes work until you have more than a handful of subnets or multiple uplinks. OSPF is the internal routing protocol — routers share topology, calculate shortest paths, and converge automatically when a link fails. BGP is the external protocol — used to announce your IP space to an ISP, or to distribute routes between multiple sites. FRRouting brings both to Linux. In a homelab, BGP is used with MetalLB (announce LoadBalancer IPs to a router) or multi-site WireGuard (distribute subnet routes between locations).
+#### Dynamic routing protocols — when BGP/OSPF matters
+Static routes work until you have more than a handful of subnets or multiple uplinks. OSPF is the internal routing protocol — routers share topology, calculate shortest paths, and converge automatically when a link fails. BGP is the external protocol — used to announce your IP space to an ISP, or to distribute routes between multiple sites. FRRouting brings both to Linux. In a homelab, BGP is used with MetalLB (announce LoadBalancer IPs to a router) or multi-site WireGuard (distribute subnet routes between locations).
 ---
 ---
 
@@ -170,7 +182,7 @@ Access the setup wizard at `http://localhost:3000` on first run. After setup, th
 sudo firewall-cmd --add-port=853/tcp --permanent && sudo firewall-cmd --reload
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # View logs
 podman logs -f adguardhome
@@ -291,7 +303,7 @@ services:
       - --log.level=INFO
       - --accesslog=true
     volumes:
-      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
       - /home/user/traefik/config:/config:Z
       - /home/user/traefik/certs:/certs:Z
     restart: unless-stopped
@@ -301,7 +313,7 @@ services:
 cd ~/traefik && podman-compose up -d
 ```
 
-**Expose a service via labels (no Caddyfile edit required):**
+#### Expose a service via labels (no Caddyfile edit required)
 ```yaml
 services:
   myapp:
@@ -314,7 +326,7 @@ services:
       - "traefik.http.services.myapp.loadbalancer.server.port=3000"
 ```
 
-**Load balancing and middleware via dynamic config (`/home/user/traefik/config/dynamic.yml`):**
+#### Load balancing and middleware via dynamic config (`/home/user/traefik/config/dynamic.yml`)
 ```yaml
 http:
   middlewares:
@@ -348,7 +360,7 @@ http:
         certResolver: letsencrypt
 ```
 
-**Secure the dashboard behind Caddy:**
+#### Secure the dashboard behind Caddy
 ```caddyfile
 traefik.home.local { tls internal; reverse_proxy localhost:8080 }
 ```
@@ -421,7 +433,7 @@ backend app_servers
   server app3 192.168.1.12:8080 check inter 10s fall 3 rise 2 backup
 ```
 
-**Load balancing algorithms:**
+#### Load balancing algorithms
 ```
 balance roundrobin   # Equal distribution (default)
 balance leastconn    # Route to server with fewest active connections
@@ -429,7 +441,7 @@ balance source       # Sticky sessions by client IP hash
 balance uri          # Sticky by URI hash (useful for caches)
 ```
 
-**TCP load balancing for databases and MQTT:**
+#### TCP load balancing for databases and MQTT
 ```
 frontend postgres_in
   mode tcp
@@ -578,7 +590,7 @@ volumes:
 cd ~/librenms && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Add a device via CLI
 podman exec librenms lnms device:add 192.168.1.1 --v2c --community public
@@ -824,7 +836,7 @@ podman exec pdns pdnsutil create-slave-zone home.local 127.0.0.1
 # Or use PowerDNS Admin web UI at http://localhost:9191 to create zones and records
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # List all zones
 podman exec pdns pdnsutil list-all-zones
@@ -1046,7 +1058,7 @@ podman exec squid squidclient -m PURGE http://example.com/
 podman exec squid squidclient mgr:info
 ```
 
-**Use Squid as a proxy for container pulls:**
+#### Use Squid as a proxy for container pulls
 ```bash
 # Set Podman to pull via Squid
 export https_proxy=http://localhost:3128
@@ -1137,7 +1149,7 @@ services:
     restart: unless-stopped
 ```
 
-**`frps.toml` on the VPS:**
+#### `frps.toml` on the VPS
 ```toml
 bindPort = 7000           # frpc connects here
 vhostHTTPPort = 8080      # HTTP vhost traffic (optional)
@@ -1163,7 +1175,7 @@ services:
     restart: unless-stopped
 ```
 
-**`frpc.toml` on your home server:**
+#### `frpc.toml` on your home server
 ```toml
 serverAddr = "your.vps.ip"
 serverPort = 7000
@@ -1240,7 +1252,7 @@ mkdir -p ~/frr/etc
 cd ~/frr && podman-compose up -d
 ```
 
-**Initial FRR config files:**
+#### Initial FRR config files
 ```bash
 # ~/frr/etc/daemons — enable only what you need
 cat > ~/frr/etc/daemons << 'EOF'
@@ -1266,7 +1278,7 @@ EOF
 podman exec -it frr vtysh
 ```
 
-**Example: iBGP between Shani OS host and a pfSense/OPNsense router:**
+#### Example: iBGP between Shani OS host and a pfSense/OPNsense router
 ```
 # Inside vtysh:
 
@@ -1288,7 +1300,7 @@ configure terminal
 exit
 ```
 
-**Example: BGP with a Hetzner cloud server (eBGP over WireGuard):**
+#### Example: BGP with a Hetzner cloud server (eBGP over WireGuard)
 ```
 configure terminal
  router bgp 65001
@@ -1310,7 +1322,7 @@ configure terminal
 exit
 ```
 
-**Example: OSPF for automatic route redistribution (all routers learn all subnets):**
+#### Example: OSPF for automatic route redistribution (all routers learn all subnets)
 ```
 configure terminal
  router ospf
@@ -1323,7 +1335,7 @@ configure terminal
 exit
 ```
 
-**Useful show commands (inside vtysh):**
+#### Useful show commands (inside vtysh)
 ```
 show ip bgp summary          # peer status, uptime, prefixes received
 show ip bgp                  # full BGP table
@@ -1335,7 +1347,7 @@ show running-config          # full current config
 write memory                 # save config to /etc/frr/frr.conf
 ```
 
-**BFD (fast failover in under 1 second):**
+#### BFD (fast failover in under 1 second)
 ```
 configure terminal
  bfd
@@ -1412,7 +1424,7 @@ ss -tlnp
 # or: lsof -i -P -n | grep LISTEN
 ```
 
-**TCP connection states to know:**
+#### TCP connection states to know
 
 - `ESTABLISHED` — active connection in use
 - `TIME_WAIT` — connection closed, waiting for delayed packets to expire (default 60–120s). High TIME_WAIT count on a busy server is normal but can exhaust ephemeral ports — tune `net.ipv4.tcp_tw_reuse` if needed.
@@ -1481,7 +1493,7 @@ sudo iptables -t raw -D PREROUTING -p tcp --dport 8080 -j TRACE  # remove when d
 
 Understanding what Podman does under the hood helps debug connectivity issues between containers and the host.
 
-**When you start a container with `-p 8080:80`:**
+#### When you start a container with `-p 8080:80`
 
 1. Podman creates a **veth pair** — a virtual Ethernet cable with one end in the container's network namespace and one end on the host's bridge.
 2. The host end is connected to a **bridge device** (e.g., `podman1` or `cni-podman0`). The bridge acts like a virtual switch.
@@ -1506,7 +1518,8 @@ podman inspect jellyfin --format '{{range .NetworkSettings.Networks}}{{.IPAddres
 ping $(podman inspect jellyfin --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
 ```
 
-**Why `host.containers.internal` exists:** when a container needs to reach a service on the host (e.g., a database not in a container), it can't use `localhost` — that resolves to its own network namespace. `host.containers.internal` is a special DNS name Podman provides that resolves to the host's IP as seen from the container.
+#### Why `host.containers.internal` exists
+when a container needs to reach a service on the host (e.g., a database not in a container), it can't use `localhost` — that resolves to its own network namespace. `host.containers.internal` is a special DNS name Podman provides that resolves to the host's IP as seen from the container.
 
 ---
 

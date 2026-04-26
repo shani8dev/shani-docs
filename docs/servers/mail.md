@@ -16,7 +16,7 @@ Production-ready email solutions for full data control and privacy.
 
 Understanding the protocol stack is essential for any sysadmin or DevOps role — interviewers expect you to trace a message end-to-end.
 
-**The three server roles:**
+#### The three server roles
 
 | Role | Protocol | Port | What it does |
 |------|----------|------|-------------|
@@ -24,7 +24,7 @@ Understanding the protocol stack is essential for any sysadmin or DevOps role �
 | MSA (Mail Submission Agent) | SMTP submission | 587 / 465 | Authenticated client → server handoff |
 | MDA (Mail Delivery Agent) | IMAP / POP3 | 143/993, 110/995 | User retrieval from mailbox (Dovecot) |
 
-**Outbound delivery flow:**
+#### Outbound delivery flow
 ```
 Mail client (MUA)
   → port 587 STARTTLS  →  Your MSA  (auth required)
@@ -33,9 +33,11 @@ Mail client (MUA)
   → port 993 IMAPS     →  Recipient's mail client
 ```
 
-**Relay vs. direct delivery:** A *relay* (SendGrid, AWS SES, Mailgun) accepts your mail and delivers it under their IP reputation — useful when your IP is new or blocked. *Direct delivery* sends from your server straight to the recipient's MX — requires a clean IP, correct PTR, and passing SPF/DKIM checks.
+#### Relay vs. direct delivery
+A *relay* (SendGrid, AWS SES, Mailgun) accepts your mail and delivers it under their IP reputation — useful when your IP is new or blocked. *Direct delivery* sends from your server straight to the recipient's MX — requires a clean IP, correct PTR, and passing SPF/DKIM checks.
 
-**IP warming:** When sending from a new IP, receiving servers rate-limit or reject you until your IP builds a reputation. Start with low volumes, ramp up over weeks, and monitor bounce/spam complaint rates. This is a real operational concern for any newsletter or transactional mail setup.
+#### IP warming
+When sending from a new IP, receiving servers rate-limit or reject you until your IP builds a reputation. Start with low volumes, ramp up over weeks, and monitor bounce/spam complaint rates. This is a real operational concern for any newsletter or transactional mail setup.
 
 ---
 
@@ -124,7 +126,7 @@ sudo firewall-cmd --add-service=smtp --add-service=smtps \
 sudo firewall-cmd --reload
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # View logs
 podman logs -f stalwart
@@ -362,7 +364,7 @@ cd ~/simplelogin && podman-compose up -d
 
 > Requires a public-facing mail server with MX, SPF, DKIM, and DMARC DNS records for the alias domain. Port 25 must be open and not blocked by your ISP — a VPS is strongly recommended.
 
-**Initialise:**
+#### Initialise
 ```bash
 podman-compose run --rm app flask db upgrade
 podman-compose run --rm app python init_app.py

@@ -14,15 +14,20 @@ Best practices for running, updating, and maintaining self-hosted containers on 
 
 These concepts apply identically whether you're using Podman on Shani OS, Docker on Ubuntu, or Kubernetes at work. Podman is OCI-compliant and drop-in compatible with Docker — `alias docker=podman` works for the vast majority of workflows.
 
-**OCI (Open Container Initiative):** The open standard that defines what a container image is and how a runtime executes it. Docker, Podman, containerd, and CRI-O all implement OCI. This is why images built with `docker build` run unchanged under Podman and in Kubernetes.
+#### OCI (Open Container Initiative)
+The open standard that defines what a container image is and how a runtime executes it. Docker, Podman, containerd, and CRI-O all implement OCI. This is why images built with `docker build` run unchanged under Podman and in Kubernetes.
 
-**Rootless vs. rootful containers:** Rootless containers run as your user, not root — a security boundary that limits what a compromised container can do to the host. Shani OS defaults to rootless Podman. In most corporate environments you'll encounter both: rootless for application workloads, rootful for system-level tools (network namespaces, privileged devices).
+#### Rootless vs. rootful containers
+Rootless containers run as your user, not root — a security boundary that limits what a compromised container can do to the host. Shani OS defaults to rootless Podman. In most corporate environments you'll encounter both: rootless for application workloads, rootful for system-level tools (network namespaces, privileged devices).
 
-**Image layers and the build cache:** Container images are layered — each `RUN`, `COPY`, and `ADD` instruction in a Dockerfile creates a new layer. Layers are cached. If your `COPY` instruction comes before a large `apt install`, every code change busts the cache and re-downloads packages. Order matters: stable instructions first, frequently changed ones last.
+#### Image layers and the build cache
+Container images are layered — each `RUN`, `COPY`, and `ADD` instruction in a Dockerfile creates a new layer. Layers are cached. If your `COPY` instruction comes before a large `apt install`, every code change busts the cache and re-downloads packages. Order matters: stable instructions first, frequently changed ones last.
 
-**Container networking:** By default, containers on the same compose stack share a *bridge network* — they reach each other by service name (e.g. `db`, `redis`). The host reaches them only on published ports. *Host networking* (`network_mode: host`) skips isolation but is occasionally needed for performance-sensitive services. *Overlay networks* (Swarm, Kubernetes) span multiple hosts.
+#### Container networking
+By default, containers on the same compose stack share a *bridge network* — they reach each other by service name (e.g. `db`, `redis`). The host reaches them only on published ports. *Host networking* (`network_mode: host`) skips isolation but is occasionally needed for performance-sensitive services. *Overlay networks* (Swarm, Kubernetes) span multiple hosts.
 
-**Secrets management:** Environment variables (`environment:` in compose) are readable by anyone who can run `podman inspect`. For production, use a secrets manager — Docker Swarm secrets, Kubernetes Secrets (ideally with external-secrets-operator + Vault), or Podman secrets (`podman secret create`). Never hardcode credentials in compose files that are committed to Git.
+#### Secrets management
+Environment variables (`environment:` in compose) are readable by anyone who can run `podman inspect`. For production, use a secrets manager — Docker Swarm secrets, Kubernetes Secrets (ideally with external-secrets-operator + Vault), or Podman secrets (`podman secret create`). Never hardcode credentials in compose files that are committed to Git.
 
 ```bash
 # Create a Podman secret
@@ -37,7 +42,8 @@ printf 'mysecretpassword' | podman secret create db_password -
 #     secrets: [db_password]
 ```
 
-**Resource limits (cgroups):** Without limits, a runaway container can OOM the host. Always set limits on untrusted or production workloads:
+#### Resource limits (cgroups)
+Without limits, a runaway container can OOM the host. Always set limits on untrusted or production workloads:
 
 ```yaml
 services:
@@ -55,13 +61,17 @@ services:
 This maps to cgroup v2 constraints — the same mechanism Kubernetes `requests`/`limits` uses under the hood.
 
 
-**Container update strategies — why Watchtower/Diun instead of `latest`:** Pinning image tags (`image: nginx:1.27.2`) is safer than `latest` — `latest` changes without warning and can break working deployments. But pinned tags go stale. The production pattern: pin tags in compose files, use Renovate or Diun to detect new versions, review the changelog, then update intentionally. `latest` is acceptable in a homelab dev environment where breakage is tolerable; never in production.
+#### Container update strategies — why Watchtower/Diun instead of `latest`
+Pinning image tags (`image: nginx:1.27.2`) is safer than `latest` — `latest` changes without warning and can break working deployments. But pinned tags go stale. The production pattern: pin tags in compose files, use Renovate or Diun to detect new versions, review the changelog, then update intentionally. `latest` is acceptable in a homelab dev environment where breakage is tolerable; never in production.
 
-**Systemd and containers — the integration model:** On a non-Kubernetes host, systemd is the process supervisor. Podman generates systemd unit files (`podman generate systemd`) that start containers as system services, handle restart-on-failure, and integrate with `journalctl` for logs. Quadlet (Podman 4.4+) is the modern approach: drop a `.container` file in `/etc/containers/systemd/`, and systemd manages the container lifecycle natively. This is how production bare-metal container deployments work without Kubernetes overhead.
+#### Systemd and containers — the integration model
+On a non-Kubernetes host, systemd is the process supervisor. Podman generates systemd unit files (`podman generate systemd`) that start containers as system services, handle restart-on-failure, and integrate with `journalctl` for logs. Quadlet (Podman 4.4+) is the modern approach: drop a `.container` file in `/etc/containers/systemd/`, and systemd manages the container lifecycle natively. This is how production bare-metal container deployments work without Kubernetes overhead.
 
-**Image garbage collection:** Pulled images accumulate on disk. Unused images (not referenced by any container) should be pruned regularly. `podman image prune -a` removes all unused images; `podman system prune` removes unused images, containers, volumes, and networks. Automate this with a systemd timer or cron. On Kubernetes, kubelet performs image GC automatically when disk usage exceeds a threshold (configurable via `--image-gc-high-threshold`, default 85%).
+#### Image garbage collection
+Pulled images accumulate on disk. Unused images (not referenced by any container) should be pruned regularly. `podman image prune -a` removes all unused images; `podman system prune` removes unused images, containers, volumes, and networks. Automate this with a systemd timer or cron. On Kubernetes, kubelet performs image GC automatically when disk usage exceeds a threshold (configurable via `--image-gc-high-threshold`, default 85%).
 
-**Health checks and auto-healing:** A health check (`HEALTHCHECK` in Dockerfile, or `healthcheck:` in compose) lets the container runtime know if the application inside is actually functioning, not just that the process is running. If a health check fails N consecutive times, the container is marked `unhealthy`. `restart: unless-stopped` only restarts on crash — for health-check-based restarts, use `autoheal` (a container that watches for unhealthy status and restarts) or Kubernetes liveness probes, which restart containers that fail the check.
+#### Health checks and auto-healing
+A health check (`HEALTHCHECK` in Dockerfile, or `healthcheck:` in compose) lets the container runtime know if the application inside is actually functioning, not just that the process is running. If a health check fails N consecutive times, the container is marked `unhealthy`. `restart: unless-stopped` only restarts on crash — for health-check-based restarts, use `autoheal` (a container that watches for unhealthy status and restarts) or Kubernetes liveness probes, which restart containers that fail the check.
 ---
 
 ## Systemd Integration

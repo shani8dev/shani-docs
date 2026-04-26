@@ -12,6 +12,29 @@ Self-hosted streaming servers, personal photo libraries, music servers, and down
 
 ---
 
+---
+
+## Job-Ready Concepts
+
+#### Video transcoding — codecs, containers, and hardware acceleration
+A video file has two layers: a container (MKV, MP4, AVI — the wrapper format) and codec (H.264, H.265/HEVC, AV1 — the compression algorithm). Jellyfin transcodes on-the-fly when a client can't decode the source codec natively (a Roku doesn't decode H.265; it needs an H.264 stream). Transcoding is CPU-intensive — a single 1080p H.265 → H.264 transcode saturates 2–4 CPU cores. Hardware transcoding (Intel Quick Sync via `/dev/dri`, NVIDIA NVENC, AMD VCE) offloads this to dedicated silicon, supporting 10–20 simultaneous streams on the same hardware that would support 1–2 in software. The key operational decision: ensure clients support direct play (no transcoding) by choosing a codec supported by your device ecosystem. H.264 + AAC in MKV direct plays on virtually everything.
+
+#### HLS, DASH, and adaptive bitrate streaming
+HTTP Live Streaming (HLS) and Dynamic Adaptive Streaming over HTTP (DASH) are the two dominant streaming protocols. Both work by splitting video into short segments (2–10 seconds) served as regular HTTP files. The client fetches a manifest (`.m3u8` for HLS, `.mpd` for DASH) listing available quality levels and segment URLs, then requests segments at the appropriate quality based on measured bandwidth. Jellyfin and Plex use HLS for their web and app streaming — there is no persistent connection, just regular HTTP requests. Adaptive bitrate (ABR) is why video quality changes dynamically when your network fluctuates. PeerTube uses WebTorrent (peer-assisted HLS) to distribute bandwidth across viewers.
+
+#### EXIF metadata and photo library management
+Digital photos embed EXIF metadata: camera model, lens, shutter speed, ISO, GPS coordinates, timestamp. Photo managers (Immich, PhotoPrism) extract this to enable timeline browsing, map view, and searchable camera/lens filters. GPS coordinates require the device to have location services enabled when the photo is taken — many camera apps default to off. The timestamp in EXIF is the camera's local time without timezone — this causes sorting errors when photos are taken across timezones. Immich normalises timestamps using timezone data. Face recognition in PhotoPrism and Immich uses a local ML model (no cloud) — it clusters face embeddings from photo crops and asks you to name each cluster.
+
+#### BitTorrent protocol and the *arr stack automation pipeline
+BitTorrent is a peer-to-peer file distribution protocol: a `.torrent` file or magnet link describes the content and a list of trackers (or uses DHT for trackerless discovery). Peers download pieces from multiple sources simultaneously and upload to others. qBittorrent manages this. The *arr stack (Radarr, Sonarr, Lidarr) automates the full pipeline: monitor Prowlarr for new releases matching your watch list → send download request to qBittorrent → monitor download completion → rename and move to media library → notify Jellyfin to scan the new file. The result: a new movie you added to Radarr's wanted list appears in Jellyfin within minutes of a release. This pipeline is a concrete example of event-driven workflow automation.
+
+#### Content delivery and the bandwidth cost of self-hosted streaming
+A 1080p H.264 stream at 8 Mbps consumed 8 hours per day = ~28 GB/month per viewer. 4K HDR at 40 Mbps = ~140 GB/month per viewer. Home internet upload bandwidth is the limiting factor for remote access — a typical 50 Mbps upload supports 6 simultaneous 1080p streams or 1 4K stream. CDN strategies for self-hosting: Cloudflare Tunnel proxies the HTTP stream (counts against Cloudflare's fair use for video — against their ToS for high-volume streaming). Tailscale routes directly to your server, using your actual upload bandwidth. A VPS reverse proxy (via frp or Pangolin) shifts the bandwidth cost to the VPS. The practical answer for personal use: Tailscale for remote access, direct LAN for most viewing.
+
+#### Digital rights management (DRM) and Plex/Jellyfin differences
+Plex Pass is required for hardware transcoding and features like mobile sync — this is a commercial layer on top of open-source foundations. Jellyfin is fully open-source with no paid tier, and includes hardware transcoding in the base installation. Neither Plex nor Jellyfin can transcode DRM-protected content (Netflix, Disney+) — they are for personal media libraries of content you own. This distinction matters for recommending the right tool: if a user asks about ripping Blu-rays and streaming them, Jellyfin with MakeMKV-ripped files is the workflow. Streaming licensed content from Netflix-equivalent services still requires those services' apps.
+
+
 ## Jellyfin
 
 **Purpose:** Free, open-source media server with hardware transcoding, multi-user accounts, parental controls, and native client apps for every platform (Android, iOS, Roku, Apple TV, Fire TV, web, Android TV).
@@ -36,7 +59,7 @@ services:
 cd ~/jellyfin && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Check Jellyfin health endpoint
 curl http://localhost:8096/health
@@ -121,7 +144,7 @@ services:
 cd ~/navidrome && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Trigger a full library rescan
 curl -u admin:changeme http://localhost:4533/rest/startScan.view?v=1.16.1&c=cli&f=json

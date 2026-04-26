@@ -23,34 +23,43 @@ Deploy a full OpenStack cloud on this system — from a minimal all-in-one devel
 
 **OpenStack vs Kubernetes — what's the difference?** OpenStack manages *virtual machines and infrastructure* (compute, networking, storage, identity). Kubernetes manages *containerised workloads*. They're complementary: many production environments run Kubernetes on top of OpenStack VMs (Magnum does this automatically). In cloud provider terms, OpenStack = the IaaS layer (like AWS EC2/VPC/EBS); Kubernetes = the PaaS layer (like EKS/GKE).
 
-**Nova vs Neutron vs Cinder — the three most commonly asked:**
+#### Nova vs Neutron vs Cinder — the three most commonly asked
 - **Nova** (compute): manages VM lifecycle — boot, stop, resize, migrate, snapshot. The core of OpenStack.
 - **Neutron** (network): provides virtual networks, subnets, routers, security groups, floating IPs, and load balancers. More complex than Nova because networking is inherently stateful.
 - **Cinder** (block storage): persistent volumes for VMs, like EBS. Backends include LVM, Ceph RBD, NFS. A volume can be attached to one VM at a time (ReadWriteOnce).
 
-**Keystone's token model:** Keystone is the identity service. Every other OpenStack API requires a Keystone token in the `X-Auth-Token` header. Tokens are short-lived (default 1 hour) and contain the user's project, roles, and service endpoints. The service catalog (which endpoint to call for which service) is embedded in the token response — this is how clients discover Nova, Neutron, etc. without hard-coding URLs.
+#### Keystone's token model
+Keystone is the identity service. Every other OpenStack API requires a Keystone token in the `X-Auth-Token` header. Tokens are short-lived (default 1 hour) and contain the user's project, roles, and service endpoints. The service catalog (which endpoint to call for which service) is embedded in the token response — this is how clients discover Nova, Neutron, etc. without hard-coding URLs.
 
-**Tenant/project isolation:** OpenStack uses *projects* (formerly tenants) as the isolation boundary — quotas, networks, and volumes belong to a project. A user belongs to one or more projects with roles. `admin` role gives full control; `member` role is standard user access; `reader` role is read-only. This maps directly to AWS accounts or Kubernetes namespaces.
+#### Tenant/project isolation
+OpenStack uses *projects* (formerly tenants) as the isolation boundary — quotas, networks, and volumes belong to a project. A user belongs to one or more projects with roles. `admin` role gives full control; `member` role is standard user access; `reader` role is read-only. This maps directly to AWS accounts or Kubernetes namespaces.
 
-**VM migration types:**
+#### VM migration types
 - **Live migration**: move a running VM to another compute node with minimal downtime (seconds). Requires shared storage (Ceph RBD) or block-device live migration.
 - **Cold migration**: stop the VM, move the disk, restart on the new node. More reliable, more downtime.
 - **Evacuation**: force-migrate all VMs from a failed compute node (used when a node dies). Used in HA cluster maintenance.
 
-**Floating IP vs fixed IP:** A fixed IP is the VM's internal address on the tenant network (e.g., `10.0.0.5`). A floating IP is a public IP that can be associated with a VM's port and provides external access. Floating IPs are drawn from an external network pool. This is analogous to AWS Elastic IPs. NAT is used to map floating IP → fixed IP on the router.
+#### Floating IP vs fixed IP
+A fixed IP is the VM's internal address on the tenant network (e.g., `10.0.0.5`). A floating IP is a public IP that can be associated with a VM's port and provides external access. Floating IPs are drawn from an external network pool. This is analogous to AWS Elastic IPs. NAT is used to map floating IP → fixed IP on the router.
 
-**Heat templates vs Terraform:** Heat is OpenStack's native orchestration — HOT (Heat Orchestration Template) format, YAML, declarative. Terraform/OpenTofu can also provision OpenStack resources via the OpenStack provider — and is more portable across clouds. For a pure OpenStack shop, Heat has the advantage of deep integration (auto-scaling groups, wait conditions, resource signals). For multi-cloud, Terraform is better.
+#### Heat templates vs Terraform
+Heat is OpenStack's native orchestration — HOT (Heat Orchestration Template) format, YAML, declarative. Terraform/OpenTofu can also provision OpenStack resources via the OpenStack provider — and is more portable across clouds. For a pure OpenStack shop, Heat has the advantage of deep integration (auto-scaling groups, wait conditions, resource signals). For multi-cloud, Terraform is better.
 
-**Ceph as the OpenStack storage backbone:** Ceph RBD (RADOS Block Device) is the preferred backend for Cinder volumes, Glance images, and Nova ephemeral disks in production OpenStack. All three services share the same Ceph cluster with separate pools. Benefits: thin provisioning, snapshots, cloning (fast VM spawning from images), no shared storage requirement for live migration (each VM's disk is a Ceph RBD image stored in the cluster, not on the compute node).
+#### Ceph as the OpenStack storage backbone
+Ceph RBD (RADOS Block Device) is the preferred backend for Cinder volumes, Glance images, and Nova ephemeral disks in production OpenStack. All three services share the same Ceph cluster with separate pools. Benefits: thin provisioning, snapshots, cloning (fast VM spawning from images), no shared storage requirement for live migration (each VM's disk is a Ceph RBD image stored in the cluster, not on the compute node).
 
 
-**OpenStack deployment model — services are just APIs:** Every OpenStack service is a REST API backed by a message queue (RabbitMQ). Nova receives a boot request → puts a message on the queue → nova-compute picks it up → calls the hypervisor. This async model is why OpenStack scales: you can have hundreds of compute nodes all consuming the same queue. The downside: debugging requires following a message through multiple service logs. `openstack server create` returning immediately doesn't mean the VM is running — poll `openstack server show` for status.
+#### OpenStack deployment model — services are just APIs
+Every OpenStack service is a REST API backed by a message queue (RabbitMQ). Nova receives a boot request → puts a message on the queue → nova-compute picks it up → calls the hypervisor. This async model is why OpenStack scales: you can have hundreds of compute nodes all consuming the same queue. The downside: debugging requires following a message through multiple service logs. `openstack server create` returning immediately doesn't mean the VM is running — poll `openstack server show` for status.
 
-**Quotas and capacity planning:** OpenStack enforces quotas per project: max VCPUs, RAM, floating IPs, volumes, and security groups. Quotas prevent one team from consuming all resources. For platform teams, quota management is a significant operational task — projects request increases, you verify capacity, you adjust. Nova's `nova-scheduler` places VMs based on actual resource availability filtered against quotas. Over-commitment ratios (defaulting to 16:1 for VCPUs, 1.5:1 for RAM) determine how many VMs fit on a compute node.
+#### Quotas and capacity planning
+OpenStack enforces quotas per project: max VCPUs, RAM, floating IPs, volumes, and security groups. Quotas prevent one team from consuming all resources. For platform teams, quota management is a significant operational task — projects request increases, you verify capacity, you adjust. Nova's `nova-scheduler` places VMs based on actual resource availability filtered against quotas. Over-commitment ratios (defaulting to 16:1 for VCPUs, 1.5:1 for RAM) determine how many VMs fit on a compute node.
 
-**Security groups vs network ACLs:** Security groups in OpenStack (Neutron) are stateful firewalls attached to VM ports — allow a rule for inbound port 443, and return traffic is automatically allowed. They're applied at the virtual switch level, not at the VM. Rules are additive: multiple security groups on one port merge their rules. This is identical to AWS security groups. Network ACLs (if configured) apply at the subnet level and are stateless (you must explicitly allow return traffic).
+#### Security groups vs network ACLs
+Security groups in OpenStack (Neutron) are stateful firewalls attached to VM ports — allow a rule for inbound port 443, and return traffic is automatically allowed. They're applied at the virtual switch level, not at the VM. Rules are additive: multiple security groups on one port merge their rules. This is identical to AWS security groups. Network ACLs (if configured) apply at the subnet level and are stateless (you must explicitly allow return traffic).
 
-**Glance images and image formats:** Glance stores VM images (qcow2, raw, vmdk). qcow2 is the standard format — thin-provisioned, supports snapshots, compresses well. raw is faster at runtime (no format overhead) but larger. When an image is used to boot a VM, Nova (with Ceph backend) clones the Glance image in Ceph as a copy-on-write RBD volume — VM boots in seconds regardless of image size. Always upload images in qcow2 format; the backend handles conversion.
+#### Glance images and image formats
+Glance stores VM images (qcow2, raw, vmdk). qcow2 is the standard format — thin-provisioned, supports snapshots, compresses well. raw is faster at runtime (no format overhead) but larger. When an image is used to boot a VM, Nova (with Ceph backend) clones the Glance image in Ceph as a copy-on-write RBD volume — VM boots in seconds regardless of image size. Always upload images in qcow2 format; the backend handles conversion.
 ---
 ---
 
@@ -105,14 +114,14 @@ sudo microstack.openstack catalog list
 sudo microstack status
 ```
 
-**Access Horizon (web dashboard):**
+#### Access Horizon (web dashboard)
 ```bash
 # Get the Horizon URL and admin credentials
 sudo microstack.openstack user password set admin   # change default password
 # Horizon is at http://<your-ip>/
 ```
 
-**Launch your first instance:**
+#### Launch your first instance
 ```bash
 # Download and upload a cloud image (CirrOS — tiny test image)
 curl -O https://download.cirros-cloud.net/0.6.2/cirros-0.6.2-x86_64-disk.img
@@ -150,7 +159,7 @@ sudo microstack.openstack server add floating ip myvm <floating-ip>
 ssh -i ~/.ssh/id_ed25519 cirros@<floating-ip>
 ```
 
-**Common MicroStack operations:**
+#### Common MicroStack operations
 ```bash
 # List all instances
 sudo microstack.openstack server list
@@ -177,7 +186,7 @@ sudo microstack.openstack console log show myvm
 sudo microstack.openstack console url show --novnc myvm
 ```
 
-**Upload Ubuntu or Debian images:**
+#### Upload Ubuntu or Debian images
 ```bash
 # Ubuntu 24.04 LTS cloud image
 curl -L -O https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
@@ -235,7 +244,7 @@ EOF
 ./stack.sh
 ```
 
-**After installation:**
+#### After installation
 ```bash
 # Source credentials
 source ~/devstack/openrc admin admin
@@ -251,7 +260,7 @@ cd ~/devstack && ./rejoin-stack.sh
 ./unstack.sh && ./clean.sh && ./stack.sh
 ```
 
-**Common DevStack workflows:**
+#### Common DevStack workflows
 ```bash
 # Source user credentials
 source openrc demo demo     # non-admin user
@@ -309,7 +318,7 @@ kolla-genpwd
 cp ~/kolla-venv/share/kolla-ansible/ansible/inventory/all-in-one ~/inventory-aio
 ```
 
-**Edit `/etc/kolla/globals.yml`:**
+#### Edit `/etc/kolla/globals.yml`
 ```yaml
 # Minimal all-in-one globals.yml
 kolla_base_distro: "ubuntu"
@@ -364,7 +373,7 @@ openstack service list
 
 ### Multi-Node Setup
 
-**`~/inventory-multinode`:**
+#### `~/inventory-multinode`
 ```ini
 [control]
 controller01 ansible_host=192.168.1.10 ansible_user=user
@@ -440,7 +449,7 @@ pip install python-openstackclient \
             python-swiftclient
 ```
 
-**Authentication — `clouds.yaml`:**
+#### Authentication — `clouds.yaml`
 ```yaml
 # ~/.config/openstack/clouds.yaml
 clouds:
@@ -477,7 +486,7 @@ export OS_CLOUD=homelab
 source /etc/kolla/admin-openrc.sh
 ```
 
-**Essential daily commands:**
+#### Essential daily commands
 ```bash
 # Identity (Keystone)
 openstack user list
@@ -1009,7 +1018,7 @@ helm upgrade --install neutron osh/neutron \
 
 Heat is OpenStack's native orchestration service — equivalent to Terraform or CloudFormation but for your private cloud. Templates are written in YAML (HOT format).
 
-**Example: Launch a web server stack:**
+#### Example: Launch a web server stack
 ```yaml
 # ~/heat/webserver.yaml
 heat_template_version: '2021-04-06'

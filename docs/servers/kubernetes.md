@@ -22,23 +22,25 @@ Lightweight and production-grade Kubernetes distributions, cluster management, G
 
 ## Key Concepts
 
-**Control plane components and what they do:**
+#### Control plane components and what they do
 - **kube-apiserver** — the front door; all kubectl commands hit this. It validates, authenticates, and persists objects to etcd.
 - **etcd** — the distributed key-value store where all cluster state lives. Losing etcd without a backup = losing the cluster.
 - **kube-scheduler** — watches for unscheduled pods and assigns them to nodes based on resource requests, taints/tolerations, affinity rules.
 - **kube-controller-manager** — runs the reconciliation loops: Deployment controller, ReplicaSet controller, Node controller, etc.
 - **cloud-controller-manager** — talks to the cloud API to provision LoadBalancers, PersistentVolumes (EBS, GCE PD), etc.
 
-**Node components:**
+#### Node components
 - **kubelet** — runs on every node, ensures the containers in a pod are running and healthy.
 - **kube-proxy** — maintains iptables/ipvs rules for Service routing on each node.
 - **Container runtime** — containerd, CRI-O, or Docker (via shim).
 
-**Why requests and limits matter:** `resources.requests` is what the scheduler uses to decide which node can fit the pod. `resources.limits` is enforced at runtime by cgroups — exceed the memory limit and the pod is OOMKilled. A common anti-pattern is setting no requests/limits at all (the scheduler has no information) or setting requests == limits for memory (prevents the kernel from reclaiming unused memory). The golden path: set requests to typical usage, limits to burst ceiling.
+#### Why requests and limits matter
+`resources.requests` is what the scheduler uses to decide which node can fit the pod. `resources.limits` is enforced at runtime by cgroups — exceed the memory limit and the pod is OOMKilled. A common anti-pattern is setting no requests/limits at all (the scheduler has no information) or setting requests == limits for memory (prevents the kernel from reclaiming unused memory). The golden path: set requests to typical usage, limits to burst ceiling.
 
-**Taints and tolerations:** A taint marks a node as unsuitable for pods that don't explicitly tolerate it. A toleration allows a pod to be scheduled on a tainted node. Example use: taint GPU nodes with `gpu=true:NoSchedule`; only pods that tolerate `gpu=true` get scheduled there. Node affinity (`preferredDuringSchedulingIgnoredDuringExecution`) softly requests nodes with specific labels; `requiredDuringScheduling...` is a hard requirement.
+#### Taints and tolerations
+A taint marks a node as unsuitable for pods that don't explicitly tolerate it. A toleration allows a pod to be scheduled on a tainted node. Example use: taint GPU nodes with `gpu=true:NoSchedule`; only pods that tolerate `gpu=true` get scheduled there. Node affinity (`preferredDuringSchedulingIgnoredDuringExecution`) softly requests nodes with specific labels; `requiredDuringScheduling...` is a hard requirement.
 
-**What happens when you run `kubectl apply`:**
+#### What happens when you run `kubectl apply`
 1. kubectl sends a `PATCH` or `POST` to kube-apiserver
 2. API server authenticates (cert/token), authorises (RBAC), then admits (admission webhooks — Kyverno, OPA)
 3. Object is persisted to etcd
@@ -47,7 +49,7 @@ Lightweight and production-grade Kubernetes distributions, cluster management, G
 6. Scheduler assigns pods to nodes
 7. kubelet on the node creates containers via the container runtime
 
-**Pod lifecycle states:**
+#### Pod lifecycle states
 - `Pending` — scheduled but not yet running (pulling image or waiting for node)
 - `Running` — at least one container is running
 - `Succeeded` — all containers exited with code 0 (for Jobs)
@@ -55,47 +57,54 @@ Lightweight and production-grade Kubernetes distributions, cluster management, G
 - `Unknown` — node communication lost
 - `CrashLoopBackOff` — container repeatedly crashes; kubelet backs off exponentially before restarting
 
-**Kubernetes networking model (four rules):**
+#### Kubernetes networking model (four rules)
 1. Every pod gets a unique cluster-routable IP — no port mapping needed between pods
 2. Pods on a node can communicate with all pods on all nodes without NAT
 3. Agents on a node can communicate with all pods on that node
 4. Pods don't know or care about their host IP
 
-**Service types:**
+#### Service types
 - `ClusterIP` (default) — accessible only within the cluster
 - `NodePort` — exposes a static port on every node's IP (accessible from outside the cluster at `nodeIP:nodePort`)
 - `LoadBalancer` — provisions a cloud load balancer; in bare-metal clusters use MetalLB
 - `ExternalName` — CNAME to an external DNS name (no proxying)
 - `Headless` (clusterIP: None) — no stable IP, DNS returns pod IPs directly (used by StatefulSets)
 
-**ConfigMap vs Secret:**
+#### ConfigMap vs Secret
 Both key-value stores. ConfigMaps are for non-sensitive configuration. Secrets are base64-encoded (not encrypted by default — use ESO + OpenBao or sealed-secrets for encryption at rest). Secrets can be consumed as environment variables or volume mounts; volume mounts are preferred so the secret can be rotated without restarting the pod.
 
-**What a container restart policy controls:** `Always` (default for Deployments), `OnFailure` (for Jobs — restart only on non-zero exit), `Never` (for batch jobs that should not retry).
+#### What a container restart policy controls
+`Always` (default for Deployments), `OnFailure` (for Jobs — restart only on non-zero exit), `Never` (for batch jobs that should not retry).
 
-**Probes and why they matter:**
+#### Probes and why they matter
 - `livenessProbe` — if this fails, kubelet kills and restarts the container. Use for deadlock detection.
 - `readinessProbe` — if this fails, the pod is removed from Service endpoints. Traffic stops going to it. Use for startup delays and temporary unhealthiness.
 - `startupProbe` — disables liveness/readiness until it succeeds. Use for slow-starting apps to prevent premature liveness kills.
 
-**Kubernetes autoscaling recap:**
+#### Kubernetes autoscaling recap
 - **HPA** — scales pod replicas based on CPU/memory or custom metrics
 - **VPA** — adjusts pod resource requests/limits (in recommendation mode via Goldilocks)
 - **KEDA** — event-driven scaling including scale-to-zero
 - **Cluster Autoscaler / Karpenter** — adds/removes nodes based on pending pods
 
 
-**RBAC mental model:** Every action in Kubernetes is: a *verb* (get, list, watch, create, update, patch, delete) on a *resource* (pods, deployments, secrets) in a *namespace*. A Role defines allowed verb+resource combinations. A RoleBinding binds a Role to a subject (User, Group, ServiceAccount). ClusterRole/ClusterRoleBinding apply cluster-wide. The principle of least privilege: CI/CD service accounts should have `create`/`update` on Deployments only, not `get` on Secrets. `kubectl auth can-i --list --as system:serviceaccount:default:myapp` shows what a service account can do.
+#### RBAC mental model
+Every action in Kubernetes is: a *verb* (get, list, watch, create, update, patch, delete) on a *resource* (pods, deployments, secrets) in a *namespace*. A Role defines allowed verb+resource combinations. A RoleBinding binds a Role to a subject (User, Group, ServiceAccount). ClusterRole/ClusterRoleBinding apply cluster-wide. The principle of least privilege: CI/CD service accounts should have `create`/`update` on Deployments only, not `get` on Secrets. `kubectl auth can-i --list --as system:serviceaccount:default:myapp` shows what a service account can do.
 
-**Network policies — default deny pattern:** By default, all pods can communicate with all pods. Network Policies are a whitelist — once you apply one to a pod, only explicitly allowed traffic is permitted. The production pattern: apply a default-deny-all policy to every namespace, then add explicit ingress/egress rules. This limits blast radius — a compromised pod in namespace `frontend` can't reach `postgres` in namespace `data` unless a policy explicitly allows it. Cilium and Calico enforce these at the kernel level (eBPF).
+#### Network policies — default deny pattern
+By default, all pods can communicate with all pods. Network Policies are a whitelist — once you apply one to a pod, only explicitly allowed traffic is permitted. The production pattern: apply a default-deny-all policy to every namespace, then add explicit ingress/egress rules. This limits blast radius — a compromised pod in namespace `frontend` can't reach `postgres` in namespace `data` unless a policy explicitly allows it. Cilium and Calico enforce these at the kernel level (eBPF).
 
-**StatefulSets vs Deployments:** Deployments assume pods are stateless and interchangeable — they can be killed and replaced in any order. StatefulSets provide: stable pod names (`pod-0`, `pod-1`), stable DNS (`pod-0.svc.namespace.svc.cluster.local`), ordered startup/shutdown, and per-pod PersistentVolumeClaims. Use StatefulSets for databases, Kafka, ZooKeeper, and anything that needs stable identity. The tradeoff: rolling updates are slower (one pod at a time, waiting for readiness) and PVCs aren't automatically deleted when you scale down.
+#### StatefulSets vs Deployments
+Deployments assume pods are stateless and interchangeable — they can be killed and replaced in any order. StatefulSets provide: stable pod names (`pod-0`, `pod-1`), stable DNS (`pod-0.svc.namespace.svc.cluster.local`), ordered startup/shutdown, and per-pod PersistentVolumeClaims. Use StatefulSets for databases, Kafka, ZooKeeper, and anything that needs stable identity. The tradeoff: rolling updates are slower (one pod at a time, waiting for readiness) and PVCs aren't automatically deleted when you scale down.
 
-**DORA metrics and what they mean for your team:** Four metrics measure software delivery performance: Deployment Frequency (how often you deploy), Lead Time for Changes (commit to production), Change Failure Rate (% of deployments causing incidents), and Time to Restore (MTTR when things break). Elite teams deploy multiple times per day with <1h lead time and <5% failure rate, recovering in under an hour. These aren't vanity metrics — low deployment frequency predicts burnout (big-bang releases); high change failure rate predicts firefighting culture.
+#### DORA metrics and what they mean for your team
+Four metrics measure software delivery performance: Deployment Frequency (how often you deploy), Lead Time for Changes (commit to production), Change Failure Rate (% of deployments causing incidents), and Time to Restore (MTTR when things break). Elite teams deploy multiple times per day with <1h lead time and <5% failure rate, recovering in under an hour. These aren't vanity metrics — low deployment frequency predicts burnout (big-bang releases); high change failure rate predicts firefighting culture.
 
-**Admission webhooks — the Kubernetes extension point:** Before any object is persisted to etcd, it passes through admission controllers. Mutating webhooks can modify the object (inject a sidecar, add labels, set default resource limits). Validating webhooks can reject it (block images without a signature, prevent privileged containers, require certain labels). Tools that use this: Kyverno (policy engine), OPA/Gatekeeper, Istio (sidecar injection), Linkerd (proxy injection). This is how platform teams enforce standards without editing every developer's manifests.
+#### Admission webhooks — the Kubernetes extension point
+Before any object is persisted to etcd, it passes through admission controllers. Mutating webhooks can modify the object (inject a sidecar, add labels, set default resource limits). Validating webhooks can reject it (block images without a signature, prevent privileged containers, require certain labels). Tools that use this: Kyverno (policy engine), OPA/Gatekeeper, Istio (sidecar injection), Linkerd (proxy injection). This is how platform teams enforce standards without editing every developer's manifests.
 
-**Persistent storage in Kubernetes — the CSI model:** Container Storage Interface (CSI) is the plugin standard for storage providers. A CSI driver (Longhorn, Rook-Ceph, AWS EBS, GCE PD) implements Create/Attach/Mount for volumes. PersistentVolumeClaims are requests for storage (size, access mode, storage class). The StorageClass determines which CSI driver handles provisioning and what parameters to use. Access modes: `ReadWriteOnce` (one node), `ReadWriteMany` (multiple nodes — requires NFS or Ceph FS), `ReadOnlyMany`. Velero backs up PVs by snapshotting them via CSI.
+#### Persistent storage in Kubernetes — the CSI model
+Container Storage Interface (CSI) is the plugin standard for storage providers. A CSI driver (Longhorn, Rook-Ceph, AWS EBS, GCE PD) implements Create/Attach/Mount for volumes. PersistentVolumeClaims are requests for storage (size, access mode, storage class). The StorageClass determines which CSI driver handles provisioning and what parameters to use. Access modes: `ReadWriteOnce` (one node), `ReadWriteMany` (multiple nodes — requires NFS or Ceph FS), `ReadOnlyMany`. Velero backs up PVs by snapshotting them via CSI.
 ---
 
 ## Choosing a Distribution
@@ -245,7 +254,7 @@ chmod 600 ~/.kube/config
 kubectl get nodes
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # View k0s status
 sudo k0s status
@@ -291,7 +300,7 @@ microk8s config > ~/.kube/config
 chmod 600 ~/.kube/config
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Check status and enabled addons
 microk8s status
@@ -349,7 +358,7 @@ minikube status
 kubectl get nodes
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Open the Kubernetes Dashboard in browser
 minikube dashboard
@@ -692,7 +701,7 @@ kubectl top nodes
 
 **Purpose:** Controls who (ServiceAccounts, users, groups) can do what (verbs: get, list, watch, create, update, patch, delete) on which resources (pods, deployments, secrets, configmaps) in which scope (namespace-scoped via Role/RoleBinding, or cluster-wide via ClusterRole/ClusterRoleBinding). Mastering RBAC is required for any production Kubernetes role — it's how you give CI/CD pipelines minimal permissions, isolate tenant namespaces, and audit access.
 
-**Core concepts:**
+#### Core concepts
 ```
 Role / ClusterRole       — defines permissions (what verbs on what resources)
 RoleBinding              — binds a Role to a subject within a namespace
@@ -782,7 +791,7 @@ kubectl create token cicd-deployer -n myapp --duration=8760h
 # Use this token in GitHub Actions secrets as KUBECONFIG
 ```
 
-**ClusterRole (cluster-wide — use sparingly):**
+#### ClusterRole (cluster-wide — use sparingly)
 ```yaml
 # ~/k8s/rbac-cluster-readonly.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -971,7 +980,7 @@ talosctl kubeconfig ~/.kube/config \
 kubectl get nodes
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Check node health
 talosctl health --nodes <node-ip> --talosconfig ~/talos-config/talosconfig
@@ -1042,7 +1051,7 @@ sudo kubeadm join <control-plane-ip>:6443 \
   --discovery-token-ca-cert-hash sha256:<hash>
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Check component status
 kubectl get componentstatuses
@@ -1850,7 +1859,7 @@ spec:
             class: nginx
 ```
 
-**Annotate an Ingress to get a cert automatically:**
+#### Annotate an Ingress to get a cert automatically
 ```yaml
 metadata:
   annotations:
@@ -1861,7 +1870,7 @@ spec:
       secretName: myapp-tls
 ```
 
-**Check certificate status:**
+#### Check certificate status
 ```bash
 kubectl get certificate -A
 kubectl describe certificate myapp-tls -n myapp
@@ -1893,7 +1902,7 @@ helm upgrade --install longhorn longhorn/longhorn \
 kubectl -n longhorn-system get pods -w
 ```
 
-**Set Longhorn as the default storage class:**
+#### Set Longhorn as the default storage class
 ```bash
 kubectl patch storageclass longhorn -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
 kubectl patch storageclass local-path -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}'
@@ -1977,7 +1986,7 @@ spec:
 kubectl apply -f ~/k8s/argocd-app.yaml
 ```
 
-**Caddy (expose ArgoCD externally):**
+#### Caddy (expose ArgoCD externally)
 ```caddyfile
 argocd.home.local {
   tls internal
@@ -2078,7 +2087,7 @@ sudo firewall-cmd --add-service=http --add-service=https --permanent && sudo fir
 
 Access at `https://<host-ip>`. On first login, set an admin password. Then import or provision clusters from the UI.
 
-**Get the bootstrap password from logs:**
+#### Get the bootstrap password from logs
 ```bash
 podman logs rancher 2>&1 | grep "Bootstrap Password"
 ```
@@ -2116,7 +2125,7 @@ k9s -n argocd
 k9s --context k3s-homelab
 ```
 
-**Key bindings inside k9s:**
+#### Key bindings inside k9s
 | Key | Action |
 |-----|--------|
 | `:pod` | Switch to pods view |
@@ -2193,7 +2202,7 @@ kubectl -n monitoring port-forward svc/kube-prometheus-stack-grafana 3000:80
 # Open http://localhost:3000 — user: admin / changeme
 ```
 
-**Import additional dashboards:**
+#### Import additional dashboards
 - Longhorn: Dashboard ID `13032`
 - Ingress NGINX: Dashboard ID `9614`
 - ArgoCD: Dashboard ID `14584`
@@ -2232,7 +2241,7 @@ velero version
 kubectl get pods -n velero
 ```
 
-**Common backup operations:**
+#### Common backup operations
 ```bash
 # Full cluster backup
 velero backup create homelab-$(date +%Y%m%d) --include-namespaces='*'
@@ -2255,7 +2264,7 @@ velero backup describe homelab-20260422 --details
 velero backup logs homelab-20260422
 ```
 
-**Scheduled backups (CRD approach — GitOps-friendly):**
+#### Scheduled backups (CRD approach — GitOps-friendly)
 ```yaml
 # ~/k8s/velero-schedule.yaml
 apiVersion: velero.io/v1
@@ -2293,7 +2302,7 @@ kubectl apply -f ~/k8s/velero-schedule.yaml
 velero schedule get
 ```
 
-**Restore operations:**
+#### Restore operations
 ```bash
 # Restore entire cluster from a backup
 velero restore create --from-backup homelab-20260422
@@ -2500,7 +2509,7 @@ kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/rele
 nix-env -iA nixpkgs.argo-rollouts
 ```
 
-**Canary Rollout example:**
+#### Canary Rollout example
 ```yaml
 # ~/k8s/rollout-canary.yaml
 apiVersion: argoproj.io/v1alpha1
@@ -2549,7 +2558,7 @@ kubectl argo rollouts abort myapp
 kubectl argo rollouts undo myapp
 ```
 
-**Blue/Green example:**
+#### Blue/Green example
 ```yaml
 strategy:
   blueGreen:
@@ -2572,7 +2581,7 @@ kubectl argo rollouts promote myapp
 
 **Purpose:** Restrict pod-to-pod and pod-to-external traffic. By default all pods can reach all pods — network policies enforce least-privilege network access. Requires a CNI that supports them (Calico, Cilium, Canal).
 
-**Deny all ingress by default, allow only from same namespace:**
+#### Deny all ingress by default, allow only from same namespace
 ```yaml
 # ~/k8s/network-policy-default-deny.yaml
 apiVersion: networking.k8s.io/v1
@@ -2681,7 +2690,7 @@ helm install external-secrets external-secrets/external-secrets \
   --set installCRDs=true
 ```
 
-**Connect ESO to OpenBao (Vault-compatible):**
+#### Connect ESO to OpenBao (Vault-compatible)
 ```yaml
 # ~/k8s/eso-openbao-store.yaml
 apiVersion: external-secrets.io/v1beta1
@@ -2745,7 +2754,7 @@ kubectl get externalsecret -n myapp
 kubectl describe externalsecret myapp-db-secret -n myapp
 ```
 
-**Connect ESO to Infisical:**
+#### Connect ESO to Infisical
 ```yaml
 apiVersion: external-secrets.io/v1beta1
 kind: ClusterSecretStore
@@ -3008,7 +3017,7 @@ services:
     restart: unless-stopped
 ```
 
-**Prometheus recording rules for DORA (add to `alerts.yml`):**
+#### Prometheus recording rules for DORA (add to `alerts.yml`)
 ```yaml
 groups:
   - name: dora_metrics
@@ -3048,7 +3057,7 @@ groups:
           ) / 3600
 ```
 
-**Grafana dashboard variables for DORA bands:**
+#### Grafana dashboard variables for DORA bands
 ```json
 {
   "panels": [{
@@ -3066,7 +3075,7 @@ groups:
 }
 ```
 
-**What DORA tells you about your process:**
+#### What DORA tells you about your process
 
 - **Low Deployment Frequency** → batching too much per release, long review cycles, fear of deploying. Fix: smaller PRs, feature flags to decouple deploy from release, invest in automated testing confidence.
 
@@ -3194,7 +3203,7 @@ spec:
         queueLength: "5"       # 1 pod per 5 messages
 ```
 
-**Scale on Prometheus metric:**
+#### Scale on Prometheus metric
 ```yaml
 triggers:
   - type: prometheus
@@ -3237,7 +3246,7 @@ cilium status
 cilium connectivity test
 ```
 
-**Hubble CLI — inspect live flows:**
+#### Hubble CLI — inspect live flows
 ```bash
 # Install Hubble CLI
 nix-env -iA nixpkgs.hubble
@@ -3437,7 +3446,7 @@ kubectl apply -f https://raw.githubusercontent.com/opencost/opencost/develop/kub
 kubectl port-forward -n opencost svc/opencost 9090:9090 9003:9003
 ```
 
-**Or via Helm with custom on-prem pricing:**
+#### Or via Helm with custom on-prem pricing
 ```yaml
 # ~/k8s/opencost-values.yaml
 opencost:
@@ -3458,7 +3467,7 @@ helm install opencost opencost/opencost \
   -f ~/k8s/opencost-values.yaml
 ```
 
-**Query the cost API:**
+#### Query the cost API
 ```bash
 # Cost breakdown by namespace (last 7 days)
 curl "http://localhost:9003/allocation?window=7d&aggregate=namespace&accumulate=false" \
@@ -3471,7 +3480,7 @@ curl "http://localhost:9003/allocation?window=24h&aggregate=deployment"
 curl "http://localhost:9003/allocation?window=7d&aggregate=label:team"
 ```
 
-**Add OpenCost to the Caddy block:**
+#### Add OpenCost to the Caddy block
 ```caddyfile
 opencost.home.local { tls internal; reverse_proxy localhost:9090 }
 ```
@@ -3533,7 +3542,7 @@ kubectl get chaosresult nginx-chaos-pod-delete -o yaml
 kubectl get chaosresult nginx-chaos-pod-delete -o jsonpath='{.status.experimentStatus.verdict}'
 ```
 
-**Add a Prometheus probe — fail the experiment if error rate exceeds SLO:**
+#### Add a Prometheus probe — fail the experiment if error rate exceeds SLO
 ```yaml
     - name: pod-delete
       spec:
@@ -3588,7 +3597,7 @@ helm install port-k8s-exporter port-labs/port-k8s-exporter \
 
 **Purpose:** A golden path is a pre-built, opinionated template for creating a new service — it encodes your team's best practices (security, observability, CI/CD, IaC) so developers can scaffold a production-ready service in minutes without needing to know every underlying tool. Backstage and Port both provide golden path scaffolding; this section shows how to implement them without either.
 
-**Option A — Cookiecutter templates (simplest):**
+#### Option A — Cookiecutter templates (simplest)
 ```bash
 # Install cookiecutter
 nix-env -iA nixpkgs.cookiecutter
@@ -3607,7 +3616,7 @@ nix-env -iA nixpkgs.cookiecutter
 cookiecutter git+https://git.home.local/platform/golden-paths.git --directory python-service
 ```
 
-**Option B — Forgejo template repositories:**
+#### Option B — Forgejo template repositories
 ```bash
 # In Forgejo: Settings → check "Template Repository" on any repo
 # Developers click "Use this template" to get a pre-wired repo with:
@@ -3643,10 +3652,13 @@ cookiecutter git+https://git.home.local/platform/golden-paths.git --directory py
 <!-- docs/postmortem.md — blameless postmortem template -->
 # Postmortem: [Incident Title]
 
-**Date:** YYYY-MM-DD
-**Duration:** Xh Ym (detection → resolution)
-**Severity:** P1 / P2 / P3
-**Author(s):**
+#### Date
+YYYY-MM-DD
+#### Duration
+Xh Ym (detection → resolution)
+#### Severity
+P1 / P2 / P3
+#### Author(s)
 
 ## Summary
 One paragraph: what broke, for how long, and what was the user impact.

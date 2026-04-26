@@ -19,53 +19,64 @@ Password management, identity providers, secrets management, and threat detectio
 
 ### Security Interview Essentials
 
-**Zero Trust principles:** "Never trust, always verify." Traditional perimeter security trusts anything inside the network. Zero trust verifies every request regardless of source — inside or outside the network — using identity, device posture, and minimal-privilege access. Implementation: mTLS between services, short-lived certificates (not long-lived API keys), device posture checks (is the OS patched?), least-privilege RBAC, and session recording for privileged access (Teleport).
+#### Zero Trust principles
+"Never trust, always verify." Traditional perimeter security trusts anything inside the network. Zero trust verifies every request regardless of source — inside or outside the network — using identity, device posture, and minimal-privilege access. Implementation: mTLS between services, short-lived certificates (not long-lived API keys), device posture checks (is the OS patched?), least-privilege RBAC, and session recording for privileged access (Teleport).
 
-**Principle of least privilege (PoLP):** Every user, process, and service gets only the permissions it needs — nothing more. In Kubernetes: ServiceAccounts with narrow Roles, not cluster-admin. In AWS: IAM roles scoped to specific S3 buckets and actions. In Linux: non-root containers, no `SYS_ADMIN` unless necessary. Violations are the root cause of most lateral movement after a breach.
+#### Principle of least privilege (PoLP)
+Every user, process, and service gets only the permissions it needs — nothing more. In Kubernetes: ServiceAccounts with narrow Roles, not cluster-admin. In AWS: IAM roles scoped to specific S3 buckets and actions. In Linux: non-root containers, no `SYS_ADMIN` unless necessary. Violations are the root cause of most lateral movement after a breach.
 
-**Defence in depth:** Multiple layers of security so that no single failure compromises the entire system. Example stack: WAF (Coraza) → reverse proxy authentication (Authelia) → network segmentation (NetworkPolicy) → container sandboxing (seccomp, AppArmor) → runtime detection (Falco) → SIEM (Wazuh). An attacker who defeats one layer still faces the next.
+#### Defence in depth
+Multiple layers of security so that no single failure compromises the entire system. Example stack: WAF (Coraza) → reverse proxy authentication (Authelia) → network segmentation (NetworkPolicy) → container sandboxing (seccomp, AppArmor) → runtime detection (Falco) → SIEM (Wazuh). An attacker who defeats one layer still faces the next.
 
-**OAuth2 flows — which to use when:**
+#### OAuth2 flows — which to use when
 - **Authorization Code + PKCE** — for web and mobile apps where a user logs in. The current gold standard. PKCE prevents code interception.
 - **Client Credentials** — for machine-to-machine (service-to-service). No user involved. Use for CI/CD tokens and API-to-API calls.
 - **Device Code** — for CLI tools and devices without a browser (headless servers, smart TVs).
 - **Implicit flow** — deprecated. Do not use.
 
-**JWT structure and common mistakes:**
+#### JWT structure and common mistakes
 A JWT has three base64url-encoded parts: `header.payload.signature`. The header declares the algorithm; the payload contains claims (sub, exp, iat, scopes); the signature verifies integrity. Common mistakes: (1) accepting `alg: none` — always reject this; (2) not verifying `exp` — always check expiry; (3) putting sensitive data in the payload — it's encoded, not encrypted (anyone can read it with base64 decode); (4) not rotating signing keys.
 
-**OWASP Top 10 in one line each (for interviews):**
+#### OWASP Top 10 in one line each (for interviews)
 A01 Broken Access Control: users can access data/actions they shouldn't (IDOR, privilege escalation). A02 Cryptographic Failures: sensitive data exposed due to weak/missing encryption. A03 Injection: user input interpreted as code (SQL, command). A04 Insecure Design: security not considered in architecture. A05 Security Misconfiguration: default credentials, unnecessary services. A06 Vulnerable Components: outdated dependencies with CVEs. A07 Auth Failures: weak passwords, no MFA, session fixation. A08 Software Integrity: unsigned updates, compromised CI/CD pipeline. A09 Logging Failures: breaches go undetected. A10 SSRF: server fetches attacker-controlled URLs.
 
-**Hash functions vs encryption vs encoding:**
+#### Hash functions vs encryption vs encoding
 - **Encoding** (base64, hex) — reversible transformation, no key, provides no security — just a format change
 - **Hashing** (SHA-256, bcrypt) — one-way, no key; used for integrity checks and password storage; bcrypt adds a work factor (slow by design)
 - **Symmetric encryption** (AES-256-GCM) — reversible with the same key; fast; used for data at rest
 - **Asymmetric encryption** (RSA, ECDSA) — public key encrypts/verifies, private key decrypts/signs; used for TLS, JWT signing, SSH keys
 
-**Supply chain security basics:** Three vectors to understand: (1) Source — code in your repo (Semgrep SAST, secret scanning). (2) Build — CI pipeline integrity (Tekton Chains SLSA provenance, cosign signing). (3) Dependency — third-party packages and base images (Trivy, Grype, Renovate, Dependency-Track). The 2020 SolarWinds attack and 2021 Log4Shell are canonical examples of each vector.
+#### Supply chain security basics
+Three vectors to understand: (1) Source — code in your repo (Semgrep SAST, secret scanning). (2) Build — CI pipeline integrity (Tekton Chains SLSA provenance, cosign signing). (3) Dependency — third-party packages and base images (Trivy, Grype, Renovate, Dependency-Track). The 2020 SolarWinds attack and 2021 Log4Shell are canonical examples of each vector.
 
-**Secrets management anti-patterns:**
+#### Secrets management anti-patterns
 - Hardcoded secrets in source code (most common, caught by Semgrep `p/secrets`)
 - Secrets in environment variables that get printed to logs
 - Long-lived API keys that never rotate
 - Sharing credentials across environments (staging DB password = prod DB password)
 - Secrets in Kubernetes manifests committed to Git without encryption (use SOPS + age or Sealed Secrets)
 
-**Vulnerability severity levels (CVSS):** CVSS (Common Vulnerability Scoring System) scores 0–10. Critical 9.0–10.0, High 7.0–8.9, Medium 4.0–6.9, Low 0.1–3.9. For triaging: fix Criticals within 24h, Highs within 7 days. Tools (Trivy, Grype, Nuclei) report these severities. In Defect Dojo you set SLA targets per severity.
+#### Vulnerability severity levels (CVSS)
+CVSS (Common Vulnerability Scoring System) scores 0–10. Critical 9.0–10.0, High 7.0–8.9, Medium 4.0–6.9, Low 0.1–3.9. For triaging: fix Criticals within 24h, Highs within 7 days. Tools (Trivy, Grype, Nuclei) report these severities. In Defect Dojo you set SLA targets per severity.
 
 
-**Identity provider architecture — LDAP vs OIDC vs SAML:** Three generations of identity federation. LDAP (Lightweight Directory Access Protocol) is the enterprise standard for directory services — Active Directory is LDAP. Applications authenticate by doing a bind to the LDAP server. OIDC (OpenID Connect) is the modern web standard, built on OAuth2 — applications redirect users to an IdP (Authentik, Keycloak), receive a JWT, and verify it locally. SAML is the enterprise web SSO standard (older than OIDC, XML-based) — you'll encounter it when integrating with corporate SSO. Most modern self-hosted apps support OIDC; legacy apps often only support LDAP. Authentik and Keycloak speak all three.
+#### Identity provider architecture — LDAP vs OIDC vs SAML
+Three generations of identity federation. LDAP (Lightweight Directory Access Protocol) is the enterprise standard for directory services — Active Directory is LDAP. Applications authenticate by doing a bind to the LDAP server. OIDC (OpenID Connect) is the modern web standard, built on OAuth2 — applications redirect users to an IdP (Authentik, Keycloak), receive a JWT, and verify it locally. SAML is the enterprise web SSO standard (older than OIDC, XML-based) — you'll encounter it when integrating with corporate SSO. Most modern self-hosted apps support OIDC; legacy apps often only support LDAP. Authentik and Keycloak speak all three.
 
-**Certificate lifecycle management:** Certificates expire. Expired certificates cause outages. step-ca and cert-manager automate issuance and renewal — but you still need to understand the concepts. A CA (Certificate Authority) signs certificates with its private key. Clients trust certificates signed by CAs in their trust store. Short-lived certificates (24h–7 days, used by Teleport and service meshes) are more secure than long-lived ones (1 year) because there's less window for a compromised cert to be misused. Intermediate CAs (step-ca creates one automatically) limit blast radius if the root key is compromised.
+#### Certificate lifecycle management
+Certificates expire. Expired certificates cause outages. step-ca and cert-manager automate issuance and renewal — but you still need to understand the concepts. A CA (Certificate Authority) signs certificates with its private key. Clients trust certificates signed by CAs in their trust store. Short-lived certificates (24h–7 days, used by Teleport and service meshes) are more secure than long-lived ones (1 year) because there's less window for a compromised cert to be misused. Intermediate CAs (step-ca creates one automatically) limit blast radius if the root key is compromised.
 
-**SIEM, SOC, and log correlation:** A SIEM (Security Information and Event Management system — Wazuh, Elastic SIEM) collects logs from all sources, normalises them, and applies correlation rules to detect attack patterns. A single failed SSH login is noise; 1000 failed logins from one IP in 10 seconds is a brute-force attempt. SIEM rules encode this logic. A SOC (Security Operations Centre) is the team that watches the SIEM. For self-hosters: Wazuh agents on every host, log forwarding from containers, and alerting to a notification channel gives you >80% of enterprise SOC capability.
+#### SIEM, SOC, and log correlation
+A SIEM (Security Information and Event Management system — Wazuh, Elastic SIEM) collects logs from all sources, normalises them, and applies correlation rules to detect attack patterns. A single failed SSH login is noise; 1000 failed logins from one IP in 10 seconds is a brute-force attempt. SIEM rules encode this logic. A SOC (Security Operations Centre) is the team that watches the SIEM. For self-hosters: Wazuh agents on every host, log forwarding from containers, and alerting to a notification channel gives you >80% of enterprise SOC capability.
 
-**Container and Kubernetes hardening checklist:** The most common misconfigurations, in order of frequency: (1) running as root (`runAsNonRoot: true` fixes this), (2) `hostPID: true` / `hostNetwork: true` (gives container access to host namespaces — almost never needed), (3) `privileged: true` (full host access — equivalent to root on the node), (4) no seccomp profile (allows all ~300+ syscalls — use `RuntimeDefault`), (5) writable root filesystem (`readOnlyRootFilesystem: true` limits malware persistence), (6) no resource limits (a compromised container can consume all host resources).
+#### Container and Kubernetes hardening checklist
+The most common misconfigurations, in order of frequency: (1) running as root (`runAsNonRoot: true` fixes this), (2) `hostPID: true` / `hostNetwork: true` (gives container access to host namespaces — almost never needed), (3) `privileged: true` (full host access — equivalent to root on the node), (4) no seccomp profile (allows all ~300+ syscalls — use `RuntimeDefault`), (5) writable root filesystem (`readOnlyRootFilesystem: true` limits malware persistence), (6) no resource limits (a compromised container can consume all host resources).
 
-**Vulnerability management workflow:** Scanning finds vulnerabilities; management decides what to do with them. The workflow: scan (Trivy, Grype) → import to tracker (Defect Dojo) → triage by severity and exploitability → assign owner → fix (update dependency, apply patch, add WAF rule) → rescan to verify. Not all Criticals are equal: a Critical CVE in a library that's never called from your code path is lower priority than a High in your authentication path. Context matters. SLA targets (Critical: 24h, High: 7 days) provide an objective standard.
+#### Vulnerability management workflow
+Scanning finds vulnerabilities; management decides what to do with them. The workflow: scan (Trivy, Grype) → import to tracker (Defect Dojo) → triage by severity and exploitability → assign owner → fix (update dependency, apply patch, add WAF rule) → rescan to verify. Not all Criticals are equal: a Critical CVE in a library that's never called from your code path is lower priority than a High in your authentication path. Context matters. SLA targets (Critical: 24h, High: 7 days) provide an objective standard.
 
-**Passkeys and WebAuthn — replacing passwords:** WebAuthn (the standard behind passkeys) uses public-key cryptography for authentication. The private key never leaves the device (stored in secure enclave or hardware key). Login: the server sends a challenge, the device signs it with the private key, the server verifies with the stored public key. This eliminates: phishing (the signature is bound to the origin domain), credential stuffing (no reusable password), and password database breaches (only public keys are stored). Pocket ID and Kanidm are purpose-built for passkey-only auth. Vaultwarden supports WebAuthn for 2FA.
+#### Passkeys and WebAuthn — replacing passwords
+WebAuthn (the standard behind passkeys) uses public-key cryptography for authentication. The private key never leaves the device (stored in secure enclave or hardware key). Login: the server sends a challenge, the device signs it with the private key, the server verifies with the stored public key. This eliminates: phishing (the signature is bound to the origin domain), credential stuffing (no reusable password), and password database breaches (only public keys are stored). Pocket ID and Kanidm are purpose-built for passkey-only auth. Vaultwarden supports WebAuthn for 2FA.
 ---
 ---
 
@@ -99,7 +110,7 @@ cd ~/vaultwarden && podman-compose up -d
 
 > Set `SIGNUPS_ALLOWED=false` after creating your account to prevent anyone else from registering.
 
-**Caddy configuration:**
+#### Caddy configuration
 ```caddyfile
 vault.home.local {
   tls internal
@@ -114,7 +125,7 @@ vault.home.local {
 restic backup /home/user/vaultwarden/data
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # View logs
 podman logs -f vaultwarden
@@ -192,7 +203,7 @@ podman exec authelia authelia crypto hash generate argon2 --password 'yourpasswo
 # Add the hash to /home/user/authelia/config/users_database.yml
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Generate a password hash for users_database.yml
 podman exec authelia authelia crypto hash generate argon2 --password 'mypassword'
@@ -210,7 +221,7 @@ curl -X POST http://localhost:9091/api/firstfactor   -H "Content-Type: applicati
 podman kill --signal=HUP authelia
 ```
 
-**Caddy integration (protect any service):**
+#### Caddy integration (protect any service)
 ```caddyfile
 auth.example.com {
   reverse_proxy localhost:9091
@@ -422,7 +433,7 @@ nix-env -iA nixpkgs.crowdsec
 sudo systemctl enable --now crowdsec-firewall-bouncer
 ```
 
-**Useful CrowdSec commands:**
+#### Useful CrowdSec commands
 ```bash
 # View active alerts/bans
 podman exec crowdsec cscli alerts list
@@ -440,7 +451,7 @@ podman exec crowdsec cscli decisions delete --ip 1.2.3.4
 podman exec crowdsec cscli collections list
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # View active alerts
 podman exec crowdsec cscli alerts list
@@ -497,14 +508,14 @@ services:
 cd ~/step-ca && podman-compose up -d
 ```
 
-**Trust the CA on this system:**
+#### Trust the CA on this system
 ```bash
 step ca root > /tmp/root_ca.crt
 sudo trust anchor /tmp/root_ca.crt
 sudo update-ca-trust
 ```
 
-**Issue a certificate manually:**
+#### Issue a certificate manually
 ```bash
 step ca certificate myservice.home.local myservice.crt myservice.key \
   --ca-url https://step-ca.home.local \
@@ -555,7 +566,7 @@ volumes:
 cd ~/infisical && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # View logs
 podman logs -f infisical
@@ -925,7 +936,7 @@ cd ~/lldap && podman-compose up -d
 
 Access the web UI at `http://localhost:17170`. Create users and groups via the dashboard.
 
-**Connect Authelia to LLDAP:**
+#### Connect Authelia to LLDAP
 ```yaml
 # In Authelia configuration.yml
 authentication_backend:
@@ -945,7 +956,7 @@ authentication_backend:
     password: adminpassword
 ```
 
-**Connect Nextcloud to LLDAP:**
+#### Connect Nextcloud to LLDAP
 ```bash
 podman exec nextcloud php occ app:enable user_ldap
 podman exec nextcloud php occ ldap:set-config "" ldapHost host.containers.internal
@@ -1084,7 +1095,7 @@ syft dir:/home/user/myapp -o spdx-json > myapp-sbom.spdx.json
 syft nginx:alpine -o table
 ```
 
-**Scan for CVEs:**
+#### Scan for CVEs
 ```bash
 # Scan an image directly
 grype jellyfin/jellyfin:latest
@@ -1099,7 +1110,7 @@ grype nginx:alpine --fail-on critical
 grype nginx:alpine -o json > nginx-vulns.json
 ```
 
-**CI integration:**
+#### CI integration
 ```yaml
 # .forgejo/workflows/sbom.yml
 steps:
@@ -1149,7 +1160,7 @@ cd ~/dependency-track && podman-compose up -d
 
 Access at `http://localhost:8082`. Default credentials: `admin` / `admin` — change immediately.
 
-**Upload an SBOM via API:**
+#### Upload an SBOM via API
 ```bash
 SBOM_B64=$(base64 -w 0 myapp-sbom.cdx.json)
 curl -X PUT http://localhost:8081/api/v1/bom \
@@ -1158,7 +1169,7 @@ curl -X PUT http://localhost:8081/api/v1/bom \
   -d "{\"projectName\":\"myapp\",\"projectVersion\":\"1.0\",\"autoCreate\":true,\"bom\":\"${SBOM_B64}\"}"
 ```
 
-**CI — auto-upload SBOM on every build:**
+#### CI — auto-upload SBOM on every build
 ```yaml
 # .woodpecker.yml
 steps:
@@ -1222,7 +1233,7 @@ findtime = 10m
 action   = firewallcmd-rich-rules[actiontype=<multiport>]
 ```
 
-**Useful commands:**
+#### Useful commands
 ```bash
 # List banned IPs
 podman exec fail2ban fail2ban-client status caddy-auth
@@ -1298,7 +1309,7 @@ pip install checkov --break-system-packages
 nix-env -iA nixpkgs.tfsec
 ```
 
-**Scan Terraform:**
+#### Scan Terraform
 ```bash
 # Full scan with CLI + JSON output
 checkov -d terraform/ -o cli -o json --output-file-path /dev/null,checkov-results.json
@@ -1311,7 +1322,7 @@ tfsec terraform/
 tfsec terraform/ --severity CRITICAL --format json --out tfsec-results.json
 ```
 
-**Scan Kubernetes manifests and Helm charts:**
+#### Scan Kubernetes manifests and Helm charts
 ```bash
 # Scan raw YAML manifests
 checkov -d k8s/ --framework kubernetes
@@ -1330,13 +1341,13 @@ checkov -d charts/myapp --framework helm
 # CKV_K8S_37  — minimise the admission of containers with added capabilities
 ```
 
-**Scan Compose files:**
+#### Scan Compose files
 ```bash
 # Check compose.yaml for security issues (privileged mode, host network, writable mounts)
 checkov -f compose.yaml --framework dockerfile
 ```
 
-**CI integration (Forgejo Actions / Woodpecker):**
+#### CI integration (Forgejo Actions / Woodpecker)
 ```yaml
 # .forgejo/workflows/iac-scan.yml
 on: [push]
@@ -1360,7 +1371,7 @@ jobs:
             --format json --out /src/tfsec.json || true
 ```
 
-**Send findings to Defect Dojo:**
+#### Send findings to Defect Dojo
 ```bash
 # After CI scan, upload JSON results to Defect Dojo for centralised triage
 curl -X POST https://defectdojo.home.local/api/v2/import-scan/ \
@@ -1401,7 +1412,7 @@ cosign attach sbom --sbom sbom.json registry.home.local/myapp:v1.2.3
 cosign verify-attestation --key cosign.pub registry.home.local/myapp:v1.2.3
 ```
 
-**Tekton Chains (SLSA Level 2 provenance — requires k3s/k0s):**
+#### Tekton Chains (SLSA Level 2 provenance — requires k3s/k0s)
 ```bash
 # Install Tekton Pipelines first (see CI/CD section)
 kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
@@ -1540,7 +1551,7 @@ podman exec teleport tctl users add admin --roles=editor,access --logins=root,us
 # Follow the invite URL printed to set a password and enrol MFA
 ```
 
-**Add a server node (install Teleport agent on target host):**
+#### Add a server node (install Teleport agent on target host)
 ```bash
 # On the target server
 curl https://goteleport.com/static/install.sh | bash
@@ -1551,7 +1562,7 @@ teleport node configure \
 systemctl enable --now teleport
 ```
 
-**Connect via `tsh` (Teleport shell client):**
+#### Connect via `tsh` (Teleport shell client)
 ```bash
 # Login
 tsh login --proxy=teleport.example.com:3080 --user=admin
@@ -1582,7 +1593,7 @@ sudo firewall-cmd --reload
 
 **Purpose:** OWASP-compliant Web Application Firewall embedded directly in Caddy as a plugin. Runs the OWASP Core Rule Set (CRS) — the industry-standard ruleset that blocks SQL injection, XSS, command injection, path traversal, and hundreds of other attack classes — without an extra reverse proxy hop. Coraza is the modern, Go-native successor to ModSecurity and the recommended WAF for Shani OS because it integrates with the Caddy you are already running.
 
-**Build a Caddy image with Coraza:**
+#### Build a Caddy image with Coraza
 ```bash
 podman build -t caddy-coraza - << 'EOF'
 FROM caddy:builder AS builder
@@ -1622,7 +1633,7 @@ services:
 cd ~/caddy && podman-compose up -d
 ```
 
-**Caddyfile with WAF enabled for a specific service:**
+#### Caddyfile with WAF enabled for a specific service
 ```caddyfile
 {
   order coraza_waf first
@@ -1653,7 +1664,7 @@ app.example.com {
 SecAction "id:900000,phase:1,nolog,pass,t:none,setvar:tx.paranoia_level=1"
 ```
 
-**Suppress a rule causing false positives:**
+#### Suppress a rule causing false positives
 ```
 SecRuleRemoveById 941100         # Remove a specific rule by ID
 SecRuleRemoveByTag "attack-sqli" # Remove all SQLi rules
@@ -1754,7 +1765,7 @@ cd ~/suricata && podman-compose up -d
 
 > Replace `eth0` with your primary interface (`ip link show`). `--network host` is required to see actual traffic.
 
-**Update rules (Emerging Threats Open — free):**
+#### Update rules (Emerging Threats Open — free)
 ```bash
 podman exec suricata suricata-update update-sources
 podman exec suricata suricata-update enable-source et/open
@@ -1791,7 +1802,7 @@ detect:
     toserver-groups: 25
 ```
 
-**Forward alerts to CrowdSec or ntfy:**
+#### Forward alerts to CrowdSec or ntfy
 ```bash
 # Watch eve.json and forward critical alerts to ntfy
 tail -f /home/user/suricata/logs/eve.json | \
@@ -1832,7 +1843,7 @@ services:
 cd ~/zap && podman-compose up -d
 ```
 
-**Scan types:**
+#### Scan types
 ```bash
 # Baseline scan — passive only, safe to run against production
 podman run --rm \
@@ -1947,7 +1958,7 @@ nix-env -iA nixpkgs.osquery
 # On Shani OS: Nix only (OS root is read-only)
 ```
 
-**Interactive queries (`osqueryi`):**
+#### Interactive queries (`osqueryi`)
 ```sql
 -- Running processes and their open network connections
 SELECT p.pid, p.name, p.cmdline, lp.port, lp.protocol, lp.address
@@ -1998,7 +2009,7 @@ SELECT pid, name, uid, gid, root, cmdline
 FROM processes WHERE uid = 0 AND parent != 1;
 ```
 
-**Continuous monitoring with `osqueryd` (daemon mode):**
+#### Continuous monitoring with `osqueryd` (daemon mode)
 ```bash
 # /etc/osquery/osquery.conf
 {
@@ -2056,7 +2067,7 @@ sudo tail -f /var/log/osquery/osqueryd.results.log | python3 -m json.tool
 # </localfile>
 ```
 
-**Fleet (Multi-host osquery management UI):**
+#### Fleet (Multi-host osquery management UI)
 ```yaml
 # ~/fleet/compose.yaml
 services:
@@ -2115,7 +2126,7 @@ sh -c "$(curl -fsSL https://nuclei.projectdiscovery.io/install.sh)"
 nuclei -update-templates
 ```
 
-**Common scan patterns:**
+#### Common scan patterns
 ```bash
 # Scan a single target with all templates
 nuclei -u https://app.example.com
@@ -2156,7 +2167,7 @@ nuclei -u https://staging.example.com \
   || { echo "Critical findings detected!"; exit 1; }
 ```
 
-**Woodpecker CI integration:**
+#### Woodpecker CI integration
 ```yaml
 # .woodpecker.yml — add Nuclei scan after deployment to staging
 - name: security-scan
@@ -2171,7 +2182,7 @@ nuclei -u https://staging.example.com \
       fi
 ```
 
-**Key template categories for DevOps/homelab:**
+#### Key template categories for DevOps/homelab
 
 | Tag | What it detects |
 |-----|----------------|
@@ -2198,7 +2209,7 @@ nix-env -iA nixpkgs.semgrep
 pip install semgrep --break-system-packages
 ```
 
-**Common scan patterns:**
+#### Common scan patterns
 ```bash
 # Scan with the auto ruleset (recommended default — curated OSS rules)
 semgrep --config=auto .
@@ -2231,7 +2242,7 @@ semgrep --config=p/secrets .
 semgrep --pattern 'query = "..." + $X' --lang python .
 ```
 
-**Writing custom Semgrep rules:**
+#### Writing custom Semgrep rules
 ```yaml
 # ~/.semgrep/custom-rules.yaml
 rules:
@@ -2271,7 +2282,7 @@ semgrep --config=~/.semgrep/custom-rules.yaml .
 semgrep --config=auto --config=~/.semgrep/custom-rules.yaml .
 ```
 
-**Woodpecker CI integration (SAST gate on every PR):**
+#### Woodpecker CI integration (SAST gate on every PR)
 ```yaml
 # .woodpecker.yml
 - name: sast-semgrep
@@ -2284,7 +2295,7 @@ semgrep --config=auto --config=~/.semgrep/custom-rules.yaml .
     event: [push, pull_request]
 ```
 
-**Semgrep vs Checkov vs tfsec:**
+#### Semgrep vs Checkov vs tfsec
 
 | Tool | Focus | Best for |
 |------|-------|---------|
@@ -2305,7 +2316,7 @@ Use all three in CI: Semgrep for code, Checkov for IaC policy, tfsec for Terrafo
 nix-env -iA nixpkgs.sops nixpkgs.age
 ```
 
-**Key setup:**
+#### Key setup
 ```bash
 # Generate an age key pair (one per person/machine)
 age-keygen -o ~/.config/sops/age/keys.txt
@@ -2327,7 +2338,7 @@ creation_rules:
 EOF
 ```
 
-**Encrypting and editing secrets:**
+#### Encrypting and editing secrets
 ```bash
 # Encrypt a new secrets file (SOPS reads .sops.yaml for the key config)
 sops --encrypt --in-place secrets.yaml
@@ -2371,7 +2382,7 @@ sops:
             ...
 ```
 
-**SOPS with Flux CD (GitOps secrets decryption in-cluster):**
+#### SOPS with Flux CD (GitOps secrets decryption in-cluster)
 ```bash
 # Create a Flux decryption secret from your age private key
 cat ~/.config/sops/age/keys.txt | kubectl create secret generic sops-age \
@@ -2401,7 +2412,7 @@ spec:
 EOF
 ```
 
-**SOPS with Ansible (replace ansible-vault):**
+#### SOPS with Ansible (replace ansible-vault)
 ```bash
 # Encrypt your vars file
 sops -e -i group_vars/all/vault.yaml
@@ -2415,7 +2426,7 @@ ansible-playbook -i inventory.ini playbook.yaml \
 sops exec-env secrets.env ansible-playbook playbook.yaml
 ```
 
-**SOPS with Terraform / OpenTofu:**
+#### SOPS with Terraform / OpenTofu
 ```bash
 # Decrypt a .tfvars secrets file, pass to tofu
 sops -d prod.secrets.tfvars.enc > /tmp/prod.secrets.tfvars
@@ -2428,7 +2439,7 @@ rm /tmp/prod.secrets.tfvars
 # resource "..." { password = data.sops_file.secrets.data["db_password"] }
 ```
 
-**`.gitignore` additions when using SOPS:**
+#### `.gitignore` additions when using SOPS
 ```gitignore
 # Never commit decrypted secrets — only commit *.sops.yaml or *.enc.yaml
 *-plain.yaml

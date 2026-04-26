@@ -6,6 +6,9 @@ updated: 2026-04-22
 
 # Clusters & High Availability
 
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal`. When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+
+
 Multi-node, replicated, and highly available deployments. All compose files use rootless Podman with `:Z` volume labels on bind mounts. Named volumes omit `:Z` — Podman manages their labels automatically.
 
 ---
@@ -14,28 +17,39 @@ Multi-node, replicated, and highly available deployments. All compose files use 
 
 These patterns appear across every company that runs production infrastructure. Understanding them is the difference between someone who follows runbooks and someone who can write them.
 
-**Replication vs. clustering:** *Replication* copies data from one node to others (primary → replicas). *Clustering* distributes both data and responsibility across nodes. PostgreSQL streaming replication is replication; Cassandra ring is clustering. Many systems combine both — MongoDB replica sets replicate within each shard, while a sharded cluster distributes across shards.
+#### Replication vs. clustering
+*Replication* copies data from one node to others (primary → replicas). *Clustering* distributes both data and responsibility across nodes. PostgreSQL streaming replication is replication; Cassandra ring is clustering. Many systems combine both — MongoDB replica sets replicate within each shard, while a sharded cluster distributes across shards.
 
-**Leader election:** When a primary fails, surviving nodes must agree on a new one without split-brain (two nodes both believing they are primary). This requires a consensus algorithm — Raft (etcd, Kafka KRaft) or Paxos variants. The protocol guarantees that only one node can be elected, even under network partition. You don't need to implement this; you need to understand *why* etcd is a dependency for Patroni, and *why* Kafka removed ZooKeeper.
+#### Leader election
+When a primary fails, surviving nodes must agree on a new one without split-brain (two nodes both believing they are primary). This requires a consensus algorithm — Raft (etcd, Kafka KRaft) or Paxos variants. The protocol guarantees that only one node can be elected, even under network partition. You don't need to implement this; you need to understand *why* etcd is a dependency for Patroni, and *why* Kafka removed ZooKeeper.
 
-**Fencing (STONITH — Shoot The Other Node In The Head):** In bare-metal HA setups, when a primary node stops responding, the cluster can't be certain whether it crashed or just lost network connectivity. A fencing device (IPMI/BMC, PDU, or cloud API) forcibly powers off or reboots the unresponsive node before promoting a standby — preventing split-brain writes. On cloud and container deployments, fencing is usually handled by the orchestrator (Kubernetes, etcd TTLs, cloud instance termination APIs). Every infrastructure engineer will encounter this concept.
+#### Fencing (STONITH — Shoot The Other Node In The Head)
+In bare-metal HA setups, when a primary node stops responding, the cluster can't be certain whether it crashed or just lost network connectivity. A fencing device (IPMI/BMC, PDU, or cloud API) forcibly powers off or reboots the unresponsive node before promoting a standby — preventing split-brain writes. On cloud and container deployments, fencing is usually handled by the orchestrator (Kubernetes, etcd TTLs, cloud instance termination APIs). Every infrastructure engineer will encounter this concept.
 
-**Replication lag:** Async replicas apply writes with a delay. During normal operation this might be milliseconds; under load it can grow to seconds or minutes. Reads from a replica during lag return stale data. This is the fundamental trade-off behind `readPreference=secondary` (MongoDB), reading from a Postgres standby, and `CONSISTENCY LOCAL_ONE` (Cassandra). Always know your acceptable staleness before sending reads to replicas.
+#### Replication lag
+Async replicas apply writes with a delay. During normal operation this might be milliseconds; under load it can grow to seconds or minutes. Reads from a replica during lag return stale data. This is the fundamental trade-off behind `readPreference=secondary` (MongoDB), reading from a Postgres standby, and `CONSISTENCY LOCAL_ONE` (Cassandra). Always know your acceptable staleness before sending reads to replicas.
 
-**HAProxy health check model:** HAProxy doesn't connect to the database to check health — it hits a REST endpoint on the HA agent (Patroni port 8008). This is intentional: probing the database port only tells you TCP is open, not whether the node is a writable primary. The agent's REST endpoint knows cluster role and reports it explicitly. This REST-based health check pattern appears across many HA stacks (Consul health checks, Kubernetes liveness/readiness probes, AWS target group health checks).
+#### HAProxy health check model
+HAProxy doesn't connect to the database to check health — it hits a REST endpoint on the HA agent (Patroni port 8008). This is intentional: probing the database port only tells you TCP is open, not whether the node is a writable primary. The agent's REST endpoint knows cluster role and reports it explicitly. This REST-based health check pattern appears across many HA stacks (Consul health checks, Kubernetes liveness/readiness probes, AWS target group health checks).
 
 
-**Quorum mathematics — why odd-numbered clusters:** A cluster with N nodes requires ⌊N/2⌋ + 1 nodes for quorum (a majority). With 3 nodes: quorum = 2, can tolerate 1 failure. With 5 nodes: quorum = 3, can tolerate 2 failures. With 4 nodes: quorum = 3, can still only tolerate 1 failure — same as 3 nodes but with more cost. Even-numbered clusters waste a node. A 2-node cluster can't achieve quorum after any single failure — this is why you should never run a 2-node etcd, Patroni, or Elasticsearch cluster in production.
+#### Quorum mathematics — why odd-numbered clusters
+A cluster with N nodes requires ⌊N/2⌋ + 1 nodes for quorum (a majority). With 3 nodes: quorum = 2, can tolerate 1 failure. With 5 nodes: quorum = 3, can tolerate 2 failures. With 4 nodes: quorum = 3, can still only tolerate 1 failure — same as 3 nodes but with more cost. Even-numbered clusters waste a node. A 2-node cluster can't achieve quorum after any single failure — this is why you should never run a 2-node etcd, Patroni, or Elasticsearch cluster in production.
 
-**Raft consensus in practice:** Raft (used by etcd, Kafka KRaft, CockroachDB) works in three roles: Leader (one per cluster, handles all writes), Follower (replicates from leader), Candidate (transitional during election). A leader sends heartbeats; if followers don't hear one within the election timeout, they become candidates and request votes. A candidate wins if it gets votes from a majority of nodes. Raft guarantees: (1) at most one leader at a time, (2) a leader has all committed entries, (3) committed entries are never lost. The practical implication: writes require a majority acknowledgment before committing — if you lose quorum, the cluster stops accepting writes.
+#### Raft consensus in practice
+Raft (used by etcd, Kafka KRaft, CockroachDB) works in three roles: Leader (one per cluster, handles all writes), Follower (replicates from leader), Candidate (transitional during election). A leader sends heartbeats; if followers don't hear one within the election timeout, they become candidates and request votes. A candidate wins if it gets votes from a majority of nodes. Raft guarantees: (1) at most one leader at a time, (2) a leader has all committed entries, (3) committed entries are never lost. The practical implication: writes require a majority acknowledgment before committing — if you lose quorum, the cluster stops accepting writes.
 
-**Kafka partitions and consumer groups:** A Kafka topic is divided into partitions — the unit of parallelism and ordering. Messages within a partition are strictly ordered; across partitions they are not. A consumer group is a set of consumers that jointly consume all partitions of a topic — each partition is assigned to exactly one consumer in the group at any time. Scaling throughput: add partitions (more parallelism) and consumers (up to the number of partitions — extra consumers idle). This model is why Kafka is "pull-based": consumers control their own offset, enabling replay and independent progress for different consumer groups on the same data.
+#### Kafka partitions and consumer groups
+A Kafka topic is divided into partitions — the unit of parallelism and ordering. Messages within a partition are strictly ordered; across partitions they are not. A consumer group is a set of consumers that jointly consume all partitions of a topic — each partition is assigned to exactly one consumer in the group at any time. Scaling throughput: add partitions (more parallelism) and consumers (up to the number of partitions — extra consumers idle). This model is why Kafka is "pull-based": consumers control their own offset, enabling replay and independent progress for different consumer groups on the same data.
 
-**RabbitMQ exchange types — routing patterns:** RabbitMQ's exchange is the router between producers and queues. Four types: **Direct** — routes to queues whose binding key exactly matches the message routing key (point-to-point). **Fanout** — broadcasts to all bound queues regardless of routing key (pub/sub). **Topic** — routes based on wildcard pattern matching (`*.error`, `logs.#`) — the most flexible. **Headers** — routes based on message headers rather than routing key (rarely used). Knowing these lets you design message routing without application-level filtering: a Topic exchange with `*.error` bound to an alert queue handles error routing at the broker.
+#### RabbitMQ exchange types — routing patterns
+RabbitMQ's exchange is the router between producers and queues. Four types: **Direct** — routes to queues whose binding key exactly matches the message routing key (point-to-point). **Fanout** — broadcasts to all bound queues regardless of routing key (pub/sub). **Topic** — routes based on wildcard pattern matching (`*.error`, `logs.#`) — the most flexible. **Headers** — routes based on message headers rather than routing key (rarely used). Knowing these lets you design message routing without application-level filtering: a Topic exchange with `*.error` bound to an alert queue handles error routing at the broker.
 
-**VictoriaMetrics vs Prometheus — architectural differences:** Prometheus is single-node — one binary, local disk, bounded retention. VictoriaMetrics is Prometheus-compatible (speaks the same scrape format, query language, and remote write API) but designed for higher throughput and longer retention: better compression (10x vs Prometheus), faster ingest, and a cluster mode for horizontal scaling. The key operational difference: VictoriaMetrics accepts Prometheus remote write, so you can run Prometheus for scraping and service discovery while using VictoriaMetrics as the long-term storage backend (the same role as Thanos, but simpler to operate).
+#### VictoriaMetrics vs Prometheus — architectural differences
+Prometheus is single-node — one binary, local disk, bounded retention. VictoriaMetrics is Prometheus-compatible (speaks the same scrape format, query language, and remote write API) but designed for higher throughput and longer retention: better compression (10x vs Prometheus), faster ingest, and a cluster mode for horizontal scaling. The key operational difference: VictoriaMetrics accepts Prometheus remote write, so you can run Prometheus for scraping and service discovery while using VictoriaMetrics as the long-term storage backend (the same role as Thanos, but simpler to operate).
 
-**Cassandra consistent hashing and the ring:** Cassandra distributes data using consistent hashing — each node owns a range of the token ring (a 64-bit integer space). A row's partition key is hashed to a token, and the node owning that token range stores it. With `replication_factor=3`, the three consecutive nodes on the ring each store a copy. This means: (1) adding a node only moves ~1/N of data, not all of it, (2) there's no primary — any replica can serve reads/writes, (3) `CONSISTENCY QUORUM` requires a majority of replicas to agree, moving Cassandra toward CP at the cost of availability during node failures.
+#### Cassandra consistent hashing and the ring
+Cassandra distributes data using consistent hashing — each node owns a range of the token ring (a 64-bit integer space). A row's partition key is hashed to a token, and the node owning that token range stores it. With `replication_factor=3`, the three consecutive nodes on the ring each store a copy. This means: (1) adding a node only moves ~1/N of data, not all of it, (2) there's no primary — any replica can serve reads/writes, (3) `CONSISTENCY QUORUM` requires a majority of replicas to agree, moving Cassandra toward CP at the cost of availability during node failures.
 ---
 
 ## Elasticsearch Cluster (3-Node)
@@ -158,7 +172,7 @@ curl http://localhost:9200/_cluster/health?pretty
 curl "http://localhost:9200/_cat/nodes?v&h=name,role,heap.percent,disk.used_percent,load_1m"
 ```
 
-**Node roles reference:**
+#### Node roles reference
 
 | Role | Responsibilities |
 |------|-----------------|
@@ -177,11 +191,14 @@ Every distributed system in this wiki — Elasticsearch, etcd, Kafka, Patroni, R
 
 A cluster of N nodes requires ⌊N/2⌋ + 1 nodes to agree before making any decision (electing a leader, accepting a write, allocating a shard). With 3 nodes, quorum = 2. If 1 node fails, the remaining 2 can still reach agreement — the cluster stays available. If 2 nodes fail, the 1 remaining node can't form a quorum alone, so it refuses to make decisions rather than risk acting on stale or inconsistent data.
 
-**Why odd numbers:** A 4-node cluster has quorum = 3, so it can only tolerate 1 failure — same as a 3-node cluster, but at higher cost. Even-numbered clusters also create a risk of a 2-2 split where neither partition can reach quorum, leaving the whole system stuck. Odd numbers are not required, but they give you the best fault tolerance per node.
+#### Why odd numbers
+A 4-node cluster has quorum = 3, so it can only tolerate 1 failure — same as a 3-node cluster, but at higher cost. Even-numbered clusters also create a risk of a 2-2 split where neither partition can reach quorum, leaving the whole system stuck. Odd numbers are not required, but they give you the best fault tolerance per node.
 
-**What split-brain means in practice:** If a network partition divides a cluster into two halves that can't communicate, and both halves could independently elect a leader and accept writes, you'd end up with two diverged datasets with no way to reconcile them. Quorum prevents this: only the partition with enough nodes to reach quorum can continue operating. The minority partition refuses to act.
+#### What split-brain means in practice
+If a network partition divides a cluster into two halves that can't communicate, and both halves could independently elect a leader and accept writes, you'd end up with two diverged datasets with no way to reconcile them. Quorum prevents this: only the partition with enough nodes to reach quorum can continue operating. The minority partition refuses to act.
 
-**Why Patroni uses etcd:** The leader election process requires a distributed consensus store that is itself fault-tolerant. Patroni nodes race to write a leader lock key in etcd. The node that succeeds becomes primary. The lock has a TTL (time-to-live); if the primary fails to renew it before expiry, etcd expires the key and a new election begins. The health check HAProxy hits (port 8008) is the Patroni REST API, not PostgreSQL directly — HAProxy asks Patroni "are you the primary?" rather than probing the database port.
+#### Why Patroni uses etcd
+The leader election process requires a distributed consensus store that is itself fault-tolerant. Patroni nodes race to write a leader lock key in etcd. The node that succeeds becomes primary. The lock has a TTL (time-to-live); if the primary fails to renew it before expiry, etcd expires the key and a new election begins. The health check HAProxy hits (port 8008) is the Patroni REST API, not PostgreSQL directly — HAProxy asks Patroni "are you the primary?" rather than probing the database port.
 
 ---
 
@@ -551,7 +568,7 @@ volumes:
   patroni2_data:
 ```
 
-**`haproxy.cfg` — routes to Patroni REST API for health checks:**
+#### `haproxy.cfg` — routes to Patroni REST API for health checks
 ```
 global
     maxconn 100
@@ -685,7 +702,7 @@ volumes:
   redis_replica2_data:
 ```
 
-**`sentinel.conf`:**
+#### `sentinel.conf`
 ```conf
 port 26379
 sentinel monitor mymaster redis-primary 6379 2
@@ -1206,7 +1223,7 @@ curl http://localhost:8482/health
 curl http://localhost:8483/health
 ```
 
-**Reconfigure Grafana to use the cluster:**
+#### Reconfigure Grafana to use the cluster
 - Data Sources → Prometheus → URL: `http://host.containers.internal:8481/select/0/prometheus`
 
 ---

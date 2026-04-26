@@ -12,6 +12,29 @@ Self-hosted personal finance, double-entry bookkeeping, invoicing, budgeting, st
 
 ---
 
+---
+
+## Job-Ready Concepts
+
+#### Double-entry bookkeeping — the foundation
+Every financial transaction involves at least two entries: a debit to one account and a credit to another of equal value. The books always balance: Assets = Liabilities + Equity. In Firefly III and hledger, every transaction explicitly moves money between accounts. This model makes inconsistency impossible — you cannot spend money without a source account, and income must credit somewhere. Contrast with single-entry systems (a simple spreadsheet of income and expenses) which can't catch errors or produce a balance sheet. Any role in fintech, accounting software, or financial data engineering requires understanding this model.
+
+#### Chart of accounts and financial reporting
+A chart of accounts (COA) is the complete list of an entity's financial accounts, organised by type: Assets (cash, accounts receivable, inventory), Liabilities (accounts payable, loans), Equity (owner's equity, retained earnings), Income (sales, service revenue), and Expenses (rent, payroll, COGS). A balance sheet shows Assets vs Liabilities + Equity at a point in time. A profit and loss (P&L) statement shows Income vs Expenses over a period. A cash flow statement shows actual cash movements. These three statements are the output of any accounting system — knowing what they contain and how they relate is baseline financial literacy for any engineer working in fintech.
+
+#### Open banking and bank data APIs
+PSD2 (EU) and equivalent regulations require banks to expose customer data via APIs to authorised third parties. The standard is OpenBanking UK (for UK banks) or Berlin Group NextGenPSD2 (for EU banks). Kresus uses Woob (previously weboob) to scrape bank data where APIs aren't available — a fragile but practical approach. Production open banking integrations use providers like TrueLayer, Plaid (US), or Salt Edge to normalise the bank API surface. Understanding that Plaid is a data aggregator (not a bank) and that its underlying data comes from screen-scraping or direct API connections depending on the institution is relevant for any fintech infrastructure role.
+
+#### Cryptocurrency node operation — UTXO vs account model
+Bitcoin uses a UTXO (Unspent Transaction Output) model: your "balance" is the sum of discrete outputs from previous transactions that haven't been spent. A transaction consumes UTXOs as inputs and creates new UTXOs as outputs. Ethereum uses an account model: each address has a balance that's updated atomically. The operational difference: a Bitcoin full node validates by tracking all UTXOs (the UTXO set, ~6 GB); an Ethereum node tracks account state. Running a full node verifies your own transactions without trusting a third party — relevant for financial sovereignty and as a building block for Lightning Network routing nodes, which require a synced Bitcoin full node.
+
+#### Tax reporting and capital gains calculation
+Most jurisdictions tax cryptocurrency as a capital asset — each disposal (sale, exchange, spend) triggers a taxable event calculated as proceeds minus cost basis. Cost basis methods: FIFO (first in, first out), LIFO (last in, first out), and specific identification. A single portfolio can have thousands of taxable events. Tools like Rotki automate this by importing trade history, applying cost basis rules, and generating tax reports. For regulated financial software, the audit trail — a complete, immutable record of every transaction and its tax treatment — is a compliance requirement, not optional.
+
+#### ISO 20022 and financial messaging standards
+ISO 20022 is the emerging global standard for financial messaging (replacing SWIFT MT messages). It uses XML or JSON to describe payments, securities, and foreign exchange transactions with rich structured data. This migration (most major payment networks are switching by 2025–2026) affects any fintech system that processes interbank payments. For engineering roles at payment processors, banks, or fintech platforms: understanding that ISO 20022 carries more data per message (purpose of payment, LEI identifiers, structured remittance information) than its predecessors is increasingly expected baseline knowledge.
+
+
 ## Firefly III (Personal Finance Manager)
 
 **Purpose:** The most feature-complete self-hosted personal finance manager. Uses double-entry bookkeeping — every transaction moves money between accounts, which means the books always balance. Supports bank accounts, credit cards, cash wallets, savings accounts, investments, and liabilities. Tracks income, expenses, transfers, budgets, categories, tags, and recurring transactions. Produces detailed reports and charts.
@@ -74,7 +97,7 @@ volumes:
 cd ~/firefly && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Run Laravel artisan commands
 podman exec firefly php artisan firefly-iii:upgrade-database
@@ -95,7 +118,7 @@ podman exec firefly cp /var/www/html/storage/database/firefly.db /tmp/firefly-ba
 podman cp firefly:/tmp/firefly-backup.db ./firefly-backup.db
 ```
 
-**Key workflows:**
+#### Key workflows
 - Create accounts (assets, liabilities, revenue, expense accounts)
 - Import transactions via the Data Importer from your bank's CSV export
 - Set up budgets with monthly limits per category
@@ -176,7 +199,7 @@ volumes:
 cd ~/ghostfolio && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # View logs
 podman logs -f ghostfolio

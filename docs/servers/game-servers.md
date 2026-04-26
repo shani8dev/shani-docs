@@ -14,6 +14,26 @@ Dedicated game servers for multiplayer gaming — hosted on your own hardware, o
 
 ---
 
+---
+
+## Job-Ready Concepts
+
+#### Dedicated server architecture — authoritative vs peer-to-peer
+A dedicated server is an authoritative game server: it holds the canonical game state and all clients send inputs to it and receive state updates from it. This prevents cheating (clients never compute the final state themselves) and enables server-side validation. Peer-to-peer (P2P) games let clients communicate directly — cheaper to host but vulnerable to cheaters who manipulate their local state. Most modern multiplayer games (Minecraft, CS2, Valheim) use dedicated server architecture. The server runs the game simulation at a fixed tick rate (Minecraft: 20 TPS, CS2: 64 or 128 tick); clients predict and interpolate between server state updates.
+
+#### UDP vs TCP for game traffic
+Real-time game traffic (position updates, inputs) uses UDP. Unlike TCP, UDP has no retransmission or ordering guarantees — a dropped position update is discarded, not retransmitted, because by the time it would arrive, the player has moved again. Games implement their own reliability layer (RakNet, ENet, Valve's GameNetworkingSockets) on top of UDP for packets that do need delivery guarantees (chat, item pickups). The trade-off: TCP's head-of-line blocking (a dropped packet stalls all subsequent data) is catastrophic for real-time inputs; UDP's independence between packets makes it tolerable for game state. RCON (used for server administration in Minecraft and CS2) uses TCP because it's not latency-sensitive.
+
+#### NAT traversal and port forwarding for game servers
+Games use UDP ports that must be reachable from the public internet for external players. NAT (Network Address Translation) — the technology that lets multiple devices share one public IP — blocks unsolicited inbound connections by default. Solutions: (1) Port forwarding — configure your router to forward a specific UDP port to your server's LAN IP. (2) UPnP — the game server requests port forwarding automatically (Valve servers do this). (3) Tailscale/mesh VPN — every player joins your tailnet; no port forwarding needed, the server is reachable via its Tailscale IP. NAT traversal is a common DevOps interview topic for any role involving peer-to-peer or UDP-based applications.
+
+#### Resource isolation for multi-game server hosting
+Pterodactyl (and Docker/Podman generally) provides isolation between game server instances via Linux namespaces (each container has its own process and network namespace) and cgroups (CPU and memory limits). This matters because a misbehaving Minecraft server consuming 100% CPU shouldn't affect a Valheim server on the same host. The Pterodactyl "egg" system packages the environment (base image, startup command, environment variables) for each game — reproducible deployments that match the game's exact runtime requirements. This pattern (containerised, resource-limited, isolated workloads managed by a panel) directly maps to Kubernetes workload isolation concepts.
+
+#### Game save data and backup strategy
+Game world files are stateful and typically not hot-copyable — copying a Minecraft `world/` directory while the server is writing can produce a corrupt save. The correct pattern: (1) trigger a server-side save command via RCON (`save-all`, `save-off`, then copy, then `save-on`), or (2) stop the container, copy, restart. For automated backups, this is exactly the pre-backup hook pattern used in Borgmatic and Restic. Valheim and Factorio checkpoint saves more safely but still benefit from this quiesce-then-copy approach. In a Pterodactyl setup, the backup system handles this by sending the appropriate RCON commands before copying.
+
+
 ## Minecraft Java Edition
 
 **Purpose:** The definitive self-hosted game server. Supports vanilla, Paper (performance-optimised), Fabric (mod loader), Forge (mod loader), and Spigot. The `itzg/minecraft-server` image is the community standard — it handles any server type via environment variables and supports auto-updating.
@@ -43,7 +63,7 @@ services:
 cd ~/minecraft && podman-compose up -d
 ```
 
-**Common environment variables:**
+#### Common environment variables
 
 | Variable | Values | Effect |
 |----------|--------|--------|
@@ -66,7 +86,7 @@ mkdir -p /home/user/minecraft/data/mods
 podman restart minecraft
 ```
 
-**RCON (remote console):**
+#### RCON (remote console)
 ```bash
 # Enable RCON in the container
 -e ENABLE_RCON=true \
@@ -82,7 +102,7 @@ podman exec minecraft rcon-cli say "Hello from server console"
 sudo firewall-cmd --add-port=25565/tcp --permanent && sudo firewall-cmd --reload
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Access the server console via RCON
 podman exec minecraft rcon-cli help
@@ -259,7 +279,7 @@ services:
 cd ~/terraria && podman-compose up -d
 ```
 
-**TModLoader (modded Terraria):**
+#### TModLoader (modded Terraria)
 ```yaml
 # ~/tmodloader/compose.yaml
 services:
@@ -312,7 +332,7 @@ cd ~/factorio && podman-compose up -d
 
 > Get your token from [factorio.com](https://factorio.com) → Profile → Token. This enables the server to appear on the server browser and handles authentication.
 
-**Mods:**
+#### Mods
 ```bash
 # Mods go in the mods subdirectory
 mkdir -p /home/user/factorio/data/mods
@@ -320,7 +340,7 @@ mkdir -p /home/user/factorio/data/mods
 # The server downloads mods to clients automatically on join
 ```
 
-**Server settings (`/home/user/factorio/data/server-settings.json`):**
+#### Server settings (`/home/user/factorio/data/server-settings.json`)
 ```json
 {
   "name": "My Factorio Server",
@@ -338,7 +358,7 @@ mkdir -p /home/user/factorio/data/mods
 sudo firewall-cmd --add-port=34197/udp --add-port=27015/tcp --permanent && sudo firewall-cmd --reload
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # View server logs
 podman logs -f factorio
@@ -424,7 +444,7 @@ cd ~/cs2 && podman-compose up -d
 
 > First run downloads the full server files (~30 GB) via SteamCMD. A fast disk is helpful here — NVMe significantly reduces startup time.
 
-**Add plugins (CounterStrikeSharp):**
+#### Add plugins (CounterStrikeSharp)
 ```bash
 # MetaMod and CounterStrikeSharp go into the game directory
 # Download releases from github.com/roflmuffin/CounterStrikeSharp
@@ -595,7 +615,7 @@ cd ~/palworld && podman-compose up -d
 sudo firewall-cmd --add-port=8211/udp --add-port=27015/udp --permanent && sudo firewall-cmd --reload
 ```
 
-**RCON (remote console):**
+#### RCON (remote console)
 ```bash
 podman exec -it palworld rcon-cli --port 25575 --password changeme
 ```

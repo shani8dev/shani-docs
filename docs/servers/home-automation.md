@@ -12,6 +12,29 @@ Smart home hubs, IoT bridges, camera NVRs, and automation pipelines — all runn
 
 ---
 
+---
+
+## Job-Ready Concepts
+
+#### MQTT — the IoT messaging backbone
+MQTT (Message Queuing Telemetry Transport) is a publish-subscribe protocol designed for constrained devices on unreliable networks. A device (ESP32, Shelly plug, Zigbee sensor via zigbee2mqtt) publishes a message to a topic (`home/livingroom/temperature`); any subscriber (Home Assistant, Node-RED, Telegraf) receives it. The broker (Mosquitto, EMQX) routes messages without the publisher knowing who reads them. Key concepts: QoS levels (0 = fire-and-forget, 1 = at-least-once with acknowledgement, 2 = exactly-once), retained messages (the broker stores the last message on a topic, so new subscribers immediately get the current state), and will messages (sent by the broker when a client disconnects unexpectedly — useful for device-offline detection). MQTT is ubiquitous in IoT engineering roles.
+
+#### Zigbee, Z-Wave, and Matter — wireless protocol comparison
+Three competing wireless protocols for smart home devices: Zigbee (2.4 GHz mesh, 250 kbps, up to 65,000 devices, most widely supported, requires a coordinator dongle), Z-Wave (sub-GHz mesh, less interference than Zigbee/WiFi, maximum 232 devices per network, better range through walls, proprietary silicon requires certification), and Matter (IP-based standard on Thread or WiFi, Apple/Google/Amazon/Amazon-endorsed, designed to unify the ecosystem, still maturing). The operational reality: Zigbee has the broadest device support and lowest device cost; Z-Wave is more reliable in RF-noisy environments; Matter is the future but current device selection is limited. Zigbee2MQTT's device database of 3,000+ supported devices makes it the practical choice today.
+
+#### Home Assistant's entity model
+Home Assistant's core abstraction is the entity — a representation of a single capability of a device (a smart bulb has entities for brightness, colour temperature, power state, and energy consumption). Entities have states (`on`, `off`, `23.5`) and attributes (additional metadata). Automations, dashboards, and integrations all operate on entities. The entity registry maps entity IDs to their underlying devices and integration source. Understanding this model is essential for debugging: when a device behaves unexpectedly, you inspect the entity's state history in the developer tools to determine whether the problem is in the device, the integration, or the automation.
+
+#### Event-driven automation and state machines
+Home Assistant automations are event-driven: a trigger (state change, time, webhook, sunrise) fires the automation; conditions gate whether actions execute; actions change states or call services. Complex automations are state machines — a "good night" script transitions the house from "awake" to "sleeping" mode by setting multiple devices in sequence. The `input_boolean` and `input_select` helpers act as stateful flags for multi-step automations. AppDaemon exposes this same model in Python, enabling loops, timers, and external API calls that YAML automations can't express. Event-driven architecture is a core backend engineering pattern; Home Assistant is a concrete, hands-on implementation.
+
+#### ESPHome and firmware-over-the-air updates
+ESPHome compiles YAML device definitions to C++ and flashes them to ESP32/ESP8266 microcontrollers. Once a device has ESPHome flashed, subsequent updates happen over-the-air (OTA) via the WiFi network — no physical access required. ESPHome's native API (a protobuf-based binary protocol) integrates directly with Home Assistant without MQTT. The compilation and OTA update pipeline is a miniature CI/CD system: edit the YAML, compile, push to device, verify. This experience with embedded firmware deployment maps directly to IoT engineering roles dealing with fleet management and OTA update pipelines at scale.
+
+#### WebRTC and zero-latency camera streams
+go2rtc introduces the difference between streaming protocols: RTSP (Real-Time Streaming Protocol, used by IP cameras) has 2–10 second latency due to buffering. WebRTC (used by browsers and go2rtc) achieves sub-second latency by using UDP with SRTP (Secure Real-time Transport Protocol) and a direct peer connection to the browser. HLS (HTTP Live Streaming) has the lowest compatibility requirements but highest latency (5–30 seconds). For home security applications, WebRTC is required for live view of camera streams; HLS is acceptable for recorded playback. Frigate uses go2rtc internally for its live view.
+
+
 ## Home Assistant
 
 **Purpose:** The leading open-source home automation platform. Integrates with 3,000+ devices and services — lights, sensors, thermostats, cameras, locks, media players, energy monitors. Supports automations, dashboards, voice assistants (local and cloud), and a mobile app.
@@ -44,7 +67,7 @@ Access at `http://localhost:8123`. On first run, Home Assistant automatically di
 restic backup /home/user/homeassistant/config
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Check Home Assistant config validity
 podman exec homeassistant hass --script check_config -c /config
@@ -68,7 +91,8 @@ curl http://localhost:8123/api/states   -H "Authorization: Bearer YOUR_LONG_LIVE
 curl -X POST http://localhost:8123/api/backup   -H "Authorization: Bearer YOUR_LONG_LIVED_TOKEN"
 ```
 
-**Recommended HACS integrations:** Mushroom Cards, Mini Graph Card, Browser Mod, Local Tuya, Adaptive Lighting.
+#### Recommended HACS integrations
+Mushroom Cards, Mini Graph Card, Browser Mod, Local Tuya, Adaptive Lighting.
 
 ---
 
@@ -94,13 +118,13 @@ services:
 cd ~/mosquitto && podman-compose up -d
 ```
 
-**Monitor MQTT traffic:**
+#### Monitor MQTT traffic
 ```bash
 # Subscribe to all topics (useful for debugging)
 podman exec mosquitto mosquitto_sub -u user -P yourpassword -t '#' -v
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Subscribe to all topics (debug)
 podman exec mosquitto mosquitto_sub -h localhost -u user -P yourpassword -t '#' -v
@@ -124,7 +148,8 @@ podman exec mosquitto mosquitto_sub -h localhost -u user -P yourpassword   -t '$
 
 **Purpose:** Bridges Zigbee devices (lights, sensors, plugs, locks) to MQTT using a $10–15 USB Zigbee coordinator. Works with 3,000+ Zigbee devices from any manufacturer — no proprietary hubs, no cloud bridges, no subscriptions.
 
-**Supported coordinators:** Sonoff Zigbee 3.0 USB Dongle Plus, CC2652R/P, HUSBZB-1, Conbee II.
+#### Supported coordinators
+Sonoff Zigbee 3.0 USB Dongle Plus, CC2652R/P, HUSBZB-1, Conbee II.
 
 ```yaml
 # ~/zigbee2mqtt/compose.yaml
@@ -144,7 +169,7 @@ services:
 cd ~/zigbee2mqtt && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Enable pairing mode (permit join for 60 seconds)
 podman exec mosquitto mosquitto_pub -h localhost -u user -P yourpassword   -t 'zigbee2mqtt/bridge/request/permit_join' -m '{"value":true,"time":60}'

@@ -14,6 +14,29 @@ Self-hosted electronic health records, hospital information systems, FHIR server
 
 ---
 
+---
+
+## Job-Ready Concepts
+
+#### HL7 FHIR — the healthcare interoperability standard
+FHIR (Fast Healthcare Interoperability Resources) is the HL7 standard for exchanging healthcare data via REST APIs. Resources are the core concept: Patient, Observation, Condition, MedicationRequest, DiagnosticReport, Immunization, Appointment, and ~145 others, each with a defined JSON/XML schema. A FHIR server stores and retrieves these resources via standard REST operations (`GET /Patient/123`, `POST /Observation`). SMART on FHIR adds OAuth2 authentication for patient-facing apps — an app requests scopes (`patient/Observation.read`) and receives a token authorising access to specific resources for a specific patient. This is the architecture behind Apple Health's medical records import and any patient-portal integration in the US (required by the 21st Century Cures Act).
+
+#### HIPAA, GDPR, and the compliance landscape
+HIPAA (US) protects Protected Health Information (PHI) — any information that could identify a patient linked to their health condition, care, or payment. The Security Rule requires technical safeguards: access controls, audit logs, encryption at rest and in transit, automatic logoff. The Minimum Necessary standard: systems should request and store only the health data required for the stated purpose. GDPR (EU) treats health data as a "special category" requiring explicit consent and stricter controls. For self-hosted clinical systems, compliance is not automatic — you must implement audit logging, role-based access, encrypted storage, and documented data retention policies. HAPI FHIR and OpenEMR have audit logging built in; enabling and routing those logs is an operational responsibility.
+
+#### Clinical terminologies — SNOMED, LOINC, ICD
+Structured clinical data requires standardised codes so systems can exchange and interpret data. SNOMED CT (clinical findings, procedures, body structures — 350,000+ concepts), LOINC (laboratory and clinical observations — `8310-5` = body temperature), ICD-10/11 (diagnoses for billing — `J45.20` = mild intermittent asthma), CPT (procedures for US billing). OpenMRS's concept dictionary maps local terms to standard codes. FHIR resources carry these codes in `coding` arrays with `system` (the terminology URL) and `code` (the value). Any role building health data integrations requires being able to read a FHIR resource's coded fields and look up the terminology.
+
+#### Health data privacy in practice — de-identification
+Before using health data for analytics or ML, it must be de-identified. The HIPAA Safe Harbor method removes 18 specific identifiers (name, date of birth, ZIP code, etc.). The Expert Determination method uses statistical analysis to verify re-identification risk below a threshold. K-anonymity ensures each record is indistinguishable from at least K-1 others on quasi-identifiers. Practical implication: even aggregate statistics from a small clinic can re-identify patients — "one patient had condition X this month" in a small town is not de-identified. Tools like ARX perform automated de-identification and k-anonymity analysis. For any role handling health data in research or analytics, understanding the legal and technical distinction between de-identified and pseudonymised data is required.
+
+#### Telemedicine and WebRTC in clinical contexts
+Telemedicine video consultations use WebRTC (the same protocol as Jitsi Meet) to deliver sub-second latency, encrypted audio/video directly between patient and provider browsers without a plugin. The clinical requirements add complexity: the session must be end-to-end encrypted (no relay server decrypting video), the session recording (if any) must be stored in the patient record with appropriate access controls, and the session must be accessible from hospital-grade firewalls that often block unusual UDP ports (requiring TURN relay fallback). Jitsi Meet's architecture — Videobridge SFU for media routing, Jicofo for focus management, XMPP signalling — is the reference implementation for HIPAA-eligible video calling.
+
+#### EHR integration patterns — HL7 v2 and FHIR side by side
+Many clinical environments run legacy HL7 v2 messaging alongside modern FHIR. HL7 v2 is a pipe-delimited text format used since the 1980s for ADT (admit/discharge/transfer) messages, lab results (ORU), and orders (ORM). A complete integration engine (Mirth Connect, Rhapsody) translates between v2 and FHIR — extracting fields from a v2 ORM message and creating a FHIR ServiceRequest resource. For health IT engineering roles, being able to read a HL7 v2 message (`MSH|^~\&|...`), identify the message type from the MSH segment, and map fields to FHIR resources is a differentiating skill that most candidates lack.
+
+
 ## OpenMRS (Open Medical Records System)
 
 **Purpose:** The most widely deployed open-source electronic medical records system in the world. Used in thousands of clinics across Africa, Asia, and Latin America. Supports patient registration, visit tracking, observations, orders, diagnoses, and a concept dictionary for customising data capture to any clinical workflow. Highly extensible via a module system.
@@ -68,7 +91,7 @@ cd ~/openmrs && podman-compose up -d
 
 Access the backend at `http://localhost:8080/openmrs` and the React SPA frontend at `http://localhost:8081`.
 
-**Key OpenMRS modules to install:**
+#### Key OpenMRS modules to install
 - **EMR API** — core clinical workflows
 - **HTML Form Entry** — customisable data capture forms
 - **Reporting** — patient cohort reports and aggregate statistics
@@ -106,7 +129,7 @@ services:
 cd ~/openemr && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # View logs
 podman logs -f openemr
@@ -126,7 +149,7 @@ podman exec openemr php /var/www/localhost/htdocs/openemr/contrib/util/installMo
 
 Access at `http://localhost:8083`. The setup wizard runs on first visit.
 
-**OpenEMR features relevant for self-hosted clinics:**
+#### OpenEMR features relevant for self-hosted clinics
 - FHIR R4 API endpoint at `/apis/default/fhir/` for interoperability
 - Telehealth via built-in Jitsi integration (Settings → Telehealth)
 - Patient portal for appointment booking and secure messaging
@@ -182,7 +205,7 @@ curl "http://localhost:8082/fhir/Observation?subject=Patient/1"
 curl http://localhost:8082/fhir/metadata
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Test the FHIR capability statement
 curl http://localhost:8082/fhir/metadata | python3 -m json.tool | head -30
@@ -341,7 +364,8 @@ volumes:
 cd ~/wger && podman-compose up -d
 ```
 
-**Mobile apps:** wger has iOS and Android apps that sync to a self-hosted server via the REST API.
+#### Mobile apps
+wger has iOS and Android apps that sync to a self-hosted server via the REST API.
 
 ---
 

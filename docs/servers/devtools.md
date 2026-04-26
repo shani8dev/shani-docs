@@ -17,34 +17,43 @@ Infrastructure, CI/CD, monitoring, code hosting, and development utilities.
 
 ### Developer Tools Interview Essentials
 
-**Git internals that come up in interviews:**
+#### Git internals that come up in interviews
 - Every commit is a snapshot (not a diff), identified by a SHA-1 hash of its content, author, timestamp, and parent commit hash. This is why commits are immutable and content-addressable.
 - `git rebase` replays commits on top of a new base, creating new SHAs. `git merge` creates a merge commit. Neither is universally better — rebase gives a linear history, merge preserves branch topology.
 - `git cherry-pick` applies a single commit's changes to the current branch. Useful for backporting fixes.
 - `git bisect` does a binary search through commit history to find which commit introduced a bug. Requires a `git bisect good` / `git bisect bad` signal — often a test script.
 
-**Code review best practices:** Reviews should be < 400 lines of changed code per PR — larger PRs have significantly lower defect detection rates. The author's job is to make the reviewer's job easy: meaningful PR description, small atomic commits, tests included. The reviewer's job is to focus on correctness, not style (automated formatters handle style). LGTM without reading = the most common code review failure mode.
+#### Code review best practices
+Reviews should be < 400 lines of changed code per PR — larger PRs have significantly lower defect detection rates. The author's job is to make the reviewer's job easy: meaningful PR description, small atomic commits, tests included. The reviewer's job is to focus on correctness, not style (automated formatters handle style). LGTM without reading = the most common code review failure mode.
 
-**Testing pyramid:** Unit tests (many, fast, no I/O) → Integration tests (fewer, slower, hit real dependencies) → End-to-end / UI tests (fewest, slowest, full stack). Inverting the pyramid (many E2E, few unit tests) makes CI slow and brittle. A common interview question: "where do you add coverage?" — start with units for logic, integration for DB queries, E2E only for critical happy paths.
+#### Testing pyramid
+Unit tests (many, fast, no I/O) → Integration tests (fewer, slower, hit real dependencies) → End-to-end / UI tests (fewest, slowest, full stack). Inverting the pyramid (many E2E, few unit tests) makes CI slow and brittle. A common interview question: "where do you add coverage?" — start with units for logic, integration for DB queries, E2E only for critical happy paths.
 
-**Static analysis vs dynamic analysis:**
+#### Static analysis vs dynamic analysis
 - Static analysis (Semgrep, ESLint, `mypy`) inspects code without running it. Fast, catches bugs early, zero runtime cost. Can have false positives.
 - Dynamic analysis (ZAP, Valgrind, sanitizers) runs the code and observes behaviour. Catches runtime bugs that static analysis misses (memory corruption, race conditions) but requires execution.
 
-**Container build performance:** Layer caching is the key lever. Layers that change rarely (OS packages, language runtime) go first; layers that change often (application code) go last. Using `--mount=type=cache` in BuildKit (or `podman build --layers`) caches package manager download directories (pip cache, npm cache) across builds, dramatically reducing build times for dependency-heavy projects.
+#### Container build performance
+Layer caching is the key lever. Layers that change rarely (OS packages, language runtime) go first; layers that change often (application code) go last. Using `--mount=type=cache` in BuildKit (or `podman build --layers`) caches package manager download directories (pip cache, npm cache) across builds, dramatically reducing build times for dependency-heavy projects.
 
-**Inner loop vs outer loop development:** Inner loop = the tight cycle of edit-build-run on your laptop (code-server, hot reload, `tilt up`). Outer loop = the CI pipeline (Woodpecker, Forgejo Actions, GitHub Actions). Fast inner loops require good local tooling (kind, minikube, Tilt, Skaffold) so you're not waiting for CI. The goal: < 1 second feedback for syntax errors, < 10 seconds for unit tests, < 5 minutes for the full CI pipeline.
+#### Inner loop vs outer loop development
+Inner loop = the tight cycle of edit-build-run on your laptop (code-server, hot reload, `tilt up`). Outer loop = the CI pipeline (Woodpecker, Forgejo Actions, GitHub Actions). Fast inner loops require good local tooling (kind, minikube, Tilt, Skaffold) so you're not waiting for CI. The goal: < 1 second feedback for syntax errors, < 10 seconds for unit tests, < 5 minutes for the full CI pipeline.
 
 
-**Service discovery patterns (Consul):** Services register with Consul on startup (name, address, port, health check endpoint). Clients query Consul's DNS (`service-name.service.consul`) or HTTP API to find a live instance — no hardcoded IPs. When a service fails its health check, Consul removes it from the registry automatically. This is how Nomad jobs find each other without environment variables or static config files. At work, you'll see this pattern in bare-metal microservice deployments, or as a sidecar in container environments that aren't on Kubernetes.
+#### Service discovery patterns (Consul)
+Services register with Consul on startup (name, address, port, health check endpoint). Clients query Consul's DNS (`service-name.service.consul`) or HTTP API to find a live instance — no hardcoded IPs. When a service fails its health check, Consul removes it from the registry automatically. This is how Nomad jobs find each other without environment variables or static config files. At work, you'll see this pattern in bare-metal microservice deployments, or as a sidecar in container environments that aren't on Kubernetes.
 
-**Nomad vs Kubernetes — when Nomad wins:** Kubernetes is the dominant orchestrator, but Nomad handles workloads K8s can't: raw binaries, Java JAR files, Batch jobs with complex scheduling, and VM workloads. Nomad's job spec is simpler and more flexible than K8s manifests — a single binary, no etcd dependency. Teams already using the HashiCorp stack (Vault, Consul, Terraform) choose Nomad for its tight integration. Know both; most large shops run Kubernetes but may have legacy Nomad clusters.
+#### Nomad vs Kubernetes — when Nomad wins
+Kubernetes is the dominant orchestrator, but Nomad handles workloads K8s can't: raw binaries, Java JAR files, Batch jobs with complex scheduling, and VM workloads. Nomad's job spec is simpler and more flexible than K8s manifests — a single binary, no etcd dependency. Teams already using the HashiCorp stack (Vault, Consul, Terraform) choose Nomad for its tight integration. Know both; most large shops run Kubernetes but may have legacy Nomad clusters.
 
-**Artifact management — why it matters:** A container registry (Harbor, Nexus, Artifactory) isn't just storage — it's a security boundary. Pull-through proxy caches upstream images locally (faster builds, no DockerHub rate limits). Vulnerability scanning at push time (Trivy in Harbor) blocks vulnerable images from entering the pipeline. Image signing (cosign, Notary) provides provenance — the cluster can verify an image was built by your CI and not tampered with. In a regulated environment, pulling directly from DockerHub is a compliance finding.
+#### Artifact management — why it matters
+A container registry (Harbor, Nexus, Artifactory) isn't just storage — it's a security boundary. Pull-through proxy caches upstream images locally (faster builds, no DockerHub rate limits). Vulnerability scanning at push time (Trivy in Harbor) blocks vulnerable images from entering the pipeline. Image signing (cosign, Notary) provides provenance — the cluster can verify an image was built by your CI and not tampered with. In a regulated environment, pulling directly from DockerHub is a compliance finding.
 
-**SonarQube quality gates:** A quality gate is a pass/fail threshold on code quality metrics — if new code introduces a coverage drop below 80%, a critical bug, or a security hotspot, the gate fails and the CI pipeline stops. This enforces quality as a pipeline concern rather than a post-merge review. The key metrics: Reliability (bugs), Security (vulnerabilities + hotspots), Maintainability (code smells, duplications), and Coverage. In interviews, distinguish SonarQube (code quality) from Semgrep (security patterns) — they complement each other.
+#### SonarQube quality gates
+A quality gate is a pass/fail threshold on code quality metrics — if new code introduces a coverage drop below 80%, a critical bug, or a security hotspot, the gate fails and the CI pipeline stops. This enforces quality as a pipeline concern rather than a post-merge review. The key metrics: Reliability (bugs), Security (vulnerabilities + hotspots), Maintainability (code smells, duplications), and Coverage. In interviews, distinguish SonarQube (code quality) from Semgrep (security patterns) — they complement each other.
 
-**Renovate vs Dependabot:** Both auto-generate PRs to update dependencies. Renovate is more configurable: custom update schedules, grouping multiple dependencies into a single PR, auto-merging patch updates that pass CI, and monorepo support. Dependabot is simpler and built into GitHub. At scale, unmanaged dependencies become the largest source of CVEs — automated dependency updates with CI checks are the lowest-effort high-impact security practice.
+#### Renovate vs Dependabot
+Both auto-generate PRs to update dependencies. Renovate is more configurable: custom update schedules, grouping multiple dependencies into a single PR, auto-merging patch updates that pass CI, and monorepo support. Dependabot is simpler and built into GitHub. At scale, unmanaged dependencies become the largest source of CVEs — automated dependency updates with CI checks are the lowest-effort high-impact security practice.
 ---
 ---
 
@@ -74,7 +83,7 @@ services:
 cd ~/gitea && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Create an admin user via CLI
 podman exec -it gitea gitea admin user create   --username admin --password changeme --email admin@example.com --admin
@@ -129,7 +138,7 @@ services:
   woodpecker-agent:
     image: woodpeckerci/woodpecker-agent:latest
     volumes:
-      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
       - woodpecker_agent:/var/lib/woodpecker
     environment:
       WOODPECKER_SERVER: woodpecker-server:9000
@@ -190,7 +199,7 @@ services:
       - 127.0.0.1:3001:3000
     volumes:
       - /home/user/coder:/var/lib/coder:Z
-      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
     environment:
       CODER_ACCESS_URL: https://coder.home.local
       CODER_WILDCARD_ACCESS_URL: *.coder.home.local
@@ -255,7 +264,7 @@ services:
 cd ~/registry && podman-compose up -d
 ```
 
-**Push an image to your registry:**
+#### Push an image to your registry
 ```bash
 podman tag myimage localhost:5000/myimage:latest
 podman push localhost:5000/myimage:latest
@@ -542,7 +551,7 @@ services:
     image: gitlab/gitlab-runner:latest
     volumes:
       - /home/user/gitlab-runner/config:/etc/gitlab-runner:Z
-      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
     restart: unless-stopped
 ```
 
@@ -624,7 +633,7 @@ cd ~/harbor && podman-compose up -d
 
 Access at `http://localhost:8180` after install. Default login: `admin` / your configured password.
 
-**Push images to Harbor:**
+#### Push images to Harbor
 ```bash
 # Login
 podman login registry.home.local
@@ -749,7 +758,7 @@ services:
     image: code.forgejo.org/forgejo/runner:latest
     volumes:
       - /home/user/forgejo-runner:/data:Z
-      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
     environment:
       FORGEJO_INSTANCE_URL: https://git.home.local
       FORGEJO_RUNNER_SECRET: changeme-from-forgejo-admin-panel
@@ -918,12 +927,12 @@ services:
 cd ~/jenkins && podman-compose up -d
 ```
 
-**Get the initial admin password:**
+#### Get the initial admin password
 ```bash
 podman exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Install plugins via CLI (Jenkins CLI jar)
 podman exec jenkins java -jar /var/jenkins_home/war/WEB-INF/jenkins-cli.jar \
@@ -975,7 +984,7 @@ cd ~/artifactory && podman-compose up -d
 
 Default login: `admin` / `password`. **Change immediately on first login.**
 
-**Common operations:**
+#### Common operations
 ```bash
 # Create a local repository via REST API
 curl -u admin:password -X PUT \
@@ -996,7 +1005,7 @@ curl -u admin:password \
   "http://localhost:8181/artifactory/api/search/quick?name=myapp"
 ```
 
-**With PostgreSQL (production):**
+#### With PostgreSQL (production)
 ```yaml
 services:
   artifactory:
@@ -1057,7 +1066,7 @@ cd ~/nexus && podman-compose up -d
 podman exec nexus cat /nexus-data/admin.password
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Configure Maven to use Nexus proxy — add to ~/.m2/settings.xml:
 # <mirrors><mirror><id>nexus</id><url>http://localhost:8091/repository/maven-public/</url>
@@ -1108,7 +1117,7 @@ services:
 cd ~/consul && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Install Consul CLI via Nix
 nix-env -iA nixpkgs.consul
@@ -1156,7 +1165,7 @@ services:
     volumes:
       - /home/user/nomad/data:/nomad/data:Z
       - /home/user/nomad/config:/etc/nomad.d:Z
-      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
     cap_add: [SYS_ADMIN]
     privileged: true
     command: "agent -dev -bind=0.0.0.0 -log-level=INFO"
@@ -1167,7 +1176,7 @@ services:
 cd ~/nomad && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Install Nomad CLI via Nix
 nix-env -iA nixpkgs.nomad
@@ -1327,14 +1336,14 @@ windmill.home.local  { tls internal; reverse_proxy localhost:8300 }
 
 Webhooks let Gitea/Forgejo notify external services when events happen in a repository — a push, a pull request, a tag. This is how CI/CD pipelines get triggered without polling.
 
-**Configuring a webhook in Gitea:**
+#### Configuring a webhook in Gitea
 1. Go to **Repository → Settings → Webhooks → Add Webhook**
 2. Choose **Gitea** (for native events) or **HTTP** (for generic JSON)
 3. Set the **Payload URL** to your CI endpoint (e.g., `https://ci.home.local/api/webhooks`)
 4. Select which events trigger the hook (push, pull request, release)
 5. Gitea sends a signed HMAC-SHA256 payload — verify the `X-Gitea-Signature` header in your receiver
 
-**Trigger a Woodpecker pipeline on push:**
+#### Trigger a Woodpecker pipeline on push
 ```bash
 # Woodpecker registers its webhook automatically when you enable a repo in the UI
 # Verify the webhook appeared under Repository → Settings → Webhooks
@@ -1427,7 +1436,8 @@ If gitleaks fires on a legitimate secret that's already been rotated and removed
 
 **Distroless** images have no shell, no package manager, no `ls`, no `cat`. You can't `exec` into them for debugging — use `kubectl debug` with a sidecar image instead. The tradeoff is worth it for production: no shell means no shell exploitation.
 
-**Layer caching in multi-stage builds:** order your Dockerfile so the steps that change least frequently come first. Dependencies (which change rarely) before application code (which changes every commit):
+#### Layer caching in multi-stage builds
+order your Dockerfile so the steps that change least frequently come first. Dependencies (which change rarely) before application code (which changes every commit):
 
 ```dockerfile
 FROM golang:1.23 AS builder

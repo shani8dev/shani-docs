@@ -14,6 +14,32 @@ Run large language models, vision pipelines, image generation, speech-to-text, a
 
 ---
 
+---
+
+## Job-Ready Concepts
+
+#### Transformer architecture and why it matters for inference
+Large language models are transformer networks. The key operational facts: inference is memory-bandwidth-bound, not compute-bound — the GPU spends most of its time moving weights from VRAM to compute units. This is why quantisation (reducing weight precision from float16 to int4) gives a 4× memory reduction with minimal quality loss. VRAM capacity determines the maximum model size; VRAM bandwidth determines tokens-per-second. A 7B model at float16 needs ~14 GB VRAM; at Q4_K_M quantisation, ~4 GB. Knowing this lets you choose the right model-hardware combination and explain why a 3090 (24 GB) outperforms a 4090 (24 GB) for inference at saturated VRAM.
+
+#### Context window, tokens, and why they matter
+A context window is the maximum number of tokens (roughly ¾ of a word each) a model can process in one request — both the input prompt and the output combined. Llama 3.2's context is 128k tokens (~96k words). A longer context costs quadratically more memory (KV cache grows with sequence length). For RAG, the context window determines how many retrieved document chunks fit alongside the query. For coding assistants, it determines how much of the codebase can be in-context at once. Context exhaustion is the most common failure mode in production LLM applications.
+
+#### RAG (Retrieval-Augmented Generation) architecture
+RAG solves the "my LLM doesn't know my data" problem without fine-tuning. The pipeline: (1) embed each document chunk using an embedding model (Ollama's `nomic-embed-text`) into a vector; (2) store vectors in a vector database (Qdrant, ChromaDB, pgvector); (3) at query time, embed the user's question and find the N most similar document vectors; (4) inject those chunks into the LLM's context alongside the question. The LLM answers from the retrieved context, not from its training data. Key metrics: chunk size (too small = no context; too large = noise), top-K (how many chunks), and embedding model quality. RAG is the dominant pattern for enterprise AI applications.
+
+#### Inference serving and batching
+A production LLM server (Ollama, vLLM, llama.cpp server) manages concurrent requests differently from a web server. Continuous batching: instead of processing one request at a time, the server processes tokens from multiple in-flight requests simultaneously, filling gaps in GPU utilisation. PagedAttention (used in vLLM) manages KV cache as virtual memory pages, allowing more concurrent requests on the same VRAM. For interviews at AI-forward companies: understand that throughput (tokens/second total) and latency (time-to-first-token) are the two key metrics, and they trade off against each other.
+
+#### Embeddings and semantic search
+An embedding model converts text into a fixed-length float vector where semantically similar texts produce nearby vectors (measured by cosine similarity or dot product). Unlike keyword search (which fails on synonyms and paraphrases), semantic search finds conceptually related content. The embedding dimension (e.g. 768, 1536) determines precision — higher dimensions capture more nuance but require more storage and VRAM. HNSW (Hierarchical Navigable Small World) graphs are the standard ANN index structure used by Qdrant, Weaviate, and pgvector — they trade a small recall loss for orders-of-magnitude faster query time versus exact search.
+
+#### Fine-tuning vs. prompting vs. RAG — when to use each
+Three ways to specialise an LLM: (1) Prompting — add instructions and examples in the system prompt. Zero cost, instant. Works for tone, format, and simple tasks. Fails when the model lacks domain knowledge. (2) RAG — retrieve relevant context at runtime. Works for factual knowledge that changes. Requires a vector database and retrieval pipeline. (3) Fine-tuning — train the model on domain-specific examples using LoRA/QLoRA. Works for style, structure, and tasks requiring deep domain knowledge baked in. High cost, requires labelled data, risk of catastrophic forgetting. For 90% of enterprise applications, RAG is the answer. Fine-tuning is justified when you need consistent output format across thousands of calls.
+
+#### LLM safety and output reliability patterns
+LLMs are probabilistic — they can hallucinate, produce inconsistent JSON, and fail silently. Production patterns: (1) Structured output — instruct the model to respond in JSON and validate with Pydantic/Zod; use grammar-constrained decoding (llama.cpp supports this) to enforce schemas at the token level. (2) Retry with reflection — if the model's output fails validation, feed the error back as a correction prompt. (3) Guardrails — validate inputs for prompt injection (user tries to override system instructions) and outputs for PII or policy violations (Langfuse can hook into this pipeline). (4) Temperature — set to 0 for deterministic tasks (classification, extraction), higher for creative generation.
+
+
 ## Ollama
 
 **Purpose:** Pull, run, and serve open-weight LLMs (Llama, Mistral, Phi, Gemma, Qwen, DeepSeek) via a simple REST API. Handles model storage, quantisation selection, and GPU offloading automatically.
@@ -51,7 +77,7 @@ curl http://localhost:11434/v1/chat/completions \
   -d '{"model":"llama3.2","messages":[{"role":"user","content":"Hello"}]}'
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Pull a model
 podman exec ollama ollama pull llama3.2
@@ -709,7 +735,7 @@ podman-compose run --rm api flask db-commands migrate
 
 Access at `http://localhost:5002`. On first visit, set up an admin account, then connect your LLM providers under Settings → Model Providers.
 
-**Key Dify features:**
+#### Key Dify features
 - **Chatbot** — deploy a custom-knowledge chatbot from uploaded documents in minutes
 - **Workflow** — visual node editor for multi-step agent pipelines (fetch URL → summarise → send notification)
 - **Agent** — connect tools (web search, code execution, API calls) to an LLM for autonomous task completion
@@ -743,7 +769,7 @@ services:
 cd ~/open-interpreter && podman-compose up -d
 ```
 
-**Or run interactively:**
+#### Or run interactively
 ```bash
 podman run -it --rm \
   -v /home/user/open-interpreter/files:/files:Z \

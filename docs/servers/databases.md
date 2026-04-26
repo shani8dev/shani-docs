@@ -29,25 +29,64 @@ The CAP theorem states that a distributed system can guarantee at most two of th
 | etcd | CP | Refuses requests if quorum is lost. Never returns stale data. |
 
 
-**ACID vs BASE — the reliability spectrum:** ACID (Atomicity, Consistency, Isolation, Durability) is the contract of traditional relational databases: every transaction either fully commits or fully rolls back, leaving the database in a consistent state, isolated from concurrent transactions, and durable on disk. BASE (Basically Available, Soft state, Eventually consistent) is the contract of distributed systems like Cassandra and early DynamoDB: the system is always available, but data may be temporarily inconsistent across nodes and will converge eventually. Most modern systems let you tune where on this spectrum you operate — Cassandra's `CONSISTENCY QUORUM` leans toward ACID; `CONSISTENCY ONE` leans toward BASE.
+#### ACID vs BASE — the reliability spectrum
+ACID (Atomicity, Consistency, Isolation, Durability) is the contract of traditional relational databases: every transaction either fully commits or fully rolls back, leaving the database in a consistent state, isolated from concurrent transactions, and durable on disk. BASE (Basically Available, Soft state, Eventually consistent) is the contract of distributed systems like Cassandra and early DynamoDB: the system is always available, but data may be temporarily inconsistent across nodes and will converge eventually. Most modern systems let you tune where on this spectrum you operate — Cassandra's `CONSISTENCY QUORUM` leans toward ACID; `CONSISTENCY ONE` leans toward BASE.
 
-**Indexing — the single most impactful performance lever:** An index is a separate data structure (B-tree by default in PostgreSQL/MariaDB) that maps column values to row locations, turning a sequential table scan O(n) into a lookup O(log n). A query on an un-indexed column on a 10M-row table reads every row; the same query with an index reads ~23 rows. Trade-offs: indexes speed up reads but slow down writes (every INSERT/UPDATE must update the index). Partial indexes (PostgreSQL: `WHERE deleted_at IS NULL`) index only a subset of rows. Composite indexes are ordered — `(a, b)` helps queries on `a` or `(a, b)` but not `b` alone. `EXPLAIN ANALYZE` shows whether an index is used.
+#### Indexing — the single most impactful performance lever
+An index is a separate data structure (B-tree by default in PostgreSQL/MariaDB) that maps column values to row locations, turning a sequential table scan O(n) into a lookup O(log n). A query on an un-indexed column on a 10M-row table reads every row; the same query with an index reads ~23 rows. Trade-offs: indexes speed up reads but slow down writes (every INSERT/UPDATE must update the index). Partial indexes (PostgreSQL: `WHERE deleted_at IS NULL`) index only a subset of rows. Composite indexes are ordered — `(a, b)` helps queries on `a` or `(a, b)` but not `b` alone. `EXPLAIN ANALYZE` shows whether an index is used.
 
-**Connection pooling — why PgBouncer exists:** PostgreSQL spawns a new OS process for every connection (unlike MySQL/MariaDB which use threads). Each process consumes ~5–10 MB of RAM. A web app with 100 concurrent workers each holding an idle connection wastes 500–1000 MB and creates scheduler pressure. PgBouncer sits between the app and PostgreSQL, multiplexing hundreds of app connections onto a small pool of actual database connections (transaction pooling: a connection is only held during a transaction, then returned to the pool). Dragonfly and Redis don't have this problem — they're single-threaded and handle connections via event loops.
+#### Connection pooling — why PgBouncer exists
+PostgreSQL spawns a new OS process for every connection (unlike MySQL/MariaDB which use threads). Each process consumes ~5–10 MB of RAM. A web app with 100 concurrent workers each holding an idle connection wastes 500–1000 MB and creates scheduler pressure. PgBouncer sits between the app and PostgreSQL, multiplexing hundreds of app connections onto a small pool of actual database connections (transaction pooling: a connection is only held during a transaction, then returned to the pool). Dragonfly and Redis don't have this problem — they're single-threaded and handle connections via event loops.
 
-**Message queues vs event streaming — when to use each:** A message queue (RabbitMQ, NATS) delivers each message to exactly one consumer, then deletes it. It's a task distribution system — ideal for job queues, email sending, and RPC. An event stream (Kafka, Redpanda) retains messages for a configurable period (days/weeks) and lets multiple independent consumers read them at their own pace. It's a shared, replayable log — ideal for audit trails, event sourcing, feeding multiple downstream systems (analytics, search indexing, ML pipelines) from one producer. The key question: do you want messages consumed and forgotten (queue) or permanently recorded and replayable (stream)?
+#### Message queues vs event streaming — when to use each
+A message queue (RabbitMQ, NATS) delivers each message to exactly one consumer, then deletes it. It's a task distribution system — ideal for job queues, email sending, and RPC. An event stream (Kafka, Redpanda) retains messages for a configurable period (days/weeks) and lets multiple independent consumers read them at their own pace. It's a shared, replayable log — ideal for audit trails, event sourcing, feeding multiple downstream systems (analytics, search indexing, ML pipelines) from one producer. The key question: do you want messages consumed and forgotten (queue) or permanently recorded and replayable (stream)?
 
-**Vector databases and embeddings — the AI infrastructure layer:** A vector database (Qdrant, Weaviate, Chroma, pgvector) stores high-dimensional float vectors (embeddings) and answers "find the N most similar vectors to this query vector" using approximate nearest-neighbour (ANN) algorithms (HNSW, IVF). Embeddings are produced by ML models — a 1536-dimension float array that encodes semantic meaning. Two semantically similar sentences produce nearby vectors. This enables RAG (Retrieval-Augmented Generation): embed your documents, store in Qdrant, embed a user query, find the most similar document chunks, pass them as context to an LLM. pgvector adds this capability to PostgreSQL; Qdrant/Weaviate are purpose-built for scale.
+#### Vector databases and embeddings — the AI infrastructure layer
+A vector database (Qdrant, Weaviate, Chroma, pgvector) stores high-dimensional float vectors (embeddings) and answers "find the N most similar vectors to this query vector" using approximate nearest-neighbour (ANN) algorithms (HNSW, IVF). Embeddings are produced by ML models — a 1536-dimension float array that encodes semantic meaning. Two semantically similar sentences produce nearby vectors. This enables RAG (Retrieval-Augmented Generation): embed your documents, store in Qdrant, embed a user query, find the most similar document chunks, pass them as context to an LLM. pgvector adds this capability to PostgreSQL; Qdrant/Weaviate are purpose-built for scale.
 
-**Time-series data model — why specialised databases exist:** Time-series data (metrics, IoT sensor readings, financial ticks) has properties regular databases handle poorly: extremely high write throughput (millions of inserts/second), data is always appended (rarely updated), queries are almost always range-based (last 24h, 7-day average), and old data is downsampled or expired. TimescaleDB adds automatic partitioning by time (hypertables) and continuous aggregates to PostgreSQL. InfluxDB uses a custom storage engine (TSM) optimised for these access patterns. The key concept: *retention policies* automatically delete data older than N days, preventing unbounded disk growth.
+#### Time-series data model — why specialised databases exist
+Time-series data (metrics, IoT sensor readings, financial ticks) has properties regular databases handle poorly: extremely high write throughput (millions of inserts/second), data is always appended (rarely updated), queries are almost always range-based (last 24h, 7-day average), and old data is downsampled or expired. TimescaleDB adds automatic partitioning by time (hypertables) and continuous aggregates to PostgreSQL. InfluxDB uses a custom storage engine (TSM) optimised for these access patterns. The key concept: *retention policies* automatically delete data older than N days, preventing unbounded disk growth.
 
-**OLTP vs OLAP — two different access patterns:** OLTP (Online Transaction Processing) databases (PostgreSQL, MariaDB, MongoDB) are optimised for high-frequency, low-latency reads and writes of individual rows — your app's operational database. OLAP (Online Analytical Processing) databases (ClickHouse, DuckDB, Redshift) are optimised for aggregate queries over millions of rows — your analytics and reporting layer. OLAP databases use columnar storage: data for one column is stored contiguously on disk, so `SELECT AVG(revenue) FROM orders` reads only the revenue column, not every field. Row-oriented databases read every column for every matching row. DuckDB runs OLAP queries directly on Parquet files; ClickHouse handles billions of rows per second on a single node.
+#### OLTP vs OLAP — two different access patterns
+OLTP (Online Transaction Processing) databases (PostgreSQL, MariaDB, MongoDB) are optimised for high-frequency, low-latency reads and writes of individual rows — your app's operational database. OLAP (Online Analytical Processing) databases (ClickHouse, DuckDB, Redshift) are optimised for aggregate queries over millions of rows — your analytics and reporting layer. OLAP databases use columnar storage: data for one column is stored contiguously on disk, so `SELECT AVG(revenue) FROM orders` reads only the revenue column, not every field. Row-oriented databases read every column for every matching row. DuckDB runs OLAP queries directly on Parquet files; ClickHouse handles billions of rows per second on a single node.
 
-**Graph databases — when the relationships are the data:** In a relational database, joining two tables is a set operation that scans rows. In a graph database (Neo4j), relationships are first-class objects stored with direct pointers — traversing "friends of friends" follows pointers in memory without scanning tables. Graph databases excel at: social networks (mutual connections, influence paths), recommendation engines (people who bought X also bought Y), access control graphs (who can access what via which roles), and network topology (how many hops between two nodes). Cypher (Neo4j's query language) expresses graph patterns naturally: `MATCH (a:User)-[:FOLLOWS]->(b:User)-[:FOLLOWS]->(c:User) WHERE a.name = 'Alice' RETURN c`.
+#### Graph databases — when the relationships are the data
+In a relational database, joining two tables is a set operation that scans rows. In a graph database (Neo4j), relationships are first-class objects stored with direct pointers — traversing "friends of friends" follows pointers in memory without scanning tables. Graph databases excel at: social networks (mutual connections, influence paths), recommendation engines (people who bought X also bought Y), access control graphs (who can access what via which roles), and network topology (how many hops between two nodes). Cypher (Neo4j's query language) expresses graph patterns naturally: `MATCH (a:User)-[:FOLLOWS]->(b:User)-[:FOLLOWS]->(c:User) WHERE a.name = 'Alice' RETURN c`.
 
-**Full-text search relevance — why MeiliSearch/Typesense aren't just SQL LIKE:** SQL `LIKE '%query%'` does a sequential scan, can't rank by relevance, and doesn't handle typos. A search engine (MeiliSearch, Typesense, Elasticsearch) builds an inverted index — a map from each word to the documents containing it. Relevance ranking uses TF-IDF (term frequency × inverse document frequency) or BM25: rare words that appear often in a specific document are strong signals. Typo tolerance uses Levenshtein distance. Faceted search filters by structured attributes (category, price range) while ranking by full-text relevance. Use a dedicated search engine when you need: typo tolerance, relevance ranking, instant-search UX, or faceting.
+#### Full-text search relevance — why MeiliSearch/Typesense aren't just SQL LIKE
+SQL `LIKE '%query%'` does a sequential scan, can't rank by relevance, and doesn't handle typos. A search engine (MeiliSearch, Typesense, Elasticsearch) builds an inverted index — a map from each word to the documents containing it. Relevance ranking uses TF-IDF (term frequency × inverse document frequency) or BM25: rare words that appear often in a specific document are strong signals. Typo tolerance uses Levenshtein distance. Faceted search filters by structured attributes (category, price range) while ranking by full-text relevance. Use a dedicated search engine when you need: typo tolerance, relevance ranking, instant-search UX, or faceting.
 
-**Sharding vs partitioning:** Partitioning splits a single table into multiple storage segments on one node — PostgreSQL table partitioning by date, MySQL partitioning by range. This improves query performance (only scan the relevant partition) and maintenance (drop old partitions instead of DELETE). Sharding distributes data across multiple nodes — each shard is a separate database server handling a subset of data. Sharding is for horizontal scale beyond what one node can handle. The challenge: cross-shard queries (join data on shard 1 with data on shard 2) require application-level handling or a distributed query layer (Citus, CockroachDB). The rule: partition first (cheap, always useful), shard only when necessary (expensive operationally).
+#### Sharding vs partitioning
+Partitioning splits a single table into multiple storage segments on one node — PostgreSQL table partitioning by date, MySQL partitioning by range. This improves query performance (only scan the relevant partition) and maintenance (drop old partitions instead of DELETE). Sharding distributes data across multiple nodes — each shard is a separate database server handling a subset of data. Sharding is for horizontal scale beyond what one node can handle. The challenge: cross-shard queries (join data on shard 1 with data on shard 2) require application-level handling or a distributed query layer (Citus, CockroachDB). The rule: partition first (cheap, always useful), shard only when necessary (expensive operationally).
+---
+
+## Job-Ready Concepts
+
+#### SQL vs NoSQL — the real distinction
+The choice isn't binary. The real question is: what access patterns does your application need? Relational databases (PostgreSQL, MariaDB) excel at complex joins, ad-hoc queries, and strong consistency. Document stores (MongoDB) excel when records are self-contained and schema flexibility matters. Wide-column stores (Cassandra, ScyllaDB) excel at write-heavy time-series workloads where queries always include a partition key. Use the wrong tool and you're fighting the data model on every query.
+
+#### ACID vs BASE — what these actually mean
+- **ACID** (Atomic, Consistent, Isolated, Durable) — every transaction either fully succeeds or fully rolls back; concurrent transactions don't see each other's partial state; committed data survives crashes. PostgreSQL, MySQL (InnoDB). The default expectation in any financial or transactional system.
+- **BASE** (Basically Available, Soft state, Eventually consistent) — the system stays available even during failures; different nodes may temporarily disagree on state; they will converge eventually. Cassandra, DynamoDB. The default model for high-write, geographically distributed systems.
+
+#### Indexes — how they work and when they hurt
+An index is a separate data structure (usually a B-tree) that the database maintains alongside a table. Reads using the index skip full table scans — fast. Writes (INSERT, UPDATE, DELETE) are slower because every index must be updated. The pathological case: a table with 15 indexes on a write-heavy workload — each write touches 15 B-trees. Rule of thumb: index columns used in WHERE, JOIN, and ORDER BY clauses on tables with > 10,000 rows. Use `EXPLAIN ANALYZE` (Postgres) or `EXPLAIN` (MySQL) to verify an index is actually being used.
+
+#### Connection pooling — why it matters at scale
+PostgreSQL creates a backend process per connection. At 500 connections, you have 500 processes. PgBouncer sits in front and multiplexes thousands of app-side connections onto a small real pool. The app sees a normal database on port 5432 — pooling is transparent. Standard in any production PostgreSQL deployment handling more than a few dozen concurrent users.
+
+#### N+1 query problem
+Fetching a list of N items then making N additional queries for related data. Example: fetch 100 users, then loop to fetch each user's profile — 101 queries instead of 1 JOIN. ORM frameworks (ActiveRecord, SQLAlchemy) are the most common source. Fix: eager loading (`.includes()`, `.joinedload()`) or an explicit JOIN. A standard interview question for any backend role.
+
+#### Read replicas vs sharding
+A read replica receives all writes from the primary and serves read queries. Scales reads but not writes — all writes still go to one primary. Sharding splits data across multiple primaries (each handles a subset by user ID or hash). Scales both, but cross-shard joins are expensive or impossible. Default path: add a read replica first; shard only when write throughput is the proven bottleneck.
+
+#### Database migrations — forward-compatible patterns
+Schema changes that break running app code during deployment cause downtime. Safe pattern for adding a required column: (1) add as nullable — app ignores it, (2) backfill existing rows, (3) make non-null in a later migration after all app instances are updated. For dropping a column: stop reading/writing it in app code first, then drop in a separate migration. Never couple a breaking schema change and the app change in the same deployment.
+
+#### Portability note
+Compose examples use rootless **Podman** and `host.containers.internal`. When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service).
+
 ---
 
 ## MariaDB
@@ -78,7 +117,7 @@ volumes:
 cd ~/mariadb && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Connect interactively
 podman exec -it mariadb mariadb -u myuser -pmyuserpass mydb
@@ -186,7 +225,7 @@ CREATE INDEX ON users (email) WHERE active = true;
 CREATE INDEX ON users (email) INCLUDE (username);
 ```
 
-**pgAdmin (PostgreSQL GUI):**
+#### pgAdmin (PostgreSQL GUI)
 ```yaml
 # ~/pgadmin/compose.yaml
 services:
@@ -204,7 +243,7 @@ services:
 cd ~/pgadmin && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Connect interactively
 podman exec -it postgres psql -U myuser -d mydb
@@ -295,7 +334,7 @@ ORDER BY embedding <=> '[0.02, 0.21, ...]'::vector
 LIMIT 5;
 ```
 
-**Operators:**
+#### Operators
 - `<=>` — cosine distance (most common for text embeddings)
 - `<->` — L2 (Euclidean) distance
 - `<#>` — negative inner product (for dot-product similarity)
@@ -325,7 +364,7 @@ conn.commit()
 
 **Purpose:** PostgreSQL is process-based — every client connection spawns a separate backend process. Under high load (hundreds of concurrent connections from an application server), this becomes the bottleneck. PgBouncer sits between your app and PostgreSQL, maintaining a small pool of real database connections and multiplexing many application connections onto them.
 
-**Pool modes:**
+#### Pool modes
 - **Transaction mode** (recommended) — a database connection is held only for the duration of a single transaction. Most efficient, but prepared statements and session-level features (`SET`, advisory locks) don't work across transactions.
 - **Session mode** — a database connection is held for the entire application session. Fully transparent to the app but uses more connections.
 - **Statement mode** — one database connection per SQL statement. Very aggressive; breaks multi-statement transactions.
@@ -353,7 +392,7 @@ services:
 cd ~/pgbouncer && podman-compose up -d
 ```
 
-**Check pool status:**
+#### Check pool status
 ```bash
 # Connect to the PgBouncer admin interface
 psql -h localhost -p 5432 -U myuser pgbouncer -c "SHOW POOLS;"
@@ -387,7 +426,7 @@ volumes:
 cd ~/redis && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Interactive CLI
 podman exec -it redis redis-cli
@@ -461,7 +500,7 @@ HGET user:42 email
 HGETALL user:42
 ```
 
-**Pub/Sub vs Streams vs Lists for messaging:**
+#### Pub/Sub vs Streams vs Lists for messaging
 - **Pub/Sub** (`SUBSCRIBE`, `PUBLISH`) — fire-and-forget. Messages are delivered to current subscribers only; no persistence, no acknowledgement.
 - **Lists** with `BRPOP` — simple work queue. One producer, one consumer per message. Good for tasks.
 - **Streams** (`XADD`, `XREADGROUP`) — persistent, consumer-group-aware event log. Replay, acknowledgement, multiple consumer groups. The closest Redis equivalent to Kafka.
@@ -485,7 +524,8 @@ redis-server --save 60 1000
 redis-server --appendonly yes --save 900 1 --save 300 10 --save 60 10000
 ```
 
-**Trade-off summary:** RDB gives faster restarts and smaller files; AOF gives better durability. For a homelab cache, losing a few seconds of data on crash is usually acceptable — use AOF with `everysec`. For session storage or queues where losing data matters, use `always` or run both.
+#### Trade-off summary
+RDB gives faster restarts and smaller files; AOF gives better durability. For a homelab cache, losing a few seconds of data on crash is usually acceptable — use AOF with `everysec`. For session storage or queues where losing data matters, use `always` or run both.
 
 ## Valkey
 
@@ -562,7 +602,7 @@ services:
 cd ~/dragonfly && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Connect with redis-cli (Dragonfly is fully compatible)
 podman exec -it dragonfly redis-cli -p 6379
@@ -610,7 +650,7 @@ volumes:
 cd ~/mongodb && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Connect with mongosh
 podman exec -it mongodb mongosh -u admin -p strongpassword --authenticationDatabase admin
@@ -681,7 +721,7 @@ volumes:
 cd ~/ferretdb && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Connect with mongosh
 podman run --rm -it mongo:7 mongosh mongodb://localhost:27018/mydb
@@ -748,7 +788,7 @@ volumes:
 cd ~/kafka && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Create a topic
 podman exec kafka kafka-topics \
@@ -844,7 +884,7 @@ cd ~/rabbitmq && podman-compose up -d
 
 > **Management UI:** `http://localhost:15672` — browse queues, exchanges, bindings, and message rates in real time.
 
-**Common operations:**
+#### Common operations
 ```bash
 # List queues
 podman exec rabbitmq rabbitmqctl list_queues name messages consumers
@@ -902,7 +942,7 @@ authorization {
 }
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Check server info
 podman run --rm natsio/nats-box \
@@ -1176,7 +1216,7 @@ volumes:
 cd ~/influxdb && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Open the InfluxDB CLI
 podman exec -it influxdb influx
@@ -1292,14 +1332,14 @@ services:
 cd ~/chroma && podman-compose up -d
 ```
 
-**Common operations (via REST API):**
+#### Common operations (via REST API)
 ```bash
 curl http://localhost:8000/api/v1/heartbeat
 curl http://localhost:8000/api/v1/collections
 curl http://localhost:8000/api/v1/version
 ```
 
-**Use with the Python SDK:**
+#### Use with the Python SDK
 ```python
 import chromadb
 
@@ -1355,7 +1395,7 @@ volumes:
 cd ~/meilisearch && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Check server health
 curl http://localhost:7700/health -H "Authorization: Bearer changeme"
@@ -1398,7 +1438,7 @@ services:
 cd ~/typesense && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Check server health
 curl http://localhost:8108/health -H "X-TYPESENSE-API-KEY: changeme"
@@ -1438,7 +1478,7 @@ services:
 cd ~/duckdb-api && podman-compose up -d
 ```
 
-**Common operations (via REST API):**
+#### Common operations (via REST API)
 ```bash
 curl -X POST http://localhost:1294/query \
   -H "Content-Type: application/json" \
@@ -1496,7 +1536,7 @@ services:
 cd ~/clickhouse && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Interactive SQL shell
 podman exec -it clickhouse clickhouse-client --password changeme
@@ -1560,7 +1600,7 @@ services:
 cd ~/surrealdb && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Connect interactively
 podman exec -it surrealdb surreal sql \

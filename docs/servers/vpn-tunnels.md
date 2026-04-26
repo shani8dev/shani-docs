@@ -17,30 +17,38 @@ All VPN and tunnel solutions on this system can run fully containerised. Rootles
 
 ### VPN & Tunnels Interview Essentials
 
-**WireGuard vs OpenVPN vs IPSec — when interviewers ask:**
+#### WireGuard vs OpenVPN vs IPSec — when interviewers ask
 WireGuard: modern (2015), small codebase (~4000 lines), fast, kernel-level, uses fixed modern crypto (ChaCha20, Curve25519). No backward compatibility negotiation — a feature, not a limitation. OpenVPN: mature (2001), large ecosystem, configurable cipher suites, userspace TLS so slower, supports TCP mode (useful when UDP is blocked). IPSec: the enterprise/router standard, complex to configure, built into most OSes natively.
 
-**Mesh VPN topology vs hub-and-spoke:** Traditional VPNs are hub-and-spoke — all client traffic flows through a central VPN server. Mesh VPNs (Tailscale, NetBird, Nebula, ZeroTier) connect every peer directly to every other peer using STUN/TURN for NAT traversal. Advantages: lower latency (direct peer-to-peer), no single point of failure, no bandwidth bottleneck at the hub. Tailscale's control plane manages the key exchange; the data plane is direct WireGuard.
+#### Mesh VPN topology vs hub-and-spoke
+Traditional VPNs are hub-and-spoke — all client traffic flows through a central VPN server. Mesh VPNs (Tailscale, NetBird, Nebula, ZeroTier) connect every peer directly to every other peer using STUN/TURN for NAT traversal. Advantages: lower latency (direct peer-to-peer), no single point of failure, no bandwidth bottleneck at the hub. Tailscale's control plane manages the key exchange; the data plane is direct WireGuard.
 
-**STUN vs TURN vs ICE:**
+#### STUN vs TURN vs ICE
 - **STUN** (Session Traversal Utilities for NAT) — tells a client its public IP and port as seen from the internet. Used for hole-punching.
 - **TURN** (Traversal Using Relays around NAT) — a relay that proxies traffic when direct hole-punching fails (symmetric NAT). More expensive (all traffic flows through the relay).
 - **ICE** (Interactive Connectivity Establishment) — the negotiation protocol that tries STUN first, falls back to TURN. Used by WebRTC and mesh VPNs.
 
-**Zero-trust network access (ZTNA) vs VPN:** A traditional VPN grants access to the network — once connected, the user can typically reach everything on the network. ZTNA grants access to specific applications or resources, not the network itself. Firezone and Teleport implement ZTNA: you get access to `postgres.internal:5432` not to the entire `10.0.0.0/8` network. Better for the principle of least privilege.
+#### Zero-trust network access (ZTNA) vs VPN
+A traditional VPN grants access to the network — once connected, the user can typically reach everything on the network. ZTNA grants access to specific applications or resources, not the network itself. Firezone and Teleport implement ZTNA: you get access to `postgres.internal:5432` not to the entire `10.0.0.0/8` network. Better for the principle of least privilege.
 
-**Tunnel overhead and MTU:** Every VPN tunnel adds overhead to each packet (headers, encryption padding). WireGuard adds ~60 bytes. This reduces the effective inner MTU below the standard 1500 bytes — if you send a full-size 1500-byte packet through a WireGuard tunnel, the outer packet exceeds the link MTU and gets fragmented or dropped. Solutions: (1) set the WireGuard client MTU to 1420 (`MTU = 1420` in wg0.conf), (2) enable MSS clamping on the server's PostUp iptables rule to automatically tell TCP connections about the reduced MTU.
+#### Tunnel overhead and MTU
+Every VPN tunnel adds overhead to each packet (headers, encryption padding). WireGuard adds ~60 bytes. This reduces the effective inner MTU below the standard 1500 bytes — if you send a full-size 1500-byte packet through a WireGuard tunnel, the outer packet exceeds the link MTU and gets fragmented or dropped. Solutions: (1) set the WireGuard client MTU to 1420 (`MTU = 1420` in wg0.conf), (2) enable MSS clamping on the server's PostUp iptables rule to automatically tell TCP connections about the reduced MTU.
 
-**Split tunnel security implications:** With a split tunnel (`AllowedIPs = 192.168.1.0/24`), only traffic to the home LAN goes through the VPN — all other internet traffic goes directly from the client's ISP. This means: (1) DNS queries for non-`.home.local` domains don't use your Pi-hole, (2) your ISP can still see your general browsing, (3) a malicious website can't be blocked by your home DNS. A full tunnel (`AllowedIPs = 0.0.0.0/0`) routes everything through home, but adds latency and uses your home bandwidth. Choose based on the use case.
+#### Split tunnel security implications
+With a split tunnel (`AllowedIPs = 192.168.1.0/24`), only traffic to the home LAN goes through the VPN — all other internet traffic goes directly from the client's ISP. This means: (1) DNS queries for non-`.home.local` domains don't use your Pi-hole, (2) your ISP can still see your general browsing, (3) a malicious website can't be blocked by your home DNS. A full tunnel (`AllowedIPs = 0.0.0.0/0`) routes everything through home, but adds latency and uses your home bandwidth. Choose based on the use case.
 
 
-**Cloudflare Tunnel vs self-hosted reverse proxy — the trade-off:** Cloudflare Tunnel (cloudflared) exposes a local service to the internet without opening firewall ports or having a public IP. The tunnel connects outbound to Cloudflare's network, which terminates HTTPS for your domain. Trade-offs: you must trust Cloudflare to terminate your TLS (they see plaintext), your availability depends on Cloudflare's uptime, and all traffic passes through their network (latency + bandwidth cost for large transfers). For services that don't need to bypass Cloudflare, Pangolin (self-hosted) or a VPS-based reverse proxy (frp) gives you the same capability without the dependency.
+#### Cloudflare Tunnel vs self-hosted reverse proxy — the trade-off
+Cloudflare Tunnel (cloudflared) exposes a local service to the internet without opening firewall ports or having a public IP. The tunnel connects outbound to Cloudflare's network, which terminates HTTPS for your domain. Trade-offs: you must trust Cloudflare to terminate your TLS (they see plaintext), your availability depends on Cloudflare's uptime, and all traffic passes through their network (latency + bandwidth cost for large transfers). For services that don't need to bypass Cloudflare, Pangolin (self-hosted) or a VPS-based reverse proxy (frp) gives you the same capability without the dependency.
 
-**NAT traversal and hole-punching:** When two peers are both behind NAT (typical home routers), neither can initiate a direct connection to the other because there's no public IP:port mapping. Hole-punching works by having both peers send UDP packets to each other simultaneously — each packet causes the NAT to create a mapping for the return direction, opening a bidirectional path. STUN servers facilitate this by telling each peer their external address. This fails with symmetric NAT (different external port for each destination), which requires a TURN relay. WireGuard-based mesh VPNs (Tailscale, NetBird) handle all of this automatically.
+#### NAT traversal and hole-punching
+When two peers are both behind NAT (typical home routers), neither can initiate a direct connection to the other because there's no public IP:port mapping. Hole-punching works by having both peers send UDP packets to each other simultaneously — each packet causes the NAT to create a mapping for the return direction, opening a bidirectional path. STUN servers facilitate this by telling each peer their external address. This fails with symmetric NAT (different external port for each destination), which requires a TURN relay. WireGuard-based mesh VPNs (Tailscale, NetBird) handle all of this automatically.
 
-**Access control at the VPN layer vs application layer:** A VPN (WireGuard, OpenVPN) controls who can reach the network; the application still controls what authenticated users can do. Zero-Trust tools (Firezone, Teleport) add a third layer: per-application access policies enforced at the gateway — user Alice can SSH to server A but not server B, even though both are on the same VPN subnet. This maps access control to identity (user + device) rather than just network position. Audit logs at the gateway layer (Teleport's session recording) are also available here, not possible with a plain VPN.
+#### Access control at the VPN layer vs application layer
+A VPN (WireGuard, OpenVPN) controls who can reach the network; the application still controls what authenticated users can do. Zero-Trust tools (Firezone, Teleport) add a third layer: per-application access policies enforced at the gateway — user Alice can SSH to server A but not server B, even though both are on the same VPN subnet. This maps access control to identity (user + device) rather than just network position. Audit logs at the gateway layer (Teleport's session recording) are also available here, not possible with a plain VPN.
 
-**Protocol obfuscation — when and why:** Standard WireGuard and OpenVPN traffic patterns are fingerprint-able by deep packet inspection (DPI). ISPs and national firewalls (GFW) identify and block them. Obfuscation tools (Xray/V2Ray with VLESS+XTLS-Reality, Hysteria2) make VPN traffic look like normal HTTPS, video streaming, or QUIC traffic. This is relevant for: (1) countries with internet censorship, (2) corporate networks that block non-HTTP outbound, (3) ISPs that throttle VPN traffic. Hysteria2 additionally uses QUIC's congestion control to improve performance on high-latency, high-loss links (satellite, mobile).
+#### Protocol obfuscation — when and why
+Standard WireGuard and OpenVPN traffic patterns are fingerprint-able by deep packet inspection (DPI). ISPs and national firewalls (GFW) identify and block them. Obfuscation tools (Xray/V2Ray with VLESS+XTLS-Reality, Hysteria2) make VPN traffic look like normal HTTPS, video streaming, or QUIC traffic. This is relevant for: (1) countries with internet censorship, (2) corporate networks that block non-HTTP outbound, (3) ISPs that throttle VPN traffic. Hysteria2 additionally uses QUIC's congestion control to improve performance on high-latency, high-loss links (satellite, mobile).
 ---
 ---
 
@@ -118,10 +126,15 @@ services:
 cd ~/wg-easy && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # View connected peers and their traffic stats
-curl http://localhost:51821/api/wireguard/client   -H "Cookie: $(curl -c - -X POST http://localhost:51821/api/session     -H 'Content-Type: application/json'     -d '{"password":"changeme"}' 2>/dev/null | grep -o 'connect.sid=[^;]*')"
+# Get session cookie first
+SESSION=$(curl -s -c - -X POST http://localhost:51821/api/session \
+  -H 'Content-Type: application/json' \
+  -d '{"password":"changeme"}' | grep -o 'connect.sid=[^;]*')
+# Then use it
+curl http://localhost:51821/api/wireguard/client -H "Cookie: $SESSION"
 
 # View WireGuard interface status on the host
 sudo wg show
@@ -191,6 +204,8 @@ AllowedIPs = 10.8.0.0/24, 192.168.1.0/24   # route LAN traffic through VPN
 On Linux clients, `systemd-resolved` handles split DNS when `DNS=` is set in the WireGuard interface config. On macOS/Windows, the WireGuard GUI app respects the DNS setting from the config file.
 
 ---
+
+## Tailscale (Managed) & Headscale (Self-Hosted Control Server)
 
 **Purpose:** Zero-config mesh VPN built on WireGuard. Tailscale uses managed coordination; Headscale is the fully open-source self-hosted control server — giving you the same experience with no third-party dependency.
 
@@ -275,7 +290,7 @@ headscale policy set -f policy.hujson
 headscale policy get
 ```
 
-**1. Create config directory and config file:**
+#### 1. Create config directory and config file
 ```bash
 mkdir -p /home/user/headscale/{config,data}
 ```
@@ -297,7 +312,7 @@ dns:
     - 8.8.8.8
 ```
 
-**2. Run the container:**
+#### 2. Run the container
 ```yaml
 # ~/headscale/compose.yaml
 services:
@@ -316,7 +331,7 @@ services:
 cd ~/headscale && podman-compose up -d
 ```
 
-**3. Create a user and connect devices:**
+#### 3. Create a user and connect devices
 ```bash
 # Create a namespace
 podman exec headscale headscale users create home
@@ -349,7 +364,7 @@ services:
 cd ~/headplane && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Create a user (namespace)
 podman exec headscale headscale users create myuser
@@ -479,7 +494,8 @@ cd ~/pangolin && podman-compose up -d
 
 Access the dashboard at `https://pangolin.yourdomain.com`, create a site, and copy the Newt credentials.
 
-**VPS firewall:** open `443/tcp` and `51820/udp`
+#### VPS firewall
+open `443/tcp` and `51820/udp`
 
 ### 2. Newt Agent (on this system)
 
@@ -525,7 +541,7 @@ curl -sSL https://raw.githubusercontent.com/netbirdio/netbird/main/infrastructur
 nano ~/netbird/.env
 ```
 
-**Key `.env` variables:**
+#### Key `.env` variables
 ```bash
 NETBIRD_DOMAIN=netbird.example.com
 
@@ -539,12 +555,12 @@ NETBIRD_TURN_USER=coturn
 NETBIRD_TURN_PASSWORD=changeme
 ```
 
-**3. Start all services:**
+#### 3. Start all services
 ```bash
 cd ~/netbird && podman-compose up -d
 ```
 
-**Services started:**
+#### Services started
 - `management` on port `443` (HTTPS/gRPC)
 - `signal` on port `10000`
 - `coturn` (TURN relay) on port `3478/udp` and `5349/tcp`
@@ -648,7 +664,7 @@ services:
 cd ~/pritunl && podman-compose up -d
 ```
 
-**Initial setup:**
+#### Initial setup
 1. Generate setup key: `podman exec pritunl pritunl setup-key`
 2. Access UI: `https://<server-ip>:443`
 3. Set MongoDB URI: `mongodb://127.0.0.1:27017/pritunl`
@@ -863,7 +879,8 @@ cd ~/hysteria && podman-compose up -d
 
 **Purpose:** Route any container's traffic through a commercial VPN provider — without installing a VPN client on the host. Gluetun supports 50+ providers (Mullvad, ProtonVPN, NordVPN, Private Internet Access, ExpressVPN, etc.) and acts as a network gateway container. Other containers join its network namespace via `network_mode: service:gluetun` — their traffic exits through the VPN tunnel transparently.
 
-**Common use case:** Route qBittorrent through Mullvad so torrent traffic never uses your home IP.
+#### Common use case
+Route qBittorrent through Mullvad so torrent traffic never uses your home IP.
 
 ```yaml
 # ~/gluetun/compose.yaml
@@ -905,13 +922,13 @@ cd ~/gluetun && podman-compose up -d
 
 > When `network_mode: service:gluetun` is set, the dependent container shares gluetun's network — all ports are exposed on the gluetun container, not the app container. The qBittorrent WebUI is reached at `http://localhost:8080` via gluetun's port mapping.
 
-**Check that traffic is routed through the VPN:**
+#### Check that traffic is routed through the VPN
 ```bash
 podman exec qbittorrent curl -s https://api.ipify.org
 # Should return the VPN exit IP, not your home IP
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Verify traffic is routed through VPN (should show VPN exit IP)
 podman exec qbittorrent curl -s https://api.ipify.org
@@ -929,7 +946,8 @@ podman restart gluetun
 podman exec gluetun cat /gluetun/servers.json | python3 -m json.tool | grep '"city"' | head -20
 ```
 
-**Supported providers include:** Mullvad, ProtonVPN, NordVPN, ExpressVPN, Private Internet Access, Surfshark, Windscribe, IVPN, AzireVPN, and any custom WireGuard/OpenVPN config.
+#### Supported providers include
+Mullvad, ProtonVPN, NordVPN, ExpressVPN, Private Internet Access, Surfshark, Windscribe, IVPN, AzireVPN, and any custom WireGuard/OpenVPN config.
 
 ---
 
@@ -1070,7 +1088,8 @@ sudo firewall-cmd --add-port=8080/tcp --add-port=8080/udp --permanent
 sudo firewall-cmd --reload
 ```
 
-**Clients:** Distribute per-user access keys (ss:// URIs) generated by the Manager. Users install the Outline Client app on Android, iOS, Windows, macOS, or Linux.
+#### Clients
+Distribute per-user access keys (ss:// URIs) generated by the Manager. Users install the Outline Client app on Android, iOS, Windows, macOS, or Linux.
 
 > Outline and Hysteria 2 solve different problems. Outline is optimised for **censorship circumvention** (traffic obfuscation). Hysteria 2 is optimised for **high-loss / high-latency networks** (QUIC transport). Use Outline where WireGuard is fingerprinted and blocked; use Hysteria 2 where packet loss degrades TCP-based protocols.
 
@@ -1080,7 +1099,8 @@ sudo firewall-cmd --reload
 
 **Purpose:** A suite of network proxy tools that wrap traffic in protocols designed to evade deep packet inspection — VLESS, VMESS, and XTLS over WebSocket or gRPC, disguised as ordinary HTTPS. Widely used alongside Hysteria 2 for censorship circumvention. Xray is the actively maintained fork of V2Ray with additional protocols (XTLS, VLESS, XHTTP) and better performance.
 
-**Use case vs WireGuard:** Xray is a proxy, not a VPN — it forwards traffic through an HTTPS tunnel that looks like web traffic. WireGuard is a full network tunnel with a distinct UDP fingerprint. In environments where WireGuard and Shadowsocks are actively blocked, Xray VLESS+XTLS over port 443 is significantly harder to detect.
+#### Use case vs WireGuard
+Xray is a proxy, not a VPN — it forwards traffic through an HTTPS tunnel that looks like web traffic. WireGuard is a full network tunnel with a distinct UDP fingerprint. In environments where WireGuard and Shadowsocks are actively blocked, Xray VLESS+XTLS over port 443 is significantly harder to detect.
 
 `/home/user/xray/config.json` (VLESS + XTLS-Reality — the modern recommended config):
 ```json
@@ -1136,7 +1156,8 @@ podman run --rm ghcr.io/xtls/xray-core:latest uuid
 podman run --rm ghcr.io/xtls/xray-core:latest x25519
 ```
 
-**Clients:** [v2rayN](https://github.com/2dust/v2rayN) (Windows), [v2rayNG](https://github.com/2dust/v2rayNG) (Android), [Shadowrocket](https://apps.apple.com/app/shadowrocket/id932747118) (iOS), [Nekoray](https://github.com/MatsuriDayo/nekoray) (Linux/Windows). Share the connection config as a `vless://` URI or QR code.
+#### Clients
+[v2rayN](https://github.com/2dust/v2rayN) (Windows), [v2rayNG](https://github.com/2dust/v2rayNG) (Android), [Shadowrocket](https://apps.apple.com/app/shadowrocket/id932747118) (iOS), [Nekoray](https://github.com/MatsuriDayo/nekoray) (Linux/Windows). Share the connection config as a `vless://` URI or QR code.
 
 > **XTLS-Reality** (shown above) is the recommended modern config — it borrows a real TLS certificate fingerprint from a public site (`www.google.com`), making the server indistinguishable from that site even to active probers. Older VMESS+WS configs are simpler but more detectable.
 

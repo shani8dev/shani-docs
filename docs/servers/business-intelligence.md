@@ -12,6 +12,29 @@ Self-hosted BI platforms, data visualisation tools, SQL explorers, and analytica
 
 ---
 
+---
+
+## Job-Ready Concepts
+
+#### OLAP vs OLTP — the fundamental access pattern split
+OLTP (Online Transaction Processing) databases (PostgreSQL, MySQL) are row-oriented — optimised for reading/writing single rows quickly. Each INSERT or SELECT retrieves entire rows. OLAP (Online Analytical Processing) databases (ClickHouse, DuckDB, Redshift) are column-oriented — data for one column is stored contiguously on disk. `SELECT AVG(revenue) FROM orders` reads only the revenue column, skipping all other fields. At 1 billion rows, this is a 10–100× query time difference. BI tools that query OLAP databases feel instant; the same queries against PostgreSQL time out. The architectural decision: use PostgreSQL for your app's operational data, replicate or ETL to ClickHouse/DuckDB for analytics.
+
+#### Star schema and dimensional modelling
+Dimensional modelling organises analytical data around a central fact table (transactions, events, measurements) surrounded by dimension tables (customers, products, dates). The fact table holds numeric measures (revenue, quantity, duration) and foreign keys to dimensions. Queries join the fact table to dimensions to slice and dice — "total revenue by country and product category this quarter" is one query. This schema is called a star because the fact table is at the centre with dimension tables radiating out. BI tools (Metabase, Superset, Looker) assume this structure and generate SQL against it. A data warehouse without dimensional modelling produces slow, complex, unmaintainable queries.
+
+#### ETL vs ELT — the modern data pipeline shift
+ETL (Extract, Transform, Load) transforms data before loading it into the warehouse — useful when transformation is expensive or the destination schema is rigid. ELT (Extract, Load, Transform) loads raw data first, then transforms it inside the warehouse using SQL — the modern pattern enabled by cheap columnar storage. Tools: dbt (data build tool) is the standard ELT transformation layer — it defines transformations as SQL `SELECT` statements, manages dependencies, tests data quality, and generates documentation. Lightdash reads dbt models directly. This is the dominant data engineering stack in 2025: source → Airbyte/Fivetran (extract/load) → dbt (transform) → ClickHouse/Redshift (warehouse) → Metabase/Superset (BI).
+
+#### Data freshness, materialisation, and query performance
+A dashboard that runs a 30-second query on every page load is unusable. Three solutions: (1) Materialised views — pre-computed query results stored as a table, refreshed on a schedule or trigger. ClickHouse continuous materialised views update in real time as data arrives. (2) Dashboard caching — Metabase and Superset cache query results for a configurable TTL; stale data trades off against query load. (3) Pre-aggregation — aggregate raw events into daily/hourly summaries at ingest time. Cube.js and dbt handle this. The rule: analytical queries should complete in under 2 seconds for interactive use. If they don't, materialise or aggregate.
+
+#### Role-based access control in BI tools
+BI tools often have access to sensitive data. Row-level security (RLS) restricts which rows a user can see — a sales manager sees only their region's data even when running a global query. Superset implements RLS via SQL WHERE clause injection on the dataset level. Column-level permissions prevent certain roles from seeing PII fields. Data masking replaces sensitive values with asterisks or tokens for lower-trust roles. In interviews for data engineering or analytics engineering roles, RLS and data governance come up frequently — it's the difference between a BI tool that just works internally versus one that can be safely exposed to external users or regulated environments.
+
+#### Metrics layers and semantic consistency
+Without a metrics layer, the same business metric is defined differently in 20 different Metabase queries — "monthly active users" means different things to different dashboards. A metrics layer (dbt metrics, Cube.js, LookML) defines metrics once and exposes them to all BI tools. The metric definition (SQL logic, time grain, filters) lives in one place; BI tools query the layer rather than raw tables. This is a standard concept in mature data organisations — the distinction between a "data analyst who builds dashboards" and a "analytics engineer who builds the semantic layer the dashboards query."
+
+
 ## Metabase
 
 **Purpose:** The most approachable self-hosted BI tool. Non-technical users can build charts and dashboards by clicking through a question builder — no SQL required. For power users, the native query editor supports full SQL with autocomplete, query versioning, and parameterised questions. Connects to PostgreSQL, MySQL, MariaDB, MongoDB, SQLite, ClickHouse, Redshift, BigQuery, Snowflake, and more.
@@ -40,7 +63,7 @@ services:
 cd ~/metabase && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Check Metabase health
 curl http://localhost:3000/api/health
@@ -60,7 +83,7 @@ curl -X POST http://localhost:3000/api/session   -H "Content-Type: application/j
 
 > Metabase can use its built-in H2 database for evaluation, but PostgreSQL is strongly recommended for production — it handles concurrent users and stores question/dashboard history reliably.
 
-**Key features to explore after setup:**
+#### Key features to explore after setup
 - **Questions** — saved queries that auto-refresh on a schedule
 - **Dashboards** — drag-and-drop canvas combining multiple questions with filters
 - **Subscriptions** — email or Slack delivery of dashboard snapshots on a cron schedule
@@ -292,7 +315,7 @@ SETTINGS kafka_broker_list = 'localhost:9092',
          kafka_format = 'JSONEachRow';
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Connect to ClickHouse SQL shell
 podman exec -it clickhouse clickhouse-client --user admin --password changeme

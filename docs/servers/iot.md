@@ -12,6 +12,26 @@ Sensor data pipelines, MQTT brokers, time-series ingestion, industrial protocols
 
 ---
 
+---
+
+## Job-Ready Concepts
+
+#### MQTT protocol internals — brokers, topics, QoS
+MQTT is a publish-subscribe protocol where a broker (Mosquitto, EMQX) routes messages between publishers and subscribers using topic hierarchies (`factory/line1/sensor/temperature`). Wildcard subscriptions: `+` matches a single level (`home/+/temperature` matches all rooms), `#` matches all remaining levels (`home/#` matches everything under home). QoS 0 (fire-and-forget) has no delivery guarantee — correct for high-frequency sensor readings where losing one reading is acceptable. QoS 1 (at-least-once) retransmits until acknowledged — correct for commands or alerts. QoS 2 (exactly-once) uses a four-way handshake — rarely used due to overhead. Retained messages: the broker stores the last retained message per topic and delivers it to new subscribers immediately — essential for device state (current temperature) that must be available without waiting for the next publish cycle.
+
+#### Time-series data model and storage engines
+IoT sensor data has specific characteristics: append-only (readings are never updated), high write throughput (thousands of sensors × multiple readings per second), range queries (last 24 hours of temperature), and eventual deletion (retain for 90 days). Regular relational databases handle this poorly — unbounded table growth, slow range scans without time-based partitioning, no native downsampling. InfluxDB's TSM (Time-Structured Merge Tree) storage engine, TimescaleDB's hypertables (automatic PostgreSQL partitioning by time), and Prometheus's TSDB are all optimised for this pattern. The key concept: continuous queries or recording rules that pre-aggregate raw data into hourly/daily summaries, keeping the database from growing unboundedly.
+
+#### Prometheus pull model vs MQTT push model
+Prometheus scrapes (pulls) metrics from HTTP `/metrics` endpoints on a schedule. This is counter-intuitive for IoT — a temperature sensor can't run an HTTP server. The bridge pattern solves this: Telegraf subscribes to MQTT topics and exposes the received values as a Prometheus metrics endpoint (`/metrics`); Prometheus scrapes Telegraf. Alternatively, Pushgateway accepts metrics pushed from batch jobs and short-lived processes. Understanding the pull vs push architecture trade-off comes up in SRE and platform engineering interviews: pull is simpler operationally (one scrape config, no push coordination), push is necessary for ephemeral or network-constrained targets.
+
+#### Industrial protocols — Modbus and OPC-UA
+Modbus (1979) is the most widely deployed industrial protocol. Modbus RTU runs over RS-485 serial (legacy hardware, still common); Modbus TCP runs over Ethernet (modern PLCs). A Modbus device exposes registers at numbered addresses; the master polls them by address. Every energy meter, VFD (Variable Frequency Drive), and PLC from the last 40 years likely speaks Modbus. OPC-UA is the modern replacement: encrypted, authenticated, self-describing (devices publish their own information model), and supports subscriptions (push) rather than polling. Knowing that OPC-UA uses certificates for authentication and can expose complex object hierarchies (not just flat registers) distinguishes it from Modbus for any industrial IoT role.
+
+#### Edge computing and the IoT data pipeline
+The full IoT pipeline from sensor to dashboard: Device → MQTT broker → Telegraf/Node-RED (transform, filter, enrich) → InfluxDB/TimescaleDB (store) → Grafana (visualise) → Prometheus/Alertmanager (alert). Edge computing moves the transformation step closer to the device — a Raspberry Pi running Node-RED at the factory edge aggregates 100 PLCs locally and sends only summary data to the cloud, reducing bandwidth and adding resilience (local processing continues during internet outages). This architecture pattern — edge gateway aggregating local devices, centralised cloud receiving summaries — is a standard IoT reference architecture asked about in IoT engineering and cloud architecture interviews.
+
+
 ## EMQX (High-Scale MQTT Broker)
 
 **Purpose:** Enterprise-grade MQTT 5.0 broker. Handles millions of concurrent connections, supports cluster mode, has a built-in SQL rule engine for message routing and transformation, and a web dashboard for managing clients, subscriptions, and rules. Use EMQX when Mosquitto's single-process model becomes a bottleneck or when you need the rule engine.
@@ -74,7 +94,7 @@ services:
 cd ~/telegraf && podman-compose up -d
 ```
 
-**Common operations:**
+#### Common operations
 ```bash
 # Test config and show what would be collected
 podman exec telegraf telegraf --config /etc/telegraf/telegraf.conf --test
@@ -219,7 +239,7 @@ groups:
           summary: "Sensor {{ $labels.device }} offline"
 ```
 
-**Route alerts to ntfy via Alertmanager:**
+#### Route alerts to ntfy via Alertmanager
 ```yaml
 # alertmanager.yml
 route:
@@ -404,7 +424,7 @@ cd ~/owntracks-recorder && podman-compose up -d
 
 Access the web frontend at `http://localhost:8086`. OwnTracks Recorder connects to your Mosquitto broker and stores location history in a flat-file database.
 
-**OwnTracks Frontend (map UI):**
+#### OwnTracks Frontend (map UI)
 ```yaml
 # ~/owntracks-frontend/compose.yaml
 services:

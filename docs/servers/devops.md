@@ -224,7 +224,7 @@ class MyPipeline:
 
 > **Note:** `act` (below) runs GitHub Actions workflows locally using Podman. For self-hosted runners, see the [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools).
 
-**Workflow structure and triggers:**
+#### Workflow structure and triggers
 ```yaml
 # .github/workflows/ci.yaml
 name: CI Pipeline
@@ -246,7 +246,7 @@ on:
         options: [staging, prod]
 ```
 
-**Complete CI workflow (build, test, push image):**
+#### Complete CI workflow (build, test, push image)
 ```yaml
 # .github/workflows/ci.yaml (continued)
 env:
@@ -385,7 +385,7 @@ jobs:
             -n production
 ```
 
-**Reusable workflows (DRY — define once, call from many repos):**
+#### Reusable workflows (DRY — define once, call from many repos)
 ```yaml
 # .github/workflows/reusable-test.yaml  (in a shared repo)
 name: Reusable Test
@@ -424,7 +424,7 @@ jobs:
       TEST_DB_URL: ${{ secrets.TEST_DB_URL }}
 ```
 
-**Branching strategy — GitHub Flow (standard for CD teams):**
+#### Branching strategy — GitHub Flow (standard for CD teams)
 ```
 main ──────────────────────────────── (always deployable, protected)
   ├── feature/add-login ─────────► PR ─► merge ─► auto-deploy staging
@@ -432,7 +432,7 @@ main ─────────────────────────
   └── release/v1.2 ─────────────► PR ─► merge ─► manual approve prod
 ```
 
-**Branch protection rules (configure in GitHub Settings → Branches):**
+#### Branch protection rules (configure in GitHub Settings → Branches)
 ```yaml
 # Typical main branch protection:
 # - Require PR before merging (no direct push)
@@ -443,7 +443,7 @@ main ─────────────────────────
 # - Restrict who can push to matching branches: team:platform-engineers
 ```
 
-**Terraform plan/apply with GitHub Actions (Infrastructure PR workflow):**
+#### Terraform plan/apply with GitHub Actions (Infrastructure PR workflow)
 ```yaml
 # .github/workflows/terraform.yaml
 name: Terraform
@@ -510,7 +510,7 @@ jobs:
         run: terraform apply -auto-approve tfplan
 ```
 
-**Secrets management in GitHub Actions:**
+#### Secrets management in GitHub Actions
 ```bash
 # Set repository secrets via CLI
 gh secret set KUBECONFIG --body "$(cat ~/.kube/config | base64)"
@@ -525,7 +525,7 @@ gh secret list
 gh secret list --env production
 ```
 
-**Matrix builds (test across multiple versions):**
+#### Matrix builds (test across multiple versions)
 ```yaml
 jobs:
   test:
@@ -541,7 +541,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 ```
 
-**Self-hosted runner on this system (route CI jobs to your own machine):**
+#### Self-hosted runner on this system (route CI jobs to your own machine)
 ```yaml
 # ~/github-runner/compose.yaml
 services:
@@ -554,7 +554,7 @@ services:
       RUNNER_WORKDIR: /tmp/github-runner
       LABELS: self-hosted,linux,shani-os
     volumes:
-      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
     restart: unless-stopped
 ```
 
@@ -594,7 +594,7 @@ act -n
 **Purpose:** Automated dependency update PRs — outdated container image tags, npm/pip/cargo packages, Actions versions. Works natively with Gitea and Forgejo.
 
 
-**Schedule with a systemd timer:**
+#### Schedule with a systemd timer
 ```bash
 cat > ~/.config/systemd/user/renovate.service << 'EOF'
 [Unit]
@@ -671,7 +671,7 @@ podman tag myapp:latest registry.home.local/myproject/myapp:latest
 podman push registry.home.local/myproject/myapp:latest
 ```
 
-**Woodpecker CI push step:**
+#### Woodpecker CI push step
 ```yaml
 # .woodpecker.yml
 steps:
@@ -698,7 +698,7 @@ steps:
 nix-env -iA nixpkgs.buildah nixpkgs.skopeo
 ```
 
-**Buildah:**
+#### Buildah
 ```bash
 # Build from a Containerfile
 buildah build -t myapp:latest .
@@ -714,7 +714,7 @@ buildah rm $ctr
 buildah push myapp:latest docker://localhost:5000/myapp:latest
 ```
 
-**Skopeo:**
+#### Skopeo
 ```bash
 # Inspect without pulling
 skopeo inspect docker://nginx:alpine
@@ -810,7 +810,7 @@ terraform {
 }
 
 provider "docker" {
-  host = "unix:///run/user/${UID}/podman/podman.sock"
+  host = "unix:///run/user/1000/podman/podman.sock"
 }
 
 resource "docker_container" "nginx" {
@@ -823,7 +823,7 @@ resource "docker_container" "nginx" {
 }
 ```
 
-**Remote state in MinIO (self-hosted S3):**
+#### Remote state in MinIO (self-hosted S3)
 ```hcl
 terraform {
   backend "s3" {
@@ -843,7 +843,7 @@ terraform {
 
 > Never commit `terraform.tfstate` to Git — it contains secrets in plaintext. Use the MinIO backend from the [Backups wiki](https://docs.shani.dev/doc/servers/backups-sync#minio-self-hosted-s3-backup-target).
 
-**Terraform Module Structure (modularization best practice):**
+#### Terraform Module Structure (modularization best practice)
 ```
 terraform/
 ├── modules/
@@ -904,7 +904,7 @@ module "myapp_ns" {
 }
 ```
 
-**Remote state with state locking (prevents concurrent apply conflicts):**
+#### Remote state with state locking (prevents concurrent apply conflicts)
 ```hcl
 # environments/prod/backend.tf
 terraform {
@@ -927,7 +927,7 @@ terraform {
 }
 ```
 
-**Drift detection (detect infrastructure changes made outside Terraform):**
+#### Drift detection (detect infrastructure changes made outside Terraform)
 ```bash
 # Detect drift between state and real infrastructure
 tofu plan -detailed-exitcode
@@ -965,7 +965,7 @@ EOF
 systemctl --user enable --now tofu-drift.timer
 ```
 
-**Policy guardrails with tflint + Checkov + tfsec:**
+#### Policy guardrails with tflint + Checkov + tfsec
 ```bash
 # Install tflint (Terraform linter — catches provider-specific mistakes)
 nix-env -iA nixpkgs.tflint
@@ -1004,7 +1004,7 @@ tfsec terraform/ --out results.json    # write to file for ingestion by Defect D
 
 > **Checkov vs tfsec:** Use both. Checkov covers Terraform, Kubernetes YAML, Dockerfiles, GitHub Actions, Helm charts, and CloudFormation in one tool. tfsec is Terraform-only but faster and catches different edge cases. Run tfsec as a fast pre-commit gate and Checkov as the full CI scan. Both integrate with Defect Dojo via JSON output.
 
-**Integrate in CI (Woodpecker / Forgejo Actions):**
+#### Integrate in CI (Woodpecker / Forgejo Actions)
 ```yaml
 # .woodpecker.yml — add after the tofu plan step
 - name: iac-security-scan
@@ -1014,7 +1014,7 @@ tfsec terraform/ --out results.json    # write to file for ingestion by Defect D
     - "[ $(jq '.summary.failed' results.json) -eq 0 ] || exit 1"
 ```
 
-**Tagging and naming policy (enforced via tflint rules):**
+#### Tagging and naming policy (enforced via tflint rules)
 ```hcl
 # .tflint.hcl — project-level tflint config
 plugin "aws" { enabled = true; version = "0.32.0"; source = "github.com/terraform-linters/tflint-ruleset-aws" }
@@ -1033,7 +1033,7 @@ rule "terraform_naming_convention" {
 }
 ```
 
-**Promote changes across Dev → UAT → Prod:**
+#### Promote changes across Dev → UAT → Prod
 ```bash
 # Pattern: same module, different tfvars per environment
 # Dev:     tofu apply -var-file=dev.tfvars    (auto-applied on merge to develop)
@@ -1068,7 +1068,7 @@ nix-env -iA nixpkgs.ansible
 snap install ansible --classic
 ```
 
-**Inventory (`~/ansible/inventory.ini`):**
+#### Inventory (`~/ansible/inventory.ini`)
 ```ini
 [webservers]
 web1.home.local ansible_user=user
@@ -1081,7 +1081,7 @@ db1.home.local ansible_user=user
 ansible_ssh_private_key_file=~/.ssh/id_ed25519
 ```
 
-**Common ad-hoc commands:**
+#### Common ad-hoc commands
 ```bash
 ansible all -i inventory.ini -m ping
 ansible webservers -i inventory.ini -m shell -a "uptime"
@@ -1128,7 +1128,7 @@ ansible-vault encrypt vars/secrets.yaml
 ansible-playbook -i inventory.ini playbook.yaml --ask-vault-pass
 ```
 
-**AWX (Ansible Tower OSS — Web UI):**
+#### AWX (Ansible Tower OSS — Web UI)
 
 AWX provides a web UI, RBAC, job scheduling, inventory management, and notifications on top of Ansible. The recommended install method is the AWX Operator on Kubernetes, but a standalone Docker Compose setup is available for homelab use.
 
@@ -1218,7 +1218,7 @@ nix-env -iA nixpkgs.terragrunt
 snap install terragrunt --classic
 ```
 
-**Recommended directory structure:**
+#### Recommended directory structure
 ```
 live/
 ├── terragrunt.hcl          ← root config: shared remote state + provider defaults
@@ -1233,7 +1233,7 @@ live/
     └── ...
 ```
 
-**Root `terragrunt.hcl` — define MinIO backend once:**
+#### Root `terragrunt.hcl` — define MinIO backend once
 ```hcl
 # live/terragrunt.hcl
 remote_state {
@@ -1268,7 +1268,7 @@ EOF
 }
 ```
 
-**Child `terragrunt.hcl` — inherit root, declare dependency:**
+#### Child `terragrunt.hcl` — inherit root, declare dependency
 ```hcl
 # live/homelab/namespaces/terragrunt.hcl
 include "root" {
@@ -1292,7 +1292,7 @@ inputs = {
 }
 ```
 
-**Common commands:**
+#### Common commands
 ```bash
 # Plan/apply a single module
 cd live/homelab/k8s-cluster && terragrunt plan
@@ -1339,7 +1339,7 @@ PACKER_LOG=1 packer build myimage.pkr.hcl   # debug mode
 
 > **Homelab + cloud hybrid:** The most common this system pattern is running core services on-prem and using a VPS (Hetzner, DigitalOcean, Vultr) for public-facing ingress, offsite backups, or a WireGuard exit node. Hetzner Cloud is the primary cloud provider referenced throughout these docs — best price/performance ratio in Europe with a clean API.
 
-**Hetzner Cloud CLI (`hcloud`) — primary:**
+#### Hetzner Cloud CLI (`hcloud`) — primary
 ```bash
 # Install via Nix
 nix-env -iA nixpkgs.hcloud
@@ -1375,7 +1375,7 @@ hcloud network add-subnet homelab-net --network-zone eu-central --type server --
 hcloud server attach-to-network vpn-node --network homelab-net --ip 10.0.1.1
 ```
 
-**AWS CLI:**
+#### AWS CLI
 ```bash
 # Install via Nix
 nix-env -iA nixpkgs.awscli2
@@ -1406,7 +1406,7 @@ aws ecr get-login-password --region eu-west-1 | \
 aws logs tail /aws/lambda/my-function --follow
 ```
 
-**GCP CLI (`gcloud`):**
+#### GCP CLI (`gcloud`)
 ```bash
 # Install via Nix
 nix-env -iA nixpkgs.google-cloud-sdk
@@ -1433,7 +1433,7 @@ gcloud run deploy myapp --image europe-west1-docker.pkg.dev/my-project/my-repo/m
   --region europe-west1 --allow-unauthenticated
 ```
 
-**Azure CLI:**
+#### Azure CLI
 ```bash
 # Install via Nix
 nix-env -iA nixpkgs.azure-cli
@@ -1511,7 +1511,7 @@ write_files:
     permissions: '0644'
 ```
 
-**Provision a Hetzner VM with cloud-init:**
+#### Provision a Hetzner VM with cloud-init
 ```bash
 hcloud server create \
   --name vpn-exit-01 \
@@ -1525,7 +1525,7 @@ hcloud server create \
 hcloud server ssh vpn-exit-01 -- "cloud-init status --wait && journalctl -u cloud-init --no-pager"
 ```
 
-**Provision a Proxmox VM with cloud-init (nocloud source):**
+#### Provision a Proxmox VM with cloud-init (nocloud source)
 ```bash
 # Download a cloud image (Ubuntu 24.04 cloud-ready)
 wget https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
@@ -1547,7 +1547,7 @@ qm set 101 --ipconfig0 "ip=192.168.1.101/24,gw=192.168.1.1"
 qm start 101
 ```
 
-**WireGuard exit node via cloud-init (one-shot VPN provisioning):**
+#### WireGuard exit node via cloud-init (one-shot VPN provisioning)
 ```yaml
 # ~/cloud-init/wireguard-exit.yaml
 #cloud-config
@@ -1581,7 +1581,7 @@ hcloud server create --name wg-exit-eu --type cx22 --image ubuntu-24.04 \
   --location nbg1 --user-data-from-file ~/cloud-init/wireguard-exit.yaml
 ```
 
-**Validate user-data before sending:**
+#### Validate user-data before sending
 ```bash
 # Install cloud-init validator
 pip install cloud-init --break-system-packages
@@ -1824,7 +1824,7 @@ cd ~/umami && podman-compose up -d
 umami.home.local { tls internal; reverse_proxy localhost:3005 }
 ```
 
-**Custom event tracking:**
+#### Custom event tracking
 ```html
 <!-- Track a button click -->
 <button data-umami-event="signup-click">Sign Up</button>
@@ -1853,7 +1853,7 @@ For compose file and setup, see the [Developer Tools wiki → Backstage](https:/
 
 WLED runs on the ESP32 microcontroller itself — not as a container on your server. Your server hosts the Home Assistant integration and optionally a WLED configuration backup.
 
-**Flash WLED onto an ESP32 (from your server):**
+#### Flash WLED onto an ESP32 (from your server)
 ```bash
 # Install esptool
 pip install esptool --break-system-packages
@@ -1868,7 +1868,7 @@ esptool.py --port /dev/ttyUSB0 write_flash 0x0 WLED_0.15.0_ESP32.bin  # update f
 
 **Or use the browser-based installer at [install.wled.me](https://install.wled.me)** — plug the ESP32 into any computer and flash directly from the browser without installing tools.
 
-**Wire the circuit:**
+#### Wire the circuit
 ```
 ESP32 GPIO2 (Data) ──► LED Strip Data In
 ESP32 GND           ──► LED Strip GND   ──► Power Supply GND
@@ -1878,7 +1878,7 @@ ESP32 GND           ──► LED Strip GND   ──► Power Supply GND
 
 > For more than ~30 LEDs, always use an external 5V power supply. A 60-LED strip at full white draws ~3.6A — far more than USB can provide.
 
-**Home Assistant integration:**
+#### Home Assistant integration
 
 Once WLED is on your network, Home Assistant auto-discovers it via mDNS. Accept the integration and your LED strip appears as a light entity with brightness, colour, and effect controls.
 
@@ -1889,7 +1889,7 @@ curl http://192.168.1.XXX/cfg.json -o /home/user/wled/backups/strip-1-cfg.json
 curl http://192.168.1.XXX/presets.json -o /home/user/wled/backups/strip-1-presets.json
 ```
 
-**Control via JSON API:**
+#### Control via JSON API
 ```bash
 # Set colour to warm white
 curl -X POST http://192.168.1.XXX/json/state \
@@ -1904,7 +1904,7 @@ curl -X POST http://192.168.1.XXX/json/state \
 curl -X POST http://192.168.1.XXX/json/state -d '{"on":false}'
 ```
 
-**MQTT control (integrates with Mosquitto):**
+#### MQTT control (integrates with Mosquitto)
 
 In WLED web UI → Config → Sync → MQTT:
 - Server: `192.168.1.X` (your Mosquitto host)
@@ -1964,7 +1964,7 @@ sudo systemctl enable --now osqueryd
 
 → Full install, scan patterns, template reference, and CI gate: [Security wiki → Nuclei](https://docs.shani.dev/doc/servers/security#nuclei-fast-vulnerability--exposure-scanner)
 
-**CI gate (fail pipeline on critical findings):**
+#### CI gate (fail pipeline on critical findings)
 ```bash
 nuclei -l targets.txt -s critical,high -silent -j -o nuclei-report.json
 [ "$(jq '[.[] | select(.info.severity=="critical")] | length' nuclei-report.json)" -eq 0 ] \
@@ -1979,7 +1979,7 @@ nuclei -l targets.txt -s critical,high -silent -j -o nuclei-report.json
 
 → Full setup, key management, and GitOps integration: [Security wiki → SOPS + age](https://docs.shani.dev/doc/servers/security#sops--age-secrets-encryption-for-git)
 
-**Quick reference:**
+#### Quick reference
 ```bash
 # Install
 nix-env -iA nixpkgs.sops nixpkgs.age
@@ -1994,7 +1994,7 @@ sops secrets.yaml                 # edit (decrypt → $EDITOR → re-encrypt)
 sops -d secrets.yaml | kubectl apply -f -   # decrypt to pipe
 ```
 
-**Woodpecker CI — inject Age key from secret:**
+#### Woodpecker CI — inject Age key from secret
 ```yaml
 steps:
   deploy:
@@ -2015,7 +2015,7 @@ steps:
 
 → Full ruleset reference, custom rule authoring, Defect Dojo SARIF integration, and comparison vs Checkov/tfsec: [Security wiki → Semgrep](https://docs.shani.dev/doc/servers/security#semgrep-sast--static-application-security-testing)
 
-**CI gate (Woodpecker / Forgejo Actions):**
+#### CI gate (Woodpecker / Forgejo Actions)
 ```yaml
 - name: sast-semgrep
   image: returntocorp/semgrep:latest
@@ -2073,43 +2073,57 @@ studio.example.com { reverse_proxy localhost:80 }
 
 ## Key Concepts
 
-**CI/CD Pipeline Stages:**
+#### CI/CD Pipeline Stages
 A production pipeline typically has these gates in order: (1) **Lint/Format** — `tflint`, `black`, `eslint`; (2) **Unit Tests** — fast, no external deps; (3) **Build** — compile or build container image; (4) **SAST** — Semgrep, Checkov; (5) **Integration Tests** — spin up dependencies; (6) **Container Scan** — Trivy; (7) **Push** — tag and push to registry; (8) **Deploy to Staging** — Argo Rollouts canary; (9) **Smoke Tests**; (10) **Promote to Prod** — manual gate or auto on metrics.
 
-**Idempotency in automation:** An operation is idempotent if running it multiple times produces the same result as running it once. Ansible modules are idempotent — running `apt: name=nginx state=present` 100 times does not install nginx 100 times. Terraform is idempotent — re-applying the same config changes nothing if the state matches. Write all your automation with idempotency in mind: check before act, not act then check.
+#### Idempotency in automation
+An operation is idempotent if running it multiple times produces the same result as running it once. Ansible modules are idempotent — running `apt: name=nginx state=present` 100 times does not install nginx 100 times. Terraform is idempotent — re-applying the same config changes nothing if the state matches. Write all your automation with idempotency in mind: check before act, not act then check.
 
-**Immutable infrastructure:** Rather than patching running servers (mutable), you build a new image with the change applied and replace the running instance. Container-based workloads are inherently immutable — you don't patch a running container, you rebuild the image and redeploy. Shani OS is an immutable OS for the same reason: updates replace the root filesystem atomically.
+#### Immutable infrastructure
+Rather than patching running servers (mutable), you build a new image with the change applied and replace the running instance. Container-based workloads are inherently immutable — you don't patch a running container, you rebuild the image and redeploy. Shani OS is an immutable OS for the same reason: updates replace the root filesystem atomically.
 
-**GitOps vs traditional CD:** Traditional CD has the pipeline push changes to the cluster (`kubectl apply` from CI). GitOps inverts this — a reconciler inside the cluster (ArgoCD, Flux) watches a Git repo and *pulls* the desired state. Benefits: every change is a Git commit (full audit trail), the cluster can self-heal by re-syncing, and the pipeline never needs cluster credentials.
+#### GitOps vs traditional CD
+Traditional CD has the pipeline push changes to the cluster (`kubectl apply` from CI). GitOps inverts this — a reconciler inside the cluster (ArgoCD, Flux) watches a Git repo and *pulls* the desired state. Benefits: every change is a Git commit (full audit trail), the cluster can self-heal by re-syncing, and the pipeline never needs cluster credentials.
 
-**Trunk-based development vs feature branches:** Trunk-based development has everyone committing directly to `main` (or short-lived branches that merge in hours, not weeks). Feature flags gate incomplete work rather than long-lived branches. This reduces merge conflicts and keeps CI fast. Most high-performing teams (per DORA research) practice trunk-based development.
+#### Trunk-based development vs feature branches
+Trunk-based development has everyone committing directly to `main` (or short-lived branches that merge in hours, not weeks). Feature flags gate incomplete work rather than long-lived branches. This reduces merge conflicts and keeps CI fast. Most high-performing teams (per DORA research) practice trunk-based development.
 
-**Shift-left security:** Moving security checks earlier in the development lifecycle — ideally before code is committed (pre-commit hooks, IDE plugins) rather than post-deployment. Semgrep in pre-commit is more shift-left than ZAP in staging. The earlier a finding, the cheaper it is to fix.
+#### Shift-left security
+Moving security checks earlier in the development lifecycle — ideally before code is committed (pre-commit hooks, IDE plugins) rather than post-deployment. Semgrep in pre-commit is more shift-left than ZAP in staging. The earlier a finding, the cheaper it is to fix.
 
-**Ephemeral environments:** On-demand environments provisioned for a specific PR or feature, then destroyed. Every PR gets its own isolated test environment with a URL like `pr-123.staging.example.com`. Enables parallel testing with no environment contention. Typically provisioned via Kubernetes namespaces + Argo Rollouts or Helm + preview URLs from Ingress.
+#### Ephemeral environments
+On-demand environments provisioned for a specific PR or feature, then destroyed. Every PR gets its own isolated test environment with a URL like `pr-123.staging.example.com`. Enables parallel testing with no environment contention. Typically provisioned via Kubernetes namespaces + Argo Rollouts or Helm + preview URLs from Ingress.
 
-**Blue/Green vs Canary vs Rolling — when to use each:**
+#### Blue/Green vs Canary vs Rolling — when to use each
 - **Rolling update** (Kubernetes default): replace pods one at a time. Zero downtime but brief period with mixed versions. Good for stateless workloads, low risk.
 - **Blue/Green**: maintain two identical environments, flip traffic instantly. Expensive (2× resources) but instant rollback. Good for scheduled maintenance windows or database migrations.
 - **Canary**: route 5–10% of traffic to new version, watch metrics, then promote. Best for high-traffic services where you want to catch regressions with real traffic before a full rollout.
 
-**Service mesh concepts (Istio/Linkerd):** A service mesh adds a sidecar proxy (Envoy for Istio, a lightweight proxy for Linkerd) to every pod. The sidecar intercepts all in/out traffic, enabling: mTLS between services without app code changes, traffic shifting (canary), circuit breaking, retries, and distributed tracing. The control plane (Istiod) pushes policy to all sidecars. This is separate from Cilium, which does similar things at the eBPF kernel level without sidecars.
+#### Service mesh concepts (Istio/Linkerd)
+A service mesh adds a sidecar proxy (Envoy for Istio, a lightweight proxy for Linkerd) to every pod. The sidecar intercepts all in/out traffic, enabling: mTLS between services without app code changes, traffic shifting (canary), circuit breaking, retries, and distributed tracing. The control plane (Istiod) pushes policy to all sidecars. This is separate from Cilium, which does similar things at the eBPF kernel level without sidecars.
 
-**On-call rotation essentials:** DORA's Time to Restore (MTTR) metric is directly tied to how well on-call is set up. The key components are: (1) alerting with high signal-to-noise (no alert fatigue — every page must be actionable), (2) runbooks linked from alerts, (3) a defined escalation chain, (4) postmortems after every incident. Grafana OnCall handles scheduling and escalation; your Prometheus alerts are the input.
+#### On-call rotation essentials
+DORA's Time to Restore (MTTR) metric is directly tied to how well on-call is set up. The key components are: (1) alerting with high signal-to-noise (no alert fatigue — every page must be actionable), (2) runbooks linked from alerts, (3) a defined escalation chain, (4) postmortems after every incident. Grafana OnCall handles scheduling and escalation; your Prometheus alerts are the input.
 
-**Rollback vs roll-forward:** Rolling back means deploying the previous known-good version. Roll-forward means quickly patching the broken version and deploying again. For stateless services, rollback is easier — `kubectl argo rollouts undo` or `kubectl rollout undo`. For services with database migrations, rollback may be impossible if the migration isn't reversible — which is why forward-compatible migrations (add column, then backfill, then make non-null) are a standard practice.
+#### Rollback vs roll-forward
+Rolling back means deploying the previous known-good version. Roll-forward means quickly patching the broken version and deploying again. For stateless services, rollback is easier — `kubectl argo rollouts undo` or `kubectl rollout undo`. For services with database migrations, rollback may be impossible if the migration isn't reversible — which is why forward-compatible migrations (add column, then backfill, then make non-null) are a standard practice.
 
-**Environment parity:** Dev, staging, and prod should be as similar as possible in config, dependencies, and infrastructure shape. Differences cause "works on staging" bugs. Using the same Helm chart with different `values.yaml` per environment (or Kustomize overlays) is the standard approach to maintaining parity while allowing necessary differences (replica count, resource limits, domain names).
+#### Environment parity
+Dev, staging, and prod should be as similar as possible in config, dependencies, and infrastructure shape. Differences cause "works on staging" bugs. Using the same Helm chart with different `values.yaml` per environment (or Kustomize overlays) is the standard approach to maintaining parity while allowing necessary differences (replica count, resource limits, domain names).
 
 
 
-**Terraform state — the source of truth for your infrastructure:** Terraform's state file (`terraform.tfstate`) maps your configuration to real infrastructure resources. It tracks resource IDs, attributes, and dependencies. Without state, Terraform can't know what it has already created. Problems with local state: (1) it can't be shared across a team, (2) it's lost if the machine is lost. Remote state (S3/MinIO backend with DynamoDB/Redis locking) is mandatory for team use — it enables state locking (prevents concurrent applies), versioning (rollback if state is corrupted), and separation from the code. `terraform import` adds existing resources to state; `terraform state rm` removes resources from tracking without destroying them.
+#### Terraform state — the source of truth for your infrastructure
+Terraform's state file (`terraform.tfstate`) maps your configuration to real infrastructure resources. It tracks resource IDs, attributes, and dependencies. Without state, Terraform can't know what it has already created. Problems with local state: (1) it can't be shared across a team, (2) it's lost if the machine is lost. Remote state (S3/MinIO backend with DynamoDB/Redis locking) is mandatory for team use — it enables state locking (prevents concurrent applies), versioning (rollback if state is corrupted), and separation from the code. `terraform import` adds existing resources to state; `terraform state rm` removes resources from tracking without destroying them.
 
-**Ansible vs Terraform — what each is for:** Terraform is declarative and idempotent for infrastructure provisioning — it manages the lifecycle of resources (create, update, destroy) by reconciling desired state with actual state. Ansible is procedural and idempotent for configuration management — it runs tasks in sequence on existing hosts (install packages, write config files, restart services). The canonical split: Terraform provisions the VM; Ansible configures what's running on it. Both can overlap (Terraform has file provisioners; Ansible has cloud modules) but the mental models are different. Mixing them without a clear boundary creates maintenance nightmares.
+#### Ansible vs Terraform — what each is for
+Terraform is declarative and idempotent for infrastructure provisioning — it manages the lifecycle of resources (create, update, destroy) by reconciling desired state with actual state. Ansible is procedural and idempotent for configuration management — it runs tasks in sequence on existing hosts (install packages, write config files, restart services). The canonical split: Terraform provisions the VM; Ansible configures what's running on it. Both can overlap (Terraform has file provisioners; Ansible has cloud modules) but the mental models are different. Mixing them without a clear boundary creates maintenance nightmares.
 
-**Policy-as-code — making compliance automatic:** Policy-as-code tools (Checkov, tfsec, OPA/Rego, Kyverno) express infrastructure and Kubernetes policies as code that can be version-controlled, reviewed, and automatically enforced. Instead of a checklist that relies on humans, a Checkov rule blocks a Terraform plan that opens port 22 to 0.0.0.0/0. OPA Gatekeeper prevents a `kubectl apply` of a deployment with no resource limits. The shift: compliance moves from a post-deployment audit to a pre-deployment gate in the CI pipeline. Every IaC commit passes through policy checks before reaching production.
+#### Policy-as-code — making compliance automatic
+Policy-as-code tools (Checkov, tfsec, OPA/Rego, Kyverno) express infrastructure and Kubernetes policies as code that can be version-controlled, reviewed, and automatically enforced. Instead of a checklist that relies on humans, a Checkov rule blocks a Terraform plan that opens port 22 to 0.0.0.0/0. OPA Gatekeeper prevents a `kubectl apply` of a deployment with no resource limits. The shift: compliance moves from a post-deployment audit to a pre-deployment gate in the CI pipeline. Every IaC commit passes through policy checks before reaching production.
 
-**Terraform modules — reusable infrastructure components:** A module is a directory of Terraform files with defined inputs (variables) and outputs. Instead of copy-pasting the same VPC/subnet/security-group configuration across 10 environments, you write it once as a module and call it with different variable values. The public Terraform Registry hosts community modules (AWS VPC, GKE cluster, etc.). Internal modules (stored in your Git repo) encode your organisation's standards — a module that provisions a PostgreSQL instance always includes backup configuration, monitoring, and correct security groups, because those are baked in. Modules are the IaC equivalent of application libraries.
+#### Terraform modules — reusable infrastructure components
+A module is a directory of Terraform files with defined inputs (variables) and outputs. Instead of copy-pasting the same VPC/subnet/security-group configuration across 10 environments, you write it once as a module and call it with different variable values. The public Terraform Registry hosts community modules (AWS VPC, GKE cluster, etc.). Internal modules (stored in your Git repo) encode your organisation's standards — a module that provisions a PostgreSQL instance always includes backup configuration, monitoring, and correct security groups, because those are baked in. Modules are the IaC equivalent of application libraries.
 
 ## Caddy Configuration
 
