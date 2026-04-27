@@ -619,7 +619,7 @@
     "slug": "servers/kubernetes",
     "title": "Kubernetes & Container Orchestration",
     "section": "Self-Hosting & Servers",
-    "updated": "2026-04-22",
+    "updated": "2026-04-27",
     "order": 999,
     "draft": false
   },
