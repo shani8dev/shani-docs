@@ -1,47 +1,97 @@
 ---
 title: Kubernetes & Container Orchestration
 section: Self-Hosting & Servers
-updated: 2026-04-22
+updated: 2026-04-27
 ---
 
-> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal`. When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway`. All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
 
 # Kubernetes & Container Orchestration
 
-Lightweight and production-grade Kubernetes distributions, cluster management, GitOps, ingress, storage, and observability — all self-hosted on this system.
+Lightweight and production-grade Kubernetes distributions, cluster management, GitOps, progressive delivery, ingress, storage, security, and observability — all self-hosted on this system.
 
-> ⚠️ **Prerequisites**: Kubernetes requires `vm.max_map_count=524288` and sufficient RAM (2 GB minimum per node, 4 GB+ recommended). Some distributions need `br_netfilter` and IP forwarding enabled. CLI tools (`kubectl`, `helm`, `k9s`, etc.) install via **Nix** (primary) or **Snap** as a fallback — see the install one-liner in the disk layout section below. k3s and MicroK8s bundle their own `kubectl` — you only need a separate install for standalone or remote-cluster access.
+> ⚠️ **Prerequisites**: Kubernetes requires `vm.max_map_count=524288` and sufficient RAM (2 GB minimum per node, 4 GB+ recommended). Some distributions need `br_netfilter` and IP forwarding enabled. CLI tools (`kubectl`, `helm`, `k9s`, etc.) install via **Nix** (primary) or **Snap** as a fallback. k3s and MicroK8s bundle their own `kubectl` — you only need a separate install for standalone or remote-cluster access.
 
-> **Immutable OS note:** On systems with a read-only OS root (`/usr/local` may not be writable), The curl-based installers for k3s, k0s, and RKE2 default to writing their binaries there. All three support an environment variable to redirect the binary to `~/.local/bin` (which lives in `@home` and persists across OS updates) — the install commands below include this already. Add `~/.local/bin` to your `PATH` once in `~/.bashrc`:</p>
+> **Immutable OS note:** On systems with a read-only OS root, the curl-based installers for k3s, k0s, and RKE2 default to writing their binaries to `/usr/local`. All three support an environment variable to redirect to `~/.local/bin`. Add it to PATH once:
 > ```bash
 > echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
 > ```
 
 ---
 
+## Table of Contents
+
+1. [Key Concepts](#key-concepts)
+2. [Distributions](#distributions)
+3. [Disk Layout & CLI Tools](#disk-layout--cli-tools)
+4. [Networking & Ingress](#networking--ingress)
+5. [DNS](#dns)
+6. [TLS & Certificate Management](#tls--certificate-management)
+7. [Storage](#storage)
+8. [NFS & Shared Storage](#nfs--shared-storage)
+9. [MinIO (Self-Hosted S3)](#minio-self-hosted-s3)
+10. [Security & Policy](#security--policy)
+11. [Secrets Management](#secrets-management)
+12. [Workload Patterns](#workload-patterns)
+13. [Workload Patterns (Advanced)](#workload-patterns-advanced)
+14. [Deployment Strategies Deep Dive](#deployment-strategies-deep-dive)
+15. [Autoscaling](#autoscaling)
+16. [GitOps & Continuous Delivery](#gitops--continuous-delivery)
+17. [Advanced GitOps Patterns](#advanced-gitops-patterns)
+18. [Progressive Delivery](#progressive-delivery)
+19. [In-Cluster CI/CD & Build](#in-cluster-cicd--build)
+20. [Image Supply Chain Security](#image-supply-chain-security)
+21. [Policy as Code — CI Gates](#policy-as-code--ci-gates)
+22. [Observability](#observability)
+23. [Grafana Dashboards as Code](#grafana-dashboards-as-code)
+24. [Alerting & On-Call](#alerting--on-call)
+25. [Service Mesh](#service-mesh)
+26. [Backup & Disaster Recovery](#backup--disaster-recovery)
+27. [Platform Engineering](#platform-engineering)
+28. [Operator Pattern & Custom Resources](#operator-pattern--custom-resources)
+29. [Cluster Management UIs](#cluster-management-uis)
+30. [Multi-Tenancy & Audit](#multi-tenancy--audit)
+31. [Helm — Advanced Usage](#helm--advanced-usage)
+32. [Cluster Hardening](#cluster-hardening)
+33. [Deprecated API Migration](#deprecated-api-migration)
+34. [Network Troubleshooting](#network-troubleshooting)
+35. [Multi-Architecture Builds](#multi-architecture-builds)
+36. [Multi-Cluster](#multi-cluster)
+37. [Zot (Lightweight OCI Registry)](#zot-lightweight-oci-registry)
+38. [Beyla (eBPF Auto-Instrumentation)](#beyla-ebpf-auto-instrumentation--no-code-changes)
+39. [kubectl Power Usage](#kubectl-power-usage)
+40. [Gateway API — Advanced Patterns](#gateway-api--advanced-patterns)
+41. [Daily Operations](#daily-operations)
+42. [Caddy Configuration Reference](#caddy-configuration-reference)
+43. [Troubleshooting](#troubleshooting)
+
+---
+
 ## Key Concepts
 
-#### Control plane components and what they do
-- **kube-apiserver** — the front door; all kubectl commands hit this. It validates, authenticates, and persists objects to etcd.
-- **etcd** — the distributed key-value store where all cluster state lives. Losing etcd without a backup = losing the cluster.
-- **kube-scheduler** — watches for unscheduled pods and assigns them to nodes based on resource requests, taints/tolerations, affinity rules.
-- **kube-controller-manager** — runs the reconciliation loops: Deployment controller, ReplicaSet controller, Node controller, etc.
-- **cloud-controller-manager** — talks to the cloud API to provision LoadBalancers, PersistentVolumes (EBS, GCE PD), etc.
+#### Control plane components
+
+| Component | Role |
+|-----------|------|
+| **kube-apiserver** | Front door — all kubectl commands hit this. Validates, authenticates, and persists objects to etcd. |
+| **etcd** | Distributed key-value store where all cluster state lives. Losing etcd without a backup = losing the cluster. |
+| **kube-scheduler** | Watches for unscheduled pods; assigns them to nodes based on resources, taints/tolerations, affinity. |
+| **kube-controller-manager** | Runs reconciliation loops: Deployment controller, ReplicaSet controller, Node controller, etc. |
+| **cloud-controller-manager** | Talks to the cloud API to provision LoadBalancers, PersistentVolumes (EBS, GCE PD), etc. |
 
 #### Node components
-- **kubelet** — runs on every node, ensures the containers in a pod are running and healthy.
-- **kube-proxy** — maintains iptables/ipvs rules for Service routing on each node.
-- **Container runtime** — containerd, CRI-O, or Docker (via shim).
 
-#### Why requests and limits matter
-`resources.requests` is what the scheduler uses to decide which node can fit the pod. `resources.limits` is enforced at runtime by cgroups — exceed the memory limit and the pod is OOMKilled. A common anti-pattern is setting no requests/limits at all (the scheduler has no information) or setting requests == limits for memory (prevents the kernel from reclaiming unused memory). The golden path: set requests to typical usage, limits to burst ceiling.
-
-#### Taints and tolerations
-A taint marks a node as unsuitable for pods that don't explicitly tolerate it. A toleration allows a pod to be scheduled on a tainted node. Example use: taint GPU nodes with `gpu=true:NoSchedule`; only pods that tolerate `gpu=true` get scheduled there. Node affinity (`preferredDuringSchedulingIgnoredDuringExecution`) softly requests nodes with specific labels; `requiredDuringScheduling...` is a hard requirement.
+| Component | Role |
+|-----------|------|
+| **kubelet** | Runs on every node; ensures pod containers are running and healthy. |
+| **kube-proxy** | Maintains iptables/ipvs rules for Service routing. Replaced by Cilium eBPF in this stack. |
+| **Container runtime** | containerd, CRI-O, or Docker (via shim). |
+| **CNI plugin** | Provides pod networking. This stack uses **Cilium** (eBPF) — replaces Flannel and kube-proxy. |
 
 #### What happens when you run `kubectl apply`
+
 1. kubectl sends a `PATCH` or `POST` to kube-apiserver
-2. API server authenticates (cert/token), authorises (RBAC), then admits (admission webhooks — Kyverno, OPA)
+2. API server authenticates (cert/token), authorises (RBAC), then admits (Kyverno/OPA webhooks)
 3. Object is persisted to etcd
 4. The relevant controller's reconciliation loop detects the change (via informer/watch)
 5. The controller creates/updates child objects (ReplicaSet → Pods)
@@ -49,363 +99,249 @@ A taint marks a node as unsuitable for pods that don't explicitly tolerate it. A
 7. kubelet on the node creates containers via the container runtime
 
 #### Pod lifecycle states
-- `Pending` — scheduled but not yet running (pulling image or waiting for node)
-- `Running` — at least one container is running
-- `Succeeded` — all containers exited with code 0 (for Jobs)
-- `Failed` — all containers exited, at least one non-zero
-- `Unknown` — node communication lost
-- `CrashLoopBackOff` — container repeatedly crashes; kubelet backs off exponentially before restarting
 
-#### Kubernetes networking model (four rules)
+| State | Meaning |
+|-------|---------|
+| `Pending` | Scheduled but not yet running (pulling image or waiting for node) |
+| `Running` | At least one container is running |
+| `Succeeded` | All containers exited with code 0 (for Jobs) |
+| `Failed` | All containers exited, at least one non-zero |
+| `Unknown` | Node communication lost |
+| `CrashLoopBackOff` | Container repeatedly crashes; kubelet backs off exponentially |
+
+#### Kubernetes networking model
+
 1. Every pod gets a unique cluster-routable IP — no port mapping needed between pods
 2. Pods on a node can communicate with all pods on all nodes without NAT
 3. Agents on a node can communicate with all pods on that node
 4. Pods don't know or care about their host IP
 
+Network Policies are a **whitelist** — once you apply one to a pod, only explicitly allowed traffic is permitted. Production pattern: default-deny-all per namespace, then explicit ingress/egress rules.
+
 #### Service types
-- `ClusterIP` (default) — accessible only within the cluster
-- `NodePort` — exposes a static port on every node's IP (accessible from outside the cluster at `nodeIP:nodePort`)
-- `LoadBalancer` — provisions a cloud load balancer; in bare-metal clusters use MetalLB
-- `ExternalName` — CNAME to an external DNS name (no proxying)
-- `Headless` (clusterIP: None) — no stable IP, DNS returns pod IPs directly (used by StatefulSets)
+
+| Type | Scope | Notes |
+|------|-------|-------|
+| `ClusterIP` | In-cluster only | Default |
+| `NodePort` | External via `nodeIP:nodePort` | Static port on every node |
+| `LoadBalancer` | Cloud LB or Cilium LB / MetalLB on bare-metal | Provisions LB IP |
+| `ExternalName` | CNAME to external DNS | No proxying |
+| `Headless` (`clusterIP: None`) | DNS returns pod IPs directly | Used by StatefulSets |
+
+#### Resources: requests vs limits
+
+`resources.requests` is what the scheduler uses to decide which node can fit the pod. `resources.limits` is enforced at runtime by cgroups — exceed the memory limit and the pod is OOMKilled.
+
+**Golden path:** set requests to typical usage, limits to burst ceiling. Avoid setting neither (scheduler has no information) or `requests == limits` for memory (prevents the kernel reclaiming unused pages).
+
+#### Taints, tolerations, and affinity
+
+A **taint** marks a node as unsuitable for pods that don't explicitly tolerate it. A **toleration** allows a pod to be scheduled on a tainted node. Example: taint GPU nodes with `gpu=true:NoSchedule`; only pods that tolerate it get scheduled there.
+
+**Node affinity:** `preferredDuringSchedulingIgnoredDuringExecution` = soft preference; `requiredDuringScheduling...` = hard requirement.
+
+#### Probes
+
+| Probe | Failure action | Use case |
+|-------|---------------|----------|
+| `livenessProbe` | kubelet kills and restarts the container | Deadlock detection |
+| `readinessProbe` | Pod removed from Service endpoints | Startup delays, temporary unhealthiness |
+| `startupProbe` | Disables liveness/readiness until it passes | Slow-starting apps |
 
 #### ConfigMap vs Secret
-Both key-value stores. ConfigMaps are for non-sensitive configuration. Secrets are base64-encoded (not encrypted by default — use ESO + OpenBao or sealed-secrets for encryption at rest). Secrets can be consumed as environment variables or volume mounts; volume mounts are preferred so the secret can be rotated without restarting the pod.
 
-#### What a container restart policy controls
-`Always` (default for Deployments), `OnFailure` (for Jobs — restart only on non-zero exit), `Never` (for batch jobs that should not retry).
-
-#### Probes and why they matter
-- `livenessProbe` — if this fails, kubelet kills and restarts the container. Use for deadlock detection.
-- `readinessProbe` — if this fails, the pod is removed from Service endpoints. Traffic stops going to it. Use for startup delays and temporary unhealthiness.
-- `startupProbe` — disables liveness/readiness until it succeeds. Use for slow-starting apps to prevent premature liveness kills.
-
-#### Kubernetes autoscaling recap
-- **HPA** — scales pod replicas based on CPU/memory or custom metrics
-- **VPA** — adjusts pod resource requests/limits (in recommendation mode via Goldilocks)
-- **KEDA** — event-driven scaling including scale-to-zero
-- **Cluster Autoscaler / Karpenter** — adds/removes nodes based on pending pods
-
-#### RBAC mental model
-Every action in Kubernetes is: a *verb* (get, list, watch, create, update, patch, delete) on a *resource* (pods, deployments, secrets) in a *namespace*. A Role defines allowed verb+resource combinations. A RoleBinding binds a Role to a subject (User, Group, ServiceAccount). ClusterRole/ClusterRoleBinding apply cluster-wide. The principle of least privilege: CI/CD service accounts should have `create`/`update` on Deployments only, not `get` on Secrets. `kubectl auth can-i --list --as system:serviceaccount:default:myapp` shows what a service account can do.
-
-#### Network policies — default deny pattern
-By default, all pods can communicate with all pods. Network Policies are a whitelist — once you apply one to a pod, only explicitly allowed traffic is permitted. The production pattern: apply a default-deny-all policy to every namespace, then add explicit ingress/egress rules. This limits blast radius — a compromised pod in namespace `frontend` can't reach `postgres` in namespace `data` unless a policy explicitly allows it. Cilium and Calico enforce these at the kernel level (eBPF).
+Both are key-value stores. ConfigMaps are for non-sensitive configuration. Secrets are base64-encoded — **not** encrypted by default. Use ESO + OpenBao or Sealed Secrets for encryption at rest. Volume mounts are preferred over env vars so secrets can be rotated without a pod restart.
 
 #### StatefulSets vs Deployments
-Deployments assume pods are stateless and interchangeable — they can be killed and replaced in any order. StatefulSets provide: stable pod names (`pod-0`, `pod-1`), stable DNS (`pod-0.svc.namespace.svc.cluster.local`), ordered startup/shutdown, and per-pod PersistentVolumeClaims. Use StatefulSets for databases, Kafka, ZooKeeper, and anything that needs stable identity. The tradeoff: rolling updates are slower (one pod at a time, waiting for readiness) and PVCs aren't automatically deleted when you scale down.
 
-#### DORA metrics and what they mean for your team
-Four metrics measure software delivery performance: Deployment Frequency (how often you deploy), Lead Time for Changes (commit to production), Change Failure Rate (% of deployments causing incidents), and Time to Restore (MTTR when things break). Elite teams deploy multiple times per day with <1h lead time and <5% failure rate, recovering in under an hour. These aren't vanity metrics — low deployment frequency predicts burnout (big-bang releases); high change failure rate predicts firefighting culture.
+**Deployments** assume pods are stateless and interchangeable. **StatefulSets** provide: stable pod names (`pod-0`, `pod-1`), stable DNS, ordered startup/shutdown, and per-pod PVCs. Use StatefulSets for databases, Kafka, ZooKeeper. Rolling updates are slower (one pod at a time) and PVCs are not auto-deleted on scale-down.
 
-#### Admission webhooks — the Kubernetes extension point
-Before any object is persisted to etcd, it passes through admission controllers. Mutating webhooks can modify the object (inject a sidecar, add labels, set default resource limits). Validating webhooks can reject it (block images without a signature, prevent privileged containers, require certain labels). Tools that use this: Kyverno (policy engine), OPA/Gatekeeper, Istio (sidecar injection), Linkerd (proxy injection). This is how platform teams enforce standards without editing every developer's manifests.
+#### RBAC mental model
 
-#### Persistent storage in Kubernetes — the CSI model
-Container Storage Interface (CSI) is the plugin standard for storage providers. A CSI driver (Longhorn, Rook-Ceph, AWS EBS, GCE PD) implements Create/Attach/Mount for volumes. PersistentVolumeClaims are requests for storage (size, access mode, storage class). The StorageClass determines which CSI driver handles provisioning and what parameters to use. Access modes: `ReadWriteOnce` (one node), `ReadWriteMany` (multiple nodes — requires NFS or Ceph FS), `ReadOnlyMany`. Velero backs up PVs by snapshotting them via CSI.
+Every action is: a **verb** (`get`, `list`, `watch`, `create`, `update`, `patch`, `delete`) on a **resource** (`pods`, `deployments`, `secrets`) in a **namespace**. A Role defines allowed combinations; a RoleBinding binds it to a subject. ClusterRole/ClusterRoleBinding apply cluster-wide.
+
+```bash
+kubectl auth can-i --list --as system:serviceaccount:default:myapp
+```
+
+#### Admission webhooks
+
+Before any object is persisted to etcd, it passes through admission controllers. **Mutating** webhooks modify the object (inject sidecars, add labels, set defaults). **Validating** webhooks can reject it (block unsigned images, prevent privileged containers). Tools: Kyverno, OPA/Gatekeeper.
+
+#### Persistent storage — the CSI model
+
+Container Storage Interface (CSI) is the plugin standard. A CSI driver (Longhorn, Rook-Ceph, AWS EBS) implements Create/Attach/Mount. PersistentVolumeClaims are requests for storage. Access modes: `ReadWriteOnce` (one node), `ReadWriteMany` (NFS or Ceph FS), `ReadOnlyMany`.
+
+#### eBPF — the technology behind Cilium
+
+eBPF lets programs run in the Linux kernel safely without kernel modules. Cilium uses eBPF to implement networking, security, and observability at the kernel level — bypassing iptables entirely, enforcing L7 HTTP/gRPC/DNS policies, and exporting flow data to Hubble with lower overhead than any userspace proxy.
+
+#### GitOps mental model
+
+Git is the single source of truth for cluster state. CI builds images and pushes a commit to the manifests repo. ArgoCD/Flux detects the diff and syncs the cluster. Rollback = `git revert`. Audit trail = git history.
+
+```
+Code repo → CI (build/test/push image) → update image tag in manifests repo
+Manifests repo → ArgoCD/Flux detects diff → syncs cluster → Argo Rollouts canary
+```
+
+#### Observability pillars
+
+| Pillar | Tool in this stack | What it shows |
+|--------|-------------------|---------------|
+| **Metrics** | Prometheus + Grafana | CPU, memory, error rates, latency percentiles |
+| **Logs** | Loki + Promtail/Alloy | Full log lines with LogQL querying |
+| **Traces** | OpenTelemetry + Tempo | Request path across microservices, per-span latency |
+| **Flows** | Cilium Hubble | Pod-to-pod network flows, dropped packets, L7 requests |
+
+#### DORA metrics
+
+Four metrics measure software delivery performance: **Deployment Frequency**, **Lead Time for Changes** (commit to production), **Change Failure Rate** (% of deployments causing incidents), and **Time to Restore** (MTTR). Elite teams: multiple deploys/day, <1h lead time, <5% failure rate, <1h recovery. These predict team health — low deployment frequency predicts burnout; high failure rate predicts firefighting culture.
+
+#### Autoscaling recap
+
+| Tool | Mechanism |
+|------|-----------|
+| **HPA** | Scales pod replicas on CPU/memory or custom metrics |
+| **VPA** | Adjusts resource requests/limits (recommendation mode via Goldilocks) |
+| **KEDA** | Event-driven scaling including scale-to-zero |
+| **Cluster Autoscaler / Karpenter** | Adds/removes nodes based on pending pods |
 
 ---
 
-## Choosing a Distribution
+## Distributions
 
 | Distribution | Best For | RAM (min) | Install via | Notes |
 |---|---|---|---|---|
 | **k3s** | Single-node homelabs, edge | 512 MB | curl installer (`~/.local/bin`) | Batteries-included, easiest to start |
 | **k0s** | Minimal, air-gapped | 1 GB | curl installer (`~/.local/bin`) | Single binary, no external deps |
 | **MicroK8s** | Quick local cluster, addons | 2 GB | **Snap** | Canonical-maintained; DNS, ingress, registry as addons |
-| **minikube** | Local dev, driver choice | 2 GB | Nix or **Snap** | Runs via Podman driver on this system |
+| **minikube** | Local dev, driver choice | 2 GB | Nix or **Snap** | Runs via Podman driver |
 | **kind** | Lightweight dev/CI | 2 GB | Nix | Runs K8s inside Podman containers |
 | **RKE2** | Hardened, production | 4 GB | curl installer (`~/.local/bin`) | CIS-benchmarked, STIG-ready |
 | **Talos** | Immutable infra, GitOps | 2 GB | talosctl | API-only, no SSH, extremely secure |
+| **kubeadm** | Vanilla upstream, CKA study | 2 GB | Nix | Full manual setup; deepest understanding |
 
 ---
 
-## Where Kubernetes Lives on Disk
+### k3s (Lightweight CNCF Kubernetes)
 
-k3s, k0s, and RKE2 are **system services** managed by systemd — their data lives under `/var/lib/rancher/` (k3s/RKE2) or `/var/lib/k0s/` (k0s), which persist across OS updates and rollbacks just like your `@containers` subvolume. Helm chart state and kubeconfig live in `~/.kube/` and `~/.config/helm/` inside `@home`.
+**Purpose:** Lightweight, CNCF-certified Kubernetes. Ships with containerd, CoreDNS, and local-path provisioner. Single binary under 70 MB. Install with `--flannel-backend=none --disable-kube-proxy` to use Cilium as the CNI (see [Networking & Ingress](#networking--ingress)).
 
-```
-/var/lib/rancher/k3s/    ← k3s data, etcd snapshots, kubeconfig
-/var/lib/k0s/            ← k0s data
-~/.kube/config           ← kubeconfig (in @home, survives updates)
-~/.config/helm/          ← Helm repos and release cache
-```
-
-##### Install all CLI tools — Nix (primary)
+#### Single-node install (with Cilium CNI)
 
 ```bash
-nix-env -iA nixpkgs.kubectl nixpkgs.kubernetes-helm nixpkgs.k9s nixpkgs.argocd nixpkgs.fluxcd nixpkgs.velero nixpkgs.kubeseal nixpkgs.kind nixpkgs.minikube
-```
-
-**Snap alternatives:** for `kubectl` and `helm` (auto-update, classic confinement):
-```bash
-snap install kubectl --classic
-snap install helm --classic
-```
-
-> 💡 `k9s` exists on the Snap Store but is flagged as unmaintained there — use the Nix package instead. `argocd`, `flux`, `velero`, and `kubeseal` CLIs are not on the Snap Store — Nix is the only option.
-
----
-
-## k3s (Lightweight CNCF Kubernetes)
-
-**Purpose:** Lightweight, CNCF-certified Kubernetes. Ships with containerd, CoreDNS, Flannel, Traefik, local-path provisioner, and metrics-server out of the box. Single binary under 70 MB. Ideal for a single Shani OS node or small multi-node cluster.
-
-### Single-Node Install
-
-```bash
-# Kernel prerequisites
 sudo sysctl -w vm.max_map_count=524288
 echo "vm.max_map_count=524288" | sudo tee /etc/sysctl.d/99-k8s.conf
 sudo modprobe br_netfilter
 echo "br_netfilter" | sudo tee /etc/modules-load.d/br_netfilter.conf
 
-# Install k3s
-# Shani OS has a read-only /usr/local — redirect the binary to ~/.local/bin (in @home)
 mkdir -p ~/.local/bin
-curl -sfL https://get.k3s.io | INSTALL_K3S_BIN_DIR=~/.local/bin sh -
+curl -sfL https://get.k3s.io | INSTALL_K3S_BIN_DIR=~/.local/bin sh -s - \
+  --flannel-backend=none \
+  --disable-kube-proxy \
+  --disable-network-policy \
+  --disable=traefik          # remove if using NGF
 
-# Ensure ~/.local/bin is on your PATH (add to ~/.bashrc if not already present)
-export PATH="$HOME/.local/bin:$PATH"
-
-# Verify cluster is running
-sudo k3s kubectl get nodes
-```
-
-##### Set up kubeconfig for your user
-
-```bash
 mkdir -p ~/.kube
 sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
 sudo chown $USER:$USER ~/.kube/config
 chmod 600 ~/.kube/config
-# Replace 127.0.0.1 with your server IP if accessing remotely
 export KUBECONFIG=~/.kube/config
+# Now install Cilium — see Networking & Ingress
 ```
 
-**Firewall (multi-node):**
-```bash
-# API server
-sudo firewall-cmd --add-port=6443/tcp --permanent
-# Flannel VXLAN
-sudo firewall-cmd --add-port=8472/udp --permanent
-# Metrics server
-sudo firewall-cmd --add-port=10250/tcp --permanent
-sudo firewall-cmd --reload
-```
-
-### Adding Worker Nodes
+#### Adding worker nodes
 
 ```bash
-# On the server node — get the join token
-sudo cat /var/lib/rancher/k3s/server/node-token
+sudo cat /var/lib/rancher/k3s/server/node-token   # on server
 
-# On each worker node
 mkdir -p ~/.local/bin
-curl -sfL https://get.k3s.io | INSTALL_K3S_BIN_DIR=~/.local/bin K3S_URL=https://<server-ip>:6443 K3S_TOKEN=<token> sh -
+curl -sfL https://get.k3s.io | INSTALL_K3S_BIN_DIR=~/.local/bin \
+  K3S_URL=https://<server-ip>:6443 K3S_TOKEN=<token> sh -
 ```
 
-### Common k3s Operations
+#### Common k3s operations
 
 ```bash
-# Check cluster status
 kubectl get nodes -o wide
 kubectl get pods -A
-
-# View k3s server logs
 sudo journalctl -u k3s -f
-
-# Uninstall k3s (server)
-~/.local/bin/k3s-uninstall.sh
-
-# Uninstall k3s (agent/worker)
-~/.local/bin/k3s-agent-uninstall.sh
-
-# Restart k3s
-sudo systemctl restart k3s
-
-# Drain a node before maintenance
 kubectl drain <node-name> --ignore-daemonsets --delete-emptydir-data
-
-# Uncordon a node after maintenance
 kubectl uncordon <node-name>
+sudo k3s etcd-snapshot save --name homelab-$(date +%Y%m%d)
+~/.local/bin/k3s-uninstall.sh
+~/.local/bin/k3s-agent-uninstall.sh
 ```
 
 ---
 
-## k0s (Minimal Single Binary)
-
-**Purpose:** Zero-dependency Kubernetes in a single binary. No external etcd, no OS package requirements. Install anywhere, run as a systemd service. Good for immutable-OS setups where you want minimal footprint.
+### k0s (Minimal Single Binary)
 
 ```bash
-# Download and install
-# Shani OS has a read-only /usr/local — download the binary to ~/.local/bin (in @home)
 mkdir -p ~/.local/bin
 curl -sSLf https://get.k0s.sh | K0S_INSTALL_PATH=~/.local/bin sudo sh
-
-# Install as a systemd service and start
 sudo k0s install controller --single
 sudo k0s start
-
-# Get kubeconfig
-sudo k0s kubeconfig admin > ~/.kube/config
-chmod 600 ~/.kube/config
-
-# Verify
+sudo k0s kubeconfig admin > ~/.kube/config && chmod 600 ~/.kube/config
 kubectl get nodes
 ```
 
-#### Common operations
 ```bash
-# View k0s status
 sudo k0s status
-
-# View logs
 sudo journalctl -u k0scontroller -f
-
-# Stop and reset
-sudo k0s stop
-sudo k0s reset
+sudo k0s stop && sudo k0s reset
 ```
 
 ---
 
-## MicroK8s (Snap — Addon-Driven Local Cluster)
-
-**Purpose:** Canonical's single-package Kubernetes distribution — installed entirely as a Snap. Ships with a built-in addon system: enable DNS, ingress, a private registry, the dashboard, Prometheus, and more with single commands. The fastest way to get a working cluster with extras on this system without touching the OS root.
+### MicroK8s (Snap — Addon-Driven)
 
 ```bash
-# Install MicroK8s — Snap only, no Nix equivalent
 sudo snap install microk8s --classic --channel=1.33/stable
+sudo usermod -aG microk8s $USER && mkdir -p ~/.kube && chmod 0700 ~/.kube
+# Log out and back in
 
-# Add your user to the microk8s group (avoids sudo for every command)
-sudo usermod -aG microk8s $USER
-mkdir -p ~/.kube && chmod 0700 ~/.kube
-# Log out and back in for group change to take effect
-
-# Wait for cluster to be ready
 microk8s status --wait-ready
+microk8s enable dns ingress hostpath-storage registry dashboard metrics-server
+microk8s enable observability   # full Prometheus + Grafana stack
 
-# Enable essential addons
-microk8s enable dns
-microk8s enable ingress
-microk8s enable hostpath-storage   # default StorageClass
-microk8s enable registry           # private registry on localhost:32000
-microk8s enable dashboard          # Kubernetes Dashboard
-microk8s enable metrics-server
+microk8s config > ~/.kube/config && chmod 600 ~/.kube/config
 ```
 
-##### Export kubeconfig to use with standard `kubectl`
-
-```bash
-microk8s config > ~/.kube/config
-chmod 600 ~/.kube/config
-```
-
-#### Common operations
-```bash
-# Check status and enabled addons
-microk8s status
-
-# Use the bundled kubectl (no separate install needed)
-microk8s kubectl get nodes
-microk8s kubectl get pods -A
-
-# Or alias it
-echo "alias kubectl='microk8s kubectl'" >> ~/.bashrc
-
-# Stop / start the cluster (without uninstalling)
-microk8s stop
-microk8s start
-
-# Enable Prometheus + Grafana stack
-microk8s enable observability
-
-# Push an image to the built-in registry
-# podman-docker shim is pre-installed on this system, but use podman directly:
-podman tag myapp:latest localhost:32000/myapp:latest
-podman push localhost:32000/myapp:latest --tls-verify=false
-
-# Uninstall
-sudo snap remove microk8s
-```
+> MicroK8s stores data in `/var/snap/microk8s/` — persists across `snap refresh`, lost only on `snap remove`.
 
 **Firewall:**
 ```bash
-sudo firewall-cmd --add-port=16443/tcp --permanent   # MicroK8s API server
-sudo firewall-cmd --add-port=10250/tcp --permanent   # Kubelet
-sudo firewall-cmd --reload
+sudo firewall-cmd --add-port=16443/tcp --add-port=10250/tcp --permanent && sudo firewall-cmd --reload
 ```
-
-> 💡 MicroK8s stores all cluster data inside the Snap's own directory (`/var/snap/microk8s/`) which lives in `@snapd` and persists across OS updates and rollbacks. It does not use `/var/lib/rancher/` or `/var/lib/k0s/`.
 
 ---
 
-## minikube (Local Dev — Podman Driver)
-
-**Purpose:** Single-node local Kubernetes for development and testing. Unlike kind (which uses containers), minikube can use multiple drivers — on this system use the **Podman driver** to avoid needing a VM. Install via Nix or Snap.
+### minikube (Local Dev — Podman Driver)
 
 ```bash
-# Install via Nix (primary)
-nix-env -iA nixpkgs.minikube
-
-# Or via Snap
-snap install minikube
-
-# Start with Podman driver (rootless, no VM needed)
+nix-env -iA nixpkgs.minikube  # or: snap install minikube
 minikube start --driver=podman --container-runtime=containerd
-
-# Verify
-minikube status
-kubectl get nodes
-```
-
-#### Common operations
-```bash
-# Open the Kubernetes Dashboard in browser
 minikube dashboard
-
-# Get the URL for a NodePort service
 minikube service myapp --url
-
-# Load a local Podman image into minikube
 minikube image load myapp:latest
-
-# Enable addons
-minikube addons enable ingress
-minikube addons enable metrics-server
-minikube addons list
-
-# Pause cluster (saves RAM without deleting)
-minikube pause
-
-# Resume
-minikube unpause
-
-# Stop and delete cluster
-minikube stop
-minikube delete
+minikube addons enable ingress metrics-server
+minikube pause / minikube unpause
+minikube stop && minikube delete
 ```
 
-> 💡 Use **kind** when you need multi-node clusters for CI. Use **minikube** when you want a richer local dev experience with addons, a dashboard, and easy service URLs.
+> Use **kind** for multi-node CI clusters. Use **minikube** for a richer local dev experience with addons and a dashboard.
 
 ---
 
-## kind (Kubernetes in Podman — for Dev/CI)
-
-**Purpose:** Run a full Kubernetes cluster inside Podman containers — no VMs. Use kind for lightweight local development and integration testing in Woodpecker/Forgejo CI pipelines. On Shani OS, kind runs on top of Podman via the `podman-docker` compatibility shim (pre-installed).
+### kind (Kubernetes in Podman — Dev/CI)
 
 ```bash
-# Install kind via Nix
 nix-env -iA nixpkgs.kind
-
-# Tell kind to use Podman
 export KIND_EXPERIMENTAL_PROVIDER=podman
-
-# Create a single-node cluster
 kind create cluster --name homelab
 
-# Create a multi-node cluster
 cat > ~/kind-multinode.yaml << 'EOF'
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
@@ -414,115 +350,463 @@ nodes:
   - role: worker
   - role: worker
 EOF
+kind create cluster --name homelab --config ~/kind-multinode.yaml
 
-kind create cluster --name multinode --config ~/kind-multinode.yaml
-
-# List clusters
-kind get clusters
-
-# Load a local image into kind (avoids registry push)
 kind load docker-image myapp:latest --name homelab
-
-# Delete cluster
 kind delete cluster --name homelab
 ```
 
 ---
 
-## RKE2 (Hardened Production Kubernetes)
+### Talos Linux (Immutable Kubernetes OS)
 
-**Purpose:** Rancher's security-focused Kubernetes distribution. CIS Kubernetes Benchmark compliant out of the box. Suitable when you need audit logs, PSA policies, and a hardened default configuration.
+**Purpose:** Minimal, API-only, immutable Linux distribution purpose-built for Kubernetes. No SSH, no shell, no package manager — all operations go through `talosctl`.
 
 ```bash
-# Install on the server node
-# Shani OS has a read-only /usr/local — redirect the binary to ~/.local/bin (in @home)
+nix-env -iA nixpkgs.talosctl
+
+talosctl gen config homelab https://<node-ip>:6443 --output-dir ~/talos-config/
+talosctl apply-config --insecure --nodes <node-ip> --file ~/talos-config/controlplane.yaml
+talosctl bootstrap --nodes <node-ip> --talosconfig ~/talos-config/talosconfig
+talosctl kubeconfig ~/.kube/config --nodes <node-ip> --talosconfig ~/talos-config/talosconfig
+
+kubectl get nodes
+```
+
+```bash
+talosctl health --nodes <node-ip>
+talosctl dmesg --nodes <node-ip>
+talosctl upgrade --nodes <node-ip> --image ghcr.io/siderolabs/installer:<version>
+talosctl upgrade-k8s --to 1.31.0 --nodes <node-ip>
+```
+
+---
+
+### RKE2 (Hardened Production Kubernetes)
+
+```bash
 mkdir -p ~/.local/bin
-curl -sfL https://get.rke2.io | INSTALL_RKE2_BIN_DIR=~/.local/bin sudo sh -
-
-# Configure
-sudo mkdir -p /etc/rancher/rke2
-cat | sudo tee /etc/rancher/rke2/config.yaml << 'EOF'
-tls-san:
-  - <your-server-ip>
-  - rke2.home.local
-cni: canal
-EOF
-
-# Enable and start
+curl -sfL https://get.rke2.io | INSTALL_RKE2_BIN_DIR=~/.local/bin sh -
 sudo systemctl enable --now rke2-server
-
-# Get kubeconfig
 sudo cp /etc/rancher/rke2/rke2.yaml ~/.kube/config
-sudo chown $USER ~/.kube/config
-chmod 600 ~/.kube/config
+sudo chown $USER:$USER ~/.kube/config && chmod 600 ~/.kube/config
 export PATH="$HOME/.local/bin:/var/lib/rancher/rke2/bin:$PATH"
+kubectl get nodes
 ```
 
 ---
 
-## Helm (Kubernetes Package Manager)
+### kubeadm (Upstream Reference Install)
 
-**Purpose:** Install, upgrade, and manage complex Kubernetes applications from charts. Most self-hosted apps (cert-manager, ingress-nginx, Longhorn, ArgoCD) are best deployed via Helm.
+> **When to use:** exact upstream behaviour, CKA/CKS study, or specific version without distribution packaging. k3s is almost always easier for homelab.
+
+#### Prerequisites
 
 ```bash
-# Install via Nix (primary)
-nix-env -iA nixpkgs.kubernetes-helm
+sudo modprobe overlay && sudo modprobe br_netfilter
+cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+EOF
+sudo sysctl --system
 
-# Or via Snap
-snap install helm --classic
+nix-env -iA nixpkgs.containerd
+sudo mkdir -p /etc/containerd
+containerd config default | sudo tee /etc/containerd/config.toml
+sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
+sudo systemctl enable --now containerd
 
-# Add common repos
-helm repo add stable https://charts.helm.sh/stable
-helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-helm repo add cert-manager https://charts.jetstack.io
-helm repo add longhorn https://charts.longhorn.io
-helm repo add argo https://argoproj.github.io/argo-helm
-helm repo update
+nix-env -iA nixpkgs.kubeadm nixpkgs.kubelet nixpkgs.kubectl
+sudo systemctl enable kubelet
+```
 
-# Search for a chart
-helm search repo ingress-nginx
+#### Initialise control plane
 
-# Install a chart
-helm install my-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx --create-namespace
+```bash
+sudo kubeadm init \
+  --pod-network-cidr=10.244.0.0/16 \
+  --apiserver-advertise-address=<node-ip> \
+  --cri-socket=unix:///run/containerd/containerd.sock
 
-# List installed releases
-helm list -A
+mkdir -p ~/.kube
+sudo cp /etc/kubernetes/admin.conf ~/.kube/config
+sudo chown $USER:$USER ~/.kube/config
 
-# Upgrade a release
-helm upgrade my-nginx ingress-nginx/ingress-nginx
+# Install CNI — Cilium preferred (eBPF, kube-proxy replacement, L7 policy)
+helm repo add cilium https://helm.cilium.io/
+helm install cilium cilium/cilium --namespace kube-system \
+  --set kubeProxyReplacement=true \
+  --set k8sServiceHost=<node-ip> --set k8sServicePort=6443
+# Flannel fallback (simpler, no L7): kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+```
 
-# Uninstall
-helm uninstall my-nginx -n ingress-nginx
+#### HA control plane (3 nodes)
 
-# Show all configurable values for a chart
-helm show values ingress-nginx/ingress-nginx
+```bash
+sudo kubeadm init \
+  --control-plane-endpoint "lb.home.local:6443" \
+  --upload-certs \
+  --pod-network-cidr=10.244.0.0/16
+# Run the printed --control-plane join command on nodes 2 and 3
+# Run the standard join command on workers
+```
+
+#### Certificate management
+
+```bash
+kubeadm certs check-expiration
+sudo kubeadm certs renew all
+sudo systemctl restart kubelet
+```
+
+> Set a calendar reminder every 11 months — kubeadm certs expire after 1 year and break the cluster silently.
+
+#### Cluster upgrade
+
+```bash
+sudo kubeadm upgrade plan
+sudo kubeadm upgrade apply v1.31.0
+nix-env -iA nixpkgs.kubelet nixpkgs.kubectl && sudo systemctl restart kubelet
+kubectl drain <worker-node> --ignore-daemonsets --delete-emptydir-data
+# On worker: sudo kubeadm upgrade node && sudo systemctl restart kubelet
+kubectl uncordon <worker-node>
+```
+
+#### Join workers
+
+```bash
+kubeadm token create --print-join-command   # regenerate join command if needed
+sudo kubeadm join <control-plane-ip>:6443 \
+  --token <token> \
+  --discovery-token-ca-cert-hash sha256:<hash> \
+  --cri-socket=unix:///run/containerd/containerd.sock
 ```
 
 ---
 
-## Gateway API (Next-Generation Ingress)
+### Cluster API (CAPI) — Declarative Cluster Lifecycle
 
-**Purpose:** The official successor to Kubernetes Ingress resources. Gateway API provides a richer, more expressive routing model — HTTP routes, gRPC routes, TCP routes, TLS termination, traffic splitting, and header-based routing — all as first-class CRDs rather than annotations. cert-manager, ingress-nginx v1.9+, Cilium, and most modern ingress controllers now support it. Deploy Gateway API alongside (or instead of) `Ingress` resources for new workloads.
+**Purpose:** Provision and manage Kubernetes clusters using CRDs. Define a `Cluster` resource and CAPI provisions control plane + worker nodes on your chosen infrastructure provider (Hetzner, AWS, vSphere).
 
 ```bash
-# Install the Gateway API CRDs (standard channel)
+nix-env -iA nixpkgs.clusterctl
+clusterctl init --infrastructure hetzner
+
+clusterctl generate cluster my-workload \
+  --kubernetes-version v1.30.0 \
+  --control-plane-machine-count 1 \
+  --worker-machine-count 2 \
+  > my-workload-cluster.yaml
+
+kubectl apply -f my-workload-cluster.yaml
+clusterctl describe cluster my-workload
+clusterctl get kubeconfig my-workload > ~/.kube/my-workload.kubeconfig
+```
+
+---
+
+## Disk Layout & CLI Tools
+
+```
+/var/lib/rancher/k3s/    ← k3s data, etcd snapshots
+/var/lib/k0s/            ← k0s data
+~/.kube/config           ← kubeconfig (in @home, survives OS updates)
+~/.config/helm/          ← Helm repos and release cache
+~/k8s/                   ← your manifests, values files, helmfile.yaml
+```
+
+#### Install all CLI tools — Nix (primary)
+
+```bash
+nix-env -iA nixpkgs.kubectl nixpkgs.kubernetes-helm nixpkgs.k9s \
+  nixpkgs.argocd nixpkgs.fluxcd nixpkgs.velero nixpkgs.kubeseal \
+  nixpkgs.kind nixpkgs.minikube nixpkgs.clusterctl nixpkgs.talosctl \
+  nixpkgs.cilium-cli nixpkgs.hubble nixpkgs.krew nixpkgs.tekton-client \
+  nixpkgs.helmfile nixpkgs.cosign nixpkgs.trivy nixpkgs.linkerd
+```
+
+**Snap alternatives** (for `kubectl` and `helm` only):
+```bash
+snap install kubectl --classic && snap install helm --classic
+```
+
+> `k9s` on Snap is unmaintained — use Nix. `argocd`, `flux`, `velero`, `kubeseal` are Nix-only.
+
+#### Kubectl plugins (krew)
+
+```bash
+nix-env -iA nixpkgs.krew
+kubectl krew update
+
+kubectl krew install ctx         # kubectl ctx — switch contexts fast
+kubectl krew install ns          # kubectl ns — switch namespaces
+kubectl krew install neat        # clean kubectl get -o yaml output
+kubectl krew install tree        # resource ownership tree
+kubectl krew install whoami      # show current auth identity
+kubectl krew install node-shell  # shell into a node
+kubectl krew install df-pv       # disk usage of PersistentVolumes
+kubectl krew install images      # list all container images in cluster
+kubectl krew install konfig      # merge/split kubeconfig files
+
+kubectl ctx k3s-homelab
+kubectl ns monitoring
+kubectl tree deployment myapp
+kubectl neat get pod myapp-xyz
+kubectl df-pv
+```
+
+---
+
+## Networking & Ingress
+
+### Cilium (eBPF CNI — Primary)
+
+**Purpose:** High-performance CNI built on eBPF. Replaces Flannel, Calico, and kube-proxy in one Helm chart. Enforces NetworkPolicies at the kernel level (no iptables), provides L7 HTTP/gRPC/DNS-aware policy, transparent WireGuard node-to-node encryption, and Hubble for real-time flow observability.
+
+> **Why Cilium over Flannel/Calico:** Flannel is L3-only with zero observability. Calico adds BGP but still relies on iptables. Cilium replaces both plus kube-proxy with a single eBPF stack: faster packet processing, L7 policy without sidecars, built-in flow inspection via Hubble, and optional Gateway API support.
+
+#### Install k3s without Flannel/kube-proxy first
+
+See [k3s install](#k3s-lightweight-cncf-kubernetes) — `--flannel-backend=none --disable-kube-proxy --disable-network-policy` are required before installing Cilium.
+
+#### Install Cilium
+
+```bash
+nix-env -iA nixpkgs.cilium-cli nixpkgs.hubble
+
+helm repo add cilium https://helm.cilium.io/
+helm upgrade --install cilium cilium/cilium \
+  --version 1.17.0 \
+  --namespace kube-system \
+  -f ~/k8s/cilium-values.yaml
+
+cilium status
+cilium connectivity test
+```
+
+```yaml
+# ~/k8s/cilium-values.yaml
+kubeProxyReplacement: true
+k8sServiceHost: "127.0.0.1"           # k3s API server on localhost
+k8sServicePort: "6443"
+
+# Native routing — bypasses iptables entirely
+routingMode: native
+autoDirectNodeRoutes: true
+ipv4NativeRoutingCIDR: "10.42.0.0/16"  # k3s default pod CIDR
+
+# WireGuard transparent encryption (node-to-node)
+encryption:
+  enabled: true
+  type: wireguard
+
+# Hubble observability
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+  ui:
+    enabled: true
+  metrics:
+    enabled: [dns, drop, tcp, http]
+
+# Gateway API support (coexists with NGF)
+gatewayAPI:
+  enabled: true
+
+# Built-in LB IPAM (can replace MetalLB for simple setups)
+loadBalancer:
+  algorithm: maglev
+```
+
+#### Firewall ports (multi-node)
+
+```bash
+# Remove Flannel VXLAN port if migrating from Flannel: --remove-port=8472/udp
+sudo firewall-cmd --add-port=6443/tcp --permanent   # API server
+sudo firewall-cmd --add-port=4240/tcp --permanent   # Cilium health
+sudo firewall-cmd --add-port=4244/tcp --permanent   # Hubble relay
+sudo firewall-cmd --add-port=4245/tcp --permanent   # Hubble peer
+sudo firewall-cmd --add-port=51871/udp --permanent  # WireGuard
+sudo firewall-cmd --add-port=10250/tcp --permanent  # kubelet
+sudo firewall-cmd --reload
+```
+
+#### Hubble — live flow inspection
+
+```bash
+cilium hubble port-forward &
+
+hubble observe --namespace myapp --follow
+hubble observe --namespace myapp --protocol http --follow
+hubble observe --verdict DROPPED --follow              # see policy denials in real time
+hubble observe --from-pod myapp/frontend --to-pod myapp/backend
+```
+
+Port-forward UI: `kubectl -n kube-system port-forward svc/hubble-ui 12000:80 &`
+
+**Caddy:** `hubble.home.local { tls internal; reverse_proxy localhost:12000 }`
+
+#### L7 NetworkPolicy (HTTP-aware)
+
+```yaml
+# Allow only specific HTTP methods — standard NetworkPolicy cannot do this
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-frontend-to-backend
+  namespace: myapp
+spec:
+  endpointSelector:
+    matchLabels:
+      app: backend
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app: frontend
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+          rules:
+            http:
+              - method: GET
+                path: /api/.*
+              - method: POST
+                path: /api/orders
+```
+
+#### DNS-aware egress policy
+
+```yaml
+# Lock down which external hosts a pod can call
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: myapp-egress
+  namespace: myapp
+spec:
+  endpointSelector:
+    matchLabels:
+      app: backend
+  egress:
+    - toFQDNs:
+        - matchName: "api.stripe.com"
+        - matchPattern: "*.amazonaws.com"
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+```
+
+#### Migrating from Flannel to Cilium
+
+```bash
+sudo k3s etcd-snapshot save --name pre-cilium-$(date +%Y%m%d)
+
+# On each node — remove stale CNI config
+sudo rm /etc/cni/net.d/10-flannel.conflist
+sudo ip link delete flannel.1 2>/dev/null || true
+sudo ip link delete cni0 2>/dev/null || true
+
+# Edit /etc/rancher/k3s/config.yaml — add:
+# flannel-backend: "none"
+# disable-kube-proxy: true
+# disable-network-policy: true
+sudo systemctl restart k3s
+
+helm upgrade --install cilium cilium/cilium --namespace kube-system -f ~/k8s/cilium-values.yaml
+cilium status --wait
+```
+
+---
+
+### Standard NetworkPolicy (L3/L4)
+
+Cilium enforces these natively alongside `CiliumNetworkPolicy`.
+
+```yaml
+# Default deny all ingress for a namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: production
+spec:
+  podSelector: {}
+  policyTypes: [Ingress]
+---
+# Allow only same-namespace traffic + DNS egress (multi-tenant pattern)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-cross-namespace
+  namespace: team-a
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - podSelector: {}
+  egress:
+    - to:
+        - podSelector: {}
+    - ports:
+        - port: 53
+          protocol: UDP
+```
+
+---
+
+### MetalLB (Bare-Metal Load Balancer)
+
+**Purpose:** LoadBalancer service support for bare-metal when Cilium's built-in LB IPAM is not sufficient (e.g. when BGP to a real router is needed).
+
+```bash
+helm repo add metallb https://metallb.github.io/metallb
+helm install metallb metallb/metallb --namespace metallb-system --create-namespace
+```
+
+```yaml
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: homelab-pool
+  namespace: metallb-system
+spec:
+  addresses:
+    - 192.168.1.200-192.168.1.220
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: homelab-l2
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+    - homelab-pool
+```
+
+> For simple homelab setups, Cilium's built-in `CiliumLoadBalancerIPPool` + `CiliumL2AnnouncementPolicy` replaces MetalLB entirely.
+
+---
+
+### Gateway API
+
+The official successor to `Ingress`. Declarative, annotation-free routing. Supported by ingress-nginx, NGF, and Cilium.
+
+```bash
+# Standard channel
 kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/latest/download/standard-install.yaml
-
-# For experimental features (GRPCRoute, TCPRoute, etc.)
+# Experimental (adds TCPRoute, TLSRoute, etc.)
 kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/latest/download/experimental-install.yaml
 ```
 
-###Create a GatewayClass and Gateway (ingress-nginx example):
-
 ```yaml
-# ~/k8s/gateway.yaml
-apiVersion: gateway.networking.k8s.io/v1
-kind: GatewayClass
-metadata:
-  name: nginx
-spec:
-  controllerName: k8s.io/ingress-nginx
----
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
@@ -541,11 +825,7 @@ spec:
         mode: Terminate
         certificateRefs:
           - name: my-tls-secret
-```
-
-##### HTTPRoute — route traffic to a service
-
-```yaml
+---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -566,163 +846,447 @@ spec:
           port: 80
 ```
 
-```bash
-kubectl apply -f ~/k8s/gateway.yaml
-kubectl get gateways
-kubectl get httproutes
-```
-
-> **Gateway API vs Ingress:** Use Gateway API for new workloads — it is the upstream direction. Keep existing Ingress resources as-is unless migrating. Both can coexist in the same cluster.
+> Use Gateway API for all new workloads — it is the upstream direction. Ingress and Gateway API can coexist.
 
 ---
 
-## HPA — Horizontal Pod Autoscaler
+### NGINX Gateway Fabric (NGF)
 
-**Purpose:** Automatically scales the number of pod replicas in a Deployment or StatefulSet based on observed CPU utilisation, memory, or custom metrics. HPA is the primary scaling mechanism for stateless workloads — it adjusts replica count between a defined min and max as load changes. Pairs with KEDA (below) for event-driven scaling and VPA/Goldilocks for right-sizing resource requests.
+**Purpose:** NGINX's Gateway API implementation. Built entirely on Gateway API CRDs — no annotations. On this system, Caddy terminates TLS on the host and forwards plain HTTP to NGF via NodePort.
 
-##### CPU-based HPA (simplest — scales when average CPU > 70%)
+#### Architecture
 
-```yaml
-# ~/k8s/hpa-cpu.yaml
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: myapp-hpa
-  namespace: myapp
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: myapp
-  minReplicas: 2
-  maxReplicas: 10
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 70    # scale up when avg CPU > 70%
+```
+Browser → HTTPS → Caddy (host, port 443)
+                   → HTTP → localhost:30080 (NodePort)
+                              → NGF (GatewayClass: nginx)
+                                  ├── HTTPRoute → app pods
+                                  └── GRPCRoute → gRPC pods
 ```
 
-##### Memory + CPU combined HPA
-
-```yaml
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: myapp-hpa
-  namespace: myapp
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: myapp
-  minReplicas: 2
-  maxReplicas: 20
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 70
-    - type: Resource
-      resource:
-        name: memory
-        target:
-          type: AverageValue
-          averageValue: 512Mi
-  behavior:
-    scaleUp:
-      stabilizationWindowSeconds: 60      # wait 60s before scaling up again
-      policies:
-        - type: Pods
-          value: 4
-          periodSeconds: 60               # add at most 4 pods per minute
-    scaleDown:
-      stabilizationWindowSeconds: 300     # wait 5m before scaling down (avoids flapping)
-      policies:
-        - type: Percent
-          value: 25
-          periodSeconds: 60               # remove at most 25% of pods per minute
-```
-
-##### Custom metrics HPA (scale on Prometheus metric via KEDA or Prometheus Adapter)
-
-```yaml
-# Requires either KEDA (recommended) or prometheus-adapter to be installed
-# KEDA approach — scale on HTTP request rate:
-apiVersion: keda.sh/v1alpha1
-kind: ScaledObject
-metadata:
-  name: myapp-http-scaler
-  namespace: myapp
-spec:
-  scaleTargetRef:
-    name: myapp
-  minReplicaCount: 2
-  maxReplicaCount: 50
-  triggers:
-    - type: prometheus
-      metadata:
-        serverAddress: http://prometheus.monitoring.svc:9090
-        metricName: http_requests_per_second
-        threshold: "100"
-        query: |
-          sum(rate(http_requests_total{job="myapp"}[1m]))
-```
-
-##### Imperative HPA (quick testing)
+#### Install
 
 ```bash
-# Create HPA imperatively
-kubectl autoscale deployment myapp --cpu-percent=70 --min=2 --max=10 -n myapp
+# Gateway API CRDs (v1.4.1 required by NGF v2.4.2)
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.1/standard-install.yaml
+kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v2.4.2/deploy/crds.yaml
 
-# Describe HPA — shows current replicas, targets, and last scale event
-kubectl describe hpa myapp-hpa -n myapp
-
-# Watch HPA in real time
-kubectl get hpa -n myapp -w
-
-# Check current metrics
-kubectl top pods -n myapp
-kubectl top nodes
+helm upgrade --install nginx-gateway-fabric \
+  oci://ghcr.io/nginx/charts/nginx-gateway-fabric \
+  --version 2.4.2 \
+  --namespace nginx-gateway --create-namespace \
+  -f ~/k8s/ngf-values.yaml --wait
 ```
 
-##### Prerequisites — metrics-server must be installed
+```yaml
+# ~/k8s/ngf-values.yaml
+nginxGateway:
+  gatewayClassName: nginx
+  replicas: 1
+  gwAPIExperimentalFeatures:
+    enable: false   # GRPCRoute is GA — not needed
+  resources:
+    requests: { cpu: 200m, memory: 256Mi }
+    limits: { cpu: 500m, memory: 512Mi }
+nginx:
+  replicas: 1
+  autoscaling:
+    enable: false
+  container:
+    resources:
+      requests: { cpu: 200m, memory: 256Mi }
+      limits: { cpu: 1000m, memory: 1Gi }
+```
+
+#### Expose via NodePort
 
 ```bash
-# k3s: metrics-server is included by default
-# Other distributions:
-kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+kubectl -n nginx-gateway patch svc nginx-gateway-nginx \
+  --type='json' \
+  -p='[{"op":"replace","path":"/spec/type","value":"NodePort"},
+       {"op":"add","path":"/spec/ports/0/nodePort","value":30080}]'
 
-# Verify
-kubectl get apiservice v1beta1.metrics.k8s.io
-kubectl top nodes
+kubectl -n nginx-gateway get svc nginx-gateway-nginx   # PORT(S): 80:30080/TCP
 ```
 
-> **HPA requires resource requests set on containers.** HPA calculates utilisation as `current_usage / requested`. If `resources.requests.cpu` is unset, HPA cannot calculate CPU percentage and will show `<unknown>` for the metric. Always set requests — use Goldilocks (below) to find the right values.
+#### Gateway and HTTPRoute
+
+```yaml
+# ~/k8s/ngf-gateway.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: nginx-gateway
+  namespace: nginx-gateway
+spec:
+  gatewayClassName: nginx
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: All
+```
+
+```yaml
+# ~/k8s/ngf-httproute-myapp.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: myapp-route
+  namespace: nginx-gateway
+spec:
+  parentRefs:
+    - name: nginx-gateway
+      namespace: nginx-gateway
+      sectionName: http
+  hostnames:
+    - myapp.home.local
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: myapp
+          namespace: myapp-ns    # cross-namespace — needs ReferenceGrant
+          port: 8080
+```
+
+```yaml
+# ~/k8s/ngf-httproute-argocd.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: argocd-route
+  namespace: nginx-gateway
+spec:
+  parentRefs:
+    - name: nginx-gateway
+      namespace: nginx-gateway
+      sectionName: http
+  hostnames:
+    - argocd.home.local
+  rules:
+    - matches:
+        - path: { type: PathPrefix, value: / }
+      backendRefs:
+        - name: argocd-server
+          namespace: argocd
+          port: 80
+```
+
+#### GRPCRoute
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: GRPCRoute
+metadata:
+  name: order-svc-grpc
+  namespace: nginx-gateway
+spec:
+  parentRefs:
+    - name: nginx-gateway
+      namespace: nginx-gateway
+      sectionName: http
+  hostnames:
+    - order-service.internal.home.local
+  rules:
+    - matches:
+        - method:
+            type: Exact
+            service: order.v1.OrderService
+      backendRefs:
+        - name: order-service
+          namespace: services-ns
+          port: 9090
+```
+
+#### ReferenceGrants (cross-namespace access)
+
+```yaml
+# Apply in EACH application namespace that NGF routes to
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: allow-ngf-gateway
+  namespace: myapp-ns
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: nginx-gateway
+    - group: gateway.networking.k8s.io
+      kind: GRPCRoute
+      namespace: nginx-gateway
+  to:
+    - group: ""
+      kind: Service
+```
+
+```bash
+for ns in argocd myapp-ns services-ns; do
+  kubectl apply -f ~/k8s/ngf-referencegrant.yaml -n $ns
+done
+```
+
+#### NGF policy CRDs
+
+| CRD | Purpose |
+|-----|---------|
+| `RateLimitPolicy` | Per-route rate limiting |
+| `ClientSettingsPolicy` | Client→NGINX timeouts and body size |
+| `ProxySettingsPolicy` | NGINX→backend proxy tuning |
+| `ObservabilityPolicy` | OpenTelemetry tracing per route |
+| `AuthenticationFilter` | Basic Auth per route |
+
+```yaml
+# Rate limit example
+apiVersion: gateway.nginx.org/v1alpha1
+kind: RateLimitPolicy
+metadata:
+  name: myapp-ratelimit
+  namespace: nginx-gateway
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: myapp-route
+  policy:
+    rate: 100r/m
+    burst: 20
+    key: ${binary_remote_addr}
+    zoneSize: 10m
+    rejectCode: 429
+```
+
+#### NGF version compatibility
+
+| NGF | Gateway API CRDs | Kubernetes |
+|-----|-----------------|------------|
+| v2.4.2 | v1.4.1 | 1.29–1.34 |
+| v2.3.0 | v1.4.0 | 1.28–1.33 |
+
+```bash
+kubectl get gatewayclass nginx
+kubectl -n nginx-gateway describe gateway nginx-gateway
+kubectl get httproute -A
+kubectl -n nginx-gateway logs -l app.kubernetes.io/name=nginx-gateway-fabric -f
+kubectl -n nginx-gateway logs -l app.kubernetes.io/component=nginx -f
+
+# Upgrade
+helm upgrade nginx-gateway-fabric \
+  oci://ghcr.io/nginx/charts/nginx-gateway-fabric \
+  --version 2.4.3 --namespace nginx-gateway -f ~/k8s/ngf-values.yaml
+```
 
 ---
 
-## Kubernetes RBAC (Role-Based Access Control)
+## TLS & Certificate Management
 
-**Purpose:** Controls who (ServiceAccounts, users, groups) can do what (verbs: get, list, watch, create, update, patch, delete) on which resources (pods, deployments, secrets, configmaps) in which scope (namespace-scoped via Role/RoleBinding, or cluster-wide via ClusterRole/ClusterRoleBinding). Mastering RBAC is required for any production Kubernetes role — it's how you give CI/CD pipelines minimal permissions, isolate tenant namespaces, and audit access.
+### cert-manager (Automatic TLS)
 
-#### Core concepts
+```bash
+helm repo add cert-manager https://charts.jetstack.io
+helm upgrade --install cert-manager cert-manager/cert-manager \
+  --namespace cert-manager --create-namespace \
+  --set installCRDs=true
 
+kubectl get pods -n cert-manager
 ```
-Role / ClusterRole       — defines permissions (what verbs on what resources)
-RoleBinding              — binds a Role to a subject within a namespace
-ClusterRoleBinding       — binds a ClusterRole to a subject cluster-wide
-Subject                  — User, Group, or ServiceAccount
-```
 
-##### Namespace-scoped Role (read-only access to pods and logs in one namespace)
+#### ClusterIssuer — Let's Encrypt HTTP-01 (public domains)
 
 ```yaml
-# ~/k8s/rbac-readonly.yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: admin@example.com
+    privateKeySecretRef:
+      name: letsencrypt-prod-key
+    solvers:
+      - http01:
+          ingress:
+            class: nginx
+```
+
+#### ClusterIssuer — Let's Encrypt DNS-01 via Cloudflare (wildcard certs)
+
+```yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-dns
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: admin@example.com
+    privateKeySecretRef:
+      name: letsencrypt-dns-key
+    solvers:
+      - dns01:
+          cloudflare:
+            apiTokenSecretRef:
+              name: cloudflare-api-token
+              key: api-token
+```
+
+```bash
+kubectl create secret generic cloudflare-api-token \
+  --namespace cert-manager \
+  --from-literal=api-token=<your-cloudflare-token>
+```
+
+#### ClusterIssuer — internal Step-CA (home.local)
+
+```yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: step-ca-internal
+spec:
+  acme:
+    server: https://step-ca.home.local/acme/acme/directory
+    email: admin@home.local
+    privateKeySecretRef:
+      name: step-ca-acme-key
+    caBundle: <base64-encoded-step-ca-root-cert>
+    solvers:
+      - http01:
+          ingress:
+            class: nginx
+```
+
+```bash
+kubectl get certificate -A
+kubectl describe certificate myapp-tls -n myapp
+```
+
+---
+
+## Storage
+
+### Longhorn (Distributed Block Storage)
+
+**Purpose:** Cloud-native distributed block storage for multi-node clusters. Provides replicated `ReadWriteOnce` PVs. Recommended for k3s/RKE2 homelab clusters.
+
+```bash
+nix-env -iA nixpkgs.open-iscsi nixpkgs.nfs-utils
+sudo systemctl enable --now iscsid
+
+helm repo add longhorn https://charts.longhorn.io
+helm upgrade --install longhorn longhorn/longhorn \
+  --namespace longhorn-system --create-namespace \
+  --set defaultSettings.defaultReplicaCount=2
+
+kubectl -n longhorn-system get pods -w
+```
+
+```bash
+# Set as default StorageClass
+kubectl patch storageclass longhorn \
+  -p '{"metadata":{"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+kubectl patch storageclass local-path \
+  -p '{"metadata":{"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
+
+kubectl -n longhorn-system port-forward svc/longhorn-frontend 8080:80
+```
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: myapp-data
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 10Gi
+```
+
+**Caddy:** `longhorn.home.local { tls internal; reverse_proxy localhost:8080 }`
+
+---
+
+### Rook-Ceph (Production Distributed Storage)
+
+**Purpose:** Production-grade distributed storage. Rook manages Ceph, providing block storage, S3-compatible object storage, and `ReadWriteMany` filesystem. Use when you need more than Longhorn: multi-site replication, S3 buckets, or large-scale RWX.
+
+```bash
+helm repo add rook-release https://charts.rook.io/release
+helm install rook-ceph rook-release/rook-ceph \
+  --namespace rook-ceph --create-namespace
+```
+
+```yaml
+# ~/k8s/rook-cluster.yaml
+apiVersion: ceph.rook.io/v1
+kind: CephCluster
+metadata:
+  name: rook-ceph
+  namespace: rook-ceph
+spec:
+  cephVersion:
+    image: quay.io/ceph/ceph:v18
+  dataDirHostPath: /var/lib/rook
+  storage:
+    useAllNodes: true
+    useAllDevices: true
+```
+
+```bash
+kubectl apply -f ~/k8s/rook-cluster.yaml
+kubectl -n rook-ceph get cephcluster
+```
+
+---
+
+### Resource Quotas & LimitRanges
+
+```yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-quota
+  namespace: production
+spec:
+  hard:
+    requests.cpu: "4"
+    requests.memory: 8Gi
+    limits.cpu: "8"
+    limits.memory: 16Gi
+    pods: "20"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-limits
+  namespace: production
+spec:
+  limits:
+    - default:
+        memory: 512Mi
+        cpu: 500m
+      defaultRequest:
+        memory: 128Mi
+        cpu: 100m
+      type: Container
+```
+
+---
+
+## Security & Policy
+
+### Kubernetes RBAC
+
+```yaml
+# Namespace-scoped read-only Role
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -754,10 +1318,8 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ```
 
-##### CI/CD ServiceAccount (minimal deploy permissions for a pipeline)
-
 ```yaml
-# ~/k8s/rbac-cicd.yaml
+# CI/CD ServiceAccount — minimal deploy permissions
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -778,7 +1340,7 @@ rules:
     verbs: ["get", "list", "update", "patch", "create"]
   - apiGroups: [""]
     resources: ["pods"]
-    verbs: ["get", "list", "watch", "delete"]   # delete to force rollout
+    verbs: ["get", "list", "watch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -796,133 +1358,810 @@ roleRef:
 ```
 
 ```bash
-kubectl apply -f ~/k8s/rbac-cicd.yaml
-
-# Extract a kubeconfig for the CI/CD ServiceAccount
-kubectl create token cicd-deployer -n myapp --duration=8760h
-# Use this token in GitHub Actions secrets as KUBECONFIG
-```
-
-#### ClusterRole (cluster-wide — use sparingly)
-
-```yaml
-# ~/k8s/rbac-cluster-readonly.yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: cluster-viewer
-rules:
-  - apiGroups: [""]
-    resources: ["nodes", "namespaces", "persistentvolumes"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["apps"]
-    resources: ["deployments", "statefulsets", "daemonsets"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["metrics.k8s.io"]
-    resources: ["nodes", "pods"]
-    verbs: ["get", "list"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: cluster-viewer-binding
-subjects:
-  - kind: Group
-    name: platform-team       # matches OIDC group if using Dex or Keycloak
-    apiGroup: rbac.authorization.k8s.io
-roleRef:
-  kind: ClusterRole
-  name: cluster-viewer
-  apiGroup: rbac.authorization.k8s.io
-```
-
-##### Built-in ClusterRoles (use instead of creating your own when possible)
-
-```bash
-# List all built-in ClusterRoles
-kubectl get clusterroles | grep -v system:
-
-# Useful built-ins:
-# view             — read-only access to most resources (namespace-scoped)
-# edit             — read/write most resources, cannot change RBAC
-# admin            — full namespace access, can manage RBAC within the namespace
-# cluster-admin    — superuser — avoid granting to CI/CD pipelines
-
-# Grant 'edit' to a user in a specific namespace
-kubectl create rolebinding myuser-edit \
-  --clusterrole=edit \
-  --user=developer@example.com \
-  --namespace=myapp
-```
-
-##### Audit and debug RBAC
-
-```bash
-# Check what a ServiceAccount / user can do
 kubectl auth can-i create deployments --as=system:serviceaccount:myapp:cicd-deployer -n myapp
-kubectl auth can-i delete secrets --as=system:serviceaccount:myapp:cicd-deployer -n myapp
-
-# List all permissions for a ServiceAccount
 kubectl auth can-i --list --as=system:serviceaccount:myapp:cicd-deployer -n myapp
+kubectl create token cicd-deployer -n myapp --duration=8760h
 
-# Who has access to secrets in a namespace?
-kubectl get rolebindings,clusterrolebindings -A -o json | \
-  python3 -c "
-import json,sys
-d=json.load(sys.stdin)
-for item in d['items']:
-    for s in item.get('subjects',[]):
-        if item.get('roleRef',{}).get('name','').find('secret') != -1 or True:
-            print(item['metadata']['name'], s.get('name',''), item['roleRef']['name'])
-" | grep -i secret
-```
-
-##### Namespace isolation with RBAC + NetworkPolicy (multi-tenant pattern)
-
-```yaml
-# Each team gets their own namespace and ServiceAccount
-# with a Role scoped to that namespace only.
-# Combined with a NetworkPolicy that blocks cross-namespace traffic:
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: deny-cross-namespace
-  namespace: team-a
-spec:
-  podSelector: {}
-  policyTypes: [Ingress, Egress]
-  ingress:
-    - from:
-        - podSelector: {}   # allow from same namespace
-  egress:
-    - to:
-        - podSelector: {}   # allow to same namespace
-    - ports:
-        - port: 53           # allow DNS
-          protocol: UDP
+# Built-in ClusterRoles — use before creating custom ones
+kubectl create rolebinding myuser-edit \
+  --clusterrole=edit --user=developer@example.com --namespace=myapp
+# view (read-only), edit (read/write), admin (full namespace), cluster-admin (superuser — avoid for CI)
 ```
 
 ---
 
-## Karpenter (Node Autoscaling)
+### Pod Security Admission (PSA)
 
-**Purpose:** Node autoscaler that provisions exactly the right EC2/cloud VM instance type for pending pods — rather than pre-defining node groups. When a pod is unschedulable, Karpenter launches a new node with the cheapest/fastest fit, and terminates idle nodes aggressively. Most useful when running k3s agents on cloud VMs (Hetzner, AWS, DigitalOcean) and you want cost-efficient autoscaling.
+**Purpose:** Kubernetes 1.25+ enforces security standards at the namespace level via labels.
+
+| Profile | Description | Use Case |
+|---------|-------------|----------|
+| `privileged` | No restrictions | kube-system, CNI pods |
+| `baseline` | Prevents known privilege escalations | Most workloads |
+| `restricted` | Hardened; requires non-root, read-only root FS | Production apps |
 
 ```bash
-# Install Karpenter (Helm — configure for your cloud provider)
-helm repo add karpenter https://charts.karpenter.sh
-helm repo update
+kubectl label namespace myapp \
+  pod-security.kubernetes.io/enforce=restricted \
+  pod-security.kubernetes.io/enforce-version=latest \
+  pod-security.kubernetes.io/warn=restricted \
+  pod-security.kubernetes.io/audit=restricted
 
+# Dry-run — preview what would fail before enforcing
+kubectl label namespace myapp pod-security.kubernetes.io/enforce=restricted --dry-run=server
+```
+
+### SecurityContext — production hardening
+
+```yaml
+spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 3000
+    fsGroup: 2000
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: myapp
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop: [ALL]
+          add: [NET_BIND_SERVICE]    # only what is needed
+      volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: cache
+          mountPath: /app/cache
+  volumes:
+    - name: tmp
+      emptyDir: {}
+    - name: cache
+      emptyDir: {}
+```
+
+---
+
+### Kyverno (Kubernetes-Native Policy Engine)
+
+**Purpose:** Write policies as YAML CRDs — no Rego. Validates, mutates, and generates resources. Simpler than OPA/Gatekeeper for most teams.
+
+```bash
+helm repo add kyverno https://kyverno.github.io/kyverno/
+helm install kyverno kyverno/kyverno --namespace kyverno --create-namespace
+```
+
+```yaml
+# Require resource limits on all pods
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-resource-limits
+spec:
+  validationFailureAction: Enforce
+  rules:
+    - name: check-limits
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+      validate:
+        message: "Resource limits are required."
+        pattern:
+          spec:
+            containers:
+              - resources:
+                  limits:
+                    memory: "?*"
+                    cpu: "?*"
+---
+# Disallow privileged containers
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-privileged
+spec:
+  validationFailureAction: Enforce
+  rules:
+    - name: no-privileged
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+      validate:
+        message: "Privileged containers are not allowed."
+        pattern:
+          spec:
+            containers:
+              - =(securityContext):
+                  =(privileged): false
+---
+# Auto-generate NetworkPolicy + PSS labels for every new managed namespace
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: namespace-bootstrap
+spec:
+  rules:
+    - name: add-default-deny
+      match:
+        any:
+          - resources:
+              kinds: [Namespace]
+              selector:
+                matchLabels:
+                  managed: "true"
+      generate:
+        apiVersion: networking.k8s.io/v1
+        kind: NetworkPolicy
+        name: default-deny-ingress
+        namespace: "{{request.object.metadata.name}}"
+        synchronize: true
+        data:
+          spec:
+            podSelector: {}
+            policyTypes: [Ingress]
+    - name: add-pss-labels
+      match:
+        any:
+          - resources:
+              kinds: [Namespace]
+              selector:
+                matchLabels:
+                  managed: "true"
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            labels:
+              pod-security.kubernetes.io/enforce: restricted
+              pod-security.kubernetes.io/enforce-version: latest
+```
+
+```bash
+# Creating a new namespace now auto-generates NetworkPolicy + PSS labels
+kubectl create namespace myapp && kubectl label namespace myapp managed=true
+
+kubectl get policyreport -A
+kubectl describe clusterpolicyreport
+kubectl apply -f policy.yaml --dry-run=server
+```
+
+---
+
+### OPA/Gatekeeper (Rego-Based Policy Engine)
+
+**Purpose:** More expressive than Kyverno for complex cross-resource validation and external data. Steeper learning curve (Rego language).
+
+```bash
+helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts
+helm install gatekeeper gatekeeper/gatekeeper --namespace gatekeeper-system --create-namespace
+```
+
+```yaml
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequiredlabels
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequiredLabels
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            labels:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequiredlabels
+        violation[{"msg": msg}] {
+          provided := {label | input.review.object.metadata.labels[label]}
+          required := {label | label := input.parameters.labels[_]}
+          missing := required - provided
+          count(missing) > 0
+          msg := sprintf("Missing required labels: %v", [missing])
+        }
+---
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequiredLabels
+metadata:
+  name: require-team-label
+spec:
+  match:
+    kinds:
+      - apiGroups: ["apps"]
+        kinds: ["Deployment"]
+    namespaces: [myapp, staging, production]
+  parameters:
+    labels: ["team", "environment"]
+```
+
+---
+
+### Falco (Runtime Threat Detection)
+
+**Purpose:** CNCF-graduated runtime security. Uses eBPF to inspect every syscall — detecting shell executions inside containers, unexpected file writes, privilege escalation, and unexpected outbound connections in real time.
+
+```bash
+helm repo add falcosecurity https://falcosecurity.github.io/charts
+helm install falco falcosecurity/falco \
+  --namespace falco --create-namespace \
+  --set driver.kind=ebpf \
+  --set falcosidekick.enabled=true \
+  --set falcosidekick.config.slack.webhookurl="https://hooks.slack.com/..." \
+  --set falcosidekick.config.ntfy.hostport="http://ntfy.home.local" \
+  --set falcosidekick.config.ntfy.topic="falco-alerts"
+```
+
+```yaml
+# /etc/falco/rules.d/custom.yaml
+- rule: Shell in Container
+  desc: A shell was spawned in a container
+  condition: >
+    spawned_process and container and
+    proc.name in (bash, sh, zsh, dash) and
+    not proc.pname in (bash, sh, zsh)
+  output: >
+    Shell in container (user=%user.name container=%container.name
+    image=%container.image.repository:%container.image.tag cmd=%proc.cmdline)
+  priority: WARNING
+
+- rule: Unexpected Outbound Connection
+  desc: Container made an outbound connection to an unexpected IP
+  condition: >
+    outbound and container and
+    not fd.sip in (192.168.0.0/16, 10.0.0.0/8) and
+    not proc.name in (curl, wget, apt-get)
+  output: >
+    Unexpected outbound (container=%container.name ip=%fd.sip cmd=%proc.cmdline)
+  priority: WARNING
+```
+
+```bash
+kubectl logs -n falco -l app.kubernetes.io/name=falco -f
+kubectl port-forward -n falco svc/falco-falcosidekick-ui 2802:2802
+```
+
+---
+
+## Secrets Management
+
+### Sealed Secrets
+
+**Purpose:** Encrypt Kubernetes Secrets for safe Git storage. The in-cluster controller holds the private key and decrypts at apply time.
+
+```bash
+helm repo add sealed-secrets https://bitnami-labs.github.io/sealed-secrets
+helm install sealed-secrets sealed-secrets/sealed-secrets -n kube-system
+
+nix-env -iA nixpkgs.kubeseal
+
+kubectl create secret generic mysecret \
+  --from-literal=password=changeme \
+  --dry-run=client -o yaml | \
+  kubeseal --format yaml > ~/k8s/mysecret-sealed.yaml
+
+kubectl apply -f ~/k8s/mysecret-sealed.yaml
+```
+
+> Back up the sealing key: `kubectl get secret -n kube-system sealed-secrets-key -o yaml`. Losing it makes all sealed secrets unrecoverable.
+
+---
+
+### External Secrets Operator (ESO)
+
+**Purpose:** Sync secrets from OpenBao, Infisical, HashiCorp Vault, AWS Secrets Manager, GCP Secret Manager, or Azure Key Vault into native Kubernetes `Secret` objects.
+
+```bash
+helm repo add external-secrets https://charts.external-secrets.io
+helm install external-secrets external-secrets/external-secrets \
+  --namespace external-secrets --create-namespace \
+  --set installCRDs=true
+```
+
+#### Connect to OpenBao
+
+```yaml
+apiVersion: external-secrets.io/v1beta1
+kind: ClusterSecretStore
+metadata:
+  name: openbao
+spec:
+  provider:
+    vault:
+      server: "http://openbao.home.local:8200"
+      path: "secret"
+      version: "v2"
+      auth:
+        tokenSecretRef:
+          name: openbao-token
+          namespace: external-secrets
+          key: token
+```
+
+```bash
+kubectl create secret generic openbao-token \
+  --namespace external-secrets \
+  --from-literal=token=<your-openbao-token>
+```
+
+#### Connect to Infisical
+
+```yaml
+apiVersion: external-secrets.io/v1beta1
+kind: ClusterSecretStore
+metadata:
+  name: infisical
+spec:
+  provider:
+    infisical:
+      auth:
+        universalAuthCredentials:
+          clientId:
+            name: infisical-creds
+            namespace: external-secrets
+            key: clientId
+          clientSecret:
+            name: infisical-creds
+            namespace: external-secrets
+            key: clientSecret
+      secretsScope:
+        projectSlug: myproject
+        environmentSlug: prod
+```
+
+#### Pull a secret from OpenBao
+
+```yaml
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: myapp-db-secret
+  namespace: myapp
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: openbao
+    kind: ClusterSecretStore
+  target:
+    name: myapp-db-credentials
+    creationPolicy: Owner
+  data:
+    - secretKey: DB_PASSWORD
+      remoteRef:
+        key: myapp/database
+        property: password
+    - secretKey: DB_USERNAME
+      remoteRef:
+        key: myapp/database
+        property: username
+```
+
+```bash
+kubectl get externalsecret -n myapp
+kubectl describe externalsecret myapp-db-secret -n myapp
+```
+
+> **Pattern:** Store all secrets in OpenBao or Infisical. Reference via `ExternalSecret` CRDs. Never put plaintext values in Kubernetes YAML — even in private Git repos.
+
+---
+
+## Workload Patterns
+
+### Init Containers and Sidecars
+
+**Init containers** run to completion before main containers start — DB migrations, waiting for dependencies, fetching config from a secret store.
+
+```yaml
+spec:
+  initContainers:
+    - name: db-migrate
+      image: myapp:v1.4.2
+      command: ["python", "manage.py", "migrate", "--noinput"]
+      env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: myapp-secrets
+              key: database-url
+  containers:
+    - name: myapp
+      image: myapp:v1.4.2
+```
+
+**Sidecar containers** run alongside the main container for its full lifetime. Common uses: log shipping (Fluentbit), metrics exporters. With Cilium as CNI, you do **not** need Envoy sidecars for L7 visibility — Cilium handles this at the node level.
+
+```yaml
+spec:
+  containers:
+    - name: myapp
+      image: myapp:latest
+    - name: log-shipper
+      image: fluent/fluent-bit:latest
+      volumeMounts:
+        - name: log-volume
+          mountPath: /var/log/app
+  volumes:
+    - name: log-volume
+      emptyDir: {}
+```
+
+---
+
+### StatefulSets
+
+Use for databases, Kafka, Elasticsearch, Redis Cluster — anything needing stable identity or per-pod PVCs.
+
+```yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: data
+spec:
+  serviceName: postgres
+  replicas: 3
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          env:
+            - { name: PGDATA, value: /var/lib/postgresql/data/pgdata }
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/postgresql/data }
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 20Gi
+---
+# Headless Service for stable DNS (postgres-0.postgres.data.svc.cluster.local)
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: data
+spec:
+  clusterIP: None
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+```
+
+---
+
+### Jobs
+
+**Purpose:** Run a pod to completion — batch processing, DB migrations, one-off tasks.
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-seed
+  namespace: myapp
+spec:
+  completions: 1
+  parallelism: 1
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 3600
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: seed
+          image: myapp:latest
+          command: ["python", "manage.py", "seed_db"]
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: myapp-secrets
+                  key: database-url
+```
+
+```bash
+kubectl apply -f ~/k8s/job-db-seed.yaml
+kubectl logs job/db-seed -n myapp
+kubectl wait --for=condition=complete job/db-seed -n myapp --timeout=300s
+```
+
+#### Indexed jobs (parallel processing with stable shard IDs)
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: process-shards
+spec:
+  completions: 10
+  parallelism: 3
+  completionMode: Indexed    # each pod gets JOB_COMPLETION_INDEX (0-9)
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: worker
+          image: myapp:latest
+          command: ["python", "process.py", "--shard=$(JOB_COMPLETION_INDEX)"]
+```
+
+---
+
+### CronJobs
+
+```yaml
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: daily-report
+  namespace: myapp
+spec:
+  schedule: "0 6 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  startingDeadlineSeconds: 300
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: report
+              image: myapp:latest
+              command: ["python", "generate_report.py"]
+              resources:
+                requests: { cpu: 200m, memory: 256Mi }
+                limits: { cpu: 500m, memory: 512Mi }
+```
+
+```bash
+kubectl create job --from=cronjob/daily-report manual-$(date +%s) -n myapp
+kubectl patch cronjob daily-report -n myapp -p '{"spec":{"suspend":true}}'
+kubectl get jobs -n myapp --sort-by='.metadata.creationTimestamp'
+```
+
+| Schedule | Meaning |
+|----------|---------|
+| `0 * * * *` | Every hour |
+| `*/15 * * * *` | Every 15 minutes |
+| `0 2 * * *` | Daily at 2 AM |
+| `0 2 * * 0` | Weekly, Sunday 2 AM |
+| `0 2 1 * *` | Monthly, 1st at 2 AM |
+| `@hourly` | Shorthand for `0 * * * *` |
+
+---
+
+### Topology Spread Constraints
+
+**Purpose:** Spread pods evenly across nodes/zones — preventing all replicas landing on one node.
+
+```yaml
+spec:
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: DoNotSchedule   # hard: pod stays Pending if can't spread
+      labelSelector:
+        matchLabels:
+          app: myapp
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway  # soft: best-effort
+      labelSelector:
+        matchLabels:
+          app: myapp
+```
+
+---
+
+### Priority Classes
+
+**Purpose:** Ensure critical workloads get scheduled, even at the cost of evicting lower-priority pods.
+
+```yaml
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: critical-workload
+value: 1000000
+globalDefault: false
+description: "Production critical. Preempts best-effort pods."
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: best-effort
+value: -100
+preemptionPolicy: Never
+description: "Background batch. Evicted first under pressure."
+```
+
+```yaml
+spec:
+  template:
+    spec:
+      priorityClassName: critical-workload
+```
+
+> Built-in system classes: `system-cluster-critical` (2000000999) and `system-node-critical` (2000001000) — used by kube-dns, Cilium.
+
+---
+
+### Pod Disruption Budgets
+
+```yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: myapp-pdb
+  namespace: myapp
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: myapp
+```
+
+```bash
+kubectl apply -f myapp-pdb.yaml
+kubectl get pdb -n myapp
+kubectl describe pdb myapp-pdb -n myapp
+```
+
+PDBs only protect against **voluntary** disruptions (drains, upgrades) — not node crashes.
+
+---
+
+### Debugging with kubectl debug
+
+```bash
+# Attach netshoot to a running pod (curl, dig, tcpdump, ss, iperf3)
+kubectl debug -it myapp-pod-xyz --image=nicolaka/netshoot --target=myapp -n myapp
+
+# Debug a distroless container (exec is impossible — use ephemeral container)
+kubectl debug -it myapp-pod-xyz --image=busybox --target=myapp -n myapp
+
+# Shell into a node
+kubectl debug node/k3s-node1 --image=busybox -it -- chroot /host
+```
+
+---
+
+## Autoscaling
+
+### HPA — Horizontal Pod Autoscaler
+
+```yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: myapp-hpa
+  namespace: myapp
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: myapp
+  minReplicas: 2
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: AverageValue
+          averageValue: 512Mi
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Pods
+          value: 4
+          periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 25
+          periodSeconds: 60
+```
+
+```bash
+kubectl autoscale deployment myapp --cpu-percent=70 --min=2 --max=10 -n myapp
+kubectl describe hpa myapp-hpa -n myapp
+kubectl get hpa -n myapp -w
+kubectl top pods -n myapp
+```
+
+> **HPA requires resource requests.** Without `resources.requests.cpu`, HPA shows `<unknown>` — it calculates utilisation as `current / requested`. Use Goldilocks to find the right values.
+
+---
+
+### KEDA (Event-Driven Autoscaling)
+
+**Purpose:** Scale to zero and back based on external event sources — queue depth (RabbitMQ, Kafka, NATS), cron schedules, Prometheus metrics, HTTP traffic, and 60+ scalers.
+
+```bash
+helm repo add kedacore https://kedacore.github.io/charts
+helm install keda kedacore/keda --namespace keda --create-namespace
+```
+
+```yaml
+# Scale on RabbitMQ queue depth (scale to zero when idle)
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: worker-scaler
+  namespace: myapp
+spec:
+  scaleTargetRef:
+    name: worker-deployment
+  minReplicaCount: 0
+  maxReplicaCount: 20
+  triggers:
+    - type: rabbitmq
+      metadata:
+        host: amqp://user:pass@rabbitmq.myapp.svc:5672/
+        queueName: jobs
+        queueLength: "5"
+---
+# Scale on Prometheus metric
+triggers:
+  - type: prometheus
+    metadata:
+      serverAddress: http://prometheus.monitoring.svc:9090
+      metricName: http_requests_pending
+      threshold: "100"
+      query: sum(http_requests_pending{job="myapp"})
+```
+
+```bash
+kubectl get scaledobjects -n myapp
+kubectl describe scaledobject worker-scaler -n myapp
+```
+
+---
+
+### Karpenter (Node Autoscaling)
+
+**Purpose:** Node autoscaler that provisions exactly the right cloud VM instance type for pending pods.
+
+```bash
+helm repo add karpenter https://charts.karpenter.sh
 helm upgrade --install karpenter karpenter/karpenter \
   --namespace karpenter --create-namespace \
   --set settings.clusterName=homelab \
   --set settings.interruptionQueue=homelab-karpenter
 ```
 
-##### NodePool — define acceptable node shapes
-
 ```yaml
-# ~/k8s/karpenter-nodepool.yaml
 apiVersion: karpenter.sh/v1
 kind: NodePool
 metadata:
@@ -948,1247 +2187,71 @@ spec:
     consolidateAfter: 1m
 ```
 
-```bash
-kubectl apply -f ~/k8s/karpenter-nodepool.yaml
-# Watch Karpenter launch nodes as pending pods arrive
-kubectl logs -n karpenter -l app.kubernetes.io/name=karpenter -f
-```
-
 ---
 
-## Talos Linux (Immutable Kubernetes OS)
+### Goldilocks (Resource Right-Sizing)
 
-**Purpose:** Talos is a minimal, API-only, immutable Linux distribution purpose-built for Kubernetes. There is no SSH, no shell, no package manager — all cluster operations go through the `talosctl` API. This eliminates an entire class of security risks and makes clusters fully declarative. Ideal for homelab users who want a production-grade, GitOps-managed cluster.
-
-### Install
+**Purpose:** Uses VPA in recommendation mode to suggest the right CPU/memory requests per container based on actual usage.
 
 ```bash
-# Install talosctl via Nix
-nix-env -iA nixpkgs.talosctl
-
-# Download the Talos ISO for your hardware
-# https://github.com/siderolabs/talos/releases
-
-# Or use the factory image builder for custom hardware:
-# https://factory.talos.dev
-```
-
-##### Bootstrap a single-node cluster
-
-```bash
-# Generate machine config
-talosctl gen config homelab https://<node-ip>:6443 \
-  --output-dir ~/talos-config/
-
-# Apply config to the node (boot from ISO first)
-talosctl apply-config --insecure \
-  --nodes <node-ip> \
-  --file ~/talos-config/controlplane.yaml
-
-# Bootstrap etcd (first control plane node only)
-talosctl bootstrap --nodes <node-ip> \
-  --talosconfig ~/talos-config/talosconfig
-
-# Get kubeconfig
-talosctl kubeconfig ~/.kube/config \
-  --nodes <node-ip> \
-  --talosconfig ~/talos-config/talosconfig
-
-# Verify
-kubectl get nodes
-```
-
-#### Common operations
-
-```bash
-# Check node health
-talosctl health --nodes <node-ip> --talosconfig ~/talos-config/talosconfig
-
-# Read kernel logs
-talosctl dmesg --nodes <node-ip>
-
-# Upgrade Talos (zero-downtime, in-place)
-talosctl upgrade --nodes <node-ip> --image ghcr.io/siderolabs/installer:<version>
-
-# Upgrade Kubernetes
-talosctl upgrade-k8s --to 1.30.0 --nodes <node-ip>
-
-# Get a shell inside a pod (only way to interact with running workloads)
-kubectl exec -it <pod> -- /bin/sh
-```
-
-> Talos enforces immutability at the OS level — the root filesystem is read-only. All customisation is done via machine configs applied through `talosctl`.
-
----
-
-## kubeadm (Upstream Reference Install)
-
-**Purpose:** The official Kubernetes installation tool from the Kubernetes project. Every distribution — k3s, k0s, RKE2 — is built on top of what kubeadm establishes. If you want vanilla upstream Kubernetes with no vendor customisation, full control over every component, or you are building for a CKA exam environment, kubeadm is the right path. It also gives you the deepest understanding of how Kubernetes actually works under the hood.
-
-> **When to choose kubeadm over k3s/RKE2:** kubeadm is best when you need exact upstream behaviour, when you are studying for CKA/CKS, or when your organisation requires a specific Kubernetes version without any distribution packaging. For homelab self-hosting, k3s is almost always easier and equally capable. kubeadm requires you to install and manage containerd, the CNI plugin, and the kubelet service manually — steps k3s and RKE2 handle automatically.
-
-##### Prerequisites — kernel modules and sysctl
-
-```bash
-# Enable required kernel modules
-sudo modprobe overlay
-sudo modprobe br_netfilter
-
-# Persist across reboots (in @data via OverlayFS on Shani OS)
-echo "overlay" | sudo tee /etc/modules-load.d/k8s.conf
-echo "br_netfilter" | sudo tee -a /etc/modules-load.d/k8s.conf
-
-# Required sysctl parameters
-cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
-net.bridge.bridge-nf-call-iptables  = 1
-net.bridge.bridge-nf-call-ip6tables = 1
-net.ipv4.ip_forward                 = 1
-EOF
-sudo sysctl --system
-
-# Verify
-lsmod | grep -e overlay -e br_netfilter
-sysctl net.ipv4.ip_forward
-```
-
-##### Install containerd (container runtime)
-
-kubeadm does not bundle a container runtime — you install containerd separately.
-
-```bash
-# Install containerd via Nix and configure it as a system service
-nix-env -iA nixpkgs.containerd
-
-# Generate default config
-sudo mkdir -p /etc/containerd
-containerd config default | sudo tee /etc/containerd/config.toml
-
-# Enable SystemdCgroup (required for kubeadm clusters)
-sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
-
-# Start containerd
-sudo systemctl enable --now containerd
-
-# Verify
-sudo ctr version
-```
-
-##### Install kubeadm, kubelet, kubectl
-
-```bash
-# Install via Nix (primary)
-nix-env -iA nixpkgs.kubeadm nixpkgs.kubelet nixpkgs.kubectl
-
-# Enable kubelet (it will stay in a crash loop until kubeadm init — this is normal)
-sudo systemctl enable kubelet
-```
-
----
-
-##### Initialise the control plane
-
-```bash
-# Single-control-plane init (most homelab and dev uses)
-sudo kubeadm init \
-  --pod-network-cidr=10.244.0.0/16 \
-  --apiserver-advertise-address=<node-ip> \
-  --cri-socket=unix:///run/containerd/containerd.sock
-
-# Set up kubeconfig for your user
-mkdir -p ~/.kube
-sudo cp /etc/kubernetes/admin.conf ~/.kube/config
-sudo chown $USER:$USER ~/.kube/config
-chmod 600 ~/.kube/config
-
-# Verify the control plane is running
-kubectl get nodes           # STATUS: NotReady — CNI not yet installed
-kubectl get pods -A         # coredns pods will be Pending — also needs CNI
-```
-
-> **Why the node is NotReady after init:** kubelet cannot configure pod networking until a CNI plugin is installed. Install the CNI immediately after init.
-
-##### Install a CNI plugin
-
-Flannel is the simplest. Calico adds NetworkPolicy enforcement. Cilium adds eBPF and Hubble observability.
-
-```bash
-# Option A — Flannel (simplest, no NetworkPolicy support)
-kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
-
-# Option B — Calico (NetworkPolicy support, widely used in production)
-kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/calico.yaml
-
-# Option C — Cilium (eBPF, NetworkPolicy, Hubble observability)
-# See the Cilium section in Platform Engineering for install steps
-
-# After installing the CNI, the node and coredns pods should become Ready within ~60 seconds
-kubectl get nodes -w
-kubectl get pods -A -w
-```
-
----
-
-##### Get the worker join command
-
-```bash
-# kubeadm prints this at the end of `init` — if you missed it, regenerate it:
-kubeadm token create --print-join-command
-
-# The output looks like:
-# sudo kubeadm join <control-plane-ip>:6443 \
-#   --token <token> \
-#   --discovery-token-ca-cert-hash sha256:<hash>
-```
-
-##### Join worker nodes
-
-Run on each worker node after installing containerd, kubeadm, and kubelet:
-
-```bash
-# Same prerequisites as the control plane (kernel modules, sysctl, containerd, kubelet)
-# Then run the join command:
-sudo kubeadm join <control-plane-ip>:6443 \
-  --token <token> \
-  --discovery-token-ca-cert-hash sha256:<hash> \
-  --cri-socket=unix:///run/containerd/containerd.sock
-
-# Verify on the control plane
-kubectl get nodes
-```
-
----
-
-##### High availability control plane (3 control plane nodes)
-
-For production clusters, run 3 control plane nodes behind a load balancer. kubeadm supports this via the `--control-plane-endpoint` flag pointing to the load balancer IP/hostname.
-
-```bash
-# Init the first control plane node
-sudo kubeadm init \
-  --control-plane-endpoint "lb.home.local:6443" \
-  --upload-certs \
-  --pod-network-cidr=10.244.0.0/16
-
-# The output includes a second join command for additional control plane nodes:
-# sudo kubeadm join lb.home.local:6443 \
-#   --token <token> \
-#   --discovery-token-ca-cert-hash sha256:<hash> \
-#   --control-plane \
-#   --certificate-key <cert-key>
-
-# Run that command on the second and third control plane nodes
-# Then join worker nodes with the standard join command (no --control-plane flag)
-```
-
----
-
-#### Certificate management
-
-Kubernetes control plane certificates expire after 1 year by default. Manage them proactively.
-
-```bash
-# Check expiry dates for all certs
-kubeadm certs check-expiration
-
-# Renew all certificates (run before expiry — does not require a restart)
-sudo kubeadm certs renew all
-
-# Renew a specific certificate
-sudo kubeadm certs renew apiserver
-sudo kubeadm certs renew scheduler.conf
-sudo kubeadm certs renew controller-manager.conf
-
-# After renewing, restart the control plane components
-sudo systemctl restart kubelet
-# Or kill the static pods (they restart automatically from manifests in /etc/kubernetes/manifests/)
-```
-
-> **Set a reminder:** kubeadm clusters provisioned for homelab use frequently break after exactly one year when certs expire. Add a calendar reminder or a systemd timer to run `kubeadm certs renew all` every 11 months.
-
----
-
-#### Cluster upgrade
-
-kubeadm manages in-place cluster upgrades. Upgrade one minor version at a time — skipping versions is not supported.
-
-```bash
-# Check what versions are available to upgrade to
-sudo kubeadm upgrade plan
-
-# Upgrade the control plane (run on the control plane node)
-sudo kubeadm upgrade apply v1.31.0
-
-# Upgrade kubelet and kubectl on the control plane node
-# (update the Nix package, then restart)
-nix-env -iA nixpkgs.kubelet nixpkgs.kubectl
-sudo systemctl restart kubelet
-
-# Drain worker nodes one at a time, upgrade kubelet, uncordon
-kubectl drain <worker-node> --ignore-daemonsets --delete-emptydir-data
-# On the worker node:
-nix-env -iA nixpkgs.kubeadm nixpkgs.kubelet
-sudo kubeadm upgrade node
-sudo systemctl restart kubelet
-# Back on the control plane:
-kubectl uncordon <worker-node>
-```
-
----
-
-#### Common operations
-
-```bash
-# Check control plane component health
-kubectl get componentstatuses
-kubectl get pods -n kube-system
-
-# View cluster-info
-kubectl cluster-info
-
-# Generate a new bootstrap token (for joining additional workers later)
-kubeadm token create
-kubeadm token list
-
-# View the kubeadm config stored in the cluster
-kubectl -n kube-system get configmap kubeadm-config -o yaml
-
-# Reset a node — removes all Kubernetes state (destructive)
-# Run on the node you want to remove from the cluster first (drain it from control plane)
-sudo kubeadm reset
-sudo rm -rf /etc/cni/net.d ~/.kube
-# Then remove it from the cluster on the control plane:
-kubectl delete node <node-name>
-```
-
----
-
-#### Caddy — expose the Kubernetes Dashboard
-
-After installing the Kubernetes Dashboard (see its section above), proxy it through Caddy:
-
-```caddyfile
-k8s.home.local {
-  tls internal
-  reverse_proxy localhost:8443 {
-    transport http { tls_insecure_skip_verify }
-  }
-}
-```
-
----
-
-#### Troubleshooting kubeadm
-
-| Issue | Cause | Fix |
-|-------|-------|-----|
-| `kubeadm init` fails: `[preflight] ... container runtime not running` | containerd is not running or using wrong socket | `sudo systemctl status containerd`; verify `--cri-socket` matches `/run/containerd/containerd.sock` |
-| Node stays `NotReady` after init | CNI not installed | `kubectl apply -f <cni-manifest>` immediately after init |
-| `coredns` pods stuck `Pending` | CNI not installed | Same as above — CoreDNS needs the CNI to schedule |
-| Worker fails to join: `token ... not found` | Bootstrap token expired (24h TTL) | Run `kubeadm token create --print-join-command` again on control plane |
-| `certificate has expired` errors | Annual cert expiry | `sudo kubeadm certs renew all && sudo systemctl restart kubelet` |
-| API server unreachable after upgrade | kubelet not restarted | `sudo systemctl restart kubelet` on the control plane |
-| `Unknown` node status | kubelet cannot reach API server | Check firewall: port 6443 must be open from worker to control plane |
-| `failed to pull image ... sandbox` | containerd misconfigured | Verify `SystemdCgroup = true` in `/etc/containerd/config.toml` |
-
----
-
-## Goldilocks (Resource Right-Sizing)
-
-**Purpose:** Goldilocks uses the Kubernetes Vertical Pod Autoscaler (VPA) in recommendation mode to analyse actual resource usage across your namespaces and suggest the right CPU/memory requests and limits for each container. The web dashboard shows current requests vs VPA recommendations and generates ready-to-paste `resources:` blocks for your Helm values files. Eliminates the guesswork of setting resource limits.
-
-```bash
-# Install the VPA (required by Goldilocks)
 kubectl apply -f https://github.com/kubernetes/autoscaler/releases/latest/download/vertical-pod-autoscaler.yaml
 
-# Install Goldilocks via Helm
 helm repo add fairwinds-stable https://charts.fairwinds.com/stable
 helm upgrade --install goldilocks fairwinds-stable/goldilocks \
   --namespace goldilocks --create-namespace
 
-# Label a namespace to enable VPA recommendations
 kubectl label namespace myapp goldilocks.fairwinds.com/enabled=true
-
-# Port-forward the dashboard
 kubectl -n goldilocks port-forward svc/goldilocks-dashboard 8080:80
-# Open http://localhost:8080
 ```
 
-The dashboard shows each deployment with three columns: current requests/limits, VPA lower bound recommendation, and VPA upper bound recommendation. Click any deployment to get a copy-pasteable Helm values block.
-
-> Goldilocks needs at least a few hours of real traffic to produce useful recommendations. It is safe to run in production — VPA is in recommendation mode only, it does not change your pods automatically.
-
-### VPA and HPA Together
-
-A common question is whether you can run VPA and HPA on the same Deployment simultaneously. The answer is: yes, but only if they are scaling on different metrics. If both HPA and VPA try to adjust CPU-based resource settings, they will fight each other in a control loop conflict.
-
-The safe combination: use HPA for replica count based on **custom or external metrics** (e.g., Kafka consumer lag via KEDA, request queue depth), and use VPA to set the right **resource requests** for each replica. This way HPA controls how many pods exist, and VPA controls how much CPU/memory each pod is allocated — orthogonal concerns with no conflict.
-
-Never run HPA on `cpu` or `memory` utilisation and VPA simultaneously on the same Deployment. Pick one for resource-based scaling.
+> VPA is in recommendation mode only — it does not change pods automatically. Safe to run in production. Let it collect a few hours of real traffic before trusting its suggestions.
+>
+> **VPA + HPA:** Never run both scaling on the same metric (CPU/memory). Safe combination: HPA on custom/external metrics (KEDA) + VPA for right-sizing requests.
 
 ---
 
-## Pod Disruption Budgets
+## GitOps & Continuous Delivery
 
-A PodDisruptionBudget (PDB) ensures a minimum number of pods remain available during voluntary disruptions — node drains, cluster upgrades, rolling restarts. Without a PDB, a `kubectl drain` could evict all your pods at once.
+### GitOps end-to-end workflow
 
-```yaml
-# ~/k8s/myapp-pdb.yaml
-apiVersion: policy/v1
-kind: PodDisruptionBudget
-metadata:
-  name: myapp-pdb
-  namespace: myapp
-spec:
-  minAvailable: 2   # at least 2 pods must always be running
-  # Alternatively: maxUnavailable: 1 (at most 1 pod can be down at once)
-  selector:
-    matchLabels:
-      app: myapp
+```
+Developer pushes to feature branch
+  → CI runs tests (Woodpecker / Forgejo Actions)
+  → CI builds image via Kaniko → pushes to Harbor
+  → CI signs image with Cosign
+  → CI updates image tag in GitOps manifests repo
+  → ArgoCD / Flux detects the change
+  → ArgoCD syncs — applies new Deployment to cluster
+  → Argo Rollouts performs canary (5% → 50% → 100%)
+  → Prometheus checks error rate during canary window
+  → Healthy → promote. Degraded → automatic rollback.
 ```
 
-```bash
-kubectl apply -f myapp-pdb.yaml
-
-# Check PDB status
-kubectl get pdb -n myapp
-kubectl describe pdb myapp-pdb -n myapp
-```
-
-`minAvailable` and `maxUnavailable` accept either an integer (absolute count) or a percentage string (`"50%"`). Set `minAvailable` to one less than your replica count so single-pod drains always succeed, but a simultaneous two-node failure is blocked until the first pod reschedules.
-
-PDBs only protect against **voluntary** disruptions (drains, upgrades). They cannot prevent a node from crashing.
+**Separate app code from deployment config.** Application repo contains code; GitOps repo contains manifests or Helm values. Rollback = `git revert`. Audit trail = git history.
 
 ---
 
-## Init Containers and Sidecar Containers
-
-**Init containers:** run to completion before any of the main containers in a Pod start. They share the Pod's volumes and network but run sequentially, one at a time. Common uses:
-
-- Wait for a dependency to be ready (database, external service)
-- Run database migrations before the app starts
-- Fetch secrets or config files and write them to a shared volume
-
-```yaml
-# Database migration init container pattern
-spec:
-  initContainers:
-    - name: db-migrate
-      image: myapp:v1.4.2
-      command: ["python", "manage.py", "migrate", "--noinput"]
-      env:
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: myapp-secrets
-              key: database-url
-      # Shares the same volumes as main containers if needed
-  containers:
-    - name: myapp
-      image: myapp:v1.4.2
-      # Main app only starts after db-migrate exits with code 0
-```
-
-**Sidecar containers:** run alongside the main container for the full lifetime of the Pod. Common uses: log shipping (Fluentbit), service mesh proxies (Envoy), metrics exporters, secret rotation agents.
-
-```yaml
-spec:
-  containers:
-    - name: myapp
-      image: myapp:latest
-    - name: log-shipper
-      image: fluent/fluent-bit:latest
-      volumeMounts:
-        - name: log-volume
-          mountPath: /var/log/app
-  volumes:
-    - name: log-volume
-      emptyDir: {}
-```
-
----
-
-## StatefulSets
-
-Deployments are for stateless workloads — any pod is interchangeable with any other. StatefulSets are for stateful workloads — databases, message brokers, caches — where each pod has a stable identity that persists across restarts.
-
-**What StatefulSets provide that Deployments don't:**
-- **Stable network identity** — pods get predictable DNS names: `pod-0.myservice.namespace.svc.cluster.local`, `pod-1.myservice.namespace.svc.cluster.local`. These names are stable across pod restarts.
-- **Ordered deployment** — pods are created and deleted in order (0, 1, 2...). Useful for databases where you want the primary (pod-0) to be fully running before replicas start.
-- **PVC templates** — each pod gets its own PersistentVolumeClaim that is not deleted when the pod is deleted or rescheduled.
-
-```yaml
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: postgres
-  namespace: data
-spec:
-  serviceName: postgres        # must match a Headless Service
-  replicas: 3
-  selector:
-    matchLabels:
-      app: postgres
-  template:
-    metadata:
-      labels:
-        app: postgres
-    spec:
-      containers:
-        - name: postgres
-          image: postgres:16-alpine
-          env:
-            - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
-          volumeMounts:
-            - name: data
-              mountPath: /var/lib/postgresql/data
-  volumeClaimTemplates:        # each pod gets its own PVC automatically
-    - metadata:
-        name: data
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: 20Gi
----
-# Headless Service — gives pods stable DNS names
-apiVersion: v1
-kind: Service
-metadata:
-  name: postgres
-  namespace: data
-spec:
-  clusterIP: None             # headless — no load balancing, direct pod DNS
-  selector:
-    app: postgres
-  ports:
-    - port: 5432
-```
-
-**When to use StatefulSet vs Deployment:**
-- StatefulSet: PostgreSQL, Kafka, Elasticsearch, Redis Cluster, ZooKeeper — anything that needs stable identity or per-pod persistent storage.
-- Deployment: web servers, API services, workers — anything where pods are interchangeable and share storage via a PVC or don't need local state.
-
----
-
-## Debugging with kubectl debug
-
-`kubectl exec` requires the container to have a shell. Distroless images (which have no shell, no utilities) make `exec` impossible. `kubectl debug` solves this by injecting an **ephemeral container** — a temporary debug container that shares the target pod's namespaces without modifying the running pod.
+### ArgoCD (GitOps Continuous Delivery)
 
 ```bash
-# Attach a busybox debug container to a running pod
-kubectl debug -it myapp-pod-xyz \
-  --image=busybox \
-  --target=myapp \
-  -n myapp
-
-# The --target flag shares the process namespace with the myapp container
-# You can see its processes with: ps aux
-# You can read its filesystem via: ls /proc/1/root/
-
-# Use a richer debug image
-kubectl debug -it myapp-pod-xyz \
-  --image=nicolaka/netshoot \
-  --target=myapp \
-  -n myapp
-# netshoot includes: curl, dig, tcpdump, ss, netstat, iperf3, and more
-
-# Debug a node directly (runs a privileged pod on the node)
-kubectl debug node/k3s-node1 \
-  --image=busybox \
-  -it -- chroot /host
-```
-
-`nicolaka/netshoot` is purpose-built for container network debugging — it has every networking tool you might need without bloating your production images.
-
----
-## ingress-nginx (Ingress Controller)
-
-**Purpose:** Route external HTTP/HTTPS traffic into your cluster. The most widely used ingress controller. Acts as the Kubernetes equivalent of Caddy or Nginx — define `Ingress` resources and it handles routing.
-
-```bash
-helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
-  --namespace ingress-nginx --create-namespace \
-  --set controller.service.type=NodePort \
-  --set controller.service.nodePorts.http=30080 \
-  --set controller.service.nodePorts.https=30443
-```
-
-##### Example Ingress resource
-
-```yaml
-# ~/k8s/ingress-example.yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: myapp-ingress
-  namespace: default
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
-spec:
-  ingressClassName: nginx
-  rules:
-    - host: myapp.home.local
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: myapp
-                port:
-                  number: 80
-```
-
-```bash
-kubectl apply -f ~/k8s/ingress-example.yaml
-```
-
----
-
-## NGINX Gateway Fabric (NGF)
-
-**Purpose:** NGINX's implementation of the Kubernetes Gateway API. Unlike ingress-nginx (which uses `Ingress` resources and annotation-heavy config), NGF is built entirely on the Gateway API CRDs — `GatewayClass`, `Gateway`, `HTTPRoute`, `GRPCRoute` — making routing declarative, namespace-scoped, and annotation-free. A single NGF deployment handles external HTTPS (via Caddy), internal gRPC between pods, and cross-namespace routing from one Gateway resource. On Shani OS with k3s, Caddy on the host acts as the TLS terminator and forwards plain HTTP to NGF via a NodePort.
-
-### Architecture on this system
-
-```
-Browser / client
-  │ HTTPS (tls internal — Step-CA cert from Caddy)
-  ▼
-Caddy (host, port 443)
-  │ HTTP → localhost:30080  (NodePort of nginx-gateway-nginx Service)
-  ▼
-nginx-gateway-nginx Service :30080 (NodePort)
-  │
-  ▼
-NGF (GatewayClass: nginx)
-  ├── HTTPRoute → app pods   (by hostname, e.g. myapp.home.local)
-  └── GRPCRoute → gRPC pods  (internal pod-to-pod via ClusterIP or same NodePort)
-```
-
-Key design points:
-- **Caddy terminates TLS** on the host — NGF receives plain HTTP on port 80. No cert-manager or `tls:` on the Gateway listener needed for homelab.
-- **NodePort 30080** — Caddy proxies `reverse_proxy localhost:30080`; `firewall-cmd` only needs to open the Caddy-facing port, not 30080 to the outside.
-- **One Gateway, one HTTP listener on port 80** — routing is by hostname only (`home.local` domains). Add new services by adding HTTPRoute manifests, no Caddy config changes needed.
-- **ReferenceGrants** — required for any HTTPRoute in the `nginx-gateway` namespace that points to a backend Service in another namespace (cross-namespace is denied by default).
-
----
-
-### Prerequisites
-
-```bash
-# Kernel and sysctl (k3s already sets most of these — verify)
-sudo sysctl -w vm.max_map_count=524288
-echo "vm.max_map_count=524288" | sudo tee /etc/sysctl.d/99-k8s.conf
-
-# Install kubectl + helm via Nix if not already present
-nix-env -iA nixpkgs.kubectl nixpkgs.kubernetes-helm
-
-# Install Gateway API CRDs — standard channel v1.4.1 (required by NGF v2.4.2)
-# Includes: GatewayClass, Gateway, HTTPRoute, GRPCRoute, ReferenceGrant
-kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.1/standard-install.yaml
-
-# Verify all 5 CRDs are Established before proceeding
-kubectl get crd | grep gateway.networking.k8s.io
-# Expected:
-# gatewayclasses.gateway.networking.k8s.io
-# gateways.gateway.networking.k8s.io
-# grpcroutes.gateway.networking.k8s.io
-# httproutes.gateway.networking.k8s.io
-# referencegrants.gateway.networking.k8s.io
-
-# Install NGF CRDs (9 nginx-specific CRDs — required before the Helm chart)
-kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v2.4.2/deploy/crds.yaml
-
-# Verify NGF CRDs
-kubectl get crd | grep gateway.nginx.org
-# nginxproxies, nginxgateways, authenticationfilters, clientsettingspolicies,
-# observabilitypolicies, proxysettingspolicies, ratelimitpolicies, upstreamsettingspolicies
-```
-
----
-
-### Install NGF
-
-NGF ships as an OCI Helm chart — no `helm repo add` needed.
-
-```bash
-helm upgrade --install nginx-gateway-fabric \
-  oci://ghcr.io/nginx/charts/nginx-gateway-fabric \
-  --version 2.4.2 \
-  --namespace nginx-gateway \
-  --create-namespace \
-  --set nginxGateway.gatewayClassName=nginx \
-  --set nginxGateway.replicas=1 \
-  --set nginx.replicas=1 \
-  --set nginx.autoscaling.enable=false \
-  --wait
-```
-
-##### Full values file for a Shani OS homelab (`~/k8s/ngf-values.yaml`)
-
-```yaml
-nginxGateway:
-  gatewayClassName: nginx
-  replicas: 1
-  gwAPIExperimentalFeatures:
-    enable: false       # GRPCRoute is GA since v1.1.0 — experimental flag not needed
-  resources:
-    requests:
-      cpu: 200m
-      memory: 256Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
-
-nginx:
-  replicas: 1
-  autoscaling:
-    enable: false       # single-node homelab — no HPA needed
-  container:
-    resources:
-      requests:
-        cpu: 200m
-        memory: 256Mi
-      limits:
-        cpu: 1000m
-        memory: 1Gi
-```
-
-```bash
-helm upgrade --install nginx-gateway-fabric \
-  oci://ghcr.io/nginx/charts/nginx-gateway-fabric \
-  --version 2.4.2 \
-  --namespace nginx-gateway \
-  --create-namespace \
-  -f ~/k8s/ngf-values.yaml \
-  --wait
-
-# Verify pods are running
-kubectl -n nginx-gateway get pods
-# nginx-gateway-fabric-*  (control plane)
-# nginx-gateway-nginx-*   (data plane — NGINX)
-
-# Check GatewayClass is Accepted
-kubectl get gatewayclass nginx
-# ACCEPTED should be True
-```
-
----
-
-### Expose NGF via NodePort
-
-NGF creates a Service named `nginx-gateway-nginx` when it programs a Gateway. Patch it to NodePort so Caddy on the host can reach it.
-
-```bash
-# Patch the Service to NodePort with a fixed port (30080)
-kubectl -n nginx-gateway patch svc nginx-gateway-nginx \
-  --type='json' \
-  -p='[
-    {"op":"replace","path":"/spec/type","value":"NodePort"},
-    {"op":"add","path":"/spec/ports/0/nodePort","value":30080}
-  ]'
-
-# Verify
-kubectl -n nginx-gateway get svc nginx-gateway-nginx
-# PORT(S): 80:30080/TCP
-
-# Allow the NodePort through firewalld (only needed if other hosts must reach it directly)
-# Caddy on localhost reaches it without a firewall rule
-sudo firewall-cmd --add-port=30080/tcp --permanent && sudo firewall-cmd --reload
-```
-
-> **Tip:** Pin the NodePort in a `values.yaml` or patch it once and leave it. k3s preserves the NodePort across pod restarts and chart upgrades.
-
----
-
-### Create the Gateway
-
-One Gateway, one HTTP listener on port 80. Caddy handles HTTPS; NGF handles routing by hostname.
-
-```yaml
-# ~/k8s/ngf-gateway.yaml
-apiVersion: gateway.networking.k8s.io/v1
-kind: Gateway
-metadata:
-  name: nginx-gateway
-  namespace: nginx-gateway
-spec:
-  gatewayClassName: nginx
-  listeners:
-    - name: http
-      protocol: HTTP
-      port: 80
-      allowedRoutes:
-        namespaces:
-          from: All       # accept HTTPRoutes and GRPCRoutes from any namespace
-```
-
-```bash
-kubectl apply -f ~/k8s/ngf-gateway.yaml
-
-# Check the Gateway is Programmed
-kubectl -n nginx-gateway describe gateway nginx-gateway
-# Conditions: Programmed=True, Accepted=True
-```
-
----
-
-### Caddy configuration
-
-Caddy on the Shani OS host terminates TLS and proxies all `*.home.local` traffic to NGF's NodePort. Add one entry per hostname — no changes to any Kubernetes manifests needed for new virtual hosts.
-
-```caddyfile
-# Each service that NGF routes — add a hostname here and an HTTPRoute in k8s
-
-myapp.home.local {
-  tls internal
-  reverse_proxy localhost:30080 {
-    header_up Host {host}   # pass the original Host header so NGF can match the HTTPRoute
-  }
-}
-
-argocd.home.local {
-  tls internal
-  reverse_proxy localhost:30080 {
-    header_up Host {host}
-  }
-}
-
-grafana.home.local {
-  tls internal
-  reverse_proxy localhost:30080 {
-    header_up Host {host}
-  }
-}
-```
-
-> **Why `header_up Host {host}`?** NGF matches HTTPRoutes by the `Host` header. Without this, Caddy rewrites the header to `localhost` and NGF returns 404 for every request.
-
----
-
-### HTTPRoute — routing by hostname
-
-Each application gets an HTTPRoute in the `nginx-gateway` namespace. No Caddyfile change needed for new paths or services — just add an HTTPRoute.
-
-```yaml
-# ~/k8s/ngf-httproute-myapp.yaml
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: myapp-route
-  namespace: nginx-gateway
-spec:
-  parentRefs:
-    - name: nginx-gateway
-      namespace: nginx-gateway
-      sectionName: http         # bind to the 'http' listener
-  hostnames:
-    - myapp.home.local
-  rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /
-      backendRefs:
-        - name: myapp
-          namespace: myapp-ns   # cross-namespace — needs ReferenceGrant below
-          port: 8080
-```
-
-```yaml
-# ~/k8s/ngf-httproute-argocd.yaml — ArgoCD (runs --insecure, plain HTTP)
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: argocd-route
-  namespace: nginx-gateway
-spec:
-  parentRefs:
-    - name: nginx-gateway
-      namespace: nginx-gateway
-      sectionName: http
-  hostnames:
-    - argocd.home.local
-  rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /
-      backendRefs:
-        - name: argocd-server
-          namespace: argocd
-          port: 80
-```
-
-```bash
-kubectl apply -f ~/k8s/ngf-httproute-myapp.yaml
-kubectl apply -f ~/k8s/ngf-httproute-argocd.yaml
-
-# Verify routes are accepted
-kubectl -n nginx-gateway get httproute
-# ACCEPTED and RESOLVED should both be True
-```
-
----
-
-### GRPCRoute — internal pod-to-pod gRPC
-
-For gRPC between services inside the cluster, pods call the `nginx-gateway-nginx` ClusterIP (or the NodePort for cross-node). NGF matches by hostname and routes to the backend.
-
-```yaml
-# ~/k8s/ngf-grpcroute.yaml
-apiVersion: gateway.networking.k8s.io/v1
-kind: GRPCRoute
-metadata:
-  name: order-svc-grpc
-  namespace: nginx-gateway
-spec:
-  parentRefs:
-    - name: nginx-gateway
-      namespace: nginx-gateway
-      sectionName: http
-  hostnames:
-    - order-service.internal.home.local
-  rules:
-    - matches:
-        - method:
-            type: Exact
-            service: order.v1.OrderService  # gRPC service name from proto
-      backendRefs:
-        - name: order-service
-          namespace: services-ns
-          port: 9090
-```
-
-```bash
-kubectl apply -f ~/k8s/ngf-grpcroute.yaml
-kubectl -n nginx-gateway get grpcroute
-```
-
----
-
-### ReferenceGrants — cross-namespace backend access
-
-HTTPRoutes and GRPCRoutes in `nginx-gateway` cannot reference Services in other namespaces unless a `ReferenceGrant` exists in the **target** namespace. Create one per application namespace.
-
-```yaml
-# ~/k8s/ngf-referencegrant.yaml
-# Apply this in EACH application namespace (change namespace: below)
-apiVersion: gateway.networking.k8s.io/v1beta1
-kind: ReferenceGrant
-metadata:
-  name: allow-ngf-gateway
-  namespace: myapp-ns            # the namespace containing your Services
-spec:
-  from:
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      namespace: nginx-gateway   # routes in this namespace may reference backends here
-    - group: gateway.networking.k8s.io
-      kind: GRPCRoute
-      namespace: nginx-gateway
-  to:
-    - group: ""
-      kind: Service
-```
-
-```bash
-# Apply in each namespace
-for ns in argocd myapp-ns services-ns; do
-  kubectl apply -f ~/k8s/ngf-referencegrant.yaml -n $ns
-done
-
-# Verify
-kubectl get referencegrant -A
-```
-
----
-
-### NGF-specific CRDs (policy extensions)
-
-All 9 NGF CRDs are installed via the `deploy/crds.yaml` manifest in the prerequisites step. They enable fine-grained per-route control:
-
-| CRD | Version | Purpose |
-|-----|---------|---------|
-| `NginxProxy` | v1alpha2 | Global NGINX config attached to GatewayClass |
-| `NginxGateway` | v1alpha1 | Per-gateway control-plane tuning |
-| `ClientSettingsPolicy` | v1alpha1 | Client→NGINX timeouts and body size limits |
-| `ProxySettingsPolicy` | v1alpha1 | NGINX→backend proxy connection tuning |
-| `ObservabilityPolicy` | v1alpha1+v1alpha2 | OpenTelemetry tracing per route |
-| `RateLimitPolicy` | v1alpha1 | Per-route rate limiting |
-| `UpstreamSettingsPolicy` | v1alpha1 | Load-balancing settings per route |
-| `AuthenticationFilter` | v1alpha1 | Basic Auth per route |
-
-##### Example — rate limit a public route
-
-```yaml
-apiVersion: gateway.nginx.org/v1alpha1
-kind: RateLimitPolicy
-metadata:
-  name: myapp-ratelimit
-  namespace: nginx-gateway
-spec:
-  targetRef:
-    group: gateway.networking.k8s.io
-    kind: HTTPRoute
-    name: myapp-route
-  policy:
-    rate: 100r/m          # 100 requests per minute
-    burst: 20
-    key: ${binary_remote_addr}
-    zoneSize: 10m
-    rejectCode: 429
-```
-
----
-
-### Common operations
-
-```bash
-# Check GatewayClass is accepted
-kubectl get gatewayclass nginx
-# ACCEPTED: True
-
-# Check Gateway is Programmed and see addresses
-kubectl -n nginx-gateway describe gateway nginx-gateway
-
-# List all HTTPRoutes and their status
-kubectl get httproute -A
-
-# List all GRPCRoutes and their status
-kubectl get grpcroute -A
-
-# Check why a route is not resolving (look at Conditions)
-kubectl -n nginx-gateway describe httproute myapp-route
-
-# View NGF control plane logs
-kubectl -n nginx-gateway logs -l app.kubernetes.io/name=nginx-gateway-fabric -f
-
-# View NGINX data plane logs (access log, errors)
-kubectl -n nginx-gateway logs -l app.kubernetes.io/component=nginx -f
-
-# Check the global NginxProxy config (created by Helm as <release>-proxy-config)
-kubectl -n nginx-gateway get nginxproxy
-
-# Reload config — NGF reloads NGINX automatically on Route changes
-# Watch for successful reloads in the data plane logs:
-kubectl -n nginx-gateway logs -l app.kubernetes.io/component=nginx | grep "reload"
-
-# Upgrade NGF
-helm upgrade nginx-gateway-fabric \
-  oci://ghcr.io/nginx/charts/nginx-gateway-fabric \
-  --version 2.4.3 \           # bump version here
-  --namespace nginx-gateway \
-  -f ~/k8s/ngf-values.yaml
-
-# Uninstall
-helm uninstall nginx-gateway-fabric -n nginx-gateway
-kubectl delete -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v2.4.2/deploy/crds.yaml
-kubectl delete -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.1/standard-install.yaml
-```
-
-### Version compatibility
-
-| NGF | Gateway API CRDs | k3s / Kubernetes | Notes |
-|-----|-----------------|-----------------|-------|
-| v2.4.2 | v1.4.1 | k8s 1.29 – 1.34 | GRPCRoute GA, RateLimitPolicy added |
-| v2.3.0 | v1.4.0 | k8s 1.28 – 1.33 | First v1.4.x requirement |
-| v2.2.x | v1.2.x | k8s 1.27 – 1.32 | |
-
-> Always match the Gateway API bundle version to the NGF requirement. Installing a newer bundle than NGF expects is safe; an older one causes CRD missing errors at startup.
-
----
-
-## cert-manager (Automatic TLS)
-
-**Purpose:** Automatically provision and renew TLS certificates for your Ingress resources — from Let's Encrypt (ACME) or your own internal CA (Step-CA). The Kubernetes equivalent of Caddy's auto-HTTPS. The most-installed Helm chart in Kubernetes after ingress controllers.
-
-```bash
-helm repo add cert-manager https://charts.jetstack.io
-helm upgrade --install cert-manager cert-manager/cert-manager \
-  --namespace cert-manager --create-namespace \
-  --set installCRDs=true
-
-# Verify all pods are running
-kubectl get pods -n cert-manager
-```
-
-##### ClusterIssuer for Let's Encrypt (HTTP-01 — public domains)
-
-```yaml
-# ~/k8s/letsencrypt-issuer.yaml
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: letsencrypt-prod
-spec:
-  acme:
-    server: https://acme-v02.api.letsencrypt.org/directory
-    email: admin@example.com
-    privateKeySecretRef:
-      name: letsencrypt-prod-key
-    solvers:
-      - http01:
-          ingress:
-            class: nginx   # or "nginx-gateway" for NGF
-```
-
-##### ClusterIssuer for Let's Encrypt (DNS-01 via Cloudflare — wildcard certs)
-
-```yaml
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: letsencrypt-dns
-spec:
-  acme:
-    server: https://acme-v02.api.letsencrypt.org/directory
-    email: admin@example.com
-    privateKeySecretRef:
-      name: letsencrypt-dns-key
-    solvers:
-      - dns01:
-          cloudflare:
-            apiTokenSecretRef:
-              name: cloudflare-api-token
-              key: api-token
-```
-
-```bash
-kubectl create secret generic cloudflare-api-token \
-  --namespace cert-manager \
-  --from-literal=api-token=<your-cloudflare-token>
-```
-
-##### ClusterIssuer for internal Step-CA (home.local domains)
-
-Use this when your cluster services are on `*.home.local` and you want certs from your own CA rather than Let's Encrypt. Requires Step-CA running and its root cert trusted by browsers (see security.md).
-
-```yaml
-# ~/k8s/step-ca-issuer.yaml
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: step-ca-internal
-spec:
-  acme:
-    server: https://step-ca.home.local/acme/acme/directory
-    email: admin@home.local
-    privateKeySecretRef:
-      name: step-ca-acme-key
-    caBundle: <base64-encoded-step-ca-root-cert>  # kubectl get configmap -n cert-manager step-ca-root -o jsonpath='{.data.root\.crt}' | base64 -w0
-    solvers:
-      - http01:
-          ingress:
-            class: nginx
-```
-
-#### Annotate an Ingress to get a cert automatically
-```yaml
-metadata:
-  annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"   # or "step-ca-internal" for .home.local
-spec:
-  tls:
-    - hosts: [myapp.example.com]
-      secretName: myapp-tls
-```
-
-#### Check certificate status
-```bash
-kubectl get certificate -A
-kubectl describe certificate myapp-tls -n myapp
-
-# Force immediate renewal
-kubectl annotate certificate myapp-tls -n myapp \
-  cert-manager.io/renew-before=999h --overwrite
-```
-
----
-
-## Longhorn (Distributed Block Storage)
-
-**Purpose:** Cloud-native distributed block storage for Kubernetes. Provides `ReadWriteOnce` and `ReadWriteMany` persistent volumes replicated across nodes. The recommended PVC solution for multi-node k3s or RKE2 clusters — replaces the default local-path provisioner with redundancy.
-
-```bash
-# Install prerequisites on all nodes
-# open-iscsi and nfs-utils — install via Distrobox or a mutable layer if not present
-# On Shani OS these are available via Nix:
-nix-env -iA nixpkgs.open-iscsi nixpkgs.nfs-utils
-sudo systemctl enable --now iscsid
-
-# Install via Helm
-helm upgrade --install longhorn longhorn/longhorn \
-  --namespace longhorn-system --create-namespace \
-  --set defaultSettings.defaultReplicaCount=2
-
-# Watch pods come up
-kubectl -n longhorn-system get pods -w
-```
-
-#### Set Longhorn as the default storage class
-```bash
-kubectl patch storageclass longhorn -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
-kubectl patch storageclass local-path -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}'
-```
-
-##### Example PVC using Longhorn
-
-```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: myapp-data
-spec:
-  accessModes: [ReadWriteOnce]
-  storageClassName: longhorn
-  resources:
-    requests:
-      storage: 10Gi
-```
-
-Access the Longhorn UI via port-forward:
-
-```bash
-kubectl -n longhorn-system port-forward svc/longhorn-frontend 8080:80
-# Open http://localhost:8080
-```
-
----
-
-## ArgoCD (GitOps Continuous Delivery)
-
-**Purpose:** GitOps-native continuous delivery for Kubernetes. Define your desired cluster state in a Git repo — ArgoCD watches it and automatically syncs your cluster to match. The self-hosted alternative to managed CD platforms. Works natively with Forgejo/Gitea.
-
-```bash
+helm repo add argo https://argoproj.github.io/argo-helm
 helm upgrade --install argocd argo/argo-cd \
   --namespace argocd --create-namespace \
   --set server.service.type=ClusterIP
 
-# Get the initial admin password
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath="{.data.password}" | base64 -d
 
-# Port-forward to access UI
 kubectl -n argocd port-forward svc/argocd-server 8180:443
-# Open https://localhost:8180 — user: admin
 ```
-
-##### Install the ArgoCD CLI
 
 ```bash
 nix-env -iA nixpkgs.argocd
-
-# Login
 argocd login localhost:8180 --username admin --insecure
 
-# Add your Forgejo/Gitea repo
 argocd repo add https://git.home.local/myorg/k8s-manifests \
   --username gitea-user --password <token>
 ```
-
-##### Create an Application pointing at your Git repo
 
 ```yaml
 # ~/k8s/argocd-app.yaml
@@ -2212,32 +2275,15 @@ spec:
       selfHeal: true
 ```
 
-```bash
-kubectl apply -f ~/k8s/argocd-app.yaml
-```
-
-#### Caddy (expose ArgoCD externally)
-
-```caddyfile
-argocd.home.local {
-  tls internal
-  reverse_proxy localhost:8180 {
-    transport http { tls_insecure_skip_verify }
-  }
-}
-```
+**Caddy:** `argocd.home.local { tls internal; reverse_proxy localhost:8180 { transport http { tls_insecure_skip_verify } } }`
 
 ---
 
-## Flux CD (GitOps Alternative to ArgoCD)
-
-**Purpose:** CNCF GitOps toolkit. Flux is more CLI- and CRD-native than ArgoCD — no UI by default, fully declarative, and deeply integrated with Helm and Kustomize. Preferred when you want pure-GitOps with no web dashboard.
+### Flux CD (GitOps Alternative)
 
 ```bash
-# Install Flux CLI via Nix
 nix-env -iA nixpkgs.fluxcd
 
-# Bootstrap Flux with a Forgejo/Gitea repo
 flux bootstrap gitea \
   --hostname=git.home.local \
   --owner=myorg \
@@ -2246,32 +2292,155 @@ flux bootstrap gitea \
   --path=clusters/homelab \
   --token-auth
 
-# Check Flux components
 kubectl -n flux-system get pods
-
-# Watch reconciliation
 flux get all -A
-
-# Force a sync
 flux reconcile source git flux-system
 flux reconcile kustomization flux-system
 ```
 
 ---
 
-## Kustomize (Config Management)
+### Kargo (Multi-Stage Promotion)
 
-**Purpose:** Template-free Kubernetes configuration management built into `kubectl`. Overlay base manifests with environment-specific patches — no Helm needed for simpler apps.
+**Purpose:** Kubernetes-native promotion engine. Bridges CI (building images) and ArgoCD/Flux (deploying) with ordered promotion pipelines — dev → staging → prod — with approval gates, verification steps, and rollback.
 
 ```bash
-# Apply a kustomization directory
-kubectl apply -k ~/k8s/overlays/production/
+helm repo add kargo https://charts.kargo.akuity.io
+helm install kargo kargo/kargo \
+  --namespace kargo --create-namespace \
+  --set api.adminAccount.passwordHash="$(htpasswd -bnBC 10 '' changeme | tr -d ':\n')"
 
-# Preview what would be applied
-kubectl kustomize ~/k8s/overlays/production/
+nix-env -iA nixpkgs.kargo
+kargo login https://localhost:31444 --admin --password changeme
 ```
 
-##### Example structure
+| Resource | Role |
+|----------|------|
+| `Warehouse` | Subscribes to image/chart/Git sources, produces `Freight` |
+| `Freight` | Immutable versioned bundle of artifact versions |
+| `Stage` | Named environment (dev, staging, prod) consuming Freight |
+| `Promotion` | The act of moving Freight from one Stage to the next |
+
+```yaml
+# ~/k8s/kargo-project.yaml
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Project
+metadata:
+  name: myapp
+---
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Warehouse
+metadata:
+  name: myapp-warehouse
+  namespace: myapp
+spec:
+  subscriptions:
+    - image:
+        repoURL: harbor.home.local/myorg/myapp
+        semverConstraint: ">=1.0.0"
+        discoveryLimit: 5
+---
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Stage
+metadata:
+  name: dev
+  namespace: myapp
+spec:
+  requestedFreight:
+    - origin:
+        kind: Warehouse
+        name: myapp-warehouse
+      sources:
+        direct: true
+  promotionTemplate:
+    spec:
+      steps:
+        - uses: git-clone
+          config:
+            repoURL: https://git.home.local/myorg/k8s-manifests
+            checkout: [{ branch: main, path: ./src }]
+        - uses: kustomize-set-image
+          config:
+            path: src/overlays/dev
+            images: [{ image: harbor.home.local/myorg/myapp }]
+        - uses: git-commit
+          config: { path: ./src }
+        - uses: git-push
+          config: { path: ./src }
+        - uses: argocd-update
+          config:
+            apps: [{ name: myapp-dev, sources: [{ repoURL: https://git.home.local/myorg/k8s-manifests }] }]
+---
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Stage
+metadata:
+  name: staging
+  namespace: myapp
+spec:
+  requestedFreight:
+    - origin:
+        kind: Warehouse
+        name: myapp-warehouse
+      sources:
+        stages: [dev]    # only promotes after dev succeeds
+  promotionTemplate:
+    spec:
+      steps:
+        - uses: git-clone
+          config: { repoURL: https://git.home.local/myorg/k8s-manifests, checkout: [{ branch: main, path: ./src }] }
+        - uses: kustomize-set-image
+          config: { path: src/overlays/staging, images: [{ image: harbor.home.local/myorg/myapp }] }
+        - uses: git-commit
+          config: { path: ./src }
+        - uses: git-push
+          config: { path: ./src }
+        - uses: argocd-update
+          config: { apps: [{ name: myapp-staging }] }
+---
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Stage
+metadata:
+  name: prod
+  namespace: myapp
+spec:
+  requestedFreight:
+    - origin:
+        kind: Warehouse
+        name: myapp-warehouse
+      sources:
+        stages: [staging]   # approval gate before prod
+  promotionTemplate:
+    spec:
+      steps:
+        - uses: git-clone
+          config: { repoURL: https://git.home.local/myorg/k8s-manifests, checkout: [{ branch: main, path: ./src }] }
+        - uses: kustomize-set-image
+          config: { path: src/overlays/prod, images: [{ image: harbor.home.local/myorg/myapp }] }
+        - uses: git-commit
+          config: { path: ./src }
+        - uses: git-push
+          config: { path: ./src }
+        - uses: argocd-update
+          config: { apps: [{ name: myapp-prod }] }
+```
+
+```bash
+kubectl apply -f ~/k8s/kargo-project.yaml
+kargo get freight --project myapp
+kargo promote --project myapp --freight <freight-id> --stage staging
+kargo get promotions --project myapp --stage prod
+```
+
+> **Kargo vs ArgoCD Image Updater:** Kargo adds ordered promotion gates, freight verification, approval workflows, and multi-source tracking. Use Kargo when you have multiple environments and need guardrails between them.
+
+---
+
+### Kustomize (Config Management)
+
+```bash
+kubectl apply -k ~/k8s/overlays/production/
+kubectl kustomize ~/k8s/overlays/production/
+```
 
 ```
 ~/k8s/
@@ -2280,84 +2449,1047 @@ kubectl kustomize ~/k8s/overlays/production/
 │   ├── service.yaml
 │   └── kustomization.yaml
 └── overlays/
-    ├── dev/
-    │   └── kustomization.yaml   # patches: replica count = 1
-    └── production/
-        └── kustomization.yaml   # patches: replica count = 3, resource limits
+    ├── dev/        # replicas=1, reduced resources
+    ├── staging/    # replicas=2
+    └── prod/       # replicas=5, HPA enabled
 ```
-
----
-
-## Rancher (Multi-Cluster Management UI)
-
-**Purpose:** Web UI for managing multiple Kubernetes clusters — provisioning, RBAC, monitoring, app catalog, and workload management from one dashboard. Best for homelabs with 2+ clusters or when you want a GUI for all cluster operations.
-
-> ⚠️ Rancher must run on a **separate** Shani OS host — not on a k3s/RKE2 node it manages. Run it as a Podman container on a standalone machine or a dedicated VM.
 
 ```yaml
-# ~/rancher/compose.yaml
-services:
-  rancher:
-    image: rancher/rancher:latest
-    ports:
-      - 0.0.0.0:80:80
-      - 0.0.0.0:443:443
-    volumes:
-      - /home/user/rancher:/var/lib/rancher:Z
-    privileged: true
-    restart: unless-stopped
-```
-
-```bash
-cd ~/rancher && podman-compose up -d
-```
-
-**Firewall:**
-```bash
-sudo firewall-cmd --add-service=http --add-service=https --permanent && sudo firewall-cmd --reload
-```
-
-Access at `https://<host-ip>`. On first login, set an admin password. Then import or provision clusters from the UI.
-
-#### Get the bootstrap password from logs
-```bash
-podman logs rancher 2>&1 | grep "Bootstrap Password"
+# k8s/overlays/prod/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+images:
+  - name: myapp
+    newTag: "v1.4.2"   # CI updates this via `kustomize edit set image`
+patches:
+  - path: patch.yaml
 ```
 
 ---
 
-## Lens / OpenLens (Desktop Cluster IDE)
-
-**Purpose:** Desktop Kubernetes IDE with a visual cluster explorer, pod log viewer, resource editor, shell access, Prometheus metrics, and Helm release manager. Works with any cluster kubeconfig.
+### Flux Image Automation
 
 ```bash
-# Install OpenLens via Flatpak (preferred on this system)
-flatpak install flathub dev.k8slens.OpenLens
+flux install --components-extra=image-reflector-controller,image-automation-controller
 ```
 
-After install, add your kubeconfig — Lens auto-detects all contexts in `~/.kube/config`.
+```yaml
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: myapp
+  namespace: flux-system
+spec:
+  image: harbor.home.local/myorg/myapp
+  interval: 1m
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: myapp
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: myapp
+  policy:
+    semver:
+      range: ">=1.0.0"
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta1
+kind: ImageUpdateAutomation
+metadata:
+  name: myapp
+  namespace: flux-system
+spec:
+  interval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  git:
+    checkout:
+      ref:
+        branch: main
+    commit:
+      author:
+        email: fluxcdbot@home.local
+        name: fluxcdbot
+      messageTemplate: "chore: update {{range .Updated.Images}}{{println .}}{{end}}"
+    push:
+      branch: main
+  update:
+    path: ./clusters/homelab
+    strategy: Setters
+```
 
 ---
 
-## k9s (Terminal Cluster Manager)
+## Progressive Delivery
 
-**Purpose:** Fast, vim-keybinding terminal UI for navigating Kubernetes resources. Browse pods, deployments, namespaces, logs, events, and exec into containers — all without typing `kubectl` commands.
+Progressive delivery is the practice of releasing to a subset of traffic before rolling out fully.
+
+| Strategy | Traffic Split | Rollback Speed | Cost | Best For |
+|----------|-------------|---------------|------|----------|
+| **Rolling Update** | Gradual pod replacement | Medium | 1× | Default; simple apps |
+| **Blue/Green** | 100% flip | Instant | 2× | Zero-downtime; easy rollback |
+| **Canary** | Percentage-based | Automatic on SLO breach | ~1.1× | Risk reduction; metric-gated |
+| **Feature Flags** | Per-user in-app | Instant flag toggle | 1× | A/B testing; dark launches |
+
+### Argo Rollouts
+
+**Purpose:** Advanced deployment strategies for Kubernetes — canary, blue/green, and analysis-gated rollouts. Replaces standard `Deployment` with a `Rollout` CRD. Pairs naturally with ArgoCD.
 
 ```bash
-# Install via Nix (preferred on this system)
+kubectl create namespace argo-rollouts
+kubectl apply -n argo-rollouts \
+  -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+
+nix-env -iA nixpkgs.argo-rollouts
+```
+
+```yaml
+# Canary rollout
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: myapp
+  namespace: default
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+        - name: myapp
+          image: myapp:v2
+          ports:
+            - containerPort: 8080
+  strategy:
+    canary:
+      steps:
+        - setWeight: 20
+        - pause: { duration: 5m }
+        - setWeight: 50
+        - pause: {}               # manual gate — promote with kubectl argo rollouts promote
+        - setWeight: 100
+      canaryService: myapp-canary
+      stableService: myapp-stable
+```
+
+```yaml
+# Blue/Green
+strategy:
+  blueGreen:
+    activeService: myapp-active
+    previewService: myapp-preview
+    autoPromotionEnabled: false
+    scaleDownDelaySeconds: 30
+```
+
+```bash
+kubectl argo rollouts get rollout myapp --watch
+kubectl argo rollouts promote myapp
+kubectl argo rollouts abort myapp
+kubectl argo rollouts undo myapp
+```
+
+---
+
+## In-Cluster CI/CD & Build
+
+### Tekton Pipelines
+
+```bash
+kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
+kubectl apply -f https://storage.googleapis.com/tekton-releases/dashboard/latest/release.yaml
+kubectl apply -f https://storage.googleapis.com/tekton-releases/triggers/latest/release.yaml
+
+nix-env -iA nixpkgs.tekton-client
+kubectl -n tekton-pipelines port-forward svc/tekton-dashboard 9097:9097
+```
+
+```yaml
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: hello
+spec:
+  steps:
+    - name: echo
+      image: alpine
+      script: echo "Hello from Tekton"
+---
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  generateName: hello-run-
+spec:
+  pipelineRef:
+    name: hello-pipeline
+```
+
+```bash
+tkn pipelinerun logs -f --last
+```
+
+---
+
+### Tekton Chains (Supply Chain Security)
+
+**Purpose:** Adds SLSA provenance generation on top of Tekton. After a TaskRun completes, Chains captures attestations, signs them with Cosign/KMS, and stores them in an OCI registry or Rekor transparency log.
+
+```bash
+kubectl apply -f https://storage.googleapis.com/tekton-releases/chains/latest/release.yaml
+cosign generate-key-pair k8s://tekton-chains/signing-secrets
+cosign verify-attestation --key cosign.pub myregistry/myimage:latest
+```
+
+---
+
+### Kaniko (In-Cluster Image Building)
+
+**Purpose:** Build OCI images inside Kubernetes pods — no Docker daemon, no root privileges.
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: build-myapp
+spec:
+  template:
+    spec:
+      containers:
+        - name: kaniko
+          image: gcr.io/kaniko-project/executor:latest
+          args:
+            - --context=git://git.home.local/myorg/myapp
+            - --dockerfile=Containerfile
+            - --destination=harbor.home.local/myorg/myapp:latest
+            - --cache=true
+            - --cache-repo=harbor.home.local/myorg/myapp-cache
+          volumeMounts:
+            - name: regcred
+              mountPath: /kaniko/.docker
+      volumes:
+        - name: regcred
+          secret:
+            secretName: registry-credentials
+            items:
+              - key: .dockerconfigjson
+                path: config.json
+      restartPolicy: Never
+```
+
+---
+
+### Argo Workflows (Data & ML Pipelines)
+
+```bash
+kubectl create namespace argo
+kubectl apply -n argo \
+  -f https://github.com/argoproj/argo-workflows/releases/latest/download/install.yaml
+
+nix-env -iA nixpkgs.argo
+argo submit -n argo --watch ~/k8s/workflow.yaml
+argo list -n argo
+argo logs -n argo my-workflow
+```
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: data-pipeline-
+spec:
+  entrypoint: main
+  templates:
+    - name: main
+      dag:
+        tasks:
+          - name: ingest
+            template: python-step
+            arguments:
+              parameters: [{ name: cmd, value: "python ingest.py" }]
+          - name: transform
+            template: python-step
+            dependencies: [ingest]
+            arguments:
+              parameters: [{ name: cmd, value: "python transform.py" }]
+    - name: python-step
+      inputs:
+        parameters:
+          - name: cmd
+      container:
+        image: python:3.12-slim
+        command: [sh, -c]
+        args: ["{{inputs.parameters.cmd}}"]
+```
+
+---
+
+## Image Supply Chain Security
+
+### Harbor (Self-Hosted OCI Registry)
+
+**Purpose:** CNCF-graduated container registry with built-in Trivy scanning, image signing, RBAC, robot accounts, and replication. Preferred over plain Gitea/Forgejo package registry for production.
+
+```bash
+helm repo add harbor https://helm.goharbor.io
+helm upgrade --install harbor harbor/harbor \
+  --namespace harbor --create-namespace \
+  --set expose.type=clusterIP \
+  --set expose.tls.enabled=false \
+  --set externalURL=https://harbor.home.local \
+  --set harborAdminPassword=changeme \
+  --set persistence.persistentVolumeClaim.registry.size=50Gi
+
+kubectl -n harbor get pods -w
+```
+
+Enable Trivy scanning in Harbor UI: **Administration → Interrogation Services → Enable**. Harbor scans every image on push automatically.
+
+```bash
+# Create a robot account for CI
+curl -X POST "https://harbor.home.local/api/v2.0/projects/myorg/robots" \
+  -H "Content-Type: application/json" -u "admin:changeme" \
+  -d '{"name":"ci-push","duration":365,"permissions":[{"kind":"project","namespace":"myorg","access":[{"resource":"repository","action":"push"},{"resource":"repository","action":"pull"}]}]}'
+```
+
+**Caddy:** `harbor.home.local { tls internal; reverse_proxy harbor-core.harbor.svc.cluster.local:80 { header_up Host {host} } }`
+
+---
+
+### Cosign (Container Image Signing)
+
+**Purpose:** Cryptographically sign container images. Signatures stored in the OCI registry alongside the image. Pair with Kyverno to enforce only signed images run in production.
+
+```bash
+nix-env -iA nixpkgs.cosign
+
+cosign generate-key-pair k8s://cosign-system/cosign
+
+cosign sign --key cosign.key \
+  --annotations "git-sha=$(git rev-parse HEAD)" \
+  --annotations "build-date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  harbor.home.local/myorg/myapp:v1.4.2
+
+cosign verify --key cosign.pub harbor.home.local/myorg/myapp:v1.4.2
+```
+
+```yaml
+# .woodpecker.yml — sign after Kaniko push
+steps:
+  - name: sign-image
+    image: gcr.io/projectsigstore/cosign:latest
+    environment:
+      COSIGN_KEY:
+        from_secret: cosign_private_key
+    commands:
+      - cosign sign --key env://COSIGN_KEY
+          --annotations "git-sha=${CI_COMMIT_SHA}"
+          harbor.home.local/myorg/myapp:${CI_COMMIT_SHA}
+```
+
+#### Enforce signed images with Kyverno
+
+```yaml
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-signed-images
+spec:
+  validationFailureAction: Enforce
+  background: false
+  rules:
+    - name: check-image-signature
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaces: [production, staging]
+      verifyImages:
+        - imageReferences:
+            - "harbor.home.local/myorg/*"
+          attestors:
+            - entries:
+                - keys:
+                    publicKeys: |-
+                      -----BEGIN PUBLIC KEY-----
+                      <your-cosign-public-key>
+                      -----END PUBLIC KEY-----
+```
+
+---
+
+### Trivy (Vulnerability & IaC Scanning)
+
+**Purpose:** CNCF-graduated all-in-one scanner for container images, Helm charts, Kubernetes manifests, Terraform/OpenTofu, and running clusters. Also generates SBOMs.
+
+```bash
+nix-env -iA nixpkgs.trivy
+
+trivy image --severity HIGH,CRITICAL harbor.home.local/myorg/myapp:latest
+trivy config ~/k8s/charts/myapp/
+trivy k8s --report=summary cluster
+trivy image --format cyclonedx --output myapp-sbom.json harbor.home.local/myorg/myapp:latest
+trivy sbom myapp-sbom.json
+```
+
+#### Trivy Operator (continuous in-cluster scanning)
+
+```bash
+helm repo add aqua https://aquasecurity.github.io/helm-charts/
+helm install trivy-operator aqua/trivy-operator \
+  --namespace trivy-system --create-namespace \
+  --set trivy.ignoreUnfixed=true
+
+kubectl get vulnerabilityreports -A
+kubectl get configauditreports -A
+kubectl describe vulnerabilityreport <pod-name> -n myapp
+```
+
+---
+
+## Observability
+
+### Prometheus + Grafana (kube-prometheus-stack)
+
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
+helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+  --namespace monitoring --create-namespace \
+  --set grafana.adminPassword=changeme \
+  --set prometheus.prometheusSpec.retention=15d
+
+kubectl -n monitoring port-forward svc/kube-prometheus-stack-grafana 3000:80
+```
+
+#### Grafana dashboard IDs
+
+| Tool | Dashboard ID |
+|------|-------------|
+| Longhorn | 13032 |
+| Ingress NGINX | 9614 |
+| ArgoCD | 14584 |
+| KEDA | 16406 |
+| Cilium Overview | 18814 |
+| Cilium / Hubble L4 Flows | 18815 |
+| Cilium / Hubble DNS | 18816 |
+| Loki Logs | 13639 |
+| Tempo Traces | 16459 |
+| OpenCost | 15714 |
+
+> Import via Grafana UI: **Dashboards → New → Import → enter ID**.
+
+---
+
+### Loki + Promtail / Grafana Alloy (Log Aggregation)
+
+**Purpose:** Loki indexes only labels (not full log content), keeping storage costs low. Promtail or the newer Alloy agent ships pod logs from every node to Loki. Query via LogQL in Grafana alongside Prometheus metrics.
+
+```bash
+helm repo add grafana https://grafana.github.io/helm-charts
+
+# Loki (single-binary — homelab mode)
+helm upgrade --install loki grafana/loki \
+  --namespace monitoring --create-namespace \
+  --set loki.auth_enabled=false \
+  --set loki.commonConfig.replication_factor=1 \
+  --set loki.storage.type=filesystem
+
+# Promtail DaemonSet
+helm upgrade --install promtail grafana/promtail \
+  --namespace monitoring \
+  --set config.lokiAddress=http://loki:3100/loki/api/v1/push
+```
+
+#### Grafana Alloy (replaces Promtail + Grafana Agent)
+
+```bash
+helm upgrade --install alloy grafana/alloy \
+  --namespace monitoring -f ~/k8s/alloy-values.yaml
+```
+
+```yaml
+# ~/k8s/alloy-values.yaml
+alloy:
+  configMap:
+    content: |
+      discovery.kubernetes "pods" { role = "pod" }
+
+      discovery.relabel "pod_logs" {
+        targets = discovery.kubernetes.pods.targets
+        rule { source_labels = ["__meta_kubernetes_namespace"]; target_label = "namespace" }
+        rule { source_labels = ["__meta_kubernetes_pod_label_app"]; target_label = "app" }
+      }
+
+      loki.source.kubernetes "pod_logs" {
+        targets    = discovery.relabel.pod_logs.output
+        forward_to = [loki.write.default.receiver]
+      }
+
+      loki.write "default" {
+        endpoint { url = "http://loki.monitoring.svc:3100/loki/api/v1/push" }
+      }
+```
+
+#### Add Loki as Grafana data source
+
+```bash
+helm upgrade kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+  --namespace monitoring --reuse-values \
+  --set grafana.additionalDataSources[0].name=Loki \
+  --set grafana.additionalDataSources[0].type=loki \
+  --set grafana.additionalDataSources[0].url=http://loki.monitoring.svc:3100
+```
+
+#### LogQL quick reference
+
+```logql
+{namespace="myapp"}                              # all logs from namespace
+{app="myapp"} |= "error"                         # filter by string
+{app="myapp"} | json | level="error"             # JSON parsing
+rate({namespace="myapp"} |= "error" [5m])        # error rate (for alerting)
+sum by (app) (rate({namespace="myapp"}[5m]))     # log volume by app
+```
+
+```bash
+kubectl -n monitoring port-forward svc/loki 3100:3100
+curl -G "http://localhost:3100/loki/api/v1/query_range" \
+  --data-urlencode 'query={namespace="myapp"} |= "error"' \
+  --data-urlencode 'start=1h' --data-urlencode 'limit=100'
+```
+
+**Caddy:** `loki.home.local { tls internal; reverse_proxy localhost:3100 }`
+
+---
+
+### OpenTelemetry + Grafana Tempo (Distributed Tracing)
+
+**Purpose:** Follow a single request across microservices — finding which service was slow or where an error occurred. OTel is the vendor-neutral instrumentation standard; Tempo is the trace backend.
+
+#### Install the OTel Operator
+
+```bash
+helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+helm install opentelemetry-operator open-telemetry/opentelemetry-operator \
+  --namespace opentelemetry-operator-system --create-namespace \
+  --set admissionWebhooks.certManager.enabled=true
+```
+
+#### Deploy an OTel Collector
+
+```yaml
+# ~/k8s/otel-collector.yaml
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel-collector
+  namespace: monitoring
+spec:
+  mode: Deployment
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc: { endpoint: 0.0.0.0:4317 }
+          http: { endpoint: 0.0.0.0:4318 }
+    processors:
+      batch: { timeout: 1s, send_batch_size: 1024 }
+      memory_limiter: { check_interval: 1s, limit_mib: 512 }
+    exporters:
+      otlp/tempo:
+        endpoint: http://tempo.monitoring.svc:4317
+        tls: { insecure: true }
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [otlp/tempo]
+```
+
+```bash
+kubectl apply -f ~/k8s/otel-collector.yaml
+```
+
+#### Install Grafana Tempo
+
+```bash
+helm upgrade --install tempo grafana/tempo \
+  --namespace monitoring \
+  --set tempo.storage.trace.backend=local \
+  --set tempo.retention=24h
+```
+
+#### Auto-instrumentation (zero-code injection)
+
+```yaml
+# ~/k8s/otel-autoinstrumentation.yaml
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: auto-instrumentation
+  namespace: myapp
+spec:
+  exporter:
+    endpoint: http://otel-collector.monitoring.svc:4317
+  sampler:
+    type: parentbased_traceidratio
+    argument: "0.1"   # sample 10% of traces
+  python:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:latest
+  java:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
+  nodejs:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:latest
+```
+
+```bash
+kubectl apply -f ~/k8s/otel-autoinstrumentation.yaml
+
+# Opt a Deployment in — no code changes required
+kubectl annotate deployment myapp \
+  instrumentation.opentelemetry.io/inject-python="auto-instrumentation" -n myapp
+```
+
+#### Add Tempo as Grafana data source
+
+```bash
+helm upgrade kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+  --namespace monitoring --reuse-values \
+  --set grafana.additionalDataSources[0].name=Tempo \
+  --set grafana.additionalDataSources[0].type=tempo \
+  --set grafana.additionalDataSources[0].url=http://tempo.monitoring.svc:3100 \
+  --set "grafana.additionalDataSources[0].jsonData.tracesToLogsV2.datasourceUid=loki" \
+  --set "grafana.additionalDataSources[0].jsonData.serviceMap.datasourceUid=prometheus"
+```
+
+> **Full observability triangle:** With Loki + Tempo + Prometheus connected, Grafana can jump from a trace → that span's logs → service metrics at that timestamp.
+
+---
+
+### OpenCost (Kubernetes Cost Monitoring)
+
+**Purpose:** Real-time cost visibility — which namespace, deployment, or label is spending what, broken down by CPU, RAM, storage, and network.
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/opencost/opencost/develop/kubernetes/opencost.yaml
+kubectl port-forward -n opencost svc/opencost 9090:9090 9003:9003
+```
+
+```yaml
+# ~/k8s/opencost-values.yaml — custom on-prem pricing
+opencost:
+  customPricing:
+    enabled: true
+    provider: custom
+    costModel:
+      CPU: "0.01"
+      RAM: "0.005"
+      storage: "0.0001"
+      network: "0.0"
+```
+
+```bash
+curl "http://localhost:9003/allocation?window=7d&aggregate=namespace" | python3 -m json.tool
+curl "http://localhost:9003/allocation?window=24h&aggregate=deployment"
+curl "http://localhost:9003/allocation?window=7d&aggregate=label:team"
+```
+
+**Caddy:** `opencost.home.local { tls internal; reverse_proxy localhost:9090 }`
+
+---
+
+### DORA Metrics
+
+| Metric | What it measures | Elite benchmark |
+|--------|-----------------|-----------------|
+| **Deployment Frequency** | How often code ships to production | Multiple per day |
+| **Lead Time for Changes** | Commit to production | < 1 hour |
+| **Change Failure Rate** | % of deployments causing incidents | 0–5% |
+| **Time to Restore (MTTR)** | Recovery time from failure | < 1 hour |
+
+#### Prometheus recording rules
+
+```yaml
+groups:
+  - name: dora_metrics
+    interval: 5m
+    rules:
+      - record: dora:deployment_frequency:rate24h
+        expr: increase(ci_pipeline_runs_total{status="success", branch="main"}[24h])
+
+      - record: dora:change_failure_rate
+        expr: |
+          sum(increase(ci_pipeline_runs_total{status="success", trigger="rollback"}[7d]))
+          / sum(increase(ci_pipeline_runs_total{status="success"}[7d]))
+
+      - record: dora:mttr_hours_p50
+        expr: |
+          histogram_quantile(0.50, sum(rate(incident_duration_seconds_bucket[30d])) by (le)) / 3600
+```
+
+#### Tracking DORA without a dedicated tool
+
+```bash
+# Deployment Frequency — releases in Forgejo in last 24h
+curl -s "http://git.home.local/api/v1/repos/myorg/myapp/releases?limit=50" \
+  -H "Authorization: token $GITEA_TOKEN" \
+  | jq '[.[] | select(.created_at > (now - 86400 | todate))] | length'
+
+# Change Failure Rate — hotfix/rollback merges in last 30 days
+git log --merges --first-parent main --format="%s" --since="30 days ago" \
+  | grep -c -i "hotfix\|rollback\|revert"
+
+# MTTR from Grafana OnCall API
+curl -s "https://oncall.home.local/api/v1/incidents/?limit=100" \
+  -H "Authorization: $GRAFANA_ONCALL_TOKEN" \
+  | jq '[.results[] | .duration_seconds] | add / length / 3600'
+```
+
+---
+
+## Service Mesh
+
+### Linkerd (Lightweight mTLS Service Mesh)
+
+**Purpose:** CNCF-graduated ultra-lightweight service mesh. Adds automatic mTLS between services, per-route observability, retries, circuit breaking, and traffic shifting — no code changes required. Uses Rust micro-proxies (`linkerd-proxy`).
+
+> **Cilium vs Linkerd:** Cilium provides eBPF-based L7 observability and WireGuard node-to-node encryption without sidecars. Linkerd adds **per-workload** SPIFFE identity and clean per-route retry budgets via `ServiceProfile`. Use Cilium for CNI + network policy + Hubble. Add Linkerd only when you specifically need per-route retry budgets, circuit breaking, or the `linkerd viz routes` golden metrics UX.
+
+```bash
+nix-env -iA nixpkgs.linkerd
+
+linkerd check --pre
+linkerd install --crds | kubectl apply -f -
+linkerd install | kubectl apply -f -
+linkerd check
+
+linkerd viz install | kubectl apply -f -
+linkerd viz check
+linkerd viz dashboard &
+```
+
+#### Inject the mesh
+
+```bash
+kubectl annotate namespace myapp linkerd.io/inject=enabled
+kubectl get deploy myapp -n myapp -o yaml | linkerd inject - | kubectl apply -f -
+
+linkerd -n myapp check --proxy
+linkerd viz stat deploy -n myapp
+linkerd viz routes deploy/myapp -n myapp
+linkerd viz tap deploy/myapp -n myapp
+linkerd viz edges pod -n myapp     # verify mTLS on all connections
+```
+
+#### ServiceProfile — per-route retries and timeouts
+
+```yaml
+# ~/k8s/linkerd-serviceprofile.yaml
+apiVersion: linkerd.io/v1alpha2
+kind: ServiceProfile
+metadata:
+  name: myapp.myapp.svc.cluster.local
+  namespace: myapp
+spec:
+  routes:
+    - name: POST /api/orders
+      condition:
+        method: POST
+        pathRegex: /api/orders
+      responseClasses:
+        - condition:
+            status:
+              min: 500
+              max: 599
+          isFailure: true
+      retryBudget:
+        retryRatio: 0.2
+        minRetriesPerSecond: 10
+        ttl: 10s
+      timeout: 2000ms
+```
+
+```bash
+kubectl apply -f ~/k8s/linkerd-serviceprofile.yaml
+linkerd viz routes -n myapp svc/myapp
+```
+
+#### Traffic splitting (canary via SMI)
+
+```yaml
+apiVersion: split.smi-spec.io/v1alpha2
+kind: TrafficSplit
+metadata:
+  name: myapp-split
+  namespace: myapp
+spec:
+  service: myapp
+  backends:
+    - service: myapp-stable
+      weight: 90
+    - service: myapp-canary
+      weight: 10
+```
+
+**Caddy:** `linkerd.home.local { tls internal; reverse_proxy localhost:50750 }`
+
+---
+
+## Backup & Disaster Recovery
+
+### Velero (Cluster Backup & Restore)
+
+```bash
+nix-env -iA nixpkgs.velero
+
+cat > ~/velero-credentials << 'EOF'
+[default]
+aws_access_key_id=minioadmin
+aws_secret_access_key=changeme
+EOF
+
+velero install \
+  --provider aws \
+  --plugins velero/velero-plugin-for-aws:latest \
+  --bucket velero-backups \
+  --secret-file ~/velero-credentials \
+  --use-volume-snapshots=false \
+  --use-node-agent \
+  --backup-location-config \
+    region=minio,s3ForcePathStyle=true,s3Url=http://minio.home.local:9000
+```
+
+```bash
+velero backup create homelab-$(date +%Y%m%d) --include-namespaces='*'
+velero backup create myapp-backup --include-namespaces myapp --ttl 720h
+velero backup get
+velero backup describe homelab-20260427 --details
+velero backup logs homelab-20260427
+```
+
+#### Scheduled backups
+
+```yaml
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: daily-cluster-backup
+  namespace: velero
+spec:
+  schedule: "0 2 * * *"
+  template:
+    includedNamespaces: ["*"]
+    excludedNamespaces: [kube-system, velero]
+    storageLocation: default
+    ttl: 720h
+    snapshotVolumes: false
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: hourly-myapp-backup
+  namespace: velero
+spec:
+  schedule: "0 * * * *"
+  template:
+    includedNamespaces: [myapp]
+    ttl: 168h
+    storageLocation: default
+```
+
+#### Restore
+
+```bash
+velero restore create --from-backup homelab-20260427
+velero restore create myapp-restore \
+  --from-backup homelab-20260427 \
+  --include-namespaces myapp
+
+# Restore to a different namespace (migration pattern)
+velero restore create \
+  --from-backup homelab-20260427 \
+  --include-namespaces myapp \
+  --namespace-mappings myapp:myapp-restored
+```
+
+---
+
+### etcd Snapshots (k3s)
+
+```bash
+sudo k3s etcd-snapshot save --name homelab-$(date +%Y%m%d)
+# Saved to: /var/lib/rancher/k3s/server/db/snapshots/
+
+restic backup ~/.kube ~/k8s
+```
+
+---
+
+## Platform Engineering
+
+### Crossplane (Kubernetes-Native IaC)
+
+**Purpose:** Manage cloud infrastructure as Kubernetes CRDs. Define a `PostgreSQLInstance` and Crossplane provisions the actual RDS or Cloud SQL instance.
+
+```bash
+helm repo add crossplane-stable https://charts.crossplane.io/stable
+helm install crossplane crossplane-stable/crossplane \
+  --namespace crossplane-system --create-namespace
+
+kubectl apply -f - <<EOF
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-hetzner
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/provider-hetzner:latest
+EOF
+
+kubectl get providers
+```
+
+---
+
+### LitmusChaos (Chaos Engineering)
+
+**Purpose:** CNCF project for chaos engineering on Kubernetes. Inject pod deletion, network latency, CPU hog, memory hog, node drain — then measure SLO compliance.
+
+> **Chaos Monkey note:** Netflix's Chaos Monkey targets AWS Auto Scaling Groups — not applicable to self-hosted Kubernetes. LitmusChaos is the correct tool here.
+
+```bash
+helm repo add litmuschaos https://litmuschaos.github.io/litmus-helm/
+helm install chaos litmuschaos/litmus \
+  --namespace litmus --create-namespace \
+  --set portal.frontend.service.type=ClusterIP
+
+kubectl port-forward svc/chaos-litmus-frontend-service 9091:9091 -n litmus
+```
+
+```yaml
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: nginx-chaos
+  namespace: default
+spec:
+  appinfo:
+    appns: default
+    applabel: "app=nginx"
+    appkind: deployment
+  chaosServiceAccount: litmus-admin
+  experiments:
+    - name: pod-delete
+      spec:
+        components:
+          env:
+            - { name: TOTAL_CHAOS_DURATION, value: "60" }
+            - { name: CHAOS_INTERVAL, value: "10" }
+            - { name: FORCE, value: "false" }
+        probe:
+          - name: check-error-rate
+            type: promProbe
+            mode: Continuous
+            promProbe/inputs:
+              endpoint: http://prometheus.monitoring.svc:9090
+              query: 'sum(rate(http_requests_total{status=~"5.."}[1m])) / sum(rate(http_requests_total[1m]))'
+              comparator:
+                type: float
+                criteria: "<="
+                value: "0.01"   # fail experiment if error rate > 1%
+```
+
+```bash
+kubectl apply -f ~/k8s/chaos-pod-delete.yaml
+kubectl get chaosresult nginx-chaos-pod-delete -o jsonpath='{.status.experimentStatus.verdict}'
+```
+
+**Caddy:** `chaos.home.local { tls internal; reverse_proxy localhost:9091 }`
+
+---
+
+### Keptn (Application Lifecycle Orchestration)
+
+**Purpose:** Event-driven orchestration for continuous deployment, SLO-based quality gates, and automated remediation. Integrates with Argo Rollouts and Prometheus.
+
+```bash
+nix-env -iA nixpkgs.keptn
+helm repo add keptn https://charts.keptn.sh
+helm install keptn keptn/keptn --namespace keptn --create-namespace \
+  --set=control-plane.apiGatewayNginx.type=ClusterIP
+kubectl -n keptn get pods
+```
+
+---
+
+### Golden Paths (Platform Engineering Practice)
+
+**Purpose:** Pre-built, opinionated templates for creating new services — encoding your team's best practices so developers can scaffold a production-ready service in minutes.
+
+```bash
+nix-env -iA nixpkgs.cookiecutter
+cookiecutter git+https://git.home.local/platform/golden-paths.git --directory python-service
+# Or use Forgejo template repositories: Settings → "Template Repository"
+```
+
+#### Runbook template (add to every service repo)
+
+```markdown
+# Runbook: {{service_name}}
+
+#### Symptoms → Actions
+
+| Symptom | First check | Fix |
+|---------|-------------|-----|
+| 5xx errors | `kubectl logs <pod>` | Check DB connectivity; restart |
+| High latency | Grafana → upstream latency panel | Scale up replicas |
+| OOMKilled | `kubectl describe pod` events | Increase memory limit |
+| Health check failing | `curl http://localhost:PORT/health` | Check env vars; verify DB migration ran |
+
+#### Escalation
+- Primary on-call: check Grafana OnCall schedule
+- Slack: #incidents
+- Postmortem: file within 48 hours of resolution
+```
+
+---
+
+### Port (Internal Developer Portal)
+
+**Purpose:** IDP alternative to Backstage. Visual UI, integrates with GitHub/GitLab/Jira/ArgoCD/Kubernetes via webhooks.
+
+> **Backstage vs Port:** Backstage is fully self-hosted and extensible but requires maintenance. Port is SaaS with a generous free tier — use it for a polished IDP with minimal ops overhead.
+
+```bash
+helm repo add port-labs https://port-labs.github.io/helm-charts
+helm install port-k8s-exporter port-labs/port-k8s-exporter \
+  --create-namespace --namespace port-k8s-exporter \
+  --set secret.secrets.portClientId="YOUR_CLIENT_ID" \
+  --set secret.secrets.portClientSecret="YOUR_CLIENT_SECRET"
+```
+
+---
+
+## Cluster Management UIs
+
+### k9s (Terminal Cluster Manager)
+
+```bash
 nix-env -iA nixpkgs.k9s
-
-# Launch (uses current kubeconfig context)
 k9s
-
-# Target a specific namespace
 k9s -n argocd
-
-# Target a specific context
 k9s --context k3s-homelab
 ```
-
-#### Key bindings inside k9s
 
 | Key | Action |
 |-----|--------|
@@ -2371,21 +3503,38 @@ k9s --context k3s-homelab
 
 ---
 
-## Kubernetes Dashboard (Web UI)
+### Headlamp (Modern Kubernetes Web UI)
 
-**Purpose:** Official Kubernetes web dashboard. Browse and manage cluster resources, view logs, exec into pods, and apply YAML manifests from the browser.
+```yaml
+# ~/headlamp/compose.yaml
+services:
+  headlamp:
+    image: ghcr.io/headlamp-k8s/headlamp:latest
+    ports:
+      - 127.0.0.1:4466:4466
+    volumes:
+      - ~/.kube:/root/.kube:ro
+    command: -in-cluster=false -kubeconfig /root/.kube/config
+    restart: unless-stopped
+```
+
+```bash
+cd ~/headlamp && podman-compose up -d
+```
+
+**Caddy:** `headlamp.home.local { tls internal; reverse_proxy localhost:4466 }`
+
+---
+
+### Kubernetes Dashboard (Official Web UI)
 
 ```bash
 helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
 helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
   --namespace kubernetes-dashboard --create-namespace
 
-# Port-forward to access
 kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
-# Open https://localhost:8443
 ```
-
-##### Create an admin service account
 
 ```yaml
 # ~/k8s/dashboard-admin.yaml
@@ -2411,1675 +3560,2604 @@ subjects:
 
 ```bash
 kubectl apply -f ~/k8s/dashboard-admin.yaml
-
-# Get login token
 kubectl -n kubernetes-dashboard create token admin-user
 ```
 
+**Caddy:** `k8s.home.local { tls internal; reverse_proxy localhost:8443 { transport http { tls_insecure_skip_verify } } }`
+
 ---
 
-## Prometheus + Grafana on Kubernetes (kube-prometheus-stack)
+### Rancher (Multi-Cluster Management)
 
-**Purpose:** Full observability stack — Prometheus, Grafana, Alertmanager, node-exporter, kube-state-metrics — deployed as a single Helm chart. Includes pre-built dashboards for cluster, node, pod, and workload metrics.
+> ⚠️ Run Rancher on a **separate** host — not on a k3s/RKE2 node it manages.
 
-```bash
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm repo update
-
-helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
-  --namespace monitoring --create-namespace \
-  --set grafana.adminPassword=changeme \
-  --set prometheus.prometheusSpec.retention=15d
-
-# Port-forward Grafana
-kubectl -n monitoring port-forward svc/kube-prometheus-stack-grafana 3000:80
-# Open http://localhost:3000 — user: admin / changeme
+```yaml
+# ~/rancher/compose.yaml
+services:
+  rancher:
+    image: rancher/rancher:latest
+    ports:
+      - 0.0.0.0:80:80
+      - 0.0.0.0:443:443
+    volumes:
+      - /home/user/rancher:/var/lib/rancher:Z
+    privileged: true
+    restart: unless-stopped
 ```
 
-#### Import additional dashboards
-- Longhorn: Dashboard ID `13032`
-- Ingress NGINX: Dashboard ID `9614`
-- ArgoCD: Dashboard ID `14584`
+```bash
+cd ~/rancher && podman-compose up -d
+podman logs rancher 2>&1 | grep "Bootstrap Password"
+sudo firewall-cmd --add-service=http --add-service=https --permanent && sudo firewall-cmd --reload
+```
 
 ---
 
-## Velero (Cluster Backup & Restore)
-
-**Purpose:** Back up and restore Kubernetes cluster resources and persistent volumes. Use Velero to snapshot your entire cluster state to S3-compatible storage (MinIO) — enabling full cluster disaster recovery, namespace migration between clusters, and pre-upgrade safety snapshots.
+### Lens / OpenLens (Desktop Cluster IDE)
 
 ```bash
-# Install Velero CLI via Nix
-nix-env -iA nixpkgs.velero
+flatpak install flathub dev.k8slens.OpenLens
+```
 
-# Create a MinIO bucket named 'velero-backups' first (via MinIO console or mc)
-# Then create a credentials file:
-cat > ~/velero-credentials << 'EOF'
-[default]
-aws_access_key_id=minioadmin
-aws_secret_access_key=changeme
+After install, add your kubeconfig — Lens auto-detects all contexts in `~/.kube/config`.
+
+---
+
+## Multi-Tenancy & Audit
+
+### vCluster (Virtual Kubernetes Clusters)
+
+**Purpose:** Fully isolated virtual Kubernetes clusters inside a single physical cluster. Each vCluster has its own API server and etcd but runs as pods on the host. Tenants get cluster-admin on their vCluster without any access to the host.
+
+```bash
+curl -L -o ~/.local/bin/vcluster \
+  "https://github.com/loft-sh/vcluster/releases/latest/download/vcluster-linux-amd64"
+chmod +x ~/.local/bin/vcluster
+
+vcluster create team-a --namespace team-a-vcluster
+vcluster connect team-a --namespace team-a-vcluster
+
+# Inside the vCluster — full admin, no host access
+kubectl get nodes
+kubectl create namespace myapp
+
+vcluster disconnect
+vcluster list
+```
+
+---
+
+### Kubernetes Audit Logging
+
+**Purpose:** Every API server request logged — who did what, when, and with what response. Essential for security investigations and compliance (SOC2, PCI).
+
+```yaml
+# /etc/kubernetes/audit-policy.yaml
+apiVersion: audit.k8s.io/v1
+kind: Policy
+omitStages: [RequestReceived]
+rules:
+  - level: RequestResponse
+    resources:
+      - group: ""
+        resources: ["secrets"]
+  - level: RequestResponse
+    resources:
+      - group: ""
+        resources: ["pods/exec", "pods/portforward", "pods/attach"]
+  - level: Request
+    verbs: ["create", "update", "patch", "delete"]
+    resources:
+      - group: apps
+        resources: ["deployments", "statefulsets", "daemonsets"]
+  - level: Request
+    verbs: ["create", "update", "patch", "delete"]
+    resources:
+      - group: rbac.authorization.k8s.io
+        resources: ["roles", "rolebindings", "clusterroles", "clusterrolebindings"]
+  - level: Metadata
+```
+
+#### Enable in k3s
+
+```bash
+cat >> /etc/rancher/k3s/config.yaml << 'EOF'
+kube-apiserver-arg:
+  - "audit-log-path=/var/log/k3s/audit.log"
+  - "audit-policy-file=/etc/kubernetes/audit-policy.yaml"
+  - "audit-log-maxage=30"
+  - "audit-log-maxbackup=10"
+  - "audit-log-maxsize=100"
 EOF
-
-# Install Velero in the cluster with MinIO backend
-velero install \
-  --provider aws \
-  --plugins velero/velero-plugin-for-aws:latest \
-  --bucket velero-backups \
-  --secret-file ~/velero-credentials \
-  --use-volume-snapshots=false \
-  --use-node-agent \
-  --backup-location-config \
-    region=minio,s3ForcePathStyle=true,s3Url=http://minio.home.local:9000
-
-# Verify installation
-velero version
-kubectl get pods -n velero
+sudo systemctl restart k3s
 ```
 
-#### Common backup operations
-
-```bash
-# Full cluster backup
-velero backup create homelab-$(date +%Y%m%d) --include-namespaces='*'
-
-# Namespace-scoped backup (faster for per-app backups)
-velero backup create myapp-backup --include-namespaces myapp
-
-# Backup with TTL (auto-deleted after 30 days)
-velero backup create homelab-$(date +%Y%m%d) \
-  --include-namespaces='*' \
-  --ttl 720h
-
-# List all backups
-velero backup get
-
-# Describe a backup (check for errors/warnings)
-velero backup describe homelab-20260422 --details
-
-# Download backup logs
-velero backup logs homelab-20260422
-```
-
-#### Scheduled backups (CRD approach — GitOps-friendly)
+#### Ship audit logs to Loki (Alloy config)
 
 ```yaml
-# ~/k8s/velero-schedule.yaml
-apiVersion: velero.io/v1
-kind: Schedule
-metadata:
-  name: daily-cluster-backup
-  namespace: velero
-spec:
-  schedule: "0 2 * * *"       # daily at 2 AM
-  template:
-    includedNamespaces:
-      - "*"
-    excludedNamespaces:
-      - kube-system
-      - velero
-    storageLocation: default
-    ttl: 720h                  # keep 30 days
-    snapshotVolumes: false
----
-apiVersion: velero.io/v1
-kind: Schedule
-metadata:
-  name: hourly-myapp-backup
-  namespace: velero
-spec:
-  schedule: "0 * * * *"
-  template:
-    includedNamespaces: [myapp]
-    ttl: 168h                  # keep 7 days
-    storageLocation: default
+loki.source.file "k3s_audit" {
+  targets = [{ __path__ = "/var/log/k3s/audit.log", job = "k3s-audit" }]
+  forward_to = [loki.write.default.receiver]
+}
 ```
 
-```bash
-kubectl apply -f ~/k8s/velero-schedule.yaml
-velero schedule get
-```
+#### Query audit logs in Grafana (LogQL)
 
-#### Restore operations
-
-```bash
-# Restore entire cluster from a backup
-velero restore create --from-backup homelab-20260422
-
-# Restore a single namespace (e.g., migrate myapp to a new cluster)
-velero restore create myapp-restore \
-  --from-backup homelab-20260422 \
-  --include-namespaces myapp
-
-# Restore to a different namespace
-velero restore create \
-  --from-backup homelab-20260422 \
-  --include-namespaces myapp \
-  --namespace-mappings myapp:myapp-restored
-
-# Watch restore progress
-velero restore describe myapp-restore --details
-velero restore logs myapp-restore
+```logql
+{job="k3s-audit"} | json | objectRef_resource="secrets" | verb="get"
+{job="k3s-audit"} | json | objectRef_subresource="exec"
+{job="k3s-audit"} | json | responseStatus_code >= 401
+{job="k3s-audit"} | json | user_username="admin" | verb=~"create|update|patch|delete"
 ```
 
 ---
 
-## In-Cluster CI/CD
+## Helm — Advanced Usage
 
-These tools run natively inside the cluster — use them for CI pipelines and build jobs that leverage Kubernetes scheduling, parallelism, and pod isolation directly.
-
----
-
-### Tekton Pipelines (Kubernetes-Native CI/CD)
-
-**Purpose:** CNCF-graduated Kubernetes-native CI/CD.
+### Helmfile (Declarative Multi-Chart Management)
 
 ```bash
-# Install on your k3s/k0s cluster
-kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
-kubectl apply -f https://storage.googleapis.com/tekton-releases/dashboard/latest/release.yaml
-kubectl apply -f https://storage.googleapis.com/tekton-releases/triggers/latest/release.yaml
+nix-env -iA nixpkgs.helmfile
+helm plugin install https://github.com/databus23/helm-diff
 
-# Install Tekton CLI — Nix (primary)
-nix-env -iA nixpkgs.tekton-client
-
-# Port-forward dashboard
-kubectl -n tekton-pipelines port-forward svc/tekton-dashboard 9097:9097
+helmfile diff            # preview all pending changes
+helmfile apply           # apply all releases in dependency order
+helmfile apply --selector app=monitoring
 ```
-
-##### Example Task + Pipeline
 
 ```yaml
-# ~/k8s/tekton-hello.yaml
-apiVersion: tekton.dev/v1
-kind: Task
-metadata:
-  name: hello
-spec:
-  steps:
-    - name: echo
-      image: alpine
-      script: echo "Hello from Tekton"
----
-apiVersion: tekton.dev/v1
-kind: PipelineRun
-metadata:
-  generateName: hello-run-
-spec:
-  pipelineRef:
-    name: hello-pipeline
-```
+# ~/k8s/helmfile.yaml
+repositories:
+  - name: prometheus-community
+    url: https://prometheus-community.github.io/helm-charts
+  - name: grafana
+    url: https://grafana.github.io/helm-charts
+  - name: argo
+    url: https://argoproj.github.io/argo-helm
+  - name: longhorn
+    url: https://charts.longhorn.io
+  - name: cilium
+    url: https://helm.cilium.io/
 
-```bash
-kubectl apply -f ~/k8s/tekton-hello.yaml
-tkn pipelinerun logs -f --last
-```
+releases:
+  - name: cilium
+    chart: cilium/cilium
+    namespace: kube-system
+    version: ">=1.17.0"
+    values: [~/k8s/values/cilium.yaml]
+    labels: { app: networking }
 
----
+  - name: kube-prometheus-stack
+    chart: prometheus-community/kube-prometheus-stack
+    namespace: monitoring
+    createNamespace: true
+    version: ">=58.0.0"
+    values: [~/k8s/values/prometheus.yaml]
+    labels: { app: monitoring }
 
-### Tekton Chains (Supply Chain Security)
+  - name: loki
+    chart: grafana/loki
+    namespace: monitoring
+    values: [~/k8s/values/loki.yaml]
+    needs: [monitoring/kube-prometheus-stack]
+    labels: { app: monitoring }
 
-**Purpose:** Adds SLSA provenance generation on top of Tekton. After a TaskRun or PipelineRun completes, Chains automatically captures attestations about what was built, signs them with a cosign/KMS key, and stores them in an OCI registry or Rekor transparency log. Satisfies SLSA Level 2+ requirements without changing your existing Tekton pipelines.
+  - name: argocd
+    chart: argo/argo-cd
+    namespace: argocd
+    createNamespace: true
+    values: [~/k8s/values/argocd.yaml]
+    labels: { app: gitops }
 
-```bash
-# Install Tekton Chains
-kubectl apply -f https://storage.googleapis.com/tekton-releases/chains/latest/release.yaml
-
-# Configure signing (cosign key pair)
-cosign generate-key-pair k8s://tekton-chains/signing-secrets
-
-# Verify provenance for an image
-cosign verify-attestation --key cosign.pub myregistry/myimage:latest
-```
-
----
-
-### Argo Workflows (Data & ML Pipelines)
-
-**Purpose:** Kubernetes-native workflow engine for data pipelines, ML training jobs, and batch processing — distinct from ArgoCD (which is GitOps CD). Argo Workflows runs DAG or step-based pipelines as Kubernetes Pods, with fan-out parallelism, artifact passing, retries, and a polished web UI. Common in MLOps stacks alongside Kubeflow.
-
-```bash
-# Install Argo Workflows
-kubectl create namespace argo
-kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/latest/download/install.yaml
-
-# Install the CLI via Nix
-nix-env -iA nixpkgs.argo
-
-# Submit a workflow
-argo submit -n argo --watch ~/k8s/workflow.yaml
-
-# List workflows
-argo list -n argo
-
-# Get workflow logs
-argo logs -n argo my-workflow
-```
-
-##### Example workflow (parallel steps)
-
-```yaml
-# ~/k8s/workflow.yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
-metadata:
-  generateName: data-pipeline-
-spec:
-  entrypoint: main
-  templates:
-    - name: main
-      dag:
-        tasks:
-          - name: ingest
-            template: python-step
-            arguments:
-              parameters:
-                - name: cmd
-                  value: "python ingest.py"
-          - name: transform
-            template: python-step
-            dependencies: [ingest]
-            arguments:
-              parameters:
-                - name: cmd
-                  value: "python transform.py"
-    - name: python-step
-      inputs:
-        parameters:
-          - name: cmd
-      container:
-        image: python:3.12-slim
-        command: [sh, -c]
-        args: ["{{inputs.parameters.cmd}}"]
+  - name: longhorn
+    chart: longhorn/longhorn
+    namespace: longhorn-system
+    createNamespace: true
+    values: [~/k8s/values/longhorn.yaml]
+    labels: { app: storage }
 ```
 
 ---
 
-### Kaniko (In-Cluster Image Building)
-
-**Purpose:** Builds OCI container images inside Kubernetes pods without requiring a Docker daemon or root privileges. Reads a Containerfile/Dockerfile and pushes the result directly to your registry — ideal for CI pipelines running inside k3s/RKE2 where you can't or don't want to mount the host Docker socket. Works well alongside Buildah (host-level) and Skopeo (registry operations).
-
-```yaml
-# ~/k8s/kaniko-job.yaml
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: build-myapp
-spec:
-  template:
-    spec:
-      containers:
-        - name: kaniko
-          image: gcr.io/kaniko-project/executor:latest
-          args:
-            - --context=git://git.home.local/myorg/myapp
-            - --dockerfile=Containerfile
-            - --destination=registry.home.local/myorg/myapp:latest
-            - --insecure-registry=registry.home.local
-          volumeMounts:
-            - name: regcred
-              mountPath: /kaniko/.docker
-      volumes:
-        - name: regcred
-          secret:
-            secretName: registry-credentials
-            items:
-              - key: .dockerconfigjson
-                path: config.json
-      restartPolicy: Never
-```
+### OCI Helm charts
 
 ```bash
-kubectl apply -f ~/k8s/kaniko-job.yaml
-kubectl logs -f job/build-myapp
+# Install directly from OCI (no helm repo add required)
+helm install myapp oci://ghcr.io/myorg/charts/myapp --version 1.2.3
+
+helm package ./myapp-chart
+helm push myapp-1.2.3.tgz oci://ghcr.io/myorg/charts/
+helm registry login ghcr.io --username myuser --password <token>
 ```
 
 ---
 
-## Argo Rollouts (Progressive Delivery)
+### Helm schema validation
 
-**Purpose:** Advanced deployment strategies for Kubernetes — canary releases, blue/green deployments, and analysis-gated rollouts. Argo Rollouts replaces standard Kubernetes `Deployment` objects with a `Rollout` CRD that supports traffic splitting, automated metric analysis (via Prometheus), and instant rollback. Pairs naturally with ArgoCD: ArgoCD syncs the desired `Rollout` spec; Argo Rollouts controls how traffic shifts during the deployment.
+Add `values.schema.json` to your chart to validate values at install/upgrade time:
 
-```bash
-# Install Argo Rollouts
-kubectl create namespace argo-rollouts
-kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
-
-# Install the kubectl plugin via Nix
-nix-env -iA nixpkgs.argo-rollouts
-```
-
-#### Canary Rollout example
-
-```yaml
-# ~/k8s/rollout-canary.yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Rollout
-metadata:
-  name: myapp
-  namespace: default
-spec:
-  replicas: 5
-  selector:
-    matchLabels:
-      app: myapp
-  template:
-    metadata:
-      labels:
-        app: myapp
-    spec:
-      containers:
-        - name: myapp
-          image: myapp:v2
-          ports:
-            - containerPort: 8080
-  strategy:
-    canary:
-      steps:
-        - setWeight: 20          # 20% traffic to new version
-        - pause: { duration: 5m } # wait 5 minutes
-        - setWeight: 50
-        - pause: {}              # manual gate — promote with kubectl argo rollouts promote
-        - setWeight: 100
-      canaryService: myapp-canary
-      stableService: myapp-stable
-```
-
-```bash
-kubectl apply -f ~/k8s/rollout-canary.yaml
-
-# Watch the rollout progress
-kubectl argo rollouts get rollout myapp --watch
-
-# Promote through a manual gate
-kubectl argo rollouts promote myapp
-
-# Abort and roll back
-kubectl argo rollouts abort myapp
-kubectl argo rollouts undo myapp
-```
-
-#### Blue/Green example
-
-```yaml
-strategy:
-  blueGreen:
-    activeService: myapp-active
-    previewService: myapp-preview
-    autoPromotionEnabled: false   # require manual promotion
-    scaleDownDelaySeconds: 30
-```
-
-```bash
-# Promote the preview to active
-kubectl argo rollouts promote myapp
-```
-
-> Argo Rollouts integrates with ingress-nginx and Gateway API for traffic splitting — it patches the Ingress or HTTPRoute weights automatically as rollout steps progress.
-
----
-
-## Network Policies
-
-**Purpose:** Restrict pod-to-pod and pod-to-external traffic. By default all pods can reach all pods — network policies enforce least-privilege network access. Requires a CNI that supports them (Calico, Cilium, Canal).
-
-#### Deny all ingress by default, allow only from same namespace
-
-```yaml
-# ~/k8s/network-policy-default-deny.yaml
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: default-deny-ingress
-  namespace: production
-spec:
-  podSelector: {}
-  policyTypes: [Ingress]
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-same-namespace
-  namespace: production
-spec:
-  podSelector: {}
-  ingress:
-    - from:
-        - podSelector: {}
-```
-
-```bash
-kubectl apply -f ~/k8s/network-policy-default-deny.yaml
+```json
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["image", "resources"],
+  "properties": {
+    "image": {
+      "type": "object",
+      "required": ["repository", "tag"],
+      "properties": {
+        "repository": { "type": "string" },
+        "tag": { "type": "string", "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$" }
+      }
+    },
+    "replicaCount": { "type": "integer", "minimum": 1, "maximum": 50 },
+    "resources": { "type": "object", "required": ["requests", "limits"] }
+  }
+}
 ```
 
 ---
 
-## Resource Quotas & Limits
-
-**Purpose:** Prevent a single namespace or workload from consuming all cluster resources. Apply ResourceQuota to namespaces and LimitRange to set defaults for pods.
-
-```yaml
-# ~/k8s/namespace-quotas.yaml
-apiVersion: v1
-kind: ResourceQuota
-metadata:
-  name: compute-quota
-  namespace: production
-spec:
-  hard:
-    requests.cpu: "4"
-    requests.memory: 8Gi
-    limits.cpu: "8"
-    limits.memory: 16Gi
-    pods: "20"
----
-apiVersion: v1
-kind: LimitRange
-metadata:
-  name: default-limits
-  namespace: production
-spec:
-  limits:
-    - default:
-        memory: 512Mi
-        cpu: 500m
-      defaultRequest:
-        memory: 128Mi
-        cpu: 100m
-      type: Container
-```
+### Useful Helm commands
 
 ```bash
-kubectl apply -f ~/k8s/namespace-quotas.yaml
+helm list -A                                              # all releases, all namespaces
+helm get values myapp -n myapp --all                      # effective values after merge
+helm template myapp ./myapp-chart -f values.yaml          # render without installing
+helm diff upgrade myapp ./myapp-chart -f values.yaml -n myapp  # requires helm-diff plugin
+helm rollback myapp 2 -n myapp
+helm history myapp -n myapp
+helm test myapp -n myapp
+helm uninstall myapp -n myapp
 ```
 
 ---
 
-## Secrets Management
-
-**Purpose:** Avoid storing plain secrets in Git. Use Sealed Secrets (encrypt secrets for Git storage) or External Secrets Operator (pull from OpenBao/Infisical/AWS SSM into native k8s Secrets).
-
-### Sealed Secrets
+## Daily Operations
 
 ```bash
-# Install controller
-helm repo add sealed-secrets https://bitnami-labs.github.io/sealed-secrets
-helm install sealed-secrets sealed-secrets/sealed-secrets -n kube-system
-
-# Install kubeseal CLI via Nix
-nix-env -iA nixpkgs.kubeseal
-
-# Seal a secret (safe to commit to Git)
-kubectl create secret generic mysecret \
-  --from-literal=password=changeme \
-  --dry-run=client -o yaml | \
-  kubeseal --format yaml > ~/k8s/mysecret-sealed.yaml
-
-# Apply the sealed secret
-kubectl apply -f ~/k8s/mysecret-sealed.yaml
-```
-
----
-
-### External Secrets Operator (ESO)
-
-**Purpose:** Sync secrets from external secret stores — OpenBao, Infisical, AWS Secrets Manager, HashiCorp Vault, GCP Secret Manager, Azure Key Vault, and more — into native Kubernetes `Secret` objects. ESO watches `ExternalSecret` CRDs and reconciles them on a schedule; your pods consume plain `Secret` objects and never know the secret came from an external store. The natural companion to OpenBao (from security.md) and Infisical for a GitOps-safe secrets workflow.
-
-```bash
-# Install ESO via Helm
-helm repo add external-secrets https://charts.external-secrets.io
-helm install external-secrets external-secrets/external-secrets \
-  --namespace external-secrets --create-namespace \
-  --set installCRDs=true
-```
-
-#### Connect ESO to OpenBao (Vault-compatible)
-
-```yaml
-# ~/k8s/eso-openbao-store.yaml
-apiVersion: external-secrets.io/v1beta1
-kind: ClusterSecretStore
-metadata:
-  name: openbao
-spec:
-  provider:
-    vault:
-      server: "http://openbao.home.local:8200"
-      path: "secret"
-      version: "v2"
-      auth:
-        tokenSecretRef:
-          name: openbao-token
-          namespace: external-secrets
-          key: token
-```
-
-```bash
-# Create the token secret ESO uses to authenticate to OpenBao
-kubectl create secret generic openbao-token \
-  --namespace external-secrets \
-  --from-literal=token=<your-openbao-token>
-
-kubectl apply -f ~/k8s/eso-openbao-store.yaml
-```
-
-##### Create an ExternalSecret — pull a database password from OpenBao into a k8s Secret
-
-```yaml
-# ~/k8s/myapp-external-secret.yaml
-apiVersion: external-secrets.io/v1beta1
-kind: ExternalSecret
-metadata:
-  name: myapp-db-secret
-  namespace: myapp
-spec:
-  refreshInterval: 1h          # re-sync every hour
-  secretStoreRef:
-    name: openbao
-    kind: ClusterSecretStore
-  target:
-    name: myapp-db-credentials  # k8s Secret that gets created/updated
-    creationPolicy: Owner
-  data:
-    - secretKey: DB_PASSWORD    # key in the k8s Secret
-      remoteRef:
-        key: myapp/database     # path in OpenBao
-        property: password      # field within the secret
-    - secretKey: DB_USERNAME
-      remoteRef:
-        key: myapp/database
-        property: username
-```
-
-```bash
-kubectl apply -f ~/k8s/myapp-external-secret.yaml
-
-# Check sync status
-kubectl get externalsecret -n myapp
-kubectl describe externalsecret myapp-db-secret -n myapp
-```
-
-#### Connect ESO to Infisical
-
-```yaml
-apiVersion: external-secrets.io/v1beta1
-kind: ClusterSecretStore
-metadata:
-  name: infisical
-spec:
-  provider:
-    infisical:
-      auth:
-        universalAuthCredentials:
-          clientId:
-            name: infisical-creds
-            namespace: external-secrets
-            key: clientId
-          clientSecret:
-            name: infisical-creds
-            namespace: external-secrets
-            key: clientSecret
-      secretsScope:
-        projectSlug: myproject
-        environmentSlug: prod
-```
-
-> **Pattern:** Store all secrets in OpenBao or Infisical. Reference them in k8s manifests via `ExternalSecret` CRDs. Never put plaintext values in Kubernetes YAML — even in private Git repos. ESO rotates the k8s Secret automatically when the upstream value changes (within the `refreshInterval`).
-
----
-
-## Useful Daily Commands
-
-```bash
-# Context management
+# Context and namespace management
 kubectl config get-contexts
 kubectl config use-context k3s-homelab
 kubectl config set-context --current --namespace=myapp
+kubectl ctx k3s-homelab      # krew ctx plugin
+kubectl ns monitoring        # krew ns plugin
 
 # Resource inspection
 kubectl get all -n myapp
 kubectl describe pod <pod-name> -n myapp
-kubectl logs <pod-name> -n myapp --previous  # logs from crashed container
+kubectl logs <pod-name> -n myapp --previous
 kubectl logs <pod-name> -n myapp -f --tail=100
+kubectl get events -n myapp --sort-by='.lastTimestamp'
 
-# Live resource editing
+# Live editing and diffing
 kubectl edit deployment myapp -n myapp
-
-# Apply and diff
 kubectl diff -f ~/k8s/deployment.yaml
 kubectl apply -f ~/k8s/deployment.yaml
 
-# Scale a deployment
+# Scaling
 kubectl scale deployment myapp --replicas=3 -n myapp
+kubectl rollout status deployment/myapp -n myapp
+kubectl rollout history deployment/myapp -n myapp
+kubectl rollout undo deployment/myapp -n myapp
 
-# Exec into a running pod
+# Pod exec and file operations
 kubectl exec -it <pod-name> -n myapp -- /bin/sh
-
-# Copy files to/from a pod
 kubectl cp myapp/<pod-name>:/app/logs ./logs/
 kubectl cp ./config.yaml myapp/<pod-name>:/app/config.yaml
 
-# Port-forward a service for local access
+# Port-forwarding
 kubectl port-forward svc/myapp 8080:80 -n myapp
 
-# View events sorted by time
-kubectl get events -n myapp --sort-by='.lastTimestamp'
-
-# Watch pods in real-time
+# Watch pods
 kubectl get pods -n myapp -w
 
-# Delete all pods in a namespace (forces restart)
+# Node maintenance
+kubectl drain <node-name> --ignore-daemonsets --delete-emptydir-data
+kubectl uncordon <node-name>
 kubectl delete pods --all -n myapp
-
-# Rollout management
-kubectl rollout status deployment/myapp -n myapp
-kubectl rollout history deployment/myapp -n myapp
-kubectl rollout undo deployment/myapp -n myapp  # roll back
 ```
 
 ---
 
-## Caddy Configuration
-
-When exposing cluster services externally, port-forward or use NodePort then proxy through Caddy on the host:
+## Caddy Configuration Reference
 
 ```caddyfile
+# Port-forward / direct services (run kubectl port-forward before starting Caddy)
 argocd.home.local   { tls internal; reverse_proxy localhost:8180 { transport http { tls_insecure_skip_verify } } }
 rancher.home.local  { tls internal; reverse_proxy localhost:8443 { transport http { tls_insecure_skip_verify } } }
 k8s.home.local      { tls internal; reverse_proxy localhost:8443 { transport http { tls_insecure_skip_verify } } }
 grafana.home.local  { tls internal; reverse_proxy localhost:3000 }
 longhorn.home.local { tls internal; reverse_proxy localhost:8080 }
+headlamp.home.local { tls internal; reverse_proxy localhost:4466 }
+opencost.home.local { tls internal; reverse_proxy localhost:9090 }
+chaos.home.local    { tls internal; reverse_proxy localhost:9091 }
+loki.home.local     { tls internal; reverse_proxy localhost:3100 }
+hubble.home.local   { tls internal; reverse_proxy localhost:12000 }
+linkerd.home.local  { tls internal; reverse_proxy localhost:50750 }
+oncall.home.local   { tls internal; reverse_proxy localhost:8082 }
 
-# NGF-backed services — add header_up Host so NGF can match the HTTPRoute hostname
-# Each hostname here needs a matching HTTPRoute in the nginx-gateway namespace
+# Harbor — needs Host header passthrough
+harbor.home.local {
+  tls internal
+  reverse_proxy harbor-core.harbor.svc.cluster.local:80 {
+    header_up Host {host}
+  }
+}
+
+# NGF-backed services — header_up Host is required so NGF can match HTTPRoute hostname
+# Each hostname needs a matching HTTPRoute in nginx-gateway namespace
 myapp.home.local {
   tls internal
   reverse_proxy localhost:30080 { header_up Host {host} }
 }
 
+argocd-ngf.home.local {
+  tls internal
+  reverse_proxy localhost:30080 { header_up Host {host} }
+}
+
+grafana-ngf.home.local {
+  tls internal
+  reverse_proxy localhost:30080 { header_up Host {host} }
+}
 ```
 
----
-
-## Backup
-
-```bash
-# Back up cluster ETCD snapshot (k3s)
-sudo k3s etcd-snapshot save --name homelab-$(date +%Y%m%d)
-# Snapshots saved to /var/lib/rancher/k3s/server/db/snapshots/
-
-# Back up kubeconfig and helm values
-restic backup ~/.kube /home/user/k8s
-```
+> **Why `header_up Host {host}`?** NGF matches HTTPRoutes by the `Host` header. Without this, Caddy rewrites it to `localhost` and NGF returns 404 for every request.
 
 ---
 
 ## Troubleshooting
 
+### General cluster issues
+
 | Issue | Solution |
 |-------|----------|
-| `kubectl: connection refused` | Check `k3s`/`k0s` systemd service: `sudo systemctl status k3s`; verify kubeconfig `server:` IP is correct |
-| MicroK8s `permission denied` on kubectl | Run `sudo usermod -aG microk8s $USER` then log out and back in; verify with `groups` |
-| MicroK8s addon enable fails | Run `microk8s status` to check all daemons are running; check `sudo snap logs microk8s` for errors |
-| MicroK8s cluster data lost after Snap refresh | Data lives in `/var/snap/microk8s/` — this persists across `snap refresh`; loss only happens on `snap remove` |
-| minikube start fails with Podman driver | Ensure Podman socket is active: `systemctl --user start podman.socket`; try `minikube delete` then re-create |
-| minikube `ImagePullBackOff` after `minikube image load` | Confirm the image name in the manifest matches exactly what was loaded; check with `minikube image ls` |
-| Node shows `NotReady` | Run `kubectl describe node <name>`; check CNI pods in `kube-system`; verify `br_netfilter` is loaded |
-| Pod stuck in `Pending` | No nodes have enough resources — check `kubectl describe pod`; or no PVC bound — check StorageClass exists |
-| Pod stuck in `CrashLoopBackOff` | Run `kubectl logs <pod> --previous`; check env vars and volume mounts via `kubectl describe pod` |
-| Pod stuck in `ImagePullBackOff` | Image name or tag wrong; registry unreachable; missing `imagePullSecret` for private registry |
-| Ingress returns 404 | Verify `ingressClassName: nginx` matches the controller; check the service name and port in the Ingress spec |
-| cert-manager certificate stuck `Pending` | Describe the Certificate and CertificateRequest: `kubectl describe cert <name>`; check ClusterIssuer status; ensure port 80 is reachable for HTTP-01 challenge |
-| Longhorn volume stuck `Attaching` | Verify `iscsid` is running on all nodes: `sudo systemctl status iscsid`; check Longhorn manager logs |
-| Longhorn volume degraded | A replica is on an unavailable node — check node health; Longhorn will rebuild the replica automatically once the node returns |
-| ArgoCD app OutOfSync after apply | Check for server-side fields mutated by Kubernetes (e.g. `status`, `managedFields`) — add `ignoreDifferences` to the Application spec |
-| ArgoCD unable to connect to Forgejo | Ensure the repo URL uses HTTPS; add the repo with `--insecure-skip-server-verification` if using a self-signed cert |
-| Helm upgrade fails mid-release | Run `helm rollback <release> -n <ns>`; if release is stuck in `pending-upgrade`, delete the secret: `kubectl delete secret sh.helm.release.v1.<release>.<revision> -n <ns>` |
-| k3s agent not joining | Verify the token matches `/var/lib/rancher/k3s/server/node-token`; check firewall allows port 6443 from worker IPs |
-| SonarQube / Elasticsearch OOM | Set `vm.max_map_count=524288` on the host and in `/etc/sysctl.d/99-k8s.conf`; restart the pod |
-| Velero backup failing | Check `velero backup logs <name>`; ensure MinIO bucket exists and credentials are correct; verify the velero pod has network access to MinIO |
-| k9s shows no resources | Check the active namespace with `:ns`; switch context with `:ctx`; ensure kubeconfig is loaded from `~/.kube/config` |
-| Dashboard `Unauthorized` | Token has expired — create a new one: `kubectl -n kubernetes-dashboard create token admin-user` |
-| Sealed secret not decrypting | The sealing key in `kube-system` must match the one used to seal — do not delete the `sealed-secrets-key` secret; back it up with `kubectl get secret -n kube-system sealed-secrets-key -o yaml` |
-| ExternalSecret stuck `SecretSyncedError` | Check `kubectl describe externalsecret <n>` — common causes: wrong path in `remoteRef.key`, token lacks read permissions in OpenBao, or the `ClusterSecretStore` can't reach the backend URL |
-| ESO not refreshing secret | Decrease `refreshInterval` for testing; check ESO operator logs: `kubectl logs -n external-secrets -l app.kubernetes.io/name=external-secrets` |
-| cert-manager Certificate stuck `Pending` | `kubectl describe certificate <n> -n <ns>` → look at the `CertificateRequest` and `Order` events; HTTP-01 needs port 80 publicly reachable; DNS-01 needs correct API token and propagation time |
-| cert-manager HTTP-01 challenge failing | The ACME solver creates a temporary Ingress — verify your ingress controller is running and the domain resolves publicly; check `kubectl get challenges -A` for error messages |
-| Argo Rollouts stuck at canary weight | Verify `canaryService` and `stableService` exist and match the Services in your namespace; check `kubectl argo rollouts get rollout myapp` for error messages |
-| Argo Rollouts canary not splitting traffic | ingress-nginx and Gateway API traffic splitting requires the corresponding annotation or HTTPRoute backend weights — check that the controller supports the Rollout's `trafficRouting` config |
-| NGF GatewayClass not Accepted | Check NGF control plane logs: `kubectl -n nginx-gateway logs -l app.kubernetes.io/name=nginx-gateway-fabric`; confirm Gateway API CRDs are installed at the correct version (`kubectl get crd | grep gateway.networking.k8s.io`) |
-| NGF returns 404 for all requests | The `Host` header is not being forwarded by Caddy — add `header_up Host {host}` inside the `reverse_proxy` block so NGF can match the HTTPRoute hostname |
-| NGF HTTPRoute not Accepted | Run `kubectl -n nginx-gateway describe httproute <n>`; common causes: `sectionName` doesn't match a listener name (`http`), `parentRef` namespace wrong, or backend namespace missing a ReferenceGrant |
-| NGF GRPCRoute not Accepted | Confirm the GRPCRoute CRD is installed (`kubectl get crd grpcroutes.gateway.networking.k8s.io`); verify `gwAPIExperimentalFeatures.enable: false` — GRPCRoute is GA and the experimental flag is not needed |
-| Cross-namespace route returning 503 | ReferenceGrant is missing or in the wrong namespace — it must be in the **target** (backend Service) namespace; run `kubectl get referencegrant -A` to verify |
-| NGF NodePort 30080 not reachable from Caddy | Confirm the Service was patched to NodePort: `kubectl -n nginx-gateway get svc nginx-gateway-nginx`; verify `PORT(S): 80:30080/TCP`; `curl http://localhost:30080` should return an NGF 404, not connection refused |
-| Caddy proxying to NGF but cert error in browser | Use `tls internal` (not bare `tls`) for `home.local` domains; ensure Step-CA is running and the root cert is trusted by the browser |
-| NGF data plane (NGINX) OOMKilled | Increase `nginx.container.resources.limits.memory` in the values file; start at `1Gi` for a homelab under real load |
-| ObservabilityPolicy CRD conflict on upgrade | `v1alpha1` must remain `storage: true` — do not change this when upgrading; if NGF crashes with `no kind registered for ObservabilityPolicy`, re-apply `deploy/crds.yaml` from the new version |
+| `kubectl: connection refused` | `sudo systemctl status k3s`; verify kubeconfig `server:` IP |
+| Node shows `NotReady` | `kubectl describe node <n>`; check CNI pods in `kube-system`; verify `br_netfilter` loaded |
+| Pod stuck in `Pending` | No nodes have enough resources, or PVC not bound — check StorageClass exists |
+| Pod stuck in `CrashLoopBackOff` | `kubectl logs <pod> --previous`; check env vars and volume mounts |
+| Pod stuck in `ImagePullBackOff` | Image name/tag wrong; registry unreachable; missing `imagePullSecret` |
 
 ---
 
-## GitOps End-to-End Workflow
+### Distribution-specific
 
-GitOps is not a tool — it's the principle that Git is the single source of truth for both application code and infrastructure state. Changes flow through Git, and automated systems reconcile the live environment to match what's in the repo. Here's how the full loop works:
+| Issue | Solution |
+|-------|----------|
+| MicroK8s `permission denied` | `sudo usermod -aG microk8s $USER` then log out/in |
+| MicroK8s addon enable fails | `microk8s status`; `sudo snap logs microk8s` |
+| minikube start fails with Podman driver | `systemctl --user start podman.socket`; `minikube delete` then re-create |
+| minikube `ImagePullBackOff` after image load | Confirm image name matches exactly; check with `minikube image ls` |
+| k3s agent not joining | Verify token matches `/var/lib/rancher/k3s/server/node-token`; check firewall allows 6443 |
+| kubeadm node stays `NotReady` | CNI not installed — apply CNI manifest immediately after `kubeadm init` |
+| kubeadm `certificate has expired` | `sudo kubeadm certs renew all && sudo systemctl restart kubelet` |
+| kubeadm init: container runtime not running | `sudo systemctl status containerd`; verify `--cri-socket` flag |
+
+---
+
+### Cilium / Networking
+
+| Issue | Solution |
+|-------|----------|
+| Pods can't reach each other after Cilium install | Delete stale config: `sudo rm /etc/cni/net.d/10-flannel.conflist`; restart pods |
+| `hubble observe` returns no flows | `kubectl -n kube-system get pods -l k8s-app=hubble-relay` |
+| L7 policy not enforced | Verify `envoy.enabled=true` (implied by Cilium 1.17+); check `cilium-envoy` DaemonSet |
+| WireGuard broken after node reboot | `lsmod | grep wireguard`; `sudo modprobe wireguard` |
+| kube-proxy still running | k3s not started with `--disable-kube-proxy`; reinstall with the flag |
+| `cilium status` shows errors | `cilium connectivity test`; check `cilium` DaemonSet pods in `kube-system` |
+
+---
+
+### Ingress / Gateway
+
+| Issue | Solution |
+|-------|----------|
+| Ingress returns 404 | Verify `ingressClassName: nginx` matches controller; check service name and port |
+| NGF GatewayClass not Accepted | Check NGF logs; confirm Gateway API CRDs installed at correct version |
+| NGF returns 404 for all requests | Add `header_up Host {host}` inside Caddy's `reverse_proxy` block |
+| NGF HTTPRoute not Accepted | Check `sectionName` matches listener; verify `parentRef` namespace; check ReferenceGrant |
+| Cross-namespace route returning 503 | ReferenceGrant must be in the **target** namespace; `kubectl get referencegrant -A` |
+| NGF NodePort 30080 not reachable | `kubectl -n nginx-gateway get svc nginx-gateway-nginx` — confirm `80:30080/TCP` |
+| NGF data plane OOMKilled | Increase `nginx.container.resources.limits.memory` to `1Gi` minimum |
+| ObservabilityPolicy CRD conflict on upgrade | Re-apply `deploy/crds.yaml` from the new NGF version |
+
+---
+
+### Storage
+
+| Issue | Solution |
+|-------|----------|
+| Longhorn volume stuck `Attaching` | `sudo systemctl status iscsid`; check Longhorn manager logs |
+| Longhorn volume degraded | Replica on unavailable node — Longhorn rebuilds once node returns |
+| PDB blocks node drain | `kubectl describe pdb`; temporarily patch `minAvailable: 0` if safe, then restore |
+
+---
+
+### GitOps & Delivery
+
+| Issue | Solution |
+|-------|----------|
+| ArgoCD app OutOfSync after apply | Add `ignoreDifferences` to Application spec for server-side mutated fields |
+| ArgoCD unable to connect to Forgejo | Use HTTPS; add `--insecure-skip-server-verification` for self-signed cert |
+| Helm upgrade fails mid-release | `helm rollback <release> -n <ns>`; if stuck `pending-upgrade`, delete the stuck secret |
+| Argo Rollouts stuck at canary weight | Verify `canaryService` and `stableService` exist; `kubectl argo rollouts get rollout myapp` |
+| Kargo Warehouse not discovering images | Check image registry credentials; verify `semverConstraint` matches published tags |
+| Kargo promotion stuck | `kubectl -n myapp describe promotion <n>`; verify ArgoCD app name matches stage config |
+
+---
+
+### Secrets
+
+| Issue | Solution |
+|-------|----------|
+| Sealed secret not decrypting | Sealing key must match — never delete `sealed-secrets-key`; back it up |
+| ExternalSecret stuck `SecretSyncedError` | `kubectl describe externalsecret <n>` — wrong `remoteRef.key`, bad permissions, or unreachable backend |
+| ESO not refreshing secret | Decrease `refreshInterval` for testing; check ESO operator logs |
+
+---
+
+### Autoscaling
+
+| Issue | Solution |
+|-------|----------|
+| HPA shows `<unknown>` for CPU | `resources.requests.cpu` must be set — HPA calculates `current / requested` |
+| VPA and HPA conflict | Never run both on same metric (CPU/memory); HPA on external metrics + VPA for sizing |
+| StatefulSet pod stuck `Terminating` | Check finalizers: `kubectl get pod <pod> -o json | jq .metadata.finalizers` |
+| Init container stuck `Init:0/1` | `kubectl logs <pod> -c <init-container-name>` |
+
+---
+
+### Certificates
+
+| Issue | Solution |
+|-------|----------|
+| cert-manager Certificate stuck `Pending` | `kubectl describe certificate <n>` → look at `CertificateRequest` and `Order` events |
+| cert-manager HTTP-01 challenge failing | Domain must resolve publicly; check `kubectl get challenges -A` |
+
+---
+
+### Observability
+
+| Issue | Solution |
+|-------|----------|
+| k9s shows no resources | Check active namespace `:ns`; switch context `:ctx` |
+| Dashboard `Unauthorized` | `kubectl -n kubernetes-dashboard create token admin-user` |
+| Headlamp shows no clusters | Ensure kubeconfig mounted read-only; `server:` URL reachable from container |
+| Loki shows no logs | Check Promtail/Alloy pods; verify `lokiAddress` matches Loki service name |
+| Tempo shows no traces | Check OTel Collector receiving spans; verify `endpoint` in Instrumentation CRD |
+| SonarQube / Elasticsearch OOM | `vm.max_map_count=524288` on host; restart pod |
+
+
+---
+
+## Alerting & On-Call
+
+### Prometheus AlertManager
+
+**Purpose:** Routes Prometheus alerts to Slack, PagerDuty, email, or ntfy. AlertManager handles deduplication, grouping, silencing, and inhibition — so 50 alerts from one failing node appear as one grouped notification.
+
+#### AlertManager config (bundled with kube-prometheus-stack)
+
+```yaml
+# ~/k8s/values/prometheus.yaml — add to your kube-prometheus-stack values
+alertmanager:
+  config:
+    global:
+      resolve_timeout: 5m
+
+    route:
+      group_by: [alertname, namespace, severity]
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+      receiver: default
+      routes:
+        - match:
+            severity: critical
+          receiver: critical-alerts
+          continue: true
+        - match:
+            severity: warning
+          receiver: warning-alerts
+
+    receivers:
+      - name: default
+        slack_configs:
+          - api_url: https://hooks.slack.com/services/XXXX
+            channel: "#k8s-alerts"
+            title: '{{ template "slack.default.title" . }}'
+            text: '{{ template "slack.default.text" . }}'
+
+      - name: critical-alerts
+        slack_configs:
+          - api_url: https://hooks.slack.com/services/XXXX
+            channel: "#incidents"
+            send_resolved: true
+        pagerduty_configs:
+          - service_key: <pagerduty-service-key>
+
+      - name: warning-alerts
+        webhook_configs:
+          - url: http://ntfy.home.local/k8s-warnings    # ntfy push notification
+
+    inhibit_rules:
+      - source_match:
+          severity: critical
+        target_match:
+          severity: warning
+        equal: [alertname, namespace]    # critical silences matching warning
+```
+
+#### Useful PrometheusRule examples
+
+```yaml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: myapp-alerts
+  namespace: myapp
+  labels:
+    release: kube-prometheus-stack    # must match kube-prometheus-stack label selector
+spec:
+  groups:
+    - name: myapp.rules
+      interval: 30s
+      rules:
+        # Alert if error rate > 1% for 5 minutes
+        - alert: HighErrorRate
+          expr: |
+            sum(rate(http_requests_total{namespace="myapp", status=~"5.."}[5m]))
+            / sum(rate(http_requests_total{namespace="myapp"}[5m])) > 0.01
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "High error rate in {{ $labels.namespace }}"
+            description: "Error rate is {{ $value | humanizePercentage }}"
+
+        # Alert if pod is not running for 10 minutes
+        - alert: PodNotRunning
+          expr: |
+            kube_pod_status_phase{namespace="myapp", phase!~"Running|Succeeded"} > 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod {{ $labels.pod }} is not running"
+
+        # Alert if PVC is more than 80% full
+        - alert: PVCAlmostFull
+          expr: |
+            kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes > 0.8
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "PVC {{ $labels.persistentvolumeclaim }} is {{ $value | humanizePercentage }} full"
+
+        # Alert if HPA is at maximum replicas
+        - alert: HPAAtMaxReplicas
+          expr: |
+            kube_horizontalpodautoscaler_status_current_replicas
+            == kube_horizontalpodautoscaler_spec_max_replicas
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "HPA {{ $labels.horizontalpodautoscaler }} is at max replicas"
+
+        # Alert if deployment has no available replicas
+        - alert: DeploymentUnavailable
+          expr: |
+            kube_deployment_status_replicas_available{namespace="myapp"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Deployment {{ $labels.deployment }} has no available replicas"
+```
+
+```bash
+# Test alertmanager config locally
+docker run --rm -v $(pwd)/alertmanager.yaml:/config.yaml \
+  prom/alertmanager:latest --config.file=/config.yaml --check-config
+
+kubectl -n monitoring port-forward svc/kube-prometheus-stack-alertmanager 9093:9093
+# Check at http://localhost:9093
+```
+
+#### ServiceMonitor / PodMonitor — Scrape Custom Apps
+
+```yaml
+# Tell Prometheus to scrape your app's /metrics endpoint
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: myapp
+  namespace: myapp
+  labels:
+    release: kube-prometheus-stack    # must match prometheus.serviceMonitorSelector
+spec:
+  selector:
+    matchLabels:
+      app: myapp
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+---
+# PodMonitor — when pods don't have a Service
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: myapp-workers
+  namespace: myapp
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: myapp-worker
+  podMetricsEndpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+```
+
+---
+
+### Grafana OnCall (On-Call Scheduling & Escalation)
+
+**Purpose:** Integrates with Grafana alerts to provide on-call schedules, escalation chains, and incident management. Self-hosted option available; SaaS tier is free for small teams.
+
+```bash
+helm repo add grafana https://grafana.github.io/helm-charts
+helm upgrade --install oncall grafana/oncall \
+  --namespace oncall --create-namespace \
+  --set base_url=https://oncall.home.local \
+  --set grafana.enabled=false \     # connect to existing Grafana
+  --set mariadb.enabled=true \
+  --set rabbitmq.enabled=true
+```
+
+```bash
+kubectl -n oncall port-forward svc/oncall-engine 8080:8080
+```
+
+**Caddy:** `oncall.home.local { tls internal; reverse_proxy localhost:8080 }`
+
+Configure in Grafana UI: **Alerts & IRM → OnCall → Connect**.
+
+---
+
+## Advanced GitOps Patterns
+
+### ArgoCD App of Apps
+
+**Purpose:** A single ArgoCD `Application` (the "parent") manages a directory of other `Application` manifests (the "children"). This is the standard pattern for managing many apps across many clusters from a single GitOps repo.
 
 ```
-Developer pushes code to feature branch
-  → CI runs tests (Woodpecker / Forgejo Actions / GitHub Actions)
-  → CI builds and pushes container image to registry (Gitea packages / GHCR)
-  → CI updates the image tag in the GitOps manifests repo (separate repo or path)
-  → ArgoCD / Flux detects the change in the manifests repo
-  → ArgoCD syncs — applies the new Deployment to the Kubernetes cluster
-  → Argo Rollouts performs a canary rollout (5% → 50% → 100% traffic)
-  → Prometheus checks error rate and latency during the canary window
-  → If metrics are healthy → promote. If degraded → automatic rollback.
-```
-
-**Separating app code from deployment config:** is intentional. The application repo contains code; a GitOps repo (sometimes called an "environment repo") contains the Kubernetes manifests or Helm values that describe what's running where. This makes rollbacks a `git revert` and gives you a complete audit trail of every deployment.
-
-##### Kustomize overlays
-
-are the standard way to manage the dev/staging/prod variation without duplicating YAML:
-
-```
-k8s/
-├── base/
-│   ├── deployment.yaml      # image: myapp:latest
-│   ├── service.yaml
-│   └── kustomization.yaml
-└── overlays/
-    ├── dev/
-    │   ├── kustomization.yaml  # patches: image tag, replicas=1, resources reduced
-    │   └── patch.yaml
-    ├── staging/
-    │   ├── kustomization.yaml  # patches: image tag, replicas=2
-    │   └── patch.yaml
-    └── prod/
-        ├── kustomization.yaml  # patches: image tag, replicas=5, HPA enabled
-        └── patch.yaml
+~/k8s-gitops/
+├── apps/
+│   ├── kustomization.yaml          ← parent Application points here
+│   ├── myapp.yaml                  ← child Application
+│   ├── monitoring.yaml             ← child Application
+│   └── ingress.yaml                ← child Application
+└── clusters/
+    └── homelab/
+        └── parent-app.yaml         ← the App of Apps
 ```
 
 ```yaml
-# k8s/overlays/prod/kustomization.yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
+# ~/k8s-gitops/clusters/homelab/parent-app.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: homelab-root
+  namespace: argocd
+  finalizers: [resources-finalizer.argocd.argoproj.io]
+spec:
+  project: default
+  source:
+    repoURL: https://git.home.local/myorg/k8s-gitops
+    targetRevision: HEAD
+    path: apps/
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+```
+
+```yaml
+# ~/k8s-gitops/apps/myapp.yaml — a child Application
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: myapp
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://git.home.local/myorg/k8s-gitops
+    targetRevision: HEAD
+    path: releases/myapp
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: myapp
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+```
+
+```bash
+kubectl apply -f ~/k8s-gitops/clusters/homelab/parent-app.yaml
+argocd app list
+argocd app sync homelab-root
+```
+
+---
+
+### ArgoCD ApplicationSet (Dynamic App Generation)
+
+**Purpose:** Generate many `Application` resources from a single `ApplicationSet` — one per environment, one per Git directory, or one per cluster. Eliminates copy-paste when you have many apps or many clusters.
+
+```yaml
+# Generate an Application for every directory in apps/
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cluster-apps
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://git.home.local/myorg/k8s-gitops
+        revision: HEAD
+        directories:
+          - path: "apps/*"          # one Application per subdirectory
+  template:
+    metadata:
+      name: "{{path.basename}}"
+    spec:
+      project: default
+      source:
+        repoURL: https://git.home.local/myorg/k8s-gitops
+        targetRevision: HEAD
+        path: "{{path}}"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{path.basename}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+---
+# Generate one Application per cluster (multi-cluster pattern)
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: multi-cluster-myapp
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - cluster: homelab
+            url: https://kubernetes.default.svc
+            env: production
+          - cluster: staging
+            url: https://staging.k8s.home.local:6443
+            env: staging
+  template:
+    metadata:
+      name: "myapp-{{cluster}}"
+    spec:
+      project: default
+      source:
+        repoURL: https://git.home.local/myorg/k8s-gitops
+        targetRevision: HEAD
+        path: "apps/myapp/overlays/{{env}}"
+      destination:
+        server: "{{url}}"
+        namespace: myapp
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+```
+
+---
+
+### Flux HelmRelease & Kustomization
+
+**Purpose:** Flux's native CRDs for managing Helm releases and Kustomize overlays declaratively in Git — the Flux equivalent of ArgoCD Applications.
+
+```yaml
+# ~/k8s-gitops/clusters/homelab/monitoring/kustomization.yaml (Flux Kustomization)
+apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
-resources:
-  - ../../base
-images:
-  - name: myapp
-    newTag: "v1.4.2"        # CI updates this line via `kustomize edit set image`
-patches:
-  - path: patch.yaml
+metadata:
+  name: monitoring
+  namespace: flux-system
+spec:
+  interval: 10m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./releases/monitoring
+  prune: true
+  wait: true
+  timeout: 5m
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: kube-prometheus-stack-grafana
+      namespace: monitoring
+---
+# HelmRelease — Flux manages a Helm release declaratively
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      version: ">=58.0.0"
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+        namespace: flux-system
+  values:
+    grafana:
+      adminPassword: changeme
+    prometheus:
+      prometheusSpec:
+        retention: 15d
+  upgrade:
+    remediation:
+      retries: 3
+  rollback:
+    timeout: 5m
+    cleanupOnFail: true
+---
+# HelmRepository — the chart source
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: prometheus-community
+  namespace: flux-system
+spec:
+  interval: 30m
+  url: https://prometheus-community.github.io/helm-charts
 ```
 
-ArgoCD watches a specific overlay path per environment — `overlays/prod` for production, `overlays/staging` for staging — and syncs each independently.
+```bash
+flux get helmreleases -A
+flux reconcile helmrelease kube-prometheus-stack -n monitoring
+flux suspend helmrelease kube-prometheus-stack -n monitoring    # pause updates
+flux resume helmrelease kube-prometheus-stack -n monitoring
+```
 
 ---
 
-## Progressive Delivery
+## Policy as Code — CI Gates
 
-Progressive delivery is the practice of releasing changes to a subset of users or traffic before rolling out fully. The three common strategies differ in how much risk they take on at once:
+### Conftest (Policy Testing in CI)
 
-**Blue/Green:** — run two identical environments (blue = current, green = new version). Flip 100% of traffic from blue to green once green is verified healthy. Fast rollback: flip back to blue instantly. Expensive: requires 2× capacity at all times during the switchover.
+**Purpose:** Test Kubernetes manifests against OPA/Rego policies **before** they reach the cluster — in CI, as a pre-commit hook, or in your IDE. Fails the pipeline if a manifest would violate a policy.
 
-**Canary:** — route a small percentage of traffic (e.g., 5%) to the new version while the rest stays on the old version. Monitor error rate and latency for the canary slice. Gradually increase the percentage. Automatically rollback if metrics degrade. More resource-efficient than blue/green; slower to complete a full rollout.
+```bash
+nix-env -iA nixpkgs.conftest
 
-**Feature Flags:** — ship code to all users but control which users see the new behaviour in the application itself. The infrastructure concern (deployment) is decoupled from the product concern (release). Useful for A/B testing, gradual rollouts to user segments, and dark launches (ship to 0% users, ramp up independently of deployments).
+# Test a manifest against policies
+conftest test ~/k8s/deployment.yaml --policy ~/policies/
 
-Argo Rollouts (documented in the Kubernetes wiki) implements blue/green and canary at the Kubernetes traffic level, integrating with Prometheus for automated analysis. For feature flags, see OpenFeature or Unleash.
-
----
-
-## DORA Metrics (Engineering Performance)
-
-DORA (DevOps Research & Assessment) metrics are the industry-standard framework for measuring software delivery performance. There are four metrics:
-
-| Metric | What it measures | Elite benchmark |
-|--------|-----------------|-----------------|
-| **Deployment Frequency** | How often code ships to production | On-demand (multiple/day) |
-| **Lead Time for Changes** | Time from commit to production | < 1 hour |
-| **Change Failure Rate** | % of deployments causing incidents | 0–5% |
-| **Time to Restore Service (MTTR)** | How long to recover from a failure | < 1 hour |
-
-Teams in the **Elite** tier (per Dora's State of DevOps report) deploy on-demand, recover in under an hour, and have change failure rates below 5%. Most teams start in Low or Medium — the goal is steady movement toward Elite.
-
-### Collecting DORA Metrics with Grafana
-
-The DORA metrics come from combining data across your CI/CD system (deployments), incident management (failures and recovery), and version control (lead time).
-
-```yaml
-# ~/grafana-dora/compose.yaml — lightweight DORA data pipeline
-# Uses Grafana + Loki + a small exporter that parses CI logs
-
-services:
-  dora-exporter:
-    image: ghcr.io/liatrio/liatrio-otel-collector:latest
-    volumes:
-      - /home/user/dora-exporter/config.yaml:/etc/otelcol/config.yaml:ro,Z
-    environment:
-      GITHUB_TOKEN: ${GITHUB_TOKEN}          # or GITEA_TOKEN for self-hosted
-      GITEA_URL: http://git.home.local
-    ports:
-      - 127.0.0.1:8888:8888
-    restart: unless-stopped
+# Test a rendered Helm chart
+helm template myapp ./myapp-chart -f values.yaml | conftest test -
 ```
 
-#### Prometheus recording rules for DORA (add to `alerts.yml`)
+```rego
+# ~/policies/no-latest-tag.rego
+package main
 
-```yaml
-groups:
-  - name: dora_metrics
-    interval: 5m
-    rules:
-      # Deployment Frequency — count successful CI pipeline runs per day
-      - record: dora:deployment_frequency:rate24h
-        expr: |
-          increase(ci_pipeline_runs_total{status="success", branch="main"}[24h])
+deny[msg] {
+  input.kind == "Deployment"
+  container := input.spec.template.spec.containers[_]
+  endswith(container.image, ":latest")
+  msg := sprintf("Container '%s' uses ':latest' tag — pin to a specific version", [container.name])
+}
 
-      # Lead Time — histogram from git commit timestamp to deployment timestamp
-      # (requires CI system to emit commit_sha and deployment_timestamp labels)
-      - record: dora:lead_time_p50_hours
-        expr: |
-          histogram_quantile(0.50,
-            sum(rate(ci_lead_time_seconds_bucket[7d])) by (le)
-          ) / 3600
+deny[msg] {
+  input.kind == "Deployment"
+  not input.spec.template.spec.securityContext.runAsNonRoot
+  msg := sprintf("Deployment '%s' must set runAsNonRoot: true", [input.metadata.name])
+}
 
-      - record: dora:lead_time_p95_hours
-        expr: |
-          histogram_quantile(0.95,
-            sum(rate(ci_lead_time_seconds_bucket[7d])) by (le)
-          ) / 3600
-
-      # Change Failure Rate — ratio of rollback/hotfix deployments to total
-      - record: dora:change_failure_rate
-        expr: |
-          sum(increase(ci_pipeline_runs_total{status="success", trigger="rollback"}[7d]))
-          /
-          sum(increase(ci_pipeline_runs_total{status="success"}[7d]))
-
-      # MTTR — average incident duration from PagerDuty/Grafana OnCall webhook
-      - record: dora:mttr_hours_p50
-        expr: |
-          histogram_quantile(0.50,
-            sum(rate(incident_duration_seconds_bucket[30d])) by (le)
-          ) / 3600
-```
-
-#### Grafana dashboard variables for DORA bands
-
-```json
-{
-  "panels": [{
-    "title": "Deployment Frequency",
-    "type": "stat",
-    "targets": [{"expr": "dora:deployment_frequency:rate24h"}],
-    "thresholds": {
-      "steps": [
-        {"color": "red",    "value": 0},
-        {"color": "yellow", "value": 1},
-        {"color": "green",  "value": 7}
-      ]
-    }
-  }]
+warn[msg] {
+  input.kind == "Deployment"
+  not input.spec.template.spec.containers[_].resources.limits
+  msg := sprintf("Deployment '%s' has no resource limits", [input.metadata.name])
 }
 ```
 
-#### What DORA tells you about your process
-
-- **Low Deployment Frequency** → batching too much per release, long review cycles, fear of deploying. Fix: smaller PRs, feature flags to decouple deploy from release, invest in automated testing confidence.
-
-- **High Lead Time** → long CI pipelines, large code review queues, manual gates. Fix: parallelise CI jobs, enforce PR size limits, automate quality gates (Trivy, Semgrep, Checkov) instead of manual review.
-
-- **High Change Failure Rate** → insufficient test coverage, deploying untested code, missing canary/rollback. Fix: Argo Rollouts canary strategy with Prometheus error-rate gates, automated rollback on SLO breach.
-
-- **High MTTR** → slow incident detection (alerting too noisy or missing), slow rollback (manual process, large blast radius). Fix: Grafana OnCall rotation, runbooks in every service repo, one-command rollback (`kubectl argo rollouts abort` / `git revert + push`).
-
-### Tracking DORA Without a Dedicated Tool
-
-For self-hosted stacks without a commercial DORA platform, derive the four metrics from what you already run:
-
-```bash
-# Deployment Frequency — count tagged releases to main in Gitea
-curl -s "http://git.home.local/api/v1/repos/myorg/myapp/releases?limit=50" \
-  -H "Authorization: token $GITEA_TOKEN" \
-  | jq '[.[] | select(.created_at > (now - 86400 | todate))] | length'
-
-# Lead Time — git log between commit and merge to main
-git log --merges --first-parent main \
-  --format="%H %at" --since="30 days ago" | head -20
-
-# MTTR — query Grafana OnCall incident durations via API
-curl -s "https://oncall.home.local/api/v1/incidents/?limit=100" \
-  -H "Authorization: $GRAFANA_ONCALL_TOKEN" \
-  | jq '[.results[] | .duration_seconds] | add / length / 3600 | . * 10 | round / 10'
-
-# Change Failure Rate — count hotfix/rollback branches merged to main
-git log --merges --first-parent main \
-  --format="%s" --since="30 days ago" \
-  | grep -c -i "hotfix\|rollback\|revert"
+```yaml
+# .woodpecker.yml — conftest gate in CI
+steps:
+  - name: policy-check
+    image: openpolicyagent/conftest:latest
+    commands:
+      - conftest test k8s/ --policy policies/ --all-namespaces
+      - helm template myapp ./chart -f values.yaml | conftest test -
 ```
 
 ---
 
-## Platform Engineering
+### kubeconform (Manifest Schema Validation)
 
-Advanced Kubernetes-native tools for platform teams. These build on the foundation in the [Kubernetes wiki](https://docs.shani.dev/doc/servers/kubernetes).
-
-### Crossplane (Kubernetes-Native IaC)
-
-**Purpose:** Manage cloud infrastructure (AWS, GCP, Azure, DigitalOcean, Hetzner, and 200+ providers) as Kubernetes CRDs — the same `kubectl apply` workflow you use for apps. Crossplane is the cloud-native alternative to OpenTofu/Terraform for teams already running Kubernetes. Define a `PostgreSQLInstance` CRD and Crossplane provisions the actual RDS or Cloud SQL instance, tracks its state, and reconciles drift automatically.
+**Purpose:** Fast Kubernetes manifest validation against the upstream API schema — catches wrong field names, missing required fields, and version mismatches before applying to a cluster. Much faster than kubeval (which is unmaintained).
 
 ```bash
-# Install Crossplane on your k3s cluster
-helm repo add crossplane-stable https://charts.crossplane.io/stable
-helm install crossplane crossplane-stable/crossplane \
-  --namespace crossplane-system --create-namespace
+nix-env -iA nixpkgs.kubeconform
 
-# Install provider (example: Hetzner Cloud)
-kubectl apply -f - <<EOF
-apiVersion: pkg.crossplane.io/v1
-kind: Provider
+# Validate all manifests in a directory
+kubeconform -strict -summary ~/k8s/
+
+# Validate a Helm render
+helm template myapp ./myapp-chart -f values.yaml | kubeconform -strict -
+
+# Validate with CRD schemas (Flux, ArgoCD, etc.)
+kubeconform \
+  -schema-location default \
+  -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+  -strict -summary ~/k8s/
+```
+
+```yaml
+# .woodpecker.yml — schema validation in CI
+steps:
+  - name: kubeconform
+    image: ghcr.io/yannh/kubeconform:latest
+    commands:
+      - kubeconform -strict -summary k8s/
+      - helm template myapp ./chart -f values.yaml | kubeconform -strict -
+```
+
+---
+
+## Network Troubleshooting
+
+### netshoot (In-Cluster Network Debugging)
+
+**Purpose:** `nicolaka/netshoot` is a comprehensive network troubleshooting container — it includes `curl`, `wget`, `dig`, `nslookup`, `tcpdump`, `ss`, `netstat`, `iperf3`, `traceroute`, `mtr`, `nmap`, and more. Use it as an ephemeral container or standalone pod.
+
+```bash
+# Attach to a running pod (ephemeral — no restart required)
+kubectl debug -it <pod-name> -n myapp \
+  --image=nicolaka/netshoot \
+  --target=myapp
+
+# Run as standalone pod in a namespace to test connectivity
+kubectl run netshoot -n myapp --rm -it --restart=Never \
+  --image=nicolaka/netshoot -- bash
+
+# Inside netshoot:
+curl -v http://backend-svc.myapp.svc.cluster.local:8080/health
+dig backend-svc.myapp.svc.cluster.local
+nslookup kubernetes.default.svc.cluster.local
+tcpdump -i any -n port 8080
+ss -tulnp
+iperf3 -c backend-svc -p 5201 -t 10    # bandwidth test
+
+# DNS resolution troubleshooting
+dig @10.96.0.10 backend-svc.myapp.svc.cluster.local    # 10.96.0.10 = kube-dns ClusterIP
+```
+
+---
+
+### Inspektor Gadget (eBPF-Based Cluster Debugging)
+
+**Purpose:** Collection of eBPF-based tools for debugging networking, tracing, and security in Kubernetes — without modifying workloads. Built on Cilium's eBPF library. Runs as a DaemonSet; queried via `kubectl gadget`.
+
+```bash
+kubectl krew install gadget
+kubectl gadget deploy
+
+# Trace all DNS queries in a namespace
+kubectl gadget trace dns -n myapp
+
+# Watch all network connections being opened
+kubectl gadget trace tcp -n myapp
+
+# Trace syscalls for a specific pod
+kubectl gadget trace exec -n myapp --podname myapp-xyz
+
+# Detect privilege escalation attempts
+kubectl gadget trace capabilities -n myapp
+
+# Watch which files a pod opens
+kubectl gadget trace open -n myapp --podname myapp-xyz
+
+# Top processes by network usage
+kubectl gadget top tcp -n myapp
+
+# Profile CPU usage with stack traces
+kubectl gadget profile cpu -n myapp --podname myapp-xyz --timeout 30
+```
+
+---
+
+### Node Problem Detector
+
+**Purpose:** Kubernetes DaemonSet that detects node-level problems (kernel panics, OOM events, disk pressure, NTP failures, container runtime crashes) and reports them as node conditions or events. Alerts fire via Prometheus.
+
+```bash
+helm repo add deliveryhero https://charts.deliveryhero.io/
+helm install node-problem-detector deliveryhero/node-problem-detector \
+  --namespace kube-system \
+  --set metrics.enabled=true \
+  --set metrics.serviceMonitor.enabled=true
+```
+
+```yaml
+# PrometheusRule for node-problem-detector alerts
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
 metadata:
-  name: provider-hetzner
+  name: node-problem-alerts
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
 spec:
-  package: xpkg.upbound.io/crossplane-contrib/provider-hetzner:latest
+  groups:
+    - name: node-problems
+      rules:
+        - alert: NodeKernelDeadlock
+          expr: kube_node_status_condition{condition="KernelDeadlock",status="true"} == 1
+          for: 5m
+          labels: { severity: critical }
+          annotations:
+            summary: "Node {{ $labels.node }} has a kernel deadlock"
+
+        - alert: NodeReadonlyFilesystem
+          expr: kube_node_status_condition{condition="ReadonlyFilesystem",status="true"} == 1
+          for: 5m
+          labels: { severity: critical }
+          annotations:
+            summary: "Node {{ $labels.node }} filesystem is read-only"
+```
+
+---
+
+## Cluster Hardening
+
+### Descheduler
+
+**Purpose:** The Kubernetes scheduler places pods at creation time but never moves them. The Descheduler runs periodically and evicts pods that violate scheduling policies — pods on overloaded nodes, topology spread violations, expired affinities — triggering the scheduler to re-place them more optimally.
+
+```bash
+helm repo add descheduler https://kubernetes-sigs.github.io/descheduler/
+helm install descheduler descheduler/descheduler \
+  --namespace kube-system \
+  --set schedule="*/10 * * * *"
+```
+
+```yaml
+# ~/k8s/descheduler-policy.yaml
+apiVersion: "descheduler/v1alpha2"
+kind: "DeschedulerPolicy"
+profiles:
+  - name: default
+    pluginConfig:
+      - name: DefaultEvictor
+        args:
+          ignorePvcPods: true
+          evictSystemCriticalPods: false
+          nodeFit: true
+    plugins:
+      balance:
+        enabled:
+          - LowNodeUtilization
+          - RemoveDuplicates
+          - RemovePodsViolatingTopologySpreadConstraint
+      deschedule:
+        enabled:
+          - RemovePodsViolatingNodeAffinity
+          - RemovePodsViolatingInterPodAntiAffinity
+          - RemovePodsHavingTooManyRestarts
+```
+
+---
+
+### CIS Kubernetes Benchmark — kube-bench
+
+**Purpose:** Run the CIS Kubernetes Benchmark against your cluster to find misconfigurations: insecure API server flags, missing audit logging, overly permissive RBAC, unencrypted etcd, and more. Essential before declaring a cluster "production-ready".
+
+```bash
+# Run against a k3s node
+kubectl apply -f https://raw.githubusercontent.com/aquasecurity/kube-bench/main/job.yaml
+kubectl logs job/kube-bench
+
+# Or run directly (finds binaries automatically)
+docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro \
+  -v $(which kubectl):/usr/local/mount-from-host/bin/kubectl \
+  -e KUBECONFIG=$KUBECONFIG \
+  --rm aquasec/kube-bench:latest \
+  run --targets=master,node,etcd,policies
+```
+
+```bash
+# Target specific section
+kube-bench run --check 1.2.6    # check a specific CIS item
+kube-bench run --targets=master --json | jq '.[] | select(.status=="FAIL")'
+```
+
+---
+
+### Production Cluster Hardening Checklist
+
+| Area | Check | Tool |
+|------|-------|------|
+| **API Server** | Audit logging enabled | k3s config / kubeadm |
+| **API Server** | Anonymous auth disabled | `--anonymous-auth=false` |
+| **RBAC** | No `cluster-admin` granted to workloads | `kubectl auth can-i --list` |
+| **RBAC** | CI/CD uses minimal ServiceAccount | Dedicated Role per namespace |
+| **Pods** | `restricted` PSA on all namespaces | `pod-security.kubernetes.io/enforce=restricted` |
+| **Pods** | `runAsNonRoot: true` on all containers | Kyverno policy |
+| **Pods** | `readOnlyRootFilesystem: true` | SecurityContext |
+| **Pods** | Resource limits set on all containers | Kyverno policy |
+| **Pods** | No `hostNetwork`, `hostPID`, `hostIPC` | Kyverno policy |
+| **Images** | No `:latest` tags in production | conftest / Kyverno |
+| **Images** | All images signed (Cosign) | Kyverno `verifyImages` |
+| **Images** | Continuous vulnerability scanning | Trivy Operator |
+| **Network** | Default-deny NetworkPolicy in every namespace | Kyverno generate |
+| **Network** | mTLS between services | Linkerd / Cilium WireGuard |
+| **Secrets** | No plaintext secrets in Git | Sealed Secrets / ESO |
+| **Secrets** | Secrets mounted as volumes, not env vars | Kyverno policy |
+| **Runtime** | Falco detecting shell exec / file writes | Falco DaemonSet |
+| **etcd** | Encrypted at rest | `--encryption-provider-config` |
+| **Nodes** | CIS benchmark passing | kube-bench |
+| **Nodes** | Node Problem Detector deployed | DaemonSet |
+| **Backups** | Velero scheduled daily | Velero Schedule CRD |
+| **Backups** | etcd snapshots to off-cluster storage | k3s etcd-snapshot + restic |
+
+---
+
+## Multi-Cluster
+
+### Cluster Federation — Admiralty
+
+**Purpose:** Schedule pods across multiple Kubernetes clusters as if they were one — useful when a cluster fills up or you need cross-cloud placement. Pods submitted to a source cluster are transparently delegated to a target cluster.
+
+```bash
+helm repo add admiralty https://charts.admiralty.io
+helm install admiralty admiralty/multicluster-scheduler \
+  --namespace admiralty --create-namespace
+```
+
+```yaml
+# Annotate a Deployment to allow cross-cluster scheduling
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+  annotations:
+    multicluster.admiralty.io/elect: ""
+spec:
+  replicas: 3
+  # rest of spec unchanged — Admiralty shadows pods to available clusters
+```
+
+---
+
+### Submariner (Cross-Cluster L3 Networking)
+
+**Purpose:** Connect multiple Kubernetes clusters at the network layer — enabling pod-to-pod and service-to-service communication across clusters without a VPN. Used for active-active multi-cluster where services in cluster-A call services in cluster-B directly.
+
+```bash
+curl -Ls https://get.submariner.io | bash
+export PATH=$PATH:~/.local/bin
+
+# Deploy broker (coordination cluster — can be a separate lightweight cluster)
+subctl deploy-broker --kubeconfig ~/.kube/cluster1.yaml
+
+# Join each cluster to the broker
+subctl join --kubeconfig ~/.kube/cluster1.yaml broker-info.subm --clusterid cluster1
+subctl join --kubeconfig ~/.kube/cluster2.yaml broker-info.subm --clusterid cluster2
+
+# Export a service from cluster1 so cluster2 can reach it
+kubectl --context cluster1 apply -f - <<EOF
+apiVersion: multicluster.x-k8s.io/v1alpha1
+kind: ServiceExport
+metadata:
+  name: myapp
+  namespace: myapp
 EOF
 
-# Check installed providers
-kubectl get providers
+# From cluster2: curl http://myapp.myapp.svc.clusterset.local
 ```
 
-##### Example Composite Resource (XR) — self-service PostgreSQL
+---
+
+## Zot (Lightweight OCI Registry)
+
+**Purpose:** CNCF sandbox project — a minimal, OCI-only container registry written in Go. Far lighter than Harbor (~50MB binary, no dependencies), ORAS-compatible, suitable for air-gapped environments or homelabs where Harbor's full feature set is unnecessary.
+
+```bash
+helm repo add project-zot http://zotregistry.dev/helm-charts
+helm install zot project-zot/zot \
+  --namespace zot --create-namespace \
+  --set service.type=ClusterIP \
+  -f ~/k8s/zot-values.yaml
+```
 
 ```yaml
-# ~/k8s/crossplane/postgres-xrd.yaml
-apiVersion: apiextensions.crossplane.io/v1
-kind: CompositeResourceDefinition
-metadata:
-  name: xpostgresqlinstances.db.shani.dev
-spec:
-  group: db.shani.dev
-  names:
-    kind: XPostgreSQLInstance
-    plural: xpostgresqlinstances
-  versions:
-    - name: v1alpha1
-      served: true
-      referenceable: true
-      schema:
-        openAPIV3Schema:
-          type: object
-          properties:
-            spec:
-              type: object
-              properties:
-                parameters:
-                  type: object
-                  properties:
-                    storageGB:
-                      type: integer
+# ~/k8s/zot-values.yaml
+configFiles:
+  config.json: |
+    {
+      "distSpecVersion": "1.1.0",
+      "storage": {
+        "rootDirectory": "/var/lib/registry"
+      },
+      "http": {
+        "address": "0.0.0.0",
+        "port": "5000",
+        "auth": {
+          "htpasswd": {
+            "path": "/etc/zot/htpasswd"
+          }
+        }
+      },
+      "log": { "level": "info" },
+      "extensions": {
+        "search": { "enable": true },
+        "ui": { "enable": true },
+        "scrub": { "enable": true }
+      }
+    }
+
+persistence:
+  enabled: true
+  size: 50Gi
 ```
+
+```bash
+kubectl -n zot port-forward svc/zot 5000:5000
+
+# Push an image
+podman tag myapp:latest localhost:5000/myorg/myapp:latest
+podman push localhost:5000/myorg/myapp:latest --tls-verify=false
+
+# List images via ORAS
+oras repo ls localhost:5000
+oras repo tags localhost:5000/myorg/myapp
+```
+
+**Caddy:** `registry.home.local { tls internal; reverse_proxy zot.zot.svc.cluster.local:5000 { header_up Host {host} } }`
+
+> **Harbor vs Zot:** Harbor if you need RBAC, replication, a web UI, and integrated Trivy scanning. Zot if you need a minimal OCI-compliant store for a homelab or air-gapped cluster.
 
 ---
 
-### KEDA (Kubernetes Event-Driven Autoscaling)
+## Beyla (eBPF Auto-Instrumentation — No Code Changes)
 
-**Purpose:** Scale Kubernetes deployments to zero — and back — based on external event sources: queue depth (RabbitMQ, Kafka, NATS), cron schedules, Prometheus metrics, HTTP traffic, and 60+ other scalers. Unlike the built-in HPA (which scales on CPU/memory only), KEDA lets a worker Deployment scale from 0 to 50 pods when a Kafka topic has messages, then back to 0 when the queue is empty. Essential for cost-efficient batch processing and event-driven workloads.
+**Purpose:** Grafana Beyla uses eBPF to automatically instrument applications at the kernel level — capturing HTTP/gRPC latency, error rates, and traces without any SDK or code instrumentation. Works for any language: Go, Python, Node.js, Java, Rust. Exports to Prometheus and OpenTelemetry. The ultimate zero-code observability.
+
+> **Beyla vs OTel auto-instrumentation:** The OTel Operator injects language-specific agents as init containers — requires Kubernetes API access and works per-language. Beyla is a DaemonSet that instruments everything on the node via eBPF — language-agnostic, no sidecars, lower overhead.
 
 ```bash
-# Install KEDA
-helm repo add kedacore https://kedacore.github.io/charts
-helm install keda kedacore/keda --namespace keda --create-namespace
+helm repo add grafana https://grafana.github.io/helm-charts
+helm upgrade --install beyla grafana/beyla \
+  --namespace beyla --create-namespace \
+  -f ~/k8s/beyla-values.yaml
 ```
-
-##### Example ScaledObject — scale on RabbitMQ queue depth
 
 ```yaml
-# ~/k8s/keda-rabbitmq.yaml
-apiVersion: keda.sh/v1alpha1
-kind: ScaledObject
-metadata:
-  name: worker-scaler
-  namespace: myapp
-spec:
-  scaleTargetRef:
-    name: worker-deployment
-  minReplicaCount: 0          # scale to zero when idle
-  maxReplicaCount: 20
-  triggers:
-    - type: rabbitmq
-      metadata:
-        host: amqp://user:pass@rabbitmq.myapp.svc:5672/
-        queueName: jobs
-        queueLength: "5"       # 1 pod per 5 messages
-```
+# ~/k8s/beyla-values.yaml
+config:
+  data: |
+    otel_metrics_export:
+      endpoint: http://otel-collector.monitoring.svc:4317
+    otel_traces_export:
+      endpoint: http://otel-collector.monitoring.svc:4317
+    prometheus_export:
+      port: 9090
+      path: /metrics
+    attributes:
+      kubernetes:
+        enable: true      # attach pod/namespace/deployment labels to metrics
 
-#### Scale on Prometheus metric
+preset: network           # instrument all pods on the node (vs 'application' for specific)
 
-```yaml
-triggers:
-  - type: prometheus
-    metadata:
-      serverAddress: http://prometheus.monitoring.svc:9090
-      metricName: http_requests_pending
-      threshold: "100"
-      query: sum(http_requests_pending{job="myapp"})
+tolerations:
+  - operator: Exists      # run on all nodes including control plane
+
+podAnnotations:
+  instrumentation.opentelemetry.io/inject-sdk: "false"   # Beyla replaces OTel injection
 ```
 
 ```bash
-# Check ScaledObject status
-kubectl get scaledobjects -n myapp
-kubectl describe scaledobject worker-scaler -n myapp
-```
+# Verify Beyla is capturing spans
+kubectl -n beyla logs -l app.kubernetes.io/name=beyla -f
 
----
-
-### Cilium + Hubble (eBPF CNI & Network Observability)
-
-**Purpose:** Cilium is a high-performance CNI plugin for Kubernetes built on eBPF — it enforces NetworkPolicies at kernel level (no iptables chains), provides transparent encryption between pods, load-balances services via XDP, and enables Layer 7 policy (HTTP-aware, gRPC-aware). Hubble is Cilium's built-in observability layer: a real-time flow explorer showing exactly which pods are talking to which, what HTTP paths are being called, and where traffic is being dropped by policy. Together they replace kube-proxy and give you a network map you can actually read.
-
-```bash
-# Install Cilium (replaces default CNI on k3s)
-# First, install k3s without flannel and kube-proxy:
-curl -sfL https://get.k3s.io | INSTALL_K3S_BIN_DIR=~/.local/bin sh -s - \
-  --flannel-backend=none \
-  --disable-kube-proxy \
-  --disable-network-policy
-
-# Install Cilium CLI
-nix-env -iA nixpkgs.cilium-cli
-
-# Install Cilium with Hubble
-cilium install --version 1.16.0
-cilium hubble enable --ui
-
-# Verify
-cilium status
-cilium connectivity test
-```
-
-#### Hubble CLI — inspect live flows
-
-```bash
-# Install Hubble CLI
-nix-env -iA nixpkgs.hubble
-
-# Port-forward Hubble relay
-cilium hubble port-forward &
-
-# Watch all flows in the myapp namespace
-hubble observe --namespace myapp --follow
-
-# Watch HTTP flows only
-hubble observe --namespace myapp --protocol http --follow
-
-# Watch dropped flows (policy violations)
-hubble observe --verdict DROPPED --follow
-
-# Show flows between two services
-hubble observe --from-pod myapp/frontend --to-pod myapp/backend
-```
-
-##### Example L7 NetworkPolicy (HTTP-aware)
-
-```yaml
-# Allow frontend to call backend on GET /api only
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
-metadata:
-  name: allow-frontend-to-backend
-  namespace: myapp
-spec:
-  endpointSelector:
-    matchLabels:
-      app: backend
-  ingress:
-    - fromEndpoints:
-        - matchLabels:
-            app: frontend
-      toPorts:
-        - ports:
-            - port: "8080"
-              protocol: TCP
-          rules:
-            http:
-              - method: GET
-                path: /api/.*
-```
-
----
-
-### Kyverno (Kubernetes Policy Engine)
-
-**Purpose:** Kubernetes-native policy engine — write policies as YAML CRDs, not Rego. Kyverno validates, mutates, and generates resources as they enter the cluster. Use it to enforce security standards (no privileged containers, require resource limits, require labels), auto-inject sidecars, and auto-generate NetworkPolicies when a new namespace is created. Replaces OPA/Gatekeeper for teams who find Rego intimidating.
-
-```bash
-# Install Kyverno
-helm repo add kyverno https://kyverno.github.io/kyverno/
-helm install kyverno kyverno/kyverno --namespace kyverno --create-namespace
-```
-
-##### Example policies
-
-```yaml
-# Require all pods to have resource limits
-apiVersion: kyverno.io/v1
-kind: ClusterPolicy
-metadata:
-  name: require-resource-limits
-spec:
-  validationFailureAction: Enforce
-  rules:
-    - name: check-limits
-      match:
-        any:
-          - resources:
-              kinds: [Pod]
-      validate:
-        message: "Resource limits are required for all containers."
-        pattern:
-          spec:
-            containers:
-              - resources:
-                  limits:
-                    memory: "?*"
-                    cpu: "?*"
----
-# Auto-add a label to every new namespace
-apiVersion: kyverno.io/v1
-kind: ClusterPolicy
-metadata:
-  name: add-namespace-label
-spec:
-  rules:
-    - name: add-env-label
-      match:
-        any:
-          - resources:
-              kinds: [Namespace]
-      mutate:
-        patchStrategicMerge:
-          metadata:
-            labels:
-              managed-by: kyverno
----
-# Disallow privileged containers cluster-wide
-apiVersion: kyverno.io/v1
-kind: ClusterPolicy
-metadata:
-  name: disallow-privileged
-spec:
-  validationFailureAction: Enforce
-  rules:
-    - name: no-privileged
-      match:
-        any:
-          - resources:
-              kinds: [Pod]
-      validate:
-        message: "Privileged containers are not allowed."
-        pattern:
-          spec:
-            containers:
-              - =(securityContext):
-                  =(privileged): false
+# Metrics are available in Prometheus automatically
+# Traces appear in Grafana Tempo
+# No annotations needed on workloads
 ```
 
 ```bash
-# Check policy reports
-kubectl get policyreport -A
-kubectl describe clusterpolicyreport
-
-# Test a policy without enforcing
-kubectl apply -f policy.yaml --dry-run=server
+# Beyla Grafana dashboard IDs
+# RED Metrics (HTTP):    19419
+# RED Metrics (gRPC):    19420
+# Network Map:           19421
 ```
 
----
 
-### Falco (Runtime Threat Detection)
-
-**Purpose:** CNCF-graduated runtime security tool. Falco uses eBPF to inspect every syscall made by every container in your cluster — detecting shell executions inside containers, unexpected file writes to `/etc`, outbound connections from unexpected processes, privilege escalation, and hundreds of other attack patterns in real time. Where Trivy and Semgrep scan for vulnerabilities before deployment, Falco catches what actually happens at runtime.
-
-```bash
-# Install Falco on k3s via Helm
-helm repo add falcosecurity https://falcosecurity.github.io/charts
-helm install falco falcosecurity/falco \
-  --namespace falco --create-namespace \
-  --set driver.kind=ebpf \
-  --set falcosidekick.enabled=true \
-  --set falcosidekick.config.slack.webhookurl="https://hooks.slack.com/..." \
-  --set falcosidekick.config.ntfy.hostport="http://ntfy.home.local" \
-  --set falcosidekick.config.ntfy.topic="falco-alerts"
-```
-
-##### Example custom rules (`/etc/falco/rules.d/custom.yaml`)
-
-```yaml
-- rule: Shell in Container
-  desc: A shell was spawned in a container
-  condition: >
-    spawned_process and container and
-    proc.name in (bash, sh, zsh, dash) and
-    not proc.pname in (bash, sh, zsh)
-  output: >
-    Shell spawned in container (user=%user.name container=%container.name
-    image=%container.image.repository:%container.image.tag
-    cmd=%proc.cmdline)
-  priority: WARNING
-  tags: [container, shell]
-
-- rule: Unexpected Outbound Connection
-  desc: Container made an outbound connection to an unexpected IP
-  condition: >
-    outbound and container and
-    not fd.sip in (192.168.0.0/16, 10.0.0.0/8) and
-    not proc.name in (curl, wget, apt-get)
-  output: >
-    Unexpected outbound (container=%container.name
-    ip=%fd.sip port=%fd.sport cmd=%proc.cmdline)
-  priority: WARNING
-```
-
-```bash
-# View Falco alerts in real time
-kubectl logs -n falco -l app.kubernetes.io/name=falco -f
-
-# Check Falcosidekick dashboard (forwards alerts to Slack, ntfy, etc.)
-kubectl port-forward -n falco svc/falco-falcosidekick-ui 2802:2802
-```
-
----
-
-### OpenCost (Kubernetes Cost Monitoring)
-
-**Purpose:** Real-time Kubernetes cost visibility — which namespace, deployment, pod, or label is spending what, broken down by CPU, RAM, GPU, storage, and network. OpenCost integrates with cloud provider billing APIs (AWS, GCP, Azure, Hetzner) or uses custom on-prem pricing to calculate actual cost per workload. Essential for multi-tenant clusters where chargebacks or budget alerts matter.
-
-```bash
-# Install OpenCost (requires Prometheus)
-kubectl apply -f https://raw.githubusercontent.com/opencost/opencost/develop/kubernetes/opencost.yaml
-
-# Port-forward the UI
-kubectl port-forward -n opencost svc/opencost 9090:9090 9003:9003
-```
-
-#### Or via Helm with custom on-prem pricing
-
-```yaml
-# ~/k8s/opencost-values.yaml
-opencost:
-  customPricing:
-    enabled: true
-    configmapName: custom-pricing
-    provider: custom
-    costModel:
-      CPU: "0.01"          # $ per CPU-hour
-      RAM: "0.005"         # $ per GB-hour
-      storage: "0.0001"    # $ per GB-hour
-      network: "0.0"
-```
-
-```bash
-helm install opencost opencost/opencost \
-  --namespace opencost --create-namespace \
-  -f ~/k8s/opencost-values.yaml
-```
-
-#### Query the cost API
-
-```bash
-# Cost breakdown by namespace (last 7 days)
-curl "http://localhost:9003/allocation?window=7d&aggregate=namespace&accumulate=false" \
-  | python3 -m json.tool
-
-# Cost by deployment
-curl "http://localhost:9003/allocation?window=24h&aggregate=deployment"
-
-# Cost by label
-curl "http://localhost:9003/allocation?window=7d&aggregate=label:team"
-```
-
-#### Add OpenCost to the Caddy block
-
-```caddyfile
-opencost.home.local { tls internal; reverse_proxy localhost:9090 }
-```
-
----
-
-### LitmusChaos (Kubernetes Chaos Engineering)
-
-**Purpose:** CNCF sandbox project for chaos engineering on Kubernetes. Define `ChaosExperiment` CRDs that inject pod deletion, network latency, CPU hog, memory hog, disk fill, and node drain — then measure whether your system recovers within SLO. Run experiments in CI to catch resilience regressions before they hit prod. The self-hosted, Kubernetes-native alternative to Chaos Monkey (which is AWS/JVM-specific and not self-hostable).
-
-> **Chaos Monkey note:** Netflix's Chaos Monkey targets AWS Auto Scaling Groups and JVM services — not applicable to self-hosted Kubernetes. LitmusChaos is the correct tool for this environment.
-
-```bash
-# Install LitmusChaos on your k3s/k0s cluster
-helm repo add litmuschaos https://litmuschaos.github.io/litmus-helm/
-helm install chaos litmuschaos/litmus \
-  --namespace litmus --create-namespace \
-  --set portal.frontend.service.type=ClusterIP
-
-# Port-forward the Litmus Portal UI
-kubectl port-forward svc/chaos-litmus-frontend-service 9091:9091 -n litmus
-# Open http://localhost:9091 — default: admin / litmus
-```
-
-##### Example ChaosEngine — pod delete experiment
-
-```yaml
-# ~/k8s/chaos-pod-delete.yaml
-apiVersion: litmuschaos.io/v1alpha1
-kind: ChaosEngine
-metadata:
-  name: nginx-chaos
-  namespace: default
-spec:
-  appinfo:
-    appns: default
-    applabel: "app=nginx"
-    appkind: deployment
-  chaosServiceAccount: litmus-admin
-  experiments:
-    - name: pod-delete
-      spec:
-        components:
-          env:
-            - name: TOTAL_CHAOS_DURATION
-              value: "60"      # inject chaos for 60 seconds
-            - name: CHAOS_INTERVAL
-              value: "10"      # delete a pod every 10 seconds
-            - name: FORCE
-              value: "false"   # graceful delete (false) or SIGKILL (true)
-```
-
-```bash
-kubectl apply -f ~/k8s/chaos-pod-delete.yaml
-
-# Watch the experiment progress
-kubectl get chaosresult nginx-chaos-pod-delete -o yaml
-
-# Check the verdict (Pass/Fail based on probe success)
-kubectl get chaosresult nginx-chaos-pod-delete -o jsonpath='{.status.experimentStatus.verdict}'
-```
-
-#### Add a Prometheus probe — fail the experiment if error rate exceeds SLO
-
-```yaml
-    - name: pod-delete
-      spec:
-        probe:
-          - name: check-error-rate
-            type: promProbe
-            mode: Continuous
-            runProperties:
-              probeTimeout: 5
-              interval: 2
-              attempt: 3
-            promProbe/inputs:
-              endpoint: http://prometheus.monitoring.svc:9090
-              query: 'sum(rate(http_requests_total{status=~"5.."}[1m])) / sum(rate(http_requests_total[1m]))'
-              comparator:
-                type: float
-                criteria: "<="
-                value: "0.01"   # fail if error rate exceeds 1%
-```
-
-**Caddy:**
-```caddyfile
-chaos.home.local { tls internal; reverse_proxy localhost:9091 }
-```
-
----
-
-### Port (Internal Developer Portal)
-
-**Purpose:** A newer, actively maintained IDP (Internal Developer Platform) alternative to Backstage. Port uses a data model of "blueprints" (entity types) and "entities" (instances) that you define via a visual UI — no YAML files to maintain in Git. Integrates with GitHub, GitLab, Jira, PagerDuty, Kubernetes, ArgoCD, and more via webhooks and ingestion actions. Better suited than Backstage for teams who want a working portal in hours rather than days.
-
-> **Backstage vs Port:** Backstage is fully self-hosted and infinitely extensible but requires significant ongoing maintenance. Port is SaaS-hosted with a generous free tier; there is no self-hosted option. Use Backstage if you need full data sovereignty; use Port if you want a polished IDP with minimal ops overhead.
-
-```bash
-# Port is SaaS — no compose setup required.
-# Sign up at https://app.getport.io (free tier: unlimited users, unlimited blueprints)
-
-# Install the Port k8s exporter to auto-populate your portal from cluster state:
-helm repo add port-labs https://port-labs.github.io/helm-charts
-helm install port-k8s-exporter port-labs/port-k8s-exporter \
-  --create-namespace --namespace port-k8s-exporter \
-  --set secret.secrets.portClientId="YOUR_CLIENT_ID" \
-  --set secret.secrets.portClientSecret="YOUR_CLIENT_SECRET"
-
-# The exporter watches your cluster and syncs Deployments, Services,
-# Namespaces, ArgoCD Applications, and more into Port blueprints automatically.
-```
-
----
-
-### Golden Paths (Platform Engineering Practice)
-
-**Purpose:** A golden path is a pre-built, opinionated template for creating a new service — it encodes your team's best practices (security, observability, CI/CD, IaC) so developers can scaffold a production-ready service in minutes without needing to know every underlying tool. Backstage and Port both provide golden path scaffolding; this section shows how to implement them without either.
-
-#### Option A — Cookiecutter templates (simplest)
-
-```bash
-# Install cookiecutter
-nix-env -iA nixpkgs.cookiecutter
-
-# Create a golden path template repo in Forgejo:
-# ~/golden-paths/python-service/
-# ├── cookiecutter.json          (prompts: service_name, team, port)
-# ├── {{cookiecutter.service_name}}/
-# │   ├── compose.yaml
-# │   ├── .woodpecker.yml        (pre-wired CI with Trivy + Checkov)
-# │   ├── terraform/             (namespace, RBAC, NetworkPolicy)
-# │   ├── k8s/                   (Deployment, Service, HPA, PodDisruptionBudget)
-# │   └── README.md
-
-# Scaffold a new service from the template:
-cookiecutter git+https://git.home.local/platform/golden-paths.git --directory python-service
-```
-
-#### Option B — Forgejo template repositories
-
-```bash
-# In Forgejo: Settings → check "Template Repository" on any repo
-# Developers click "Use this template" to get a pre-wired repo with:
-# - .woodpecker.yml (CI pipeline with lint, test, Trivy scan, deploy stages)
-# - compose.yaml (service + healthcheck + labels for autoupdate + diun)
-# - k8s/ (Deployment, Service, HPA manifests)
-# - terraform/ (namespace + RBAC module)
-# - docs/runbook.md (incident response template — see below)
-```
-
-##### Runbook and postmortem templates
-
-— add these to every golden path repo:
-
-```markdown
-<!-- docs/runbook.md — include in every service golden path -->
-# Runbook: {{service_name}}
-
-## Symptoms → Actions
-
-| Symptom | First check | Fix |
-|---------|-------------|-----|
-| Service returns 5xx | `podman logs {{service_name}}` | Check DB connectivity; restart container |
-| High latency (p99 > 1s) | Grafana → Service dashboard → upstream latency panel | Scale up replicas; check dependency health |
-| OOMKilled | `kubectl describe pod` events | Increase memory limit in compose.yaml / k8s manifest |
-| Health check failing | `curl http://localhost:PORT/health` | Check environment variables; verify DB migration ran |
-
-## Escalation
-- Primary on-call: check Grafana OnCall schedule
-- Slack: #incidents channel
-- Postmortem: file within 48 hours of resolution (see postmortem.md)
-```
-
-```markdown
-<!-- docs/postmortem.md — blameless postmortem template -->
-# Postmortem: [Incident Title]
-
-#### Date
-YYYY-MM-DD
-#### Duration
-Xh Ym (detection → resolution)
-#### Severity
-P1 / P2 / P3
-#### Author(s)
-
-## Summary
-One paragraph: what broke, for how long, and what was the user impact.
-
-## Timeline (UTC)
-| Time | Event |
-|------|-------|
-| HH:MM | Alert fired in Grafana OnCall |
-| HH:MM | On-call engineer acknowledged |
-| HH:MM | Root cause identified |
-| HH:MM | Fix deployed |
-| HH:MM | Service confirmed healthy |
-
-## Root Cause
-Technical explanation of what failed and why.
-
-## Contributing Factors
-- Missing/incorrect monitoring
-- Deployment without a health check gate
-- Untested failure mode
-
-## Impact
-- Services affected:
-- Users affected (estimated):
-- Data loss: Yes / No
-
-## What Went Well
-- Alerts fired quickly
-- Runbook was accurate
-
-## Action Items
-| Action | Owner | Due date |
-|--------|-------|----------|
-| Add integration test for this failure mode | @engineer | YYYY-MM-DD |
-| Add alert for leading indicator metric | @sre | YYYY-MM-DD |
-| Update runbook with new symptom | @oncall | YYYY-MM-DD |
-```
-
----
-
-
----
-
-## Cluster API (CAPI) — Declarative Cluster Lifecycle Management
-
-**Purpose:** Kubernetes extension for provisioning and managing Kubernetes clusters themselves using Kubernetes-style CRDs. Define a `Cluster` resource and CAPI provisions the control plane and worker nodes on your chosen infrastructure provider (Hetzner, AWS, vSphere, DigitalOcean). Replaces ad-hoc scripts with a declarative, GitOps-compatible cluster lifecycle model.
-
-```bash
-# Install clusterctl CLI
-nix-env -iA nixpkgs.clusterctl
-
-# Initialise CAPI on a management cluster (your k3s homelab cluster)
-clusterctl init --infrastructure hetzner
-
-# Generate a workload cluster manifest
-clusterctl generate cluster my-workload \
-  --kubernetes-version v1.30.0 \
-  --control-plane-machine-count 1 \
-  --worker-machine-count 2 \
-  > my-workload-cluster.yaml
-
-# Apply it
-kubectl apply -f my-workload-cluster.yaml
-
-# Watch cluster provisioning
-clusterctl describe cluster my-workload
-
-# Get kubeconfig for the new cluster
-clusterctl get kubeconfig my-workload > ~/.kube/my-workload.kubeconfig
-```
-
----
-
-## Headlamp (Kubernetes Web UI)
-
-**Purpose:** Modern, extensible Kubernetes UI that runs in the browser or as a desktop app. Faster and more feature-complete than the official Kubernetes Dashboard, with plugin support, multi-cluster management, RBAC visualisation, and resource editing. A good alternative when k9s's terminal interface isn't appropriate.
-
-```yaml
-# ~/headlamp/compose.yaml
-services:
-  headlamp:
-    image: ghcr.io/headlamp-k8s/headlamp:latest
-    ports:
-      - 127.0.0.1:4466:4466
-    volumes:
-      - ~/.kube:/root/.kube:ro
-    command: -in-cluster=false -kubeconfig /root/.kube/config
-    restart: unless-stopped
-```
-
-```bash
-cd ~/headlamp && podman-compose up -d
-```
-
-**Caddy:**
-```caddyfile
-headlamp.home.local { tls internal; reverse_proxy localhost:4466 }
-```
-
----
-
-## Kubectl Plugins (krew)
-
-```bash
-# Install krew (kubectl plugin manager) via Nix
-nix-env -iA nixpkgs.krew
-
-# Update plugin index
-kubectl krew update
-
-# Useful plugins for production use
-kubectl krew install ctx         # switch contexts fast: kubectl ctx
-kubectl krew install ns          # switch namespaces: kubectl ns myapp
-kubectl krew install neat        # clean up kubectl get -o yaml output
-kubectl krew install tree        # show resource ownership tree
-kubectl krew install whoami      # show current auth identity
-kubectl krew install node-shell  # shell into a node
-kubectl krew install df-pv       # disk usage of PersistentVolumes
-kubectl krew install images      # list all container images in cluster
-kubectl krew install konfig      # merge/split kubeconfig files
-
-# Common usage
-kubectl ctx k3s-homelab           # switch to k3s context
-kubectl ns monitoring             # switch to monitoring namespace
-kubectl tree deployment myapp     # show deployment → replicaset → pods tree
-kubectl neat get pod myapp-xyz    # clean YAML without managed fields noise
-kubectl df-pv                     # show PV disk usage across cluster
-```
-
----
-
-## Keptn (Cloud-Native Application Lifecycle Orchestration)
-
-**Purpose:** Automates delivery and operations of cloud-native applications. Keptn provides event-driven orchestration for continuous deployment, SLO-based quality gates, automated remediation, and progressive delivery. Integrates with Argo Rollouts, Prometheus, and Dynatrace/Datadog for automated delivery pipeline control based on real metrics.
-
-```bash
-# Install Keptn CLI
-nix-env -iA nixpkgs.keptn
-
-# Install Keptn on your cluster
-helm repo add keptn https://charts.keptn.sh
-helm install keptn keptn/keptn --namespace keptn --create-namespace \
-  --set=control-plane.apiGatewayNginx.type=ClusterIP
-
-# Check components
-kubectl -n keptn get pods
-```
-
----
-
-## Troubleshooting (additional)
+### Policy & Hardening
 
 | Issue | Solution |
 |-------|----------|
-| HPA shows `<unknown>` for CPU target | `resources.requests.cpu` must be set on the container — HPA calculates utilisation as current / requested; without a request, the ratio is undefined |
-| VPA and HPA conflict | Never run VPA and HPA on the same Deployment scaling on the same metric (CPU/memory); use HPA for replicas on custom/external metrics and VPA for right-sizing requests |
-| PDB blocks node drain | `kubectl describe pdb` to check `minAvailable`; temporarily patch `minAvailable: 0` during planned maintenance if safe, then restore |
-| Init container stuck `Init:0/1` | `kubectl logs <pod> -c <init-container-name>` to see init container output; check dependencies it's waiting for |
-| StatefulSet pod stuck `Terminating` | Kubernetes waits for graceful shutdown; if stuck, check for finalizers: `kubectl get pod <pod> -o json | jq .metadata.finalizers` |
-| Headlamp shows no clusters | Ensure the kubeconfig is mounted read-only and the `server:` URL in the kubeconfig is reachable from inside the container |
+| conftest passes locally but fails in CI | Ensure `--policy` path and `--all-namespaces` flag match CI config |
+| kubeconform fails on CRD resources | Add `-schema-location` for CRD catalog URL; use `--ignore-missing-schemas` during migration |
+| kube-bench says API server flags missing | For k3s, set flags via `kube-apiserver-arg:` in `/etc/rancher/k3s/config.yaml` |
+| PSA blocks system namespace pods | Add `pod-security.kubernetes.io/enforce=privileged` to `kube-system` before enforcing elsewhere |
+| Kyverno webhook times out | `kubectl get pods -n kyverno`; scale replicas; check `--webhookTimeout` |
 
+### Multi-Cluster & Registry
+
+| Issue | Solution |
+|-------|----------|
+| Submariner tunnel not establishing | Check UDP 4500/4800 between nodes; verify broker token; `subctl diagnose all` |
+| Zot push rejected 401 | Verify htpasswd credentials; check `auth.htpasswd.path` in config.json |
+| Admiralty pods stuck Pending | Check `MultiClusterSchedulingProfile` on target cluster; verify Admiralty version compatibility |
+| Harbor push fails: `unknown blob` | Harbor storage PVC full — check `kubectl -n harbor get pvc` |
+| Harbor DB migration error on upgrade | Check `harbor-database` pod logs; run migration job manually if needed |
+
+### Alerting
+
+| Issue | Solution |
+|-------|----------|
+| AlertManager not sending alerts | Check `kubectl -n monitoring get pods`; view config: `kubectl -n monitoring get secret alertmanager-main -o yaml` |
+| PrometheusRule not picked up | Labels must match `prometheus.prometheusSpec.ruleSelector`; add `release: kube-prometheus-stack` label |
+| ServiceMonitor metrics missing | Labels must match `prometheus.serviceMonitorSelector`; check `kubectl get servicemonitor -A` |
+| Grafana OnCall not receiving alerts | Verify Grafana alert notification policy points to OnCall integration |
+| Beyla shows no metrics | Check DaemonSet is running; verify kernel ≥5.8; check eBPF capabilities (`SYS_ADMIN` or CAP_BPF) |
+
+---
+
+## DNS
+
+### CoreDNS (Cluster DNS)
+
+**Purpose:** CoreDNS is the default cluster DNS in all distributions. Every Service gets a DNS record (`<svc>.<ns>.svc.cluster.local`). Every pod's `/etc/resolv.conf` is configured to use it automatically.
+
+#### DNS resolution inside pods
+
+```
+# Pattern:                         Example
+<svc>                              → myapp                          (same namespace only)
+<svc>.<namespace>                  → myapp.production
+<svc>.<namespace>.svc              → myapp.production.svc
+<svc>.<namespace>.svc.cluster.local → myapp.production.svc.cluster.local  (always works)
+
+# StatefulSet pods get stable DNS
+<pod>.<svc>.<ns>.svc.cluster.local → postgres-0.postgres.data.svc.cluster.local
+
+# Headless service returns all pod IPs via DNS A records
+dig postgres.data.svc.cluster.local   # returns postgres-0, postgres-1, postgres-2 IPs
+```
+
+#### ndots and the search domain trap
+
+`ndots:5` is the default — a query for `api.stripe.com` first tries:
+1. `api.stripe.com.myapp.svc.cluster.local`
+2. `api.stripe.com.svc.cluster.local`
+3. `api.stripe.com.cluster.local`
+4. `api.stripe.com.` (actual lookup)
+
+This adds latency for every external call. Fix for latency-sensitive pods:
+
+```yaml
+spec:
+  dnsConfig:
+    options:
+      - name: ndots
+        value: "2"    # only try cluster.local search for short names; go direct for FQDNs
+      - name: single-request-reopen   # prevents race condition in some DNS resolvers
+```
+
+#### Customise CoreDNS
+
+```bash
+kubectl -n kube-system edit configmap coredns
+```
+
+```
+# Common Corefile additions:
+.:53 {
+    errors
+    health
+    ready
+    kubernetes cluster.local in-addr.arpa ip6.arpa {
+        pods insecure
+        fallthrough in-addr.arpa ip6.arpa
+    }
+
+    # Forward internal domain to an internal DNS server
+    forward home.local 192.168.1.1
+
+    # Rewrite a hostname inside the cluster
+    rewrite name myapp.old.cluster.local myapp.myapp.svc.cluster.local
+
+    # Cache TTL
+    cache 30
+
+    # Stub zone — resolve a domain via a different DNS server
+    import /etc/coredns/custom/*.server
+
+    forward . /etc/resolv.conf
+    log
+    loop
+    reload
+    loadbalance
+}
+```
+
+```bash
+# Restart CoreDNS to pick up changes
+kubectl rollout restart deployment coredns -n kube-system
+
+# Debug DNS from inside a pod
+kubectl run dnsutils --rm -it --restart=Never --image=registry.k8s.io/e2e-test-images/jessie-dnsutils:1.3 -- bash
+# inside: nslookup kubernetes.default, dig myapp.myapp.svc.cluster.local
+```
+
+---
+
+### ExternalDNS (Sync Ingress to DNS Provider)
+
+**Purpose:** Automatically creates DNS records in Cloudflare, Route53, or your own DNS server when you create Ingress/Gateway/Service resources — no manual DNS management.
+
+```bash
+helm repo add external-dns https://kubernetes-sigs.github.io/external-dns/
+helm upgrade --install external-dns external-dns/external-dns \
+  --namespace external-dns --create-namespace \
+  -f ~/k8s/external-dns-values.yaml
+```
+
+```yaml
+# ~/k8s/external-dns-values.yaml — Cloudflare provider
+provider:
+  name: cloudflare
+env:
+  - name: CF_API_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: cloudflare-credentials
+        key: api-token
+txtOwnerId: homelab                  # unique ID to identify records this instance manages
+domainFilters:
+  - example.com
+policy: sync                         # upsert-only (safer) or sync (also deletes stale records)
+sources:
+  - ingress
+  - gateway-httproute                # Gateway API support
+  - service
+```
+
+```bash
+kubectl create secret generic cloudflare-credentials \
+  --namespace external-dns \
+  --from-literal=api-token=<your-token>
+
+# Watch ExternalDNS process records
+kubectl -n external-dns logs -l app.kubernetes.io/name=external-dns -f
+
+# Annotate an Ingress to target a specific hostname
+kubectl annotate ingress myapp \
+  external-dns.alpha.kubernetes.io/hostname=myapp.example.com \
+  external-dns.alpha.kubernetes.io/ttl=60
+```
+
+---
+
+## Workload Patterns (Advanced)
+
+### Pod Affinity & Anti-Affinity
+
+**Purpose:** Co-locate pods with related services (affinity) or spread replicas so no two land on the same node/zone (anti-affinity).
+
+```yaml
+spec:
+  affinity:
+    # Hard anti-affinity — never two replicas on the same node
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              app: myapp
+          topologyKey: kubernetes.io/hostname
+
+    # Soft preference — prefer to run near the cache pod
+    podAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 80
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app: redis-cache
+            topologyKey: kubernetes.io/hostname
+
+    # Hard node affinity — only schedule on nodes with SSD
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: disktype
+                operator: In
+                values: [ssd]
+```
+
+```bash
+# Label nodes for affinity rules
+kubectl label node k3s-node1 disktype=ssd zone=a gpu=true
+kubectl label node k3s-node2 disktype=hdd zone=b
+
+# Show node labels
+kubectl get nodes --show-labels
+kubectl describe node k3s-node1 | grep Labels -A 20
+```
+
+---
+
+### Lifecycle Hooks & Graceful Shutdown
+
+**Purpose:** `postStart` runs immediately after container start (useful for warming caches). `preStop` runs before the container receives SIGTERM — use it for graceful draining. `terminationGracePeriodSeconds` controls how long Kubernetes waits before sending SIGKILL.
+
+```yaml
+spec:
+  terminationGracePeriodSeconds: 60   # default 30 — increase for slow-shutdown apps
+  containers:
+    - name: myapp
+      lifecycle:
+        postStart:
+          exec:
+            command: ["/bin/sh", "-c", "sleep 2 && curl -s http://localhost:8080/warmup"]
+        preStop:
+          exec:
+            # Drain in-flight requests before SIGTERM is sent
+            command: ["/bin/sh", "-c", "sleep 5"]
+      # For HTTP servers — wait for connections to drain
+      # lifecycle:
+      #   preStop:
+      #     httpGet:
+      #       path: /drain
+      #       port: 8080
+```
+
+> **The SIGTERM race:** Kubernetes simultaneously removes the pod from Service endpoints AND sends SIGTERM. Without a `preStop` sleep, requests already routed to the pod arrive after SIGTERM — causing 502s. A 5-second `preStop` sleep is the most common fix.
+
+```yaml
+# Pod-level sysctl (for latency-tuned apps)
+spec:
+  securityContext:
+    sysctls:
+      - name: net.core.somaxconn
+        value: "65535"
+      - name: net.ipv4.tcp_tw_reuse
+        value: "1"
+  # Note: unsafe sysctls require kubelet --allowed-unsafe-sysctls flag
+```
+
+---
+
+### Projected Volumes & Downward API
+
+**Purpose:** Inject cluster metadata — pod name, namespace, node name, resource limits — into the container without hardcoding. Projected volumes combine multiple sources (ServiceAccount tokens, ConfigMaps, Secrets, DownwardAPI) into one mount.
+
+```yaml
+spec:
+  containers:
+    - name: myapp
+      env:
+        # Downward API as env vars
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: MEMORY_LIMIT
+          valueFrom:
+            resourceFieldRef:
+              containerName: myapp
+              resource: limits.memory
+      volumeMounts:
+        - name: podinfo
+          mountPath: /etc/podinfo
+        - name: combined
+          mountPath: /etc/projected
+  volumes:
+    # Downward API as files (useful for labelling metrics)
+    - name: podinfo
+      downwardAPI:
+        items:
+          - path: labels
+            fieldRef:
+              fieldPath: metadata.labels
+          - path: annotations
+            fieldRef:
+              fieldPath: metadata.annotations
+
+    # Projected volume — merge token + configmap + secret into one mount
+    - name: combined
+      projected:
+        sources:
+          - serviceAccountToken:
+              path: token
+              expirationSeconds: 3600
+              audience: myapp
+          - configMap:
+              name: myapp-config
+          - secret:
+              name: myapp-secrets
+```
+
+---
+
+### PVC Resize (Expanding Volumes)
+
+**Purpose:** Expand a PVC without data loss — supported by Longhorn, Rook-Ceph, and most cloud CSI drivers.
+
+```bash
+# Confirm the StorageClass allows expansion
+kubectl get sc longhorn -o jsonpath='{.allowVolumeExpansion}'   # → true
+
+# Patch the PVC — Kubernetes will expand the underlying volume
+kubectl patch pvc myapp-data -n myapp \
+  --type='json' \
+  -p='[{"op":"replace","path":"/spec/resources/requests/storage","value":"20Gi"}]'
+
+# Watch until expansion completes (may require pod restart for filesystem resize)
+kubectl get pvc myapp-data -n myapp -w
+
+# For pods that need to see the new size: delete pod (StatefulSet restarts it)
+# For Deployments: rolling restart
+kubectl rollout restart deployment myapp -n myapp
+```
+
+```yaml
+# Force online resize (supported by ext4/xfs with resizefs)
+spec:
+  resources:
+    requests:
+      storage: 20Gi    # just edit this value — kubectl apply -f or kubectl edit pvc
+```
+
+---
+
+### DaemonSet Patterns
+
+**Purpose:** DaemonSets run exactly one pod per node — used for node-level agents, log shippers, CNI, monitoring.
+
+```yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: log-shipper
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: log-shipper
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1     # update one node at a time
+  template:
+    metadata:
+      labels:
+        app: log-shipper
+    spec:
+      # DaemonSets often need to tolerate all taints
+      tolerations:
+        - operator: Exists
+      # Access host filesystem for log collection
+      volumes:
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: varlibdockercontainers
+          hostPath:
+            path: /var/lib/docker/containers
+      containers:
+        - name: fluent-bit
+          image: fluent/fluent-bit:latest
+          securityContext:
+            runAsNonRoot: false   # log shippers often need root for host file access
+          volumeMounts:
+            - name: varlog
+              mountPath: /var/log
+              readOnly: true
+```
+
+```bash
+# Only run on specific nodes
+kubectl label node k3s-node1 role=logging
+# Add nodeSelector to DaemonSet spec:
+#   nodeSelector:
+#     role: logging
+
+kubectl get daemonset -A
+kubectl rollout status daemonset/log-shipper -n monitoring
+kubectl rollout history daemonset/log-shipper -n monitoring
+kubectl rollout undo daemonset/log-shipper -n monitoring
+```
+
+---
+
+### ImagePullSecrets & Private Registry Auth
+
+**Purpose:** Pull images from private registries (Harbor, Gitea, GHCR, ECR). Create a `docker-registry` Secret and reference it in the Pod spec or ServiceAccount.
+
+```bash
+# Create a registry credential secret
+kubectl create secret docker-registry regcred \
+  --docker-server=harbor.home.local \
+  --docker-username=robot$ci-push \
+  --docker-password=<robot-token> \
+  --namespace myapp
+
+# Or from an existing Docker/Podman config
+kubectl create secret generic regcred \
+  --from-file=.dockerconfigjson=$HOME/.docker/config.json \
+  --type=kubernetes.io/dockerconfigjson \
+  --namespace myapp
+```
+
+```yaml
+# Reference in a Pod/Deployment
+spec:
+  imagePullSecrets:
+    - name: regcred
+  containers:
+    - name: myapp
+      image: harbor.home.local/myorg/myapp:v1.4.2
+```
+
+```yaml
+# Attach to a ServiceAccount — all pods using this SA inherit the pull secret
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: myapp
+imagePullSecrets:
+  - name: regcred
+```
+
+```bash
+# For ECR — token rotates every 12h, use a CronJob to refresh:
+kubectl create cronjob ecr-refresh --schedule="0 */10 * * *" \
+  --image=amazon/aws-cli \
+  -- sh -c '
+    TOKEN=$(aws ecr get-login-password --region eu-west-1)
+    kubectl create secret docker-registry regcred \
+      --docker-server=<account>.dkr.ecr.eu-west-1.amazonaws.com \
+      --docker-username=AWS --docker-password=$TOKEN \
+      --namespace myapp --dry-run=client -o yaml | kubectl apply -f -'
+```
+
+---
+
+## kubectl Power Usage
+
+### Output Formatting & Filtering
+
+```bash
+# JSONPath — extract specific fields
+kubectl get pods -n myapp -o jsonpath='{.items[*].metadata.name}'
+kubectl get pod myapp-xyz -o jsonpath='{.status.containerStatuses[0].restartCount}'
+kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.capacity.memory}{"\n"}{end}'
+
+# Go template — more powerful formatting
+kubectl get pods -o go-template='{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'
+
+# Custom columns
+kubectl get pods -o custom-columns=\
+'NAME:.metadata.name,STATUS:.status.phase,NODE:.spec.nodeName,IMAGE:.spec.containers[0].image'
+
+# Sort
+kubectl get pods --sort-by='.metadata.creationTimestamp'
+kubectl get pods --sort-by='.status.containerStatuses[0].restartCount'
+
+# Field selectors
+kubectl get pods --field-selector=status.phase=Running
+kubectl get pods --field-selector=spec.nodeName=k3s-node1
+kubectl get events --field-selector=involvedObject.name=myapp-xyz
+
+# Label selectors
+kubectl get pods -l app=myapp,environment=production
+kubectl get pods -l 'environment in (production,staging)'
+kubectl get pods -l 'app notin (debug,test)'
+
+# All resources in a namespace (including CRDs)
+kubectl api-resources --verbs=list --namespaced -o name | \
+  xargs -I{} kubectl get {} --ignore-not-found -n myapp
+
+# Watch with custom columns
+kubectl get pods -w -o custom-columns='NAME:.metadata.name,STATUS:.status.phase'
+```
+
+### kubectl Explain & Discovery
+
+```bash
+# Explain any field, including nested
+kubectl explain pod.spec.containers.securityContext
+kubectl explain deployment.spec.strategy
+kubectl explain horizontalpodautoscaler.spec.behavior
+
+# Discover available API resources
+kubectl api-resources
+kubectl api-resources --namespaced=false        # cluster-scoped only
+kubectl api-resources | grep -i batch
+
+# Check API versions available in your cluster
+kubectl api-versions | sort
+
+# Explain a CRD field
+kubectl explain ciliumnetworkpolicy.spec.ingress
+
+# Discover supported flags for a resource
+kubectl explain clusterissuer --api-version=cert-manager.io/v1
+```
+
+### kubectl Patch Patterns
+
+```bash
+# Strategic merge patch — merge nested fields
+kubectl patch deployment myapp -n myapp --type=strategic \
+  --patch='{"spec":{"template":{"spec":{"containers":[{"name":"myapp","image":"myapp:v2"}]}}}}'
+
+# JSON patch — precise array operations
+kubectl patch service myapp -n myapp --type='json' \
+  -p='[{"op":"replace","path":"/spec/type","value":"NodePort"}]'
+
+# Add a label
+kubectl patch namespace myapp --type='json' \
+  -p='[{"op":"add","path":"/metadata/labels/environment","value":"production"}]'
+
+# Remove a finalizer (use when resource is stuck Terminating)
+kubectl patch pod myapp-xyz -n myapp --type='json' \
+  -p='[{"op":"remove","path":"/metadata/finalizers"}]'
+
+# Remove a finalizer from a namespace stuck Terminating
+kubectl get namespace terminating-ns -o json | \
+  jq '.spec.finalizers = []' | \
+  kubectl replace --raw "/api/v1/namespaces/terminating-ns/finalize" -f -
+
+# Server-Side Apply — declarative and field-manager aware (preferred over apply -f)
+kubectl apply --server-side -f ~/k8s/deployment.yaml
+kubectl apply --server-side --field-manager=my-tool -f ~/k8s/deployment.yaml
+```
+
+### Useful One-Liners
+
+```bash
+# Restart all deployments in a namespace
+kubectl rollout restart deployment -n myapp
+
+# Delete all evicted pods cluster-wide
+kubectl get pods -A --field-selector=status.phase=Failed \
+  -o json | kubectl delete -f -
+
+# Force delete a stuck pod
+kubectl delete pod myapp-xyz -n myapp --grace-period=0 --force
+
+# Get all images running in the cluster
+kubectl get pods -A -o jsonpath='{range .items[*]}{range .spec.containers[*]}{.image}{"\n"}{end}{end}' | sort -u
+
+# Find which pods are using the most memory
+kubectl top pods -A --sort-by=memory
+
+# Find all pods NOT running
+kubectl get pods -A --field-selector='status.phase!=Running,status.phase!=Succeeded'
+
+# Copy a secret between namespaces
+kubectl get secret mysecret -n source-ns -o yaml | \
+  sed 's/namespace: source-ns/namespace: target-ns/' | \
+  kubectl apply -f -
+
+# Get a pod's effective environment variables (including from secrets/configmaps)
+kubectl exec myapp-xyz -n myapp -- env | sort
+
+# Verify what a ServiceAccount can do
+kubectl auth can-i --list --as=system:serviceaccount:myapp:default -n myapp
+
+# Find which node a pod is on
+kubectl get pod myapp-xyz -n myapp -o wide
+
+# Get events sorted by time for a specific pod
+kubectl get events -n myapp --field-selector=involvedObject.name=myapp-xyz --sort-by='.lastTimestamp'
+
+# Watch resource changes in real time (like a live diff)
+kubectl get deploy myapp -n myapp -w -o json | jq '.spec.replicas'
+```
+
+---
+
+## Operator Pattern & Custom Resources
+
+### Understanding Operators
+
+**Purpose:** A Kubernetes Operator extends the API with custom resources (CRDs) and implements a control loop that reconciles desired state. An operator for PostgreSQL would watch `PostgreSQLCluster` CRDs and provision/manage actual database pods. Everything in this stack — Cilium, ArgoCD, Longhorn, cert-manager — is implemented as operators.
+
+#### Operator maturity levels (OperatorHub model)
+
+| Level | Capability |
+|-------|-----------|
+| 1 — Basic Install | Automated deployment |
+| 2 — Seamless Upgrades | Manages upgrades |
+| 3 — Full Lifecycle | Backup, recovery, failure handling |
+| 4 — Deep Insights | Metrics, alerts, log processing |
+| 5 — Auto Pilot | Horizontal/vertical scaling, auto-config |
+
+#### Key operators to know for production databases
+
+```bash
+# CloudNativePG — PostgreSQL operator (Level 5)
+helm repo add cnpg https://cloudnative-pg.github.io/charts
+helm upgrade --install cnpg cnpg/cloudnative-pg \
+  --namespace cnpg-system --create-namespace
+```
+
+```yaml
+# CloudNativePG Cluster — highly available PostgreSQL
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres-cluster
+  namespace: data
+spec:
+  instances: 3               # 1 primary + 2 read replicas
+  storage:
+    size: 20Gi
+    storageClass: longhorn
+  postgresql:
+    parameters:
+      max_connections: "200"
+      shared_buffers: "256MB"
+  backup:
+    retentionPolicy: "30d"
+    barmanObjectStore:
+      destinationPath: s3://backups/postgres
+      s3Credentials:
+        accessKeyId:
+          name: backup-creds
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: backup-creds
+          key: ACCESS_SECRET_KEY
+```
+
+```bash
+kubectl get cluster -n data
+kubectl get pods -n data                  # postgres-cluster-1, -2, -3
+kubectl exec -it postgres-cluster-1 -n data -- psql -U postgres
+
+# Promote a replica to primary
+kubectl cnpg promote postgres-cluster postgres-cluster-2 -n data
+
+# Trigger a backup
+kubectl cnpg backup postgres-cluster -n data
+```
+
+```bash
+# Strimzi — Apache Kafka operator
+helm repo add strimzi https://strimzi.io/charts/
+helm install strimzi strimzi/strimzi-kafka-operator \
+  --namespace kafka --create-namespace
+```
+
+```yaml
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: my-cluster
+  namespace: kafka
+spec:
+  kafka:
+    replicas: 3
+    storage:
+      type: persistent-claim
+      size: 50Gi
+      class: longhorn
+    config:
+      offsets.topic.replication.factor: 3
+      transaction.state.log.replication.factor: 3
+  zookeeper:
+    replicas: 3
+    storage:
+      type: persistent-claim
+      size: 10Gi
+  entityOperator:
+    topicOperator: {}
+    userOperator: {}
+```
+
+```bash
+# Redis Operator (Spotahome)
+helm repo add redis-operator https://spotahome.github.io/redis-operator
+helm install redis-operator redis-operator/redis-operator \
+  --namespace redis-system --create-namespace
+```
+
+```yaml
+apiVersion: databases.spotahome.com/v1
+kind: RedisFailover
+metadata:
+  name: redis-cluster
+  namespace: data
+spec:
+  sentinel:
+    replicas: 3
+  redis:
+    replicas: 3
+    storage:
+      persistentVolumeClaim:
+        metadata:
+          name: redis-data
+        spec:
+          accessModes: [ReadWriteOnce]
+          storageClass: longhorn
+          resources:
+            requests:
+              storage: 10Gi
+```
+
+---
+
+## Deployment Strategies Deep Dive
+
+### Rolling Update Tuning
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  replicas: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2          # allow 2 extra pods above desired during rollout
+      maxUnavailable: 0    # never go below desired count (zero-downtime)
+      # maxSurge: 25%      # percentage form also valid
+      # maxUnavailable: 25%
+
+  # Minimum time a pod must be ready before it's considered available
+  minReadySeconds: 10
+  
+  # Keep old ReplicaSets for rollback history
+  revisionHistoryLimit: 5
+```
+
+```bash
+# Pause a rollout mid-way (inspect canary behaviour)
+kubectl rollout pause deployment/myapp -n myapp
+kubectl rollout resume deployment/myapp -n myapp
+
+# Check rollout status
+kubectl rollout status deployment/myapp -n myapp --timeout=5m
+
+# Full rollout history with annotations
+kubectl rollout history deployment/myapp -n myapp
+kubectl rollout history deployment/myapp -n myapp --revision=3
+
+# Rollback to a specific revision
+kubectl rollout undo deployment/myapp -n myapp --to-revision=3
+```
+
+### Recreate Strategy (Downtime Deployments)
+
+```yaml
+spec:
+  strategy:
+    type: Recreate     # kill ALL old pods, then start new ones — accepts downtime
+                       # use for: DB schema migrations that break backward compat
+```
+
+---
+
+## Multi-Architecture Builds
+
+### Building Multi-Platform Images (amd64 + arm64)
+
+**Purpose:** Build images that run on both x86 servers and ARM nodes (Raspberry Pi, AWS Graviton, Apple Silicon) from a single manifest. Stored as an OCI index in the registry.
+
+```bash
+# Using Podman (buildx equivalent)
+podman manifest create myapp-manifest
+
+podman build --platform linux/amd64 -t myapp:amd64 .
+podman build --platform linux/arm64 -t myapp:arm64 .
+
+podman manifest add myapp-manifest myapp:amd64
+podman manifest add myapp-manifest myapp:arm64
+
+podman manifest push myapp-manifest harbor.home.local/myorg/myapp:latest
+
+# Using Docker buildx (for CI on Docker hosts)
+docker buildx create --use --name multiarch
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  --push \
+  -t harbor.home.local/myorg/myapp:latest .
+```
+
+```yaml
+# Kaniko in CI — multi-arch via parallel jobs
+# .woodpecker.yml
+steps:
+  - name: build-amd64
+    image: gcr.io/kaniko-project/executor:latest
+    args:
+      - --context=git://git.home.local/myorg/myapp
+      - --platform=linux/amd64
+      - --destination=harbor.home.local/myorg/myapp:${CI_COMMIT_SHA}-amd64
+
+  - name: build-arm64
+    image: gcr.io/kaniko-project/executor:latest-arm64
+    args:
+      - --context=git://git.home.local/myorg/myapp
+      - --platform=linux/arm64
+      - --destination=harbor.home.local/myorg/myapp:${CI_COMMIT_SHA}-arm64
+
+  - name: create-manifest
+    image: mplatform/manifest-tool:latest
+    commands:
+      - manifest-tool push from-args \
+          --platforms linux/amd64,linux/arm64 \
+          --template harbor.home.local/myorg/myapp:${CI_COMMIT_SHA}-ARCH \
+          --target harbor.home.local/myorg/myapp:${CI_COMMIT_SHA}
+```
+
+```bash
+# Verify a manifest image is multi-arch
+podman manifest inspect harbor.home.local/myorg/myapp:latest | jq '.manifests[].platform'
+
+# Node labels for architecture-based scheduling
+kubectl get nodes -o custom-columns='NODE:.metadata.name,ARCH:.status.nodeInfo.architecture'
+
+# Schedule only on arm64 nodes
+spec:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+```
+
+---
+
+## Deprecated API Migration
+
+### Finding and Fixing Deprecated APIs
+
+**Purpose:** Kubernetes removes deprecated API versions between minor releases. Applying a manifest with a removed API version hard-fails. Catch these before upgrading.
+
+```bash
+# Install pluto — scans for deprecated/removed APIs
+nix-env -iA nixpkgs.pluto
+
+# Scan live cluster resources
+pluto detect-all-in-cluster
+
+# Scan a Helm release
+helm get manifest myapp -n myapp | pluto detect -
+
+# Scan local manifests
+pluto detect-files -d ~/k8s/
+
+# Target a specific Kubernetes version
+pluto detect-all-in-cluster --target-versions k8s=v1.32.0
+
+# Install nova — finds outdated Helm chart versions
+helm plugin install https://github.com/FairwindsOps/nova
+nova find --wide
+```
+
+```bash
+# Common API migrations (as of 1.25–1.32):
+# PodSecurityPolicy (removed 1.25)        → PSA labels (built-in)
+# Ingress networking.k8s.io/v1beta1       → networking.k8s.io/v1
+# HPA autoscaling/v2beta1                 → autoscaling/v2
+# CronJob batch/v1beta1                   → batch/v1
+# PodDisruptionBudget policy/v1beta1      → policy/v1
+# FlowSchema/PriorityLevelConfiguration v1beta1 → v1
+
+# Migrate a live resource in-place
+kubectl convert -f myapp-deployment.yaml --output-version apps/v1
+```
+
+```yaml
+# .woodpecker.yml — pluto check in CI
+steps:
+  - name: deprecated-api-check
+    image: us-docker.pkg.dev/fairwinds-ops/oss/pluto:latest
+    commands:
+      - pluto detect-files -d k8s/ --target-versions k8s=v1.33.0
+      - helm template myapp ./chart -f values.yaml | pluto detect -
+```
+
+---
+
+## NFS & Shared Storage
+
+### NFS Subdir External Provisioner
+
+**Purpose:** Dynamically provision PVCs backed by an NFS server — the simplest way to get `ReadWriteMany` access mode in a homelab without Rook-Ceph.
+
+```bash
+helm repo add nfs-subdir-external-provisioner \
+  https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+
+helm install nfs-provisioner \
+  nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
+  --namespace kube-system \
+  --set nfs.server=192.168.1.50 \
+  --set nfs.path=/exports/k8s \
+  --set storageClass.name=nfs-client \
+  --set storageClass.reclaimPolicy=Retain \
+  --set storageClass.archiveOnDelete=false
+```
+
+```yaml
+# ReadWriteMany PVC (shared across multiple pods/nodes)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shared-data
+  namespace: myapp
+spec:
+  accessModes: [ReadWriteMany]
+  storageClassName: nfs-client
+  resources:
+    requests:
+      storage: 50Gi
+```
+
+```bash
+kubectl get storageclass nfs-client
+kubectl get pvc shared-data -n myapp
+# ACCESSMODES shows RWX — multiple pods on different nodes can mount simultaneously
+```
+
+---
+
+## MinIO (Self-Hosted S3)
+
+**Purpose:** S3-compatible object storage for Kubernetes — used as the Velero backup target, Loki log storage, Tempo trace storage, and Harbor registry backend. The standard self-hosted S3 replacement.
+
+```bash
+helm repo add minio https://charts.min.io/
+helm upgrade --install minio minio/minio \
+  --namespace minio --create-namespace \
+  --set rootUser=minioadmin \
+  --set rootPassword=changeme \
+  --set persistence.storageClass=longhorn \
+  --set persistence.size=100Gi \
+  --set service.type=ClusterIP
+```
+
+```bash
+# Install mc (MinIO client)
+nix-env -iA nixpkgs.minio-client
+
+mc alias set homelab http://localhost:9000 minioadmin changeme
+mc mb homelab/velero-backups
+mc mb homelab/loki-logs
+mc mb homelab/tempo-traces
+
+# List buckets and objects
+mc ls homelab/
+mc ls homelab/velero-backups/
+
+# Set lifecycle policy (auto-delete after 30 days)
+mc ilm add homelab/loki-logs --expiry-days 30
+
+# Watch live access log
+mc admin trace homelab
+```
+
+```bash
+kubectl -n minio port-forward svc/minio 9000:9000 9001:9001
+# Console at http://localhost:9001
+```
+
+**Caddy:** `minio.home.local { tls internal; reverse_proxy localhost:9001 }`
+
+#### Use MinIO as Loki backend (replacing local filesystem)
+
+```yaml
+# ~/k8s/values/loki.yaml
+loki:
+  storage:
+    type: s3
+    s3:
+      endpoint: http://minio.minio.svc:9000
+      region: us-east-1
+      bucketnames: loki-logs
+      accessKeyId: minioadmin
+      secretAccessKey: changeme
+      s3ForcePathStyle: true
+      insecure: true
+  commonConfig:
+    replication_factor: 1
+```
+
+---
+
+## Grafana Dashboards as Code
+
+### Grafana Dashboard Provisioning (GitOps)
+
+**Purpose:** Store Grafana dashboards as JSON in Git and have them auto-provisioned — no manual UI imports, no dashboard drift.
+
+```yaml
+# ~/k8s/values/prometheus.yaml (kube-prometheus-stack)
+grafana:
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: default
+          orgId: 1
+          folder: Homelab
+          type: file
+          options:
+            path: /var/lib/grafana/dashboards/default
+
+  # Auto-load dashboards from ConfigMaps with this label
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      searchNamespace: ALL    # scan all namespaces for dashboard ConfigMaps
+
+  # Import community dashboards by ID
+  dashboards:
+    default:
+      cilium-overview:
+        gnetId: 18814
+        revision: 1
+        datasource: Prometheus
+      loki-logs:
+        gnetId: 13639
+        revision: 1
+        datasource: Loki
+      opencost:
+        gnetId: 15714
+        revision: 1
+        datasource: Prometheus
+```
+
+```yaml
+# Store a custom dashboard as a ConfigMap — auto-imported by Grafana sidecar
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myapp-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"     # must match sidecar.dashboards.label
+data:
+  myapp.json: |
+    {
+      "title": "MyApp Overview",
+      "uid": "myapp-overview",
+      "panels": [
+        {
+          "title": "Request Rate",
+          "type": "timeseries",
+          "targets": [{
+            "expr": "sum(rate(http_requests_total{namespace=\"myapp\"}[5m])) by (status)"
+          }]
+        },
+        {
+          "title": "Error Rate",
+          "type": "stat",
+          "targets": [{
+            "expr": "sum(rate(http_requests_total{namespace=\"myapp\",status=~\"5..\"}[5m])) / sum(rate(http_requests_total{namespace=\"myapp\"}[5m]))"
+          }]
+        },
+        {
+          "title": "p99 Latency",
+          "type": "timeseries",
+          "targets": [{
+            "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{namespace=\"myapp\"}[5m])) by (le))"
+          }]
+        }
+      ]
+    }
+```
+
+---
+
+## Gateway API — Advanced Patterns
+
+### Header-Based Routing & Traffic Mirroring
+
+```yaml
+# Route by header — canary for specific users
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: myapp-header-canary
+  namespace: nginx-gateway
+spec:
+  parentRefs:
+    - name: nginx-gateway
+      sectionName: http
+  hostnames: [myapp.home.local]
+  rules:
+    # Route beta users to canary (header: X-Beta: true)
+    - matches:
+        - headers:
+            - name: X-Beta
+              value: "true"
+      backendRefs:
+        - name: myapp-canary
+          namespace: myapp-ns
+          port: 8080
+
+    # Everyone else gets stable
+    - backendRefs:
+        - name: myapp-stable
+          namespace: myapp-ns
+          port: 8080
+---
+# URL rewriting
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: myapp-rewrite
+spec:
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/v1
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /api
+      backendRefs:
+        - name: myapp
+          port: 8080
+---
+# Traffic mirroring — send 100% to prod, copy to staging (dark launch)
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: myapp-mirror
+spec:
+  rules:
+    - backendRefs:
+        - name: myapp-prod
+          port: 8080
+      filters:
+        - type: RequestMirror
+          requestMirror:
+            backendRef:
+              name: myapp-staging
+              port: 8080
+```
+
+---
+
+## Additional Troubleshooting
+
+### kubectl Quick Debug Flows
+
+```bash
+# ---- Pod won't start ----
+kubectl describe pod <pod> -n myapp           # check Events section
+kubectl logs <pod> -n myapp --previous        # logs from last crash
+kubectl get events -n myapp --sort-by='.lastTimestamp' | tail -20
+
+# ---- Service not reachable ----
+# 1. Confirm endpoints exist
+kubectl get endpoints myapp -n myapp          # should show pod IPs
+# 2. Test from inside the cluster
+kubectl run curl --rm -it --restart=Never --image=curlimages/curl -- \
+  curl -v http://myapp.myapp.svc.cluster.local:8080/health
+# 3. Check NetworkPolicy isn't blocking
+hubble observe --to-pod myapp/<pod> --verdict DROPPED
+
+# ---- Node is NotReady ----
+kubectl describe node <node>                  # check Conditions section
+ssh <node> 'sudo journalctl -u kubelet -n 50'
+ssh <node> 'sudo systemctl status containerd'
+
+# ---- PVC stuck Pending ----
+kubectl describe pvc myapp-data -n myapp      # check Events
+kubectl get sc                                # confirm StorageClass exists
+kubectl get pods -n longhorn-system           # check CSI driver pods
+
+# ---- OOMKilled ----
+kubectl describe pod <pod> -n myapp | grep -A5 "OOMKilled"
+kubectl top pod <pod> -n myapp --containers
+# Fix: increase limits or fix memory leak
+
+# ---- CrashLoopBackOff ----
+kubectl logs <pod> -n myapp --previous
+kubectl exec -it <pod> -n myapp -- /bin/sh    # if shell available
+kubectl debug -it <pod> --image=busybox --target=myapp -n myapp  # if distroless
+
+# ---- Certificate not provisioning ----
+kubectl get certificate -n myapp
+kubectl get certificaterequest -n myapp
+kubectl get order -n myapp                    # ACME HTTP-01 / DNS-01 state
+kubectl get challenge -n myapp               # challenge in progress?
+kubectl describe challenge -n myapp          # detailed ACME error
+
+# ---- ArgoCD OutOfSync (ignoring normal fields) ----
+# ignoreDifferences for fields that Kubernetes/operators mutate:
+spec:
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas           # if HPA manages replicas
+    - group: ""
+      kind: Service
+      jsonPointers:
+        - /spec/clusterIP          # assigned by Kubernetes
+        - /spec/clusterIPs
+```
+
+### Resource Debugging Checklist
+
+```bash
+# Full resource dump for a namespace — useful for incident handoff
+kubectl get all,cm,secret,pvc,ingress,httproute,certificate,externalsecret \
+  -n myapp -o yaml > /tmp/myapp-snapshot-$(date +%Y%m%d-%H%M).yaml
+
+# Compare two snapshots
+diff /tmp/myapp-snapshot-before.yaml /tmp/myapp-snapshot-after.yaml
+
+# Cluster-wide resource count (spot runaway resource creation)
+kubectl get pods -A --no-headers | wc -l
+kubectl get pvc -A --no-headers | wc -l
+
+# Top nodes and pods
+kubectl top nodes
+kubectl top pods -A --sort-by=memory | head -20
+kubectl top pods -A --sort-by=cpu | head -20
+
+# Find who owns a pod (trace back to Deployment/StatefulSet)
+kubectl tree pod myapp-xyz -n myapp    # requires krew tree plugin
+```
