@@ -245,6 +245,13 @@
   </url>
 
   <url>
+    <loc>https://docs.shani.dev/doc/networking/ip-addressing</loc>
+    <lastmod>2026-04-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://docs.shani.dev/doc/networking/kdeconnect</loc>
     <lastmod>2026-04-18</lastmod>
     <changefreq>monthly</changefreq>
@@ -268,6 +275,13 @@
   <url>
     <loc>https://docs.shani.dev/doc/networking/nbd</loc>
     <lastmod>2026-04-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://docs.shani.dev/doc/networking/network-tools</loc>
+    <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -352,6 +366,13 @@
   <url>
     <loc>https://docs.shani.dev/doc/networking/tailscale</loc>
     <lastmod>2026-04-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://docs.shani.dev/doc/networking/virtual-networking</loc>
+    <lastmod>2026-04-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -742,8 +763,22 @@
   </url>
 
   <url>
-    <loc>https://docs.shani.dev/doc/system/network-tools</loc>
-    <lastmod>2026-04-01</lastmod>
+    <loc>https://docs.shani.dev/doc/system/hardware</loc>
+    <lastmod>2026-04-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://docs.shani.dev/doc/system/kernel-modules</loc>
+    <lastmod>2026-04-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://docs.shani.dev/doc/system/logging</loc>
+    <lastmod>2026-04-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -751,6 +786,13 @@
   <url>
     <loc>https://docs.shani.dev/doc/system/process-management</loc>
     <lastmod>2026-04-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://docs.shani.dev/doc/system/storage</loc>
+    <lastmod>2026-04-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -764,13 +806,6 @@
 
   <url>
     <loc>https://docs.shani.dev/doc/system/users-groups</loc>
-    <lastmod>2026-04-25</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>https://docs.shani.dev/doc/system/virtual-networking</loc>
     <lastmod>2026-04-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>

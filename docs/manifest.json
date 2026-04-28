@@ -272,6 +272,14 @@
     "draft": false
   },
   {
+    "slug": "networking/ip-addressing",
+    "title": "IP Addressing & Routing",
+    "section": "Networking",
+    "updated": "2026-04-28",
+    "order": 999,
+    "draft": false
+  },
+  {
     "slug": "networking/kdeconnect",
     "title": "KDE Connect",
     "section": "Networking",
@@ -300,6 +308,14 @@
     "title": "nbd-server (Network Block Device)",
     "section": "Networking",
     "updated": "2026-04-18",
+    "order": 999,
+    "draft": false
+  },
+  {
+    "slug": "networking/network-tools",
+    "title": "Network Tools",
+    "section": "Networking",
+    "updated": "2026-04-01",
     "order": 999,
     "draft": false
   },
@@ -396,6 +412,14 @@
     "title": "Tailscale VPN",
     "section": "Networking",
     "updated": "2026-04-22",
+    "order": 999,
+    "draft": false
+  },
+  {
+    "slug": "networking/virtual-networking",
+    "title": "Virtual Networking",
+    "section": "Networking",
+    "updated": "2026-04-25",
     "order": 999,
     "draft": false
   },
@@ -825,7 +849,7 @@
   },
   {
     "slug": "system/ch-commands",
-    "title": "ch* Commands",
+    "title": "File Permissions & Attributes",
     "section": "System",
     "updated": "2026-04-25",
     "order": 999,
@@ -840,10 +864,26 @@
     "draft": false
   },
   {
-    "slug": "system/network-tools",
-    "title": "Network Tools",
+    "slug": "system/hardware",
+    "title": "Hardware",
     "section": "System",
-    "updated": "2026-04-01",
+    "updated": "2026-04-28",
+    "order": 999,
+    "draft": false
+  },
+  {
+    "slug": "system/kernel-modules",
+    "title": "Kernel Modules",
+    "section": "System",
+    "updated": "2026-04-28",
+    "order": 999,
+    "draft": false
+  },
+  {
+    "slug": "system/logging",
+    "title": "Logging",
+    "section": "System",
+    "updated": "2026-04-28",
     "order": 999,
     "draft": false
   },
@@ -852,6 +892,14 @@
     "title": "Process Management",
     "section": "System",
     "updated": "2026-04-25",
+    "order": 999,
+    "draft": false
+  },
+  {
+    "slug": "system/storage",
+    "title": "Storage",
+    "section": "System",
+    "updated": "2026-04-28",
     "order": 999,
     "draft": false
   },
@@ -867,14 +915,6 @@
     "slug": "system/users-groups",
     "title": "Users & Groups",
     "section": "System",
-    "updated": "2026-04-25",
-    "order": 999,
-    "draft": false
-  },
-  {
-    "slug": "system/virtual-networking",
-    "title": "Virtual Networking",
-    "section": "Network",
     "updated": "2026-04-25",
     "order": 999,
     "draft": false
