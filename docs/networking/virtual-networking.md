@@ -1,6 +1,6 @@
 ---
 title: Virtual Networking
-section: Network
+section: Networking
 updated: 2026-04-25
 ---
 

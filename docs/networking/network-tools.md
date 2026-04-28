@@ -1,6 +1,6 @@
 ---
 title: Network Tools
-section: System
+section: Networking
 updated: 2026-04-01
 ---
 
@@ -94,11 +94,14 @@ sudo resolvconf -u              # Force regeneration of resolv.conf
 ## 🔌 3. Interfaces, Routing & Hardware
 Manage network interfaces, drivers, and wireless settings.
 
-**`ip`** — Modern interface & routing management (replaces ifconfig/route).
+**`ip`** — Address, route, and neighbour management. For full coverage of CIDR, subnetting, gateways, static routes, and persistent configuration see [IP Addressing & Routing](ip-addressing).
 ```bash
 ip -brief addr show             # Compact IP summary
-ip route get 8.8.8.8            # Trace route for specific destination
-ip neigh flush all              # Clear ARP cache
+ip route get 8.8.8.8            # Which route would be used for a destination
+ip neigh flush dev eth0         # Clear ARP cache for an interface
+ip link set eth0 up             # Bring interface up
+ip addr add 192.168.1.10/24 dev eth0   # Add address (ephemeral)
+ip route add default via 192.168.1.1   # Add default gateway (ephemeral)
 ```
 
 **`ethtool`** — NIC hardware diagnostics.

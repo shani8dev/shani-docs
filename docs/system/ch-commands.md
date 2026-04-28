@@ -1,5 +1,5 @@
 ---
-title: ch* Commands
+title: File Permissions & Attributes
 section: System
 updated: 2026-04-25
 ---
