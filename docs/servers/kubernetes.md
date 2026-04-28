@@ -20,11 +20,10 @@ Lightweight and production-grade Kubernetes distributions, cluster management, G
 
 ---
 
-
 ## Table of Contents
 
 **Core Concepts & Distributions**
-1. [Key Concepts](#key-concepts)
+1. [Key Concepts](#key-concepts) *(Control Plane, Networking, RBAC, Storage, eBPF, GitOps, Namespaces, Labels, Deployments, Events, and more)*
 2. [Distributions](#distributions)
 3. [Disk Layout & CLI Tools](#disk-layout-cli-tools)
 
@@ -52,7 +51,7 @@ Lightweight and production-grade Kubernetes distributions, cluster management, G
 **Workloads & Scheduling**
 19. [Workload Patterns](#workload-patterns) *(includes Init Containers, Sidecars, StatefulSets, Jobs, DaemonSets, Affinity, Lifecycle Hooks, and more)*
 20. [Deployment Strategies Deep Dive](#deployment-strategies-deep-dive)
-21. [Autoscaling](#autoscaling)
+21. [Autoscaling](#autoscaling) *(includes Cluster Autoscaler, Karpenter, HPA, VPA, KEDA, Goldilocks)*
 22. [GPU & AI/ML Workloads](#gpu-aiml-workloads)
 23. [KubeVirt — VMs in Kubernetes](#kubevirt-vms-in-kubernetes)
 24. [WebAssembly (WASM) Workloads](#webassembly-wasm-workloads)
@@ -68,7 +67,7 @@ Lightweight and production-grade Kubernetes distributions, cluster management, G
 32. [Multi-Architecture Builds](#multi-architecture-builds)
 
 **Observability**
-33. [Observability](#observability)
+33. [Observability](#observability) *(includes Prometheus AlertManager config, ServiceMonitor/PodMonitor, DORA metrics)*
 34. [Grafana Dashboards as Code](#grafana-dashboards-as-code)
 35. [SLO Management](#slo-management)
 36. [Beyla (eBPF Auto-Instrumentation — No Code Changes)](#beyla-ebpf-auto-instrumentation-no-code-changes)
@@ -81,16 +80,12 @@ Lightweight and production-grade Kubernetes distributions, cluster management, G
 41. [Cluster Upgrade Strategies](#cluster-upgrade-strategies)
 
 **Platform & Multi-Cluster**
-42. [Crossplane (Kubernetes-Native IaC)](#crossplane-kubernetes-native-iac)
-43. [LitmusChaos (Chaos Engineering)](#litmuschaos-chaos-engineering)
-44. [Keptn (Application Lifecycle Orchestration)](#keptn-application-lifecycle-orchestration)
-45. [Golden Paths (Platform Engineering Practice)](#golden-paths-platform-engineering-practice)
-46. [Port (Internal Developer Portal)](#port-internal-developer-portal)
-47. [Operator Pattern & Custom Resources](#operator-pattern-custom-resources)
-48. [Cluster API (CAPI)](#cluster-api-capi)
-49. [Multi-Cluster](#multi-cluster)
-50. [Multi-Tenancy & Audit](#multi-tenancy-audit)
-51. [Cluster Management UIs](#cluster-management-uis)
+42. [Platform Engineering](#platform-engineering) *(Crossplane, LitmusChaos, Keptn, Golden Paths, Port)*
+43. [Operator Pattern & Custom Resources](#operator-pattern-custom-resources)
+44. [Cluster API (CAPI)](#cluster-api-capi)
+45. [Multi-Cluster](#multi-cluster)
+46. [Multi-Tenancy & Audit](#multi-tenancy-audit)
+47. [Cluster Management UIs](#cluster-management-uis)
 
 **Tooling Reference**
 52. [Helm — Advanced Usage](#helm-advanced-usage)
@@ -131,25 +126,45 @@ Lightweight and production-grade Kubernetes distributions, cluster management, G
 #### What happens when you run `kubectl apply`
 
 1. kubectl sends a `PATCH` or `POST` to kube-apiserver
-2. API server authenticates (cert/token), authorises (RBAC), then admits (Kyverno/OPA webhooks)
-3. Object is persisted to etcd
-4. The relevant controller's reconciliation loop detects the change (via informer/watch)
-5. The controller creates/updates child objects (ReplicaSet → Pods)
-6. Scheduler assigns pods to nodes
-7. kubelet on the node creates containers via the container runtime
+2. API server **authenticates** the request (client cert or bearer token)
+3. API server **authorises** via RBAC — is this subject allowed to perform this verb on this resource?
+4. **Mutating admission webhooks** run (Kyverno mutate, inject sidecars, set defaults) — object may be changed
+5. Object is **validated** against the OpenAPI schema
+6. **Validating admission webhooks** run (Kyverno validate, OPA/Gatekeeper) — may reject the request
+7. Object is **persisted to etcd**
+8. The relevant controller's informer detects the change and its reconciliation loop runs
+9. The controller creates/updates child objects (Deployment → ReplicaSet → Pods)
+10. Scheduler assigns pending pods to nodes based on resources, taints, affinity
+11. kubelet on the target node pulls the image and creates containers via the container runtime
 
 > **Server-side apply (SSA):** `kubectl apply --server-side` moves the field ownership tracking to the API server. Preferred for GitOps — prevents field manager conflicts when multiple tools (ArgoCD, Helm, kubectl) manage overlapping objects. Use `--force-conflicts` to take ownership of conflicting fields.
 
 #### Pod lifecycle states
 
-| State | Meaning |
-|-------|---------|
-| `Pending` | Scheduled but not yet running (pulling image or waiting for node) |
-| `Running` | At least one container is running |
-| `Succeeded` | All containers exited with code 0 (for Jobs) |
-| `Failed` | All containers exited, at least one non-zero |
-| `Unknown` | Node communication lost |
-| `CrashLoopBackOff` | Container repeatedly crashes; kubelet backs off exponentially |
+Kubernetes reports two distinct concepts: the **phase** (official API field `status.phase`) and the **status reason** shown by `kubectl get pods` in the STATUS column.
+
+**Official phases:**
+
+| Phase | Meaning |
+|-------|---------| 
+| `Pending` | Pod accepted but containers not yet running — scheduling, image pull, or PVC binding in progress |
+| `Running` | Pod bound to a node; at least one container is running, starting, or restarting |
+| `Succeeded` | All containers exited with code 0 (terminal — used by Jobs) |
+| `Failed` | All containers have terminated; at least one exited non-zero or was killed |
+| `Unknown` | Pod state cannot be determined — typically the node is unreachable |
+
+**Common STATUS reasons (not phases, shown in `kubectl get pods`):**
+
+| Status | What it means |
+|--------|--------------|
+| `Terminating` | Pod received a delete request; waiting for graceful shutdown and finalizer removal |
+| `CrashLoopBackOff` | Container repeatedly crashes; kubelet backs off exponentially (1s → 2s → 4s → … → 5m max) |
+| `ImagePullBackOff` / `ErrImagePull` | Registry unreachable, or image/tag not found |
+| `Init:0/2` | Waiting for init containers (0 of 2 complete) |
+| `PodInitializing` | Init containers done; app containers starting |
+| `ContainerCreating` | Image pulled; container runtime is creating the container |
+| `OOMKilled` | Container exceeded `limits.memory`; killed by the Linux OOM killer |
+| `Completed` | All containers exited 0 (Job/CronJob pod) |
 
 #### Kubernetes networking model
 
@@ -158,7 +173,7 @@ Lightweight and production-grade Kubernetes distributions, cluster management, G
 3. Agents on a node can communicate with all pods on that node
 4. Pods don't know or care about their host IP
 
-Network Policies are a **whitelist** — once you apply one to a pod, only explicitly allowed traffic is permitted. Production pattern: default-deny-all per namespace, then explicit ingress/egress rules.
+Network Policies are **additive whitelists** — by default, all pod-to-pod traffic is allowed. The moment any NetworkPolicy selects a pod, only traffic explicitly permitted by *any* matching policy is allowed. Production pattern: apply a default-deny-all policy to every namespace, then add explicit ingress/egress allow rules per service. Cilium extends standard NetworkPolicy with L7 (HTTP/gRPC/DNS) rules.
 
 #### Service types
 
@@ -172,31 +187,144 @@ Network Policies are a **whitelist** — once you apply one to a pod, only expli
 
 #### Resources: requests vs limits
 
-`resources.requests` is what the scheduler uses to decide which node can fit the pod. `resources.limits` is enforced at runtime by cgroups — exceed the memory limit and the pod is OOMKilled.
+`resources.requests` is what the scheduler uses to decide which node can fit the pod. `resources.limits` is enforced at runtime by cgroups.
 
-**Golden path:** set requests to typical usage, limits to burst ceiling. Avoid setting neither (scheduler has no information) or `requests == limits` for memory (prevents the kernel reclaiming unused pages).
+**How limits are enforced:**
+- **Memory:** hard limit — exceed it and the container is OOMKilled immediately
+- **CPU:** soft throttle — the container's CPU is rate-limited (not killed); it just runs slower
+
+```yaml
+resources:
+  requests:
+    cpu: 100m       # 0.1 vCPU — used by scheduler to place the pod
+    memory: 256Mi   # used by scheduler and OOM killer
+  limits:
+    cpu: 500m       # throttled at 0.5 vCPU — never OOMKilled for CPU
+    memory: 512Mi   # OOMKilled if exceeded
+```
+
+**Golden path:** set `requests` to typical (p50) usage, `limits` to burst ceiling (p99). Avoid:
+- Setting neither: scheduler is blind, QoS becomes BestEffort (first evicted)
+- `requests == limits` for memory: prevents kernel from reclaiming unused pages (can waste RAM)
+- No memory limit at all: one runaway container can crash the node
+
+> Use **Goldilocks** to derive right-sized values from VPA recommendations based on actual traffic.
 
 #### Taints, tolerations, and affinity
 
-A **taint** marks a node as unsuitable for pods that don't explicitly tolerate it. A **toleration** allows a pod to be scheduled on a tainted node. Example: taint GPU nodes with `gpu=true:NoSchedule`; only pods that tolerate it get scheduled there.
+A **taint** marks a node as unsuitable for pods that don't explicitly tolerate it. A **toleration** on a pod opts it in to a tainted node.
 
-**Node affinity:** `preferredDuringSchedulingIgnoredDuringExecution` = soft preference; `requiredDuringScheduling...` = hard requirement.
+**Taint effects:**
+
+| Effect | Behaviour |
+|--------|-----------|
+| `NoSchedule` | New pods without a matching toleration are not scheduled here; existing pods stay |
+| `PreferNoSchedule` | Scheduler tries to avoid placing pods here, but will if no other node fits |
+| `NoExecute` | Existing pods without a matching toleration are evicted; new ones are not scheduled |
+
+```bash
+# Taint a GPU node — only GPU workloads get scheduled
+kubectl taint node gpu-node1 gpu=true:NoSchedule
+
+# Add toleration to a pod spec
+tolerations:
+  - key: "gpu"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
+
+# Remove a taint (note the trailing -)
+kubectl taint node gpu-node1 gpu=true:NoSchedule-
+```
+
+**Node affinity vs node selector:**
+- `nodeSelector`: simple key/value match (legacy, less flexible)
+- `nodeAffinity`: `requiredDuringSchedulingIgnoredDuringExecution` = hard requirement; `preferredDuringSchedulingIgnoredDuringExecution` = soft preference (weighted)
+
+> **Taints + tolerations vs affinity:** Taints *repel* pods (node says "not you"). Affinity *attracts* pods (pod says "I want that node"). Use both together: taint GPU nodes AND add affinity to GPU pods so they land on GPU nodes and nowhere else.
 
 #### Probes
 
 | Probe | Failure action | Use case |
 |-------|---------------|----------|
-| `livenessProbe` | kubelet kills and restarts the container | Deadlock detection |
-| `readinessProbe` | Pod removed from Service endpoints | Startup delays, temporary unhealthiness |
-| `startupProbe` | Disables liveness/readiness until it passes | Slow-starting apps |
+| `livenessProbe` | kubelet kills and restarts the container | Deadlock detection — use conservatively |
+| `readinessProbe` | Pod removed from Service endpoints | Startup delays, temporary unhealthiness (DB reconnect, cache warm) |
+| `startupProbe` | Disables liveness/readiness until it passes | Slow-starting apps (JVM, ML model load) |
+
+**Probe mechanisms** (all three probes support all mechanisms):
+- `exec` — runs a command inside the container; exit 0 = healthy
+- `httpGet` — HTTP GET; status 200–399 = healthy
+- `tcpSocket` — TCP connect; success = healthy
+- `grpc` — gRPC health check protocol (1.24+)
+
+```yaml
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: 8080
+  initialDelaySeconds: 15    # wait before first probe — tune per app startup time
+  periodSeconds: 10
+  failureThreshold: 3        # 3 consecutive failures → restart
+  timeoutSeconds: 5
+
+startupProbe:
+  httpGet:
+    path: /healthz
+    port: 8080
+  failureThreshold: 30       # 30 × 10s = 5 min max startup time
+  periodSeconds: 10
+```
+
+> **Common mistake:** A liveness probe that hits your app's external DB will kill the pod when the DB is slow — making an outage worse. Liveness probes should only check the process itself (deadlock, infinite loop). Readiness probes can check DB connectivity.
 
 #### ConfigMap vs Secret
 
-Both are key-value stores. ConfigMaps are for non-sensitive configuration. Secrets are base64-encoded — **not** encrypted by default. Use ESO + OpenBao or Sealed Secrets for encryption at rest. Volume mounts are preferred over env vars so secrets can be rotated without a pod restart.
+Both are key-value stores mounted into pods as volumes or environment variables.
+
+| | ConfigMap | Secret |
+|-|-----------|--------|
+| **Content** | Non-sensitive config (feature flags, app settings) | Sensitive data (passwords, tokens, TLS certs) |
+| **Encoding** | Plain text | Base64-encoded (not encrypted — just encoded) |
+| **RBAC** | Standard | Separate `get secrets` permission; restrict tightly |
+| **Encryption at rest** | No | Only with EncryptionConfiguration or external KMS |
+
+```yaml
+# Volume mount (preferred) — changes take effect without pod restart (~60s propagation)
+volumes:
+  - name: config
+    configMap:
+      name: myapp-config
+  - name: creds
+    secret:
+      secretName: myapp-secrets
+      defaultMode: 0400    # read-only for owner
+
+# Env var (less preferred — requires pod restart to pick up changes)
+env:
+  - name: DB_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: myapp-secrets
+        key: db-password
+```
+
+> **Encryption at rest:** By default, Secrets are stored as base64 in etcd — anyone with etcd access can read them. Enable Kubernetes EncryptionConfiguration with an AES-GCM provider, or use ESO + OpenBao/Vault for proper secret management. Sealed Secrets encrypts the manifest itself (safe to commit to Git).
 
 #### StatefulSets vs Deployments
 
-**Deployments** assume pods are stateless and interchangeable. **StatefulSets** provide: stable pod names (`pod-0`, `pod-1`), stable DNS, ordered startup/shutdown, and per-pod PVCs. Use StatefulSets for databases, Kafka, ZooKeeper. Rolling updates are slower (one pod at a time) and PVCs are not auto-deleted on scale-down.
+| | Deployment | StatefulSet |
+|-|------------|-------------|
+| **Pod identity** | Random names (`myapp-xyz`) | Stable ordinal names (`myapp-0`, `myapp-1`) |
+| **DNS** | Single service DNS | Per-pod DNS (`myapp-0.myapp.ns.svc.cluster.local`) |
+| **Storage** | Shared PVC or ephemeral | Per-pod PVCs (via `volumeClaimTemplates`) |
+| **Startup order** | All pods start in parallel | Sequential by default (0 → 1 → 2) |
+| **Use case** | Stateless apps, APIs, workers | Databases, Kafka, Elasticsearch, ZooKeeper |
+| **PVC on scale-down** | N/A | PVCs are **not** deleted — manual cleanup required |
+
+```bash
+# Stateful DNS — predictable and stable even after pod restart
+nslookup postgres-0.postgres.data.svc.cluster.local
+```
 
 #### QoS Classes
 
@@ -256,24 +384,76 @@ kubectl api-resources --api-group=cilium.io    # filter by API group
 
 #### Admission webhooks
 
-Before any object is persisted to etcd, it passes through admission controllers. **Mutating** webhooks modify the object (inject sidecars, add labels, set defaults). **Validating** webhooks can reject it (block unsigned images, prevent privileged containers). Tools: Kyverno, OPA/Gatekeeper.
+Before any object is persisted to etcd, it passes through two phases of admission control:
+
+1. **Mutating admission** — webhooks may modify the object (inject sidecars, add labels, set resource defaults). Runs first so validators see the final object.
+2. **Validating admission** — webhooks may reject the object but cannot modify it (block unsigned images, enforce policy). Runs second.
+
+Both phases run in parallel across all registered webhooks within each phase. A single webhook can implement both. Tools: Kyverno (YAML-native), OPA/Gatekeeper (Rego).
+
+> If a webhook is unavailable and its `failurePolicy` is `Fail`, all matching requests are rejected. Set `failurePolicy: Ignore` for non-critical webhooks, and ensure webhook pods have `priorityClass: system-cluster-critical`.
 
 #### Persistent storage — the CSI model
 
-Container Storage Interface (CSI) is the plugin standard. A CSI driver (Longhorn, Rook-Ceph, AWS EBS) implements Create/Attach/Mount. PersistentVolumeClaims are requests for storage. Access modes: `ReadWriteOnce` (one node), `ReadWriteMany` (NFS or Ceph FS), `ReadOnlyMany`.
+Container Storage Interface (CSI) is the plugin standard. A CSI driver (Longhorn, Rook-Ceph, AWS EBS) implements the Create/Attach/Mount lifecycle.
+
+- **PersistentVolume (PV):** the actual storage resource (provisioned manually or dynamically by a StorageClass)
+- **PersistentVolumeClaim (PVC):** a pod's request for storage — size, access mode, and StorageClass
+- **StorageClass:** defines the provisioner and parameters; `reclaimPolicy: Retain` (keep data on PVC delete) vs `Delete` (destroy it)
+
+**Access modes:**
+- `ReadWriteOnce` (RWO) — mounted read/write by one node at a time; block storage (Longhorn, EBS)
+- `ReadWriteMany` (RWX) — mounted read/write by multiple nodes; NFS, CephFS
+- `ReadOnlyMany` (ROX) — mounted read-only by multiple nodes
+
+```bash
+kubectl get pv           # cluster-scoped — shows all volumes and their RECLAIM POLICY
+kubectl get pvc -A       # namespace-scoped — pod's view of storage
+kubectl describe pv <pv-name>   # see which PVC is bound and the reclaim policy
+```
 
 #### eBPF — the technology behind Cilium
 
-eBPF lets programs run in the Linux kernel safely without kernel modules. Cilium uses eBPF to implement networking, security, and observability at the kernel level — bypassing iptables entirely, enforcing L7 HTTP/gRPC/DNS policies, and exporting flow data to Hubble with lower overhead than any userspace proxy.
+**eBPF** (extended Berkeley Packet Filter) lets sandboxed programs run in the Linux kernel without writing kernel modules. The kernel verifies programs are safe (no infinite loops, no out-of-bounds access) before loading them.
+
+**Why it matters for Kubernetes:**
+- **Traditional path:** packets hit iptables → kube-proxy → userspace proxy → pod. Slow, stateful, hard to debug.
+- **Cilium/eBPF path:** packets are processed at the kernel network layer by eBPF programs — no iptables rules, no kube-proxy, no extra hops.
+
+| Capability | How Cilium uses eBPF |
+|------------|---------------------|
+| **Networking** | Replaces kube-proxy; pod routing at kernel speed |
+| **L7 Policy** | HTTP/gRPC/DNS-aware NetworkPolicy without Envoy sidecar injection |
+| **Encryption** | Transparent WireGuard node-to-node via eBPF |
+| **Observability** | Hubble captures all pod flows at kernel level; zero app changes |
+| **Load balancing** | Maglev consistent hashing in kernel (DSR mode for direct return) |
+
+> Kernel version ≥5.10 recommended for full Cilium features; ≥5.8 for Beyla eBPF auto-instrumentation.
 
 #### GitOps mental model
 
-Git is the single source of truth for cluster state. CI builds images and pushes a commit to the manifests repo. ArgoCD/Flux detects the diff and syncs the cluster. Rollback = `git revert`. Audit trail = git history.
+Git is the **single source of truth** for cluster state. Nobody applies manifests manually — everything flows through Git.
 
 ```
-Code repo → CI (build/test/push image) → update image tag in manifests repo
-Manifests repo → ArgoCD/Flux detects diff → syncs cluster → Argo Rollouts canary
+Code repo ──→ CI (build/test/push image)
+                    │
+                    ↓
+           Manifests repo (update image tag, Helm values)
+                    │
+                    ↓
+           ArgoCD / Flux (detects diff every ~3 min or via webhook)
+                    │
+                    ↓
+           Kubernetes cluster (reconciled to match Git)
 ```
+
+**Key properties:**
+- **Rollback** = `git revert` → automatic re-sync, no `kubectl rollout undo`
+- **Audit trail** = git history and PR comments (who changed what, when, and why)
+- **Drift detection** = ArgoCD/Flux detects and can auto-correct manual `kubectl` changes
+- **Disaster recovery** = re-apply the Git repo to a new cluster to recreate state
+
+> **Drift:** any change made directly with `kubectl apply` that wasn't committed to Git. GitOps tools report this as `OutOfSync` and can auto-revert it. Use `kubectl apply --dry-run=server` to preview without drifting.
 
 #### Observability pillars
 
@@ -479,6 +659,129 @@ kubectl get pod myapp-xyz -n myapp -o jsonpath='{.status.conditions}'  | jq .
 
 ---
 
+#### Namespaces
+
+Namespaces are a virtual partition of a cluster — they scope names, RBAC, ResourceQuotas, NetworkPolicies, and LimitRanges. Objects with the same name can exist in different namespaces. `kube-system` holds control-plane components; `default` is the initial user namespace. Namespaces do **not** provide network isolation on their own — use NetworkPolicies for that.
+
+```bash
+kubectl get namespaces
+kubectl create namespace myapp
+kubectl config set-context --current --namespace=myapp   # set default namespace
+kubectl get pods -A                                       # all namespaces
+kubectl get pods -n kube-system                          # specific namespace
+```
+
+> **Production pattern:** One namespace per application/service. Use `ResourceQuota` and `LimitRange` to cap what each namespace can consume.
+
+---
+
+#### Labels & Selectors
+
+Labels are `key: value` pairs attached to any Kubernetes object. They are the **primary mechanism** Kubernetes uses to group and target objects — Services use them to find pods, Deployments use them to own ReplicaSets, NetworkPolicies use them to apply rules, and node affinity uses node labels.
+
+```yaml
+metadata:
+  labels:
+    app: myapp
+    version: v1.4.2
+    environment: production
+    team: backend
+```
+
+```bash
+kubectl get pods -l app=myapp                            # equality selector
+kubectl get pods -l 'environment in (production,staging)'  # set-based selector
+kubectl label pod myapp-xyz canary=true                  # add label
+kubectl label pod myapp-xyz canary-                      # remove label
+kubectl get pods --show-labels
+```
+
+**Selector types:**
+- **Equality-based** (`=`, `==`, `!=`): used in Services, ReplicationControllers
+- **Set-based** (`in`, `notin`, `exists`): used in Deployments, Jobs, DaemonSets, affinity rules
+
+> Labels are indexed and queryable. Keep them consistent across your fleet — `app`, `version`, `environment`, `team`, `component` are common conventions (see `app.kubernetes.io/` well-known labels).
+
+---
+
+#### Annotations
+
+Annotations are also `key: value` pairs but are **not** used for selection. They carry arbitrary metadata — tool configuration, last-applied values, build IDs, Slack channel, runbook URLs.
+
+```yaml
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: "..."
+    prometheus.io/scrape: "true"                       # Prometheus scrape hint
+    prometheus.io/port: "8080"
+    kubernetes.io/change-cause: "deploy v1.4.2 fix OOM"  # shown in rollout history
+    link/runbook: "https://wiki.home.local/runbooks/myapp"
+```
+
+> Values can be any string including JSON. Unlike labels, annotations are not indexed — don't use them as selectors.
+
+---
+
+#### Deployments & ReplicaSets
+
+A **Deployment** manages the desired state of a stateless application. You declare `replicas: 3` and `image: myapp:v2`, and the Deployment controller creates a **ReplicaSet** to maintain that count. On update, the Deployment creates a new ReplicaSet and scales it up while scaling the old one down — this is the rolling update.
+
+```
+Deployment
+  └── ReplicaSet (v2 — active)       3/3 pods
+  └── ReplicaSet (v1 — scaled down)  0/3 pods  ← kept for rollback
+```
+
+```bash
+kubectl get replicasets -n myapp        # see all RSes owned by the Deployment
+kubectl rollout history deployment/myapp -n myapp   # see revision history
+kubectl rollout undo deployment/myapp -n myapp      # roll back to previous RS
+```
+
+> `revisionHistoryLimit` (default 10) controls how many old ReplicaSets are kept. Set to 3–5 in production to avoid cluttering the namespace.
+
+---
+
+#### Events
+
+Kubernetes Events record what happened to an object — image pulls, scheduling decisions, probe failures, OOMKills. They are the first thing to check when a pod won't start.
+
+```bash
+kubectl describe pod myapp-xyz -n myapp          # events at the bottom
+kubectl get events -n myapp --sort-by='.lastTimestamp' | tail -30
+kubectl get events -n myapp --field-selector reason=OOMKilling
+kubectl get events -A --field-selector type=Warning   # all warnings cluster-wide
+```
+
+Events expire after ~1 hour by default. For persistent event storage, use a tool like `event-exporter` to ship events to Loki.
+
+---
+
+#### restartPolicy
+
+Controls what happens when a container in a pod exits.
+
+| Policy | Behaviour | Use Case |
+|--------|-----------|----------|
+| `Always` | Restart on any exit (default for Deployments/DaemonSets) | Long-running services |
+| `OnFailure` | Restart only on non-zero exit | Jobs that should retry |
+| `Never` | Never restart | One-shot jobs; debugging |
+
+> Pods with `restartPolicy: Never` move to `Failed` phase on non-zero exit. Pods with `Always` go to `CrashLoopBackOff` if they keep crashing.
+
+---
+
+#### hostNetwork, hostPID, hostIPC
+
+These pod-level flags break container isolation in exchange for performance or access to host resources. **Avoid in production unless absolutely necessary** — they are blocked by `restricted` PSA profile.
+
+| Flag | Effect | Legitimate use |
+|------|--------|----------------|
+| `hostNetwork: true` | Pod uses the node's network namespace; bypasses CNI | Node-local monitoring agents (Cilium, Falco) |
+| `hostPID: true` | Pod can see all processes on the node | Debugging tools, eBPF profilers |
+| `hostIPC: true` | Pod shares the node's IPC namespace | High-performance shared-memory workloads |
+
+---
 
 ## Distributions
 
@@ -585,29 +888,6 @@ microk8s config > ~/.kube/config && chmod 600 ~/.kube/config
 **Firewall:**
 ```bash
 sudo firewall-cmd --add-port=16443/tcp --add-port=10250/tcp --permanent && sudo firewall-cmd --reload
-```
-
----
-
-### kind (Kubernetes in Podman — Dev/CI)
-
-```bash
-nix-env -iA nixpkgs.kind
-export KIND_EXPERIMENTAL_PROVIDER=podman
-kind create cluster --name homelab
-
-cat > ~/kind-multinode.yaml << 'EOF'
-kind: Cluster
-apiVersion: kind.x-k8s.io/v1alpha4
-nodes:
-  - role: control-plane
-  - role: worker
-  - role: worker
-EOF
-kind create cluster --name homelab --config ~/kind-multinode.yaml
-
-kind load docker-image myapp:latest --name homelab
-kind delete cluster --name homelab
 ```
 
 ---
@@ -845,7 +1125,6 @@ Key bindings inside k9s:
 
 ---
 
-
 ## Networking & Ingress
 
 ### Cilium (eBPF CNI — Primary)
@@ -1013,7 +1292,6 @@ cilium status --wait
 
 ---
 
-
 ## DNS
 
 ### CoreDNS (Cluster DNS)
@@ -1149,7 +1427,6 @@ kubectl annotate ingress myapp \
 ```
 
 ---
-
 
 ## NetworkPolicy — Default Deny Patterns
 
@@ -1637,7 +1914,6 @@ helm upgrade nginx-gateway-fabric \
 
 ---
 
-
 ## TLS & Certificate Management
 
 ### cert-manager (Automatic TLS)
@@ -1778,7 +2054,6 @@ spec:
 
 ---
 
-
 ## Service Mesh
 
 ### Linkerd (Lightweight mTLS Service Mesh)
@@ -1867,7 +2142,6 @@ spec:
 
 ---
 
-
 ## Gateway API — Advanced Patterns
 
 ### Header-Based Routing & Traffic Mirroring
@@ -1941,7 +2215,6 @@ spec:
 ```
 
 ---
-
 
 ## Network Troubleshooting
 
@@ -2046,7 +2319,6 @@ spec:
 ```
 
 ---
-
 
 ## Storage
 
@@ -2209,7 +2481,6 @@ kubectl get pvc -A | grep -v Bound         # find unbound PVCs (problem indicato
 
 ---
 
-
 ## NFS & Shared Storage
 
 ### NFS Subdir External Provisioner
@@ -2252,7 +2523,6 @@ kubectl get pvc shared-data -n myapp
 ```
 
 ---
-
 
 ## MinIO (Self-Hosted S3)
 
@@ -2316,7 +2586,6 @@ loki:
 ```
 
 ---
-
 
 ## Security & Policy
 
@@ -2731,7 +3000,6 @@ sudo kube-bench 2>/dev/null | grep -E "^\[FAIL\]"
 
 ---
 
-
 ## Secrets Management
 
 ### Sealed Secrets
@@ -2965,7 +3233,6 @@ kubectl describe externalsecret myapp-db-secret -n myapp
 
 ---
 
-
 ## Image Supply Chain Security
 
 ### Harbor (Self-Hosted OCI Registry)
@@ -3089,7 +3356,6 @@ kubectl describe vulnerabilityreport <pod-name> -n myapp
 
 ---
 
-
 ## SPIFFE/SPIRE — Workload Identity
 
 **Purpose:** SPIFFE (Secure Production Identity Framework for Everyone) is the CNCF standard for workload identity. SPIRE is the reference implementation. Every pod gets a cryptographically verifiable X.509 SVID (SPIFFE Verifiable Identity Document) — even across clusters and clouds. This is the foundation for zero-trust between services.
@@ -3147,7 +3413,6 @@ spec:
 > **Cilium + SPIFFE:** Cilium's mTLS uses WireGuard at the node level. SPIFFE/SPIRE adds per-workload identity for zero-trust that survives pod migration and multi-cluster federation.
 
 ---
-
 
 ## Cluster Hardening
 
@@ -3372,7 +3637,6 @@ kubectl create clusterrolebinding dev-team-view \
 
 ---
 
-
 ## Workload Patterns
 
 ### StatefulSets
@@ -3411,6 +3675,16 @@ spec:
         resources:
           requests:
             storage: 20Gi
+  # updateStrategy controls how rolling updates work for StatefulSets
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0     # only update pods with index >= partition; set > 0 for phased rollout
+  
+  # podManagementPolicy: OrderedReady (default) | Parallel
+  # OrderedReady: start/stop pods one at a time in order (0, 1, 2...)
+  # Parallel: start/stop all pods simultaneously — faster but less safe for DBs
+  podManagementPolicy: OrderedReady
 ---
 # Headless Service for stable DNS (postgres-0.postgres.data.svc.cluster.local)
 apiVersion: v1
@@ -3424,6 +3698,19 @@ spec:
     app: postgres
   ports:
     - port: 5432
+```
+
+```bash
+# StatefulSet-specific operations
+kubectl rollout status statefulset/postgres -n data
+kubectl rollout undo statefulset/postgres -n data
+
+# Scale down safely (pods deleted highest-index first: 2 → 1 → 0)
+kubectl scale statefulset postgres --replicas=1 -n data
+
+# Note: PVCs are NOT deleted on scale-down — manual cleanup required
+kubectl get pvc -n data -l app=postgres
+kubectl delete pvc data-postgres-2 -n data    # only after verifying data is safe
 ```
 
 ---
@@ -3531,106 +3818,6 @@ kubectl get jobs -n myapp --sort-by='.metadata.creationTimestamp'
 | `@hourly` | Shorthand for `0 * * * *` |
 
 ---
-
-### Topology Spread Constraints
-
-**Purpose:** Spread pods evenly across nodes/zones — preventing all replicas landing on one node.
-
-```yaml
-spec:
-  topologySpreadConstraints:
-    - maxSkew: 1
-      topologyKey: kubernetes.io/hostname
-      whenUnsatisfiable: DoNotSchedule   # hard: pod stays Pending if can't spread
-      labelSelector:
-        matchLabels:
-          app: myapp
-    - maxSkew: 1
-      topologyKey: topology.kubernetes.io/zone
-      whenUnsatisfiable: ScheduleAnyway  # soft: best-effort
-      labelSelector:
-        matchLabels:
-          app: myapp
-```
-
----
-
-### Priority Classes
-
-**Purpose:** Ensure critical workloads get scheduled, even at the cost of evicting lower-priority pods.
-
-```yaml
-apiVersion: scheduling.k8s.io/v1
-kind: PriorityClass
-metadata:
-  name: critical-workload
-value: 1000000
-globalDefault: false
-description: "Production critical. Preempts best-effort pods."
----
-apiVersion: scheduling.k8s.io/v1
-kind: PriorityClass
-metadata:
-  name: best-effort
-value: -100
-preemptionPolicy: Never
-description: "Background batch. Evicted first under pressure."
-```
-
-```yaml
-spec:
-  template:
-    spec:
-      priorityClassName: critical-workload
-```
-
-> Built-in system classes: `system-cluster-critical` (2000000999) and `system-node-critical` (2000001000) — used by kube-dns, Cilium.
-
----
-
-### Pod Disruption Budgets
-
-```yaml
-apiVersion: policy/v1
-kind: PodDisruptionBudget
-metadata:
-  name: myapp-pdb
-  namespace: myapp
-spec:
-  minAvailable: 2
-  selector:
-    matchLabels:
-      app: myapp
-```
-
-```bash
-kubectl apply -f myapp-pdb.yaml
-kubectl get pdb -n myapp
-kubectl describe pdb myapp-pdb -n myapp
-```
-
-PDBs only protect against **voluntary** disruptions (drains, upgrades) — not node crashes.
-
----
-
-### Debugging with kubectl debug
-
-```bash
-# Attach netshoot to a running pod (curl, dig, tcpdump, ss, iperf3)
-kubectl debug -it myapp-pod-xyz --image=nicolaka/netshoot --target=myapp -n myapp
-
-# Debug a distroless container (exec is impossible — use ephemeral container)
-kubectl debug -it myapp-pod-xyz --image=busybox --target=myapp -n myapp
-
-# Shell into a node
-kubectl debug node/k3s-node1 --image=busybox -it -- chroot /host
-```
-
----
-
-
----
-
 
 ### Init Containers
 
@@ -3751,9 +3938,86 @@ Use Istio sidecars when: you need advanced traffic management features Cilium do
 
 ---
 
+### Topology Spread Constraints
+
+**Purpose:** Spread pods evenly across nodes/zones — preventing all replicas landing on one node.
+
+```yaml
+spec:
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: DoNotSchedule   # hard: pod stays Pending if can't spread
+      labelSelector:
+        matchLabels:
+          app: myapp
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway  # soft: best-effort
+      labelSelector:
+        matchLabels:
+          app: myapp
+```
 
 ---
 
+### Priority Classes
+
+**Purpose:** Ensure critical workloads get scheduled, even at the cost of evicting lower-priority pods.
+
+```yaml
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: critical-workload
+value: 1000000
+globalDefault: false
+description: "Production critical. Preempts best-effort pods."
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: best-effort
+value: -100
+preemptionPolicy: Never
+description: "Background batch. Evicted first under pressure."
+```
+
+```yaml
+spec:
+  template:
+    spec:
+      priorityClassName: critical-workload
+```
+
+> Built-in system classes: `system-cluster-critical` (2000000999) and `system-node-critical` (2000001000) — used by kube-dns, Cilium.
+
+---
+
+### Pod Disruption Budgets
+
+```yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: myapp-pdb
+  namespace: myapp
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: myapp
+```
+
+```bash
+kubectl apply -f myapp-pdb.yaml
+kubectl get pdb -n myapp
+kubectl describe pdb myapp-pdb -n myapp
+```
+
+PDBs only protect against **voluntary** disruptions (drains, upgrades) — not node crashes.
+
+---
 
 ### Pod Affinity & Anti-Affinity
 
@@ -4052,6 +4316,20 @@ kubectl create cronjob ecr-refresh --schedule="0 */10 * * *" \
 
 ---
 
+### Debugging with kubectl debug
+
+```bash
+# Attach netshoot to a running pod (curl, dig, tcpdump, ss, iperf3)
+kubectl debug -it myapp-pod-xyz --image=nicolaka/netshoot --target=myapp -n myapp
+
+# Debug a distroless container (exec is impossible — use ephemeral container)
+kubectl debug -it myapp-pod-xyz --image=busybox --target=myapp -n myapp
+
+# Shell into a node
+kubectl debug node/k3s-node1 --image=busybox -it -- chroot /host
+```
+
+---
 
 ## Deployment Strategies Deep Dive
 
@@ -4103,7 +4381,6 @@ spec:
 ```
 
 ---
-
 
 ## Autoscaling
 
@@ -4270,6 +4547,29 @@ kubectl get --raw "/apis/custom.metrics.k8s.io/v1beta1/namespaces/myapp/pods/*/h
 
 ---
 
+### Cluster Autoscaler
+
+**Purpose:** The standard Kubernetes node autoscaler — watches for unschedulable pods and triggers scale-up of a cloud node group (AWS ASG, GCE MIG, Azure VMSS). Scales down idle nodes after a configurable cool-down period. Use **Karpenter** on AWS/Azure for faster, more cost-efficient provisioning; use Cluster Autoscaler for GKE, generic cloud, or on-prem with custom node groups.
+
+```bash
+helm repo add autoscaler https://kubernetes.github.io/autoscaler
+helm upgrade --install cluster-autoscaler autoscaler/cluster-autoscaler   --namespace kube-system   --set autoDiscovery.clusterName=homelab   --set awsRegion=eu-central-1   --set rbac.serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=arn:aws:iam::ACCOUNT:role/ClusterAutoscaler
+```
+
+```bash
+kubectl -n kube-system logs -l app.kubernetes.io/name=cluster-autoscaler -f
+
+# Annotate a node group to allow scale-down of specific nodes
+kubectl annotate node k3s-worker-1 cluster-autoscaler.kubernetes.io/scale-down-disabled=true
+
+# Check CA decisions
+kubectl -n kube-system get configmap cluster-autoscaler-status -o yaml
+```
+
+> **CA vs Karpenter:** Cluster Autoscaler works with pre-defined node groups (fixed instance types). Karpenter provisions any instance type that fits pending pod requirements — often cheaper. For homelab/bare-metal, neither applies; use manual node management or CAPI.
+
+---
+
 ### Karpenter (Cloud Node Autoscaler)
 
 **Purpose:** Node autoscaler that provisions exactly the right cloud VM instance type for pending pods.
@@ -4388,7 +4688,6 @@ kubectl -n goldilocks port-forward svc/goldilocks-dashboard 8080:80
 > **VPA + HPA:** Never run both scaling on the same metric (CPU/memory). Safe combination: HPA on custom/external metrics (KEDA) + VPA for right-sizing requests.
 
 ---
-
 
 ## GPU & AI/ML Workloads
 
@@ -4571,7 +4870,6 @@ Key metrics: `DCGM_FI_DEV_GPU_UTIL` (%), `DCGM_FI_DEV_MEM_COPY_UTIL` (%), `DCGM_
 
 ---
 
-
 ## KubeVirt — VMs in Kubernetes
 
 **Purpose:** Run full virtual machines as Kubernetes workloads. Uses the same scheduling, networking, storage, and RBAC as pod workloads — but the workload is a KVM VM, not a container. Useful for legacy apps that can't be containerized, Windows workloads, or when you need stronger isolation than containers provide.
@@ -4655,7 +4953,6 @@ virtctl expose vm ubuntu-vm --name ubuntu-ssh --port 22 --type NodePort
 
 ---
 
-
 ## WebAssembly (WASM) Workloads
 
 **Purpose:** Run WebAssembly modules directly in Kubernetes as workloads — smaller images (KB instead of MB), near-native performance, stronger sandboxing than containers, and true multi-architecture portability without multi-arch builds.
@@ -4736,7 +5033,6 @@ EOF
 ```
 
 ---
-
 
 ## GitOps & Continuous Delivery
 
@@ -5137,7 +5433,6 @@ flux reconcile source git flux-system
 
 ---
 
-
 ## Advanced GitOps Patterns
 
 ### ArgoCD App of Apps
@@ -5359,7 +5654,6 @@ flux resume helmrelease kube-prometheus-stack -n monitoring
 
 ---
 
-
 ## Progressive Delivery
 
 Progressive delivery is the practice of releasing to a subset of traffic before rolling out fully.
@@ -5435,7 +5729,6 @@ kubectl argo rollouts undo myapp
 ```
 
 ---
-
 
 ## In-Cluster CI/CD & Build
 
@@ -5747,7 +6040,6 @@ spec:
 
 ---
 
-
 ## Local Development & Cluster Intercept
 
 A major pain point in microservices development: "how do I test my local code against real cluster services?" These tools solve it differently — each has trade-offs.
@@ -5776,6 +6068,29 @@ minikube stop && minikube delete
 ```
 
 > Use **kind** for multi-node CI clusters. Use **minikube** for a richer local dev experience with addons and a dashboard.
+
+---
+
+### kind (Kubernetes in Podman — Dev/CI)
+
+```bash
+nix-env -iA nixpkgs.kind
+export KIND_EXPERIMENTAL_PROVIDER=podman
+kind create cluster --name homelab
+
+cat > ~/kind-multinode.yaml << 'EOF'
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+  - role: worker
+  - role: worker
+EOF
+kind create cluster --name homelab --config ~/kind-multinode.yaml
+
+kind load docker-image myapp:latest --name homelab
+kind delete cluster --name homelab
+```
 
 ---
 
@@ -5992,7 +6307,6 @@ GOARCH=arm64 ko build ./cmd/myapp
 
 ---
 
-
 ## Policy as Code — CI Gates
 
 ### Conftest (Policy Testing in CI)
@@ -6077,7 +6391,6 @@ steps:
 
 ---
 
-
 ## Buildpacks & Image Build Strategies
 
 A comparison of in-cluster and local image build strategies:
@@ -6116,7 +6429,6 @@ pack inspect-image harbor.home.local/myorg/myapp:latest
 ```
 
 ---
-
 
 ## Multi-Architecture Builds
 
@@ -6186,7 +6498,6 @@ spec:
 
 ---
 
-
 ## Observability
 
 ### Prometheus + Grafana (kube-prometheus-stack)
@@ -6219,6 +6530,181 @@ kubectl -n monitoring port-forward svc/kube-prometheus-stack-grafana 3000:80
 | OpenCost | 15714 |
 
 > Import via Grafana UI: **Dashboards → New → Import → enter ID**.
+
+---
+
+### Prometheus AlertManager
+
+**Purpose:** Routes Prometheus alerts to Slack, PagerDuty, email, or ntfy. AlertManager handles deduplication, grouping, silencing, and inhibition — so 50 alerts from one failing node appear as one grouped notification.
+
+#### AlertManager config (bundled with kube-prometheus-stack)
+
+```yaml
+# ~/k8s/values/prometheus.yaml — add to your kube-prometheus-stack values
+alertmanager:
+  config:
+    global:
+      resolve_timeout: 5m
+
+    route:
+      group_by: [alertname, namespace, severity]
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+      receiver: default
+      routes:
+        - match:
+            severity: critical
+          receiver: critical-alerts
+          continue: true
+        - match:
+            severity: warning
+          receiver: warning-alerts
+
+    receivers:
+      - name: default
+        slack_configs:
+          - api_url: https://hooks.slack.com/services/XXXX
+            channel: "#k8s-alerts"
+            title: '{{ template "slack.default.title" . }}'
+            text: '{{ template "slack.default.text" . }}'
+
+      - name: critical-alerts
+        slack_configs:
+          - api_url: https://hooks.slack.com/services/XXXX
+            channel: "#incidents"
+            send_resolved: true
+        pagerduty_configs:
+          - service_key: <pagerduty-service-key>
+
+      - name: warning-alerts
+        webhook_configs:
+          - url: http://ntfy.home.local/k8s-warnings    # ntfy push notification
+
+    inhibit_rules:
+      - source_match:
+          severity: critical
+        target_match:
+          severity: warning
+        equal: [alertname, namespace]    # critical silences matching warning
+```
+
+#### Useful PrometheusRule examples
+
+```yaml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: myapp-alerts
+  namespace: myapp
+  labels:
+    release: kube-prometheus-stack    # must match kube-prometheus-stack label selector
+spec:
+  groups:
+    - name: myapp.rules
+      interval: 30s
+      rules:
+        # Alert if error rate > 1% for 5 minutes
+        - alert: HighErrorRate
+          expr: |
+            sum(rate(http_requests_total{namespace="myapp", status=~"5.."}[5m]))
+            / sum(rate(http_requests_total{namespace="myapp"}[5m])) > 0.01
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "High error rate in {{ $labels.namespace }}"
+            description: "Error rate is {{ $value | humanizePercentage }}"
+
+        # Alert if pod is not running for 10 minutes
+        - alert: PodNotRunning
+          expr: |
+            kube_pod_status_phase{namespace="myapp", phase!~"Running|Succeeded"} > 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod {{ $labels.pod }} is not running"
+
+        # Alert if PVC is more than 80% full
+        - alert: PVCAlmostFull
+          expr: |
+            kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes > 0.8
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "PVC {{ $labels.persistentvolumeclaim }} is {{ $value | humanizePercentage }} full"
+
+        # Alert if HPA is at maximum replicas
+        - alert: HPAAtMaxReplicas
+          expr: |
+            kube_horizontalpodautoscaler_status_current_replicas
+            == kube_horizontalpodautoscaler_spec_max_replicas
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "HPA {{ $labels.horizontalpodautoscaler }} is at max replicas"
+
+        # Alert if deployment has no available replicas
+        - alert: DeploymentUnavailable
+          expr: |
+            kube_deployment_status_replicas_available{namespace="myapp"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Deployment {{ $labels.deployment }} has no available replicas"
+```
+
+```bash
+# Test alertmanager config locally
+docker run --rm -v $(pwd)/alertmanager.yaml:/config.yaml \
+  prom/alertmanager:latest --config.file=/config.yaml --check-config
+
+kubectl -n monitoring port-forward svc/kube-prometheus-stack-alertmanager 9093:9093
+# Check at http://localhost:9093
+```
+
+#### ServiceMonitor / PodMonitor — Scrape Custom Apps
+
+```yaml
+# Tell Prometheus to scrape your app's /metrics endpoint
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: myapp
+  namespace: myapp
+  labels:
+    release: kube-prometheus-stack    # must match prometheus.serviceMonitorSelector
+spec:
+  selector:
+    matchLabels:
+      app: myapp
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+---
+# PodMonitor — when pods don't have a Service
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: myapp-workers
+  namespace: myapp
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: myapp-worker
+  podMetricsEndpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+```
 
 ---
 
@@ -6542,7 +7028,6 @@ curl -s "https://oncall.home.local/api/v1/incidents/?limit=100" \
 
 ---
 
-
 ## Grafana Dashboards as Code
 
 ### Grafana Dashboard Provisioning (GitOps)
@@ -6629,7 +7114,6 @@ data:
 ```
 
 ---
-
 
 ## SLO Management
 
@@ -6745,7 +7229,6 @@ Pyrra generates alerts at multiple time windows automatically:
 
 ---
 
-
 ## Beyla (eBPF Auto-Instrumentation — No Code Changes)
 
 **Purpose:** Grafana Beyla uses eBPF to automatically instrument applications at the kernel level — capturing HTTP/gRPC latency, error rates, and traces without any SDK or code instrumentation. Works for any language: Go, Python, Node.js, Java, Rust. Exports to Prometheus and OpenTelemetry. The ultimate zero-code observability.
@@ -6823,7 +7306,6 @@ kubectl -n oncall port-forward svc/oncall-engine 8080:8080
 Configure in Grafana UI: **Alerts & IRM → OnCall → Connect**.
 
 ---
-
 
 ## Backup & Disaster Recovery
 
@@ -7015,7 +7497,6 @@ restic -r b2:my-bucket:k8s-backups backup ~/.kube ~/k8s
 
 ---
 
-
 ## etcd Operations & Disaster Recovery
 
 etcd is the sole persistent state store for Kubernetes. Losing etcd without a backup means losing the entire cluster configuration — all Deployments, Secrets, ConfigMaps, CRDs, and RBAC rules. Back it up regularly.
@@ -7134,7 +7615,6 @@ ETCDCTL_API=3 etcdctl endpoint status --write-out=table ...
 > **Application-level backup with Velero** is covered in [Backup & Disaster Recovery](#backup--disaster-recovery). Unlike etcd snapshots (which restore the whole cluster), Velero restores individual namespaces and PVCs — use both strategies together.
 
 ---
-
 
 ## Cost Management & Resource Efficiency
 
@@ -7257,7 +7737,6 @@ kubectl -n goldilocks port-forward svc/goldilocks-dashboard 8080:80 &
 ```
 
 ---
-
 
 ## Cluster Upgrade Strategies
 
@@ -7400,6 +7879,10 @@ kubectl get nodes -w
 
 
 ---
+
+## Platform Engineering
+
+Platform engineering builds internal developer platforms (IDPs) — self-service tooling, golden paths, and guardrails so teams can deploy and operate services without deep Kubernetes expertise. The sections below cover infrastructure-as-code, chaos engineering, lifecycle orchestration, and developer portal tooling.
 
 
 ### Crossplane (Kubernetes-Native IaC)
@@ -7544,8 +8027,6 @@ helm install port-k8s-exporter port-labs/port-k8s-exporter \
 
 ---
 
-
-
 ## Operator Pattern & Custom Resources
 
 ### Understanding Operators
@@ -7677,7 +8158,6 @@ spec:
 
 ---
 
-
 ## Cluster API (CAPI)
 
 **Purpose:** Declarative, Kubernetes-native cluster lifecycle management. Define clusters as CRDs — create, upgrade, scale, and delete entire Kubernetes clusters the same way you manage application workloads. Supports AWS, Azure, GCP, vSphere, bare-metal (via Tinkerbell), and more.
@@ -7749,7 +8229,6 @@ kubectl delete cluster production-cluster
 
 ---
 
-
 ## Multi-Cluster
 
 ### Cluster Federation — Admiralty
@@ -7805,7 +8284,6 @@ EOF
 ```
 
 ---
-
 
 ## Multi-Tenancy & Audit
 
@@ -7895,7 +8373,6 @@ loki.source.file "k3s_audit" {
 ```
 
 ---
-
 
 ## Cluster Management UIs
 
@@ -8020,7 +8497,6 @@ After install, add your kubeconfig — Lens auto-detects all contexts in `~/.kub
 
 ---
 
-
 ## Helm — Advanced Usage
 
 ### Helmfile (Declarative Multi-Chart Management)
@@ -8141,7 +8617,6 @@ helm uninstall myapp -n myapp
 ```
 
 ---
-
 
 ## kubectl Power Usage
 
@@ -8288,7 +8763,6 @@ kubectl get nodes -o custom-columns='NAME:.metadata.name,CONDITIONS:.status.cond
 
 ---
 
-
 ## Deprecated API Migration
 
 ### Finding and Fixing Deprecated APIs
@@ -8340,7 +8814,6 @@ steps:
 ```
 
 ---
-
 
 ## Daily Operations
 
@@ -8488,7 +8961,6 @@ sudo k3s ctr namespaces ls      # k8s.io = Kubernetes namespace in containerd
 
 ---
 
-
 ## Caddy Configuration Reference
 
 ```caddyfile
@@ -8535,7 +9007,6 @@ grafana-ngf.home.local {
 > **Why `header_up Host {host}`?** NGF matches HTTPRoutes by the `Host` header. Without this, Caddy rewrites it to `localhost` and NGF returns 404 for every request.
 
 ---
-
 
 ## Zot (Lightweight OCI Registry)
 
@@ -8598,7 +9069,6 @@ oras repo tags localhost:5000/myorg/myapp
 
 ---
 
-
 ## Robusta — Kubernetes Operations Platform
 
 **Purpose:** Robusta enriches Prometheus alerts with context — when an alert fires, Robusta automatically attaches pod logs, recent events, CPU/memory graphs, and related Kubernetes objects to the Slack/Teams notification. It also runs automated playbooks (auto-remediation) and provides a full Kubernetes observability UI.
@@ -8651,7 +9121,6 @@ robusta playbooks trigger prometheus_alert AlertName=Watchdog namespace=default
 ```
 
 ---
-
 
 ## Dagger — Portable CI Engine
 
@@ -8719,7 +9188,6 @@ dagger run python dagger/main.py
 > **Dagger vs Tekton:** Tekton is cluster-native and fits Kubernetes-only workflows. Dagger is language-native — the same pipeline runs in your terminal, GitHub Actions, GitLab CI, or Tekton. Use Dagger when your developers need to run CI locally without a cluster.
 
 ---
-
 
 ## Troubleshooting
 
@@ -8822,7 +9290,10 @@ dagger run python dagger/main.py
 |-------|----------|
 | HPA shows `<unknown>` for CPU | `resources.requests.cpu` must be set — HPA calculates `current / requested` |
 | VPA and HPA conflict | Never run both on same metric (CPU/memory); HPA on external metrics + VPA for sizing |
-| StatefulSet pod stuck `Terminating` | Check finalizers: `kubectl get pod <pod> -o json | jq .metadata.finalizers` |
+| KEDA ScaledObject shows 0 replicas but queue has messages | Check `kubectl describe scaledobject` for trigger errors; verify secret ref for queue credentials |
+| KEDA scale-to-zero doesn't recover | Check `pollingInterval` and `cooldownPeriod`; confirm trigger metric is reachable from KEDA namespace |
+| Cluster Autoscaler not scaling up | Check `cluster-autoscaler-status` ConfigMap; ensure node group max not hit; check for unschedulable pods vs pending pods |
+| StatefulSet pod stuck `Terminating` | Check finalizers: `kubectl get pod <pod> -o json \| jq .metadata.finalizers` |
 | Init container stuck `Init:0/1` | `kubectl logs <pod> -c <init-container-name>` |
 
 ---
@@ -8873,179 +9344,6 @@ dagger run python dagger/main.py
 | etcd `request timeout` in API server logs | etcd overloaded; check `etcd_disk_wal_fsync_duration_seconds_bucket` in Prometheus |
 
 
-### Prometheus AlertManager
-
-**Purpose:** Routes Prometheus alerts to Slack, PagerDuty, email, or ntfy. AlertManager handles deduplication, grouping, silencing, and inhibition — so 50 alerts from one failing node appear as one grouped notification.
-
-#### AlertManager config (bundled with kube-prometheus-stack)
-
-```yaml
-# ~/k8s/values/prometheus.yaml — add to your kube-prometheus-stack values
-alertmanager:
-  config:
-    global:
-      resolve_timeout: 5m
-
-    route:
-      group_by: [alertname, namespace, severity]
-      group_wait: 30s
-      group_interval: 5m
-      repeat_interval: 12h
-      receiver: default
-      routes:
-        - match:
-            severity: critical
-          receiver: critical-alerts
-          continue: true
-        - match:
-            severity: warning
-          receiver: warning-alerts
-
-    receivers:
-      - name: default
-        slack_configs:
-          - api_url: https://hooks.slack.com/services/XXXX
-            channel: "#k8s-alerts"
-            title: '{{ template "slack.default.title" . }}'
-            text: '{{ template "slack.default.text" . }}'
-
-      - name: critical-alerts
-        slack_configs:
-          - api_url: https://hooks.slack.com/services/XXXX
-            channel: "#incidents"
-            send_resolved: true
-        pagerduty_configs:
-          - service_key: <pagerduty-service-key>
-
-      - name: warning-alerts
-        webhook_configs:
-          - url: http://ntfy.home.local/k8s-warnings    # ntfy push notification
-
-    inhibit_rules:
-      - source_match:
-          severity: critical
-        target_match:
-          severity: warning
-        equal: [alertname, namespace]    # critical silences matching warning
-```
-
-#### Useful PrometheusRule examples
-
-```yaml
-apiVersion: monitoring.coreos.com/v1
-kind: PrometheusRule
-metadata:
-  name: myapp-alerts
-  namespace: myapp
-  labels:
-    release: kube-prometheus-stack    # must match kube-prometheus-stack label selector
-spec:
-  groups:
-    - name: myapp.rules
-      interval: 30s
-      rules:
-        # Alert if error rate > 1% for 5 minutes
-        - alert: HighErrorRate
-          expr: |
-            sum(rate(http_requests_total{namespace="myapp", status=~"5.."}[5m]))
-            / sum(rate(http_requests_total{namespace="myapp"}[5m])) > 0.01
-          for: 5m
-          labels:
-            severity: critical
-          annotations:
-            summary: "High error rate in {{ $labels.namespace }}"
-            description: "Error rate is {{ $value | humanizePercentage }}"
-
-        # Alert if pod is not running for 10 minutes
-        - alert: PodNotRunning
-          expr: |
-            kube_pod_status_phase{namespace="myapp", phase!~"Running|Succeeded"} > 0
-          for: 10m
-          labels:
-            severity: warning
-          annotations:
-            summary: "Pod {{ $labels.pod }} is not running"
-
-        # Alert if PVC is more than 80% full
-        - alert: PVCAlmostFull
-          expr: |
-            kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes > 0.8
-          for: 5m
-          labels:
-            severity: warning
-          annotations:
-            summary: "PVC {{ $labels.persistentvolumeclaim }} is {{ $value | humanizePercentage }} full"
-
-        # Alert if HPA is at maximum replicas
-        - alert: HPAAtMaxReplicas
-          expr: |
-            kube_horizontalpodautoscaler_status_current_replicas
-            == kube_horizontalpodautoscaler_spec_max_replicas
-          for: 15m
-          labels:
-            severity: warning
-          annotations:
-            summary: "HPA {{ $labels.horizontalpodautoscaler }} is at max replicas"
-
-        # Alert if deployment has no available replicas
-        - alert: DeploymentUnavailable
-          expr: |
-            kube_deployment_status_replicas_available{namespace="myapp"} == 0
-          for: 2m
-          labels:
-            severity: critical
-          annotations:
-            summary: "Deployment {{ $labels.deployment }} has no available replicas"
-```
-
-```bash
-# Test alertmanager config locally
-docker run --rm -v $(pwd)/alertmanager.yaml:/config.yaml \
-  prom/alertmanager:latest --config.file=/config.yaml --check-config
-
-kubectl -n monitoring port-forward svc/kube-prometheus-stack-alertmanager 9093:9093
-# Check at http://localhost:9093
-```
-
-#### ServiceMonitor / PodMonitor — Scrape Custom Apps
-
-```yaml
-# Tell Prometheus to scrape your app's /metrics endpoint
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: myapp
-  namespace: myapp
-  labels:
-    release: kube-prometheus-stack    # must match prometheus.serviceMonitorSelector
-spec:
-  selector:
-    matchLabels:
-      app: myapp
-  endpoints:
-    - port: http
-      path: /metrics
-      interval: 30s
-      scrapeTimeout: 10s
----
-# PodMonitor — when pods don't have a Service
-apiVersion: monitoring.coreos.com/v1
-kind: PodMonitor
-metadata:
-  name: myapp-workers
-  namespace: myapp
-  labels:
-    release: kube-prometheus-stack
-spec:
-  selector:
-    matchLabels:
-      app: myapp-worker
-  podMetricsEndpoints:
-    - port: metrics
-      path: /metrics
-      interval: 30s
-```
-
 ---
 
 ### Policy & Hardening
@@ -9058,6 +9356,18 @@ spec:
 | PSA blocks system namespace pods | Add `pod-security.kubernetes.io/enforce=privileged` to `kube-system` before enforcing elsewhere |
 | Kyverno webhook times out | `kubectl get pods -n kyverno`; scale replicas; check `--webhookTimeout` |
 
+---
+
+### Multi-Tenancy
+
+| Issue | Solution |
+|-------|----------|
+| vCluster pods stuck Pending | Check host cluster has resources; verify `storageClass` exists in host namespace |
+| vCluster kubeconfig connection refused | Ensure port-forward is running: `vcluster connect <name> -n <ns>` |
+| Kubernetes Audit logs not appearing in Loki | Verify Alloy `kubernetes_audit` config; check `--audit-log-path` in k3s config |
+
+---
+
 ### Multi-Cluster & Registry
 
 | Issue | Solution |
@@ -9067,6 +9377,8 @@ spec:
 | Admiralty pods stuck Pending | Check `MultiClusterSchedulingProfile` on target cluster; verify Admiralty version compatibility |
 | Harbor push fails: `unknown blob` | Harbor storage PVC full — check `kubectl -n harbor get pvc` |
 | Harbor DB migration error on upgrade | Check `harbor-database` pod logs; run migration job manually if needed |
+
+---
 
 ### Alerting
 
@@ -9079,8 +9391,6 @@ spec:
 | Beyla shows no metrics | Check DaemonSet is running; verify kernel ≥5.8; check eBPF capabilities (`SYS_ADMIN` or CAP_BPF) |
 
 ---
-
-
 
 ## Troubleshooting — Advanced Debug Flows
 
