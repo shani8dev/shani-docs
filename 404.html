@@ -8,25 +8,29 @@
   <link rel="manifest" href="/manifest.json">
   <script>
     // GitHub Pages SPA redirect — rewrite 404 paths back to index.html
-    // preserving the path so the SPA router (/doc/<slug>) can handle it.
+    // preserving the path, query string, and hash so the SPA router can restore them.
     (function () {
       var l = window.location;
-      var path = l.pathname;
+      var path   = l.pathname;
+      var search = l.search ? l.search.slice(1) : '';
+      var hash   = l.hash   ? l.hash.slice(1)   : '';
       // Normalise legacy /docs/<slug> → /doc/<slug>
-      var docMatch = path.match(/^\/docs\/(.+?)(?:\.md)?$/);
+      var docMatch = path.match(/^\/docs\/(.+?)(?:\.md)?\/?$/);
       if (docMatch) path = '/doc/' + docMatch[1];
-      // Redirect to root, passing the intended path as a query param
-      // so index.html can restore it with history.replaceState.
       var redirect = l.protocol + '//' + l.hostname +
-        (l.port ? ':' + l.port : '') +
-        '/?p=' + encodeURIComponent(path) +
-        (l.hash ? '&h=' + encodeURIComponent(l.hash.slice(1)) : '');
+        (l.port ? ':' + l.port : '') + '/' +
+        '?p=' + encodeURIComponent(path) +
+        (search ? '&q=' + encodeURIComponent(search) : '') +
+        (hash   ? '&h=' + encodeURIComponent(hash)   : '');
       l.replace(redirect);
     })();
   </script>
   <script>
     (function () {
-      var pfx = 'shanidocs_';
+      // Prefix must match CONFIG.STORAGE_PREFIX + '_' used in script-docs.js
+      var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                  ? CONFIG.STORAGE_PREFIX + '_'
+                  : 'shanidocs_';
       var t = localStorage.getItem(pfx + 'theme') ||
               (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', t);

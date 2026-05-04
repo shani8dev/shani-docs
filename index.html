@@ -44,7 +44,10 @@
   <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
   <script>
     (function () {
-      var pfx = 'shanidocs_';
+      // Prefix must match CONFIG.STORAGE_PREFIX + '_' from script-docs.js
+      var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                  ? CONFIG.STORAGE_PREFIX + '_'
+                  : 'shanidocs_';
       var t = localStorage.getItem(pfx + 'theme') ||
               (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', t);
@@ -202,9 +205,16 @@
   <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
   <script>
     (function () {
-      var params = new URLSearchParams(location.search);
-      var p = params.get('p');
-      if (p) history.replaceState(null, '', p + (params.get('h') ? '#' + params.get('h') : ''));
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
     })();
   </script>
   <script src="/config-docs.js"></script>

@@ -132,6 +132,7 @@ function buildStub(doc) {
     publisher: { '@type': 'Organization', name: SITE_TITLE,
                  logo: { '@type': 'ImageObject', url: FAVICON_URL } },
     image,
+    isPartOf: { '@type': 'WebSite', name: SITE_TITLE, url: WIKI_URL },
   });
 
   return `<!DOCTYPE html>
@@ -154,6 +155,9 @@ function buildStub(doc) {
   <meta property="og:image"       content="${image}">
   ${datePublished ? `<meta property="article:published_time" content="${datePublished}">
   <meta property="article:modified_time"  content="${datePublished}">` : ''}
+  <meta property="article:author"  content="${escHtml(AUTHOR)}">
+  <meta property="article:section" content="${escHtml(doc.section || '')}">
+  ${doc.keywords ? `<meta name="keywords" content="${escHtml(doc.keywords)}">` : ''}
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        content="${escHtml(TWITTER_HANDLE)}">
@@ -169,7 +173,10 @@ function buildStub(doc) {
   <!-- Theme flash prevention — mirrors index.html inline script -->
   <script>
     (function () {
-      var pfx = '${STORAGE_PREFIX}_';
+      // Prefix matches CONFIG.STORAGE_PREFIX + '_' from script-docs.js
+      var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                  ? CONFIG.STORAGE_PREFIX + '_'
+                  : '${STORAGE_PREFIX}_';
       var t = localStorage.getItem(pfx + 'theme') ||
               (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', t);
