@@ -352,12 +352,23 @@ function renderNavTree(tree, activeSlug) {
 function getSlugFromHash() {
   // Support path-style URLs: /doc/<slug>
   const p = location.pathname;
-  if (p.startsWith('/doc/')) return decodeURIComponent(p.slice(5));
+  if (p.startsWith('/doc/')) {
+    const raw = decodeURIComponent(p.slice(5));
+    return raw ? raw.replace(/\/+$/, '') : null;  // 🔧 Strip trailing slashes
+  }
+  
   // Legacy hash fallback: #doc/<slug> or #/<slug>
   const h = location.hash.slice(1);
-  if (h.startsWith('doc/')) return h.slice(4);
-  if (h.startsWith('/'))    return h.slice(1);
-  return h || null;
+  if (h.startsWith('doc/')) {
+    const raw = h.slice(4);
+    return raw ? raw.replace(/\/+$/, '') : null;  // 🔧 Strip trailing slashes
+  }
+  if (h.startsWith('/')) {
+    const raw = h.slice(1);
+    return raw ? raw.replace(/\/+$/, '') : null;  // 🔧 Strip trailing slashes
+  }
+  const raw = h || null;
+  return raw ? raw.replace(/\/+$/, '') : null;    // 🔧 Strip trailing slashes
 }
 
 function navigate(slug, pushState = true) {
