@@ -135,6 +135,8 @@ function buildStub(doc) {
     isPartOf: { '@type': 'WebSite', name: SITE_TITLE, url: WIKI_URL },
   });
 
+  const LOGO_IMG_URL = getConfig('LOGO_IMG_URL', FAVICON_URL);
+
   return `<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
@@ -142,38 +144,44 @@ function buildStub(doc) {
   <meta name="viewport" content="width=device-width,initial-scale=1">
 
   <title>${title} — ${escHtml(SITE_TITLE)}</title>
-  <meta name="description" content="${desc}">
+  <meta name="description" id="meta-desc"     content="${desc}">
+  <meta name="keywords"    id="meta-keywords" content="${escHtml(doc.keywords || '')}">
   <meta name="author"      content="${escHtml(AUTHOR)}">
   <meta name="robots"      content="${robots}">
-  <link rel="canonical"    href="${escHtml(url)}">
+  <link rel="canonical"    id="canonical-url" href="${escHtml(url)}">
 
-  <meta property="og:type"        content="article">
-  <meta property="og:site_name"   content="${escHtml(SITE_TITLE)}">
-  <meta property="og:title"       content="${title}">
-  <meta property="og:description" content="${desc}">
-  <meta property="og:url"         content="${escHtml(url)}">
-  <meta property="og:image"       content="${image}">
+  <meta property="og:site_name" id="og-site-name" content="${escHtml(SITE_TITLE)}">
+  <meta property="og:type"      id="og-type"       content="article">
+  <meta property="og:title"     id="og-title"      content="${title}">
+  <meta property="og:description" id="og-desc"     content="${desc}">
+  <meta property="og:url"       id="og-url"        content="${escHtml(url)}">
+  <meta property="og:image"     id="og-image"      content="${image}">
   ${datePublished ? `<meta property="article:published_time" content="${datePublished}">
   <meta property="article:modified_time"  content="${datePublished}">` : ''}
   <meta property="article:author"  content="${escHtml(AUTHOR)}">
   <meta property="article:section" content="${escHtml(doc.section || '')}">
-  ${doc.keywords ? `<meta name="keywords" content="${escHtml(doc.keywords)}">` : ''}
 
   <meta name="twitter:card"        content="summary_large_image">
-  <meta name="twitter:site"        content="${escHtml(TWITTER_HANDLE)}">
-  <meta name="twitter:title"       content="${title}">
-  <meta name="twitter:description" content="${desc}">
-  <meta name="twitter:image"       content="${image}">
+  <meta name="twitter:site"        id="tw-site"  content="${escHtml(TWITTER_HANDLE)}">
+  <meta name="twitter:title"       id="tw-title" content="${title}">
+  <meta name="twitter:description" id="tw-desc"  content="${desc}">
+  <meta name="twitter:image"       id="tw-image" content="${image}">
 
   <script type="application/ld+json">${ldJson}</script>
 
-  <link rel="icon" type="image/svg+xml" href="${escHtml(FAVICON_URL)}">
-  <link rel="manifest" href="/manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 
-  <!-- Theme flash prevention — mirrors index.html inline script -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="${escHtml(FAVICON_URL)}">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#161514">
+
   <script>
     (function () {
-      // Prefix matches CONFIG.STORAGE_PREFIX + '_' from script-docs.js
       var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
                   ? CONFIG.STORAGE_PREFIX + '_'
                   : '${STORAGE_PREFIX}_';
@@ -185,9 +193,41 @@ function buildStub(doc) {
 
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
 </head>
 <body>
-  <!-- Loading overlay — identical to index.html so the SPA's hideLoader() works -->
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
   <div id="page-loader" aria-hidden="true">
     <div class="loader__logo">
       <img id="loader-logo-img" src="${escHtml(FAVICON_URL)}" alt="${escHtml(SITE_TITLE)}" height="40">
@@ -196,7 +236,64 @@ function buildStub(doc) {
     <p class="loader__text">Loading wiki…</p>
   </div>
 
-  <!-- SPA takes over: reads the current URL path, fetches the .md, renders the doc -->
+  <div class="auspicious-bar" aria-label="${escHtml(SITE_TITLE)}">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <header class="topbar" role="banner">
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <a href="/" class="topbar__logo" aria-label="${escHtml(SITE_TITLE)} home">
+      <img src="${escHtml(LOGO_IMG_URL)}" alt="${escHtml(SITE_TITLE)}" id="logo-img" height="24">
+      <span class="topbar__logo-word logo__word">docs</span>
+    </a>
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input type="search" id="wiki-search" class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation" autocomplete="off" spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+    <div class="topbar__actions">
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+      <a class="btn-icon" href="https://github.com/shani8dev" target="_blank" rel="noopener" aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <main class="content" id="main-content" tabindex="-1">
+    <div class="content__inner" id="doc-content" role="article"></div>
+  </main>
+
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
   <script src="/script-docs.js"></script>
