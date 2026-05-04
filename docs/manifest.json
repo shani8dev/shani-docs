@@ -3,976 +3,1220 @@
     "slug": "arch/boot",
     "title": "Boot Process",
     "section": "Architecture",
+    "description": "Boot Process  Shanios uses a fully measured, signed boot chain built on systemd-boot, dracut-generated Unified Kernel Images (UKIs), and optionally TPM2 + …",
     "updated": "2026-05-13",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "arch/btrfs",
     "title": "Btrfs Deep Dive",
     "section": "Architecture",
+    "description": "Btrfs Deep Dive  Shanios leverages advanced Btrfs features for immutability, efficiency, and data integrity.  Copy-on-Write (CoW)  Btrfs CoW minimises stor…",
     "updated": "2026-05-13",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "arch/dracut-module",
     "title": "Dracut Initramfs Module",
     "section": "Architecture",
+    "description": "Dracut Initramfs Module  Shanios ships a custom dracut module () that adds three hooks to the initramfs. These hooks implement the two features that requir…",
     "updated": "2026-05-13",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "arch/filesystem",
     "title": "Filesystem Structure",
     "section": "Architecture",
+    "description": "Filesystem Structure  Shanios uses Btrfs with a sophisticated subvolume layout housed in a single Btrfs partition (plus a 1 GB FAT32 ESP). The design separ…",
     "updated": "2026-05-13",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "arch/overlay",
     "title": "Overlay Filesystem",
     "section": "Architecture",
+    "description": "Overlay Filesystem  Shanios uses Linux OverlayFS to present a fully writable  on top of a read-only root filesystem. This is what makes the immutable OS fe…",
     "updated": "2026-05-13",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "concepts/atomic-updates",
     "title": "Atomic Updates",
     "section": "Concepts",
+    "description": "Atomic Updates  Shanios uses an intelligent multi-layered update system with automatic checking, user notifications, and the  tool for atomic system update…",
     "updated": "2026-04-27",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "concepts/blue-green",
     "title": "Blue-Green Deployment",
     "section": "Concepts",
+    "description": "Blue-Green Deployment  Shanios implements blue-green deployment using Btrfs subvolumes — a strategy adapted from DevOps for desktop Linux.  How It Works  1…",
     "updated": "2026-04-01",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "concepts/immutability",
     "title": "Immutability",
     "section": "Concepts",
+    "description": "Understanding Immutability  Shanios's immutability fundamentally changes how you interact with the system. Understanding this concept is key to using Shani…",
     "updated": "2026-04-01",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "concepts/persistence",
     "title": "Persistence Strategy",
     "section": "Concepts",
+    "description": "Persistence Strategy  Shanios selectively persists data across immutable system updates through bind mounts and dedicated Btrfs subvolumes.  Three Categori…",
     "updated": "2026-04-01",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "enterprise/fleet",
     "title": "OEM & Fleet Deployment",
     "section": "Enterprise",
+    "description": "OEM & Fleet Deployment  Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or…",
     "updated": "2026-04-27",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "faq",
     "title": "FAQ",
     "section": "FAQ",
+    "description": "Frequently Asked Questions  Answers to the most common questions about Shanios — software installation, updates, hardware, security, and the immutable arch…",
     "updated": "2026-05-13",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "install/first-boot",
     "title": "First Boot",
     "section": "Installation",
+    "description": "First Boot Configuration  Plymouth BGRT Boot Theme  Shanios uses the Plymouth BGRT boot theme. Plymouth provides a smooth graphical boot experience, suppre…",
     "updated": "2026-04-01",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "install/pre-install",
     "title": "Pre-Installation Setup",
     "section": "Installation",
+    "description": "Pre-Installation Setup  BIOS/UEFI Configuration  Configure your firmware before installation (typically accessed via F2, F10, Del, or Esc during startup): …",
     "updated": "2026-04-01",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "install/requirements",
     "title": "System Requirements",
     "section": "Installation",
+    "description": "System Requirements  Hardware Requirements  | Component | Minimum | Recommended | |-----------|---------|-------------| | Processor | x8664 dual-core with …",
     "updated": "2026-04-01",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "install/steps",
     "title": "Installation Steps",
     "section": "Installation",
+    "description": "Installation Steps  Installation takes approximately 10–15 minutes.  Step-by-Step  1. Boot from USB — Press F12, F2, or Del during startup. Select your USB…",
     "updated": "2026-04-01",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "intro/getting-started",
     "title": "Getting Started",
     "section": "Introduction",
+    "description": "Getting Started  A complete walkthrough: choose your edition, download and verify the ISO, install, and configure Shanios for daily use.  Choosing Your Edi…",
     "updated": "2026-04-27",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "intro/migrating",
     "title": "Migrating from Traditional Linux",
     "section": "Introduction",
+    "description": "Migrating from Traditional Linux  If you're coming from Ubuntu, Fedora, Arch, or any mutable Linux distro, the main adjustment is how you install software …",
     "updated": "2026-04-19",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "intro/optimizations",
     "title": "System Optimizations",
     "section": "Introduction",
+    "description": "System Optimizations  Shanios includes extensive performance, gaming, and reliability optimizations out of the box, eliminating the need for manual tweakin…",
     "updated": "2026-04-01",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "intro/user-config",
     "title": "User Configuration",
     "section": "Introduction",
+    "description": "User Configuration  The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created u…",
     "updated": "2026-04-01",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "intro/what-is-shanios",
     "title": "What is Shanios?",
     "section": "Introduction",
+    "description": "What is Shanios?  Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs f…",
     "updated": "2026-04-27",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "intro/whats-included",
     "title": "What's Included",
     "section": "Introduction",
+    "description": "What's Included  Shanios comes fully equipped with a comprehensive software stack, carefully curated for desktop computing, development, gaming, and profes…",
     "updated": "2026-04-01",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/apache",
     "title": "Apache HTTP Server",
     "section": "Networking",
+    "description": "Apache HTTP Server  Apache is a full-featured, battle-tested web server. On Shani OS, Caddy is the recommended reverse proxy for self-hosted services due t…",
     "updated": "2026-04-20",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/apcupsd",
     "title": "apcupsd (UPS Daemon)",
     "section": "Networking",
+    "description": "apcupsd — APC UPS Daemon  apcupsd monitors APC Uninterruptible Power Supplies and triggers a graceful system shutdown when battery runs low. It is pre-inst…",
     "updated": "2026-04-20",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/arpwatch",
     "title": "arpwatch (ARP Monitor)",
     "section": "Networking",
+    "description": "arpwatch — ARP Activity Monitor  arpwatch monitors Ethernet ARP traffic and maintains a database of IP-to-MAC address mappings. It sends an email alert (vi…",
     "updated": "2026-04-20",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/avahi",
     "title": "Avahi (mDNS)",
     "section": "Networking",
+    "description": "Avahi — Zero-Config mDNS/DNS-SD (Bonjour)  Avahi is active by default — your machine is immediately reachable as  on the LAN. It is used by CUPS (printers)…",
     "updated": "2026-04-18",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/bind",
     "title": "BIND (Authoritative DNS)",
     "section": "Networking",
+    "description": "BIND — Authoritative DNS Server  BIND () is the most widely deployed DNS server. On Shani OS it is pre-installed and provides two distinct functions that a…",
     "updated": "2026-04-20",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/caddy",
     "title": "Caddy",
     "section": "Networking",
+    "description": "Caddy Web Server   is a modern web server with automatic HTTPS. It provisions and renews TLS certificates entirely automatically — via Let's Encrypt for pu…",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/cloudflared",
     "title": "Cloudflared Tunnels",
     "section": "Networking",
+    "description": "Cloudflared — Zero-Trust Tunnels  Cloudflared creates an encrypted, outbound-only tunnel from your Shani OS machine to Cloudflare's global edge network. Th…",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/dnscrypt-proxy",
     "title": "dnscrypt-proxy (Encrypted DNS)",
     "section": "Networking",
+    "description": "dnscrypt-proxy — Encrypted DNS  dnscrypt-proxy encrypts DNS queries between your machine and upstream resolvers using DNSCrypt or DNS-over-HTTPS (DoH). Wit…",
     "updated": "2026-04-20",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/dnsmasq",
     "title": "dnsmasq (Local DNS)",
     "section": "Networking",
+    "description": "dnsmasq — Local DNS, DHCP & Split DNS  dnsmasq is a lightweight DNS forwarder, local caching resolver, and DHCP server — ideal for homelab setups. Use it f…",
     "updated": "2026-04-18",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/exim",
     "title": "Exim (Mail Transfer Agent)",
     "section": "Networking",
+    "description": "Exim — Mail Transfer Agent  Exim is a pre-installed Mail Transfer Agent (MTA). On a desktop or homelab machine, its primary purpose is local mail delivery …",
     "updated": "2026-04-20",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/fail2ban",
     "title": "Fail2ban (Brute-Force Protection)",
     "section": "Networking",
+    "description": "Fail2ban — Brute-Force Protection  fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs via firewalld. It in…",
     "updated": "2026-04-20",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/firewalld",
     "title": "Firewall (firewalld)",
     "section": "Networking",
+    "description": "Firewall (firewalld)  firewalld is active by default on Shani OS with a restrictive inbound policy. It manages nftables under the hood using a zone-based m…",
     "updated": "2026-04-20",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/gpsd",
     "title": "gpsd (GPS Daemon)",
     "section": "Networking",
+    "description": "gpsd — GPS Daemon  gpsd is a service daemon that reads data from GPS/GNSS receivers and makes it available to multiple clients over a local socket. Applica…",
     "updated": "2026-04-20",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/ip-addressing",
     "title": "IP Addressing & Routing",
     "section": "Networking",
+    "description": "IP Addressing & Routing  This page covers IP addressing fundamentals — CIDR notation, subnetting, IPv4 and IPv6 — and practical  command usage for managing…",
     "updated": "2026-04-28",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/kdeconnect",
     "title": "KDE Connect",
     "section": "Networking",
+    "description": "KDE Connect — Link Desktop and Mobile Devices  KDE Connect integrates your phone (Android/iOS) with your Shani OS desktop over the local network. It is pre…",
     "updated": "2026-04-18",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/kerberos",
     "title": "Kerberos",
     "section": "Networking",
+    "description": "Kerberos 5 (KDC)  Kerberos provides strong mutual authentication for client/server applications using secret-key cryptography. It is the standard for enter…",
     "updated": "2026-04-18",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/modemmanager",
     "title": "ModemManager (Mobile Broadband)",
     "section": "Networking",
+    "description": "ModemManager — Mobile Broadband (3G/4G/5G)  ModemManager is pre-installed on Shani OS and integrates with NetworkManager to provide first-class support for…",
     "updated": "2026-04-18",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/nbd",
     "title": "nbd-server (Network Block Device)",
     "section": "Networking",
+    "description": "Network Block Device (NBD)  NBD exports a block device (disk, partition, or image file) over the network. The client side presents it as a local block devi…",
     "updated": "2026-04-18",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/network-tools",
     "title": "Network Tools",
     "section": "Networking",
+    "description": "Network Tools  Shanios includes a comprehensive suite of networking utilities for diagnostics, monitoring, security, and file transfer. All tools listed he…",
     "updated": "2026-04-01",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/networkmanager-vpn",
     "title": "NetworkManager & VPN",
     "section": "Networking",
+    "description": "NetworkManager & VPN  NetworkManager is pre-installed and active by default on Shani OS. It manages all network connections — wired, Wi-Fi, mobile broadban…",
     "updated": "2026-04-18",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/nfs",
     "title": "NFS File Sharing",
     "section": "Networking",
+    "description": "NFS — Network File System  Native Linux file sharing at near-local disk speeds. Best for Linux-to-Linux sharing on a trusted LAN. NFS state is bind-mounted…",
     "updated": "2026-04-18",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/openresolv",
     "title": "openresolv (DNS)",
     "section": "Networking",
+    "description": "openresolv — DNS Resolution Management  Shani OS uses openresolv to manage . Rather than any single program owning DNS, openresolv acts as a central broker…",
     "updated": "2026-04-18",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/openssh",
     "title": "OpenSSH",
     "section": "Networking",
+    "description": "OpenSSH — Remote Shell & File Transfer  OpenSSH provides encrypted remote access, file transfer, and port forwarding. On Shani OS, the SSH daemon () is not…",
     "updated": "2026-04-18",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/openvpn",
     "title": "OpenVPN",
     "section": "Networking",
+    "description": "OpenVPN  OpenVPN and its NetworkManager plugin are pre-installed on Shani OS. Use it to connect to corporate or university VPNs, self-hosted VPN servers, o…",
     "updated": "2026-04-20",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/remote-desktop",
     "title": "Remote Desktop",
     "section": "Networking",
+    "description": "Remote Desktop — RDP & VNC  Shani OS includes both client and server tools for graphical remote desktop access. All tools are pre-installed.  ---  Client —…",
     "updated": "2026-04-18",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/rsyncd",
     "title": "rsyncd (rsync Daemon)",
     "section": "Networking",
+    "description": "rsync Daemon (rsyncd)  The rsync daemon exposes file modules over the  protocol for fast, efficient network file synchronisation and backups. Unlike SSH-ba…",
     "updated": "2026-04-18",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/samba",
     "title": "Samba (SMB/CIFS)",
     "section": "Networking",
+    "description": "Samba — SMB/CIFS (Windows / macOS / Linux)  Samba provides file and print sharing using the SMB/CIFS protocol, making your Shani OS machine appear as a Win…",
     "updated": "2026-04-18",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/slapd",
     "title": "slapd (OpenLDAP)",
     "section": "Networking",
+    "description": "OpenLDAP Server (slapd)  OpenLDAP is an open-source implementation of the Lightweight Directory Access Protocol (LDAP), used for centralised authentication…",
     "updated": "2026-04-18",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/snmpd",
     "title": "snmpd (SNMP)",
     "section": "Networking",
+    "description": "SNMP Daemon (snmpd)  The Simple Network Management Protocol daemon allows your Shani OS machine to be monitored by external systems such as Zabbix, Nagios,…",
     "updated": "2026-04-18",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/sshfs",
     "title": "SSHFS",
     "section": "Networking",
+    "description": "SSHFS — Mount Remote Directories over SSH  SSHFS mounts any directory from an SSH-accessible machine as a local folder using FUSE. It requires only an SSH …",
     "updated": "2026-04-18",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/tailscale",
     "title": "Tailscale VPN",
     "section": "Networking",
+    "description": "Tailscale — Private WireGuard Mesh  Tailscale builds a private, peer-to-peer encrypted network (a \"tailnet\") between all your devices using WireGuard under…",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/virtual-networking",
     "title": "Virtual Networking",
     "section": "Networking",
+    "description": "Virtual Networking  Linux exposes a rich set of virtual network devices and primitives for building software-defined networks, container networking, VMs, V…",
     "updated": "2026-04-25",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "networking/wireguard",
     "title": "WireGuard (Manual)",
     "section": "Networking",
+    "description": "WireGuard — Manual Peer-to-Peer VPN  WireGuard kernel support and  are pre-installed on Shani OS. Tailscale uses WireGuard under the hood, but you can conf…",
     "updated": "2026-04-18",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "overview",
     "title": "Overview",
     "section": "Overview",
+    "description": "Shanios Technical Documentation  Comprehensive guide to the immutable Linux OS with atomic updates.  Welcome to the Shanios technical documentation. This w…",
     "updated": "2026-04-27",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "security/apparmor",
     "title": "AppArmor (Mandatory Access Control)",
     "section": "Security",
+    "description": "AppArmor — Mandatory Access Control  AppArmor is a Linux Security Module that confines programs to a defined set of resources using per-application profile…",
     "updated": "2026-04-20",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "security/audit",
     "title": "Audit (auditd)",
     "section": "Security",
+    "description": "Audit — auditd   is the Linux kernel audit framework daemon. It captures security-relevant kernel events — file access, system calls, authentication, privi…",
     "updated": "2026-04-20",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "security/features",
     "title": "Security Features",
     "section": "Security",
+    "description": "Security Features  Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot wi…",
     "updated": "2026-04-27",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "security/fwupd",
     "title": "Firmware Updates (fwupd)",
     "section": "Security",
+    "description": "Firmware Updates — fwupd   is the Linux Vendor Firmware Service client. It downloads firmware updates for BIOS/UEFI, drives, controllers, and other hardwar…",
     "updated": "2026-04-20",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "security/gen-efi",
     "title": "gen-efi Reference",
     "section": "Security",
+    "description": "gen-efi Reference   is the Shanios UKI (Unified Kernel Image) builder and Secure Boot key manager. It wraps  and / to produce signed EFI binaries placed in…",
     "updated": "2026-05-13",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "security/gocryptfs",
     "title": "Directory Encryption (gocryptfs)",
     "section": "Security",
+    "description": "Directory Encryption — gocryptfs   encrypts individual directories using FUSE. Each file is stored as a separate encrypted blob, so cloud sync tools (Nextc…",
     "updated": "2026-04-20",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "security/hardware-auth",
     "title": "Hardware Authentication",
     "section": "Security",
+    "description": "Hardware Authentication  Shani OS ships with full support for hardware authentication out of the box — fingerprint readers, YubiKeys, FIDO2/U2F tokens, sma…",
     "updated": "2026-04-20",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "security/luks",
     "title": "LUKS Management",
     "section": "Security",
+    "description": "LUKS Management  Full-disk encryption with LUKS2 must be enabled during the Shanios installer — it is a single checkbox on the disk setup screen. There is …",
     "updated": "2026-05-09",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "security/lynis",
     "title": "Lynis (Security Auditing)",
     "section": "Security",
+    "description": "Lynis — Security Auditing  Lynis is a security auditing tool that scans a running Linux system and produces a hardening report. It checks hundreds of items…",
     "updated": "2026-04-20",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "security/rkhunter",
     "title": "rkhunter (Rootkit Hunter)",
     "section": "Security",
+    "description": "rkhunter — Rootkit Hunter  rkhunter scans a system for known rootkits, backdoors, and local exploits. It checks system binaries against stored hashes, look…",
     "updated": "2026-04-20",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "security/secure-boot",
     "title": "Secure Boot",
     "section": "Security",
+    "description": "Secure Boot  Shanios ships with its own MOK (Machine Owner Key) and signs all UKI images at install time. Secure Boot can be enabled after installation to …",
     "updated": "2026-04-30",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "security/tpm2",
     "title": "TPM2 Enrollment",
     "section": "Security",
+    "description": "TPM2 Enrollment  TPM2 enrollment seals your LUKS2 disk encryption key into your machine's Trusted Platform Module. Once enrolled, the disk unlocks automati…",
     "updated": "2026-04-30",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/ai-llms",
     "title": "AI & LLMs",
     "section": "Self-Hosting & Servers",
+    "description": "AI & LLMs  Run large language models, vision pipelines, image generation, speech-to-text, and AI coding assistants entirely on your own hardware. No API ke…",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/backups-sync",
     "title": "Backups & Storage",
     "section": "Self-Hosting & Servers",
+    "description": "Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …",
     "updated": "2026-04-21",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/business-intelligence",
     "title": "Business Intelligence & Analytics",
     "section": "Self-Hosting & Servers",
+    "description": "Business Intelligence & Analytics  Self-hosted BI platforms, data visualisation tools, SQL explorers, and analytical dashboards. Query your databases, buil…",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/clusters",
     "title": "Clusters & High Availability",
     "section": "Self-Hosting & Servers",
+    "description": "Clusters & High Availability  Portability note: Compose examples use rootless Podman and . When using Docker, replace  with  and  with  (add  to the servic…",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/communication",
     "title": "Communication",
     "section": "Self-Hosting & Servers",
+    "description": "Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/databases",
     "title": "Databases & Caches",
     "section": "Self-Hosting & Servers",
+    "description": "Databases & Caches  Relational, document, caching, time-series, vector, graph, wide-column, streaming, and full-text search engines. All run rootless with …",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/devops",
     "title": "DevOps & Infrastructure",
     "section": "Self-Hosting & Servers",
+    "description": "Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/devtools",
     "title": "Developer Tools",
     "section": "Self-Hosting & Servers",
+    "description": "Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/education",
     "title": "Education & E-Learning",
     "section": "Self-Hosting & Servers",
+    "description": "Education & E-Learning  Self-hosted learning management systems, school administration platforms, collaborative tools, and knowledge-sharing apps. Run your…",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/finance",
     "title": "Finance & Accounting",
     "section": "Self-Hosting & Servers",
+    "description": "Finance & Accounting  Self-hosted personal finance, double-entry bookkeeping, invoicing, budgeting, stock portfolio tracking, and cryptocurrency nodes. Kee…",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/game-servers",
     "title": "Game Servers",
     "section": "Self-Hosting & Servers",
+    "description": "Game Servers  Dedicated game servers for multiplayer gaming — hosted on your own hardware, on your own terms. No monthly fees, no player limits imposed by …",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/home-automation",
     "title": "Home Automation",
     "section": "Self-Hosting & Servers",
+    "description": "Home Automation  Smart home hubs, IoT bridges, camera NVRs, and automation pipelines — all running locally with no cloud dependency.  Why local? Cloud-depe…",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/iot",
     "title": "IoT & Monitoring",
     "section": "Self-Hosting & Servers",
+    "description": "IoT & Monitoring  Sensor data pipelines, MQTT brokers, time-series ingestion, industrial protocols, dashboards, alerting, and network monitoring. Everythin…",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/kubernetes",
     "title": "Kubernetes & Container Orchestration",
     "section": "Self-Hosting & Servers",
+    "description": "Portability note: Compose examples use rootless Podman and . When using Docker, replace  with  and  with . All concepts, architecture patterns, and CLI com…",
     "updated": "2026-04-27",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/mail",
     "title": "Mail Servers",
     "section": "Self-Hosting & Servers",
+    "description": "Mail Servers  Production-ready email solutions for full data control and privacy.  ⚠️ Prerequisite: Requires static public IP, reverse DNS (PTR), and corre…",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/management",
     "title": "Container Management & Lifecycle",
     "section": "Self-Hosting & Servers",
+    "description": "Container Management & Lifecycle  Best practices for running, updating, and maintaining self-hosted containers on Shani OS.  ---  Key Concepts  These conce…",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/media",
     "title": "Media & Entertainment",
     "section": "Self-Hosting & Servers",
+    "description": "Media & Entertainment  Self-hosted streaming servers, personal photo libraries, music servers, and download automation.  All containers bind to  by default…",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/medical",
     "title": "Medical & Health",
     "section": "Self-Hosting & Servers",
+    "description": "Medical & Health  Self-hosted electronic health records, hospital information systems, FHIR servers, health data aggregation, telemedicine, and personal we…",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/monitoring",
     "title": "Monitoring & Observability",
     "section": "Self-Hosting & Servers",
+    "description": "Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/networking",
     "title": "Networking & Infrastructure",
     "section": "Self-Hosting & Servers",
+    "description": "Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/openstack",
     "title": "OpenStack & Private Cloud",
     "section": "Self-Hosting & Servers",
+    "description": "Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …",
     "updated": "2026-04-25",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/productivity",
     "title": "Productivity & Files",
     "section": "Self-Hosting & Servers",
+    "description": "Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/security",
     "title": "Security & Identity",
     "section": "Self-Hosting & Servers",
+    "description": "Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "servers/vpn-tunnels",
     "title": "VPN & Tunnels",
     "section": "Self-Hosting & Servers",
+    "description": "Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "software/appimage",
     "title": "AppImage",
     "section": "Software & Apps",
+    "description": "AppImage  AppImages are self-contained executable bundles that run on any Linux system without installation. Gear Lever (pre-installed) provides a GUI for …",
     "updated": "2026-04-01",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "software/apptainer",
     "title": "Apptainer (HPC Containers)",
     "section": "Software & Apps",
+    "description": "Apptainer (HPC Containers)  Apptainer (formerly Singularity) is the container runtime built for HPC. It packages your entire software environment into a si…",
     "updated": "2026-05-07",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "software/bottles",
     "title": "Bottles (Windows Compatibility)",
     "section": "Software & Apps",
+    "description": "Bottles (Windows Compatibility)  Bottles is the recommended tool for running non-gaming Windows software on Shanios. It manages Wine environments (\"bottles…",
     "updated": "2026-05-08",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "software/containers",
     "title": "Containers",
     "section": "Software & Apps",
+    "description": "Containers on Shanios  Shanios is a first-class container platform. The following runtimes are pre-installed and ready to use:  | Runtime | Best for | Wiki…",
     "updated": "2026-05-07",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "software/distrobox",
     "title": "Distrobox",
     "section": "Software & Apps",
+    "description": "Distrobox  Distrobox is the recommended way to run software that requires traditional package managers on Shanios. It creates a full mutable Linux containe…",
     "updated": "2026-04-01",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "software/flatpak",
     "title": "Flatpak",
     "section": "Software & Apps",
+    "description": "Flatpak  Flatpak is the primary method for installing GUI applications on Shanios. Flathub is pre-configured and ready to use from first boot — no setup re…",
     "updated": "2026-04-01",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "software/gpu-containers",
     "title": "GPU Acceleration & HPC Containers",
     "section": "Software & Apps",
+    "description": "GPU Acceleration & HPC Containers  Shanios is an immutable OS built for reproducibility. GPU drivers are pre-installed and OS-managed, while heavy user-spa…",
     "updated": "2026-04-17",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "software/homebrew",
     "title": "Homebrew",
     "section": "Software & Apps",
+    "description": "Homebrew  Homebrew is an optional, user-space package manager that installs software under . It is useful if you are familiar with macOS tooling, need a pa…",
     "updated": "2026-04-01",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "software/lxc-lxd",
     "title": "LXC and LXD",
     "section": "Software & Apps",
+    "description": "LXC and LXD  LXC and LXD provide full Linux system containers — a complete operating system (init system, services, network stack) inside an isolated envir…",
     "updated": "2026-05-07",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "software/nix",
     "title": "Nix Package Manager",
     "section": "Software & Apps",
+    "description": "Nix Package Manager  Nix is pre-installed on Shanios and is the recommended way to install CLI tools, language runtimes, and developer libraries. All Nix d…",
     "updated": "2026-04-01",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "software/snaps",
     "title": "Snaps",
     "section": "Software & Apps",
+    "description": "Snaps  Snap packages are sandboxed, self-contained applications published to the Snap Store by Canonical and third-party developers. Shanios ships with sna…",
     "updated": "2026-04-01",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "software/systemd-nspawn",
     "title": "systemd-nspawn",
     "section": "Software & Apps",
+    "description": "systemd-nspawn   is a lightweight container mechanism built directly into systemd. It runs a full Linux distribution — complete with an init system and its…",
     "updated": "2026-05-07",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "software/vms",
     "title": "Virtual Machines",
     "section": "Software & Apps",
+    "description": "Virtual Machines  Shanios ships a full virtualisation stack pre-installed and ready to use. VM disk images live in dedicated Btrfs subvolumes ( and ) with …",
     "updated": "2026-04-01",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "software/waydroid",
     "title": "Android (Waydroid)",
     "section": "Software & Apps",
+    "description": "Android (Waydroid)  Waydroid runs a full Android system in a container on Shanios. It integrates with the Wayland compositor so Android apps appear as nati…",
     "updated": "2026-04-01",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "system/backup",
     "title": "Backup & Recovery",
     "section": "System",
+    "description": "Backup & Recovery  Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User data and container state must be backed up independently…",
     "updated": "2026-05-13",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "system/ch-commands",
     "title": "File Permissions & Attributes",
     "section": "System",
+    "description": "ch* Commands  The  family covers the core \"change\" utilities — tools that modify permissions, ownership, file attributes, and user account properties. All …",
     "updated": "2026-04-25",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "system/cronie",
     "title": "cronie (Cron Scheduler)",
     "section": "System",
+    "description": "cronie — Cron Job Scheduler  cronie is the standard cron daemon — it runs commands on a schedule defined in crontab files. It is pre-installed and active b…",
     "updated": "2026-04-20",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "system/hardware",
     "title": "Hardware",
     "section": "System",
+    "description": "Hardware  This page covers inspecting and diagnosing hardware on Shani OS: CPUs, memory, GPUs, storage controllers, USB devices, sensors, and firmware. All…",
     "updated": "2026-04-28",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "system/kernel-modules",
     "title": "Kernel Modules",
     "section": "System",
+    "description": "Kernel Modules  Kernel modules are loadable drivers and extensions that the Linux kernel can load and unload at runtime without rebooting. On Shani OS, mod…",
     "updated": "2026-04-28",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "system/logging",
     "title": "Logging",
     "section": "System",
+    "description": "Logging  Shani OS uses systemd-journald as its primary logging system. All kernel messages, service output, and system events flow into a single structured…",
     "updated": "2026-04-28",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "system/process-management",
     "title": "Process Management",
     "section": "System",
+    "description": "Process Management  Standard Linux process management tools are all available on Shani OS. This page covers inspecting, controlling, and debugging running …",
     "updated": "2026-04-25",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "system/storage",
     "title": "Storage",
     "section": "System",
+    "description": "Storage  This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring…",
     "updated": "2026-04-28",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "system/systemd",
     "title": "Systemd",
     "section": "System",
+    "description": "Systemd  Systemd is the init system and service manager on Shani OS. It starts every process at boot, manages all daemons, handles logging via the journal,…",
     "updated": "2026-04-25",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "system/users-groups",
     "title": "Users & Groups",
     "section": "System",
+    "description": "Users & Groups  User accounts on Shani OS follow standard Linux conventions — accounts are stored in , , and , which live in the  overlay and persist acros…",
     "updated": "2026-04-25",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "troubleshooting",
     "title": "Troubleshooting Guide",
     "section": "System Management",
+    "description": "Troubleshooting Guide  The most important thing to know about troubleshooting Shanios is that the worst case is almost always \"rollback and reboot.\" The ar…",
     "updated": "2026-05-13",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "updates/config",
     "title": "System Config",
     "section": "Updates & Config",
+    "description": "System Config  All system configuration in Shanios follows standard Linux conventions — edit files in , manage services with . Your changes are captured by…",
     "updated": "2026-05-06",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "updates/shani-health",
     "title": "shani-health Reference",
     "section": "Updates & Config",
+    "description": "shani-health Reference   is the system health and diagnostics CLI for Shanios. It provides a comprehensive single-command view of your system's state: boot…",
     "updated": "2026-05-13",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "updates/shani-reset",
     "title": "Factory Reset (shani-reset)",
     "section": "Updates & Config",
+    "description": "Factory Reset   wipes all persistent system state stored in  and reboots the machine. On the next boot,  recreates the  structure, the  overlay starts fres…",
     "updated": "2026-05-13",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "updates/shell",
     "title": "Shell & Environment",
     "section": "Updates & Config",
+    "description": "Shell & Environment  Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your…",
     "updated": "2026-04-22",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "updates/system",
     "title": "System Updates",
     "section": "Updates & Config",
+    "description": "System Updates  Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the…",
     "updated": "2026-05-13",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   },
   {
     "slug": "updates/user-setup",
     "title": "User Provisioning (shani-user-setup)",
     "section": "Updates & Config",
+    "description": "User Provisioning   automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix channels, and…",
     "updated": "2026-05-13",
     "order": 999,
-    "draft": false
+    "draft": false,
+    "keywords": ""
   }
 ]
