@@ -477,8 +477,11 @@ function renderDoc(slug, raw) {
   const title   = fm.title   || slugToTitle(slug);
   const section = fm.section || getGroupTitle(slug);
 
-  document.title = `${title} — ${CONFIG.SITE_TITLE}`;
-  $('#meta-desc')?.setAttribute('content', fm.description || fm.excerpt || CONFIG.SITE_DESCRIPTION);
+  setPageMeta({
+    url: `${CONFIG.WIKI_URL}/doc/${slug}`,
+    title,
+    description: fm.description || fm.excerpt || CONFIG.SITE_DESCRIPTION
+  });
 
   // Track view and recently viewed
   ViewCounter.increment(slug);
@@ -674,7 +677,12 @@ function processCallouts(html) {
 function renderHome() {
   const content = $('#doc-content');
   if (!content) return;
-  document.title = `${CONFIG.SITE_TITLE} — ${CONFIG.SITE_TAGLINE}`;
+
+  setPageMeta({
+    url: `${CONFIG.WIKI_URL}/`, // matches the trailing-slash form used in sitemap.xml
+    title: CONFIG.SITE_TAGLINE,
+    description: CONFIG.SITE_DESCRIPTION
+  });
 
   // Widen the content column for the home page
   const inner = content.closest('.content__inner');
@@ -730,7 +738,15 @@ function renderHome() {
 function renderSectionPage(groupItem) {
   const content = $('#doc-content');
   if (!content) return;
-  document.title = `${groupItem.title} — ${CONFIG.SITE_TITLE}`;
+
+  // Section landing pages aren't in sitemap.xml (no stable slug), so fall
+  // back to the site root for canonical rather than leaving a stale
+  // canonical pointing at whatever doc page was viewed previously.
+  setPageMeta({
+    url: CONFIG.WIKI_URL,
+    title: groupItem.title,
+    description: CONFIG.SITE_DESCRIPTION
+  });
 
   // Widen content column for section listing too
   const inner = content.closest('.content__inner');
@@ -927,6 +943,25 @@ function applyBranding() {
   $('#tw-desc')?.setAttribute('content', cfg.SITE_DESCRIPTION);
   $('#tw-image')?.setAttribute('content', cfg.OG_IMAGE || cfg.FAVICON_URL);
   $('#canonical-url')?.setAttribute('href', cfg.WIKI_URL || location.href);
+}
+
+// ── Per-page canonical / OG / Twitter tags ─────────────────────────
+// Each indexable page (home or a specific doc) MUST get its own canonical
+// and og:url — otherwise every page points back at the homepage and Google
+// folds them all into one "alternate page with proper canonical tag".
+function setPageMeta({ url, title, description }) {
+  const cfg = CONFIG;
+  const fullTitle = title ? `${title} — ${cfg.SITE_TITLE}` : cfg.SITE_TITLE;
+  const desc = description || cfg.SITE_DESCRIPTION;
+
+  document.title = fullTitle;
+  $('#meta-desc')?.setAttribute('content', desc);
+  $('#og-title')?.setAttribute('content', fullTitle);
+  $('#og-desc')?.setAttribute('content', desc);
+  $('#og-url')?.setAttribute('content', url);
+  $('#tw-title')?.setAttribute('content', fullTitle);
+  $('#tw-desc')?.setAttribute('content', desc);
+  $('#canonical-url')?.setAttribute('href', url);
 }
 
 // ── Helpers ───────────────────────────────────────────────────────
