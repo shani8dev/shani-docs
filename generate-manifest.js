@@ -23,6 +23,125 @@
 const fs   = require('fs');
 const path = require('path');
 
+// ── Markdown → HTML (for prerendered stub content) ─────────────────
+// Prefer the real `marked` package (same renderer family the client uses)
+// if it's installed; otherwise fall back to a small dependency-free
+// converter. Either way, the goal is real, crawlable text in the static
+// stub — script-docs.js still hydrates/replaces this on the client for
+// full interactivity (TOC, copy buttons, Prism, KaTeX, etc).
+let marked = null;
+try { marked = require('marked'); } catch { /* not installed — fallback used */ }
+
+function mdToHtmlFallback(md) {
+  const blocks = [];
+  let src = String(md || '').replace(/\r\n/g, '\n');
+
+  // Pull out fenced code blocks first so nothing inside them gets mangled
+  src = src.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
+    const idx = blocks.push(
+      `<pre><code${lang ? ` class="language-${escXml(lang)}"` : ''}>${escXml(code.replace(/\n$/, ''))}</code></pre>`
+    ) - 1;
+    return `\u0000BLOCK${idx}\u0000`;
+  });
+
+  const inline = s => s
+    .replace(/`([^`]+)`/g, (_, c) => `<code>${escXml(c)}</code>`)
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, t, u) => `<a href="${escXml(u)}">${t}</a>`);
+
+  const lines = src.split('\n');
+  const out = [];
+  let para = [];
+  let list = null; // 'ul' | 'ol'
+
+  const flushPara = () => {
+    if (para.length) { out.push(`<p>${inline(para.join(' ').trim())}</p>`); para = []; }
+  };
+  const flushList = () => {
+    if (list) { out.push(`</${list}>`); list = null; }
+  };
+
+  for (const line of lines) {
+    if (/^\u0000BLOCK\d+\u0000$/.test(line.trim())) {
+      flushPara(); flushList();
+      out.push(line.trim());
+      continue;
+    }
+    const h = line.match(/^(#{1,6})\s+(.*)$/);
+    if (h) {
+      flushPara(); flushList();
+      const lvl = h[1].length;
+      out.push(`<h${lvl}>${inline(h[2].trim())}</h${lvl}>`);
+      continue;
+    }
+    const ul = line.match(/^\s*[-*+]\s+(.*)$/);
+    const ol = line.match(/^\s*\d+\.\s+(.*)$/);
+    if (ul || ol) {
+      flushPara();
+      const tag = ul ? 'ul' : 'ol';
+      if (list !== tag) { flushList(); out.push(`<${tag}>`); list = tag; }
+      out.push(`<li>${inline((ul || ol)[1].trim())}</li>`);
+      continue;
+    }
+    const bq = line.match(/^\s*>\s?(.*)$/);
+    if (bq) {
+      flushPara(); flushList();
+      out.push(`<blockquote><p>${inline(bq[1].trim())}</p></blockquote>`);
+      continue;
+    }
+    if (!line.trim()) { flushPara(); flushList(); continue; }
+    para.push(line.trim());
+  }
+  flushPara(); flushList();
+
+  let html = out.join('\n');
+  blocks.forEach((b, i) => { html = html.replace(`\u0000BLOCK${i}\u0000`, b); });
+  return html;
+}
+
+function mdToHtml(md) {
+  if (marked) {
+    try { return typeof marked.parse === 'function' ? marked.parse(md || '') : marked(md || ''); }
+    catch { /* fall through to the built-in converter */ }
+  }
+  return mdToHtmlFallback(md);
+}
+
+// Strip a leading "# Title" line from the body if it duplicates the doc's
+// title (which the stub already renders in <h1 class="doc-title">) —
+// otherwise every page ships two H1s, which is bad for SEO/structure.
+function stripDuplicateLeadingH1(body, title) {
+  const m = String(body || '').match(/^\s*#\s+(.+?)\s*\n([\s\S]*)$/);
+  if (!m) return body;
+  const norm = s => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+  return norm(m[1]) === norm(title) ? m[2] : body;
+}
+
+// Same admonition syntax the client renders (> [!NOTE] ...), turned into
+// the same .callout markup used by processCallouts() in script-docs.js,
+// so the prerendered stub and the hydrated client version match.
+const CALLOUT_MAP = {
+  NOTE:      ['note',      'fa-solid fa-circle-info',          'Note'],
+  TIP:       ['tip',       'fa-solid fa-lightbulb',            'Tip'],
+  WARNING:   ['warning',   'fa-solid fa-triangle-exclamation', 'Warning'],
+  DANGER:    ['danger',    'fa-solid fa-circle-xmark',         'Danger'],
+  IMPORTANT: ['important', 'fa-solid fa-star',                 'Important'],
+  CAUTION:   ['caution',   'fa-solid fa-shield-exclamation',   'Caution'],
+};
+function renderCallouts(html) {
+  return html.replace(
+    /<blockquote>\s*<p>\[!(NOTE|TIP|WARNING|DANGER|IMPORTANT|CAUTION)\]\s*([\s\S]*?)<\/p>\s*<\/blockquote>/gi,
+    (_, type, body) => {
+      const [cls, icon, label] = CALLOUT_MAP[type.toUpperCase()] || CALLOUT_MAP.NOTE;
+      return `<div class="callout callout--${cls}" role="note">
+        <i class="${icon} callout__icon" aria-label="${label}"></i>
+        <div class="callout__body"><strong class="callout__title">${label}</strong><div>${body.trim()}</div></div>
+      </div>`;
+    }
+  );
+}
+
 // ── Paths ─────────────────────────────────────────────────────────
 const DOCS_DIR     = path.join(__dirname, 'docs');
 const OUT_PATH     = path.join(DOCS_DIR, 'manifest.json');
@@ -136,6 +255,7 @@ function buildStub(doc) {
   });
 
   const LOGO_IMG_URL = getConfig('LOGO_IMG_URL', FAVICON_URL);
+  const bodyHtml = renderCallouts(mdToHtml(stripDuplicateLeadingH1(doc.body || '', doc.title)));
 
   return `<!DOCTYPE html>
 <html lang="en" data-theme="dark">
@@ -285,7 +405,23 @@ function buildStub(doc) {
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">${title}</h1>
+        <div class="doc-meta">
+          ${doc.section ? `<span class="doc-meta__badge">${escHtml(doc.section)}</span>` : ''}
+          ${doc.updated ? `<span><i class="fa-regular fa-clock"></i> ${escHtml(doc.updated)}</span>` : ''}
+        </div>
+      </div>
+      <div class="prose">${bodyHtml}</div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">
@@ -421,6 +557,7 @@ function build() {
       order:       Number(fm.order || 999),
       draft:       fm.draft       === 'true',
       keywords:    fm.keywords    || '',
+      body,        // kept in-memory only for stub rendering — NOT written to manifest.json
     };
 
     docs.push(doc);
@@ -428,7 +565,11 @@ function build() {
   }
 
   // ── docs/manifest.json ──────────────────────────────────────────
-  fs.writeFileSync(OUT_PATH, JSON.stringify(docs, null, 2));
+  // Strip `body` — it's only carried on the in-memory doc objects so
+  // buildStub() can prerender content; it doesn't belong in the client-
+  // facing manifest (bloats the file the search index loads).
+  const manifestDocs = docs.map(({ body, ...rest }) => rest);
+  fs.writeFileSync(OUT_PATH, JSON.stringify(manifestDocs, null, 2));
   console.log(`\n✓ docs/manifest.json  (${docs.length} doc(s))`);
 
   // ── sitemap.xml ─────────────────────────────────────────────────
