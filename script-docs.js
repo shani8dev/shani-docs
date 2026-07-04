@@ -404,6 +404,13 @@ function navigate(slug, pushState = true) {
 window.addEventListener('popstate', () => navigate(getSlugFromHash(), false));
 
 // ── Doc Loader ────────────────────────────────────────────────────
+// Tracks whether loadDoc() has run yet this page-load. On a /doc/<slug>
+// stub, #doc-content already contains real prerendered markup (see
+// generate-manifest.js's buildStub) — the very first call should fetch
+// quietly in the background instead of blanking it to a skeleton, or
+// every direct/search visit flashes: good content → skeleton → content.
+let _docFirstLoad = true;
+
 async function loadDoc(slug) {
   const content = $('#doc-content');
   if (!content) return;
@@ -412,16 +419,21 @@ async function loadDoc(slug) {
   const inner = content.closest('.content__inner');
   if (inner) inner.classList.remove('content__inner--wide');
 
-  content.innerHTML = `
-    <div class="doc-skeleton">
-      <div class="doc-skeleton__line doc-skeleton__line--title"></div>
-      <div class="doc-skeleton__line doc-skeleton__line--wide" style="margin-top:1.5rem"></div>
-      <div class="doc-skeleton__line doc-skeleton__line--mid"></div>
-      <div class="doc-skeleton__line doc-skeleton__line--wide"></div>
-      <div class="doc-skeleton__line doc-skeleton__line--short"></div>
-    </div>`;
+  const isFirstLoad     = _docFirstLoad;
+  _docFirstLoad         = false;
+  const hasPrerendered  = isFirstLoad && !!content.querySelector('.doc-header, .prose');
 
-  $('.content')?.scrollTo(0, 0);
+  if (!hasPrerendered) {
+    content.innerHTML = `
+      <div class="doc-skeleton">
+        <div class="doc-skeleton__line doc-skeleton__line--title"></div>
+        <div class="doc-skeleton__line doc-skeleton__line--wide" style="margin-top:1.5rem"></div>
+        <div class="doc-skeleton__line doc-skeleton__line--mid"></div>
+        <div class="doc-skeleton__line doc-skeleton__line--wide"></div>
+        <div class="doc-skeleton__line doc-skeleton__line--short"></div>
+      </div>`;
+    $('.content')?.scrollTo(0, 0);
+  }
 
   if (State.docCache[slug]) { renderDoc(slug, State.docCache[slug]); return; }
 
@@ -437,6 +449,13 @@ async function loadDoc(slug) {
   }
 
   if (!text) {
+    if (hasPrerendered) {
+      // Network hiccup on the very first load — the prerendered stub content
+      // is already valid and on-screen, so leave it rather than replacing a
+      // real page with a false "doesn't exist yet" message.
+      console.warn(`[docs] Could not fetch live content for "${slug}" — keeping prerendered version.`);
+      return;
+    }
     content.innerHTML = `
       <div class="doc-error">
         <div class="doc-error__icon"><i class="fa-solid fa-file-circle-xmark"></i></div>
