@@ -146,7 +146,66 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Persistence Strategy</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Concepts</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+        </div>
+      </div>
+      <div class="prose"><p>Shanios selectively persists data across immutable system updates through bind mounts and dedicated Btrfs subvolumes.</p>
+<h2>Three Categories</h2>
+<h3>❌ Replaced on Update</h3>
+<p>The active slot (<code>@blue</code> or <code>@green</code>) is overwritten:</p>
+<ul>
+<li><code>/</code> (root — <code>@blue</code> or <code>@green</code>)</li>
+<li><code>/usr /bin /sbin /lib</code></li>
+<li><code>/opt /srv</code> (pre-installed)</li>
+<li><code>/boot/efi</code> (ESP — UKI updated)</li>
+</ul>
+<h3>✅ Persistent (Survives All Updates)</h3>
+<p>Dedicated Btrfs subvolumes that are never touched by updates:</p>
+<p>| Location | Subvolume | |----------|-----------| | <code>/home</code> | <code>@home</code> | | <code>/root</code> | <code>@root</code> | | <code>/data</code> | <code>@data</code> — overlay + service state | | <code>/var/log</code> | <code>@log</code> | | <code>/var/cache</code> | <code>@cache</code> | | <code>/var/lib/flatpak</code> | <code>@flatpak</code> | | <code>/var/lib/containers</code> | <code>@containers</code> | | <code>/nix</code> | <code>@nix</code> — Nix package store | | <code>/var/lib/libvirt</code> | <code>@libvirt</code> (nodatacow) | | <code>/var/lib/waydroid</code> | <code>@waydroid</code> | | <code>/var/lib/snapd</code> | <code>@snapd</code> |</p>
+<p><code>@nix</code> and <code>@flatpak</code> are shared by both slots.</p>
+<h3>🔄 Volatile (Cleared on Reboot)</h3>
+<p><code>systemd.volatile=state</code> kernel parameter mounts a tmpfs over <code>/var</code>:</p>
+<ul>
+<li><code>/var</code> (tmpfs)</li>
+<li><code>/tmp</code> (tmpfs — fstab entry)</li>
+<li><code>/run</code> (tmpfs)</li>
+<li><code>/dev /proc /sys</code> (virtual filesystems)</li>
+</ul>
+<p>Critical service state is <strong>bind-mounted back</strong> from <code>@data</code> on every boot.</p>
+<h2>The /etc Overlay</h2>
+<p><code>/etc</code> is an OverlayFS — a three-layer combination:</p>
+<ul>
+<li><strong>Lower layer (read-only):</strong> <code>/etc</code> from the active slot (<code>@blue</code> or <code>@green</code>)</li>
+<li><strong>Upper layer (writable):</strong> <code>/data/overlay/etc/upper/</code> — only your changes live here</li>
+<li><strong>Work dir:</strong> <code>/data/overlay/etc/work/</code> — required by the kernel for atomic copy-up</li>
+</ul>
+<pre><code>/etc appears fully writable to all processes.
+Upper overrides lower — your changes take precedence.
+Unchanged files are served from the read-only lower layer.
+Changes in upper (@data) survive OS updates — only the lower is replaced.</code></pre>
+<p>fstab entry:</p>
+<pre><code>overlay /etc overlay rw,lowerdir=/etc,upperdir=/data/overlay/etc/upper,workdir=/data/overlay/etc/work,index=off,metacopy=off,x-systemd.requires-mounts-for=/data 0 0</code></pre>
+<p>View overlay modifications:</p>
+<pre><code class="language-bash">ls -la /data/overlay/etc/upper</code></pre>
+<h2>Bind-Mounted Service State</h2>
+<p>Because <code>/var</code> is volatile, all service state that must survive reboots is stored in <code>@data</code> and bind-mounted back at boot.</p>
+<p>Key bind mounts from <code>@data/varlib/</code> → <code>/var/lib/</code>:</p>
+<p>| Category | Examples | |----------|---------| | System Core | <code>dbus</code>, <code>systemd</code>, <code>fontconfig</code> | | Networking | <code>NetworkManager</code>, <code>bluetooth</code>, <code>firewalld</code> | | File Sharing | <code>samba</code>, <code>nfs</code> | | Remote Access & VPN | <code>caddy</code>, <code>tailscale</code>, <code>cloudflared</code>, <code>geoclue</code> | | Display Manager | <code>gdm</code>, <code>sddm</code>, <code>colord</code> | | Audio & Peripherals | <code>pipewire</code>, <code>cups</code>, <code>sane</code>, <code>upower</code> | | Auth & Security | <code>fprint</code>, <code>AccountsService</code>, <code>boltd</code>, <code>sshd</code>, <code>tpm2-tss</code> | | Spool | <code>cron</code>, <code>at</code>, <code>cups</code> print queue, <code>postfix</code> |</p>
+<p>All bind mounts use:</p>
+<pre><code>bind,nofail,x-systemd.after=var.mount,x-systemd.requires-mounts-for=/data</code></pre></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

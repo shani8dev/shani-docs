@@ -146,7 +146,127 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Hardware Authentication</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Security</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+        </div>
+      </div>
+      <div class="prose"><p>Shani OS ships with full support for hardware authentication out of the box — fingerprint readers, YubiKeys, FIDO2/U2F tokens, smart cards (PIV), NFC tokens, and TOTP/HOTP authenticators. All required packages and PAM modules are pre-installed; no driver downloads are needed.</p>
+<p>---</p>
+<h2>Fingerprint Authentication</h2>
+<p><strong>Package:</strong> <code>fprintd</code>, <code>libfprint</code></p>
+<p>Fingerprints can be used to unlock the login screen, sudo prompts, and the lock screen.</p>
+<pre><code class="language-bash"># Enroll a finger (replace 'right-index-finger' with the finger you want)
+fprintd-enroll -f right-index-finger
+
+# List enrolled fingers
+fprintd-list &quot;$USER&quot;
+
+# Test a fingerprint
+fprintd-verify
+
+# Delete enrolled fingers
+fprintd-delete &quot;$USER&quot;</code></pre>
+<p>Enrollment via GUI: <strong>System Settings → Users → Fingerprint Login</strong> (KDE) or <strong>Settings → Users</strong> (GNOME).</p>
+<h3>Supported Hardware</h3>
+<p>Any fingerprint reader with a libfprint driver is supported. Check compatibility:</p>
+<pre><code class="language-bash"># Is your device recognised?
+lsusb | grep -i finger
+fprintd-enroll   # will fail with a clear error if the device is unsupported</code></pre>
+<p>---</p>
+<h2>YubiKey and FIDO2/U2F</h2>
+<p><strong>Packages:</strong> <code>libfido2</code>, <code>pam-u2f</code>, <code>yubikey-manager</code></p>
+<h3>Setting Up PAM U2F (sudo / login)</h3>
+<pre><code class="language-bash"># 1. Create the U2F key mapping directory
+mkdir -p ~/.config/Yubico
+
+# 2. Register your YubiKey (touch the key when it blinks)
+pamu2fcfg &gt; ~/.config/Yubico/u2f_keys
+
+# If you have a second key for backup, append it
+pamu2fcfg -n &gt;&gt; ~/.config/Yubico/u2f_keys</code></pre>
+<p>Edit <code>/etc/pam.d/sudo</code> to require the YubiKey in addition to the password:</p>
+<pre><code>auth required pam_u2f.so</code></pre>
+<p>Or to allow either password or YubiKey:</p>
+<pre><code>auth sufficient pam_u2f.so</code></pre>
+<h3>YubiKey Manager</h3>
+<pre><code class="language-bash"># Show YubiKey info
+ykman info
+
+# List configured applications
+ykman list
+
+# Configure FIDO2 PIN
+ykman fido access change-pin
+
+# Reset FIDO2 application (clears all credentials)
+ykman fido reset</code></pre>
+<h3>FIDO2 for SSH</h3>
+<pre><code class="language-bash"># Generate a FIDO2-backed SSH key (resident key stored on the YubiKey)
+ssh-keygen -t ed25519-sk -O resident -O application=ssh:myserver
+
+# Non-resident (key file required alongside the token)
+ssh-keygen -t ed25519-sk</code></pre>
+<p>---</p>
+<h2>Smart Card / PIV</h2>
+<p><strong>Packages:</strong> <code>opensc</code>, <code>pcscd</code>, <code>pcsc-tools</code></p>
+<pre><code class="language-bash"># Start the PC/SC daemon
+sudo systemctl enable --now pcscd
+
+# List connected smart cards
+pcsc_scan
+
+# Show card info via OpenSC
+opensc-tool --list-readers
+opensc-tool --list-algorithms
+
+# List certificates on a PIV card
+pkcs11-tool --module /usr/lib/opensc-pkcs11.so --list-certificates</code></pre>
+<h3>SSH with Smart Card</h3>
+<pre><code class="language-bash"># List keys visible via PKCS#11
+ssh-keygen -D /usr/lib/opensc-pkcs11.so -e
+
+# Use the card for SSH authentication
+ssh -I /usr/lib/opensc-pkcs11.so user@host</code></pre>
+<p>---</p>
+<h2>NFC Authentication</h2>
+<p><strong>Packages:</strong> <code>libnfc</code>, <code>pcsc-lite</code></p>
+<p>NFC tokens are accessed via the PC/SC stack. Once <code>pcscd</code> is running, NFC cards compatible with pcsc-lite are accessible in the same way as contact smart cards:</p>
+<pre><code class="language-bash">sudo systemctl enable --now pcscd
+pcsc_scan   # shows NFC card when tapped</code></pre>
+<p>---</p>
+<h2>TOTP / HOTP (Two-Factor)</h2>
+<p><strong>Package:</strong> <code>oath-toolkit</code></p>
+<p><code>oathtool</code> generates TOTP and HOTP codes from a shared secret, compatible with Google Authenticator, Authy, and any RFC 6238/4226 implementation.</p>
+<pre><code class="language-bash"># Generate a TOTP code from a base32 secret
+oathtool --totp --base32 JBSWY3DPEHPK3PXP
+
+# Generate a HOTP code (counter-based)
+oathtool --hotp --base32 JBSWY3DPEHPK3PXP 0
+
+# Verify a TOTP code
+oathtool --totp --base32 -w 1 JBSWY3DPEHPK3PXP 123456</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>fprintd-enroll</code> says no device found | Check <code>lsusb</code> for the reader; the sensor may not have a libfprint driver | | YubiKey not detected | Check <code>lsusb</code>; <code>ykman list</code>; ensure <code>pcscd</code> is running for PIV/OTP modes | | Smart card not detected | <code>sudo systemctl status pcscd</code>; run <code>pcsc_scan</code> with card inserted | | PAM U2F not prompting for key | Check <code>/etc/pam.d/</code> config; verify <code>~/.config/Yubico/u2f_keys</code> exists and is correct | | SSH FIDO2 key says "unsupported" | Ensure the server has <code>PubkeyAuthOptions verify-required</code> removed or set correctly for sk keys |</p>
+<p>---</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="features">Security Features</a> — full list of supported authentication methods</li>
+<li><a href="luks">LUKS Management</a> — using a keyfile for disk unlock</li>
+<li><a href="tpm2">TPM2 Enrollment</a> — TPM-based disk unlock</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

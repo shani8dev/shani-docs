@@ -146,7 +146,294 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Virtual Networking</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-25</span>
+        </div>
+      </div>
+      <div class="prose"><p>Linux exposes a rich set of virtual network devices and primitives for building software-defined networks, container networking, VMs, VPN tunnels, and isolated test environments. All operations use <code>iproute2</code> (<code>ip</code> command), which is pre-installed on Shani OS.</p>
+<blockquote><p>💡 Virtual interfaces created with <code>ip link add</code> are ephemeral — they disappear on reboot. To make them persistent, define them as systemd-networkd <code>.netdev</code> and <code>.network</code> files (see <a href="#persistent-configuration-systemd-networkd">Persistent Configuration</a>).</p></blockquote>
+<p>---</p>
+<h2>Virtual Interface Types at a Glance</h2>
+<p>| Type | Purpose | |------|---------| | <strong>bridge</strong> | Software Layer 2 switch — connects multiple interfaces to one segment | | <strong>vlan</strong> | 802.1Q VLAN tagging on an existing interface | | <strong>veth</strong> | Virtual Ethernet pair — two ends of a virtual cable | | <strong>tun</strong> | Layer 3 (IP) tunnel — used by WireGuard, OpenVPN, VPNs | | <strong>tap</strong> | Layer 2 (Ethernet) tunnel — used by QEMU/KVM VMs, Libvirt | | <strong>dummy</strong> | Loopback-like stub — useful for testing and stable routing | | <strong>macvlan</strong> | Multiple MAC addresses on one physical NIC | | <strong>ipvlan</strong> | Multiple IP addresses on one physical NIC, shared MAC | | <strong>vrf</strong> | Virtual Routing and Forwarding — separate routing tables per tenant | | <strong>bond</strong> | Aggregate multiple NICs (active-backup, LACP, etc.) | | <strong>team</strong> | Like bonding but with a userspace daemon and richer policy |</p>
+<p>---</p>
+<h2>1. Bridge — Software Layer 2 Switch</h2>
+<p>A bridge connects multiple network interfaces at Layer 2, acting like a virtual switch. Containers, VMs, and physical NICs can all be members of the same bridge.</p>
+<pre><code class="language-bash"># Create the bridge
+sudo ip link add name br0 type bridge
+
+# Bring it up and assign an IP
+sudo ip link set br0 up
+sudo ip addr add 192.168.100.1/24 dev br0
+
+# Add an existing interface as a bridge port
+sudo ip link set eth1 master br0
+
+# Remove a port
+sudo ip link set eth1 nomaster
+
+# List bridge members
+bridge link show
+
+# Show bridge forwarding database (MAC table)
+bridge fdb show br0
+
+# Delete the bridge
+sudo ip link delete br0 type bridge</code></pre>
+<blockquote><p>💡 For QEMU/KVM VMs, the typical pattern is: create <code>br0</code> → bridge it to the physical NIC → attach each VM's TAP device to <code>br0</code>. The VM gets a real Layer 2 presence on the LAN.</p></blockquote>
+<p>---</p>
+<h2>2. VLAN — 802.1Q Tagged Sub-interfaces</h2>
+<p>VLANs create sub-interfaces that tag frames with a VLAN ID. Useful for segmenting traffic on a trunk port.</p>
+<pre><code class="language-bash"># Create VLAN 10 on eth0
+sudo ip link add link eth0 name eth0.10 type vlan id 10
+
+# Bring up both the parent and the VLAN interface
+sudo ip link set eth0 up
+sudo ip link set eth0.10 up
+sudo ip addr add 10.10.0.1/24 dev eth0.10
+
+# Show VLAN details
+ip -d link show eth0.10
+
+# Remove the VLAN sub-interface
+sudo ip link delete eth0.10</code></pre>
+<p>Multiple VLANs on the same physical interface:</p>
+<pre><code class="language-bash">sudo ip link add link eth0 name eth0.20 type vlan id 20
+sudo ip link add link eth0 name eth0.30 type vlan id 30
+sudo ip link set eth0.20 up &amp;&amp; sudo ip addr add 10.20.0.1/24 dev eth0.20
+sudo ip link set eth0.30 up &amp;&amp; sudo ip addr add 10.30.0.1/24 dev eth0.30</code></pre>
+<p>---</p>
+<h2>3. veth Pairs — Virtual Ethernet Cables</h2>
+<p>A veth pair is two virtual NICs connected back-to-back — anything sent into one end emerges from the other. Used heavily by containers (one end goes into a network namespace, the other into a bridge).</p>
+<pre><code class="language-bash"># Create a pair: veth0 &lt;--&gt; veth1
+sudo ip link add veth0 type veth peer name veth1
+
+# Bring both ends up
+sudo ip link set veth0 up
+sudo ip link set veth1 up
+
+# Assign addresses and communicate
+sudo ip addr add 192.168.200.1/24 dev veth0
+sudo ip addr add 192.168.200.2/24 dev veth1
+ping -c 2 192.168.200.2 -I veth0
+
+# Move one end into a namespace (typical container setup)
+sudo ip netns add myns
+sudo ip link set veth1 netns myns
+sudo ip netns exec myns ip link set veth1 up
+sudo ip netns exec myns ip addr add 192.168.200.2/24 dev veth1
+
+# Delete the pair (deleting either end removes both)
+sudo ip link delete veth0</code></pre>
+<p>---</p>
+<h2>4. TUN / TAP — Userspace Tunnel Devices</h2>
+<p>TUN (Layer 3) and TAP (Layer 2) devices expose a virtual NIC to a userspace process via a file descriptor on <code>/dev/net/tun</code>. VPN daemons (WireGuard, OpenVPN, WireProxy) use TUN; QEMU/KVM uses TAP for VM networking.</p>
+<h3>Manual TUN</h3>
+<pre><code class="language-bash"># Create a persistent TUN device owned by your user
+sudo ip tuntap add name tun0 mode tun user $USER
+
+sudo ip link set tun0 up
+sudo ip addr add 10.99.0.1 peer 10.99.0.2 dev tun0
+
+# Remove it
+sudo ip tuntap del name tun0 mode tun</code></pre>
+<h3>Manual TAP (for VMs)</h3>
+<pre><code class="language-bash"># Create a TAP device and attach it to a bridge
+sudo ip tuntap add name tap0 mode tap user $USER
+sudo ip link set tap0 master br0
+sudo ip link set tap0 up
+
+# Remove it
+sudo ip link delete tap0</code></pre>
+<blockquote><p>💡 QEMU creates and destroys TAP devices automatically when using <code>-netdev tap,id=net0,ifname=tap0,script=no</code> — you rarely need to manage them by hand unless writing a custom networking script.</p></blockquote>
+<p>---</p>
+<h2>5. Network Namespaces — Full Isolation</h2>
+<p>A network namespace gives a process its own private network stack: interfaces, routes, firewall rules, and sockets are completely isolated from the host.</p>
+<pre><code class="language-bash"># Create a namespace
+sudo ip netns add isolated
+
+# List namespaces
+ip netns list
+
+# Run a command inside the namespace
+sudo ip netns exec isolated ip link
+
+# The namespace only has loopback by default — add connectivity via a veth pair
+sudo ip link add veth-host type veth peer name veth-ns
+sudo ip link set veth-ns netns isolated
+
+sudo ip link set veth-host up
+sudo ip addr add 10.0.0.1/24 dev veth-host
+
+sudo ip netns exec isolated ip link set lo up
+sudo ip netns exec isolated ip link set veth-ns up
+sudo ip netns exec isolated ip addr add 10.0.0.2/24 dev veth-ns
+sudo ip netns exec isolated ip route add default via 10.0.0.1
+
+# Verify isolation: ping the namespace from host
+ping -c 2 10.0.0.2
+
+# Run a shell inside the namespace
+sudo ip netns exec isolated bash
+
+# Delete the namespace (also removes the veth-ns end)
+sudo ip netns delete isolated
+sudo ip link delete veth-host</code></pre>
+<p>Enable IP forwarding and NAT to give namespaces internet access:</p>
+<pre><code class="language-bash">echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
+sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/24 -j MASQUERADE</code></pre>
+<p>---</p>
+<h2>6. Dummy Interface — Stable Stub</h2>
+<p>A dummy interface is like an extra loopback — useful for assigning stable IPs that don't depend on a physical link being present. Common in routing daemons, BGP anycast, and testing.</p>
+<pre><code class="language-bash">sudo ip link add dummy0 type dummy
+sudo ip link set dummy0 up
+sudo ip addr add 203.0.113.1/32 dev dummy0
+
+# Remove
+sudo ip link delete dummy0</code></pre>
+<p>---</p>
+<h2>7. macvlan — Multiple MACs on One NIC</h2>
+<p>macvlan creates virtual interfaces with distinct MAC addresses that share a physical NIC. Each macvlan interface is addressable separately on the LAN. Useful for containers that need a real LAN presence without a bridge.</p>
+<pre><code class="language-bash"># Modes: bridge, private, vepa, passthru
+sudo ip link add macvlan0 link eth0 type macvlan mode bridge
+sudo ip link set macvlan0 up
+sudo ip addr add 192.168.1.200/24 dev macvlan0
+
+# Move macvlan into a container namespace
+sudo ip link set macvlan0 netns mycontainer
+
+sudo ip link delete macvlan0</code></pre>
+<blockquote><p>⚠️ A macvlan interface <strong>cannot communicate with its parent</strong> (<code>eth0</code>) directly — the host and the macvlan exist on different internal segments. Use a bridge instead if host-to-container communication is needed.</p></blockquote>
+<p>---</p>
+<h2>8. VRF — Virtual Routing and Forwarding</h2>
+<p>A VRF assigns interfaces to an isolated routing table. Traffic in one VRF cannot leak into another — useful for multi-tenant setups, management plane separation, or testing routing policies.</p>
+<pre><code class="language-bash"># Create a VRF with routing table ID 10
+sudo ip link add vrf-mgmt type vrf table 10
+sudo ip link set vrf-mgmt up
+
+# Bind an interface to the VRF
+sudo ip link set eth1 master vrf-mgmt
+
+# Routes added to eth1 now live in table 10
+sudo ip addr add 10.200.0.1/24 dev eth1
+sudo ip route show vrf vrf-mgmt
+
+# Run a command in the VRF context (uses SO_BINDTODEVICE)
+sudo ip vrf exec vrf-mgmt ping 10.200.0.2
+
+# Remove VRF
+sudo ip link delete vrf-mgmt</code></pre>
+<p>---</p>
+<h2>9. Bonding — NIC Aggregation</h2>
+<p>Bonding combines multiple physical NICs into a single logical interface for redundancy or throughput.</p>
+<pre><code class="language-bash"># Load the bonding module
+sudo modprobe bonding
+
+# Create a bond in active-backup mode (mode 1)
+sudo ip link add bond0 type bond
+sudo ip link set bond0 type bond mode active-backup miimon 100
+
+# Bring down member NICs before adding them
+sudo ip link set eth0 down
+sudo ip link set eth1 down
+
+# Add members
+sudo ip link set eth0 master bond0
+sudo ip link set eth1 master bond0
+
+# Bring everything up
+sudo ip link set bond0 up
+sudo ip addr add 192.168.1.50/24 dev bond0
+
+# Show bond status
+cat /proc/net/bonding/bond0</code></pre>
+<p>Common bond modes:</p>
+<p>| Mode | Name | Description | |------|------|-------------| | 0 | balance-rr | Round-robin — requires switch support | | 1 | active-backup | One active, one standby — no switch config needed | | 2 | balance-xor | XOR hash — requires switch support | | 4 | 802.3ad | LACP — requires managed switch with LACP | | 5 | balance-tlb | Adaptive transmit — no switch config needed | | 6 | balance-alb | Adaptive load balancing — no switch config needed |</p>
+<p>---</p>
+<h2>10. Useful Inspection Commands</h2>
+<pre><code class="language-bash"># List all interfaces with type
+ip -d link show
+
+# List all interfaces briefly
+ip -brief link
+
+# Show routing tables
+ip route show table all
+
+# Show a specific routing table
+ip route show table 10
+
+# Show neighbours (ARP/NDP cache)
+ip neigh show
+
+# Flush ARP cache for an interface
+sudo ip neigh flush dev eth0
+
+# Monitor real-time link/route/address events
+ip monitor
+
+# Show bridge ports and state (STP, etc.)
+bridge link show
+bridge vlan show</code></pre>
+<p>---</p>
+<h2>Persistent Configuration (systemd-networkd)</h2>
+<p>To survive reboots, define virtual devices in <code>/etc/systemd/network/</code>.</p>
+<h3>Persistent bridge with a member</h3>
+<p><strong><code>/etc/systemd/network/10-br0.netdev</code></strong></p>
+<pre><code class="language-ini">[NetDev]
+Name=br0
+Kind=bridge</code></pre>
+<p><strong><code>/etc/systemd/network/10-br0.network</code></strong></p>
+<pre><code class="language-ini">[Match]
+Name=br0
+
+[Network]
+Address=192.168.100.1/24</code></pre>
+<p><strong><code>/etc/systemd/network/20-eth1-bridge.network</code></strong></p>
+<pre><code class="language-ini">[Match]
+Name=eth1
+
+[Network]
+Bridge=br0</code></pre>
+<h3>Persistent VLAN</h3>
+<p><strong><code>/etc/systemd/network/30-vlan10.netdev</code></strong></p>
+<pre><code class="language-ini">[NetDev]
+Name=eth0.10
+Kind=vlan
+
+[VLAN]
+Id=10</code></pre>
+<p><strong><code>/etc/systemd/network/30-vlan10.network</code></strong></p>
+<pre><code class="language-ini">[Match]
+Name=eth0.10
+
+[Network]
+Address=10.10.0.1/24</code></pre>
+<p>Apply changes:</p>
+<pre><code class="language-bash">sudo systemctl restart systemd-networkd
+networkctl status          # Verify interfaces came up correctly</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Interface not forwarding between bridge ports | Check <code>net.ipv4.ip_forward</code> (<code>sysctl net.ipv4.ip_forward</code>); ensure it is <code>1</code> | | Bridge member goes <code>blocking</code> or <code>listening</code> | STP convergence is normal — wait ~30s, or disable STP on the bridge: <code>sudo ip link set br0 type bridge stp_state 0</code> | | macvlan can't reach host | Expected — macvlan parent and child can't communicate. Use a bridge or a veth pair to the host instead | | Namespace has no internet | Add a default route inside the namespace and enable NAT on the host (see <a href="#5-network-namespaces--full-isolation">Network Namespaces</a>) | | Bond not failing over | Verify <code>miimon</code> is non-zero; check that both member NICs are actually <code>up</code> | | Changes lost after reboot | Create systemd-networkd <code>.netdev</code>/<code>.network</code> files for persistence | | <code>RTNETLINK answers: File exists</code> | Interface or route already exists — delete the old one first: <code>sudo ip link delete &lt;name&gt;</code> |</p>
+<p>---</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="../troubleshooting/network-diag">Network Diagnostics & Tools</a> — <code>ip</code>, <code>ss</code>, <code>tcpdump</code>, <code>nmap</code></li>
+<li><a href="../system/containers">Containers</a> — Podman networking and CNI plugins</li>
+<li><a href="../system/firewall">Firewall</a> — nftables rules for virtual interfaces</li>
+<li><a href="../network/wireguard">WireGuard VPN</a> — TUN-based VPN setup</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

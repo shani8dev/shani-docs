@@ -146,7 +146,98 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Secure Boot</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Security</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-30</span>
+        </div>
+      </div>
+      <div class="prose"><p>Shanios ships with its own MOK (Machine Owner Key) and signs all UKI images at install time. Secure Boot can be enabled after installation to ensure only verified OS images can boot.</p>
+<h2>How It Works</h2>
+<p>The full boot chain:</p>
+<pre><code>UEFI Firmware (verifies Shim via Microsoft CA)
+  → Shim (verifies systemd-boot via MOK)
+    → systemd-boot (verifies the UKI via MOK)
+      → Unified Kernel Image (kernel + initramfs + cmdline, all signed together)</code></pre>
+<ol>
+<li>The Shanios installer generates a unique MOK key pair on your machine</li>
+<li>Both UKIs (<code>shanios-blue.efi</code>, <code>shanios-green.efi</code>) are signed with this key</li>
+<li>You enroll the public MOK in your firmware's MOK database</li>
+<li>Enable Secure Boot in UEFI settings</li>
+<li>Your firmware now verifies every Shanios UKI before booting it — unsigned or tampered images are rejected</li>
+</ol>
+<p>The bootloader editor is disabled and the kernel command line is embedded in the UKI at build time, so it cannot be modified from the boot menu.</p>
+<p>Each time <code>shani-deploy</code> runs an update, <code>gen-efi</code> rebuilds and re-signs the new slot's UKI before updating the boot entry.</p>
+<h2>Enrolling the MOK Key</h2>
+<h3>Method 1: From the Live USB (Recommended)</h3>
+<p>On the first boot from the Shani OS USB, MokManager launches automatically:</p>
+<ol>
+<li>Select "Enroll key from disk"</li>
+<li>Navigate to the EFI partition and select <code>EFI/BOOT/MOK.der</code></li>
+<li>Confirm enrollment</li>
+<li>Reboot and enable Secure Boot in BIOS</li>
+</ol>
+<h3>Method 2: From the Installed System</h3>
+<pre><code class="language-bash"># Re-signs all EFI binaries, copies MOK.der to ESP, stages enrollment via mokutil
+sudo gen-efi enroll-mok
+
+# Reboot — MokManager appears automatically
+# Confirm with password: shanios
+sudo reboot</code></pre>
+<p>After MokManager completes, enable Secure Boot in BIOS. Then clean up any stale keys from previous installations:</p>
+<pre><code class="language-bash">sudo gen-efi cleanup-mok</code></pre>
+<h2>Verifying Secure Boot Status</h2>
+<pre><code class="language-bash"># Check if Secure Boot is currently active
+mokutil --sb-state
+
+# List enrolled MOK keys
+mokutil --list-enrolled | grep -i shani
+
+# Verify a UKI is signed with the local MOK cert
+sbverify --cert /etc/secureboot/keys/MOK.crt /boot/efi/EFI/shanios/shanios-blue.efi
+sbverify --cert /etc/secureboot/keys/MOK.crt /boot/efi/EFI/shanios/shanios-green.efi</code></pre>
+<h2>Key Files</h2>
+<p>| File | Purpose | |------|---------| | <code>/etc/secureboot/keys/MOK.key</code> | Private key — used by <code>gen-efi</code> to sign new UKIs (never leaves the device) | | <code>/etc/secureboot/keys/MOK.crt</code> | PEM certificate — used by sbsign | | <code>/etc/secureboot/keys/MOK.der</code> | DER-encoded public key — enrolled in firmware MOK database |</p>
+<p>Keys are stored in the <code>/etc</code> OverlayFS upper layer (inside <code>@data</code>) and persist across all updates and rollbacks.</p>
+<h2>Re-generating Keys</h2>
+<p>If <code>gen-efi</code> detects a missing or mismatched keypair, it regenerates the full pair automatically. To force re-enrollment after regeneration:</p>
+<pre><code class="language-bash">sudo gen-efi enroll-mok
+# Reboot → complete MokManager enrollment → re-enable Secure Boot</code></pre>
+<h2>Troubleshooting</h2>
+<p><strong>Boot fails after enabling Secure Boot:</strong></p>
+<ul>
+<li>Reboot and disable Secure Boot temporarily</li>
+<li>Verify MOK was enrolled: <code>mokutil --list-enrolled | grep -i shani</code></li>
+<li>Check UKI signature: <code>sbverify --cert /etc/secureboot/keys/MOK.crt /boot/efi/EFI/shanios/shanios-blue.efi</code></li>
+<li>Run <code>sudo gen-efi configure blue</code> to rebuild and re-sign, then retry enrollment</li>
+</ul>
+<p><strong>MokManager doesn't appear on reboot:</strong></p>
+<ul>
+<li>The firmware may have cleared the pending enrollment after timeout</li>
+<li>Re-run <code>sudo gen-efi enroll-mok</code> and reboot again promptly</li>
+</ul>
+<p><strong>"Verification failed: (0x1A) Security Violation":</strong></p>
+<ul>
+<li>The UKI was not signed with an enrolled key</li>
+<li>Disable Secure Boot, run <code>sudo gen-efi configure blue</code>, re-enroll with <code>sudo gen-efi enroll-mok</code>, and retry</li>
+</ul>
+<p><strong>TPM2 fails after Secure Boot change:</strong></p>
+<ul>
+<li>When you change Secure Boot settings, PCR 7 changes — re-enroll TPM2:</li>
+</ul>
+<pre><code class="language-bash">  sudo gen-efi cleanup-tpm2
+  sudo gen-efi enroll-tpm2
+  </code></pre></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

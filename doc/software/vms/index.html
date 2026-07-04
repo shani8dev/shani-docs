@@ -146,7 +146,126 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Virtual Machines</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Software &amp; Apps</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+        </div>
+      </div>
+      <div class="prose"><p>Shanios ships a full virtualisation stack pre-installed and ready to use. VM disk images live in dedicated Btrfs subvolumes (<code>@libvirt</code> and <code>@qemu</code>) with <code>nodatacow</code> enabled for optimal disk I/O performance. These subvolumes persist across all system updates and rollbacks.</p>
+<h2>Pre-installed Stack</h2>
+<ul>
+<li><strong>libvirt</strong> — VM management daemon (<code>libvirtd</code>), accessible via <code>virsh</code> and virt-manager</li>
+<li><strong>QEMU/KVM</strong> — hardware-accelerated virtualisation (no system QEMU package; all VM tooling is delivered via Flatpak which bundles its own QEMU)</li>
+<li><strong>systemd-nspawn</strong> — lightweight OS containers managed as systemd units (stored in <code>@machines</code>)</li>
+<li><strong>LXC/LXD</strong> — full system containers with near-VM isolation (stored in <code>@lxc</code> / <code>@lxd</code>, <code>lxd.socket</code> enabled at boot)</li>
+<li><strong>GNOME Boxes</strong> — simple VM manager, pre-installed on the GNOME edition as a Flatpak (<code>org.gnome.Boxes</code>)</li>
+<li><strong>Virt-manager</strong> — pre-installed on the KDE Plasma edition as a Flatpak (<code>org.virt_manager.virt-manager</code> + <code>org.virt_manager.virt_manager.Extension.Qemu</code>); install on GNOME edition via Flatpak</li>
+</ul>
+<h2>GNOME Boxes</h2>
+<p>The simplest way to run VMs on Shanios. Pre-installed on the GNOME edition as a Flatpak. For advanced configuration (CPU pinning, GPU passthrough, custom XML), use virt-manager instead.</p>
+<pre><code class="language-bash"># Open from the app launcher, or:
+flatpak run org.gnome.Boxes</code></pre>
+<p>Boxes handles downloading ISOs, creating VMs, and managing snapshots — no manual QEMU or libvirt configuration needed.</p>
+<h2>Virt-Manager (Full libvirt GUI)</h2>
+<pre><code class="language-bash"># Pre-installed on KDE Plasma edition. Install on GNOME edition:
+flatpak install flathub org.virt_manager.virt-manager
+flatpak install flathub org.virt_manager.virt_manager.Extension.Qemu
+
+# Or use virsh from the terminal
+virsh list --all
+virsh start myvm
+virsh shutdown myvm
+virsh snapshot-create-as myvm snap1</code></pre>
+<h2>QEMU/KVM — Command Line</h2>
+<pre><code class="language-bash"># Check KVM is available
+ls /dev/kvm
+kvm-ok   # or: grep -c vmx /proc/cpuinfo  (Intel) / grep -c svm /proc/cpuinfo  (AMD)
+
+# Quick VM from an ISO (2 CPU cores, 2 GB RAM)
+qemu-system-x86_64 \
+  -enable-kvm \
+  -cpu host \
+  -m 2G \
+  -smp 2 \
+  -cdrom ~/Downloads/ubuntu.iso \
+  -drive file=~/vms/ubuntu.qcow2,format=qcow2 \
+  -boot d
+
+# Create a disk image
+qemu-img create -f qcow2 ~/vms/myvm.qcow2 40G
+
+# Check image info
+qemu-img info ~/vms/myvm.qcow2</code></pre>
+<h2>systemd-nspawn (Lightweight OS Containers)</h2>
+<pre><code class="language-bash"># Pull an Arch Linux base and boot it as a container
+sudo machinectl pull-tar https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/x86_64/alpine-minirootfs-3.20.0-x86_64.tar.gz alpine
+
+# List machines
+machinectl list
+machinectl list-images
+
+# Start / stop a machine
+sudo machinectl start alpine
+sudo machinectl stop alpine
+
+# Login to a running machine
+sudo machinectl login alpine
+
+# Enable a machine to start at boot
+sudo machinectl enable alpine</code></pre>
+<h2>LXC / LXD</h2>
+<p><code>lxd.socket</code> is enabled at boot. Your user is automatically added to the <code>lxc</code> and <code>lxd</code> groups during installation.</p>
+<pre><code class="language-bash"># Initialize LXD (first-time setup)
+sudo lxd init --auto
+
+# Launch a container
+lxc launch ubuntu:24.04 mycontainer
+
+# List running containers
+lxc list
+
+# Execute a command
+lxc exec mycontainer -- bash
+
+# Stop / delete
+lxc stop mycontainer
+lxc delete mycontainer
+
+# Create a snapshot
+lxc snapshot mycontainer snap1
+
+# Launch a VM (not a container) with LXD
+lxc launch ubuntu:24.04 myvm --vm</code></pre>
+<h2>Storage Layout</h2>
+<p>| Subvolume | Mount Point | Notes | |---|---|---| | <code>@libvirt</code> | <code>/var/lib/libvirt</code> | libvirt VM disk images — <code>nodatacow</code> | | <code>@qemu</code> | <code>/var/lib/qemu</code> | Bare QEMU disk images — <code>nodatacow</code> | | <code>@machines</code> | <code>/var/lib/machines</code> | systemd-nspawn containers | | <code>@lxc</code> | <code>/var/lib/lxc</code> | LXC containers | | <code>@lxd</code> | <code>/var/lib/lxd</code> | LXD container and VM storage |</p>
+<p><code>nodatacow</code> is set on <code>@libvirt</code> and <code>@qemu</code> because Copy-on-Write causes fragmentation and performance degradation for large, frequently-written VM disk files.</p>
+<h2>VM Guest Tools (Running Shanios as a Guest)</h2>
+<p>If Shanios is running inside a VM (VMware, VirtualBox, QEMU/SPICE), guest tools are pre-installed:</p>
+<ul>
+<li><code>spice-vdagent</code> — clipboard sharing, dynamic resolution for SPICE/QEMU</li>
+<li><code>qemu-guest-agent</code> — host–guest coordination for QEMU</li>
+<li><code>virtualbox-guest-utils</code> — VirtualBox additions</li>
+<li><code>open-vm-tools</code> — VMware tools</li>
+</ul>
+<p>These are grouped under <code>shani-video-guest.target</code> and activate automatically when the relevant package detects the VM environment.</p>
+<h2>Tips</h2>
+<ul>
+<li>Keep VM disk images in <code>/home</code> or the dedicated <code>@libvirt</code>/<code>@qemu</code> subvolumes — not in <code>/var</code> (volatile tmpfs)</li>
+<li>For Windows VMs, use VirtIO drivers for best disk and network performance</li>
+<li>For development environments that need a full OS, prefer <strong>Distrobox</strong> (lighter, shares your home directory) over a full VM</li>
+<li>LXD VMs offer a middle ground — hardware-level isolation with faster boot than QEMU</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

@@ -146,7 +146,99 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">AppArmor (Mandatory Access Control)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Security</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+        </div>
+      </div>
+      <div class="prose"><p>AppArmor is a Linux Security Module that confines programs to a defined set of resources using per-application profiles. A profile specifies which files, capabilities, network operations, and system calls a program is allowed — anything not explicitly permitted is denied. This limits the damage a compromised or misbehaving process can cause, even if it runs as root.</p>
+<p>AppArmor is pre-installed and active by default on Shani OS. Profiles ship with applications and are loaded at boot.</p>
+<p>---</p>
+<h2>Status</h2>
+<pre><code class="language-bash"># Check AppArmor is active in the kernel
+sudo aa-status
+
+# Shows:
+#   - Number of loaded profiles
+#   - Number of profiles in enforce vs complain mode
+#   - List of confined processes</code></pre>
+<p>AppArmor profiles operate in two modes:</p>
+<p>| Mode | Effect | |------|--------| | <code>enforce</code> | Policy violations are <strong>blocked</strong> and logged | | <code>complain</code> | Policy violations are <strong>logged only</strong> — nothing is blocked. Used for testing new profiles. |</p>
+<p>---</p>
+<h2>Managing Profiles</h2>
+<pre><code class="language-bash"># List all loaded profiles and their mode
+sudo aa-status | grep -E &quot;enforce|complain&quot;
+
+# Put a profile into complain mode (for testing/debugging)
+sudo aa-complain /usr/bin/firefox
+
+# Put a profile back into enforce mode
+sudo aa-enforce /usr/bin/firefox
+
+# Reload all profiles (after editing a profile file)
+sudo systemctl reload apparmor
+
+# Reload a single profile
+sudo apparmor_parser -r /etc/apparmor.d/usr.bin.firefox
+
+# Disable a specific profile entirely
+sudo aa-disable /usr/bin/firefox
+
+# Re-enable a disabled profile
+sudo aa-enable /usr/bin/firefox</code></pre>
+<p>---</p>
+<h2>Profile Files</h2>
+<p>Profiles are stored in <code>/etc/apparmor.d/</code>. Each file corresponds to a confined binary.</p>
+<h3>Viewing a Profile</h3>
+<pre><code class="language-bash"># View the Firefox profile
+cat /etc/apparmor.d/usr.bin.firefox
+
+# Example of what a profile looks like:
+# /usr/bin/firefox {
+#   #include &lt;abstractions/base&gt;
+#   /home/*/.mozilla/ rw,         # read/write mozilla profile dir
+#   /tmp/** rw,                   # read/write temp files
+#   network inet stream,          # outbound TCP
+#   deny /etc/shadow r,           # explicitly deny reading shadow file
+# }</code></pre>
+<h3>Writing a Profile for a New Application</h3>
+<p>Use <code>aa-genprof</code> to generate a profile interactively — it runs the application in complain mode, watches what it does, and offers to build rules from observed behaviour:</p>
+<pre><code class="language-bash"># Start profile generation
+sudo aa-genprof /path/to/application
+
+# In another terminal, use the application normally
+# Back in aa-genprof, press S to scan events and F to finish</code></pre>
+<p>Use <code>aa-logprof</code> to update an existing profile based on new denials in the log:</p>
+<pre><code class="language-bash">sudo aa-logprof</code></pre>
+<p>---</p>
+<h2>Checking Denials</h2>
+<p>AppArmor logs denied operations to the audit log and journal:</p>
+<pre><code class="language-bash"># View AppArmor denials via journald
+sudo journalctl -k | grep -i &quot;apparmor.*denied&quot;
+
+# Or via audit log (if auditd is running)
+sudo grep &quot;apparmor.*DENIED&quot; /var/log/audit/audit.log
+
+# Recent denials only
+sudo journalctl -k --since &quot;1 hour ago&quot; | grep &quot;apparmor.*denied&quot;</code></pre>
+<p>A typical denial looks like:</p>
+<pre><code>apparmor=&quot;DENIED&quot; operation=&quot;open&quot; profile=&quot;/usr/bin/myapp&quot;
+name=&quot;/etc/passwd&quot; pid=1234 comm=&quot;myapp&quot; requested_mask=&quot;r&quot; denied_mask=&quot;r&quot;</code></pre>
+<p>This tells you: <code>myapp</code> tried to read <code>/etc/passwd</code> and was denied. To allow it, add <code>/etc/passwd r,</code> to the profile.</p>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Application crashes or behaves oddly | Check for AppArmor denials: <code>journalctl -k | grep &quot;apparmor.*denied&quot;</code>; put the profile in complain mode temporarily: <code>sudo aa-complain /path/to/binary</code> | | Profile reload fails | Check syntax: <code>sudo apparmor_parser -p /etc/apparmor.d/profile-name</code>; fix errors and reload | | <code>aa-status</code> shows no profiles | AppArmor is loaded but no profiles are installed — install application packages that ship profiles, or write your own | | Denial for a path that should be allowed | Edit the profile to add the required rule, then reload: <code>sudo apparmor_parser -r /etc/apparmor.d/profile</code> | | Want to test a profile change safely | Switch to complain mode first (<code>aa-complain</code>), test, check logs, then enforce (<code>aa-enforce</code>) once the profile is working correctly |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

@@ -146,7 +146,69 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">System Optimizations</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Introduction</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+        </div>
+      </div>
+      <div class="prose"><p>Shanios includes extensive performance, gaming, and reliability optimizations out of the box, eliminating the need for manual tweaking. These enterprise-grade optimizations are pre-configured and active from first boot.</p>
+<h2>Memory & Storage Management</h2>
+<ul>
+<li><strong>ZRAM Compression:</strong> Automatic RAM compression using the zstd algorithm provides improved memory efficiency without requiring swap partitions.</li>
+<li><strong>Optimized Swappiness:</strong> Tuned to 133 — encourages the kernel to use compressed ZRAM swap before evicting clean page cache, maintaining system responsiveness under memory pressure.</li>
+<li><strong>Btrfs Maintenance:</strong> Automated filesystem maintenance runs in the background — periodic scrubbing for data integrity, balance operations, and defragmentation. Scheduled to minimize impact on system usage.</li>
+<li><strong>Profile Sync Daemon:</strong> Browser profiles are stored in tmpfs (RAM) for dramatically faster load times and reduced disk writes, with periodic sync back to persistent storage.</li>
+<li><strong>Optimized Page Lock Unfairness:</strong> Set to 1 to reduce lock contention and improve multi-threaded application performance, particularly for databases and high-concurrency workloads.</li>
+</ul>
+<h2>Gaming & Performance</h2>
+<h3>Game Controller Hardware</h3>
+<ul>
+<li><strong>game-devices-udev:</strong> Comprehensive udev rules for 8BitDo, PlayStation (DualShock 3/4, DualSense, DualSense Edge), Xbox (360, One, Series), Nintendo Switch Pro, Joy-Cons, GameCube adapter, VR equipment, and more</li>
+<li><strong>OpenRGB udev rules:</strong> RGB control for keyboards, mice, headsets, fans from ASUS Aura, Corsair, Razer, SteelSeries, Logitech G, MSI Mystic Light, Cooler Master, NZXT, and others</li>
+<li><strong>Racing Wheel Support:</strong> Logitech (G25/G27/G29/G920/G923), Thrustmaster (T150/T300RS/T500RS), Fanatec — with full force feedback</li>
+</ul>
+<h3>Kernel-Level Gaming Optimizations</h3>
+<ul>
+<li><strong>Game Compatibility Kernel Parameters:</strong> Increased PID limit (65535), expanded memory map areas (2147483642), enhanced inotify limits</li>
+<li><strong>Network Optimization:</strong> TCP FIN timeout reduced to 5 seconds (Valve SteamOS optimization) — prevents "address already in use" errors in multiplayer games</li>
+<li><strong>CPU Scheduler Tuning:</strong> CFS bandwidth slice: 3000μs; base slice: 3ms; autogroup scheduling enabled</li>
+<li><strong>MGLRU (Multi-Gen LRU):</strong> Enabled with aggressive settings for intelligent memory reclaim</li>
+<li><strong>Transparent Hugepage:</strong> Set to <code>madvise</code> for selective large page usage</li>
+<li><strong>GameMode Integration:</strong> GameMode daemon enabled globally — auto-applies CPU governor, I/O priority, and GPU performance levels when games launch</li>
+<li><strong>High-Precision Timers:</strong> HPET and RTC frequencies increased to 3072 Hz for superior timing accuracy</li>
+</ul>
+<h2>Process Management & Responsiveness</h2>
+<ul>
+<li><strong>Ananicy-cpp:</strong> Automatic process priority management with game-aware rules — background tasks are deprioritized when games or media are active</li>
+<li><strong>systemd-oomd:</strong> System-wide OOM daemon enabled by default to prevent system freezes</li>
+<li><strong>IRQBalance:</strong> Optimizes interrupt distribution across CPU cores</li>
+<li><strong>Increased File & Process Limits:</strong> Default limits raised to 1,048,576 for open files (NOFILE) and processes (NPROC)</li>
+<li><strong>Fast Shutdown:</strong> Reduced timeout values (10s stop, 10s abort) — services that fail to stop gracefully are automatically killed</li>
+</ul>
+<h2>Boot & System Efficiency</h2>
+<ul>
+<li><strong>Plymouth (BGRT Theme):</strong> Smooth graphical boot experience showing manufacturer's logo</li>
+<li><strong>Journal Size Limit:</strong> systemd journal capped at 50 MB to prevent excessive disk usage</li>
+<li><strong>Reduced Kernel Messages:</strong> Console printk level set to 3 (errors and critical messages only)</li>
+<li><strong>Time Synchronization:</strong> systemd-timesyncd enabled by default for automatic NTP synchronization</li>
+<li><strong>Socket Activation:</strong> Many services start on-demand — pcscd, lircd, gpsd, cups, avahi-daemon, saned</li>
+</ul>
+<h2>Automated Maintenance (Systemd Timers)</h2>
+<p>| Timer | Action | |-------|--------| | <code>btrfs-scrub.timer</code> | Monthly scrubbing to detect and repair data corruption | | <code>btrfs-balance.timer</code> | Periodic filesystem balancing for optimal performance | | <code>btrfs-defrag.timer</code> | Automatic defragmentation on fragmented files | | <code>btrfs-trim.timer</code> | Regular TRIM operations for SSD optimisation | | <code>beesd</code> daemon | Continuous background block-level deduplication across all Btrfs subvolumes | | <code>flatpak-update-system.timer</code> | System Flatpak auto-updates every 12 hours | | <code>flatpak-update-user.timer</code> | Per-user Flatpak auto-updates every 12 hours | | <code>profile-sync-daemon</code> | Browser cache sync from RAM to disk |</p>
+<p>All maintenance operations are scheduled during low-usage periods and use minimal system resources.</p>
+<blockquote><p><strong>Note:</strong> All these optimizations are pre-configured and active from first boot. No manual configuration, tweaking, or performance tuning required.</p></blockquote>
+<blockquote><p>For the full security configuration — AppArmor, firewalld, kernel module blacklist, LSM stack, and hardening parameters — see <a href="../security/features">Security Features</a>.</p></blockquote></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

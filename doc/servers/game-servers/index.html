@@ -146,7 +146,483 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Game Servers</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+        </div>
+      </div>
+      <div class="prose"><p>Dedicated game servers for multiplayer gaming — hosted on your own hardware, on your own terms. No monthly fees, no player limits imposed by third parties, full control over mods, difficulty, and world data.</p>
+<blockquote><p><strong>Network note:</strong> Game servers need ports reachable by players. For LAN-only play, no port forwarding is needed. For internet play, either forward the game port on your router to your server's LAN IP, or reach players via Tailscale — every player installs Tailscale and connects to your server's Tailscale IP, no public port forwarding required.</p></blockquote>
+<blockquote><p><strong>RAM guidance:</strong> Minecraft Java needs ~2–6 GB per server depending on mods and player count. Valheim needs ~2 GB. Factorio is surprisingly lean at ~500 MB. Always allocate headroom above the minimum.</p></blockquote>
+<p>---</p>
+<h2>Key Concepts</h2>
+<h4>Dedicated server architecture — authoritative vs peer-to-peer</h4>
+<p>A dedicated server is an authoritative game server: it holds the canonical game state and all clients send inputs to it and receive state updates from it. This prevents cheating (clients never compute the final state themselves) and enables server-side validation. Peer-to-peer (P2P) games let clients communicate directly — cheaper to host but vulnerable to cheaters who manipulate their local state. Most modern multiplayer games (Minecraft, CS2, Valheim) use dedicated server architecture. The server runs the game simulation at a fixed tick rate (Minecraft: 20 TPS, CS2: 64 or 128 tick); clients predict and interpolate between server state updates.</p>
+<h4>UDP vs TCP for game traffic</h4>
+<p>Real-time game traffic (position updates, inputs) uses UDP. Unlike TCP, UDP has no retransmission or ordering guarantees — a dropped position update is discarded, not retransmitted, because by the time it would arrive, the player has moved again. Games implement their own reliability layer (RakNet, ENet, Valve's GameNetworkingSockets) on top of UDP for packets that do need delivery guarantees (chat, item pickups). The trade-off: TCP's head-of-line blocking (a dropped packet stalls all subsequent data) is catastrophic for real-time inputs; UDP's independence between packets makes it tolerable for game state. RCON (used for server administration in Minecraft and CS2) uses TCP because it's not latency-sensitive.</p>
+<h4>NAT traversal and port forwarding for game servers</h4>
+<p>Games use UDP ports that must be reachable from the public internet for external players. NAT (Network Address Translation) — the technology that lets multiple devices share one public IP — blocks unsolicited inbound connections by default. Solutions: (1) Port forwarding — configure your router to forward a specific UDP port to your server's LAN IP. (2) UPnP — the game server requests port forwarding automatically (Valve servers do this). (3) Tailscale/mesh VPN — every player joins your tailnet; no port forwarding needed, the server is reachable via its Tailscale IP. NAT traversal is a common DevOps interview topic for any role involving peer-to-peer or UDP-based applications.</p>
+<h4>Resource isolation for multi-game server hosting</h4>
+<p>Pterodactyl (and Docker/Podman generally) provides isolation between game server instances via Linux namespaces (each container has its own process and network namespace) and cgroups (CPU and memory limits). This matters because a misbehaving Minecraft server consuming 100% CPU shouldn't affect a Valheim server on the same host. The Pterodactyl "egg" system packages the environment (base image, startup command, environment variables) for each game — reproducible deployments that match the game's exact runtime requirements. This pattern (containerised, resource-limited, isolated workloads managed by a panel) directly maps to Kubernetes workload isolation concepts.</p>
+<h4>Game save data and backup strategy</h4>
+<p>Game world files are stateful and typically not hot-copyable — copying a Minecraft <code>world/</code> directory while the server is writing can produce a corrupt save. The correct pattern: (1) trigger a server-side save command via RCON (<code>save-all</code>, <code>save-off</code>, then copy, then <code>save-on</code>), or (2) stop the container, copy, restart. For automated backups, this is exactly the pre-backup hook pattern used in Borgmatic and Restic. Valheim and Factorio checkpoint saves more safely but still benefit from this quiesce-then-copy approach. In a Pterodactyl setup, the backup system handles this by sending the appropriate RCON commands before copying.</p>
+<h2>Minecraft Java Edition</h2>
+<p><strong>Purpose:</strong> The definitive self-hosted game server. Supports vanilla, Paper (performance-optimised), Fabric (mod loader), Forge (mod loader), and Spigot. The <code>itzg/minecraft-server</code> image is the community standard — it handles any server type via environment variables and supports auto-updating.</p>
+<pre><code class="language-yaml"># ~/minecraft/compose.yaml
+services:
+  minecraft:
+    image: itzg/minecraft-server:latest
+    ports:
+      - 25565:25565
+    volumes:
+      - /home/user/minecraft/data:/data:Z
+    environment:
+      EULA: TRUE
+      TYPE: PAPER
+      VERSION: LATEST
+      MEMORY: 4G
+      DIFFICULTY: normal
+      OPS: YourUsername
+      MOTD: Home Server
+      TZ: Asia/Kolkata
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/minecraft &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common environment variables</h4>
+<p>| Variable | Values | Effect | |----------|--------|--------| | <code>TYPE</code> | <code>VANILLA</code>, <code>PAPER</code>, <code>FABRIC</code>, <code>FORGE</code>, <code>SPIGOT</code> | Server software | | <code>VERSION</code> | <code>LATEST</code>, <code>1.21.4</code>, <code>1.20.1</code> | Game version | | <code>MEMORY</code> | <code>2G</code>, <code>4G</code>, <code>8G</code> | JVM heap size | | <code>DIFFICULTY</code> | <code>peaceful</code>, <code>easy</code>, <code>normal</code>, <code>hard</code> | World difficulty | | <code>MAX_PLAYERS</code> | <code>20</code> | Player cap | | <code>VIEW_DISTANCE</code> | <code>10</code> | Chunk render distance | | <code>WHITELIST</code> | <code>player1,player2</code> | Whitelist players | | <code>OPS</code> | <code>YourUsername</code> | Server operators | | <code>SEED</code> | any string | World generation seed | | <code>MODE</code> | <code>survival</code>, <code>creative</code>, <code>adventure</code> | Game mode |</p>
+<h5>Install mods (Fabric/Forge)</h5>
+<pre><code class="language-bash"># Drop .jar mod files into the mods directory
+mkdir -p /home/user/minecraft/data/mods
+# Then restart the container — mods are loaded on startup
+podman restart minecraft</code></pre>
+<h4>RCON (remote console)</h4>
+<pre><code class="language-bash"># Enable RCON in the container
+-e ENABLE_RCON=true \
+-e RCON_PASSWORD=changeme \
+-e RCON_PORT=25575
+
+# Connect via mcrcon
+podman exec minecraft rcon-cli say &quot;Hello from server console&quot;</code></pre>
+<p><strong>Firewall:</strong></p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=25565/tcp --permanent &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Access the server console via RCON
+podman exec minecraft rcon-cli help
+podman exec minecraft rcon-cli list
+podman exec minecraft rcon-cli say &quot;Server restarting in 5 minutes&quot;
+podman exec minecraft rcon-cli time set day
+podman exec minecraft rcon-cli weather clear
+
+# Save the world manually
+podman exec minecraft rcon-cli save-all
+
+# Make a player an operator
+podman exec minecraft rcon-cli op YourUsername
+
+# Ban a player
+podman exec minecraft rcon-cli ban GrieferName &quot;griefing&quot;
+
+# Kick a player
+podman exec minecraft rcon-cli kick GrieferName &quot;Reason&quot;
+
+# Show connected players
+podman exec minecraft rcon-cli list
+
+# View server logs
+podman logs -f minecraft
+
+# Backup the world directory
+tar -czf minecraft-world-$(date +%Y%m%d).tar.gz /home/user/minecraft/data/world</code></pre>
+<h4>Tickrate, simulation rate, and networking overhead</h4>
+<p>A game server's tickrate is how many times per second it simulates the world and sends state updates to clients. 20 tick (Minecraft default) means one update every 50ms. 64 tick (CS:GO matchmaking) means 15ms updates. 128 tick means 7.8ms. Higher tickrate means more accurate hit detection and smoother movement, but proportionally more CPU and bandwidth per player. At 20 players, a 128-tick server uses ~3× the bandwidth of a 20-tick server. For casual play, 20 tick is fine; for competitive shooters, 64–128 tick is expected.</p>
+<h4>Persistent world state and checkpoint saves</h4>
+<p>Games with persistent worlds (Valheim, Minecraft, Terraria) save world state to disk on a schedule and on clean shutdown. The risk: if the server crashes mid-save, the save file can be corrupted. Mitigation: (1) the server writes to a <code>.tmp</code> file then atomically renames it — check if your game does this; (2) keep rolling backups (last 5 saves) so you can roll back to the last good state; (3) Restic running on the save directory with hourly snapshots gives you point-in-time recovery. For Valheim, the world files are in <code>~/.config/unity3d/IronGate/Valheim/worlds_local/</code>.</p>
+<h4>Firewall and DDoS considerations for public game servers</h4>
+<p>Game servers on public IPs are routinely port-scanned and occasionally DDoS'd. Mitigations: (1) use a VPS as a WireGuard relay — your home IP is never exposed, traffic enters through the VPS and tunnels to your home server; (2) fail2ban with game-specific filters blocks repeat connection abusers; (3) Cloudflare Spectrum (paid) proxies UDP-based game traffic through Cloudflare's DDoS mitigation network; (4) rate-limit connections at the firewall level — legitimate clients reconnect, bots move on. Never expose RCON to the public internet — always restrict to localhost or VPN addresses.</p>
+<p>---</p>
+<h2>Minecraft Bedrock Edition</h2>
+<p><strong>Purpose:</strong> Bedrock-edition dedicated server for players on Windows 10/11, Xbox, PlayStation, Switch, iOS, and Android. Supports cross-platform play. Uses the same <code>itzg</code> image family.</p>
+<pre><code class="language-yaml"># ~/minecraft-bedrock/compose.yaml
+services:
+  minecraft-bedrock:
+    image: itzg/minecraft-bedrock-server:latest
+    ports:
+      - 19132:19132/udp
+      - 19133:19133/udp
+    volumes:
+      - /home/user/minecraft-bedrock/data:/data:Z
+    environment:
+      EULA: TRUE
+      SERVER_NAME: Home Bedrock Server
+      GAMEMODE: survival
+      DIFFICULTY: normal
+      MAX_PLAYERS: 10
+      TZ: Asia/Kolkata
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/minecraft-bedrock &amp;&amp; podman-compose up -d</code></pre>
+<p><strong>Firewall:</strong></p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=19132/udp --add-port=19133/udp --permanent &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<p>---</p>
+<h2>Minecraft Network: Velocity Proxy</h2>
+<p><strong>Purpose:</strong> Run multiple Minecraft servers (e.g., a survival world, a creative world, a minigames server) behind a single IP and port. Players connect to the proxy and <code>/server survival</code> to switch between backends. Velocity is the modern, actively maintained replacement for BungeeCord.</p>
+<pre><code class="language-yaml"># ~/velocity/compose.yaml
+services:
+  velocity:
+    image: itzg/mc-proxy:latest
+    ports:
+      - 25577:25577
+    volumes:
+      - /home/user/velocity/config:/config:Z
+    environment:
+      MEMORY: 512M
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/velocity &amp;&amp; podman-compose up -d</code></pre>
+<h5>Minimal <code>velocity.toml</code></h5>
+<pre><code class="language-toml">bind = &quot;0.0.0.0:25577&quot;
+motd = &quot;&amp;aHome Network&quot;
+show-max-players = 100
+player-info-forwarding-mode = &quot;modern&quot;
+
+[servers]
+survival = &quot;localhost:25565&quot;
+creative = &quot;localhost:25566&quot;
+try = [&quot;survival&quot;]
+
+[forced-hosts]</code></pre>
+<blockquote><p>Each backend Paper server must have <code>velocity-secret</code> configured and <code>online-mode=false</code> in <code>server.properties</code> — Velocity handles authentication.</p></blockquote>
+<p>---</p>
+<h2>Valheim</h2>
+<p><strong>Purpose:</strong> Dedicated server for the Viking survival game. Fully configurable world name, password, and modding support via BepInEx. Automatically updates on container restart.</p>
+<pre><code class="language-yaml"># ~/valheim/compose.yaml
+services:
+  valheim:
+    image: lloesche/valheim-server:latest
+    ports:
+      - 2456:2456/udp
+      - 2457:2457/udp
+      - 2458:2458/udp
+    volumes:
+      - /home/user/valheim/data:/opt/valheim:Z
+      - /home/user/valheim/config:/config:Z
+    environment:
+      SERVER_NAME: Home Valheim
+      WORLD_NAME: Midgard
+      SERVER_PASS: changeme
+      SERVER_PUBLIC: false
+      UPDATE_ON_STARTUP: true
+      TZ: Asia/Kolkata
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/valheim &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>Set <code>SERVER_PUBLIC=false</code> to hide from the public server list — players connect by direct IP. Set a password of at least 5 characters.</p></blockquote>
+<h5>Install BepInEx mods</h5>
+<pre><code class="language-bash"># Create BepInEx plugins directory
+mkdir -p /home/user/valheim/config/BepInEx/plugins
+# Drop mod .dll files here — they load on server restart</code></pre>
+<p><strong>Firewall:</strong></p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=2456-2458/udp --permanent &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<p>---</p>
+<h2>Terraria</h2>
+<p><strong>Purpose:</strong> Dedicated server for the 2D sandbox game. Supports vanilla and TModLoader (modded) builds, world selection, password protection, and server-side characters.</p>
+<pre><code class="language-yaml"># ~/terraria/compose.yaml
+services:
+  terraria:
+    image: ryshe/terraria:latest
+    ports:
+      - 7777:7777
+    volumes:
+      - /home/user/terraria/data:/root/.local/share/Terraria:Z
+    environment:
+      world: /root/.local/share/Terraria/Worlds/MyWorld.wld
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/terraria &amp;&amp; podman-compose up -d</code></pre>
+<h4>TModLoader (modded Terraria)</h4>
+<pre><code class="language-yaml"># ~/tmodloader/compose.yaml
+services:
+  tmodloader:
+    image: jacobsmile/tmodloader1449:latest
+    ports:
+      - 7777:7777
+    volumes:
+      - /home/user/terraria/data:/root/.local/share/Terraria:Z
+      - /home/user/terraria/mods:/root/.local/share/Terraria/ModLoader/Mods:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/tmodloader &amp;&amp; podman-compose up -d</code></pre>
+<p><strong>Firewall:</strong></p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=7777/tcp --permanent &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<p>---</p>
+<h2>Factorio</h2>
+<p><strong>Purpose:</strong> Dedicated server for the factory automation game. Supports headless operation, saves management, and mod synchronisation. Factorio's dedicated server is exceptionally well-engineered — it runs on ~500 MB RAM and handles 50+ players on modest hardware.</p>
+<pre><code class="language-yaml"># ~/factorio/compose.yaml
+services:
+  factorio:
+    image: factoriotools/factorio:stable
+    ports:
+      - 34197:34197/udp
+      - 27015:27015/tcp
+    volumes:
+      - /home/user/factorio/data:/factorio:Z
+    environment:
+      SAVE_NAME: my-factory
+      GENERATE_NEW_SAVE: true
+      USERNAME: your-factorio-username
+      TOKEN: your-factorio-token
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/factorio &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>Get your token from <a href="https://factorio.com">factorio.com</a> → Profile → Token. This enables the server to appear on the server browser and handles authentication.</p></blockquote>
+<h4>Mods</h4>
+<pre><code class="language-bash"># Mods go in the mods subdirectory
+mkdir -p /home/user/factorio/data/mods
+# Download .zip mod files from mods.factorio.com and drop them here
+# The server downloads mods to clients automatically on join</code></pre>
+<h4>Server settings (<code>/home/user/factorio/data/server-settings.json</code>)</h4>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;My Factorio Server&quot;,
+  &quot;description&quot;: &quot;Home server&quot;,
+  &quot;visibility&quot;: { &quot;public&quot;: false, &quot;lan&quot;: true },
+  &quot;require_user_verification&quot;: true,
+  &quot;max_players&quot;: 10,
+  &quot;autosave_interval&quot;: 10,
+  &quot;autosave_slots&quot;: 5
+}</code></pre>
+<p><strong>Firewall:</strong></p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=34197/udp --add-port=27015/tcp --permanent &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># View server logs
+podman logs -f factorio
+
+# Backup the save file
+cp /home/user/factorio/data/saves/my-factory.zip    /home/user/backups/factorio-$(date +%Y%m%d).zip
+
+# List available saves
+ls /home/user/factorio/data/saves/
+
+# Generate a new map with specific settings
+podman exec factorio /factorio/bin/x64/factorio   --create /factorio/saves/new-world   --map-gen-settings /factorio/data/map-gen-settings.json</code></pre>
+<p>---</p>
+<h2>Satisfactory</h2>
+<p><strong>Purpose:</strong> Dedicated server for the 3D open-world factory game. Supports persistent world saves, auto-updates via SteamCMD, and HTTPS API for server management.</p>
+<pre><code class="language-yaml"># ~/satisfactory/compose.yaml
+services:
+  satisfactory:
+    image: wolveix/satisfactory-server:latest
+    ports:
+      - 7777:7777/udp
+      - 7777:7777/tcp
+    volumes:
+      - /home/user/satisfactory/data:/home/steam/SatisfactoryDedicatedServer:Z
+    environment:
+      MAXPLAYERS: 4
+      STEAMBETA: false
+      TZ: Asia/Kolkata
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/satisfactory &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>First startup downloads the full game (~15 GB) via SteamCMD — allow 10–30 minutes depending on connection speed. Watch progress with <code>podman logs -f satisfactory</code>.</p></blockquote>
+<p><strong>Firewall:</strong></p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=7777/udp --add-port=7777/tcp --permanent &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<p>---</p>
+<h2>CS2 / Counter-Strike Dedicated Server</h2>
+<p><strong>Purpose:</strong> Dedicated server for Counter-Strike 2 (and CS:GO legacy). Supports custom maps, plugins via MetaMod + CounterStrikeSharp, and competitive/casual game modes.</p>
+<pre><code class="language-yaml"># ~/cs2/compose.yaml
+services:
+  cs2:
+    image: joedwards32/cs2:latest
+    ports:
+      - 27015:27015/tcp
+      - 27015:27015/udp
+      - 27020:27020/udp
+    volumes:
+      - /home/user/cs2/data:/home/steam/cs2-dedicated:Z
+    environment:
+      STEAMAPPID: 730
+      CS2_SERVERNAME: Home CS2 Server
+      CS2_CHEATS: 0
+      CS2_PORT: 27015
+      CS2_MAXPLAYERS: 12
+      CS2_GAMETYPE: 0
+      CS2_GAMEMODE: 1
+      CS2_MAPGROUP: mg_active
+      CS2_STARTMAP: de_dust2
+      CS2_RCON_PASSWORD: changeme
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/cs2 &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>First run downloads the full server files (~30 GB) via SteamCMD. A fast disk is helpful here — NVMe significantly reduces startup time.</p></blockquote>
+<h4>Add plugins (CounterStrikeSharp)</h4>
+<pre><code class="language-bash"># MetaMod and CounterStrikeSharp go into the game directory
+# Download releases from github.com/roflmuffin/CounterStrikeSharp
+# Extract to /home/user/cs2/data/game/csgo/addons/</code></pre>
+<p><strong>Firewall:</strong></p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=27015/tcp --add-port=27015/udp --add-port=27020/udp --permanent &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<p>---</p>
+<h2>Pterodactyl (Game Server Management Panel)</h2>
+<p><strong>Purpose:</strong> The most widely used self-hosted game server management panel. Run multiple game servers with different users, resource quotas, and isolated environments from a single web UI. Supports 50+ games out of the box via "eggs" (server type definitions). Has a clean admin panel, per-user file manager, console access, and a public REST API.</p>
+<pre><code class="language-yaml"># ~/pterodactyl/compose.yml
+services:
+  panel:
+    image: ghcr.io/pterodactyl/panel:latest
+    ports: [&quot;127.0.0.1:80:80&quot;, &quot;127.0.0.1:443:443&quot;]
+    environment:
+      APP_URL: https://panel.home.local
+      APP_KEY: base64:changeme-run-php-artisan-key-generate
+      DB_HOST: db
+      DB_DATABASE: panel
+      DB_USERNAME: pterodactyl
+      DB_PASSWORD: changeme
+      REDIS_HOST: redis
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      QUEUE_DRIVER: redis
+      APP_TIMEZONE: Asia/Kolkata
+      MAIL_DRIVER: log
+    volumes:
+      - /home/user/pterodactyl/var:/app/var:Z
+      - /home/user/pterodactyl/logs:/app/storage/logs:Z
+      - /home/user/pterodactyl/nginx:/etc/nginx/http.d:Z
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: panel
+      MYSQL_USER: pterodactyl
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  db_data:</code></pre>
+<pre><code class="language-bash">cd ~/pterodactyl &amp;&amp; podman-compose up -d</code></pre>
+<h5>Create admin user</h5>
+<pre><code class="language-bash">podman exec -it pterodactyl-panel-1 php artisan p:user:make</code></pre>
+<blockquote><p>Pterodactyl uses a separate <strong>Wings</strong> daemon that runs on the same or different hosts to actually manage game server containers. Install Wings on each game server host following the <a href="https://pterodactyl.io/wings/1.0/installing.html">official Wings guide</a>.</p></blockquote>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">panel.home.local { tls internal; reverse_proxy localhost:80 }</code></pre>
+<p>---</p>
+<h2>Crafty Controller (Minecraft Panel)</h2>
+<p><strong>Purpose:</strong> Lightweight Minecraft-focused management panel. Simpler than Pterodactyl — designed specifically for Minecraft server management with a clean UI, auto-backup scheduling, RCON console, player stats, and CPU/RAM graphs per server. Ideal when you only run Minecraft and want something simpler than Pterodactyl.</p>
+<pre><code class="language-yaml"># ~/crafty/compose.yaml
+services:
+  crafty:
+    image: registry.gitlab.com/crafty-controller/crafty-4:latest
+    ports:
+      - 127.0.0.1:8000:8000
+      - 127.0.0.1:8443:8443
+      - 25500-25600:25500-25600
+    volumes:
+      - /home/user/crafty/backups:/var/opt/minecraft/backups:Z
+      - /home/user/crafty/logs:/var/opt/minecraft/logs:Z
+      - /home/user/crafty/servers:/var/opt/minecraft/servers:Z
+      - /home/user/crafty/config:/var/opt/minecraft/config:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/crafty &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>https://localhost:8443</code>. Default login: <code>admin</code> / <code>crafty</code> — change immediately. Create servers from the panel and let Crafty download the correct server jar.</p>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">crafty.home.local { tls internal; reverse_proxy localhost:8443 }</code></pre>
+<p>---</p>
+<h2>Port Reference</h2>
+<p>| Game | Protocol | Port(s) | |------|----------|---------| | Minecraft Java | TCP | 25565 | | Minecraft Bedrock | UDP | 19132–19133 | | Velocity Proxy | TCP | 25577 | | Valheim | UDP | 2456–2458 | | Terraria | TCP | 7777 | | Factorio | UDP | 34197 | | CS2 | TCP+UDP | 27015, 27020 UDP | | Satisfactory | TCP+UDP | 7777 | | Pterodactyl Panel | TCP | 80, 443 | | Pterodactyl Wings | TCP | 8080, 2022 | | Crafty Controller | TCP | 8443 |</p>
+<p>---</p>
+<h2>Palworld Dedicated Server</h2>
+<p><strong>Purpose:</strong> Dedicated server for Palworld — the open-world survival crafting game. The itzg-style LinuxGSM image auto-installs via SteamCMD and handles updates with a simple restart.</p>
+<pre><code class="language-yaml"># ~/palworld/compose.yaml
+services:
+  palworld:
+    image: thijsvanloef/palworld-server-docker:latest
+    ports:
+      - 0.0.0.0:8211:8211/udp   # game traffic
+      - 0.0.0.0:27015:27015/udp # Steam query
+    volumes:
+      - /home/user/palworld/data:/palworld:Z
+    environment:
+      PUID: &quot;1000&quot;
+      PGID: &quot;1000&quot;
+      PORT: &quot;8211&quot;
+      PLAYERS: &quot;16&quot;
+      MULTITHREADING: &quot;true&quot;
+      RCON_ENABLED: &quot;true&quot;
+      RCON_PORT: &quot;25575&quot;
+      ADMIN_PASSWORD: changeme
+      SERVER_PASSWORD: &quot;&quot;           # leave blank for public server
+      SERVER_NAME: &quot;My Palworld Server&quot;
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/palworld &amp;&amp; podman-compose up -d</code></pre>
+<p><strong>Firewall:</strong></p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=8211/udp --add-port=27015/udp --permanent &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<h4>RCON (remote console)</h4>
+<pre><code class="language-bash">podman exec -it palworld rcon-cli --port 25575 --password changeme</code></pre>
+<p>Server data and save files live in <code>/home/user/palworld/data</code> — include this in your Restic backup job.</p>
+<p>---</p>
+<h2>Rust Dedicated Server</h2>
+<p><strong>Purpose:</strong> Dedicated server for Rust — the multiplayer survival game. Uses the official <code>LinuxGSM</code>-compatible image via <code>cm2network/steamcmd</code>. Wipes are scheduled automatically; the server broadcasts wipe warnings to players.</p>
+<pre><code class="language-yaml"># ~/rust/compose.yaml
+services:
+  rust:
+    image: didstopia/rust-server:latest
+    ports:
+      - 0.0.0.0:28015:28015/udp  # game traffic
+      - 0.0.0.0:28015:28015/tcp  # RCON
+      - 0.0.0.0:28016:28016/tcp  # RCON web
+      - 0.0.0.0:8080:8080/tcp    # map web UI (optional)
+    volumes:
+      - /home/user/rust/data:/steamcmd/rust:Z
+    environment:
+      RUST_SERVER_NAME: &quot;My Rust Server&quot;
+      RUST_SERVER_DESCRIPTION: &quot;Self-hosted Rust&quot;
+      RUST_SERVER_MAXPLAYERS: &quot;50&quot;
+      RUST_SERVER_WORLDSIZE: &quot;3500&quot;
+      RUST_SERVER_SEED: &quot;12345&quot;
+      RUST_SERVER_SAVE_INTERVAL: &quot;600&quot;
+      RUST_RCON_PASSWORD: changeme
+      RUST_UPDATE_ON_BOOT: &quot;1&quot;
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/rust &amp;&amp; podman-compose up -d</code></pre>
+<p><strong>Firewall:</strong></p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=28015/udp --add-port=28015/tcp --add-port=28016/tcp --permanent &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<blockquote><p>First boot downloads the full Rust server (~8 GB via SteamCMD) — this can take 10–20 minutes. Monitor progress with <code>podman logs -f rust</code>. Map seed and world size cannot be changed without a full wipe.</p></blockquote>
+<p>---</p>
+<h2>Backups</h2>
+<p>Game world data is irreplaceable — back it up with Restic on a schedule:</p>
+<pre><code class="language-bash"># ~/.config/systemd/user/gameserver-backup.service
+[Unit]
+Description=Game Server Backup
+
+[Service]
+Type=oneshot
+ExecStart=podman exec restic restic backup \
+  /home/user/minecraft/data/world \
+  /home/user/valheim/data/worlds_local \
+  /home/user/factorio/data/saves
+ExecStartPost=curl -d &quot;Game server backup done ✅&quot; https://ntfy.sh/your-topic</code></pre>
+<pre><code class="language-bash"># ~/.config/systemd/user/gameserver-backup.timer
+[Unit]
+Description=Daily game server backup
+
+[Timer]
+OnCalendar=*-*-* 04:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Players can't connect from internet | Verify port is forwarded on router to server LAN IP; confirm <code>firewall-cmd</code> rule is in place; test with <code>nc -zv your-public-ip port</code> | | Minecraft server crashes on startup | Check <code>podman logs minecraft</code>; most crashes are missing EULA (<code>EULA=TRUE</code>), insufficient memory (<code>MEMORY=4G</code>), or a corrupt world | | Valheim <code>ERROR: No map seed</code> on new world | Ensure <code>WORLD_NAME</code> is set and the data volume has write permissions | | Terraria world not found | The world file path inside the container must match the <code>-e world=</code> path exactly; verify with <code>podman exec terraria ls /root/.local/share/Terraria/Worlds/</code> | | Factorio can't authenticate players | <code>USERNAME</code> and <code>TOKEN</code> must match your factorio.com account exactly; generate a fresh token on the website if needed | | CS2 stuck downloading | SteamCMD can be slow — watch with <code>podman logs -f cs2</code>; ensure the data volume has 40 GB free | | Satisfactory clients can't find server | Ensure both TCP and UDP 7777 are open; Satisfactory uses both protocols | | Pterodactyl Wings not connecting to panel | Ensure the Wings daemon's <code>config.yml</code> has the correct panel URL and token; check Wings logs with <code>journalctl -u wings</code> | | High CPU on Minecraft server | Switch from vanilla to Paper — it patches performance issues and runs 2–5× more efficiently at high player counts | | Minecraft world corruption after crash | Always stop cleanly before server maintenance: <code>podman exec minecraft rcon-cli stop</code>; never force-kill a running Minecraft server | | Modded server fails to start | Mod version mismatch — ensure all mods target the same Minecraft and mod-loader version; check logs for <code>ClassNotFoundException</code> | | Velocity players see wrong server | Ensure backend servers have <code>online-mode=false</code> and the matching <code>velocity-secret</code> set in <code>paper.yml</code> |</p>
+<blockquote><p>💡 <strong>Performance tip:</strong> For Minecraft, use <strong>Paper</strong> instead of vanilla — it uses async chunk loading, mob AI optimisations, and dozens of performance patches. At 10+ players on modded servers, also look at <strong>Aikar's JVM flags</strong> which are available at aikar.co/2018/07/02/tuning-the-jvm-g1gc-garbage-collector-flags-for-minecraft.</p></blockquote>
+<p>| Palworld server not appearing in list | Confirm <code>8211/udp</code> and <code>27015/udp</code> are open in firewall and router; Palworld uses UDP exclusively for game traffic | | Palworld save corruption after crash | Enable <code>RCON_ENABLED=true</code> and use <code>rcon-cli save</code> before stopping the container; avoid <code>podman kill</code> | | Rust server stuck at SteamCMD download | Large initial download (~8 GB) — normal; check disk space with <code>df -h</code>; if download hangs, restart the container | | Rust world not persisting after restart | Verify the <code>/steamcmd/rust</code> volume mount path; confirm <code>RUST_SERVER_SAVE_INTERVAL</code> is set and the data directory has write permissions |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

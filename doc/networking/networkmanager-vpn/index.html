@@ -146,7 +146,124 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">NetworkManager &amp; VPN</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-18</span>
+        </div>
+      </div>
+      <div class="prose"><p>NetworkManager is <strong>pre-installed and active by default</strong> on Shani OS. It manages all network connections — wired, Wi-Fi, mobile broadband, and VPN — and integrates with Tailscale, openresolv, and KDE/GNOME settings panels.</p>
+<p>Use <code>nmcli</code> for scripting and automation, <code>nmtui</code> for an interactive terminal UI, or <strong>Settings → Network</strong> for the full GUI.</p>
+<p>---</p>
+<h2>Connection Management</h2>
+<pre><code class="language-bash"># Show all interfaces and their state
+nmcli device status
+
+# List all saved connections
+nmcli connection show
+
+# Show only active connections
+nmcli connection show --active
+
+# Activate a saved connection
+nmcli connection up &quot;MyWifi&quot;
+
+# Deactivate a connection
+nmcli connection down &quot;MyWifi&quot;
+
+# Delete a saved connection profile
+nmcli connection delete &quot;OldNetwork&quot;
+
+# Reload all connection files from disk (after manual edits)
+nmcli connection reload</code></pre>
+<p>---</p>
+<h2>Wi-Fi</h2>
+<pre><code class="language-bash"># Scan for available networks
+nmcli device wifi list
+
+# Rescan (force a fresh scan)
+nmcli device wifi rescan &amp;&amp; nmcli device wifi list
+
+# Connect to a new Wi-Fi network (saves the connection profile automatically)
+nmcli device wifi connect &quot;SSID&quot; password &quot;yourpassword&quot;
+
+# Connect using a specific interface
+nmcli device wifi connect &quot;SSID&quot; password &quot;yourpassword&quot; ifname wlan0
+
+# Create a Wi-Fi hotspot (AP mode)
+nmcli device wifi hotspot ifname wlan0 ssid &quot;MyHotspot&quot; password &quot;hotspotpass&quot;
+
+# Show saved password of a Wi-Fi connection (requires sudo)
+sudo nmcli -s connection show &quot;MyWifi&quot; | grep psk</code></pre>
+<p>---</p>
+<h2>Static IP</h2>
+<pre><code class="language-bash"># Set a static IP on a wired connection
+nmcli connection modify &quot;Wired connection 1&quot; \
+  ipv4.method manual \
+  ipv4.addresses 192.168.1.50/24 \
+  ipv4.gateway 192.168.1.1 \
+  ipv4.dns &quot;1.1.1.1,8.8.8.8&quot;
+
+# Apply
+nmcli connection up &quot;Wired connection 1&quot;
+
+# Revert to DHCP
+nmcli connection modify &quot;Wired connection 1&quot; ipv4.method auto
+nmcli connection up &quot;Wired connection 1&quot;</code></pre>
+<p>---</p>
+<h2>Terminal UI</h2>
+<pre><code class="language-bash">nmtui</code></pre>
+<p><code>nmtui</code> provides an interactive, keyboard-driven interface for editing connections, activating/deactivating them, and setting the hostname. Useful over SSH when you don't want to memorise <code>nmcli</code> syntax.</p>
+<p>---</p>
+<h2>VPN — All Protocols Pre-installed</h2>
+<p>Shani OS ships all major VPN protocol plugins for NetworkManager. No additional package installation is needed. Connect via <strong>Settings → Network → VPN → +</strong> and choose your protocol, or use <code>nmcli</code> below.</p>
+<h3>OpenVPN</h3>
+<pre><code class="language-bash"># Import a .ovpn client config file
+nmcli connection import type openvpn file /path/to/client.ovpn
+
+# Connect
+nmcli connection up &quot;client&quot;
+
+# Or import via GUI: Settings → Network → VPN → + → Import from file → select .ovpn</code></pre>
+<h3>WireGuard</h3>
+<pre><code class="language-bash"># Import a wg0.conf file
+nmcli connection import type wireguard file /etc/wireguard/wg0.conf
+
+nmcli connection up &quot;wg0&quot;</code></pre>
+<p>WireGuard connections can also be created manually in the GUI with no config file. See the <a href="https://docs.shani.dev/doc/networking/wireguard">WireGuard wiki page</a> for raw peer-to-peer setup without NetworkManager.</p>
+<h3>IKEv2 / IPsec (strongSwan)</h3>
+<pre><code class="language-bash"># Configure via the GUI: Settings → Network → VPN → + → IPsec/IKEv2
+# Or interactively via nmtui</code></pre>
+<h3>Cisco AnyConnect / OpenConnect</h3>
+<pre><code class="language-bash"># Connect interactively (prompts for username, password, and 2FA token)
+openconnect --protocol=anyconnect vpn.example.com
+
+# Or use the NetworkManager GUI plugin:
+# Settings → Network → VPN → + → Cisco AnyConnect Compatible VPN (openconnect)</code></pre>
+<h3>Fortinet SSL VPN</h3>
+<pre><code class="language-bash">openfortivpn vpn.example.com:443 --username=youruser
+# Prompts for password</code></pre>
+<h3>PPTP / L2TP</h3>
+<p>Available via GUI: <strong>Settings → Network → VPN → +</strong> → Point-to-Point Tunneling Protocol (PPTP) or Layer 2 Tunneling Protocol (L2TP). These are legacy protocols — prefer WireGuard or OpenVPN where possible.</p>
+<p>---</p>
+<h2>All Supported VPN Protocols</h2>
+<p>| Protocol | Plugin / Tool | Notes | |----------|--------------|-------| | OpenVPN | <code>NetworkManager-openvpn</code> | Most common; import <code>.ovpn</code> | | WireGuard | <code>NetworkManager-wireguard</code> | Fast, modern; import <code>.conf</code> | | IKEv2 / IPsec | <code>NetworkManager-strongswan</code> | Common in enterprise | | L2TP/IPsec | <code>NetworkManager-l2tp</code> | Legacy enterprise | | PPTP | <code>NetworkManager-pptp</code> | Legacy; avoid if possible | | Cisco AnyConnect | <code>openconnect</code> | <code>--protocol=anyconnect</code> | | GlobalProtect (Palo Alto) | <code>openconnect</code> | <code>--protocol=gp</code> | | Pulse/Ivanti Secure | <code>openconnect</code> | <code>--protocol=pulse</code> | | Fortinet SSL VPN | <code>openfortivpn</code> | Standalone client | | Cisco VPNC | <code>vpnc</code> | Older Cisco IPsec | | SSTP (Microsoft) | <code>NetworkManager-sstp</code> | Via GUI plugin |</p>
+<p>---</p>
+<h2>DNS & Split DNS with VPNs</h2>
+<p>Shani OS uses openresolv to broker DNS across multiple simultaneous connections. When a VPN connects, its DNS servers are automatically registered — split DNS (sending only <code>.corp</code> queries to the VPN) works without any manual <code>/etc/resolv.conf</code> editing. See the <a href="https://docs.shani.dev/doc/networking/openresolv">openresolv wiki page</a> for details.</p>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>nmcli device wifi list</code> shows nothing | Check <code>nmcli radio wifi</code> — if off, run <code>nmcli radio wifi on</code>; also check <code>rfkill list</code> for hardware blocks | | Wi-Fi connects but no internet | Check DNS: <code>cat /etc/resolv.conf</code>; try <code>ping 1.1.1.1</code> vs <code>ping example.com</code> to distinguish routing vs DNS issues | | VPN connects but traffic doesn't route | Check active routes: <code>ip route show</code>; the VPN connection may need <code>ipv4.never-default false</code> | | OpenVPN import fails | Ensure the <code>.ovpn</code> file doesn't reference external certificate files — all certs must be inline | | WireGuard connection times out | Confirm endpoint IP and port are correct; check that your ISP doesn't block UDP on that port | | GUI not showing all VPN protocols | Some protocols only appear in <code>nmtui</code> or <code>nmcli</code> — all are installed regardless |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

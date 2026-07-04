@@ -146,7 +146,220 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Caddy</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+        </div>
+      </div>
+      <div class="prose"><h1>Caddy Web Server</h1>
+<p><a href="https://caddyserver.com/">Caddy</a> is a modern web server with automatic HTTPS. It provisions and renews TLS certificates entirely automatically — via Let's Encrypt for public domains and via its own internal CA for private <code>.home.local</code> addresses — with no manual certificate management, no OpenSSL commands, and no browser warnings.</p>
+<p>On Shani OS, Caddy is pre-installed and is the recommended reverse proxy for all self-hosted services. Always bind container ports to <code>127.0.0.1</code> and proxy through Caddy — this ensures every service is accessible only via HTTPS and never directly exposed to the network.</p>
+<p>---</p>
+<h2>Configuration Context</h2>
+<p>Caddy's behaviour depends on how it is launched.</p>
+<h3>System Service (Recommended)</h3>
+<p>When managed via systemd, Caddy runs as the <code>caddy</code> system user and loads a system-wide config:</p>
+<ul>
+<li><strong>Config file:</strong> <code>/etc/caddy/Caddyfile</code></li>
+<li><strong>Certificates & data:</strong> <code>/var/lib/caddy/.local/share/caddy/</code></li>
+</ul>
+<p>On Shani OS, <code>/etc</code> is managed atomically — your Caddyfile persists across OS updates and rollbacks.</p>
+<pre><code class="language-bash">sudo systemctl enable --now caddy</code></pre>
+<h3>Manual / Development</h3>
+<p>Running <code>caddy run</code> from a terminal loads the <code>Caddyfile</code> from the <strong>current working directory</strong>, or from an explicit path:</p>
+<pre><code class="language-bash">cd ~/projects/my-app/
+caddy run                              # loads ./Caddyfile
+caddy run --config /path/to/Caddyfile  # explicit path</code></pre>
+<p>---</p>
+<h2>Service Management</h2>
+<pre><code class="language-bash"># Enable and start on boot
+sudo systemctl enable --now caddy
+
+# Reload config with zero downtime (preferred — no connection drops)
+sudo systemctl reload caddy
+
+# Full restart (needed after a Caddy binary update)
+sudo systemctl restart caddy
+
+# Check status
+systemctl status caddy
+
+# Watch live logs
+journalctl -u caddy -f
+
+# Validate Caddyfile syntax before reloading (catches errors before they go live)
+caddy validate --config /etc/caddy/Caddyfile
+
+# Auto-format and fix indentation in place
+sudo caddy fmt --overwrite /etc/caddy/Caddyfile</code></pre>
+<p>---</p>
+<h2>Caddyfile Reference</h2>
+<h3>Reverse Proxy</h3>
+<p>The most common use case — route external traffic to local services running on Podman, Distrobox, or bare ports.</p>
+<pre><code class="language-caddyfile"># /etc/caddy/Caddyfile
+
+# Public domain — HTTPS via Let's Encrypt, auto-renewed
+app.example.com {
+    reverse_proxy localhost:8080
+}
+
+# Private domain — HTTPS via Caddy's internal CA
+# Trust the CA once (see TLS section below) and all .home.local sites get valid certs
+myapp.home.local {
+    tls internal
+    reverse_proxy localhost:3000
+}
+
+# Multiple subdomains, different backends
+api.example.com       { reverse_proxy localhost:8000 }
+dashboard.example.com { reverse_proxy localhost:9090 }
+grafana.home.local    { tls internal; reverse_proxy localhost:3001 }</code></pre>
+<h3>Static File Server</h3>
+<pre><code class="language-caddyfile">docs.example.com {
+    root * /srv/http/docs
+    file_server
+    encode zstd gzip
+}</code></pre>
+<h3>Load Balancing</h3>
+<pre><code class="language-caddyfile">app.example.com {
+    reverse_proxy localhost:3001 localhost:3002 localhost:3003 {
+        lb_policy round_robin
+        health_uri /health
+        health_interval 10s
+    }
+}</code></pre>
+<h3>Basic Auth & Security Headers</h3>
+<pre><code class="language-caddyfile"># Generate the bcrypt hash first:
+#   caddy hash-password --plaintext &quot;yourpassword&quot;
+
+secure.example.com {
+    basicauth {
+        admin $2a$14$YOUR_HASH_HERE
+    }
+    header {
+        Strict-Transport-Security &quot;max-age=31536000; includeSubDomains; preload&quot;
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy no-referrer
+        -Server
+    }
+    reverse_proxy localhost:8080
+}</code></pre>
+<h3>Forward Auth (Authelia / Authentik)</h3>
+<p>Protect any service behind your SSO provider — one login page guards your entire self-hosted stack:</p>
+<pre><code class="language-caddyfile"># Authelia forward auth
+service.example.com {
+    forward_auth localhost:9091 {
+        uri /api/verify?rd=https://auth.example.com
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+    reverse_proxy localhost:SERVICE_PORT
+}
+
+# Authentik forward auth
+service.example.com {
+    forward_auth localhost:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
+        copy_headers X-authentik-username X-authentik-groups X-authentik-email
+        header_up X-Original-URL {scheme}://{host}{uri}
+    }
+    reverse_proxy localhost:SERVICE_PORT
+}</code></pre>
+<h3>Redirect HTTP → HTTPS (Explicit)</h3>
+<p>Caddy handles this automatically for public domains. For internal hosts where you want an explicit redirect:</p>
+<pre><code class="language-caddyfile">http://myapp.home.local {
+    redir https://{host}{uri} permanent
+}</code></pre>
+<h3>Global Options</h3>
+<pre><code class="language-caddyfile">{
+    email admin@example.com     # Used for Let's Encrypt notifications
+    default_bind 0.0.0.0        # Prefer IPv4; remove if IPv6 works correctly
+    # admin off                 # Disable the local admin API if not needed
+}
+
+example.com {
+    reverse_proxy 192.168.1.50:80
+}</code></pre>
+<p>---</p>
+<h2>TLS & Certificates</h2>
+<p>| Domain type | Configuration | How it works | |-------------|---------------|--------------| | Public (<code>example.com</code>) | No <code>tls</code> directive needed | Caddy auto-provisions via Let's Encrypt ACME (HTTP-01 or TLS-ALPN-01) | | Private (<code>.home.local</code>, <code>.lan</code>, <code>.internal</code>) | <code>tls internal</code> | Caddy issues certificates from its own local CA | | Custom cert | <code>tls /path/cert.pem /path/key.pem</code> | Your own certificate | | Let's Encrypt staging (testing) | <code>acme_ca https://acme-staging-v02.api.letsencrypt.org/directory</code> | Avoids rate limits while testing |</p>
+<h3>Trust the Internal CA</h3>
+<p>Run this once on the Shani OS machine so that browsers and command-line tools trust the local CA for all <code>*.home.local</code> domains:</p>
+<pre><code class="language-bash">sudo trust anchor \
+  /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt
+sudo update-ca-trust</code></pre>
+<p>To trust it on other devices (phones, other laptops), export the certificate and install it in each device's trust store. On Android: Settings → Security → Install from storage. On iOS: Settings → General → VPN & Device Management.</p>
+<h3>Wildcard Certificates (DNS-01 Challenge)</h3>
+<p>For a wildcard cert (<code>*.home.local</code>) that works across all subdomains, use the DNS-01 challenge with your DNS provider's plugin. This avoids needing port 80 open:</p>
+<pre><code class="language-caddyfile">{
+    acme_dns cloudflare {env.CF_API_TOKEN}
+}
+
+*.home.local {
+    tls {
+        dns cloudflare {env.CF_API_TOKEN}
+    }
+    @jellyfin host jellyfin.home.local
+    handle @jellyfin {
+        reverse_proxy localhost:8096
+    }
+    @nextcloud host nextcloud.home.local
+    handle @nextcloud {
+        reverse_proxy localhost:8080
+    }
+}</code></pre>
+<p>---</p>
+<h2>Caddy + Tailscale</h2>
+<p>Use Caddy with <code>tls internal</code> to serve HTTPS on your Tailscale interface. Services become available as <code>https://hostname.tailnet-name.ts.net</code> with valid certificates on every tailnet device (after trusting the local CA):</p>
+<pre><code class="language-caddyfile"># Accessible only on your tailnet — not exposed to the internet
+jellyfin.home.local {
+    tls internal
+    reverse_proxy localhost:8096
+}
+
+vaultwarden.home.local {
+    tls internal
+    reverse_proxy localhost:8180
+}</code></pre>
+<p>Services exposed via Tailscale do not need firewall rules — Tailscale handles access control. See the <a href="https://docs.shani.dev/doc/networking/tailscale">Tailscale wiki page</a> for setup.</p>
+<p>---</p>
+<h2>Caddy + Cloudflared</h2>
+<p>When exposing services via Cloudflare Tunnel, you do <strong>not</strong> need a Caddyfile entry — Cloudflare handles TLS termination at the edge. Caddy is still the right choice for internal <code>.home.local</code> access on Tailscale, and for any services accessed directly on the LAN.</p>
+<p>Use both together: Caddy serves internal traffic; Cloudflared exposes selected services publicly. See the <a href="https://docs.shani.dev/doc/networking/cloudflared">Cloudflared wiki page</a>.</p>
+<p>---</p>
+<h2>Permissions & File Serving</h2>
+<p>Caddy runs as the <code>caddy</code> system user with restricted privileges. If it needs to read files from your home directory, grant access with ACLs rather than changing ownership:</p>
+<pre><code class="language-bash"># Grant recursive read + execute to the caddy user
+sudo setfacl -R -m u:caddy:rx /home/user/www
+
+# Verify
+getfacl /home/user/www</code></pre>
+<p>For SELinux contexts (Shani OS uses SELinux by default):</p>
+<pre><code class="language-bash"># Check the current context
+ls -Z /home/user/www
+
+# Relabel if needed
+sudo restorecon -Rv /home/user/www</code></pre>
+<p>---</p>
+<h2>Firewall</h2>
+<p>Open ports 80 and 443 if Caddy is serving public traffic. Let's Encrypt requires port 80 to be reachable for HTTP-01 challenges:</p>
+<pre><code class="language-bash">sudo firewall-cmd --add-service=http --add-service=https --permanent
+sudo firewall-cmd --reload</code></pre>
+<p>For internal-only Caddy serving <code>.home.local</code> addresses over Tailscale or the LAN, no firewall changes are needed — ports 80 and 443 do not need to be open to the internet.</p>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>permission denied</code> serving files | <code>sudo setfacl -R -m u:caddy:rx /your/path</code>; check SELinux context with <code>ls -Z</code> | | Browser shows untrusted cert for <code>.home.local</code> | Trust the Caddy local CA: <code>sudo trust anchor /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt &amp;&amp; sudo update-ca-trust</code> | | <code>bind: address already in use</code> | Another process owns port 80 or 443 — <code>sudo ss -tlnp | grep ':80\|:443'</code> to identify it | | Service won't start | Validate syntax first: <code>caddy validate --config /etc/caddy/Caddyfile</code>; then check logs: <code>journalctl -u caddy -f</code> | | Let's Encrypt rate limit hit | Switch to staging CA: <code>acme_ca https://acme-staging-v02.api.letsencrypt.org/directory</code> while testing | | Reverse proxy returns 502 Bad Gateway | Confirm the backend is running and bound to the right port: <code>curl -v http://localhost:PORT</code>; for containers use <code>host.containers.internal</code> instead of <code>localhost</code> | | Config change not taking effect | Run <code>sudo systemctl reload caddy</code> — Caddy must be explicitly reloaded to pick up Caddyfile changes | | HTTPS certificate not renewing | Check <code>journalctl -u caddy</code> for ACME errors; confirm port 80 is reachable from the internet for HTTP-01 challenges | | WebSocket connections dropping | Add <code>@ws { header Connection <em>Upgrade</em> }</code> matcher and <code>handle @ws { reverse_proxy ... }</code> with explicit WebSocket header passthrough |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

@@ -146,7 +146,103 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">What's Included</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Introduction</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+        </div>
+      </div>
+      <div class="prose"><p>Shanios comes fully equipped with a comprehensive software stack, carefully curated for desktop computing, development, gaming, and professional workloads. Everything works out of the box—no configuration required.</p>
+<h2>System Foundation</h2>
+<ul>
+<li><strong>Base:</strong> Arch Linux with rolling release updates, latest stable kernel with Intel and AMD microcode</li>
+<li><strong>Firmware:</strong> Comprehensive collection split by vendor: AMD GPU, Atheros, Broadcom, Cirrus, Intel, MediaTek, NVIDIA, Radeon, Realtek, and others</li>
+<li><strong>Bootloader:</strong> systemd-boot with UEFI and Secure Boot support</li>
+<li><strong>Boot Graphics:</strong> Plymouth with BGRT theme (displays manufacturer logo during boot)</li>
+<li><strong>Initramfs:</strong> dracut with full UKI (Unified Kernel Image) generation via <code>gen-efi</code></li>
+<li><strong>Filesystem:</strong> Btrfs with compression, CoW snapshots, automated maintenance and continuous background deduplication via bees</li>
+<li><strong>Encryption:</strong> LUKS2 (cryptsetup), fscrypt, ecryptfs-utils, gocryptfs</li>
+<li><strong>Network Storage:</strong> NFS client/server, Samba/CIFS, SSHFS</li>
+<li><strong>Updates:</strong> Atomic deployment via <strong>shani-deploy</strong> with automatic rollback on failed boot</li>
+</ul>
+<h2>Security</h2>
+<ul>
+<li><strong>Mandatory Access Control:</strong> AppArmor enabled by default with policies enforced at boot</li>
+<li><strong>Firewall:</strong> firewalld active with pre-configured rules for KDE Connect and Waydroid</li>
+<li><strong>Intrusion Prevention:</strong> fail2ban for automated log-based banning</li>
+<li><strong>TPM:</strong> tpm2-tools and tpm2-tss for hardware security module interaction</li>
+<li><strong>Smart Card & Hardware Keys:</strong> opensc, ccid, libfido2 (FIDO2/U2F security keys)</li>
+<li><strong>Remote Access:</strong> OpenSSH 10.x, Tailscale mesh VPN, cloudflared zero-trust tunnels</li>
+<li><strong>VPN Protocols:</strong> OpenVPN, WireGuard, L2TP, PPTP, strongSwan/IKEv2, Cisco AnyConnect, SSTP, Fortinet SSL, Cisco VPNC — all pre-installed</li>
+</ul>
+<h2>Desktop & Applications</h2>
+<ul>
+<li><strong>Desktop Environment:</strong> GNOME or KDE Plasma (chosen at download), Wayland-first with full X11 compatibility</li>
+<li><strong>Pre-installed Apps (both editions):</strong> Vivaldi browser, OnlyOffice, Gear Lever, Warehouse, Flatseal, Pods, BoxBuddy</li>
+<li><strong>KDE extras:</strong> Kate, Okular, Gwenview, Elisa, Haruna, Kamoso, KolourPaint, and games</li>
+<li><strong>GNOME extras:</strong> Papers, Loupe, Showtime, Decibels, GNOME Text Editor, Gnote, Meld, Boxes, and games</li>
+<li><strong>Package Formats:</strong> Flatpak (primary, from Flathub, auto-updates every 12 hours), AppImage via Gear Lever, Nix package manager (pre-installed)</li>
+<li><strong>Containers:</strong> Podman (rootless), podman-docker, buildah, skopeo, Distrobox, LXC, LXD, Apptainer, Snap</li>
+</ul>
+<h2>Multimedia</h2>
+<ul>
+<li><strong>Audio:</strong> PipeWire 1.4.x with full ALSA, JACK, and PulseAudio compatibility; WirePlumber session manager</li>
+<li><strong>Audio Codecs:</strong> FLAC, OPUS, Vorbis, MP3, AAC, AC3/DTS, ALAC, Speex, SBC, LDAC, aptX, LC3, WavPack</li>
+<li><strong>Video:</strong> Complete GStreamer plugin suite; FFmpeg (full build); AV1, HEVC, VP8/VP9, H.264, H.265, AVIF, HEIF, JPEG XL, WebP</li>
+<li><strong>Image Processing:</strong> ImageMagick, camera RAW via libraw; HDR via libplacebo and libdovi</li>
+</ul>
+<h2>Graphics Drivers & APIs</h2>
+<ul>
+<li><strong>OpenGL/GLES:</strong> Mesa 3D 25.x for Intel, AMD, NVIDIA (nouveau), and software rendering</li>
+<li><strong>Vulkan:</strong> Drivers for Intel, AMD, NVIDIA open, software, VMs, DirectX-on-Vulkan, Qualcomm, Apple Silicon</li>
+<li><strong>Hardware Video Acceleration:</strong> Intel iHD driver, NVIDIA open kernel module, VDPAU, VA-API</li>
+<li><strong>Hybrid Graphics:</strong> nvidia-prime (PRIME render offload), switcheroo-control</li>
+</ul>
+<h2>Printing & Scanning</h2>
+<ul>
+<li><strong>Print System:</strong> CUPS 2.4 with filters, PDF printer, network browsing, ipp-usb for driverless printers</li>
+<li><strong>Printer Drivers:</strong> HP, Epson, Brother, Canon, and generic PCL drivers</li>
+<li><strong>Scanning:</strong> SANE with sane-airscan (driverless network scanning via IPP)</li>
+</ul>
+<h2>Networking</h2>
+<ul>
+<li><strong>Connection Management:</strong> NetworkManager 1.54.x, ModemManager (3G/4G/5G), wpa_supplicant</li>
+<li><strong>Mesh VPN / Tunneling:</strong> Tailscale, cloudflared</li>
+<li><strong>DNS & Discovery:</strong> dnsmasq, openresolv, Avahi (mDNS/DNS-SD)</li>
+<li><strong>Web Server:</strong> Caddy 2.10.x with automatic HTTPS via Let's Encrypt</li>
+<li><strong>Remote Desktop:</strong> FreeRDP client; kRDP/kRFB (KDE); gnome-remote-desktop (GNOME)</li>
+</ul>
+<h2>Gaming</h2>
+<ul>
+<li><strong>Controllers:</strong> 8BitDo, PlayStation DS3/DS4/DualSense, Xbox, Nintendo Switch Pro, Joy-Cons, and many more</li>
+<li><strong>Racing Wheels:</strong> Logitech, Thrustmaster, Fanatec with full force feedback</li>
+<li><strong>RGB Peripherals:</strong> OpenRGB udev rules for keyboards, mice, headsets, fans from all major manufacturers</li>
+<li><strong>GameMode:</strong> Auto-applies CPU governor, I/O priority, and GPU performance mode when games are launched</li>
+</ul>
+<h2>Shell Experience</h2>
+<ul>
+<li><strong>Default Shell:</strong> Zsh 5.9 with fish-style syntax highlighting, autosuggestions, and history substring search</li>
+<li><strong>Prompt:</strong> Starship — fast cross-shell prompt with git integration</li>
+<li><strong>Smart History:</strong> McFly — neural network command history search</li>
+<li><strong>Fuzzy Finder:</strong> FZF — integrated into Zsh for Ctrl+R, Ctrl+T, and Alt+C</li>
+<li><strong>Alternatives:</strong> Bash 5.3 and Fish 4.5 also installed</li>
+</ul>
+<h2>Fonts & Accessibility</h2>
+<ul>
+<li><strong>Fonts:</strong> Noto fonts family (including CJK, emoji), TTF Hack; Indian language support (Devanagari, Tamil, Telugu, etc.) pre-configured</li>
+<li><strong>Input Methods:</strong> IBus with typing booster, Chinese, Japanese, Korean, Vietnamese, and Indic scripts</li>
+<li><strong>Accessibility:</strong> Orca screen reader, espeak-ng TTS, brltty (braille), speech-dispatcher</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

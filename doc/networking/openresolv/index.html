@@ -146,7 +146,106 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">openresolv (DNS)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-18</span>
+        </div>
+      </div>
+      <div class="prose"><h1>openresolv — DNS Resolution Management</h1>
+<p>Shani OS uses <strong>openresolv</strong> to manage <code>/etc/resolv.conf</code>. Rather than any single program owning DNS, openresolv acts as a central broker: NetworkManager, VPN clients (OpenVPN, WireGuard, Tailscale), and dnsmasq all register their nameservers via the <code>resolvconf</code> command, which merges them into a single consistent <code>/etc/resolv.conf</code>. DNS "just works" when you connect a VPN, switch networks, or bring up Tailscale — no manual editing needed.</p>
+<blockquote><p><strong>Note:</strong> Shani OS does <strong>not</strong> use <code>systemd-resolved</code>. Commands like <code>resolvectl status</code> will not work. Use <code>resolvconf -l</code> and <code>cat /etc/resolv.conf</code> instead.</p></blockquote>
+<p>---</p>
+<h2>Basic Inspection</h2>
+<pre><code class="language-bash"># Show all currently registered nameserver records (one block per interface)
+resolvconf -l
+
+# Show which interfaces have registered DNS
+resolvconf -l | grep -E &quot;^\*\*\*&quot;
+
+# Show the final merged /etc/resolv.conf that all programs read
+cat /etc/resolv.conf
+
+# Force regeneration after a manual config change
+sudo resolvconf -u</code></pre>
+<p>---</p>
+<h2>How It Works</h2>
+<p>Each interface registers a block of nameserver records when it comes up, and deregisters them when it goes down:</p>
+<pre><code>*** eth0 ***
+nameserver 192.168.1.1
+
+*** tailscale0 ***
+nameserver 100.100.100.100
+search tailnet-name.ts.net
+
+*** tun0 (OpenVPN) ***
+nameserver 10.8.0.1
+domain corp.example.com</code></pre>
+<p>openresolv merges these into <code>/etc/resolv.conf</code> according to priority rules in <code>/etc/resolvconf.conf</code>. VPN-specific domains are honoured — queries for <code>*.corp.example.com</code> go to the VPN's DNS, while all other queries go through your regular upstream.</p>
+<p>---</p>
+<h2>Manual Registration (Testing)</h2>
+<pre><code class="language-bash"># Manually register a nameserver on a test interface
+echo &quot;nameserver 1.1.1.1&quot; | sudo resolvconf -a eth0.test
+
+# Remove the test record
+sudo resolvconf -d eth0.test
+
+# Regenerate resolv.conf after manual change
+sudo resolvconf -u</code></pre>
+<p>---</p>
+<h2>Configuration (<code>/etc/resolvconf.conf</code>)</h2>
+<pre><code class="language-bash"># Use dnsmasq as a local caching resolver (recommended for performance and custom domains)
+# When set, /etc/resolv.conf points to 127.0.0.1 and dnsmasq handles all queries.
+# See the dnsmasq wiki page for full dnsmasq configuration details.
+name_servers=127.0.0.1
+
+# Rotate among nameservers for load distribution
+resolv_conf_options=rotate
+
+# Reduce per-server timeout (faster failover when a server is slow)
+resolv_conf_options=timeout:2
+
+# Prevent VPN DNS from leaking to non-VPN interfaces
+private_interfaces=&quot;tun0 wg0&quot;
+
+# Exclude specific interfaces from DNS registration entirely
+# (useful for virtual/container interfaces you don't want affecting global DNS)
+# exclude_interfaces=&quot;docker0 virbr0&quot;</code></pre>
+<p>After editing:</p>
+<pre><code class="language-bash">sudo resolvconf -u
+cat /etc/resolv.conf  # verify the output</code></pre>
+<p>---</p>
+<h2>Split DNS with VPNs</h2>
+<p>Split DNS — sending queries for <code>.corp.example.com</code> to the VPN's DNS while everything else goes to your regular resolver — is handled automatically. When OpenVPN or WireGuard (via NetworkManager) registers a domain-specific nameserver, openresolv routes matching queries to it without any manual configuration.</p>
+<p>Example: your OpenVPN config pushes <code>dhcp-option DNS 10.8.0.1</code> and <code>dhcp-option DOMAIN corp.example.com</code>. openresolv registers this as:</p>
+<pre><code>nameserver 10.8.0.1
+domain corp.example.com</code></pre>
+<p>Your system will then resolve <code>server.corp.example.com</code> through <code>10.8.0.1</code>, while <code>google.com</code> continues through your normal DNS — all transparently.</p>
+<p>---</p>
+<h2>dnsmasq Integration (Local Caching + Custom Domains)</h2>
+<p>Setting <code>name_servers=127.0.0.1</code> in <code>/etc/resolvconf.conf</code> routes all DNS queries through a local dnsmasq instance, adding caching and support for custom <code>.home</code> domain names. See the <a href="https://docs.shani.dev/doc/networking/dnsmasq">dnsmasq wiki page</a> for full configuration details.</p>
+<p>The key steps are:</p>
+<pre><code class="language-bash"># 1. Enable dnsmasq
+sudo systemctl enable --now dnsmasq
+
+# 2. Tell openresolv to use dnsmasq
+echo 'name_servers=127.0.0.1' | sudo tee -a /etc/resolvconf.conf
+
+# 3. Regenerate /etc/resolv.conf
+sudo resolvconf -u</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>resolvectl status</code> shows nothing | Shani OS uses openresolv, not systemd-resolved — use <code>resolvconf -l</code> and <code>cat /etc/resolv.conf</code> instead | | DNS stops working after VPN disconnects | Run <code>sudo resolvconf -u</code> to force regeneration; check <code>resolvconf -l</code> to see if stale records remain | | VPN DNS not being used for corporate hostnames | Check that your VPN config pushes a domain suffix; verify with <code>resolvconf -l | grep domain</code> after connecting | | <code>/etc/resolv.conf</code> shows only 127.0.0.1 | This is correct when dnsmasq is set as <code>name_servers=127.0.0.1</code>; check that dnsmasq is running: <code>systemctl status dnsmasq</code> | | Tailscale MagicDNS not resolving | Confirm <code>tailscale0</code> appears in <code>resolvconf -l</code>; ensure <code>--accept-dns=true</code> was passed to <code>tailscale up</code> | | DNS slow after switching networks | Enable dnsmasq as a local cache (<code>name_servers=127.0.0.1</code>) to avoid cold-start latency on every lookup |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

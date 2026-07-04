@@ -146,7 +146,80 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">rsyncd (rsync Daemon)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-18</span>
+        </div>
+      </div>
+      <div class="prose"><h1>rsync Daemon (rsyncd)</h1>
+<p>The rsync daemon exposes file modules over the <code>rsync://</code> protocol for fast, efficient network file synchronisation and backups. Unlike SSH-based rsync, rsyncd runs as a standalone service — useful for automated, password-protected transfers without requiring SSH access.</p>
+<p>rsyncd is pre-installed on Shani OS. Lock and state files persist in <code>/data/varlib/rsync</code> across OS updates.</p>
+<p>---</p>
+<h2>Server Setup</h2>
+<h3>Configuration</h3>
+<p>Create <code>/etc/rsyncd.conf</code>:</p>
+<pre><code class="language-ini"># Global settings
+uid = nobody
+gid = nobody
+use chroot = yes
+max connections = 4
+log file = /var/log/rsyncd.log
+pid file = /var/run/rsyncd.pid
+
+[backup]
+    comment = Network Backup
+    path = /home/user/backups
+    read only = false
+    auth users = syncuser
+    secrets file = /etc/rsyncd.secrets
+    hosts allow = 192.168.1.0/24
+
+[media]
+    comment = Read-only Media Mirror
+    path = /srv/media
+    read only = true
+    list = true
+    hosts allow = 192.168.1.0/24</code></pre>
+<h3>Authentication</h3>
+<p>Create <code>/etc/rsyncd.secrets</code> with <code>username:password</code> pairs:</p>
+<pre><code class="language-bash">echo &quot;syncuser:StrongPassword123&quot; | sudo tee /etc/rsyncd.secrets
+sudo chmod 600 /etc/rsyncd.secrets</code></pre>
+<h3>Enable & Firewall</h3>
+<pre><code class="language-bash"># Enable the service
+sudo systemctl enable --now rsyncd
+
+# Open port 873 (restrict to your LAN)
+sudo firewall-cmd --add-rich-rule='rule family=&quot;ipv4&quot; source address=&quot;192.168.1.0/24&quot; port port=&quot;873&quot; protocol=&quot;tcp&quot; accept' --permanent
+sudo firewall-cmd --reload</code></pre>
+<p>---</p>
+<h2>Client Usage</h2>
+<pre><code class="language-bash"># List available modules on the server
+rsync rsync://syncuser@192.168.1.100/
+
+# Sync a local directory to the server (with progress)
+rsync -avz --progress /local/dir/ rsync://syncuser@192.168.1.100/backup/
+
+# Pull files from the server to local
+rsync -avz rsync://syncuser@192.168.1.100/media/ /mnt/media/
+
+# Dry run (shows what would be transferred without doing it)
+rsync -avzn /local/dir/ rsync://syncuser@192.168.1.100/backup/</code></pre>
+<p>For one-off transfers between machines that have SSH access, SSH-tunnelled rsync is simpler — no daemon required:</p>
+<pre><code class="language-bash">rsync -avz -e &quot;ssh -p 2222&quot; ~/myproject youruser@192.168.1.100:~/</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>Connection refused</code> | Check <code>systemctl status rsyncd</code>; confirm port 873 is open: <code>sudo firewall-cmd --list-all</code> | | <code>Auth failed</code> | Verify <code>/etc/rsyncd.secrets</code> has mode <code>600</code> (<code>sudo chmod 600 /etc/rsyncd.secrets</code>) and the username in the client command matches <code>auth users</code> in the config | | <code>hosts allow</code> blocking your client | Check the client IP is within the <code>hosts allow</code> range; temporarily remove the restriction for testing | | Files not syncing (no errors) | Add <code>-v</code> for verbose output; check that the source path ends with <code>/</code> if you want directory <em>contents</em> (not the directory itself) |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

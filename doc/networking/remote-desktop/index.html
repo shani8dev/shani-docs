@@ -146,7 +146,77 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Remote Desktop</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-18</span>
+        </div>
+      </div>
+      <div class="prose"><h1>Remote Desktop — RDP & VNC</h1>
+<p>Shani OS includes both client and server tools for graphical remote desktop access. All tools are pre-installed.</p>
+<p>---</p>
+<h2>Client — Connect to a Remote Desktop</h2>
+<h3>FreeRDP (RDP Client)</h3>
+<p>Connect to Windows machines or any RDP-capable server:</p>
+<pre><code class="language-bash"># Basic RDP connection
+xfreerdp /v:192.168.1.100 /u:username /p:password /dynamic-resolution /gfx /rfx
+
+# Full-screen, multi-monitor
+xfreerdp /v:server.example.com /u:me /f /multimon
+
+# RDP over SSH tunnel (recommended for untrusted networks)
+ssh -L 3389:192.168.1.100:3389 jumphost &amp;
+xfreerdp /v:localhost /u:username</code></pre>
+<h3>VNC Client</h3>
+<p>Any VNC viewer can connect to a VNC server:</p>
+<pre><code class="language-bash">vncviewer hostname:5900</code></pre>
+<p>---</p>
+<h2>Server — Share Your Desktop</h2>
+<h3>KDE Edition: kRDP (RDP Server)</h3>
+<p>Enable in <strong>Settings → System → Remote Desktop → Enable Remote Desktop</strong>.</p>
+<pre><code class="language-bash"># Or enable via systemd
+systemctl --user enable --now plasma-remotedesktop</code></pre>
+<p>Once enabled, your desktop is accessible from Windows <strong>Remote Desktop Connection</strong> or any RDP client using your machine's IP address.</p>
+<h3>KDE Edition: krfb (VNC Server)</h3>
+<pre><code class="language-bash"># Enable the VNC server
+systemctl --user enable --now krfb
+
+# Connect from any VNC viewer
+vncviewer hostname:5900</code></pre>
+<p>krfb can also be configured to prompt for permission each time someone connects — enable this in <strong>System Settings → Remote Desktop → Ask for confirmation</strong>.</p>
+<h3>GNOME Edition: gnome-remote-desktop</h3>
+<p>Pre-installed on the GNOME edition. Enable in <strong>Settings → Sharing → Remote Desktop</strong>.</p>
+<pre><code class="language-bash"># Enable RDP and set credentials
+grdctl rdp enable
+grdctl rdp set-credentials username password
+
+# Check status
+grdctl status</code></pre>
+<p>Supports both RDP and VNC protocols simultaneously.</p>
+<p>---</p>
+<h2>Firewall</h2>
+<p>Open the required ports if you are accepting remote desktop connections:</p>
+<pre><code class="language-bash"># RDP (port 3389)
+sudo firewall-cmd --add-service=rdp --permanent
+
+# VNC (port 5900; adjust if using a different display number)
+sudo firewall-cmd --add-port=5900/tcp --permanent
+
+sudo firewall-cmd --reload</code></pre>
+<blockquote><p><strong>Security:</strong> Avoid exposing RDP or VNC directly to the internet. Instead, connect via Tailscale or tunnel over SSH (<code>ssh -L 3389:localhost:3389 yourserver</code>). See the <a href="https://docs.shani.dev/doc/networking/openssh">OpenSSH wiki page</a> for SSH tunnel details.</p></blockquote>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Cannot connect (connection refused) | Check that the server service is running: <code>systemctl --user status plasma-remotedesktop</code> or <code>grdctl status</code>; verify the firewall port is open | | Black screen on connect | Log out of any active local session first — some RDP implementations cannot share a session that is already displayed on a local monitor | | Poor performance / lag | Use RDP instead of VNC for LAN connections — RDP is hardware-accelerated; for VNC, enable compression in your viewer | | Windows RDP client shows certificate warning | This is expected for self-signed certificates — accept and remember the certificate | | krfb prompts "someone is trying to connect" every time | Disable confirmation in <strong>System Settings → Remote Desktop → Ask for confirmation</strong> |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

@@ -146,7 +146,433 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Home Automation</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+        </div>
+      </div>
+      <div class="prose"><p>Smart home hubs, IoT bridges, camera NVRs, and automation pipelines — all running locally with no cloud dependency.</p>
+<blockquote><p><strong>Why local?</strong> Cloud-dependent smart home devices can stop working when manufacturers shut down servers or change APIs. Local automation gives you sub-50ms response times, works during internet outages, and keeps all your sensor data on your own hardware.</p></blockquote>
+<p>---</p>
+<h2>Key Concepts</h2>
+<h4>MQTT — the IoT messaging backbone</h4>
+<p>MQTT (Message Queuing Telemetry Transport) is a publish-subscribe protocol designed for constrained devices on unreliable networks. A device (ESP32, Shelly plug, Zigbee sensor via zigbee2mqtt) publishes a message to a topic (<code>home/livingroom/temperature</code>); any subscriber (Home Assistant, Node-RED, Telegraf) receives it. The broker (Mosquitto, EMQX) routes messages without the publisher knowing who reads them. Key concepts: QoS levels (0 = fire-and-forget, 1 = at-least-once with acknowledgement, 2 = exactly-once), retained messages (the broker stores the last message on a topic, so new subscribers immediately get the current state), and will messages (sent by the broker when a client disconnects unexpectedly — useful for device-offline detection). MQTT is ubiquitous in IoT engineering roles.</p>
+<h4>Zigbee, Z-Wave, and Matter — wireless protocol comparison</h4>
+<p>Three competing wireless protocols for smart home devices: Zigbee (2.4 GHz mesh, 250 kbps, up to 65,000 devices, most widely supported, requires a coordinator dongle), Z-Wave (sub-GHz mesh, less interference than Zigbee/WiFi, maximum 232 devices per network, better range through walls, proprietary silicon requires certification), and Matter (IP-based standard on Thread or WiFi, Apple/Google/Amazon/Amazon-endorsed, designed to unify the ecosystem, still maturing). The operational reality: Zigbee has the broadest device support and lowest device cost; Z-Wave is more reliable in RF-noisy environments; Matter is the future but current device selection is limited. Zigbee2MQTT's device database of 3,000+ supported devices makes it the practical choice today.</p>
+<h4>Home Assistant's entity model</h4>
+<p>Home Assistant's core abstraction is the entity — a representation of a single capability of a device (a smart bulb has entities for brightness, colour temperature, power state, and energy consumption). Entities have states (<code>on</code>, <code>off</code>, <code>23.5</code>) and attributes (additional metadata). Automations, dashboards, and integrations all operate on entities. The entity registry maps entity IDs to their underlying devices and integration source. Understanding this model is essential for debugging: when a device behaves unexpectedly, you inspect the entity's state history in the developer tools to determine whether the problem is in the device, the integration, or the automation.</p>
+<h4>Event-driven automation and state machines</h4>
+<p>Home Assistant automations are event-driven: a trigger (state change, time, webhook, sunrise) fires the automation; conditions gate whether actions execute; actions change states or call services. Complex automations are state machines — a "good night" script transitions the house from "awake" to "sleeping" mode by setting multiple devices in sequence. The <code>input_boolean</code> and <code>input_select</code> helpers act as stateful flags for multi-step automations. AppDaemon exposes this same model in Python, enabling loops, timers, and external API calls that YAML automations can't express. Event-driven architecture is a core backend engineering pattern; Home Assistant is a concrete, hands-on implementation.</p>
+<h4>ESPHome and firmware-over-the-air updates</h4>
+<p>ESPHome compiles YAML device definitions to C++ and flashes them to ESP32/ESP8266 microcontrollers. Once a device has ESPHome flashed, subsequent updates happen over-the-air (OTA) via the WiFi network — no physical access required. ESPHome's native API (a protobuf-based binary protocol) integrates directly with Home Assistant without MQTT. The compilation and OTA update pipeline is a miniature CI/CD system: edit the YAML, compile, push to device, verify. This experience with embedded firmware deployment maps directly to IoT engineering roles dealing with fleet management and OTA update pipelines at scale.</p>
+<h4>WebRTC and zero-latency camera streams</h4>
+<p>go2rtc introduces the difference between streaming protocols: RTSP (Real-Time Streaming Protocol, used by IP cameras) has 2–10 second latency due to buffering. WebRTC (used by browsers and go2rtc) achieves sub-second latency by using UDP with SRTP (Secure Real-time Transport Protocol) and a direct peer connection to the browser. HLS (HTTP Live Streaming) has the lowest compatibility requirements but highest latency (5–30 seconds). For home security applications, WebRTC is required for live view of camera streams; HLS is acceptable for recorded playback. Frigate uses go2rtc internally for its live view.</p>
+<h2>Home Assistant</h2>
+<p><strong>Purpose:</strong> The leading open-source home automation platform. Integrates with 3,000+ devices and services — lights, sensors, thermostats, cameras, locks, media players, energy monitors. Supports automations, dashboards, voice assistants (local and cloud), and a mobile app.</p>
+<pre><code class="language-yaml"># ~/homeassistant/compose.yaml
+services:
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    network_mode: host
+    volumes:
+      - /home/user/homeassistant/config:/config:Z
+    environment:
+      TZ: Asia/Kolkata
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/homeassistant &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p><code>--network host</code> is required for Home Assistant to discover devices on your local network via mDNS and UPnP.</p></blockquote>
+<p>Access at <code>http://localhost:8123</code>. On first run, Home Assistant automatically discovers many devices on your network.</p>
+<h5>Backup your config</h5>
+<pre><code class="language-bash"># The built-in backup tool (Settings → System → Backups) creates .tar archives
+# Back them up offsite with Restic
+restic backup /home/user/homeassistant/config</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Check Home Assistant config validity
+podman exec homeassistant hass --script check_config -c /config
+
+# Restart Home Assistant (soft restart, keeps docker running)
+curl -X POST http://localhost:8123/api/services/homeassistant/restart   -H &quot;Authorization: Bearer YOUR_LONG_LIVED_TOKEN&quot;   -H &quot;Content-Type: application/json&quot;
+
+# View live logs
+podman logs -f homeassistant
+
+# Call a service via API
+curl -X POST http://localhost:8123/api/services/light/turn_on   -H &quot;Authorization: Bearer YOUR_LONG_LIVED_TOKEN&quot;   -H &quot;Content-Type: application/json&quot;   -d '{&quot;entity_id&quot;: &quot;light.living_room&quot;}'
+
+# Get current state of an entity
+curl http://localhost:8123/api/states/sensor.bedroom_temperature   -H &quot;Authorization: Bearer YOUR_LONG_LIVED_TOKEN&quot;
+
+# List all entities
+curl http://localhost:8123/api/states   -H &quot;Authorization: Bearer YOUR_LONG_LIVED_TOKEN&quot; | python3 -m json.tool
+
+# Run a one-off backup
+curl -X POST http://localhost:8123/api/backup   -H &quot;Authorization: Bearer YOUR_LONG_LIVED_TOKEN&quot;</code></pre>
+<h4>Recommended HACS integrations</h4>
+<p>Mushroom Cards, Mini Graph Card, Browser Mod, Local Tuya, Adaptive Lighting.</p>
+<p>---</p>
+<h2>Mosquitto (MQTT Broker)</h2>
+<p><strong>Purpose:</strong> Lightweight MQTT message broker. Required for Zigbee2MQTT, ESPHome, and many other IoT integrations. Acts as the communication backbone between devices and Home Assistant.</p>
+<pre><code class="language-yaml"># ~/mosquitto/compose.yaml
+services:
+  mosquitto:
+    image: eclipse-mosquitto
+    ports:
+      - 127.0.0.1:1883:1883
+    volumes:
+      - /home/user/mosquitto/config:/mosquitto/config:Z
+      - /home/user/mosquitto/data:/mosquitto/data:Z
+      - /home/user/mosquitto/log:/mosquitto/log:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/mosquitto &amp;&amp; podman-compose up -d</code></pre>
+<h4>Monitor MQTT traffic</h4>
+<pre><code class="language-bash"># Subscribe to all topics (useful for debugging)
+podman exec mosquitto mosquitto_sub -u user -P yourpassword -t '#' -v</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Subscribe to all topics (debug)
+podman exec mosquitto mosquitto_sub -h localhost -u user -P yourpassword -t '#' -v
+
+# Subscribe to a specific topic
+podman exec mosquitto mosquitto_sub -h localhost -u user -P yourpassword -t 'home/bedroom/temperature'
+
+# Publish a message
+podman exec mosquitto mosquitto_pub -h localhost -u user -P yourpassword   -t 'home/bedroom/temperature' -m '22.5'
+
+# Check broker stats
+podman exec mosquitto mosquitto_sub -h localhost -u user -P yourpassword   -t '$SYS/#' -C 10
+
+# View connected clients count
+podman exec mosquitto mosquitto_sub -h localhost -u user -P yourpassword   -t '$SYS/broker/clients/connected' -C 1</code></pre>
+<p>---</p>
+<h2>Zigbee2MQTT</h2>
+<p><strong>Purpose:</strong> Bridges Zigbee devices (lights, sensors, plugs, locks) to MQTT using a $10–15 USB Zigbee coordinator. Works with 3,000+ Zigbee devices from any manufacturer — no proprietary hubs, no cloud bridges, no subscriptions.</p>
+<h4>Supported coordinators</h4>
+<p>Sonoff Zigbee 3.0 USB Dongle Plus, CC2652R/P, HUSBZB-1, Conbee II.</p>
+<pre><code class="language-yaml"># ~/zigbee2mqtt/compose.yaml
+services:
+  zigbee2mqtt:
+    image: koenkk/zigbee2mqtt
+    volumes:
+      - /home/user/zigbee2mqtt/data:/app/data:Z
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    environment:
+      TZ: Asia/Kolkata
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/zigbee2mqtt &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Enable pairing mode (permit join for 60 seconds)
+podman exec mosquitto mosquitto_pub -h localhost -u user -P yourpassword   -t 'zigbee2mqtt/bridge/request/permit_join' -m '{&quot;value&quot;:true,&quot;time&quot;:60}'
+
+# List all paired devices
+podman exec mosquitto mosquitto_sub -h localhost -u user -P yourpassword   -t 'zigbee2mqtt/bridge/devices' -C 1 | python3 -m json.tool
+
+# Get current state of a device
+podman exec mosquitto mosquitto_sub -h localhost -u user -P yourpassword   -t 'zigbee2mqtt/MY_DEVICE' -C 1
+
+# Rename a device
+podman exec mosquitto mosquitto_pub -h localhost -u user -P yourpassword   -t 'zigbee2mqtt/bridge/request/device/rename'   -m '{&quot;from&quot;:&quot;0x1234abcd5678&quot;,&quot;to&quot;:&quot;bedroom_sensor&quot;}'
+
+# Remove (unlink) a device
+podman exec mosquitto mosquitto_pub -h localhost -u user -P yourpassword   -t 'zigbee2mqtt/bridge/request/device/remove' -m '{&quot;id&quot;:&quot;bedroom_sensor&quot;}'
+
+# View Z2M logs
+podman logs -f zigbee2mqtt</code></pre>
+<blockquote><p>Find your coordinator: <code>ls /dev/tty*</code> or <code>dmesg | grep tty</code> after plugging it in.</p></blockquote>
+<h5>Minimal <code>configuration.yaml</code></h5>
+<pre><code class="language-yaml">homeassistant: true
+mqtt:
+  server: mqtt://localhost:1883
+  user: user
+  password: yourpassword
+serial:
+  port: /dev/ttyUSB0
+frontend:
+  port: 8080</code></pre>
+<p>Access the web UI at <code>http://localhost:8080</code> to pair devices and view the network map.</p>
+<p>---</p>
+<h2>ESPHome</h2>
+<p><strong>Purpose:</strong> Compile and flash YAML-based firmware to ESP32/ESP8266 microcontrollers. Build custom sensors, switches, displays, and automations that integrate directly with Home Assistant over Wi-Fi — no cloud, no pairing apps.</p>
+<pre><code class="language-yaml"># ~/esphome/compose.yaml
+services:
+  esphome:
+    image: esphome/esphome
+    ports:
+      - 127.0.0.1:6052:6052
+    volumes:
+      - /home/user/esphome/config:/config:Z
+    environment:
+      TZ: Asia/Kolkata
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/esphome &amp;&amp; podman-compose up -d</code></pre>
+<h5>Example device config (temperature + humidity sensor)</h5>
+<pre><code class="language-yaml"># /home/user/esphome/config/bedroom-sensor.yaml
+esphome:
+  name: bedroom-sensor
+
+esp32:
+  board: esp32dev
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+api:
+  encryption:
+    key: !secret api_key
+
+ota:
+  password: !secret ota_password
+
+sensor:
+  - platform: dht
+    pin: GPIO4
+    temperature:
+      name: &quot;Bedroom Temperature&quot;
+    humidity:
+      name: &quot;Bedroom Humidity&quot;
+    update_interval: 60s</code></pre>
+<p>---</p>
+<h2>Node-RED</h2>
+<p><strong>Purpose:</strong> Flow-based visual programming for wiring devices, APIs, and automations. Great for complex logic that is easier to build visually than in Home Assistant's YAML automations. Useful for integrating non-HA services (e.g., MQTT → database → notification).</p>
+<pre><code class="language-yaml"># ~/node-red/compose.yaml
+services:
+  node-red:
+    image: nodered/node-red
+    ports:
+      - 127.0.0.1:1880:1880
+    volumes:
+      - /home/user/nodered/data:/data:Z
+    environment:
+      TZ: Asia/Kolkata
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/node-red &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:1880</code>. Install the <code>node-red-contrib-home-assistant-websocket</code> palette to connect to Home Assistant. Install <code>node-red-node-sqlite</code> to log sensor data locally.</p>
+<p>---</p>
+<h2>Matter Server</h2>
+<p><strong>Purpose:</strong> Bridges Matter/Thread smart home devices to Home Assistant. Matter is the new unified smart home standard supported by Apple, Google, Amazon, and hundreds of device manufacturers — all locally, no cloud required.</p>
+<pre><code class="language-yaml"># ~/matter-server/compose.yaml
+services:
+  matter-server:
+    image: ghcr.io/home-assistant-libs/python-matter-server:stable
+    network_mode: host
+    volumes:
+      - /home/user/matter-server/data:/data:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/matter-server &amp;&amp; podman-compose up -d</code></pre>
+<p>In Home Assistant: Settings → Devices & Services → Add Integration → Matter (BETA). Point it at <code>ws://localhost:5580/ws</code>.</p>
+<blockquote><p>You need a Thread border router to use Thread devices. Apple HomePod mini, Google Nest Hub, or a dedicated USB Thread dongle all work.</p></blockquote>
+<p>---</p>
+<h2>Frigate</h2>
+<p><strong>Purpose:</strong> Network Video Recorder (NVR) with real-time AI object detection — people, cars, animals, packages. Runs detection locally using your GPU or a Coral TPU. Integrates deeply with Home Assistant for automations triggered by detections.</p>
+<pre><code class="language-yaml"># ~/frigate/compose.yaml
+services:
+  frigate:
+    image: ghcr.io/blakeblackshear/frigate:stable
+    ports:
+      - 127.0.0.1:5000:5000
+      - 127.0.0.1:8554:8554
+      - 127.0.0.1:8555:8555/udp
+    volumes:
+      - /home/user/frigate/config:/config:Z
+      - /home/user/frigate/media:/media/frigate:Z
+    devices:
+      - /dev/dri:/dev/dri
+    shm_size: 256m
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/frigate &amp;&amp; podman-compose up -d</code></pre>
+<h5>Minimal <code>config.yml</code></h5>
+<pre><code class="language-yaml">mqtt:
+  enabled: true
+  host: localhost
+  user: user
+  password: yourpassword
+
+cameras:
+  front-door:
+    ffmpeg:
+      inputs:
+        - path: rtsp://camera-ip:554/stream
+          roles: [detect, record]
+    detect:
+      width: 1280
+      height: 720
+      fps: 5
+
+detectors:
+  cpu1:
+    type: cpu</code></pre>
+<blockquote><p>Add a Google Coral USB TPU (<code>--device /dev/bus/usb</code>) for hardware-accelerated detection at 100+ FPS with minimal CPU usage.</p></blockquote>
+<p>---</p>
+<h2>Double Take (Facial Recognition)</h2>
+<p><strong>Purpose:</strong> Integrates with Frigate to identify specific people by face. When Frigate detects a person, Double Take runs recognition against a library of known faces and publishes the result to MQTT — letting Home Assistant trigger "welcome home" automations by person.</p>
+<pre><code class="language-yaml"># ~/double-take/compose.yaml
+services:
+  double-take:
+    image: jakowenko/double-take
+    ports:
+      - 127.0.0.1:3002:3000
+    volumes:
+      - /home/user/double-take/.storage:/.storage:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/double-take &amp;&amp; podman-compose up -d</code></pre>
+<p>Configure recognisers (CompreFace, DeepStack, or CodeProject.AI) in the Double Take UI, then add face images to the library.</p>
+<p>---</p>
+<h2>go2rtc (WebRTC Camera Gateway)</h2>
+<p><strong>Purpose:</strong> Universal camera streaming gateway. Takes any RTSP, RTMP, ONVIF, USB, or HTTP camera stream and re-serves it as WebRTC (browser-viewable), MSE, HLS, or RTSP. Zero-latency browser previews, multi-stream support, and deep Frigate and Home Assistant integration — go2rtc powers the camera streams in Frigate 0.13+ and Home Assistant's WebRTC camera card.</p>
+<pre><code class="language-yaml"># ~/go2rtc/compose.yaml
+services:
+  go2rtc:
+    image: alexxit/go2rtc
+    ports:
+      - 127.0.0.1:1984:1984
+      - 8554:8554
+      - 8555:8555/tcp
+      - 8555:8555/udp
+    volumes:
+      - /home/user/go2rtc/go2rtc.yaml:/config/go2rtc.yaml:ro,Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/go2rtc &amp;&amp; podman-compose up -d</code></pre>
+<h5>Example <code>go2rtc.yaml</code></h5>
+<pre><code class="language-yaml">streams:
+  front-door: rtsp://admin:password@192.168.1.101:554/stream1
+  back-yard: rtsp://admin:password@192.168.1.102:554/h264Preview_01_main
+  doorbell: rtspx://192.168.1.103:7441/api/camera/proxy/...
+
+webrtc:
+  candidates:
+    - 192.168.1.10:8555  # your server's LAN IP
+
+api:
+  listen: &quot;:1984&quot;</code></pre>
+<p>Access the web UI at <code>http://localhost:1984</code> to view live streams in the browser. In Frigate config, set <code>go2rtc.streams</code> to reference the same stream names.</p>
+<p>---</p>
+<h2>Z-Wave JS UI (Z-Wave Device Bridge)</h2>
+<p><strong>Purpose:</strong> Full-featured Z-Wave device manager and MQTT bridge. Similar to Zigbee2MQTT but for Z-Wave — manages your Z-Wave USB controller (Aeotec Z-Stick, HUSBZB-1, Zooz ZST10), pairs devices, exposes them to Home Assistant via MQTT or WebSocket, and provides a visual mesh network map. Required for Z-Wave devices like Yale/Schlage smart locks, Fibaro sensors, and Qubino modules.</p>
+<pre><code class="language-yaml"># ~/zwave-js-ui/compose.yaml
+services:
+  zwave-js-ui:
+    image: zwavejs/zwave-js-ui:latest
+    ports:
+      - 127.0.0.1:8091:8091
+      - 127.0.0.1:3002:3000
+    volumes:
+      - /home/user/zwave-js-ui/store:/usr/src/app/store:Z
+    devices:
+      - /dev/ttyUSB1:/dev/ttyUSB1
+    environment:
+      TZ: Asia/Kolkata
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/zwave-js-ui &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>Find your Z-Wave stick: <code>ls /dev/ttyUSB*</code> after plugging it in (may be <code>ttyUSB0</code> or <code>ttyACM0</code> depending on the model).</p></blockquote>
+<p>In Home Assistant: Settings → Devices & Services → Add Integration → Z-Wave JS → use WebSocket URL <code>ws://host.containers.internal:3000</code>.</p>
+<p>---</p>
+<h2>Scrypted (Camera Hub & NVR)</h2>
+<p><strong>Purpose:</strong> Camera management and NVR platform with a focus on HomeKit Secure Video integration. Supports 40+ camera brands, transcodes streams to HomeKit format, and integrates with Google Home, Alexa, Home Assistant, and Frigate. If you want your RTSP cameras to appear natively in Apple Home or Google Home, Scrypted is the bridge.</p>
+<pre><code class="language-yaml"># ~/scrypted/compose.yaml
+services:
+  scrypted:
+    image: koush/scrypted
+    network_mode: host
+    volumes:
+      - /home/user/scrypted/volume:/server/volume:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/scrypted &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p><code>--network host</code> is required for mDNS discovery of cameras and HomeKit pairing. Access the UI at <code>https://localhost:10443</code> (self-signed cert on first run).</p></blockquote>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">scrypted.home.local { tls internal; reverse_proxy localhost:10443 }</code></pre>
+<p>---</p>
+<h2>AppDaemon (Python Automation Engine)</h2>
+<p><strong>Purpose:</strong> Python scripting environment for Home Assistant automations. Write complex automation logic in Python instead of YAML — full access to Home Assistant's state machine, events, and services. Ideal for automations that require loops, data structures, external API calls, or logic that would be unwieldy in HA's built-in automation editor. Also includes HADashboard for building kiosk-style tablet wall panels.</p>
+<pre><code class="language-yaml"># ~/appdaemon/compose.yaml
+services:
+  appdaemon:
+    image: acockburn/appdaemon:latest
+    ports:
+      - 127.0.0.1:5050:5050
+    volumes:
+      - /home/user/appdaemon/config:/conf:Z
+    environment:
+      HA_URL: http://host.containers.internal:8123
+      TOKEN: your-long-lived-access-token
+      TZ: Asia/Kolkata
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/appdaemon &amp;&amp; podman-compose up -d</code></pre>
+<h5>Example app (<code>/conf/apps/notify_on_door.py</code>)</h5>
+<pre><code class="language-python">import appdaemon.plugins.hass.hassapi as hass
+
+class DoorNotifier(hass.Hass):
+    def initialize(self):
+        self.listen_state(self.door_opened, &quot;binary_sensor.front_door&quot;, new=&quot;on&quot;)
+
+    def door_opened(self, entity, attribute, old, new, kwargs):
+        self.notify(&quot;Front door opened!&quot;, name=&quot;mobile_app_phone&quot;)
+        self.call_service(&quot;light/turn_on&quot;, entity_id=&quot;light.porch&quot;, brightness=255)</code></pre>
+<p>---</p>
+<h2>evcc (EV Charging Optimiser)</h2>
+<p><strong>Purpose:</strong> Electric vehicle charging automation — charges your EV using surplus solar power, off-peak tariff windows, or a combination of both. Integrates with 200+ EV chargers (go-e, Wallbox, ABB, etc.), inverters (SMA, Fronius, Huawei, Shelly EM), and energy meters. Displays a real-time dashboard showing solar yield, grid import/export, and charging state.</p>
+<pre><code class="language-yaml"># ~/evcc/compose.yml
+services:
+  evcc:
+    image: evcc/evcc:latest
+    ports: [&quot;127.0.0.1:7070:7070&quot;]
+    volumes:
+      - /home/user/evcc/evcc.yaml:/etc/evcc.yaml:ro,Z
+      - /home/user/evcc/data:/root/.evcc:Z
+    environment:
+      TZ: Asia/Kolkata
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/evcc &amp;&amp; podman-compose up -d</code></pre>
+<h5>Minimal <code>evcc.yaml</code></h5>
+<pre><code class="language-yaml">network:
+  schema: http
+  host: evcc.home.local
+  port: 7070
+
+interval: 30s
+
+meters:
+  - name: grid
+    type: template
+    template: shelly-3em
+    host: 192.168.1.50
+
+chargers:
+  - name: wallbox
+    type: template
+    template: go-e
+    host: 192.168.1.60
+
+vehicles:
+  - name: mycar
+    type: template
+    template: generic
+    title: My EV
+    capacity: 60  # kWh</code></pre>
+<p>Access at <code>http://localhost:7070</code>. Set charging mode to <strong>PV</strong> for solar-only charging, <strong>MinPV</strong> for guaranteed minimum current topped up by solar, or <strong>Now</strong> for maximum speed regardless of source.</p>
+<p>---</p>
+<h2>Caddy Configuration</h2>
+<pre><code class="language-caddyfile">homeassistant.home.local  { tls internal; reverse_proxy localhost:8123 }
+zigbee.home.local         { tls internal; reverse_proxy localhost:8080 }
+esphome.home.local        { tls internal; reverse_proxy localhost:6052 }
+nodered.home.local        { tls internal; reverse_proxy localhost:1880 }
+frigate.home.local        { tls internal; reverse_proxy localhost:5000 }
+doubletake.home.local     { tls internal; reverse_proxy localhost:3000 }
+appdaemon.home.local      { tls internal; reverse_proxy localhost:5050 }
+evcc.home.local           { tls internal; reverse_proxy localhost:7070 }</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Home Assistant can't discover devices | Ensure <code>--network host</code> is set; check that mDNS/multicast is not blocked on your LAN | | Zigbee2MQTT can't open serial port | Verify the device path with <code>ls /dev/ttyUSB*</code>; add your user to the <code>dialout</code> group: <code>sudo usermod -aG dialout $USER</code> | | MQTT connection refused | Check Mosquitto is running and the password file is correct; verify the port is not blocked by firewalld | | Frigate using too much CPU | Set <code>fps: 5</code> or lower in detect config; add a Coral TPU or use GPU detection with <code>--device /dev/dri</code> | | ESPHome OTA upload fails | Ensure the ESP32 is on the same network as the server; check the API encryption key matches in both config and device | | Node-RED flows lost after update | Flows are stored in <code>/home/user/nodered/data/flows.json</code> — ensure the volume is mounted correctly | | Home Assistant automations not triggering | Check logs (Settings → System → Logs); verify MQTT messages are arriving with <code>mosquitto_sub -t '#' -v</code> | | Matter pairing fails | Ensure both the Matter Server and Home Assistant are on the same LAN/VLAN; Matter devices need mDNS broadcast to work | | Double Take not recognising faces | Ensure Frigate is publishing snapshots to MQTT; check the face library has enough reference images per person (5+ recommended) | | WLED not discovered by Home Assistant | Ensure WLED and Home Assistant are on the same LAN/VLAN; mDNS must be allowed between them; try adding via IP manually in the WLED integration | | WLED LEDs flicker or show wrong colours | Check data wire connection quality; add a 300–500 Ohm resistor on the data line; ensure GND is shared between the ESP32 and LED strip power supply |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

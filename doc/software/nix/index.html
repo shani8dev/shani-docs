@@ -146,7 +146,86 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Nix Package Manager</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Software &amp; Apps</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+        </div>
+      </div>
+      <div class="prose"><p>Nix is pre-installed on Shanios and is the recommended way to install CLI tools, language runtimes, and developer libraries. All Nix data lives in the dedicated <code>@nix</code> Btrfs subvolume mounted at <code>/nix</code>, which is shared across both <code>@blue</code> and <code>@green</code> slots — installed Nix packages survive all system updates and rollbacks.</p>
+<p><code>nix-daemon.socket</code> is enabled at boot. A channel must be added before installing packages for the first time.</p>
+<h2>First-Time Setup</h2>
+<pre><code class="language-bash"># Add the unstable channel (do this once after installation)
+nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
+nix-channel --update</code></pre>
+<h2>Installing Packages</h2>
+<pre><code class="language-bash"># Install a package into your profile
+nix-env -iA nixpkgs.ripgrep
+nix-env -iA nixpkgs.nodejs
+nix-env -iA nixpkgs.python3
+
+# Search for packages
+nix search nixpkgs &lt;keyword&gt;
+
+# Run a package without installing it (ephemeral shell)
+nix shell nixpkgs#python3
+nix shell nixpkgs#nodejs nixpkgs#yarn
+
+# List installed packages
+nix-env -q
+
+# Upgrade all packages
+nix-channel --update &amp;&amp; nix-env -u '*'
+
+# Remove a package
+nix-env -e packagename
+
+# Rollback to previous Nix profile generation
+nix-env --rollback</code></pre>
+<h2>Python via Nix</h2>
+<pre><code class="language-bash"># Install a Python package globally via Nix
+nix-env -iA nixpkgs.python3Packages.requests
+nix-env -iA nixpkgs.python3Packages.numpy
+
+# Or use a temporary shell with specific Python packages
+nix shell nixpkgs#python3 nixpkgs#python3Packages.flask</code></pre>
+<h2>Node.js via Nix</h2>
+<pre><code class="language-bash"># Install Node.js and npm
+nix-env -iA nixpkgs.nodejs
+
+# Or a specific version
+nix shell nixpkgs#nodejs_20
+nix shell nixpkgs#nodejs_22</code></pre>
+<h2>Nix Flakes (Experimental)</h2>
+<pre><code class="language-bash"># Enable flakes (add to ~/.config/nix/nix.conf)
+# experimental-features = nix-command flakes
+
+# Use a flake without installing
+nix run nixpkgs#cowsay -- hello
+
+# Enter a dev shell from a flake
+nix develop
+
+# Update flake inputs
+nix flake update</code></pre>
+<h2>Tips</h2>
+<ul>
+<li>Nix packages live in <code>/nix/store</code> — the <code>@nix</code> subvolume is preserved across every OS update and rollback</li>
+<li>Use <code>nix-env</code> for persistent installs; use <code>nix shell</code> for temporary/one-off usage</li>
+<li>Prefer <code>nix-env -iA nixpkgs.&lt;package&gt;</code> over <code>nix-env -i &lt;package&gt;</code> — the <code>-A</code> (attribute) form is faster and unambiguous</li>
+<li>The <code>@nix</code> subvolume has Copy-on-Write enabled so <code>bees</code> can deduplicate its content over time</li>
+<li>For complex development environments, consider using <code>nix shell</code> with a <code>shell.nix</code> or flake instead of polluting your global profile</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

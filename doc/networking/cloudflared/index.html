@@ -146,7 +146,156 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Cloudflared Tunnels</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+        </div>
+      </div>
+      <div class="prose"><h1>Cloudflared — Zero-Trust Tunnels</h1>
+<p>Cloudflared creates an encrypted, outbound-only tunnel from your Shani OS machine to Cloudflare's global edge network. This lets you expose local services at a real public HTTPS URL — with no static IP, no port forwarding, and no inbound firewall ports. The tunnel connects outward from your server; all traffic flows back through that established connection.</p>
+<p>Cloudflared is pre-installed on Shani OS. Tunnel credentials are stored at <code>/data/varlib/cloudflared</code> and survive all OS updates and rollbacks. <strong>Inactive until you authenticate.</strong></p>
+<p>---</p>
+<h2>When to Use Cloudflared vs Tailscale</h2>
+<p>| Scenario | Use | |----------|-----| | Private access between your own devices | <strong>Tailscale</strong> — zero-config, no public URL | | Share a service with others via a real internet URL | <strong>Cloudflared</strong> — public HTTPS, no IP needed | | Full data sovereignty (no third-party cloud) | <strong>Pangolin</strong> — self-hosted tunnel via your own VPS |</p>
+<p>You can run both simultaneously: Caddy + Tailscale for internal <code>.home.local</code> access; Cloudflared for selectively public services.</p>
+<p>---</p>
+<h2>1. Authenticate</h2>
+<pre><code class="language-bash"># Opens a browser to log in to your Cloudflare account
+cloudflared tunnel login
+# Saves credentials to ~/.cloudflared/cert.pem</code></pre>
+<p>Your Cloudflare account must own at least one domain with DNS managed by Cloudflare (not just registered there — the nameservers must point to Cloudflare).</p>
+<p>---</p>
+<h2>2. Create a Tunnel</h2>
+<pre><code class="language-bash"># Create a named tunnel — assigns a stable UUID that never changes
+cloudflared tunnel create my-home-server
+
+# List your tunnels and their UUIDs
+cloudflared tunnel list</code></pre>
+<p>The tunnel UUID and a JSON credentials file are created at <code>~/.cloudflared/&lt;UUID&gt;.json</code>. These are what authenticate your server to the tunnel — back them up.</p>
+<p>---</p>
+<h2>3. Configure Ingress</h2>
+<p>Create <code>~/.cloudflared/config.yml</code>. Each <code>hostname</code> entry maps a public subdomain to a local service. The order matters — Cloudflared matches rules top to bottom:</p>
+<pre><code class="language-yaml">tunnel: &lt;YOUR-TUNNEL-UUID&gt;
+credentials-file: /home/user/.cloudflared/&lt;UUID&gt;.json
+
+ingress:
+  # Media server
+  - hostname: media.example.com
+    service: http://localhost:8096
+
+  # File sync
+  - hostname: files.example.com
+    service: http://localhost:8384
+
+  # Password manager
+  - hostname: vault.example.com
+    service: http://localhost:8180
+    originRequest:
+      noTLSVerify: false
+
+  # Home automation — requires WebSocket support
+  - hostname: ha.example.com
+    service: http://localhost:8123
+    originRequest:
+      connectTimeout: 30s
+
+  # Catch-all — required, must be last
+  - service: http_status:404</code></pre>
+<blockquote><p><strong>Note:</strong> You do not need a Caddyfile entry for services exposed via Cloudflared — Cloudflare handles TLS termination at the edge. Caddy is still useful for internal <code>.home.local</code> access on Tailscale or the LAN.</p></blockquote>
+<h3>HTTPS Backend</h3>
+<p>If your local service runs HTTPS (e.g., you've configured Caddy with <code>tls internal</code>):</p>
+<pre><code class="language-yaml">ingress:
+  - hostname: app.example.com
+    service: https://localhost:443
+    originRequest:
+      noTLSVerify: true   # needed for self-signed / internal CA certs</code></pre>
+<p>---</p>
+<h2>4. Route DNS</h2>
+<p>Tell Cloudflare to point your subdomains at the tunnel. This creates CNAME records automatically in your Cloudflare DNS zone — no manual DNS editing required:</p>
+<pre><code class="language-bash">cloudflared tunnel route dns my-home-server media.example.com
+cloudflared tunnel route dns my-home-server files.example.com
+cloudflared tunnel route dns my-home-server vault.example.com
+cloudflared tunnel route dns my-home-server ha.example.com</code></pre>
+<p>DNS propagation is usually near-instant since Cloudflare controls both sides.</p>
+<p>---</p>
+<h2>5. Test Locally</h2>
+<p>Run the tunnel in the foreground to verify it works before committing to a persistent service:</p>
+<pre><code class="language-bash">cloudflared tunnel run my-home-server
+# Open media.example.com in a browser — you should reach Jellyfin
+# Ctrl-C to stop</code></pre>
+<p>---</p>
+<h2>6. Install as a Persistent Service</h2>
+<pre><code class="language-bash"># Install the systemd service (runs as root, starts at boot)
+sudo cloudflared service install
+
+sudo systemctl enable --now cloudflared</code></pre>
+<p>The service uses the config at <code>~/.cloudflared/config.yml</code> (for the user who ran <code>cloudflared tunnel login</code>) or <code>/etc/cloudflared/config.yml</code> if you move it there for a system-wide install.</p>
+<p>---</p>
+<h2>Status & Logs</h2>
+<pre><code class="language-bash"># List all tunnels and their current status
+cloudflared tunnel list
+
+# Detailed info for a specific tunnel (connection count, regions, uptime)
+cloudflared tunnel info my-home-server
+
+# Live logs
+sudo journalctl -u cloudflared -f
+
+# Active connections and which Cloudflare edge PoPs they're using
+cloudflared tunnel connections my-home-server</code></pre>
+<p>---</p>
+<h2>Access Policies (Zero Trust)</h2>
+<p>Protect exposed services with Cloudflare Access — require users to log in with email OTP, GitHub, Google, or any OIDC provider before reaching your service. This is particularly useful for services like Grafana or code-server that don't have their own authentication.</p>
+<p>Configure in the <a href="https://one.dash.cloudflare.com/">Cloudflare Zero Trust dashboard</a> under <strong>Access → Applications → Add an application → Self-hosted</strong>. No code changes on your side — Cloudflare handles the auth wall.</p>
+<pre><code class="language-yaml"># In config.yml — mark a service as requiring Access authentication
+ingress:
+  - hostname: grafana.example.com
+    service: http://localhost:3000
+    # Access policy is applied at the Cloudflare edge — no config changes here needed
+    # Just create the Access Application in the Zero Trust dashboard</code></pre>
+<p>---</p>
+<h2>Running via Token (Dashboard-Managed)</h2>
+<p>If you prefer to manage tunnels entirely from the Cloudflare dashboard without a local config file:</p>
+<pre><code class="language-bash"># Get the token from: Zero Trust Dashboard → Networks → Tunnels → your tunnel → Configure → Run command
+sudo cloudflared service install --token &lt;YOUR-TUNNEL-TOKEN&gt;
+sudo systemctl enable --now cloudflared</code></pre>
+<p>Or as a rootless Podman container:</p>
+<pre><code class="language-bash">podman run -d \
+  --name cloudflared \
+  --restart unless-stopped \
+  cloudflare/cloudflared:latest tunnel --no-autoupdate run \
+    --token &lt;YOUR-TUNNEL-TOKEN&gt;</code></pre>
+<p>---</p>
+<h2>Multiple Tunnels</h2>
+<p>You can run multiple tunnels from the same machine — useful for separating concerns or using different Cloudflare accounts:</p>
+<pre><code class="language-bash"># Create a second tunnel
+cloudflared tunnel create work-server
+
+# Run with explicit config
+cloudflared tunnel --config ~/.cloudflared/work-config.yml run work-server</code></pre>
+<p>For multiple persistent tunnels via systemd, create separate service files under <code>/etc/systemd/system/</code> pointing to different config files.</p>
+<p>---</p>
+<h2>Removing a Service from the Tunnel</h2>
+<pre><code class="language-bash"># 1. Remove the hostname block from config.yml
+# 2. Reload the running tunnel
+sudo systemctl reload cloudflared
+
+# 3. Delete the CNAME record in the Cloudflare DNS dashboard
+#    (cloudflared doesn't auto-delete DNS records when you remove an ingress rule)</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>ERR Failed to dial edge</code> | Check outbound HTTPS connectivity; corporate or ISP firewalls may block Cloudflare edge IPs on port 7844 (the QUIC port) — try <code>cloudflared tunnel run --protocol http2</code> | | Tunnel connects but subdomain returns error 1033 | DNS CNAME hasn't propagated, or <code>cloudflared tunnel route dns</code> wasn't run for that hostname — check the Cloudflare DNS dashboard | | Service returns 502 via tunnel | The local service isn't running or is bound to the wrong port; verify with <code>curl http://localhost:PORT</code> on the server | | WebSocket disconnects | Add <code>originRequest: { connectTimeout: 30s }</code> to the ingress rule; some apps (Vaultwarden, Home Assistant, Open WebUI) require WebSocket keep-alives | | Tunnel not starting after reboot | <code>sudo systemctl status cloudflared</code>; verify the credentials file path in config.yml points to the actual file and hasn't moved | | High latency to the tunnel | Cloudflare connects to the nearest edge PoP — check <code>cloudflared tunnel connections</code> to see which regions are being used; opening UDP 7844 enables QUIC (faster than HTTP/2) | | Access policy not triggering | Ensure the Cloudflare Access application is configured for the exact hostname (no wildcards unless explicitly set); check that the application type is "Self-hosted" | | <code>credentials file not found</code> error | The JSON credentials file path in config.yml must be absolute and match the actual file location; run <code>cloudflared tunnel list</code> to confirm the UUID |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

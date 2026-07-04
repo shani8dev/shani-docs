@@ -146,7 +146,176 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">OpenSSH</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-18</span>
+        </div>
+      </div>
+      <div class="prose"><h1>OpenSSH — Remote Shell & File Transfer</h1>
+<p>OpenSSH provides encrypted remote access, file transfer, and port forwarding. On Shani OS, the SSH daemon (<code>sshd</code>) is <strong>not enabled by default</strong>.</p>
+<p><strong>Recommended approach:</strong> Use SSH over Tailscale (<code>tailscale ssh</code>) for access between your own devices — it eliminates the need to manage keys or open firewall ports. Enable <code>sshd</code> directly only when you need access from machines that are not on your Tailscale network.</p>
+<p>---</p>
+<h2>Quick Start</h2>
+<pre><code class="language-bash"># Enable and start the SSH daemon
+sudo systemctl enable --now sshd
+
+# Confirm it's listening
+ss -tlnp | grep 22</code></pre>
+<p>---</p>
+<h2>Server Setup</h2>
+<h3>1. Harden <code>/etc/ssh/sshd_config</code></h3>
+<p>The defaults are functional but not maximally secure. Edit the config:</p>
+<pre><code class="language-bash">sudo nano /etc/ssh/sshd_config</code></pre>
+<p>Recommended settings:</p>
+<pre><code class="language-text"># Use a non-standard port to reduce automated scanner noise
+Port 2222
+
+# Key-based authentication only — disable passwords
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+
+# Disable root login entirely
+PermitRootLogin no
+
+# Only allow specific users
+AllowUsers youruser
+
+# Disable unused authentication methods
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys
+
+# Reduce login grace period
+LoginGraceTime 30
+
+# Disconnect idle sessions after 15 minutes
+ClientAliveInterval 900
+ClientAliveCountMax 0
+
+# Disable X11 and TCP forwarding if not needed
+X11Forwarding no
+AllowTcpForwarding no
+
+# Speed up login by skipping reverse DNS lookup
+UseDNS no
+
+# Limit to modern ciphers and MACs
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com
+MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com</code></pre>
+<p>Apply changes:</p>
+<pre><code class="language-bash"># Validate config before restarting (catches syntax errors)
+sudo sshd -t
+
+sudo systemctl restart sshd</code></pre>
+<h3>2. Socket Activation (On-Demand)</h3>
+<p>For machines that rarely accept SSH connections, use socket activation instead of a persistent daemon. <code>sshd</code> starts only when a connection attempt arrives:</p>
+<pre><code class="language-bash"># Disable the persistent daemon
+sudo systemctl disable --now sshd
+
+# Enable socket activation instead
+sudo systemctl enable --now sshd.socket</code></pre>
+<h3>3. Open the Firewall</h3>
+<pre><code class="language-bash"># Custom port (adjust 2222 to your chosen port)
+sudo firewall-cmd --add-port=2222/tcp --permanent
+sudo firewall-cmd --reload
+
+# Or if using the default port 22
+# sudo firewall-cmd --add-service=ssh --permanent
+# sudo firewall-cmd --reload</code></pre>
+<blockquote><p><strong>Tip:</strong> Pair with <a href="https://docs.shani.dev/doc/networking/fail2ban">Fail2ban</a> to automatically ban IPs with repeated failed login attempts.</p></blockquote>
+<p>---</p>
+<h2>Client Setup</h2>
+<h3>1. Generate a Key Pair</h3>
+<p>Run this on your <strong>client</strong> machine (not the server):</p>
+<pre><code class="language-bash"># Ed25519 is fast, compact, and recommended
+ssh-keygen -t ed25519 -C &quot;laptop-$(date +%Y)&quot;
+
+# Key pair saved to:
+# ~/.ssh/id_ed25519       (private key — never share this)
+# ~/.ssh/id_ed25519.pub   (public key — copy this to servers)</code></pre>
+<h3>2. Copy the Public Key to the Server</h3>
+<pre><code class="language-bash">ssh-copy-id -p 2222 youruser@192.168.1.100
+
+# Or manually:
+cat ~/.ssh/id_ed25519.pub | ssh -p 2222 youruser@192.168.1.100 \
+  &quot;mkdir -p ~/.ssh &amp;&amp; chmod 700 ~/.ssh &amp;&amp; cat &gt;&gt; ~/.ssh/authorized_keys &amp;&amp; chmod 600 ~/.ssh/authorized_keys&quot;</code></pre>
+<h3>3. Client Configuration (<code>~/.ssh/config</code>)</h3>
+<p>Create a config file on your client to avoid typing full addresses every time:</p>
+<pre><code class="language-text">Host shanios
+    HostName 192.168.1.100
+    User youruser
+    Port 2222
+    IdentityFile ~/.ssh/id_ed25519
+    IdentitiesOnly yes
+
+# Access via Tailscale (no port or key management needed)
+Host shanios-ts
+    HostName shani-server
+    User youruser
+
+# Jump host (reach an internal server via your Shani OS box)
+Host internal-server
+    HostName 10.0.0.5
+    User admin
+    ProxyJump shanios</code></pre>
+<p>Connect with:</p>
+<pre><code class="language-bash">ssh shanios
+ssh shanios-ts
+ssh internal-server</code></pre>
+<p>---</p>
+<h2>SSH via Tailscale</h2>
+<p>If Tailscale SSH is enabled on the server, you can SSH to any device on your tailnet without managing <code>authorized_keys</code>, firewall rules, or port numbers:</p>
+<pre><code class="language-bash"># On the server — enable Tailscale SSH (one-time setup)
+sudo tailscale up --ssh
+
+# From any client on the same tailnet
+tailscale ssh youruser@shani-server
+# or using the Tailscale IP directly
+ssh youruser@100.x.y.z</code></pre>
+<p>ACLs for Tailscale SSH are managed in the Tailscale admin console — you can restrict which users/devices can SSH to which targets.</p>
+<p>---</p>
+<h2>File Transfer</h2>
+<pre><code class="language-bash"># Copy a file from local to remote
+scp -P 2222 file.txt youruser@shanios:/home/youruser/
+
+# Copy a directory recursively
+scp -P 2222 -r ~/myproject youruser@shanios:~/
+
+# Using rsync (faster for large or repeated transfers, resumes interrupted copies)
+rsync -avz -e &quot;ssh -p 2222&quot; ~/myproject youruser@shanios:~/</code></pre>
+<p>For mounting a remote directory as a local filesystem over SSH, see the <a href="https://docs.shani.dev/doc/networking/sshfs">SSHFS wiki page</a>.</p>
+<p>---</p>
+<h2>Port Forwarding & Tunnels</h2>
+<pre><code class="language-bash"># Local forwarding: access a remote service on your local machine
+# (reach the server's Jellyfin at localhost:8096)
+ssh -L 8096:localhost:8096 shanios
+
+# Remote forwarding: expose a local service on the remote server
+# (the server's port 3000 tunnels back to your local port 3000)
+ssh -R 3000:localhost:3000 shanios
+
+# Dynamic SOCKS proxy (route all browser traffic through your server)
+ssh -D 1080 shanios
+# Then configure your browser to use SOCKS5 proxy at localhost:1080
+
+# Keep a tunnel alive in the background
+ssh -N -f -L 5432:localhost:5432 shanios   # tunnel remote Postgres locally</code></pre>
+<p>---</p>
+<h2>Server Key Persistence</h2>
+<p>On Shani OS, SSH host keys are stored in <code>/etc/ssh/</code> and persisted across OS updates and rollbacks. You will not see <code>REMOTE HOST IDENTIFICATION HAS CHANGED</code> warnings after a system update.</p>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>Connection refused</code> | Confirm <code>sshd</code> or <code>sshd.socket</code> is active: <code>systemctl status sshd sshd.socket</code>; check firewall: <code>sudo firewall-cmd --list-ports</code> | | <code>Permission denied (publickey)</code> | Check permissions: <code>~/.ssh</code> must be <code>700</code> and <code>~/.ssh/authorized_keys</code> must be <code>600</code>; verify the key is actually in <code>authorized_keys</code> | | <code>Host key verification failed</code> | The server's host key changed — if expected (reinstall), remove the old entry: <code>ssh-keygen -R 192.168.1.100</code> | | Slow login (10+ second delay) | <code>UseDNS no</code> should be set in <code>sshd_config</code> — reverse DNS lookup on connect causes the delay | | <code>Too many authentication failures</code> | Add <code>IdentitiesOnly yes</code> to <code>~/.ssh/config</code> for that host to prevent the SSH agent from offering all stored keys | | Cannot connect after changing port | Ensure the new port is open in the firewall and you verified connectivity before closing the existing session | | View server-side logs | <code>journalctl -u sshd -f</code> | | View client-side debug output | Add <code>-v</code> (or <code>-vvv</code> for maximum verbosity) to the <code>ssh</code> command |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

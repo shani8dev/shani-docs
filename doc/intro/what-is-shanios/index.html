@@ -146,7 +146,58 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">What is Shanios?</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Introduction</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-27</span>
+        </div>
+      </div>
+      <div class="prose"><p>Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs filesystem, it provides atomic updates, instant rollback, and system integrity by design. It ships as two editions — <strong>GNOME</strong> and <strong>KDE Plasma</strong> — and works out of the box with no post-install tweaking required.</p>
+<h2>Core Pillars</h2>
+<ul>
+<li><strong>Immutability:</strong> The root filesystem (<code>/</code>) is mounted read-only. System binaries and libraries cannot be changed at runtime — by you, by software, or by malware. The only way to modify the OS is through the controlled <code>shani-deploy</code> update pipeline.</li>
+<li><strong>Blue-Green Deployment:</strong> Two complete system images (<code>@blue</code> and <code>@green</code>) are maintained. While one is active, updates are written to the other. On reboot you switch to the updated image. The previous one is kept as a one-command rollback target.</li>
+<li><strong>Atomic Updates:</strong> Updates are all-or-nothing. The running system is never touched during an update. If something goes wrong, boot failure is detected automatically and the system rolls back — your work is never interrupted.</li>
+<li><strong>Selective Persistence:</strong> User data, configuration changes (<code>/etc</code> overlay), Flatpak apps, containers, VMs, and service credentials all live in dedicated Btrfs subvolumes that survive every update and rollback, always.</li>
+<li><strong>Defence-in-Depth Security:</strong> Six Linux Security Modules run simultaneously (<code>lsm=landlock,lockdown,yama,integrity,apparmor,bpf</code>), LUKS2 argon2id full-disk encryption, TPM2 auto-unlock, Secure Boot with MOK, Intel ME disabled by default, and every OS image is SHA256+GPG verified before deployment.</li>
+<li><strong>Zero Telemetry:</strong> No usage data, crash reports, analytics, or tracking of any kind — ever. The entire codebase is public on GitHub; every claim is independently verifiable.</li>
+</ul>
+<h2>Traditional vs Immutable OS</h2>
+<p>| Layer | Traditional Linux | Shanios (Immutable) | |-------|------------------|---------------------| | <code>/boot/efi</code> (ESP — FAT32) | ✏️ Writable — accidental overwrites possible | 🔒 Mounted only during updates — UKIs Secure Boot signed per slot | | <code>/usr /bin /lib /sbin</code> | ✏️ Writable — any process can corrupt system binaries | 🔒 Read-only root — kernel-enforced, no writes possible | | <code>/etc /opt</code> | ✏️ Writable — config drift accumulates silently | ⚙️ Writable overlay — changes persist, base untouched | | <code>/var</code> (logs, state, spool) | ✏️ Mixed — grows unbounded, hard to audit | 🔄 Volatile base + selectively persisted service state | | <code>/home</code> (user data) | ✏️ Writable — no snapshot isolation by default | ✅ Persistent — Btrfs snapshots available on demand |</p>
+<h3>Traditional Consequences</h3>
+<ul>
+<li>❌ A bad update can leave the system unbootable</li>
+<li>❌ Dependency conflicts corrupt shared libraries</li>
+<li>❌ Rollback requires manual snapshot discipline</li>
+<li>❌ System state drifts from original install</li>
+<li>❌ Any exploited process can modify <code>/usr /bin</code></li>
+<li>❌ No cryptographic verification of the boot chain</li>
+</ul>
+<h3>Shanios Guarantees</h3>
+<ul>
+<li>✅ Atomic updates — all or nothing, never half-applied</li>
+<li>✅ Instant rollback — previous slot always on disk</li>
+<li>✅ Verified boot chain — SHA256 + GPG + Secure Boot</li>
+<li>✅ No system drift — root replaced wholesale each update</li>
+<li>✅ IMA/EVM runtime integrity measurement active</li>
+<li>✅ Six LSMs active simultaneously (AppArmor, Landlock…)</li>
+</ul>
+<h2>How This Feels in Practice</h2>
+<p>The immutable root is transparent in daily use. You edit <code>/etc</code> files normally, install Flatpaks and Nix packages freely, run containers, and manage VMs — all exactly as you would on any Linux system. The difference is that updates never break a running system, rollback is always available, and an attacker who gains root access during a session cannot plant a persistent backdoor into system paths.</p>
+<p>The OS that passed build-time verification is the OS that runs, byte for byte, until the next deliberate <code>shani-deploy</code> update.</p>
+<h2>Built in India</h2>
+<p>Shanios is built in India 🇮🇳 by <a href="https://github.com/Shrinivasvkumbhar">Shrinivas Vishnu Kumbhar</a>. Indian-language support — Devanagari, Tamil, Telugu, and more — is a first-class feature, pre-configured from first boot with IBus multi-language input.</p>
+<p>The entire codebase is public at <a href="https://github.com/shani8dev">github.com/shani8dev</a>. Every claim in this documentation is independently verifiable.</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

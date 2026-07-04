@@ -146,7 +146,290 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Storage</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">System</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-28</span>
+        </div>
+      </div>
+      <div class="prose"><p>This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring, and the udisks2 layer used by desktop tools.</p>
+<p>For encrypted volumes see <a href="../security/luks">LUKS Management</a>. For Btrfs-specific operations (snapshots, subvolumes, scrub) see <a href="../arch/btrfs">Btrfs Deep Dive</a>. For backup strategy see <a href="backup">Backup & Recovery</a>.</p>
+<p>---</p>
+<h2>Inspecting Block Devices</h2>
+<pre><code class="language-bash"># List all block devices with sizes and mount points
+lsblk
+
+# Detailed view including filesystem type and UUID
+lsblk -f
+
+# Show all disks with model, size, and type (rotational/SSD/NVMe)
+lsblk -d -o NAME,SIZE,ROTA,TYPE,MODEL
+
+# List partition table for a specific disk
+sudo fdisk -l /dev/sda
+sudo fdisk -l /dev/nvme0n1
+
+# Show disk UUIDs and labels (useful for fstab)
+blkid
+sudo blkid /dev/sda1
+
+# Detailed hardware info for a disk
+sudo hdparm -I /dev/sda          # ATA drives
+sudo nvme id-ctrl /dev/nvme0     # NVMe drives
+
+# Show disk serial, firmware, and transport
+sudo smartctl -i /dev/sda</code></pre>
+<p>---</p>
+<h2>Partitioning</h2>
+<h3>fdisk — Interactive Partitioner (MBR & GPT)</h3>
+<pre><code class="language-bash">sudo fdisk /dev/sda</code></pre>
+<p>Common fdisk commands inside the prompt:</p>
+<p>| Key | Action | |-----|--------| | <code>p</code> | Print current partition table | | <code>n</code> | New partition | | <code>d</code> | Delete partition | | <code>t</code> | Change partition type | | <code>g</code> | Create new GPT table | | <code>o</code> | Create new MBR table | | <code>w</code> | Write and exit | | <code>q</code> | Quit without saving |</p>
+<h3>gdisk — GPT-only Partitioner</h3>
+<pre><code class="language-bash">sudo gdisk /dev/sda</code></pre>
+<h3>parted — Scriptable Partitioner</h3>
+<pre><code class="language-bash"># Print partition table
+sudo parted /dev/sda print
+
+# Create a new GPT table (destructive)
+sudo parted /dev/sda mklabel gpt
+
+# Create a partition (start and end in MiB/GiB/%)
+sudo parted /dev/sda mkpart primary ext4 1MiB 100GiB
+
+# Resize a partition (filesystem must be resized separately)
+sudo parted /dev/sda resizepart 1 200GiB
+
+# Non-interactive (scripted)
+sudo parted -s /dev/sdb mklabel gpt mkpart primary 1MiB 100%</code></pre>
+<p>---</p>
+<h2>Filesystems</h2>
+<h3>Creating Filesystems</h3>
+<pre><code class="language-bash"># ext4
+sudo mkfs.ext4 /dev/sda1
+sudo mkfs.ext4 -L &quot;mydata&quot; /dev/sda1    # with label
+
+# Btrfs
+sudo mkfs.btrfs /dev/sda1
+sudo mkfs.btrfs -L &quot;data&quot; -d single /dev/sda1
+
+# XFS
+sudo mkfs.xfs /dev/sda1
+
+# FAT32 (USB drives, EFI)
+sudo mkfs.vfat -F32 /dev/sdb1
+
+# exFAT
+sudo mkfs.exfat /dev/sdb1</code></pre>
+<h3>Mounting</h3>
+<pre><code class="language-bash"># Mount a filesystem
+sudo mount /dev/sda1 /mnt
+
+# Mount with options
+sudo mount -o noatime,compress=zstd /dev/sda1 /mnt    # Btrfs
+sudo mount -o ro /dev/sda1 /mnt                        # Read-only
+
+# Mount by UUID (preferred in scripts)
+sudo mount UUID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx /mnt
+
+# Mount an ISO image
+sudo mount -o loop image.iso /mnt
+
+# Unmount
+sudo umount /mnt
+
+# Lazy unmount (detaches when no longer busy)
+sudo umount -l /mnt
+
+# Show all currently mounted filesystems
+mount | column -t
+findmnt
+findmnt --real    # physical mounts only</code></pre>
+<h3>Checking and Repairing</h3>
+<pre><code class="language-bash"># ext4 — must be unmounted first
+sudo e2fsck -f /dev/sda1
+
+# Btrfs — can be run on a mounted filesystem (read-only check)
+sudo btrfs check /dev/sda1
+sudo btrfs scrub start /          # Online scrub (finds and fixes errors)
+sudo btrfs scrub status /
+
+# XFS — must be unmounted
+sudo xfs_repair /dev/sda1
+
+# FAT/exFAT
+sudo fsck.vfat /dev/sdb1</code></pre>
+<h3>Resizing</h3>
+<pre><code class="language-bash"># ext4 — grow (filesystem must be mounted or unmounted)
+sudo resize2fs /dev/sda1           # fill the partition
+sudo resize2fs /dev/sda1 50G       # specific size
+
+# Btrfs — grow or shrink while mounted
+sudo btrfs filesystem resize +20G /mountpoint
+sudo btrfs filesystem resize max /mountpoint   # fill partition
+
+# XFS — grow only, must be mounted
+sudo xfs_growfs /mountpoint</code></pre>
+<p>---</p>
+<h2>/etc/fstab — Persistent Mounts</h2>
+<p>Entries in <code>/etc/fstab</code> are captured by the <code>/etc</code> overlay and persist across OS updates.</p>
+<pre><code># &lt;device&gt;                                &lt;mountpoint&gt;  &lt;type&gt;   &lt;options&gt;                    &lt;dump&gt; &lt;pass&gt;
+UUID=aaaa-bbbb-cccc                       /data         btrfs    defaults,noatime,compress=zstd  0      0
+UUID=dddd-eeee-ffff                       /mnt/backup   ext4     defaults,noatime                0      2
+UUID=1234-5678                            /boot/efi     vfat     umask=0077                      0      1</code></pre>
+<pre><code class="language-bash"># Test all fstab entries without rebooting
+sudo mount -a
+
+# Verify a specific entry
+sudo mount /mnt/backup</code></pre>
+<blockquote><p>💡 Always use UUID (<code>blkid</code>) rather than device names like <code>/dev/sda1</code> — device names shift when you add or remove drives.</p></blockquote>
+<p>---</p>
+<h2>Disk Usage</h2>
+<pre><code class="language-bash"># Free space on all mounted filesystems
+df -h
+
+# Disk usage of a directory (human-readable, summarized)
+du -sh /home
+
+# Top 20 largest directories under /var
+du -h /var | sort -rh | head -20
+
+# Interactive disk usage explorer (pre-installed)
+ncdu /
+
+# Btrfs-specific: actual space used after compression and deduplication
+compsize /home
+sudo btrfs filesystem usage /</code></pre>
+<p>---</p>
+<h2>SMART — Disk Health Monitoring</h2>
+<p>SMART (Self-Monitoring, Analysis and Reporting Technology) provides drive health data. <code>smartmontools</code> is pre-installed.</p>
+<pre><code class="language-bash"># Quick health summary
+sudo smartctl -H /dev/sda
+
+# Full SMART info and attributes
+sudo smartctl -a /dev/sda
+
+# NVMe health
+sudo smartctl -a /dev/nvme0
+
+# Run a short self-test (takes ~2 minutes)
+sudo smartctl -t short /dev/sda
+
+# Run a long self-test (takes hours — run overnight)
+sudo smartctl -t long /dev/sda
+
+# Check test results
+sudo smartctl -l selftest /dev/sda
+
+# Enable SMART if disabled
+sudo smartctl -s on /dev/sda</code></pre>
+<h3>Automated SMART Monitoring (smartd)</h3>
+<pre><code class="language-bash"># Enable the smartd daemon to monitor all drives and alert on errors
+sudo systemctl enable --now smartd
+
+# Check smartd status
+systemctl status smartd
+
+# View smartd alerts
+journalctl -u smartd -n 50</code></pre>
+<p>The default <code>/etc/smartd.conf</code> monitors all drives and writes to the journal. For email alerts, add <code>-m your@email.com</code> to the <code>DEVICESCAN</code> line.</p>
+<p>---</p>
+<h2>NVMe Tools</h2>
+<pre><code class="language-bash"># List NVMe drives
+sudo nvme list
+
+# Health and SMART data
+sudo nvme smart-log /dev/nvme0
+
+# Firmware version
+sudo nvme id-ctrl /dev/nvme0 | grep -i fw
+
+# Format a namespace (DESTRUCTIVE — erases drive)
+sudo nvme format /dev/nvme0 --ses=1
+
+# NVMe error log
+sudo nvme error-log /dev/nvme0</code></pre>
+<p>---</p>
+<h2>udisks2 — Desktop Storage Layer</h2>
+<p>udisks2 is the D-Bus service that GNOME Disks, KDE's Removable Media, and file managers use to mount/unmount drives without root.</p>
+<pre><code class="language-bash"># List all drives and block devices
+udisksctl status
+
+# Mount a drive as your user (no sudo needed)
+udisksctl mount -b /dev/sdb1
+
+# Unmount
+udisksctl unmount -b /dev/sdb1
+
+# Power off (safely spin down) a USB drive
+udisksctl power-off -b /dev/sdb
+
+# Unlock a LUKS volume
+udisksctl unlock -b /dev/sdb1
+
+# Show detailed info for a device
+udisksctl info -b /dev/sda</code></pre>
+<p>---</p>
+<h2>Loop Devices</h2>
+<p>Loop devices let you mount image files as block devices.</p>
+<pre><code class="language-bash"># Attach an image to a loop device
+sudo losetup -fP disk.img        # -f = find free, -P = scan partitions
+
+# List active loop devices
+losetup -l
+
+# Mount the loop device (or a partition within it)
+sudo mount /dev/loop0p1 /mnt
+
+# Detach
+sudo losetup -d /dev/loop0
+
+# Create a blank image file (e.g. 2 GiB)
+dd if=/dev/zero of=disk.img bs=1M count=2048
+# or (sparse, instant):
+truncate -s 2G disk.img</code></pre>
+<p>---</p>
+<h2>Swap</h2>
+<pre><code class="language-bash"># Show current swap usage
+swapon --show
+free -h
+
+# Add a swap file
+sudo fallocate -l 4G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+
+# Make permanent (add to /etc/fstab)
+echo '/swapfile none swap defaults 0 0' | sudo tee -a /etc/fstab
+
+# Disable a swap file
+sudo swapoff /swapfile
+
+# ZRAM swap (Shani OS default)
+zramctl                          # show ZRAM devices and compression ratio
+cat /proc/swaps                  # all active swap sources</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>umount: target is busy</code> | Find what's using it: <code>lsof +D /mountpoint</code> or <code>fuser -mv /mountpoint</code>; then kill or <code>umount -l</code> | | Drive not appearing in <code>lsblk</code> | Check <code>dmesg | tail -30</code> for kernel errors; try a different port or cable | | SMART not available | Some USB enclosures block SMART passthrough; try <code>smartctl -d sat /dev/sdb</code> | | <code>e2fsck</code> finds errors but drive is mounted | Boot from the other slot and run <code>e2fsck</code> unmounted | | Btrfs reports errors after scrub | Check <code>dmesg | grep btrfs</code>; if uncorrectable, restore from backup — the drive may be failing | | <code>No space left</code> but <code>df</code> shows free space | Inode exhaustion: <code>df -i</code>; or Btrfs metadata full: <code>sudo btrfs balance start -m /</code> | | UUID changed after mkfs | Update <code>/etc/fstab</code> with <code>blkid</code>; regenerate initramfs with <code>sudo dracut --force</code> |</p>
+<p>---</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="../arch/btrfs">Btrfs Deep Dive</a> — subvolumes, snapshots, send/receive, balance</li>
+<li><a href="../security/luks">LUKS Management</a> — encrypted volumes</li>
+<li><a href="backup">Backup & Recovery</a> — restic, rclone, snapshot strategy</li>
+<li><a href="../arch/filesystem">Filesystem Structure</a> — Shani OS subvolume layout</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

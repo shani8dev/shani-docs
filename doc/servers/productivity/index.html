@@ -146,7 +146,1574 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Productivity &amp; Files</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+        </div>
+      </div>
+      <div class="prose"><blockquote><p><strong>Portability note:</strong> Compose examples use rootless <strong>Podman</strong> and <code>host.containers.internal</code> (the host gateway from a container). When using Docker, replace <code>podman-compose</code> with <code>docker compose</code> and <code>host.containers.internal</code> with <code>host-gateway</code> (add <code>extra_hosts: [host-gateway:host-gateway]</code> to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.</p></blockquote>
+<h1>Productivity & Files</h1>
+<p>Self-hosted cloud storage, file sync, document management, task management, knowledge bases, and personal finance tools.</p>
+<p>---</p>
+<h2>Key Concepts</h2>
+<h4>Internal Developer Platforms (IDPs) — what they solve</h4>
+<p>Without an IDP, every developer needs to know: how to provision infrastructure (Terraform), how to set up CI/CD (Woodpecker/GitHub Actions), how to configure observability (Prometheus + Grafana), how to manage secrets (OpenBao), and how to deploy (Helm + ArgoCD). An IDP (Backstage, Port) wraps all of this in a self-service UI with golden path templates. A developer fills in a form and gets a GitHub repo, CI pipeline, Kubernetes namespace, database, and Grafana dashboard — all wired together. This is what "platform engineering" means in practice.</p>
+<h4>Document-as-code vs knowledge wiki</h4>
+<p>"Docs-as-code" treats documentation like source code — Markdown files in Git, reviewed via PRs, versioned alongside the code they describe, rendered by a static site generator (Docusaurus). This contrasts with wikis (Confluence, BookStack) where docs live in a database, aren't version-controlled with code, and aren't part of the review process. Best practice: API docs and runbooks live in the code repo; architectural decision records (ADRs) also live in Git; long-form internal knowledge in a wiki.</p>
+<h4>Architecture Decision Records (ADRs)</h4>
+<p>Lightweight documents that capture the context, decision, and consequences of a significant technical decision. Stored in <code>docs/adr/</code> in the repo. Format: (1) Status (proposed/accepted/deprecated/superseded), (2) Context (what problem, what constraints), (3) Decision (what was chosen), (4) Consequences (trade-offs). ADRs let future engineers understand <em>why</em> a decision was made, not just <em>what</em> was decided. Essential for remote teams and long-lived systems.</p>
+<h4>Webhook-driven automation patterns</h4>
+<p>A webhook is an HTTP POST that an event source sends to a configured URL when something happens. Gitea sends a webhook on push → Woodpecker CI starts a pipeline. GitHub sends a webhook on PR merge → n8n workflow updates a Jira ticket. Webhooks are stateless and fire-and-forget — the source doesn't wait for the receiver. For reliability, the receiver should acknowledge immediately (HTTP 200) and process asynchronously. Webhook security: always verify the HMAC-SHA256 signature in the <code>X-Gitea-Signature</code> or <code>X-Hub-Signature-256</code> header.</p>
+<h4>S3-compatible storage in the modern stack</h4>
+<p>Understanding the S3 API is a core DevOps skill because it's used by: Velero (Kubernetes backups), Restic/Kopia (file backups), Thanos (Prometheus long-term storage), Loki (log storage), MLflow (model artifacts), and dozens of other tools. The key operations: PutObject, GetObject, DeleteObject, ListObjectsV2. Presigned URLs (time-limited, signature-authenticated URLs for direct client access) come up in interview questions about secure file sharing.</p>
+<h4>Self-hosted vs SaaS trade-offs — the honest framing</h4>
+<p>Self-hosting gives you data sovereignty, no per-seat pricing, and customisation. The real costs: operational overhead (updates, backups, uptime), security responsibility (you patch the CVEs, not the vendor), and feature gaps (SaaS products have larger engineering teams). The right answer depends on data sensitivity (medical/legal → self-host), team size (one person managing 20 self-hosted apps is a maintenance burden), and internet reliability (self-hosted services go down when your home internet does).</p>
+<h4>Nextcloud as a platform, not just file sync</h4>
+<p>Nextcloud's app ecosystem makes it more than Dropbox. Talk (video calls + chat), Calendar (CalDAV), Contacts (CardDAV), Notes, Deck (Kanban), and Forms extend it toward a self-hosted Google Workspace. The key architecture decision: high-performance backend (Redis for caching, PostgreSQL over SQLite, preview generation workers) makes the difference between a slow clunky app and one that feels like a real SaaS product. External storage mounts (S3, SFTP, SMB) let you use Nextcloud as a unified frontend for data that lives elsewhere.</p>
+<h4>Workflow automation — n8n vs Zapier mental model</h4>
+<p>n8n is a self-hosted Zapier/Make alternative: visual, node-based automation flows triggered by webhooks, schedules, or events. Each node is an action (HTTP request, database query, email send, Slack message). The key concept is the data flow between nodes — each node receives the previous node's output as JSON. Useful patterns: nightly report from Prometheus data → formatted Markdown → sent to Telegram; new row in Nextcloud spreadsheet → create task in Vikunja; RSS item with keyword → saved to Wallabag. For DevOps automation (CI/CD, Kubernetes), prefer purpose-built tools; n8n is best for glue code between productivity apps.</p>
+<p><strong>CalDAV and CardDAV — the open calendar/contacts standard:</strong> These protocols (extensions of WebDAV) are how Nextcloud, Radicale, and Baikal expose calendars and contacts to any client (iOS, Android, Thunderbird, GNOME Calendar). Understanding them matters because: (1) any self-hosted calendar server can replace Google Calendar if your clients support CalDAV, (2) when debugging sync issues, the protocol is the same regardless of server, (3) event data lives in iCalendar format (.ics) — human-readable, version-controllable.</p>
+<h4>Documentation as institutional memory</h4>
+<p>The half-life of tribal knowledge is the tenure of the person who holds it. A wiki (BookStack, Outline, Wiki.js) only provides value if it's kept current and actually consulted. Two practices that work: (1) runbooks linked from Grafana alerts — the person paged opens the alert and sees the runbook URL immediately, so runbooks get used and therefore get maintained; (2) ADRs committed alongside code — the PR that adds a service also adds a doc/adr explaining why.</p>
+<h4>Internal developer portals — what Backstage actually solves</h4>
+<p>Software catalog sprawl: in a company with 50+ microservices, no one knows who owns what, what's deployed where, what APIs exist, or where the runbooks are. Backstage solves this with a software catalog (every service has a <code>catalog-info.yaml</code> with owner, links, dependencies) and a TechDocs site (markdown documentation auto-published from the service repo). Plugins add live data: which Kubernetes pods are running for this service, the latest CI build status, Datadog SLOs, PagerDuty on-call. The business value: onboarding time drops from weeks to days when every new engineer can discover services, owners, and documentation from one place.</p>
+<h4>Knowledge management — why wikis fail and how to fix them</h4>
+<p>Wikis fail because they rot: content goes stale, nobody maintains it, and eventually nobody trusts it. Practices that work: (1) link runbooks directly from Grafana alerts — the person paged opens the alert and sees the runbook URL immediately, so runbooks get used and therefore maintained; (2) ADRs (Architecture Decision Records) committed alongside code — the PR that adds a service also adds <code>docs/decisions/001-why-postgres.md</code>; (3) treat documentation as code — PRs required for doc changes, linting for broken links, last-modified dates visible on every page. The failure mode to avoid: a wiki that's separate from the workflow is a wiki nobody reads.</p>
+<h4>Webhook-driven automation — the integration pattern</h4>
+<p>Webhooks are HTTP POST requests sent by a system when an event occurs. Gitea sends a webhook on every push; Grafana sends one when an alert fires; Stripe sends one when a payment succeeds. n8n, Huginn, and custom endpoints receive these webhooks and trigger workflows. The pattern: system event → webhook POST → automation platform → actions (send Slack message, create Jira ticket, trigger deployment, update spreadsheet). This is the foundation of event-driven integration — cheaper and simpler than polling APIs on a schedule. Webhook security: always validate the HMAC signature in the payload header before processing.</p>
+<h4>S3-compatible storage as a universal integration layer</h4>
+<p>MinIO's S3-compatible API means any tool that supports S3 works with your self-hosted storage: backup tools (Restic, Kopia), analytics platforms (Trino, DuckDB, Spark), ML frameworks (MLflow artifact store), logging pipelines (Loki, Thanos), and CI artifact storage (Woodpecker). The S3 API has become the universal object storage interface — knowing how to configure IAM-style bucket policies, lifecycle rules, and versioning in MinIO transfers directly to AWS S3 skills, and vice versa.</p>
+<p>---</p>
+<p>---</p>
+<h2>Nextcloud</h2>
+<p><strong>Purpose:</strong> Comprehensive self-hosted cloud suite — file sync across all your devices, calendar, contacts, collaborative document editing (via Collabora or OnlyOffice), and a mobile app that feels like Google Drive. Replaces Dropbox, Google Drive, Google Calendar, and Google Contacts simultaneously.</p>
+<h3>How WebDAV and CalDAV Work</h3>
+<p>Nextcloud (and several other tools in this section) expose their file and calendar data via two HTTP-based protocols that are worth understanding:</p>
+<p><strong>WebDAV (Web Distributed Authoring and Versioning):</strong> extends HTTP with additional methods (<code>PROPFIND</code>, <code>MKCOL</code>, <code>COPY</code>, <code>MOVE</code>, <code>LOCK</code>) that let clients browse, upload, download, and manage files over HTTPS — without a proprietary sync agent. Any WebDAV client (Nautilus, Finder, Cyberduck, rclone, Windows Explorer) can mount a WebDAV share as a filesystem. Nextcloud exposes WebDAV at:</p>
+<pre><code>https://files.home.local/remote.php/dav/files/&lt;username&gt;/</code></pre>
+<p><strong>CalDAV:</strong> is a similar extension for calendar data — it adds iCalendar (<code>.ics</code>) create/read/update/delete operations over HTTP. Any CalDAV-compatible calendar app (GNOME Calendar, Apple Calendar, Thunderbird, Android via DAVx⁵) syncs directly with your Nextcloud calendar. Nextcloud's CalDAV endpoint:</p>
+<pre><code>https://files.home.local/remote.php/dav/calendars/&lt;username&gt;/</code></pre>
+<p><strong>CardDAV:</strong> is the same concept for contacts (<code>.vcf</code> / vCard format). These three protocols together are why Nextcloud can replace an entire Google Workspace for file, calendar, and contacts sync — they're open standards, not proprietary APIs.</p>
+<h5>Mounting Nextcloud via rclone (WebDAV)</h5>
+<pre><code class="language-bash"># Configure in rclone config (type: webdav, vendor: nextcloud)
+rclone copy nextcloud:/Documents ~/local-backup/
+
+# Or mount as a local filesystem
+rclone mount nextcloud:/ ~/mnt/nextcloud/ --daemon</code></pre>
+<pre><code class="language-yaml"># ~/nextcloud/compose.yaml
+services:
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nc
+      MYSQL_PASSWORD: ncpass
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  nextcloud:
+    image: nextcloud:30
+    ports: [&quot;127.0.0.1:8888:80&quot;]
+    environment:
+      MYSQL_HOST: db
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nc
+      MYSQL_PASSWORD: ncpass
+      REDIS_HOST: redis
+      NEXTCLOUD_ADMIN_USER: admin
+      NEXTCLOUD_ADMIN_PASSWORD: changeme
+      NEXTCLOUD_TRUSTED_DOMAINS: files.home.local
+    volumes: [nc_data:/var/www/html]
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+volumes:
+  db_data:
+  nc_data:</code></pre>
+<pre><code class="language-bash">cd ~/nextcloud &amp;&amp; podman-compose up -d</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">files.home.local { tls internal; reverse_proxy localhost:8888 }</code></pre>
+<h5>Run background jobs (required for performance)</h5>
+<pre><code class="language-bash"># Add to a systemd timer — every 5 minutes
+podman exec -u www-data nextcloud php /var/www/html/cron.php</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Run Nextcloud cron (add to systemd timer — every 5 minutes)
+podman exec -u www-data nextcloud php /var/www/html/cron.php
+
+# Run OCC commands (Nextcloud's admin CLI)
+podman exec -u www-data nextcloud php occ status
+podman exec -u www-data nextcloud php occ user:list
+podman exec -u www-data nextcloud php occ files:scan --all
+podman exec -u www-data nextcloud php occ maintenance:mode --on
+podman exec -u www-data nextcloud php occ maintenance:mode --off
+podman exec -u www-data nextcloud php occ upgrade
+podman exec -u www-data nextcloud php occ app:install photos
+podman exec -u www-data nextcloud php occ app:list
+podman exec -u www-data nextcloud php occ db:add-missing-indices
+
+# Add a trusted domain
+podman exec -u www-data nextcloud php occ config:system:set trusted_domains 2 --value=files.home.local
+
+# View Nextcloud logs
+podman exec -u www-data nextcloud php occ log:tail
+
+# Check background jobs are running
+podman exec -u www-data nextcloud php occ background:cron</code></pre>
+<h4>Recommended apps to install</h4>
+<p>Nextcloud Office (Collabora), Contacts, Calendar, Notes, Passwords, Talk (video calls).</p>
+<p>---</p>
+<h2>Syncthing</h2>
+<p><strong>Purpose:</strong> Decentralised, peer-to-peer file sync with no central server. Devices sync directly with each other — encrypted, open-source, and completely private. Ideal for syncing folders across your laptop, phone, and server without a cloud account.</p>
+<pre><code class="language-yaml"># ~/syncthing/compose.yaml
+services:
+  syncthing:
+    image: syncthing/syncthing:latest
+    ports:
+      - 127.0.0.1:8384:8384
+      - 22000:22000/tcp
+      - 22000:22000/udp
+      - 21027:21027/udp
+    volumes:
+      - /home/user/syncthing/config:/var/syncthing/config:Z
+      - /home/user/sync:/var/syncthing/Sync:Z
+    environment:
+      PUID: &quot;1000&quot;
+      PGID: &quot;1000&quot;
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/syncthing &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># View logs
+podman logs -f syncthing
+
+# Get device ID (needed to pair with other devices)
+podman exec syncthing syncthing --device-id
+
+# List paired devices and their status via API
+curl -s -H &quot;X-API-Key: $(grep apikey /home/user/syncthing/config/config.xml | grep -oP '(?&lt;=&gt;)[^&lt;]+')&quot;   http://localhost:8384/rest/system/connections | python3 -m json.tool
+
+# Check folder sync status
+curl -s -H &quot;X-API-Key: YOUR_API_KEY&quot;   http://localhost:8384/rest/db/status?folder=default | python3 -m json.tool
+
+# Force a full rescan
+curl -X POST -H &quot;X-API-Key: YOUR_API_KEY&quot;   &quot;http://localhost:8384/rest/db/scan?folder=default&quot;
+
+# Get server version and stats
+curl -s http://localhost:8384/rest/system/version</code></pre>
+<p><strong>Firewall:</strong> (for syncing with external devices):</p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=22000/tcp --add-port=22000/udp --add-port=21027/udp --permanent
+sudo firewall-cmd --reload</code></pre>
+<p>Access the web UI at <code>http://localhost:8384</code>. Add remote devices using their Device ID (found in the UI).</p>
+<p>---</p>
+<h2>Filebrowser</h2>
+<p><strong>Purpose:</strong> Lightweight web-based file manager. Browse, upload, download, rename, and edit files on your server from any browser. Useful for quick file access without needing an SSH client or a full Nextcloud setup.</p>
+<pre><code class="language-yaml"># ~/filebrowser/compose.yaml
+services:
+  filebrowser:
+    image: filebrowser/filebrowser:s6
+    ports:
+      - 127.0.0.1:8085:80
+    volumes:
+      - /home/user:/srv:Z
+      - /home/user/filebrowser.db:/database.db:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/filebrowser &amp;&amp; podman-compose up -d</code></pre>
+<p>Default login: admin / admin. Change the password immediately after first login.</p>
+<p>---</p>
+<h2>Paperless-ngx</h2>
+<p><strong>Purpose:</strong> Document management system with OCR. Scan paper documents, automatically index and tag their contents, and make everything full-text searchable. Drop a PDF into the consume folder and it is automatically processed and filed.</p>
+<pre><code class="language-yaml"># ~/paperless/compose.yaml
+services:
+  broker:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: paperless
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  webserver:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    ports: [&quot;127.0.0.1:8000:8000&quot;]
+    environment:
+      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_DBHOST: db
+      PAPERLESS_OCR_LANGUAGE: eng
+      PAPERLESS_TIME_ZONE: Asia/Kolkata
+      PAPERLESS_ADMIN_USER: admin
+      PAPERLESS_ADMIN_PASSWORD: changeme
+    volumes:
+      - /home/user/paperless/data:/usr/src/paperless/data:Z
+      - /home/user/paperless/media:/usr/src/paperless/media:Z
+      - /home/user/Documents/inbox:/usr/src/paperless/consume:Z
+      - /home/user/paperless/export:/usr/src/paperless/export:Z
+    depends_on: [broker, db]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/paperless &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Trigger a manual document consumption scan
+curl -X POST http://localhost:8000/api/documents/post_document/   -H &quot;Authorization: Token YOUR_API_TOKEN&quot;   -F &quot;document=@/path/to/file.pdf&quot;
+
+# List recent documents
+curl http://localhost:8000/api/documents/?ordering=-created   -H &quot;Authorization: Token YOUR_API_TOKEN&quot; | python3 -m json.tool | head -50
+
+# Run management commands
+podman exec webserver python manage.py document_index reindex
+podman exec webserver python manage.py document_thumbnails
+podman exec webserver python manage.py check
+
+# Search documents from CLI
+curl &quot;http://localhost:8000/api/documents/?query=invoice&amp;format=json&quot;   -H &quot;Authorization: Token YOUR_API_TOKEN&quot;
+
+# Create a superuser
+podman exec webserver python manage.py createsuperuser
+
+# Export all documents
+podman exec webserver python manage.py document_exporter /usr/src/paperless/export
+
+# View logs
+podman logs -f webserver</code></pre>
+<blockquote><p>Drop documents into <code>~/Documents/inbox</code> — Paperless will automatically OCR, index, and file them within minutes.</p></blockquote>
+<h3>Share Documents via Email</h3>
+<p>Paperless-ngx can send documents as email attachments directly from the UI or via automation. This requires configuring SMTP settings in the environment.</p>
+<h4>1. Add SMTP settings to the compose environment</h4>
+<pre><code class="language-yaml">environment:
+  # ... existing vars ...
+  PAPERLESS_EMAIL_HOST: host.containers.internal   # or your SMTP relay / Mailrise
+  PAPERLESS_EMAIL_PORT: &quot;25&quot;
+  PAPERLESS_EMAIL_HOST_USER: &quot;&quot;            # blank for unauthenticated local relay
+  PAPERLESS_EMAIL_HOST_PASSWORD: &quot;&quot;
+  PAPERLESS_EMAIL_USE_TLS: &quot;false&quot;
+  PAPERLESS_EMAIL_USE_SSL: &quot;false&quot;
+  PAPERLESS_FROM_EMAIL: paperless@home.local</code></pre>
+<p>For an authenticated SMTP provider (e.g., Brevo, Mailgun, Gmail SMTP):</p>
+<pre><code class="language-yaml">  PAPERLESS_EMAIL_HOST: smtp.brevo.com
+  PAPERLESS_EMAIL_PORT: &quot;587&quot;
+  PAPERLESS_EMAIL_HOST_USER: your@email.com
+  PAPERLESS_EMAIL_HOST_PASSWORD: your-smtp-password
+  PAPERLESS_EMAIL_USE_TLS: &quot;true&quot;</code></pre>
+<h4>2. Configure a mail rule to send on consume (optional automation)</h4>
+<p>In the Paperless UI → <strong>Settings → Mail Rules → Add Rule</strong>:</p>
+<ul>
+<li>Action: <strong>Assign tags / correspondent</strong> (or trigger a workflow)</li>
+</ul>
+<blockquote><p>Full email-out automation is available via the <strong>Workflows</strong> feature (Paperless-ngx 2.x+). Go to <strong>Settings → Workflows → Add Workflow</strong> → Trigger: <em>Document Added</em> → Action: <em>Send Email</em>.</p></blockquote>
+<h4>3. Send a document manually from the UI</h4>
+<p>Open any document → click the <strong>⋮ menu → Share / Send</strong> → enter a recipient address. Paperless attaches the original PDF and sends via the configured SMTP relay.</p>
+<h4>4. Send via API</h4>
+<pre><code class="language-bash"># Share document ID 42 by email
+curl -X POST http://localhost:8000/api/documents/42/share_link/ \
+  -H &quot;Authorization: Token YOUR_API_TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;expiration&quot;: null}'
+# Returns a share link — paste into an email manually</code></pre>
+<blockquote><p>For a simple local SMTP relay without an external account, pair Paperless with <strong>Mailrise</strong> or <strong>Maddy</strong> (both documented in the Mail section) — configure Paperless to use <code>host.containers.internal:25</code> as the relay.</p></blockquote>
+<p>---</p>
+<h2>Planka (Kanban Board)</h2>
+<p><strong>Purpose:</strong> Open-source Trello alternative. Real-time collaborative Kanban boards with cards, labels, checklists, due dates, and member assignments.</p>
+<pre><code class="language-yaml"># ~/planka/compose.yaml
+services:
+  planka:
+    image: ghcr.io/plankanban/planka:latest
+    ports:
+      - 127.0.0.1:3000:3000
+    volumes:
+      - /home/user/planka/avatars:/app/public/user-avatars:Z
+      - /home/user/planka/background:/app/public/project-background-images:Z
+      - /home/user/planka/attachments:/app/private/attachments:Z
+    environment:
+      DATABASE_URL: postgresql://planka:changeme@db:5432/planka
+      SECRET_KEY: changeme-run-openssl-rand-hex-64
+      BASE_URL: https://planka.home.local
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: planka
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: planka
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/planka &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>Planka bundles PostgreSQL in the compose file above — no separate database service is needed.</p></blockquote>
+<p>---</p>
+<h2>Vikunja (Task Management)</h2>
+<p><strong>Purpose:</strong> Self-hosted to-do app and project manager. Supports tasks, projects, teams, Kanban boards, Gantt charts, and CalDAV sync for task syncing with mobile apps. Clean alternative to Todoist.</p>
+<pre><code class="language-yaml"># ~/vikunja/compose.yaml
+services:
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: vikunja
+      MYSQL_USER: vikunja
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+  vikunja:
+    image: vikunja/vikunja:latest
+    ports: [&quot;127.0.0.1:3456:3456&quot;]
+    environment:
+      VIKUNJA_DATABASE_HOST: db
+      VIKUNJA_DATABASE_TYPE: mysql
+      VIKUNJA_DATABASE_USER: vikunja
+      VIKUNJA_DATABASE_PASSWORD: changeme
+      VIKUNJA_DATABASE_DATABASE: vikunja
+      VIKUNJA_SERVICE_JWTSECRET: changeme
+      VIKUNJA_SERVICE_FRONTENDURL: https://tasks.home.local
+    volumes: [vikunja_files:/app/vikunja/files]
+    depends_on: [db]
+    restart: unless-stopped
+
+volumes: {db_data: {}, vikunja_files: {}}</code></pre>
+<pre><code class="language-bash">cd ~/vikunja &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>Outline (Team Knowledge Base)</h2>
+<p><strong>Purpose:</strong> Modern wiki and knowledge base with real-time collaborative editing, a clean Notion-like interface, and full Markdown support. Great for team documentation, runbooks, and personal notes.</p>
+<pre><code class="language-yaml"># ~/outline/compose.yaml
+services:
+  outline:
+    image: outlinewiki/outline:latest
+    ports: [&quot;127.0.0.1:3030:3000&quot;]
+    environment:
+      DATABASE_URL: postgres://outline:changeme@db:5432/outline
+      REDIS_URL: redis://redis:6379
+      SECRET_KEY: changeme-run-openssl-rand-hex-32
+      UTILS_SECRET: changeme-run-openssl-rand-hex-32
+      URL: https://wiki.home.local
+      PORT: &quot;3000&quot;
+      # File storage (local)
+      FILE_STORAGE: local
+      FILE_STORAGE_LOCAL_ROOT_DIR: /var/lib/outline/data
+    volumes: [outline_data:/var/lib/outline/data]
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: outline
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: outline
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes: {pg_data: {}, outline_data: {}}</code></pre>
+<pre><code class="language-bash">cd ~/outline &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>Outline requires an OIDC provider for login. Use Authentik or Zitadel configured with an Outline application.</p></blockquote>
+<p>---</p>
+<h2>Mealie (Recipe Manager)</h2>
+<p><strong>Purpose:</strong> Self-hosted recipe manager with web scraping (import recipes from any URL), meal planning, shopping list generation, and household sharing.</p>
+<pre><code class="language-yaml"># ~/mealie/compose.yaml
+services:
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie:latest
+    ports:
+      - 127.0.0.1:9925:9000
+    volumes:
+      - /home/user/mealie/data:/app/data:Z
+    environment:
+      BASE_URL: https://recipes.home.local
+      DEFAULT_EMAIL: admin@home.local
+      DEFAULT_PASSWORD: changeme
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/mealie &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>Miniflux (RSS Reader)</h2>
+<p><strong>Purpose:</strong> Minimal, fast RSS and Atom feed reader. No tracking, no ads, no algorithmic recommendations — just the articles from sources you choose. Supports Fever and Google Reader APIs for mobile app compatibility (Reeder, NetNewsWire).</p>
+<pre><code class="language-yaml"># ~/miniflux/compose.yaml
+services:
+  miniflux:
+    image: miniflux/miniflux:latest
+    ports:
+      - 127.0.0.1:8090:8080
+    environment:
+      DATABASE_URL: postgres://miniflux:changeme@db/miniflux?sslmode=disable
+      RUN_MIGRATIONS: &quot;1&quot;
+      CREATE_ADMIN: &quot;1&quot;
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: changeme
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: miniflux
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: miniflux
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/miniflux &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Create additional users
+podman exec miniflux miniflux -create-admin
+
+# Refresh all feeds now
+podman exec miniflux miniflux -refresh-feeds
+
+# Run database migrations
+podman exec miniflux miniflux -migrate
+
+# Import OPML file
+curl -X POST http://localhost:8090/v1/import   -H &quot;X-Auth-Token: YOUR_API_KEY&quot;   -F &quot;file=@subscriptions.opml&quot;
+
+# Export subscriptions as OPML
+curl http://localhost:8090/v1/export   -H &quot;X-Auth-Token: YOUR_API_KEY&quot; -o subscriptions.opml
+
+# View logs
+podman logs -f miniflux</code></pre>
+<p>---</p>
+<h2>n8n (Workflow Automation)</h2>
+<p><strong>Purpose:</strong> Visual workflow automation with 400+ integrations — webhooks, APIs, databases, AI tools, home automation, and more. Build multi-step automations without code using a drag-and-drop node editor. Self-hosted alternative to Zapier and Make. Pairs well with Nextcloud, Gitea, and Home Assistant for event-driven workflows across your entire self-hosted stack.</p>
+<pre><code class="language-yaml"># ~/n8n/compose.yaml
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    ports:
+      - 127.0.0.1:5678:5678
+    volumes:
+      - /home/user/n8n:/home/node/.n8n:Z
+    environment:
+      N8N_HOST: n8n.example.com
+      N8N_PROTOCOL: https
+      WEBHOOK_URL: https://n8n.example.com
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/n8n &amp;&amp; podman-compose up -d</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">n8n.example.com { reverse_proxy localhost:5678 }</code></pre>
+<blockquote><p>n8n webhooks require a publicly accessible URL. Use a Cloudflare Tunnel or Pangolin for internet-facing webhooks without opening firewall ports — see the <a href="https://docs.shani.dev/doc/servers/vpn-tunnels">VPN & Tunnels wiki</a>.</p></blockquote>
+<p>---</p>
+<h2>Stirling PDF</h2>
+<p><strong>Purpose:</strong> Web-based PDF Swiss Army knife. Merge, split, compress, convert, rotate, watermark, OCR, edit metadata, and more — all locally, no files uploaded to third-party services.</p>
+<pre><code class="language-yaml"># ~/stirling-pdf/compose.yaml
+services:
+  stirling-pdf:
+    image: stirlingtools/stirling-pdf:latest
+    ports:
+      - 127.0.0.1:8080:8080
+    volumes:
+      - /home/user/stirling/trainingData:/usr/share/tessdata:Z
+      - /home/user/stirling/extraConfigs:/configs:Z
+    environment:
+      DOCKER_ENABLE_SECURITY: false
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/stirling-pdf &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>Ghost (Publishing & Blogging)</h2>
+<p><strong>Purpose:</strong> Modern, open-source publishing platform. Ghost is a focused writing and newsletter tool — clean editor, built-in membership and paid subscriptions (via Stripe), email newsletters, and a polished public-facing blog. The self-hosted alternative to Substack or Medium.</p>
+<pre><code class="language-yaml"># ~/ghost/compose.yaml
+services:
+  ghost:
+    image: ghost:5-alpine
+    ports: [&quot;127.0.0.1:2368:2368&quot;]
+    environment:
+      url: https://blog.example.com
+      database__client: mysql
+      database__connection__host: db
+      database__connection__user: ghost
+      database__connection__password: changeme
+      database__connection__database: ghost
+      mail__transport: SMTP
+      mail__options__host: localhost
+      mail__options__port: 25
+      NODE_ENV: production
+    volumes:
+      - /home/user/ghost/content:/var/lib/ghost/content:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: ghost
+      MYSQL_USER: ghost
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  db_data:</code></pre>
+<pre><code class="language-bash">cd ~/ghost &amp;&amp; podman-compose up -d</code></pre>
+<p>Access the admin panel at <code>http://localhost:2368/ghost</code>. Set up your site, configure the theme, and connect Stripe for paid memberships.</p>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">blog.example.com { reverse_proxy localhost:2368 }</code></pre>
+<p>---</p>
+<h2>WordPress</h2>
+<p><strong>Purpose:</strong> The world's most widely used CMS. Powers 40% of the web. Massive plugin ecosystem, thousands of themes, WooCommerce for e-commerce, and a huge talent pool. The right choice when you need maximum flexibility or have to integrate with existing WordPress tooling.</p>
+<pre><code class="language-yaml"># ~/wordpress/compose.yaml
+services:
+  wordpress:
+    image: wordpress:6-php8.3-apache
+    ports: [&quot;127.0.0.1:8100:80&quot;]
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: changeme
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_HOME', 'https://site.example.com');
+        define('WP_SITEURL', 'https://site.example.com');
+    volumes:
+      - /home/user/wordpress/data:/var/www/html:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  db_data:</code></pre>
+<pre><code class="language-bash">cd ~/wordpress &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>For better performance, add Redis object caching: deploy a Redis container and install the <code>Redis Object Cache</code> WordPress plugin, pointing it at <code>host.containers.internal:6379</code>.</p></blockquote>
+<p>---</p>
+<h2>BookStack (Documentation Wiki)</h2>
+<p><strong>Purpose:</strong> Simple, elegant wiki and documentation platform. Books, chapters, and pages organise content hierarchically. Supports Markdown and WYSIWYG editing, page revisions, search, diagrams (Draw.io integration), and LDAP/SAML SSO. Excellent for team runbooks, internal documentation, and knowledge bases.</p>
+<pre><code class="language-yaml"># ~/bookstack/compose.yaml
+services:
+  bookstack:
+    image: lscr.io/linuxserver/bookstack:latest
+    ports: [&quot;127.0.0.1:6875:80&quot;]
+    environment:
+      PUID: &quot;1000&quot;
+      PGID: &quot;1000&quot;
+      TZ: Asia/Kolkata
+      APP_URL: https://docs.home.local
+      DB_HOST: db
+      DB_DATABASE: bookstack
+      DB_USERNAME: bookstack
+      DB_PASSWORD: changeme
+    volumes:
+      - /home/user/bookstack/config:/config:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: bookstack
+      MYSQL_USER: bookstack
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  db_data:</code></pre>
+<pre><code class="language-bash">cd ~/bookstack &amp;&amp; podman-compose up -d</code></pre>
+<p>Default login: <code>admin@admin.com</code> / <code>password</code>. Change immediately after first access.</p>
+<blockquote><p><strong>Choosing between BookStack, Outline, and Wiki.js:</strong> BookStack is the most approachable with its book/chapter/page hierarchy. Outline has a Notion-like interface and requires OIDC. Wiki.js supports Git-backed storage and multi-database backends.</p></blockquote>
+<p>---</p>
+<h2>Wiki.js</h2>
+<p><strong>Purpose:</strong> Powerful, extensible wiki with a Git-backed storage option — every page is a Markdown file committed to a Git repository. Supports 50+ authentication providers, 20+ rendering engines, and full-text search. Good choice when you want your wiki version-controlled.</p>
+<pre><code class="language-yaml"># ~/wikijs/compose.yaml
+services:
+  wikijs:
+    image: ghcr.io/requarks/wiki:2
+    ports: [&quot;127.0.0.1:3300:3000&quot;]
+    environment:
+      DB_TYPE: postgres
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: wiki
+      DB_USER: wiki
+      DB_PASS: changeme
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: wiki
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: wiki
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/wikijs &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:3300</code> to complete the setup wizard. Enable the Git storage module to sync all pages to a Gitea repository.</p>
+<p>---</p>
+<h2>HedgeDoc (Collaborative Markdown)</h2>
+<p><strong>Purpose:</strong> Real-time collaborative Markdown editor. Multiple people edit simultaneously — useful for meeting notes, shared documents, and technical writing. Each document gets a public shareable link. Think Google Docs but Markdown-based and self-hosted.</p>
+<pre><code class="language-yaml"># ~/hedgedoc/compose.yaml
+services:
+  hedgedoc:
+    image: quay.io/hedgedoc/hedgedoc:latest
+    ports: [&quot;127.0.0.1:3400:3000&quot;]
+    environment:
+      CMD_DOMAIN: notes.home.local
+      CMD_URL_ADDPORT: &quot;false&quot;
+      CMD_PROTOCOL_USESSL: &quot;true&quot;
+      CMD_DB_URL: postgres://hedgedoc:changeme@db:5432/hedgedoc
+      CMD_SESSION_SECRET: changeme-run-openssl-rand-hex-32
+      CMD_ALLOW_ANONYMOUS: &quot;true&quot;
+      CMD_ALLOW_ANONYMOUS_EDITS: &quot;true&quot;
+    volumes:
+      - /home/user/hedgedoc/uploads:/hedgedoc/public/uploads:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: hedgedoc
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: hedgedoc
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/hedgedoc &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>CryptPad (Encrypted Collaborative Office)</h2>
+<p><strong>Purpose:</strong> Zero-knowledge, end-to-end encrypted collaboration suite. Documents, spreadsheets, presentations, kanban, code pads, and whiteboards — all encrypted client-side. The server never sees your content. The self-hosted alternative to Google Docs with privacy as the first principle.</p>
+<pre><code class="language-yaml"># ~/cryptpad/compose.yaml
+services:
+  cryptpad:
+    image: cryptpad/cryptpad:latest
+    ports:
+      - 127.0.0.1:3500:3000
+    volumes:
+      - /home/user/cryptpad/data:/cryptpad/data:Z
+      - /home/user/cryptpad/customize:/cryptpad/customize.dist:Z
+    environment:
+      CPAD_MAIN_DOMAIN: pad.home.local
+      CPAD_SANDBOX_DOMAIN: sandbox.home.local
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/cryptpad &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>CryptPad requires <strong>two separate subdomains</strong> — one for the main app and one for the sandbox iframe (security requirement). Configure both in Caddy and DNS.</p></blockquote>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">pad.home.local     { tls internal; reverse_proxy localhost:3500 }
+sandbox.home.local { tls internal; reverse_proxy localhost:3500 }</code></pre>
+<p>---</p>
+<h2>FreshRSS (RSS Reader)</h2>
+<p><strong>Purpose:</strong> Fast, self-hosted RSS and Atom feed aggregator. Multi-user, supports Google Reader and Fever APIs (for mobile apps like Reeder, NetNewsWire, and ReadKit), has a powerful filtering engine, and handles thousands of feeds reliably. A more feature-complete alternative to Miniflux.</p>
+<pre><code class="language-yaml"># ~/freshrss/compose.yaml
+services:
+  freshrss:
+    image: freshrss/freshrss:latest
+    ports:
+      - 127.0.0.1:8200:80
+    volumes:
+      - /home/user/freshrss/data:/var/www/FreshRSS/data:Z
+      - /home/user/freshrss/extensions:/var/www/FreshRSS/extensions:Z
+    environment:
+      TZ: Asia/Kolkata
+      CRON_MIN: 4,34
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/freshrss &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:8200</code>. During setup, choose SQLite for simplicity or PostgreSQL for multi-user deployments. Enable the API in Settings → Authentication for mobile app access.</p>
+<blockquote><p>Mobile apps: <strong>Reeder 5</strong> (iOS), <strong>NetNewsWire</strong> (iOS/macOS), <strong>ReadKit</strong>, and <strong>Fluent Reader</strong> all support the Fever or Google Reader API that FreshRSS exposes.</p></blockquote>
+<p>---</p>
+<h2>Wallabag (Read-It-Later)</h2>
+<p><strong>Purpose:</strong> Save articles from the web to read later — offline, without ads, in a clean reading view. Browser extensions and mobile apps (iOS, Android) let you save with one tap. Full-text search, tagging, and export to ePub/PDF. Self-hosted Pocket/Instapaper replacement.</p>
+<pre><code class="language-yaml"># ~/wallabag/compose.yaml
+services:
+  wallabag:
+    image: wallabag/wallabag:latest
+    ports: [&quot;127.0.0.1:8250:80&quot;]
+    environment:
+      SYMFONY__ENV__DATABASE_DRIVER: pdo_pgsql
+      SYMFONY__ENV__DATABASE_HOST: db
+      SYMFONY__ENV__DATABASE_PORT: 5432
+      SYMFONY__ENV__DATABASE_NAME: wallabag
+      SYMFONY__ENV__DATABASE_USER: wallabag
+      SYMFONY__ENV__DATABASE_PASSWORD: changeme
+      SYMFONY__ENV__SECRET: changeme-run-openssl-rand-hex-32
+      SYMFONY__ENV__DOMAIN_NAME: https://read.home.local
+      POPULATE_DATABASE: &quot;True&quot;
+    volumes:
+      - /home/user/wallabag/images:/var/www/wallabag/web/assets/images:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: wallabag
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: wallabag
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/wallabag &amp;&amp; podman-compose up -d</code></pre>
+<p>Default login: <code>wallabag</code> / <code>wallabag</code>. Change immediately.</p>
+<p>---</p>
+<h2>Linkwarden (Bookmark Manager)</h2>
+<p><strong>Purpose:</strong> Collaborative bookmark manager with automatic webpage archiving. When you save a link, Linkwarden takes a full-page screenshot and saves the HTML — so bookmarks never go dead. Tags, collections, full-text search, and public sharing.</p>
+<pre><code class="language-yaml"># ~/linkwarden/compose.yaml
+services:
+  linkwarden:
+    image: ghcr.io/linkwarden/linkwarden:latest
+    ports: [&quot;127.0.0.1:3210:3000&quot;]
+    environment:
+      DATABASE_URL: postgresql://linkwarden:changeme@db:5432/linkwarden
+      NEXTAUTH_SECRET: changeme-run-openssl-rand-hex-32
+      NEXTAUTH_URL: https://links.home.local
+      NEXT_PUBLIC_DISABLE_REGISTRATION: &quot;true&quot;
+    volumes:
+      - /home/user/linkwarden/data:/data/data:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: linkwarden
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: linkwarden
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/linkwarden &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>Monica (Personal CRM)</h2>
+<p><strong>Purpose:</strong> Personal relationship manager. Track your contacts, log notes from conversations, set reminders for birthdays and follow-ups, record relationship history, and never forget important details about the people in your life. The self-hosted alternative to remembering things about people you care about.</p>
+<pre><code class="language-yaml"># ~/monica/compose.yaml
+services:
+  monica:
+    image: monica:latest
+    ports: [&quot;127.0.0.1:8094:80&quot;]
+    environment:
+      APP_KEY: base64:changeme-run-php-artisan-key-generate
+      APP_URL: https://crm.home.local
+      DB_HOST: db
+      DB_DATABASE: monica
+      DB_USERNAME: monica
+      DB_PASSWORD: changeme
+    volumes:
+      - /home/user/monica/storage:/var/www/html/storage:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: monica
+      MYSQL_USER: monica
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  db_data:</code></pre>
+<pre><code class="language-bash">cd ~/monica &amp;&amp; podman-compose up -d</code></pre>
+<h5>First run</h5>
+<pre><code class="language-bash">podman exec monica php artisan setup:production --force</code></pre>
+<p>---</p>
+<h2>Rallly (Scheduling & Polls)</h2>
+<p><strong>Purpose:</strong> Lightweight Doodle alternative for scheduling meetings. Create a poll with date/time options, share the link, and let participants vote. No accounts required for respondents. Clean, fast, and self-contained.</p>
+<pre><code class="language-yaml"># ~/rallly/compose.yaml
+services:
+  rallly:
+    image: lukevella/rallly:latest
+    ports: [&quot;127.0.0.1:3450:3000&quot;]
+    environment:
+      DATABASE_URL: postgresql://rallly:changeme@db:5432/rallly
+      SECRET_PASSWORD: changeme-run-openssl-rand-hex-32
+      NEXT_PUBLIC_BASE_URL: https://schedule.home.local
+      SUPPORT_EMAIL: admin@home.local
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: rallly
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: rallly
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/rallly &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>Kimai (Time Tracking)</h2>
+<p><strong>Purpose:</strong> Open-source time tracking for freelancers and teams. Log time against projects and clients, generate invoices, track budgets, and export timesheets. The self-hosted Toggl/Harvest alternative.</p>
+<pre><code class="language-yaml"># ~/kimai/compose.yaml
+services:
+  kimai:
+    image: kimai/kimai2:apache
+    ports: [&quot;127.0.0.1:8300:8001&quot;]
+    environment:
+      ADMINMAIL: admin@example.com
+      ADMINPASS: changeme
+      DATABASE_URL: mysql://kimai:changeme@db/kimai
+      MAILER_FROM: kimai@example.com
+      MAILER_URL: null://localhost
+    volumes:
+      - /home/user/kimai/data:/opt/kimai/var/data:Z
+      - /home/user/kimai/plugins:/opt/kimai/var/plugins:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: kimai
+      MYSQL_USER: kimai
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  db_data:</code></pre>
+<pre><code class="language-bash">cd ~/kimai &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>Grocy (Household Management)</h2>
+<p><strong>Purpose:</strong> Grocery and household management system. Track pantry stock, shopping lists, product expiry dates, meal planning, and chores. Integrates with barcode scanners for quick stock updates. Useful for reducing food waste and keeping a well-organised household.</p>
+<pre><code class="language-yaml"># ~/grocy/compose.yaml
+services:
+  grocy:
+    image: lscr.io/linuxserver/grocy:latest
+    ports:
+      - 127.0.0.1:9283:80
+    volumes:
+      - /home/user/grocy/data:/var/www/data:Z
+    environment:
+      PUID: &quot;1000&quot;
+      PGID: &quot;1000&quot;
+      TZ: Asia/Kolkata
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/grocy &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:9283</code>. Default credentials: <code>admin</code> / <code>admin</code>. Change in the settings.</p>
+<blockquote><p>Grocy has companion Android and iOS apps for on-the-go barcode scanning — point them at your server URL.</p></blockquote>
+<p>---</p>
+<h2>Joplin Server (Notes Sync Backend)</h2>
+<p><strong>Purpose:</strong> Self-hosted sync server for Joplin — the open-source, end-to-end encrypted note-taking app available on Linux, macOS, Windows, iOS, and Android. Joplin clients store notes locally and sync via your server — no cloud subscription required. Supports notebooks, tags, Markdown, attachments, and end-to-end encryption with your own key.</p>
+<pre><code class="language-yaml"># ~/joplin/compose.yaml
+services:
+  joplin:
+    image: joplin/server:latest
+    ports: [&quot;127.0.0.1:22300:22300&quot;]
+    environment:
+      APP_BASE_URL: https://joplin.home.local
+      APP_PORT: 22300
+      DB_CLIENT: pg
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: joplin
+      POSTGRES_USER: joplin
+      POSTGRES_PASSWORD: changeme
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: joplin
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: joplin
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/joplin &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:22300</code>. Default admin credentials: <code>admin@localhost</code> / <code>admin</code> — change immediately. In the Joplin desktop or mobile app, go to Settings → Synchronisation → Joplin Server and enter your server URL with a user account.</p>
+<p>---</p>
+<h2>Penpot (Open-Source Design Tool)</h2>
+<p><strong>Purpose:</strong> Self-hosted, browser-based design and prototyping tool — a Figma alternative. Create UI mockups, design systems, interactive prototypes, and export assets, all in a collaborative environment where multiple users work on the same file simultaneously. Fully vector-based, exports SVG and CSS, and integrates with developer handoff workflows.</p>
+<pre><code class="language-yaml"># ~/penpot/compose.yaml
+services:
+  penpot-frontend:
+    image: penpotapp/frontend:latest
+    ports: [&quot;127.0.0.1:9001:80&quot;]
+    environment:
+      PENPOT_FLAGS: enable-registration enable-login
+    restart: unless-stopped
+
+  penpot-backend:
+    image: penpotapp/backend:latest
+    environment:
+      PENPOT_FLAGS: enable-registration enable-login
+      PENPOT_PUBLIC_URI: https://design.home.local
+      PENPOT_DATABASE_URI: postgresql://penpot:changeme@db/penpot
+      PENPOT_REDIS_URI: redis://redis/0
+      PENPOT_STORAGE_BACKEND: fs
+      PENPOT_STORAGE_FS_DIRECTORY: /opt/data/assets
+      PENPOT_SECRET_KEY: changeme-run-openssl-rand-hex-32
+    volumes:
+      - /home/user/penpot/assets:/opt/data/assets:Z
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  penpot-exporter:
+    image: penpotapp/exporter:latest
+    environment:
+      PENPOT_PUBLIC_URI: https://design.home.local
+      PENPOT_REDIS_URI: redis://redis/0
+    depends_on: [redis]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: penpot
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: penpot
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/penpot &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:9001</code>. Create a team workspace, invite collaborators, and design with real-time multiplayer editing.</p>
+<p>---</p>
+<h2>Memos (Lightweight Personal Notes)</h2>
+<p><strong>Purpose:</strong> Fast, Twitter-style self-hosted memo and personal knowledge base. Jot down fleeting notes, ideas, and links in a microblog-style feed — each memo is a short, tagged Markdown entry. No folders, no hierarchy — just a searchable, filterable stream. Much lighter than Outline or BookStack when you just need a scratchpad.</p>
+<pre><code class="language-yaml"># ~/memos/compose.yaml
+services:
+  memos:
+    image: neosmemo/memos:stable
+    ports:
+      - 127.0.0.1:5230:5230
+    volumes:
+      - /home/user/memos/data:/var/opt/memos:Z
+    environment:
+      TZ: Asia/Kolkata
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/memos &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:5230</code>. Create an account, start writing memos with <code>#tags</code> and Markdown. The REST API allows posting from scripts, CLI aliases, or mobile shortcuts — useful for quick capture from anywhere on your Tailscale network.</p>
+<p>---</p>
+<h2>AFFiNE (Collaborative Knowledge Base)</h2>
+<p><strong>Purpose:</strong> A modern, open-source alternative to Notion and Miro combined. AFFiNE merges a block-based document editor, a whiteboard canvas, and a database view into one tool. Pages can switch between document mode (writing) and edgeless mode (infinite canvas/whiteboard) without creating separate files. Self-hosted, offline-capable, and with real-time collaboration via WebSocket. A strong Notion replacement that keeps all data local.</p>
+<pre><code class="language-yaml"># ~/affine/compose.yaml
+services:
+  affine:
+    image: ghcr.io/toeverything/affine-graphql:stable
+    ports: [&quot;127.0.0.1:3010:3010&quot;]
+    environment:
+      NODE_OPTIONS: &quot;--import=./scripts/register.js&quot;
+      AFFINE_CONFIG_PATH: /root/.affine/config
+      DATABASE_URL: postgresql://affine:changeme@db:5432/affine
+      REDIS_SERVER_HOST: redis
+    volumes:
+      - /home/user/affine/config:/root/.affine/config:Z
+      - /home/user/affine/storage:/root/.affine/storage:Z
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: affine
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: affine
+    volumes: [pg_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: [&quot;CMD-SHELL&quot;, &quot;pg_isready -U affine&quot;]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/affine &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:3010</code>. Create a workspace, sign in, and start creating pages. Toggle between document and whiteboard mode with the view switcher.</p>
+<blockquote><p><strong>vs Outline:</strong> AFFiNE is better for mixed document+canvas work and personal knowledge management. Outline is better for team wikis and structured documentation.</p></blockquote>
+<blockquote><p><strong>Stable release:</strong> AFFiNE has exited beta — the compose above uses <code>ghcr.io/toeverything/affine-graphql:stable</code>, which is the production-ready tag. The <code>latest</code> tag may include canary features that are not yet stable; prefer <code>stable</code> for homelab deployments.</p></blockquote>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">affine.home.local { tls internal; reverse_proxy localhost:3010 }</code></pre>
+<p>---</p>
+<h2>Hoarder (AI-Powered Bookmark Manager)</h2>
+<p><strong>Purpose:</strong> A self-hosted bookmark manager that uses a local LLM (via Ollama) to automatically tag and summarise every saved link. Paste a URL, and Hoarder fetches the page, extracts the content, generates tags, and writes a summary — making your bookmarks searchable and organised without any manual effort. Also saves full-page screenshots and supports highlights. A smarter replacement for Linkwarden or Wallabag when you want automatic organisation.</p>
+<pre><code class="language-yaml"># ~/hoarder/compose.yaml
+services:
+  web:
+    image: ghcr.io/hoarder-app/hoarder:latest
+    ports: [&quot;127.0.0.1:3055:3000&quot;]
+    environment:
+      NEXTAUTH_SECRET: changeme-run-openssl-rand-hex-32
+      NEXTAUTH_URL: https://hoarder.home.local
+      DATA_DIR: /data
+      MEILI_ADDR: http://meilisearch:7700
+      MEILI_MASTER_KEY: changeme
+      BROWSER_WEB_URL: http://chrome:9222
+      OLLAMA_BASE_URL: http://host.containers.internal:11434
+      INFERENCE_TEXT_MODEL: llama3.2
+      INFERENCE_IMAGE_MODEL: llava
+      DISABLE_SIGNUPS: &quot;true&quot;
+    volumes:
+      - /home/user/hoarder/data:/data:Z
+    depends_on: [meilisearch, chrome]
+    restart: unless-stopped
+
+  chrome:
+    image: gcr.io/zenika-hub/alpine-chrome:latest
+    command: chromium-browser --disable-gpu --headless --no-sandbox --remote-debugging-address=0.0.0.0 --remote-debugging-port=9222
+    restart: unless-stopped
+
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    environment:
+      MEILI_MASTER_KEY: changeme
+      MEILI_NO_ANALYTICS: &quot;true&quot;
+    volumes: [meili_data:/meili_data]
+    restart: unless-stopped
+
+volumes:
+  meili_data:</code></pre>
+<pre><code class="language-bash">cd ~/hoarder &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:3055</code>. Create an account (signups are disabled after the first — set <code>DISABLE_SIGNUPS: &quot;false&quot;</code> to allow more users). Save bookmarks via the web UI, browser extension, or mobile share sheet.</p>
+<blockquote><p>Pull the <code>llava</code> multimodal model for screenshot understanding: <code>podman exec ollama ollama pull llava</code>. Without it, Hoarder still summarises text content using the text model.</p></blockquote>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">hoarder.home.local { tls internal; reverse_proxy localhost:3055 }</code></pre>
+<p>---</p>
+<h2>Excalidraw (Collaborative Whiteboard)</h2>
+<p><strong>Purpose:</strong> Self-hosted virtual whiteboard with a hand-drawn aesthetic. Sketch architecture diagrams, wireframes, flowcharts, and brainstorm maps — either solo or with your team in real-time. No account required; drawings are stored in the browser or exported as <code>.excalidraw</code> or SVG. Much simpler than Penpot for quick sketches and team whiteboarding sessions.</p>
+<pre><code class="language-yaml"># ~/excalidraw/compose.yaml
+services:
+  excalidraw:
+    image: excalidraw/excalidraw:latest
+    ports:
+      - 127.0.0.1:3700:80
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/excalidraw &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>Excalidraw is a pure frontend — no database, no persistent server state. All data lives in the browser's local storage or in exported files. For real-time collaboration, the official backend (<code>@excalidraw/excalidraw-room</code>) is a separate WebSocket service:</p></blockquote>
+<pre><code class="language-yaml"># Add to the same compose.yaml for live collaboration
+  excalidraw-room:
+    image: excalidraw/excalidraw-room:latest
+    ports:
+      - 127.0.0.1:3701:80
+    restart: unless-stopped</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">draw.home.local { tls internal; reverse_proxy localhost:3700 }</code></pre>
+<p>---</p>
+<h2>Cal.com (Scheduling & Booking)</h2>
+<p><strong>Purpose:</strong> Self-hosted Calendly alternative with a complete scheduling infrastructure. Define your availability, create booking pages for different meeting types, connect a CalDAV calendar, set buffer times and limits, and let invitees book a slot without back-and-forth emails. Supports team scheduling, round-robin assignment, collective bookings, and webhooks. Much richer than Rallly for full scheduling automation.</p>
+<pre><code class="language-yaml"># ~/calcom/compose.yaml
+services:
+  calcom:
+    image: calcom/cal.com:latest
+    ports:
+      - 127.0.0.1:3900:3000
+    environment:
+      DATABASE_URL: postgresql://calcom:changeme@db:5432/calcom
+      NEXTAUTH_URL: https://cal.example.com
+      NEXTAUTH_SECRET: changeme-run-openssl-rand-hex-32
+      CALCOM_LICENSE_KEY: &quot;&quot;   # leave blank for self-hosted Community Edition
+      EMAIL_FROM: noreply@example.com
+      EMAIL_SERVER_HOST: host.containers.internal
+      EMAIL_SERVER_PORT: &quot;25&quot;
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: calcom
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: calcom
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/calcom &amp;&amp; podman-compose up -d</code></pre>
+<h5>Run DB migrations on first start</h5>
+<pre><code class="language-bash">podman exec calcom npx prisma db push</code></pre>
+<p>Access at <code>http://localhost:3900</code>. Create your first user account, connect a calendar, and set your working hours.</p>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">cal.example.com { reverse_proxy localhost:3900 }</code></pre>
+<p>---</p>
+<h2>Limesurvey (Self-Hosted Survey Platform)</h2>
+<p><strong>Purpose:</strong> Full-featured, self-hosted survey platform for creating questionnaires with advanced branching logic, quotas, conditions, and multilingual support. Supports a wide range of question types (matrix, ranking, sliders, file upload), exports results to CSV and SPSS, and handles anonymous or token-based respondents. Much more powerful than Rallly — use Rallly for lightweight scheduling polls, use Limesurvey when you need real survey methodology.</p>
+<pre><code class="language-yaml"># ~/limesurvey/compose.yaml
+services:
+  limesurvey:
+    image: martialblog/limesurvey:latest
+    ports:
+      - 127.0.0.1:8420:8080
+    environment:
+      DB_TYPE: mysql
+      DB_HOST: db
+      DB_PORT: &quot;3306&quot;
+      DB_NAME: limesurvey
+      DB_USERNAME: limesurvey
+      DB_PASSWORD: changeme
+      ADMIN_USER: admin
+      ADMIN_PASSWORD: changeme
+      ADMIN_NAME: Admin
+      ADMIN_EMAIL: admin@example.com
+      BASE_URL: https://survey.home.local
+      URL_FORMAT: path
+    volumes:
+      - /home/user/limesurvey/upload:/var/www/html/upload:Z
+      - /home/user/limesurvey/config:/var/www/html/application/config:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:10.11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: limesurvey
+      MYSQL_USER: limesurvey
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  db_data:</code></pre>
+<pre><code class="language-bash">cd ~/limesurvey &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:8420/admin</code>. Log in with the admin credentials above.</p>
+<h4>Key workflows</h4>
+<ul>
+<li><strong>Create a survey:</strong> Surveys → Create a new survey → add question groups and questions.</li>
+<li><strong>Question types:</strong> Single/multiple choice, free text, matrix, date, file upload, ranking, slider, and more.</li>
+<li><strong>Branching logic:</strong> Use <strong>Conditions</strong> on individual questions and <strong>Relevance equations</strong> for group-level skip logic.</li>
+<li><strong>Quota management:</strong> Set response limits per answer option under Survey → Quotas.</li>
+<li><strong>Tokens:</strong> Enable <strong>Participants</strong> to create a closed survey with invitation tokens — each token is single-use.</li>
+<li><strong>Export:</strong> Results → Export → CSV (for spreadsheets) or SPSS format (<code>.sav</code>) for statistical analysis.</li>
+</ul>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">survey.home.local { tls internal; reverse_proxy localhost:8420 }</code></pre>
+<p>---</p>
+<h2>Docusaurus (Docs-as-Code Site Generator)</h2>
+<p><strong>Purpose:</strong> Static documentation site generator from Meta, used by React, Webpack, Prettier, and hundreds of major OSS projects. Write docs in Markdown/MDX, version them with your code in Gitea/Forgejo, and publish a fast, searchable, professionally themed documentation site. Pairs perfectly with a Gitea CI pipeline — push to <code>main</code>, the site rebuilds automatically. Simpler and more docs-focused than WordPress or Ghost for technical documentation.</p>
+<pre><code class="language-yaml"># ~/docusaurus/compose.yaml — serves a pre-built Docusaurus site
+services:
+  docusaurus:
+    image: nginx:alpine
+    ports:
+      - 127.0.0.1:8421:80
+    volumes:
+      - /home/user/docusaurus/build:/usr/share/nginx/html:ro,Z
+    restart: unless-stopped</code></pre>
+<h4>Build the site on your workstation or in a Gitea Actions runner</h4>
+<pre><code class="language-bash"># Scaffold a new docs site
+npx create-docusaurus@latest my-docs classic
+cd my-docs
+
+# Write docs in docs/*.md, configure docusaurus.config.js
+npm run build        # produces build/ directory
+rsync -av build/ user@server:/home/user/docusaurus/build/</code></pre>
+<h5>Minimal <code>docusaurus.config.js</code> for a self-hosted intranet</h5>
+<pre><code class="language-js">const config = {
+  title: 'My Homelab Docs',
+  url: 'https://docs.home.local',
+  baseUrl: '/',
+  onBrokenLinks: 'throw',
+  presets: [
+    ['classic', {
+      docs: { routeBasePath: '/' },  // docs at root, no landing page
+      blog: false,
+      theme: { customCss: './src/css/custom.css' },
+    }],
+  ],
+};
+module.exports = config;</code></pre>
+<h4>Gitea Actions workflow to auto-deploy on push</h4>
+<pre><code class="language-yaml"># .gitea/workflows/deploy-docs.yaml
+name: Deploy Docs
+on:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci &amp;&amp; npm run build
+      - name: Deploy to server
+        run: rsync -av --delete build/ user@docs-server:/home/user/docusaurus/build/</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">docs.home.local { tls internal; reverse_proxy localhost:8421 }</code></pre>
+<blockquote><p>Docusaurus supports Algolia DocSearch for full-text search in production. For a self-hosted alternative, use the <a href="https://github.com/easyops-cn/docusaurus-search-local">local search plugin</a> which generates a client-side index at build time — no external service needed.</p></blockquote>
+<p>---</p>
+<h2>Taiga (Agile Project Management)</h2>
+<p><strong>Purpose:</strong> Mature, full-featured Agile project management platform covering Scrum and Kanban workflows. Supports sprints, epics, user stories, tasks, issues, and a backlog — a true Jira alternative for teams that want open-source self-hosting. Complements Planka (which is lightweight Kanban-only) with proper Scrum ceremonies: sprint planning, backlog refinement, velocity tracking, and burndown charts.</p>
+<pre><code class="language-yaml"># ~/taiga/compose.yaml
+services:
+  taiga-db:
+    image: postgres:12.3
+    environment:
+      POSTGRES_DB: taiga
+      POSTGRES_USER: taiga
+      POSTGRES_PASSWORD: changeme
+    volumes: [taiga_db:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  taiga-back:
+    image: taigaio/taiga-back:latest
+    ports: [&quot;127.0.0.1:8003:8000&quot;]
+    environment:
+      TAIGA_SECRET_KEY: changeme-run-openssl-rand-hex-32
+      TAIGA_SITES_DOMAIN: taiga.home.local
+      TAIGA_SITES_SCHEME: https
+      POSTGRES_DB: taiga
+      POSTGRES_USER: taiga
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_HOST: taiga-db
+      RABBITMQ_USER: taiga
+      RABBITMQ_PASS: changeme
+      RABBITMQ_VHOST: taiga
+      RABBITMQ_HOST: taiga-rabbitmq
+      RABBITMQ_PORT: &quot;5672&quot;
+    depends_on: [taiga-db, taiga-rabbitmq]
+    volumes:
+      - /home/user/taiga/static:/taiga-back/static:Z
+      - /home/user/taiga/media:/taiga-back/media:Z
+    restart: unless-stopped
+
+  taiga-front:
+    image: taigaio/taiga-front:latest
+    ports: [&quot;127.0.0.1:8004:80&quot;]
+    environment:
+      TAIGA_URL: https://taiga.home.local
+      TAIGA_WEBSOCKETS_URL: wss://taiga.home.local
+    restart: unless-stopped
+
+  taiga-events:
+    image: taigaio/taiga-events:latest
+    environment:
+      RABBITMQ_USER: taiga
+      RABBITMQ_PASS: changeme
+      RABBITMQ_VHOST: taiga
+      RABBITMQ_HOST: taiga-rabbitmq
+      TAIGA_SECRET_KEY: changeme-run-openssl-rand-hex-32
+    depends_on: [taiga-rabbitmq]
+    restart: unless-stopped
+
+  taiga-async:
+    image: taigaio/taiga-back:latest
+    entrypoint: [&quot;/taiga-back/docker/async_entrypoint.sh&quot;]
+    environment:
+      TAIGA_SECRET_KEY: changeme-run-openssl-rand-hex-32
+      POSTGRES_DB: taiga
+      POSTGRES_USER: taiga
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_HOST: taiga-db
+      RABBITMQ_USER: taiga
+      RABBITMQ_PASS: changeme
+      RABBITMQ_VHOST: taiga
+      RABBITMQ_HOST: taiga-rabbitmq
+    depends_on: [taiga-db, taiga-rabbitmq]
+    restart: unless-stopped
+
+  taiga-rabbitmq:
+    image: rabbitmq:3.8-management-alpine
+    environment:
+      RABBITMQ_ERLANG_COOKIE: changeme
+      RABBITMQ_DEFAULT_USER: taiga
+      RABBITMQ_DEFAULT_PASS: changeme
+      RABBITMQ_DEFAULT_VHOST: taiga
+    restart: unless-stopped
+
+volumes:
+  taiga_db:</code></pre>
+<pre><code class="language-bash">cd ~/taiga &amp;&amp; podman-compose up -d</code></pre>
+<p>Access the frontend at <code>http://localhost:8004</code>. On first load, register an admin account. Default project types include Scrum and Kanban — choose during project creation.</p>
+<h4>Key workflows</h4>
+<ul>
+<li><strong>Scrum:</strong> Create a project → add User Stories to the backlog → plan sprints → track velocity per sprint on the dashboard.</li>
+<li><strong>Kanban:</strong> Create a Kanban project → manage the board swimlanes → set WIP limits per column.</li>
+<li><strong>Epics:</strong> Group related user stories under an Epic for high-level roadmap tracking.</li>
+<li><strong>Issues:</strong> Track bugs and support requests separately from user stories in the Issues module.</li>
+</ul>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">taiga.home.local {
+  tls internal
+  # Frontend
+  reverse_proxy /api/* localhost:8003
+  reverse_proxy /admin/* localhost:8003
+  reverse_proxy /static/* localhost:8003
+  reverse_proxy /media/* localhost:8003
+  reverse_proxy /* localhost:8004
+}</code></pre>
+<blockquote><p><strong>Planka vs Taiga:</strong> Use Planka for simple personal Kanban boards with minimal setup. Use Taiga when you need Scrum sprints, epics, velocity charts, and a full agile workflow for a team.</p></blockquote>
+<p>---</p>
+<h4>Cross-repository wiki as a standalone CMS</h4>
+<p>For a shared knowledge base that isn't tied to a specific repo, create a dedicated repository called <code>wiki</code> or <code>docs</code> and use its built-in wiki:</p>
+<pre><code class="language-bash"># Create a bare wiki repository via Gitea API
+curl -X POST https://gitea.home.local/api/v1/user/repos \
+  -H &quot;Authorization: token YOUR_TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;name&quot;:&quot;wiki&quot;,&quot;private&quot;:true,&quot;has_wiki&quot;:true}'</code></pre>
+<blockquote><p>The Gitea wiki doesn't support custom themes or plugins — it renders plain Markdown with a fixed layout. For structured, navigable documentation with nested categories and search, use BookStack or Wiki.js. For docs-as-code with a custom site, use Docusaurus.</p></blockquote>
+<p>---</p>
+<h2>Docmost (Modern Wiki & Knowledge Base)</h2>
+<p><strong>Purpose:</strong> Actively developed, modern wiki and knowledge base with a clean block-based editor (similar to Notion). Supports nested pages, workspaces, real-time collaborative editing, comments, and permissions. Lighter and easier to self-host than Outline, with better out-of-the-box ergonomics — no mandatory OIDC setup, simpler environment variables, and a single-container option. A strong alternative when Outline feels heavyweight or requires too many dependencies.</p>
+<pre><code class="language-yaml"># ~/docmost/compose.yaml
+services:
+  docmost:
+    image: docmost/docmost:latest
+    ports:
+      - 127.0.0.1:3800:3000
+    environment:
+      APP_URL: https://wiki.home.local
+      APP_SECRET: changeme-run-openssl-rand-hex-32
+      DATABASE_URL: postgresql://docmost:changeme@db:5432/docmost
+      REDIS_URL: redis://redis:6379
+    volumes:
+      - /home/user/docmost/storage:/app/data/storage:Z
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: docmost
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: docmost
+    volumes: [pg_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: [&quot;CMD-SHELL&quot;, &quot;pg_isready -U docmost&quot;]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/docmost &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:3800</code>. On first run, complete the setup wizard to create your workspace and first admin user.</p>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># View logs
+podman logs -f docmost
+
+# Run database migrations manually (after upgrade)
+podman exec docmost node ace migration:run
+
+# Backup storage (attachments and uploads)
+rsync -av /home/user/docmost/storage/ backup:/docmost-storage/</code></pre>
+<h4>Key features</h4>
+<ul>
+<li>Block-based editor with slash commands (<code>/</code> to insert headings, tables, code blocks, callouts, embeds)</li>
+<li>Nested page hierarchy — pages can have unlimited child pages</li>
+<li>Real-time multiplayer editing via WebSocket</li>
+<li>Per-workspace and per-page permissions</li>
+<li>Comments and inline mentions</li>
+<li>Full-text search across all pages</li>
+</ul>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">wiki.home.local { tls internal; reverse_proxy localhost:3800 }</code></pre>
+<blockquote><p><strong>Docmost vs Outline:</strong> Docmost requires fewer dependencies (no MinIO/S3 for storage — files go to the local volume), has no mandatory SSO requirement, and is faster to get running. Outline has a more mature ecosystem and stronger integrations. For a solo or small-team homelab wiki, Docmost is the easier starting point.</p></blockquote>
+<h2>Caddy Configuration</h2>
+<pre><code class="language-caddyfile">files.home.local     { tls internal; reverse_proxy localhost:8888 }
+sync.home.local      { tls internal; reverse_proxy localhost:8384 }
+docs.home.local      { tls internal; reverse_proxy localhost:8000 }
+tasks.home.local     { tls internal; reverse_proxy localhost:3456 }
+wiki.home.local      { tls internal; reverse_proxy localhost:3030 }
+recipes.home.local   { tls internal; reverse_proxy localhost:9925 }
+pdf.home.local       { tls internal; reverse_proxy localhost:8080 }
+n8n.example.com      { reverse_proxy localhost:5678 }
+blog.example.com     { reverse_proxy localhost:2368 }
+site.example.com     { reverse_proxy localhost:8100 }
+bookstack.home.local { tls internal; reverse_proxy localhost:6875 }
+wikijs.home.local    { tls internal; reverse_proxy localhost:3300 }
+notes.home.local     { tls internal; reverse_proxy localhost:3400 }
+pad.home.local       { tls internal; reverse_proxy localhost:3500 }
+rss.home.local       { tls internal; reverse_proxy localhost:8200 }
+read.home.local      { tls internal; reverse_proxy localhost:8250 }
+links.home.local     { tls internal; reverse_proxy localhost:3210 }
+crm.home.local       { tls internal; reverse_proxy localhost:8094 }
+schedule.home.local  { tls internal; reverse_proxy localhost:3450 }
+time.home.local      { tls internal; reverse_proxy localhost:8300 }
+grocy.home.local     { tls internal; reverse_proxy localhost:9283 }
+joplin.home.local    { tls internal; reverse_proxy localhost:22300 }
+design.home.local    { tls internal; reverse_proxy localhost:9001 }
+affine.home.local    { tls internal; reverse_proxy localhost:3010 }
+hoarder.home.local   { tls internal; reverse_proxy localhost:3055 }
+memos.home.local     { tls internal; reverse_proxy localhost:5230 }
+draw.home.local      { tls internal; reverse_proxy localhost:3700 }
+cal.example.com      { reverse_proxy localhost:3900 }
+survey.home.local    { tls internal; reverse_proxy localhost:8420 }
+docs-static.home.local { tls internal; reverse_proxy localhost:8421 }
+taiga.home.local     { tls internal; reverse_proxy localhost:8004 }
+wiki.home.local      { tls internal; reverse_proxy localhost:3800 }</code></pre>
+<p>---</p>
+<h2>The S3 API: A Core Cloud Skill</h2>
+<p>Several tools in this wiki (MinIO in backups-sync.md, Garage, Cloudflare R2) implement the <strong>S3-compatible API</strong> — originally Amazon S3's interface but now a de facto standard for object storage. Understanding this API is valuable independent of which storage backend you use.</p>
+<h4>Core operations</h4>
+<p>| HTTP Method | S3 Operation | What it does | |------------|-------------|--------------| | <code>PUT /bucket/key</code> | PutObject | Upload a file | | <code>GET /bucket/key</code> | GetObject | Download a file | | <code>DELETE /bucket/key</code> | DeleteObject | Delete a file | | <code>GET /bucket?list-type=2</code> | ListObjectsV2 | List objects in a bucket | | <code>POST /bucket/key?uploads</code> | CreateMultipartUpload | Start a large upload |</p>
+<p><strong>Presigned URLs:</strong> — time-limited URLs that grant access to a specific object without requiring the requester to have credentials. The URL embeds an HMAC signature valid for a configured time window. Used for secure direct downloads or uploads from untrusted clients:</p>
+<pre><code class="language-bash"># Generate a presigned URL with MinIO client (mc)
+mc alias set local http://localhost:9000 admin changeme123
+mc share download local/my-bucket/report.pdf --expire=24h
+
+# Or with the AWS CLI (works against MinIO with --endpoint-url)
+aws s3 presign s3://my-bucket/report.pdf \
+  --endpoint-url http://localhost:9000 \
+  --expires-in 86400</code></pre>
+<p><strong>Multipart uploads:</strong> — large files (>100MB) are split into parts, uploaded in parallel, and assembled server-side. This is why Rclone's <code>--s3-chunk-size</code> flag exists — it controls the part size.</p>
+<p>Understanding the S3 API is useful because it's the interface Restic, Rclone, Kopia, Litestream, and most cloud-native tools use for object storage. The same client code works against AWS S3, MinIO, Garage, Cloudflare R2, and Backblaze B2 — just change the endpoint URL.</p>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Nextcloud showing <code>Untrusted domain</code> | Add your domain to <code>NEXTCLOUD_TRUSTED_DOMAINS</code> env var or <code>config.php</code> <code>trusted_domains</code> array | | Nextcloud file sync very slow | Ensure background cron jobs are running (<code>php cron.php</code> every 5 minutes via systemd timer) | | Syncthing devices not finding each other | Ensure ports 22000/tcp and 22000/udp are open in the firewall; verify both devices show the other as Connected | | Paperless not consuming documents | Check the consume directory path matches the volume mount; verify file permissions allow the container user to read the files | | Paperless email not sending | Verify <code>PAPERLESS_EMAIL_HOST</code> is reachable from inside the container; run <code>podman exec webserver python manage.py sendtestemail your@email.com</code> to test the SMTP config | | Paperless workflow email action missing | Workflow email actions require Paperless-ngx 2.x — update to <code>ghcr.io/paperless-ngx/paperless-ngx:latest</code> and run <code>python manage.py migrate</code> | | Miniflux database connection refused | Ensure PostgreSQL is running and the <code>DATABASE_URL</code> host/port is reachable from the container | | Planka <code>SECRET_KEY must be set</code> | Generate one with <code>openssl rand -hex 64</code> and set it in the environment | | Outline blank on load | OIDC configuration is likely missing or wrong — check <code>SECRET_KEY</code> and <code>UTILS_SECRET</code> are both set and non-empty | | n8n webhook not triggering | Ensure <code>WEBHOOK_URL</code> is the publicly accessible URL; check that Caddy or the tunnel is proxying correctly | | Vikunja CalDAV not syncing | Ensure <code>VIKUNJA_SERVICE_FRONTENDURL</code> matches the URL your client connects to; CalDAV endpoint is at <code>/dav</code> | | Ghost <code>404</code> on homepage | Verify <code>url</code> in the Ghost environment matches the actual domain you're accessing | | WordPress white screen of death | Check PHP error logs with <code>podman logs wordpress</code>; often a plugin conflict — disable plugins from the DB if the admin panel is inaccessible | | BookStack blank after setup | Check <code>APP_URL</code> includes the correct scheme (<code>https://</code>); clear cache with <code>podman exec bookstack php artisan config:cache</code> | | Wiki.js page save fails | Ensure the PostgreSQL user has <code>CREATE</code> privileges; check <code>podman logs wikijs</code> for SQL errors | | HedgeDoc realtime not working | WebSocket proxying must be enabled — add <code>reverse_proxy</code> with <code>header_up Upgrade {http.request.header.Upgrade}</code> in Caddy | | CryptPad sandbox not loading | Ensure both domains (<code>pad.<em></code> and <code>sandbox.</em></code>) resolve and are proxied; CryptPad enforces same-origin policy via the sandbox domain | | FreshRSS feeds not updating | Check <code>CRON_MIN</code> is set; verify outbound internet access; check feed URLs are valid in the admin panel | | Wallabag import fails | Large imports time out — use the background queue: run <code>podman exec wallabag bin/console wallabag:import:redis-worker</code> | | Linkwarden archive not working | The archiving feature requires Chromium — ensure the container has network access to fetch pages | | Monica <code>APP_KEY</code> error | Generate with <code>podman exec monica php artisan key:generate --show</code> and set the result as <code>APP_KEY</code> | | Rallly invitees can't vote | Verify <code>NEXT_PUBLIC_BASE_URL</code> is accessible from outside your server; voters don't need accounts but do need to reach the URL | | Kimai time entries not saving | Check <code>DATABASE_URL</code> connection string; run <code>podman exec kimai bin/console kimai:update</code> after first startup | | Grocy barcode scanner not finding products | Grocy uses the Open Food Facts database — scan a barcode and manually add the product if it's not found automatically | | Joplin Server sync fails | Verify <code>APP_BASE_URL</code> matches the URL clients connect to; check the user account exists and has the correct password; ensure PostgreSQL is reachable | | Penpot blank canvas | Clear browser cache; verify the exporter container is running — it handles PDF/PNG export and some rendering tasks | | Memos notes not persisting | Ensure the <code>/var/opt/memos</code> volume is correctly mounted with write permissions; SQLite database lives there | | AFFiNE blank after startup | Wait 30–60 s for the database migrations to complete; check <code>podman logs affine</code> for PostgreSQL connection errors; ensure the DB health check passes before the app starts | | Hoarder bookmarks not summarising | Ensure Ollama is running and the <code>llama3.2</code> model is pulled; check <code>OLLAMA_BASE_URL</code> uses <code>host.containers.internal</code>; view task logs in the Hoarder admin panel | | Hoarder screenshots blank | The <code>chrome</code> container must be running and port <code>9222</code> reachable; check <code>podman logs chrome</code> for startup errors | | Excalidraw real-time collaboration not syncing | Confirm the <code>excalidraw-room</code> WebSocket container is running; the frontend must be configured with the room server URL in its environment | | Cal.com blank page after deploy | Run <code>podman exec calcom npx prisma db push</code> to apply DB migrations; check <code>NEXTAUTH_URL</code> exactly matches the URL you access it from | | Cal.com booking emails not sending | Verify <code>EMAIL_SERVER_HOST</code> and <code>EMAIL_SERVER_PORT</code> point at a working SMTP relay; check Cal.com logs for mailer errors | | Limesurvey blank page after install | Ensure <code>BASE_URL</code> matches the exact URL you're accessing; check <code>podman logs limesurvey</code> for PHP errors; verify the MariaDB container is healthy | | Limesurvey email invitations not sending | Configure SMTP under Global Settings → Email settings in the admin panel; test with the built-in email test button | | Limesurvey CSV export missing data | Ensure the survey is set to store responses — check Survey → Settings → Responses → check <code>Save IP address</code> and <code>Save timings</code> options are as expected | | Docusaurus build fails | Run <code>npm run build</code> locally first to catch broken links and MDX syntax errors before deploying; check <code>onBrokenLinks</code> is set to <code>'throw'</code> to catch issues early | | Taiga frontend blank / API errors | Verify <code>TAIGA_URL</code> in the frontend env matches the domain you're accessing exactly; confirm <code>taiga-back</code> is reachable and healthy — check <code>podman logs taiga-back</code> | | Taiga websocket events not updating | The <code>taiga-events</code> service must be running and connected to RabbitMQ; check <code>podman logs taiga-events</code>; verify the <code>taiga-rabbitmq</code> container is healthy | | Taiga async tasks not processing | The <code>taiga-async</code> worker must be running alongside the backend — verify it shows as running with <code>podman ps</code>; check RabbitMQ queue depth at <code>http://localhost:15672</code> | | Docmost editor not saving | Verify Redis is running — real-time collaboration and caching depend on it; check <code>podman logs docmost</code> for Redis connection errors | | Docmost storage attachments missing after migration | The <code>/app/data/storage</code> volume must be preserved across upgrades; ensure the volume mount path hasn't changed in the compose file |</p>
+<p>---</p>
+<h2>Notesnook (End-to-End Encrypted Notes)</h2>
+<p><strong>Purpose:</strong> Privacy-focused, end-to-end encrypted note-taking app. Unlike Joplin (which requires a separate sync server), Notesnook is a polished all-in-one app — the web/desktop/mobile clients sync via the Notesnook cloud, but the server-side architecture is open-source and self-hostable. Good alternative to Joplin when you want a more modern UI without setting up a separate sync backend.</p>
+<blockquote><p><strong>Self-hosting Notesnook:</strong> The server component is called <code>notesnook-sync-server</code> and is available on GitHub. Requires a MongoDB instance and environment-variable configuration. The compose setup is more complex than Joplin Server; use Joplin for straightforward homelab setups or Notesnook for teams that want the polished mobile apps.</p></blockquote>
+<p>---</p>
+<h2>Etherpad (Simple Collaborative Text Editor)</h2>
+<p><strong>Purpose:</strong> The original real-time collaborative text editor. No accounts required by default — just share a pad URL and multiple users can type simultaneously. Simpler than HedgeDoc (which is Markdown-focused) or CryptPad (which is encrypted). Good for quick meeting notes, brainstorming sessions, and shared drafts.</p>
+<pre><code class="language-yaml"># ~/etherpad/compose.yaml
+services:
+  etherpad:
+    image: etherpad/etherpad:latest
+    ports:
+      - 127.0.0.1:9001:9001
+    environment:
+      DB_TYPE: postgres
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: etherpad
+      DB_USER: etherpad
+      DB_PASS: changeme
+      ADMIN_PASSWORD: changeme
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: etherpad
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: etherpad
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/etherpad &amp;&amp; podman-compose up -d</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">pad-simple.home.local { tls internal; reverse_proxy localhost:9001 }</code></pre>
+<p>---</p>
+<h2>Immich (Photo & Video Management)</h2>
+<p><strong>Purpose:</strong> Self-hosted Google Photos replacement. Automatic mobile backup, face recognition, smart albums, map view, and a clean mobile app for iOS and Android. The single most requested self-hosted app — it replaces iCloud Photo Library and Google Photos with zero cloud dependency.</p>
+<pre><code class="language-yaml"># ~/immich/compose.yaml
+services:
+  immich-server:
+    image: ghcr.io/immich-app/immich-server:release
+    ports:
+      - 127.0.0.1:2283:2283
+    environment:
+      DB_HOSTNAME: database
+      DB_DATABASE_NAME: immich
+      DB_USERNAME: postgres
+      DB_PASSWORD: changeme
+      REDIS_HOSTNAME: redis
+    volumes:
+      - /home/user/photos:/usr/src/app/upload:Z
+      - /etc/localtime:/etc/localtime:ro
+    depends_on: [database, redis]
+    restart: unless-stopped
+
+  immich-machine-learning:
+    image: ghcr.io/immich-app/immich-machine-learning:release
+    volumes:
+      - /home/user/immich/model-cache:/cache:Z
+    restart: unless-stopped
+
+  database:
+    image: tensorchord/pgvecto-rs:pg16-v0.2.0
+    environment:
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_USER: postgres
+      POSTGRES_DB: immich
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/immich &amp;&amp; podman-compose up -d</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">photos.home.local { tls internal; reverse_proxy localhost:2283 }</code></pre>
+<blockquote><p>Immich requires the <code>tensorchord/pgvecto-rs</code> Postgres image (not standard Postgres) for the vector search features used by face recognition and smart search. Do not substitute standard Postgres — it will fail at startup.</p></blockquote>
+<p>---</p>
+<h2>Additional Caddy Routes</h2>
+<pre><code class="language-caddyfile">pad-simple.home.local { tls internal; reverse_proxy localhost:9001 }
+photos.home.local     { tls internal; reverse_proxy localhost:2283 }</code></pre>
+<p>---</p>
+<h2>Choosing the Right Productivity Tool</h2>
+<p>A decision guide for common use cases:</p>
+<p>| Need | Recommended | Why | |------|------------|-----| | Team wiki / runbooks | Docmost | Easiest setup, block editor, no mandatory SSO | | Structured docs-as-code | Docusaurus | Git-backed, versioned, full-text search at build time | | Figma replacement | Penpot | Full vector design + prototyping + dev handoff | | Quick whiteboard | Excalidraw | Zero setup, hand-drawn aesthetic, exports SVG | | Personal notes | Memos or Joplin | Memos = Twitter-style quick capture; Joplin = Notebook with E2E encryption | | Collaborative Notion-like | AFFiNE | Document + whiteboard in one, offline-capable | | Team project management | Plane or Huly | Plane = Linear-like; Huly = all-in-one hub | | Scrum / sprints | Taiga | Full Scrum with epics, velocity, backlog | | Simple Kanban | Planka | Lightweight Trello clone | | Photo backup | Immich | Google Photos replacement, face recognition | | Read-later | Wallabag | Full article archiving, clean reading view | | Smart bookmarks | Hoarder | AI tagging + summarisation via Ollama |</p>
+<p>---</p>
+<h2>Troubleshooting (additional)</h2>
+<p>| Issue | Solution | |-------|----------| | Immich machine learning container OOM | Limit ML memory: set <code>MACHINE_LEARNING_WORKERS=1</code> and <code>MACHINE_LEARNING_WORKER_TIMEOUT=120</code>; face recognition needs ~2 GB RAM | | Immich photos not backing up from mobile | Ensure the Immich mobile app uses the correct server URL (include <code>https://</code> and no trailing slash); verify the server is reachable from your mobile network | | Etherpad pad not syncing | WebSocket must be proxied — add <code>header_up Upgrade {http.request.header.Upgrade}</code> in the Caddy reverse_proxy block | | AFFiNE collaboration not working | The WebSocket server must be reachable; confirm port 3010 is accessible from all clients and Caddy is proxying WebSocket upgrades |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

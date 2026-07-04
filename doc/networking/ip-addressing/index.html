@@ -146,7 +146,355 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">IP Addressing &amp; Routing</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-28</span>
+        </div>
+      </div>
+      <div class="prose"><p>This page covers IP addressing fundamentals — CIDR notation, subnetting, IPv4 and IPv6 — and practical <code>ip</code> command usage for managing addresses, gateways, and routes on Shani OS. All operations use <code>iproute2</code> which is pre-installed.</p>
+<p>For virtual interfaces (bridges, VLANs, veth pairs) see <a href="virtual-networking">Virtual Networking</a>. For diagnostics and traffic inspection see <a href="network-tools">Network Tools</a>.</p>
+<p>---</p>
+<h2>CIDR Notation</h2>
+<p><strong>CIDR (Classless Inter-Domain Routing)</strong> notation expresses an IP address and its network mask together:</p>
+<pre><code>192.168.1.0/24
+│           │
+│           └─ prefix length: how many bits are the network part
+└─ network address</code></pre>
+<p>The prefix length determines how many host addresses the network contains:</p>
+<p>| CIDR | Subnet Mask | Hosts | Common Use | |------|------------|-------|------------| | <code>/8</code> | <code>255.0.0.0</code> | 16,777,214 | Class A private (10.0.0.0/8) | | <code>/16</code> | <code>255.255.0.0</code> | 65,534 | Class B private (172.16.0.0/16) | | <code>/24</code> | <code>255.255.255.0</code> | 254 | Typical home/office LAN | | <code>/25</code> | <code>255.255.255.128</code> | 126 | Split a /24 in half | | <code>/26</code> | <code>255.255.255.192</code> | 62 | Quarter of a /24 | | <code>/28</code> | <code>255.255.255.240</code> | 14 | Small VLAN or DMZ | | <code>/30</code> | <code>255.255.255.252</code> | 2 | Point-to-point link | | <code>/31</code> | <code>255.255.255.254</code> | 2 (no broadcast) | Point-to-point (RFC 3021) | | <code>/32</code> | <code>255.255.255.255</code> | 1 | Single host / loopback route |</p>
+<p><strong>Formula:</strong> <code>2^(32 − prefix) − 2</code> usable hosts (subtract network and broadcast addresses). <code>/31</code> and <code>/32</code> are exceptions used for point-to-point links and host routes respectively.</p>
+<h3>Quick Mental Math</h3>
+<p>For any <code>/prefix</code>:</p>
+<ul>
+<li><strong>Network bits</strong>: the prefix number</li>
+<li><strong>Host bits</strong>: <code>32 − prefix</code></li>
+<li><strong>Hosts</strong>: <code>2^host_bits − 2</code></li>
+</ul>
+<p>Example — <code>192.168.10.0/26</code>:</p>
+<ul>
+<li>Host bits: <code>32 − 26 = 6</code></li>
+<li>Hosts: <code>2^6 − 2 = 62</code></li>
+<li>Range: <code>192.168.10.1</code> – <code>192.168.10.62</code></li>
+<li>Broadcast: <code>192.168.10.63</code></li>
+</ul>
+<p>---</p>
+<h2>Reserved and Special IPv4 Ranges</h2>
+<p>| Range | Purpose | |-------|---------| | <code>10.0.0.0/8</code> | Private (RFC 1918) | | <code>172.16.0.0/12</code> | Private (RFC 1918) — <code>172.16.x.x</code> to <code>172.31.x.x</code> | | <code>192.168.0.0/16</code> | Private (RFC 1918) | | <code>127.0.0.0/8</code> | Loopback | | <code>169.254.0.0/16</code> | Link-local / APIPA (no DHCP response) | | <code>100.64.0.0/10</code> | Carrier-grade NAT (CGNAT) — also used by Tailscale | | <code>0.0.0.0/0</code> | Default route (all destinations) | | <code>255.255.255.255/32</code> | Limited broadcast | | <code>224.0.0.0/4</code> | Multicast | | <code>240.0.0.0/4</code> | Reserved (experimental) |</p>
+<p>---</p>
+<h2>Subnetting a Network</h2>
+<h3>Splitting a /24 into Smaller Subnets</h3>
+<p>A common task: take a <code>192.168.1.0/24</code> and divide it into smaller segments.</p>
+<p>| Subnet | Range | Broadcast | Hosts | |--------|-------|-----------|-------| | <code>192.168.1.0/25</code> | <code>.1</code> – <code>.126</code> | <code>.127</code> | 126 | | <code>192.168.1.128/25</code> | <code>.129</code> – <code>.254</code> | <code>.255</code> | 126 |</p>
+<p>Split again into <code>/26</code>:</p>
+<p>| Subnet | Range | Broadcast | Hosts | |--------|-------|-----------|-------| | <code>192.168.1.0/26</code> | <code>.1</code> – <code>.62</code> | <code>.63</code> | 62 | | <code>192.168.1.64/26</code> | <code>.65</code> – <code>.126</code> | <code>.127</code> | 62 | | <code>192.168.1.128/26</code> | <code>.129</code> – <code>.190</code> | <code>.191</code> | 62 | | <code>192.168.1.192/26</code> | <code>.193</code> – <code>.254</code> | <code>.255</code> | 62 |</p>
+<h3>Key Rule — Network Address Alignment</h3>
+<p>A subnet's network address must be a multiple of its block size (<code>2^host_bits</code>). For <code>/26</code> the block size is 64, so valid network addresses are <code>.0</code>, <code>.64</code>, <code>.128</code>, <code>.192</code>. <code>192.168.1.100/26</code> is valid as a host address but <code>192.168.1.100/26</code> is <strong>not</strong> a valid network address.</p>
+<p>---</p>
+<h2>IPv6 Addressing</h2>
+<p>IPv6 uses 128-bit addresses written as eight 16-bit groups in hexadecimal:</p>
+<pre><code>2001:0db8:85a3:0000:0000:8a2e:0370:7334</code></pre>
+<p>Two simplification rules:</p>
+<ol>
+<li>Leading zeros in each group can be dropped: <code>0db8</code> → <code>db8</code>, <code>0000</code> → <code>0</code></li>
+<li>One consecutive run of all-zero groups can be replaced with <code>::</code>: <code>::</code> can appear only once</li>
+</ol>
+<pre><code>2001:db8:85a3::8a2e:370:7334</code></pre>
+<h3>IPv6 Prefix Lengths</h3>
+<p>IPv6 uses CIDR notation the same way. Common prefix lengths:</p>
+<p>| Prefix | Use | |--------|-----| | <code>/128</code> | Single host (like IPv4 /32) | | <code>/64</code> | Standard LAN segment — required for SLAAC | | <code>/48</code> | Typical allocation to a site/organisation | | <code>/32</code> | Typical ISP customer allocation |</p>
+<p>A <code>/64</code> has <code>2^64</code> addresses — about 18 quintillion hosts per network segment.</p>
+<h3>Special IPv6 Addresses</h3>
+<p>| Address | Meaning | |---------|---------| | <code>::1/128</code> | Loopback (IPv6 equivalent of 127.0.0.1) | | <code>fe80::/10</code> | Link-local (auto-configured, non-routable) | | <code>fc00::/7</code> | Unique local (ULA — IPv6 private, like RFC 1918) | | <code>ff00::/8</code> | Multicast | | <code>2000::/3</code> | Global unicast (public internet) | | <code>64:ff9b::/96</code> | IPv4-mapped / NAT64 | | <code>::ffff:0:0/96</code> | IPv4-mapped IPv6 address | | <code>::/0</code> | Default route |</p>
+<h3>Link-Local Addresses</h3>
+<p>Every IPv6-capable interface automatically generates a <strong>link-local address</strong> in the <code>fe80::/10</code> range derived from the MAC address (EUI-64) or a random value. Link-local addresses are only valid on their local segment and are never routed. They are always present even if no global IPv6 address is configured.</p>
+<pre><code class="language-bash">ip -6 addr show          # fe80::... addresses are link-local
+ping6 fe80::1%eth0       # must specify the interface with %iface for link-local</code></pre>
+<p>---</p>
+<h2>Managing Addresses with <code>ip</code></h2>
+<h3>Viewing Addresses</h3>
+<pre><code class="language-bash"># All interfaces with addresses
+ip addr show
+ip a                          # shorthand
+
+# Compact one-line-per-interface view
+ip -brief addr show
+ip -br a
+
+# Single interface
+ip addr show eth0
+
+# IPv4 only
+ip -4 addr show
+
+# IPv6 only
+ip -6 addr show</code></pre>
+<h3>Adding and Removing Addresses</h3>
+<pre><code class="language-bash"># Add an IPv4 address to an interface
+sudo ip addr add 192.168.1.100/24 dev eth0
+
+# Add an IPv6 address
+sudo ip addr add 2001:db8::1/64 dev eth0
+
+# Add a secondary address (multiple IPs on one interface)
+sudo ip addr add 192.168.1.200/24 dev eth0
+
+# Remove an address
+sudo ip addr del 192.168.1.100/24 dev eth0
+
+# Flush all addresses from an interface
+sudo ip addr flush dev eth0</code></pre>
+<blockquote><p>💡 Addresses added with <code>ip addr add</code> are ephemeral — they disappear on reboot. For persistence, configure them via NetworkManager or systemd-networkd. See <a href="#persistent-configuration">Persistent Configuration</a>.</p></blockquote>
+<h3>Bringing Interfaces Up and Down</h3>
+<pre><code class="language-bash">sudo ip link set eth0 up
+sudo ip link set eth0 down
+
+# Set MTU
+sudo ip link set eth0 mtu 9000    # jumbo frames
+
+# Set MAC address
+sudo ip link set eth0 address 02:00:00:00:00:01</code></pre>
+<p>---</p>
+<h2>Default Gateway</h2>
+<p>The default gateway is the router that handles traffic destined for addresses not in any local subnet. It corresponds to the route for <code>0.0.0.0/0</code> (IPv4) or <code>::/0</code> (IPv6).</p>
+<pre><code class="language-bash"># Show the default gateway
+ip route show default
+ip route | grep default
+
+# Example output:
+# default via 192.168.1.1 dev eth0 proto dhcp src 192.168.1.50 metric 100
+
+# Add a default gateway
+sudo ip route add default via 192.168.1.1 dev eth0
+
+# Add a default IPv6 gateway
+sudo ip -6 route add default via fe80::1 dev eth0
+
+# Remove a default gateway
+sudo ip route del default via 192.168.1.1
+
+# Change the default gateway
+sudo ip route replace default via 192.168.1.254 dev eth0</code></pre>
+<p>---</p>
+<h2>Routing Table</h2>
+<p>The routing table is the kernel's lookup table: for each destination, which interface and next-hop to use.</p>
+<pre><code class="language-bash"># Show the full IPv4 routing table
+ip route show
+ip route show table all          # all routing tables including policy routes
+
+# Show the IPv6 routing table
+ip -6 route show
+
+# Trace which route would be used for a destination
+ip route get 8.8.8.8
+ip route get 10.0.0.5
+ip -6 route get 2001:db8::1
+
+# Example output of ip route get:
+# 8.8.8.8 via 192.168.1.1 dev eth0 src 192.168.1.50 uid 1000
+#     cache</code></pre>
+<h3>Adding and Removing Routes</h3>
+<pre><code class="language-bash"># Add a static route to a specific network
+sudo ip route add 10.10.0.0/16 via 192.168.1.254 dev eth0
+
+# Add a host route (single IP)
+sudo ip route add 10.20.30.40/32 via 192.168.1.254
+
+# Add a route via a specific interface (no gateway — directly connected)
+sudo ip route add 172.16.0.0/24 dev eth1
+
+# Remove a route
+sudo ip route del 10.10.0.0/16 via 192.168.1.254
+
+# Blackhole route (silently drop matching traffic)
+sudo ip route add blackhole 192.0.2.0/24
+
+# Unreachable route (return ICMP unreachable)
+sudo ip route add unreachable 192.0.2.0/24</code></pre>
+<h3>Route Metrics</h3>
+<p>When multiple routes match a destination, the one with the <strong>lowest metric</strong> wins.</p>
+<pre><code class="language-bash"># Add a route with a specific metric
+sudo ip route add default via 192.168.1.1 metric 100
+sudo ip route add default via 10.0.0.1 metric 200    # fallback
+
+# Show metrics
+ip route show | grep metric</code></pre>
+<p>---</p>
+<h2>Multiple Routing Tables (Policy Routing)</h2>
+<p>Linux supports up to 252 named routing tables. Policy routing lets you route traffic differently based on source address, mark, or interface — useful for VPNs, multi-homing, and VRFs.</p>
+<pre><code class="language-bash"># List named routing tables
+cat /etc/iproute2/rt_tables
+
+# Add a route to a specific table (table 100)
+sudo ip route add default via 10.0.0.1 table 100
+
+# Add a rule: traffic from 192.168.2.0/24 uses table 100
+sudo ip rule add from 192.168.2.0/24 table 100
+
+# Show all routing rules (policy database)
+ip rule show
+
+# Show routes in a specific table
+ip route show table 100
+
+# Delete a rule
+sudo ip rule del from 192.168.2.0/24 table 100</code></pre>
+<p>---</p>
+<h2>ARP and Neighbour Table</h2>
+<p>ARP (IPv4) and NDP (IPv6) map IP addresses to MAC addresses on the local segment. The kernel caches these in the neighbour table.</p>
+<pre><code class="language-bash"># Show the ARP/neighbour cache
+ip neigh show
+ip neigh show dev eth0
+
+# Add a static ARP entry
+sudo ip neigh add 192.168.1.50 lladdr 00:11:22:33:44:55 dev eth0
+
+# Delete an entry
+sudo ip neigh del 192.168.1.50 dev eth0
+
+# Flush all neighbours on an interface
+sudo ip neigh flush dev eth0
+
+# Flush stale entries only
+sudo ip neigh flush nud stale dev eth0</code></pre>
+<p>---</p>
+<h2>Persistent Configuration</h2>
+<h3>NetworkManager (recommended for desktops)</h3>
+<pre><code class="language-bash"># Show all connections
+nmcli connection show
+
+# Set a static IP on a connection
+nmcli connection modify &quot;Wired connection 1&quot; \
+  ipv4.method manual \
+  ipv4.addresses &quot;192.168.1.100/24&quot; \
+  ipv4.gateway &quot;192.168.1.1&quot; \
+  ipv4.dns &quot;1.1.1.1,8.8.8.8&quot;
+
+# Set a static IPv6 address
+nmcli connection modify &quot;Wired connection 1&quot; \
+  ipv6.method manual \
+  ipv6.addresses &quot;2001:db8::10/64&quot; \
+  ipv6.gateway &quot;2001:db8::1&quot;
+
+# Re-enable DHCP
+nmcli connection modify &quot;Wired connection 1&quot; \
+  ipv4.method auto \
+  ipv4.addresses &quot;&quot; \
+  ipv4.gateway &quot;&quot; \
+  ipv4.dns &quot;&quot;
+
+# Apply changes
+nmcli connection up &quot;Wired connection 1&quot;
+
+# Add a persistent static route via NetworkManager
+nmcli connection modify &quot;Wired connection 1&quot; \
+  +ipv4.routes &quot;10.10.0.0/16 192.168.1.254&quot;</code></pre>
+<h3>systemd-networkd (servers / headless)</h3>
+<p><strong><code>/etc/systemd/network/10-eth0.network</code></strong></p>
+<pre><code class="language-ini">[Match]
+Name=eth0
+
+[Network]
+Address=192.168.1.100/24
+Gateway=192.168.1.1
+DNS=1.1.1.1
+DNS=8.8.8.8
+
+# Static IPv6
+Address=2001:db8::10/64
+Gateway=2001:db8::1
+
+[Route]
+Destination=10.10.0.0/16
+Gateway=192.168.1.254</code></pre>
+<pre><code class="language-bash">sudo systemctl restart systemd-networkd
+networkctl status eth0</code></pre>
+<p>---</p>
+<h2>IPv4 vs IPv6 Dual Stack</h2>
+<p>Most modern systems run <strong>dual stack</strong> — both IPv4 and IPv6 simultaneously. Applications try IPv6 first (RFC 6724 address selection).</p>
+<pre><code class="language-bash"># Check if IPv6 is enabled on an interface
+cat /proc/sys/net/ipv6/conf/eth0/disable_ipv6
+# 0 = enabled, 1 = disabled
+
+# Disable IPv6 on a specific interface
+sudo sysctl net.ipv6.conf.eth0.disable_ipv6=1
+
+# Disable IPv6 globally
+sudo sysctl net.ipv6.conf.all.disable_ipv6=1
+
+# Make permanent via systemd-sysctl
+echo &quot;net.ipv6.conf.all.disable_ipv6 = 1&quot; | sudo tee /etc/sysctl.d/40-ipv6.conf
+
+# Test which address is used to reach a host
+ip route get 2001:4860:4860::8888    # Google's IPv6 DNS
+curl -6 https://ipv6.google.com      # force IPv6
+curl -4 https://google.com           # force IPv4</code></pre>
+<p>---</p>
+<h2>IP Forwarding</h2>
+<p>IP forwarding must be enabled for a machine to route packets between interfaces (acting as a router, NAT gateway, or container host).</p>
+<pre><code class="language-bash"># Check current state
+cat /proc/sys/net/ipv4/ip_forward       # 1=enabled, 0=disabled
+cat /proc/sys/net/ipv6/conf/all/forwarding
+
+# Enable temporarily (lost on reboot)
+sudo sysctl -w net.ipv4.ip_forward=1
+sudo sysctl -w net.ipv6.conf.all.forwarding=1
+
+# Enable persistently
+sudo tee /etc/sysctl.d/30-forwarding.conf &lt;&lt; 'EOF'
+net.ipv4.ip_forward = 1
+net.ipv6.conf.all.forwarding = 1
+EOF
+sudo sysctl --system</code></pre>
+<p>---</p>
+<h2>Useful One-Liners</h2>
+<pre><code class="language-bash"># My public IPv4 address
+curl -4 -s ifconfig.me
+
+# My public IPv6 address
+curl -6 -s ifconfig.me
+
+# All local IPs (no loopback)
+ip -br addr show | grep -v lo
+
+# Default gateway
+ip route show default | awk '{print $3}'
+
+# Which interface reaches the internet?
+ip route get 8.8.8.8 | awk '{print $5; exit}'
+
+# Is an IP in a particular subnet? (bash arithmetic)
+# e.g. is 192.168.1.50 in 192.168.1.0/24?
+python3 -c &quot;import ipaddress; print('yes' if ipaddress.ip_address('192.168.1.50') in ipaddress.ip_network('192.168.1.0/24') else 'no')&quot;
+
+# List all routes with their interface
+ip route show | awk '{print $1, $3, $5}'
+
+# Watch the routing table for changes
+watch -n 1 ip route show</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | No internet despite correct IP and gateway | Check DNS: <code>dig google.com @8.8.8.8</code>; check routing: <code>ip route get 8.8.8.8</code>; check firewall: <code>sudo nft list ruleset</code> | | <code>Network unreachable</code> | No route to destination — check <code>ip route show</code>; verify the gateway is reachable with <code>ping 192.168.1.1</code> | | <code>No route to host</code> | Route exists but the host is not responding — check firewall at the destination, check ARP: <code>ip neigh show</code> | | Wrong gateway used | Multiple default routes — check metrics with <code>ip route show</code>; remove lower-priority duplicates | | IPv6 link-local only, no global address | SLAAC or DHCPv6 failing — check <code>journalctl -u NetworkManager</code>; verify the router is sending RA (router advertisements) | | <code>169.254.x.x</code> address assigned | DHCP failed — APIPA fallback; check DHCP server and cable/connection | | Route disappears after reboot | Route was set with <code>ip route add</code> (ephemeral); persist via NetworkManager or systemd-networkd | | Packets sent but not returned | Asymmetric routing — check return path on the other end; intermediate firewall may be blocking | | VPN routes not taking effect | Check <code>ip rule show</code> for policy routing; VPN may need <code>table</code> configuration |</p>
+<p>---</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="network-tools">Network Tools</a> — <code>ping</code>, <code>traceroute</code>, <code>ss</code>, <code>tcpdump</code>, diagnostics</li>
+<li><a href="virtual-networking">Virtual Networking</a> — bridges, VLANs, veth pairs, namespaces</li>
+<li><a href="networkmanager-vpn">NetworkManager & VPN</a> — persistent interface configuration</li>
+<li><a href="firewalld">Firewall (firewalld)</a> — nftables rules affecting routing</li>
+<li><a href="wireguard">WireGuard (Manual)</a> — VPN with custom routing tables</li>
+<li><a href="tailscale">Tailscale VPN</a> — mesh VPN using <code>100.64.0.0/10</code> (CGNAT range)</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

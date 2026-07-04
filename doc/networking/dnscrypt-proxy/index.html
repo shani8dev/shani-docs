@@ -146,7 +146,113 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">dnscrypt-proxy (Encrypted DNS)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+        </div>
+      </div>
+      <div class="prose"><p>dnscrypt-proxy encrypts DNS queries between your machine and upstream resolvers using <strong>DNSCrypt</strong> or <strong>DNS-over-HTTPS (DoH)</strong>. Without it, DNS queries travel in plaintext — your ISP and anyone on-path can see every hostname you look up.</p>
+<p>Pre-installed on Shani OS, integrated with openresolv. <strong>Not active by default</strong> — enable it when you want encrypted DNS without running a full resolver like BIND or dnsmasq.</p>
+<blockquote><p>If you already use <strong>dnsmasq</strong> for local domains, pair them: run dnscrypt-proxy on port 5300 and have dnsmasq forward all non-local queries to it. See the <a href="#integration-with-dnsmasq">integration section</a> below.</p></blockquote>
+<p>---</p>
+<h2>Enable</h2>
+<pre><code class="language-bash">sudo systemctl enable --now dnscrypt-proxy
+
+# Confirm it is listening on 127.0.0.1:53
+sudo ss -ulnp | grep :53
+
+# Watch logs
+journalctl -u dnscrypt-proxy -f</code></pre>
+<p>By default, dnscrypt-proxy listens on <code>127.0.0.1:53</code> and auto-selects public DoH/DNSCrypt resolvers that support DNSSEC and do not log queries.</p>
+<p>---</p>
+<h2>Point the System at dnscrypt-proxy</h2>
+<p>Tell openresolv to route all DNS queries through dnscrypt-proxy:</p>
+<pre><code class="language-bash"># Set dnscrypt-proxy as the system resolver
+echo 'name_servers=127.0.0.1' | sudo tee -a /etc/resolvconf.conf
+
+# Regenerate /etc/resolv.conf
+sudo resolvconf -u
+
+# Verify
+cat /etc/resolv.conf       # should show: nameserver 127.0.0.1
+dig +short example.com     # should return an answer</code></pre>
+<p>---</p>
+<h2>Configuration</h2>
+<p>Edit <code>/etc/dnscrypt-proxy/dnscrypt-proxy.toml</code>:</p>
+<pre><code class="language-toml"># Listen address — change port to 5300 if dnsmasq also runs on this machine
+listen_addresses = ['127.0.0.1:53']
+
+# Use only resolvers that claim to not log queries
+require_nolog = true
+
+# Use only resolvers with DNSSEC support
+require_dnssec = true
+
+# Use only resolvers that don't filter (no censorship)
+require_nofilter = true
+
+# Automatically update the resolver list
+auto_update_resolvers = true
+
+# Optional: pin specific resolvers instead of auto-selecting
+# server_names = ['cloudflare', 'quad9-dnscrypt-ip4-filter-pri']</code></pre>
+<p>After editing:</p>
+<pre><code class="language-bash">sudo systemctl restart dnscrypt-proxy</code></pre>
+<h3>Choosing Resolvers</h3>
+<pre><code class="language-bash"># List all available resolvers and their properties
+sudo dnscrypt-proxy -list
+
+# Test resolver performance and check a query
+sudo dnscrypt-proxy -resolve example.com</code></pre>
+<p>---</p>
+<h2>Integration with dnsmasq</h2>
+<p>Run dnscrypt-proxy on port 5300 and have dnsmasq forward public queries to it, while keeping local <code>.home.local</code> names local:</p>
+<pre><code class="language-toml"># /etc/dnscrypt-proxy/dnscrypt-proxy.toml
+listen_addresses = ['127.0.0.1:5300']</code></pre>
+<pre><code class="language-ini"># /etc/dnsmasq.conf
+server=127.0.0.1#5300        # forward all public queries to dnscrypt-proxy
+address=/home.local/192.168.1.x   # resolve local names directly</code></pre>
+<p>openresolv points to dnsmasq (<code>name_servers=127.0.0.1</code>), which caches and forwards to dnscrypt-proxy on port 5300. This gives you local custom DNS, caching, and encrypted upstream resolution together.</p>
+<p>---</p>
+<h2>DNS Blocking</h2>
+<p>Block ads and malware domains at the DNS level:</p>
+<pre><code class="language-toml"># /etc/dnscrypt-proxy/dnscrypt-proxy.toml
+[blocked_names]
+  blocked_names_file = '/etc/dnscrypt-proxy/blocked-names.txt'
+  log_file = '/var/log/dnscrypt-proxy-blocked.log'</code></pre>
+<pre><code class="language-bash"># Download a community blocklist
+curl -s https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts \
+  | grep '^0.0.0.0' | awk '{print $2}' \
+  | sudo tee /etc/dnscrypt-proxy/blocked-names.txt
+sudo systemctl restart dnscrypt-proxy</code></pre>
+<p>---</p>
+<h2>Verifying Encryption</h2>
+<pre><code class="language-bash"># Check which resolver is active and its properties
+sudo dnscrypt-proxy -resolve example.com
+
+# DNS leak test — resolvers shown should be DoH/DNSCrypt servers, not your ISP's
+# Visit: https://www.dnsleaktest.com</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Won't start | Check <code>journalctl -u dnscrypt-proxy</code>; common cause is port 53 already in use — check <code>ss -ulnp \| grep :53</code> | | Port 53 conflict | If using alongside dnsmasq, set <code>listen_addresses = ['127.0.0.1:5300']</code> and point dnsmasq at that port | | DNS stops working after enabling | Verify <code>cat /etc/resolv.conf</code> shows <code>nameserver 127.0.0.1</code>; test with <code>dig @127.0.0.1 example.com</code> | | All resolvers unavailable | Some networks block non-HTTP traffic on port 443 — add <code>protocols = ['doh']</code> to force DNS-over-HTTPS on standard port 443 | | VPN DNS not working | Ensure openresolv manages <code>/etc/resolv.conf</code> — VPN connections register their DNS via openresolv, which overrides dnscrypt-proxy for VPN-specific domains | | Slow DNS | dnscrypt-proxy first-query latency is higher than a local cache — pair with dnsmasq for caching |</p>
+<p>---</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="firewalld">Firewall</a> — DNS port rules</li>
+<li><a href="wireguard">WireGuard</a> — VPN DNS interaction with openresolv</li>
+<li><a href="features">Security Features</a> — network security overview</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

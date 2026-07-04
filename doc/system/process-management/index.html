@@ -146,7 +146,309 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Process Management</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">System</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-25</span>
+        </div>
+      </div>
+      <div class="prose"><p>Standard Linux process management tools are all available on Shani OS. This page covers inspecting, controlling, and debugging running processes.</p>
+<p>---</p>
+<h2>Viewing Processes</h2>
+<h3>ps — snapshot of running processes</h3>
+<pre><code class="language-bash"># All processes, full format (most useful general view)
+ps aux
+
+# Process tree (shows parent-child relationships)
+ps auxf
+
+# All processes, long format with threads
+ps -eLf
+
+# Specific user's processes
+ps -u alice
+
+# Specific process by name
+ps aux | grep caddy
+
+# Sort by CPU usage
+ps aux --sort=-%cpu | head -20
+
+# Sort by memory usage
+ps aux --sort=-%mem | head -20
+
+# Show a specific PID
+ps -p 1234 -o pid,ppid,user,cmd,%cpu,%mem</code></pre>
+<h3>pgrep / pidof — find PIDs by name</h3>
+<pre><code class="language-bash"># Find PIDs matching a name
+pgrep caddy
+pgrep -u alice          # all PIDs owned by alice
+pgrep -la caddy         # with full command line
+
+# Get PID of an exact binary name
+pidof sshd</code></pre>
+<h3>htop — interactive process viewer</h3>
+<p><code>htop</code> is pre-installed. Press <code>F1</code> for help, <code>F6</code> to sort, <code>F9</code> to kill, <code>q</code> to quit.</p>
+<pre><code class="language-bash">htop
+
+# Filter to a specific user
+htop -u alice
+
+# Filter to a specific PID
+htop -p 1234,5678</code></pre>
+<p>Useful htop shortcuts:</p>
+<p>| Key | Action | |-----|--------| | <code>F6</code> | Sort by column | | <code>F4</code> | Filter by name | | <code>F9</code> | Send signal to selected process | | <code>t</code> | Toggle tree view | | <code>H</code> | Toggle user threads | | <code>K</code> | Toggle kernel threads | | <code>Space</code> | Tag a process (for batch operations) |</p>
+<p>---</p>
+<h2>Signals & Killing Processes</h2>
+<h3>kill / killall / pkill</h3>
+<pre><code class="language-bash"># Send SIGTERM (15) — graceful shutdown request
+kill 1234
+kill -TERM 1234
+
+# Send SIGKILL (9) — force kill, cannot be caught or ignored
+kill -9 1234
+kill -KILL 1234
+
+# Send SIGHUP (1) — reload config (many daemons interpret this as a reload)
+kill -HUP 1234
+
+# Kill all processes matching a name
+killall caddy
+killall -9 caddy         # force
+
+# Kill processes by pattern
+pkill -f &quot;python manage.py&quot;   # matches full command line
+pkill -u alice                # kill all of alice's processes
+
+# Kill all processes for a user (also terminates their session)
+sudo loginctl kill-user alice</code></pre>
+<h3>Common signals</h3>
+<p>| Signal | Number | Default action | Use | |--------|--------|----------------|-----| | <code>SIGTERM</code> | 15 | Terminate (graceful) | Normal shutdown — gives process time to clean up | | <code>SIGKILL</code> | 9 | Terminate (forced) | Last resort — process cannot catch or ignore this | | <code>SIGHUP</code> | 1 | Terminate (or reload) | Reload config in daemons (nginx, sshd, etc.) | | <code>SIGINT</code> | 2 | Terminate | Same as Ctrl+C | | <code>SIGSTOP</code> | 19 | Pause | Pause a process (cannot be caught) | | <code>SIGCONT</code> | 18 | Resume | Resume a paused process | | <code>SIGUSR1/2</code> | 10/12 | User-defined | App-specific (e.g. log rotation) |</p>
+<pre><code class="language-bash"># List all signal names and numbers
+kill -l</code></pre>
+<p>---</p>
+<h2>Priority & Scheduling</h2>
+<h3>nice / renice — CPU priority</h3>
+<p>Priority ranges from -20 (highest) to +19 (lowest). Default is 0. Only root can set negative (higher priority) values.</p>
+<pre><code class="language-bash"># Start a process with low priority (nice value 10)
+nice -n 10 make -j8
+
+# Start with very low priority (background batch job)
+nice -n 19 restic backup ~/
+
+# Change priority of a running process
+sudo renice -n 5 -p 1234       # by PID
+sudo renice -n 10 -u alice     # all of alice's processes
+
+# Check current nice value
+ps -o pid,ni,comm -p 1234</code></pre>
+<h3>ionice — I/O scheduling priority</h3>
+<p>Controls how the kernel schedules disk I/O for a process.</p>
+<pre><code class="language-bash"># Run with idle I/O priority (only gets disk when nothing else needs it)
+ionice -c 3 rsync -a /home /backup
+
+# Best-effort, low priority (class 2, priority 7 = lowest)
+ionice -c 2 -n 7 dd if=/dev/sda of=/dev/null
+
+# Check I/O priority of a process
+ionice -p 1234
+
+# Change I/O priority of a running process
+sudo ionice -c 3 -p 1234</code></pre>
+<p>---</p>
+<h2>Background Jobs & Job Control</h2>
+<pre><code class="language-bash"># Run a command in the background
+long-running-command &amp;
+
+# List background jobs in the current shell
+jobs
+jobs -l   # with PIDs
+
+# Bring a background job to the foreground
+fg %1     # job number 1
+fg        # most recent job
+
+# Send a foreground process to the background (first Ctrl+Z to pause, then bg)
+Ctrl+Z
+bg %1
+
+# Detach from terminal completely (survives shell exit)
+nohup long-running-command &amp;
+nohup long-running-command &gt; ~/output.log 2&gt;&amp;1 &amp;
+
+# Disown a job (remove from shell's job table)
+disown %1</code></pre>
+<p>For long-running tasks that must survive terminal disconnection, use <code>tmux</code> (pre-installed) instead of <code>nohup</code>:</p>
+<pre><code class="language-bash">tmux new -s backup
+# run your command
+Ctrl+B then D   # detach — command keeps running
+tmux attach -t backup   # reattach later</code></pre>
+<p>---</p>
+<h2>/proc — Process Information</h2>
+<p>Every process has a directory at <code>/proc/&lt;PID&gt;/</code> exposing its state as virtual files.</p>
+<pre><code class="language-bash"># Command line of a process
+cat /proc/1234/cmdline | tr '\0' ' '
+
+# Environment variables of a process (requires same user or root)
+cat /proc/1234/environ | tr '\0' '\n'
+
+# Open file descriptors
+ls -la /proc/1234/fd
+ls /proc/1234/fd | wc -l   # count open files
+
+# Memory maps
+cat /proc/1234/maps
+
+# Current working directory
+readlink /proc/1234/cwd
+
+# Executable path
+readlink /proc/1234/exe
+
+# Resource limits
+cat /proc/1234/limits
+
+# CPU and memory stats
+cat /proc/1234/status
+
+# System-wide info
+cat /proc/cpuinfo       # CPU details
+cat /proc/meminfo       # memory usage
+cat /proc/loadavg       # 1/5/15-minute load averages, running/total threads, last PID
+cat /proc/uptime        # seconds since boot</code></pre>
+<p>---</p>
+<h2>lsof — Open Files & Sockets</h2>
+<p><code>lsof</code> lists all open files, including network sockets, pipes, and device files.</p>
+<pre><code class="language-bash"># All open files (large output)
+sudo lsof
+
+# Open files by a specific process
+lsof -p 1234
+
+# Open files by a specific user
+lsof -u alice
+
+# What process has a file open
+lsof /var/log/syslog
+
+# What process is using a port
+sudo lsof -i :80
+sudo lsof -i :443
+sudo lsof -i TCP:22
+
+# All network connections (no DNS lookup)
+sudo lsof -i -n -P
+
+# All open files in a directory
+lsof +D /home/alice
+
+# Files opened by a specific command name
+lsof -c caddy</code></pre>
+<p>---</p>
+<h2>strace — System Call Tracing</h2>
+<p><code>strace</code> traces system calls made by a process — useful for debugging why something is failing.</p>
+<pre><code class="language-bash"># Trace a new command
+strace ls /tmp
+
+# Attach to a running process
+sudo strace -p 1234
+
+# Trace with timestamps
+strace -t ls /tmp
+
+# Trace only specific system calls
+strace -e openat,read,write ls /tmp
+
+# Trace file operations only
+strace -e trace=file ls /tmp
+
+# Count system calls (summary)
+strace -c ls /tmp
+
+# Follow child processes (forks)
+strace -f bash -c &quot;ls &amp;&amp; echo done&quot;
+
+# Write output to a file
+strace -o /tmp/trace.txt ls /tmp
+
+# Practical: why is a service failing to start?
+sudo strace -f -e trace=file systemctl start myservice 2&gt;&amp;1 | grep -E &quot;ENOENT|EACCES|open&quot;</code></pre>
+<p>---</p>
+<h2>systemd-cgls / systemctl — Process Hierarchy</h2>
+<p>Systemd organises all processes into control groups (cgroups). This is the authoritative view of what's running and under which service.</p>
+<pre><code class="language-bash"># Show the full cgroup tree (which service owns which processes)
+systemd-cgls
+
+# Show resource usage by service (CPU, memory, I/O)
+systemd-cgtop
+
+# Show processes for a specific service
+systemctl status caddy
+# (the PID list at the bottom includes all child processes)
+
+# Which service owns a PID?
+systemctl status 1234</code></pre>
+<p>---</p>
+<h2>Memory & Resource Usage</h2>
+<pre><code class="language-bash"># Memory overview
+free -h
+
+# Detailed memory breakdown
+cat /proc/meminfo
+
+# Per-process memory (resident set size)
+ps aux --sort=-%rss | head -20
+
+# Virtual, resident, and shared memory for a process
+cat /proc/1234/status | grep -E &quot;VmRSS|VmSize|VmSwap&quot;
+
+# Check for OOM kills (Out of Memory killer events)
+sudo journalctl -k | grep -i &quot;oom\|killed process&quot;
+dmesg | grep -i oom
+
+# Shared memory segments
+ipcs -m
+
+# ZRAM swap usage (Shani OS uses ZRAM by default)
+zramctl</code></pre>
+<p>---</p>
+<h2>Monitoring CPU Load</h2>
+<pre><code class="language-bash"># Current load averages (1, 5, 15 minutes)
+uptime
+cat /proc/loadavg
+
+# CPU usage summary (press 1 to show per-core)
+top
+
+# Watch CPU usage of a specific process
+watch -n 1 'ps -p 1234 -o %cpu,%mem,cmd'
+
+# Per-core usage snapshot
+mpstat -P ALL 1 3
+
+# CPU frequency and governor
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Process won't die with <code>kill -9</code> | The process is in an uninterruptible sleep (D state) — usually waiting on I/O. Check <code>ps aux</code> for <code>D</code> state; may need to wait for I/O to complete or reboot | | <code>kill: Operation not permitted</code> | You don't own the process — use <code>sudo kill</code> | | High load but low CPU usage | Check I/O wait: <code>top</code> → look at <code>%wa</code> in the CPU line; <code>iostat -x 1</code> for disk I/O | | Process keeps respawning after kill | It's managed by systemd — use <code>sudo systemctl stop &lt;service&gt;</code> instead | | Can't find which process owns a port | <code>sudo ss -tlnp | grep :PORT</code> or <code>sudo lsof -i :PORT</code> | | <code>strace</code> shows permission denied | Run with <code>sudo</code>; or check <code>/proc/sys/kernel/yama/ptrace_scope</code> (0 = unrestricted, 1 = parent only) | | Process using too much memory | Check <code>cat /proc/&lt;PID&gt;/status | grep VmRSS</code>; consider setting memory limits in the service unit with <code>MemoryMax=</code> |</p>
+<p>---</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="systemd">Systemd</a> — service management, unit files, resource limits with <code>MemoryMax=</code> and <code>CPUQuota=</code></li>
+<li><a href="shell">Shell & Environment</a> — <code>htop</code>, <code>ncdu</code>, and other pre-installed monitoring tools</li>
+<li><a href="shani-health">shani-health</a> — <code>--hardware</code> report includes CPU load, memory, OOM events, and zombie processes</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

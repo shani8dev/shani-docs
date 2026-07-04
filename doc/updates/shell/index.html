@@ -146,7 +146,120 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Shell &amp; Environment</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Updates &amp; Config</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+        </div>
+      </div>
+      <div class="prose"><p>Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your home directory and persists across every OS update and rollback.</p>
+<h2>Default Shell Stack</h2>
+<p>| Tool | Role | |------|------| | <strong>Zsh</strong> | Default shell for all users | | <strong>Starship</strong> | Cross-shell prompt with git, language runtime, exit-code, and timing info | | <strong>McFly</strong> | Neural-network command history search (replaces Ctrl+R) | | <strong>FZF</strong> | Fuzzy finder — integrated for Ctrl+T (files) and Alt+C (cd) | | <strong>zsh-syntax-highlighting</strong> | Fish-style inline syntax colouring (green = valid, red = invalid) | | <strong>zsh-autosuggestions</strong> | Ghost-text suggestions from history; press → or End to accept | | <strong>zsh-history-substring-search</strong> | Up/Down arrow searches history by substring, not just prefix | | <strong>zsh-completions</strong> | Tab completions for git, systemctl, podman, flatpak, nix-env, shani-deploy, and more |</p>
+<p>Bash and Fish are also installed if you prefer them.</p>
+<h2>Changing Your Shell</h2>
+<pre><code class="language-bash">chsh -s /bin/bash    # switch to Bash
+chsh -s /bin/fish    # switch to Fish
+chsh -s /bin/zsh     # switch back to Zsh (default)</code></pre>
+<p>Log out and back in for the change to take effect.</p>
+<h2>Customising Zsh</h2>
+<pre><code class="language-bash">nano ~/.zshrc
+source ~/.zshrc   # reload without restarting the shell</code></pre>
+<h2>Starship Prompt</h2>
+<p>Starship shows by default: current directory, git branch/status, active Python virtualenv, Node.js version (in Node projects), Rust toolchain version (when <code>Cargo.toml</code> is present), exit code of last command (when non-zero), and command duration for long-running commands.</p>
+<pre><code class="language-bash">nano ~/.config/starship.toml
+starship help</code></pre>
+<h2>McFly History Search</h2>
+<p>McFly replaces <code>Ctrl+R</code> with a context-aware, exit-code-aware history search that learns from your usage patterns. Everything runs on-device — no data leaves your system.</p>
+<pre><code class="language-bash"># Press Ctrl+R to open McFly
+# Type to filter; Enter to select; Ctrl+C to cancel
+
+# McFly database location (grows more useful over time)
+ls ~/.local/share/mcfly/</code></pre>
+<h2>FZF Integration</h2>
+<p>FZF is integrated into Zsh for three keybindings:</p>
+<p>| Keybinding | Action | |-----------|--------| | <code>Ctrl+R</code> | History search (McFly takes precedence; FZF is fallback) | | <code>Ctrl+T</code> | Fuzzy file finder — inserts selected path at cursor | | <code>Alt+C</code> | Fuzzy <code>cd</code> — jump to any subdirectory |</p>
+<pre><code class="language-bash"># Use fzf in scripts
+ls | fzf
+fzf --preview 'cat {}'
+
+# Select a git branch to checkout
+git branch | fzf | xargs git checkout</code></pre>
+<h2>Pre-Installed CLI Tools</h2>
+<h3>File Search and Navigation</h3>
+<pre><code class="language-bash">rg &quot;search term&quot;           # ripgrep — fast recursive search
+rg --type py &quot;import&quot;      # search only Python files
+fd &quot;filename&quot;              # fd — modern find replacement
+fd -e py                   # find by extension</code></pre>
+<h3>File Viewing</h3>
+<pre><code class="language-bash">bat file.py                # bat — cat with syntax highlighting
+eza -la --git              # eza — modern ls with git status</code></pre>
+<h3>System Monitoring</h3>
+<pre><code class="language-bash">htop                       # interactive process viewer
+fastfetch                  # system information summary
+ncdu                       # interactive disk usage analyser</code></pre>
+<h3>Text Processing</h3>
+<pre><code class="language-bash">echo '{&quot;key&quot;: &quot;value&quot;}' | jq .    # jq — JSON processor</code></pre>
+<h3>Compression</h3>
+<pre><code class="language-bash">7z a archive.7z file.txt
+tar xzf archive.tar.gz
+unzip archive.zip</code></pre>
+<h2>Shell Configuration Files</h2>
+<pre><code>~/.zshrc                     — Zsh configuration (plugins, aliases, env vars)
+~/.bashrc                    — Bash configuration
+~/.profile                   — login shell config (shared between shells)
+~/.config/starship.toml      — Starship prompt configuration
+~/.local/share/mcfly/        — McFly history database
+~/.config/environment.d/     — session environment variables (Wayland/X)</code></pre>
+<p>All of these are in <code>@home</code> — never touched by OS updates or rollbacks.</p>
+<h2>Environment Variables</h2>
+<pre><code class="language-bash"># Shell-specific (Zsh)
+nano ~/.zshrc
+export EDITOR=vim
+export PATH=&quot;$HOME/.local/bin:$PATH&quot;
+
+# Session environment (Wayland/X sessions)
+# ~/.config/environment.d/my-vars.conf
+EDITOR=nvim
+MOZ_ENABLE_WAYLAND=1
+
+# System-wide
+sudo nano /etc/environment</code></pre>
+<h2>Nix Package Manager</h2>
+<p>Nix is pre-installed on the dedicated <code>@nix</code> subvolume. Install CLI tools without root — they survive all OS updates and rollbacks:</p>
+<pre><code class="language-bash"># Add channel (required before first install)
+nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
+nix-channel --update
+
+# Install packages
+nix-env -iA nixpkgs.ripgrep
+nix-env -iA nixpkgs.bat
+nix-env -iA nixpkgs.lazygit
+nix-env -iA nixpkgs.zoxide
+
+# List installed
+nix-env -q
+
+# Upgrade all
+nix-env -u '*'</code></pre>
+<h2>Tmux</h2>
+<p>Tmux is pre-installed:</p>
+<pre><code class="language-bash">tmux new -s work          # start named session
+Ctrl+B then %             # split horizontally
+Ctrl+B then &quot;             # split vertically
+Ctrl+B then D             # detach (session keeps running)
+tmux ls                   # list sessions
+tmux attach -t work       # reattach</code></pre>
+<p>Configuration lives in <code>~/.tmux.conf</code>.</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

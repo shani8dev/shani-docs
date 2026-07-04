@@ -146,7 +146,588 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">AI &amp; LLMs</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+        </div>
+      </div>
+      <div class="prose"><p>Run large language models, vision pipelines, image generation, speech-to-text, and AI coding assistants entirely on your own hardware. No API keys. No usage limits. Nothing leaves your machine.</p>
+<blockquote><p><strong>GPU note:</strong> Shani OS pre-configures <code>/dev/dri</code> device passthrough for Podman. AMD and Intel GPUs work out of the box. NVIDIA requires the NVIDIA Container Toolkit — see <a href="https://docs.shani.dev/doc/servers/ai-llms#gpu">docs.shani.dev/doc/servers/ai-llms#gpu</a>.</p></blockquote>
+<blockquote><p><strong>RAM guidance:</strong> A 7B model needs ~8 GB RAM/VRAM, a 13B model needs ~16 GB, a 70B model needs ~40 GB. Models run on CPU if no GPU is available — slower, but functional. Quantised (GGUF) models trade a small accuracy reduction for significantly lower memory requirements.</p></blockquote>
+<p>---</p>
+<h2>Key Concepts</h2>
+<h4>Transformer architecture and why it matters for inference</h4>
+<p>Large language models are transformer networks. The key operational facts: inference is memory-bandwidth-bound, not compute-bound — the GPU spends most of its time moving weights from VRAM to compute units. This is why quantisation (reducing weight precision from float16 to int4) gives a 4× memory reduction with minimal quality loss. VRAM capacity determines the maximum model size; VRAM bandwidth determines tokens-per-second. A 7B model at float16 needs ~14 GB VRAM; at Q4_K_M quantisation, ~4 GB. Knowing this lets you choose the right model-hardware combination and explain why a 3090 (24 GB) outperforms a 4090 (24 GB) for inference at saturated VRAM.</p>
+<h4>Context window, tokens, and why they matter</h4>
+<p>A context window is the maximum number of tokens (roughly ¾ of a word each) a model can process in one request — both the input prompt and the output combined. Llama 3.2's context is 128k tokens (~96k words). A longer context costs quadratically more memory (KV cache grows with sequence length). For RAG, the context window determines how many retrieved document chunks fit alongside the query. For coding assistants, it determines how much of the codebase can be in-context at once. Context exhaustion is the most common failure mode in production LLM applications.</p>
+<h4>RAG (Retrieval-Augmented Generation) architecture</h4>
+<p>RAG solves the "my LLM doesn't know my data" problem without fine-tuning. The pipeline: (1) embed each document chunk using an embedding model (Ollama's <code>nomic-embed-text</code>) into a vector; (2) store vectors in a vector database (Qdrant, ChromaDB, pgvector); (3) at query time, embed the user's question and find the N most similar document vectors; (4) inject those chunks into the LLM's context alongside the question. The LLM answers from the retrieved context, not from its training data. Key metrics: chunk size (too small = no context; too large = noise), top-K (how many chunks), and embedding model quality. RAG is the dominant pattern for enterprise AI applications.</p>
+<h4>Inference serving and batching</h4>
+<p>A production LLM server (Ollama, vLLM, llama.cpp server) manages concurrent requests differently from a web server. Continuous batching: instead of processing one request at a time, the server processes tokens from multiple in-flight requests simultaneously, filling gaps in GPU utilisation. PagedAttention (used in vLLM) manages KV cache as virtual memory pages, allowing more concurrent requests on the same VRAM. For interviews at AI-forward companies: understand that throughput (tokens/second total) and latency (time-to-first-token) are the two key metrics, and they trade off against each other.</p>
+<h4>Embeddings and semantic search</h4>
+<p>An embedding model converts text into a fixed-length float vector where semantically similar texts produce nearby vectors (measured by cosine similarity or dot product). Unlike keyword search (which fails on synonyms and paraphrases), semantic search finds conceptually related content. The embedding dimension (e.g. 768, 1536) determines precision — higher dimensions capture more nuance but require more storage and VRAM. HNSW (Hierarchical Navigable Small World) graphs are the standard ANN index structure used by Qdrant, Weaviate, and pgvector — they trade a small recall loss for orders-of-magnitude faster query time versus exact search.</p>
+<h4>Fine-tuning vs. prompting vs. RAG — when to use each</h4>
+<p>Three ways to specialise an LLM: (1) Prompting — add instructions and examples in the system prompt. Zero cost, instant. Works for tone, format, and simple tasks. Fails when the model lacks domain knowledge. (2) RAG — retrieve relevant context at runtime. Works for factual knowledge that changes. Requires a vector database and retrieval pipeline. (3) Fine-tuning — train the model on domain-specific examples using LoRA/QLoRA. Works for style, structure, and tasks requiring deep domain knowledge baked in. High cost, requires labelled data, risk of catastrophic forgetting. For 90% of enterprise applications, RAG is the answer. Fine-tuning is justified when you need consistent output format across thousands of calls.</p>
+<h4>LLM safety and output reliability patterns</h4>
+<p>LLMs are probabilistic — they can hallucinate, produce inconsistent JSON, and fail silently. Production patterns: (1) Structured output — instruct the model to respond in JSON and validate with Pydantic/Zod; use grammar-constrained decoding (llama.cpp supports this) to enforce schemas at the token level. (2) Retry with reflection — if the model's output fails validation, feed the error back as a correction prompt. (3) Guardrails — validate inputs for prompt injection (user tries to override system instructions) and outputs for PII or policy violations (Langfuse can hook into this pipeline). (4) Temperature — set to 0 for deterministic tasks (classification, extraction), higher for creative generation.</p>
+<h2>Ollama</h2>
+<p><strong>Purpose:</strong> Pull, run, and serve open-weight LLMs (Llama, Mistral, Phi, Gemma, Qwen, DeepSeek) via a simple REST API. Handles model storage, quantisation selection, and GPU offloading automatically.</p>
+<pre><code class="language-yaml"># ~/ollama/compose.yaml
+services:
+  ollama:
+    image: ollama/ollama          # AMD GPU: use ollama/ollama:rocm
+    ports:
+      - 127.0.0.1:11434:11434
+    volumes:
+      - /home/user/ollama:/root/.ollama:Z
+    devices:
+      - /dev/dri
+      # AMD GPU: also add /dev/kfd (required for ROCm)
+      # - /dev/kfd
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/ollama &amp;&amp; podman-compose up -d</code></pre>
+<h5>REST API example</h5>
+<pre><code class="language-bash">curl http://localhost:11434/api/generate \
+  -d '{&quot;model&quot;:&quot;llama3.2&quot;,&quot;prompt&quot;:&quot;What is immutable Linux?&quot;,&quot;stream&quot;:false}'</code></pre>
+<h5>OpenAI-compatible API</h5>
+<p>(drop-in replacement for any OpenAI client):</p>
+<pre><code class="language-bash">curl http://localhost:11434/v1/chat/completions \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;model&quot;:&quot;llama3.2&quot;,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;Hello&quot;}]}'</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Pull a model
+podman exec ollama ollama pull llama3.2
+
+# Pull a smaller/faster model
+podman exec ollama ollama pull phi4-mini
+
+# Pull a specific quantisation
+podman exec ollama ollama pull llama3.2:3b-instruct-q4_K_M
+
+# Run a model interactively in the terminal
+podman exec -it ollama ollama run llama3.2
+
+# Run a one-shot prompt
+podman exec ollama ollama run llama3.2 &quot;Summarise the theory of relativity in 2 sentences&quot;
+
+# List downloaded models
+podman exec ollama ollama list
+
+# Show model info, parameters and template
+podman exec ollama ollama show llama3.2
+
+# Show currently loaded models and their VRAM usage
+podman exec ollama ollama ps
+
+# Remove a model
+podman exec ollama ollama rm llama3.2:latest
+
+# Copy a model (create an alias)
+podman exec ollama ollama cp llama3.2 my-custom-model
+
+# Check Ollama version
+podman exec ollama ollama version
+
+# List models via API
+curl http://localhost:11434/api/tags</code></pre>
+<p>---</p>
+<h2>Open WebUI</h2>
+<p><strong>Purpose:</strong> A polished, ChatGPT-style web interface for Ollama and any OpenAI-compatible API. Supports multiple models, conversation history, document RAG pipelines, image generation, voice input, web search, and user accounts with role-based access.</p>
+<pre><code class="language-yaml"># ~/open-webui/compose.yaml
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    ports:
+      - 127.0.0.1:3000:8080
+    volumes:
+      - /home/user/open-webui/data:/app/backend/data:Z
+    environment:
+      OLLAMA_BASE_URL: http://host.containers.internal:11434
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/open-webui &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>Use <code>host.containers.internal</code> (not <code>localhost</code>) when Open WebUI needs to reach Ollama running in another container.</p></blockquote>
+<blockquote><p><strong>RAG & vector search:</strong> Open WebUI's RAG pipeline uses its built-in ChromaDB by default. For production RAG workloads, connect an external vector database — see <a href="https://docs.shani.dev/doc/servers/databases#qdrant-vector-database">Qdrant and Weaviate in the Databases wiki</a>.</p></blockquote>
+<p>Access at <code>http://localhost:3000</code>. Proxy through Caddy for HTTPS: <code>webui.home.local { tls internal; reverse_proxy localhost:3000 }</code>.</p>
+<h5>Connect to external APIs</h5>
+<p>(Anthropic, OpenAI, Groq) alongside local models by adding connections under Settings → Connections. You can mix local Ollama models with cloud APIs in the same interface.</p>
+<p>---</p>
+<h2>LocalAI</h2>
+<p><strong>Purpose:</strong> A drop-in, OpenAI-compatible REST API server that runs any GGUF, GGML, or diffusion model locally. Connect tools that expect the OpenAI API — LangChain, AutoGen, LlamaIndex, Cursor — without sending data to OpenAI.</p>
+<pre><code class="language-yaml"># ~/localai/compose.yaml
+services:
+  localai:
+    image: localai/localai:latest
+    ports:
+      - 127.0.0.1:8080:8080
+    volumes:
+      - /home/user/localai/models:/models:Z
+    devices:
+      - /dev/dri
+    environment:
+      MODELS_PATH: /models
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/localai &amp;&amp; podman-compose up -d</code></pre>
+<h5>Test the API</h5>
+<pre><code class="language-bash">curl http://localhost:8080/v1/chat/completions \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;model&quot;:&quot;llama3.2&quot;,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;Hello&quot;}]}'</code></pre>
+<blockquote><p>LocalAI supports embeddings, function calling, audio transcription, and image generation — all via the standard OpenAI API surface.</p></blockquote>
+<p>---</p>
+<h2>ComfyUI</h2>
+<p><strong>Purpose:</strong> A node-based workflow editor for Stable Diffusion (SDXL, SD1.5, Flux). Build and save image generation pipelines as JSON graphs. Supports ControlNet, LoRA, inpainting, upscaling, AnimateDiff, and video generation.</p>
+<pre><code class="language-yaml"># ~/comfyui/compose.yaml
+services:
+  comfyui:
+    image: ghcr.io/comfyanonymous/comfyui:latest
+    ports:
+      - 127.0.0.1:8188:8188
+    volumes:
+      - /home/user/comfyui/models:/root/.local/share/comfyui/models:Z
+      - /home/user/comfyui/output:/root/.local/share/comfyui/output:Z
+    devices:
+      - /dev/dri
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/comfyui &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:8188</code>. Place model checkpoints in <code>~/comfyui/models/checkpoints/</code>. Download models from CivitAI or Hugging Face directly into this directory.</p>
+<p>---</p>
+<h2>Automatic1111 (Stable Diffusion Web UI)</h2>
+<p><strong>Purpose:</strong> The original and most widely used Stable Diffusion interface. Rich plugin ecosystem, img2img, inpainting, ControlNet, and an extensive settings surface. Better for users who want a traditional form-based UI rather than ComfyUI's node graph.</p>
+<pre><code class="language-yaml"># ~/a1111/compose.yaml
+services:
+  a1111:
+    image: universalml/stable-diffusion-webui:latest
+    ports:
+      - 127.0.0.1:7860:7860
+    volumes:
+      - /home/user/a1111/models:/stable-diffusion-webui/models:Z
+      - /home/user/a1111/outputs:/stable-diffusion-webui/outputs:Z
+    devices:
+      - /dev/dri
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/a1111 &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:7860</code>. Compatible with the same checkpoint <code>.safetensors</code> files as ComfyUI — share the models directory between both.</p>
+<p>---</p>
+<h2>Whisper (Speech-to-Text)</h2>
+<p><strong>Purpose:</strong> Local, offline speech-to-text transcription using OpenAI's Whisper model. Supports 99 languages. Runs via a REST API — useful for transcription pipelines, voice notes, subtitle generation, and voice input in Open WebUI.</p>
+<pre><code class="language-yaml"># ~/whisper/compose.yaml
+services:
+  whisper:
+    image: onerahmet/openai-whisper-asr-webservice
+    ports:
+      - 127.0.0.1:9000:9000
+    volumes:
+      - /home/user/whisper/data:/data:Z
+    environment:
+      ASR_MODEL: base
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/whisper &amp;&amp; podman-compose up -d</code></pre>
+<h5>Transcribe a file</h5>
+<pre><code class="language-bash">curl -F &quot;audio_file=@recording.mp3&quot; http://localhost:9000/asr</code></pre>
+<p>Available models: <code>tiny</code>, <code>base</code>, <code>small</code>, <code>medium</code>, <code>large</code>, <code>large-v3</code>. Larger models are more accurate but slower and require more RAM. For most use cases, <code>medium</code> balances accuracy and speed well.</p>
+<p>---</p>
+<h2>Kokoro TTS (Text-to-Speech)</h2>
+<p><strong>Purpose:</strong> High-quality, local text-to-speech synthesis using the Kokoro model. Produces natural-sounding speech with multiple voices and accents — useful for audiobook creation, accessibility tools, and voice assistants.</p>
+<pre><code class="language-yaml"># ~/kokoro/compose.yaml
+services:
+  kokoro:
+    image: ghcr.io/remsky/kokoro-fastapi-cpu:latest
+    ports:
+      - 127.0.0.1:8880:8880
+    volumes:
+      - /home/user/kokoro/voices:/app/voices:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/kokoro &amp;&amp; podman-compose up -d</code></pre>
+<p><strong>Synthesise speech:</strong></p>
+<pre><code class="language-bash">curl -X POST http://localhost:8880/v1/audio/speech \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;model&quot;:&quot;kokoro&quot;,&quot;input&quot;:&quot;Hello from your home server.&quot;,&quot;voice&quot;:&quot;af_bella&quot;}' \
+  --output speech.mp3</code></pre>
+<blockquote><p>Kokoro exposes an OpenAI-compatible <code>/v1/audio/speech</code> endpoint — connect it to Open WebUI's TTS setting for voice responses.</p></blockquote>
+<p>---</p>
+<h2>Tabby (AI Coding Assistant)</h2>
+<p><strong>Purpose:</strong> Self-hosted AI coding assistant server. Works as a drop-in alternative to GitHub Copilot — installs as a VS Code, JetBrains, or Vim extension and completes code inline as you type, using models running entirely on your hardware.</p>
+<pre><code class="language-yaml"># ~/tabby/compose.yaml
+services:
+  tabby:
+    image: tabbyml/tabby:latest
+    ports:
+      - 127.0.0.1:8081:8080
+    volumes:
+      - /home/user/tabby/data:/data:Z
+    devices:
+      - /dev/dri
+    command: serve --model TabbyML/StarCoder-1B --device cpu
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/tabby &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>Replace <code>--device cpu</code> with <code>--device cuda</code> for NVIDIA, <code>--device rocm</code> for AMD, or keep <code>--device cpu</code> for CPU inference. (<code>--device metal</code> is macOS-only and not applicable here.) Smaller models like <code>TabbyML/StarCoder-1B</code> run well on CPU for local use.</p></blockquote>
+<h5>VS Code setup</h5>
+<p>Install the <a href="https://marketplace.visualstudio.com/items?itemName=TabbyML.vscode-tabby">Tabby extension</a>, then point it at <code>http://tabby.home.local</code> in settings.</p>
+<p>---</p>
+<h2>AnythingLLM (Team RAG + Multi-Model Workspace)</h2>
+<p><strong>Purpose:</strong> A full-stack RAG and AI workspace designed for teams. Upload documents (PDFs, Word, text, URLs), create workspaces, and chat against them with any LLM — Ollama, OpenAI, Anthropic, or any OpenAI-compatible endpoint. Supports agents, web scraping, multi-user accounts with role-based access, API keys, and an embeddable chat widget. More feature-complete than Open WebUI's RAG pipeline for document-heavy use cases.</p>
+<pre><code class="language-yaml"># ~/anythingllm/compose.yaml
+services:
+  anythingllm:
+    image: mintplexlabs/anythingllm:latest
+    ports:
+      - 127.0.0.1:3001:3001
+    volumes:
+      - /home/user/anythingllm/storage:/app/server/storage:Z
+    environment:
+      STORAGE_DIR: /app/server/storage
+      LLM_PROVIDER: ollama
+      OLLAMA_BASE_PATH: http://host.containers.internal:11434
+      OLLAMA_MODEL_PREF: llama3.2
+      EMBEDDING_ENGINE: ollama
+      OLLAMA_EMBEDDING_MODEL_PREF: nomic-embed-text
+      VECTOR_DB: lancedb
+      JWT_SECRET: changeme-run-openssl-rand-hex-32
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/anythingllm &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:3001</code>. Create workspaces, upload documents, and start querying. Connect to any LLM provider in Settings → LLM Preference.</p>
+<blockquote><p><strong>vs Open WebUI:</strong> Use AnythingLLM when your primary use case is document Q&A across teams. Use Open WebUI when you want a chat-first interface with light RAG and broader model management.</p></blockquote>
+<p>---</p>
+<h2>LiteLLM (Multi-Provider LLM Proxy)</h2>
+<p><strong>Purpose:</strong> A unified OpenAI-compatible proxy that sits in front of 100+ LLM providers — Ollama, Anthropic, OpenAI, Groq, Mistral, Bedrock, Azure, and more. Route requests to different models based on model name, load-balance across providers, set per-key spend limits, and get unified logging and cost tracking. Any tool that speaks the OpenAI API (Open WebUI, AnythingLLM, Cursor, Continue.dev) can use LiteLLM as a single endpoint.</p>
+<pre><code class="language-yaml"># ~/litellm/compose.yml
+services:
+  litellm:
+    image: ghcr.io/berriai/litellm:main-latest
+    ports: [&quot;127.0.0.1:4000:4000&quot;]
+    volumes:
+      - /home/user/litellm/config.yaml:/app/config.yaml:ro,Z
+    command: --config /app/config.yaml --port 4000 --num_workers 8
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: litellm
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: litellm
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/litellm &amp;&amp; podman-compose up -d</code></pre>
+<h5>First run — apply database migrations</h5>
+<pre><code class="language-bash">podman exec litellm-litellm-1 litellm --database_url &quot;postgresql://litellm:changeme@db:5432/litellm&quot; migrate</code></pre>
+<h5>Example <code>config.yaml</code></h5>
+<pre><code class="language-yaml">model_list:
+  - model_name: llama3.2
+    litellm_params:
+      model: ollama/llama3.2
+      api_base: http://host.containers.internal:11434
+
+  - model_name: phi4-mini
+    litellm_params:
+      model: ollama/phi4-mini
+      api_base: http://host.containers.internal:11434
+
+  - model_name: claude-sonnet
+    litellm_params:
+      model: anthropic/claude-sonnet-4-5-20250929
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  - model_name: gpt-4o
+    litellm_params:
+      model: openai/gpt-4o
+      api_key: os.environ/OPENAI_API_KEY
+
+litellm_settings:
+  drop_params: true
+  success_callback: [&quot;langfuse&quot;]
+
+general_settings:
+  master_key: sk-changeme
+  database_url: postgresql://litellm:changeme@db:5432/litellm</code></pre>
+<h5>Use LiteLLM from any OpenAI client</h5>
+<pre><code class="language-bash">curl http://localhost:4000/v1/chat/completions \
+  -H &quot;Authorization: Bearer sk-changeme&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;model&quot;: &quot;llama3.2&quot;, &quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Hello&quot;}]}'</code></pre>
+<p>---</p>
+<h2>Vane (AI Search Engine)</h2>
+<p><strong>Purpose:</strong> Open-source AI-powered search engine — a self-hosted Perplexity.ai alternative (formerly known as Perplexica, rebranded to Vane). Bundles SearXNG internally, retrieves live results, and uses a local LLM (via Ollama) to synthesise a cited, conversational answer. No query data sent to any third party.</p>
+<pre><code class="language-yaml"># ~/vane/compose.yml
+services:
+  vane:
+    image: itzcrazykns1337/vane:latest   # includes bundled SearXNG
+    ports: [&quot;127.0.0.1:3009:3000&quot;]
+    volumes:
+      - /home/user/vane/data:/home/vane/data:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/vane &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:3009</code>. On first load, configure your AI provider (Ollama URL: <code>http://host.containers.internal:11434</code>, model: <code>llama3.2</code>) through the setup screen.</p>
+<blockquote><p>If you already run a separate SearXNG instance, use the slim image instead: <code>itzcrazykns1337/vane:slim-latest</code> and set <code>SEARXNG_API_URL: http://host.containers.internal:8090</code>.</p></blockquote>
+<blockquote><p>Vane needs at least a 7B model for coherent answers. <code>llama3.2</code> or <code>mistral</code> work well. Pull the model first with <code>podman exec ollama ollama pull llama3.2</code>.</p></blockquote>
+<p>---</p>
+<h2>InvokeAI (Professional Stable Diffusion UI)</h2>
+<p><strong>Purpose:</strong> Professional-grade Stable Diffusion interface with a node-based canvas, a polished linear workflow UI, ControlNet, IP-Adapter, regional prompting, and model management. A strong alternative to ComfyUI when you want more polish, and to A1111 when you need more power. Excellent for photographers and digital artists who want a native-feeling app experience.</p>
+<pre><code class="language-yaml"># ~/invokeai/compose.yaml
+services:
+  invokeai:
+    image: ghcr.io/invoke-ai/invokeai:latest
+    ports:
+      - 127.0.0.1:9090:9090
+    volumes:
+      - /home/user/invokeai/models:/invokeai/models:Z
+      - /home/user/invokeai/outputs:/invokeai/outputs:Z
+      - /home/user/invokeai/configs:/invokeai/configs:Z
+    devices:
+      - /dev/dri
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/invokeai &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:9090</code>. On first run, download models from the Model Manager — it supports HuggingFace Hub, CivitAI, and direct URLs. Compatible checkpoint files are shared with ComfyUI and A1111.</p>
+<p>---</p>
+<h2>Piper TTS (Lightweight Text-to-Speech)</h2>
+<p><strong>Purpose:</strong> Fast, local neural text-to-speech synthesis. Piper is significantly lighter than Kokoro — a single voice model is 50–200 MB and runs in real time on CPU. Ideal for notifications, accessibility features, and voice synthesis when you don't need the premium audio quality of Kokoro.</p>
+<pre><code class="language-yaml"># ~/piper-tts/compose.yaml
+services:
+  piper-tts:
+    image: rhasspy/wyoming-piper
+    ports:
+      - 127.0.0.1:5000:5000
+    volumes:
+      - /home/user/piper/voices:/app/voices:Z
+    command: --piper /usr/local/bin/piper --data-dir /app/voices --download-dir /app/voices --voice en_US-lessac-medium
+    restart: unless-stopped
+  piper-rest:
+    image: ghcr.io/mush42/piper-rest-api:latest
+    ports:
+      - 127.0.0.1:5001:5000
+    volumes:
+      - /home/user/piper/voices:/voices:Z
+    command: --models-dir /voices
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/piper-tts &amp;&amp; podman-compose up -d</code></pre>
+<p><strong>Synthesise speech:</strong></p>
+<pre><code class="language-bash">echo &quot;Hello from Piper&quot; | \
+  curl -X POST http://localhost:5001/api/tts \
+  -H &quot;Content-Type: text/plain&quot; \
+  --data-binary @- \
+  --output speech.wav</code></pre>
+<blockquote><p>Piper uses the Wyoming protocol — it integrates directly with Home Assistant's Assist voice pipeline for 100% local voice commands without cloud STT/TTS.</p></blockquote>
+<p>---</p>
+<h2>Flowise (Visual LLM Pipeline Builder)</h2>
+<p><strong>Purpose:</strong> Drag-and-drop UI for building LangChain and LlamaIndex pipelines — chatbots, RAG workflows, agents, and API endpoints — without writing code. Connect Ollama models, vector databases, document loaders, and output parsers visually, then expose them as REST endpoints or embed them as chat widgets.</p>
+<pre><code class="language-yaml"># ~/flowise/compose.yaml
+services:
+  flowise:
+    image: flowiseai/flowise
+    ports:
+      - 127.0.0.1:3003:3000
+    volumes:
+      - /home/user/flowise/data:/root/.flowise:Z
+    environment:
+      FLOWISE_USERNAME: admin
+      FLOWISE_PASSWORD: changeme
+      FLOWISE_SECRETKEY_OVERWRITE: changeme-run-openssl-rand-hex-32
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/flowise &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:3003</code>. Build chains by dragging components onto the canvas — connect an Ollama LLM node, a Qdrant vector store, a PDF loader, and a conversational memory node to create a document Q&A chatbot in minutes.</p>
+<blockquote><p><strong>vs AnythingLLM:</strong> Flowise gives you full control over the pipeline architecture via the visual editor. AnythingLLM is better when you just want to upload documents and chat.</p></blockquote>
+<p>---</p>
+<h2>Langfuse (LLM Observability & Tracing)</h2>
+<p><strong>Purpose:</strong> Open-source observability platform for LLM applications. Traces every prompt, completion, token count, latency, and cost across your entire AI stack — Ollama, LiteLLM, OpenAI, Flowise, and AnythingLLM all support Langfuse callbacks. Essential for debugging RAG pipelines and monitoring production AI workloads.</p>
+<pre><code class="language-yaml"># ~/langfuse/compose.yml
+services:
+  langfuse:
+    image: langfuse/langfuse:latest
+    ports: [&quot;127.0.0.1:3004:3000&quot;]
+    environment:
+      DATABASE_URL: postgresql://langfuse:changeme@db:5432/langfuse
+      NEXTAUTH_URL: https://langfuse.home.local
+      NEXTAUTH_SECRET: changeme-run-openssl-rand-base64-32
+      SALT: changeme-run-openssl-rand-base64-16
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: langfuse
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: langfuse
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/langfuse &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:3004</code>. Create a project, copy the public/secret key pair, and add them to LiteLLM's <code>config.yaml</code> (<code>LANGFUSE_PUBLIC_KEY</code>, <code>LANGFUSE_SECRET_KEY</code>) to start seeing traces immediately.</p>
+<p>---</p>
+<h2>Open WebUI Pipelines (Tool Use & Custom Functions)</h2>
+<p><strong>Purpose:</strong> Open WebUI Pipelines is a plugin server that extends Open WebUI with custom Python functions — rate limiting, content filtering, model routing, tool use (web search, calculators, code execution), and integration with external APIs. Pipelines run server-side as a sidecar to Open WebUI.</p>
+<pre><code class="language-yaml"># ~/pipelines/compose.yaml
+services:
+  pipelines:
+    image: ghcr.io/open-webui/pipelines:main
+    ports:
+      - 127.0.0.1:9099:9099
+    volumes:
+      - /home/user/pipelines:/app/pipelines:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/pipelines &amp;&amp; podman-compose up -d</code></pre>
+<p>In Open WebUI: Settings → Connections → add OpenAI-compatible endpoint <code>http://host.containers.internal:9099</code> with API key <code>0p3n-w3bu!</code>. Installed pipelines appear as selectable models in the chat interface.</p>
+<p>---</p>
+<h2>Dify (LLM Application Platform)</h2>
+<p><strong>Purpose:</strong> Full-stack LLM application development platform — build chatbots, agents, RAG pipelines, and AI workflows with a visual editor, then deploy them as API endpoints or embeddable widgets. Dify combines what Flowise and AnythingLLM do separately: a powerful workflow canvas <em>and</em> a complete RAG document pipeline <em>and</em> a deployment platform, all in one. Supports Ollama, OpenAI, Anthropic, Azure, Groq, and 30+ other providers.</p>
+<pre><code class="language-yaml"># ~/dify/compose.yml
+services:
+  api:
+    image: langgenius/dify-api:latest
+    environment:
+      DB_USERNAME: postgres
+      DB_PASSWORD: changeme
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: dify
+      REDIS_HOST: redis
+      CELERY_BROKER_URL: redis://redis:6379/1
+      SECRET_KEY: changeme-run-openssl-rand-base64-42
+      STORAGE_TYPE: local
+      STORAGE_LOCAL_PATH: /app/api/storage
+      SANDBOX_HOST: sandbox
+    volumes:
+      - /home/user/dify/storage:/app/api/storage:Z
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  worker:
+    image: langgenius/dify-api:latest
+    command: celery -A app.celery worker -P gevent -c 1 --loglevel INFO
+    environment:
+      DB_USERNAME: postgres
+      DB_PASSWORD: changeme
+      DB_HOST: db
+      DB_DATABASE: dify
+      REDIS_HOST: redis
+      CELERY_BROKER_URL: redis://redis:6379/1
+      SECRET_KEY: changeme-run-openssl-rand-base64-42
+      STORAGE_TYPE: local
+      STORAGE_LOCAL_PATH: /app/api/storage
+    volumes:
+      - /home/user/dify/storage:/app/api/storage:Z
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  web:
+    image: langgenius/dify-web:latest
+    ports: [&quot;127.0.0.1:3005:3000&quot;]
+    environment:
+      CONSOLE_API_URL: http://host.containers.internal:5002
+      APP_API_URL: http://host.containers.internal:5002
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports: [&quot;127.0.0.1:5002:80&quot;]
+    volumes:
+      - /home/user/dify/nginx/nginx.conf:/etc/nginx/nginx.conf:ro,Z
+    depends_on: [api, web]
+    restart: unless-stopped
+
+  sandbox:
+    image: langgenius/dify-sandbox:latest
+    environment:
+      API_KEY: changeme-sandbox-key
+      GIN_MODE: release
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: dify
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    volumes: [qdrant_data:/qdrant/storage]
+    restart: unless-stopped
+
+volumes: {pg_data: {}, qdrant_data: {}}</code></pre>
+<pre><code class="language-bash">cd ~/dify &amp;&amp; podman-compose up -d</code></pre>
+<h5>First run — initialise the database</h5>
+<pre><code class="language-bash">podman-compose run --rm api flask db upgrade
+podman-compose run --rm api flask db-commands migrate</code></pre>
+<p>Access at <code>http://localhost:5002</code>. On first visit, set up an admin account, then connect your LLM providers under Settings → Model Providers.</p>
+<h4>Key Dify features</h4>
+<ul>
+<li><strong>Chatbot</strong> — deploy a custom-knowledge chatbot from uploaded documents in minutes</li>
+<li><strong>Workflow</strong> — visual node editor for multi-step agent pipelines (fetch URL → summarise → send notification)</li>
+<li><strong>Agent</strong> — connect tools (web search, code execution, API calls) to an LLM for autonomous task completion</li>
+<li><strong>API</strong> — every app generates a REST API endpoint; use it from any external system</li>
+</ul>
+<blockquote><p><strong>vs Flowise:</strong> Dify includes a full RAG knowledge base system, user management, and app publishing workflow that Flowise lacks. Use Flowise for pure LangChain pipeline prototyping; use Dify when you want to deploy production AI applications.</p></blockquote>
+<p>---</p>
+<h2>Open Interpreter (Local Code Execution Agent)</h2>
+<p><strong>Purpose:</strong> An open-source implementation of OpenAI's Code Interpreter — a local agent that writes and executes Python, JavaScript, Shell, and other code to accomplish tasks. Point it at Ollama and it runs entirely offline. Ask it to "analyse this CSV and plot the top 10 by revenue" and it writes the code, runs it, and returns the result.</p>
+<pre><code class="language-yaml"># ~/open-interpreter/compose.yaml
+services:
+  open-interpreter:
+    image: openinterpreter/open-interpreter:latest
+    ports:
+      - 127.0.0.1:8265:8265
+    volumes:
+      - /home/user/open-interpreter/files:/files:Z
+    environment:
+      OLLAMA_HOST: http://host.containers.internal:11434
+      DEFAULT_MODEL: ollama/llama3.2
+    command: server
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/open-interpreter &amp;&amp; podman-compose up -d</code></pre>
+<h4>Or run interactively</h4>
+<pre><code class="language-bash">podman run -it --rm \
+  -v /home/user/open-interpreter/files:/files:Z \
+  -e OLLAMA_HOST=http://host.containers.internal:11434 \
+  openinterpreter/open-interpreter:latest \
+  --model ollama/llama3.2 \
+  --local</code></pre>
+<blockquote><p>For best results with code execution tasks, use a larger model — <code>llama3.1:70b</code> or <code>qwen2.5-coder:32b</code> produce significantly better code than 7B models.</p></blockquote>
+<p>---</p>
+<h2>Caddy Configuration</h2>
+<p>Expose your AI tools privately over HTTPS on your tailnet:</p>
+<pre><code class="language-caddyfile"># /etc/caddy/Caddyfile
+
+ollama.home.local    { tls internal; reverse_proxy localhost:11434 }
+webui.home.local     { tls internal; reverse_proxy localhost:3000 }
+comfyui.home.local   { tls internal; reverse_proxy localhost:8188 }
+a1111.home.local     { tls internal; reverse_proxy localhost:7860 }
+localai.home.local   { tls internal; reverse_proxy localhost:8080 }
+whisper.home.local   { tls internal; reverse_proxy localhost:9000 }
+kokoro.home.local    { tls internal; reverse_proxy localhost:8880 }
+tabby.home.local     { tls internal; reverse_proxy localhost:8081 }
+anything.home.local  { tls internal; reverse_proxy localhost:3001 }
+litellm.home.local   { tls internal; reverse_proxy localhost:4000 }
+vane.home.local      { tls internal; reverse_proxy localhost:3009 }
+invokeai.home.local  { tls internal; reverse_proxy localhost:9090 }
+flowise.home.local   { tls internal; reverse_proxy localhost:3003 }
+langfuse.home.local  { tls internal; reverse_proxy localhost:3004 }
+dify.home.local      { tls internal; reverse_proxy localhost:5002 }</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Ollama is slow / not using GPU | Check <code>podman exec ollama ollama ps</code> — if accelerator shows <code>CPU</code>, verify <code>--device /dev/dri</code> is passed and the <code>renderD128</code> device exists | | Open WebUI can't connect to Ollama | Use <code>host.containers.internal:11434</code> instead of <code>localhost</code> in <code>OLLAMA_BASE_URL</code> | | Model download fails | Check disk space — models are stored in <code>/home/user/ollama</code>. Ensure the volume path has write permissions | | ComfyUI shows no models | Verify checkpoint files are in <code>~/comfyui/models/checkpoints/</code> with <code>.safetensors</code> or <code>.ckpt</code> extension | | Whisper transcription is inaccurate | Upgrade to a larger model by changing <code>ASR_MODEL=medium</code> or <code>ASR_MODEL=large</code> | | Port conflict on 8080 | LocalAI and several other tools default to 8080 — change the host port to <code>-p 127.0.0.1:8081:8080</code> | | Kokoro produces no audio | Ensure voices directory exists and contains <code>.pt</code> voice files; check container logs for model load errors | | Tabby extension not connecting | Verify <code>tabby.home.local</code> resolves on Tailscale; check the extension's server URL setting includes the correct port | | Open WebUI RAG not finding documents | Ensure the document was fully processed (green tick in Documents); re-upload if stuck on processing | | AnythingLLM workspace shows no responses | Verify <code>OLLAMA_BASE_PATH</code> uses <code>host.containers.internal</code>; ensure the chosen model is pulled in Ollama | | LiteLLM returns 400 for Ollama models | Ensure the model name in <code>config.yaml</code> matches exactly what <code>ollama list</code> shows; use <code>ollama/</code> prefix in litellm_params | | Vane shows blank results | Check container logs with <code>podman logs vane-vane-1</code>; verify Ollama URL is set correctly in the web UI settings | | InvokeAI model import fails | Ensure the models volume has write permissions; check that VRAM/RAM is sufficient for the selected model size | | Piper TTS no audio output | Verify the voice model <code>.onnx</code> file was downloaded into the voices directory; check <code>podman logs piper-tts</code> | | Flowise chains return empty responses | Verify Ollama URL uses <code>host.containers.internal</code>; check that the selected model is pulled; inspect the debug output in the Flowise canvas | | Langfuse shows no traces | Ensure <code>LANGFUSE_PUBLIC_KEY</code> and <code>LANGFUSE_SECRET_KEY</code> are set in LiteLLM or the calling app; check <code>podman logs langfuse</code> for DB connection errors | | Dify worker not processing documents | Ensure Celery worker container is running; check Redis connectivity; view worker logs with <code>podman logs dify-worker-1</code> | | Dify Qdrant connection error | The Qdrant service must be running before the API starts; check <code>QDRANT_HOST</code> env var points to the correct container name | | Open Interpreter refuses to execute code | By default the agent confirms before running code — pass <code>--auto_run</code> to skip confirmation; ensure the files volume has write permissions |</p>
+<blockquote><p>🔒 <strong>Security tip:</strong> Always bind AI service ports to <code>127.0.0.1</code> and proxy through Caddy. These services have no built-in authentication — do not expose them directly to the internet.</p></blockquote></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

@@ -146,7 +146,59 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">First Boot</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Installation</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+        </div>
+      </div>
+      <div class="prose"><h1>First Boot Configuration</h1>
+<h2>Plymouth BGRT Boot Theme</h2>
+<p>Shanios uses the <strong>Plymouth BGRT</strong> boot theme. Plymouth provides a smooth graphical boot experience, suppressing kernel and systemd messages from the screen. The BGRT (Boot Graphics Resource Table) theme reads the manufacturer's logo directly from the UEFI firmware and displays it during boot — providing a seamless transition from firmware to OS.</p>
+<p>If LUKS2 full-disk encryption is enabled, Plymouth presents the passphrase prompt over the boot animation. With TPM2 auto-unlock enrolled, even this prompt is skipped and the disk unlocks silently.</p>
+<h2>Initial Setup Wizard</h2>
+<p>After first deployment completes, the Initial Setup wizard guides you through:</p>
+<ul>
+<li>Creating your user account and setting a password</li>
+<li>Configuring network connections (Wi-Fi, wired)</li>
+<li>Setting language, locale, and keyboard layout</li>
+<li>Setting privacy preferences</li>
+<li>Enabling location services (optional)</li>
+<li>Customising appearance settings</li>
+</ul>
+<p>The wizard runs automatically. If you skip it, re-run with <code>gnome-initial-setup</code> (GNOME) or from System Settings → Welcome (KDE).</p>
+<h2>After the Wizard — Recommended First Steps</h2>
+<ul>
+<li><strong>Flathub is pre-configured.</strong> No <code>flatpak remote-add</code> needed — open GNOME Software or KDE Discover and browse apps immediately.</li>
+<li><strong>Nix channel:</strong> Nix is pre-installed and running. Add a channel before installing packages:</li>
+</ul>
+<pre><code class="language-bash">  nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
+  nix-channel --update
+  </code></pre>
+<ul>
+<li><strong>TPM2 enrollment (if you enabled encryption):</strong> Enroll your LUKS key into TPM2 so the disk unlocks automatically at boot — no passphrase prompt. See the <a href="../security/tpm2">TPM2 Enrollment</a> section.</li>
+<li><strong>Waydroid (Android apps):</strong> Run <code>sudo waydroid-helper init</code> for automatic setup. Firewall rules are already configured. See the <a href="../software/waydroid">Android section</a>.</li>
+<li><strong>Secure Boot:</strong> If your BIOS supports it, enroll the MOK key and enable Secure Boot. See the <a href="../security/secure-boot">Secure Boot section</a>.</li>
+<li><strong>Check current slot:</strong> Run <code>cat /data/current-slot</code> to confirm whether you booted into <code>@blue</code> or <code>@green</code>.</li>
+</ul>
+<h2>OEM & Fleet Deployment</h2>
+<p>Shanios is designed for OEM and fleet use. Every machine imaging from the same signed ISO will boot into an identical, verified state. The Initial Setup wizard runs on first user login per machine, so user-specific personalisation is captured without requiring per-device pre-configuration.</p>
+<ul>
+<li>Rollback never requires reimaging — the previous OS slot is always in the boot menu</li>
+<li>The boot-counting pipeline detects boot failures and automatically reverts the slot before the user sees an error</li>
+<li>All user-facing changes (<code>/etc</code> customisations, systemd units, SSH keys, service configs) are in the <code>@data</code> OverlayFS and survive every update and rollback without reimaging</li>
+<li><code>passim</code> (local content sharing daemon) broadcasts available fwupd firmware payloads via mDNS — machines on the same LAN avoid downloading the same firmware repeatedly</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

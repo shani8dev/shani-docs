@@ -146,7 +146,96 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Overlay Filesystem</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Architecture</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-05-13</span>
+        </div>
+      </div>
+      <div class="prose"><p>Shanios uses Linux OverlayFS to present a fully writable <code>/etc</code> on top of a read-only root filesystem. This is what makes the immutable OS feel transparent — you can edit any config file as normal, and your changes persist across every update and rollback.</p>
+<h2>How OverlayFS Works</h2>
+<p>OverlayFS stacks two or more directories into a single unified view:</p>
+<pre><code>/etc  (merged view — what processes see)
+  ├── upper  →  /data/overlay/etc/upper/   (your changes — writable)
+  ├── work   →  /data/overlay/etc/work/    (kernel internal — do not touch)
+  └── lower  →  /etc from @blue or @green  (base OS config — read-only)</code></pre>
+<ul>
+<li><strong>Reads:</strong> If the file exists in <code>upper</code>, it is served from there. Otherwise it falls through to <code>lower</code>.</li>
+<li><strong>Writes:</strong> On first write to any file, the kernel performs a "copy-up" — the original is copied from <code>lower</code> to <code>upper</code>, then the write is applied to the copy. The <code>lower</code> layer is never modified.</li>
+<li><strong>Deletes:</strong> A whiteout file is created in <code>upper</code> to mask the <code>lower</code> entry.</li>
+</ul>
+<h2>When the Overlay is Mounted</h2>
+<p>The <code>/etc</code> overlay is mounted by the <code>shanios-overlay-etc.sh</code> dracut hook at <strong>pre-pivot priority 50</strong> — before <code>pivot_root</code> hands control to systemd PID 1. This guarantees systemd reads the correct (user-modified) <code>/etc</code> from its very first unit file access.</p>
+<p>If the overlay were applied via fstab instead (after <code>pivot_root</code>), systemd would have already cached paths from the read-only root and silently miss any overlay changes.</p>
+<h2>fstab Entry (Informational)</h2>
+<p>The fstab overlay entry is present but <strong>commented out</strong> — the dracut hook handles this mount:</p>
+<pre><code># /etc OverlayFS — MOVED TO DRACUT (99shanios/shanios-overlay-etc.sh, pre-pivot 50)
+# Mounting /etc overlay here (after pivot_root) is too late.
+#
+# overlay /etc overlay rw,lowerdir=/etc,upperdir=/data/overlay/etc/upper, \
+#   workdir=/data/overlay/etc/work,index=off,metacopy=off, \
+#   x-systemd.requires-mounts-for=/data  0 0</code></pre>
+<p>The <code>index=off,metacopy=off</code> options are required for compatibility with dracut's early-boot environment. They also ensure consistent behaviour across kernel versions.</p>
+<h2>What This Means in Practice</h2>
+<pre><code class="language-bash"># This works exactly as on any Linux system:
+sudo nano /etc/hostname
+sudo systemctl edit --full sshd.service
+sudo visudo
+
+# Your change lands in upper, not in the read-only slot:
+ls /data/overlay/etc/upper/</code></pre>
+<p>On the next OS update, the <code>lower</code> layer is replaced (new slot), but <code>upper</code> is in <code>@data</code> and is untouched. Your customisations are automatically re-layered on top of the new base.</p>
+<h2>Inspecting Your Customisations</h2>
+<pre><code class="language-bash"># See every file you've changed in /etc
+find /data/overlay/etc/upper -not -type d | sort
+
+# Diff a specific file against the slot's original
+diff /data/overlay/etc/upper/ssh/sshd_config \
+     /run/shanios-data-tmp/overlay/etc/upper/../../../blue/etc/ssh/sshd_config
+# Or compare against the running read-only root:
+sudo diff /data/overlay/etc/upper/ssh/sshd_config \
+     /proc/1/root/etc/ssh/sshd_config 2&gt;/dev/null</code></pre>
+<h2>Resetting a File to Default</h2>
+<pre><code class="language-bash"># Remove the upper-layer copy — the lower (default) version re-appears
+sudo rm /data/overlay/etc/upper/hostname
+
+# Or reset the entire overlay (removes ALL your /etc customisations — use with care)
+sudo rm -rf /data/overlay/etc/upper/*
+sudo systemctl reboot</code></pre>
+<p>For a full factory reset that also clears service state, use <a href="../updates/shani-reset"><code>shani-reset</code></a> instead.</p>
+<h2>Checking Overlay Health</h2>
+<pre><code class="language-bash"># Confirm /etc is mounted as an overlay
+findmnt /etc
+# Expected: overlay overlay rw,...,upperdir=/data/overlay/etc/upper,...
+
+# Count modified files
+find /data/overlay/etc/upper -mindepth 1 | wc -l
+
+# Use shani-health for a detailed report
+shani-health --boot   # shows &quot;Immutability → /etc: overlay active, N file(s) modified&quot;</code></pre>
+<h2>Limitations</h2>
+<ul>
+<li>OverlayFS does not support NFS as a lower layer.</li>
+<li>Certain syscalls (<code>rename</code> across layers, <code>mknod</code>) have edge-case behaviour — this rarely affects real configs.</li>
+<li>Very large numbers of files in <code>upper</code> can slow down directory reads slightly. Keep <code>upper</code> clean by removing files you no longer need to override.</li>
+<li>The <code>work</code> directory must be on the same filesystem as <code>upper</code> (both are on <code>@data</code>).</li>
+</ul>
+<h2>See Also</h2>
+<ul>
+<li><a href="dracut-module">Dracut Module</a> — how the overlay is mounted at early boot</li>
+<li><a href="../updates/config">System Config</a> — editing <code>/etc</code> files and managing the overlay</li>
+<li><a href="../updates/shani-reset">Factory Reset</a> — clearing the entire overlay</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

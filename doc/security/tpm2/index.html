@@ -146,7 +146,80 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">TPM2 Enrollment</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Security</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-30</span>
+        </div>
+      </div>
+      <div class="prose"><p>TPM2 enrollment seals your LUKS2 disk encryption key into your machine's Trusted Platform Module. Once enrolled, the disk unlocks automatically at boot — no passphrase prompt — as long as the boot chain is unmodified. Any tampering causes the TPM to withhold the key, and Plymouth falls back to asking for your passphrase. Your LUKS passphrase always remains valid as a fallback.</p>
+<h2>Prerequisites</h2>
+<ul>
+<li>LUKS2 full-disk encryption enabled at installation</li>
+<li>TPM 2.0 chip present and enabled in UEFI firmware</li>
+<li>Secure Boot enrolled (recommended — enables PCR 7 binding)</li>
+</ul>
+<p>Check TPM availability:</p>
+<pre><code class="language-bash">sudo systemd-cryptenroll --tpm2-device=list
+# Should show your TPM device, e.g. /dev/tpmrm0</code></pre>
+<h2>Enrolling the TPM2 Key</h2>
+<p>Use <code>gen-efi enroll-tpm2</code> — it handles PCR policy selection, KDF validation, and optional PIN setup automatically:</p>
+<pre><code class="language-bash">sudo gen-efi enroll-tpm2</code></pre>
+<p>You will be prompted for your LUKS passphrase. You can also opt in to a TPM2 PIN for a second factor.</p>
+<p><strong>PCR policy is chosen automatically based on Secure Boot state:</strong></p>
+<p>| Secure Boot state | PCR policy | Protection level | |-------------------|-----------|-----------------| | Enabled | PCR 0 + PCR 7 | Firmware measurements + Secure Boot certificate state | | Disabled | PCR 0 only | Firmware measurements only (weaker — physical-access attack possible) |</p>
+<p><code>gen-efi enroll-tpm2</code> also checks the LUKS KDF and warns if it is <code>pbkdf2</code> instead of <code>argon2id</code>. You can convert with:</p>
+<pre><code class="language-bash">sudo cryptsetup luksConvertKey --pbkdf argon2id /dev/nvme0n1p2</code></pre>
+<h2>Verifying Enrollment</h2>
+<pre><code class="language-bash"># List LUKS keyslots and tokens including TPM2 entries
+sudo cryptsetup luksDump /dev/nvme0n1p2 | grep -A5 &quot;Token&quot;
+
+# Confirm TPM2 enrollment
+sudo cryptsetup luksDump /dev/nvme0n1p2 | grep systemd-tpm2
+
+# List available TPM2 devices
+sudo systemd-cryptenroll --tpm2-device=list</code></pre>
+<h2>Updating After Firmware or Boot Changes</h2>
+<p>If <code>fwupdmgr update</code> updated your BIOS or platform firmware, PCR 0 changes. The TPM will not release the key with the old binding, so you will be prompted for your LUKS passphrase on the next boot. This is expected.</p>
+<p>After booting with your passphrase, clean up the stale slot and re-enroll:</p>
+<pre><code class="language-bash">sudo gen-efi cleanup-tpm2
+sudo gen-efi enroll-tpm2</code></pre>
+<p><code>cleanup-tpm2</code> collects all TPM2-type keyslots from the LUKS header, keeps the highest-numbered (most recently written), and wipes the rest. It prompts for your LUKS passphrase to authorise each removal.</p>
+<h2>After Secure Boot Changes</h2>
+<p>When you change Secure Boot settings (enable, disable, or change enrolled keys), PCR 7 changes. Re-enroll:</p>
+<pre><code class="language-bash">sudo gen-efi cleanup-tpm2
+sudo gen-efi enroll-tpm2</code></pre>
+<h2>Removing TPM2 Enrollment</h2>
+<pre><code class="language-bash"># Wipe only the TPM2 keyslots — passphrase keyslot is untouched
+sudo gen-efi cleanup-tpm2</code></pre>
+<p>After this, the disk requires a passphrase at every boot.</p>
+<h2>Troubleshooting</h2>
+<p><strong>TPM falls back to passphrase prompt at boot:</strong></p>
+<ul>
+<li>A PCR value changed (firmware update, Secure Boot toggle)</li>
+<li>Clean up the old slot and re-enroll: <code>sudo gen-efi cleanup-tpm2 &amp;&amp; sudo gen-efi enroll-tpm2</code></li>
+</ul>
+<p><strong>"No TPM2 device found":</strong></p>
+<ul>
+<li>Check UEFI → Security → TPM — ensure it is enabled</li>
+<li>Verify: <code>ls /dev/tpm*</code> and <code>sudo systemd-cryptenroll --tpm2-device=list</code></li>
+</ul>
+<p><strong>Locked out (no passphrase, TPM won't unlock):</strong></p>
+<ul>
+<li>Boot from Shanios USB</li>
+<li><code>sudo cryptsetup open /dev/nvme0n1p2 shani_root</code> — enter your recovery passphrase</li>
+<li>Mount and access data, then re-enroll TPM2 with corrected PCR bindings</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

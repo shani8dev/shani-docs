@@ -146,7 +146,109 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Distrobox</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Software &amp; Apps</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+        </div>
+      </div>
+      <div class="prose"><p>Distrobox is the recommended way to run software that requires traditional package managers on Shanios. It creates a full mutable Linux container (Ubuntu, Fedora, Arch, etc.) with seamless desktop integration — your home directory, display, audio, GPU, and USB devices are all available inside. Container data lives in the <code>@containers</code> Btrfs subvolume and survives every OS update and rollback untouched.</p>
+<p><strong>BoxBuddy</strong> (pre-installed on both GNOME and KDE editions) provides a graphical interface for creating and managing Distrobox containers without the terminal — open it from your application launcher.</p>
+<h2>Creating a Container</h2>
+<pre><code class="language-bash"># Ubuntu 24.04 (recommended for broad compatibility)
+distrobox create --name ubuntu --image ubuntu:24.04
+
+# Fedora 41
+distrobox create --name fedora --image fedora:41
+
+# Arch Linux (close to Shanios base — good for AUR access)
+distrobox create --name arch --image archlinux:latest
+
+# List available images
+distrobox create --help | grep -A20 &quot;image&quot;</code></pre>
+<h2>Entering and Using a Container</h2>
+<pre><code class="language-bash"># Enter a container
+distrobox enter ubuntu
+
+# Run a command directly (no interactive shell)
+distrobox enter ubuntu -- bash -c &quot;apt list --installed 2&gt;/dev/null | head -20&quot;
+
+# Inside the container — full apt/dnf/pacman access
+sudo apt update &amp;&amp; sudo apt install build-essential
+sudo apt install python3-dev libssl-dev
+
+# Your home directory is the same inside and outside
+ls ~/   # same files</code></pre>
+<h2>Exporting Apps to Your Host</h2>
+<p>Export a GUI application or CLI binary to your host launcher/PATH:</p>
+<pre><code class="language-bash"># Export a GUI app (creates a .desktop entry in your launcher)
+distrobox-export --app code                 # VS Code installed inside the container
+distrobox-export --app gimp
+
+# Export a CLI binary to ~/.local/bin/ (available in host PATH)
+distrobox-export --bin /usr/bin/gcc
+distrobox-export --bin /usr/local/bin/my-tool
+
+# Remove an exported app
+distrobox-export --app code --delete</code></pre>
+<p>After exporting a GUI app, it appears in GNOME Activities or KDE Application Menu and launches inside the container transparently.</p>
+<h2>Managing Containers</h2>
+<pre><code class="language-bash"># List all containers
+distrobox list
+
+# Stop a running container
+distrobox stop ubuntu
+
+# Remove a container (data in home is unaffected)
+distrobox rm ubuntu
+
+# Remove and recreate (upgrade the distro)
+distrobox rm ubuntu
+distrobox create --name ubuntu --image ubuntu:24.04
+distrobox enter ubuntu</code></pre>
+<h2>Development Workflows</h2>
+<pre><code class="language-bash"># Python dev environment in Ubuntu
+distrobox create --name pydev --image ubuntu:24.04
+distrobox enter pydev
+sudo apt install python3.12 python3.12-venv python3-pip
+python3 -m venv ~/venvs/myproject
+source ~/venvs/myproject/bin/activate
+pip install django numpy pandas
+
+# Node.js via nvm inside Fedora
+distrobox enter fedora
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+source ~/.bashrc
+nvm install 22
+node --version</code></pre>
+<h2>Host Integration</h2>
+<p>Inside a Distrobox container:</p>
+<ul>
+<li><code>~</code> is the same as on the host — files are shared</li>
+<li><code>DISPLAY</code>, <code>WAYLAND_DISPLAY</code>, <code>DBUS_SESSION_BUS_ADDRESS</code> are forwarded — GUI apps work</li>
+<li>PipeWire/PulseAudio socket is shared — audio works</li>
+<li>GPU is available — hardware acceleration works</li>
+<li><code>host-spawn &lt;command&gt;</code> runs a command on the host from inside the container</li>
+</ul>
+<pre><code class="language-bash"># From inside a container — run something on the host
+host-spawn flatpak run org.gimp.GIMP
+host-spawn systemctl --user restart pipewire</code></pre>
+<h2>Tips</h2>
+<ul>
+<li>Install heavy build dependencies in Distrobox rather than Nix to keep the Nix store clean</li>
+<li>For AUR packages, use the <code>arch</code> container — <code>yay</code> and <code>paru</code> work inside it</li>
+<li>Container data (installed packages) lives in Podman storage (<code>@containers</code>), not your home directory — reinstalling a container resets its installed packages, but not your home files</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

@@ -146,7 +146,1194 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Networking &amp; Infrastructure</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+        </div>
+      </div>
+      <div class="prose"><blockquote><p><strong>Portability note:</strong> Compose examples use rootless <strong>Podman</strong> and <code>host.containers.internal</code> (the host gateway from a container). When using Docker, replace <code>podman-compose</code> with <code>docker compose</code> and <code>host.containers.internal</code> with <code>host-gateway</code> (add <code>extra_hosts: [host-gateway:host-gateway]</code> to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.</p></blockquote>
+<h1>Networking & Infrastructure</h1>
+<p>DNS filtering, privacy-friendly analytics, search engines, dashboards, latency monitoring, and network utilities.</p>
+<p>---</p>
+<h2>Key Concepts</h2>
+<h4>OSI model in practice</h4>
+<p>Interviewers ask this to test whether you can reason about where a problem is occurring. Useful frames:</p>
+<ul>
+<li>Layer 3 (Network) problem: <code>ping</code> fails, wrong route, IP unreachable</li>
+<li>Layer 4 (Transport) problem: TCP connection times out or is refused, wrong port, firewall blocking</li>
+<li>Layer 7 (Application) problem: connection works but HTTP returns wrong status, TLS cert mismatch, wrong Host header</li>
+</ul>
+<h4>DNS resolution chain</h4>
+<p>Browser checks local cache → OS cache → <code>/etc/hosts</code> → configured resolver (Pi-hole, AdGuard) → resolver queries root nameservers → TLD nameserver → authoritative nameserver → response cached at each layer with TTL. <code>dig +trace</code> shows the full chain.</p>
+<h4>Subnetting mental model</h4>
+<p>A <code>/24</code> has 256 addresses (254 usable — first is network address, last is broadcast). A <code>/25</code> splits a <code>/24</code> in half (128 addresses each). Each bit you add to the prefix halves the subnet. Common subnets: <code>/32</code> (single host), <code>/30</code> (4 addr, 2 usable — point-to-point links), <code>/29</code> (8 addr), <code>/28</code> (16), <code>/27</code> (32), <code>/26</code> (64), <code>/25</code> (128), <code>/24</code> (256), <code>/16</code> (65,536).</p>
+<h4>NAT types and VPN implications</h4>
+<ul>
+<li>Full-cone NAT: any external host can reach the mapped port (rare, easy for VPNs)</li>
+<li>Symmetric NAT: each outbound connection gets a different external port mapping (common on corporate networks — breaks WireGuard hole-punching, requires TURN relay)</li>
+<li>Port-restricted cone NAT: most home routers; WireGuard hole-punching works with STUN</li>
+</ul>
+<h4>How HTTPS actually works (TLS 1.3 handshake)</h4>
+<ol>
+<li>Client sends <code>ClientHello</code> with supported cipher suites and a key share</li>
+<li>Server responds with <code>ServerHello</code>, its certificate, and its key share — in <em>one round trip</em> (TLS 1.3 optimisation)</li>
+<li>Both sides derive the session key from the key exchange (ECDHE)</li>
+<li>Client verifies the server's certificate against trusted CAs</li>
+<li>Encrypted application data flows</li>
+</ol>
+<h4>Reverse proxy vs forward proxy</h4>
+<p>A reverse proxy sits in front of servers — clients talk to the proxy, which forwards to the backend (Caddy, Nginx, Traefik, HAProxy). The client often doesn't know there's a backend at all. A forward proxy sits in front of clients — clients send all traffic to the proxy, which forwards to the internet (Squid, corporate web proxy). VPNs act like forward proxies for encrypted traffic.</p>
+<h4>Load balancing algorithms</h4>
+<ul>
+<li><strong>Round robin</strong> — requests distributed equally in turn</li>
+<li><strong>Least connections</strong> — new request goes to the backend with fewest active connections (better for varied request lengths)</li>
+<li><strong>IP hash / source hash</strong> — same client IP always goes to the same backend (sticky sessions without cookies)</li>
+<li><strong>Weighted</strong> — backends have weights; higher-weight servers get more traffic (useful for canary deployments or mixed instance sizes)</li>
+</ul>
+<h4>BGP (Border Gateway Protocol) basics for interviews</h4>
+<p>BGP is the routing protocol of the internet — it exchanges reachability information between Autonomous Systems (ASes). Each AS has an AS number (ASN). iBGP (interior) routes within one AS; eBGP (exterior) routes between ASes. BGP is a path-vector protocol — it chooses routes based on AS-path length and policy attributes. Relevant in homelab with FRRouting, and in cloud when advertising VPC routes or Tailscale subnets into your network.</p>
+<h4>VLAN fundamentals</h4>
+<p>A VLAN (Virtual LAN) segments a physical switch into multiple logical networks. Tagged frames (802.1Q) carry a VLAN ID in the Ethernet header. Trunk ports carry multiple VLANs; access ports carry one. Common segmentation: IoT VLAN (isolated), servers VLAN, management VLAN. VLANs don't cross routers without explicit routing or an SVR (Switched Virtual Router) interface.</p>
+<h4>MTU and fragmentation</h4>
+<p>Maximum Transmission Unit — the largest packet a link will carry. Ethernet's standard MTU is 1500 bytes. VPN tunnels add overhead (WireGuard adds ~32–60 bytes), which reduces the effective inner MTU. Setting the wrong MTU causes silent data corruption or dropped connections for large packets. Fix: set MSS clamping (<code>--clamp-mss-to-pmtu</code> in WireGuard/iptables) or discover the path MTU with <code>ping -M do -s 1400</code>.</p>
+<h4>Reverse proxy patterns — Caddy vs Nginx vs Traefik vs HAProxy</h4>
+<p>Each serves a different primary use case. Caddy: automatic HTTPS (ACME), human-readable config, best for homelab and small deployments. Nginx: highest throughput, battle-tested, extensive module ecosystem, config is verbose. Traefik: auto-discovers routes from container labels — zero-config for Docker/Kubernetes, but harder to reason about in complex setups. HAProxy: the performance and reliability choice for TCP-level load balancing, used in front of databases and Kubernetes control planes. Know which layer each operates at: Caddy/Nginx/Traefik are L7 (HTTP); HAProxy works at L4 and L7.</p>
+<h4>DNS-based service discovery</h4>
+<p>DNS TTL is the core reliability lever. A low TTL (30–60s) means changes propagate fast but increases DNS query load. A high TTL (3600s) means failures persist until TTL expires. In internal DNS (Technitium, PowerDNS), keep TTLs low for services that change. Health-check-based DNS (Route53 health checks, PowerDNS with health checking) removes failing IPs from DNS automatically — a primitive but effective load balancing and failover mechanism.</p>
+<h4>DHCP and IPAM operational reality</h4>
+<p>In a managed network, every IP assignment should be intentional. Static DHCP leases (assign a fixed IP based on MAC address) give services predictable addresses without manual configuration on each device. An IPAM tool (NetBox, phpIPAM) is the source of truth — it documents what IP belongs to what device, VLAN, and subnet. Without IPAM, IP conflicts are a matter of when, not if. DHCP servers (Kea, dnsmasq) should feed lease data back to IPAM automatically.</p>
+<h4>Caching proxy and bandwidth management</h4>
+<p>A caching proxy (Squid) intercepts HTTP/HTTPS requests and serves cached responses. Benefits: reduced bandwidth (shared package mirrors, container image layers), content filtering, access logs, and enforced egress policies. In a homelab, a Squid proxy in front of package managers (apt, pip, npm) dramatically reduces external bandwidth. In enterprises, forward proxies are often mandatory — traffic that doesn't go through the proxy is blocked at the firewall.</p>
+<h4>Dynamic routing protocols — when BGP/OSPF matters</h4>
+<p>Static routes work until you have more than a handful of subnets or multiple uplinks. OSPF is the internal routing protocol — routers share topology, calculate shortest paths, and converge automatically when a link fails. BGP is the external protocol — used to announce your IP space to an ISP, or to distribute routes between multiple sites. FRRouting brings both to Linux. In a homelab, BGP is used with MetalLB (announce LoadBalancer IPs to a router) or multi-site WireGuard (distribute subnet routes between locations). ---</p>
+<p>---</p>
+<h2>Pi-hole</h2>
+<p><strong>Purpose:</strong> Network-wide DNS ad and tracker blocker. Runs as your LAN's DNS server and blocks ads, telemetry, and malware domains for every device — phones, smart TVs, IoT — without installing anything on them.</p>
+<pre><code class="language-yaml"># ~/pihole/compose.yaml
+services:
+  pihole:
+    image: pihole/pihole:latest
+    ports:
+      - 127.0.0.1:8083:80
+      - 53:53/tcp
+      - 53:53/udp
+    volumes:
+      - /home/user/pihole/etc-pihole:/etc/pihole:Z
+      - /home/user/pihole/etc-dnsmasq.d:/etc/dnsmasq.d:Z
+    environment:
+      TZ: Asia/Kolkata
+      WEBPASSWORD: changeme
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/pihole &amp;&amp; podman-compose up -d</code></pre>
+<p><strong>Firewall:</strong> (allow DNS from LAN):</p>
+<pre><code class="language-bash">sudo firewall-cmd --add-service=dns --permanent &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<pre><code class="language-bash"># Update gravity (blocklists) manually
+podman exec pihole pihole -g
+
+# View real-time query log
+podman exec pihole pihole -t
+
+# Enable/disable Pi-hole blocking
+podman exec pihole pihole enable
+podman exec pihole pihole disable 300  # disable for 300 seconds
+
+# Add a domain to whitelist
+podman exec pihole pihole -w example.com
+
+# Add a domain to blacklist
+podman exec pihole pihole -b ads.example.com
+
+# Remove from whitelist
+podman exec pihole pihole -w -d example.com
+
+# View stats summary
+podman exec pihole pihole -c
+
+# Flush logs
+podman exec pihole pihole flush
+
+# Restart DNS resolver
+podman exec pihole pihole restartdns
+
+# Show version info
+podman exec pihole pihole version</code></pre>
+<blockquote><p>Set your router's DHCP DNS option to your server's LAN IP. All devices will automatically use Pi-hole.</p></blockquote>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">pihole.home.local { tls internal; reverse_proxy localhost:8083 }</code></pre>
+<p>---</p>
+<h2>AdGuard Home</h2>
+<p><strong>Purpose:</strong> Pi-hole alternative with native DNS-over-HTTPS (DoH) and DNS-over-TLS (DoT) support, a cleaner UI, per-client rules, and built-in parental controls.</p>
+<pre><code class="language-yaml"># ~/adguardhome/compose.yaml
+services:
+  adguardhome:
+    image: adguard/adguardhome
+    ports:
+      - 53:53/tcp
+      - 53:53/udp
+      - 127.0.0.1:3000:3000
+      - 853:853/tcp
+    volumes:
+      - /home/user/adguard/work:/opt/adguardhome/work:Z
+      - /home/user/adguard/conf:/opt/adguardhome/conf:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/adguardhome &amp;&amp; podman-compose up -d</code></pre>
+<p>Access the setup wizard at <code>http://localhost:3000</code> on first run. After setup, the UI moves to port <code>80</code> (or the port you configure).</p>
+<p><strong>Firewall:</strong> (for DoT from external devices):</p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=853/tcp --permanent &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># View logs
+podman logs -f adguardhome
+
+# Test DNS resolution via AdGuard
+podman exec adguardhome nslookup google.com 127.0.0.1
+
+# Query statistics via API
+curl -u admin:changeme http://localhost:3000/control/stats
+
+# Update blocklists
+curl -X POST -u admin:changeme http://localhost:3000/control/filtering/refresh   -H &quot;Content-Type: application/json&quot; -d '{&quot;whitelist&quot;:false}'
+
+# Add a custom DNS rewrite (internal domain)
+curl -X POST -u admin:changeme http://localhost:3000/control/rewrite/add   -H &quot;Content-Type: application/json&quot;   -d '{&quot;domain&quot;:&quot;myserver.home.local&quot;,&quot;answer&quot;:&quot;192.168.1.10&quot;}'</code></pre>
+<p>---</p>
+<h2>Unbound (Recursive DNS Resolver)</h2>
+<p><strong>Purpose:</strong> Validating, caching, recursive DNS resolver. Use it upstream of Pi-hole or AdGuard Home for DNSSEC validation and to eliminate your ISP's DNS from the picture entirely. Queries go directly to root nameservers.</p>
+<pre><code class="language-yaml"># ~/unbound/compose.yaml
+services:
+  unbound:
+    image: mvance/unbound
+    ports:
+      - 127.0.0.1:5335:53/tcp
+      - 127.0.0.1:5335:53/udp
+    volumes:
+      - /home/user/unbound/unbound.conf:/opt/unbound/etc/unbound/unbound.conf:ro,Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/unbound &amp;&amp; podman-compose up -d</code></pre>
+<p>In Pi-hole: Settings → DNS → Custom upstream DNS → <code>127.0.0.1#5335</code>. Disable all other upstream DNS entries.</p>
+<p>---</p>
+<h2>Nginx Proxy Manager</h2>
+<p><strong>Purpose:</strong> GUI-based reverse proxy with Let's Encrypt integration. If you find Caddy's Caddyfile syntax unfamiliar, NPM offers a click-through interface for creating proxy hosts, redirects, and SSL termination.</p>
+<pre><code class="language-yaml"># ~/npm/compose.yml
+services:
+  npm:
+    image: jc21/nginx-proxy-manager:latest
+    ports:
+      - &quot;80:80&quot;
+      - &quot;443:443&quot;
+      - &quot;127.0.0.1:81:81&quot;
+    environment:
+      DB_MYSQL_HOST: db
+      DB_MYSQL_PORT: 3306
+      DB_MYSQL_USER: npm
+      DB_MYSQL_PASSWORD: changeme
+      DB_MYSQL_NAME: npm
+    volumes:
+      - /home/user/npm/data:/data:Z
+      - /home/user/npm/letsencrypt:/etc/letsencrypt:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: npm
+      MYSQL_USER: npm
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  db_data:</code></pre>
+<pre><code class="language-bash">cd ~/npm &amp;&amp; podman-compose up -d</code></pre>
+<p>Access the admin UI at <code>http://localhost:81</code>. Default credentials: <code>admin@example.com</code> / <code>changeme</code> — change immediately after first login. Add proxy hosts via Dashboard → Proxy Hosts → Add Proxy Host; enable Let's Encrypt in the SSL tab.</p>
+<p>---</p>
+<h2>Traefik</h2>
+<p><strong>Purpose:</strong> Container-native reverse proxy and load balancer. Auto-discovers services by watching Docker/Podman labels — no config file reload needed when you start a new container. Supports automatic HTTPS via Let's Encrypt, weighted load balancing, sticky sessions, rate limiting, circuit breakers, and middleware chains. Best for setups where containers come and go frequently and you want routing to update automatically.</p>
+<pre><code class="language-yaml"># ~/traefik/compose.yml
+services:
+  traefik:
+    image: traefik:v3
+    ports:
+      - &quot;0.0.0.0:80:80&quot;
+      - &quot;0.0.0.0:443:443&quot;
+      - &quot;127.0.0.1:8080:8080&quot;   # Dashboard
+    command:
+      - --api.dashboard=true
+      - --api.insecure=false
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.file.directory=/config
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.letsencrypt.acme.email=you@example.com
+      - --certificatesresolvers.letsencrypt.acme.storage=/certs/acme.json
+      - --log.level=INFO
+      - --accesslog=true
+    volumes:
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /home/user/traefik/config:/config:Z
+      - /home/user/traefik/certs:/certs:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/traefik &amp;&amp; podman-compose up -d</code></pre>
+<h4>Expose a service via labels (no Caddyfile edit required)</h4>
+<pre><code class="language-yaml">services:
+  myapp:
+    image: myapp:latest
+    labels:
+      - &quot;traefik.enable=true&quot;
+      - &quot;traefik.http.routers.myapp.rule=Host(`app.example.com`)&quot;
+      - &quot;traefik.http.routers.myapp.entrypoints=websecure&quot;
+      - &quot;traefik.http.routers.myapp.tls.certresolver=letsencrypt&quot;
+      - &quot;traefik.http.services.myapp.loadbalancer.server.port=3000&quot;</code></pre>
+<h4>Load balancing and middleware via dynamic config (<code>/home/user/traefik/config/dynamic.yml</code>)</h4>
+<pre><code class="language-yaml">http:
+  middlewares:
+    rate-limit:
+      rateLimit:
+        average: 100
+        burst: 50
+
+    internal-only:
+      ipAllowList:
+        sourceRange:
+          - &quot;192.168.1.0/24&quot;
+          - &quot;100.64.0.0/10&quot;     # Tailscale
+
+  services:
+    myapp-weighted:
+      weighted:
+        services:
+          - name: myapp-v1
+            weight: 90
+          - name: myapp-v2
+            weight: 10           # Canary: 10% to new version
+
+  routers:
+    myapp:
+      rule: Host(`app.example.com`)
+      service: myapp-weighted
+      entryPoints: [websecure]
+      middlewares: [rate-limit]
+      tls:
+        certResolver: letsencrypt</code></pre>
+<h4>Secure the dashboard behind Caddy</h4>
+<pre><code class="language-caddyfile">traefik.home.local { tls internal; reverse_proxy localhost:8080 }</code></pre>
+<p>---</p>
+<h2>HAProxy (High-Performance Load Balancer)</h2>
+<p><strong>Purpose:</strong> The gold-standard TCP and HTTP load balancer. HAProxy has been the backbone of GitHub, Reddit, and Stack Overflow for years. Unlike Traefik (label-driven, auto-discovery) or Caddy (config-file, developer-friendly), HAProxy is purpose-built for raw throughput, advanced health checking, and TCP-layer load balancing — useful for load balancing PostgreSQL replicas, MQTT brokers, Redis, or any non-HTTP protocol alongside web traffic.</p>
+<pre><code class="language-yaml"># ~/haproxy/compose.yaml
+services:
+  haproxy:
+    image: haproxy:3-alpine
+    ports:
+      - 0.0.0.0:80:80
+      - 0.0.0.0:443:443
+      - 127.0.0.1:9000:9000
+    volumes:
+      - /home/user/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro,Z
+      - /home/user/haproxy/certs:/etc/haproxy/certs:ro,Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/haproxy &amp;&amp; podman-compose up -d</code></pre>
+<h5>Example <code>haproxy.cfg</code> — HTTP load balancing with health checks</h5>
+<pre><code>global
+  log stdout format raw local0
+  maxconn 50000
+
+defaults
+  mode http
+  log global
+  option httplog
+  option dontlognull
+  option forwardfor
+  option http-server-close
+  timeout connect 5s
+  timeout client  30s
+  timeout server  30s
+  retries 3
+
+# Stats dashboard
+frontend stats
+  bind *:9000
+  stats enable
+  stats uri /
+  stats refresh 10s
+  stats auth admin:changeme
+  stats hide-version
+
+# HTTPS frontend
+frontend https_in
+  bind *:443 ssl crt /etc/haproxy/certs/combined.pem
+  http-request set-header X-Forwarded-Proto https
+  default_backend app_servers
+
+# Backend with health checks
+backend app_servers
+  balance roundrobin
+  option httpchk GET /health HTTP/1.1\r\nHost:\ app.example.com
+  http-check expect status 200
+  server app1 192.168.1.10:8080 check inter 10s fall 3 rise 2
+  server app2 192.168.1.11:8080 check inter 10s fall 3 rise 2
+  server app3 192.168.1.12:8080 check inter 10s fall 3 rise 2 backup</code></pre>
+<h4>Load balancing algorithms</h4>
+<pre><code>balance roundrobin   # Equal distribution (default)
+balance leastconn    # Route to server with fewest active connections
+balance source       # Sticky sessions by client IP hash
+balance uri          # Sticky by URI hash (useful for caches)</code></pre>
+<h4>TCP load balancing for databases and MQTT</h4>
+<pre><code>frontend postgres_in
+  mode tcp
+  bind *:5432
+  default_backend postgres_servers
+
+backend postgres_servers
+  mode tcp
+  balance leastconn
+  option tcp-check
+  server pg-primary 192.168.1.20:5432 check
+  server pg-replica 192.168.1.21:5432 check backup
+
+frontend mqtt_in
+  mode tcp
+  bind *:1883
+  default_backend mqtt_brokers
+
+backend mqtt_brokers
+  mode tcp
+  balance leastconn
+  server mqtt1 192.168.1.30:1883 check
+  server mqtt2 192.168.1.31:1883 check</code></pre>
+<p>Access the live stats page at <code>http://localhost:9000</code> to see connection counts, request rates, error rates, and per-backend health in real time.</p>
+<p>---</p>
+<h2>SearXNG</h2>
+<p><strong>Purpose:</strong> Privacy-respecting meta-search engine. Aggregates results from Google, Bing, DuckDuckGo, and 70+ other sources without tracking, logging, or profiling users. Run it on your server and use it as your default browser search engine.</p>
+<pre><code class="language-yaml"># ~/searxng/compose.yaml
+services:
+  searxng:
+    image: searxng/searxng:latest
+    ports:
+      - 127.0.0.1:8091:8080
+    volumes:
+      - /home/user/searxng/settings:/etc/searxng:Z
+    environment:
+      SEARXNG_BASE_URL: https://search.home.local
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/searxng &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>Technitium DNS Server</h2>
+<p><strong>Purpose:</strong> Full-featured authoritative and recursive DNS server with a clean web UI. Goes further than Pi-hole and AdGuard Home — Technitium can host your own DNS zones (split-horizon DNS for <code>home.local</code>), act as a DHCP server, supports DNS-over-HTTPS/TLS/QUIC, has advanced conditional forwarding, and includes built-in ad-blocking. The right choice when you need proper DNS zone management alongside ad-blocking.</p>
+<pre><code class="language-yaml"># ~/technitium-dns/compose.yaml
+services:
+  technitium-dns:
+    image: technitium/dns-server:latest
+    ports:
+      - 53:53/udp
+      - 53:53/tcp
+      - 127.0.0.1:5380:5380
+      - 853:853/tcp
+      - 443:443/tcp
+    volumes:
+      - /home/user/technitium/config:/etc/dns:Z
+    environment:
+      DNS_SERVER_DOMAIN: dns.home.local
+      DNS_SERVER_ADMIN_PASSWORD: changeme
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/technitium-dns &amp;&amp; podman-compose up -d</code></pre>
+<p>Access the web UI at <code>http://localhost:5380</code>. Configure zones, forwarders, and blocklists in the admin panel.</p>
+<blockquote><p><strong>Pi-hole vs AdGuard vs Technitium:</strong> Use Pi-hole or AdGuard for simple network-wide ad-blocking. Use Technitium when you also need to manage DNS zones for internal services or run DHCP from the same interface.</p></blockquote>
+<p>---</p>
+<h2>LibreNMS (Network Monitoring)</h2>
+<p><strong>Purpose:</strong> Full-featured auto-discovering network monitoring system. Discovers routers, switches, servers, APs, and printers via SNMP, then monitors CPU, memory, interface traffic, BGP, environmental sensors, and more. Generates alerts, bandwidth graphs, and SLA reports. The self-hosted PRTG/SolarWinds alternative.</p>
+<pre><code class="language-yaml"># ~/librenms/compose.yml
+services:
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: librenms
+      MYSQL_USER: librenms
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    command: --innodb-file-per-table=1 --lower-case-table-names=0
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  librenms:
+    image: librenms/librenms:latest
+    ports: [&quot;127.0.0.1:8100:8000&quot;]
+    environment:
+      DB_HOST: db
+      DB_NAME: librenms
+      DB_USER: librenms
+      DB_PASSWORD: changeme
+      REDIS_HOST: redis
+      TZ: Asia/Kolkata
+      MEMORY_LIMIT: 256M
+      UPLOAD_MAX_SIZE: 16M
+    volumes:
+      - /home/user/librenms/data:/data:Z
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  dispatcher:
+    image: librenms/librenms:latest
+    environment:
+      DB_HOST: db
+      DB_NAME: librenms
+      DB_USER: librenms
+      DB_PASSWORD: changeme
+      REDIS_HOST: redis
+      DISPATCHER_NODE_ID: dispatcher1
+      SIDECAR_DISPATCHER: &quot;1&quot;
+    volumes:
+      - /home/user/librenms/data:/data:Z
+    depends_on: [librenms]
+    restart: unless-stopped
+
+volumes:
+  db_data:</code></pre>
+<pre><code class="language-bash">cd ~/librenms &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Add a device via CLI
+podman exec librenms lnms device:add 192.168.1.1 --v2c --community public
+
+# Run discovery and polling manually
+podman exec librenms lnms device:poll 192.168.1.1
+
+# Validate the install
+podman exec librenms lnms validate
+
+# View logs
+podman logs -f librenms
+
+# Generate an API token for integrations
+podman exec librenms lnms api-token:add mytoken --user admin</code></pre>
+<p>Access at <code>http://localhost:8100</code>. Add devices via Devices → Add Device, specifying SNMP community string and version.</p>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">librenms.home.local { tls internal; reverse_proxy localhost:8100 }</code></pre>
+<p>---</p>
+<h2>NetBox (Network Documentation & IPAM)</h2>
+<p><strong>Purpose:</strong> Source of truth for your network infrastructure. Document IP address assignments (IPAM), VLAN configurations, rack layouts, cable connections, device inventory, and circuit topology. NetBox is not a monitoring tool — it's the authoritative record of what you have and how it's connected. Integrates with Ansible, Terraform, and LibreNMS.</p>
+<pre><code class="language-yaml"># ~/netbox/compose.yml
+services:
+  netbox:
+    image: netboxcommunity/netbox:latest
+    ports: [&quot;127.0.0.1:8101:8080&quot;]
+    environment:
+      DB_HOST: postgres
+      DB_NAME: netbox
+      DB_USER: netbox
+      DB_PASSWORD: changeme
+      REDIS_HOST: redis
+      REDIS_PASSWORD: &quot;&quot;
+      SECRET_KEY: changeme-run-openssl-rand-base64-50
+      ALLOWED_HOSTS: netbox.home.local localhost
+      SUPERUSER_EMAIL: admin@home.local
+      SUPERUSER_PASSWORD: changeme
+    volumes:
+      - /home/user/netbox/media:/opt/netbox/netbox/media:Z
+    depends_on: [postgres, redis]
+    restart: unless-stopped
+
+  netbox-worker:
+    image: netboxcommunity/netbox:latest
+    command: /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py rqworker
+    environment:
+      DB_HOST: postgres
+      DB_NAME: netbox
+      DB_USER: netbox
+      DB_PASSWORD: changeme
+      REDIS_HOST: redis
+      SECRET_KEY: changeme-run-openssl-rand-base64-50
+    depends_on: [postgres, redis]
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: netbox
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: netbox
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/netbox &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:8101</code>. Start by defining your IP prefixes and VLANs, then populate devices and rack positions.</p>
+<p>---</p>
+<h2>Ntopng (Network Traffic Analysis)</h2>
+<p><strong>Purpose:</strong> Real-time network traffic monitoring and analysis. Shows active flows, top talkers, protocol breakdown, geo-IP mapping, and historical traffic trends. Can integrate with nProbe for deep packet inspection and with pfSense/OPNsense via NetFlow/sFlow export.</p>
+<pre><code class="language-yaml"># ~/ntopng/compose.yaml
+services:
+  ntopng:
+    image: ntop/ntopng:stable
+    network_mode: host
+    volumes:
+      - /home/user/ntopng/data:/var/lib/ntopng:Z
+    environment:
+      NTOPNG_COMMUNITY: true
+    command: --interface=eth0 --http-port=3000 --data-dir=/var/lib/ntopng --community
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/ntopng &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>Replace <code>eth0</code> with your primary network interface name (<code>ip link show</code>). <code>--network host</code> is required for ntopng to see actual traffic.</p></blockquote>
+<p>---</p>
+<h2>Blocky (Fast DNS Ad Blocker)</h2>
+<p><strong>Purpose:</strong> High-performance DNS proxy written in Go. Blocks ads and trackers via deny-lists (same blocklists as Pi-hole), supports DNS-over-HTTPS and DNS-over-TLS upstream resolvers, per-client group rules, conditional forwarding, query logging to a database, and response caching with prefetching. Starts in under a second and uses a fraction of Pi-hole's RAM — good choice for low-power hardware or containers where resource efficiency matters.</p>
+<pre><code class="language-yaml"># ~/blocky/compose.yml
+services:
+  blocky:
+    image: spx01/blocky:latest
+    ports:
+      - &quot;53:53/tcp&quot;
+      - &quot;53:53/udp&quot;
+      - &quot;127.0.0.1:4000:4000&quot;
+    volumes:
+      - /home/user/blocky/config.yml:/app/config.yml:ro,Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/blocky &amp;&amp; podman-compose up -d</code></pre>
+<h5>Example <code>config.yml</code></h5>
+<pre><code class="language-yaml">upstreams:
+  groups:
+    default:
+      - https://one.one.one.one/dns-query    # Cloudflare DoH
+      - https://dns.quad9.net/dns-query      # Quad9 DoH
+
+blocking:
+  blackLists:
+    ads:
+      - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+      - https://adaway.org/hosts.txt
+  clientGroupsBlock:
+    default:
+      - ads
+
+caching:
+  minTime: 5m
+  maxTime: 30m
+  prefetching: true
+
+queryLog:
+  type: console
+  logRetentionDays: 7
+
+ports:
+  dns: 53
+  http: 4000</code></pre>
+<blockquote><p><strong>Pi-hole vs Blocky:</strong> Use Pi-hole or AdGuard Home for a dashboard-heavy, click-to-manage experience. Use Blocky when you want a lean, config-file-driven blocker with better performance and no web UI overhead.</p></blockquote>
+<p>---</p>
+<h2>PowerDNS + PowerDNS Admin (Authoritative DNS)</h2>
+<p><strong>Purpose:</strong> Authoritative DNS server for your own domains. While Pi-hole, AdGuard, and Technitium handle <em>resolving</em> DNS queries for your LAN, PowerDNS <em>answers</em> authoritative queries — it's what you run when you want <code>example.com</code> (or an internal zone like <code>home.local</code>) to be served from your own nameserver. PowerDNS Admin provides a web UI for managing zones and records. Common in homelabs that run their own internal PKI or split-horizon DNS.</p>
+<pre><code class="language-yaml"># ~/powerdns/compose.yaml
+services:
+  pdns:
+    image: powerdns/pdns-auth-49:latest
+    ports:
+      - 0.0.0.0:5300:53/tcp
+      - 0.0.0.0:5300:53/udp
+      - 127.0.0.1:8053:8081
+    volumes:
+      - /home/user/powerdns/pdns.conf:/etc/powerdns/pdns.conf:ro,Z
+    environment:
+      PDNS_AUTH_API_KEY: changeme
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: pdns
+      MYSQL_USER: pdns
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+  powerdns-admin:
+    image: powerdnsadmin/pda-legacy:latest
+    ports:
+      - 127.0.0.1:9191:80
+    environment:
+      SQLALCHEMY_DATABASE_URI: mysql://pdns:changeme@db/pdns
+      SECRET_KEY: changeme-run-openssl-rand-hex-32
+      PDNS_STATS_URL: http://pdns:8081/
+      PDNS_API_KEY: changeme
+      PDNS_VERSION: &quot;4.9&quot;
+    depends_on: [db, pdns]
+    restart: unless-stopped
+
+volumes:
+  db_data:</code></pre>
+<h5>Minimal <code>pdns.conf</code></h5>
+<pre><code class="language-ini">launch=gmysql
+gmysql-host=db
+gmysql-user=pdns
+gmysql-password=changeme
+gmysql-dbname=pdns
+gmysql-dnssec=yes
+
+api=yes
+api-key=changeme
+webserver=yes
+webserver-address=0.0.0.0
+webserver-port=8081
+webserver-allow-from=0.0.0.0/0
+
+local-port=53</code></pre>
+<h5>Initialise the database schema</h5>
+<pre><code class="language-bash">podman exec pdns pdnsutil create-slave-zone home.local 127.0.0.1
+# Or use PowerDNS Admin web UI at http://localhost:9191 to create zones and records</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># List all zones
+podman exec pdns pdnsutil list-all-zones
+
+# Add a zone
+podman exec pdns pdnsutil create-zone home.local ns1.home.local
+
+# Add an A record
+podman exec pdns pdnsutil add-record home.local myserver A 192.168.1.50
+
+# Check DNSSEC status
+podman exec pdns pdnsutil check-all-zones
+
+# Reload zone after manual DB edits
+podman exec pdns pdnsutil rectify-zone home.local
+
+# Test from host
+dig @127.0.0.1 -p 5300 myserver.home.local</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">pdnsadmin.home.local { tls internal; reverse_proxy localhost:9191 }</code></pre>
+<p>---</p>
+<h2>Kea DHCP (Modern DHCP Server)</h2>
+<p><strong>Purpose:</strong> ISC Kea is the modern replacement for ISC DHCP (<code>dhcpd</code>). Provides DHCPv4 and DHCPv6 with a REST API, a lease database (PostgreSQL or MySQL), high-availability failover, host reservations, and a web UI via Stork. Run it alongside Technitium or PowerDNS to control both DHCP and DNS from your server, giving you reliable <code>hostname → IP</code> mappings for every device on your LAN.</p>
+<pre><code class="language-yaml"># ~/kea/compose.yaml
+services:
+  kea-dhcp4:
+    image: jonasal/kea-dhcp4:latest
+    network_mode: host          # Must see your LAN broadcast domain
+    volumes:
+      - /home/user/kea/kea-dhcp4.conf:/etc/kea/kea-dhcp4.conf:ro,Z
+      - /home/user/kea/leases:/var/lib/kea:Z
+    restart: unless-stopped</code></pre>
+<h5>Minimal <code>kea-dhcp4.conf</code></h5>
+<pre><code class="language-json">{
+  &quot;Dhcp4&quot;: {
+    &quot;interfaces-config&quot;: {
+      &quot;interfaces&quot;: [&quot;eth0&quot;]
+    },
+    &quot;lease-database&quot;: {
+      &quot;type&quot;: &quot;memfile&quot;,
+      &quot;persist&quot;: true,
+      &quot;name&quot;: &quot;/var/lib/kea/dhcp4.leases&quot;
+    },
+    &quot;subnet4&quot;: [{
+      &quot;id&quot;: 1,
+      &quot;subnet&quot;: &quot;192.168.1.0/24&quot;,
+      &quot;pools&quot;: [{ &quot;pool&quot;: &quot;192.168.1.100 - 192.168.1.200&quot; }],
+      &quot;option-data&quot;: [
+        { &quot;name&quot;: &quot;routers&quot;,              &quot;data&quot;: &quot;192.168.1.1&quot; },
+        { &quot;name&quot;: &quot;domain-name-servers&quot;,  &quot;data&quot;: &quot;192.168.1.10&quot; },
+        { &quot;name&quot;: &quot;domain-search&quot;,        &quot;data&quot;: &quot;home.local&quot; }
+      ],
+      &quot;reservations&quot;: [
+        {
+          &quot;hw-address&quot;: &quot;aa:bb:cc:dd:ee:ff&quot;,
+          &quot;ip-address&quot;:  &quot;192.168.1.50&quot;,
+          &quot;hostname&quot;:    &quot;myserver&quot;
+        }
+      ]
+    }],
+    &quot;loggers&quot;: [{
+      &quot;name&quot;: &quot;kea-dhcp4&quot;,
+      &quot;output_options&quot;: [{ &quot;output&quot;: &quot;stdout&quot; }],
+      &quot;severity&quot;: &quot;INFO&quot;
+    }]
+  }
+}</code></pre>
+<pre><code class="language-bash">cd ~/kea &amp;&amp; podman-compose up -d
+
+# View current leases
+cat /home/user/kea/leases/dhcp4.leases
+
+# Firewall — allow DHCP
+sudo firewall-cmd --add-service=dhcp --permanent &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<blockquote><p><strong>Kea vs dnsmasq:</strong> dnsmasq (bundled with Pi-hole) is excellent for simple setups. Kea is the right choice when you need HA failover, a REST API, PostgreSQL lease storage, or want to manage DHCP independently of your DNS blocker.</p></blockquote>
+<p>---</p>
+<h2>phpIPAM (Lightweight IP Address Management)</h2>
+<p><strong>Purpose:</strong> Web-based IP address management tool. Track which IPs are assigned, to what device, who requested the allocation, and which subnets are full. phpIPAM is lighter than NetBox for teams who just need clean IPAM without the full network topology and asset management features. Integrates with PowerDNS for automatic PTR record updates when IPs are assigned.</p>
+<pre><code class="language-yaml"># ~/phpipam/compose.yaml
+services:
+  phpipam-web:
+    image: phpipam/phpipam-www:latest
+    ports:
+      - 127.0.0.1:8200:80
+    environment:
+      TZ: Asia/Kolkata
+      IPAM_DATABASE_HOST: db
+      IPAM_DATABASE_USER: phpipam
+      IPAM_DATABASE_PASS: changeme
+      IPAM_DATABASE_NAME: phpipam
+    volumes:
+      - /home/user/phpipam/logo:/phpipam/css/images/logo:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  phpipam-cron:
+    image: phpipam/phpipam-cron:latest
+    environment:
+      TZ: Asia/Kolkata
+      IPAM_DATABASE_HOST: db
+      IPAM_DATABASE_USER: phpipam
+      IPAM_DATABASE_PASS: changeme
+      IPAM_DATABASE_NAME: phpipam
+      SCAN_INTERVAL: 1h
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: phpipam
+      MYSQL_USER: phpipam
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  db_data:</code></pre>
+<pre><code class="language-bash">cd ~/phpipam &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:8200</code>. On first run, select <strong>Automatic database installation</strong> and create the admin account. Then define your subnets and start allocating IPs.</p>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">ipam.home.local { tls internal; reverse_proxy localhost:8200 }</code></pre>
+<blockquote><p><strong>NetBox vs phpIPAM:</strong> Use phpIPAM for pure IPAM (subnets, IPs, reservations). Use NetBox when you also need rack diagrams, cable management, VLAN documentation, and device inventory.</p></blockquote>
+<p>---</p>
+<h2>Squid (Caching Proxy)</h2>
+<p><strong>Purpose:</strong> High-performance HTTP/HTTPS caching proxy. Squid caches web content so repeated requests are served from disk rather than the internet — saving bandwidth, reducing latency, and enabling content filtering by URL, domain, or MIME type. Useful in homelabs with metered internet connections, for caching container image pulls, or as a transparent proxy for auditing outbound HTTP traffic from containers.</p>
+<pre><code class="language-yaml"># ~/squid/compose.yaml
+services:
+  squid:
+    image: ubuntu/squid:latest
+    ports:
+      - 127.0.0.1:3128:3128
+    volumes:
+      - /home/user/squid/squid.conf:/etc/squid/squid.conf:ro,Z
+      - /home/user/squid/cache:/var/spool/squid:Z
+      - /home/user/squid/logs:/var/log/squid:Z
+    restart: unless-stopped</code></pre>
+<h5>Minimal <code>squid.conf</code></h5>
+<pre><code># Allow LAN clients
+acl localnet src 192.168.0.0/16
+acl localnet src 10.0.0.0/8
+
+# Standard safe ports
+acl SSL_ports port 443
+acl Safe_ports port 80 443 21 70 210 280 488 591 777 1025-65535
+acl CONNECT method CONNECT
+
+http_access deny !Safe_ports
+http_access deny CONNECT !SSL_ports
+http_access allow localnet
+http_access allow localhost
+http_access deny all
+
+http_port 3128
+
+# Cache configuration
+cache_dir ufs /var/spool/squid 10000 16 256   # 10 GB cache
+maximum_object_size 512 MB
+cache_mem 512 MB
+maximum_object_size_in_memory 10 MB
+
+# Access log
+access_log /var/log/squid/access.log squid</code></pre>
+<pre><code class="language-bash">cd ~/squid &amp;&amp; podman-compose up -d
+
+# Initialise the cache directory (first run)
+podman exec squid squid -z
+
+# View access log
+podman exec squid tail -f /var/log/squid/access.log
+
+# Force cache refresh for a URL
+podman exec squid squidclient -m PURGE http://example.com/
+
+# Check cache statistics
+podman exec squid squidclient mgr:info</code></pre>
+<h4>Use Squid as a proxy for container pulls</h4>
+<pre><code class="language-bash"># Set Podman to pull via Squid
+export https_proxy=http://localhost:3128
+export http_proxy=http://localhost:3128
+podman pull nginx:alpine</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">squid.home.local { tls internal; reverse_proxy localhost:3128 }</code></pre>
+<p>---</p>
+<h2>ddns-updater (Dynamic DNS)</h2>
+<p><strong>Purpose:</strong> Keeps your DNS records updated when your home/server IP changes. Polls your current public IP on a schedule and updates records via the APIs of 30+ providers — Cloudflare, Namecheap, DuckDNS, Gandi, Porkbun, Hetzner, and more. Essential if you're self-hosting from a residential or dynamic-IP connection without a static IP.</p>
+<pre><code class="language-yaml"># ~/ddns-updater/compose.yaml
+services:
+  ddns-updater:
+    image: qmcgaw/ddns-updater:latest
+    ports:
+      - 127.0.0.1:8000:8000
+    volumes:
+      - /home/user/ddns-updater/data:/updater/data:Z
+    environment:
+      PERIOD: 5m
+      UPDATE_COOLDOWN_PERIOD: 5m
+      PUBLICIP_FETCHERS: all
+      LOG_LEVEL: info
+      TZ: Asia/Kolkata
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/ddns-updater &amp;&amp; podman-compose up -d</code></pre>
+<h5>Configure providers in <code>/home/user/ddns-updater/data/config.json</code></h5>
+<pre><code class="language-json">{
+  &quot;settings&quot;: [
+    {
+      &quot;provider&quot;: &quot;cloudflare&quot;,
+      &quot;zone_identifier&quot;: &quot;your-zone-id&quot;,
+      &quot;domain&quot;: &quot;home.example.com&quot;,
+      &quot;host&quot;: &quot;@&quot;,
+      &quot;ttl&quot;: 300,
+      &quot;proxied&quot;: false,
+      &quot;token&quot;: &quot;your-cloudflare-api-token&quot;,
+      &quot;ip_version&quot;: &quot;ipv4&quot;
+    },
+    {
+      &quot;provider&quot;: &quot;duckdns&quot;,
+      &quot;domain&quot;: &quot;myhome.duckdns.org&quot;,
+      &quot;token&quot;: &quot;your-duckdns-token&quot;,
+      &quot;ip_version&quot;: &quot;ipv4&quot;
+    }
+  ]
+}</code></pre>
+<p>Access the status dashboard at <code>http://localhost:8000</code> — shows last update time, current IP, and success/failure per record.</p>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">ddns.home.local { tls internal; reverse_proxy localhost:8000 }</code></pre>
+<blockquote><p><strong>Tip:</strong> Pair with a short TTL (300 seconds) on the DNS record so clients pick up the new IP quickly after a change.</p></blockquote>
+<p>---</p>
+<h2>frp (Fast Reverse Proxy)</h2>
+<p><strong>Purpose:</strong> Expose services running behind NAT or a firewall to the internet via a VPS relay — without needing to open ports on your home router or ISP. You run <code>frps</code> (server) on a cheap VPS with a public IP, and <code>frpc</code> (client) on your home server. The client connects outbound to the VPS; all traffic to <code>vps-ip:port</code> is tunnelled back to your local service. A lightweight alternative to Cloudflare Tunnel or Pangolin when you need raw TCP/UDP forwarding or non-HTTP protocols.</p>
+<pre><code class="language-yaml"># On your VPS — ~/frps/compose.yaml
+services:
+  frps:
+    image: snowdreamtech/frps:latest
+    network_mode: host
+    volumes:
+      - /home/user/frps/frps.toml:/etc/frp/frps.toml:ro
+    restart: unless-stopped</code></pre>
+<h4><code>frps.toml</code> on the VPS</h4>
+<pre><code class="language-toml">bindPort = 7000           # frpc connects here
+vhostHTTPPort = 8080      # HTTP vhost traffic (optional)
+vhostHTTPSPort = 8443     # HTTPS vhost traffic (optional)
+
+auth.method = &quot;token&quot;
+auth.token = &quot;changeme-strong-secret&quot;
+
+webServer.addr = &quot;127.0.0.1&quot;
+webServer.port = 7500
+webServer.user = &quot;admin&quot;
+webServer.password = &quot;changeme&quot;</code></pre>
+<pre><code class="language-yaml"># On your home server — ~/frpc/compose.yaml
+services:
+  frpc:
+    image: snowdreamtech/frpc:latest
+    network_mode: host
+    volumes:
+      - /home/user/frpc/frpc.toml:/etc/frp/frpc.toml:ro
+    restart: unless-stopped</code></pre>
+<h4><code>frpc.toml</code> on your home server</h4>
+<pre><code class="language-toml">serverAddr = &quot;your.vps.ip&quot;
+serverPort = 7000
+
+auth.method = &quot;token&quot;
+auth.token = &quot;changeme-strong-secret&quot;
+
+# Expose a local HTTP service
+[[proxies]]
+name = &quot;homelab-web&quot;
+type = &quot;http&quot;
+localIP = &quot;127.0.0.1&quot;
+localPort = 80
+customDomains = [&quot;home.example.com&quot;]
+
+# Expose SSH
+[[proxies]]
+name = &quot;homelab-ssh&quot;
+type = &quot;tcp&quot;
+localIP = &quot;127.0.0.1&quot;
+localPort = 22
+remotePort = 2222          # ssh -p 2222 user@your.vps.ip
+
+# Expose a raw TCP service (e.g. MQTT)
+[[proxies]]
+name = &quot;mqtt&quot;
+type = &quot;tcp&quot;
+localIP = &quot;127.0.0.1&quot;
+localPort = 1883
+remotePort = 1883</code></pre>
+<pre><code class="language-bash"># Start on the VPS
+cd ~/frps &amp;&amp; podman-compose up -d
+
+# Start on the home server
+cd ~/frpc &amp;&amp; podman-compose up -d</code></pre>
+<p><strong>Firewall on the VPS:</strong></p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=7000/tcp --permanent   # frpc control
+sudo firewall-cmd --add-port=8080/tcp --permanent   # HTTP vhost
+sudo firewall-cmd --add-port=8443/tcp --permanent   # HTTPS vhost
+sudo firewall-cmd --add-port=2222/tcp --permanent   # SSH forwarding
+sudo firewall-cmd --reload</code></pre>
+<blockquote><p><strong>frp vs Cloudflare Tunnel:</strong> Cloudflare Tunnel is zero-config and free, but traffic passes through Cloudflare's network and requires HTTP/HTTPS. frp works for any TCP/UDP protocol, traffic stays on your VPS, and you keep full control. Use frp when you need to forward MQTT, SSH, game server ports, or any non-HTTP service.</p></blockquote>
+<p>---</p>
+<h2>FRRouting (BGP / OSPF / Dynamic Routing)</h2>
+<p><strong>Purpose:</strong> Full-featured open-source routing suite implementing BGP, OSPF, IS-IS, RIP, PIM, and BFD — the same protocols running on enterprise and ISP routers. On a homelab or small datacenter, FRR is most useful for: advertising your Tailscale/WireGuard subnets into BGP, running BGP between your Shani OS host and a pfSense/OPNsense router, implementing ECMP load-balancing between uplinks, or learning BGP/OSPF for job preparation. FRR runs as a container alongside your network stack — it doesn't require a separate router appliance.</p>
+<blockquote><p><strong>Note:</strong> FRR needs <code>--network host</code> and <code>--cap-add NET_ADMIN,NET_RAW,SYS_ADMIN</code> to manipulate kernel routing tables. These capabilities are available to rootless Podman containers on this system with <code>--privileged</code> or explicit <code>--cap-add</code>. The kernel routing changes FRR makes are real — they affect the host's routing table.</p></blockquote>
+<pre><code class="language-yaml"># ~/frr/compose.yaml
+services:
+  frr:
+    image: frrouting/frr:latest
+    network_mode: host
+    cap_add: [NET_ADMIN, NET_RAW, SYS_ADMIN]
+    volumes:
+      - /home/user/frr/etc:/etc/frr:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">mkdir -p ~/frr/etc
+cd ~/frr &amp;&amp; podman-compose up -d</code></pre>
+<h4>Initial FRR config files</h4>
+<pre><code class="language-bash"># ~/frr/etc/daemons — enable only what you need
+cat &gt; ~/frr/etc/daemons &lt;&lt; 'EOF'
+zebra=yes      # core routing daemon — always required
+bgpd=yes       # enable for BGP
+ospfd=yes      # enable for OSPFv2
+ospf6d=no
+ripd=no
+ripngd=no
+isisd=no
+pimd=no
+bfdd=yes       # Bidirectional Forwarding Detection — fast link failure detection
+EOF
+
+# ~/frr/etc/vtysh.conf
+cat &gt; ~/frr/etc/vtysh.conf &lt;&lt; 'EOF'
+service integrated-vtysh-config
+EOF</code></pre>
+<h5>Connect to the FRR CLI (vtysh)</h5>
+<pre><code class="language-bash">podman exec -it frr vtysh</code></pre>
+<h4>Example: iBGP between Shani OS host and a pfSense/OPNsense router</h4>
+<pre><code># Inside vtysh:
+
+# Set the router ID (use host's LAN IP)
+configure terminal
+ router bgp 65001
+  bgp router-id 192.168.1.10
+  neighbor 192.168.1.1 remote-as 65001          ! pfSense/OPNsense LAN IP, same AS = iBGP
+  neighbor 192.168.1.1 description pfsense-router
+  !
+  address-family ipv4 unicast
+   network 10.8.0.0/24                           ! advertise WireGuard VPN subnet into BGP
+   network 100.64.0.0/10                         ! advertise Tailscale CGNAT range
+   neighbor 192.168.1.1 activate
+   neighbor 192.168.1.1 soft-reconfiguration inbound
+  exit-address-family
+ !
+ ip route 10.8.0.0/24 wg0                        ! static route so zebra knows the next-hop
+exit</code></pre>
+<h4>Example: BGP with a Hetzner cloud server (eBGP over WireGuard)</h4>
+<pre><code>configure terminal
+ router bgp 65001
+  bgp router-id 192.168.1.10
+  neighbor 10.8.0.2 remote-as 65002             ! Hetzner VM, different AS = eBGP
+  neighbor 10.8.0.2 ebgp-multihop 2             ! required when peering over a tunnel
+  neighbor 10.8.0.2 update-source wg0
+  !
+  address-family ipv4 unicast
+   network 192.168.1.0/24                        ! advertise homelab LAN to the cloud
+   neighbor 10.8.0.2 activate
+   neighbor 10.8.0.2 route-map EXPORT out
+  exit-address-family
+ !
+ route-map EXPORT permit 10
+  match ip address prefix-list HOMELAB
+ !
+ ip prefix-list HOMELAB seq 5 permit 192.168.1.0/24
+exit</code></pre>
+<h4>Example: OSPF for automatic route redistribution (all routers learn all subnets)</h4>
+<pre><code>configure terminal
+ router ospf
+  ospf router-id 192.168.1.10
+  network 192.168.1.0/24 area 0.0.0.0
+  network 10.8.0.0/24 area 0.0.0.0
+  passive-interface default           ! don't send OSPF hellos on all interfaces
+  no passive-interface eth0           ! only peer on the LAN interface
+  redistribute connected              ! inject directly connected routes
+exit</code></pre>
+<h4>Useful show commands (inside vtysh)</h4>
+<pre><code>show ip bgp summary          # peer status, uptime, prefixes received
+show ip bgp                  # full BGP table
+show ip route                # kernel routing table (zebra view)
+show ip route bgp            # only BGP-learned routes
+show ip ospf neighbor        # OSPF adjacency table
+show bfd peers               # BFD session status (sub-second failure detection)
+show running-config          # full current config
+write memory                 # save config to /etc/frr/frr.conf</code></pre>
+<h4>BFD (fast failover in under 1 second)</h4>
+<pre><code>configure terminal
+ bfd
+  peer 192.168.1.1
+   detect-multiplier 3
+   receive-interval 300
+   transmit-interval 300
+  !
+ exit
+ !
+ router bgp 65001
+  neighbor 192.168.1.1 bfd       ! attach BFD to the BGP peer
+exit</code></pre>
+<blockquote><p><strong>FRR vs a dedicated router VM:</strong> FRR in a container is appropriate for BGP peering, route redistribution, and learning. For a full home router (DHCP, NAT, firewall, PPPoE), use OPNsense or pfSense on a dedicated machine or VM. FRR and OPNsense complement each other — OPNsense handles the internet edge, FRR handles internal routing between segments.</p></blockquote>
+<h2>Caddy Configuration</h2>
+<pre><code class="language-caddyfile">pihole.home.local      { tls internal; reverse_proxy localhost:8083 }
+search.home.local      { tls internal; reverse_proxy localhost:8091 }
+dns.home.local         { tls internal; reverse_proxy localhost:5380 }
+librenms.home.local    { tls internal; reverse_proxy localhost:8100 }
+netbox.home.local      { tls internal; reverse_proxy localhost:8101 }
+ntopng.home.local      { tls internal; reverse_proxy localhost:3000 }
+blocky.home.local      { tls internal; reverse_proxy localhost:4000 }
+traefik.home.local     { tls internal; reverse_proxy localhost:8080 }
+haproxy.home.local     { tls internal; reverse_proxy localhost:9000 }
+npm.home.local         { tls internal; reverse_proxy localhost:81 }
+pdnsadmin.home.local   { tls internal; reverse_proxy localhost:9191 }
+ipam.home.local        { tls internal; reverse_proxy localhost:8200 }
+ddns.home.local        { tls internal; reverse_proxy localhost:8000 }</code></pre>
+<p>---</p>
+<h2>Network Debugging Quick Reference</h2>
+<p>These commands are the foundation of diagnosing connectivity, DNS, and firewall problems on any Linux host.</p>
+<pre><code class="language-bash"># Show all active connections and their state
+ss -s
+
+# Find what process is listening on a specific port
+ss -tlnp | grep :443
+ss -tlnp | grep :8080
+
+# Show all established TCP connections
+ss -tn state established
+
+# Trace the path to a host (TCP, bypasses ICMP blocks)
+traceroute -T -p 443 example.com
+
+# Capture packets on an interface (write to file for Wireshark)
+sudo tcpdump -i eth0 -n 'port 443' -w /tmp/capture.pcap
+sudo tcpdump -i eth0 -n 'host 1.1.1.1'
+sudo tcpdump -i podman1 -n 'port 5432'   # capture container traffic
+
+# DNS debugging — full recursive trace
+dig +trace example.com
+
+# Query a specific resolver
+dig @1.1.1.1 example.com
+dig @localhost example.com         # test your Pi-hole / AdGuard
+
+# Check if a port is reachable (without telnet)
+curl -v --connect-timeout 5 telnet://192.168.1.100:5432
+
+# Show listening ports and their process
+ss -tlnp
+# or: lsof -i -P -n | grep LISTEN</code></pre>
+<h4>TCP connection states to know</h4>
+<ul>
+<li><code>ESTABLISHED</code> — active connection in use</li>
+<li><code>TIME_WAIT</code> — connection closed, waiting for delayed packets to expire (default 60–120s). High TIME_WAIT count on a busy server is normal but can exhaust ephemeral ports — tune <code>net.ipv4.tcp_tw_reuse</code> if needed.</li>
+<li><code>CLOSE_WAIT</code> — the remote end closed the connection but the local application hasn't called <code>close()</code> yet. Persistent CLOSE_WAIT usually indicates a bug in the application.</li>
+<li><code>SYN_SENT</code> — connection attempt in progress, SYN sent but SYN-ACK not yet received. Stuck connections here usually indicate the remote is unreachable or filtered by a firewall.</li>
+</ul>
+<p>---</p>
+<h2>TCP/IP Fundamentals</h2>
+<h3>The TCP Three-Way Handshake</h3>
+<p>Every TCP connection opens with a three-message exchange:</p>
+<ol>
+<li><strong>SYN</strong> — client sends a segment with the SYN flag, picks an initial sequence number</li>
+<li><strong>SYN-ACK</strong> — server acknowledges the client's SYN and sends its own SYN</li>
+<li><strong>ACK</strong> — client acknowledges the server's SYN. Connection is now established.</li>
+</ol>
+<p>This is why connection setup has a minimum latency of 1.5× the round-trip time (RTT) — three messages across two RTTs. TLS 1.3 reduces this further with 0-RTT resumption for known sessions.</p>
+<h3>TCP vs UDP</h3>
+<p>| Property | TCP | UDP | |----------|-----|-----| | Reliability | Guaranteed delivery, retransmission on loss | Best-effort, no retransmission | | Order | Ordered delivery | Out-of-order delivery possible | | Connection | Connection-oriented (handshake) | Connectionless | | Overhead | Higher (headers, ACKs, state) | Lower | | Use cases | HTTP, PostgreSQL, SSH — anything correctness-critical | DNS, VoIP, video streaming, WireGuard |</p>
+<p>WireGuard uses UDP specifically because the VPN layer handles its own reliability, and UDP's stateless nature makes it more resilient to brief packet loss and network changes (roaming between WiFi and mobile data).</p>
+<p>---</p>
+<h2>iptables and nftables Basics</h2>
+<p>Firewalld (used throughout this wiki) is a high-level interface over <code>nftables</code> on modern Linux. Understanding the underlying layer helps when debugging unexpected traffic behaviour.</p>
+<pre><code class="language-bash"># List all current nft rules (the native tool on modern systems)
+sudo nft list ruleset
+
+# List iptables rules with packet/byte counts (legacy view of nftables)
+sudo iptables -L -n -v
+sudo iptables -t nat -L -n -v    # NAT rules — important for container port forwarding
+
+# Show firewalld zones and their services
+sudo firewall-cmd --list-all
+sudo firewall-cmd --list-all-zones
+
+# Temporarily allow a port (lost on next firewalld reload)
+sudo firewall-cmd --add-port=8080/tcp
+
+# Permanently allow a port
+sudo firewall-cmd --permanent --add-port=8080/tcp &amp;&amp; sudo firewall-cmd --reload
+
+# Trace a packet through iptables (debug mode)
+sudo iptables -t raw -A PREROUTING -p tcp --dport 8080 -j TRACE
+sudo journalctl -k | grep TRACE   # see which rules the packet hits
+sudo iptables -t raw -D PREROUTING -p tcp --dport 8080 -j TRACE  # remove when done</code></pre>
+<p>---</p>
+<h2>How Container Networking Works</h2>
+<p>Understanding what Podman does under the hood helps debug connectivity issues between containers and the host.</p>
+<h4>When you start a container with <code>-p 8080:80</code></h4>
+<ol>
+<li>Podman creates a <strong>veth pair</strong> — a virtual Ethernet cable with one end in the container's network namespace and one end on the host's bridge.</li>
+<li>The host end is connected to a <strong>bridge device</strong> (e.g., <code>podman1</code> or <code>cni-podman0</code>). The bridge acts like a virtual switch.</li>
+<li>Podman adds an <strong>iptables NAT rule</strong> to forward packets arriving on host port 8080 to the container's IP on port 80.</li>
+<li>A return NAT rule ensures response packets are masqueraded back through the host IP.</li>
+</ol>
+<pre><code class="language-bash"># See the bridge Podman created
+ip link show type bridge
+ip addr show podman1    # or cni-podman0
+
+# See veth pairs (one end in container, one on bridge)
+ip link show type veth
+
+# See Podman's NAT rules
+sudo iptables -t nat -L PODMAN -n -v
+
+# Find a container's IP address
+podman inspect jellyfin --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'
+
+# Ping a container from the host using its IP directly
+ping $(podman inspect jellyfin --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')</code></pre>
+<h4>Why <code>host.containers.internal</code> exists</h4>
+<p>when a container needs to reach a service on the host (e.g., a database not in a container), it can't use <code>localhost</code> — that resolves to its own network namespace. <code>host.containers.internal</code> is a special DNS name Podman provides that resolves to the host's IP as seen from the container.</p>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Pi-hole not blocking ads on some devices | Verify the device's DNS is pointing at the server IP (not 1.1.1.1 hardcoded); check Pi-hole's query log to confirm queries are reaching it | | AdGuard DoT not working | Ensure <code>853/tcp</code> is open in firewalld; some clients need the full TLS hostname in the format <code>tls://server-ip</code> | | Port 53 conflict | <code>systemd-resolved</code> may be listening on port 53 — run <code>sudo systemctl disable --now systemd-resolved</code> or configure it to use a stub listener only | | Traefik not picking up containers | Ensure <code>--providers.docker=true</code> in the Traefik command args; verify containers have the <code>traefik.enable=true</code> label and are on the same network as Traefik | | Traefik HTTPS cert not issued | Check the ACME email is set; ensure port <code>80</code> is publicly reachable for the HTTP challenge; use DNS challenge for wildcard certs | | HAProxy backend health check fails | Verify the health check path returns HTTP 200 from the backend; confirm <code>option httpchk</code> sends the correct <code>Host</code> header; check <code>podman logs haproxy</code> | | HAProxy stats page blank | Confirm port <code>9000</code> is bound and <code>stats auth</code> credentials are correct; the stats URI defaults to <code>/</code> | | NPM SSL certificate fails | Ensure ports <code>80</code> and <code>443</code> are publicly reachable and DNS points at your server; check Let's Encrypt rate limits if retrying | | Technitium zones not resolving | Ensure the zone type is set to <code>Primary</code> and a valid SOA record exists; test with <code>dig @localhost home.local</code> | | LibreNMS no data after adding device | Verify SNMP community string matches the device; check <code>podman logs dispatcher</code> for polling errors; ensure UDP 161 is accessible | | LibreNMS RRD graphs blank | The dispatcher container must be running; check Redis connectivity between librenms and dispatcher containers | | NetBox <code>SECRET_KEY too short</code> | Generate with <code>openssl rand -base64 50</code>; must be at least 50 characters | | NetBox worker not processing jobs | Ensure the <code>netbox-worker</code> container is running; check Redis is reachable; view logs with <code>podman logs netbox-worker</code> | | Ntopng shows no traffic | Ensure <code>--network host</code> is set and the correct interface is specified; verify the interface has traffic with <code>tcpdump -i eth0 -c 5</code> | | Blocky not blocking ads | Verify the blocklist URLs are reachable from the container on startup; check <code>podman logs blocky</code> for download errors; confirm client DNS points at the server | | PowerDNS zone not resolving | Run <code>pdnsutil check-zone home.local</code> and <code>pdnsutil rectify-zone home.local</code>; confirm the SOA record exists; test with <code>dig @127.0.0.1 -p 5300 home.local</code> | | PowerDNS Admin can't connect to API | Verify <code>PDNS_API_KEY</code> matches <code>api-key</code> in <code>pdns.conf</code>; ensure the <code>webserver</code> is enabled and <code>webserver-allow-from=0.0.0.0/0</code> is set | | Kea DHCP leases not assigned | Confirm <code>network_mode: host</code> is set; verify the interface name in <code>interfaces-config</code> matches your LAN interface (<code>ip link show</code>) | | Kea DHCP conflict with existing DHCP | Disable DHCP on your router before starting Kea; two DHCP servers on the same subnet cause unpredictable address assignment | | phpIPAM database installation fails | Ensure MariaDB is fully started (<code>podman logs db</code>); try refreshing the setup page after 30 seconds | | Squid <code>NONE/400 Bad Request</code> | Confirm the client is sending a proper HTTP proxy request; for HTTPS, the client must send a <code>CONNECT</code> request first | | Squid cache not filling | Verify the cache directory exists and is writable; run <code>squid -z</code> inside the container to initialise the cache structure | | ddns-updater not updating | Check <code>podman logs ddns-updater</code>; verify the API token has <code>Zone:Edit</code> permission in Cloudflare; check <code>config.json</code> syntax with <code>podman exec ddns-updater ddns-updater --help</code> | | ddns-updater shows wrong current IP | The <code>PUBLICIP_FETCHERS: all</code> strategy uses multiple sources and picks the majority result; if behind a corporate NAT you may need to set <code>PUBLICIP_HTTP_PROVIDERS</code> to a specific provider | | frp client can't connect to server | Check port <code>7000/tcp</code> is open on the VPS firewall; verify <code>auth.token</code> matches in both <code>frps.toml</code> and <code>frpc.toml</code>; check <code>podman logs frps</code> for <code>authentication failed</code> errors | | frp HTTP vhost not routing | Ensure the <code>customDomains</code> value resolves to your VPS IP; verify <code>vhostHTTPPort</code> in <code>frps.toml</code> matches the port you're testing; check that <code>type = &quot;http&quot;</code> (not <code>tcp</code>) is set in <code>frpc.toml</code> |</p>
+<p>| FRR container exits immediately | Check <code>~/frr/etc/daemons</code> exists and <code>zebra=yes</code> is set; FRR requires zebra regardless of which other daemons are enabled | | FRR <code>permission denied</code> on routing table | Ensure <code>cap_add: [NET_ADMIN, NET_RAW, SYS_ADMIN]</code> is in compose.yaml; verify <code>network_mode: host</code> is set | | BGP peer stuck in <code>Active</code> state | Confirm the peer IP is reachable (<code>ping</code> from within the container); check both sides have each other's router-id as neighbor; verify AS numbers match the expected iBGP/eBGP setup | | BGP routes received but not in kernel table | Check <code>show ip route bgp</code> vs <code>show ip bgp</code> — missing routes may be filtered by a route-map or have a lower admin distance than a static/connected route | | OSPF neighbor stuck in <code>Init</code> | Both sides must be in the same area and have matching hello/dead timers; check <code>passive-interface</code> isn't blocking the peering interface | | <code>hcloud</code> command not found after Nix install | Ensure <code>~/.nix-profile/bin</code> is on your <code>PATH</code>; run <code>source ~/.nix-profile/etc/profile.d/nix.sh</code> or add it to <code>~/.bashrc</code> | | AWS CLI <code>NoCredentialsError</code> | Run <code>aws configure</code> or export <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code> environment variables | | cloud-init not running on Hetzner VM | Verify the user-data was passed correctly: <code>hcloud server describe &lt;name&gt;</code> shows <code>User Data: yes</code>; SSH in and check <code>cloud-init status</code> and <code>journalctl -u cloud-init</code> | | cloud-init schema validation fails | Common issues: missing <code>#cloud-config</code> header on line 1; YAML indentation errors; <code>runcmd</code> items must be lists (use <code>- command</code> not <code>command</code>) |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

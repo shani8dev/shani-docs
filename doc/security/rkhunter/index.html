@@ -146,7 +146,107 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">rkhunter (Rootkit Hunter)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Security</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+        </div>
+      </div>
+      <div class="prose"><p>rkhunter scans a system for known rootkits, backdoors, and local exploits. It checks system binaries against stored hashes, looks for suspicious file permissions, hidden files in sensitive directories, and known rootkit signatures. It is pre-installed on Shani OS.</p>
+<p>rkhunter does not change anything — it only scans and reports.</p>
+<blockquote><p><strong>Important workflow:</strong> rkhunter must build a baseline of known-good file hashes <strong>before</strong> the system is potentially compromised — ideally immediately after installation, and again after every system update. Running it for the first time on an already-compromised system provides little value.</p></blockquote>
+<p>---</p>
+<h2>Initial Setup</h2>
+<pre><code class="language-bash"># 1. Update the rootkit signature database
+sudo rkhunter --update
+
+# 2. Build a baseline of current system file hashes
+#    Run this immediately after a clean install and after every system update
+sudo rkhunter --propupd</code></pre>
+<p>---</p>
+<h2>Running a Scan</h2>
+<pre><code class="language-bash"># Full system scan (interactive — press Enter to continue between sections)
+sudo rkhunter --check
+
+# Non-interactive scan (suitable for cron / scripting)
+sudo rkhunter --check --skip-keypress
+
+# Suppress OK messages — show only warnings
+sudo rkhunter --check --skip-keypress --rwo
+
+# Log output to a file
+sudo rkhunter --check --skip-keypress --rwo 2&gt;/dev/null | tee ~/rkhunter-$(date +%Y%m%d).txt</code></pre>
+<p>---</p>
+<h2>Understanding the Output</h2>
+<pre><code>[ Rootkit Hunter version 1.4.6 ]
+
+Checking system commands...
+  Performing 'strings' command checks
+    Checking 'strings' command                               [ OK ]
+
+  Performing file properties checks
+    Checking for prerequisites                               [ OK ]
+    /usr/bin/awk                                             [ OK ]
+    /usr/bin/basename                                        [ WARNING ]
+
+[09:15:32] Warning: The file properties have changed:
+[09:15:32]          File: /usr/bin/basename
+[09:15:32]          Current inode: 123456   Stored inode: 123400</code></pre>
+<p>A <code>WARNING</code> for a file that changed after a package update is <strong>expected</strong> — this is why you run <code>--propupd</code> after every update. An unexpected warning (file changed with no package update) warrants investigation.</p>
+<p>---</p>
+<h2>After a System Update</h2>
+<p>Every time you update system packages, file hashes legitimately change. Update the baseline immediately after upgrading:</p>
+<pre><code class="language-bash">sudo pacman -Syu
+sudo rkhunter --propupd   # update baseline to reflect new package versions</code></pre>
+<p>If you scan before running <code>--propupd</code> after an update, you will see a flood of hash-change warnings for every updated binary — these are false positives.</p>
+<p>---</p>
+<h2>Scheduled Scans</h2>
+<pre><code class="language-bash">sudo tee /etc/cron.weekly/rkhunter-scan &lt;&lt; 'EOF'
+#!/bin/sh
+rkhunter --update --skip-keypress --quiet
+rkhunter --check --skip-keypress --rwo \
+  --logfile /var/log/rkhunter/scan-$(date +%Y%m%d).log 2&gt;/dev/null
+EOF
+sudo chmod +x /etc/cron.weekly/rkhunter-scan
+sudo mkdir -p /var/log/rkhunter</code></pre>
+<p>---</p>
+<h2>Configuration</h2>
+<p><code>/etc/rkhunter.conf</code> controls which checks run and what is whitelisted:</p>
+<pre><code class="language-ini"># Email warnings to root (requires a working MTA — see Exim page)
+MAIL-ON-WARNING=root
+
+# Whitelist a known-safe script that rkhunter flags as suspicious
+SCRIPTWHITELIST=/usr/bin/egrep
+SCRIPTWHITELIST=/usr/bin/fgrep
+
+# Whitelist a hidden directory that rkhunter warns about
+ALLOWHIDDENDIR=/dev/.udev
+ALLOWHIDDENDIR=/dev/.static
+
+# Disable a specific test (use test name from the log)
+DISABLE_TESTS=suspscan</code></pre>
+<p>After editing:</p>
+<pre><code class="language-bash">sudo rkhunter --config-check   # verify config syntax</code></pre>
+<p>---</p>
+<h2>Logs</h2>
+<pre><code class="language-bash"># View the full log from the last scan
+sudo cat /var/log/rkhunter.log
+
+# See only warnings from the last scan
+sudo grep -i &quot;warning\|infected\|found&quot; /var/log/rkhunter.log</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Many <code>WARNING</code> after a system update | Expected — run <code>sudo rkhunter --propupd</code> to update the baseline, then re-scan | | <code>Unhappy about OS</code> / <code>Unknown OS</code> warning | Cosmetic on Arch-based systems; does not indicate a problem | | False positive for a known-safe binary | Add it to <code>SCRIPTWHITELIST</code> in <code>/etc/rkhunter.conf</code> | | <code>rkhunter --update</code> fails | Check network connectivity; the signature database is downloaded from the rkhunter project servers | | Scan not finding anything suspicious | That's the expected result on a healthy system — the value of rkhunter is the delta between scans, not finding problems on every run |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

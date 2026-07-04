@@ -146,7 +146,112 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">NFS File Sharing</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-18</span>
+        </div>
+      </div>
+      <div class="prose"><h1>NFS — Network File System</h1>
+<p>Native Linux file sharing at near-local disk speeds. Best for Linux-to-Linux sharing on a trusted LAN. NFS state is bind-mounted from <code>/data/varlib/nfs</code> and persists across OS updates.</p>
+<blockquote><p><strong>Prefer Samba</strong> if you need to share with Windows or macOS clients. Use NFS for Linux-to-Linux shares where performance matters.</p></blockquote>
+<p>---</p>
+<h2>Server Setup</h2>
+<h3>1. Enable NFS Server</h3>
+<pre><code class="language-bash">sudo systemctl enable --now nfs-server</code></pre>
+<h3>2. Define Exports</h3>
+<p>Edit <code>/etc/exports</code>:</p>
+<pre><code class="language-text"># /etc/exports
+# Syntax: /path  allowed_clients(options)
+
+# Read-write share for LAN clients
+/home/user/shared     192.168.1.0/24(rw,sync,no_subtree_check)
+
+# Read-only share (e.g. for media)
+/srv/media            192.168.1.0/24(ro,sync,no_subtree_check)
+
+# Single trusted host with full root access (backup/cluster use only)
+/var/backups          192.168.1.5(rw,sync,no_subtree_check,no_root_squash)</code></pre>
+<p><strong>Common export options:</strong></p>
+<p>| Option | Effect | |--------|--------| | <code>rw</code> | Read/write access (default: <code>ro</code>) | | <code>sync</code> | Wait for writes to commit to disk before replying (safer, slightly slower) | | <code>no_subtree_check</code> | Improves performance when exporting a subdirectory; recommended | | <code>root_squash</code> | <strong>(Default)</strong> Maps remote root UID to <code>nfsnobody</code> — prevents privilege escalation | | <code>no_root_squash</code> | ⚠️ Allows remote root to act as root on the share. Use only on trusted hosts |</p>
+<h3>3. Apply & Verify</h3>
+<pre><code class="language-bash"># Re-read /etc/exports without restarting the server
+sudo exportfs -arv
+
+# Check which exports are active
+showmount -e localhost</code></pre>
+<h3>4. Firewall</h3>
+<pre><code class="language-bash">sudo firewall-cmd --add-service=nfs --add-service=rpcbind --add-service=mountd --permanent
+sudo firewall-cmd --reload</code></pre>
+<p>---</p>
+<h2>Client — Mounting</h2>
+<h3>Temporary Mount</h3>
+<pre><code class="language-bash">sudo mkdir -p /mnt/remote
+sudo mount -t nfs 192.168.1.100:/home/user/shared /mnt/remote
+
+# Unmount
+sudo umount /mnt/remote</code></pre>
+<h3>Persistent Mount (<code>/etc/fstab</code>)</h3>
+<pre><code class="language-text">192.168.1.100:/home/user/shared  /mnt/remote  nfs  defaults,_netdev,nfsvers=4,timeo=14  0 0</code></pre>
+<p>| Option | Effect | |--------|--------| | <code>_netdev</code> | Delays mount until the network interface is up | | <code>nfsvers=4</code> | Forces NFSv4 — more firewall-friendly and secure than v3 | | <code>timeo=14</code> | Timeout in tenths of a second before retrying (1.4 s); reduces boot hang if server is down |</p>
+<p>Apply without rebooting:</p>
+<pre><code class="language-bash">sudo mount -a</code></pre>
+<p>---</p>
+<h2>Disk Quotas (quota-tools)</h2>
+<p>quota-tools enforces per-user and per-group disk usage limits on NFS-exported filesystems. Quotas are enforced on the <strong>server</strong> side — limits apply regardless of which client is writing.</p>
+<h3>Enable Quotas on the Server</h3>
+<pre><code class="language-bash"># 1. Mount the filesystem with quota options in /etc/fstab
+#    Add usrquota and/or grpquota to the options field:
+#    /dev/sdb1  /srv/shared  ext4  defaults,usrquota,grpquota  0 2
+
+# 2. Remount to apply the new options
+sudo mount -o remount /srv/shared
+
+# 3. Initialise the quota database files
+sudo quotacheck -cug /srv/shared
+
+# 4. Enable quota enforcement
+sudo quotaon /srv/shared</code></pre>
+<h3>Set User Quotas</h3>
+<pre><code class="language-bash"># Edit quotas for a specific user (opens an editor)
+sudo edquota -u alice
+
+# The editor shows soft/hard limits for blocks (KB) and inodes (file count):
+# Filesystem  blocks   soft   hard  inodes  soft  hard
+# /srv/shared  102400  900000 1000000   512  4500  5000
+#
+# soft = warning threshold; hard = absolute limit
+# grace period applies when usage is between soft and hard limits
+
+# Set the grace period (how long a user can exceed soft limit before hard limit kicks in)
+sudo edquota -t
+
+# Copy one user's quota settings to another user
+sudo edquota -p alice bob</code></pre>
+<h3>Reporting</h3>
+<pre><code class="language-bash"># Show quota usage for all users on a filesystem
+sudo repquota /srv/shared
+
+# Show your own quota usage
+quota -s
+
+# Show quota for a specific user
+sudo quota -su alice</code></pre>
+<h3>NFS + Quotas</h3>
+<p>NFS clients do not enforce quotas locally — writes that exceed a quota are rejected by the server with an <code>EDQUOT</code> (disk quota exceeded) error, which the client reports as "no space left on device".</p>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>Permission denied</code> | Check the client IP is within the allowed range in <code>/etc/exports</code>; also verify Linux filesystem permissions on the export path | | <code>Stale file handle</code> | The exported path was deleted or the server restarted while the client had it open — <code>sudo umount -f /mnt/remote</code> and remount | | <code>Access denied by server</code> | Check <code>journalctl -u nfs-server</code> on the host for detailed errors | | Mount hangs at boot | Add <code>_netdev</code> and <code>timeo=14</code> to fstab options; ensure <code>nfs-server</code> is running on the host | | <code>showmount</code> fails from client | Open <code>rpcbind</code> and <code>mountd</code> firewall services on the server in addition to <code>nfs</code> |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

@@ -146,7 +146,990 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">OpenStack &amp; Private Cloud</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-25</span>
+        </div>
+      </div>
+      <div class="prose"><blockquote><p><strong>Portability note:</strong> Compose examples use rootless <strong>Podman</strong> and <code>host.containers.internal</code> (the host gateway from a container). When using Docker, replace <code>podman-compose</code> with <code>docker compose</code> and <code>host.containers.internal</code> with <code>host-gateway</code> (add <code>extra_hosts: [host-gateway:host-gateway]</code> to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.</p></blockquote>
+<h1>OpenStack & Private Cloud</h1>
+<p>Deploy a full OpenStack cloud on this system — from a minimal all-in-one development setup to a multi-node private cloud with compute, networking, storage, and identity services. All compose files use rootless Podman with <code>:Z</code> volume labels on bind mounts. Named volumes omit <code>:Z</code> — Podman manages their labels automatically.</p>
+<blockquote><p><strong>Install convention:</strong> CLI tools and dev runtimes install via <strong>Nix</strong> (primary) or <strong>Snap</strong> (fallback). GUI apps go via <strong>Flatpak</strong>. Services run as rootless <strong>Podman</strong> containers. On immutable OS distributions the root filesystem is read-only — use Nix, Snap, or Distrobox for user-space tooling.</p></blockquote>
+<blockquote><p>⚠️ <strong>Resource requirements:</strong> OpenStack is a full private cloud stack. Even an all-in-one Devstack node needs at least 8 GB RAM and 50 GB disk. A production multi-node setup needs 16 GB+ per controller node and 8 GB+ per compute node. For lightweight single-node use, <a href="#microstack-snap--all-in-one">MicroStack</a> is the fastest path.</p></blockquote>
+<p>---</p>
+<h2>Key Concepts</h2>
+<p><strong>OpenStack vs Kubernetes — what's the difference?:</strong> OpenStack manages <em>virtual machines and infrastructure</em> (compute, networking, storage, identity). Kubernetes manages <em>containerised workloads</em>. They're complementary: many production environments run Kubernetes on top of OpenStack VMs (Magnum does this automatically). In cloud provider terms, OpenStack = the IaaS layer (like AWS EC2/VPC/EBS); Kubernetes = the PaaS layer (like EKS/GKE).</p>
+<h4>Nova vs Neutron vs Cinder — the three most commonly asked</h4>
+<ul>
+<li><strong>Nova</strong> (compute): manages VM lifecycle — boot, stop, resize, migrate, snapshot. The core of OpenStack.</li>
+<li><strong>Neutron</strong> (network): provides virtual networks, subnets, routers, security groups, floating IPs, and load balancers. More complex than Nova because networking is inherently stateful.</li>
+<li><strong>Cinder</strong> (block storage): persistent volumes for VMs, like EBS. Backends include LVM, Ceph RBD, NFS. A volume can be attached to one VM at a time (ReadWriteOnce).</li>
+</ul>
+<h4>Keystone's token model</h4>
+<p>Keystone is the identity service. Every other OpenStack API requires a Keystone token in the <code>X-Auth-Token</code> header. Tokens are short-lived (default 1 hour) and contain the user's project, roles, and service endpoints. The service catalog (which endpoint to call for which service) is embedded in the token response — this is how clients discover Nova, Neutron, etc. without hard-coding URLs.</p>
+<h4>Tenant/project isolation</h4>
+<p>OpenStack uses <em>projects</em> (formerly tenants) as the isolation boundary — quotas, networks, and volumes belong to a project. A user belongs to one or more projects with roles. <code>admin</code> role gives full control; <code>member</code> role is standard user access; <code>reader</code> role is read-only. This maps directly to AWS accounts or Kubernetes namespaces.</p>
+<h4>VM migration types</h4>
+<ul>
+<li><strong>Live migration</strong>: move a running VM to another compute node with minimal downtime (seconds). Requires shared storage (Ceph RBD) or block-device live migration.</li>
+<li><strong>Cold migration</strong>: stop the VM, move the disk, restart on the new node. More reliable, more downtime.</li>
+<li><strong>Evacuation</strong>: force-migrate all VMs from a failed compute node (used when a node dies). Used in HA cluster maintenance.</li>
+</ul>
+<h4>Floating IP vs fixed IP</h4>
+<p>A fixed IP is the VM's internal address on the tenant network (e.g., <code>10.0.0.5</code>). A floating IP is a public IP that can be associated with a VM's port and provides external access. Floating IPs are drawn from an external network pool. This is analogous to AWS Elastic IPs. NAT is used to map floating IP → fixed IP on the router.</p>
+<h4>Heat templates vs Terraform</h4>
+<p>Heat is OpenStack's native orchestration — HOT (Heat Orchestration Template) format, YAML, declarative. Terraform/OpenTofu can also provision OpenStack resources via the OpenStack provider — and is more portable across clouds. For a pure OpenStack shop, Heat has the advantage of deep integration (auto-scaling groups, wait conditions, resource signals). For multi-cloud, Terraform is better.</p>
+<h4>Ceph as the OpenStack storage backbone</h4>
+<p>Ceph RBD (RADOS Block Device) is the preferred backend for Cinder volumes, Glance images, and Nova ephemeral disks in production OpenStack. All three services share the same Ceph cluster with separate pools. Benefits: thin provisioning, snapshots, cloning (fast VM spawning from images), no shared storage requirement for live migration (each VM's disk is a Ceph RBD image stored in the cluster, not on the compute node).</p>
+<h4>OpenStack deployment model — services are just APIs</h4>
+<p>Every OpenStack service is a REST API backed by a message queue (RabbitMQ). Nova receives a boot request → puts a message on the queue → nova-compute picks it up → calls the hypervisor. This async model is why OpenStack scales: you can have hundreds of compute nodes all consuming the same queue. The downside: debugging requires following a message through multiple service logs. <code>openstack server create</code> returning immediately doesn't mean the VM is running — poll <code>openstack server show</code> for status.</p>
+<h4>Quotas and capacity planning</h4>
+<p>OpenStack enforces quotas per project: max VCPUs, RAM, floating IPs, volumes, and security groups. Quotas prevent one team from consuming all resources. For platform teams, quota management is a significant operational task — projects request increases, you verify capacity, you adjust. Nova's <code>nova-scheduler</code> places VMs based on actual resource availability filtered against quotas. Over-commitment ratios (defaulting to 16:1 for VCPUs, 1.5:1 for RAM) determine how many VMs fit on a compute node.</p>
+<h4>Security groups vs network ACLs</h4>
+<p>Security groups in OpenStack (Neutron) are stateful firewalls attached to VM ports — allow a rule for inbound port 443, and return traffic is automatically allowed. They're applied at the virtual switch level, not at the VM. Rules are additive: multiple security groups on one port merge their rules. This is identical to AWS security groups. Network ACLs (if configured) apply at the subnet level and are stateless (you must explicitly allow return traffic).</p>
+<h4>Glance images and image formats</h4>
+<p>Glance stores VM images (qcow2, raw, vmdk). qcow2 is the standard format — thin-provisioned, supports snapshots, compresses well. raw is faster at runtime (no format overhead) but larger. When an image is used to boot a VM, Nova (with Ceph backend) clones the Glance image in Ceph as a copy-on-write RBD volume — VM boots in seconds regardless of image size. Always upload images in qcow2 format; the backend handles conversion.</p>
+<h4>Ceph integration — the backbone of production OpenStack storage</h4>
+<p>Most production OpenStack deployments use Ceph as the unified storage backend: Cinder (block storage) uses RBD (RADOS Block Device), Glance (image service) stores images in Ceph object storage, and Nova (compute) boots instances directly from Ceph-backed volumes via copy-on-write clones — a VM boots in seconds regardless of image size because only modified blocks are written. The Ceph cluster is separate from OpenStack compute nodes; they communicate via the Ceph client library embedded in libvirt/QEMU. This architecture makes live migration trivial (no data to move — the new host just attaches to the same Ceph volume) and enables snapshotting at the storage layer.</p>
+<h4>Keystone token types and service discovery</h4>
+<p>Keystone issues tokens (currently Fernet format — signed, non-persistent) that services use to authenticate API calls. The service catalog embedded in the token lists the endpoint URLs for every OpenStack service — compute, storage, networking, identity. When <code>nova list</code> runs, it first contacts Keystone to get a token and the catalog, then calls the Nova endpoint from the catalog. Every OpenStack service validates tokens against Keystone on every API call. This central identity model means a Keystone outage takes down the entire cloud's API layer — HA Keystone deployment is non-negotiable in production.</p>
+<h4>Neutron ML2 plugin architecture — why OpenStack networking is complex</h4>
+<p>Neutron's Modular Layer 2 (ML2) plugin separates the type driver (what kind of network: VLAN, VXLAN, flat) from the mechanism driver (how it's implemented: OVS, OVN, SR-IOV). OVN (Open Virtual Network) is the current recommended mechanism driver — it replaces the older OVS agent model with a centralised database (OVSDB) that distributes flow rules to all compute nodes without requiring a Neutron agent on each. The complexity comes from the abstraction layers: Neutron networks → Neutron subnets → Neutron ports → OVN logical switches → OVS flow rules on the hypervisor. When debugging, work down the stack: check the Neutron API first, then OVN database (<code>ovn-nbctl show</code>), then OVS flows (<code>ovs-ofctl dump-flows</code>).</p>
+<p>---</p>
+<p>---</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#choosing-your-openstack-path">Choosing Your OpenStack Path</a></li>
+<li><a href="#microstack-snap--all-in-one">MicroStack (All-in-One)</a></li>
+<li><a href="#devstack-development">DevStack (Development)</a></li>
+<li><a href="#kolla-ansible-production">Kolla-Ansible (Production)</a></li>
+<li><a href="#openstack-cli-tools">OpenStack CLI Tools</a></li>
+<li><a href="#core-services-reference">Core Services Reference</a></li>
+<li><a href="#containerised-supporting-services">Containerised Supporting Services</a></li>
+<li><a href="#integrating-with-kubernetes">Integrating with Kubernetes</a></li>
+<li><a href="#caddy-configuration">Caddy Configuration</a></li>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+</ul>
+<p>---</p>
+<h2>Choosing Your OpenStack Path</h2>
+<p>| Option | Best For | RAM (min) | Complexity | Notes | |--------|----------|-----------|------------|-------| | <strong>MicroStack</strong> | Local dev, learning, homelabs | 8 GB | Low | Snap-based, all-in-one, Canonical-maintained | | <strong>DevStack</strong> | Development, contributing upstream | 8 GB | Medium | Git-based, single-node, not production-ready | | <strong>Kolla-Ansible</strong> | Production, multi-node | 16 GB | High | Container-based, production-grade, full control | | <strong>OpenStack-Helm</strong> | K8s-native OpenStack | 16 GB | Very High | Runs OpenStack services as Helm charts on Kubernetes | | <strong>TripleO / Director</strong> | Bare-metal, telco | 32 GB | Very High | Red Hat/CentOS heritage, being phased out upstream |</p>
+<p>For a Shani OS homelab, <strong>MicroStack</strong> (learn/experiment) or <strong>Kolla-Ansible</strong> (build something real) are the two practical paths.</p>
+<p>---</p>
+<h2>MicroStack (Snap — All-in-One)</h2>
+<p><strong>Purpose:</strong> Canonical's single-Snap OpenStack distribution. Installs Nova (compute), Neutron (networking), Cinder (block storage), Glance (images), Keystone (identity), and Horizon (dashboard) in minutes. The fastest way to get a working OpenStack on this system for learning, development, and homelab use.</p>
+<pre><code class="language-bash"># Install MicroStack — Snap only, no Nix equivalent
+sudo snap install microstack --channel=2024/stable --classic
+
+# Initialise the all-in-one node
+# This configures all services, sets up the database, and provisions the default network
+sudo microstack init --auto --control
+
+# Verify all services are running
+sudo microstack.openstack service list
+sudo microstack.openstack catalog list
+
+# Check the control plane
+sudo microstack status</code></pre>
+<h4>Access Horizon (web dashboard)</h4>
+<pre><code class="language-bash"># Get the Horizon URL and admin credentials
+sudo microstack.openstack user password set admin   # change default password
+# Horizon is at http://&lt;your-ip&gt;/</code></pre>
+<h4>Launch your first instance</h4>
+<pre><code class="language-bash"># Download and upload a cloud image (CirrOS — tiny test image)
+curl -O https://download.cirros-cloud.net/0.6.2/cirros-0.6.2-x86_64-disk.img
+sudo microstack.openstack image create \
+  --file cirros-0.6.2-x86_64-disk.img \
+  --disk-format qcow2 --container-format bare \
+  --public cirros-0.6.2
+
+# List available flavors
+sudo microstack.openstack flavor list
+
+# Create an SSH key pair
+sudo microstack.openstack keypair create --public-key ~/.ssh/id_ed25519.pub mykey
+
+# Create a security group rule for SSH
+sudo microstack.openstack security group rule create default \
+  --protocol tcp --dst-port 22 --remote-ip 0.0.0.0/0
+
+# Boot an instance
+sudo microstack.openstack server create \
+  --image cirros-0.6.2 \
+  --flavor m1.tiny \
+  --network test \
+  --key-name mykey \
+  myvm
+
+# Watch it boot
+sudo microstack.openstack server show myvm
+
+# Assign a floating IP
+sudo microstack.openstack floating ip create external
+sudo microstack.openstack server add floating ip myvm &lt;floating-ip&gt;
+
+# SSH into the instance
+ssh -i ~/.ssh/id_ed25519 cirros@&lt;floating-ip&gt;</code></pre>
+<h4>Common MicroStack operations</h4>
+<pre><code class="language-bash"># List all instances
+sudo microstack.openstack server list
+
+# Stop / start an instance
+sudo microstack.openstack server stop myvm
+sudo microstack.openstack server start myvm
+
+# Delete an instance
+sudo microstack.openstack server delete myvm
+
+# List images, flavors, networks
+sudo microstack.openstack image list
+sudo microstack.openstack flavor list
+sudo microstack.openstack network list
+
+# Create a custom flavor (2 vCPU, 4 GB RAM, 20 GB disk)
+sudo microstack.openstack flavor create --vcpus 2 --ram 4096 --disk 20 m1.medium
+
+# View instance console log
+sudo microstack.openstack console log show myvm
+
+# Get a VNC console URL
+sudo microstack.openstack console url show --novnc myvm</code></pre>
+<h4>Upload Ubuntu or Debian images</h4>
+<pre><code class="language-bash"># Ubuntu 24.04 LTS cloud image
+curl -L -O https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
+sudo microstack.openstack image create \
+  --file noble-server-cloudimg-amd64.img \
+  --disk-format qcow2 --container-format bare \
+  --public ubuntu-24.04
+
+# Debian 12
+curl -L -O https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2
+sudo microstack.openstack image create \
+  --file debian-12-genericcloud-amd64.qcow2 \
+  --disk-format qcow2 --container-format bare \
+  --public debian-12</code></pre>
+<blockquote><p>💡 MicroStack stores all cluster state inside <code>/var/snap/microstack/</code> which lives in <code>@snapd</code> and persists across Shani OS updates and rollbacks. It does not use the OS root.</p></blockquote>
+<p>---</p>
+<h2>DevStack (Development)</h2>
+<p><strong>Purpose:</strong> The reference OpenStack development environment. Installs directly from Git, making it easy to test patches, contribute upstream, or explore bleeding-edge features. <strong>Not for production</strong> — DevStack is a single-node setup designed to be torn down and rebuilt. Run it inside a Distrobox container to keep the host clean.</p>
+<h5>Run DevStack inside a Distrobox Ubuntu container</h5>
+<pre><code class="language-bash"># Create an Ubuntu 24.04 Distrobox container for DevStack
+distrobox create --name devstack --image ubuntu:24.04
+distrobox enter devstack
+
+# Inside the container — install prerequisites
+sudo apt update &amp;&amp; sudo apt install -y git python3-pip python3-venv
+
+# Clone DevStack
+git clone https://opendev.org/openstack/devstack
+cd devstack
+
+# Create a minimal local.conf
+cat &gt; local.conf &lt;&lt; 'EOF'
+[[local|localrc]]
+ADMIN_PASSWORD=changeme
+DATABASE_PASSWORD=changeme
+RABBIT_PASSWORD=changeme
+SERVICE_PASSWORD=changeme
+
+# Disable services you don't need (speeds up install dramatically)
+disable_service tempest
+disable_service horizon     # Enable if you want the dashboard
+
+# Use a specific OpenStack release (remove to track main)
+# OPENSTACK_RELEASES=2024.2
+EOF
+
+# Run the installer (takes 20–40 minutes)
+./stack.sh</code></pre>
+<h4>After installation</h4>
+<pre><code class="language-bash"># Source credentials
+source ~/devstack/openrc admin admin
+
+# Verify
+openstack service list
+openstack catalog list
+
+# Re-stack after a reboot (keeps existing data)
+cd ~/devstack &amp;&amp; ./rejoin-stack.sh
+
+# Full teardown and rebuild
+./unstack.sh &amp;&amp; ./clean.sh &amp;&amp; ./stack.sh</code></pre>
+<h4>Common DevStack workflows</h4>
+<pre><code class="language-bash"># Source user credentials
+source openrc demo demo     # non-admin user
+source openrc admin admin   # admin
+
+# Run a specific set of services only
+# In local.conf:
+# ENABLED_SERVICES=key,rabbit,mysql,n-api,n-cpu,n-cond,n-sch,g-api,g-reg,c-api,c-vol,c-sch,q-svc,q-dhcp,q-l3,q-meta
+
+# Watch service logs (screen session)
+screen -x stack
+
+# View individual service log
+sudo journalctl -u devstack@n-api -f    # Nova API
+sudo journalctl -u devstack@q-svc -f   # Neutron</code></pre>
+<p>---</p>
+<h2>Kolla-Ansible (Production)</h2>
+<p><strong>Purpose:</strong> Deploy OpenStack using containerised services managed by Ansible. Kolla packages every OpenStack service as an OCI image; Kolla-Ansible orchestrates deployment, configuration, and upgrades. This is the recommended path for a production-grade multi-node private cloud on this system.</p>
+<blockquote><p><strong>Architecture:</strong> A typical small deployment has 1–3 controller nodes (Keystone, Nova-API, Neutron-Server, Glance, Cinder, Horizon, RabbitMQ, MariaDB, HAProxy) and 1–N compute nodes (Nova-Compute, Neutron-Agent). All-in-one deployments run everything on a single node.</p></blockquote>
+<h3>Prerequisites</h3>
+<pre><code class="language-bash"># Install Python and Ansible via Nix
+nix-env -iA nixpkgs.python312 nixpkgs.python312Packages.pip nixpkgs.ansible
+
+# Install kolla-ansible in a virtual environment
+python3 -m venv ~/kolla-venv
+source ~/kolla-venv/bin/activate
+pip install kolla-ansible
+
+# Install Ansible Galaxy requirements
+kolla-ansible install-deps</code></pre>
+<h3>All-in-One Setup</h3>
+<pre><code class="language-bash"># Create the kolla config directory
+sudo mkdir -p /etc/kolla
+sudo chown $USER:$USER /etc/kolla
+
+# Copy default configuration
+cp ~/kolla-venv/share/kolla-ansible/etc_examples/kolla/* /etc/kolla/
+
+# Generate random passwords for all services
+kolla-genpwd
+
+# Copy the all-in-one inventory
+cp ~/kolla-venv/share/kolla-ansible/ansible/inventory/all-in-one ~/inventory-aio</code></pre>
+<h4>Edit <code>/etc/kolla/globals.yml</code></h4>
+<pre><code class="language-yaml"># Minimal all-in-one globals.yml
+kolla_base_distro: &quot;ubuntu&quot;
+kolla_install_type: &quot;binary&quot;
+openstack_release: &quot;2024.2&quot;
+
+# Network interfaces — adjust to match your system
+network_interface: &quot;eth0&quot;          # Management / API network
+neutron_external_interface: &quot;eth1&quot; # Flat provider network (no IP needed)
+kolla_internal_vip_address: &quot;192.168.1.100&quot;  # VIP for HA — use host IP for AIO
+
+# Enable services
+enable_cinder: &quot;yes&quot;
+enable_glance: &quot;yes&quot;
+enable_heat: &quot;yes&quot;
+enable_horizon: &quot;yes&quot;
+enable_neutron: &quot;yes&quot;
+enable_nova: &quot;yes&quot;
+enable_placement: &quot;yes&quot;
+
+# Cinder volume group — create with 'sudo vgcreate cinder-volumes /dev/sdX'
+enable_cinder_backend_lvm: &quot;yes&quot;
+cinder_volume_group: &quot;cinder-volumes&quot;
+
+# Optional: object storage
+enable_swift: &quot;no&quot;
+
+# Optional: Kubernetes integration via Magnum
+enable_magnum: &quot;no&quot;</code></pre>
+<h5>Bootstrap and deploy</h5>
+<pre><code class="language-bash">source ~/kolla-venv/bin/activate
+
+# Bootstrap servers (installs Docker/Podman, dependencies)
+kolla-ansible -i ~/inventory-aio bootstrap-servers
+
+# Pre-deployment checks
+kolla-ansible -i ~/inventory-aio prechecks
+
+# Deploy (this takes 20–60 minutes)
+kolla-ansible -i ~/inventory-aio deploy
+
+# Generate the OpenStack credentials file
+kolla-ansible -i ~/inventory-aio post-deploy
+
+# Source credentials
+source /etc/kolla/admin-openrc.sh
+openstack service list</code></pre>
+<h3>Multi-Node Setup</h3>
+<h4><code>~/inventory-multinode</code></h4>
+<pre><code class="language-ini">[control]
+controller01 ansible_host=192.168.1.10 ansible_user=user
+controller02 ansible_host=192.168.1.11 ansible_user=user
+controller03 ansible_host=192.168.1.12 ansible_user=user
+
+[network]
+controller01
+controller02
+controller03
+
+[compute]
+compute01 ansible_host=192.168.1.20 ansible_user=user
+compute02 ansible_host=192.168.1.21 ansible_user=user
+
+[storage]
+storage01 ansible_host=192.168.1.30 ansible_user=user
+
+[monitoring]
+controller01
+
+[deployment]
+localhost ansible_connection=local</code></pre>
+<pre><code class="language-bash">kolla-ansible -i ~/inventory-multinode bootstrap-servers
+kolla-ansible -i ~/inventory-multinode prechecks
+kolla-ansible -i ~/inventory-multinode deploy
+kolla-ansible -i ~/inventory-multinode post-deploy</code></pre>
+<h3>Upgrades and Maintenance</h3>
+<pre><code class="language-bash"># Upgrade OpenStack to a new release
+# 1. Update openstack_release in globals.yml
+# 2. Pull new images
+kolla-ansible -i ~/inventory-aio pull
+
+# 3. Run upgrade
+kolla-ansible -i ~/inventory-aio upgrade
+
+# Reconfigure (apply globals.yml changes without full redeploy)
+kolla-ansible -i ~/inventory-aio reconfigure
+
+# Check service health
+kolla-ansible -i ~/inventory-aio check
+
+# Destroy and clean up (warning: deletes all data)
+kolla-ansible -i ~/inventory-aio destroy --yes-i-really-really-mean-it</code></pre>
+<p>---</p>
+<h2>OpenStack CLI Tools</h2>
+<h5>Install via Nix (primary)</h5>
+<pre><code class="language-bash"># OpenStackClient — unified CLI for all services
+nix-env -iA nixpkgs.python312Packages.openstackclient
+
+# Or install in a virtual environment (gets latest version)
+python3 -m venv ~/os-venv
+source ~/os-venv/bin/activate
+pip install python-openstackclient \
+            python-cinderclient \
+            python-glanceclient \
+            python-heatclient \
+            python-magnumclient \
+            python-neutronclient \
+            python-novaclient \
+            python-swiftclient</code></pre>
+<h4>Authentication — <code>clouds.yaml</code></h4>
+<pre><code class="language-yaml"># ~/.config/openstack/clouds.yaml
+clouds:
+  homelab:
+    auth:
+      auth_url: https://keystone.home.local:5000
+      username: admin
+      password: changeme
+      project_name: admin
+      user_domain_name: Default
+      project_domain_name: Default
+    region_name: RegionOne
+    interface: public
+    identity_api_version: 3
+
+  homelab-demo:
+    auth:
+      auth_url: https://keystone.home.local:5000
+      username: demo
+      password: demopass
+      project_name: demo
+      user_domain_name: Default
+      project_domain_name: Default
+    region_name: RegionOne
+    interface: public
+    identity_api_version: 3</code></pre>
+<pre><code class="language-bash"># Use a specific cloud profile
+export OS_CLOUD=homelab
+
+# Or source the openrc file
+source /etc/kolla/admin-openrc.sh</code></pre>
+<h4>Essential daily commands</h4>
+<pre><code class="language-bash"># Identity (Keystone)
+openstack user list
+openstack project list
+openstack role list
+openstack user create --password changeme --project demo myuser
+openstack role add --user myuser --project demo member
+openstack token issue
+
+# Compute (Nova)
+openstack server list
+openstack server list --all-projects   # admin
+openstack server create \
+  --image ubuntu-24.04 \
+  --flavor m1.small \
+  --network internal \
+  --key-name mykey \
+  --security-group default \
+  myserver
+openstack server start myserver
+openstack server stop myserver
+openstack server reboot myserver
+openstack server delete myserver
+openstack server migrate myserver --host compute02  # live migration
+openstack hypervisor list
+openstack hypervisor stats show
+
+# Images (Glance)
+openstack image list
+openstack image create \
+  --file ubuntu-24.04-server-cloudimg-amd64.img \
+  --disk-format qcow2 --container-format bare \
+  --public ubuntu-24.04
+openstack image show ubuntu-24.04
+openstack image delete ubuntu-24.04
+
+# Networking (Neutron)
+openstack network list
+openstack network create --provider-network-type flat \
+  --provider-physical-network physnet1 \
+  --external external-net
+openstack subnet create \
+  --network external-net \
+  --subnet-range 192.168.100.0/24 \
+  --gateway 192.168.100.1 \
+  --allocation-pool start=192.168.100.200,end=192.168.100.250 \
+  --no-dhcp external-subnet
+openstack network create internal
+openstack subnet create \
+  --network internal \
+  --subnet-range 10.0.0.0/24 \
+  internal-subnet
+openstack router create myrouter
+openstack router set --external-gateway external-net myrouter
+openstack router add subnet myrouter internal-subnet
+openstack floating ip create external-net
+openstack server add floating ip myserver &lt;floating-ip&gt;
+openstack security group rule create default \
+  --protocol tcp --dst-port 22 --remote-ip 0.0.0.0/0
+openstack security group rule create default \
+  --protocol icmp --remote-ip 0.0.0.0/0
+
+# Block Storage (Cinder)
+openstack volume list
+openstack volume create --size 20 mydisk
+openstack server add volume myserver mydisk
+openstack volume snapshot create --volume mydisk mysnap
+openstack volume backup create --name mybackup mydisk
+
+# Object Storage (Swift)
+openstack container create mybucket
+openstack object create mybucket myfile.txt
+openstack object list mybucket
+openstack object save mybucket myfile.txt
+
+# Orchestration (Heat)
+openstack stack list
+openstack stack create -t ~/heat/mystack.yaml mystack
+openstack stack update -t ~/heat/mystack.yaml mystack
+openstack stack delete mystack
+
+# Key pairs
+openstack keypair create --public-key ~/.ssh/id_ed25519.pub mykey
+openstack keypair list
+
+# Flavors
+openstack flavor list
+openstack flavor create --vcpus 4 --ram 8192 --disk 50 m1.large
+openstack flavor delete m1.large</code></pre>
+<p>---</p>
+<h2>Core Services Reference</h2>
+<p>OpenStack is composed of many loosely coupled services. These are the ones you'll encounter most in a homelab or small private cloud.</p>
+<p>| Service | Code Name | Purpose | Port | |---------|-----------|---------|------| | Identity | Keystone | Auth, tokens, service catalog | 5000 | | Image | Glance | VM image storage and retrieval | 9292 | | Compute | Nova | VM lifecycle management | 8774 | | Placement | Placement | Resource inventory tracking | 8778 | | Network | Neutron | Virtual networks, routers, FIPs | 9696 | | Block Storage | Cinder | Persistent volumes for VMs | 8776 | | Object Storage | Swift | S3-like object store | 8080 | | Dashboard | Horizon | Web UI for all services | 80/443 | | Orchestration | Heat | Stack templates (like Terraform) | 8004 | | Telemetry | Ceilometer | Usage metering and events | 8041 | | Bare Metal | Ironic | Provision physical servers | 6385 | | Container Infra | Magnum | Kubernetes clusters via API | 9511 | | DNS | Designate | DNS as a service | 9001 | | Load Balancer | Octavia | LBaaS with Amphorae | 9876 | | Key Manager | Barbican | Secret and certificate storage | 9311 | | Shared File System | Manila | NFS/CIFS shares for VMs | 8786 |</p>
+<p>---</p>
+<h2>Containerised Supporting Services</h2>
+<p>Several OpenStack services have popular self-hosted equivalents that integrate directly via standard APIs. Use these on this system alongside or instead of full OpenStack deployments.</p>
+<h3>MinIO (OpenStack Swift-compatible Object Storage)</h3>
+<p><strong>Purpose:</strong> S3 and Swift-compatible object storage. Use MinIO as a drop-in Swift replacement for image storage (Glance), volume backups (Cinder), or Heat templates. Lighter than running full Swift.</p>
+<pre><code class="language-yaml"># ~/minio/compose.yaml
+services:
+  minio:
+    image: quay.io/minio/minio:latest
+    ports:
+      - 127.0.0.1:9000:9000
+      - 127.0.0.1:9001:9001
+    volumes:
+      - /home/user/minio/data:/data:Z
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: changeme
+      MINIO_VOLUMES: /data
+    command: server /data --console-address &quot;:9001&quot;
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/minio &amp;&amp; podman-compose up -d
+
+# Install the MinIO client (mc) via Nix
+nix-env -iA nixpkgs.minio-client
+
+# Configure mc
+mc alias set homelab http://localhost:9000 minioadmin changeme
+
+# Create buckets (equivalent to Swift containers)
+mc mb homelab/glance-images
+mc mb homelab/cinder-backups
+mc mb homelab/heat-templates
+
+# Set Glance to use MinIO as the backend
+# In /etc/kolla/config/glance/glance-api.conf (Kolla) or DevStack local.conf:
+# [glance_store]
+# stores = http,swift
+# default_store = swift
+# swift_store_auth_address = http://localhost:9000
+# swift_store_user = minioadmin:changeme
+# swift_store_key = changeme</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">minio.home.local        { tls internal; reverse_proxy localhost:9000 }
+minio-console.home.local { tls internal; reverse_proxy localhost:9001 }</code></pre>
+<p>---</p>
+<h3>Ceph (Distributed Storage for OpenStack)</h3>
+<p><strong>Purpose:</strong> Ceph is the reference storage backend for production OpenStack deployments — it powers Cinder (RBD volumes), Glance (image storage), and Nova (ephemeral disks). A 3-node Ceph cluster provides redundancy and near-unlimited scale.</p>
+<pre><code class="language-yaml"># ~/ceph/compose.yaml — minimal Ceph cluster using ceph/daemon images
+services:
+  mon:
+    image: quay.io/ceph/ceph:v18
+    hostname: mon
+    environment:
+      CEPH_DAEMON: MON
+      MON_IP: 192.168.1.10
+      CEPH_PUBLIC_NETWORK: 192.168.1.0/24
+      CLUSTER: ceph
+    volumes:
+      - /home/user/ceph/etc:/etc/ceph:Z
+      - /home/user/ceph/lib:/var/lib/ceph:Z
+    ports:
+      - 127.0.0.1:6789:6789
+    restart: unless-stopped
+
+  osd1:
+    image: quay.io/ceph/ceph:v18
+    hostname: osd1
+    privileged: true
+    environment:
+      CEPH_DAEMON: OSD_DIRECTORY
+      CLUSTER: ceph
+    volumes:
+      - /home/user/ceph/etc:/etc/ceph:Z
+      - /home/user/ceph/osd1:/var/lib/ceph/osd:Z
+    depends_on: [mon]
+    restart: unless-stopped
+
+volumes:
+  {}</code></pre>
+<pre><code class="language-bash">cd ~/ceph &amp;&amp; podman-compose up -d
+
+# Check cluster health
+podman exec ceph-mon-1 ceph status
+podman exec ceph-mon-1 ceph health detail
+
+# Create pools for OpenStack
+podman exec ceph-mon-1 ceph osd pool create volumes 128     # Cinder
+podman exec ceph-mon-1 ceph osd pool create images 128      # Glance
+podman exec ceph-mon-1 ceph osd pool create vms 128         # Nova ephemeral
+
+# Enable RBD application on each pool
+podman exec ceph-mon-1 ceph osd pool application enable volumes rbd
+podman exec ceph-mon-1 ceph osd pool application enable images rbd
+podman exec ceph-mon-1 ceph osd pool application enable vms rbd
+
+# Create keyring for OpenStack services
+podman exec ceph-mon-1 ceph auth get-or-create \
+  client.cinder mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=volumes, allow rx pool=images'</code></pre>
+<blockquote><p>For a full production Ceph deployment on this system, use <strong>Ceph's own <code>cephadm</code> orchestrator</strong> or the <a href="https://rook.io">Rook operator</a> inside your k3s/RKE2 cluster.</p></blockquote>
+<p>---</p>
+<h3>Vault / OpenBao (Keystone Credential Backend)</h3>
+<p><strong>Purpose:</strong> Use OpenBao (the open-source HashiCorp Vault fork) as Keystone's credential and secret backend — replacing the default Fernet keys stored on disk. Also useful as a Barbican backend.</p>
+<pre><code class="language-yaml"># ~/openbao/compose.yaml
+services:
+  openbao:
+    image: quay.io/openbao/openbao:latest
+    ports:
+      - 127.0.0.1:8200:8200
+    volumes:
+      - /home/user/openbao/data:/openbao/data:Z
+      - /home/user/openbao/config:/openbao/config:Z
+    cap_add:
+      - IPC_LOCK
+    command: server
+    environment:
+      BAO_ADDR: http://0.0.0.0:8200
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/openbao &amp;&amp; podman-compose up -d
+
+# Install the bao CLI via Nix
+nix-env -iA nixpkgs.openbao
+
+export BAO_ADDR=http://localhost:8200
+
+# Initialise
+bao operator init -key-shares=5 -key-threshold=3
+
+# Unseal (run 3 times with 3 different unseal keys)
+bao operator unseal &lt;key1&gt;
+bao operator unseal &lt;key2&gt;
+bao operator unseal &lt;key3&gt;
+
+# Login with the root token
+bao login &lt;root-token&gt;
+
+# Enable KV store for OpenStack secrets
+bao secrets enable -path=openstack kv-v2
+
+# Store a Keystone secret
+bao kv put openstack/keystone fernet_key_0=&lt;base64-key&gt;</code></pre>
+<p>---</p>
+<h3>RabbitMQ (OpenStack Message Queue)</h3>
+<p>OpenStack services communicate via AMQP. In Kolla deployments RabbitMQ is managed automatically. For custom or hybrid deployments:</p>
+<pre><code class="language-yaml"># ~/rabbitmq/compose.yaml
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    hostname: rabbitmq
+    ports:
+      - 127.0.0.1:5672:5672
+      - 127.0.0.1:15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: openstack
+      RABBITMQ_DEFAULT_PASS: changeme
+      RABBITMQ_DEFAULT_VHOST: /
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: unless-stopped
+
+volumes:
+  rabbitmq_data:</code></pre>
+<pre><code class="language-bash">cd ~/rabbitmq &amp;&amp; podman-compose up -d
+
+# Verify
+podman exec rabbitmq-rabbitmq-1 rabbitmqctl status</code></pre>
+<p>---</p>
+<h3>MariaDB + Galera (OpenStack Database)</h3>
+<p>OpenStack services share a MySQL-compatible database. For a production HA setup use Galera:</p>
+<pre><code class="language-yaml"># ~/mariadb-galera/compose.yaml
+services:
+  db1:
+    image: mariadb:11
+    hostname: db1
+    ports:
+      - 127.0.0.1:3306:3306
+    environment:
+      MARIADB_ROOT_PASSWORD: changeme
+      MARIADB_GALERA_CLUSTER_NAME: openstack
+      MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://db1,db2,db3
+      MARIADB_GALERA_MARIABACKUP_USER: backupuser
+      MARIADB_GALERA_MARIABACKUP_PASSWORD: changeme
+    volumes:
+      - db1_data:/var/lib/mysql
+    restart: unless-stopped
+
+  db2:
+    image: mariadb:11
+    hostname: db2
+    environment:
+      MARIADB_ROOT_PASSWORD: changeme
+      MARIADB_GALERA_CLUSTER_NAME: openstack
+      MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://db1,db2,db3
+      MARIADB_GALERA_MARIABACKUP_USER: backupuser
+      MARIADB_GALERA_MARIABACKUP_PASSWORD: changeme
+    volumes:
+      - db2_data:/var/lib/mysql
+    depends_on: [db1]
+    restart: unless-stopped
+
+  db3:
+    image: mariadb:11
+    hostname: db3
+    environment:
+      MARIADB_ROOT_PASSWORD: changeme
+      MARIADB_GALERA_CLUSTER_NAME: openstack
+      MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://db1,db2,db3
+      MARIADB_GALERA_MARIABACKUP_USER: backupuser
+      MARIADB_GALERA_MARIABACKUP_PASSWORD: changeme
+    volumes:
+      - db3_data:/var/lib/mysql
+    depends_on: [db1]
+    restart: unless-stopped
+
+volumes:
+  db1_data:
+  db2_data:
+  db3_data:</code></pre>
+<pre><code class="language-bash">cd ~/mariadb-galera &amp;&amp; podman-compose up -d
+
+# Create OpenStack service databases (run once)
+podman exec mariadb-galera-db1-1 mysql -u root -pchangeme -e &quot;
+  CREATE DATABASE keystone;
+  CREATE DATABASE nova;
+  CREATE DATABASE nova_api;
+  CREATE DATABASE nova_cell0;
+  CREATE DATABASE neutron;
+  CREATE DATABASE glance;
+  CREATE DATABASE cinder;
+  CREATE DATABASE heat;
+  GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' IDENTIFIED BY 'changeme';
+  GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'%' IDENTIFIED BY 'changeme';
+  GRANT ALL PRIVILEGES ON nova_api.* TO 'nova'@'%' IDENTIFIED BY 'changeme';
+  GRANT ALL PRIVILEGES ON nova_cell0.* TO 'nova'@'%' IDENTIFIED BY 'changeme';
+  GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'%' IDENTIFIED BY 'changeme';
+  GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'%' IDENTIFIED BY 'changeme';
+  GRANT ALL PRIVILEGES ON cinder.* TO 'cinder'@'%' IDENTIFIED BY 'changeme';
+  GRANT ALL PRIVILEGES ON heat.* TO 'heat'@'%' IDENTIFIED BY 'changeme';
+  FLUSH PRIVILEGES;
+&quot;</code></pre>
+<p>---</p>
+<h3>Memcached (Token Cache)</h3>
+<p>Keystone uses Memcached to cache tokens and reduce database load:</p>
+<pre><code class="language-yaml"># ~/memcached/compose.yaml
+services:
+  memcached:
+    image: memcached:alpine
+    ports:
+      - 127.0.0.1:11211:11211
+    command: memcached -m 512 -c 1024
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/memcached &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>Integrating with Kubernetes</h2>
+<h3>Magnum (Kubernetes-as-a-Service)</h3>
+<p>Magnum is the OpenStack service that provisions Kubernetes clusters on demand — you call the OpenStack API and get a working k8s cluster running on Nova VMs. Requires a working OpenStack environment with at least Nova, Neutron, Glance, and Cinder.</p>
+<pre><code class="language-bash"># Enable Magnum in Kolla globals.yml
+# enable_magnum: &quot;yes&quot;
+# kolla-ansible -i ~/inventory-aio reconfigure
+
+# Install the Magnum client
+pip install python-magnumclient
+
+# Upload a COE (Container Orchestration Engine) image
+# Download the Fedora CoreOS image built for Magnum
+curl -L -O https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/latest/x86_64/fedora-coreos-*-openstack.x86_64.qcow2
+
+openstack image create \
+  --file fedora-coreos-*-openstack.x86_64.qcow2 \
+  --disk-format qcow2 --container-format bare \
+  --public \
+  --property os_distro=fedora-coreos \
+  fedora-coreos
+
+# Create a cluster template
+openstack coe cluster template create k8s-template \
+  --image fedora-coreos \
+  --keypair mykey \
+  --external-network external-net \
+  --dns-nameserver 1.1.1.1 \
+  --flavor m1.small \
+  --master-flavor m1.medium \
+  --coe kubernetes \
+  --docker-storage-driver overlay2 \
+  --network-driver flannel
+
+# Provision a Kubernetes cluster
+openstack coe cluster create mycluster \
+  --cluster-template k8s-template \
+  --master-count 1 \
+  --node-count 2
+
+# Watch provisioning status
+openstack coe cluster show mycluster
+
+# Get kubeconfig
+mkdir -p ~/mycluster-config
+$(openstack coe cluster config mycluster --dir ~/mycluster-config --force)
+export KUBECONFIG=~/mycluster-config/config
+
+# Verify
+kubectl get nodes</code></pre>
+<p>---</p>
+<h3>OpenStack Helm (Kubernetes-Native OpenStack)</h3>
+<p>Run OpenStack services themselves as Helm charts on your k3s/RKE2 cluster. This is the most cloud-native OpenStack deployment model.</p>
+<pre><code class="language-bash"># Prerequisites: k3s or RKE2 running, Helm installed
+# OpenStack-Helm repository
+helm repo add osh https://tarballs.opendev.org/openstack/openstack-helm
+helm repo add osh-infra https://tarballs.opendev.org/openstack/openstack-helm-infra
+helm repo update
+
+# Install infrastructure components first
+helm upgrade --install ingress-openstack osh-infra/ingress \
+  --namespace openstack --create-namespace
+
+helm upgrade --install mariadb osh-infra/mariadb \
+  --namespace openstack \
+  --set volume.size=50Gi
+
+helm upgrade --install rabbitmq osh-infra/rabbitmq \
+  --namespace openstack
+
+helm upgrade --install memcached osh-infra/memcached \
+  --namespace openstack
+
+# Install core OpenStack services
+helm upgrade --install keystone osh/keystone \
+  --namespace openstack
+
+helm upgrade --install glance osh/glance \
+  --namespace openstack
+
+helm upgrade --install nova osh/nova \
+  --namespace openstack
+
+helm upgrade --install neutron osh/neutron \
+  --namespace openstack</code></pre>
+<p>---</p>
+<h2>Heat Templates (Infrastructure as Code)</h2>
+<p>Heat is OpenStack's native orchestration service — equivalent to Terraform or CloudFormation but for your private cloud. Templates are written in YAML (HOT format).</p>
+<h4>Example: Launch a web server stack</h4>
+<pre><code class="language-yaml"># ~/heat/webserver.yaml
+heat_template_version: '2021-04-06'
+
+description: Single web server instance with floating IP
+
+parameters:
+  image:
+    type: string
+    default: ubuntu-24.04
+  flavor:
+    type: string
+    default: m1.small
+  key_name:
+    type: string
+    default: mykey
+  network:
+    type: string
+    default: internal
+  external_network:
+    type: string
+    default: external-net
+
+resources:
+  security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules:
+        - protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+        - protocol: tcp
+          port_range_min: 80
+          port_range_max: 80
+        - protocol: icmp
+
+  server:
+    type: OS::Nova::Server
+    properties:
+      image: { get_param: image }
+      flavor: { get_param: flavor }
+      key_name: { get_param: key_name }
+      networks:
+        - network: { get_param: network }
+      security_groups:
+        - { get_resource: security_group }
+      user_data: |
+        #!/bin/bash
+        apt update &amp;&amp; apt install -y nginx
+        systemctl enable --now nginx
+
+  floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: external_network }
+
+  floating_ip_assoc:
+    type: OS::Neutron::FloatingIPAssociation
+    properties:
+      floatingip_id: { get_resource: floating_ip }
+      port_id: { get_attr: [server, addresses, internal, 0, port] }
+
+outputs:
+  server_ip:
+    description: Floating IP of the web server
+    value: { get_attr: [floating_ip, floating_ip_address] }</code></pre>
+<pre><code class="language-bash"># Deploy the stack
+openstack stack create -t ~/heat/webserver.yaml webserver-stack
+
+# Watch progress
+openstack stack event list webserver-stack --follow
+
+# Get outputs
+openstack stack output show webserver-stack server_ip
+
+# Update the stack
+openstack stack update -t ~/heat/webserver.yaml webserver-stack
+
+# Delete the stack (removes all resources)
+openstack stack delete webserver-stack</code></pre>
+<h2>Caddy Configuration</h2>
+<pre><code class="language-caddyfile"># OpenStack Horizon dashboard
+horizon.home.local       { tls internal; reverse_proxy localhost:80 }
+
+# OpenStack API endpoints (proxy from Caddy to Kolla/MicroStack services)
+keystone.home.local      { tls internal; reverse_proxy localhost:5000 }
+glance.home.local        { tls internal; reverse_proxy localhost:9292 }
+nova.home.local          { tls internal; reverse_proxy localhost:8774 }
+neutron.home.local       { tls internal; reverse_proxy localhost:9696 }
+cinder.home.local        { tls internal; reverse_proxy localhost:8776 }
+heat.home.local          { tls internal; reverse_proxy localhost:8004 }
+swift.home.local         { tls internal; reverse_proxy localhost:8080 }
+placement.home.local     { tls internal; reverse_proxy localhost:8778 }
+
+# Supporting services
+minio.home.local         { tls internal; reverse_proxy localhost:9000 }
+minio-console.home.local { tls internal; reverse_proxy localhost:9001 }
+openbao.home.local       { tls internal; reverse_proxy localhost:8200 }
+rabbitmq.home.local      { tls internal; reverse_proxy localhost:15672 }</code></pre>
+<p>---</p>
+<h2>Useful Daily Commands</h2>
+<pre><code class="language-bash"># Quota management
+openstack quota show --project demo
+openstack quota set --instances 20 --cores 40 --ram 102400 demo
+
+# Aggregates and availability zones
+openstack aggregate create --zone az1 az1
+openstack aggregate add host az1 compute01
+openstack server create ... --availability-zone az1
+
+# Host operations
+openstack host list
+openstack compute service list
+openstack compute service set --disable compute01 nova-compute  # drain
+openstack compute service set --enable compute01 nova-compute   # restore
+
+# Tenant network creation (typical Neutron setup)
+openstack network create --internal tenant-net
+openstack subnet create \
+  --network tenant-net \
+  --subnet-range 10.10.0.0/24 \
+  --dns-nameserver 1.1.1.1 \
+  tenant-subnet
+openstack router create tenant-router
+openstack router set --external-gateway external-net tenant-router
+openstack router add subnet tenant-router tenant-subnet
+
+# Resize a server
+openstack server resize --flavor m1.large myserver
+openstack server resize confirm myserver
+
+# Create and use a volume snapshot
+openstack volume snapshot create --volume mydisk snap1
+openstack volume create --snapshot snap1 --size 20 newdisk
+
+# Backup and restore
+openstack volume backup create --name backup1 --force mydisk
+openstack volume backup restore backup1 mydisk
+
+# Instance console access
+openstack console log show myserver
+openstack console url show --novnc myserver
+
+# Floating IP management
+openstack floating ip list
+openstack floating ip create external-net
+openstack floating ip delete &lt;id&gt;</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | MicroStack <code>microstack status</code> shows services down | Run <code>sudo snap restart microstack</code>; check <code>sudo snap logs microstack</code> for errors | | MicroStack <code>openstack</code> CLI returns <code>Connection refused</code> | Ensure you're using <code>sudo microstack.openstack</code> not bare <code>openstack</code>; or source <code>/var/snap/microstack/common/etc/microstack.rc</code> | | DevStack <code>stack.sh</code> fails mid-way | Check <code>~/devstack/logs/</code> for the failing service; common causes: insufficient RAM, missing <code>local.conf</code> parameters, network connectivity | | DevStack services down after reboot | Run <code>cd ~/devstack &amp;&amp; ./rejoin-stack.sh</code> — <code>./stack.sh</code> starts from scratch; <code>rejoin-stack.sh</code> re-attaches to existing services | | Kolla <code>prechecks</code> fails on <code>docker_sdk</code> | Kolla needs Docker SDK on the control node: <code>pip install docker</code> inside the kolla-venv; Kolla uses the Docker API even with Podman | | Kolla deploy fails with <code>UNREACHABLE</code> | Verify SSH key access from the deploy node to all inventory hosts; test with <code>ansible -i inventory-aio all -m ping</code> | | Horizon <code>CSRF verification failed</code> | Set <code>ALLOWED_HOSTS</code> in <code>/etc/kolla/config/horizon/local_settings</code> to match your domain | | Nova instances stuck in <code>SPAWNING</code> | Check <code>nova-compute</code> logs on the compute node: <code>sudo journalctl -u kolla-nova-compute</code>; common cause: missing Glance image or insufficient compute resources | | Nova live migration fails | Verify compute nodes can reach each other on ports 16509 (libvirt) and 49152+ (QEMU migration); check <code>nova.conf</code> migration settings | | Neutron DHCP not assigning IPs to instances | Check <code>neutron-dhcp-agent</code> is running; verify the network's <code>enable_dhcp</code> is <code>true</code>; check <code>neutron-metadata-agent</code> status | | Floating IP not reachable | Verify the external network gateway is correctly configured; check security group rules allow ICMP; confirm the router's external gateway matches the floating IP pool | | Keystone <code>401 Unauthorized</code> | Token may have expired — run <code>openstack token issue</code> again; check <code>OS_AUTH_URL</code> points to port 5000, not 35357 (deprecated admin port) | | Glance image stuck <code>queued</code> | Check Glance API logs; if using Swift/MinIO backend, verify the backend credentials and connectivity; for local backend check disk space | | Cinder volume stuck <code>creating</code> | Check <code>cinder-volume</code> service logs; if using LVM, verify the <code>cinder-volumes</code> VG exists and has free space: <code>sudo vgs</code> | | Ceph pool <code>HEALTH_WARN: too few PGs</code> | Increase PG count: <code>ceph osd pool set &lt;pool&gt; pg_num 256</code>; wait for rebalancing before increasing further | | Magnum cluster stuck <code>CREATE_IN_PROGRESS</code> | Check Heat stack events for the cluster: <code>openstack stack event list &lt;cluster-stack-name&gt; --follow</code>; common cause: Glance image wrong <code>os_distro</code> property | | OpenStack-Helm pod <code>CrashLoopBackOff</code> | Check <code>kubectl logs -n openstack &lt;pod&gt;</code>; most common cause is database not ready — check MariaDB pod status first | | <code>openstack</code> CLI <code>SSL: CERTIFICATE_VERIFY_FAILED</code> | Add <code>--insecure</code> flag or set <code>OS_CACERT=/path/to/ca.crt</code>; for Kolla, the CA is at <code>/etc/kolla/certificates/ca/root.crt</code> | | RabbitMQ queues accumulating | A service is not consuming messages — check the dead service's logs; use <code>rabbitmqctl list_queues</code> to identify the backlog | | MariaDB Galera cluster split-brain | Identify the most up-to-date node with <code>mysql -e &quot;SHOW STATUS LIKE 'wsrep_last_committed'&quot;</code>; bootstrap from that node |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

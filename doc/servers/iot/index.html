@@ -146,7 +146,383 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">IoT &amp; Monitoring</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+        </div>
+      </div>
+      <div class="prose"><p>Sensor data pipelines, MQTT brokers, time-series ingestion, industrial protocols, dashboards, alerting, and network monitoring. Everything from a single temperature sensor to a multi-site SCADA system.</p>
+<blockquote><p>This page covers the <em>data infrastructure</em> layer — brokers, pipelines, storage, and visualisation. For smart home automation (Home Assistant, Zigbee2MQTT, ESPHome), see the <a href="https://docs.shani.dev/doc/servers/home-automation">Home Automation wiki</a>. Those tools and the ones here are complementary and frequently used together.</p></blockquote>
+<p>---</p>
+<h2>Key Concepts</h2>
+<h4>MQTT protocol internals — brokers, topics, QoS</h4>
+<p>MQTT is a publish-subscribe protocol where a broker (Mosquitto, EMQX) routes messages between publishers and subscribers using topic hierarchies (<code>factory/line1/sensor/temperature</code>). Wildcard subscriptions: <code>+</code> matches a single level (<code>home/+/temperature</code> matches all rooms), <code>#</code> matches all remaining levels (<code>home/#</code> matches everything under home). QoS 0 (fire-and-forget) has no delivery guarantee — correct for high-frequency sensor readings where losing one reading is acceptable. QoS 1 (at-least-once) retransmits until acknowledged — correct for commands or alerts. QoS 2 (exactly-once) uses a four-way handshake — rarely used due to overhead. Retained messages: the broker stores the last retained message per topic and delivers it to new subscribers immediately — essential for device state (current temperature) that must be available without waiting for the next publish cycle.</p>
+<h4>Time-series data model and storage engines</h4>
+<p>IoT sensor data has specific characteristics: append-only (readings are never updated), high write throughput (thousands of sensors × multiple readings per second), range queries (last 24 hours of temperature), and eventual deletion (retain for 90 days). Regular relational databases handle this poorly — unbounded table growth, slow range scans without time-based partitioning, no native downsampling. InfluxDB's TSM (Time-Structured Merge Tree) storage engine, TimescaleDB's hypertables (automatic PostgreSQL partitioning by time), and Prometheus's TSDB are all optimised for this pattern. The key concept: continuous queries or recording rules that pre-aggregate raw data into hourly/daily summaries, keeping the database from growing unboundedly.</p>
+<h4>Prometheus pull model vs MQTT push model</h4>
+<p>Prometheus scrapes (pulls) metrics from HTTP <code>/metrics</code> endpoints on a schedule. This is counter-intuitive for IoT — a temperature sensor can't run an HTTP server. The bridge pattern solves this: Telegraf subscribes to MQTT topics and exposes the received values as a Prometheus metrics endpoint (<code>/metrics</code>); Prometheus scrapes Telegraf. Alternatively, Pushgateway accepts metrics pushed from batch jobs and short-lived processes. Understanding the pull vs push architecture trade-off comes up in SRE and platform engineering interviews: pull is simpler operationally (one scrape config, no push coordination), push is necessary for ephemeral or network-constrained targets.</p>
+<h4>Industrial protocols — Modbus and OPC-UA</h4>
+<p>Modbus (1979) is the most widely deployed industrial protocol. Modbus RTU runs over RS-485 serial (legacy hardware, still common); Modbus TCP runs over Ethernet (modern PLCs). A Modbus device exposes registers at numbered addresses; the master polls them by address. Every energy meter, VFD (Variable Frequency Drive), and PLC from the last 40 years likely speaks Modbus. OPC-UA is the modern replacement: encrypted, authenticated, self-describing (devices publish their own information model), and supports subscriptions (push) rather than polling. Knowing that OPC-UA uses certificates for authentication and can expose complex object hierarchies (not just flat registers) distinguishes it from Modbus for any industrial IoT role.</p>
+<h4>Edge computing and the IoT data pipeline</h4>
+<p>The full IoT pipeline from sensor to dashboard: Device → MQTT broker → Telegraf/Node-RED (transform, filter, enrich) → InfluxDB/TimescaleDB (store) → Grafana (visualise) → Prometheus/Alertmanager (alert). Edge computing moves the transformation step closer to the device — a Raspberry Pi running Node-RED at the factory edge aggregates 100 PLCs locally and sends only summary data to the cloud, reducing bandwidth and adding resilience (local processing continues during internet outages). This architecture pattern — edge gateway aggregating local devices, centralised cloud receiving summaries — is a standard IoT reference architecture asked about in IoT engineering and cloud architecture interviews.</p>
+<h2>EMQX (High-Scale MQTT Broker)</h2>
+<p><strong>Purpose:</strong> Enterprise-grade MQTT 5.0 broker. Handles millions of concurrent connections, supports cluster mode, has a built-in SQL rule engine for message routing and transformation, and a web dashboard for managing clients, subscriptions, and rules. Use EMQX when Mosquitto's single-process model becomes a bottleneck or when you need the rule engine.</p>
+<pre><code class="language-yaml"># ~/emqx/compose.yaml
+services:
+  emqx:
+    image: emqx/emqx:5
+    ports:
+      - 127.0.0.1:1883:1883
+      - 127.0.0.1:8083:8083
+      - 127.0.0.1:8084:8084
+      - 127.0.0.1:8883:8883
+      - 127.0.0.1:18083:18083
+    volumes:
+      - /home/user/emqx/data:/opt/emqx/data:Z
+      - /home/user/emqx/log:/opt/emqx/log:Z
+    environment:
+      EMQX_NODE__NAME: emqx@127.0.0.1
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/emqx &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p><strong>Dashboard:</strong> <code>http://localhost:18083</code> — default login <code>admin</code> / <code>public</code> (change immediately).</p></blockquote>
+<h5>EMQX Rule Engine example</h5>
+<p>— route sensor messages to InfluxDB:</p>
+<pre><code class="language-sql">-- In the EMQX dashboard → Rules → Create
+SELECT
+  payload.temperature AS temperature,
+  payload.humidity AS humidity,
+  payload.device_id AS device
+FROM &quot;home/+/sensors&quot;</code></pre>
+<p>Then add an InfluxDB action to write the matched fields as a measurement.</p>
+<h4>Time-series data retention and downsampling</h4>
+<p>Raw sensor data (1-second resolution) grows quickly — 100 sensors at 1s intervals produces 8.6M data points per day. InfluxDB's retention policies and continuous queries (or TimescaleDB's <code>time_bucket</code> + materialized views) automatically aggregate old data: keep 30 days at 1s, 1 year at 1m, forever at 1h. This keeps storage bounded without losing long-term trends. Grafana displays all resolutions seamlessly via variable time ranges.</p>
+<h4>Device security and firmware management</h4>
+<p>IoT devices are frequently the weakest security link: default credentials, no TLS, no update mechanism. Minimum viable security: (1) VLAN-isolate IoT devices from your main network — they can only reach the MQTT broker, not the internet or other LAN hosts; (2) use unique credentials per device (ESPHome generates device-specific API keys); (3) disable cloud callbacks where possible (Tuya local mode, WLED); (4) OTA firmware updates should be signed — ESPHome supports MD5 hash verification; (5) expose no IoT device management interface to the internet.</p>
+<h4>MQTT topic design patterns</h4>
+<p>A well-designed topic hierarchy makes routing, filtering, and ACLs straightforward. Convention: <code>location/device-type/device-id/measurement</code>. Example: <code>home/sensor/bedroom-1/temperature</code>. Wildcard subscriptions: <code>home/sensor/+/temperature</code> subscribes to all temperature readings; <code>home/#</code> subscribes to everything. Design topics with routing in mind — the broker's ACL system grants/denies access per topic prefix. Avoid putting sensitive data (user IDs, exact location) in topic names since they're visible in broker logs.</p>
+<h4>Edge vs cloud processing — when to compute locally</h4>
+<p>Processing at the edge (ESPHome doing threshold detection, Node-RED doing aggregation) reduces bandwidth, adds resilience (automation works during internet outage), and improves latency (local decisions in <10ms vs 100ms+ cloud roundtrip). Rule of thumb: decisions that affect physical actuators (lights, locks, HVAC) should run locally. Archival, analytics, and ML inference can run in the cloud or on a home server. The hybrid model — local for control, server for analytics — is the production pattern for serious home automation setups.</p>
+<p>---</p>
+<h2>Telegraf (Universal Metrics Collector)</h2>
+<p><strong>Purpose:</strong> Plugin-based metrics agent from InfluxData. Collects from 300+ input sources — MQTT topics, SNMP, Modbus, OPC-UA, system metrics, Docker stats, database queries, REST APIs, JVM, and more — and writes to 50+ output destinations including InfluxDB, Prometheus, TimescaleDB, and Kafka. The Swiss Army knife of metrics collection.</p>
+<pre><code class="language-yaml"># ~/telegraf/compose.yaml
+services:
+  telegraf:
+    image: telegraf:latest
+    network_mode: host
+    volumes:
+      - /home/user/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro,Z
+      - /run/user/${UID}/podman/podman.sock:/var/run/docker.sock:ro
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/telegraf &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Test config and show what would be collected
+podman exec telegraf telegraf --config /etc/telegraf/telegraf.conf --test
+
+# Validate config
+podman exec telegraf telegraf --config /etc/telegraf/telegraf.conf --config-directory /etc/telegraf/telegraf.d --test --input-filter cpu
+
+# View logs
+podman logs -f telegraf
+
+# List available input plugins
+podman exec telegraf telegraf --input-list
+
+# List available output plugins
+podman exec telegraf telegraf --output-list
+
+# Reload config (restart container)
+podman restart telegraf</code></pre>
+<h5>Example <code>telegraf.conf</code> — MQTT → InfluxDB pipeline</h5>
+<pre><code class="language-toml">[agent]
+  interval = &quot;10s&quot;
+  flush_interval = &quot;10s&quot;
+
+# Read from MQTT topics
+[[inputs.mqtt_consumer]]
+  servers = [&quot;tcp://localhost:1883&quot;]
+  topics = [&quot;home/#&quot;]
+  username = &quot;iot_user&quot;
+  password = &quot;yourpassword&quot;
+  data_format = &quot;json&quot;
+  json_time_key = &quot;timestamp&quot;
+  json_time_format = &quot;unix&quot;
+
+# System metrics
+[[inputs.cpu]]
+  percpu = true
+[[inputs.mem]]
+[[inputs.disk]]
+  ignore_fs = [&quot;tmpfs&quot;, &quot;devtmpfs&quot;]
+[[inputs.net]]
+
+# Podman container stats (uses Podman socket mounted above)
+[[inputs.docker]]
+  endpoint = &quot;unix:///var/run/docker.sock&quot;
+
+# Write to InfluxDB
+[[outputs.influxdb_v2]]
+  urls = [&quot;http://localhost:8086&quot;]
+  token = &quot;your-influxdb-token&quot;
+  organization = &quot;home&quot;
+  bucket = &quot;iot&quot;
+
+# Also write to Prometheus for Grafana
+[[outputs.prometheus_client]]
+  listen = &quot;:9273&quot;</code></pre>
+<p>---</p>
+<h2>Prometheus + Alertmanager (Pull-Based Metrics)</h2>
+<p><strong>Purpose:</strong> Pull-based metrics system. Prometheus scrapes HTTP <code>/metrics</code> endpoints on a schedule, stores the time-series data, and evaluates alerting rules. Alertmanager routes firing alerts to Slack, email, PagerDuty, ntfy, and more.</p>
+<pre><code class="language-yaml"># ~/prometheus/compose.yaml
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - 127.0.0.1:9090:9090
+    volumes:
+      - /home/user/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro,Z
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+  alertmanager:
+    image: prom/alertmanager:latest
+    ports:
+      - 127.0.0.1:9093:9093
+    volumes:
+      - /home/user/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro,Z
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:</code></pre>
+<pre><code class="language-bash">cd ~/prometheus &amp;&amp; podman-compose up -d</code></pre>
+<h5>Example <code>prometheus.yml</code> with IoT scrape targets</h5>
+<pre><code class="language-yaml">global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
+scrape_configs:
+  - job_name: node
+    static_configs:
+      - targets: ['host.containers.internal:9100']
+
+  - job_name: telegraf
+    static_configs:
+      - targets: ['host.containers.internal:9273']
+
+  - job_name: mqtt_exporter
+    static_configs:
+      - targets: ['host.containers.internal:9234']</code></pre>
+<h5>Example alert rules (<code>alerts.yml</code>)</h5>
+<pre><code class="language-yaml">groups:
+  - name: iot
+    rules:
+      - alert: HighTemperature
+        expr: mqtt_sensor_temperature &gt; 35
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: &quot;High temperature in {{ $labels.room }}&quot;
+          description: &quot;Temperature is {{ $value }}°C&quot;
+
+      - alert: SensorOffline
+        expr: time() - mqtt_sensor_last_seen &gt; 300
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: &quot;Sensor {{ $labels.device }} offline&quot;</code></pre>
+<h4>Route alerts to ntfy via Alertmanager</h4>
+<pre><code class="language-yaml"># alertmanager.yml
+route:
+  receiver: ntfy
+
+receivers:
+  - name: ntfy
+    webhook_configs:
+      - url: http://localhost:8090/your-topic
+        send_resolved: true</code></pre>
+<p>---</p>
+<h2>MQTT Exporter for Prometheus</h2>
+<p><strong>Purpose:</strong> Bridges MQTT topics to Prometheus metrics. Subscribes to configured MQTT topics and exposes values as Prometheus gauge/counter metrics — lets Prometheus scrape data from any MQTT-publishing device.</p>
+<pre><code class="language-yaml"># ~/mqtt-exporter/compose.yaml
+services:
+  mqtt-exporter:
+    image: ghcr.io/hikhvar/mqtt2prometheus:latest
+    ports:
+      - 127.0.0.1:9234:9234
+    volumes:
+      - /home/user/mqtt-exporter/config.yml:/config.yml:ro,Z
+    command: -config /config.yml
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/mqtt-exporter &amp;&amp; podman-compose up -d</code></pre>
+<h5>Example <code>config.yml</code></h5>
+<pre><code class="language-yaml">mqtt:
+  server: tcp://localhost:1883
+  user: iot_user
+  password: yourpassword
+  topic_path: home/+/+
+  device_id_regex: &quot;home/(?P&lt;device&gt;[^/]+)/.+&quot;
+  qos: 0
+cache:
+  timeout: 600s
+json_parsing:
+  separator: &quot;.&quot;
+metrics:
+  - prom_name: temperature
+    mqtt_name: temperature
+    help: Temperature in Celsius
+    type: gauge
+  - prom_name: humidity
+    mqtt_name: humidity
+    help: Relative humidity percent
+    type: gauge
+  - prom_name: battery_level
+    mqtt_name: battery
+    help: Battery level percent
+    type: gauge</code></pre>
+<p>---</p>
+<h2>Industrial Protocols: Modbus & OPC-UA</h2>
+<h3>Modbus (Industry standard RS-485/TCP)</h3>
+<p>Modbus is the most widely used industrial protocol — PLCs, VFDs, energy meters, and sensors have spoken it for 40 years. Node-RED's Modbus palette handles both RTU (serial) and TCP variants.</p>
+<pre><code class="language-yaml"># ~/modbus-mqtt/compose.yaml
+services:
+  modbus-mqtt:
+    image: ghcr.io/cloud-solutions-group/modbus-mqtt-bridge:latest
+    volumes:
+      - /home/user/modbus-mqtt/config.json:/app/config.json:ro,Z
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/modbus-mqtt &amp;&amp; podman-compose up -d</code></pre>
+<h5>Example Modbus config (reading an energy meter)</h5>
+<pre><code class="language-json">{
+  &quot;mqtt&quot;: {
+    &quot;host&quot;: &quot;localhost&quot;,
+    &quot;port&quot;: 1883,
+    &quot;username&quot;: &quot;iot_user&quot;,
+    &quot;password&quot;: &quot;yourpassword&quot;
+  },
+  &quot;modbus&quot;: {
+    &quot;host&quot;: &quot;192.168.1.100&quot;,
+    &quot;port&quot;: 502,
+    &quot;unitId&quot;: 1
+  },
+  &quot;registers&quot;: [
+    {&quot;address&quot;: 0, &quot;name&quot;: &quot;voltage&quot;, &quot;topic&quot;: &quot;factory/panel1/voltage&quot;, &quot;scale&quot;: 0.1},
+    {&quot;address&quot;: 1, &quot;name&quot;: &quot;current&quot;, &quot;topic&quot;: &quot;factory/panel1/current&quot;, &quot;scale&quot;: 0.01},
+    {&quot;address&quot;: 2, &quot;name&quot;: &quot;power&quot;, &quot;topic&quot;: &quot;factory/panel1/power&quot;, &quot;scale&quot;: 1}
+  ],
+  &quot;pollInterval&quot;: 5000
+}</code></pre>
+<h3>OPC-UA (Modern industrial standard)</h3>
+<p>OPC-UA is the modern, secure replacement for OPC Classic. Supported by Siemens, Rockwell, Beckhoff, and most modern PLCs and SCADA systems.</p>
+<pre><code class="language-yaml"># ~/opcua-mqtt/compose.yaml
+services:
+  opcua-mqtt:
+    image: ghcr.io/united-manufacturing-hub/opcua-simulator:latest
+    volumes:
+      - /home/user/opcua-mqtt/config.yaml:/app/config.yaml:ro,Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/opcua-mqtt &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>Typical IoT Stack Architecture</h2>
+<pre><code>Physical Sensors / ESP32 / Shelly / Tasmota
+           │ MQTT publish
+           ▼
+     Mosquitto / EMQX          ← MQTT broker
+           │
+    ┌──────┴──────┐
+    ▼             ▼
+ Node-RED      Telegraf         ← Pipeline / collector
+    │             │
+    ▼             ▼
+ InfluxDB    TimescaleDB        ← Time-series storage
+    │             │
+    └──────┬──────┘
+           ▼
+        Grafana                 ← Dashboards
+           │
+    Prometheus / Alertmanager   ← Alerting
+           │
+         ntfy                   ← Push notifications</code></pre>
+<p>---</p>
+<h2>OwnTracks (Private Location Tracking)</h2>
+<p><strong>Purpose:</strong> Self-hosted location sharing platform. The OwnTracks app (iOS and Android) publishes your GPS location to your own MQTT broker or HTTP endpoint — nobody else's server sees your location. Use it to track your own device over time, share location with family members privately, or trigger Home Assistant automations when you arrive home. A privacy-respecting replacement for Google Maps Timeline or Life360.</p>
+<pre><code class="language-yaml"># ~/owntracks-recorder/compose.yaml
+services:
+  owntracks-recorder:
+    image: owntracks/recorder:latest
+    ports:
+      - 127.0.0.1:8086:8083
+      - 127.0.0.1:8087:8084
+    volumes:
+      - /home/user/owntracks/store:/store:Z
+    environment:
+      OTR_HOST: host.containers.internal
+      OTR_PORT: 1883
+      OTR_USER: iot_user
+      OTR_PASS: yourpassword
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/owntracks-recorder &amp;&amp; podman-compose up -d</code></pre>
+<p>Access the web frontend at <code>http://localhost:8086</code>. OwnTracks Recorder connects to your Mosquitto broker and stores location history in a flat-file database.</p>
+<h4>OwnTracks Frontend (map UI)</h4>
+<pre><code class="language-yaml"># ~/owntracks-frontend/compose.yaml
+services:
+  owntracks-frontend:
+    image: owntracks/frontend:latest
+    ports:
+      - 127.0.0.1:8085:80
+    environment:
+      SERVER_HOST: host.containers.internal
+      SERVER_PORT: 8086
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/owntracks-frontend &amp;&amp; podman-compose up -d</code></pre>
+<p><strong>App configuration (iOS/Android):</strong></p>
+<ul>
+<li>Mode: HTTP</li>
+<li>Host: <code>https://owntracks.home.local</code></li>
+<li>Port: 443</li>
+<li>Username: your-name</li>
+<li>Device ID: phone</li>
+</ul>
+<h5>Integrate with Home Assistant</h5>
+<pre><code class="language-yaml"># configuration.yaml — add the OwnTracks integration
+device_tracker:
+  - platform: owntracks_http</code></pre>
+<p>Or use the built-in Home Assistant OwnTracks integration (Settings → Integrations → OwnTracks) which handles the HTTP endpoint automatically.</p>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">owntracks.home.local { tls internal; reverse_proxy localhost:8086 }</code></pre>
+<p>---</p>
+<h2>Caddy Configuration</h2>
+<pre><code class="language-caddyfile">nodered.home.local    { tls internal; reverse_proxy localhost:1880 }
+grafana.home.local    { tls internal; reverse_proxy localhost:3001 }
+prometheus.home.local { tls internal; reverse_proxy localhost:9090 }
+alerts.home.local     { tls internal; reverse_proxy localhost:9093 }
+emqx.home.local       { tls internal; reverse_proxy localhost:18083 }
+owntracks.home.local  { tls internal; reverse_proxy localhost:8086 }</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | MQTT broker connection refused | Check <code>podman logs mosquitto</code>; verify port <code>1883</code> is not blocked by firewalld; confirm credentials in the config match | | Sensors publishing but data not reaching InfluxDB | Add a Node-RED debug node after the MQTT input to inspect payloads; check field names match what Telegraf/InfluxDB expects | | Telegraf not writing to InfluxDB | Verify the token has write access to the bucket; check <code>podman logs telegraf</code> for <code>connection refused</code> or auth errors | | Grafana showing no data | Confirm the datasource URL uses <code>host.containers.internal</code>; check InfluxDB bucket and org names match exactly | | Modbus device not responding | Check unit ID (slave address) matches the device; verify TCP port <code>502</code> is reachable; for RTU, check baud rate and parity settings | | OPC-UA authentication error | Verify the server certificate is trusted; some PLCs require client certificate authentication — generate one with Step-CA | | Prometheus scrape failing | Confirm the target endpoint responds at <code>/metrics</code> with a 200; check that the port is bound and reachable from the Prometheus container | | Alertmanager not sending alerts | Verify the receiver config syntax; test with <code>amtool alert add</code> and check logs with <code>podman logs alertmanager</code> | | EMQX dashboard inaccessible | Ensure port <code>18083</code> is bound to <code>127.0.0.1</code>; default credentials are <code>admin</code> / <code>public</code> — change them immediately | | Beszel agent not reporting | Verify the public key from the hub is correctly pasted into the agent; check that port <code>45876</code> is reachable from the hub | | OwnTracks app not reporting location | Verify the HTTP endpoint URL is correct in the app; check <code>podman logs owntracks-recorder</code> for connection errors; ensure Caddy is forwarding to port <code>8086</code> |</p>
+<blockquote><p>💡 <strong>Tip:</strong> For sensor devices with unreliable Wi-Fi, set MQTT QoS to 1 (at least once) and enable <code>persistence true</code> in Mosquitto. Messages published when the broker is temporarily unreachable will be delivered when reconnected.</p></blockquote></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

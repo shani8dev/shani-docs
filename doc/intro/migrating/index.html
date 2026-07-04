@@ -146,7 +146,162 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Migrating from Traditional Linux</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Introduction</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-19</span>
+        </div>
+      </div>
+      <div class="prose"><p>If you're coming from Ubuntu, Fedora, Arch, or any mutable Linux distro, the main adjustment is how you install software and make system-level changes. Everything else — your dotfiles, shell, <code>/etc</code> configs, and all files under <code>/home</code> — works exactly as you'd expect.</p>
+<h2>The Mental Model Shift</h2>
+<p>On a traditional Linux distribution, software installation means writing files into the OS root. The package manager is the single source of truth for what is installed.</p>
+<p>On Shanios, the OS root is frozen — a verified, signed image. You do not write into it because doing so would undermine the reliability guarantee: if you can add arbitrary packages to the OS, the OS is no longer the reproducible artefact that the update pipeline verified.</p>
+<p>Instead, persistent layers sit alongside the OS, each in its own Btrfs subvolume:</p>
+<ul>
+<li><strong><code>@flatpak</code></strong> — GUI desktop applications (browsers, office, media, etc.) — your new <code>apt install</code> / <code>pacman -S</code> for GUI apps. Flathub is pre-configured from day one.</li>
+<li><strong><code>@snapd</code></strong> — Snap packages, pre-configured as a fallback for apps not on Flathub.</li>
+<li><strong><code>@nix</code></strong> — CLI tools, development runtimes, and language toolchains with pinned versions and zero conflicts. Shared across both OS slots — installed Nix packages survive updates and rollbacks.</li>
+<li><strong><code>@containers</code></strong> — Distrobox and Podman OCI containers. Distrobox is your escape hatch: a full mutable Linux container (Ubuntu, Fedora, Arch — your choice) with seamless desktop integration.</li>
+<li><strong><code>@machines</code></strong> — systemd-nspawn system containers.</li>
+<li><strong><code>@lxc</code></strong> / <strong><code>@lxd</code></strong> — LXC/LXD full system containers.</li>
+<li><strong><code>@libvirt</code></strong> / <strong><code>@qemu</code></strong> — Virtual machine disk images.</li>
+<li><strong><code>@waydroid</code></strong> — Android environment.</li>
+</ul>
+<p>All of these survive every OS update and rollback. They are never touched by <code>shani-deploy</code>. They have their own update paths and do not conflict with each other.</p>
+<p><strong>Dotfiles work normally.</strong> Everything in <code>/home</code> is fully writable. Your <code>~/.zshrc</code>, <code>~/.config/</code>, <code>~/.local/</code> — untouched by the OS, ever. The immutability applies only to the OS itself, not your user space.</p>
+<h2>Workflow Translation Table</h2>
+<h3>GUI Applications</h3>
+<p>| Traditional | Shanios | |---|---| | <code>sudo apt install firefox</code> | <code>flatpak install flathub org.mozilla.firefox</code> | | <code>sudo dnf install gimp</code> | <code>flatpak install flathub org.gimp.GIMP</code> | | <code>sudo pacman -S vlc</code> | <code>flatpak install flathub org.videolan.VLC</code> | | <code>yay -S spotify</code> | <code>flatpak install flathub com.spotify.Client</code> | | <code>sudo apt install code</code> | <code>flatpak install flathub com.visualstudio.code</code> |</p>
+<p>Search for the Flatpak app ID at <a href="https://flathub.org">flathub.org</a> or via <code>flatpak search &lt;name&gt;</code>. If an app is only available on the Snap Store, <code>snap install &lt;name&gt;</code> works as a fallback.</p>
+<h3>CLI Tools and Development Runtimes</h3>
+<p>| Traditional | Shanios | |---|---| | <code>sudo apt install nodejs</code> | <code>nix-env -iA nixpkgs.nodejs</code> | | <code>sudo pacman -S python</code> | <code>nix-env -iA nixpkgs.python312</code> | | <code>sudo dnf install rustup</code> | <code>nix-env -iA nixpkgs.rustup</code> | | <code>sudo apt install ripgrep</code> | <code>nix-env -iA nixpkgs.ripgrep</code> | | <code>sudo pacman -S kubectl</code> | <code>nix-env -iA nixpkgs.kubectl</code> | | <code>brew install bat</code> | <code>nix-env -iA nixpkgs.bat</code> | | <code>sudo apt install golang</code> | <code>nix-env -iA nixpkgs.go</code> | | <code>sudo pacman -S neovim</code> | <code>nix-env -iA nixpkgs.neovim</code> | | <code>sudo pip install</code> globally | <code>pip install --user</code>, or <code>nix-env -iA nixpkgs.python3Packages.foo</code>, or Distrobox | | <code>sudo npm install -g</code> | <code>nix-env -iA nixpkgs.nodejs</code>, or <code>npm install -g</code> inside Distrobox | | <code>make install</code> to system paths | Build and install inside Distrobox; export with <code>distrobox-export --bin</code> |</p>
+<p>Add a Nix channel before installing packages (one-time setup):</p>
+<pre><code class="language-bash">nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
+nix-channel --update</code></pre>
+<p>Then install anything from the 100,000+ packages at <a href="https://search.nixos.org/packages">search.nixos.org</a>:</p>
+<pre><code class="language-bash">nix-env -iA nixpkgs.package-name</code></pre>
+<h3>Windows Applications</h3>
+<p>Windows <code>.exe</code> software runs through Wine — no Windows licence required, no VM overhead for most apps.</p>
+<p>| Traditional | Shanios | |---|---| | Run a Windows <code>.exe</code> installer | Open with Bottles — creates an isolated Wine environment | | Install a Windows productivity tool | Bottles → Create bottle → Run Executable | | Run legacy Windows software | Bottles with Wine Staging or Wine-GE runner | | <code>apt install wine</code> / <code>pacman -S wine</code> | Bottles (pre-installed on KDE) or Flatpak Wine | | Windows game (non-Steam) | Bottles with Wine-GE, or Heroic Games Launcher |</p>
+<p><strong>Bottles</strong> (<code>com.usebottles.bottles</code>) is pre-installed on KDE Plasma and available on Flathub for the GNOME edition. For applications requiring a real Windows kernel (hardware drivers, anti-cheat, enterprise software with kernel-level components), use a Windows VM via virt-manager (pre-installed on KDE Plasma) or GNOME Boxes.</p>
+<p>For portable AppImage tools: download the <code>.AppImage</code>, make it executable, and run — or open with <strong>Gear Lever</strong> (pre-installed) to add it permanently to your launcher with automatic update checking.</p>
+<h3>System Updates</h3>
+<p>| Traditional | Shanios | |---|---| | <code>sudo apt upgrade</code> | <code>sudo shani-deploy</code> | | <code>sudo pacman -Syu</code> | <code>sudo shani-deploy</code> | | <code>sudo dnf upgrade</code> | <code>sudo shani-deploy</code> | | Reboot to apply kernel | Reboot after <code>shani-deploy</code> | | Roll back to previous packages | <code>sudo shani-deploy -r</code> (entire OS, instant) |</p>
+<p><code>shani-deploy</code> replaces the entire OS image — there is no partial update state. If the new image causes problems, rollback returns you to the previous complete OS state instantly.</p>
+<h3>Containers and VMs</h3>
+<p>| Traditional | Shanios | |---|---| | <code>docker run</code> | <code>podman run</code> (rootless, drop-in compatible) | | System-level service with <code>apt install</code> | <code>podman run</code> for containerised services; Distrobox for binaries | | VM with VirtualBox / VMware | virt-manager + KVM (pre-installed on KDE); GNOME Boxes on GNOME | | AUR helpers (<code>yay</code>, <code>paru</code>) | Distrobox with an Arch container — full AUR access inside |</p>
+<h3>System-Level Software (Not Available on Host)</h3>
+<p>| Traditional | Shanios Alternative | |---|---| | <code>sudo pacman -S foo</code> to the live root | Flatpak, Nix, Distrobox, Snap | | Modify <code>/usr</code>, <code>/bin</code>, <code>/lib</code> at runtime | <code>/etc</code> overlay for config; Distrobox for binaries | | <code>sudo pacman -S nvidia</code> | Drivers are part of the OS image; already configured at install | | Kernel modules via DKMS | Custom modules are not supported; use upstream drivers | | <code>sudo apt install docker</code> | Use Podman (pre-installed, Docker-compatible) | | <code>sudo pip install</code> globally | Would be overwritten on next update — use <code>pip install --user</code> or <code>nix-env</code> | | <code>make install</code> to system directories | Read-only at runtime — build and export from Distrobox | | Install software requiring out-of-tree kernel modules | Module must be in the shipped image — open a request; use DKMS in a container in the interim | | Third-party APT repos / PPAs | Use inside a Distrobox Ubuntu container |</p>
+<h2>What Is Exactly the Same</h2>
+<ul>
+<li>Editing <code>/etc/hostname</code>, <code>/etc/hosts</code>, <code>/etc/fstab</code>, <code>/etc/ssh/sshd_config</code>, etc. — all normal; changes persist via OverlayFS</li>
+<li><code>sudo systemctl enable/disable/start/stop</code> — works as expected, changes persist</li>
+<li><code>~/.bashrc</code>, <code>~/.zshrc</code>, <code>~/.config/</code> — untouched by the OS, ever</li>
+<li>Cron jobs, user timers — stored in <code>@data</code>, survive updates</li>
+<li><code>/home</code> in all its detail — completely independent of the OS slots</li>
+<li>Printer setup, Bluetooth pairing, NetworkManager connections — all persisted in <code>@data/varlib/</code></li>
+<li>SSH, GPG keys, and credential management (stored in <code>~/.ssh</code> and <code>~/.gnupg</code>)</li>
+<li>Docker Compose workflows — use <code>podman compose</code> or <code>podman-docker</code> drop-in</li>
+<li>Git repositories and configuration</li>
+<li>Python virtual environments in <code>~/.venv</code> or project directories</li>
+<li>Node projects in <code>~/projects</code> with <code>node_modules</code></li>
+<li>Dotfiles managed by <code>stow</code>, <code>chezmoi</code>, or a bare git repo</li>
+</ul>
+<h2>Filesystem Layout</h2>
+<p>| Directory | Behaviour | |---|---| | <code>/home</code> | Fully writable, stored in <code>@home</code> — unchanged from any Linux distro | | <code>/etc</code> | Writable via OverlayFS — your changes persist | | <code>/tmp</code> | Writable tmpfs — cleared on reboot as usual | | <code>/usr</code> | <strong>Read-only</strong> — OS files live here, you cannot modify them | | <code>/bin</code>, <code>/lib</code>, <code>/sbin</code> | Symlinks into <code>/usr</code> — effectively read-only | | <code>/var</code> | tmpfs — cleared on reboot; persistent state bind-mounted from <code>@data</code> | | <code>/nix</code> | Writable by Nix — your Nix packages live here (<code>@nix</code>) | | <code>/var/lib/flatpak</code> | Flatpak apps — writable via <code>@flatpak</code> | | <code>/var/lib/snapd</code> | Snap packages — writable via <code>@snapd</code> | | <code>/var/lib/containers</code> | Distrobox and Podman containers — writable via <code>@containers</code> | | <code>/var/lib/machines</code> | systemd-nspawn system containers — writable via <code>@machines</code> | | <code>/var/lib/lxd</code> | LXD containers — writable via <code>@lxd</code> | | <code>/var/lib/libvirt</code> | VM disk images — writable via <code>@libvirt</code> | | <code>/var/lib/waydroid</code> | Android environment — writable via <code>@waydroid</code> |</p>
+<p>The read-only nature of <code>/usr</code> is the main thing to internalise. Anything that tries to write to <code>/usr/local/bin</code> or install files into <code>/usr/share</code> will fail. Use Nix, Flatpak, Snap, or Distrobox instead.</p>
+<p>To see what you have customised (what differs from the OS defaults):</p>
+<pre><code class="language-bash">ls /data/overlay/etc/upper/</code></pre>
+<p>To revert a specific <code>/etc</code> file to the OS default:</p>
+<pre><code class="language-bash">sudo rm /data/overlay/etc/upper/path/to/file
+# The OS default (lower OverlayFS layer) becomes active again</code></pre>
+<h2>Installing a Development Environment</h2>
+<p>A typical developer setup on Shanios:</p>
+<pre><code class="language-bash"># CLI tools via Nix — no root, no conflicts, pinned versions
+nix-env -i git nodejs rustup python312 ripgrep fd bat
+
+# Create an Arch Distrobox for AUR and pacman access
+distrobox create --name arch-dev --image archlinux:latest
+distrobox enter arch-dev
+# Inside: full pacman + yay + AUR, home dir shared with host
+
+# Export a binary from the container to the host launcher
+distrobox-export --bin /usr/bin/some-tool
+
+# Containerised database via Podman
+podman run -d -p 5432:5432 -e POSTGRES_PASSWORD=secret postgres:16
+
+# IDE as Flatpak
+flatpak install flathub com.visualstudio.code</code></pre>
+<p>BoxBuddy (pre-installed) gives you a graphical interface for creating and entering Distrobox containers.</p>
+<h2>Development Workflows</h2>
+<h3>Multiple Versions of the Same Tool</h3>
+<p>Nix installs multiple versions of the same tool simultaneously without conflict:</p>
+<pre><code class="language-bash"># Install both versions simultaneously — no conflict
+nix-env -iA nixpkgs.nodejs_18
+nix-env -iA nixpkgs.nodejs_22
+
+# Per-project shell with a specific version (does not install globally)
+nix-shell -p nodejs_18  # enters a shell with Node 18 on PATH
+nix-shell -p nodejs_22  # separate shell with Node 22
+
+# Reproducible project environment via shell.nix
+# Place in project root — everyone running nix-shell gets identical tools</code></pre>
+<h3>Full System Containers (LXC/LXD and systemd-nspawn)</h3>
+<p>For workflows that need a complete isolated Linux system — with its own init, services, and network stack — two options are pre-installed:</p>
+<p><strong>LXC/LXD</strong> offers a built-in image catalog, port forwarding, and snapshot management. Container storage lives in <code>@lxc</code>/<code>@lxd</code>:</p>
+<pre><code class="language-bash">lxc launch ubuntu:24.04 myserver
+lxc exec myserver -- bash</code></pre>
+<p><strong>systemd-nspawn</strong> is the lightest option — no daemon, just point it at a Linux root directory and it boots. Container filesystems live in <code>@machines</code>:</p>
+<pre><code class="language-bash">sudo machinectl pull-tar --verify=no \
+  https://geo.mirror.pkgbuild.com/images/latest/Arch-Linux-x86_64-basic.tar.zst archlinux
+sudo machinectl start archlinux
+sudo machinectl login archlinux</code></pre>
+<h3>Android Apps (Waydroid)</h3>
+<p>Waydroid runs a full hardware-accelerated Android stack in a container. The <code>@waydroid</code> subvolume persists across every OS update:</p>
+<pre><code class="language-bash">sudo waydroid init    # one-time setup
+waydroid session start
+waydroid show-full-ui
+waydroid app install myapp.apk    # test your APK</code></pre>
+<h2>Shell and Terminal</h2>
+<p>The shell environment is configured out of the box:</p>
+<pre><code class="language-bash">echo $SHELL         # /usr/bin/zsh
+which starship      # prompt
+which fzf           # fuzzy finder
+which eza           # modern ls replacement
+# McFly for smart command history (Ctrl+R replacement) — already integrated</code></pre>
+<h2>Backup and Data Management</h2>
+<pre><code class="language-bash"># restic is pre-installed — encrypted, versioned backups
+restic -r s3:s3.amazonaws.com/mybucket init
+restic -r s3:s3.amazonaws.com/mybucket backup ~/Documents ~/Projects ~/Pictures
+
+# rclone is pre-installed — sync to cloud storage
+rclone config  # set up Google Drive, S3, Backblaze, etc.
+rclone sync ~/Documents gdrive:Backup/Documents</code></pre>
+<p>Both <code>restic</code> and <code>rclone</code> configurations persist in <code>/data/varlib/</code> and survive OS updates.</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="../concepts/immutability">Immutability</a> — what you can and cannot do and why</li>
+<li><a href="../concepts/persistence">Persistence Strategy</a> — what survives updates and rollbacks</li>
+<li><a href="getting-started">Getting Started</a> — full setup walkthrough</li>
+<li><a href="https://docs.shani.dev/doc/software/nix">docs.shani.dev — Nix</a></li>
+<li><a href="https://docs.shani.dev/doc/software/flatpak">docs.shani.dev — Flatpak</a></li>
+<li><a href="https://docs.shani.dev/doc/software/distrobox">docs.shani.dev — Distrobox</a></li>
+<li><a href="https://docs.shani.dev/doc/software/containers">docs.shani.dev — Containers</a></li>
+<li><a href="https://docs.shani.dev/doc/software/waydroid">docs.shani.dev — Android (Waydroid)</a></li>
+<li><a href="https://docs.shani.dev/doc/software/appimage">docs.shani.dev — AppImage</a></li>
+<li><a href="https://docs.shani.dev/doc/software/snaps">docs.shani.dev — Snaps</a></li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

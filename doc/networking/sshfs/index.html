@@ -146,7 +146,74 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">SSHFS</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-18</span>
+        </div>
+      </div>
+      <div class="prose"><h1>SSHFS — Mount Remote Directories over SSH</h1>
+<p>SSHFS mounts any directory from an SSH-accessible machine as a local folder using FUSE. It requires only an SSH server on the remote — no special server-side software or configuration is needed beyond a working SSH connection. SSHFS is pre-installed on Shani OS.</p>
+<p>See the <a href="https://docs.shani.dev/doc/networking/openssh">OpenSSH wiki page</a> for SSH setup, key generation, and the <code>~/.ssh/config</code> shortcuts used in the examples below.</p>
+<p>---</p>
+<h2>Mounting</h2>
+<pre><code class="language-bash"># Mount a remote directory
+sshfs user@hostname:/home/user/projects ~/mnt/remote-projects
+
+# Use a non-standard SSH port
+sshfs -p 2222 user@hostname:/data ~/mnt/server
+
+# Mount with reconnect and keepalive (survives brief network drops)
+sshfs user@hostname:/data ~/mnt/server \
+  -o reconnect,ServerAliveInterval=15,ServerAliveCountMax=3
+
+# Use an SSH config alias (from ~/.ssh/config)
+sshfs shanios:/home/youruser ~/mnt/shanios
+
+# Unmount
+fusermount -u ~/mnt/remote-projects</code></pre>
+<p>---</p>
+<h2>Useful Mount Options</h2>
+<p>Pass options with <code>-o option1,option2</code>:</p>
+<p>| Option | Effect | |--------|--------| | <code>reconnect</code> | Automatically reconnect if the connection drops | | <code>ServerAliveInterval=15</code> | Send a keepalive every 15 seconds | | <code>ServerAliveCountMax=3</code> | Disconnect after 3 unanswered keepalives | | <code>follow_symlinks</code> | Follow symlinks on the remote (disabled by default for safety) | | <code>cache=yes</code> | Enable attribute caching (faster, but stale if files change externally) | | <code>uid=1000,gid=1000</code> | Map remote files to a specific local UID/GID | | <code>allow_other</code> | Allow other local users to access the mount (requires <code>user_allow_other</code> in <code>/etc/fuse.conf</code>) | | <code>idmap=user</code> | Map remote user to local user by name |</p>
+<p>---</p>
+<h2>Auto-mount at Login (fstab)</h2>
+<p>Add to <code>/etc/fstab</code>:</p>
+<pre><code class="language-text">user@hostname:/home/user/projects  /home/user/mnt/remote  fuse.sshfs  defaults,_netdev,reconnect,uid=1000,gid=1000,IdentityFile=/home/user/.ssh/id_ed25519  0 0</code></pre>
+<p>Apply without rebooting:</p>
+<pre><code class="language-bash">sudo mount -a</code></pre>
+<blockquote><p><strong>Note:</strong> fstab SSHFS mounts require the SSH key to be usable without an interactive passphrase (use <code>ssh-agent</code> or a key without a passphrase for system-level mounts).</p></blockquote>
+<p>---</p>
+<h2>Auto-mount on Access (systemd .mount unit)</h2>
+<p>For mounts that should activate on demand rather than at boot:</p>
+<p>Create <code>~/.config/systemd/user/mnt-remote.mount</code>:</p>
+<pre><code class="language-ini">[Unit]
+Description=SSHFS Mount — Remote Server
+After=network-online.target
+
+[Mount]
+What=user@hostname:/home/user/projects
+Where=/home/user/mnt/remote
+Type=fuse.sshfs
+Options=reconnect,ServerAliveInterval=15,IdentityFile=%h/.ssh/id_ed25519
+
+[Install]
+WantedBy=default.target</code></pre>
+<pre><code class="language-bash">systemctl --user daemon-reload
+systemctl --user enable --now mnt-remote.mount</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>fuse: bad mount point</code> | Create the mount point first: <code>mkdir -p ~/mnt/remote-projects</code> | | <code>Transport endpoint is not connected</code> after network drop | Unmount the stale mount: <code>fusermount -u ~/mnt/remote-projects</code> then remount; use <code>reconnect</code> option to avoid this | | Very slow file listing | Disable host key DNS lookups in <code>~/.ssh/config</code> with <code>UseDNS no</code>; enable attribute caching with <code>-o cache=yes</code> | | <code>Permission denied</code> | Confirm SSH key auth works first: <code>ssh user@hostname</code>; check that the remote path exists and is readable by that user | | Mount disappears after suspend/resume | Use <code>reconnect,ServerAliveInterval=15</code> options; alternatively, use a systemd mount unit with <code>Restart=on-failure</code> |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

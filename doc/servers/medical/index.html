@@ -146,7 +146,362 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Medical &amp; Health</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+        </div>
+      </div>
+      <div class="prose"><p>Self-hosted electronic health records, hospital information systems, FHIR servers, health data aggregation, telemedicine, and personal wellness tracking. Keep sensitive medical data on hardware you own and control.</p>
+<blockquote><p>⚠️ <strong>Compliance note:</strong> If you are deploying these systems for clinical use in a regulated environment, ensure you understand your local requirements — HIPAA (US), GDPR (EU), or equivalent. Self-hosting does not automatically satisfy compliance obligations; it gives you the control needed to meet them. For personal health tracking, no such obligations apply.</p></blockquote>
+<blockquote><p>🔒 <strong>Security requirement:</strong> All services in this section must be accessed over HTTPS. Use Caddy with <code>tls internal</code> for private access or Let's Encrypt for any externally accessible service. Never expose health data over plain HTTP.</p></blockquote>
+<p>---</p>
+<h2>Key Concepts</h2>
+<h4>HL7 FHIR — the healthcare interoperability standard</h4>
+<p>FHIR (Fast Healthcare Interoperability Resources) is the HL7 standard for exchanging healthcare data via REST APIs. Resources are the core concept: Patient, Observation, Condition, MedicationRequest, DiagnosticReport, Immunization, Appointment, and ~145 others, each with a defined JSON/XML schema. A FHIR server stores and retrieves these resources via standard REST operations (<code>GET /Patient/123</code>, <code>POST /Observation</code>). SMART on FHIR adds OAuth2 authentication for patient-facing apps — an app requests scopes (<code>patient/Observation.read</code>) and receives a token authorising access to specific resources for a specific patient. This is the architecture behind Apple Health's medical records import and any patient-portal integration in the US (required by the 21st Century Cures Act).</p>
+<h4>HIPAA, GDPR, and the compliance landscape</h4>
+<p>HIPAA (US) protects Protected Health Information (PHI) — any information that could identify a patient linked to their health condition, care, or payment. The Security Rule requires technical safeguards: access controls, audit logs, encryption at rest and in transit, automatic logoff. The Minimum Necessary standard: systems should request and store only the health data required for the stated purpose. GDPR (EU) treats health data as a "special category" requiring explicit consent and stricter controls. For self-hosted clinical systems, compliance is not automatic — you must implement audit logging, role-based access, encrypted storage, and documented data retention policies. HAPI FHIR and OpenEMR have audit logging built in; enabling and routing those logs is an operational responsibility.</p>
+<h4>Clinical terminologies — SNOMED, LOINC, ICD</h4>
+<p>Structured clinical data requires standardised codes so systems can exchange and interpret data. SNOMED CT (clinical findings, procedures, body structures — 350,000+ concepts), LOINC (laboratory and clinical observations — <code>8310-5</code> = body temperature), ICD-10/11 (diagnoses for billing — <code>J45.20</code> = mild intermittent asthma), CPT (procedures for US billing). OpenMRS's concept dictionary maps local terms to standard codes. FHIR resources carry these codes in <code>coding</code> arrays with <code>system</code> (the terminology URL) and <code>code</code> (the value). Any role building health data integrations requires being able to read a FHIR resource's coded fields and look up the terminology.</p>
+<h4>Health data privacy in practice — de-identification</h4>
+<p>Before using health data for analytics or ML, it must be de-identified. The HIPAA Safe Harbor method removes 18 specific identifiers (name, date of birth, ZIP code, etc.). The Expert Determination method uses statistical analysis to verify re-identification risk below a threshold. K-anonymity ensures each record is indistinguishable from at least K-1 others on quasi-identifiers. Practical implication: even aggregate statistics from a small clinic can re-identify patients — "one patient had condition X this month" in a small town is not de-identified. Tools like ARX perform automated de-identification and k-anonymity analysis. For any role handling health data in research or analytics, understanding the legal and technical distinction between de-identified and pseudonymised data is required.</p>
+<h4>Telemedicine and WebRTC in clinical contexts</h4>
+<p>Telemedicine video consultations use WebRTC (the same protocol as Jitsi Meet) to deliver sub-second latency, encrypted audio/video directly between patient and provider browsers without a plugin. The clinical requirements add complexity: the session must be end-to-end encrypted (no relay server decrypting video), the session recording (if any) must be stored in the patient record with appropriate access controls, and the session must be accessible from hospital-grade firewalls that often block unusual UDP ports (requiring TURN relay fallback). Jitsi Meet's architecture — Videobridge SFU for media routing, Jicofo for focus management, XMPP signalling — is the reference implementation for HIPAA-eligible video calling.</p>
+<h4>EHR integration patterns — HL7 v2 and FHIR side by side</h4>
+<p>Many clinical environments run legacy HL7 v2 messaging alongside modern FHIR. HL7 v2 is a pipe-delimited text format used since the 1980s for ADT (admit/discharge/transfer) messages, lab results (ORU), and orders (ORM). A complete integration engine (Mirth Connect, Rhapsody) translates between v2 and FHIR — extracting fields from a v2 ORM message and creating a FHIR ServiceRequest resource. For health IT engineering roles, being able to read a HL7 v2 message (<code>MSH|^~\&amp;|...</code>), identify the message type from the MSH segment, and map fields to FHIR resources is a differentiating skill that most candidates lack.</p>
+<h2>OpenMRS (Open Medical Records System)</h2>
+<p><strong>Purpose:</strong> The most widely deployed open-source electronic medical records system in the world. Used in thousands of clinics across Africa, Asia, and Latin America. Supports patient registration, visit tracking, observations, orders, diagnoses, and a concept dictionary for customising data capture to any clinical workflow. Highly extensible via a module system.</p>
+<pre><code class="language-yaml"># ~/openmrs/compose.yml
+services:
+  openmrs:
+    image: openmrs/openmrs-reference-application-3-backend:latest
+    ports: [&quot;127.0.0.1:8080:8080&quot;]
+    environment:
+      OMRS_CONFIG_MODULE_WEB_ADMIN: &quot;true&quot;
+      OMRS_CONFIG_AUTO_UPDATE_DATABASE: &quot;true&quot;
+      OMRS_CONFIG_CONNECTION_SERVER: db
+      OMRS_CONFIG_CONNECTION_DATABASE: openmrs
+      OMRS_CONFIG_CONNECTION_USERNAME: openmrs
+      OMRS_CONFIG_CONNECTION_PASSWORD: changeme
+      OMRS_CONFIG_CONNECTION_ROOT_PASSWORD: rootchangeme
+    volumes:
+      - /home/user/openmrs/data:/openmrs/data:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  openmrs-frontend:
+    image: openmrs/openmrs-reference-application-3-frontend:latest
+    ports: [&quot;127.0.0.1:8081:80&quot;]
+    environment:
+      SPA_PATH: /openmrs/spa
+      API_URL: /openmrs
+      SPA_CONFIG_URLS: /openmrs/spa/config.json
+    depends_on: [openmrs]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:10.11
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_DATABASE: openmrs
+      MYSQL_USER: openmrs
+      MYSQL_PASSWORD: changeme
+      MYSQL_ROOT_PASSWORD: rootchangeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  db_data:</code></pre>
+<pre><code class="language-bash">cd ~/openmrs &amp;&amp; podman-compose up -d</code></pre>
+<p>Access the backend at <code>http://localhost:8080/openmrs</code> and the React SPA frontend at <code>http://localhost:8081</code>.</p>
+<h4>Key OpenMRS modules to install</h4>
+<ul>
+<li><strong>EMR API</strong> — core clinical workflows</li>
+<li><strong>HTML Form Entry</strong> — customisable data capture forms</li>
+<li><strong>Reporting</strong> — patient cohort reports and aggregate statistics</li>
+<li><strong>Allergies UI</strong> — allergy tracking</li>
+<li><strong>Atlas</strong> — anonymised usage reporting for the global community (optional)</li>
+</ul>
+<h4>FHIR resources and the RESTful API model</h4>
+<p>FHIR structures clinical data as resources: Patient, Observation, Condition, MedicationRequest, DiagnosticReport, Encounter. Each resource is a JSON or XML document with a standard schema. The FHIR REST API maps directly to HTTP: <code>GET /Patient/{id}</code> retrieves a patient record; <code>POST /Observation</code> creates a new observation; <code>GET /Observation?subject=Patient/{id}&amp;code=8480-6</code> searches for a patient's blood pressure readings using LOINC code 8480-6. The <code>_include</code> parameter joins related resources in one request (fetch a DiagnosticReport and its referenced Observation in one call). This RESTful model makes FHIR significantly more developer-friendly than HL7 v2 (pipe-delimited messages) or SOAP-based web services.</p>
+<h4>Clinical decision support — CDS Hooks</h4>
+<p>CDS Hooks is a standard for triggering external clinical decision support services at specific points in a clinical workflow: <code>patient-view</code> (clinician opens a patient chart), <code>order-select</code> (clinician selects a medication), <code>order-sign</code> (clinician signs an order). The EHR sends a JSON hook request to the CDS service; the service responds with cards — informational alerts, suggestions, or links — displayed in the EHR UI. This enables real-time drug interaction alerts, guideline reminders, and predictive risk scores without modifying the EHR itself. OpenMRS and HAPI FHIR support CDS Hooks.</p>
+<h4>De-identification and the Safe Harbor method</h4>
+<p>HIPAA's Safe Harbor de-identification method requires removing 18 specific identifiers: names, geographic subdivisions smaller than state, dates (other than year) for individuals over 89, phone numbers, fax numbers, email addresses, SSN, medical record numbers, health plan beneficiary numbers, account numbers, certificate/license numbers, VINs, device identifiers, URLs, IP addresses, biometric identifiers, full-face photos, and any other unique identifiers. After removal, the covered entity must have no actual knowledge the information could identify an individual. De-identified data is no longer PHI and can be used for research and analytics without patient consent. Synthetic data generation (Synthea) creates realistic but entirely fictional patient datasets useful for testing.</p>
+<h4>Audit logging requirements in healthcare systems</h4>
+<p>Every access to patient data must be logged for compliance (HIPAA, GDPR Article 9). Required fields: who accessed the record (user ID + role), which record was accessed (patient ID + resource type), from where (IP address, application), when (timestamp with timezone), and what action (read, write, delete). Logs must be tamper-evident (write to an append-only log store or SIEM like Wazuh), retained for 6 years under HIPAA, and regularly reviewed for anomalous access patterns (a nurse accessing 500 records in 10 minutes). OpenMRS includes an Audit Log module; HAPI FHIR server logs all REST interactions in a standard format.</p>
+<p>---</p>
+<h2>OpenEMR</h2>
+<p><strong>Purpose:</strong> Full-featured open-source EHR/EMR and practice management system for small to medium clinics. Includes patient demographics, scheduling, clinical notes (SOAP), e-prescribing, billing (ICD-10, CPT), lab orders, imaging, and a patient portal. More approachable for Western clinical workflows than OpenMRS.</p>
+<pre><code class="language-yaml"># ~/openemr/compose.yaml
+services:
+  openemr:
+    image: openemr/openemr:7.0.3
+    ports:
+      - 127.0.0.1:8083:80
+      - 127.0.0.1:8084:443
+    volumes:
+      - /home/user/openemr/sites:/var/www/localhost/htdocs/openemr/sites:Z
+      - /home/user/openemr/logs:/var/log:Z
+    environment:
+      MYSQL_HOST: host.containers.internal
+      MYSQL_ROOT_PASS: rootchangeme
+      MYSQL_USER: openemr
+      MYSQL_PASS: changeme
+      OE_USER: admin
+      OE_PASS: changeme
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/openemr &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># View logs
+podman logs -f openemr
+
+# Run OpenEMR CLI commands
+podman exec openemr php /var/www/localhost/htdocs/openemr/library/oe_utils.php
+
+# Backup OpenEMR database
+podman exec openemr mysqldump -h host.containers.internal -u openemr -pchangeme openemr &gt; openemr-backup.sql
+
+# Check FHIR API is responding
+curl http://localhost:8083/apis/default/fhir/metadata | python3 -m json.tool | head -20
+
+# Create an admin via CLI
+podman exec openemr php /var/www/localhost/htdocs/openemr/contrib/util/installModules.php</code></pre>
+<p>Access at <code>http://localhost:8083</code>. The setup wizard runs on first visit.</p>
+<h4>OpenEMR features relevant for self-hosted clinics</h4>
+<ul>
+<li>FHIR R4 API endpoint at <code>/apis/default/fhir/</code> for interoperability</li>
+<li>Telehealth via built-in Jitsi integration (Settings → Telehealth)</li>
+<li>Patient portal for appointment booking and secure messaging</li>
+<li>Two-factor authentication for provider logins</li>
+<li>Audit logging for all record access</li>
+</ul>
+<p>---</p>
+<h2>HAPI FHIR Server</h2>
+<p><strong>Purpose:</strong> Reference implementation of the HL7 FHIR (Fast Healthcare Interoperability Resources) standard. A FHIR server is the interoperability backbone of a modern health data stack — it stores and exposes clinical resources (Patient, Observation, Condition, MedicationRequest, Immunization, DiagnosticReport) in a standardised REST API that any FHIR-compatible app or device can consume.</p>
+<pre><code class="language-yaml"># ~/hapi-fhir/compose.yaml
+services:
+  hapi-fhir:
+    image: hapiproject/hapi:latest
+    ports:
+      - 127.0.0.1:8082:8080
+    volumes:
+      - /home/user/hapi-fhir/data:/data:Z
+    environment:
+      hapi.fhir.default_encoding: json
+      hapi.fhir.fhir_version: R4
+      spring.datasource.url: jdbc:postgresql://host.containers.internal:5432/hapifhir
+      spring.datasource.username: hapifhir
+      spring.datasource.password: changeme
+      spring.datasource.driverClassName: org.postgresql.Driver
+      spring.jpa.properties.hibernate.dialect: ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/hapi-fhir &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>Create the PostgreSQL database first: <code>CREATE DATABASE hapifhir;</code></p></blockquote>
+<h5>Test the FHIR API</h5>
+<pre><code class="language-bash"># Create a Patient resource
+curl -X POST http://localhost:8082/fhir/Patient \
+  -H &quot;Content-Type: application/fhir+json&quot; \
+  -d '{&quot;resourceType&quot;:&quot;Patient&quot;,&quot;name&quot;:[{&quot;family&quot;:&quot;Smith&quot;,&quot;given&quot;:[&quot;John&quot;]}],&quot;birthDate&quot;:&quot;1985-04-15&quot;,&quot;gender&quot;:&quot;male&quot;}'
+
+# Search patients by name
+curl &quot;http://localhost:8082/fhir/Patient?family=Smith&quot;
+
+# Get all Observations for a patient
+curl &quot;http://localhost:8082/fhir/Observation?subject=Patient/1&quot;
+
+# FHIR capability statement
+curl http://localhost:8082/fhir/metadata</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Test the FHIR capability statement
+curl http://localhost:8082/fhir/metadata | python3 -m json.tool | head -30
+
+# Create a Patient resource
+curl -X POST http://localhost:8082/fhir/Patient   -H &quot;Content-Type: application/fhir+json&quot;   -d '{&quot;resourceType&quot;:&quot;Patient&quot;,&quot;name&quot;:[{&quot;family&quot;:&quot;Smith&quot;,&quot;given&quot;:[&quot;John&quot;]}],&quot;birthDate&quot;:&quot;1985-04-15&quot;,&quot;gender&quot;:&quot;male&quot;}'
+
+# Search patients by name
+curl &quot;http://localhost:8082/fhir/Patient?family=Smith&quot;
+
+# Get all Observations for a patient
+curl &quot;http://localhost:8082/fhir/Observation?subject=Patient/1&quot;
+
+# Validate a resource
+curl -X POST &quot;http://localhost:8082/fhir/Patient/\$validate&quot;   -H &quot;Content-Type: application/fhir+json&quot;   -d '{&quot;resourceType&quot;:&quot;Patient&quot;,&quot;name&quot;:[{&quot;family&quot;:&quot;Test&quot;}]}'
+
+# Count resources
+curl &quot;http://localhost:8082/fhir/Patient?_summary=count&quot;
+
+# View server logs
+podman logs -f hapi-fhir</code></pre>
+<blockquote><p>OpenEMR, OpenMRS, and wearable sync tools (Apple Health, Google Fit, Garmin) can all export FHIR resources — centralise them in a self-hosted HAPI FHIR server as your personal health data hub.</p></blockquote>
+<p>---</p>
+<h2>Medplum</h2>
+<p><strong>Purpose:</strong> Modern FHIR-native healthcare platform. Combines a FHIR R4 server, a bot and automation engine (think healthcare-specific n8n), an admin UI, and a React component library for building custom patient-facing apps. Better developer experience than HAPI for teams building healthcare applications rather than just storing records.</p>
+<pre><code class="language-yaml"># ~/medplum/compose.yml
+services:
+  medplum-server:
+    image: medplum/medplum-server:latest
+    ports: [&quot;127.0.0.1:8103:8103&quot;]
+    environment:
+      DATABASE_URL: postgresql://medplum:changeme@db:5432/medplum
+      REDIS_URL: redis://redis:6379
+      APP_BASE_URL: https://medplum.home.local
+      BASE_URL: https://medplum.home.local/api/
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: medplum
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: medplum
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/medplum &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>Tandoor (Recipe & Nutrition Tracking)</h2>
+<p><strong>Purpose:</strong> Self-hosted recipe manager with ingredient-level nutritional data, meal planning, and shopping list generation. Useful for health-focused users who want to log macros and nutrition against specific recipes. See also <a href="https://docs.shani.dev/doc/servers/productivity#mealie-recipe-manager">Mealie in the Productivity wiki</a> for a lighter-weight recipe manager without the nutrition tracking focus.</p>
+<pre><code class="language-yaml"># ~/tandoor/compose.yml
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: djangouser
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: djangodb
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  web:
+    image: vabene1111/recipes:latest
+    ports: [&quot;127.0.0.1:8085:8080&quot;]
+    environment:
+      SECRET_KEY: changeme-run-openssl-rand-base64-50
+      DB_ENGINE: django.db.backends.postgresql
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: djangouser
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: djangodb
+      ALLOWED_HOSTS: &quot;*&quot;
+    volumes:
+      - /home/user/tandoor/staticfiles:/opt/recipes/staticfiles:Z
+      - /home/user/tandoor/mediafiles:/opt/recipes/mediafiles:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/tandoor &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>Wger (Workout Manager)</h2>
+<p><strong>Purpose:</strong> Self-hosted fitness tracker — workout plans, exercise logging, body weight and measurements over time, REST API for mobile app integration, and a nutrition module with a food database. Useful for athletes who want to keep training logs private and under their own control.</p>
+<pre><code class="language-yaml"># ~/wger/compose.yml
+services:
+  web:
+    image: wger/server:latest
+    ports: [&quot;127.0.0.1:8086:80&quot;]
+    environment:
+      WGER_USE_GUNICORN: &quot;True&quot;
+      DJANGO_DB_ENGINE: django.db.backends.postgresql
+      DJANGO_DB_DATABASE: wger
+      DJANGO_DB_USER: wger
+      DJANGO_DB_PASSWORD: changeme
+      DJANGO_DB_HOST: db
+      DJANGO_DB_PORT: 5432
+      SITE_URL: https://wger.home.local
+    volumes:
+      - /home/user/wger/media:/home/wger/media:Z
+      - /home/user/wger/static:/home/wger/static:Z
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: wger
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: wger
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/wger &amp;&amp; podman-compose up -d</code></pre>
+<h4>Mobile apps</h4>
+<p>wger has iOS and Android apps that sync to a self-hosted server via the REST API.</p>
+<p>---</p>
+<h2>Fasten Health (Personal Health Record Aggregator)</h2>
+<p><strong>Purpose:</strong> Connects to hundreds of US health providers, insurance networks, and labs via SMART on FHIR and downloads your complete health records to your self-hosted server. One dashboard for all your medical history across every provider — visit notes, labs, imaging, prescriptions — stored locally.</p>
+<pre><code class="language-yaml"># ~/fasten-health/compose.yaml
+services:
+  fasten-health:
+    image: ghcr.io/fastenhealth/fasten-onprem:main
+    ports:
+      - 127.0.0.1:8090:8080
+    volumes:
+      - /home/user/fasten/db:/opt/fasten/db:Z
+      - /home/user/fasten/cache:/opt/fasten/cache:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/fasten-health &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:8090</code>. Add providers under Sources → Add Source. Fasten uses the standardised SMART on FHIR authorisation flow — your credentials never touch the Fasten server, only your own instance.</p>
+<blockquote><p>Fasten currently supports 1,000+ US health systems. Non-US users can manually import FHIR bundles exported from compatible EHR systems.</p></blockquote>
+<p>---</p>
+<h2>Personal Health Data Stack</h2>
+<p>A complete personal health data system on Shani OS:</p>
+<pre><code>Wearables / Devices / Provider Portals
+         │
+         ▼
+   Fasten Health          ← aggregates FHIR records from providers
+   Apple Health export    ← via FHIR export + manual import
+         │
+         ▼
+   HAPI FHIR Server       ← central FHIR store (your health data hub)
+         │
+         ▼
+   Metabase / Grafana     ← dashboards over FHIR data via PostgreSQL
+         │
+         ▼
+   Restic → Backblaze B2  ← encrypted offsite backup</code></pre>
+<p>---</p>
+<h2>Caddy Configuration</h2>
+<pre><code class="language-caddyfile">openmrs.home.local  { tls internal; reverse_proxy localhost:8080 }
+openemr.home.local  { tls internal; reverse_proxy localhost:8083 }
+fhir.home.local     { tls internal; reverse_proxy localhost:8082 }
+fasten.home.local   { tls internal; reverse_proxy localhost:8090 }
+tandoor.home.local  { tls internal; reverse_proxy localhost:8085 }
+wger.home.local     { tls internal; reverse_proxy localhost:8086 }</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | OpenMRS setup wizard loops | Ensure MariaDB is fully started before OpenMRS; add <code>depends_on</code> with a health check; verify <code>utf8mb4</code> charset is set | | OpenEMR blank after install | Check PHP error log with <code>podman logs openemr</code>; ensure the sites volume has correct write permissions | | HAPI FHIR 500 on startup | PostgreSQL must be running and the <code>hapifhir</code> database must exist before starting; HAPI runs Flyway migrations on boot | | FHIR resource validation errors | Check the resource against the FHIR R4 spec at <code>http://localhost:8082/fhir/StructureDefinition</code>; use the <code>$validate</code> operation | | Fasten health provider not found | The provider list is US-focused; for other countries, use the manual FHIR bundle import option | | Medplum bots not executing | Ensure the bot is deployed and the subscription trigger is correctly configured; check the audit log in the admin panel | | wger app can't sync | Verify <code>SITE_URL</code> matches the URL the mobile app connects to; the REST API is at <code>/api/v2/</code> | | Nextcloud Health app missing data | Ensure the Health app is enabled in Apps; data is per-user and stored in Nextcloud's database | | Tandoor nutrition data missing | Import the USDA food database after first run: <code>podman exec web python manage.py import_usda_data</code> |</p>
+<blockquote><p>🔒 <strong>Security checklist for health data:</strong></p></blockquote>
+<blockquote><p>- Use HTTPS for all health services — never plain HTTP</p></blockquote>
+<blockquote><p>- Restrict access to Tailscale or Authelia-protected routes only; health data should never be publicly accessible</p></blockquote>
+<blockquote><p>- Enable audit logging in OpenMRS and OpenEMR — every record access should be logged</p></blockquote>
+<blockquote><p>- Back up health databases daily with Restic to an encrypted offsite destination</p></blockquote>
+<blockquote><p>- Rotate database passwords and service credentials on a schedule</p></blockquote></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

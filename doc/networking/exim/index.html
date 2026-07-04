@@ -146,7 +146,101 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Exim (Mail Transfer Agent)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+        </div>
+      </div>
+      <div class="prose"><p>Exim is a pre-installed Mail Transfer Agent (MTA). On a desktop or homelab machine, its primary purpose is <strong>local mail delivery</strong> — routing system notifications, cron job output, fail2ban alerts, and other daemon messages to the local <code>root</code> or user mailbox, and optionally forwarding them to an external email address via a relay (smarthost).</p>
+<p>Running a full inbound SMTP server on a residential IP is generally impractical (ISPs block port 25; major providers reject mail from dynamic IPs). The most useful configuration for Shani OS is <strong>smarthost / relay mode</strong>: Exim accepts local mail and forwards it through an authenticated external SMTP server such as Gmail, Fastmail, or Mailgun.</p>
+<p>---</p>
+<h2>Service Management</h2>
+<pre><code class="language-bash">sudo systemctl enable --now exim
+
+systemctl status exim
+journalctl -u exim -f</code></pre>
+<p>---</p>
+<h2>Configuration</h2>
+<p>Exim's config is at <code>/etc/mail/exim.conf</code> (on Arch-based systems, sometimes <code>/etc/exim/exim.conf</code>). Shani OS uses the standard Arch path <code>/etc/mail/exim.conf</code>.</p>
+<h3>Smarthost (Relay via External SMTP)</h3>
+<p>The most common setup: all local mail is relayed through an external SMTP server. Replace the values below with your provider's settings.</p>
+<pre><code># /etc/mail/exim.conf
+
+primary_hostname = yourhostname.local
+
+# Accept mail for local delivery
+local_interfaces = 127.0.0.1
+
+# Route all outbound mail through a smarthost
+begin routers
+
+  send_via_smarthost:
+    driver = manualroute
+    domains = !+local_domains
+    transport = smarthost_smtp
+    route_list = * smtp.gmail.com
+
+begin transports
+
+  smarthost_smtp:
+    driver = smtp
+    hosts = smtp.gmail.com
+    port = 587
+    hosts_require_auth = *
+    hosts_require_tls = *
+
+begin authenticators
+
+  plaintext_auth:
+    driver = plaintext
+    public_name = PLAIN
+    client_send = : your@gmail.com : your-app-password</code></pre>
+<blockquote><p><strong>Gmail:</strong> Use an <a href="https://myaccount.google.com/apppasswords">App Password</a> (not your main password) — requires 2FA to be enabled on the account. Set <code>smtp.gmail.com</code>, port <code>587</code>.</p></blockquote>
+<p>After editing:</p>
+<pre><code class="language-bash"># Test config syntax
+sudo exim -bV
+
+# Reload
+sudo systemctl restart exim</code></pre>
+<h3>Forward Root Mail to a User or External Address</h3>
+<p>System daemons send mail to <code>root</code>. Forward it to a real address by creating <code>/etc/aliases</code>:</p>
+<pre><code>root: youruser
+youruser: you@example.com</code></pre>
+<p>Then rebuild the alias database:</p>
+<pre><code class="language-bash">sudo newaliases</code></pre>
+<h3>Forward a User's Local Mail</h3>
+<p>Create <code>~/.forward</code> in the user's home directory:</p>
+<pre><code>you@example.com</code></pre>
+<p>---</p>
+<h2>Sending Test Mail</h2>
+<pre><code class="language-bash"># Send a test message
+echo &quot;Test from Shani OS&quot; | mail -s &quot;Test&quot; root
+
+# Or directly via Exim
+echo &quot;Subject: Test&quot; | sudo exim -v root
+
+# Check the mail queue
+exim -bp
+
+# Force delivery of queued messages
+sudo exim -qf
+
+# View Exim logs
+sudo tail -f /var/log/exim/mainlog</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Mail stuck in queue | Run <code>exim -bp</code> to see the queue; <code>sudo exim -qf</code> to force retry; check <code>mainlog</code> for rejection reasons | | <code>Authentication failed</code> | Verify credentials in <code>client_send</code>; for Gmail, ensure you are using an App Password not your account password | | <code>TLS negotiation failed</code> | Confirm <code>hosts_require_tls = *</code> is set and the upstream SMTP port supports STARTTLS (587) or TLS (465) | | Cron output not being mailed | Ensure <code>MAILTO</code> is set in the crontab (<code>MAILTO=root</code> or <code>MAILTO=youruser</code>) and Exim is running | | Exim not starting | Run <code>sudo exim -bV</code> to check config syntax; check <code>journalctl -u exim</code> for errors |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">
