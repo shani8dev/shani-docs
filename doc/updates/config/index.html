@@ -146,7 +146,136 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">System Config</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Updates &amp; Config</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-05-06</span>
+        </div>
+      </div>
+      <div class="prose"><p>All system configuration in Shanios follows standard Linux conventions — edit files in <code>/etc</code>, manage services with <code>systemctl</code>. Your changes are captured by the OverlayFS upper layer and survive every OS update and rollback.</p>
+<h2>How the /etc Overlay Works</h2>
+<pre><code>Lower layer (read-only): /etc from the active @blue or @green slot
+Upper layer (writable):  /data/overlay/etc/upper/
+Merged view:             /etc (what you see and interact with)</code></pre>
+<p>When you write to any <code>/etc</code> file, the kernel copies it from the lower layer to the upper layer and applies your change. When the OS updates (new lower layer), your upper-layer files are untouched. Files you have never modified automatically reflect the new OS defaults.</p>
+<h2>Editing /etc Files</h2>
+<p>Nothing special is required — edit files in <code>/etc</code> exactly as on any Linux system:</p>
+<pre><code class="language-bash">sudo nano /etc/hostname
+sudo nano /etc/hosts
+sudo nano /etc/locale.conf
+sudo nano /etc/environment
+sudo nano /etc/ssh/sshd_config
+sudo nano /etc/fstab
+
+# Edit systemd service overrides
+sudo systemctl edit sshd.service           # creates a drop-in override
+sudo systemctl edit --full sshd.service    # full copy you can modify freely</code></pre>
+<p>Changes take effect immediately (or after service restart for daemon config) and survive every OS update.</p>
+<h2>Viewing Your Customisations</h2>
+<pre><code class="language-bash"># Every /etc file you have modified
+find /data/overlay/etc/upper/ -type f | sort
+
+# Compare a modified file to the OS default
+diff /data/overlay/etc/upper/ssh/sshd_config \
+     /etc/ssh/sshd_config</code></pre>
+<h2>Reverting a File to OS Default</h2>
+<pre><code class="language-bash"># Remove the upper-layer version — the OS default becomes active again
+sudo rm /data/overlay/etc/upper/ssh/sshd_config</code></pre>
+<h2>Resetting All /etc Customisations</h2>
+<p>Use <code>shani-reset</code> rather than raw <code>rm -rf</code> to avoid leaving the overlay work directory in an inconsistent state:</p>
+<pre><code class="language-bash"># Factory reset all persistent system state in /data (keeps /home and OS slots intact)
+sudo shani-reset
+
+# Preview what would be wiped without making changes
+sudo shani-reset --dry-run
+
+# Keep previously downloaded OS images
+sudo shani-reset --keep-downloads</code></pre>
+<h2>Locale & Timezone</h2>
+<pre><code class="language-bash">sudo localectl set-locale LANG=en_IN.UTF-8
+sudo localectl set-keymap us
+sudo localectl set-x11-keymap us
+sudo timedatectl set-timezone Asia/Kolkata
+
+localectl status
+timedatectl status</code></pre>
+<h2>Hostname</h2>
+<pre><code class="language-bash">sudo hostnamectl set-hostname my-machine
+hostnamectl</code></pre>
+<p>Your machine is reachable as <code>hostname.local</code> on the local network via Avahi (mDNS), active by default.</p>
+<h2>Managing Services</h2>
+<pre><code class="language-bash"># Enable/disable a service (persists across reboots via overlay)
+sudo systemctl enable --now sshd
+sudo systemctl disable sshd
+
+# Start/stop/restart
+sudo systemctl start sshd
+sudo systemctl stop sshd
+sudo systemctl restart sshd
+sudo systemctl reload nginx
+
+systemctl status sshd
+journalctl -u sshd -f
+journalctl -u sshd --since today
+
+systemctl list-unit-files --state=enabled
+systemctl --failed</code></pre>
+<h3>User Services</h3>
+<pre><code class="language-bash">systemctl --user enable --now my-service.service
+systemctl --user status my-service.service
+journalctl --user -u my-service.service -f</code></pre>
+<p>User service unit files live in <code>~/.config/systemd/user/</code>.</p>
+<h2>Adding Custom systemd Units</h2>
+<pre><code class="language-bash">sudo nano /etc/systemd/system/myapp.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now myapp.service</code></pre>
+<p>Units placed in <code>/etc/systemd/system/</code> are captured by the overlay and persist across updates.</p>
+<h2>sysctl Tuning</h2>
+<pre><code class="language-bash"># Temporary (lost on reboot)
+sudo sysctl vm.swappiness=10
+
+# Persistent
+echo &quot;vm.swappiness=10&quot; | sudo tee /etc/sysctl.d/99-custom.conf
+sudo sysctl --system   # apply without reboot</code></pre>
+<p>Common customisations:</p>
+<pre><code class="language-bash"># /etc/sysctl.d/99-custom.conf
+vm.swappiness=10
+fs.inotify.max_user_watches=524288
+fs.file-max=2097152</code></pre>
+<h2>Kernel Parameters</h2>
+<p>Permanent kernel parameter changes are embedded in the UKI via <code>gen-efi</code>, not via <code>/etc/default/grub</code>. The generated command line is written to <code>/etc/kernel/install_cmdline_&lt;slot&gt;</code> on each run and cannot be manually pre-edited (it is overwritten). To add a permanent parameter, contact the project or use a <code>dracut.conf.d</code> snippet — then rebuild:</p>
+<pre><code class="language-bash">sudo gen-efi configure blue   # rebuild UKI for the currently booted slot</code></pre>
+<p>See <a href="../security/gen-efi">gen-efi Reference</a> for details.</p>
+<h2>Network Configuration</h2>
+<p>NetworkManager handles all network configuration. Wi-Fi passwords, VPN profiles, and static IP configurations persist in <code>/data/varlib/NetworkManager</code> across all updates and rollbacks.</p>
+<pre><code class="language-bash">nmcli connection show
+nmcli device wifi connect &quot;SSID&quot; password &quot;password&quot;
+nmcli device status</code></pre>
+<h2>Time Synchronisation</h2>
+<p><code>systemd-timesyncd</code> is enabled by default:</p>
+<pre><code class="language-bash">sudo nano /etc/systemd/timesyncd.conf
+# [Time]
+# NTP=time.cloudflare.com
+# FallbackNTP=pool.ntp.org
+
+sudo systemctl restart systemd-timesyncd
+timedatectl timesync-status</code></pre>
+<h2>PAM & sudo</h2>
+<pre><code class="language-bash">sudo visudo
+
+# Add a sudoers drop-in (safer than editing /etc/sudoers directly)
+sudo nano /etc/sudoers.d/my-rules
+# username ALL=(ALL) NOPASSWD: /usr/bin/specific-command</code></pre></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

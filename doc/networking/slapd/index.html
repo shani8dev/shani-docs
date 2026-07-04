@@ -146,7 +146,111 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">slapd (OpenLDAP)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-18</span>
+        </div>
+      </div>
+      <div class="prose"><h1>OpenLDAP Server (slapd)</h1>
+<p>OpenLDAP is an open-source implementation of the Lightweight Directory Access Protocol (LDAP), used for centralised authentication and directory services. It is pre-installed on Shani OS.</p>
+<p>Database files persist in <code>/var/lib/openldap/openldap-data</code>, bind-mounted from <code>/data/varlib/openldap</code>, and survive OS updates.</p>
+<p>---</p>
+<h2>Setup</h2>
+<h3>Enable the Service</h3>
+<pre><code class="language-bash">sudo systemctl enable --now slapd</code></pre>
+<h3>Generate a Password Hash</h3>
+<pre><code class="language-bash"># Generates a hashed password for use in LDIF files
+slappasswd
+# Enter your chosen password — copy the {SSHA}... output</code></pre>
+<h3>Configure the Root DN</h3>
+<p>OpenLDAP starts empty. Create <code>setup.ldif</code> to set the base DN and admin user:</p>
+<pre><code class="language-ldif">dn: cn=config
+changetype: modify
+replace: olcSuffix
+olcSuffix: dc=shanios,dc=local
+-
+replace: olcRootDN
+olcRootDN: cn=Manager,dc=shanios,dc=local
+-
+replace: olcRootPW
+olcRootPW: {SSHA}hashedpasswordhere</code></pre>
+<p>Apply using the local UNIX socket (no password needed):</p>
+<pre><code class="language-bash">sudo ldapadd -Y EXTERNAL -H ldapi:/// -f setup.ldif</code></pre>
+<h3>Load Core Schema</h3>
+<pre><code class="language-bash"># Load standard schemas (required for most LDAP deployments)
+sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/core.ldif
+sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
+sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif</code></pre>
+<p>---</p>
+<h2>Adding Entries</h2>
+<h3>Base Structure</h3>
+<p>Create <code>base.ldif</code>:</p>
+<pre><code class="language-ldif">dn: dc=shanios,dc=local
+objectClass: dcObject
+objectClass: organization
+o: Shani OS Local
+dc: shanios
+
+dn: ou=users,dc=shanios,dc=local
+objectClass: organizationalUnit
+ou: users
+
+dn: ou=groups,dc=shanios,dc=local
+objectClass: organizationalUnit
+ou: groups</code></pre>
+<pre><code class="language-bash">ldapadd -x -H ldap://localhost \
+  -D &quot;cn=Manager,dc=shanios,dc=local&quot; \
+  -W -f base.ldif</code></pre>
+<h3>Add a User</h3>
+<pre><code class="language-ldif">dn: uid=alice,ou=users,dc=shanios,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: alice
+cn: Alice Smith
+sn: Smith
+mail: alice@shanios.local
+uidNumber: 10001
+gidNumber: 10001
+homeDirectory: /home/alice
+loginShell: /bin/bash
+userPassword: {SSHA}hashedpasswordhere</code></pre>
+<pre><code class="language-bash">ldapadd -x -H ldap://localhost \
+  -D &quot;cn=Manager,dc=shanios,dc=local&quot; \
+  -W -f user-alice.ldif</code></pre>
+<p>---</p>
+<h2>Querying</h2>
+<pre><code class="language-bash"># List all entries under the base DN
+ldapsearch -x -H ldap://localhost -b dc=shanios,dc=local
+
+# Search for a specific user
+ldapsearch -x -H ldap://localhost \
+  -b ou=users,dc=shanios,dc=local \
+  &quot;(uid=alice)&quot;
+
+# Authenticated search (as Manager)
+ldapsearch -x -H ldap://localhost \
+  -D &quot;cn=Manager,dc=shanios,dc=local&quot; \
+  -W -b dc=shanios,dc=local</code></pre>
+<p>---</p>
+<h2>Firewall</h2>
+<pre><code class="language-bash">sudo firewall-cmd --add-service=ldap --permanent    # port 389 (plain/STARTTLS)
+sudo firewall-cmd --add-service=ldaps --permanent   # port 636 (TLS)
+sudo firewall-cmd --reload</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>ldapadd</code> returns <code>No such object</code> | The parent DN doesn't exist yet — add base structure entries before adding users/groups | | <code>Invalid credentials</code> | Wrong bind DN or password; the bind DN must match <code>olcRootDN</code> exactly | | <code>Can't contact LDAP server</code> | Check <code>systemctl status slapd</code>; confirm the service is listening: <code>ss -tlnp | grep 389</code> | | Schema error on <code>ldapadd</code> | Load the required schema LDIFs first (<code>core.ldif</code>, <code>cosine.ldif</code>, <code>inetorgperson.ldif</code>) | | View slapd logs | <code>journalctl -u slapd -f</code> |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

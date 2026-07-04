@@ -146,7 +146,133 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Btrfs Deep Dive</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Architecture</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-05-13</span>
+        </div>
+      </div>
+      <div class="prose"><p>Shanios leverages advanced Btrfs features for immutability, efficiency, and data integrity.</p>
+<h2>Copy-on-Write (CoW)</h2>
+<p>Btrfs CoW minimises storage duplication:</p>
+<ul>
+<li>Shared data blocks between <code>@blue</code> and <code>@green</code> — only the delta is stored</li>
+<li>Typical dual-root overhead is ~18% over a single installation</li>
+<li>Efficient atomic updates: writing to the inactive slot never touches the live one</li>
+<li>Cheap snapshots: snapshot creation is nearly instantaneous regardless of subvolume size</li>
+</ul>
+<h2>Transparent Compression</h2>
+<p>Default mount options for all data subvolumes:</p>
+<pre><code>compress=zstd,space_cache=v2,autodefrag</code></pre>
+<ul>
+<li>Reduces disk usage by 30–50% for typical workloads</li>
+<li>Minimal CPU overhead with zstd</li>
+<li>Improves SSD lifespan by reducing write amplification</li>
+<li><code>autodefrag</code> periodically defragments small random-write files in the background</li>
+</ul>
+<h2>Subvolumes with nodatacow</h2>
+<p>Specific subvolumes disable CoW for performance:</p>
+<ul>
+<li><strong><code>@swap</code>:</strong> CoW must be disabled for swap files — Btrfs requires it, and compression is also disabled</li>
+<li><strong><code>@libvirt</code>:</strong> VM disk images benefit from direct writes (no snapshot overhead)</li>
+<li><strong><code>@qemu</code>:</strong> Bare QEMU VM disk images</li>
+</ul>
+<p>These subvolumes use <code>nodatacow,nospace_cache</code> and do not participate in bees deduplication.</p>
+<h2>Mount Options by Subvolume</h2>
+<p>| Subvolume(s) | Mount Options | Notes | |---|---|---| | <code>@blue</code> / <code>@green</code> | <code>ro,noatime,compress=zstd,space_cache=v2,autodefrag</code> | Mounted by dracut via kernel cmdline — <strong>not in fstab</strong> | | <code>@root</code>, <code>@home</code>, <code>@data</code> | <code>rw,noatime,compress=zstd,space_cache=v2,autodefrag</code> | Core persistent data — always mounted | | <code>@nix</code> | <code>nofail,noatime,compress=zstd,space_cache=v2,autodefrag</code> | CoW kept for bees deduplication | | <code>@log</code>, <code>@cache</code> | <code>rw,noatime,compress=zstd,space_cache=v2,autodefrag,x-systemd.after=var.mount,x-systemd.requires=var.mount</code> | Requires <code>/var</code> to exist first | | <code>@flatpak</code>, <code>@snapd</code>, <code>@waydroid</code>, <code>@containers</code>, <code>@machines</code>, <code>@lxc</code>, <code>@lxd</code> | <code>nofail,noatime,compress=zstd,space_cache=v2,autodefrag,x-systemd.after=var.mount,x-systemd.requires=var.mount</code> | <code>nofail</code> — boots cleanly even if not yet created | | <code>@libvirt</code>, <code>@qemu</code> | <code>nofail,noatime,nodatacow,nospace_cache,x-systemd.after=var.mount,x-systemd.requires=var.mount</code> | nodatacow required for VM disk performance | | <code>@swap</code> | <code>nofail,noatime,nodatacow,nospace_cache</code> | Mandatory for swapfile correctness on Btrfs |</p>
+<h2>Why noatime?</h2>
+<p>All subvolumes use <code>noatime</code>:</p>
+<ul>
+<li>Prevents writing to disk every time a file is read</li>
+<li>Significantly reduces SSD wear</li>
+<li>Improves battery life on laptops</li>
+<li>No impact on most applications (relatime/noatime is a Debian/Ubuntu default too)</li>
+</ul>
+<h2>Manual Snapshots</h2>
+<pre><code class="language-bash"># Create a read-only snapshot of /home (best practice for backups)
+sudo btrfs subvolume snapshot -r /home /data/snapshots/home-$(date +%Y%m%d)
+
+# Create a writable snapshot
+sudo btrfs subvolume snapshot /home /data/snapshots/home-writable
+
+# List all subvolumes and snapshots
+sudo btrfs subvolume list /
+
+# Show details of a specific snapshot
+sudo btrfs subvolume show /data/snapshots/home-20260427
+
+# Delete an old snapshot to free space
+sudo btrfs subvolume delete /data/snapshots/home-20240601
+
+# Send snapshot to another drive (full backup)
+sudo btrfs send /data/snapshots/home-20250101 | sudo btrfs receive /mnt/backup/
+
+# Incremental send (only sends the diff)
+sudo btrfs send -p /data/snapshots/home-20250101 /data/snapshots/home-20250201 \
+  | sudo btrfs receive /mnt/backup/</code></pre>
+<blockquote><p><strong>Snapshots are not backups</strong> if they live on the same disk — a disk failure loses both. Use <code>btrfs send</code> to an external drive, or <code>restic</code>/<code>rclone</code> for cloud storage. See <a href="../system/backup">Backup & Recovery</a> for a complete backup strategy.</p></blockquote>
+<h2>Btrfs Manual Maintenance</h2>
+<pre><code class="language-bash"># Disk usage (more accurate than df for Btrfs)
+sudo btrfs filesystem usage /
+sudo btrfs filesystem df /
+sudo btrfs filesystem du -s --human-readable /data
+
+# Scrub — verify checksums, repair if possible
+sudo btrfs scrub start /
+sudo btrfs scrub status /
+sudo btrfs scrub cancel /
+
+# Balance — redistribute data across devices / fix metadata
+sudo btrfs balance start /
+sudo btrfs balance start -dusage=50 -musage=50 /   # safer partial balance
+sudo btrfs balance status /
+
+# Device statistics — read/write errors per device
+sudo btrfs device stats /
+
+# Fix ENOSPC (&quot;no space left&quot; even though df shows free space)
+# Remove old snapshots first, then:
+sudo btrfs balance start -musage=0 /
+
+# Quotas (track space per subvolume)
+sudo btrfs quota enable /
+sudo btrfs qgroup show --sync /
+
+# Inspect swapfile offset (needed for hibernation resume=)
+sudo btrfs inspect-internal map-swapfile -r /@swap/swapfile</code></pre>
+<h2>Checking Deduplication Status</h2>
+<p>Shanios uses <code>bees</code> (Block-level Extent Enumeration and Sharing) for continuous background deduplication. <code>bees</code> is a block-level deduplicator — it finds identical 128 KB blocks across all subvolumes and shares them via Btrfs extent references.</p>
+<pre><code class="language-bash"># Check bees daemon status (UUID is your Btrfs filesystem UUID)
+sudo systemctl status &quot;beesd@*&quot;
+
+# View recent dedup activity
+sudo journalctl -u &quot;beesd@*&quot; --since today | grep -E &quot;dedup|hash|block|crawl&quot;
+
+# Check compression ratio per subvolume
+sudo compsize /
+sudo compsize /home
+sudo compsize /nix
+sudo compsize /var/lib/flatpak
+
+# Full storage usage report
+shani-health --storage-info</code></pre>
+<p><code>bees</code> is configured by <code>beesd-setup</code> which writes <code>/etc/bees/&lt;uuid&gt;.conf</code> and enables the <code>beesd@&lt;uuid&gt;.service</code> unit. The hash table size is automatically tuned to 256 MB per TB of filesystem size (capped at 1 GB for 4+ TB filesystems).</p>
+<h2>Automated Maintenance</h2>
+<p>Shanios runs Btrfs maintenance automatically via systemd timers — no manual intervention required:</p>
+<p>| Timer | Action | |-------|--------| | <code>btrfs-scrub.timer</code> | Monthly scrubbing to detect and repair data corruption | | <code>btrfs-balance.timer</code> | Periodic filesystem balancing for optimal performance | | <code>btrfs-defrag.timer</code> | Automatic defragmentation on fragmented files | | <code>btrfs-trim.timer</code> | Regular TRIM operations for SSD optimisation | | <code>beesd</code> daemon | Continuous background block-level deduplication across all Btrfs subvolumes |</p>
+<pre><code class="language-bash"># Check timer status and next run times
+systemctl status btrfs-scrub.timer btrfs-balance.timer btrfs-defrag.timer
+systemctl list-timers btrfs-*</code></pre></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

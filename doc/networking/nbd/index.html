@@ -146,7 +146,73 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">nbd-server (Network Block Device)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-18</span>
+        </div>
+      </div>
+      <div class="prose"><h1>Network Block Device (NBD)</h1>
+<p>NBD exports a block device (disk, partition, or image file) over the network. The client side presents it as a local block device (e.g., <code>/dev/nbd0</code>) that can be formatted, mounted, or used as raw storage.</p>
+<p>Common uses: thin-client boot images, centralised VM disk storage, and network-attached swap.</p>
+<p>---</p>
+<h2>Server Setup</h2>
+<h3>Configuration</h3>
+<p>Edit <code>/etc/nbd-server/config</code>:</p>
+<pre><code class="language-ini">[generic]
+    # user = nbd
+    # group = nbd
+
+[disk1]
+    exportname = /home/user/nbd-images/disk1.img
+    port = 10809
+    readonly = false
+    copyonwrite = false
+    flush = true
+    sync = true</code></pre>
+<p>Multiple export sections (<code>[disk1]</code>, <code>[disk2]</code>, …) can be defined in the same file, each on a different port.</p>
+<h3>Enable & Firewall</h3>
+<pre><code class="language-bash"># Enable the NBD server
+sudo systemctl enable --now nbd-server
+
+# Open the port in the firewall (restrict to your LAN — NBD has no built-in auth)
+sudo firewall-cmd --add-rich-rule='rule family=&quot;ipv4&quot; source address=&quot;192.168.1.0/24&quot; port port=&quot;10809&quot; protocol=&quot;tcp&quot; accept' --permanent
+sudo firewall-cmd --reload</code></pre>
+<blockquote><p>⚠️ <strong>Security:</strong> NBD has no built-in authentication or encryption. Always restrict access to trusted networks via firewall rules, or tunnel NBD over SSH/WireGuard on untrusted networks.</p></blockquote>
+<p>---</p>
+<h2>Client Usage</h2>
+<p><code>nbd-client</code> is pre-installed on Shani OS.</p>
+<pre><code class="language-bash"># Load the nbd kernel module if not already loaded
+sudo modprobe nbd
+
+# Connect to a remote block device
+sudo nbd-client &lt;server-ip&gt; 10809 /dev/nbd0
+
+# Format the device (first-time setup only — this destroys existing data)
+sudo mkfs.ext4 /dev/nbd0
+
+# Mount the device
+sudo mkdir -p /mnt/remote-disk
+sudo mount /dev/nbd0 /mnt/remote-disk
+
+# Work with the files...
+
+# Disconnect (unmount first, then disconnect)
+sudo umount /mnt/remote-disk
+sudo nbd-client -d /dev/nbd0</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>nbd-client: No such device /dev/nbd0</code> | Load the kernel module: <code>sudo modprobe nbd</code> | | <code>Connection refused</code> on the client | Check <code>systemctl status nbd-server</code> on the server; verify the port and firewall with <code>sudo firewall-cmd --list-all</code> | | Filesystem errors after disconnect | Always unmount before disconnecting — <code>umount</code> first, then <code>nbd-client -d</code> | | Server crashes on large writes | Add <code>flush = true</code> and <code>sync = true</code> to the export section in the config |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

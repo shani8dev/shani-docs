@@ -146,7 +146,176 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Kernel Modules</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">System</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-28</span>
+        </div>
+      </div>
+      <div class="prose"><p>Kernel modules are loadable drivers and extensions that the Linux kernel can load and unload at runtime without rebooting. On Shani OS, module configuration files placed in <code>/etc/modules-load.d/</code> and <code>/etc/modprobe.d/</code> live in the <code>/etc</code> overlay and persist across all OS updates and rollbacks.</p>
+<p>---</p>
+<h2>Listing and Inspecting Modules</h2>
+<pre><code class="language-bash"># List all currently loaded modules
+lsmod
+
+# Show information about a module (description, parameters, dependencies)
+modinfo kvm
+modinfo iwlwifi
+modinfo nvidia
+
+# Show only specific fields
+modinfo -F filename kvm        # path to the .ko file
+modinfo -F parm kvm            # available parameters
+modinfo -F depends kvm         # dependencies
+
+# Check if a module is loaded
+lsmod | grep kvm</code></pre>
+<p>---</p>
+<h2>Loading and Unloading Modules</h2>
+<pre><code class="language-bash"># Load a module (for the current session only)
+sudo modprobe kvm
+sudo modprobe kvm_intel          # or kvm_amd depending on CPU
+
+# Load with parameters
+sudo modprobe iwlwifi 11n_disable=1
+sudo modprobe usbcore autosuspend=1
+
+# Unload a module
+sudo modprobe -r kvm_intel
+sudo rmmod kvm_intel             # alternative, does not handle dependencies
+
+# Unload a module and all its dependents
+sudo modprobe -r --remove-dependencies kvm_intel
+
+# Dry run — show what would be loaded/unloaded
+sudo modprobe --dry-run kvm</code></pre>
+<blockquote><p>⚠️ <code>rmmod</code> fails if the module is in use. Use <code>modprobe -r</code> which handles the dependency chain, or check what is using it with <code>lsmod | grep &lt;module&gt;</code> and look at the "Used by" column.</p></blockquote>
+<p>---</p>
+<h2>Persistent Module Loading</h2>
+<p>To load a module automatically at boot, create a file in <code>/etc/modules-load.d/</code>. Files here are processed by <code>systemd-modules-load.service</code> early in the boot sequence.</p>
+<pre><code class="language-bash"># Load a single module at boot
+echo &quot;kvm_intel&quot; | sudo tee /etc/modules-load.d/kvm.conf
+
+# Load multiple modules
+sudo tee /etc/modules-load.d/virtualisation.conf &lt;&lt; 'EOF'
+kvm
+kvm_intel
+vhost_net
+EOF</code></pre>
+<p>Each file should contain one module name per line. Comments starting with <code>#</code> are ignored.</p>
+<pre><code class="language-bash"># Verify the service loaded all modules correctly
+systemctl status systemd-modules-load.service
+journalctl -u systemd-modules-load.service</code></pre>
+<p>---</p>
+<h2>Module Parameters</h2>
+<p>Module parameters can be set persistently in <code>/etc/modprobe.d/</code>.</p>
+<pre><code class="language-bash"># Disable 802.11n (workaround for some Wi-Fi issues)
+echo &quot;options iwlwifi 11n_disable=1&quot; | sudo tee /etc/modprobe.d/iwlwifi.conf
+
+# Set KVM nested virtualisation
+echo &quot;options kvm_intel nested=1&quot; | sudo tee /etc/modprobe.d/kvm.conf
+echo &quot;options kvm_amd nested=1&quot;   | sudo tee /etc/modprobe.d/kvm.conf   # AMD
+
+# Set USB autosuspend delay
+echo &quot;options usbcore autosuspend=5&quot; | sudo tee /etc/modprobe.d/usb.conf
+
+# Verify active parameters for a loaded module
+cat /sys/module/kvm_intel/parameters/nested
+cat /sys/module/iwlwifi/parameters/11n_disable</code></pre>
+<p>Changes to <code>/etc/modprobe.d/</code> take effect on the next module load. To apply immediately: unload and reload the module with <code>modprobe -r</code> then <code>modprobe</code>.</p>
+<p>---</p>
+<h2>Blacklisting Modules</h2>
+<p>Blacklisting prevents a module from loading automatically. Useful for disabling a buggy driver, forcing a different driver, or preventing a conflicting module from loading alongside another.</p>
+<pre><code class="language-bash"># Blacklist a module
+echo &quot;blacklist nouveau&quot; | sudo tee /etc/modprobe.d/blacklist-nouveau.conf
+
+# Blacklist and also prevent loading as a dependency
+sudo tee /etc/modprobe.d/blacklist-nouveau.conf &lt;&lt; 'EOF'
+blacklist nouveau
+install nouveau /bin/false
+EOF</code></pre>
+<p>The <code>install &lt;module&gt; /bin/false</code> directive is stronger — it replaces the module's install command with <code>/bin/false</code>, preventing it from loading even as a dependency of another module.</p>
+<pre><code class="language-bash"># Verify a module is blacklisted
+cat /etc/modprobe.d/*.conf | grep blacklist</code></pre>
+<blockquote><p>💡 Common blacklisting use cases on Shani OS: disabling <code>nouveau</code> when using the NVIDIA proprietary driver, blacklisting <code>pcspkr</code> to silence the PC speaker beep, or blacklisting <code>iTCO_wdt</code> to prevent false watchdog triggers.</p></blockquote>
+<p>---</p>
+<h2>Module Aliases</h2>
+<p>Aliases let you refer to a module by a friendly name or map a hardware ID to a driver.</p>
+<pre><code class="language-bash"># Show all aliases for a module
+modinfo -F alias kvm_intel
+
+# Show which module would handle a specific hardware ID
+modprobe --show-depends pci:v00008086d00001234sv...
+
+# List all alias mappings (from modules.alias in the kernel)
+cat /lib/modules/$(uname -r)/modules.alias | grep iwlwifi</code></pre>
+<p>---</p>
+<h2>Dracut and the Initramfs</h2>
+<p>On Shani OS, the initramfs is built with <strong>dracut</strong>. Modules that must be available before the root filesystem is mounted (e.g. storage controllers, crypto drivers) need to be included in the initramfs.</p>
+<pre><code class="language-bash"># Force-include a module in the initramfs
+echo &quot;add_drivers+=\&quot; virtio_blk virtio_scsi \&quot;&quot; | sudo tee /etc/dracut.conf.d/virtio.conf
+
+# Regenerate the initramfs after changes
+sudo dracut --force
+
+# Verify a module is present in the initramfs
+lsinitrd | grep virtio
+lsinitrd /boot/initramfs-linux.img | grep &lt;module&gt;</code></pre>
+<blockquote><p>⚠️ After adding or changing module configuration that affects early boot (storage, crypto, firmware), always regenerate the initramfs with <code>sudo dracut --force</code> and reboot to verify the new initramfs works before removing the previous boot slot.</p></blockquote>
+<p>---</p>
+<h2>Firmware</h2>
+<p>Many modules require firmware blobs that are loaded from <code>/lib/firmware/</code>. Shani OS ships a comprehensive <code>linux-firmware</code> package split by vendor. If a module reports a missing firmware file:</p>
+<pre><code class="language-bash"># Check dmesg for firmware load failures
+dmesg | grep -i firmware
+dmesg | grep &quot;Direct firmware load&quot;
+
+# List available firmware files for a driver
+ls /lib/firmware/iwlwifi*         # Intel Wi-Fi firmware
+ls /lib/firmware/amdgpu/          # AMD GPU firmware
+
+# Check which firmware package provides a file
+pacman -F /lib/firmware/iwlwifi-8265-36.ucode</code></pre>
+<p>If a firmware file is genuinely missing, the relevant <code>linux-firmware-&lt;vendor&gt;</code> package may not be installed. On Shani OS these are split packages (e.g. <code>linux-firmware-intel</code>, <code>linux-firmware-amdgpu</code>).</p>
+<p>---</p>
+<h2>Useful Diagnostics</h2>
+<pre><code class="language-bash"># Show kernel messages related to module loading since boot
+dmesg | grep -E &quot;module|driver|firmware&quot; | head -40
+
+# Show all modules and their memory usage
+lsmod | sort -k2 -rh
+
+# Find which module handles a device (by PCI ID)
+lspci -k | grep -A3 &quot;VGA\|Network\|Audio&quot;
+
+# Find which module handles a USB device
+lsusb -v 2&gt;/dev/null | grep -E &quot;idVendor|idProduct|Kernel driver&quot;
+
+# Check for module load errors at boot
+journalctl -b | grep -i &quot;module\|modprobe\|failed to load&quot;
+
+# Show all loaded modules with their sysfs paths
+ls /sys/module/</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>modprobe: FATAL: Module not found</code> | Module name may differ — check <code>modinfo</code> or search: <code>find /lib/modules/$(uname -r) -name &quot;<em>name</em>&quot;</code> | | Module loads but device doesn't work | Check <code>dmesg</code> for firmware errors; verify firmware package is installed | | <code>rmmod: ERROR: Module is in use</code> | Check the "Used by" column in <code>lsmod</code>; unload dependent modules first, or use <code>modprobe -r</code> | | Module loads but wrong driver is used | Blacklist the competing module in <code>/etc/modprobe.d/</code> | | Changes to <code>/etc/modprobe.d/</code> not taking effect | Unload and reload the module; or reboot; if it's an initramfs module, run <code>sudo dracut --force</code> | | Missing firmware after OS update | Run <code>sudo pacman -S linux-firmware</code> or the specific vendor firmware package | | Module not loading at boot despite <code>/etc/modules-load.d/</code> entry | Check <code>systemctl status systemd-modules-load</code>; verify the module name is correct with <code>modinfo</code> |</p>
+<p>---</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="systemd">Systemd</a> — <code>systemd-modules-load.service</code>, unit dependencies</li>
+<li><a href="hardware">Hardware</a> — <code>lspci</code>, <code>lsusb</code>, device identification</li>
+<li><a href="storage">Storage</a> — storage controller modules, NVMe</li>
+<li><a href="../arch/dracut-module">Architecture: Dracut Initramfs Module</a> — Shani OS initramfs build</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

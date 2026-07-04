@@ -146,7 +146,92 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Kerberos</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-18</span>
+        </div>
+      </div>
+      <div class="prose"><h1>Kerberos 5 (KDC)</h1>
+<p>Kerberos provides strong mutual authentication for client/server applications using secret-key cryptography. It is the standard for enterprise network authentication and is required by Active Directory environments.</p>
+<p>---</p>
+<h2>Server Setup (KDC)</h2>
+<h3>Configuration</h3>
+<p>Edit <code>/etc/krb5.conf</code>:</p>
+<pre><code class="language-ini">[libdefaults]
+    default_realm = SHANIOS.LOCAL
+    dns_lookup_realm = false
+    dns_lookup_kdc = false
+    forwardable = true
+
+[realms]
+    SHANIOS.LOCAL = {
+        kdc = kdc.shanios.local
+        admin_server = kdc.shanios.local
+    }
+
+[domain_realm]
+    .shanios.local = SHANIOS.LOCAL
+    shanios.local = SHANIOS.LOCAL</code></pre>
+<h3>Initialize the Realm Database</h3>
+<pre><code class="language-bash"># Create the realm database (prompts for a master password)
+sudo kdb5_util create -s -r SHANIOS.LOCAL
+
+# Start services
+sudo systemctl enable --now krb5kdc
+sudo systemctl enable --now kadmin</code></pre>
+<h3>Principal Administration</h3>
+<pre><code class="language-bash"># Open the admin shell (runs locally as root, bypasses network auth)
+sudo kadmin.local
+
+# Inside kadmin.local:
+addprinc admin/admin          # create an admin principal
+addprinc youruser             # create a user principal
+addprinc -randkey host/kdc.shanios.local  # create a host service principal
+ktadd host/kdc.shanios.local  # export to /etc/krb5.keytab
+listprincs                    # list all principals
+delprinc olduser              # delete a principal
+quit</code></pre>
+<h3>Firewall</h3>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=88/tcp --add-port=88/udp --permanent   # KDC (authentication)
+sudo firewall-cmd --add-port=749/tcp --permanent                     # kadmin (admin)
+sudo firewall-cmd --add-port=464/tcp --add-port=464/udp --permanent  # kpasswd (password change)
+sudo firewall-cmd --reload</code></pre>
+<h3>Persistence</h3>
+<p>Kerberos database files are stored in <code>/var/lib/kerberos/krb5kdc</code> and bind-mounted from <code>/data/varlib/kerberos</code> — they persist across OS updates and rollbacks.</p>
+<p>---</p>
+<h2>Client Usage</h2>
+<h3>Obtain a Ticket</h3>
+<pre><code class="language-bash"># Authenticate and obtain a Kerberos ticket
+kinit youruser@SHANIOS.LOCAL
+
+# List active tickets and their expiry
+klist
+
+# Renew a ticket before it expires
+kinit -R
+
+# Destroy all tickets (log out)
+kdestroy</code></pre>
+<h3>Test Authentication</h3>
+<pre><code class="language-bash"># Verify you can reach the KDC
+kinit admin/admin@SHANIOS.LOCAL
+
+# Check DNS resolves the KDC correctly
+host kdc.shanios.local</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>Cannot contact any KDC for realm</code> | Check that <code>krb5kdc</code> is running (<code>systemctl status krb5kdc</code>) and that UDP/TCP 88 is open in the firewall | | <code>Clock skew too great</code> | Kerberos requires clocks within 5 minutes — sync with <code>sudo timedatectl set-ntp true</code> | | <code>Client not found in Kerberos database</code> | The principal does not exist — create it with <code>sudo kadmin.local</code> → <code>addprinc username</code> | | <code>Decrypt integrity check failed</code> | Wrong password, or the keytab is stale — regenerate with <code>ktadd</code> in <code>kadmin.local</code> |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

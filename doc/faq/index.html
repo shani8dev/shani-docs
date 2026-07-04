@@ -146,7 +146,172 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">FAQ</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">FAQ</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-05-13</span>
+        </div>
+      </div>
+      <div class="prose"><h1>Frequently Asked Questions</h1>
+<p>Answers to the most common questions about Shanios — software installation, updates, hardware, security, and the immutable architecture in plain terms.</p>
+<p>---</p>
+<h2>Installation & Requirements</h2>
+<p><strong>Does Shanios require UEFI?</strong></p>
+<p>Yes. Legacy/CSM BIOS boot is not supported. Most PCs made after 2012 have UEFI. If you see options like Secure Boot and UEFI boot mode in your firmware settings, you're fine.</p>
+<p><strong>Does it work on my hardware?</strong></p>
+<p>Shanios runs on any 64-bit x86 CPU (Intel or AMD) with UEFI firmware. 4 GB RAM and 32 GB storage minimum; 8 GB RAM and 64 GB recommended. NVIDIA, AMD, and Intel graphics all work at first boot — no post-install driver setup. ARM (Apple Silicon, Raspberry Pi) is not supported.</p>
+<p><strong>Do I need to disable Secure Boot to install?</strong></p>
+<p>Yes, temporarily. Disable Secure Boot before installing, then re-enable it after installation and enroll your MOK key. See <a href="security/secure-boot">Secure Boot</a>.</p>
+<p><strong>Can I dual boot with Windows?</strong></p>
+<p>Technically possible but not recommended — Windows may overwrite the bootloader on updates. The cleaner setup is to run Windows in a virtual machine via virt-manager (pre-installed on KDE Plasma). Your Windows install lives in <code>@libvirt</code> and is unaffected by OS updates.</p>
+<p><strong>Can I install it on a VM to try it out?</strong></p>
+<p>Yes. Shanios includes guest tools for QEMU/KVM, VirtualBox, and VMware that activate automatically. Give the VM at least 4 GB RAM and 40 GB disk.</p>
+<p>---</p>
+<h2>Software & Packages</h2>
+<p><strong>Can I use <code>pacman -S</code> to install packages?</strong></p>
+<p>No — and you don't need to. The OS root is physically read-only; <code>pacman</code> writes to <code>/usr</code>, which the kernel refuses at runtime. More importantly, anything installed to the OS root would be overwritten on the next update. Use the right layer for each type of software:</p>
+<ul>
+<li><strong>GUI apps</strong> → <code>flatpak install flathub app.name</code></li>
+<li><strong>CLI tools and dev runtimes</strong> → <code>nix-env -iA nixpkgs.tool-name</code></li>
+<li><strong>Full mutable environment (full <code>apt</code>, <code>pacman</code>, <code>yay</code>)</strong> → <code>distrobox create --name mybox --image archlinux:latest</code></li>
+<li><strong>Services and databases</strong> → <code>podman run ...</code></li>
+</ul>
+<p><strong>How do I install a <code>.deb</code> or <code>.rpm</code> package?</strong></p>
+<p>Create a Distrobox container matching the target distribution:</p>
+<pre><code class="language-bash">distrobox create --name ubuntu-dev --image ubuntu:24.04
+distrobox enter ubuntu-dev
+sudo dpkg -i package.deb
+distrobox-export --app app-name   # adds to host launcher</code></pre>
+<p><strong>I need a tool that only exists in the AUR. How do I get it?</strong></p>
+<pre><code class="language-bash">distrobox create --name arch-aur --image archlinux:latest
+distrobox enter arch-aur
+sudo pacman -S --needed base-devel git
+git clone https://aur.archlinux.org/yay.git &amp;&amp; cd yay &amp;&amp; makepkg -si
+yay -S aur-package-name
+distrobox-export --bin /usr/bin/tool-name</code></pre>
+<p>The exported binary is available on your host PATH from that point on.</p>
+<p><strong>Does Flatpak work exactly like on other distros?</strong></p>
+<p>Yes. Flathub is pre-configured. GNOME Software and KDE Discover both use Flathub by default. <code>flatpak install</code>, <code>update</code>, and <code>remove</code> work identically. Apps auto-update every 12 hours.</p>
+<p><strong>Can I install development tools like Node, Python, Rust, Go?</strong></p>
+<p>Yes, via Nix. Add a channel once, then install:</p>
+<pre><code class="language-bash">nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
+nix-channel --update
+nix-env -iA nixpkgs.nodejs_22
+nix-env -iA nixpkgs.rustup
+nix-env -iA nixpkgs.python312
+nix-env -iA nixpkgs.go</code></pre>
+<p>Nix packages survive every OS update and rollback. Multiple versions coexist without conflict.</p>
+<p><strong>Can I install VS Code?</strong></p>
+<pre><code class="language-bash">flatpak install flathub com.visualstudio.code</code></pre>
+<p>For workflows requiring direct system access (custom language servers, specific extension requirements), install via Distrobox and export to host — or use Snap: <code>snap install code --classic</code>.</p>
+<p><strong>Can I run Windows applications?</strong></p>
+<p>Yes. Bottles (pre-installed on KDE Plasma; available on Flathub for GNOME) provides a Wine-based compatibility layer. Steam's Proton (pre-installed on KDE Plasma) runs Windows games. Does Homebrew work? Yes, identically to macOS — it installs to <code>/home/linuxbrew/.linuxbrew</code>, completely outside the read-only root, and packages survive every OS update.</p>
+<p><strong>What about Android apps?</strong></p>
+<p>Waydroid runs a full hardware-accelerated Android 11 stack, pre-installed on both editions. Set up with <code>sudo waydroid-helper init</code>. See the <a href="software/waydroid">Android (Waydroid)</a> guide.</p>
+<p>---</p>
+<h2>Updates & Rollback</h2>
+<p><strong>How does updating work?</strong></p>
+<pre><code class="language-bash">sudo shani-deploy update</code></pre>
+<p>This downloads a new OS image, verifies SHA256 + GPG signature, snapshots the inactive slot, extracts the new image, generates a signed UKI, and updates the bootloader. Your running system is never touched. Reboot when ready.</p>
+<p><strong>How often do updates come out?</strong></p>
+<p>The <code>stable</code> channel releases approximately monthly. The <code>latest</code> channel is more frequent. Check your channel: <code>cat /etc/shani-channel</code>.</p>
+<p><strong>What happens to my files during an update?</strong></p>
+<p>Nothing. <code>shani-deploy</code> only writes to the inactive OS slot. It never touches <code>@home</code>, <code>@flatpak</code>, <code>@nix</code>, <code>@containers</code>, or any other user data subvolume.</p>
+<p><strong>How do I roll back?</strong></p>
+<pre><code class="language-bash">sudo shani-deploy --rollback
+sudo reboot</code></pre>
+<p>Or select the <strong>(Candidate)</strong> entry from the boot menu at startup.</p>
+<p><strong>Can I roll back multiple times?</strong></p>
+<p>Yes. Each update creates a timestamped Btrfs snapshot of the slot it replaces. <code>shani-deploy -r</code> restores from the most recent snapshot. To go further back, use <code>btrfs subvolume list /</code> to find older backup snapshots and restore manually.</p>
+<p><strong>What if the new OS can't boot at all?</strong></p>
+<p>systemd-boot's boot-counting mechanism detects repeated boot failures and automatically falls back to the previous slot — without any user intervention. The new slot gets three attempts before automatic fallback triggers.</p>
+<p><strong>Will my <code>/etc</code> configuration survive an update?</strong></p>
+<p>Yes. Your <code>/etc</code> changes are stored in the OverlayFS upper layer at <code>/data/overlay/etc/upper/</code>, completely separate from the OS image. They survive every update and rollback. New OS defaults appear for files you have never touched; your customised files remain yours.</p>
+<p><strong>Can I update Flatpak apps and the OS independently?</strong></p>
+<p>Yes. <code>flatpak update</code> and <code>sudo shani-deploy update</code> are completely independent. You can update apps without touching the OS, update the OS without touching apps, or update both in any order. An OS rollback does not roll back your apps.</p>
+<p><strong>How much disk space do two OS copies take?</strong></p>
+<p>Less than you might expect. <code>@blue</code> and <code>@green</code> share unchanged data blocks via Btrfs CoW — only changed files consume additional space, typically around 18% overhead. Btrfs zstd compression reduces the effective size by 30–50%. Run <code>sudo shani-deploy --storage-info</code> to see accurate compressed sizes.</p>
+<p><strong>What if I run out of disk space?</strong></p>
+<pre><code class="language-bash">sudo shani-deploy -c          # remove slot backup snapshots and download cache
+flatpak uninstall --unused    # remove unused Flatpak runtimes (can reclaim several GB)
+podman system prune -af       # remove unused container images
+nix-collect-garbage -d        # remove old Nix generations</code></pre>
+<p>---</p>
+<h2>Hardware & Gaming</h2>
+<p><strong>Does NVIDIA work?</strong></p>
+<p>Yes. The <code>nvidia-open</code> driver is pre-installed and configured on the KDE Plasma edition. On the GNOME edition, the driver is available and configured during installation. <code>nvidia-smi</code> and all standard NVIDIA tools work. Secure Boot is supported via MOK-signed kernel modules. On Optimus laptops, use <code>prime-run application-name</code> to run on the discrete GPU.</p>
+<p><strong>Does gaming work without the KDE Plasma edition?</strong></p>
+<p>Steam is available as a Flatpak on GNOME. The KDE Plasma edition ships the full pre-configured gaming stack (MangoHud, GameScope, GameMode, Heroic, Lutris, etc.) but nothing prevents gaming on GNOME — you install the same Flatpaks manually.</p>
+<p><strong>Do gaming controllers work?</strong></p>
+<p>Yes. <code>game-devices-udev</code> rules are pre-installed covering PlayStation (DS3, DS4, DualSense, DualSense Edge), Xbox (360, One, Series), Nintendo Switch Pro, Joy-Cons, GameCube adapter, 8BitDo, and many more. Plug in and play — Steam Input handles configuration.</p>
+<p><strong>Do racing wheels work?</strong></p>
+<p>Yes. Logitech (G25, G27, G29, G920, G923), Thrustmaster (T150, T300RS, T500RS), and Fanatec wheels are supported with full force feedback. Oversteer (pre-installed on KDE Plasma) provides graphical configuration.</p>
+<p><strong>Does VR work?</strong></p>
+<p>HTC Vive, Valve Index, and PSVR are supported via SteamVR. udev rules are pre-configured.</p>
+<p><strong>Does my fingerprint sensor work?</strong></p>
+<p>Supported fingerprint sensors work at first boot via <code>fprintd</code> and <code>libfprint</code>. GDM (GNOME) and SDDM (KDE) both support fingerprint authentication at the login screen. Enroll via Settings → Users → Fingerprint Login.</p>
+<p><strong>Does it work on a laptop?</strong></p>
+<p>Yes. Hibernation is configured automatically at install (swapfile sized to RAM, correct offset embedded in UKI). TPM2 auto-unlock handles LUKS decryption at resume. <code>power-profiles-daemon</code> manages battery/performance profiles.</p>
+<p>---</p>
+<h2>Storage & Encryption</h2>
+<p><strong>Should I enable LUKS2 encryption?</strong></p>
+<p>Yes, especially for laptops and portable devices. Enable it in the installer (one checkbox), then run:</p>
+<pre><code class="language-bash">sudo gen-efi enroll-tpm2</code></pre>
+<p>This enables TPM2 auto-unlock — the disk unlocks silently on your hardware and stays locked on any other machine.</p>
+<p><strong>What if I forgot to enable encryption during install?</strong></p>
+<p>You need to reinstall — there is no in-place conversion. Back up your data first with restic, reinstall with encryption enabled, then restore. See <a href="security/luks">LUKS Management</a>.</p>
+<p><strong>Does full-disk encryption slow down the system?</strong></p>
+<p>Negligibly. Modern CPUs (Intel Skylake+, AMD Zen+) have AES hardware acceleration (AES-NI). The encryption overhead is typically under 1% of disk throughput.</p>
+<p><strong>What happens to my LUKS key if I update the BIOS firmware?</strong></p>
+<p>After a firmware update, PCR 0 changes. The TPM will not release the LUKS key — you will be prompted for your passphrase on the next boot. This is correct security behaviour. After booting:</p>
+<pre><code class="language-bash">sudo gen-efi cleanup-tpm2
+sudo gen-efi enroll-tpm2</code></pre>
+<p><strong>Does hibernation work with encryption?</strong></p>
+<p>Yes. Hibernation is configured automatically at installation. TPM2 auto-unlock handles the decryption at resume without a passphrase prompt.</p>
+<p>---</p>
+<h2>Switching from Windows or macOS</h2>
+<p><strong>What replaces my Windows apps?</strong></p>
+<p>Most have direct replacements on Flatpak: Firefox or Vivaldi (browser, both pre-installed), OnlyOffice (office suite, pre-installed, opens <code>.docx</code>/<code>.xlsx</code>/<code>.pptx</code>), GIMP (Photoshop equivalent), Kdenlive (video editor), OBS Studio (streaming/recording), VLC (media player), Telegram, Discord — all on Flathub. Windows apps with no Linux equivalent can run via Bottles (Wine-based).</p>
+<p><strong>What about <code>.docx</code> and <code>.xlsx</code> files?</strong></p>
+<p>OnlyOffice Desktop Editors is pre-installed on both editions and has excellent compatibility with Microsoft Office formats.</p>
+<p><strong>I use Homebrew on macOS. Do I need to learn something new?</strong></p>
+<p>No. Homebrew can be installed on Shanios and works identically to macOS. That said, Nix is pre-installed and handles the same use cases with more power — worth exploring after settling in.</p>
+<p><strong>Will iCloud/OneDrive/Google Drive work?</strong></p>
+<p>Google Drive is accessible in the GNOME file manager (Nautilus) via <code>gvfs-google</code>. OneDrive via <code>gvfs-onedrive</code>. For KDE, <code>rclone</code> provides access to all three plus 70+ other providers.</p>
+<p>---</p>
+<h2>Privacy & Telemetry</h2>
+<p><strong>Does Shanios collect any data?</strong></p>
+<p>No. Zero telemetry means zero. No usage data, no hardware reports, no crash reports, no analytics, no identifiers. <code>shani-deploy</code> connects to download servers to fetch images (standard HTTP — your IP, nothing else).</p>
+<p><strong>How can I verify there is no telemetry?</strong></p>
+<p>The entire codebase is public at <a href="https://github.com/shani8dev">github.com/shani8dev</a>. Every script, every systemd unit, every service that runs on your machine is readable. Every claim is independently verifiable.</p>
+<p>---</p>
+<h2>Security</h2>
+<p><strong>Is the immutable root actually secure?</strong></p>
+<p>Yes, in a meaningful way. The OS root is physically read-only at the kernel VFS layer — not a permission, not a policy. Root processes cannot write persistent backdoors to <code>/usr/bin</code> or any other system path. Malware that gains a root session has that session — it does not have persistence across reboots. Combined with six simultaneous Linux Security Modules active from first boot, the security posture is significantly stronger than a traditional mutable Linux system. See <a href="security/features">Security Features</a>.</p>
+<p><strong>Does Secure Boot actually work?</strong></p>
+<p>Yes. The full boot chain is UEFI firmware → Shim (Microsoft-signed) → systemd-boot (MOK-signed) → Unified Kernel Image (MOK-signed, contains kernel + initramfs + cmdline). The bootloader editor is disabled and the kernel cmdline is embedded in the UKI — it cannot be modified from the boot menu. See <a href="security/secure-boot">Secure Boot</a>.</p>
+<p>---</p>
+<h2>Community & Support</h2>
+<p><strong>Where do I report bugs?</strong></p>
+<p><a href="https://github.com/shani8dev/shani-os/issues">github.com/shani8dev/shani-os/issues</a> — include the output of <code>uname -r</code>, <code>cat /data/current-slot</code>, <code>shani-deploy --version</code>, and relevant <code>journalctl</code> logs.</p>
+<p><strong>Where do I ask questions?</strong></p>
+<p><a href="https://t.me/shani8dev">Telegram community</a> — the primary support channel for questions, feature requests, and general discussion.</p>
+<p><strong>Is Shanios free?</strong></p>
+<p>Yes, fully free and open source. No accounts, no subscriptions, no paid tiers.</p>
+<p><strong>Is there a commercial support option?</strong></p>
+<p>Enterprise and OEM enquiries: <a href="https://shani.dev#enterprise">shani.dev — Enterprise & Vendors</a>.</p>
+<p><strong>Can I contribute?</strong></p>
+<p>Yes. Source code, build scripts, and documentation are all public at <a href="https://github.com/shani8dev">github.com/shani8dev</a>. Pull requests and issue reports are welcome.</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

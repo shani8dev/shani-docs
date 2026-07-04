@@ -146,7 +146,68 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Avahi (mDNS)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-18</span>
+        </div>
+      </div>
+      <div class="prose"><h1>Avahi — Zero-Config mDNS/DNS-SD (Bonjour)</h1>
+<p>Avahi is <strong>active by default</strong> — your machine is immediately reachable as <code>hostname.local</code> on the LAN. It is used by CUPS (printers), KDE Connect, DLNA media servers, and SSH discovery tools.</p>
+<h2>Discovering Services</h2>
+<pre><code class="language-bash"># Discover all services on the network (live view, Ctrl-C to stop)
+avahi-browse -a
+
+# One-shot (exit after listing all found services)
+avahi-browse -at
+
+# Filter by service type
+avahi-browse _http._tcp    # HTTP services
+avahi-browse _ssh._tcp     # SSH servers
+avahi-browse _smb._tcp     # Samba shares
+avahi-browse _ipp._tcp     # Printers
+
+# Resolve hostnames alongside service discovery
+avahi-browse -at -r</code></pre>
+<h2>Name Resolution</h2>
+<pre><code class="language-bash"># Resolve a .local hostname to IP
+avahi-resolve --name myhostname.local
+
+# Reverse lookup (IP → hostname)
+avahi-resolve --address 192.168.1.50
+
+# Check daemon status
+sudo systemctl status avahi-daemon
+
+# Restart after config changes
+sudo systemctl restart avahi-daemon</code></pre>
+<h2>Publishing a Custom Service</h2>
+<p>Create <code>/etc/avahi/services/myservice.service</code>:</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; standalone='no'?&gt;
+&lt;service-group&gt;
+  &lt;name&gt;My Web Server&lt;/name&gt;
+  &lt;service&gt;
+    &lt;type&gt;_http._tcp&lt;/type&gt;
+    &lt;port&gt;8080&lt;/port&gt;
+  &lt;/service&gt;
+&lt;/service-group&gt;</code></pre>
+<p>Avahi auto-reloads service files from <code>/etc/avahi/services/</code> — no daemon restart is needed after adding or editing a file.</p>
+<h2>Disabling Avahi (Reduce Attack Surface)</h2>
+<p>If you do not need <code>.local</code> discovery on a given machine:</p>
+<pre><code class="language-bash">sudo systemctl disable --now avahi-daemon</code></pre>
+<blockquote><p><strong>Note:</strong> Disabling Avahi will prevent CUPS printer auto-discovery and KDE Connect device detection on the LAN.</p></blockquote>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>hostname.local</code> not resolving from another machine | Ensure <code>avahi-daemon</code> is running; check that your firewall allows UDP 5353 (mDNS) — the <code>mdns</code> firewalld service covers this | | Services not appearing in <code>avahi-browse -a</code> | Confirm the remote service publishes via mDNS; some services require explicit Avahi service files | | Name collision (<code>hostname-2.local</code>) | Two devices share the same hostname — rename one via <code>hostnamectl set-hostname newname</code> | | Avahi flooding logs with errors | Check <code>/etc/nsswitch.conf</code> — <code>mdns4_minimal</code> should appear before <code>dns</code> in the <code>hosts:</code> line |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

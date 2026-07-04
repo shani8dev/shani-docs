@@ -146,7 +146,167 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">systemd-nspawn</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Software &amp; Apps</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-05-07</span>
+        </div>
+      </div>
+      <div class="prose"><p><code>systemd-nspawn</code> is a lightweight container mechanism built directly into systemd. It runs a full Linux distribution — complete with an init system and its own namespace — without any daemon, image format, or external tooling. You point it at a directory containing a Linux root filesystem and it boots it.</p>
+<p>On Shanios, <code>systemd-nspawn</code> is pre-installed with no configuration needed. Container root filesystems live in the <code>@machines</code> Btrfs subvolume at <code>/var/lib/machines</code>, completely independent of the OS slots. They survive every OS update and rollback untouched.</p>
+<p><code>machinectl</code> is the management tool — it handles pulling images, starting and stopping containers, logging in, and lifecycle management.</p>
+<h2>When to Use nspawn</h2>
+<p>| | systemd-nspawn | LXD | Distrobox | Podman | QEMU/KVM | |---|---|---|---|---|---| | Purpose | Lightweight system containers | Full system containers | Dev/app containers | OCI app containers | Full VMs | | Daemon required | No | Yes (lxd.socket) | No | No (socket-activated) | Yes | | Full init system | Yes | Yes | No | No | Yes | | Startup time | ~1s | ~3s | ~1s | ~0.1s | ~30s | | Isolation | High | High | Low–medium | Medium | Full |</p>
+<p><strong>Use systemd-nspawn when</strong> you want a full Linux system container with zero setup — no daemon, no image format, no wizard. Pull a tarball, boot it. Best for isolated builds, service sandboxing, and quick system environment tests. For a richer operational layer (image catalog, port forwarding devices, resource limits), use <a href="lxc-lxd.md">LXC/LXD</a>.</p>
+<h2>Quick Start: Arch Linux Container</h2>
+<pre><code class="language-bash"># Pull an Arch Linux base image
+sudo machinectl pull-tar --verify=no \
+  https://geo.mirror.pkgbuild.com/images/latest/Arch-Linux-x86_64-basic.tar.zst \
+  archlinux
+
+# Start the container
+sudo machinectl start archlinux
+
+# Log in
+sudo machinectl login archlinux
+
+# List running containers
+machinectl list
+
+# Stop the container
+sudo machinectl stop archlinux</code></pre>
+<p>The container root lives at <code>/var/lib/machines/archlinux</code> — a plain directory in the <code>@machines</code> subvolume.</p>
+<h2>Pulling and Creating Container Images</h2>
+<p><code>machinectl</code> can pull tar archives and raw disk images:</p>
+<pre><code class="language-bash"># Pull a tar archive (most common)
+sudo machinectl pull-tar --verify=no \
+  https://geo.mirror.pkgbuild.com/images/latest/Arch-Linux-x86_64-basic.tar.zst \
+  archlinux
+
+# List downloaded images
+machinectl list-images
+
+# Show image details
+machinectl image-status archlinux</code></pre>
+<p>You can also bootstrap manually:</p>
+<pre><code class="language-bash"># Debian container via debootstrap
+sudo debootstrap stable /var/lib/machines/debian-stable
+sudo systemd-nspawn -D /var/lib/machines/debian-stable
+
+# Arch container via pacstrap (on Shanios, pacman is available)
+sudo mkdir /var/lib/machines/arch-custom
+sudo pacstrap -c /var/lib/machines/arch-custom base</code></pre>
+<h2>Managing Containers</h2>
+<pre><code class="language-bash"># Start a container (runs as a background systemd service)
+sudo machinectl start archlinux
+
+# Log in interactively
+sudo machinectl login archlinux
+
+# Run a single command without logging in
+sudo machinectl shell archlinux /bin/bash -c &quot;pacman -Syu --noconfirm&quot;
+
+# One-off shell via nspawn directly
+sudo systemd-nspawn -D /var/lib/machines/archlinux
+
+# Status and control
+machinectl list
+machinectl status archlinux
+sudo machinectl stop archlinux
+sudo machinectl reboot archlinux
+sudo machinectl kill archlinux</code></pre>
+<h2>Auto-Start at Boot</h2>
+<pre><code class="language-bash"># Enable auto-start
+sudo machinectl enable archlinux
+
+# Disable auto-start
+sudo machinectl disable archlinux
+
+# Manage the underlying unit directly
+sudo systemctl status systemd-nspawn@archlinux.service
+journalctl -u systemd-nspawn@archlinux.service</code></pre>
+<h2>Networking</h2>
+<p>By default, nspawn containers share the host network namespace — the container uses the host IP and can access the internet directly. This is the simplest setup for builds and tests.</p>
+<p>For isolated networking with its own IP:</p>
+<pre><code class="language-bash"># Start with private networking (one-off)
+sudo systemd-nspawn --network-veth -D /var/lib/machines/archlinux
+
+# Persist via .nspawn config file
+sudo mkdir -p /etc/systemd/nspawn
+cat &lt;&lt; 'EOF' | sudo tee /etc/systemd/nspawn/archlinux.nspawn
+[Network]
+Private=yes
+VirtualEthernet=yes
+EOF
+sudo machinectl start archlinux</code></pre>
+<h2>Bind Mounts</h2>
+<pre><code class="language-bash"># Bind a host directory at startup (one-off)
+sudo systemd-nspawn \
+  --bind=/home/$USER/projects:/projects \
+  -D /var/lib/machines/archlinux
+
+# Persist via .nspawn config
+cat &lt;&lt; 'EOF' | sudo tee /etc/systemd/nspawn/archlinux.nspawn
+[Files]
+Bind=/home/username/projects:/projects
+Bind=/home/username/data:/data
+EOF</code></pre>
+<h2>Btrfs Snapshots</h2>
+<p>Container roots live in <code>@machines</code> and participate in Btrfs snapshotting:</p>
+<pre><code class="language-bash"># Snapshot before making changes
+sudo btrfs subvolume snapshot \
+  /var/lib/machines/archlinux \
+  /var/lib/machines/archlinux-snap-$(date +%Y%m%d)
+
+# Restore: stop, delete current, rename snapshot
+sudo machinectl stop archlinux
+sudo btrfs subvolume delete /var/lib/machines/archlinux
+sudo mv /var/lib/machines/archlinux-snap-20260501 /var/lib/machines/archlinux
+sudo machinectl start archlinux
+
+# Clone a container (built-in)
+sudo machinectl clone archlinux archlinux-test
+
+# Remove a container image
+sudo machinectl remove archlinux-test</code></pre>
+<h2>Practical Patterns</h2>
+<h3>Isolated Build Environment</h3>
+<pre><code class="language-bash">sudo machinectl start archlinux
+sudo machinectl shell archlinux /bin/bash -c &quot;
+  pacman -Sy --noconfirm base-devel git
+  useradd -m builder
+&quot;
+sudo systemd-nspawn \
+  --bind=/home/$USER/myproject:/build \
+  -D /var/lib/machines/archlinux \
+  su - builder -c &quot;cd /build &amp;&amp; makepkg -s&quot;</code></pre>
+<h3>Testing a System Service</h3>
+<pre><code class="language-bash">sudo machinectl start archlinux
+sudo machinectl shell archlinux /bin/bash -c &quot;
+  pacman -Sy --noconfirm nginx
+  systemctl enable --now nginx
+&quot;
+# nginx runs under systemd inside the container, isolated from host</code></pre>
+<h3>Disposable Test Container</h3>
+<pre><code class="language-bash">sudo machinectl clone archlinux arch-test
+sudo machinectl start arch-test
+sudo machinectl shell arch-test /bin/bash
+# ... test things ...
+sudo machinectl stop arch-test
+sudo machinectl remove arch-test</code></pre>
+<h2>Storage</h2>
+<p>| Location | Subvolume | |---|---| | <code>/var/lib/machines/</code> | <code>@machines</code> |</p>
+<p>The <code>@machines</code> subvolume is independent of both OS slots and survives all updates and rollbacks.</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

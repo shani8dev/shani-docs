@@ -146,7 +146,119 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">LUKS Management</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Security</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-05-09</span>
+        </div>
+      </div>
+      <div class="prose"><p>Full-disk encryption with LUKS2 must be enabled during the Shanios installer — it is a single checkbox on the disk setup screen. There is no in-place conversion from an unencrypted installation.</p>
+<h2>If You Missed Encryption at Install</h2>
+<p>Reinstall. Back up your data first, then run the installer and enable encryption at the disk setup step:</p>
+<pre><code class="language-bash"># Back up your home directory before reinstalling
+restic -r /media/external/backup init
+restic -r /media/external/backup backup ~/
+restic -r /media/external/backup backup /data/
+restic -r /media/external/backup check</code></pre>
+<p>After reinstalling with encryption enabled, enroll TPM2 for passwordless unlock:</p>
+<pre><code class="language-bash">sudo gen-efi enroll-tpm2</code></pre>
+<p>Attempting to encrypt an existing installation by hand requires: backing up all data, booting from USB, repartitioning, creating a LUKS container, recreating the Btrfs subvolume layout, restoring data, regenerating UKIs, and re-enrolling TPM2 — each step is an opportunity for data loss. The installer does all of this correctly in a few clicks.</p>
+<h2>Why LUKS2 with argon2id</h2>
+<p>Shanios uses LUKS2 with the <code>argon2id</code> key derivation function. <code>argon2id</code> is memory-hard — it requires a large amount of RAM to compute, making GPU and ASIC brute-force attacks orders of magnitude more expensive than with older PBKDF2-based setups. LUKS2 also supports up to 32 keyslots, allowing a passphrase, keyfile, and TPM2-sealed key all active simultaneously.</p>
+<p>Default encryption parameters used by the installer:</p>
+<pre><code>Cipher:      aes-xts-plain64
+Key size:    512 bits
+PBKDF:       argon2id
+Memory cost: 1048576 KB (1 GB)
+Time cost:   4 iterations
+Parallelism: 4 threads</code></pre>
+<p>---</p>
+<h2>Checking Encryption Status</h2>
+<pre><code class="language-bash"># Is the root partition encrypted?
+lsblk -f | grep -E &quot;crypt|luks&quot;
+
+# View LUKS header — version, cipher, KDF, all keyslots
+sudo cryptsetup luksDump /dev/nvme0n1p2
+
+# Confirm active mapper device
+cat /proc/mounts | grep mapper</code></pre>
+<p>Look for <code>Version: 2</code>, <code>cipher: aes-xts-plain64</code>, and <code>PBKDF: argon2id</code>. If you see <code>pbkdf2</code>, convert it:</p>
+<pre><code class="language-bash">sudo cryptsetup luksConvertKey --pbkdf argon2id /dev/nvme0n1p2</code></pre>
+<p>---</p>
+<h2>Managing Keyslots</h2>
+<p>LUKS2 supports up to 32 keyslots. You can have a passphrase, a backup passphrase, a keyfile, and a TPM2-sealed key all active simultaneously.</p>
+<h3>Adding a Second Passphrase</h3>
+<pre><code class="language-bash">sudo cryptsetup luksAddKey /dev/nvme0n1p2
+# Enter any existing passphrase when prompted, then set the new one</code></pre>
+<h3>Changing Your Passphrase</h3>
+<p>LUKS does not have a "change passphrase" operation — add a new keyslot then remove the old one:</p>
+<pre><code class="language-bash"># Step 1: Add the new passphrase (new keyslot)
+sudo cryptsetup luksAddKey /dev/nvme0n1p2
+
+# Step 2: Find the old keyslot number
+sudo cryptsetup luksDump /dev/nvme0n1p2 | grep -A2 &quot;Keyslot&quot;
+
+# Step 3: Remove the old keyslot
+sudo cryptsetup luksKillSlot /dev/nvme0n1p2 &lt;keyslot-number&gt;</code></pre>
+<h3>Adding a Keyfile</h3>
+<pre><code class="language-bash">sudo dd if=/dev/urandom of=/root/luks-keyfile bs=512 count=8
+sudo chmod 400 /root/luks-keyfile
+sudo cryptsetup luksAddKey /dev/nvme0n1p2 /root/luks-keyfile</code></pre>
+<p>Store the keyfile off-device. Losing it does not lock you out as long as your passphrase is intact.</p>
+<h3>Removing a Keyslot</h3>
+<pre><code class="language-bash">sudo cryptsetup luksKillSlot /dev/nvme0n1p2 &lt;keyslot-number&gt;</code></pre>
+<p>Never remove all keyslots — always keep your passphrase slot.</p>
+<h3>Listing All Keyslots</h3>
+<pre><code class="language-bash">sudo cryptsetup luksDump /dev/nvme0n1p2 | grep -E &quot;Keyslot|Token&quot;</code></pre>
+<p>---</p>
+<h2>Backing Up the LUKS Header</h2>
+<p>The LUKS header holds all keyslots. If it is corrupted, the encrypted data is <strong>permanently and completely unrecoverable</strong>. Back it up:</p>
+<pre><code class="language-bash">sudo cryptsetup luksHeaderBackup /dev/nvme0n1p2 \
+  --header-backup-file ~/luks-header-backup-$(date +%Y%m%d).img
+# Store off-device — external drive or encrypted cloud storage</code></pre>
+<p>Back up again any time you add or remove a keyslot.</p>
+<p>Restoring:</p>
+<pre><code class="language-bash">sudo cryptsetup luksHeaderRestore /dev/nvme0n1p2 \
+  --header-backup-file luks-header-backup-20260401.img</code></pre>
+<p>---</p>
+<h2>TPM2 Auto-Unlock</h2>
+<pre><code class="language-bash"># Enroll — handles PCR policy selection automatically
+sudo gen-efi enroll-tpm2
+
+# After firmware updates or Secure Boot changes — re-enroll
+sudo gen-efi cleanup-tpm2
+sudo gen-efi enroll-tpm2
+
+# Verify TPM2 enrollment is present
+sudo cryptsetup luksDump /dev/nvme0n1p2 | grep systemd-tpm2</code></pre>
+<p>See <a href="tpm2">TPM2 Enrollment</a> for full details including PCR policy, PIN options, and troubleshooting.</p>
+<p>---</p>
+<h2>Emergency Recovery</h2>
+<p><strong>Forgotten passphrase, no backup key:</strong> the data is unrecoverable. Reinstall and restore from backups.</p>
+<p><strong>Have a backup keyfile:</strong></p>
+<pre><code class="language-bash"># Boot from Shanios USB
+sudo cryptsetup open /dev/nvme0n1p2 shani_root \
+  --key-file /path/to/luks-keyfile
+sudo mount -o subvol=@home /dev/mapper/shani_root /mnt/home</code></pre>
+<p><strong>Corrupted header, have a header backup:</strong></p>
+<pre><code class="language-bash"># Boot from Shanios USB
+sudo cryptsetup luksHeaderRestore /dev/nvme0n1p2 \
+  --header-backup-file luks-header-backup.img
+sudo cryptsetup open /dev/nvme0n1p2 shani_root</code></pre>
+<p><strong>TPM2 won't unlock after firmware update:</strong></p>
+<pre><code class="language-bash"># Boot and enter passphrase when prompted, then re-enroll
+sudo gen-efi cleanup-tpm2
+sudo gen-efi enroll-tpm2</code></pre></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

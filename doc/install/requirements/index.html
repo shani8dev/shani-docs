@@ -146,7 +146,41 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">System Requirements</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Installation</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+        </div>
+      </div>
+      <div class="prose"><h2>Hardware Requirements</h2>
+<p>| Component | Minimum | Recommended | |-----------|---------|-------------| | Processor | x86_64 dual-core with VT-x/AMD-V | x86_64 quad-core or better | | Memory | 4 GB RAM | 8 GB RAM or more | | Storage | 32 GB (dual-image architecture) | 64 GB or more | | Firmware | UEFI (required) | UEFI with TPM 2.0 | | Installation Media | 8 GB USB drive | 16 GB USB 3.0 drive |</p>
+<blockquote><p><strong>Why 32GB minimum?</strong> Shanios maintains two complete system images (<code>@blue</code> and <code>@green</code>) for atomic updates. However, Btrfs Copy-on-Write shares unchanged data between them, resulting in only ~18% overhead compared to traditional systems.</p></blockquote>
+<h2>Disk Partition Layout</h2>
+<p>Shanios uses a simple two-partition layout — there are no separate <code>/home</code>, <code>/var</code>, or swap partitions. All subvolumes live within the single Btrfs partition.</p>
+<p>| Partition | Filesystem | Size | Purpose | |-----------|-----------|------|---------| | EFI System Partition (ESP) | FAT32 | 1 GB | Bootloader, UKI images — mounted at <code>/boot/efi</code> | | Root partition | Btrfs (or LUKS2 → Btrfs) | Remainder of disk | All system subvolumes (<code>@blue</code>, <code>@green</code>, <code>@home</code>, <code>@data</code>, etc.) |</p>
+<p>When full-disk encryption is chosen, the Btrfs partition is wrapped in a LUKS2 container (<code>/dev/mapper/shani_root</code>). The ESP is never encrypted — only the root partition is.</p>
+<h2>Firmware Requirements</h2>
+<ul>
+<li><strong>UEFI required</strong> — legacy BIOS is not supported</li>
+<li><strong>Secure Boot</strong> — optional but recommended; Shanios ships its own MOK key</li>
+<li><strong>TPM 2.0</strong> — optional; required for automatic LUKS2 unlock without passphrase</li>
+</ul>
+<h2>Not Supported</h2>
+<ul>
+<li>Legacy BIOS / CSM mode</li>
+<li>32-bit (x86) CPUs</li>
+<li>Dual-boot configurations (not recommended — other OSes may break the bootloader)</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

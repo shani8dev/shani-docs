@@ -146,7 +146,83 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Bottles (Windows Compatibility)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Software &amp; Apps</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-05-08</span>
+        </div>
+      </div>
+      <div class="prose"><p><strong>Bottles</strong> is the recommended tool for running non-gaming Windows software on Shanios. It manages Wine environments ("bottles"), handles runtime dependencies, and keeps each application's Windows registry and files isolated in its own prefix.</p>
+<blockquote><p><strong>Installation</strong>: Pre-installed on the KDE Plasma edition. On the GNOME edition:</p></blockquote>
+<blockquote><p><pre><code class="language-bash">&gt; flatpak install flathub com.usebottles.bottles
+&gt; </code></pre></p></blockquote>
+<p>For gaming, use Steam + Proton or Heroic Games Launcher instead — Bottles is for productivity tools, creative software, business applications, utilities, and legacy apps.</p>
+<h2>How Wine Works</h2>
+<p>Wine reimplements the Windows API as native Linux calls — it is not an emulator. DXVK (DirectX 9/10/11) and VKD3D (DirectX 12) translate DirectX calls to Vulkan. Most Windows applications run at near-native speed.</p>
+<p>Wine cannot run applications that rely on Windows kernel drivers, hardware dongles tied to Windows, or kernel-level anti-cheat. Use a Windows VM for those cases.</p>
+<h2>Creating a Bottle</h2>
+<p>Open Bottles from your application launcher → <strong>Create a new bottle</strong>:</p>
+<ul>
+<li><strong>Application</strong> — for productivity tools, utilities, and most Windows software.</li>
+<li><strong>Gaming</strong> — pre-configured with DXVK and VKD3D for DirectX games.</li>
+<li><strong>Custom</strong> — full manual control.</li>
+</ul>
+<h2>Installing Windows Software</h2>
+<ol>
+<li>Open your bottle → <strong>Run Executable</strong> → select the <code>.exe</code> installer</li>
+<li>Follow the installer as you would on Windows</li>
+<li>The installed app appears under <strong>Programs</strong></li>
+<li>Click <strong>Add Desktop Entry</strong> (three-dot menu) to add it to your Linux launcher</li>
+</ol>
+<p>Your Linux home directory is accessible from inside Wine at <code>Z:\home\username</code>.</p>
+<h2>Runtime Dependencies</h2>
+<p>Go to your bottle → <strong>Dependencies</strong> → search and install as needed:</p>
+<p>| Dependency | Required by | |---|---| | <code>vcredist2019</code> | Most modern Windows apps (Visual C++ 2019) | | <code>vcredist2015</code> | Older apps (Visual C++ 2015) | | <code>dotnet48</code> | .NET Framework 4.8 — business software, installers | | <code>dotnet6</code> | .NET 6 — newer cross-platform apps | | <code>d3dx9</code> | DirectX 9 components | | <code>d3dcompiler_47</code> | DirectX shader compiler | | <code>corefonts</code> | Microsoft Core Fonts — improves text rendering | | <code>liberation</code> | Liberation fonts — metrically compatible with Arial/Times |</p>
+<h2>Wine Runners</h2>
+<p>Change the runner in <strong>Settings → Runner</strong>:</p>
+<p>| Runner | Best for | |---|---| | <strong>Caffe</strong> | Default — stable, good general-purpose choice | | <strong>Vaniglia</strong> | Upstream Wine, minimal patches — use when patched runners misbehave | | <strong>Wine Staging</strong> | Wine + Staging patchset — good for productivity apps | | <strong>Wine-GE</strong> | Valve's Wine backported for non-Steam use — best for DirectX games and media software |</p>
+<h2>Advanced Configuration</h2>
+<p><strong>DXVK and VKD3D</strong>: In bottle <strong>Settings</strong>, enable DXVK (DirectX 9/10/11 → Vulkan) and VKD3D (DirectX 12 → Vulkan). Both are enabled by default in the Gaming template. Some creative and 3D tools also benefit.</p>
+<p><strong>Virtual Desktop Mode</strong>: Enable in bottle Settings if an app has window management or full-screen rendering issues. Wine creates a fake Windows desktop at a fixed resolution inside a single Linux window.</p>
+<p><strong>DLL Overrides</strong>: In bottle <strong>Settings → DLL Overrides</strong>, set <code>native,builtin</code> to prefer a winetricks-installed DLL, or <code>builtin,native</code> to prefer Wine's built-in. Common fix: install <code>d3dx9</code> via Dependencies, then set <code>d3d9</code> override to <code>native</code>.</p>
+<p><strong>Environment Variables</strong>: In bottle <strong>Settings → Environment Variables</strong>:</p>
+<ul>
+<li><code>WINE_LARGE_ADDRESS_AWARE=1</code> — allows 32-bit apps to use more than 2 GB RAM</li>
+<li><code>WINEDEBUG=-all</code> — suppress debug output (speeds up some apps)</li>
+</ul>
+<h2>Storage</h2>
+<p>Bottles runs as a Flatpak. Data lives in <code>~/.var/app/com.usebottles.bottles/data/bottles/bottles/</code> — inside the <code>@home</code> subvolume, surviving all OS updates and rollbacks.</p>
+<h2>Checking Compatibility</h2>
+<ul>
+<li><strong><a href="https://appdb.winehq.org">WineHQ AppDB</a></strong> — compatibility database. Platinum/Gold = works well; Bronze = workarounds needed; Garbage = consider a Windows VM.</li>
+<li><strong><a href="https://www.protondb.com">ProtonDB</a></strong> — for Windows games under Proton/Steam.</li>
+</ul>
+<h2>When to Use a Windows VM Instead</h2>
+<p>Wine cannot handle:</p>
+<ul>
+<li>Applications requiring a <strong>kernel driver</strong> (hardware dongles, some DRM, security software)</li>
+<li><strong>Kernel-level anti-cheat</strong> systems</li>
+<li>The <strong>full Microsoft Office suite</strong> with macros, COM add-ins, and MDM integration</li>
+<li><strong>Enterprise software</strong> with hardware-locked licensing</li>
+</ul>
+<p>For these, use a Windows VM via virt-manager (pre-installed on the KDE Plasma edition). See <a href="vms.md">Virtual Machines</a>.</p>
+<h2>Troubleshooting</h2>
+<ul>
+<li><strong>App won't start</strong>: Check the <strong>Logs</strong> tab. Install <code>vcredist2019</code> or <code>dotnet48</code> first.</li>
+<li><strong>Graphics glitches</strong>: Switch runner (e.g. Caffe → Wine-GE). Toggle DXVK on or off.</li>
+<li><strong>App needs other drives</strong>: <strong>Settings → Sandbox</strong> — add paths or disable sandboxing.</li>
+<li><strong>Crashes on startup</strong>: Check WineHQ AppDB for known workarounds.</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

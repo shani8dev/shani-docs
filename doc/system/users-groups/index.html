@@ -146,7 +146,282 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Users &amp; Groups</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">System</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-25</span>
+        </div>
+      </div>
+      <div class="prose"><p>User accounts on Shani OS follow standard Linux conventions — accounts are stored in <code>/etc/passwd</code>, <code>/etc/shadow</code>, and <code>/etc/group</code>, which live in the <code>/etc</code> overlay and persist across all OS updates and rollbacks.</p>
+<p>The key difference from a traditional distro is that <strong>you should use <code>adduser</code> (not <code>useradd</code>) for interactive accounts</strong>. The <code>adduser</code> wrapper on Shani OS reads <code>/etc/shani-extra-groups</code> and automatically adds new users to all the groups they need (wheel, video, input, kvm, etc.) in one step. See <a href="user-setup">User Provisioning</a> for the full group reference.</p>
+<p>---</p>
+<h2>On Shani OS: adduser vs useradd</h2>
+<p>| Command | Use when | |---------|----------| | <code>sudo adduser &lt;name&gt;</code> | Creating a human user — reads <code>/etc/shani-extra-groups</code>, sets Zsh shell, prompts for password | | <code>sudo useradd</code> | Scripted/service account creation where you need fine-grained control |</p>
+<pre><code class="language-bash"># Preferred: creates account, sets groups, prompts for password interactively
+sudo adduser alice
+
+# After adding, trigger shani-user-setup to provision Flatpak/Nix/subuid ranges
+sudo touch /data/user-setup-needed</code></pre>
+<p>---</p>
+<h2>Creating Users</h2>
+<h3>Interactive user (preferred)</h3>
+<pre><code class="language-bash">sudo adduser alice
+# Prompts for password and GECOS info
+# Automatically adds to groups from /etc/shani-extra-groups</code></pre>
+<h3>Scripted user creation</h3>
+<pre><code class="language-bash"># Create account with home directory, set shell explicitly
+sudo useradd -m -s /bin/zsh -c &quot;Alice Smith&quot; alice
+
+# Set password
+sudo passwd alice
+
+# Add to all required groups
+sudo usermod -aG wheel,video,input,audio,kvm,storage,network,realtime alice
+
+# Trigger shani-user-setup for Flatpak/Nix/subuid provisioning
+sudo touch /data/user-setup-needed</code></pre>
+<h3>Service/system account (no login)</h3>
+<pre><code class="language-bash"># System account: UID &lt; 1000, no home, no shell, no password
+sudo useradd --system --no-create-home --shell /usr/sbin/nologin myservice
+
+# With a dedicated home directory (for service data)
+sudo useradd --system --create-home --home-dir /var/lib/myservice \
+  --shell /usr/sbin/nologin myservice</code></pre>
+<p>---</p>
+<h2>Modifying Users</h2>
+<pre><code class="language-bash"># Change display name (GECOS)
+sudo usermod -c &quot;Alice Smith&quot; alice
+
+# Change login shell
+sudo usermod -s /bin/bash alice
+# or interactively:
+chsh -s /bin/bash alice
+
+# Change home directory (use -m to move contents)
+sudo usermod -m -d /home/newhome alice
+
+# Lock an account (prepends ! to the password hash — SSH keys still work)
+sudo usermod -L alice
+
+# Unlock
+sudo usermod -U alice
+
+# Rename a user (also rename the home directory manually)
+sudo usermod -l newname alice
+sudo mv /home/alice /home/newname
+sudo usermod -d /home/newname newname
+
+# Expire an account on a specific date (format: YYYY-MM-DD)
+sudo usermod -e 2026-12-31 alice
+
+# Remove expiry
+sudo usermod -e &quot;&quot; alice</code></pre>
+<p>---</p>
+<h2>Deleting Users</h2>
+<pre><code class="language-bash"># Remove account but keep home directory (recommended — avoids accidental data loss)
+sudo userdel alice
+
+# Remove account AND home directory
+sudo userdel -r alice
+
+# Also remove the user's mail spool
+sudo userdel -r -f alice</code></pre>
+<blockquote><p>⚠️ On Shani OS, <code>/home</code> is a separate Btrfs subvolume (<code>@home</code>). Even <code>userdel -r</code> only removes the directory — the subvolume itself remains. If you want to fully remove a user's data, delete the subvolume manually:</p></blockquote>
+<blockquote><p><pre><code class="language-bash">&gt; sudo btrfs subvolume delete /home/alice
+&gt; </code></pre></p></blockquote>
+<p>---</p>
+<h2>Passwords</h2>
+<pre><code class="language-bash"># Set or change your own password
+passwd
+
+# Set another user's password (root/wheel only)
+sudo passwd alice
+
+# Force password change on next login
+sudo passwd -e alice
+
+# Lock password login (SSH key auth still works)
+sudo passwd -l alice
+
+# Unlock
+sudo passwd -u alice
+
+# Check password status
+sudo passwd -S alice
+# Output: alice PS 2026-01-15 0 99999 7 -1
+# Fields: username  status  last-change  min-days  max-days  warn-days  inactive-days
+# status: PS=password set, LK=locked, NP=no password</code></pre>
+<h3>Password aging with chage</h3>
+<pre><code class="language-bash"># View aging settings
+sudo chage -l alice
+
+# Set maximum password age (days)
+sudo chage -M 90 alice
+
+# Force change on next login
+sudo chage -d 0 alice
+
+# Set account expiry
+sudo chage -E 2026-12-31 alice</code></pre>
+<p>See <a href="ch-commands">ch* Commands</a> for the full <code>chage</code> reference.</p>
+<p>---</p>
+<h2>Groups</h2>
+<h3>Creating and modifying groups</h3>
+<pre><code class="language-bash"># Create a new group
+sudo groupadd developers
+
+# Create with a specific GID
+sudo groupadd -g 2000 developers
+
+# Rename a group
+sudo groupmod -n devs developers
+
+# Delete a group (does not affect users who were members)
+sudo groupdel developers</code></pre>
+<h3>Managing group membership</h3>
+<pre><code class="language-bash"># Add a user to one or more groups (append — does not remove from existing groups)
+sudo usermod -aG developers,docker alice
+
+# Remove a user from a group
+sudo gpasswd -d alice developers
+
+# Set exact group list (replaces existing supplementary groups — use with care)
+sudo usermod -G wheel,video,input alice
+
+# Make a user the group administrator
+sudo gpasswd -A alice developers</code></pre>
+<h3>Inspecting group membership</h3>
+<pre><code class="language-bash"># Show all groups the current user belongs to
+groups
+
+# Show groups for a specific user
+groups alice
+id alice
+
+# List all members of a group
+getent group wheel
+
+# List all groups
+getent group
+
+# Check if a user is in a specific group
+id alice | grep -w wheel</code></pre>
+<p>---</p>
+<h2>sudo & Privileges</h2>
+<p>On Shani OS, <code>wheel</code> group members have full sudo access. The configuration lives in <code>/etc/sudoers</code> (managed by the OS) and <code>/etc/sudoers.d/</code> (your custom rules, captured by the overlay).</p>
+<pre><code class="language-bash"># Edit sudoers safely (validates syntax before saving — never edit /etc/sudoers directly)
+sudo visudo
+
+# Add a drop-in rule (preferred — less risk of locking yourself out)
+sudo nano /etc/sudoers.d/my-rules</code></pre>
+<h3>Common sudoers patterns</h3>
+<pre><code class="language-text"># Full sudo without password (convenient for a personal machine)
+alice ALL=(ALL) NOPASSWD: ALL
+
+# Allow a specific command without password
+alice ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart caddy
+
+# Allow a group to run a command without password
+%developers ALL=(ALL) NOPASSWD: /usr/bin/podman
+
+# Run commands as a specific user (not root)
+alice ALL=(deploy) NOPASSWD: /usr/local/bin/deploy.sh
+
+# Restrict to specific hosts
+alice workstation=(ALL) ALL</code></pre>
+<blockquote><p>⚠️ Always use <code>sudo visudo</code> or <code>sudo visudo -f /etc/sudoers.d/myrule</code> — it validates syntax before writing. A syntax error in sudoers locks out all sudo access. If this happens, boot to the other slot and fix the file via the <code>/etc</code> overlay.</p></blockquote>
+<h3>Running commands as another user</h3>
+<pre><code class="language-bash"># Run as root
+sudo command
+
+# Run as a specific user
+sudo -u alice command
+
+# Open a root shell (full environment)
+sudo -i
+
+# Open a shell as another user
+sudo -u alice -s
+
+# Check what sudo permissions the current user has
+sudo -l</code></pre>
+<p>---</p>
+<h2>Inspecting Accounts</h2>
+<pre><code class="language-bash"># Current user and UID
+whoami
+id
+
+# Who is logged in right now
+who
+w
+
+# Login history (reads /var/log/wtmp)
+last
+last alice             # filtered by user
+last -n 20             # last 20 entries
+last reboot            # reboot history
+
+# Failed login attempts (reads /var/log/btmp)
+sudo lastb
+sudo lastb -n 20
+
+# Last login time per user
+lastlog
+lastlog -u alice
+
+# List all user accounts (UID &gt;= 1000 = human users)
+getent passwd | awk -F: '$3 &gt;= 1000 {print $1, $3, $6, $7}'
+
+# Currently active login sessions
+loginctl list-sessions
+loginctl show-session 1
+loginctl show-user alice</code></pre>
+<p>---</p>
+<h2>Linger (User Services Without Login)</h2>
+<p>By default, user systemd services stop when the last session for that user ends. Enable linger to keep user services running at all times — required for user-level backup timers, containers, and any service that should run without an active login:</p>
+<pre><code class="language-bash"># Enable linger for a user
+sudo loginctl enable-linger alice
+
+# Disable
+sudo loginctl disable-linger alice
+
+# Check linger status
+loginctl show-user alice | grep Linger</code></pre>
+<p>This is required for the <code>backup.timer</code> and any other <code>systemctl --user</code> timer that should fire even when the user is not logged in. See <a href="backup">Backup & Recovery</a> for the full example.</p>
+<p>---</p>
+<h2>/etc/passwd and /etc/shadow</h2>
+<p>These files live in the <code>/etc</code> overlay and are preserved across every OS update. You rarely need to edit them directly — use the commands above. For reference:</p>
+<pre><code>/etc/passwd  — username:x:UID:GID:GECOS:home:shell
+/etc/shadow  — username:hashed-password:last-change:min:max:warn:inactive:expire
+/etc/group   — groupname:x:GID:member1,member2
+/etc/subuid  — username:start:count  (rootless container UID ranges)
+/etc/subgid  — username:start:count  (rootless container GID ranges)</code></pre>
+<pre><code class="language-bash"># Read entries for a specific user (uses NSS — works with LDAP too)
+getent passwd alice
+getent shadow alice    # requires root
+getent group developers</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | New user missing groups (kvm, video, etc.) | Run <code>sudo touch /data/user-setup-needed</code> to trigger <code>shani-user-setup</code>; or <code>sudo FORCE_SETUP=1 shani-user-setup</code> | | <code>sudo: alice is not in the sudoers file</code> | Add alice to the wheel group: <code>sudo usermod -aG wheel alice</code>; log out and back in | | Group membership not taking effect | Log out and back in — supplementary groups are read at login. To apply immediately: <code>newgrp developers</code> (opens a subshell in that group) | | <code>userdel: user alice is currently used by process</code> | Kill active sessions first: <code>sudo loginctl kill-user alice</code>; then retry | | User can't run rootless Podman | Check <code>cat /etc/subuid</code> — if alice has no entry, run <code>sudo touch /data/user-setup-needed</code> | | Locked out of sudo (syntax error in sudoers) | Boot into the other slot from systemd-boot; mount the <code>/etc</code> overlay and remove the broken file from <code>/data/overlay/etc/upper/sudoers.d/</code> | | Account exists but home directory is missing | <code>sudo mkhomedir_helper alice</code> or <code>sudo cp -a /etc/skel /home/alice &amp;&amp; sudo chown -R alice:alice /home/alice</code> |</p>
+<p>---</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="user-setup">User Provisioning</a> — <code>shani-user-setup</code>, <code>/etc/shani-extra-groups</code>, subuid allocation</li>
+<li><a href="ch-commands">ch* Commands</a> — <code>chmod</code>, <code>chown</code>, <code>chage</code>, <code>chsh</code>, <code>chpasswd</code></li>
+<li><a href="config">System Config</a> — how <code>/etc</code> overlay preserves account changes across updates</li>
+<li><a href="shani-reset">Factory Reset</a> — what happens to user accounts after a reset</li>
+<li><a href="shell">Shell & Environment</a> — Zsh, Starship, and per-user shell config</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

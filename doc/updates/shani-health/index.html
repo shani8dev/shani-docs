@@ -146,7 +146,199 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">shani-health Reference</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Updates &amp; Config</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-05-13</span>
+        </div>
+      </div>
+      <div class="prose"><p><code>shani-health</code> is the system health and diagnostics CLI for Shanios. It provides a comprehensive single-command view of your system's state: boot chain, security posture, storage, hardware, networking, packages, containers, and more. It is the primary tool for diagnosing issues and checking system integrity.</p>
+<p>---</p>
+<h2>Basic Usage</h2>
+<pre><code class="language-bash"># Full system status report (default)
+shani-health
+
+# Focused reports
+shani-health --boot           # Boot chain, slots, UKI, deployment state
+shani-health --security       # Secure Boot, LUKS, TPM2, users, LSMs
+shani-health --hardware       # CPU, GPU, disk, SMART, battery, firmware
+shani-health --network        # NetworkManager, DNS, VPN, firewall, servers
+shani-health --packages       # Flatpak, snap, Nix, containers, virtualisation
+
+# Storage analysis
+shani-health --storage-info   # Btrfs subvolume sizes, compression, snapshots
+
+# Log tools
+shani-health --journal                  # Critical journal messages
+shani-health --journal err              # Errors and above
+shani-health --journal warning --since -1h   # Warnings in the last hour
+shani-health --clean-logs               # Remove logs older than 30 days
+shani-health --clean-logs 7             # Remove logs older than 7 days
+shani-health --export-logs ~/           # Bundle diagnostics for bug reports
+
+# Maintenance
+shani-health --history 100              # Last 100 deploy/rollback events
+shani-health --verify                   # Deep integrity check (runs Btrfs scrub)
+shani-health --clear-boot-failure       # Clear a stale boot failure marker
+
+# Output options
+shani-health -v                         # Verbose/debug output</code></pre>
+<p>---</p>
+<h2>What shani-health Checks</h2>
+<h3>Full Report (default / <code>--info</code>)</h3>
+<p>The default run covers every component in one pass. Sections include:</p>
+<ul>
+<li><strong>OS & Slots</strong> — version, profile, channel, uptime, hostname, locale, timezone, machine-id, and the current/expected/candidate slot state</li>
+<li><strong>Boot Health</strong> — boot chain services, dracut 99shanios module, failure markers, cmdline slot consistency</li>
+<li><strong>Boot Entries</strong> — ESP space, EFI files (shim + mmx64 + sd-boot), UKI presence and signature validity, keymap, boot default</li>
+<li><strong>Deployment</strong> — reboot-needed, deployment_pending, installed version, cmdline files, rollback backups</li>
+<li><strong>Update Tools</strong> — gen-efi, GPG signing key, download cache, partial downloads, download tools</li>
+<li><strong>Data State</strong> — <code>/data</code> mount, tmpfiles, shani-user-setup.path, varlib/varspool directories, overlay dirs</li>
+<li><strong>Immutability</strong> — root read-only, <code>/var</code> tmpfs, <code>/etc</code> overlay, critical subvolumes</li>
+<li><strong>Secure Boot</strong> — SB state, MOK key enrollment, MOK keypair validity, UKI signatures, UKI build tools</li>
+<li><strong>Kernel Security</strong> — LSM stack (landlock/lockdown/yama/integrity/apparmor/bpf), kernel lockdown, module blacklist, protocol blacklist</li>
+<li><strong>Encryption</strong> — LUKS state, KDF (argon2id recommended), key slots, crypttab, dracut crypt config</li>
+<li><strong>TPM2</strong> — hardware presence, enrollment status, PCR policy vs current Secure Boot state</li>
+<li><strong>Security Services</strong> — AppArmor, firewall, polkit, fail2ban, FIDO2/libfido2, pcscd, fprintd</li>
+<li><strong>Security Tools</strong> — lynis hardening index, rkhunter scan history</li>
+<li><strong>Users & Access</strong> — login users, passwords, wheel group, UID-0 accounts, NOPASSWD sudo, home permissions, SSH key permissions, GnuPG permissions</li>
+<li><strong>Groups</strong> — system groups (kvm, video, input, realtime…), group membership from <code>/etc/shani-extra-groups</code></li>
+<li><strong>Hardware</strong> — CPU model/flags/microcode, RAM, GPU, virtualization, IOMMU, temperatures, Bluetooth, peripherals</li>
+<li><strong>Disk</strong> — device model, SMART health, SSD wear, disk temperature, partition table, swap/hibernate</li>
+<li><strong>Battery</strong> — charge level, health, cycle count (laptop/UPS systems only)</li>
+<li><strong>Storage</strong> — Btrfs free space, scrub status, maintenance timers, bees deduplication, device errors</li>
+<li><strong>Firmware</strong> — CPU microcode, fwupd, pending firmware updates</li>
+<li><strong>Performance</strong> — power-profiles-daemon, irqbalance, ananicy-cpp, gamemode, THP</li>
+<li><strong>Network</strong> — NetworkManager, DNS, DHCP, Wi-Fi backend, VPN, internet, resolv.conf, servers (SSH, Samba, NFS, web…)</li>
+<li><strong>Audio & Display</strong> — PipeWire, WirePlumber, rtkit, display manager, XDG portals, Plymouth</li>
+<li><strong>Printing & Scanning</strong> — CUPS, cups-browsed, ipp-usb, SANE</li>
+<li><strong>Package Managers</strong> — Flatpak, Snap, Nix, AppImage, shani-update timer</li>
+<li><strong>Backup Tools</strong> — rclone, restic</li>
+<li><strong>Containers</strong> — Podman, Distrobox, LXD, Docker, Waydroid, nspawn</li>
+<li><strong>Virtualization</strong> — KVM, libvirt daemons, VM inventory, default network, storage pools</li>
+<li><strong>Monitoring</strong> — smartd, logrotate, cronie, tmpfiles, timesyncd, auditd, sysstat</li>
+<li><strong>Runtime Health</strong> — CPU load, memory, ZRAM, OOM kills, kernel oops, MCE hardware errors, entropy, zombies, dirty memory, journal errors, <code>@log</code> size</li>
+<li><strong>Units</strong> — failed systemd units (system and user)</li>
+<li><strong>Core Dumps</strong> — systemd-coredump handler, recorded dumps</li>
+<li><strong>System Health</strong> — D-Bus, logind, nsswitch, failed logins, boot time, kernel version, home usage</li>
+</ul>
+<h3>Boot Report (<code>--boot</code>)</h3>
+<p>A focused view of the boot chain and deployment state. Covers OS/Slots, Boot Health, Boot Entries, Deployment, Update Tools, Data State, and Secure Boot. Use this after an update or when debugging boot issues.</p>
+<h3>Security Report (<code>--security</code>)</h3>
+<p>Covers Secure Boot, Kernel Security, Encryption, TPM2, Security Services, Security Tools, Users & Access, and Groups. Useful for security audits and hardening checks.</p>
+<h3>Hardware Report (<code>--hardware</code>)</h3>
+<p>Covers Hardware, Disk, Battery, Storage, and Firmware. Use when checking for disk health, temperatures, or firmware updates.</p>
+<h3>Network Report (<code>--network</code>)</h3>
+<p>Covers Network and Servers. Use when debugging connectivity, DNS, or server configuration issues.</p>
+<h3>Package Report (<code>--packages</code>)</h3>
+<p>Covers Package Managers, Backup Tools, Containers, Virtualisation, and Monitoring.</p>
+<p>---</p>
+<h2>Reading the Output</h2>
+<p>Each row uses a colour-coded status prefix:</p>
+<p>| Prefix | Symbol | Meaning | |--------|--------|---------| | <code>OK</code> | ✓ green | Healthy | | <code>!</code> | ⚠ yellow | Warning — degraded but functional | | <code>!!</code> | ✗ red | Error — action required | | <code>--</code> | — dim | Informational | | <code>~~</code> | ○ cyan | Not enabled (optional feature) | | <code>&gt;&gt;</code> | ◉ green/dim | Enabled, idle (socket-activated) | | <code>-&gt;</code> | ↻ cyan | In progress |</p>
+<p>Recommendations are collected and printed as a numbered list at the bottom of the report.</p>
+<p>---</p>
+<h2>Storage Analysis (<code>--storage-info</code>)</h2>
+<pre><code class="language-bash">shani-health --storage-info</code></pre>
+<p>Mounts the Btrfs root at <code>subvolid=5</code> and reports:</p>
+<ul>
+<li>Filesystem free space and block group profiles</li>
+<li>Per-subvolume sizes with compression ratios (uses <code>compsize</code> if installed)</li>
+<li>Backup snapshot ages (warns if >30 days old)</li>
+<li>Application storage: Flatpak, Snap, Nix, Podman, LXD, Waydroid, home directories</li>
+<li>Snapshot summary with creation dates</li>
+<li>Reclaim hints: duperemove, bees status, stale snapshots</li>
+</ul>
+<p>This is more detailed than <code>sudo shani-deploy --storage-info</code>, which only reports compressed OS slot sizes.</p>
+<p>---</p>
+<h2>Log Management (<code>--clean-logs</code>)</h2>
+<pre><code class="language-bash"># Remove logs older than 30 days (default)
+shani-health --clean-logs
+
+# Remove logs older than 7 days
+shani-health --clean-logs 7</code></pre>
+<p>Cleans:</p>
+<ul>
+<li>Stale journal directories from old machine-IDs</li>
+<li>Vacuums the current journal to its configured <code>SystemMaxUse</code> cap</li>
+<li>Rotated log archives (<code>.gz</code>, <code>.bz2</code>, <code>.xz</code>, <code>.zst</code>, numbered copies)</li>
+<li>Oversized CUPS, btmp/wtmp, rkhunter/lynis logs</li>
+<li>sysstat daily files beyond the retention window</li>
+<li>Leaves current active log files untouched</li>
+</ul>
+<p>---</p>
+<h2>Integrity Verification (<code>--verify</code>)</h2>
+<pre><code class="language-bash">shani-health --verify</code></pre>
+<p>Performs a deep integrity check that includes:</p>
+<ol>
+<li>UKI signature verification against the local MOK certificate</li>
+<li>Btrfs scrub on both <code>@blue</code> and <code>@green</code> subvolumes</li>
+<li>Slot marker consistency (<code>/data/current-slot</code>)</li>
+<li>Boot entry consistency (<code>loader.conf</code> default vs slot)</li>
+<li>Immutability checks (root read-only, <code>/var</code> tmpfs, <code>/etc</code> overlay)</li>
+<li>Critical subvolume mount verification</li>
+</ol>
+<blockquote><p><strong>Note:</strong> Btrfs scrub reads and checksums every block. On large volumes this can take minutes to hours. The command waits for completion.</p></blockquote>
+<p>Returns exit code <code>1</code> if any integrity issues are found.</p>
+<p>---</p>
+<h2>Journal Viewer (<code>--journal</code>)</h2>
+<pre><code class="language-bash">shani-health --journal                    # Critical messages (default)
+shani-health --journal err                # Errors and above
+shani-health --journal warning            # Warnings and above
+shani-health --journal err --since -2h    # Errors in the last 2 hours</code></pre>
+<p>Shows categorised journal messages grouped by priority level, AppArmor denials with top offending profiles, OOM kill events, and currently failed units.</p>
+<p>---</p>
+<h2>Bug Report Bundle (<code>--export-logs</code>)</h2>
+<pre><code class="language-bash">shani-health --export-logs ~/</code></pre>
+<p>Creates a compressed bundle at <code>~/shanios-report-&lt;timestamp&gt;.tar.gz</code> containing:</p>
+<ul>
+<li><code>shanios-deploy.log</code> and <code>.old</code></li>
+<li>Last 500 journal entries (filtered to remove passwords, tokens, secrets)</li>
+<li><code>system-state.txt</code> — kernel cmdline, uname, versions, boot markers, Btrfs subvolumes, fstab, failed units</li>
+<li><code>loader.conf</code>, <code>loader-entries.txt</code>, <code>efi-binaries.txt</code> from the ESP</li>
+</ul>
+<p>Safe to attach to bug reports — no private keys or passwords are included.</p>
+<p>---</p>
+<h2>Scripting with shani-health</h2>
+<h3>Exit Codes</h3>
+<p>| Code | Meaning | |------|---------| | <code>0</code> | No issues found | | <code>1</code> | Issues found (warnings or errors) |</p>
+<h3>Fleet Health Monitoring</h3>
+<pre><code class="language-bash"># Remote check via SSH or Tailscale
+ssh admin@machine-name.tailnet.ts.net 'shani-health --boot'
+
+# Automate with a systemd timer
+# /etc/systemd/system/shani-health-report.service
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'shani-health &gt; /var/log/shani-health-$(date +%%Y%%m%%d).txt 2&gt;&amp;1'
+
+# /etc/systemd/system/shani-health-report.timer
+[Timer]
+OnCalendar=daily
+Persistent=true
+[Install]
+WantedBy=timers.target</code></pre>
+<p>For Nagios/Zabbix-style monitoring, the non-zero exit code on any issue makes <code>shani-health</code> usable directly as a check script. For Prometheus/Grafana, wrap the output in a custom exporter that parses the coloured rows.</p>
+<p>---</p>
+<h2>Relationship to Other Tools</h2>
+<p>| Command | Focus | |---------|-------| | <code>shani-health</code> | Live system health — all components | | <code>shani-health --storage-info</code> | Deep Btrfs storage analysis | | <code>sudo shani-deploy --storage-info</code> | Compressed sizes of OS slots only | | <code>shani-health --verify</code> | Deep integrity check with scrub | | <code>sudo shani-deploy -r</code> | Roll back inactive slot |</p>
+<p>---</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="system">System Updates</a> — how <code>shani-deploy</code> works</li>
+<li><a href="../arch/boot">Boot Process</a> — boot chain and health services</li>
+<li><a href="../security/gen-efi">gen-efi Reference</a> — UKI generation and signing</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

@@ -146,7 +146,131 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Dracut Initramfs Module</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Architecture</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-05-13</span>
+        </div>
+      </div>
+      <div class="prose"><p>Shanios ships a custom dracut module (<code>99shanios</code>) that adds three hooks to the initramfs. These hooks implement the two features that require early-boot access before the root filesystem is available to userspace: <strong>boot failure detection</strong> and <strong><code>/etc</code> OverlayFS mounting</strong>.</p>
+<p>---</p>
+<h2>Module Location</h2>
+<pre><code>/usr/lib/dracut/modules.d/99shanios/
+├── module-setup.sh              ← declares hooks and binaries
+├── shanios-boot-failure-hook.sh ← pre-mount (priority 90)
+├── shanios-overlay-etc.sh       ← pre-pivot (priority 50)
+└── shanios-boot-success-clear.sh ← pre-pivot (priority 90)</code></pre>
+<p>The module is always included in Shanios initramfs builds (<code>check()</code> returns 0 unconditionally). It is rebuilt automatically by <code>gen-efi configure &lt;slot&gt;</code> on every deploy.</p>
+<p>---</p>
+<h2>Hook: shanios-boot-failure-hook.sh (pre-mount 90)</h2>
+<p><strong>Runs:</strong> After LUKS unlock and device discovery, <strong>before</strong> the root Btrfs subvolume is mounted.</p>
+<p><strong>Purpose:</strong> Write a <code>boot_hard_failure</code> marker so that if root mount fails, the failure is recorded persistently and <code>shani-update</code> can detect it on the next boot.</p>
+<p><strong>Why dracut and not a systemd service:</strong> dracut has no "on mount failure" hook. The only reliable pattern is write-before-mount, clear-on-success. If root never mounts, the marker persists. If root mounts successfully, the <code>shanios-boot-success-clear.sh</code> hook at pre-pivot removes it.</p>
+<p><strong>What it does:</strong></p>
+<ol>
+<li>Locates the Btrfs device by filesystem label (<code>shani_root</code>)</li>
+<li>Mounts <code>@data</code> read-write to a temporary mountpoint (<code>/run/shanios-data-tmp</code>)</li>
+<li>Reads the attempted slot from <code>rootflags=subvol=@&lt;slot&gt;</code> in the kernel cmdline</li>
+<li>Writes the slot name to <code>/data/boot_hard_failure</code></li>
+<li>Unmounts <code>@data</code> immediately</li>
+</ol>
+<p><strong>Failure handling:</strong> If the <code>@data</code> subvolume cannot be mounted (e.g. disk not found), the hook exits silently with a warning in the boot log rather than halting the boot.</p>
+<p>---</p>
+<h2>Hook: shanios-overlay-etc.sh (pre-pivot 50)</h2>
+<p><strong>Runs:</strong> After root is successfully mounted, <strong>before</strong> <code>pivot_root</code> hands control to systemd.</p>
+<p><strong>Purpose:</strong> Mount the <code>/etc</code> OverlayFS so systemd PID 1 reads the correct (user-modified) <code>/etc</code> from its very first unit file access.</p>
+<p><strong>Why in dracut and not fstab:</strong> If the overlay is applied via fstab after <code>pivot_root</code>, systemd has already cached paths from the read-only root's <code>/etc</code>. The overlay must be in place before the switch to the new root.</p>
+<p><strong>What it does:</strong></p>
+<ol>
+<li>Locates the Btrfs device by filesystem label</li>
+<li>Mounts <code>@data</code> read-write at <code>/run/shanios-data-tmp</code></li>
+<li>Creates <code>/data/overlay/etc/upper</code> and <code>work</code> directories if missing</li>
+<li>Mounts OverlayFS onto <code>${NEWROOT}/etc</code> with options <code>index=off,metacopy=off</code></li>
+<li><strong>Does not unmount <code>@data</code></strong> — the overlay upper/work directories are on this mount; unmounting would break the overlay</li>
+</ol>
+<p>The <code>@data</code> mount at <code>/run/shanios-data-tmp</code> is carried into the new root by <code>switch_root</code> (which moves all <code>/run</code> mounts automatically). It is visible in the booted system at <code>/run/shanios-data-tmp</code> until the fstab <code>@data</code> mount at <code>/data</code> takes over.</p>
+<p><strong>Mount options:</strong></p>
+<p>| Option | Reason | |--------|--------| | <code>index=off</code> | Avoids inode index checks that break across subvolume mounts | | <code>metacopy=off</code> | Disables metadata-only copy-up; keeps behaviour simple and compatible with older kernels |</p>
+<p>---</p>
+<h2>Hook: shanios-boot-success-clear.sh (pre-pivot 90)</h2>
+<p><strong>Runs:</strong> After root is successfully mounted and after the overlay hook (priority 50), before <code>pivot_root</code>.</p>
+<p><strong>Purpose:</strong> Clear the <code>boot_hard_failure</code> marker written by the pre-mount hook, confirming that root mount succeeded.</p>
+<p><strong>What it does:</strong></p>
+<ol>
+<li>Uses the already-mounted <code>@data</code> from the overlay hook (or re-mounts it if the overlay hook failed)</li>
+<li>Removes <code>/data/boot_hard_failure</code> if present</li>
+<li><strong>Does not unmount <code>@data</code></strong> — same reason as the overlay hook</li>
+</ol>
+<p><strong>Ordering:</strong> Running at priority 90 (after the overlay hook at 50) ensures the overlay is already live when success is declared.</p>
+<p>---</p>
+<h2>Interaction with Boot Health Services</h2>
+<p>The dracut hooks work together with userspace systemd services to provide complete boot failure detection:</p>
+<pre><code>Boot attempt
+  │
+  ├─ [pre-mount 90] shanios-boot-failure-hook.sh
+  │    └─ writes /data/boot_hard_failure
+  │
+  ├─ Root mount attempted
+  │    ├─ FAIL → pre-pivot never runs → boot_hard_failure persists → reboot
+  │    └─ SUCCESS ↓
+  │
+  ├─ [pre-pivot 50] shanios-overlay-etc.sh
+  │    └─ mounts /etc overlay
+  │
+  ├─ [pre-pivot 90] shanios-boot-success-clear.sh
+  │    └─ removes /data/boot_hard_failure
+  │
+  └─ pivot_root → systemd PID 1
+       │
+       ├─ mark-boot-in-progress.service
+       │    └─ writes /data/boot_in_progress, clears boot-ok
+       │
+       ├─ mark-boot-success.service (at multi-user.target)
+       │    └─ writes /data/boot-ok, clears boot_in_progress
+       │
+       ├─ bless-boot.service (after mark-boot-success)
+       │    └─ bootctl set-good (stops boot counter)
+       │
+       └─ check-boot-failure.timer (OnBootSec=15m)
+            └─ if boot_in_progress &amp;&amp; ! boot-ok → writes /data/boot_failure</code></pre>
+<p>---</p>
+<h2>Rebuilding the Module</h2>
+<p>The module is rebuilt automatically by every <code>shani-deploy</code> run and every <code>gen-efi configure</code> call. To rebuild manually:</p>
+<pre><code class="language-bash"># Rebuild initramfs (and re-sign UKI) for the currently booted slot
+sudo gen-efi configure blue
+
+# Or rebuild just the initramfs without re-signing
+sudo dracut --force --kver &quot;$(uname -r)&quot;</code></pre>
+<blockquote><p><strong>Note:</strong> A raw <code>dracut --force</code> without <code>--uefi</code> produces a separate initrd file, not a UKI. Always use <code>gen-efi configure</code> to ensure the result is signed and installed correctly.</p></blockquote>
+<p>---</p>
+<h2>Verifying the Module is Installed</h2>
+<pre><code class="language-bash"># Check module files are present
+ls /usr/lib/dracut/modules.d/99shanios/
+
+# Check the module is included in the running initramfs
+# (decompress the UKI and inspect its cpio archive)
+sudo /usr/lib/systemd/systemd-stub /boot/efi/EFI/shanios/shanios-blue.efi --dump 2&gt;/dev/null \
+  | cpio -t 2&gt;/dev/null | grep shanios
+
+# Or use shani-health
+shani-health --boot   # shows &quot;Dracut mod: OK 99shanios module installed (N hooks)&quot;</code></pre>
+<p>---</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="boot">Boot Process</a> — how the full boot chain works</li>
+<li><a href="overlay">Overlay Filesystem</a> — how the <code>/etc</code> overlay works at runtime</li>
+<li><a href="../security/gen-efi">gen-efi Reference</a> — building and signing UKIs</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

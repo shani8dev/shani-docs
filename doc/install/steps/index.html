@@ -146,7 +146,46 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Installation Steps</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Installation</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+        </div>
+      </div>
+      <div class="prose"><p>Installation takes approximately 10–15 minutes.</p>
+<h2>Step-by-Step</h2>
+<ol>
+<li><strong>Boot from USB</strong> — Press F12, F2, or Del during startup. Select your USB drive from the boot menu.</li>
+<li><strong>Select "Install Shanios"</strong> — Choose the installation option from the boot menu.</li>
+<li><strong>Language & Region</strong> — Select language, timezone, and keyboard layout.</li>
+<li><strong>Disk Selection</strong> — Choose target disk and partitioning scheme (automatic recommended).</li>
+<li><strong>Encryption (Optional)</strong> — Enable LUKS2 full-disk encryption. Recommended for laptops and portable systems.</li>
+<li><strong>Install</strong> — The installer creates Btrfs subvolumes, installs the base system, and configures the bootloader.</li>
+<li><strong>Reboot</strong> — Remove USB drive when prompted and reboot into Shanios.</li>
+</ol>
+<h2>What the Installer Sets Up</h2>
+<p>All of the following is completed by the installer (<code>install.sh</code> + <code>configure.sh</code>) <strong>before</strong> first boot — nothing heavy runs in the background on your first session:</p>
+<ul>
+<li>All Btrfs subvolumes are created: <code>@root</code>, <code>@home</code>, <code>@data</code>, <code>@nix</code>, <code>@cache</code>, <code>@log</code>, <code>@flatpak</code>, <code>@snapd</code>, <code>@waydroid</code>, <code>@containers</code>, <code>@machines</code>, <code>@lxc</code>, <code>@lxd</code>, <code>@libvirt</code>, <code>@qemu</code>, <code>@swap</code></li>
+<li>The system image is extracted into <code>shanios_base</code>, snapshotted to <code>@blue</code> (read-only), then snapshotted again to <code>@green</code>. The active slot is written to <code>/data/current-slot</code> (<code>blue</code>)</li>
+<li>The Flatpak store is extracted and snapshotted into <code>@flatpak</code>. If Snap seed was included on the ISO, it is extracted into <code>@snapd</code></li>
+<li>The swapfile is created in <code>@swap</code> using <code>btrfs filesystem mkswapfile</code> sized to match RAM</li>
+<li>Locale, keyboard, timezone, hostname, user account, and autologin are configured via <code>chroot</code></li>
+<li>MOK keys are generated, Secure Boot components installed, and both UKIs (<code>shanios-blue.efi</code>, <code>shanios-green.efi</code>) are built using <code>dracut --force --uefi</code> and signed with the MOK key</li>
+<li><code>/etc/crypttab</code> is generated with the LUKS UUID and <code>none</code> key field if encryption was chosen</li>
+<li>Firewall rules for KDE Connect and Waydroid are applied via <code>firewall-offline-cmd</code></li>
+</ul>
+<p>On first boot, <code>beesd-setup.service</code> configures the deduplication daemon for the Btrfs volume UUID. The Initial Setup wizard then runs for user-facing personalisation.</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

@@ -146,7 +146,290 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Hardware</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">System</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-28</span>
+        </div>
+      </div>
+      <div class="prose"><p>This page covers inspecting and diagnosing hardware on Shani OS: CPUs, memory, GPUs, storage controllers, USB devices, sensors, and firmware. All tools listed here are pre-installed unless noted.</p>
+<p>---</p>
+<h2>System Overview</h2>
+<pre><code class="language-bash"># Quick full system summary (CPU, RAM, GPU, storage, network, OS)
+inxi -Fz
+
+# Shorter summary — CPU, RAM, and uptime
+inxi -b
+
+# Hardware summary without network info
+inxi -Fxz --no-host
+
+# DMI/BIOS info (manufacturer, serial, chassis type)
+sudo dmidecode -t system
+sudo dmidecode -t bios
+sudo dmidecode -t baseboard
+
+# Kernel and OS info
+uname -a
+hostnamectl</code></pre>
+<p>---</p>
+<h2>CPU</h2>
+<pre><code class="language-bash"># CPU model, cores, threads, cache
+lscpu
+
+# Per-core info from /proc
+cat /proc/cpuinfo
+
+# Current frequency of all cores
+cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq
+
+# CPU governor (performance, powersave, schedutil, etc.)
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+
+# Set governor for all cores
+echo &quot;performance&quot; | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+
+# Available governors
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors
+
+# CPU microcode version
+grep -m1 &quot;microcode&quot; /proc/cpuinfo
+
+# Hardware vulnerabilities and mitigations
+grep -r . /sys/devices/system/cpu/vulnerabilities/
+
+# CPU topology (sockets, dies, cores, threads)
+lscpu -e</code></pre>
+<p>---</p>
+<h2>Memory</h2>
+<pre><code class="language-bash"># Overview: total, used, free, buffers, swap
+free -h
+
+# Detailed memory info from kernel
+cat /proc/meminfo
+
+# Physical RAM slots, size, speed, type (DDR4/DDR5)
+sudo dmidecode -t memory
+
+# Memory usage per process (sorted by RSS)
+ps aux --sort=-%rss | head -20
+
+# Huge pages
+cat /proc/sys/vm/nr_hugepages
+grep -i huge /proc/meminfo
+
+# ZRAM (compressed swap) usage
+zramctl
+
+# Memory bandwidth test (requires memtester — not pre-installed)
+# sudo pacman -S memtester &amp;&amp; sudo memtester 1G 1</code></pre>
+<p>---</p>
+<h2>PCI Devices</h2>
+<pre><code class="language-bash"># List all PCI devices
+lspci
+
+# Verbose — includes subsystem IDs and driver info
+lspci -v
+
+# Show kernel driver in use for each device
+lspci -k
+
+# Filter by class (VGA, Network, Audio, USB, etc.)
+lspci -k | grep -A3 &quot;VGA\|3D&quot;
+lspci -k | grep -A3 &quot;Network\|Ethernet&quot;
+lspci -k | grep -A3 &quot;Audio&quot;
+
+# Show device IDs (vendor:device) — useful for finding drivers
+lspci -n
+
+# Tree view
+lspci -tv
+
+# Detailed info for a specific device
+lspci -v -s 00:02.0</code></pre>
+<p>---</p>
+<h2>USB Devices</h2>
+<pre><code class="language-bash"># List all USB devices
+lsusb
+
+# Verbose (includes device class, subclass, driver)
+lsusb -v 2&gt;/dev/null | less
+
+# Tree view showing hub topology
+lsusb -t
+
+# Monitor USB events in real time (plug/unplug)
+sudo udevadm monitor --udev --subsystem-match=usb
+
+# Show udev info for a specific device
+udevadm info /dev/sdb
+udevadm info -a /dev/sdb        # full attribute chain
+
+# USB device power management
+cat /sys/bus/usb/devices/*/power/control</code></pre>
+<p>---</p>
+<h2>GPU</h2>
+<pre><code class="language-bash"># GPU model and driver
+lspci -k | grep -A3 -i &quot;vga\|3d\|display&quot;
+
+# OpenCL platforms and devices
+clinfo
+
+# Vulkan info (pre-installed)
+vulkaninfo --summary
+
+# Mesa GPU info (AMD/Intel open source)
+glxinfo -B                      # requires X11/XWayland session
+DISPLAY=:0 glxinfo -B
+
+# NVIDIA (if using proprietary driver)
+nvidia-smi
+nvidia-smi -q                   # full detail
+watch -n 1 nvidia-smi           # live monitor
+
+# AMD GPU usage and temperature (via sysfs)
+cat /sys/class/drm/card0/device/gpu_busy_percent
+cat /sys/class/drm/card0/device/hwmon/hwmon*/temp1_input   # in millidegrees
+
+# Intel GPU usage
+cat /sys/class/drm/card0/gt/gt0/rc6_enable
+intel_gpu_top                   # requires intel-gpu-tools (not pre-installed)
+
+# Switcheroo (multi-GPU / hybrid graphics)
+switcherooctl list
+switcherooctl switch             # switch active GPU</code></pre>
+<p>---</p>
+<h2>Temperature and Sensors</h2>
+<p><code>lm_sensors</code> is pre-installed. Run <code>sudo sensors-detect</code> once to configure it, then use <code>sensors</code> for readings.</p>
+<pre><code class="language-bash"># Initial sensor detection (run once, answer yes to auto-load modules)
+sudo sensors-detect --auto
+
+# Read all sensor values (CPU temp, fan speeds, voltages)
+sensors
+
+# Watch sensors live
+watch -n 1 sensors
+
+# JSON output for scripting
+sensors -j
+
+# Hard disk temperature
+sudo hddtemp /dev/sda            # requires hddtemp (not pre-installed)
+sudo smartctl -A /dev/sda | grep Temp   # via SMART
+
+# NVMe temperature
+sudo nvme smart-log /dev/nvme0 | grep &quot;temperature&quot;
+cat /sys/class/nvme/nvme0/hwmon*/temp1_input   # in millidegrees
+
+# Thermal zones (kernel thermal framework)
+paste /sys/class/thermal/thermal_zone*/type /sys/class/thermal/thermal_zone*/temp</code></pre>
+<p>---</p>
+<h2>Fan Control</h2>
+<pre><code class="language-bash"># View fan speeds (from sensors)
+sensors | grep -i fan
+
+# Automatic fan control daemon — fancontrol (part of lm_sensors)
+# Configure with:
+sudo pwmconfig                   # interactive wizard
+sudo systemctl enable --now fancontrol
+
+# Manual PWM control (use with caution)
+cat /sys/class/hwmon/hwmon0/pwm1_enable    # 0=full speed, 1=manual, 2=auto
+echo 1 | sudo tee /sys/class/hwmon/hwmon0/pwm1_enable  # manual mode
+echo 180 | sudo tee /sys/class/hwmon/hwmon0/pwm1        # 0–255</code></pre>
+<p>---</p>
+<h2>Power Management</h2>
+<pre><code class="language-bash"># Current power profile
+powerprofilesctl get
+
+# Set power profile
+powerprofilesctl set performance    # performance / balanced / power-saver
+
+# List available profiles
+powerprofilesctl list
+
+# Battery status (laptops)
+upower -i /org/freedesktop/UPower/devices/battery_BAT0
+upower -e | xargs -I{} upower -i {}   # all power devices
+
+# Suspend / hibernate / shutdown
+systemctl suspend
+systemctl hibernate
+systemctl poweroff
+systemctl reboot
+
+# Wake-on-LAN
+sudo ethtool -s eth0 wol g       # enable WoL (magic packet)
+sudo ethtool eth0 | grep Wake    # check current setting</code></pre>
+<p>---</p>
+<h2>Firmware Updates</h2>
+<p>Firmware updates for supported devices are managed by <strong>fwupd</strong>. See <a href="../security/fwupd">Firmware Updates</a> for full documentation.</p>
+<pre><code class="language-bash"># Quick reference
+sudo fwupdmgr get-devices
+sudo fwupdmgr refresh
+sudo fwupdmgr get-updates
+sudo fwupdmgr update</code></pre>
+<p>---</p>
+<h2>Hardware Errors and Events</h2>
+<pre><code class="language-bash"># Kernel hardware messages since boot
+dmesg | grep -iE &quot;error|fail|warn|hardware&quot; | head -40
+
+# ACPI events (power button, lid, AC adapter)
+journalctl -u acpid -n 50
+
+# PCIe errors (AER — Advanced Error Reporting)
+dmesg | grep -i &quot;aer\|pcie error&quot;
+
+# Memory errors (MCE — Machine Check Exception)
+dmesg | grep -i mce
+sudo mcelog                      # requires mcelog (not pre-installed)
+
+# USB errors
+dmesg | grep -i &quot;usb.*error\|unable to enumerate&quot;
+
+# NVMe errors
+sudo nvme error-log /dev/nvme0
+
+# Hardware event log via IPMI (servers)
+sudo ipmitool sel list           # requires ipmitool</code></pre>
+<p>---</p>
+<h2>Identifying Unknown Hardware</h2>
+<pre><code class="language-bash"># Look up a PCI vendor:device ID on the internet
+lspci -n | awk '{print $3}'      # list raw IDs
+# Then search: https://pci-ids.ucw.cz/
+
+# Look up a USB vendor:product ID
+lsusb | awk '{print $6}'
+# Then search: https://usb-ids.gowdy.us/
+
+# Find which package provides a driver for a device
+lspci -k | grep &quot;Kernel driver&quot;  # find the driver name
+pacman -F /lib/modules/$(uname -r)/kernel/drivers/**/drivername.ko.zst
+
+# udev rule for a device
+udevadm info --query=all --name=/dev/sdb | grep -E &quot;ID_VENDOR|ID_MODEL|DRIVER&quot;</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Device not detected | Check <code>dmesg | tail -30</code> after plugging in; verify with <code>lspci -k</code> or <code>lsusb</code>; try a different port | | Wrong driver loaded | Blacklist the competing module — see <a href="kernel-modules">Kernel Modules</a> | | <code>sensors</code> shows no data | Run <code>sudo sensors-detect --auto</code> to detect and load the correct modules | | GPU not accelerating | Check <code>lspci -k</code> to confirm the right driver is in use; check for firmware errors in <code>dmesg</code> | | High CPU temperature | Check <code>sensors</code>; verify thermal paste is applied; check fan speed; check <code>powerprofilesctl</code> | | Battery draining fast | Install and check <code>powertop</code> (not pre-installed); verify <code>power-saver</code> profile is active | | <code>dmidecode</code> returns empty | System firmware may not populate DMI tables — try <code>inxi -Fz</code> for alternative sources |</p>
+<p>---</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="kernel-modules">Kernel Modules</a> — loading drivers, blacklisting, parameters</li>
+<li><a href="storage">Storage</a> — SMART, NVMe, disk health</li>
+<li><a href="../security/fwupd">Firmware Updates</a> — fwupd for device firmware</li>
+<li><a href="process-management">Process Management</a> — CPU load, memory usage per process</li>
+<li><a href="systemd">Systemd</a> — <code>CPUQuota=</code>, <code>MemoryMax=</code>, resource limits</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

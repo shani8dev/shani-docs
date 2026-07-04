@@ -146,7 +146,124 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Apache HTTP Server</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+        </div>
+      </div>
+      <div class="prose"><p>Apache is a full-featured, battle-tested web server. On Shani OS, Caddy is the recommended reverse proxy for self-hosted services due to its automatic HTTPS and simpler configuration — but Apache is pre-installed for workloads that specifically need it: <code>.htaccess</code>-based access control, <code>mod_rewrite</code> rules inherited from existing deployments, PHP via <code>mod_php</code>, or applications that ship Apache-specific configuration.</p>
+<p>Both can coexist by binding Apache to a non-standard port and proxying through Caddy.</p>
+<p>---</p>
+<h2>Service Management</h2>
+<pre><code class="language-bash"># Enable and start at boot
+sudo systemctl enable --now httpd
+
+# Reload config with zero downtime (preferred)
+sudo systemctl reload httpd
+
+# Full restart (needed after enabling/disabling modules)
+sudo systemctl restart httpd
+
+# Test config syntax before reloading (catches errors before they go live)
+sudo apachectl configtest
+
+# Watch live logs
+journalctl -u httpd -f</code></pre>
+<p>---</p>
+<h2>Configuration</h2>
+<p>The main config file is <code>/etc/httpd/conf/httpd.conf</code>. Site-specific configs belong in <code>/etc/httpd/conf.d/</code> — any <code>.conf</code> file placed there is automatically included.</p>
+<h3>Listen on a Non-Standard Port (Caddy Proxy Mode)</h3>
+<p>If Caddy handles ports 80/443, bind Apache to a local port and proxy through Caddy:</p>
+<pre><code class="language-apache"># /etc/httpd/conf/httpd.conf
+Listen 127.0.0.1:8080</code></pre>
+<p>Then in your Caddyfile:</p>
+<pre><code class="language-caddyfile">app.example.com {
+    reverse_proxy localhost:8080
+}</code></pre>
+<h3>Virtual Hosts</h3>
+<pre><code class="language-apache"># /etc/httpd/conf.d/mysite.conf
+
+&lt;VirtualHost *:8080&gt;
+    ServerName mysite.example.com
+    DocumentRoot /srv/http/mysite
+
+    &lt;Directory /srv/http/mysite&gt;
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
+    &lt;/Directory&gt;
+
+    ErrorLog  /var/log/httpd/mysite-error.log
+    CustomLog /var/log/httpd/mysite-access.log combined
+&lt;/VirtualHost&gt;</code></pre>
+<h3>Basic Authentication</h3>
+<pre><code class="language-bash"># Create a password file (-c creates the file; omit -c when adding further users)
+sudo htpasswd -c /etc/httpd/conf/.htpasswd alice
+sudo htpasswd /etc/httpd/conf/.htpasswd bob</code></pre>
+<pre><code class="language-apache">&lt;Directory /srv/http/protected&gt;
+    AuthType Basic
+    AuthName &quot;Restricted&quot;
+    AuthUserFile /etc/httpd/conf/.htpasswd
+    Require valid-user
+&lt;/Directory&gt;</code></pre>
+<h3>URL Rewriting</h3>
+<pre><code class="language-apache">&lt;VirtualHost *:8080&gt;
+    ServerName app.example.com
+    DocumentRoot /srv/http/app
+
+    RewriteEngine On
+
+    # SPA fallback — serve index.html for all non-file routes
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ /index.html [L]
+&lt;/VirtualHost&gt;</code></pre>
+<p>---</p>
+<h2>Modules</h2>
+<pre><code class="language-bash"># List all loaded modules
+httpd -M
+
+# Common modules — verify they are uncommented in httpd.conf:
+# LoadModule rewrite_module     modules/mod_rewrite.so
+# LoadModule ssl_module         modules/mod_ssl.so
+# LoadModule proxy_module       modules/mod_proxy.so
+# LoadModule proxy_http_module  modules/mod_proxy_http.so
+# LoadModule headers_module     modules/mod_headers.so</code></pre>
+<p>After enabling or disabling a module, a full restart is required:</p>
+<pre><code class="language-bash">sudo systemctl restart httpd</code></pre>
+<p>---</p>
+<h2>Logs</h2>
+<pre><code class="language-bash">sudo tail -f /var/log/httpd/error_log
+sudo tail -f /var/log/httpd/access_log</code></pre>
+<p>---</p>
+<h2>Firewall</h2>
+<p>Only needed if Apache is serving traffic directly (not behind Caddy):</p>
+<pre><code class="language-bash">sudo firewall-cmd --add-service=http --add-service=https --permanent
+sudo firewall-cmd --reload</code></pre>
+<p>---</p>
+<h2>Permissions & SELinux</h2>
+<p>Apache runs as the <code>http</code> user. Shani OS uses SELinux by default — files served by Apache must carry the correct context:</p>
+<pre><code class="language-bash"># Apply the correct context to a new document root
+sudo chcon -Rt httpd_sys_content_t /srv/http/mysite
+
+# Or let restorecon derive it from policy
+sudo restorecon -Rv /srv/http/mysite</code></pre>
+<p>If Apache needs to connect to a backend (reverse proxy mode), enable the relevant boolean:</p>
+<pre><code class="language-bash">sudo setsebool -P httpd_can_network_connect 1</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>AH00558: Could not reliably determine server's FQDN</code> | Add <code>ServerName localhost</code> to <code>httpd.conf</code> — cosmetic, does not affect operation | | Port 80/443 already in use | Caddy or another service owns the port — bind Apache to <code>127.0.0.1:8080</code> and proxy through Caddy | | <code>403 Forbidden</code> on directory | Check filesystem permissions and the <code>&lt;Directory&gt;</code> block's <code>Require</code> directive; check SELinux context with <code>ls -Z</code> | | <code>Permission denied</code> in error log | Apache (<code>http</code> user) cannot read the file — fix permissions or apply the correct SELinux context | | Reverse proxy returns 503 | Enable the SELinux boolean: <code>sudo setsebool -P httpd_can_network_connect 1</code> | | Config changes not taking effect | Run <code>sudo apachectl configtest</code> to validate, then <code>sudo systemctl reload httpd</code> |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

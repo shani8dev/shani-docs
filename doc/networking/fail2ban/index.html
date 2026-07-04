@@ -146,7 +146,119 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Fail2ban (Brute-Force Protection)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+        </div>
+      </div>
+      <div class="prose"><p>fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs via firewalld. It integrates with firewalld automatically on Shani OS — no extra backend configuration is required.</p>
+<p><strong>Not enabled by default.</strong> Enable it whenever you run any public-facing service — especially SSH, Caddy, or Vaultwarden.</p>
+<p>---</p>
+<h2>Enable & Status</h2>
+<pre><code class="language-bash"># Enable and start (persists across reboots)
+sudo systemctl enable --now fail2ban
+
+# Overall status — shows all active jails and ban counts
+sudo fail2ban-client status
+
+# Status of the SSH jail specifically
+sudo fail2ban-client status sshd
+
+# Watch logs live
+sudo journalctl -u fail2ban -f</code></pre>
+<p>---</p>
+<h2>Manual Ban / Unban</h2>
+<pre><code class="language-bash"># Ban an IP in the sshd jail
+sudo fail2ban-client set sshd banip 1.2.3.4
+
+# Unban an IP
+sudo fail2ban-client set sshd unbanip 1.2.3.4
+
+# View all currently banned IPs across all jails
+sudo fail2ban-client banned
+
+# View the raw firewalld rules fail2ban has added
+sudo firewall-cmd --direct --get-all-rules</code></pre>
+<p>---</p>
+<h2>Configuration</h2>
+<p>fail2ban ships with a default <code>/etc/fail2ban/jail.conf</code>. <strong>Never edit this file directly</strong> — it is overwritten on package updates. Instead, create overrides in <code>/etc/fail2ban/jail.d/</code>.</p>
+<h3>SSH Jail</h3>
+<p>Create <code>/etc/fail2ban/jail.d/sshd-local.conf</code>:</p>
+<pre><code class="language-ini">[sshd]
+enabled  = true
+port     = ssh
+maxretry = 5
+bantime  = 1h
+findtime = 10m</code></pre>
+<blockquote><p>If you changed SSH to a non-standard port (e.g., 2222), set <code>port = 2222</code> here.</p></blockquote>
+<p>| Parameter | Meaning | |-----------|---------| | <code>maxretry</code> | Failures before banning | | <code>findtime</code> | Time window in which failures are counted | | <code>bantime</code> | How long the IP is banned; use <code>-1</code> for permanent |</p>
+<h3>Caddy Jail</h3>
+<p>First, enable JSON logging in your Caddyfile:</p>
+<pre><code class="language-caddyfile">{
+    log {
+        output file /var/log/caddy/access.log
+        format json
+    }
+}</code></pre>
+<p>Create <code>/etc/fail2ban/filter.d/caddy.conf</code>:</p>
+<pre><code class="language-ini">[Definition]
+failregex = ^.*&quot;remote_ip&quot;:&quot;&lt;HOST&gt;&quot;.*&quot;status&quot;:(401|403|404|429).*$
+ignoreregex =
+datepattern = %%Y-%%m-%%dT%%H:%%M:%%S</code></pre>
+<p>Create <code>/etc/fail2ban/jail.d/caddy.conf</code>:</p>
+<pre><code class="language-ini">[caddy]
+enabled  = true
+port     = http,https
+filter   = caddy
+logpath  = /var/log/caddy/access.log
+maxretry = 10
+bantime  = 1h
+findtime = 10m</code></pre>
+<h3>Vaultwarden Jail</h3>
+<p>Create <code>/etc/fail2ban/filter.d/vaultwarden.conf</code>:</p>
+<pre><code class="language-ini">[Definition]
+failregex = ^.*Username or password is incorrect\. Try again\. IP: &lt;HOST&gt;\..*$
+ignoreregex =</code></pre>
+<p>Create <code>/etc/fail2ban/jail.d/vaultwarden.conf</code>:</p>
+<pre><code class="language-ini">[vaultwarden]
+enabled  = true
+port     = http,https
+filter   = vaultwarden
+logpath  = /home/user/vaultwarden/data/vaultwarden.log
+maxretry = 5
+bantime  = 1h
+findtime = 10m</code></pre>
+<h3>Reload After Changes</h3>
+<pre><code class="language-bash">sudo systemctl restart fail2ban
+
+# Verify the new jail is active
+sudo fail2ban-client status caddy</code></pre>
+<p>---</p>
+<h2>Whitelist Your Own IP</h2>
+<p>Prevent accidentally locking yourself out. Create <code>/etc/fail2ban/jail.d/local.conf</code>:</p>
+<pre><code class="language-ini">[DEFAULT]
+ignoreip = 127.0.0.1/8 ::1 192.168.1.0/24 100.64.0.0/10</code></pre>
+<p><code>100.64.0.0/10</code> covers the entire Tailscale CGNAT address range.</p>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | fail2ban won't start | Check <code>journalctl -u fail2ban</code> for syntax errors; validate with <code>sudo fail2ban-client -t</code> | | Banned yourself | Unban with <code>sudo fail2ban-client set sshd unbanip YOUR_IP</code>; add your IP to <code>ignoreip</code> | | IPs not being banned | Confirm the jail is enabled (<code>sudo fail2ban-client status</code>); verify the log path in the jail config exists and is being written to | | firewalld not blocking banned IPs | Ensure fail2ban is using the firewalld backend: check <code>/etc/fail2ban/jail.conf</code> for <code>banaction = firewallcmd-rich-rules</code> | | Caddy jail never triggers | Confirm Caddy is writing JSON logs to <code>logpath</code>; test the regex: <code>sudo fail2ban-regex /var/log/caddy/access.log /etc/fail2ban/filter.d/caddy.conf</code> |</p>
+<p>---</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="firewalld">Firewall</a> — the firewall that fail2ban writes rules into</li>
+<li><a href="features">Security Features</a> — overview of all security layers</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

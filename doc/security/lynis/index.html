@@ -146,7 +146,93 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Lynis (Security Auditing)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Security</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+        </div>
+      </div>
+      <div class="prose"><p>Lynis is a security auditing tool that scans a running Linux system and produces a hardening report. It checks hundreds of items: file permissions, installed software, kernel parameters, authentication settings, network configuration, and more — and produces a prioritised list of findings with remediation suggestions. It is pre-installed on Shani OS.</p>
+<p>Lynis does not change anything — it only reads and reports.</p>
+<p>---</p>
+<h2>Running an Audit</h2>
+<pre><code class="language-bash"># Full system audit (run as root for maximum coverage)
+sudo lynis audit system
+
+# Audit without colours (for piping to a file or CI)
+sudo lynis audit system --no-colors 2&gt;/dev/null | tee ~/lynis-report.txt
+
+# Quick audit of a specific category only
+sudo lynis audit system --tests-from-group authentication
+sudo lynis audit system --tests-from-group networking
+sudo lynis audit system --tests-from-group firewalls
+sudo lynis audit system --tests-from-group file_permissions</code></pre>
+<p>The audit takes 1–3 minutes. At the end, Lynis prints a <strong>Hardening Index</strong> score (0–100) and a list of suggestions grouped by severity.</p>
+<p>---</p>
+<h2>Understanding the Report</h2>
+<pre><code>[+] Boot and services
+------------------------------------
+  - Checking UEFI boot                                    [ ENABLED ]
+  - Checking presence of GRUB2                            [ FOUND ]
+
+[!] Authentication
+------------------------------------
+  - Default umask in /etc/profile                         [ SUGGESTION ]
+    * Consider a more restrictive umask value (027 or 077)
+    * Details  : umask 022
+    * Solution : Edit /etc/profile and change the umask
+
+[WARNING]
+  - SSH PermitRootLogin is set to 'yes'                   [ WARNING ]</code></pre>
+<p>Severity levels:</p>
+<p>| Level | Meaning | |-------|---------| | <code>OK</code> / <code>FOUND</code> | Item is configured correctly | | <code>SUGGESTION</code> | Low-risk improvement; worth considering | | <code>WARNING</code> | Higher-risk finding; should be addressed | | <code>CRITICAL</code> | Serious issue; address promptly |</p>
+<p>---</p>
+<h2>Report Files</h2>
+<p>Lynis writes detailed machine-readable output to:</p>
+<pre><code class="language-bash"># Human-readable log (full detail)
+/var/log/lynis.log
+
+# Machine-readable report (key=value pairs for scripting)
+/var/log/lynis-report.dat
+
+# Parse specific findings from the report
+grep &quot;^suggestion\|^warning&quot; /var/log/lynis-report.dat
+
+# Count total warnings
+grep -c &quot;^warning&quot; /var/log/lynis-report.dat</code></pre>
+<p>---</p>
+<h2>Scheduled Audits</h2>
+<p>Run Lynis weekly and save timestamped reports:</p>
+<pre><code class="language-bash">sudo tee /etc/cron.weekly/lynis-audit &lt;&lt; 'EOF'
+#!/bin/sh
+lynis audit system --no-colors --quiet 2&gt;/dev/null \
+  &gt; /var/log/lynis/audit-$(date +%Y%m%d).txt
+EOF
+sudo chmod +x /etc/cron.weekly/lynis-audit
+sudo mkdir -p /var/log/lynis</code></pre>
+<p>---</p>
+<h2>Common Findings on Shani OS</h2>
+<p>| Finding | Typical Suggestion | |---------|--------------------| | <code>umask</code> too permissive | Set <code>umask 027</code> in <code>/etc/profile</code> | | SSH root login enabled | Set <code>PermitRootLogin no</code> in <code>/etc/ssh/sshd_config</code> | | No password on GRUB | Set a GRUB superuser password (physical access only) | | Core dumps not restricted | Add <code>* hard core 0</code> to <code>/etc/security/limits.conf</code> | | USB storage not disabled | Add <code>install usb-storage /bin/false</code> to a modprobe drop-in if USB mass storage is not needed | | Auditd not running | Enable <code>auditd</code> if compliance logging is required — see the <a href="https://docs.shani.dev/doc/security/audit">Audit page</a> |</p>
+<p>---</p>
+<h2>Updating Lynis</h2>
+<pre><code class="language-bash"># Check the installed version
+lynis show version
+
+# Update via pacman (Lynis is in the Arch repos)
+sudo pacman -Su lynis</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Many <code>FILE_PERMISSIONS</code> warnings | Lynis compares against strict defaults; review each before changing — some are intentional on a desktop OS | | Score seems low | A freshly installed system typically scores 60–70; a locked-down server might reach 85+; the score is relative, not a pass/fail threshold | | <code>lynis: command not found</code> | Run as root or with <code>sudo</code> — Lynis may not be in the non-root <code>PATH</code> | | Audit hangs on a test | A specific test may be probing a slow device or network; interrupt with Ctrl-C and re-run with <code>--skip-test TEST_ID</code> |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

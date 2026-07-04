@@ -146,7 +146,141 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Android (Waydroid)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Software &amp; Apps</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+        </div>
+      </div>
+      <div class="prose"><p>Waydroid runs a full Android system in a container on Shanios. It integrates with the Wayland compositor so Android apps appear as native windows. Waydroid is pre-installed and pre-configured — you just need to initialise it.</p>
+<h2>What's Pre-installed</h2>
+<ul>
+<li><code>waydroid</code> — the container runtime</li>
+<li><code>waydroid-helper</code> — automated setup and management tool</li>
+<li><code>waydroid-container.service</code> — enabled at boot</li>
+<li><code>python-pyclip</code> — clipboard integration between Android and host</li>
+<li><code>android-tools</code> — <code>adb</code> and <code>fastboot</code></li>
+<li><code>android-udev</code> — udev rules for Android device access</li>
+<li>Firewall rules pre-configured (DNS 53/udp, DHCP 67/udp, <code>waydroid0</code> in trusted zone)</li>
+</ul>
+<h2>Initial Setup</h2>
+<pre><code class="language-bash"># One-command setup using the pre-installed helper
+sudo waydroid-helper init
+
+# Waydroid will download the Android system image automatically.
+# This requires an internet connection and takes a few minutes.</code></pre>
+<p>After <code>init</code> completes, Waydroid appears in your app launcher. Android apps can be launched from there or via the terminal.</p>
+<h2>Google Play Store and ARM Apps</h2>
+<p>The default Waydroid image is AOSP without Google services. For Play Store access, install GApps after initialisation:</p>
+<pre><code class="language-bash">pip install waydroid-script --break-system-packages
+sudo waydroid-script install gapps</code></pre>
+<p>After installing GApps, open the Play Store and sign in with your Google account. You may need to register your device ID at <code>google.com/android/uncertified</code> if the Play Store blocks downloads.</p>
+<p><strong>ARM app compatibility</strong> is handled by <code>libhoudini</code> (Intel's ARM-to-x86 translation), included in the Shanios Waydroid setup. Most ARM-compiled Android apps run transparently.</p>
+<h2>Basic Usage</h2>
+<pre><code class="language-bash"># Start the Waydroid session
+waydroid session start
+
+# Launch the Android app drawer (full Android UI)
+waydroid show-full-ui
+
+# Stop the session
+waydroid session stop
+
+# Check status
+waydroid status</code></pre>
+<h2>Installing Android Apps</h2>
+<h3>From APK files</h3>
+<pre><code class="language-bash"># Install an APK
+waydroid app install /path/to/app.apk
+
+# List installed apps
+waydroid app list
+
+# Launch a specific app by package name
+waydroid app launch com.example.app
+
+# Remove an app
+waydroid app remove com.example.app</code></pre>
+<h3>Via ADB</h3>
+<pre><code class="language-bash"># Connect ADB to the running Waydroid instance
+adb connect 192.168.250.1:5555
+
+# Install an APK via ADB
+adb install app.apk
+
+# Open a shell inside Android
+adb shell</code></pre>
+<h2>Clipboard Integration</h2>
+<p>The <code>python-pyclip</code> package enables clipboard sharing between Android apps and your Linux desktop. Copy text in an Android app and paste it in a Linux app, and vice versa — automatically.</p>
+<h2>File Sharing</h2>
+<pre><code class="language-bash"># Android's shared storage is accessible on the host at:
+ls ~/waydroid/data/media/0/
+
+# Copy files into Android
+cp myfile.pdf ~/waydroid/data/media/0/Downloads/</code></pre>
+<h2>Performance Tips</h2>
+<pre><code class="language-bash"># Check if hardware acceleration is working
+waydroid prop get persist.waydroid.width
+
+# Force a specific resolution (useful for HiDPI displays)
+waydroid prop set persist.waydroid.width 1920
+waydroid prop set persist.waydroid.height 1080
+
+# Reset display settings to default
+waydroid prop set persist.waydroid.width &quot;&quot;
+waydroid prop set persist.waydroid.height &quot;&quot;</code></pre>
+<h2>Managing the Service</h2>
+<pre><code class="language-bash"># The container service is enabled at boot — check its status
+systemctl status waydroid-container
+
+# Restart the container
+sudo systemctl restart waydroid-container
+
+# Stop the container (frees memory when not in use)
+sudo systemctl stop waydroid-container
+
+# View Waydroid logs
+journalctl -u waydroid-container -f</code></pre>
+<h2>Storage</h2>
+<p>Waydroid data lives in the <code>@waydroid</code> Btrfs subvolume mounted at <code>/var/lib/waydroid</code>. It persists across all system updates and rollbacks. The Android system image, installed apps, and user data all reside here.</p>
+<h2>Firewall</h2>
+<p>Firewall rules are pre-configured during installation:</p>
+<ul>
+<li>Port 53/udp (DNS) and 67/udp (DHCP) are open for the <code>waydroid0</code> interface</li>
+<li>The <code>waydroid0</code> interface is in the trusted firewall zone</li>
+<li>Packet forwarding is enabled</li>
+</ul>
+<p>No manual firewall configuration is needed.</p>
+<h2>Troubleshooting</h2>
+<pre><code class="language-bash"># Re-initialise Waydroid if something goes wrong
+sudo waydroid-helper init --force
+
+# Check for missing kernel modules
+sudo modprobe binder_linux
+sudo modprobe ashmem_linux   # older kernels only; not needed on 6.x+
+
+# Verify binder is available
+ls /dev/binder /dev/anbox-binder 2&gt;/dev/null || echo &quot;binder not found&quot;
+
+# Full reset (removes all Android data and apps)
+sudo waydroid init -f</code></pre>
+<h2>Tips</h2>
+<ul>
+<li>Waydroid requires a Wayland session — it does not work under XWayland or on X11-only desktops</li>
+<li>For Google Play Store support, use a community GApps package (not included by default)</li>
+<li>Battery and suspend management: stop the <code>waydroid-container</code> service when not in use to save power</li>
+<li>Android apps are sandboxed inside the Waydroid container and cannot access your Linux files unless you explicitly share them via the <code>~/.local/share/waydroid/data/media/0/</code> path</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

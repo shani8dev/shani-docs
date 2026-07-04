@@ -146,7 +146,737 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Communication</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+        </div>
+      </div>
+      <div class="prose"><blockquote><p><strong>Portability note:</strong> Compose examples use rootless <strong>Podman</strong> and <code>host.containers.internal</code> (the host gateway from a container). When using Docker, replace <code>podman-compose</code> with <code>docker compose</code> and <code>host.containers.internal</code> with <code>host-gateway</code> (add <code>extra_hosts: [host-gateway:host-gateway]</code> to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.</p></blockquote>
+<h1>Communication</h1>
+<p>Self-hosted chat, push notifications, VoIP, and team collaboration platforms.</p>
+<p>---</p>
+<h2>Key Concepts</h2>
+<h4>Federation and the fediverse — ActivityPub and Matrix</h4>
+<p>Two independent federation protocols power the self-hosted social and communication ecosystem. Matrix (used by Synapse, Conduit) federates real-time messaging — your homeserver and another operator's homeserver exchange messages directly, with no central relay. ActivityPub (used by Mastodon, Lemmy, Pixelfed, PeerTube) federates social actions — follows, posts, likes — across servers. Both use a server-to-server API for federation and a client-to-server API for user clients. The critical concept for interviews: federation means data is distributed across many servers with no central authority — this creates challenges for moderation, key verification, and data retention that centralised platforms don't have.</p>
+<h4>End-to-end encryption in messaging — what it protects and what it doesn't</h4>
+<p>E2EE (used by Matrix with Olm/Megolm, Signal Protocol) encrypts messages on the sender's device and decrypts only on recipient devices — the server relays ciphertext and never sees plaintext. What it protects: message content from server operators, network observers, and data breaches. What it doesn't protect: metadata (who communicated with whom, when, how often), the server itself if the client is compromised, or key verification failures (man-in-the-middle if users don't verify key fingerprints). Matrix's cross-signing and verification process addresses the key verification problem. For security engineering roles, the distinction between transport encryption (TLS) and end-to-end encryption is a standard interview question.</p>
+<h4>XMPP vs Matrix vs IRC — protocol generations</h4>
+<p>IRC (1988) is stateless, no message history, no encryption in the base protocol. XMPP (1999) adds presence, federation, and a rich extension system (XEPs) but has a fragmented client ecosystem. Matrix (2014) was designed from the start for end-to-end encryption, rich media, bridges to other protocols, and a replicated history model (every homeserver stores a copy of room history it participates in). Matrix's replicated history is its key architectural difference — it provides resilience (the room continues even if the founding server goes offline) but at the cost of storage and complexity. Bridges (mautrix-whatsapp, mautrix-telegram) let Matrix users communicate with users on closed platforms.</p>
+<h4>WebRTC and real-time media</h4>
+<p>Jitsi Meet and Matrix video calls use WebRTC — the browser standard for real-time audio/video. WebRTC establishes peer-to-peer connections using ICE (Interactive Connectivity Establishment): STUN servers help peers discover their public IP/port; TURN servers relay media when direct P2P fails (symmetric NAT). For group calls, a Selective Forwarding Unit (SFU) like Jitsi's Videobridge receives each participant's stream and selectively forwards it to others — more efficient than full mesh P2P (N² streams) or MCU (transcodes everything). Jitsi Videobridge is an SFU. Understanding this architecture matters for any role involving real-time communication infrastructure.</p>
+<h4>SIP and VoIP fundamentals</h4>
+<p>SIP (Session Initiation Protocol) is the signalling protocol for VoIP — it negotiates calls (INVITE, 200 OK, BYE) but doesn't carry audio. RTP (Real-time Transport Protocol) carries the actual audio/video. FreePBX is an Asterisk frontend: Asterisk handles SIP signalling, codec negotiation, and RTP media. A SIP trunk connects your PBX to the PSTN (public telephone network) via a VoIP provider. A SIP extension is a phone or softphone registered to your PBX. Common codecs: G.711 (uncompressed, highest quality, most bandwidth), G.729 (compressed, lower bandwidth, slight quality loss), Opus (modern, variable bitrate, used in WebRTC). VoIP engineering roles test on SIP trace reading and NAT traversal.</p>
+<h4>Push notification architecture — APNS, FCM, and self-hosted alternatives</h4>
+<p>Mobile push notifications (iOS: APNS, Android: FCM) require routing through Apple's and Google's servers — apps can't receive pushes without them. This is why truly server-side push requires a relay: ntfy and Gotify provide an app that maintains a persistent connection to your server and displays notifications without going through Google/Apple. The trade-off: ntfy has an Android app using websockets (no FCM dependency), but on iOS, background delivery still requires APNS. For privacy-focused deployment, understanding what requires a cloud relay versus what's fully local is important.</p>
+<h2>Matrix / Synapse</h2>
+<p><strong>Purpose:</strong> Federated, open-source real-time communication protocol. Powers Element, Schildi, FluffyChat, and other secure messengers. Messages are end-to-end encrypted, decentralised, and stored on your own server.</p>
+<pre><code class="language-yaml"># ~/matrix/compose.yaml
+services:
+  synapse:
+    image: matrixdotorg/synapse:latest
+    ports: [&quot;127.0.0.1:8448:8008&quot;]
+    volumes:
+      - /home/user/synapse:/data:Z
+    environment:
+      SYNAPSE_SERVER_NAME: chat.example.com
+      SYNAPSE_REPORT_STATS: &quot;no&quot;
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/matrix &amp;&amp; podman-compose up -d</code></pre>
+<h5>Generate initial config</h5>
+<pre><code class="language-bash">podman run --rm \
+  -v /home/user/synapse:/data:Z \
+  -e SYNAPSE_SERVER_NAME=chat.example.com \
+  -e SYNAPSE_REPORT_STATS=no \
+  matrixdotorg/synapse:latest generate</code></pre>
+<p><strong>Create the first admin user:</strong></p>
+<pre><code class="language-bash">podman exec -it synapse register_new_matrix_user \
+  http://localhost:8008 -c /data/homeserver.yaml \
+  --admin -u admin -p changeme</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Create a new user
+podman exec -it synapse register_new_matrix_user   http://localhost:8008 -c /data/homeserver.yaml   -u newuser -p newpassword --no-admin
+
+# Make a user admin
+podman exec synapse   /bin/bash -c &quot;cd /data &amp;&amp; python -m synapse.app.admin_cmd -c homeserver.yaml   modify-user --make-admin @user:chat.example.com&quot;
+
+# View server stats
+curl http://localhost:8448/_synapse/admin/v1/server_version   -H &quot;Authorization: Bearer YOUR_ADMIN_TOKEN&quot;
+
+# List all registered users
+curl http://localhost:8448/_synapse/admin/v2/users?from=0&amp;limit=100   -H &quot;Authorization: Bearer YOUR_ADMIN_TOKEN&quot;
+
+# Reload config
+podman kill --signal=HUP synapse
+
+# Run database maintenance
+podman exec synapse python -m synapse.app.admin_cmd   -c /data/homeserver.yaml run-background-updates</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">chat.example.com {
+  reverse_proxy localhost:8448
+  # Matrix well-known delegation
+  handle /.well-known/matrix/* {
+    respond `{&quot;m.homeserver&quot;:{&quot;base_url&quot;:&quot;https://chat.example.com&quot;}}` 200
+  }
+}</code></pre>
+<h4>Matrix architecture — homeservers, federation, and rooms</h4>
+<p>Matrix is a decentralised protocol. Each user belongs to a homeserver (<code>@user:yourdomain.com</code>). Rooms are identified by IDs (<code>!roomid:originserver.com</code>) and can federate across homeservers — participants from <code>matrix.org</code>, <code>yourdomain.com</code>, and any other homeserver can all be in the same room. The homeserver stores all events its users participate in. Federation means your homeserver syncs room history with other participating homeservers. Synapse is the reference implementation; Conduit and Dendrite are lighter alternatives. The trade-off of self-hosting: you control your data and identity, but you're responsible for federation performance and storage growth.</p>
+<h4>End-to-end encryption — what it actually protects</h4>
+<p>E2EE (as in Signal protocol, Matrix Megolm) means messages are encrypted on the sender's device and decrypted only on recipients' devices. The server sees only ciphertext — it cannot read message contents, even under legal compulsion. What it does NOT protect: metadata (who talked to whom, when, how often), device compromise (if your phone is seized, messages are readable), or forward secrecy failures (if a long-term key leaks and past messages were recorded). Matrix's cross-signing and key verification UI is designed to let users verify that no man-in-the-middle has injected a malicious device into their room.</p>
+<h4>Push notifications in self-hosted messaging</h4>
+<p>Mobile devices wake up for push notifications via platform-specific channels: APNs for iOS, FCM for Android. A self-hosted Matrix homeserver needs a push gateway (the <code>sygnal</code> service) that translates Matrix push events to APNs/FCM API calls. This requires API credentials from Apple (APNs certificate) and Google (FCM project key). Without this, messages only arrive when the app is open. Element Call and other Matrix apps also use this path. The privacy-preserving alternative: Ntfy as a self-hosted push notification server (supports UnifiedPush, bypassing FCM for Android) — several Matrix clients support UnifiedPush.</p>
+<h4>VoIP quality factors — jitter, latency, MOS score</h4>
+<p>Voice over IP quality is measured by three factors: latency (one-way delay; below 150ms is imperceptible, above 300ms causes conversational overlap), jitter (variation in packet arrival time; should be below 30ms — a jitter buffer compensates but adds latency), and packet loss (above 1% causes audible artefacts; above 5% makes calls unusable). Mean Opinion Score (MOS) is a 1–5 subjective quality rating; codecs trade bandwidth for MOS: Opus at 24kbps scores ~4.0 (near toll quality); G.711 (PSTN-grade) scores ~4.4 at 64kbps. QoS (DSCP marking, priority queuing) on your router ensures VoIP packets are prioritised over bulk downloads.</p>
+<p>---</p>
+<h2>Mattermost</h2>
+<p><strong>Purpose:</strong> Slack alternative for developer and engineering teams. Threads, channels, file sharing, built-in code snippets, webhooks, and bot integrations. GDPR-compliant; all data stays on your server.</p>
+<pre><code class="language-yaml"># ~/mattermost/compose.yaml
+services:
+  mattermost:
+    image: mattermost/mattermost-team-edition
+    ports:
+      - 127.0.0.1:8065:8065
+    volumes:
+      - /home/user/mattermost/config:/mattermost/config:Z
+      - /home/user/mattermost/data:/mattermost/data:Z
+      - /home/user/mattermost/logs:/mattermost/logs:Z
+    environment:
+      MM_SQLSETTINGS_DRIVERNAME: postgres
+      MM_SQLSETTINGS_DATASOURCE: postgres://mattermost:changeme@host.containers.internal/mattermost?sslmode=disable
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/mattermost &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>Mattermost requires PostgreSQL. Run it from the <a href="https://docs.shani.dev/doc/servers/databases">Databases wiki</a> first.</p></blockquote>
+<p>---</p>
+<h2>Rocket.Chat</h2>
+<p><strong>Purpose:</strong> Omnichannel communication platform with live chat, email, social media, and WhatsApp integration. Better than Mattermost for customer-facing teams; heavier resource footprint.</p>
+<pre><code class="language-yaml"># ~/rocketchat/compose.yaml
+services:
+  rocketchat:
+    image: rocket.chat:latest
+    ports: [&quot;127.0.0.1:3000:3000&quot;]
+    environment:
+      MONGO_URL: mongodb://mongodb:27017/rocketchat
+      MONGO_OPLOG_URL: mongodb://mongodb:27017/local
+      ROOT_URL: https://chat.example.com
+    depends_on: [mongodb]
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:7
+    command: mongod --oplogSize 128 --replSet rs0
+    volumes: [mongo_data:/data/db]
+    restart: unless-stopped
+
+volumes:
+  mongo_data:</code></pre>
+<pre><code class="language-bash">cd ~/rocketchat &amp;&amp; podman-compose up -d</code></pre>
+<h5>Initialise the MongoDB replica set (required on first run)</h5>
+<pre><code class="language-bash">podman exec mongodb mongosh --eval &quot;rs.initiate()&quot;</code></pre>
+<h2>Ntfy</h2>
+<p><strong>Purpose:</strong> Lightweight push notification server with a mobile app (iOS and Android), browser notifications, and pub/sub topics. Send alerts from any script, cron job, or service to your phone with a single <code>curl</code> command.</p>
+<pre><code class="language-yaml"># ~/ntfy/compose.yaml
+services:
+  ntfy:
+    image: binwiederhier/ntfy
+    ports:
+      - 127.0.0.1:8090:80
+    volumes:
+      - /home/user/ntfy/cache:/var/cache/ntfy:Z
+      - /home/user/ntfy/config:/etc/ntfy:Z
+    command: serve
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/ntfy &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Send a simple notification
+curl -d &quot;Backup complete&quot; http://localhost:8090/your-topic
+
+# Send to self-hosted instance with priority and title
+curl \
+  -H &quot;Title: Home Server Alert&quot; \
+  -H &quot;Priority: high&quot; \
+  -H &quot;Tags: warning,computer&quot; \
+  -d &quot;Disk usage is above 90%&quot; \
+  http://localhost:8090/your-topic
+
+# Send with attachment
+curl -T screenshot.png \
+  -H &quot;Filename: screenshot.png&quot; \
+  http://localhost:8090/your-topic
+
+# Subscribe and watch (long-poll)
+curl -s http://localhost:8090/your-topic/json
+
+# List published messages (last 10)
+curl http://localhost:8090/your-topic/json?poll=1
+
+# Create a user (on self-hosted with auth enabled)
+podman exec ntfy ntfy user add --role=admin myuser</code></pre>
+<blockquote><p>For private notifications, self-host Ntfy and set <code>AUTH_DEFAULT_ACCESS=deny-all</code> in the config, then create user accounts.</p></blockquote>
+<p>---</p>
+<h2>Gotify</h2>
+<p><strong>Purpose:</strong> Simple self-hosted push notification server with REST API, WebSocket stream, and an Android app. All notifications stay on your server — no cloud routing.</p>
+<pre><code class="language-yaml"># ~/gotify/compose.yaml
+services:
+  gotify:
+    image: gotify/server
+    ports:
+      - 127.0.0.1:8070:80
+    volumes:
+      - /home/user/gotify/data:/app/data:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/gotify &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:8070</code>. Create an app token and use it in your scripts:</p>
+<pre><code class="language-bash">curl &quot;http://localhost:8070/message?token=YOUR_APP_TOKEN&quot; \
+  -F &quot;title=Home Server&quot; \
+  -F &quot;message=All services running&quot; \
+  -F &quot;priority=5&quot;</code></pre>
+<p>---</p>
+<h2>Jitsi Meet (Video Conferencing)</h2>
+<p><strong>Purpose:</strong> Self-hosted, open-source video conferencing. No accounts required, no time limits, end-to-end encryption. Drop-in replacement for Zoom or Google Meet for personal or small-team use. For education-specific virtual classrooms with whiteboards, breakout rooms, polling, and LMS integration, see <a href="https://docs.shani.dev/doc/servers/education#bigbluebutton-virtual-classroom">BigBlueButton in the Education wiki</a>.</p>
+<pre><code class="language-yaml"># ~/jitsi/compose.yaml — use the official quick-install from github.com/jitsi/docker-jitsi-meet
+# Run: wget $(curl -s https://api.github.com/repos/jitsi/docker-jitsi-meet/releases/latest | grep 'tarball' | cut -d'&quot;' -f4) -O jitsi.tar.gz
+# Extract and run: cp env.example .env &amp;&amp; ./gen-passwords.sh &amp;&amp; podman-compose up -d</code></pre>
+<p>Ports required: <code>80/tcp</code>, <code>443/tcp</code>, <code>10000/udp</code> (media). Caddy should proxy 80/443 and pass through the media port.</p>
+<p>---</p>
+<h2>Conduit (Lightweight Matrix Server)</h2>
+<p><strong>Purpose:</strong> A Matrix homeserver written in Rust. Uses significantly less RAM than Synapse (~50 MB vs ~500 MB). Ideal for personal or small family use where Synapse's federation features are not needed.</p>
+<pre><code class="language-yaml"># ~/conduit/compose.yaml
+services:
+  conduit:
+    image: matrixconduit/matrix-conduit:latest
+    ports:
+      - 127.0.0.1:6167:6167
+    volumes:
+      - /home/user/conduit/data:/var/lib/matrix-conduit:Z
+    environment:
+      CONDUIT_SERVER_NAME: chat.example.com
+      CONDUIT_DATABASE_BACKEND: rocksdb
+      CONDUIT_ALLOW_REGISTRATION: false
+      CONDUIT_TRUSTED_SERVERS: [&quot;matrix.org&quot;]
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/conduit &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>Choose Conduit for personal use on low-RAM hardware. Choose Synapse for full federation, bridges, and admin features.</p></blockquote>
+<p>---</p>
+<h2>Discourse (Community Forum)</h2>
+<p><strong>Purpose:</strong> The gold-standard self-hosted community discussion platform. Threaded topics, real-time notifications, badges, trust levels, rich embeds, email-in replies, and an extensive plugin ecosystem. Used by GitHub, Rust, Docker, and thousands of open-source projects. If your community currently lives on a subreddit, Facebook group, or Google Group, Discourse is the self-hosted replacement.</p>
+<pre><code class="language-yaml"># ~/discourse/compose.yaml — use the official launcher (recommended)
+# git clone https://github.com/discourse/discourse_docker
+# cd discourse_docker &amp;&amp; cp samples/standalone.yml containers/app.yml
+# Edit containers/app.yml, then:
+# ./launcher bootstrap app
+# ./launcher start app</code></pre>
+<pre><code class="language-bash">cd ~/discourse &amp;&amp; podman-compose up -d</code></pre>
+<p>For a containerised quickstart with Podman:</p>
+<pre><code class="language-yaml"># ~/discourse/compose.yaml
+services:
+  discourse:
+    image: bitnami/discourse:latest
+    ports:
+      - 127.0.0.1:3100:3000
+    volumes:
+      - /home/user/discourse/data:/shared:Z
+    environment:
+      DISCOURSE_DB_HOST: host.containers.internal
+      DISCOURSE_DB_NAME: discourse
+      DISCOURSE_DB_USERNAME: discourse
+      DISCOURSE_DB_PASSWORD: changeme
+      DISCOURSE_REDIS_HOST: host.containers.internal
+      DISCOURSE_HOSTNAME: forum.example.com
+      DISCOURSE_DEVELOPER_EMAILS: admin@example.com
+      DISCOURSE_SMTP_ADDRESS: localhost
+      DISCOURSE_SMTP_PORT: 25
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/discourse &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>Discourse requires PostgreSQL and Redis. Run both from the <a href="https://docs.shani.dev/doc/servers/databases">Databases wiki</a> first. It also requires outbound email (SMTP) for account activation — use Mailpit in development.</p></blockquote>
+<h4>First-time setup</h4>
+<p>Visit <code>http://localhost:3100/finish-installation</code> to create the admin account.</p>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">forum.example.com { reverse_proxy localhost:3100 }</code></pre>
+<p>---</p>
+<h2>Mastodon (Federated Microblogging)</h2>
+<p><strong>Purpose:</strong> Self-hosted, ActivityPub-federated microblogging. Your users have accounts like <code>@alice@social.example.com</code> and can follow and be followed by users on any other Mastodon, Misskey, or compatible ActivityPub server. Full Twitter/X replacement that federates with the global fediverse.</p>
+<pre><code class="language-yaml"># ~/mastodon/compose.yaml
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: mastodon
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: mastodon_production
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  web:
+    image: ghcr.io/mastodon/mastodon:latest
+    command: bundle exec puma -C config/puma.rb
+    ports: [&quot;127.0.0.1:3200:3000&quot;]
+    environment:
+      LOCAL_DOMAIN: social.example.com
+      SECRET_KEY_BASE: changeme-run-rake-secret
+      OTP_SECRET: changeme-run-rake-secret
+      DB_HOST: db
+      DB_NAME: mastodon_production
+      DB_USER: mastodon
+      DB_PASS: changeme
+      REDIS_HOST: redis
+      SMTP_SERVER: localhost
+      SMTP_PORT: 25
+      SMTP_FROM_ADDRESS: notifications@social.example.com
+      RAILS_ENV: production
+    volumes:
+      - /home/user/mastodon/public/system:/mastodon/public/system:Z
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  sidekiq:
+    image: ghcr.io/mastodon/mastodon:latest
+    command: bundle exec sidekiq
+    environment:
+      LOCAL_DOMAIN: social.example.com
+      SECRET_KEY_BASE: changeme-run-rake-secret
+      OTP_SECRET: changeme-run-rake-secret
+      DB_HOST: db
+      DB_USER: mastodon
+      DB_PASS: changeme
+      DB_NAME: mastodon_production
+      REDIS_HOST: redis
+      RAILS_ENV: production
+    volumes:
+      - /home/user/mastodon/public/system:/mastodon/public/system:Z
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/mastodon &amp;&amp; podman-compose up -d</code></pre>
+<h4>Initial setup</h4>
+<pre><code class="language-bash"># Run DB migrations and create admin user
+podman-compose run --rm web bundle exec rails db:migrate
+podman-compose run --rm web bundle exec rails mastodon:accounts:create \
+  USERNAME=admin EMAIL=admin@example.com CONFIRMED=true ROLE=Owner</code></pre>
+<blockquote><p>Mastodon requires a public-facing domain — it federates with other servers using HTTP. Use a Cloudflare Tunnel or ensure port 443 is forwarded.</p></blockquote>
+<p>---</p>
+<h2>Lemmy (Federated Link Aggregator)</h2>
+<p><strong>Purpose:</strong> Self-hosted Reddit alternative with ActivityPub federation. Communities, upvoting, threaded comments, cross-posting, moderation tools, and federation with the broader fediverse. Your instance can federate with other Lemmy and Kbin instances.</p>
+<pre><code class="language-yaml"># ~/lemmy/compose.yaml
+services:
+  lemmy:
+    image: dessalines/lemmy:latest
+    ports: [&quot;127.0.0.1:8536:8536&quot;]
+    environment:
+      RUST_LOG: warn
+    volumes:
+      - /home/user/lemmy/config/config.hjson:/config/config.hjson:ro,Z
+    depends_on: [postgres]
+    restart: unless-stopped
+
+  lemmy-ui:
+    image: dessalines/lemmy-ui:latest
+    ports: [&quot;127.0.0.1:1234:1234&quot;]
+    environment:
+      LEMMY_UI_LEMMY_INTERNAL_HOST: lemmy:8536
+      LEMMY_UI_LEMMY_EXTERNAL_HOST: lemmy.example.com
+      LEMMY_UI_HTTPS: &quot;true&quot;
+    depends_on: [lemmy]
+    restart: unless-stopped
+
+  postgres:
+    image: tensorchord/pgvecto-rs:pg16-v0.2.1
+    environment:
+      POSTGRES_USER: lemmy
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: lemmy
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/lemmy &amp;&amp; podman-compose up -d</code></pre>
+<h5>Minimal <code>config.hjson</code></h5>
+<pre><code class="language-hjson">{
+  hostname: &quot;lemmy.example.com&quot;
+  bind: &quot;0.0.0.0&quot;
+  port: 8536
+  database: {
+    host: &quot;postgres&quot;
+    user: &quot;lemmy&quot;
+    password: &quot;changeme&quot;
+    database: &quot;lemmy&quot;
+  }
+  federation: { enabled: true }
+  email: {
+    smtp_server: &quot;localhost:25&quot;
+    smtp_from_address: &quot;noreply@lemmy.example.com&quot;
+  }
+}</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">lemmy.example.com {
+  handle_path /api/* { reverse_proxy localhost:8536 }
+  handle_path /feeds/* { reverse_proxy localhost:8536 }
+  handle_path /pictrs/* { reverse_proxy localhost:8536 }
+  handle { reverse_proxy localhost:1234 }
+}</code></pre>
+<p>---</p>
+<h2>Pixelfed (Federated Photo Sharing)</h2>
+<p><strong>Purpose:</strong> Instagram alternative with ActivityPub federation. Share photos, stories, and reels with followers across the fediverse. Completely open-source and ad-free. Pixelfed accounts can follow Mastodon accounts and vice versa.</p>
+<pre><code class="language-yaml"># ~/pixelfed/compose.yaml
+services:
+  app:
+    image: pixelfed/pixelfed:latest
+    ports: [&quot;127.0.0.1:8082:80&quot;]
+    environment:
+      APP_NAME: &quot;My Pixelfed&quot;
+      APP_URL: https://photos.example.com
+      APP_DOMAIN: photos.example.com
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_DATABASE: pixelfed
+      DB_USERNAME: pixelfed
+      DB_PASSWORD: changeme
+      REDIS_HOST: redis
+      MAIL_DRIVER: smtp
+      MAIL_HOST: localhost
+      SESSION_DRIVER: redis
+      CACHE_DRIVER: redis
+      QUEUE_DRIVER: redis
+    volumes:
+      - /home/user/pixelfed/storage:/var/www/storage:Z
+      - /home/user/pixelfed/bootstrap:/var/www/bootstrap/cache:Z
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  worker:
+    image: pixelfed/pixelfed:latest
+    command: gosu www-data php artisan horizon
+    environment:
+      DB_HOST: db
+      DB_DATABASE: pixelfed
+      DB_USERNAME: pixelfed
+      DB_PASSWORD: changeme
+      REDIS_HOST: redis
+    volumes:
+      - /home/user/pixelfed/storage:/var/www/storage:Z
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: pixelfed
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: pixelfed
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/pixelfed &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>PeerTube (Federated Video Platform)</h2>
+<p><strong>Purpose:</strong> Self-hosted YouTube alternative with ActivityPub federation. Upload and stream videos, live stream, create playlists, and federate with other PeerTube instances. Uses WebTorrent/HLS for peer-assisted streaming to reduce bandwidth costs. Viewers can subscribe to your channel from Mastodon.</p>
+<pre><code class="language-yaml"># ~/peertube/compose.yaml
+services:
+  peertube:
+    image: chocobozzz/peertube:production-bookworm
+    ports:
+      - &quot;127.0.0.1:9000:9000&quot;
+      - &quot;0.0.0.0:1935:1935&quot;   # RTMP for live streaming
+    environment:
+      PEERTUBE_DB_USERNAME: peertube
+      PEERTUBE_DB_PASSWORD: changeme
+      PEERTUBE_DB_HOSTNAME: postgres
+      PEERTUBE_REDIS_HOSTNAME: redis
+      PEERTUBE_WEBSERVER_HOSTNAME: videos.example.com
+      PEERTUBE_WEBSERVER_PORT: 443
+      PEERTUBE_WEBSERVER_HTTPS: &quot;true&quot;
+      PEERTUBE_SMTP_HOSTNAME: localhost
+      PEERTUBE_SMTP_PORT: 25
+      PEERTUBE_ADMIN_EMAIL: admin@example.com
+    volumes:
+      - /home/user/peertube/data:/data:Z
+      - /home/user/peertube/config:/config:Z
+    depends_on: [postgres, redis]
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: peertube
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: peertube
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/peertube &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>PeerTube requires a public-facing HTTPS domain for federation and HLS video delivery. Open port <code>1935/tcp</code> in your firewall for live streaming ingestion.</p></blockquote>
+<p><strong>Firewall:</strong></p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=1935/tcp --permanent &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<p>---</p>
+<h2>Zulip (Threaded Team Chat)</h2>
+<p><strong>Purpose:</strong> Conversation-threaded team messaging that keeps discussions organised at scale. Unlike Slack/Mattermost where channels become walls of noise, Zulip's topic model means every message lives in a named thread within a stream — you can catch up on only what matters. Used by many open-source communities as their primary async communication platform.</p>
+<pre><code class="language-yaml"># ~/zulip/compose.yaml
+services:
+  zulip:
+    image: zulip/docker-zulip:latest
+    ports: [&quot;127.0.0.1:8442:443&quot;]
+    environment:
+      DB_HOST: postgres
+      DB_HOST_PORT: 5432
+      DB_USER: zulip
+      SETTING_MEMCACHED_LOCATION: memcached:11211
+      SETTING_REDIS_HOST: redis
+      SETTING_REDIS_PORT: 6379
+      SECRETS_email_password: changeme
+      SECRETS_rabbitmq_password: changeme
+      SECRETS_postgres_password: changeme
+      SECRETS_secret_key: changeme-run-openssl-rand-base64-64
+      SETTING_EXTERNAL_HOST: chat.example.com
+      SETTING_ZULIP_ADMINISTRATOR: admin@example.com
+      ZULIP_AUTH_BACKENDS: EmailAuthBackend
+    volumes:
+      - /home/user/zulip/data:/data:Z
+    depends_on: [postgres, memcached, redis, rabbitmq]
+    restart: unless-stopped
+
+  postgres:
+    image: zulip/zulip-postgresql:14
+    environment:
+      POSTGRES_DB: zulip
+      POSTGRES_USER: zulip
+      POSTGRES_PASSWORD: changeme
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  memcached:
+    image: memcached:alpine
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: zulip
+      RABBITMQ_DEFAULT_PASS: changeme
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/zulip &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>Mumble (Low-Latency Voice Chat)</h2>
+<p><strong>Purpose:</strong> Open-source, low-latency voice over IP (VoIP) server. Designed for gaming and real-time voice communication — sub-10ms latency, positional audio, per-channel and per-user permission trees, and excellent audio quality. A self-hosted Discord voice alternative for teams who need reliable, private voice communication.</p>
+<pre><code class="language-yaml"># ~/mumble/compose.yaml
+services:
+  mumble:
+    image: mumblevoip/mumble-server:latest
+    ports:
+      - 64738:64738/tcp
+      - 64738:64738/udp
+    volumes:
+      - /home/user/mumble/data:/data:Z
+    environment:
+      SUPERUSER_PASSWORD: changeme
+      TZ: Asia/Kolkata
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/mumble &amp;&amp; podman-compose up -d</code></pre>
+<p><strong>Firewall:</strong></p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=64738/tcp --add-port=64738/udp --permanent &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<blockquote><p><strong>Web-based access:</strong> Run <a href="https://github.com/Johni0702/mumble-web">Mumble Web</a> alongside the server for browser-based voice without installing a client:</p></blockquote>
+<pre><code class="language-yaml"># ~/mumble-web/compose.yaml
+services:
+  mumble-web:
+    image: johni0702/mumble-web
+    ports:
+      - &quot;127.0.0.1:64737:64737&quot;
+    environment:
+      MUMBLE_SERVER: host.containers.internal:64738
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/mumble-web &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>FreePBX (SIP PBX & VoIP Server)</h2>
+<p><strong>Purpose:</strong> Full-featured open-source PBX built on Asterisk. Manage SIP extensions, IVR menus, call routing, voicemail, and trunks from a web UI. Ideal for self-hosted office phone systems or home VoIP setups.</p>
+<pre><code class="language-yaml"># ~/freepbx/compose.yaml
+services:
+  freepbx:
+    image: tiredofit/freepbx:latest
+    network_mode: host
+    volumes:
+      - /home/user/freepbx/data:/data:Z
+    environment:
+      MYSQL_ROOT_PASSWORD: changeme
+      RTP_START: 10000
+      RTP_FINISH: 10200
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/freepbx &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p><code>--network host</code> is required for SIP and RTP UDP traffic to work correctly. FreePBX uses ports <code>5060/udp</code> (SIP), <code>5061/tcp</code> (SIP-TLS), and the RTP range you configure for audio.</p></blockquote>
+<p><strong>Firewall:</strong></p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=5060/udp --add-port=5061/tcp --permanent
+sudo firewall-cmd --add-port=10000-10200/udp --permanent
+sudo firewall-cmd --reload</code></pre>
+<p>Access the admin UI at <code>http://localhost/admin</code>. Configure a SIP trunk under Connectivity → Trunks, then add extensions under Applications → Extensions.</p>
+<p>---</p>
+<h2>SimpleX Chat Server (SMP + XFTP)</h2>
+<p><strong>Purpose:</strong> The most private self-hosted messaging infrastructure available. SimpleX has no user IDs — not phone numbers, not usernames, not public keys. Messages are routed through SMP (SimpleX Messaging Protocol) relay servers; your server handles message queuing without knowing who is communicating with whom. Run your own relay so all message traffic stays on your hardware. Users connect to your relay by scanning a QR code or entering your server address in the SimpleX iOS/Android app.</p>
+<pre><code class="language-yaml"># ~/simplex/compose.yaml
+services:
+  # SMP Relay (message queuing)
+  simplex-smp:
+    image: simplexchat/smp-server:latest
+    ports:
+      - &quot;5223:5223&quot;
+    volumes:
+      - /home/user/simplex/smp:/etc/opt/simplex:Z
+      - /home/user/simplex/smp-data:/var/opt/simplex:Z
+    restart: unless-stopped
+
+  # XFTP Server (file transfers)
+  simplex-xftp:
+    image: simplexchat/xftp-server:latest
+    ports:
+      - &quot;443:443&quot;
+    volumes:
+      - /home/user/simplex/xftp:/etc/opt/simplex-xftp:Z
+      - /home/user/simplex/xftp-data:/var/opt/simplex-xftp:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/simplex &amp;&amp; podman-compose up -d</code></pre>
+<h5>Initialise the server (first run)</h5>
+<pre><code class="language-bash"># Generate server config and fingerprint
+podman run --rm \
+  -v /home/user/simplex/smp:/etc/opt/simplex:Z \
+  -v /home/user/simplex/smp-data:/var/opt/simplex:Z \
+  simplexchat/smp-server:latest \
+  smp-server init -l
+
+# The output shows your server address fingerprint:
+# smp://FINGERPRINT@your-domain:5223</code></pre>
+<blockquote><p>Port <code>5223/tcp</code> must be publicly reachable for the SMP relay. Add your <code>smp://FINGERPRINT@your-domain:5223</code> address in the SimpleX app under Settings → Network & servers → SMP servers → Add server.</p></blockquote>
+<p><strong>Firewall:</strong></p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=5223/tcp --permanent &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<p>---</p>
+<h2>Chatwoot (Customer Support & Live Chat)</h2>
+<p><strong>Purpose:</strong> Open-source customer support platform and live chat inbox. Embed a chat widget on any website, manage conversations across email, WhatsApp, Instagram, Twitter/X, Telegram, and LINE from a single inbox. Supports teams with agent assignments, canned responses, labels, and CSAT surveys. The self-hosted Intercom/Zendesk alternative.</p>
+<pre><code class="language-yaml"># ~/chatwoot/compose.yaml
+services:
+  chatwoot:
+    image: chatwoot/chatwoot:latest
+    ports: [&quot;127.0.0.1:3300:3000&quot;]
+    command: bundle exec rails s -p 3000 -b 0.0.0.0
+    environment:
+      SECRET_KEY_BASE: changeme-run-openssl-rand-hex-64
+      FRONTEND_URL: https://chat.example.com
+      DEFAULT_LOCALE: en
+      FORCE_SSL: &quot;false&quot;
+      ENABLE_ACCOUNT_SIGNUP: &quot;false&quot;
+      REDIS_URL: redis://redis:6379
+      POSTGRES_HOST: db
+      POSTGRES_DATABASE: chatwoot
+      POSTGRES_USERNAME: chatwoot
+      POSTGRES_PASSWORD: changeme
+      ACTIVE_STORAGE_SERVICE: local
+      STORAGE_DIR: /app/storage
+      MAILER_SENDER_EMAIL: support@example.com
+      SMTP_ADDRESS: localhost
+      SMTP_PORT: 25
+    volumes:
+      - /home/user/chatwoot/storage:/app/storage:Z
+      - /home/user/chatwoot/public/packs:/app/public/packs:Z
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  sidekiq:
+    image: chatwoot/chatwoot:latest
+    command: bundle exec sidekiq -C config/sidekiq.yml
+    environment:
+      SECRET_KEY_BASE: changeme-run-openssl-rand-hex-64
+      FRONTEND_URL: https://chat.example.com
+      REDIS_URL: redis://redis:6379
+      POSTGRES_HOST: db
+      POSTGRES_DATABASE: chatwoot
+      POSTGRES_USERNAME: chatwoot
+      POSTGRES_PASSWORD: changeme
+    volumes:
+      - /home/user/chatwoot/storage:/app/storage:Z
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: chatwoot
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: chatwoot
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/chatwoot &amp;&amp; podman-compose up -d</code></pre>
+<h4>Prepare database and create admin</h4>
+<pre><code class="language-bash">podman-compose run --rm chatwoot bundle exec rails db:chatwoot_prepare
+podman-compose run --rm chatwoot bundle exec rails db:seed</code></pre>
+<p>Access at <code>http://localhost:3300</code>. Complete the setup wizard to create your account and first inbox. Add the live chat widget to any site:</p>
+<pre><code class="language-html">&lt;script&gt;
+  (function(d,t) {
+    var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+    g.src=&quot;https://chat.example.com/packs/js/sdk.js&quot;;
+    g.defer=true; g.async=true;
+    s.parentNode.insertBefore(g,s);
+    g.onload=function(){ window.chatwootSDK.run({ websiteToken: 'YOUR_TOKEN', baseUrl: 'https://chat.example.com' }) }
+  })(document,&quot;script&quot;);
+&lt;/script&gt;</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">chat.example.com { reverse_proxy localhost:3300 }</code></pre>
+<p>---</p>
+<h2>Caddy Configuration</h2>
+<pre><code class="language-caddyfile">chat.example.com      { reverse_proxy localhost:8448 }
+mattermost.home.local { tls internal; reverse_proxy localhost:8065 }
+rocketchat.home.local { tls internal; reverse_proxy localhost:3000 }
+ntfy.home.local       { tls internal; reverse_proxy localhost:8090 }
+gotify.home.local     { tls internal; reverse_proxy localhost:8070 }
+jitsi.example.com     { reverse_proxy localhost:8080 }
+conduit.example.com   { reverse_proxy localhost:6167 }
+forum.example.com     { reverse_proxy localhost:3100 }
+social.example.com    { reverse_proxy localhost:3200 }
+lemmy.example.com     { reverse_proxy localhost:1234 }
+photos.example.com    { reverse_proxy localhost:8082 }
+videos.example.com    { reverse_proxy localhost:9000 }
+zulip.example.com     { reverse_proxy localhost:8442 }
+simplex.example.com   { reverse_proxy localhost:5223 }
+support.example.com   { reverse_proxy localhost:3300 }</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Matrix clients can't log in | Check <code>SYNAPSE_SERVER_NAME</code> matches the domain; verify the well-known delegation in Caddy returns valid JSON | | Synapse high memory usage | Switch to Conduit for personal use, or tune <code>caches.global_factor</code> in <code>homeserver.yaml</code> | | Ntfy notifications not received | Verify the topic name matches on sender and app; check <code>AUTH_DEFAULT_ACCESS</code> allows unauthenticated publish | | Mattermost DB connection refused | Ensure PostgreSQL is running and the <code>MM_SQLSETTINGS_DATASOURCE</code> connection string is correct | | Jitsi video choppy | Ensure <code>10000/udp</code> is open in firewalld; Jitsi media relay requires a direct UDP path | | Rocket.Chat replica set error | Run <code>rs.initiate()</code> in the MongoDB shell after first boot: <code>podman exec mongodb mongosh --eval &quot;rs.initiate()&quot;</code> | | Discourse <code>500 - Missing secret_key_base</code> | Ensure <code>DISCOURSE_SECRET_KEY_BASE</code> is set; generate with <code>openssl rand -hex 64</code> | | Discourse emails not sent | Verify SMTP settings in the admin panel (Admin → Settings → Email); test with the "Send test email" button | | Mastodon federation not working | Ensure your domain is publicly reachable on port 443; verify the <code>/.well-known/webfinger</code> route resolves | | Mastodon media uploads failing | Check the <code>public/system</code> volume has write permissions; ensure disk space is available | | Lemmy posts not federating | Verify <code>federation.enabled: true</code> in config; check that your domain is publicly reachable | | Pixelfed <code>500</code> after setup | Run <code>podman exec app php artisan storage:link &amp;&amp; php artisan config:cache</code> to rebuild the app cache | | PeerTube video processing stuck | Check the worker container logs; ensure ffmpeg is available in the image and the data volume has enough space | | PeerTube live stream not connecting | Verify RTMP port <code>1935/tcp</code> is open and the stream key in OBS matches PeerTube's live settings | | Zulip blank after startup | Zulip takes 60–90 s to initialise; check <code>podman logs zulip</code>; verify all dependency containers (postgres, redis, memcached, rabbitmq) are healthy | | Mumble audio quality poor | Ensure UDP port <code>64738</code> is reachable — TCP fallback works but has higher latency; check client codec settings | | FreePBX no audio on calls (one-way) | Ensure the RTP port range is open in the firewall; verify <code>nat=yes</code> is set on SIP trunks behind NAT | | SimpleX server not reachable | Ensure port <code>5223/tcp</code> is publicly reachable; verify the fingerprint in your server address matches what <code>smp-server</code> printed during init | | Chatwoot widget not loading | Verify <code>FRONTEND_URL</code> matches the domain the widget is loaded from; check CSP headers aren't blocking the script | | Chatwoot Sidekiq not processing | Check Redis is running and <code>REDIS_URL</code> is correct; view Sidekiq logs with <code>podman logs chatwoot-sidekiq-1</code> |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

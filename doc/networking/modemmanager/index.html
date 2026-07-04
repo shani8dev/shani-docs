@@ -146,7 +146,97 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">ModemManager (Mobile Broadband)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-18</span>
+        </div>
+      </div>
+      <div class="prose"><h1>ModemManager — Mobile Broadband (3G/4G/5G)</h1>
+<p>ModemManager is pre-installed on Shani OS and integrates with NetworkManager to provide first-class support for USB and PCIe mobile broadband modems and SIM cards. It manages LTE/5G data connections, signal monitoring, and SMS.</p>
+<p>When you plug in a supported modem, NetworkManager automatically detects it and creates a Mobile Broadband connection. You can configure the APN and connect entirely from <strong>Settings → Network → Mobile Broadband</strong> without touching the terminal.</p>
+<p>---</p>
+<h2>Modem Detection & Status</h2>
+<pre><code class="language-bash"># List all detected modems
+mmcli -L
+
+# Detailed modem info (model, firmware, signal strength, access technology, SIM status)
+mmcli -m 0
+
+# Signal strength and quality (request a fresh measurement first)
+mmcli -m 0 --signal-setup=5    # start polling every 5 seconds
+mmcli -m 0 --signal-get        # read the current measurement
+
+# Show SIM details (IMSI, operator name, phone number)
+mmcli -m 0 --sim 0
+
+# Show current bearer / active data connection details
+mmcli -m 0 --list-bearers
+mmcli -b 0</code></pre>
+<p>---</p>
+<h2>Connecting & Disconnecting</h2>
+<p>NetworkManager handles connections automatically once you configure an APN. Use these commands for scripting or troubleshooting:</p>
+<pre><code class="language-bash"># List all saved connections (your modem connection appears here)
+nmcli connection show
+
+# Bring up a mobile broadband connection
+nmcli connection up &quot;Mobile Broadband&quot;
+
+# Bring it down
+nmcli connection down &quot;Mobile Broadband&quot;
+
+# Show the active connection's IP, gateway, and DNS
+nmcli device show cdc-wdm0</code></pre>
+<h3>Manual APN Configuration</h3>
+<p>If auto-detection picks the wrong APN:</p>
+<pre><code class="language-bash"># List available APN profiles for your operator (requires modem to be registered on network)
+mmcli -m 0 --3gpp-scan
+
+# Or configure directly via nmcli
+nmcli connection modify &quot;Mobile Broadband&quot; \
+  gsm.apn &quot;your.operator.apn&quot; \
+  gsm.username &quot;&quot; \
+  gsm.password &quot;&quot;
+
+nmcli connection up &quot;Mobile Broadband&quot;</code></pre>
+<p>---</p>
+<h2>SMS</h2>
+<p>SMS support depends on your modem hardware and firmware. Most USB LTE dongles support it; built-in modems vary.</p>
+<pre><code class="language-bash"># Check if SMS is supported by this modem
+mmcli -m 0 | grep -i messaging
+
+# List all SMS messages stored on the modem/SIM
+mmcli -m 0 --messaging-list-sms
+
+# Read a specific message (use the index from the list above)
+mmcli -s 0
+
+# Delete a message
+mmcli -s 0 --delete
+
+# Send an SMS
+mmcli -m 0 --messaging-create-sms=&quot;text=Hello&amp;number=+911234567890&quot;</code></pre>
+<p>---</p>
+<h2>USSD (Carrier Self-Service)</h2>
+<p>USSD codes let you query your carrier for balance, remaining data, and plan information without calling support:</p>
+<pre><code class="language-bash"># Send a USSD code (replace *123# with your carrier's code)
+mmcli -m 0 --3gpp-ussd-initiate=&quot;*123#&quot;
+
+# Cancel an ongoing USSD session
+mmcli -m 0 --3gpp-ussd-cancel</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Modem not detected (<code>mmcli -L</code> shows nothing) | Check <code>lsusb</code> or <code>lspci</code> — if the kernel sees the hardware, try <code>sudo modprobe qmi_wwan</code> or <code>cdc_mbim</code> | | Modem listed but no connection | Verify the APN is correct for your carrier; check <code>mmcli -m 0</code> — registration status must show <code>registered</code> | | SIM not detected | Reseat the SIM; check <code>mmcli -m 0</code> for PIN lock status — unlock with <code>mmcli -m 0 --pin=XXXX</code> | | Low signal / frequent disconnects | Run <code>mmcli -m 0 --signal-get</code> to check signal quality; reposition the modem or antenna | | SMS not sending | Confirm SMS support: <code>mmcli -m 0 | grep -i sms</code>; modem must be registered on a network first | | ModemManager interfering with a serial GPS | Create <code>/etc/udev/rules.d/99-mm-ignore-gps.rules</code> with <code>ATTRS{idVendor}==&quot;XXXX&quot;, ATTRS{idProduct}==&quot;YYYY&quot;, ENV{ID_MM_DEVICE_IGNORE}=&quot;1&quot;</code> (replace XX values from <code>lsusb</code> output) |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

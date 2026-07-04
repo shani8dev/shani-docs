@@ -146,7 +146,113 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">User Provisioning (shani-user-setup)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Updates &amp; Config</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-05-13</span>
+        </div>
+      </div>
+      <div class="prose"><h1>User Provisioning</h1>
+<p><code>shani-user-setup</code> automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix channels, and rootless container namespaces. It runs as root via a systemd path unit that watches <code>/data/user-setup-needed</code>, triggered by <code>shani-deploy</code> after every OS update and by the first-run wizard when a new user account is created.</p>
+<p>---</p>
+<h2>What It Does</h2>
+<p>For each interactive user account on the system, <code>shani-user-setup</code>:</p>
+<ol>
+<li><strong>Groups</strong> — adds the user to all groups listed in <code>/etc/shani-extra-groups</code>, skipping any that don't exist</li>
+<li><strong>Default shell</strong> — sets the shell to Zsh (falling back to Bash if Zsh isn't installed), only if the current shell differs</li>
+<li><strong>Flatpak remote</strong> — adds the <code>flathub</code> remote for the user if not already present</li>
+<li><strong>Nix channel</strong> — adds the <code>nixpkgs-unstable</code> channel if no channel named <code>nixpkgs</code> exists (never overwrites an existing nixpkgs channel)</li>
+<li><strong>subuid/subgid ranges</strong> — allocates 65,536 sub-UIDs and sub-GIDs for rootless Podman/LXC/LXD if not already assigned</li>
+<li><strong>Podman storage migration</strong> — runs <code>podman system migrate</code> to upgrade the storage graph if <code>/var/lib/containers</code> is mounted</li>
+</ol>
+<p>A stamp file at <code>~/.cache/shani/user-setup.stamp</code> records the script mtime and extra-groups list. If the stamp matches, the expensive steps are skipped on subsequent runs. Set <code>FORCE_SETUP=1</code> to bypass.</p>
+<p>---</p>
+<h2>Extra Groups</h2>
+<p>The list of groups added to every user is read from a single file:</p>
+<pre><code>/etc/shani-extra-groups</code></pre>
+<p>Format: one comma-separated line, no spaces.</p>
+<pre><code>wheel,video,input,audio,kvm,storage,network,realtime,scanner,lp,cups,libvirt,lxd</code></pre>
+<h3>Group Reference</h3>
+<p>| Group | Purpose | |-------|---------| | <code>wheel</code> | Sudo privileges for system administration | | <code>input</code> | Direct input device access (keyboards, mice, controllers) | | <code>realtime</code> | Real-time scheduling, HPET/RTC access for audio production and low-latency gaming | | <code>video</code> | GPU and video hardware access | | <code>sys</code> | Hardware monitoring and sensor access | | <code>cups</code>, <code>lp</code> | Printer management and job submission | | <code>scanner</code> | Scanner device access | | <code>nixbld</code> | Nix build users group — required for the Nix package manager daemon | | <code>lxc</code>, <code>lxd</code> | LXC/LXD container management without root | | <code>kvm</code> | Virtual machine management (KVM hardware access) | | <code>libvirt</code> | libvirt VM management via <code>virsh</code> and virt-manager |</p>
+<p>This file is the <strong>single source of truth</strong> shared between <code>shani-user-setup</code> and the <code>adduser</code>/<code>useradd</code> wrappers. Editing it ensures that all future users (and any re-provisioning runs) get the same groups.</p>
+<p>If the file is absent, <code>shani-user-setup</code> falls back to the built-in default group list.</p>
+<pre><code class="language-bash"># View current extra groups
+cat /etc/shani-extra-groups
+
+# Add a group (via /etc overlay — persists across updates)
+sudo nano /etc/shani-extra-groups
+
+# Force re-provisioning all users with the new group list
+sudo FORCE_SETUP=1 shani-user-setup</code></pre>
+<p>---</p>
+<h2>Triggering</h2>
+<p><code>shani-user-setup</code> runs when <code>/data/user-setup-needed</code> is created or modified:</p>
+<pre><code class="language-bash"># systemd path unit watches for this file
+systemctl status shani-user-setup.path
+
+# Trigger manually (e.g. after adding a new user)
+sudo touch /data/user-setup-needed</code></pre>
+<p><code>shani-deploy</code> writes this marker after every slot switch so new group assignments from the updated OS are applied on the next login.</p>
+<p>---</p>
+<h2>Running Manually</h2>
+<pre><code class="language-bash"># Provision all users (normal run)
+sudo shani-user-setup
+
+# Dry run — log what would change without making changes
+sudo DRY_RUN=1 shani-user-setup
+
+# Force full re-provisioning (ignore stamp file)
+sudo FORCE_SETUP=1 shani-user-setup</code></pre>
+<p>---</p>
+<h2>Checking Status</h2>
+<pre><code class="language-bash"># View provisioning logs
+journalctl -t shani-user-setup -n 50
+
+# Check path unit status
+systemctl status shani-user-setup.path
+systemctl status shani-user-setup.service
+
+# Check if a user is in the required groups
+id myuser
+
+# Check subuid/subgid assignment
+grep myuser /etc/subuid /etc/subgid</code></pre>
+<p>---</p>
+<h2>After a Factory Reset</h2>
+<p>After <code>shani-reset</code>, user accounts are gone (the <code>/etc</code> overlay is wiped). On the next boot:</p>
+<ol>
+<li>The first-run wizard creates a new user account</li>
+<li><code>shani-user-setup.path</code> detects the new account and triggers provisioning</li>
+<li>The new user gets all groups, correct shell, and Flatpak/Nix setup automatically</li>
+</ol>
+<p>Files in <code>/home/&lt;username&gt;</code> survive the reset (the <code>@home</code> subvolume is not wiped). Once the account is re-created with the same username, all personal files are immediately accessible.</p>
+<p>---</p>
+<h2>Rootless Container Support</h2>
+<p><code>shani-user-setup</code> allocates subUID/subGID ranges automatically, which are required for rootless Podman, Distrobox, LXC, and LXD.</p>
+<p>The allocation algorithm finds the highest existing range end in <code>/etc/subuid</code> and allocates the next 65,536 IDs to avoid collisions. For example, with one existing user allocated at <code>100000–165535</code>, a second user gets <code>165536–231071</code>.</p>
+<pre><code class="language-bash"># Verify your subuid/subgid assignment
+cat /etc/subuid
+cat /etc/subgid
+
+# Verify Podman rootless works
+podman run --rm alpine echo hello</code></pre>
+<p>---</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="shell">Shell & Environment</a> — Zsh configuration and shell tools</li>
+<li><a href="shani-reset">Factory Reset</a> — re-provisioning after a reset</li>
+<li><a href="config">System Config</a> — editing <code>/etc/shani-extra-groups</code> via the overlay</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

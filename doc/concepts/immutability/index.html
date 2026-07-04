@@ -146,7 +146,53 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Immutability</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Concepts</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+        </div>
+      </div>
+      <div class="prose"><h1>Understanding Immutability</h1>
+<p>Shanios's immutability fundamentally changes how you interact with the system. Understanding this concept is key to using Shanios effectively.</p>
+<h2>What You CAN Do</h2>
+<ul>
+<li>✅ Install applications via Flatpak</li>
+<li>✅ Edit configuration files in <code>/etc</code></li>
+<li>✅ Create and modify files in <code>/home</code></li>
+<li>✅ Run containers (Podman, Distrobox, LXC)</li>
+<li>✅ Update the entire system atomically</li>
+<li>✅ Store data in <code>/data</code> and persistent subvolumes</li>
+</ul>
+<h2>What You CANNOT Do</h2>
+<ul>
+<li>❌ Use pacman to install traditional packages (<em>use Flatpak, Nix, or Distrobox</em>)</li>
+<li>❌ Modify files in <code>/</code> (root filesystem) (<em>read-only by design</em>)</li>
+<li>❌ Edit files in <code>/usr</code>, <code>/bin</code>, <code>/lib</code> directly (<em>use <code>/etc</code> overlay for configs, Distrobox for binaries</em>)</li>
+<li>❌ Install software that requires system-level changes (<em>use containers or AppImages instead</em>)</li>
+<li>❌ Run <code>sudo pip install</code> globally (<em>use <code>pip install --user</code>, Nix, or Distrobox</em>)</li>
+<li>❌ Run <code>sudo npm install -g</code> to system paths (<em>use Nix or install inside Distrobox</em>)</li>
+<li>❌ Use <code>make install</code> to install built software into system directories (<em>build and export from Distrobox</em>)</li>
+<li>❌ Modify files in <code>/opt</code> or <code>/usr/share</code> directly (<em>/etc overlay for config; Distrobox for everything else</em>)</li>
+</ul>
+<h2>Why This Design?</h2>
+<h3>Security</h3>
+<p>Malware cannot modify system files or persist across reboots.</p>
+<h3>Reliability</h3>
+<p>Updates are atomic — they either work completely or fail safely.</p>
+<h3>Rollback</h3>
+<p>Instant recovery from failed updates or system issues.</p>
+<h3>Consistency</h3>
+<p>System state is always predictable and reproducible. The same image that was deployed is the same image that runs — indefinitely, regardless of what software is installed or run on top.</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

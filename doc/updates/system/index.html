@@ -146,7 +146,130 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">System Updates</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Updates &amp; Config</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-05-13</span>
+        </div>
+      </div>
+      <div class="prose"><p>Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the next reboot. The previous slot is preserved as an instant rollback target.</p>
+<h2>Automatic Updates</h2>
+<p><code>shani-update</code> is the user-facing update manager. It runs automatically via a desktop autostart entry at login (after a 15-second delay) and via a systemd user timer that fires 15 minutes after boot and then every 2 hours.</p>
+<p>On each run, <code>shani-update</code> works through a fixed priority sequence:</p>
+<ol>
+<li><strong>Hard failure detection</strong> — if a dracut pre-mount hook recorded a <code>boot_hard_failure</code> marker (root filesystem failed to mount), offers immediate rollback. This is distinct from a soft fallback-boot and requires manual action.</li>
+<li><strong>Fallback boot detection</strong> — if the last boot failed and the system fell back to the standby slot, offers to roll back the broken slot.</li>
+<li><strong>Reboot-needed check</strong> — if a staged update is waiting, shows a restart dialog.</li>
+<li><strong>Candidate boot check</strong> — if you're running a freshly deployed slot, offers a rollback window.</li>
+<li><strong>Update check</strong> — fetches release metadata and, if a newer version is available, shows an install dialog.</li>
+</ol>
+<p>When the user confirms an update, <code>shani-update</code> detects the available terminal emulator and launches <code>shani-deploy</code> inside it.</p>
+<pre><code class="language-bash"># Check timer status
+systemctl --user status shani-update.timer
+
+# View update manager logs
+cat ~/.cache/shani-update.log
+journalctl -t shani-update -n 50
+
+# Run an immediate interactive check
+shani-update</code></pre>
+<h2>Manual Update</h2>
+<pre><code class="language-bash"># Download, verify, and stage the update
+sudo shani-deploy
+
+# Simulate without making any changes (dry-run)
+sudo shani-deploy -d
+
+# Force redeploy even if already on the latest version
+sudo shani-deploy -f
+
+# Verbose output
+sudo shani-deploy -v
+
+# Override the update channel for a single run
+sudo shani-deploy -t latest</code></pre>
+<h2>Update Process in Detail</h2>
+<ol>
+<li><strong>Self-update check</strong> — downloads a newer version of <code>shani-deploy</code> itself if available and re-execs</li>
+<li><strong>Slot detection</strong> — determines the active and candidate slots</li>
+<li><strong>Space check</strong> — verifies at least 10 GB free on the Btrfs filesystem</li>
+<li><strong>Fetch metadata</strong> — downloads the latest release manifest from the CDN (R2 primary, SourceForge fallback)</li>
+<li><strong>Download</strong> — streams the image with resume support via <code>aria2c</code>, <code>wget</code>, or <code>curl</code></li>
+<li><strong>SHA256 verify</strong> — verifies checksum after download</li>
+<li><strong>GPG verify</strong> — verifies signature against the Shani OS GPG key (<code>7B927BFFD4A9EAAA8B666B77DE217F3DA8014792</code>)</li>
+<li><strong>Snapshot</strong> — takes a timestamped Btrfs snapshot of the inactive slot before writing</li>
+<li><strong>Extract</strong> — pipes the verified image into <code>btrfs receive</code></li>
+<li><strong>UKI generation</strong> — runs <code>gen-efi configure &lt;inactive-slot&gt;</code> inside a chroot of the new slot</li>
+<li><strong>Boot entry update</strong> — new slot set as next-boot default with <code>+3-0</code> boot count tries</li>
+<li><strong>Notify</strong> — writes <code>/run/shanios/reboot-needed</code>; your session continues until you choose to reboot</li>
+</ol>
+<p>Nothing in your running OS is touched at any point.</p>
+<h2>Rolling Back</h2>
+<pre><code class="language-bash"># Roll back from the currently booted slot (restores the inactive slot from its last snapshot)
+sudo shani-deploy -r
+sudo reboot</code></pre>
+<p>Or select the <strong>(Candidate)</strong> entry from the systemd-boot menu at startup (press Space to show the menu).</p>
+<p><strong>Important:</strong> Run rollback from the OS copy you want to keep. If you are on <code>@blue</code> and want to revert <code>@green</code>, run rollback from <code>@blue</code>.</p>
+<h2>Update Channels</h2>
+<pre><code class="language-bash"># Check current channel
+cat /etc/shani-channel
+
+# Switch default channel permanently
+sudo shani-deploy --set-channel stable   # monthly validated builds (default)
+sudo shani-deploy --set-channel latest   # more frequent, pre-QA releases
+
+# Use a channel for one run only
+sudo shani-deploy -t latest</code></pre>
+<h2>Boot Counting and Automatic Fallback</h2>
+<p>After an update, the new slot is registered in systemd-boot with <code>+3-0</code> boot count tries. If the new slot fails to boot three times, systemd-boot automatically falls back to the previous slot — no user action required.</p>
+<p>Shanios uses two tiers of boot failure detection:</p>
+<p>| Tier | Marker | Trigger | Action | |------|--------|---------|--------| | Hard failure | <code>/data/boot_hard_failure</code> | Root filesystem mount failed (dracut pre-mount hook) | Manual: <code>shani-deploy --rollback</code> | | Soft failure | <code>/data/boot_failure</code> | System booted but never reached <code>multi-user.target</code> within 15 minutes | Automated rollback offered by <code>shani-update</code> |</p>
+<p>On first login after a fallback, <code>shani-update</code> detects the mismatch and shows a dialog offering to roll back the failed slot.</p>
+<h2>Storage Management</h2>
+<pre><code class="language-bash"># Remove old backup snapshots and cached downloads
+sudo shani-deploy -c
+
+# Run on-demand block deduplication (complements background bees deduplication)
+sudo shani-deploy -o
+
+# Check storage health and subvolume sizes
+shani-health --storage-info
+
+# Check individual subvolume sizes directly
+sudo btrfs filesystem du -s --human-readable /
+sudo btrfs filesystem du -s --human-readable /home
+sudo btrfs filesystem du -s --human-readable /var/lib/flatpak</code></pre>
+<h2>Flatpak Auto-Updates</h2>
+<p>Flatpak apps update separately from the OS. Two timers handle this — one system-wide, one per-user:</p>
+<pre><code class="language-bash"># Manual Flatpak update
+flatpak update
+
+# View installed Flatpaks
+flatpak list --app
+
+# Check Flatpak update timers
+systemctl status flatpak-update-system.timer
+systemctl --user status flatpak-update-user.timer</code></pre>
+<p>The system timer fires 15 minutes after boot and every 12 hours. The user timer does the same for per-user Flatpak remotes. Both automatically uninstall unused runtimes after updating.</p>
+<h2>Firmware Updates (fwupd)</h2>
+<pre><code class="language-bash">sudo fwupdmgr refresh
+sudo fwupdmgr get-updates
+sudo fwupdmgr update</code></pre>
+<blockquote><p>After a firmware update, PCR 0 changes. Re-enroll TPM2 if you are using automatic LUKS unlock:</p></blockquote>
+<blockquote><p><pre><code class="language-bash">&gt; sudo gen-efi cleanup-tpm2
+&gt; sudo gen-efi enroll-tpm2
+&gt; </code></pre></p></blockquote>
+<blockquote><p>See <a href="../security/tpm2">TPM2 Enrollment</a>.</p></blockquote></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

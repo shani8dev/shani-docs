@@ -146,7 +146,65 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">AppImage</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Software &amp; Apps</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+        </div>
+      </div>
+      <div class="prose"><p>AppImages are self-contained executable bundles that run on any Linux system without installation. <strong>Gear Lever</strong> (pre-installed) provides a GUI for managing AppImages — integrating them into your app launcher, handling updates, and organising your collection.</p>
+<h2>Running an AppImage</h2>
+<pre><code class="language-bash"># Make executable and run
+chmod +x MyApp.AppImage
+./MyApp.AppImage</code></pre>
+<p>Or open Gear Lever (from your app launcher) and drag the AppImage in.</p>
+<h2>Gear Lever</h2>
+<p>Gear Lever integrates AppImages into your desktop:</p>
+<ul>
+<li>Automatically makes AppImages executable</li>
+<li>Extracts and installs the <code>.desktop</code> entry and icon into your launcher</li>
+<li>Manages a library of your AppImages in <code>~/Applications/</code></li>
+<li>Checks for updates via AppImageUpdate (where supported)</li>
+</ul>
+<p>Open Gear Lever from GNOME Activities / KDE Application Menu, or:</p>
+<pre><code class="language-bash">flatpak run it.mijorus.gearlever</code></pre>
+<h2>Organising AppImages</h2>
+<p>The recommended location for personal AppImages:</p>
+<pre><code class="language-bash">mkdir -p ~/Applications
+mv MyApp.AppImage ~/Applications/</code></pre>
+<p>Gear Lever monitors this directory automatically.</p>
+<h2>FUSE Requirement</h2>
+<p>AppImages use FUSE to mount their squashfs payload at runtime. FUSE is pre-installed on Shanios.</p>
+<p>If an AppImage refuses to run with a "FUSE" error:</p>
+<pre><code class="language-bash"># Check FUSE availability
+ls /dev/fuse
+
+# Run AppImage without FUSE (extracts to temp dir)
+./MyApp.AppImage --appimage-extract-and-run</code></pre>
+<h2>Extracting an AppImage</h2>
+<pre><code class="language-bash"># Extract contents to a directory (no FUSE needed)
+./MyApp.AppImage --appimage-extract
+# Creates: squashfs-root/</code></pre>
+<h2>AppImageUpdate (CLI)</h2>
+<pre><code class="language-bash"># Check for updates (if AppImage supports it)
+appimageupdatetool MyApp.AppImage
+
+# Apply update in-place
+appimageupdatetool --overwrite MyApp.AppImage</code></pre>
+<h2>Persistence</h2>
+<p>AppImages and their data live entirely in your home directory — they are unaffected by OS updates and rollbacks. No special handling is needed.</p>
+<h2>Sandboxing</h2>
+<p>Unlike Flatpak, AppImages are <strong>not sandboxed</strong> by default. They run with the same permissions as your user. For untrusted AppImages, consider running them inside a Distrobox container.</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

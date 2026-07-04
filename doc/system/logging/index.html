@@ -146,7 +146,251 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Logging</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">System</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-28</span>
+        </div>
+      </div>
+      <div class="prose"><p>Shani OS uses <strong>systemd-journald</strong> as its primary logging system. All kernel messages, service output, and system events flow into a single structured binary journal. There are no scattered <code>/var/log/*.log</code> text files to hunt through — <code>journalctl</code> is the single interface for everything.</p>
+<p>This page covers journald configuration, log retention, forwarding to syslog, and persistent log storage across reboots.</p>
+<p>For <code>journalctl</code> usage within service debugging, see <a href="systemd">Systemd</a>.</p>
+<p>---</p>
+<h2>How Journald Works</h2>
+<p>journald collects log entries from:</p>
+<ul>
+<li><strong>Kernel</strong> — dmesg / kernel ring buffer</li>
+<li><strong>Systemd services</strong> — stdout/stderr of every unit</li>
+<li><strong>syslog socket</strong> — <code>/run/systemd/journal/syslog</code> (for legacy syslog-aware apps)</li>
+<li><strong>kmsg</strong> — kernel messages during early boot</li>
+<li><strong>audit</strong> — kernel audit subsystem</li>
+<li><strong>Native journald API</strong> — <code>sd_journal_send()</code>, <code>systemd-cat</code></li>
+</ul>
+<p>By default on Shani OS, logs are stored in <code>/run/journal/</code> (volatile, in RAM) and are lost on reboot. Persistent storage can be enabled — see below.</p>
+<p>---</p>
+<h2>Enabling Persistent Logs</h2>
+<pre><code class="language-bash"># Create the persistent journal directory
+sudo mkdir -p /var/log/journal
+sudo systemd-tmpfiles --create --prefix /var/log/journal
+
+# Restart journald to pick up the new directory
+sudo systemctl restart systemd-journald
+
+# Verify logs are now persisting
+journalctl --disk-usage
+ls /var/log/journal/</code></pre>
+<p>Once <code>/var/log/journal/</code> exists, journald automatically writes there instead of <code>/run/journal/</code>. Logs survive reboots and you can query previous boots with <code>journalctl -b -1</code>, <code>-b -2</code>, etc.</p>
+<blockquote><p>💡 On Shani OS, <code>/var/log/journal/</code> persists across OS updates because <code>/var</code> is a separate data partition. You do not need to re-enable persistent logging after an update.</p></blockquote>
+<p>---</p>
+<h2>journald Configuration</h2>
+<p>The main config file is <code>/etc/systemd/journald.conf</code>. Changes here are captured by the <code>/etc</code> overlay.</p>
+<pre><code class="language-bash">sudo nano /etc/systemd/journald.conf</code></pre>
+<p>Key settings:</p>
+<pre><code class="language-ini">[Journal]
+# Where to store logs: auto (persistent if /var/log/journal exists), persistent, volatile, none
+Storage=auto
+
+# Maximum disk space the journal may use
+SystemMaxUse=500M
+
+# Keep at least this much space free on the filesystem
+SystemKeepFree=1G
+
+# Maximum size of a single journal file
+SystemMaxFileSize=50M
+
+# How long to keep journal files (regardless of size)
+MaxRetentionSec=3months
+
+# Compress journal entries (default: yes)
+Compress=yes
+
+# Rate limiting — drop entries if a service logs too fast
+RateLimitIntervalSec=30s
+RateLimitBurst=10000
+
+# Forward to syslog socket (for rsyslog/syslog-ng)
+ForwardToSyslog=no
+
+# Forward to /dev/kmsg (useful for embedded/debug)
+ForwardToKMsg=no
+
+# Forward to the system console
+ForwardToConsole=no
+
+# Forward to wall (broadcast to all logged-in users)
+ForwardToWall=yes
+
+# Maximum log level to forward to console/wall (0=emerg … 7=debug)
+MaxLevelConsole=emerg
+MaxLevelWall=emerg</code></pre>
+<pre><code class="language-bash"># Apply config changes
+sudo systemctl restart systemd-journald</code></pre>
+<p>---</p>
+<h2>Retention and Vacuuming</h2>
+<pre><code class="language-bash"># Show how much disk space the journal is using
+journalctl --disk-usage
+
+# Remove old journal files to stay under a size limit
+sudo journalctl --vacuum-size=500M
+
+# Remove journal files older than a time period
+sudo journalctl --vacuum-time=2weeks
+sudo journalctl --vacuum-time=3months
+
+# Keep only the last N journal files per machine-ID
+sudo journalctl --vacuum-files=5
+
+# Rotate journal files (close current, open new)
+sudo journalctl --rotate
+
+# Verify journal file integrity
+sudo journalctl --verify</code></pre>
+<blockquote><p>💡 Combine <code>--rotate</code> and <code>--vacuum-*</code> to immediately free space: rotate first (seals the active file), then vacuum the sealed files.</p></blockquote>
+<p>---</p>
+<h2>Querying Logs</h2>
+<pre><code class="language-bash"># All logs from current boot
+journalctl -b
+
+# All logs from previous boot
+journalctl -b -1
+
+# List available boots
+journalctl --list-boots
+
+# Follow logs in real time (like tail -f)
+journalctl -f
+
+# Logs for a specific service
+journalctl -u caddy
+journalctl -u caddy -f           # follow
+journalctl -u caddy -n 100       # last 100 lines
+journalctl -u caddy -b           # current boot only
+journalctl -u caddy --since today
+
+# Kernel messages only
+journalctl -k
+journalctl -k -b -1              # kernel messages from previous boot
+
+# Filter by priority (emerg, alert, crit, err, warning, notice, info, debug)
+journalctl -p err                # errors and above
+journalctl -p warning -b         # warnings and above, current boot
+
+# Filter by time range
+journalctl --since &quot;2026-04-01&quot; --until &quot;2026-04-02&quot;
+journalctl --since -1h           # last hour
+
+# Filter by syslog identifier (tag set by the application)
+journalctl -t shani-update
+journalctl -t kernel
+
+# Filter by UID or GID
+journalctl _UID=1000
+journalctl _GID=1000
+
+# Filter by executable path
+journalctl _EXE=/usr/bin/sshd
+
+# Full verbose output (all journal fields)
+journalctl -o verbose
+
+# JSON output (for scripting or log shipping)
+journalctl -u caddy -n 50 -o json
+journalctl -u caddy -n 50 -o json-pretty
+
+# Export for archiving or transfer
+journalctl -b -o export &gt; /tmp/boot-logs.export</code></pre>
+<p>---</p>
+<h2>Writing to the Journal</h2>
+<pre><code class="language-bash"># Write a message directly to the journal from a script
+systemd-cat echo &quot;Backup completed successfully&quot;
+
+# With priority and identifier
+echo &quot;deploy finished&quot; | systemd-cat -t myapp -p info
+echo &quot;deploy failed&quot;   | systemd-cat -t myapp -p err
+
+# Pipe a command's output to the journal
+my-script.sh 2&gt;&amp;1 | systemd-cat -t my-script -p info</code></pre>
+<p>In systemd service units, <code>StandardOutput=journal</code> and <code>StandardError=journal</code> (the default) automatically route all stdout/stderr to the journal with the unit name as the identifier.</p>
+<p>---</p>
+<h2>Forwarding to a Syslog Daemon</h2>
+<p>If you need traditional text-file logging (e.g. for log shippers like Filebeat, or for compatibility with tools that parse <code>/var/log/</code>), you can forward from journald to a syslog daemon.</p>
+<h3>rsyslog</h3>
+<pre><code class="language-bash"># Install rsyslog (not pre-installed)
+# It is available but not part of the default image — install via the system overlay
+sudo pacman -S rsyslog
+
+sudo systemctl enable --now rsyslog</code></pre>
+<p>Enable forwarding in journald:</p>
+<pre><code class="language-ini"># /etc/systemd/journald.conf
+[Journal]
+ForwardToSyslog=yes</code></pre>
+<p>Then configure rsyslog normally in <code>/etc/rsyslog.conf</code>.</p>
+<h3>Remote log forwarding (journald native)</h3>
+<p>journald can forward to a remote journal instance over a secure TLS connection using <code>systemd-journal-remote</code> and <code>systemd-journal-upload</code> — useful for centralising logs from multiple Shani OS machines.</p>
+<pre><code class="language-bash"># On the log server
+sudo systemctl enable --now systemd-journal-remote.socket
+
+# On each client
+sudo systemctl enable --now systemd-journal-upload
+
+# Configure the upload URL
+# /etc/systemd/journal-upload.conf
+[Upload]
+URL=https://log-server:19532</code></pre>
+<p>---</p>
+<h2>Per-Service Log Limits</h2>
+<p>You can cap how fast or how much a specific service can log by adding a drop-in:</p>
+<pre><code class="language-ini"># /etc/systemd/system/myapp.service.d/logging.conf
+[Service]
+LogRateLimitIntervalSec=10s
+LogRateLimitBurst=500</code></pre>
+<p>Or redirect a service's logs entirely:</p>
+<pre><code class="language-ini">[Service]
+StandardOutput=append:/var/log/myapp/output.log
+StandardError=append:/var/log/myapp/error.log</code></pre>
+<p>---</p>
+<h2>Boot and Early Boot Logs</h2>
+<pre><code class="language-bash"># Show the kernel ring buffer (dmesg equivalent)
+journalctl -k
+
+# Early boot messages (before journal socket was ready)
+journalctl -b -o short-monotonic | head -100
+
+# Boot timing — how long each service took
+systemd-analyze blame
+
+# Critical chain — what determined total boot time
+systemd-analyze critical-chain</code></pre>
+<p>---</p>
+<h2>Log Levels Reference</h2>
+<p>| Priority | Value | Meaning | |----------|-------|---------| | <code>emerg</code> | 0 | System is unusable | | <code>alert</code> | 1 | Immediate action required | | <code>crit</code> | 2 | Critical condition | | <code>err</code> | 3 | Error condition | | <code>warning</code> | 4 | Warning condition | | <code>notice</code> | 5 | Normal but significant | | <code>info</code> | 6 | Informational | | <code>debug</code> | 7 | Debug-level messages |</p>
+<pre><code class="language-bash"># Show only warnings and above
+journalctl -p 4
+
+# Show only errors and above across all boots
+journalctl -p err --no-pager</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Logs lost after reboot | Enable persistent storage: <code>sudo mkdir -p /var/log/journal &amp;&amp; sudo systemctl restart systemd-journald</code> | | Journal growing too large | Set <code>SystemMaxUse=</code> in <code>journald.conf</code>; run <code>sudo journalctl --vacuum-size=500M</code> | | <code>journalctl</code> shows nothing for a service | Check <code>systemctl status &lt;service&gt;</code> — if the service never started, there are no logs; verify <code>StandardOutput=journal</code> in the unit | | Log entries missing (rate limited) | Increase <code>RateLimitBurst=</code> in <code>journald.conf</code> for noisy services | | Can't read journal as a regular user | Add user to the <code>systemd-journal</code> group: <code>sudo usermod -aG systemd-journal $USER</code> | | <code>--verify</code> reports errors | Journal file may be corrupt — delete the corrupt file from <code>/var/log/journal/&lt;machine-id&gt;/</code> and restart journald | | Need logs in text format | Use <code>journalctl -o short &gt; /tmp/log.txt</code> or forward to rsyslog with <code>ForwardToSyslog=yes</code> |</p>
+<p>---</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="systemd">Systemd</a> — service logs, <code>journalctl -u</code>, unit file logging options</li>
+<li><a href="process-management">Process Management</a> — OOM killer events, <code>journalctl -k | grep oom</code></li>
+<li><a href="../updates/shani-health">shani-health Reference</a> — automated journal error reporting</li>
+<li><a href="backup">Backup & Recovery</a> — backing up <code>/var/log/journal/</code> if persistent logs are enabled</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

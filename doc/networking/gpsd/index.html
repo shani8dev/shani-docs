@@ -146,7 +146,94 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">gpsd (GPS Daemon)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+        </div>
+      </div>
+      <div class="prose"><p>gpsd is a service daemon that reads data from GPS/GNSS receivers and makes it available to multiple clients over a local socket. Applications such as Chrony (NTP), navigation software, and location-aware tools query gpsd rather than the device directly, allowing multiple programs to share a single GPS receiver simultaneously.</p>
+<p>gpsd is pre-installed on Shani OS. <strong>Not active by default</strong> — enable it when a GPS receiver is connected.</p>
+<p>---</p>
+<h2>Supported Hardware</h2>
+<p>gpsd works with virtually any GPS receiver that presents as a serial device:</p>
+<ul>
+<li><strong>USB GPS dongles</strong> — appear as <code>/dev/ttyUSB0</code> or <code>/dev/ttyACM0</code></li>
+<li><strong>Serial GPS modules</strong> — appear as <code>/dev/ttyS0</code> or <code>/dev/ttyAMA0</code></li>
+<li><strong>NMEA-over-Bluetooth</strong> — appear as <code>/dev/rfcomm0</code></li>
+</ul>
+<p>Identify your device after plugging it in:</p>
+<pre><code class="language-bash"># USB devices
+lsusb
+
+# New serial devices (watch for new entries after plugging in)
+ls /dev/tty{USB,ACM}*
+
+# Check kernel messages for the assigned device node
+dmesg | tail -20</code></pre>
+<p>---</p>
+<h2>Enable & Configure</h2>
+<h3>Specify the Device</h3>
+<p>Edit <code>/etc/default/gpsd</code> (or <code>/etc/gpsd</code> depending on packaging):</p>
+<pre><code class="language-bash"># Device the GPS receiver is connected to
+DEVICES=&quot;/dev/ttyUSB0&quot;
+
+# Options passed to gpsd
+GPSD_OPTIONS=&quot;-n&quot;    # -n: don't wait for a client to poll — start reading immediately
+
+# Start gpsd on boot
+START_DAEMON=&quot;true&quot;</code></pre>
+<pre><code class="language-bash">sudo systemctl enable --now gpsd
+systemctl status gpsd</code></pre>
+<h3>Socket Activation (Default)</h3>
+<p>gpsd on Arch uses socket activation — it starts on demand when a client connects. Enable the socket unit instead:</p>
+<pre><code class="language-bash">sudo systemctl enable --now gpsd.socket</code></pre>
+<p>---</p>
+<h2>Status & Testing</h2>
+<pre><code class="language-bash"># Interactive GPS monitor — shows satellite view, fix status, lat/lon/alt
+gpsd -N -D 2 /dev/ttyUSB0   # run in foreground for testing
+
+# cgps — ncurses client showing position and satellite data
+cgps -s
+
+# gpsmon — lower-level protocol monitor
+gpsmon
+
+# Raw NMEA sentences from the device
+cat /dev/ttyUSB0</code></pre>
+<p><code>cgps</code> output key fields:</p>
+<p>| Field | Meaning | |-------|---------| | <code>Status</code> | <code>NO FIX</code> / <code>2D FIX</code> / <code>3D FIX</code> | | <code>Latitude / Longitude</code> | Position in decimal degrees | | <code>Altitude</code> | Height above sea level | | <code>Speed</code> | Ground speed | | <code>Satellites Used</code> | Number of satellites contributing to the fix |</p>
+<p>A 3D fix requires at least 4 satellites. Getting a first fix (TTFF) outdoors typically takes 30–90 seconds on a cold start.</p>
+<p>---</p>
+<h2>Using GPS as a Time Source (Chrony)</h2>
+<p>A GPS receiver provides highly accurate time via the PPS (Pulse Per Second) signal. Pair gpsd with Chrony to use GPS as an NTP reference:</p>
+<pre><code class="language-bash"># /etc/chrony.conf — add these lines
+refclock SHM 0 offset 0.5 delay 0.2 refid GPS
+refclock SOCK /var/run/chrony.ttyUSB0.sock refid PPS</code></pre>
+<pre><code class="language-bash">sudo systemctl restart chronyd
+chronyc sources -v   # GPS should appear as a source</code></pre>
+<blockquote><p>PPS requires hardware support from the GPS module. Most consumer USB GPS dongles do not expose PPS — check your hardware specs.</p></blockquote>
+<p>---</p>
+<h2>Firewall</h2>
+<p>gpsd listens on <code>localhost:2947</code> by default. If you need LAN access (e.g., to share one GPS across multiple machines):</p>
+<pre><code class="language-bash"># Edit /etc/default/gpsd and add -G to listen on all interfaces:
+GPSD_OPTIONS=&quot;-n -G&quot;
+
+sudo firewall-cmd --add-port=2947/tcp --permanent
+sudo firewall-cmd --reload</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>cgps</code> shows <code>NO FIX</code> | Move outdoors — GPS requires clear sky view; cold start takes up to 90 seconds | | Device not found | Check <code>ls /dev/ttyUSB*</code>; add your user to the <code>uucp</code> group for non-root access: <code>sudo usermod -aG uucp $USER</code> | | gpsd not reading device | Try running in foreground: <code>sudo gpsd -N -D 5 /dev/ttyUSB0</code> — look for permission or baud rate errors | | ModemManager interfering | ModemManager probes serial devices and can disrupt GPS. Add a udev rule to ignore it: <code>sudo tee /etc/udev/rules.d/99-gpsd.rules &lt;&lt;&lt; 'ATTRS{idVendor}==&quot;XXXX&quot;, ATTRS{idProduct}==&quot;YYYY&quot;, ENV{ID_MM_DEVICE_IGNORE}=&quot;1&quot;'</code> (replace with your device's IDs from <code>lsusb</code>) | | Multiple clients can't connect | gpsd handles multiple clients natively — no configuration needed; verify gpsd is running with <code>systemctl status gpsd</code> |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

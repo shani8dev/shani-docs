@@ -146,7 +146,142 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Firewall (firewalld)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+        </div>
+      </div>
+      <div class="prose"><p>firewalld is <strong>active by default</strong> on Shani OS with a restrictive inbound policy. It manages nftables under the hood using a zone-based model — every interface belongs to a zone, and each zone has its own allow/deny rules. Do not mix direct <code>nft</code> commands with firewalld rules as they will conflict.</p>
+<p>Pre-configured zones for KDE Connect, GSConnect, Waydroid, and Tailscale are included out of the box.</p>
+<p>| Zone | Default assignment | Policy | |------|--------------------|--------| | <code>public</code> | All physical NICs | Deny inbound, allow outbound | | <code>trusted</code> | <code>waydroid0</code> | Accept all |</p>
+<p>---</p>
+<h2>Status & Inspection</h2>
+<pre><code class="language-bash"># Confirm firewall is running
+sudo firewall-cmd --state
+
+# Show all rules for the active zone
+sudo firewall-cmd --list-all
+
+# Show all zones with their rules
+sudo firewall-cmd --list-all-zones
+
+# Show active zones and their interfaces
+sudo firewall-cmd --get-active-zones
+
+# Show which zone an interface belongs to
+sudo firewall-cmd --get-zone-of-interface=eth0
+
+# Show the default zone
+sudo firewall-cmd --get-default-zone</code></pre>
+<p>---</p>
+<h2>Opening Services & Ports</h2>
+<p>The <code>--permanent</code> flag writes the rule to disk so it survives reboots. Always follow with <code>--reload</code> to apply immediately to the running firewall.</p>
+<pre><code class="language-bash"># Allow a named service (uses built-in service definitions)
+sudo firewall-cmd --add-service=http --permanent
+sudo firewall-cmd --add-service=https --permanent
+sudo firewall-cmd --add-service=ssh --permanent
+sudo firewall-cmd --reload
+
+# Allow a specific TCP/UDP port
+sudo firewall-cmd --add-port=8080/tcp --permanent
+sudo firewall-cmd --add-port=51820/udp --permanent   # WireGuard
+sudo firewall-cmd --add-port=41641/udp --permanent   # Tailscale
+sudo firewall-cmd --reload
+
+# Remove a rule
+sudo firewall-cmd --remove-service=http --permanent
+sudo firewall-cmd --remove-port=8080/tcp --permanent
+sudo firewall-cmd --reload
+
+# List all available pre-defined service names
+sudo firewall-cmd --get-services</code></pre>
+<p>---</p>
+<h2>Zones</h2>
+<p>Zones let you apply different rules to different network interfaces or source IP ranges — useful when a LAN interface and a VPN interface should have different trust levels.</p>
+<pre><code class="language-bash"># Move an interface to a different zone
+sudo firewall-cmd --zone=trusted --change-interface=tailscale0 --permanent
+sudo firewall-cmd --reload
+
+# Add a source IP range to a zone (all traffic from that range uses that zone's rules)
+sudo firewall-cmd --zone=trusted --add-source=192.168.1.0/24 --permanent
+sudo firewall-cmd --reload
+
+# Create a custom zone
+sudo firewall-cmd --new-zone=homelab --permanent
+sudo firewall-cmd --reload
+sudo firewall-cmd --zone=homelab --add-service=http --permanent
+sudo firewall-cmd --reload</code></pre>
+<p>---</p>
+<h2>Rich Rules</h2>
+<p>Rich rules allow more granular conditions — source IP, destination port, logging, and rate limiting.</p>
+<pre><code class="language-bash"># Allow SSH only from your LAN
+sudo firewall-cmd --add-rich-rule='rule family=&quot;ipv4&quot; source address=&quot;192.168.1.0/24&quot; service name=&quot;ssh&quot; accept' --permanent
+
+# Block a specific IP entirely
+sudo firewall-cmd --add-rich-rule='rule family=&quot;ipv4&quot; source address=&quot;1.2.3.4&quot; reject' --permanent
+
+# Rate-limit new connections to port 443
+sudo firewall-cmd --add-rich-rule='rule service name=&quot;https&quot; limit value=&quot;50/m&quot; accept' --permanent
+
+# Log and drop traffic from a subnet
+sudo firewall-cmd --add-rich-rule='rule family=&quot;ipv4&quot; source address=&quot;10.0.0.0/8&quot; log prefix=&quot;BLOCKED: &quot; level=&quot;warning&quot; drop' --permanent
+
+sudo firewall-cmd --reload</code></pre>
+<p>---</p>
+<h2>Port Forwarding</h2>
+<pre><code class="language-bash"># Forward incoming port 80 to localhost:8080
+sudo firewall-cmd --add-forward-port=port=80:proto=tcp:toport=8080:toaddr=127.0.0.1 --permanent
+sudo firewall-cmd --reload</code></pre>
+<p>---</p>
+<h2>Logging</h2>
+<pre><code class="language-bash"># Enable logging of dropped packets
+sudo firewall-cmd --set-log-denied=all --permanent
+sudo firewall-cmd --reload
+
+# View firewall-related kernel messages
+sudo journalctl -k | grep -i &quot;nft\|firewall\|REJECT\|DROP&quot;</code></pre>
+<p>---</p>
+<h2>Runtime vs Permanent</h2>
+<pre><code class="language-bash"># Show rules currently active (runtime)
+sudo firewall-cmd --list-all
+
+# Show what will be active after the next reload (permanent config on disk)
+sudo firewall-cmd --list-all --permanent
+
+# Sync runtime to match permanent config
+sudo firewall-cmd --reload
+
+# Make the current runtime config permanent without re-running each command
+sudo firewall-cmd --runtime-to-permanent</code></pre>
+<p>Omit <code>--permanent</code> to test a rule without committing it — it disappears on the next <code>--reload</code> or reboot.</p>
+<p>---</p>
+<h2>GUI</h2>
+<pre><code class="language-bash"># Launch the graphical firewall manager (pre-installed)
+sudo firewall-config</code></pre>
+<p>---</p>
+<h2>Common Port Reference</h2>
+<p>| Service | Port | Protocol | |---------|------|----------| | SSH | 22 | TCP | | HTTP | 80 | TCP | | HTTPS | 443 | TCP | | DNS | 53 | TCP/UDP | | WireGuard | 51820 | UDP | | Tailscale | 41641 | UDP | | Syncthing | 22000 | TCP/UDP | | KDE Connect | 1714–1764 | TCP/UDP | | Minecraft | 25565 | TCP |</p>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Service reachable locally but not from LAN | Check <code>--list-all</code> to confirm the port/service is open; verify the interface is in the correct zone | | Rule added but not working | Did you forget <code>--reload</code>? Runtime and permanent configs can diverge | | <code>ALREADY_ENABLED</code> error | The rule already exists permanently; inspect with <code>--list-all --permanent</code> | | Port open but connection refused | The service itself may not be running; check <code>systemctl status &lt;service&gt;</code> | | Rules disappear after reboot | Rule was added without <code>--permanent</code> | | fail2ban bans not appearing in firewall | Confirm fail2ban's backend is <code>firewalld</code>; check <code>sudo firewall-cmd --direct --get-all-rules</code> | | Waydroid has no network | Check <code>waydroid0</code> is in the trusted zone: <code>sudo firewall-cmd --get-zone-of-interface=waydroid0</code> | | Podman/container networking broken | Add the container bridge to trusted: <code>sudo firewall-cmd --zone=trusted --add-interface=podman0 --permanent</code> |</p>
+<p>---</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="fail2ban">fail2ban</a> — brute-force protection layered on top of the firewall</li>
+<li><a href="wireguard">WireGuard</a> — opening the WireGuard UDP port</li>
+<li><a href="features">Security Features</a> — overview of all security layers</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

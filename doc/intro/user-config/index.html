@@ -146,7 +146,26 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">User Configuration</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Introduction</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+        </div>
+      </div>
+      <div class="prose"><p>The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created users: the <code>shani-user-setup.path</code> unit monitors <code>/etc/passwd</code> for changes and triggers <code>shani-user-setup.service</code> whenever a new regular user (UID 1000–59999) is detected. That service automatically adds the user to all required groups and sets their default shell to <code>/bin/zsh</code>.</p>
+<p>This means any user created post-installation — via the desktop first-run wizard, or with <code>useradd</code>/<code>adduser</code> on the command line — gets the same setup automatically.</p>
+<p>For the full list of groups provisioned to each user, the mechanism that controls them, and how to customise group membership, see <a href="../updates/user-setup">User Provisioning</a>.</p>
+<p>For pre-configured firewall rules (KDE Connect, Waydroid, and other system-level rules applied at installation), see <a href="../security/features">Security Features</a>.</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

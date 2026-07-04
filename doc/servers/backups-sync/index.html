@@ -146,7 +146,549 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Backups &amp; Storage</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-21</span>
+        </div>
+      </div>
+      <div class="prose"><blockquote><p><strong>Portability note:</strong> Compose examples use rootless <strong>Podman</strong> and <code>host.containers.internal</code> (the host gateway from a container). When using Docker, replace <code>podman-compose</code> with <code>docker compose</code> and <code>host.containers.internal</code> with <code>host-gateway</code> (add <code>extra_hosts: [host-gateway:host-gateway]</code> to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.</p></blockquote>
+<h1>Backups & Sync</h1>
+<p>Reliable, encrypted backup solutions and cloud synchronisation tools.</p>
+<blockquote><p><strong>Follow the 3-2-1 rule:</strong> Three copies of your data, on two different storage media, with one copy offsite. A home server running without offsite backups is one hardware failure away from total data loss.</p></blockquote>
+<p>---</p>
+<h2>Key Concepts</h2>
+<p>Every backup strategy should be defined against two metrics:</p>
+<p><strong>Recovery Point Objective (RPO):</strong> — how much data loss is acceptable. If your RPO is 24 hours, a daily backup is sufficient. If your RPO is 1 hour, you need hourly backups or continuous replication (Litestream for SQLite, streaming replication for PostgreSQL). RPO answers: <em>how old can the data be when I restore?</em></p>
+<p><strong>Recovery Time Objective (RTO):</strong> — how long it takes to be back online after a failure. A cold restore from offsite Backblaze B2 might take 4 hours. Failover to a warm standby might take 5 minutes. RTO answers: <em>how long can I be down?</em></p>
+<p>Define both before choosing backup tools. A personal homelab might tolerate RPO=24h, RTO=4h. A business-critical app might need RPO=15min, RTO=30min — which requires a completely different strategy.</p>
+<h4>Deduplication and chunking — how Restic and Kopia work</h4>
+<p>Content-defined chunking splits data into variable-size chunks based on a rolling hash of content (not fixed byte offsets). Identical chunks across different files or snapshots are stored once and referenced by hash (content-addressable storage). This is why backing up 10 snapshots of a 10 GB database doesn't cost 100 GB — unchanged blocks are deduplicated. Restic and Kopia both use this model. The implication: the first backup is slow (all data chunked and uploaded); subsequent backups are fast (only changed chunks).</p>
+<p><strong>Backup encryption — what Restic actually does:</strong> Restic encrypts every chunk before it leaves your machine using AES-256-CTR with a key derived from your repository password (using scrypt for key derivation). The storage backend (B2, R2, SFTP) never sees plaintext. The repository password is the only thing that can decrypt the data — losing it means permanent data loss. Best practice: store the password in a password manager AND a separate physical location (printed, in a safe). The encryption key is not recoverable by Restic, Backblaze, or Cloudflare.</p>
+<h4>Object storage concepts — buckets, versioning, and immutability</h4>
+<p>Object storage (S3, B2, R2, MinIO, Garage) uses a flat namespace of key-value pairs (keys are the "file paths", values are bytes). There's no real directory structure — slashes in key names are a convention. Versioning keeps all previous versions of an object, enabling rollback. Object Lock (immutable buckets) prevents deletion or modification for a set retention period — this is the mechanism that makes backups ransomware-proof, since even compromised credentials can't delete locked objects. Always enable Object Lock on your backup buckets.</p>
+<h4>Push vs pull backup architectures</h4>
+<p>Pull-based (Borgmatic, Restic via cron on the source server) — the source machine initiates the backup and pushes data to the repository. Simple, but requires outbound access from each source. Push-based (Restic REST Server, Bacula) — a central backup server pulls data from agents on each machine. Better for centrally managed fleets but requires inbound network access to each source. Hybrid: Borgmatic scheduled on each host pushes to a central Restic REST Server — centralised storage with decentralised execution.</p>
+<h4>Litestream continuous replication model</h4>
+<p>Litestream watches SQLite's WAL (Write-Ahead Log) file for new frames and streams them to S3-compatible storage in near real-time (sub-second RPO). It doesn't take snapshots — it captures every write transaction. Recovery: download the base snapshot plus WAL frames and replay. This makes SQLite viable for production apps that previously required PostgreSQL for HA. The trade-off: Litestream adds ~1ms latency per write (WAL flush), and only one writer is allowed (SQLite's inherent limitation).</p>
+<h4>Encryption key management for backups</h4>
+<p>The weakest link in encrypted backups is usually the key/password. Common mistakes: (1) storing the password in the same place as the backup (if B2 is compromised, both the backup and the password are gone), (2) no documented recovery procedure (future-you can't restore without it), (3) rotating the password without re-encrypting old snapshots (Restic doesn't automatically re-encrypt history). Best practice: password in your Vaultwarden, a printed copy in a fireproof safe, and a <code>restic key list</code> / <code>restic key add</code> workflow documented in your runbook.</p>
+<h4>The 3-2-1-1-0 rule — the modern backup standard</h4>
+<p>The original 3-2-1 rule (3 copies, 2 media types, 1 offsite) has been extended: add a 1 for one air-gapped or immutable copy (Object Lock on B2/R2, a disconnected drive), and 0 for zero unverified backups — every backup must be regularly tested with an actual restore. Ransomware operators now target backup systems first; immutable Object Lock means even a fully compromised host with valid credentials can't delete locked objects before the retention period expires.</p>
+<h4>Why backup verification is the step everyone skips</h4>
+<p>A backup that has never been tested is not a backup — it's a hope. Common failure modes: (1) the backup ran but the restore fails due to corruption; (2) the repository password was lost; (3) the snapshot exists but the target path was wrong and critical files are missing; (4) the restore succeeds but the restored app fails due to missing environment config. Schedule a quarterly restore drill: pick a random snapshot, restore to a separate directory, verify a sample of files, and time the process. This drill also produces your real RTO number, not an estimate.</p>
+<h4>Backup scope — what people forget to include</h4>
+<p>Application data is obvious. Commonly forgotten: (1) container volumes not explicitly mapped to a host path; (2) cron jobs and systemd timer definitions; (3) <code>/etc</code> config files modified after initial setup; (4) Podman secrets and environment variable files; (5) SSH keys and GPG keys; (6) TLS certificates and CA bundles from step-ca; (7) Restic repository passwords themselves (kept in Vaultwarden, but Vaultwarden also needs a backup). For a homelab, a single Restic job covering <code>/home/user</code> and the Vaultwarden export covers the majority of state.</p>
+<h4>Bandwidth and cost optimisation for offsite backups</h4>
+<p>Restic's deduplication means after the initial upload, daily incremental backups are small — typically 1–5% of total data size for typical homelab workloads. Cloudflare R2's zero egress fee makes it uniquely attractive for backup destinations where you might restore frequently. Backblaze B2 at $0.006/GB/month with free egress to Cloudflare CDN (via B2-Cloudflare partnership) is the cheapest option for large cold storage. For very large initial backups (>500 GB), seed locally first and sync the repository to the cloud — faster than uploading over a home connection.</p>
+<h4>Snapshot vs continuous replication — choosing the right model</h4>
+<p>Snapshot backups (Restic, Borgmatic, Kopia) capture state at a point in time. RPO equals your backup interval — daily snapshots mean up to 24 hours of data loss. Continuous replication (Litestream, PostgreSQL streaming replication) captures every write transaction in near real-time — RPO of seconds. The cost: continuous replication requires more storage (WAL segments), more network bandwidth, and a live replica. Practical guidance: use snapshots for everything; add continuous replication only for databases where you genuinely can't afford to lose an hour of data.</p>
+<h4>Restic vs Kopia vs Borgmatic — choosing a backup tool</h4>
+<p>All three deduplicate, encrypt, and support multiple backends. Key differences: <strong>Restic</strong> has the widest backend support (S3, B2, SFTP, REST, rclone) and the most documentation — the safe default. <strong>Kopia</strong> is faster for large datasets (parallel uploading, better compression), has a web UI, and supports maintenance policies. <strong>Borgmatic</strong> wraps Borg, which has the most efficient deduplication algorithm (variable-length chunking with rolling hash) — better than Restic's fixed-size chunks for certain workloads. All three use content-addressable storage; the choice mostly comes down to backend support and whether you need a UI.</p>
+<h4>Testing restores — the restore drill checklist</h4>
+<p>A backup that has never been tested is not a backup. Checklist for a quarterly restore drill: (1) pick a random snapshot from 2 weeks ago; (2) restore to a temp directory (<code>restic restore latest --target /tmp/restore-test</code>); (3) verify file count and spot-check 5 random files; (4) for database backups, restore to a test instance and run <code>SELECT COUNT(*)</code> on key tables; (5) record the time taken — this is your actual RTO; (6) verify the repository password is documented somewhere other than the backed-up machine itself.</p>
+<p>---</p>
+<h2>Restic</h2>
+<p><strong>Purpose:</strong> Fast, encrypted, deduplicated backups to any destination — local disk, SFTP, S3, Backblaze B2, REST server, and more. Each backup is a snapshot; you can restore any point in time. Restic verifies integrity on every backup run. Current stable release: <strong>0.18.1</strong> (September 2025).</p>
+<blockquote><p><strong>Note on the Docker image:</strong> The official <code>restic/restic</code> image does not include a scheduler or cron daemon — it is a bare binary image intended for one-shot use. For scheduled, unattended backups in a container, use <code>mazzolino/restic</code> (a.k.a. <a href="https://github.com/djmaze/resticker">resticker</a>) which wraps Restic with a built-in cron runner. The compose file below uses the bare image for manual/scripted use; see the systemd timer section for scheduling.</p></blockquote>
+<pre><code class="language-yaml"># ~/restic/compose.yaml
+services:
+  restic:
+    image: restic/restic:latest
+    container_name: restic
+    volumes:
+      - /home/user/data:/data:ro,Z
+      - /home/user/backups:/backups:Z
+    environment:
+      RESTIC_PASSWORD: changeme
+      RESTIC_REPOSITORY: /backups
+    entrypoint: /bin/sh
+    command: -c &quot;tail -f /dev/null&quot;
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/restic &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Initialise a new repository
+podman exec restic restic init
+
+# Run a backup
+podman exec restic restic backup /data
+
+# Run a backup with max compression (0.15+)
+podman exec restic restic backup --compression max /data
+
+# List snapshots
+podman exec restic restic snapshots
+
+# Restore the latest snapshot
+podman exec restic restic restore latest --target /restore
+
+# Restore a specific path from the latest snapshot
+podman exec restic restic restore latest --target /restore --include /data/important
+
+# Prune old snapshots (keep 7 daily, 4 weekly, 12 monthly)
+# Note: --prune flag added to forget so it runs in one pass
+podman exec restic restic forget --keep-daily 7 --keep-weekly 4 --keep-monthly 12 --prune
+
+# Repack small pack files to reclaim space (0.18+)
+podman exec restic restic prune --repack-smaller-than 128M
+
+# Verify repository integrity
+podman exec restic restic check
+
+# Full integrity check — downloads and verifies all data (slow but thorough)
+podman exec restic restic check --read-data</code></pre>
+<h5>Backup to Backblaze B2 (offsite)</h5>
+<pre><code class="language-bash">-e RESTIC_REPOSITORY=b2:your-bucket-name:/backups \
+-e B2_ACCOUNT_ID=your-account-id \
+-e B2_ACCOUNT_KEY=your-account-key</code></pre>
+<h5>Backup to SFTP (another machine on your network)</h5>
+<pre><code class="language-bash">-e RESTIC_REPOSITORY=sftp:user@192.168.1.100:/backups</code></pre>
+<blockquote><p><strong>0.18.x deprecation notice:</strong> The legacy index format and S3 legacy layout are always enabled for removal in a future 0.19.0 release. Run <code>restic migrate</code> on older repositories to upgrade them to the current format.</p></blockquote>
+<p>---</p>
+<h2>Borgmatic</h2>
+<p><strong>Purpose:</strong> Automates Borg Backup — a highly efficient, deduplicated backup tool. Borgmatic wraps Borg with a simple YAML config, handles scheduling, pruning, and health check notifications automatically.</p>
+<pre><code class="language-yaml"># ~/borgmatic/compose.yaml
+services:
+  borgmatic:
+    image: b3vis/borgmatic
+    volumes:
+      - /home/user/data:/mnt/source:ro,Z
+      - /home/user/borgmatic/config:/etc/borgmatic.d:Z
+      - /home/user/borgmatic/repo:/mnt/borg:Z
+      - /home/user/borgmatic/.config/borg:/root/.config/borg:Z
+    environment:
+      TZ: Asia/Kolkata
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/borgmatic &amp;&amp; podman-compose up -d</code></pre>
+<h5>Example <code>config.yaml</code></h5>
+<pre><code class="language-yaml"># /home/user/borgmatic/config/config.yaml
+repositories:
+  - path: /mnt/borg/home-server
+    label: local
+
+source_directories:
+  - /mnt/source
+
+encryption_passphrase: changeme
+
+retention:
+  keep_daily: 7
+  keep_weekly: 4
+  keep_monthly: 6
+
+healthchecks:
+  ping_url: https://hc-ping.com/your-uuid</code></pre>
+<h5>Manual operations</h5>
+<pre><code class="language-bash"># Run a backup now
+podman exec borgmatic borgmatic create
+
+# List archives
+podman exec borgmatic borgmatic list
+
+# Check repository
+podman exec borgmatic borgmatic check</code></pre>
+<p>---</p>
+<h2>Duplicati</h2>
+<p><strong>Purpose:</strong> Web UI-driven incremental backup with scheduling, encryption, and support for 20+ cloud providers including Google Drive, OneDrive, Dropbox, and S3.</p>
+<pre><code class="language-yaml"># ~/duplicati/compose.yaml
+services:
+  duplicati:
+    image: lscr.io/linuxserver/duplicati
+    ports:
+      - 127.0.0.1:8200:8200
+    volumes:
+      - /home/user/duplicati/config:/config:Z
+      - /home/user/data:/source:ro,Z
+      - /home/user/backups:/backups:Z
+    environment:
+      PUID: &quot;1000&quot;
+      PGID: &quot;1000&quot;
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/duplicati &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:8200</code>. Configure backup jobs, schedules, and encryption via the web UI. Supports AES-256 encryption — set a passphrase on every job.</p>
+<p>---</p>
+<h2>Rclone</h2>
+<p><strong>Purpose:</strong> Sync, copy, and mount data across 70+ cloud providers. Supports encryption, bandwidth throttling, and incremental sync. Useful for offsite replication and archiving to cold storage.</p>
+<pre><code class="language-yaml"># ~/rclone/compose.yaml
+services:
+  rclone:
+    image: rclone/rclone:latest
+    volumes:
+      - /home/user/rclone/config:/config/rclone:Z
+      - /home/user/backups:/backups:Z
+    command: sync /backups remote:your-bucket --log-level INFO
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/rclone &amp;&amp; podman-compose up -d</code></pre>
+<h5>Configure a remote (run interactively)</h5>
+<pre><code class="language-bash">podman run --rm -it \
+  -v /home/user/rclone/config:/config/rclone:Z \
+  rclone/rclone:latest config</code></pre>
+<h4>Common sync commands</h4>
+<pre><code class="language-bash"># Sync (mirror source to destination — deletes extra files at destination)
+podman exec rclone rclone sync /backups remote:your-bucket
+
+# Copy (one-way, no deletes)
+podman exec rclone rclone copy /backups remote:your-bucket
+
+# Check integrity
+podman exec rclone rclone check /backups remote:your-bucket
+
+# Mount a remote as a filesystem
+podman exec rclone rclone mount remote:your-bucket /mnt/cloud --daemon</code></pre>
+<h5>Encrypt a remote</h5>
+<p>(wrap any existing remote with Rclone Crypt):</p>
+<pre><code class="language-bash"># In interactive config, choose 'crypt' type, point at your existing remote
+# Results in: rclone copy /data cryptremote:</code></pre>
+<p>---</p>
+<h2>MinIO (Self-Hosted S3 Backup Target)</h2>
+<p><strong>Purpose:</strong> High-performance, S3-compatible object storage. Run it on a second machine (or external drive) as a local offsite backup target — Restic, Borgmatic, and Duplicati all support S3 natively.</p>
+<pre><code class="language-yaml"># ~/minio/compose.yaml
+services:
+  minio:
+    image: quay.io/minio/minio
+    ports:
+      - 127.0.0.1:9000:9000
+      - 127.0.0.1:9001:9001
+    volumes:
+      - /home/user/minio/data:/data:Z
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: changeme123
+    command: server /data --console-address :9001
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/minio &amp;&amp; podman-compose up -d</code></pre>
+<p>Access the web console at <code>http://localhost:9001</code>. Create a bucket and access keys, then point Restic or Rclone at <code>s3:http://localhost:9000/your-bucket</code>.</p>
+<h5>Point Restic at MinIO</h5>
+<pre><code class="language-bash">-e RESTIC_REPOSITORY=s3:http://localhost:9000/restic-backups \
+-e AWS_ACCESS_KEY_ID=your-access-key \
+-e AWS_SECRET_ACCESS_KEY=your-secret-key</code></pre>
+<p>---</p>
+<h2>Kopia</h2>
+<p><strong>Purpose:</strong> Modern, fast backup tool with a polished web UI, built-in deduplication, compression (zstd), and end-to-end encryption. Supports local, SFTP, S3, Backblaze B2, and Rclone as destinations. A strong alternative to Restic when you want a GUI. Current stable release: <strong>0.22.3</strong> (December 2025).</p>
+<blockquote><p><strong>CSRF note:</strong> The <code>--disable-csrf-token-checks</code> flag is required when accessing the Kopia UI through a reverse proxy. Omit it for direct local access.</p></blockquote>
+<pre><code class="language-yaml"># ~/kopia/compose.yaml
+services:
+  kopia:
+    image: kopia/kopia:latest
+    container_name: kopia
+    hostname: kopia
+    ports:
+      - 127.0.0.1:51515:51515
+    volumes:
+      - /home/user/kopia/config:/app/config:Z
+      - /home/user/kopia/cache:/app/cache:Z
+      - /home/user/kopia/logs:/app/logs:Z
+      - /home/user/data:/data:ro,Z
+      - /home/user/backups:/repository:Z
+    environment:
+      KOPIA_PASSWORD: changeme
+      TZ: Asia/Kolkata
+    command:
+      - server
+      - start
+      - --insecure
+      - --address=0.0.0.0:51515
+      - --server-username=admin
+      - --server-password=changeme
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/kopia &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:51515</code>. Connect to a repository, configure sources, and set schedules through the UI.</p>
+<p>---</p>
+<h2>Garage (Distributed S3-Compatible Storage)</h2>
+<p><strong>Purpose:</strong> Lightweight, self-hosted distributed object storage. Designed to run on a cluster of modest machines or drives across multiple physical locations — a true geo-distributed MinIO alternative that runs well on low-power hardware. S3-compatible API means Restic, Rclone, and any other S3-aware tool works with it out of the box.</p>
+<pre><code class="language-yaml"># ~/garage/compose.yaml
+services:
+  garage:
+    image: dxflrs/garage:latest
+    ports:
+      - 127.0.0.1:3900:3900
+      - 127.0.0.1:3901:3901
+      - 127.0.0.1:3902:3902
+    volumes:
+      - /home/user/garage/data:/var/lib/garage/data:Z
+      - /home/user/garage/meta:/var/lib/garage/meta:Z
+      - /home/user/garage/config.toml:/etc/garage.toml:ro,Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/garage &amp;&amp; podman-compose up -d</code></pre>
+<h5>Minimal <code>config.toml</code></h5>
+<pre><code class="language-toml">metadata_dir = &quot;/var/lib/garage/meta&quot;
+data_dir = &quot;/var/lib/garage/data&quot;
+db_engine = &quot;lmdb&quot;
+replication_factor = 1
+
+[s3_api]
+s3_region = &quot;garage&quot;
+api_bind_addr = &quot;0.0.0.0:3900&quot;
+
+[admin]
+api_bind_addr = &quot;0.0.0.0:3903&quot;</code></pre>
+<blockquote><p>Garage is ideal when you want to spread backup storage across two home machines (e.g., a mini PC and an old laptop) for local redundancy without cloud costs.</p></blockquote>
+<p>---</p>
+<h2>Litestream (SQLite Continuous Replication)</h2>
+<p><strong>Purpose:</strong> Streams SQLite changes to S3-compatible object storage in real time — effectively giving SQLite continuous off-site replication with sub-second RPO. Any app using SQLite (including many lightweight self-hosted tools) gets disaster recovery without changing a line of code. Litestream runs as a sidecar: it watches the SQLite file and asynchronously replicates every write to your backup destination. Current stable release: <strong>0.5.x</strong> (active development resumed October 2025).</p>
+<blockquote><p><strong>⚠️ Breaking changes in 0.5.x vs 0.3.x:</strong></p></blockquote>
+<blockquote><p>- The backup file format changed — 0.5.x <strong>cannot restore from 0.3.x WAL backups</strong>. Start fresh or keep a 0.3.x instance until old backups expire.</p></blockquote>
+<blockquote><p>- The config key <code>replicas</code> (array) is replaced by <code>replica</code> (single object). Only one replica destination per database is supported.</p></blockquote>
+<blockquote><p>- The <code>litestream wal</code> command is now <code>litestream ltx</code>.</p></blockquote>
+<blockquote><p>- Age encryption was removed in 0.5.0 and will return in a future release. Do not upgrade if you rely on Age encryption.</p></blockquote>
+<blockquote><p>- Upgrade directly to <strong>0.5.2+</strong> — 0.5.0 had several bugs fixed in 0.5.1 and 0.5.2.</p></blockquote>
+<pre><code class="language-yaml"># ~/litestream/compose.yaml
+services:
+  litestream:
+    image: litestream/litestream:latest
+    volumes:
+      - /home/user/app/data:/data:Z
+      - /home/user/litestream/litestream.yml:/etc/litestream.yml:ro,Z
+    command: replicate
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/litestream &amp;&amp; podman-compose up -d</code></pre>
+<h5>Example <code>litestream.yml</code> (v0.5.x format)</h5>
+<pre><code class="language-yaml">dbs:
+  - path: /data/app.db
+    replica:                          # singular key — not &quot;replicas&quot;
+      type: s3
+      bucket: my-litestream-backups
+      path: app
+      region: us-east-1
+      access-key-id: your-access-key
+      secret-access-key: your-secret-key
+      endpoint: http://host.containers.internal:9000  # MinIO</code></pre>
+<h4>Restore from replica</h4>
+<pre><code class="language-bash">podman run --rm \
+  -v /home/user/app/data:/data:Z \
+  -v /home/user/litestream/litestream.yml:/etc/litestream.yml:ro,Z \
+  litestream/litestream:latest restore -o /data/app.db s3://my-litestream-backups/app</code></pre>
+<h4>List available restore points</h4>
+<pre><code class="language-bash">podman exec litestream litestream snapshots s3://my-litestream-backups/app</code></pre>
+<blockquote><p>Pair Litestream with Restic for defence in depth: Litestream gives you near-zero RPO for SQLite apps; Restic gives you encrypted, point-in-time snapshots for everything else.</p></blockquote>
+<p>---</p>
+<h2>Restic REST Server (Self-Hosted Repository Server)</h2>
+<p><strong>Purpose:</strong> Run a Restic repository server on a local machine — any server on your LAN, a Raspberry Pi, or an old laptop. Restic clients back up directly to it over HTTPS without needing MinIO, S3, or any object-storage stack. This is the simplest way to get a centralised, self-hosted Restic destination: one server runs the REST backend, all your machines point at it.</p>
+<pre><code class="language-yaml"># ~/restic-rest-server/compose.yaml
+services:
+  rest-server:
+    image: restic/rest-server:latest
+    container_name: restic-rest-server
+    ports:
+      - &quot;127.0.0.1:8000:8000&quot;   # bind to 127.0.0.1; proxy through Caddy for TLS
+    volumes:
+      - /home/user/restic-rest-server/data:/data:Z
+      - /home/user/restic-rest-server/.htpasswd:/.htpasswd:ro,Z
+    environment:
+      OPTIONS: &quot;--htpasswd-file /.htpasswd&quot;
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/restic-rest-server &amp;&amp; podman-compose up -d</code></pre>
+<h5>Create user credentials (htpasswd)</h5>
+<pre><code class="language-bash"># Install htpasswd via Nix (part of the apacheHttpd package)
+nix-env -iA nixpkgs.apacheHttpd
+
+# Create the password file with the first user
+htpasswd -B -c /home/user/restic-rest-server/.htpasswd backupuser
+
+# Add more users
+htpasswd -B /home/user/restic-rest-server/.htpasswd seconduser</code></pre>
+<h5>Point Restic at the REST server</h5>
+<pre><code class="language-bash"># Initialise a repository for a specific user
+RESTIC_REPOSITORY=rest:http://localhost:8000/backupuser \
+RESTIC_PASSWORD=your-restic-encryption-password \
+restic init
+
+# Or via the container environment
+-e RESTIC_REPOSITORY=rest:https://restic.home.local/backupuser \
+-e RESTIC_PASSWORD=your-restic-encryption-password</code></pre>
+<h4>Caddy (add TLS — strongly recommended)</h4>
+<pre><code class="language-caddyfile">restic.home.local { tls internal; reverse_proxy localhost:8000 }</code></pre>
+<blockquote><p><strong>Multi-user repos:</strong> Each user gets an isolated repository directory under <code>/data/&lt;username&gt;/</code>. The REST server enforces htpasswd auth — users can only access their own path. Enable <code>--append-only</code> mode to prevent clients from deleting snapshots: add it to <code>OPTIONS</code> in the environment.</p></blockquote>
+<h4>Append-only mode (protect against ransomware deleting backups)</h4>
+<pre><code class="language-yaml">environment:
+  OPTIONS: &quot;--htpasswd-file /.htpasswd --append-only&quot;</code></pre>
+<p>---</p>
+<h2>Backblaze B2 (Concrete Config)</h2>
+<p><strong>Purpose:</strong> Backblaze B2 is one of the most cost-effective offsite backup destinations — S3-compatible, with costs well below AWS S3. Restic, Rclone, and Kopia all support it natively. The backups-sync page references B2 as a destination in passing; this section provides the complete working configuration.</p>
+<h3>Restic → B2</h3>
+<pre><code class="language-yaml"># Add to your restic container environment, or export before running CLI commands
+environment:
+  RESTIC_REPOSITORY: &quot;b2:your-bucket-name:/restic&quot;
+  RESTIC_PASSWORD: &quot;your-strong-encryption-password&quot;
+  B2_ACCOUNT_ID: &quot;your-b2-application-key-id&quot;
+  B2_ACCOUNT_KEY: &quot;your-b2-application-key&quot;</code></pre>
+<pre><code class="language-bash"># Initialise
+podman exec restic restic init
+
+# Backup
+podman exec restic restic backup /data --compression max
+
+# Prune
+podman exec restic restic forget --keep-daily 7 --keep-weekly 4 --keep-monthly 12 --prune</code></pre>
+<blockquote><p>Create a B2 <strong>Application Key</strong> (not the master key) with access limited to a single bucket — use the B2 dashboard under App Keys → Add a New Application Key.</p></blockquote>
+<h3>Rclone → B2</h3>
+<p>Configure Rclone interactively (<code>rclone config</code>), choose <code>b2</code> as the backend, enter your key ID and application key. Then:</p>
+<pre><code class="language-bash"># Sync backups to B2
+podman exec rclone rclone sync /backups b2remote:your-bucket --transfers 4
+
+# Copy (no deletes)
+podman exec rclone rclone copy /backups b2remote:your-bucket</code></pre>
+<h3>Kopia → B2</h3>
+<p>In the Kopia web UI (<code>http://localhost:51515</code>):</p>
+<ol>
+<li><strong>Connect to Repository → Backblaze B2</strong></li>
+<li>Enter bucket name, Key ID, and Application Key</li>
+<li>Set the repository password (encryption passphrase)</li>
+<li>Configure snapshot policies and schedules</li>
+</ol>
+<p>Or via CLI:</p>
+<pre><code class="language-bash">podman exec kopia kopia repository create b2 \
+  --bucket=your-bucket-name \
+  --key-id=your-key-id \
+  --key=your-application-key \
+  --password=your-kopia-password</code></pre>
+<h3>Troubleshooting</h3>
+<p>| Issue | Solution | |-------|----------| | <code>b2: 401 Unauthorized</code> | Check that the Application Key has <code>readFiles</code>, <code>writeFiles</code>, <code>deleteFiles</code> on the correct bucket | | Restic B2 backup very slow | B2 performs best with parallel uploads — Restic uses multiple goroutines by default; verify network is the bottleneck with <code>restic backup --verbose 2</code> | | Rclone B2 rate limit errors | Add <code>--b2-upload-concurrency 4</code> and <code>--transfers 4</code> to avoid hitting per-bucket concurrency limits |</p>
+<p>---</p>
+<h2>Cloudflare R2 (Zero-Egress S3-Compatible Target)</h2>
+<p><strong>Purpose:</strong> Cloudflare R2 is an S3-compatible object storage service with <strong>zero egress fees</strong> — you pay only for storage (~$0.015/GB/month) and write operations, never for downloads. This makes it particularly attractive as an offsite backup destination compared to AWS S3 or GCS, which charge for egress. Restic, Rclone, and Kopia all work with R2 via the S3-compatible API.</p>
+<h3>Setup</h3>
+<ol>
+<li>In the Cloudflare dashboard: <strong>R2 → Create Bucket</strong> (choose a region close to you)</li>
+<li><strong>R2 → Manage R2 API Tokens → Create API Token</strong> — select <code>Object Read &amp; Write</code> for your bucket</li>
+<li>Note your <strong>Account ID</strong>, <strong>Access Key ID</strong>, and <strong>Secret Access Key</strong></li>
+</ol>
+<h3>Restic → R2</h3>
+<pre><code class="language-yaml">environment:
+  RESTIC_REPOSITORY: &quot;s3:https://&lt;account-id&gt;.r2.cloudflarestorage.com/your-bucket&quot;
+  RESTIC_PASSWORD: &quot;your-strong-encryption-password&quot;
+  AWS_ACCESS_KEY_ID: &quot;your-r2-access-key-id&quot;
+  AWS_SECRET_ACCESS_KEY: &quot;your-r2-secret-access-key&quot;</code></pre>
+<pre><code class="language-bash">podman exec restic restic init
+podman exec restic restic backup /data --compression max</code></pre>
+<h3>Rclone → R2</h3>
+<p>Add to <code>rclone.conf</code> (or configure interactively with <code>rclone config</code>, choose <code>s3</code> backend, provider <code>Cloudflare</code>):</p>
+<pre><code class="language-ini">[r2]
+type = s3
+provider = Cloudflare
+access_key_id = your-r2-access-key-id
+secret_access_key = your-r2-secret-access-key
+endpoint = https://&lt;account-id&gt;.r2.cloudflarestorage.com</code></pre>
+<pre><code class="language-bash">podman exec rclone rclone sync /backups r2:your-bucket</code></pre>
+<h3>Kopia → R2</h3>
+<p>In Kopia web UI → <strong>Connect → S3 Compatible</strong>:</p>
+<ul>
+<li><strong>Endpoint:</strong> <code>https://&lt;account-id&gt;.r2.cloudflarestorage.com</code></li>
+<li><strong>Bucket:</strong> <code>your-bucket</code></li>
+<li><strong>Access Key ID / Secret:</strong> R2 API token credentials</li>
+<li>Leave region blank (R2 does not require a region)</li>
+</ul>
+<blockquote><p><strong>R2 vs B2:</strong> R2 has no egress fees and is cheaper for workloads with frequent restores. B2 has a more mature ecosystem and better Restic/Rclone documentation. Both are good choices — use R2 if you restore frequently or want to avoid any egress costs.</p></blockquote>
+<p>---</p>
+<h2>Automated Backup with systemd</h2>
+<p>Set up a daily backup timer that runs Restic and sends a notification via Ntfy:</p>
+<pre><code class="language-bash"># ~/.config/systemd/user/backup.service
+[Unit]
+Description=Daily Restic Backup
+
+[Service]
+Type=oneshot
+ExecStart=podman exec restic restic backup /data
+ExecStartPost=curl -d &quot;Backup complete ✅&quot; https://ntfy.sh/your-topic
+ExecStartPost=podman exec restic restic forget --keep-daily 7 --keep-weekly 4 --keep-monthly 12 --prune</code></pre>
+<pre><code class="language-bash"># ~/.config/systemd/user/backup.timer
+[Unit]
+Description=Run daily backup at 3 AM
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target</code></pre>
+<pre><code class="language-bash">systemctl --user enable --now backup.timer</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>wrong password or no key found</code> (Restic) | Ensure <code>RESTIC_PASSWORD</code> matches the password used when the repo was initialised | | Backup is slow | Enable compression: <code>restic backup --compression max /data</code>. Ensure the source volume is mounted <code>:ro</code> to avoid file locking | | Rclone sync deletes files unexpectedly | Use <code>rclone copy</code> instead of <code>rclone sync</code> if you do not want destination-only files removed | | MinIO access denied | Check that the access key and bucket policy allow read/write; create a dedicated access key per backup client | | Duplicati job fails silently | Check the job log in the web UI under <em>Show Log → Stored</em>; also verify destination credentials haven't expired | | Volume permissions error | Add <code>--userns=keep-id</code> to the Podman run command to preserve your UID inside the container | | Restic <code>repository is locked</code> | Run <code>podman exec restic restic unlock</code> — happens if a previous backup was interrupted | | Kopia web UI unreachable | Ensure <code>--insecure</code> is set (required without TLS cert); if behind a reverse proxy, also add <code>--disable-csrf-token-checks</code>; proxy through Caddy for HTTPS | | Litestream replication lag | Check <code>podman logs litestream</code> for errors; in 0.5.x, look for LTX compaction errors rather than WAL checkpoint errors | | Litestream restore returns empty DB | Verify the S3 bucket and path in <code>litestream.yml</code> match exactly; use <code>litestream snapshots</code> to list available restore points (note: <code>litestream wal</code> command is <code>litestream ltx</code> in 0.5.x) | | Litestream: <code>yaml: unmarshal errors</code> after upgrade | Config format changed in 0.5.x — rename <code>replicas:</code> (array) to <code>replica:</code> (single object) per database | | Litestream S3 upload errors (<code>MalformedTrailerError</code>) | Upgrade to 0.5.4+ — earlier 0.5.x releases had an incompatibility with some S3-compatible providers (MinIO, B2, Spaces) due to aws-chunked encoding | | Restic <code>--compression</code> flag not recognised | Requires Restic 0.14+; update the image to <code>restic/restic:latest</code> | | REST server returns <code>403 Forbidden</code> | Verify the username/password in <code>RESTIC_REPOSITORY</code> URL matches the <code>.htpasswd</code> file; re-run <code>htpasswd</code> if unsure | | REST server <code>repository not found</code> | Run <code>restic init</code> targeting the REST server URL before the first backup | | R2 <code>SignatureDoesNotMatch</code> | Confirm the endpoint URL uses your Account ID: <code>https://&lt;account-id&gt;.r2.cloudflarestorage.com</code>; do not include the bucket in the endpoint | | R2 slow uploads | R2 enforces per-object size limits on multipart uploads; add <code>--s3-chunk-size 64M</code> in Rclone or ensure Restic packs are within limits |</p>
+<h2>The 3-2-1-1-0 Rule</h2>
+<p>The classic 3-2-1 rule (three copies, two media types, one offsite) has been extended for modern threat models:</p>
+<ul>
+<li><strong>3</strong> total copies of your data</li>
+<li><strong>2</strong> different storage media types (local disk + cloud, or NVMe + tape)</li>
+<li><strong>1</strong> copy offsite (Backblaze B2, Cloudflare R2, or a friend's server)</li>
+<li><strong>1</strong> copy offline or air-gapped (USB drive stored offline, Backblaze's Object Lock / immutable buckets)</li>
+<li><strong>0</strong> restore failures — verified by actually restoring</li>
+</ul>
+<p>The offline copy specifically addresses ransomware: if all your backups are network-accessible, ransomware can encrypt them too. An air-gapped copy (offline disk, or B2 with Object Lock enabled so backups can't be deleted for a set period) survives even a full ransomware event.</p>
+<p>---</p>
+<h2>Testing Your Restores</h2>
+<p>A backup you have never restored from is a backup you don't know works. Run a restore test monthly — automate it so it actually happens:</p>
+<pre><code class="language-bash">#!/bin/bash
+# ~/.local/bin/restore-test.sh — run monthly via systemd timer
+set -euo pipefail
+
+TEST_DIR=$(mktemp -d)
+trap &quot;rm -rf $TEST_DIR&quot; EXIT
+
+echo &quot;Starting restore test to $TEST_DIR...&quot;
+
+# Restore latest Restic snapshot
+podman exec restic restic restore latest --target &quot;$TEST_DIR&quot;
+
+# Verify critical files exist and are non-empty
+FAILURES=0
+for FILE in data/app.db data/config.json; do
+  if [ -s &quot;$TEST_DIR/$FILE&quot; ]; then
+    echo &quot;✅ $FILE — OK&quot;
+  else
+    echo &quot;❌ $FILE — MISSING or EMPTY&quot;
+    FAILURES=$((FAILURES+1))
+  fi
+done
+
+# Report result
+if [ &quot;$FAILURES&quot; -eq 0 ]; then
+  curl -s -d &quot;✅ Monthly restore test PASSED on $(hostname)&quot; \
+    http://localhost:8090/your-ntfy-topic
+else
+  curl -s -d &quot;❌ Monthly restore test FAILED — $FAILURES files missing&quot; \
+    http://localhost:8090/your-ntfy-topic
+  exit 1
+fi</code></pre>
+<p>Add a systemd timer to run it monthly:</p>
+<pre><code class="language-bash"># ~/.config/systemd/user/restore-test.timer
+[Unit]
+Description=Monthly Backup Restore Test
+
+[Timer]
+OnCalendar=monthly
+Persistent=true
+
+[Install]
+WantedBy=timers.target</code></pre>
+<pre><code class="language-bash">systemctl --user enable --now restore-test.timer</code></pre>
+<p>---</p>
+<h2>Encryption Key Management</h2>
+<p>Restic uses <code>RESTIC_PASSWORD</code>, Borgmatic uses <code>encryption_passphrase</code>. These keys are the last line of defence for your backups — if you lose the key, the backup is permanently unrecoverable.</p>
+<p>The key cannot be stored in the same place as the backup. Common safe approaches:</p>
+<ul>
+<li><strong>Password manager</strong> (Bitwarden / Vaultwarden) — store the key there, backed up independently. Make sure your password manager vault is also backed up.</li>
+<li><strong>Printed paper key</strong> — print the passphrase and store it in a fireproof safe or safety deposit box. Low-tech but survives all digital failures.</li>
+<li><strong>Separate encrypted key backup</strong> — encrypt the key with a second passphrase and store it on a different service (e.g., backup your Restic password to a Bitwarden-encrypted note that itself has a printed emergency recovery code).</li>
+</ul>
+<p>Never put the backup encryption key in the same repository being encrypted, or on the same machine in plaintext. The whole point of encryption is that the backup is useless to an attacker without the key — that property disappears if the key lives next to the data.</p>
+<blockquote><p>💡 <strong>Tip:</strong> Test your restores periodically. A backup you have never restored from is a backup you do not know works.</p></blockquote>
+<p>---</p>
+<h2>Caddy Configuration</h2>
+<pre><code class="language-caddyfile">kopia.home.local   { tls internal; reverse_proxy localhost:51515 }
+duplicati.home.local { tls internal; reverse_proxy localhost:8200 }
+minio.home.local   { tls internal; reverse_proxy localhost:9001 }
+restic.home.local  { tls internal; reverse_proxy localhost:8000 }</code></pre></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

@@ -146,7 +146,136 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">File Permissions &amp; Attributes</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">System</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-25</span>
+        </div>
+      </div>
+      <div class="prose"><h1>ch* Commands</h1>
+<p>The <code>ch*</code> family covers the core "change" utilities — tools that modify permissions, ownership, file attributes, and user account properties. All are pre-installed on Shani OS.</p>
+<p>---</p>
+<h2>chmod — Change File Permissions</h2>
+<p><code>chmod</code> sets read, write, and execute permissions for the owner, group, and others.</p>
+<h3>Symbolic mode</h3>
+<pre><code class="language-bash">chmod u+x script.sh          # Add execute for owner
+chmod go-w file.txt           # Remove write for group and others
+chmod a+r file.txt            # Add read for everyone
+chmod u=rw,go=r file.txt      # Set exact permissions per class</code></pre>
+<p>| Symbol | Meaning | |--------|---------| | <code>u</code> | Owner (user) | | <code>g</code> | Group | | <code>o</code> | Others | | <code>a</code> | All (u+g+o) | | <code>+</code> | Add permission | | <code>-</code> | Remove permission | | <code>=</code> | Set exactly (overwrites) |</p>
+<h3>Octal mode</h3>
+<p>Each permission class is a 3-bit value: read=4, write=2, execute=1.</p>
+<pre><code class="language-bash">chmod 755 script.sh           # rwxr-xr-x  (owner: rwx, group: r-x, others: r-x)
+chmod 644 file.txt            # rw-r--r--  (owner: rw, group: r, others: r)
+chmod 600 ~/.ssh/id_ed25519   # rw-------  (private key — others must have no access)
+chmod 700 ~/.ssh              # rwx------  (SSH directory)
+chmod 000 locked.txt          # ---------- (no access for anyone)</code></pre>
+<p>Common permission patterns:</p>
+<p>| Octal | Symbolic | Typical use | |-------|----------|-------------| | <code>755</code> | <code>rwxr-xr-x</code> | Executable scripts, directories | | <code>644</code> | <code>rw-r--r--</code> | Regular files | | <code>600</code> | <code>rw-------</code> | Private keys, secrets | | <code>700</code> | <code>rwx------</code> | Private directories | | <code>664</code> | <code>rw-rw-r--</code> | Shared group files | | <code>775</code> | <code>rwxrwxr-x</code> | Shared group directories |</p>
+<h3>Recursive and special bits</h3>
+<pre><code class="language-bash">chmod -R 755 /var/www/html    # Recursive (applies to all files and subdirs)
+
+chmod u+s /usr/bin/myapp      # Setuid — runs as file owner, not caller
+chmod g+s /shared/dir         # Setgid — new files inherit group; useful for shared dirs
+chmod +t /tmp                 # Sticky bit — only owner can delete their own files</code></pre>
+<blockquote><p>⚠️ Avoid <code>chmod -R 777</code>. It grants world-write to everything, including config files and scripts.</p></blockquote>
+<p>---</p>
+<h2>chown — Change Ownership</h2>
+<p><code>chown</code> sets the owner and optionally the group of a file or directory.</p>
+<pre><code class="language-bash">chown alice file.txt              # Change owner to alice
+chown alice:developers file.txt   # Change owner and group
+chown :developers file.txt        # Change group only (note leading colon)
+chown -R alice:alice /home/alice  # Recursive ownership change
+chown --reference=ref.txt file.txt # Copy ownership from another file</code></pre>
+<blockquote><p>💡 <code>chgrp</code> is a shorthand for changing only the group: <code>chgrp developers file.txt</code> is equivalent to <code>chown :developers file.txt</code>.</p></blockquote>
+<p>---</p>
+<h2>chattr — Change Extended File Attributes</h2>
+<p><code>chattr</code> sets low-level filesystem attributes on ext2/ext4/Btrfs. These attributes are enforced by the kernel — even root cannot modify or delete a file with the immutable flag set without first removing the attribute.</p>
+<pre><code class="language-bash">sudo chattr +i important.conf     # Immutable — no writes, renames, or deletes
+sudo chattr -i important.conf     # Remove immutable flag
+sudo chattr +a logfile.log        # Append-only — can only append, not overwrite
+sudo chattr +u file.txt           # Undeletable (save data on deletion for recovery)
+sudo chattr +c archive.tar        # Enable transparent compression (ext4)
+sudo chattr -R +i /etc/           # Recursive — use with caution</code></pre>
+<p>Check attributes with <code>lsattr</code>:</p>
+<pre><code class="language-bash">lsattr important.conf
+# ----i--------e-- important.conf
+
+lsattr -R /etc/               # Recursive listing</code></pre>
+<p>Common attribute flags:</p>
+<p>| Flag | Meaning | |------|---------| | <code>i</code> | Immutable — no modifications, no deletion, even by root | | <code>a</code> | Append-only — data can be added but not overwritten | | <code>u</code> | Undeletable — kernel keeps data recoverable after deletion | | <code>c</code> | Transparent compression | | <code>e</code> | Extents in use (set automatically, do not modify) |</p>
+<blockquote><p>⚠️ The <code>+i</code> flag is useful for protecting config files from accidental changes, but remember to remove it before package updates that modify the file.</p></blockquote>
+<p>---</p>
+<h2>chage — Change Password Aging Policy</h2>
+<p><code>chage</code> manages password expiry and account aging for local users. Useful for enforcing security policies without a directory service.</p>
+<pre><code class="language-bash">sudo chage -l alice               # List current aging settings
+sudo chage -M 90 alice            # Password expires after 90 days
+sudo chage -m 7 alice             # Minimum 7 days between password changes
+sudo chage -W 14 alice            # Warn user 14 days before expiry
+sudo chage -I 30 alice            # Lock account 30 days after expiry
+sudo chage -E 2026-12-31 alice    # Account expires on a specific date
+sudo chage -E -1 alice            # Remove account expiry
+sudo chage -d 0 alice             # Force password change on next login</code></pre>
+<p>View aging info:</p>
+<pre><code class="language-bash">sudo chage -l alice
+# Last password change                        : Apr 01, 2026
+# Password expires                            : Jun 30, 2026
+# Password inactive                           : Jul 30, 2026
+# Account expires                             : never
+# Minimum number of days between changes      : 7
+# Maximum number of days between changes      : 90
+# Number of days of warning before expiry     : 14</code></pre>
+<p>---</p>
+<h2>chsh — Change Login Shell</h2>
+<p><code>chsh</code> changes a user's default login shell.</p>
+<pre><code class="language-bash">chsh                              # Interactive prompt for current user
+chsh -s /bin/zsh                  # Set shell to zsh for current user
+chsh -s /bin/bash alice           # Set shell for another user (root only)
+chsh -l                           # List valid shells (reads /etc/shells)</code></pre>
+<p>Shells must be listed in <code>/etc/shells</code> to be accepted. To add a custom shell:</p>
+<pre><code class="language-bash">which fish                        # e.g. /usr/bin/fish
+echo /usr/bin/fish | sudo tee -a /etc/shells
+chsh -s /usr/bin/fish</code></pre>
+<p>The change takes effect on the next login. Running <code>echo $SHELL</code> in an existing session still shows the old shell.</p>
+<p>---</p>
+<h2>chfn — Change Finger (GECOS) Information</h2>
+<p><code>chfn</code> updates the GECOS field in <code>/etc/passwd</code> — the display name and contact info shown by <code>finger</code> and some system tools.</p>
+<pre><code class="language-bash">chfn                              # Interactive prompts for current user
+chfn -f &quot;Alice Smith&quot; alice       # Set full name (root only for other users)
+chfn -r &quot;Ops Team&quot; alice          # Set room/location
+chfn -w &quot;555-1234&quot; alice          # Set work phone
+chfn -h &quot;555-5678&quot; alice          # Set home phone</code></pre>
+<p>The GECOS string is cosmetic and not security-sensitive, but it is displayed in <code>finger</code>, <code>w</code>, <code>who</code>, and some email clients.</p>
+<p>---</p>
+<h2>chpasswd — Batch Password Changes</h2>
+<p><code>chpasswd</code> reads <code>username:password</code> pairs from stdin and updates passwords in bulk. It is intended for provisioning scripts, not interactive use.</p>
+<pre><code class="language-bash">echo &quot;alice:NewP@ssw0rd&quot; | sudo chpasswd
+echo &quot;bob:AnotherSecure1&quot; | sudo chpasswd
+
+# Batch from a file (delete the file immediately after use)
+sudo chpasswd &lt; /tmp/passwords.txt
+sudo shred -u /tmp/passwords.txt</code></pre>
+<blockquote><p>⚠️ Avoid embedding plain-text passwords in scripts. Use <code>chpasswd</code> only in controlled provisioning environments, and always shred the input file after use.</p></blockquote>
+<p>---</p>
+<h2>Quick Reference</h2>
+<p>| Command | Purpose | |---------|---------| | <code>chmod</code> | File/directory permissions (rwx) | | <code>chown</code> | File owner and group | | <code>chgrp</code> | File group only | | <code>chattr</code> | Kernel-level file attributes (immutable, append-only) | | <code>lsattr</code> | List extended file attributes | | <code>chage</code> | Password aging and account expiry | | <code>chsh</code> | Login shell | | <code>chfn</code> | GECOS / display name fields | | <code>chpasswd</code> | Batch password updates |</p>
+<p>---</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="../system/users">Users & Groups</a> — account management, <code>useradd</code>, <code>usermod</code></li>
+<li><a href="../arch/filesystem">Filesystem Structure</a> — subvolume layout and permissions</li>
+<li><a href="../network/ssh">SSH Hardening</a> — key permissions (<code>chmod 600</code>)</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

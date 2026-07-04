@@ -146,7 +146,178 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">BIND (Authoritative DNS)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+        </div>
+      </div>
+      <div class="prose"><h1>BIND — Authoritative DNS Server</h1>
+<p>BIND (<code>named</code>) is the most widely deployed DNS server. On Shani OS it is pre-installed and provides two distinct functions that are often combined but can be used independently:</p>
+<ul>
+<li><strong>Authoritative server</strong> — the canonical source of truth for a zone (e.g., <code>home.local</code>). Other resolvers query it for answers about your domain.</li>
+<li><strong>Recursive / caching resolver</strong> — forwards queries upstream and caches results locally.</li>
+</ul>
+<p>For simple local DNS and DHCP on a homelab, <strong>dnsmasq</strong> is lighter and easier to configure. Use BIND when you need a full authoritative zone with proper SOA/NS records, zone transfers to secondary servers, DNSSEC signing, or split-horizon DNS.</p>
+<p><code>named</code> state and zone files persist in <code>/var/named</code>, bind-mounted from <code>/data/varlib/named</code>, and survive OS updates.</p>
+<p>---</p>
+<h2>Enable</h2>
+<pre><code class="language-bash">sudo systemctl enable --now named
+
+# Check status
+systemctl status named
+
+# Watch logs
+journalctl -u named -f</code></pre>
+<p>---</p>
+<h2>Configuration</h2>
+<p>The main config is <code>/etc/named.conf</code>. Zones are typically stored in <code>/var/named/</code>.</p>
+<h3>Caching / Forwarding Resolver Only</h3>
+<p>Use this when you want a local caching resolver that forwards to an upstream (e.g., to use alongside dnsmasq for split DNS, or as a standalone resolver):</p>
+<pre><code>// /etc/named.conf
+options {
+    directory &quot;/var/named&quot;;
+    listen-on { 127.0.0.1; };   // localhost only — change to 0.0.0.0 for LAN
+    allow-query { localhost; 192.168.1.0/24; };
+    recursion yes;
+
+    forwarders {
+        1.1.1.1;
+        8.8.8.8;
+    };
+    forward only;
+
+    dnssec-validation auto;
+};</code></pre>
+<h3>Authoritative Zone for <code>home.local</code></h3>
+<p>A split-horizon setup: BIND is authoritative for <code>home.local</code> while forwarding all other queries upstream. This is the recommended homelab pattern.</p>
+<pre><code>// /etc/named.conf
+options {
+    directory &quot;/var/named&quot;;
+    listen-on { any; };
+    allow-query { localhost; 192.168.1.0/24; };
+    recursion yes;
+
+    forwarders { 1.1.1.1; 8.8.8.8; };
+    forward only;
+
+    dnssec-validation auto;
+};
+
+// Authoritative for home.local (forward zone)
+zone &quot;home.local&quot; IN {
+    type master;
+    file &quot;home.local.zone&quot;;
+    allow-update { none; };
+};
+
+// Authoritative for reverse zone (192.168.1.x → hostname)
+zone &quot;1.168.192.in-addr.arpa&quot; IN {
+    type master;
+    file &quot;192.168.1.rev&quot;;
+    allow-update { none; };
+};</code></pre>
+<h3>Zone File: <code>/var/named/home.local.zone</code></h3>
+<pre><code class="language-dns">$TTL 86400
+@   IN  SOA  ns1.home.local. admin.home.local. (
+        2026042001  ; Serial (date + increment: YYYYMMDDnn)
+        3600        ; Refresh
+        900         ; Retry
+        604800      ; Expire
+        300 )       ; Negative cache TTL
+
+; Name servers
+@       IN  NS   ns1.home.local.
+
+; A records
+ns1     IN  A    192.168.1.1
+router  IN  A    192.168.1.1
+nas     IN  A    192.168.1.10
+printer IN  A    192.168.1.20
+desktop IN  A    192.168.1.50
+
+; CNAME aliases
+files   IN  CNAME nas.home.local.</code></pre>
+<h3>Reverse Zone File: <code>/var/named/192.168.1.rev</code></h3>
+<pre><code class="language-dns">$TTL 86400
+@   IN  SOA  ns1.home.local. admin.home.local. (
+        2026042001
+        3600
+        900
+        604800
+        300 )
+
+@       IN  NS   ns1.home.local.
+
+; PTR records (last octet only)
+1       IN  PTR  router.home.local.
+10      IN  PTR  nas.home.local.
+20      IN  PTR  printer.home.local.
+50      IN  PTR  desktop.home.local.</code></pre>
+<p>---</p>
+<h2>Applying Changes</h2>
+<pre><code class="language-bash"># Check config syntax
+sudo named-checkconf
+
+# Check a zone file
+sudo named-checkzone home.local /var/named/home.local.zone
+
+# Reload zones without restarting (increment Serial first)
+sudo systemctl reload named
+
+# Force reload of all zones
+sudo rndc reload
+
+# Reload a single zone
+sudo rndc reload home.local
+
+# Flush the DNS cache
+sudo rndc flush</code></pre>
+<blockquote><p><strong>Always increment the Serial number</strong> in the SOA record before reloading — secondary servers and caches use this to detect changes. The convention is <code>YYYYMMDDnn</code> (e.g., <code>2026042001</code> for the first change on 2026-04-20).</p></blockquote>
+<p>---</p>
+<h2>Zone Transfers (Primary → Secondary)</h2>
+<p>Allow a secondary BIND server to receive zone transfers:</p>
+<pre><code>// On the primary — add to the zone block:
+zone &quot;home.local&quot; IN {
+    type master;
+    file &quot;home.local.zone&quot;;
+    allow-transfer { 192.168.1.2; };   // secondary server IP
+    notify yes;
+};</code></pre>
+<pre><code>// On the secondary:
+zone &quot;home.local&quot; IN {
+    type slave;
+    file &quot;slaves/home.local.zone&quot;;
+    masters { 192.168.1.1; };
+};</code></pre>
+<p>---</p>
+<h2>Firewall</h2>
+<pre><code class="language-bash">sudo firewall-cmd --add-service=dns --permanent
+sudo firewall-cmd --reload</code></pre>
+<p>---</p>
+<h2>Testing</h2>
+<pre><code class="language-bash"># Query your BIND server directly
+dig @127.0.0.1 nas.home.local
+dig @127.0.0.1 -x 192.168.1.10    # reverse lookup
+
+# Verify the server is authoritative (should show 'aa' flag)
+dig @127.0.0.1 home.local SOA
+
+# Check from another machine on the LAN
+dig @192.168.1.1 nas.home.local</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>named</code> won't start | Run <code>sudo named-checkconf</code> — syntax errors in <code>named.conf</code> prevent startup; check <code>journalctl -u named</code> | | Zone not loading | Run <code>sudo named-checkzone home.local /var/named/home.local.zone</code> — common causes are missing trailing dots on FQDNs and wrong Serial format | | Queries returning <code>SERVFAIL</code> | DNSSEC validation failing — set <code>dnssec-validation no;</code> temporarily to isolate; or ensure <code>dnssec-validation auto;</code> and that upstream resolvers support DNSSEC | | Recursive queries not working from LAN | Check <code>allow-query</code> and <code>recursion yes</code> are set in <code>options {}</code> | | Changes not picked up | Increment the Serial in the zone file, then run <code>sudo rndc reload home.local</code> | | Port 53 conflict with dnsmasq | Run only one resolver on port 53 — either configure dnsmasq to forward <code>.home.local</code> to BIND on a non-standard port, or replace dnsmasq with BIND entirely |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

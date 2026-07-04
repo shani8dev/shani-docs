@@ -146,7 +146,124 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Samba (SMB/CIFS)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-18</span>
+        </div>
+      </div>
+      <div class="prose"><h1>Samba — SMB/CIFS (Windows / macOS / Linux)</h1>
+<p>Samba provides file and print sharing using the SMB/CIFS protocol, making your Shani OS machine appear as a Windows-compatible network share. It is pre-installed, and its runtime state (locks, caches, <code>tdbsam</code> database) is bind-mounted from <code>/data/varlib/samba</code>, ensuring it persists across OS updates.</p>
+<blockquote><p><strong>Prefer NFS</strong> for Linux-to-Linux sharing. Use Samba when you need Windows or macOS compatibility.</p></blockquote>
+<p>---</p>
+<h2>Server Setup</h2>
+<h3>1. Enable Services</h3>
+<p>Samba consists of <code>smbd</code> (file sharing) and <code>nmbd</code> (NetBIOS name resolution for Windows discovery):</p>
+<pre><code class="language-bash">sudo systemctl enable --now smb nmb</code></pre>
+<h3>2. Configuration</h3>
+<p><strong>File:</strong> <code>/etc/samba/smb.conf</code></p>
+<pre><code class="language-ini">[global]
+    workgroup = WORKGROUP
+    server role = standalone server
+    passdb backend = tdbsam
+    security = user
+    guest account = nobody
+
+    ; Enforce SMB2+ — SMB1 is disabled for security
+    client min protocol = SMB2
+    server min protocol = SMB2
+
+    ; Sync Samba password changes back to the Linux account
+    unix password sync = yes
+    passwd program = /usr/bin/passwd %u
+    pam password change = yes
+    obey pam restrictions = yes
+
+    ; Logging
+    log file = /var/log/samba/%m.log
+    max log size = 1000
+
+    ; User share support (GUI-created shares via Dolphin/Nautilus)
+    usershare path = /var/lib/samba/usershare
+    usershare max shares = 100
+    usershare owner only = yes
+    usershare allow guests = yes
+
+[homes]
+    comment = Home Directories
+    browseable = no
+    read only = yes
+    create mask = 0700
+    directory mask = 0700
+    valid users = %S
+
+[printers]
+    comment = All Printers
+    browseable = no
+    path = /var/spool/samba
+    printable = yes
+    guest ok = no
+    read only = yes
+    create mask = 0700
+
+[print$]
+    comment = Printer Drivers
+    path = /var/lib/samba/printers
+    browseable = yes
+    read only = yes
+    guest ok = no</code></pre>
+<blockquote><p>💡 <strong>Validate your config:</strong> Run <code>testparm</code> after editing to catch syntax errors before restarting.</p></blockquote>
+<h3>3. User Authentication</h3>
+<p>Samba maintains its own password database. Even with <code>unix password sync = yes</code>, you must create the Samba password entry initially:</p>
+<pre><code class="language-bash"># Add a Samba password for an existing Linux user
+sudo smbpasswd -a youruser
+
+# Enable an existing Samba user (if previously disabled)
+sudo smbpasswd -e youruser</code></pre>
+<p>This grants access to the automatic <code>[homes]</code> share at <code>\\server-ip\youruser</code>.</p>
+<h3>4. Adding a Custom Share</h3>
+<p>Append to the bottom of <code>/etc/samba/smb.conf</code>:</p>
+<pre><code class="language-ini">[SharedFiles]
+    comment = Shared Files
+    path = /home/user/shared
+    browseable = yes
+    read only = no
+    valid users = youruser
+    create mask = 0644
+    directory mask = 0755</code></pre>
+<p>Then restart Samba to apply:</p>
+<pre><code class="language-bash">sudo systemctl restart smb nmb</code></pre>
+<h3>5. Firewall</h3>
+<pre><code class="language-bash">sudo firewall-cmd --add-service=samba --permanent
+sudo firewall-cmd --reload</code></pre>
+<p>---</p>
+<h2>Client Usage</h2>
+<h3>Linux</h3>
+<p>Temporary mount:</p>
+<pre><code class="language-bash">sudo mount -t cifs //192.168.1.100/SharedFiles /mnt/samba \
+  -o username=youruser,uid=$(id -u),gid=$(id -g),vers=3.0</code></pre>
+<p>Persistent mount via <code>/etc/fstab</code> — first create <code>~/.smbcredentials</code> (mode <code>600</code>):</p>
+<pre><code class="language-text">username=youruser
+password=yourpass</code></pre>
+<p>Then add to <code>/etc/fstab</code>:</p>
+<pre><code class="language-text">//192.168.1.100/SharedFiles  /mnt/samba  cifs  credentials=/home/user/.smbcredentials,uid=1000,gid=1000,_netdev,vers=3.0  0 0</code></pre>
+<h3>Windows</h3>
+<p>In File Explorer address bar or Run dialog: <code>\\192.168.1.100\SharedFiles</code> or <code>\\192.168.1.100\youruser</code></p>
+<h3>macOS</h3>
+<p>Finder → Go → Connect to Server: <code>smb://192.168.1.100/SharedFiles</code></p>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Share not appearing in Windows network browser | Ensure <code>nmb</code> is running; Windows uses NetBIOS/WSD for discovery — connecting directly by IP (<code>\\192.168.1.100</code>) always works | | <code>Permission denied</code> when accessing share | Check Linux filesystem permissions on the shared path — Samba permissions are layered on top; both must allow access | | <code>NT_STATUS_LOGON_FAILURE</code> | Wrong Samba password — reset with <code>sudo smbpasswd youruser</code> | | <code>mount error(13): Permission denied</code> on Linux | Add <code>sec=ntlmssp</code> to mount options; verify credentials in <code>.smbcredentials</code> | | Config changes not taking effect | Run <code>testparm</code> to validate, then <code>sudo systemctl restart smb nmb</code> | | View logs | <code>journalctl -u smb</code> or <code>/var/log/samba/log.smbd</code> |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

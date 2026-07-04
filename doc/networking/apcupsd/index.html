@@ -146,7 +146,97 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">apcupsd (UPS Daemon)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+        </div>
+      </div>
+      <div class="prose"><h1>apcupsd — APC UPS Daemon</h1>
+<p>apcupsd monitors APC Uninterruptible Power Supplies and triggers a graceful system shutdown when battery runs low. It is pre-installed on Shani OS. Connect your APC UPS via USB — most models are detected automatically with no additional drivers.</p>
+<p><strong>Not active by default.</strong> Enable it only if a UPS is connected.</p>
+<p>---</p>
+<h2>Enable</h2>
+<pre><code class="language-bash">sudo systemctl enable --now apcupsd
+
+systemctl status apcupsd</code></pre>
+<p>---</p>
+<h2>Configuration</h2>
+<p>Edit <code>/etc/apcupsd/apcupsd.conf</code>:</p>
+<pre><code class="language-bash"># UPS name (label only — for log messages)
+UPSNAME myups
+
+# Communication device — USB is most common for desktop APC units
+UPSCABLE usb
+UPSTYPE usb
+DEVICE                    # leave blank for USB; apcupsd auto-detects
+
+# Shutdown thresholds
+BATTERYLEVEL 10           # shut down when battery drops to 10%
+MINUTES 5                 # or when &lt; 5 minutes runtime remains
+
+# How long to wait on battery before shutdown (0 = immediate)
+TIMEOUT 0
+
+# Where to write the status file
+STATFILE /var/log/apcupsd.status
+
+# Event scripts directory
+SCRIPTDIR /etc/apcupsd
+
+# Network Information Server — allows remote status queries
+NISIP 127.0.0.1           # 0.0.0.0 to allow LAN access
+NISPORT 3551</code></pre>
+<p>After editing:</p>
+<pre><code class="language-bash">sudo systemctl restart apcupsd</code></pre>
+<p>---</p>
+<h2>Status & Monitoring</h2>
+<pre><code class="language-bash"># Live UPS status (battery level, load, runtime estimate, events)
+apcaccess status
+
+# Watch status continuously
+watch -n 5 apcaccess status
+
+# View event log (power failures, battery tests, shutdowns)
+sudo tail -f /var/log/apcupsd.events
+
+# Run a battery self-test
+apctest</code></pre>
+<p>Key fields in <code>apcaccess status</code>:</p>
+<p>| Field | Meaning | |-------|---------| | <code>STATUS</code> | <code>ONLINE</code>, <code>ONBATT</code>, <code>LOWBATT</code> | | <code>BCHARGE</code> | Battery charge percentage | | <code>TIMELEFT</code> | Estimated runtime on battery | | <code>LOADPCT</code> | Load on the UPS as percentage of capacity | | <code>LINEV</code> | Input mains voltage | | <code>BATTV</code> | Battery voltage |</p>
+<p>---</p>
+<h2>Event Scripts</h2>
+<p>apcupsd runs scripts from <code>/etc/apcupsd/</code> when power events occur. The key events and their script names:</p>
+<p>| Event | Script | Triggered when | |-------|--------|----------------| | Power failure | <code>onbattery</code> | Mains power lost | | Power restored | <code>offbattery</code> | Mains power returns | | Low battery | <code>doshutdown</code> | Battery/runtime threshold reached | | Battery test done | <code>endapctest</code> | Self-test completes |</p>
+<p>Edit <code>/etc/apcupsd/onbattery</code> to send a notification when power fails:</p>
+<pre><code class="language-bash">#!/bin/sh
+echo &quot;Power failure at $(date)&quot; | mail -s &quot;UPS: On Battery&quot; root</code></pre>
+<p>Make scripts executable:</p>
+<pre><code class="language-bash">sudo chmod +x /etc/apcupsd/onbattery</code></pre>
+<p>---</p>
+<h2>Network Status Server</h2>
+<p>apcupsd includes a small status server (NIS) on port 3551. Query a remote apcupsd instance from another machine:</p>
+<pre><code class="language-bash"># Query local daemon
+apcaccess status localhost
+
+# Query a remote machine (must have NISIP 0.0.0.0 in config)
+apcaccess status 192.168.1.10:3551</code></pre>
+<p>Open the firewall if you need LAN access to the status server:</p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=3551/tcp --permanent
+sudo firewall-cmd --reload</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>apcupsd</code> won't start | Check <code>journalctl -u apcupsd</code>; common cause is wrong <code>UPSCABLE</code>/<code>UPSTYPE</code> — use <code>usb</code> for USB-connected APC units | | <code>apcaccess</code> returns <code>NETWORK ERROR</code> | Daemon isn't running or NIS is disabled — check <code>systemctl status apcupsd</code> | | UPS not detected | Run <code>lsusb</code> to confirm the UPS appears; APC USB devices use the standard HID UPS class — no extra driver needed | | Shutdown not triggering on low battery | Check <code>BATTERYLEVEL</code> and <code>MINUTES</code> thresholds in the config; test with <code>apctest</code> → option 7 (simulate power failure) | | <code>STATFLAG</code> shows <code>0x060000</code> (communication lost) | Cable issue or wrong port — unplug/replug USB; check <code>DEVICE</code> is blank for USB |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

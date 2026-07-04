@@ -146,7 +146,115 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Filesystem Structure</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Architecture</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-05-13</span>
+        </div>
+      </div>
+      <div class="prose"><p>Shanios uses Btrfs with a sophisticated subvolume layout housed in a single Btrfs partition (plus a 1 GB FAT32 ESP). The design separates the immutable OS from all persistent state, so updates and rollbacks are atomic and data survives every slot switch.</p>
+<h2>Subvolume Layout</h2>
+<p>| Subvolume | Mount Point | Purpose | |-----------|------------|---------| | <code>@blue</code> / <code>@green</code> | <code>/</code> | Root filesystems for blue-green deployment — alternates as active/standby. Mounted <strong>read-only</strong> by dracut; never in fstab. | | <code>@root</code> | <code>/root</code> | Root user home — persists across slot switches | | <code>@home</code> | <code>/home</code> | User data and personal configurations | | <code>@data</code> | <code>/data</code> | Overlay storage and persistent service data (bind-mount source tree) | | <code>@nix</code> | <code>/nix</code> | Nix package manager store — shared across both slots | | <code>@log</code> | <code>/var/log</code> | System logs across reboots | | <code>@cache</code> | <code>/var/cache</code> | Package manager cache | | <code>@flatpak</code> | <code>/var/lib/flatpak</code> | Flatpak applications and runtimes | | <code>@snapd</code> | <code>/var/lib/snapd</code> | Snap package storage, revisions, and writable snap data | | <code>@waydroid</code> | <code>/var/lib/waydroid</code> | Android system images and data | | <code>@containers</code> | <code>/var/lib/containers</code> | Podman/Docker container storage | | <code>@machines</code> | <code>/var/lib/machines</code> | systemd-nspawn containers | | <code>@lxc</code> | <code>/var/lib/lxc</code> | LXC containers | | <code>@lxd</code> | <code>/var/lib/lxd</code> | LXD container and VM storage | | <code>@libvirt</code> | <code>/var/lib/libvirt</code> | Virtual machine disk images (nodatacow) | | <code>@qemu</code> | <code>/var/lib/qemu</code> | Bare QEMU VM disk images (nodatacow) | | <code>@swap</code> | <code>/swap</code> | Swap file container (nodatacow) |</p>
+<h2>The @data Subvolume</h2>
+<p><code>@data</code> is the heart of Shanios persistence. Its internal structure:</p>
+<pre><code>/data/
+├── overlay/
+│   └── etc/
+│       ├── upper/     ← your /etc changes are stored here
+│       └── work/      ← kernel OverlayFS work directory
+├── varlib/            ← bind-mount sources for /var/lib/*
+│   ├── NetworkManager/
+│   ├── bluetooth/
+│   ├── caddy/
+│   ├── cloudflared/
+│   ├── cups/
+│   ├── dbus/
+│   ├── firewalld/
+│   ├── fontconfig/
+│   ├── gdm/ / sddm/
+│   ├── pipewire/
+│   ├── polkit-1/
+│   ├── samba/ / nfs/
+│   ├── sshd/
+│   ├── systemd/
+│   ├── tailscale/
+│   ├── tpm2-tss/
+│   ├── upower/
+│   ├── fwupd/
+│   ├── fprint/
+│   ├── AccountsService/
+│   ├── boltd/
+│   ├── sudo/
+│   ├── appimage/
+│   ├── fail2ban/
+│   ├── restic/ / rclone/
+│   └── ...
+├── varspool/          ← bind-mount sources for /var/spool/*
+│   ├── cron/
+│   ├── at/
+│   ├── anacron/
+│   ├── cups/
+│   ├── samba/
+│   └── postfix/
+├── downloads/         ← cached OS images (used by shani-deploy)
+├── current-slot       ← &quot;blue&quot; or &quot;green&quot;
+├── previous-slot      ← the slot before the last deploy/rollback
+├── boot-ok            ← written by mark-boot-success
+├── boot_in_progress   ← written by mark-boot-in-progress, cleared on success
+├── boot_failure       ← written by check-boot-failure on soft boot failure
+├── boot_failure.acked ← written when user acknowledges failure dialog
+└── boot_hard_failure  ← written by dracut hook if root mount fails</code></pre>
+<h2>Persistent Bind Mounts from @data</h2>
+<p>Because <code>/var</code> is volatile (tmpfs via <code>systemd.volatile=state</code>), critical service state is bind-mounted from <code>@data</code>. Every bind mount uses <code>nofail,x-systemd.after=var.mount,x-systemd.requires-mounts-for=/data</code> so the system boots cleanly even if individual services are not installed.</p>
+<h3>System Core</h3>
+<p>| Source (<code>@data</code>) | Target | |---|---| | <code>/data/varlib/dbus</code> | <code>/var/lib/dbus</code> | | <code>/data/varlib/systemd</code> | <code>/var/lib/systemd</code> | | <code>/data/varlib/fontconfig</code> | <code>/var/lib/fontconfig</code> |</p>
+<h3>Networking</h3>
+<p>| Source | Target | |---|---| | <code>/data/varlib/NetworkManager</code> | <code>/var/lib/NetworkManager</code> | | <code>/data/varlib/bluetooth</code> | <code>/var/lib/bluetooth</code> | | <code>/data/varlib/firewalld</code> | <code>/var/lib/firewalld</code> | | <code>/data/varlib/samba</code> | <code>/var/lib/samba</code> | | <code>/data/varlib/nfs</code> | <code>/var/lib/nfs</code> |</p>
+<h3>Remote Access & VPN</h3>
+<p>| Source | Target | |---|---| | <code>/data/varlib/caddy</code> | <code>/var/lib/caddy</code> | | <code>/data/varlib/tailscale</code> | <code>/var/lib/tailscale</code> | | <code>/data/varlib/cloudflared</code> | <code>/var/lib/cloudflared</code> | | <code>/data/varlib/geoclue</code> | <code>/var/lib/geoclue</code> |</p>
+<h3>Display, Audio & Peripherals</h3>
+<p>| Source | Target | |---|---| | <code>/data/varlib/gdm</code> | <code>/var/lib/gdm</code> | | <code>/data/varlib/sddm</code> | <code>/var/lib/sddm</code> | | <code>/data/varlib/colord</code> | <code>/var/lib/colord</code> | | <code>/data/varlib/pipewire</code> | <code>/var/lib/pipewire</code> | | <code>/data/varlib/rtkit</code> | <code>/var/lib/rtkit</code> | | <code>/data/varlib/cups</code> | <code>/var/lib/cups</code> | | <code>/data/varlib/sane</code> | <code>/var/lib/sane</code> | | <code>/data/varlib/upower</code> | <code>/var/lib/upower</code> |</p>
+<h3>Auth & Security</h3>
+<p>| Source | Target | |---|---| | <code>/data/varlib/fprint</code> | <code>/var/lib/fprint</code> | | <code>/data/varlib/AccountsService</code> | <code>/var/lib/AccountsService</code> | | <code>/data/varlib/boltd</code> | <code>/var/lib/boltd</code> | | <code>/data/varlib/sudo</code> | <code>/var/lib/sudo</code> | | <code>/data/varlib/sshd</code> | <code>/var/lib/sshd</code> | | <code>/data/varlib/polkit-1</code> | <code>/var/lib/polkit-1</code> | | <code>/data/varlib/tpm2-tss</code> | <code>/var/lib/tpm2-tss</code> |</p>
+<h3>Hardware & Data Protection</h3>
+<p>| Source | Target | |---|---| | <code>/data/varlib/fwupd</code> | <code>/var/lib/fwupd</code> | | <code>/data/varlib/fail2ban</code> | <code>/var/lib/fail2ban</code> | | <code>/data/varlib/restic</code> | <code>/var/lib/restic</code> | | <code>/data/varlib/rclone</code> | <code>/var/lib/rclone</code> | | <code>/data/varlib/appimage</code> | <code>/var/lib/appimage</code> |</p>
+<h3>Scheduling & Spools</h3>
+<p>| Source | Target | |---|---| | <code>/data/varspool/anacron</code> | <code>/var/spool/anacron</code> | | <code>/data/varspool/cron</code> | <code>/var/spool/cron</code> | | <code>/data/varspool/at</code> | <code>/var/spool/at</code> | | <code>/data/varspool/cups</code> | <code>/var/spool/cups</code> | | <code>/data/varspool/samba</code> | <code>/var/spool/samba</code> | | <code>/data/varspool/postfix</code> | <code>/var/spool/postfix</code> |</p>
+<h2>Mount Options Reference</h2>
+<ul>
+<li><strong>Root slots</strong> (<code>@blue</code>/<code>@green</code>) — <strong>not in fstab</strong> — mounted read-only by dracut via kernel cmdline</li>
+<li><strong>Container/virtualisation subvolumes</strong> — use <code>nofail</code> so the system boots cleanly even if not yet created</li>
+<li><strong>VM disk subvolumes</strong> (<code>@libvirt</code>, <code>@qemu</code>) and <code>@swap</code> — use <code>nodatacow,nospace_cache</code> (required for correctness and performance)</li>
+<li><strong>All other Btrfs subvolumes</strong> — use <code>noatime,compress=zstd,space_cache=v2,autodefrag</code></li>
+<li><strong>All bind mounts</strong> — use <code>bind,nofail,x-systemd.after=var.mount,x-systemd.requires-mounts-for=/data</code></li>
+</ul>
+<h3>Why noatime?</h3>
+<p>Writing an access timestamp on every file read would generate massive write traffic on a busy system. All subvolumes use <code>noatime</code> to prevent this — reducing SSD wear, improving battery life, and eliminating pointless write amplification.</p>
+<h3>Why systemd.volatile=state?</h3>
+<p><code>/var</code> is a tmpfs cleared on every reboot. This keeps the OS truly stateless — log files, caches, and runtime state cannot accumulate across reboots and affect behaviour. The bind mounts from <code>@data</code> selectively restore only the service state that should persist.</p>
+<h2>Adding a New Persistent Service</h2>
+<p>If you self-host a service that needs state to survive reboots:</p>
+<pre><code class="language-bash"># 1. Create the backing directory in @data
+sudo mkdir -p /data/varlib/myservice
+
+# 2. Add a fstab bind mount
+sudo nano /etc/fstab
+# /data/varlib/myservice  /var/lib/myservice  none  bind,nofail,x-systemd.after=var.mount,x-systemd.requires-mounts-for=/data  0 0
+
+# 3. Reload and mount
+sudo systemctl daemon-reload
+sudo mount /var/lib/myservice</code></pre>
+<p>Changes to <code>/etc/fstab</code> are captured by the OverlayFS overlay and survive every OS update.</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

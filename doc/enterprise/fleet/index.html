@@ -146,7 +146,175 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">OEM &amp; Fleet Deployment</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Enterprise</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-27</span>
+        </div>
+      </div>
+      <div class="prose"><p>Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or-nothing. Rollback requires no reimaging. The fleet stays uniform because the OS is replaced wholesale on each update — never patched in place.</p>
+<p>Enterprise contact and OEM enquiries: <a href="https://shani.dev#enterprise">shani.dev — Enterprise & Vendors</a>.</p>
+<h2>Why Immutability Solves Fleet Management</h2>
+<p>Traditional fleet management tooling (Ansible, Puppet, Chef, Salt) solves a problem Shanios makes unnecessary: reconciling the actual state of a mutable system with the desired state. You write playbooks to install packages, configure files, enable services, and fix drift. You run them on a schedule.</p>
+<p>On Shanios, the root filesystem is physically read-only. A machine cannot drift from the OS image it booted. The only way the OS changes is through <code>shani-deploy</code>, which replaces it atomically. Configuration lives in the <code>/etc</code> OverlayFS overlay (in <code>@data</code>) — tracked separately from the OS image and surviving every update.</p>
+<p>The result is a fleet model that looks more like container orchestration than traditional desktop management: the OS is an image, deployments are image swaps, and per-machine state is limited and explicit.</p>
+<p>| Concern | Traditional Mutable Linux | Shanios | |---|---|---| | Fleet uniformity | Drifts over time; requires reconciliation tools | Every machine on same channel runs identical verified image | | Bad update recovery | Reimage or manual rollback; often on-site | One SSH command (<code>shani-deploy -r</code>); automatic if unattended | | Security audit | Hardening guide + config management | Secure by default; auditable public codebase | | Software inventory | <code>dpkg -l</code>, <code>rpm -qa</code> varies per machine | OS image version + Flatpak list — identical across fleet | | Remote management | MDM + SSH + config management stack | SSH or Tailscale; no drift to manage | | Encryption | Configure LUKS separately | LUKS2 + TPM2 at install; no foreign key escrow |</p>
+<p>---</p>
+<h2>OEM Deployment</h2>
+<h3>Pre-installation Customisation</h3>
+<p><strong>Plymouth branding:</strong> The Plymouth boot theme uses BGRT — it reads the OEM logo directly from UEFI firmware. A machine whose logo is in the UEFI BGRT table automatically displays it during boot without any image customisation. For custom logos beyond BGRT, the Plymouth theme configuration lives in <code>/usr/share/plymouth/themes/</code>.</p>
+<p><strong>Pre-installed Flatpaks:</strong> To ship machines with specific applications pre-installed, add Flatpak refs to the OEM configuration layer. Flatpaks install to <code>@flatpak</code> and are fully independent of the OS image.</p>
+<p><strong>Custom Flatpak remotes:</strong> Organisations can run private Flatpak repositories for internal applications:</p>
+<pre><code class="language-bash"># Add a private Flatpak repository
+flatpak remote-add --if-not-exists myorg https://flatpak.myorg.com/repo
+
+# Install an internal app
+flatpak install myorg com.myorg.InternalApp</code></pre>
+<h3>Image Signing</h3>
+<p>Every Shanios release is signed with key <code>7B927BFFD4A9EAAA8B666B77DE217F3DA8014792</code>. For organisations deploying a custom build, the signing key is configurable in <code>shani-deploy</code>. Machines enrolled with your key only accept images signed by your key — a tampered or unofficial image fails verification before it is written.</p>
+<p>---</p>
+<h2>Fleet Update Management</h2>
+<h3>Centralised Update Delivery</h3>
+<p>For fleet deployments, mirror the update CDN internally and point machines at your internal mirror by configuring the update URL in <code>shani-deploy</code>'s configuration. Updates are downloaded from your network, not the public CDN. This controls bandwidth and allows offline or air-gapped deployments.</p>
+<h3>Release Channels and Staged Rollouts</h3>
+<p><code>shani-deploy</code> supports two release channels: <code>stable</code> (default, monthly) and <code>latest</code> (more frequent). For staged rollouts, run a canary group on <code>latest</code> before pushing the full fleet on <code>stable</code>:</p>
+<pre><code class="language-bash"># Check current channel
+cat /etc/shani-channel
+
+# Switch channel (persisted to /etc/shani-channel)
+sudo shani-deploy --set-channel stable
+sudo shani-deploy --set-channel latest
+
+# Use a channel for a single run without changing the default
+sudo shani-deploy -t latest</code></pre>
+<h3>Automated Unattended Updates</h3>
+<p>For unattended fleet updates, a systemd timer can trigger <code>shani-deploy</code> on a schedule. The update stages the new image and writes <code>/run/shanios/reboot-needed</code>; the reboot can be scheduled separately in a maintenance window:</p>
+<pre><code class="language-ini"># /etc/systemd/system/shani-autoupdate.timer
+[Unit]
+Description=Automatic Shani OS update check
+
+[Timer]
+OnCalendar=weekly
+Persistent=true
+
+[Install]
+WantedBy=timers.target</code></pre>
+<pre><code class="language-ini"># /etc/systemd/system/shani-autoupdate.service
+[Unit]
+Description=Automatic Shani OS update
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/shani-deploy</code></pre>
+<pre><code class="language-bash">sudo systemctl enable shani-autoupdate.timer</code></pre>
+<p>For managed fleets, disable the <code>shani-update</code> interactive prompt so it does not surface to users:</p>
+<pre><code class="language-bash">sudo rm /etc/xdg/autostart/shani-update.desktop</code></pre>
+<p>---</p>
+<h2>Remote Rollback Without Reimaging</h2>
+<p><strong>Automatic rollback (no intervention):</strong> systemd-boot's boot-counting mechanism detects a slot that fails to reach <code>multi-user.target</code> within three boot attempts and automatically falls back to the previous slot.</p>
+<p><strong>Manual rollback (one command, remotely):</strong></p>
+<pre><code class="language-bash">sudo shani-deploy -r
+# Then reboot — via SSH, MDM, or remote management console</code></pre>
+<p>No reimaging cycle. No USB drive. No on-site visit. The previous OS slot is always kept on disk until the next update cycle.</p>
+<p>---</p>
+<h2>Configuration Management</h2>
+<p>For configuration that must be consistent across a fleet — SSH hardening, service enablement, custom <code>/etc</code> settings — use the OverlayFS upper layer in <code>@data</code>:</p>
+<pre><code class="language-bash"># Deploy a managed configuration to the persistent overlay
+sudo cp /path/to/managed/sshd_config /data/overlay/etc/upper/ssh/sshd_config
+
+# Enable a managed service (symlink persists in the overlay)
+sudo systemctl enable --now myservice</code></pre>
+<p>Changes to <code>/etc</code> via OverlayFS survive every OS update and rollback. When the OS updates, new defaults in the lower layer are visible to files you have not customised; files you have customised retain your version.</p>
+<h3>Auditing Customisations</h3>
+<pre><code class="language-bash"># See all machine-specific /etc customisations
+find /data/overlay/etc/upper -type f | sort
+
+# Compare a customised file to the OS default
+diff /data/overlay/etc/upper/ssh/sshd_config /etc/ssh/sshd_config</code></pre>
+<p>---</p>
+<h2>School Labs and Shared Computing</h2>
+<p>Shanios is particularly well-suited to environments where users cannot be trusted to preserve the OS — school labs, library terminals, shared workstations, kiosks.</p>
+<p>A user cannot persistently corrupt the immutable root. Changes to system files are impossible. Changes to <code>/etc</code> via OverlayFS are per-machine and auditable.</p>
+<p><strong>Reset between sessions:</strong> For kiosk or lab scenarios where each session should start fresh:</p>
+<pre><code class="language-bash"># Example: reset a lab user's home directory on logout
+# /etc/gdm/PostSession/Default (GNOME) or equivalent
+rsync -a --delete /etc/skel/ /home/labuser/</code></pre>
+<p><strong>OS reset between terms:</strong> <code>shani-reset</code> wipes all persistent system state in <code>/data</code> (the <code>/etc</code> overlay, service state, enabled units, etc.) without touching the OS image or user home directories:</p>
+<pre><code class="language-bash"># Preview what would be wiped (dry run)
+sudo shani-reset --dry-run
+
+# Wipe all /data state and reboot (system starts fresh from the same OS image)
+sudo shani-reset
+
+# Wipe /data AND /home to also reset user files
+sudo shani-reset --home</code></pre>
+<p>No reimaging cycle needed between semesters.</p>
+<p><strong>Indian language support:</strong> Devanagari, Tamil, Telugu, and other Indian scripts are configured from first boot. IBus multi-language input is pre-configured. The software is free, the codebase is auditable, and there is no subscription, licence fee, or vendor lock-in.</p>
+<p>---</p>
+<h2>Monitoring and Observability</h2>
+<h3>shani-health</h3>
+<p><code>shani-health</code> is the diagnostic tool for fleet monitoring. It covers boot state, security configuration, storage, hardware, and package status:</p>
+<pre><code class="language-bash"># Full system status report
+shani-health
+
+# Boot report: slots, UKI state, deployment status
+shani-health --boot
+
+# Security report: boot chain, encryption, LSM, users
+shani-health --security
+
+# Btrfs storage analysis
+shani-health --storage-info
+
+# Deep integrity check: UKI signatures + Btrfs scrub
+shani-health --verify
+
+# Last 50 deploy/rollback events
+shani-health --history
+
+# systemd journal entries at error level and above
+shani-health --journal err</code></pre>
+<h3>Remote Monitoring via Tailscale or SSH</h3>
+<p>Each machine is accessible via SSH over Tailscale without requiring a VPN server or port forwarding. Tailscale state persists across OS updates at <code>/data/varlib/tailscale</code>:</p>
+<pre><code class="language-bash"># Check a remote machine's active slot and boot state
+ssh admin@machine-name.tailnet.ts.net 'cat /data/current-slot &amp;&amp; shani-health --boot'
+
+# Remote rollback
+ssh admin@machine-name.tailnet.ts.net 'sudo shani-deploy -r &amp;&amp; sudo reboot'</code></pre>
+<p>---</p>
+<h2>Security Posture for Enterprise Compliance</h2>
+<p>Shanios's default security configuration is designed to pass enterprise security audits without additional hardening steps:</p>
+<ul>
+<li>Six simultaneous Linux Security Modules (AppArmor, Landlock, Lockdown, Yama, IMA/EVM, BPF LSM)</li>
+<li>Immutable root filesystem — even root cannot write to system paths at runtime</li>
+<li>LUKS2 argon2id full-disk encryption (opt-in at install)</li>
+<li>TPM2 auto-unlock — disk locked against physical removal to another machine</li>
+<li>Secure Boot via Shim + MOK-signed UKIs — bootloader editor disabled</li>
+<li>Signed OS images — SHA256 + GPG verified before every deployment</li>
+<li>Intel ME kernel modules blacklisted by default</li>
+<li>firewalld active from first boot — default-deny inbound</li>
+<li>fail2ban active — automated banning of repeated authentication failures</li>
+<li>Zero telemetry — no usage data, crash reports, or analytics</li>
+</ul>
+<p>LUKS2 keys never leave the device. TPM2 sealing binds to PCRs 0 and 7 — the firmware state and the Secure Boot policy. For government and institutional deployments requiring no foreign key escrow: the encryption key is on the device, sealed in the TPM2 chip, verifiable via the public <code>gen-efi</code> source code.</p>
+<p>---</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="../security/features">Security Features</a> — full security model</li>
+<li><a href="../concepts/atomic-updates">Atomic Updates</a> — update and rollback pipeline</li>
+<li><a href="../arch/overlay">Overlay Filesystem</a> — <code>/etc</code> customisation persistence</li>
+<li><a href="../security/tpm2">TPM2 Enrollment</a> — passwordless disk unlock</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

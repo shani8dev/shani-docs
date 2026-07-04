@@ -146,7 +146,49 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Overview</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Overview</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-27</span>
+        </div>
+      </div>
+      <div class="prose"><h1>Shanios Technical Documentation</h1>
+<p>Comprehensive guide to the immutable Linux OS with atomic updates.</p>
+<p>Welcome to the Shanios technical documentation. This wiki provides comprehensive information about Shanios's architecture, installation, configuration, and daily use.</p>
+<p>Shanios is an <strong>immutable Linux desktop</strong> built on Arch Linux. The OS core is permanently read-only — nothing running on your machine can modify it, not even root. It always keeps two complete, bootable copies of the OS on disk. You run on one; updates are prepared on the other. When you're ready, reboot into the new one. If anything goes wrong, reboot back. It ships in two editions — <strong>GNOME</strong> and <strong>KDE Plasma</strong> — and works out of the box with no post-install tweaking required.</p>
+<p>Current stable release: <strong>2026.04.15</strong> · GNOME edition ~5.4 GB · KDE Plasma edition ~7.6 GB · Both SHA256 + GPG signed.</p>
+<h2>Five Core Ideas</h2>
+<ul>
+<li><strong>Immutability:</strong> The root filesystem is read-only at runtime. Neither accidental commands nor malware can corrupt the OS — it always boots to a known-good state. Even a process running as root cannot modify core system files during a live session.</li>
+<li><strong>Atomic updates via blue-green deployment:</strong> Two complete system images (<code>@blue</code> and <code>@green</code>) are maintained at all times. Updates are written to the inactive image; you boot into it only when it's ready. The previous image remains as an instant rollback target. If the new copy can't boot at all, systemd-boot detects the failure and reverts automatically.</li>
+<li><strong>Selective persistence:</strong> Your data, configuration, Flatpak apps, containers, and service credentials all live in separate Btrfs subvolumes that survive every update and rollback untouched.</li>
+<li><strong>Defence-in-depth security:</strong> Six Linux Security Modules run simultaneously (<code>lsm=landlock,lockdown,yama,integrity,apparmor,bpf</code>), LUKS2 argon2id encryption, TPM2 auto-unlock, Secure Boot, Intel ME kernel modules blacklisted by default, and every OS image SHA256+GPG verified before deployment.</li>
+<li><strong>Zero telemetry:</strong> No usage data, crash reports, analytics, or tracking of any kind — ever.</li>
+</ul>
+<p>Built in India 🇮🇳 by <a href="https://github.com/Shrinivasvkumbhar">Shrinivas Vishnu Kumbhar</a>. Indian-language support (Devanagari, Tamil, Telugu, and more) is a first-class feature.</p>
+<p><strong>New to Shanios?</strong> Visit <a href="https://shani.dev">shani.dev</a> for a general introduction, download links, and feature overview. This wiki focuses on technical implementation and usage details.</p>
+<h2>Editions</h2>
+<p>| Edition | Size | Best For | |---------|------|----------| | <strong>GNOME</strong> | ~5.4 GB | Most users — Windows/macOS switchers, office work, students, OEM deployments | | <strong>KDE Plasma</strong> | ~7.6 GB | Gamers and power users — full gaming stack pre-installed, virt-manager, full KDE suite |</p>
+<p>Both editions include the same underlying architecture, security stack, and immutable OS core.</p>
+<h2>Quick Links</h2>
+<ul>
+<li><a href="intro/what-is-shanios">What is Shanios?</a> — core concepts explained</li>
+<li><a href="intro/getting-started">Getting Started</a> — download, verify, install, first boot</li>
+<li><a href="intro/migrating">Migrating from Traditional Linux</a> — workflow mapping</li>
+<li><a href="intro/whats-included">What's Included</a> — full software stack</li>
+<li><a href="updates/system">System Updates</a> — update and rollback</li>
+<li><a href="security/features">Security Features</a> — full security model</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

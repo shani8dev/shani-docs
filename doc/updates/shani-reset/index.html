@@ -146,7 +146,102 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Factory Reset (shani-reset)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Updates &amp; Config</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-05-13</span>
+        </div>
+      </div>
+      <div class="prose"><h1>Factory Reset</h1>
+<p><code>shani-reset</code> wipes all persistent system state stored in <code>/data</code> and reboots the machine. On the next boot, <code>systemd-tmpfiles</code> recreates the <code>/data</code> structure, the <code>/etc</code> overlay starts fresh from the read-only root, and all services start as if this were a first-run.</p>
+<p>---</p>
+<h2>What Gets Wiped</h2>
+<p>| What | Location | Notes | |------|----------|-------| | All <code>/etc</code> modifications | <code>/data/overlay/etc/upper/</code> | <strong>Includes user accounts</strong> (<code>/etc/passwd</code>, <code>/etc/shadow</code>, <code>/etc/group</code>), hostname, locale, sshd config, enabled units, <code>subuid</code>/<code>subgid</code> | | All <code>/var</code> overlay changes | <code>/data/overlay/var/upper/</code> | Only if <code>/var</code> overlay is in use | | All persistent service state | <code>/data/varlib/<em>/</code> | Wi-Fi passwords, Bluetooth pairings, Tailscale key, TPM2 state, printer configs, etc. | | Job scheduler spools | <code>/data/varspool/</em>/</code> | Cron jobs, at jobs, mail queue | | Cached OS downloads | <code>/data/downloads/</code> | Skipped with <code>--keep-downloads</code> | | Boot state markers | <code>/data/boot_*</code> | All failure and success markers | | Deployment flag | <code>/data/deployment_pending</code> | Any in-flight deployment |</p>
+<h2>What Is NOT Wiped</h2>
+<p>| What | Notes | |------|-------| | <code>/home</code> | User files in the <code>@home</code> subvolume — separate from <code>/data</code> | | <code>/root</code> | Root home in the <code>@root</code> subvolume | | <code>@blue</code> / <code>@green</code> | OS root subvolumes — system still boots the same slot | | ESP / UKI boot images | System still boots correctly after reset | | <code>/data/current-slot</code> | Preserved so the system boots into the correct slot |</p>
+<p>---</p>
+<h2>Usage</h2>
+<pre><code class="language-bash"># Default: selective wipe of /data state directories, then reboot
+sudo shani-reset
+
+# Preview what would be wiped without making changes
+sudo shani-reset --dry-run
+
+# Hard wipe: remove everything under /data, let tmpfiles recreate
+sudo shani-reset --hard
+
+# Preserve cached OS images (can be several GB)
+sudo shani-reset --keep-downloads
+
+# Also wipe /home (all user files — irreversible, asks twice)
+sudo shani-reset --home
+
+# Skip the confirmation prompt (for scripted use)
+sudo shani-reset --yes</code></pre>
+<p>---</p>
+<h2>Soft Wipe vs Hard Wipe</h2>
+<p>Both modes produce the same end state after reboot. Choose based on your situation:</p>
+<p><strong>Soft wipe (default):</strong> Selectively clears the state directories. The bind-mount targets (e.g. <code>/data/varlib/NetworkManager</code>) are preserved as empty directories, which is required for the bind mounts to work immediately after reboot without a <code>systemd-tmpfiles</code> run.</p>
+<p><strong>Hard wipe (<code>--hard</code>):</strong> Removes everything under <code>/data</code> in one pass, including any files that accumulated outside the expected structure. <code>systemd-tmpfiles</code> recreates the full directory tree on the next boot. This is cleaner but requires tmpfiles to run before services can bind-mount their state.</p>
+<p>---</p>
+<h2>User Accounts After Reset</h2>
+<blockquote><p><strong>Important:</strong> User accounts are stored in <code>/etc/passwd</code>, <code>/etc/shadow</code>, and <code>/etc/group</code> — which live in the <code>/etc</code> overlay (<code>/data/overlay/etc/upper/</code>). Resetting the overlay wipes all user accounts created after installation.</p></blockquote>
+<p><strong>What happens after reboot:</strong></p>
+<ol>
+<li>The system boots into the reset state with only the default accounts from the read-only root</li>
+<li>On a desktop system, the KDE (plasma-welcome) or GNOME (gnome-initial-setup) first-run wizard starts automatically and creates a new user account</li>
+<li>The <code>shani-user-setup</code> service provisions the new user with the correct groups, shell, Flatpak remotes, and Nix channels</li>
+<li>Files in <code>/home</code> are intact — once the account is re-created with the same username, all personal files are immediately accessible again</li>
+</ol>
+<p>If you run the reset on a headless server without a first-run wizard, create the user manually after reboot:</p>
+<pre><code class="language-bash"># Create the user (the adduser wrapper ensures correct group membership)
+sudo adduser myuser
+
+# Or manually with usermod after useradd
+sudo useradd -m myuser
+sudo usermod -aG wheel,video,input,audio myuser
+sudo passwd myuser</code></pre>
+<p>---</p>
+<h2>What Happens After Reboot</h2>
+<ol>
+<li><code>systemd-tmpfiles</code> recreates <code>/data</code> structure from <code>shanios-data-structure.conf</code></li>
+<li><code>/etc</code> overlay starts fresh from the <code>@blue</code> or <code>@green</code> read-only root</li>
+<li>All services start in their initial state (first-time setup)</li>
+<li><code>shani-update</code> runs automatically and offers to update to the latest version</li>
+<li>Desktop first-run wizard guides through locale, timezone, and user account creation</li>
+</ol>
+<p>---</p>
+<h2>Examples</h2>
+<h3>Reset a misconfigured system</h3>
+<pre><code class="language-bash"># Preview what would be wiped
+sudo shani-reset --dry-run
+
+# Perform the reset
+sudo shani-reset</code></pre>
+<h3>Reset while preserving large OS downloads</h3>
+<pre><code class="language-bash">sudo shani-reset --keep-downloads</code></pre>
+<h3>Complete factory reset including user files</h3>
+<pre><code class="language-bash"># This is irreversible — all personal files in /home will be deleted
+sudo shani-reset --home</code></pre>
+<h3>Scripted reset (no prompts)</h3>
+<pre><code class="language-bash">sudo shani-reset --yes --keep-downloads</code></pre>
+<p>---</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="config">System Config</a> — editing <code>/etc</code> files and managing the overlay</li>
+<li><a href="../arch/overlay">Overlay Filesystem</a> — how the <code>/etc</code> overlay works</li>
+<li><a href="system">System Updates</a> — rolling back an update without a full reset</li>
+</ul></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

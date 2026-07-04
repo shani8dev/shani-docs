@@ -146,7 +146,1281 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">DevOps &amp; Infrastructure</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+        </div>
+      </div>
+      <div class="prose"><blockquote><p><strong>Portability note:</strong> Compose examples use rootless <strong>Podman</strong> and <code>host.containers.internal</code> (the host gateway from a container). When using Docker, replace <code>podman-compose</code> with <code>docker compose</code> and <code>host.containers.internal</code> with <code>host-gateway</code> (add <code>extra_hosts: [host-gateway:host-gateway]</code> to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.</p></blockquote>
+<h1>DevOps & Infrastructure</h1>
+<p>CI/CD pipelines, infrastructure as code, cloud provider tooling, HA clusters, container image management, and platform engineering — all self-hosted on this system.</p>
+<blockquote><p><strong>Install convention:</strong> CLI tools and dev runtimes install via <strong>Nix</strong> (primary) or <strong>Snap</strong> (fallback). GUI apps go via <strong>Flatpak</strong>. Services and servers run as rootless <strong>Podman</strong> containers. On immutable OS distributions the root filesystem is read-only — use Nix, Snap, or Distrobox rather than system package managers for user-space tooling.</p></blockquote>
+<p>---</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#code-hosting">Code Hosting</a></li>
+<li><a href="#cicd">CI/CD</a></li>
+<li><a href="#container--image-tools">Container & Image Tools</a></li>
+<li><a href="#kubernetes--orchestration">Kubernetes & Orchestration</a></li>
+<li><a href="#ha-clusters">HA Clusters</a></li>
+<li><a href="#infrastructure-as-code">Infrastructure as Code</a></li>
+<li><a href="#artifact--dependency-management">Artifact & Dependency Management</a></li>
+<li><a href="#service-discovery--orchestration">Service Discovery & Orchestration</a></li>
+<li><a href="#developer-environments--utilities">Developer Environments & Utilities</a></li>
+<li><a href="#internal-platforms">Internal Platforms</a></li>
+<li><a href="#hardware--embedded">Hardware & Embedded</a></li>
+<li><a href="#iot--scada-tools">IoT & SCADA Tools</a></li>
+<li><a href="#security-cli-tools">Security CLI Tools</a></li>
+<li><a href="#education--training-platforms">Education & Training Platforms</a></li>
+<li><a href="#key-concepts">Key Concepts</a></li>
+</ul>
+<p>---</p>
+<h2>Code Hosting</h2>
+<blockquote><p>Full setup, compose files, and common operations for code hosting tools live in the <a href="https://docs.shani.dev/doc/servers/devtools">Developer Tools wiki</a>. This section covers DevOps integration patterns.</p></blockquote>
+<h3>Gitea / Forgejo</h3>
+<p>For compose files, CLI operations, SSH setup, and Gitea Classroom patterns, see the <a href="https://docs.shani.dev/doc/servers/devtools#gitea--forgejo">Developer Tools wiki → Gitea & Forgejo</a>.</p>
+<p>Configure SSH clients to use <code>Port 2222</code> for <code>git.home.local</code>.</p>
+<h3>GitLab CE</h3>
+<p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#gitlab-ce">Developer Tools wiki → GitLab CE</a>.</p>
+<p>---</p>
+<h2>CI/CD</h2>
+<blockquote><p>Compose files and basic setup for self-hosted CI runners live in the <a href="https://docs.shani.dev/doc/servers/devtools">Developer Tools wiki</a>. This section covers CI/CD pipeline patterns, GitHub Actions workflows, and cloud-CI integration.</p></blockquote>
+<h3>Woodpecker CI</h3>
+<p>For compose file, server/agent setup, and Gitea OAuth integration, see the <a href="https://docs.shani.dev/doc/servers/devtools#woodpecker-ci">Developer Tools wiki → Woodpecker CI</a>.</p>
+<p>---</p>
+<h3>Forgejo Actions Runner</h3>
+<p>For compose file and registration steps, see the <a href="https://docs.shani.dev/doc/servers/devtools#forgejo-actions-runner">Developer Tools wiki → Forgejo Actions Runner</a>.</p>
+<h5>Example workflow</h5>
+<p>(<code>.forgejo/workflows/ci.yml</code>):</p>
+<pre><code class="language-yaml">on: [push]
+jobs:
+  test:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo &quot;Hello from Forgejo Actions&quot;</code></pre>
+<p>---</p>
+<h3>Jenkins</h3>
+<p>For compose file, initial setup, and common CLI operations, see the <a href="https://docs.shani.dev/doc/servers/devtools#jenkins-enterprise-cicd">Developer Tools wiki → Jenkins</a>.</p>
+<h3>OpenFeature + Flagd (Feature Flag Management)</h3>
+<p><strong>Purpose:</strong> OpenFeature is a vendor-neutral FHIR-like standard for feature flags — your application code calls the OpenFeature SDK and any backend (Flagd, LaunchDarkly, Unleash, CloudBees) can be swapped without code changes. Flagd is the lightweight, self-hosted reference backend: it reads flag definitions from a config file or Kubernetes CRDs, evaluates them with targeting rules, and serves them over gRPC or HTTP. Increasingly standard in platform engineering stacks.</p>
+<pre><code class="language-yaml"># ~/flagd/compose.yaml
+services:
+  flagd:
+    image: ghcr.io/open-feature/flagd:latest
+    ports:
+      - 127.0.0.1:8013:8013   # gRPC
+      - 127.0.0.1:8014:8014   # HTTP
+    volumes:
+      - /home/user/flagd/flags.json:/flags.json:ro,Z
+    command: start --uri file:///flags.json
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/flagd &amp;&amp; podman-compose up -d</code></pre>
+<h5>Example <code>flags.json</code></h5>
+<pre><code class="language-json">{
+  &quot;$schema&quot;: &quot;https://flagd.dev/schema/v0/flags.json&quot;,
+  &quot;flags&quot;: {
+    &quot;new-checkout-flow&quot;: {
+      &quot;state&quot;: &quot;ENABLED&quot;,
+      &quot;variants&quot;: { &quot;on&quot;: true, &quot;off&quot;: false },
+      &quot;defaultVariant&quot;: &quot;off&quot;,
+      &quot;targeting&quot;: {
+        &quot;if&quot;: [
+          { &quot;in&quot;: [{ &quot;var&quot;: &quot;email&quot; }, [&quot;beta@example.com&quot;]] },
+          &quot;on&quot;, &quot;off&quot;
+        ]
+      }
+    }
+  }
+}</code></pre>
+<h5>Use from Python</h5>
+<pre><code class="language-python">from openfeature import api
+from openfeature.provider.flagd import FlagdProvider
+
+api.set_provider(FlagdProvider())
+client = api.get_client()
+enabled = client.get_boolean_value(&quot;new-checkout-flow&quot;, False, {&quot;email&quot;: &quot;user@example.com&quot;})</code></pre>
+<p>---</p>
+<h3>Score (Platform-Agnostic Workload Spec)</h3>
+<p><strong>Purpose:</strong> Score is a developer-centric workload specification format — like <code>docker-compose.yaml</code> but platform-agnostic. Developers write a <code>score.yaml</code> describing their workload (containers, resources, environment) once, and <code>score-compose</code> or <code>score-k8s</code> translates it to a <code>compose.yaml</code> or Kubernetes manifests respectively. Eliminates the need for developers to know Kubernetes YAML while keeping platform teams in control of how workloads are deployed.</p>
+<pre><code class="language-bash"># Install via Nix
+nix-env -iA nixpkgs.score-compose nixpkgs.score-k8s
+
+# Initialise a Score project
+score-compose init
+score-k8s init
+
+# Generate a compose.yaml from score.yaml
+score-compose generate score.yaml --output compose.yaml
+
+# Generate Kubernetes manifests from score.yaml
+score-k8s generate score.yaml --output manifests/</code></pre>
+<h5>Example <code>score.yaml</code></h5>
+<pre><code class="language-yaml">apiVersion: score.dev/v1b1
+metadata:
+  name: my-service
+containers:
+  web:
+    image: myapp:latest
+    variables:
+      DB_URL: ${resources.db.host}:${resources.db.port}/${resources.db.name}
+    ports:
+      - name: http
+        port: 8080
+resources:
+  db:
+    type: postgres</code></pre>
+<p>---</p>
+<h3>Dagger (Portable Pipelines as Code)</h3>
+<p><strong>Purpose:</strong> Write CI/CD pipelines in Python, Go, TypeScript, or PHP — not YAML. Pipelines run identically on your workstation (via Podman) and in any CI system. Eliminates "works on CI but not locally" problems.</p>
+<pre><code class="language-bash"># Install Dagger CLI — Nix (primary)
+nix-env -iA nixpkgs.dagger
+
+# Or via Snap
+snap install dagger --classic
+
+# Point Dagger at the rootless Podman socket
+export _EXPERIMENTAL_DAGGER_RUNNER_HOST=unix:///run/user/$UID/podman/podman.sock
+
+# Initialise a Dagger module
+dagger init --sdk=python
+
+# Run a function locally
+dagger call build --source=.</code></pre>
+<h5>Example <code>main.py</code></h5>
+<pre><code class="language-python">import dagger
+from dagger import dag, function, object_type
+
+@object_type
+class MyPipeline:
+    @function
+    async def build(self, source: dagger.Directory) -&gt; dagger.Container:
+        return (
+            dag.container()
+            .from_(&quot;python:3.12-slim&quot;)
+            .with_directory(&quot;/app&quot;, source)
+            .with_workdir(&quot;/app&quot;)
+            .with_exec([&quot;pip&quot;, &quot;install&quot;, &quot;-r&quot;, &quot;requirements.txt&quot;])
+            .with_exec([&quot;python&quot;, &quot;-m&quot;, &quot;pytest&quot;])
+        )</code></pre>
+<p>---</p>
+<h3>GitHub Actions (Cloud CI/CD — github.com)</h3>
+<p><strong>Purpose:</strong> GitHub's native CI/CD system. Workflows are YAML files in <code>.github/workflows/</code> that trigger on push, pull request, schedule, or manual dispatch.</p>
+<blockquote><p><strong>Note:</strong> <code>act</code> (below) runs GitHub Actions workflows locally using Podman. For self-hosted runners, see the <a href="https://docs.shani.dev/doc/servers/devtools">Developer Tools wiki</a>.</p></blockquote>
+<h4>Workflow structure and triggers</h4>
+<pre><code class="language-yaml"># .github/workflows/ci.yaml
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 2 * * 1'    # weekly at 2 AM Monday
+  workflow_dispatch:         # manual trigger from GitHub UI
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options: [staging, prod]</code></pre>
+<h4>Complete CI workflow (build, test, push image)</h4>
+<pre><code class="language-yaml"># .github/workflows/ci.yaml (continued)
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest tests/ --tb=short --junitxml=test-results.xml
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: test-results.xml
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=sha-
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max</code></pre>
+<h3>Dependency Caching in CI</h3>
+<p>The <code>cache-from: type=gha</code> above caches Docker image layers. For faster dependency installs (pip, npm, Go modules), use <code>actions/cache</code> keyed on the lockfile hash — so the cache is invalidated only when dependencies actually change:</p>
+<pre><code class="language-yaml"># Python
+- uses: actions/cache@v4
+  with:
+    path: ~/.cache/pip
+    key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+    restore-keys: ${{ runner.os }}-pip-
+
+# Node.js
+- uses: actions/cache@v4
+  with:
+    path: ~/.npm
+    key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+    restore-keys: ${{ runner.os }}-node-
+
+# Go modules
+- uses: actions/cache@v4
+  with:
+    path: ~/go/pkg/mod
+    key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
+    restore-keys: ${{ runner.os }}-go-</code></pre>
+<p>The <code>restore-keys</code> fallback uses a partial cache (the most recent cache for this OS, even with a different lockfile hash) — a partial cache hit is still much faster than downloading all dependencies from scratch.</p>
+<pre><code class="language-yaml"># .github/workflows/deploy.yaml
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [&quot;CI Pipeline&quot;]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  deploy-staging:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.example.com
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to staging
+        run: |
+          echo &quot;${{ secrets.KUBECONFIG }}&quot; | base64 -d &gt; kubeconfig
+          kubectl --kubeconfig kubeconfig set image deployment/myapp \
+            myapp=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }} \
+            -n staging
+
+  deploy-prod:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment:
+      name: production         # requires manual approval in GitHub Environments settings
+      url: https://example.com
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to production
+        run: |
+          echo &quot;${{ secrets.KUBECONFIG_PROD }}&quot; | base64 -d &gt; kubeconfig
+          kubectl --kubeconfig kubeconfig set image deployment/myapp \
+            myapp=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }} \
+            -n production</code></pre>
+<h4>Reusable workflows (DRY — define once, call from many repos)</h4>
+<pre><code class="language-yaml"># .github/workflows/reusable-test.yaml  (in a shared repo)
+name: Reusable Test
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        required: false
+        default: '3.12'
+        type: string
+    secrets:
+      TEST_DB_URL:
+        required: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+      - run: pytest
+        env:
+          DATABASE_URL: ${{ secrets.TEST_DB_URL }}</code></pre>
+<pre><code class="language-yaml"># .github/workflows/ci.yaml  (in a consumer repo)
+jobs:
+  test:
+    uses: myorg/shared-workflows/.github/workflows/reusable-test.yaml@main
+    with:
+      python-version: '3.11'
+    secrets:
+      TEST_DB_URL: ${{ secrets.TEST_DB_URL }}</code></pre>
+<h4>Branching strategy — GitHub Flow (standard for CD teams)</h4>
+<pre><code>main ──────────────────────────────── (always deployable, protected)
+  ├── feature/add-login ─────────► PR ─► merge ─► auto-deploy staging
+  ├── fix/null-pointer ──────────► PR ─► merge ─► auto-deploy staging
+  └── release/v1.2 ─────────────► PR ─► merge ─► manual approve prod</code></pre>
+<h4>Branch protection rules (configure in GitHub Settings → Branches)</h4>
+<pre><code class="language-yaml"># Typical main branch protection:
+# - Require PR before merging (no direct push)
+# - Require status checks: ci/test, ci/lint, security/scan
+# - Require at least 1 approving review
+# - Dismiss stale reviews when new commits pushed
+# - Require branches to be up to date before merging
+# - Restrict who can push to matching branches: team:platform-engineers</code></pre>
+<h4>Terraform plan/apply with GitHub Actions (Infrastructure PR workflow)</h4>
+<p><pre><code class="language-yaml"># .github/workflows/terraform.yaml
+name: Terraform
+
+on:
+  pull_request:
+    paths: ['terraform/**']
+  push:
+    branches: [main]
+    paths: ['terraform/**']
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform/
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: &quot;~1.9&quot;
+
+      - name: Terraform Init
+        run: terraform init
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: tflint
+        uses: terraform-linters/setup-tflint@v4
+      - run: tflint --recursive
+
+      - name: Checkov security scan
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: terraform/
+          quiet: true
+          soft_fail: false
+
+      - name: Terraform Plan
+        if: github.event_name == 'pull_request'
+        run: terraform plan -no-color -out=tfplan
+        env:
+          TF_VAR_environment: ${{ github.base_ref }}
+
+      - name: Comment plan on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const plan = require('fs').readFileSync('tfplan.txt', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '</code></pre>hcl\n' + plan + '\n```' });</p>
+<ul>
+<li>name: Terraform Apply</li>
+<p>if: github.ref == 'refs/heads/main' && github.event_name == 'push' run: terraform apply -auto-approve tfplan <pre><code>
+#### Secrets management in GitHub Actions</code></pre>bash</p>
+</ul>
+<h1>Set repository secrets via CLI</h1>
+<p>gh secret set KUBECONFIG --body "$(cat ~/.kube/config | base64)" gh secret set REGISTRY_PASSWORD < ~/.docker-password</p>
+<h1>Set environment-scoped secrets (staging vs prod isolation)</h1>
+<p>gh secret set DATABASE_URL --env staging --body "postgres://..." gh secret set DATABASE_URL --env production --body "postgres://..."</p>
+<h1>List secrets (names only — values never shown)</h1>
+<p>gh secret list gh secret list --env production <pre><code>
+#### Matrix builds (test across multiple versions)</code></pre>yaml jobs: test: strategy: matrix: python-version: ['3.10', '3.11', '3.12'] os: [ubuntu-latest, ubuntu-22.04] fail-fast: false      # don't cancel other matrix jobs on failure runs-on: ${{ matrix.os }} steps:</p>
+<ul>
+<li>uses: actions/setup-python@v5</li>
+<p>with: python-version: ${{ matrix.python-version }} <pre><code>
+#### Self-hosted runner on this system (route CI jobs to your own machine)</code></pre>yaml</p>
+</ul>
+<h1>~/github-runner/compose.yaml</h1>
+<p>services: github-runner: image: myoung34/github-runner:latest environment: REPO_URL: https://github.com/myorg/myrepo RUNNER_TOKEN: <token-from-github-settings-actions-runners> RUNNER_NAME: shani-runner-01 RUNNER_WORKDIR: /tmp/github-runner LABELS: self-hosted,linux,shani-os volumes:</p>
+<ul>
+<li>/run/user/1000/podman/podman.sock:/var/run/docker.sock:ro</li>
+<p>restart: unless-stopped <pre><code></code></pre>bash cd ~/github-runner && podman-compose up -d <pre><code>
+In your workflows, use `runs-on: [self-hosted, shani-os]` to route jobs to this runner.
+
+---
+
+### act (Local GitHub Actions Runner)
+
+**Purpose:** Run GitHub Actions workflows locally without pushing to GitHub. Reads `.github/workflows/*.yml` and runs them in containers. Use for local iteration before pushing.
+</code></pre>bash</p>
+</ul>
+<h1>Install act — Nix</h1>
+<p>nix-env -iA nixpkgs.act</p>
+<h1>Run the default push event</h1>
+<p>act</p>
+<h1>Run a specific job</h1>
+<p>act -j build</p>
+<h1>Pass secrets</h1>
+<p>act --secret-file .secrets</p>
+<h1>Dry run</h1>
+<p>act -n <pre><code>
+---
+
+### Renovate Bot
+
+**Purpose:** Automated dependency update PRs — outdated container image tags, npm/pip/cargo packages, Actions versions. Works natively with Gitea and Forgejo.
+
+#### Schedule with a systemd timer</code></pre>bash cat > ~/.config/systemd/user/renovate.service << 'EOF' [Unit] Description=Renovate Dependency Updater</p>
+<p>[Service] Type=oneshot WorkingDirectory=/home/user/renovate ExecStart=podman-compose run --rm renovate EOF</p>
+<p>cat > ~/.config/systemd/user/renovate.timer << 'EOF' [Unit] Description=Weekly Renovate Run</p>
+<p>[Timer] OnCalendar=weekly Persistent=true</p>
+<p>[Install] WantedBy=timers.target EOF</p>
+<p>systemctl --user enable --now renovate.timer <pre><code>
+##### Minimal `renovate.json`
+</code></pre>json { "$schema": "https://docs.renovatebot.com/renovate-schema.json", "extends": ["config:base"], "automerge": false } <pre><code>
+---
+
+### SonarQube (Code Quality &amp; Security)
+
+For compose file and setup, see the [Developer Tools wiki → SonarQube](https://docs.shani.dev/doc/servers/devtools#sonarqube-code-quality--security).
+
+&gt; Requires `vm.max_map_count=524288` and `fs.file-max=131072` on the host. Set persistently:
+&gt; </code></pre>bash</p>
+<blockquote><p>echo 'vm.max_map_count=524288' | sudo tee -a /etc/sysctl.d/sonar.conf</p></blockquote>
+<blockquote><p>sudo sysctl -p /etc/sysctl.d/sonar.conf</p></blockquote>
+<blockquote><p><pre><code>
+---
+
+## Container &amp; Image Tools
+
+### Private Container Registry
+
+For compose file and setup, see the [Developer Tools wiki → Private Container Registry](https://docs.shani.dev/doc/servers/devtools#private-container-registry).
+</code></pre>bash</p></blockquote>
+<h1>Tag and push</h1>
+<p>podman tag myimage localhost:5000/myimage:latest podman push localhost:5000/myimage:latest <pre><code>
+Add `unqualified-search-registries = [&quot;localhost:5000&quot;]` to `/etc/containers/registries.conf` to allow unverified pushes in development.
+
+---
+
+### Harbor (Enterprise Container Registry)
+
+For compose file (official installer) and setup, see the [Developer Tools wiki → Harbor](https://docs.shani.dev/doc/servers/devtools#harbor-enterprise-container-registry).
+</code></pre>bash</p>
+<h1>Push images</h1>
+<p>podman login registry.home.local podman tag myapp:latest registry.home.local/myproject/myapp:latest podman push registry.home.local/myproject/myapp:latest <pre><code>
+#### Woodpecker CI push step</code></pre>yaml</p>
+<h1>.woodpecker.yml</h1>
+<p>steps: build-and-push: image: woodpeckerci/plugin-docker-buildx settings: registry: registry.home.local repo: registry.home.local/myproject/myapp username: from_secret: harbor_user password: from_secret: harbor_password tags: [latest, "${CI_COMMIT_SHA}"] <pre><code>
+---
+
+### Buildah &amp; Skopeo (OCI Image Tools)
+
+**Purpose:** Buildah builds OCI images without a daemon and without root — perfect for rootless CI. Skopeo inspects, copies, and signs images across registries without pulling them fully.
+</code></pre>bash</p>
+<h1>Install via Nix (primary)</h1>
+<p>nix-env -iA nixpkgs.buildah nixpkgs.skopeo <pre><code>
+#### Buildah</code></pre>bash</p>
+<h1>Build from a Containerfile</h1>
+<p>buildah build -t myapp:latest .</p>
+<h1>Scripted build (no Containerfile)</h1>
+<p>ctr=$(buildah from alpine:latest) buildah run $ctr -- apk add --no-cache python3 buildah config --entrypoint '["python3", "-m", "http.server"]' $ctr buildah commit $ctr myapp:latest buildah rm $ctr</p>
+<h1>Push to registry</h1>
+<p>buildah push myapp:latest docker://localhost:5000/myapp:latest <pre><code>
+#### Skopeo</code></pre>bash</p>
+<h1>Inspect without pulling</h1>
+<p>skopeo inspect docker://nginx:alpine</p>
+<h1>Copy between registries (no full pull)</h1>
+<p>skopeo copy docker://nginx:alpine docker://localhost:5000/nginx:alpine</p>
+<h1>Copy all tags</h1>
+<p>skopeo copy --all docker://nginx docker://localhost:5000/nginx</p>
+<h1>Delete from registry</h1>
+<p>skopeo delete docker://localhost:5000/myapp:old</p>
+<h1>Sync an entire repo to a local mirror</h1>
+<p>skopeo sync --src docker --dest dir nginx:alpine /tmp/mirror/ <pre><code>
+---
+
+### Mailpit (Email Testing)
+
+For compose file and setup, see the [Developer Tools wiki → Mailpit](https://docs.shani.dev/doc/servers/devtools#mailpit-email-testing).
+
+---
+
+## Kubernetes &amp; Orchestration
+
+For all Kubernetes distributions (k3s, k0s, MicroK8s, RKE2, Talos), cluster management, GitOps tooling, ingress, storage, and platform engineering tools, see the [Kubernetes &amp; Container Orchestration wiki](https://docs.shani.dev/doc/servers/kubernetes).
+
+---
+
+## HA Clusters
+
+All HA cluster compose files (PostgreSQL/Patroni, Redis Sentinel, Valkey Cluster, MongoDB, Kafka, Cassandra, ScyllaDB, RabbitMQ, Elasticsearch, OpenSearch, VictoriaMetrics, etcd) are in the dedicated [Clusters wiki](https://docs.shani.dev/doc/servers/clusters).
+
+### Choosing the Right HA Strategy
+
+| Service | Strategy | Compose Path | Tolerates Node Loss |
+|---------|----------|-------------|---------------------|
+| PostgreSQL | Patroni + etcd + HAProxy | `~/patroni/` | 1 of 2 |
+| Redis / Valkey | Sentinel (3 sentinels + replicas) | `~/redis-sentinel/` | 1 of 3 |
+| Redis / Valkey | Native Cluster (6 nodes, 3+3) | `~/valkey-cluster/` | 1 per shard |
+| MongoDB | Replica Set (3 nodes) | `~/mongodb-rs/` | 1 of 3 |
+| Kafka | KRaft (3 nodes) | `~/kafka-cluster/` | 1 of 3 |
+| Cassandra | Ring (3 nodes, RF=3) | `~/cassandra-cluster/` | 1 of 3 |
+| ScyllaDB | Ring (3 nodes, RF=3) | `~/scylladb-cluster/` | 1 of 3 |
+| RabbitMQ | Cluster + Quorum Queues | `~/rabbitmq-cluster/` | 1 of 3 |
+| Elasticsearch | 3-node master/data | `~/elk-cluster/` | 1 of 3 |
+| OpenSearch | 3-node cluster manager | `~/opensearch-cluster/` | 1 of 3 |
+| VictoriaMetrics | vminsert/vmselect/vmstorage | `~/victoriametrics-cluster/` | 1 of 2 storage |
+| etcd | 3-node Raft | `~/etcd-cluster/` | 1 of 3 |
+
+---
+
+## Infrastructure as Code
+
+### OpenTofu / Terraform
+
+**Purpose:** Declarative cloud and on-premise infrastructure provisioning. OpenTofu is the open-source, BSL-free fork of Terraform and is drop-in compatible.
+</code></pre>bash</p>
+<h1>Install OpenTofu via Nix (preferred — open source)</h1>
+<p>nix-env -iA nixpkgs.opentofu</p>
+<h1>Or Terraform via Nix</h1>
+<p>nix-env -iA nixpkgs.terraform</p>
+<h1>Both also available via Snap</h1>
+<p>snap install opentofu --classic snap install terraform --classic <pre><code></code></pre>bash tofu init        # download providers tofu plan        # preview changes tofu apply       # apply tofu destroy     # remove all managed resources tofu fmt -recursive tofu validate tofu import aws_instance.web i-1234567890abcdef0 <pre><code>
+##### Example `main.tf` — manage a Podman container
+</code></pre>hcl terraform { required_providers { docker = { source  = "kreuzwerker/docker" version = "~> 3.0" } } }</p>
+<p>provider "docker" { host = "unix:///run/user/1000/podman/podman.sock" }</p>
+<p>resource "docker_container" "nginx" { name  = "nginx-tf" image = "nginx:alpine" ports { internal = 80 external = 8099 } } <pre><code>
+#### Remote state in MinIO (self-hosted S3)</code></pre>hcl terraform { backend "s3" { bucket                      = "tofu-state" key                         = "homelab/terraform.tfstate" region                      = "us-east-1" endpoint                    = "http://minio.home.local:9000" access_key                  = "minioadmin" secret_key                  = "changeme" skip_credentials_validation = true skip_metadata_api_check     = true skip_region_validation      = true force_path_style            = true } }</p>
+<pre><code>
+&gt; Never commit `terraform.tfstate` to Git — it contains secrets in plaintext. Use the MinIO backend from the [Backups wiki](https://docs.shani.dev/doc/servers/backups-sync#minio-self-hosted-s3-backup-target).
+
+#### Terraform Module Structure (modularization best practice)</code></pre>
+<p>terraform/ ├── modules/ │   ├── k8s-namespace/        # reusable module: creates namespace + RBAC + quota │   │   ├── main.tf │   │   ├── variables.tf │   │   └── outputs.tf │   ├── monitoring-stack/     # reusable module: deploys Prometheus + Grafana │   └── network/              # reusable module: VPC, subnets, firewall rules ├── environments/ │   ├── dev/ │   │   ├── main.tf           # calls modules with dev-specific vars │   │   ├── terraform.tfvars  # dev values │   │   └── backend.tf        # remote state: s3://tofu-state/dev/terraform.tfstate │   ├── staging/ │   └── prod/ └── .terraform.lock.hcl       # provider version lock — always commit this <pre><code></code></pre>hcl</p>
+<h1>modules/k8s-namespace/variables.tf</h1>
+<p>variable "name"        { type = string } variable "environment" { type = string } variable "team"        { type = string } variable "cpu_limit"   { type = string; default = "4" } variable "mem_limit"   { type = string; default = "8Gi" }</p>
+<h1>modules/k8s-namespace/main.tf</h1>
+<p>resource "kubernetes_namespace" "this" { metadata { name = var.name labels = { environment = var.environment team        = var.team managed-by  = "terraform"      # tagging policy: always present } } }</p>
+<p>resource "kubernetes_resource_quota" "this" { metadata { name = "default-quota"; namespace = kubernetes_namespace.this.metadata[0].name } spec { hard = { "limits.cpu"    = var.cpu_limit "limits.memory" = var.mem_limit } } }</p>
+<h1>environments/prod/main.tf — consume the module</h1>
+<p>module "myapp_ns" { source      = "../../modules/k8s-namespace" name        = "myapp" environment = "prod" team        = "platform" cpu_limit   = "8" mem_limit   = "16Gi" } <pre><code>
+#### Remote state with state locking (prevents concurrent apply conflicts)</code></pre>hcl</p>
+<h1>environments/prod/backend.tf</h1>
+<p>terraform { backend "s3" { bucket                      = "tofu-state" key                         = "prod/terraform.tfstate" region                      = "us-east-1" endpoint                    = "http://minio.home.local:9000" access_key                  = "minioadmin" secret_key                  = "changeme" skip_credentials_validation = true skip_metadata_api_check     = true skip_region_validation      = true force_path_style            = true</p>
+<p># State locking via DynamoDB (for AWS) or the S3 backend's built-in locking # MinIO's S3 backend supports native state locking (no DynamoDB needed with OpenTofu 1.7+) use_lockfile = true } } <pre><code>
+#### Drift detection (detect infrastructure changes made outside Terraform)</code></pre>bash</p>
+<h1>Detect drift between state and real infrastructure</h1>
+<p>tofu plan -detailed-exitcode</p>
+<h1>Exit code 0 = no changes; 1 = error; 2 = changes detected (drift)</h1>
+<h1>Refresh state from real infrastructure (updates state without changing infra)</h1>
+<p>tofu refresh</p>
+<h1>Import a resource created manually (bring it under Terraform management)</h1>
+<p>tofu import kubernetes_namespace.myapp myapp</p>
+<h1>Automated drift detection via systemd timer</h1>
+<p>cat > ~/.config/systemd/user/tofu-drift.service << 'EOF' [Unit] Description=OpenTofu Drift Detection</p>
+<p>[Service] Type=oneshot WorkingDirectory=/home/user/terraform/environments/prod ExecStart=/bin/bash -c 'tofu plan -detailed-exitcode 2>&1 | \ grep -E "(must be replaced|will be destroyed|has changed)" && \ curl -s -d "Terraform drift detected in prod" http://ntfy.home.local/infra-alerts || true' EOF</p>
+<p>cat > ~/.config/systemd/user/tofu-drift.timer << 'EOF' [Unit] Description=Daily Terraform Drift Check [Timer] OnCalendar=daily Persistent=true [Install] WantedBy=timers.target EOF</p>
+<p>systemctl --user enable --now tofu-drift.timer <pre><code>
+#### Policy guardrails with tflint + Checkov + tfsec</code></pre>bash</p>
+<h1>Install tflint (Terraform linter — catches provider-specific mistakes)</h1>
+<p>nix-env -iA nixpkgs.tflint</p>
+<h1>Install Checkov (security policy scanner for IaC — multi-framework)</h1>
+<p>pip install checkov --break-system-packages</p>
+<h1>Install tfsec (focused Terraform security scanner, fast, no Python dep)</h1>
+<p>nix-env -iA nixpkgs.tfsec</p>
+<h1>tflint: lint all modules</h1>
+<p>tflint --recursive --format=compact</p>
+<h1>Checkov: security scan (fails on critical findings)</h1>
+<p>checkov -d terraform/ \ --check CKV_K8S_8,CKV_K8S_9,CKV_K8S_14,CKV_K8S_35 \ --soft-fail-on MEDIUM \ -o cli</p>
+<h1>Common checks relevant to Kubernetes Terraform:</h1>
+<h1>CKV_K8S_8  — containers must have readiness probes</h1>
+<h1>CKV_K8S_9  — containers must have liveness probes</h1>
+<h1>CKV_K8S_14 — image tag must not be 'latest'</h1>
+<h1>CKV_K8S_35 — secrets must not be in environment variables</h1>
+<h1>CKV_K8S_43 — image must use digest (not mutable tag)</h1>
+<h1>tfsec: fast, Terraform-native security scan (good for CI gates)</h1>
+<p>tfsec terraform/ tfsec terraform/ --severity CRITICAL   # fail only on critical tfsec terraform/ --format json         # machine-readable output tfsec terraform/ --out results.json    # write to file for ingestion by Defect Dojo</p>
+<h1>Inline suppression (when a finding is intentional — add to the .tf resource):</h1>
+<h1>#tfsec:ignore:aws-s3-enable-bucket-logging</h1>
+<p><pre><code>
+&gt; **Checkov vs tfsec:** Use both. Checkov covers Terraform, Kubernetes YAML, Dockerfiles, GitHub Actions, Helm charts, and CloudFormation in one tool. tfsec is Terraform-only but faster and catches different edge cases. Run tfsec as a fast pre-commit gate and Checkov as the full CI scan. Both integrate with Defect Dojo via JSON output.
+
+#### Integrate in CI (Woodpecker / Forgejo Actions)</code></pre>yaml</p>
+<h1>.woodpecker.yml — add after the tofu plan step</h1>
+<ul>
+<li>name: iac-security-scan</li>
+<p>image: bridgecrew/checkov commands:</p>
+<li>checkov -d terraform/ -o cli -o json --output-file-path /dev/null,results.json</li>
+<li>"[ $(jq '.summary.failed' results.json) -eq 0 ] || exit 1"</li>
+<p><pre><code>
+#### Tagging and naming policy (enforced via tflint rules)</code></pre>hcl</p>
+</ul>
+<h1>.tflint.hcl — project-level tflint config</h1>
+<p>plugin "aws" { enabled = true; version = "0.32.0"; source = "github.com/terraform-linters/tflint-ruleset-aws" } plugin "kubernetes" { enabled = true }</p>
+<p>rule "terraform_required_tags" { enabled = true # Enforce that every resource has these tags: required_tags = ["environment", "team", "managed-by", "cost-center"] }</p>
+<p>rule "terraform_naming_convention" { enabled = true # Enforce snake_case naming for all resources format = "snake_case" } <pre><code>
+#### Promote changes across Dev → UAT → Prod</code></pre>bash</p>
+<h1>Pattern: same module, different tfvars per environment</h1>
+<h1>Dev:     tofu apply -var-file=dev.tfvars    (auto-applied on merge to develop)</h1>
+<h1>UAT:     tofu apply -var-file=uat.tfvars    (requires PR approval)</h1>
+<h1>Prod:    tofu apply -var-file=prod.tfvars   (requires second approval + plan review)</h1>
+<h1>Workspace approach (alternative — single state tree, multiple workspaces):</h1>
+<p>tofu workspace new dev tofu workspace new uat tofu workspace new prod tofu workspace select prod tofu plan -var-file=prod.tfvars tofu apply -var-file=prod.tfvars</p>
+<h1>Always plan before apply in prod</h1>
+<p>tofu plan -out=prod.tfplan -var-file=prod.tfvars</p>
+<h1>(review prod.tfplan output)</h1>
+<p>tofu apply prod.tfplan   # applies exactly what was planned — no surprises <pre><code>
+---
+
+### Ansible (Configuration Management)
+
+**Purpose:** Agentless configuration management and automation over SSH. Define desired server state in YAML playbooks. No agent on remote hosts — just SSH and Python.
+</code></pre>bash</p>
+<h1>Install via Nix</h1>
+<p>nix-env -iA nixpkgs.ansible</p>
+<h1>Or via Snap</h1>
+<p>snap install ansible --classic <pre><code>
+#### Inventory (`~/ansible/inventory.ini`)</code></pre>ini [webservers] web1.home.local ansible_user=user web2.home.local ansible_user=user</p>
+<p>[databases] db1.home.local ansible_user=user</p>
+<p>[all:vars] ansible_ssh_private_key_file=~/.ssh/id_ed25519 <pre><code>
+#### Common ad-hoc commands</code></pre>bash ansible all -i inventory.ini -m ping ansible webservers -i inventory.ini -m shell -a "uptime" ansible all -i inventory.ini -m copy -a "src=./config.conf dest=/etc/myapp/config.conf" ansible-playbook -i inventory.ini playbook.yaml --check --diff <pre><code>
+##### Example playbook
+</code></pre>yaml ---</p>
+<ul>
+<li>name: Configure web servers</li>
+<p>hosts: webservers become: true tasks:</p>
+<li>name: Ensure nginx is installed</li>
+<p>package: name: nginx state: present</p>
+</ul>
+<ul>
+<li>name: Deploy nginx config</li>
+<p>template: src: templates/nginx.conf.j2 dest: /etc/nginx/nginx.conf notify: Restart nginx</p>
+</ul>
+<ul>
+<li>name: Ensure nginx is running</li>
+<p>service: name: nginx state: started enabled: true</p>
+</ul>
+<p>handlers:</p>
+<ul>
+<li>name: Restart nginx</li>
+<p>service: name: nginx state: restarted <pre><code></code></pre>bash ansible-playbook -i inventory.ini playbook.yaml ansible-playbook -i inventory.ini playbook.yaml --tags "deploy" ansible-playbook -i inventory.ini playbook.yaml --limit web1.home.local ansible-vault encrypt vars/secrets.yaml ansible-playbook -i inventory.ini playbook.yaml --ask-vault-pass <pre><code>
+#### AWX (Ansible Tower OSS — Web UI)
+
+AWX provides a web UI, RBAC, job scheduling, inventory management, and notifications on top of Ansible. The recommended install method is the AWX Operator on Kubernetes, but a standalone Docker Compose setup is available for homelab use.
+</code></pre>yaml</p>
+</ul>
+<h1>~/awx/compose.yaml</h1>
+<h1>AWX requires postgres and redis; the operator handles this on k8s</h1>
+<h1>For a quick homelab setup, use the AWX operator on k3s instead:</h1>
+<h1>kubectl apply -f https://raw.githubusercontent.com/ansible/awx-operator/main/deploy/awx-operator.yaml</h1>
+<h1>Then create an AWX custom resource — see AWX operator docs.</h1>
+<h1>Direct compose: use the community awx-on-docker project:</h1>
+<p>services: postgres: image: postgres:15 environment: POSTGRES_USER: awx POSTGRES_PASSWORD: changeme POSTGRES_DB: awx volumes: [pg_data:/var/lib/postgresql/data] restart: unless-stopped</p>
+<p>redis: image: redis:7-alpine restart: unless-stopped</p>
+<p>awx_web: image: ansible/awx:latest ports: ["127.0.0.1:8052:8052"] environment: SECRET_KEY: "run: openssl rand -hex 32" DATABASE_HOST: postgres DATABASE_USER: awx DATABASE_PASSWORD: changeme DATABASE_NAME: awx REDIS_HOST: redis AWX_ADMIN_USER: admin AWX_ADMIN_PASSWORD: changeme depends_on: [postgres, redis] restart: unless-stopped</p>
+<p>volumes: pg_data: <pre><code></code></pre>bash cd ~/awx && podman-compose up -d</p>
+<h1>Access at http://localhost:8052 — default login: admin / changeme</h1>
+<p><pre><code>
+**Caddy:**</code></pre>caddyfile awx.home.local { tls internal; reverse_proxy localhost:8052 } <pre><code>
+---
+
+### Pulumi (IaC in Real Languages)
+
+**Purpose:** IaC using Python, TypeScript, Go, C#, or Java — no DSL. State stored in Pulumi Cloud or self-hosted in S3-compatible storage. Popular in developer-centric teams.
+</code></pre>bash</p>
+<h1>Install via Nix</h1>
+<p>nix-env -iA nixpkgs.pulumi</p>
+<h1>Or via Snap</h1>
+<p>snap install pulumi --classic</p>
+<h1>Login to self-hosted MinIO backend</h1>
+<p>pulumi login s3://pulumi-state?endpoint=http://minio.home.local:9000&region=us-east-1&s3ForcePathStyle=true</p>
+<p>pulumi new python pulumi preview pulumi up pulumi destroy pulumi stack output <pre><code>
+---
+
+### Terragrunt (OpenTofu / Terraform Wrapper)
+
+**Purpose:** Thin wrapper around OpenTofu/Terraform that solves two real problems at scale: **DRY remote state configuration** (define your MinIO backend once, inherit it across all modules) and **multi-module orchestration** (deploy 20 modules in dependency order with one command). Essential once you outgrow a single `main.tf` — typical use case is a `live/` directory tree where every folder is an independent tofu root with no copy-pasted backend blocks.
+</code></pre>bash</p>
+<h1>Install via Nix</h1>
+<p>nix-env -iA nixpkgs.terragrunt</p>
+<h1>Or via Snap</h1>
+<p>snap install terragrunt --classic</p>
+<pre><code>
+#### Recommended directory structure</code></pre>
+<p>live/ ├── terragrunt.hcl          ← root config: shared remote state + provider defaults ├── homelab/ │   ├── k8s-cluster/ │   │   └── terragrunt.hcl  ← module config: inherits root, declares dependencies │   ├── dns/ │   │   └── terragrunt.hcl │   └── namespaces/ │       └── terragrunt.hcl └── prod/ └── ... <pre><code>
+#### Root `terragrunt.hcl` — define MinIO backend once</code></pre>hcl</p>
+<h1>live/terragrunt.hcl</h1>
+<p>remote_state { backend = "s3" generate = { path      = "backend.tf" if_exists = "overwrite_terragrunt" } config = { bucket   = "tofu-state" key      = "${path_relative_to_include()}/terraform.tfstate" region   = "us-east-1" endpoint = "http://minio.home.local:9000" access_key                  = get_env("MINIO_ACCESS_KEY", "minioadmin") secret_key                  = get_env("MINIO_SECRET_KEY", "changeme") skip_credentials_validation = true skip_metadata_api_check     = true skip_region_validation      = true force_path_style            = true } }</p>
+<h1>Inject default provider config into every child module</h1>
+<p>generate "provider" { path      = "provider.tf" if_exists = "overwrite_terragrunt" contents  = <<EOF provider "hetzner" { token = get_env("HCLOUD_TOKEN") } EOF } <pre><code>
+#### Child `terragrunt.hcl` — inherit root, declare dependency</code></pre>hcl</p>
+<h1>live/homelab/namespaces/terragrunt.hcl</h1>
+<p>include "root" { path = find_in_parent_folders()   # walks up until it finds the root terragrunt.hcl }</p>
+<p>terraform { source = "../../../modules//k8s-namespace" }</p>
+<p>dependency "cluster" { config_path = "../k8s-cluster" mock_outputs = { cluster_endpoint = "https://127.0.0.1:6443"  # used in plan when cluster doesn't exist yet } }</p>
+<p>inputs = { cluster_endpoint = dependency.cluster.outputs.cluster_endpoint namespaces       = ["monitoring", "apps", "security"] } <pre><code>
+#### Common commands</code></pre>bash</p>
+<h1>Plan/apply a single module</h1>
+<p>cd live/homelab/k8s-cluster && terragrunt plan cd live/homelab/k8s-cluster && terragrunt apply</p>
+<h1>Apply ALL modules in dependency order (the killer feature)</h1>
+<p>cd live/homelab && terragrunt run-all apply</p>
+<h1>Destroy all modules in reverse dependency order</h1>
+<p>cd live/homelab && terragrunt run-all destroy</p>
+<h1>Plan all — great for PRs to see the full blast radius</h1>
+<p>cd live && terragrunt run-all plan</p>
+<h1>Only run modules that changed (compares to last apply state)</h1>
+<p>terragrunt run-all apply --terragrunt-modules-that-include root.hcl</p>
+<h1>Graph the dependency tree</h1>
+<p>terragrunt graph-dependencies | dot -Tpng > deps.png <pre><code>
+&gt; **OpenTofu + Terragrunt + MinIO** is the fully self-hosted, BSL-free equivalent of the Terraform Cloud / HCP Terraform stack. All state stays in your MinIO bucket; Terragrunt handles the DRY config and orchestration.
+
+---
+
+### Packer (Machine Image Builder)
+
+**Purpose:** Build identical VM templates, cloud AMIs, container base images, or ISOs from a single HCL template. Common for teams using vSphere, AWS, Azure, or bare-metal.
+</code></pre>bash</p>
+<h1>Install via Nix</h1>
+<p>nix-env -iA nixpkgs.packer</p>
+<p>packer init . packer validate myimage.pkr.hcl packer build myimage.pkr.hcl packer build -var "version=1.2.3" myimage.pkr.hcl PACKER_LOG=1 packer build myimage.pkr.hcl   # debug mode <pre><code>
+### Cloud Provider CLIs (AWS / GCP / Azure / Hetzner)
+
+**Purpose:** Command-line interfaces for managing cloud resources directly — provisioning VMs, managing object storage, configuring DNS, pulling logs, and scripting infrastructure tasks. On Shani OS all CLIs install via Nix; none require a system-level package manager.
+
+&gt; **Homelab + cloud hybrid:** The most common this system pattern is running core services on-prem and using a VPS (Hetzner, DigitalOcean, Vultr) for public-facing ingress, offsite backups, or a WireGuard exit node. Hetzner Cloud is the primary cloud provider referenced throughout these docs — best price/performance ratio in Europe with a clean API.
+
+#### Hetzner Cloud CLI (`hcloud`) — primary</code></pre>bash</p>
+<h1>Install via Nix</h1>
+<p>nix-env -iA nixpkgs.hcloud</p>
+<h1>Authenticate (get token from Hetzner Cloud Console → Project → API Tokens)</h1>
+<p>hcloud context create homelab</p>
+<h1>Paste token when prompted — stored in ~/.config/hcloud/cli.toml</h1>
+<h1>Common operations</h1>
+<p>hcloud server list hcloud server create --name vpn-node --type cx22 --image ubuntu-24.04 --location nbg1 \ --ssh-key ~/.ssh/id_ed25519.pub</p>
+<p>hcloud server ssh vpn-node hcloud server delete vpn-node</p>
+<h1>Volumes (persistent block storage)</h1>
+<p>hcloud volume create --name data --size 50 --server vpn-node hcloud volume list</p>
+<h1>Firewall</h1>
+<p>hcloud firewall create --name homelab-fw hcloud firewall add-rule homelab-fw --direction in --protocol tcp --port 22 --source-ips 0.0.0.0/0 hcloud firewall apply-to-resource homelab-fw --type server --server vpn-node</p>
+<h1>Floating IPs (static public IP that survives server recreation)</h1>
+<p>hcloud floating-ip create --type ipv4 --home-location nbg1 hcloud floating-ip assign <ip-id> vpn-node</p>
+<h1>Private networks (connect VMs without public IPs)</h1>
+<p>hcloud network create --name homelab-net --ip-range 10.0.0.0/16 hcloud network add-subnet homelab-net --network-zone eu-central --type server --ip-range 10.0.1.0/24 hcloud server attach-to-network vpn-node --network homelab-net --ip 10.0.1.1 <pre><code>
+#### AWS CLI</code></pre>bash</p>
+<h1>Install via Nix</h1>
+<p>nix-env -iA nixpkgs.awscli2</p>
+<h1>Configure (credentials from IAM → Users → Security credentials)</h1>
+<p>aws configure</p>
+<h1>Or use environment variables (preferred for CI):</h1>
+<h1>AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION</h1>
+<h1>Common operations</h1>
+<p>aws s3 ls aws s3 cp backup.tar.gz s3://my-bucket/backups/ aws s3 sync /home/user/data/ s3://my-bucket/data/ --delete</p>
+<h1>EC2</h1>
+<p>aws ec2 describe-instances --query 'Reservations[<em>].Instances[</em>].[InstanceId,State.Name,PublicIpAddress]' --output table aws ec2 start-instances --instance-ids i-1234567890abcdef0 aws ec2 stop-instances --instance-ids i-1234567890abcdef0</p>
+<h1>SSM (connect without opening port 22)</h1>
+<p>aws ssm start-session --target i-1234567890abcdef0</p>
+<h1>ECR (container registry)</h1>
+<p>aws ecr get-login-password --region eu-west-1 | \ podman login --username AWS --password-stdin 123456789.dkr.ecr.eu-west-1.amazonaws.com</p>
+<h1>CloudWatch logs</h1>
+<p>aws logs tail /aws/lambda/my-function --follow <pre><code>
+#### GCP CLI (`gcloud`)</code></pre>bash</p>
+<h1>Install via Nix</h1>
+<p>nix-env -iA nixpkgs.google-cloud-sdk</p>
+<h1>Authenticate</h1>
+<p>gcloud auth login gcloud config set project my-project-id</p>
+<h1>Common operations</h1>
+<p>gcloud compute instances list gcloud compute ssh my-vm --zone europe-west1-b</p>
+<h1>GCS (Cloud Storage)</h1>
+<p>gcloud storage ls gcloud storage cp backup.tar.gz gs://my-bucket/backups/ gcloud storage rsync -r /home/user/data/ gs://my-bucket/data/</p>
+<h1>GCR (Artifact Registry)</h1>
+<p>gcloud auth configure-docker europe-west1-docker.pkg.dev podman push europe-west1-docker.pkg.dev/my-project/my-repo/myapp:latest</p>
+<h1>Cloud Run</h1>
+<p>gcloud run deploy myapp --image europe-west1-docker.pkg.dev/my-project/my-repo/myapp:latest \ --region europe-west1 --allow-unauthenticated <pre><code>
+#### Azure CLI</code></pre>bash</p>
+<h1>Install via Nix</h1>
+<p>nix-env -iA nixpkgs.azure-cli</p>
+<h1>Authenticate</h1>
+<p>az login                          # browser-based az login --use-device-code        # for headless/SSH sessions</p>
+<h1>Common operations</h1>
+<p>az vm list --output table az vm start --resource-group myRG --name myVM az vm stop  --resource-group myRG --name myVM</p>
+<h1>Azure Blob Storage</h1>
+<p>az storage blob upload --account-name mystorageacct \ --container-name backups --name backup.tar.gz --file backup.tar.gz</p>
+<h1>ACR (container registry)</h1>
+<p>az acr login --name myregistry podman push myregistry.azurecr.io/myapp:latest</p>
+<h1>AKS</h1>
+<p>az aks get-credentials --resource-group myRG --name myAKS kubectl get nodes <pre><code>
+---
+
+### cloud-init (VM Bootstrap Automation)
+
+**Purpose:** Industry-standard mechanism for bootstrapping cloud VMs and bare-metal nodes on first boot. A `user-data` YAML file is passed to the instance at creation time (via the cloud provider API or a local `nocloud` source) — cloud-init runs it once, before your configuration management tool takes over. Used to: create users and SSH keys, install base packages, write files, run bootstrap scripts, and configure the system for Ansible/OpenTofu to manage.
+
+&gt; On Shani OS itself, cloud-init is not used (Shani uses its own atomic update mechanism). This section covers provisioning *other* machines from Shani OS — Hetzner VMs, bare-metal nodes, Proxmox VMs — using cloud-init user-data files you create and pass via `hcloud` or Proxmox.
+
+##### Minimal user-data (Hetzner Ubuntu VM)
+</code></pre>yaml</p>
+<h1>~/cloud-init/base-server.yaml</h1>
+<p>#cloud-config</p>
+<h1>Create a non-root admin user</h1>
+<p>users:</p>
+<ul>
+<li>name: ops</li>
+<p>groups: [sudo, docker] shell: /bin/bash sudo: ALL=(ALL) NOPASSWD:ALL ssh_authorized_keys:</p>
+<li>ssh-ed25519 AAAA...your-public-key... ops@shani</li>
+</ul>
+<h1>Disable password auth entirely</h1>
+<p>ssh_pwauth: false disable_root: true</p>
+<h1>Install base packages</h1>
+<p>packages:</p>
+<ul>
+<li>curl</li>
+<li>git</li>
+<li>htop</li>
+<li>fail2ban</li>
+<li>ufw</li>
+</ul>
+<h1>Run once on first boot</h1>
+<p>runcmd:</p>
+<ul>
+<li>ufw allow 22/tcp</li>
+<li>ufw allow 80/tcp</li>
+<li>ufw allow 443/tcp</li>
+<li>ufw --force enable</li>
+<li>systemctl enable --now fail2ban</li>
+<li>curl -fsSL https://get.docker.com | sh    # or install Podman</li>
+</ul>
+<h1>Write a file on the new VM</h1>
+<p>write_files:</p>
+<ul>
+<li>path: /etc/motd</li>
+<p>content: | Managed by Shani homelab. Do not edit manually. permissions: '0644' <pre><code>
+#### Provision a Hetzner VM with cloud-init</code></pre>bash hcloud server create \ --name vpn-exit-01 \ --type cx22 \ --image ubuntu-24.04 \ --location nbg1 \ --ssh-key ~/.ssh/id_ed25519.pub \ --user-data-from-file ~/cloud-init/base-server.yaml</p>
+</ul>
+<h1>Watch the bootstrap complete (takes 60–90 seconds)</h1>
+<p>hcloud server ssh vpn-exit-01 -- "cloud-init status --wait && journalctl -u cloud-init --no-pager" <pre><code>
+#### Provision a Proxmox VM with cloud-init (nocloud source)</code></pre>bash</p>
+<h1>Download a cloud image (Ubuntu 24.04 cloud-ready)</h1>
+<p>wget https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img</p>
+<h1>Create a VM template in Proxmox</h1>
+<p>qm create 9000 --name ubuntu-template --memory 2048 --cores 2 --net0 virtio,bridge=vmbr0 qm importdisk 9000 noble-server-cloudimg-amd64.img local-lvm qm set 9000 --scsihw virtio-scsi-pci --scsi0 local-lvm:vm-9000-disk-0 qm set 9000 --ide2 local-lvm:cloudinit   # attach cloud-init drive qm set 9000 --boot c --bootdisk scsi0 qm set 9000 --serial0 socket --vga serial0 qm set 9000 --ipconfig0 ip=dhcp qm template 9000</p>
+<h1>Clone template and pass your user-data</h1>
+<p>qm clone 9000 101 --name worker-01 --full qm set 101 --cicustom "user=local:snippets/base-server.yaml" qm set 101 --ipconfig0 "ip=192.168.1.101/24,gw=192.168.1.1" qm start 101 <pre><code>
+#### WireGuard exit node via cloud-init (one-shot VPN provisioning)</code></pre>yaml</p>
+<h1>~/cloud-init/wireguard-exit.yaml</h1>
+<p>#cloud-config packages: [wireguard]</p>
+<p>write_files:</p>
+<ul>
+<li>path: /etc/wireguard/wg0.conf</li>
+<p>permissions: '0600' content: | [Interface] PrivateKey = <server-private-key> Address = 10.8.0.1/24 ListenPort = 51820 PostUp   = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE</p>
+</ul>
+<p>[Peer] PublicKey = <client-public-key> AllowedIPs = 10.8.0.2/32</p>
+<p>runcmd:</p>
+<ul>
+<li>sysctl -w net.ipv4.ip_forward=1</li>
+<li>echo "net.ipv4.ip_forward=1" >> /etc/sysctl.d/99-wireguard.conf</li>
+<li>systemctl enable --now wg-quick@wg0</li>
+<li>ufw allow 51820/udp</li>
+<li>ufw --force enable</li>
+<p><pre><code></code></pre>bash hcloud server create --name wg-exit-eu --type cx22 --image ubuntu-24.04 \ --location nbg1 --user-data-from-file ~/cloud-init/wireguard-exit.yaml <pre><code>
+#### Validate user-data before sending</code></pre>bash</p>
+</ul>
+<h1>Install cloud-init validator</h1>
+<p>pip install cloud-init --break-system-packages</p>
+<h1>Validate syntax</h1>
+<p>cloud-init schema --config-file ~/cloud-init/base-server.yaml <pre><code>
+---
+
+### Chef / Puppet
+
+&gt; **Note:** Chef and Puppet use persistent agents installed on managed hosts — incompatible with Shani OS's immutable, read-only root. Use **Ansible** (agentless, SSH + Python) for configuration management on this system. Chef/Puppet are listed here for awareness when working in enterprise environments that already use them; on this system, Ansible with AWX is the supported path.
+
+---
+
+## Artifact &amp; Dependency Management
+
+### JFrog Artifactory OSS
+
+For compose file and setup, see the [Developer Tools wiki → JFrog Artifactory OSS](https://docs.shani.dev/doc/servers/devtools#jfrog-artifactory-oss-universal-artifact-repository).
+</code></pre>bash</p>
+<h1>Push a Docker image</h1>
+<p>podman tag myapp:latest localhost:8182/my-docker-local/myapp:latest podman push localhost:8182/my-docker-local/myapp:latest</p>
+<h1>Upload a generic artifact</h1>
+<p>curl -u admin:password -T ./myapp.tar.gz \ "http://localhost:8181/artifactory/generic-local/myapp-1.0.tar.gz" <pre><code>
+---
+
+### Nexus Repository OSS
+
+For compose file and setup, see the [Developer Tools wiki → Nexus Repository OSS](https://docs.shani.dev/doc/servers/devtools#nexus-repository-oss-maven-npm-pypi-docker-proxy).
+</code></pre>bash</p>
+<h1>Configure npm to proxy through Nexus</h1>
+<p>npm config set registry http://localhost:8091/repository/npm-proxy/</p>
+<h1>Push a Docker image</h1>
+<p>podman tag myapp:latest localhost:8092/myapp:latest podman push localhost:8092/myapp:latest <pre><code>
+&gt; ⚠️ Nexus requires at least 4 GB RAM. Set `-Xms2703m -Xmx2703m` via `INSTALL4J_ADD_VM_PARAMS` to cap memory.
+
+---
+
+## Service Discovery &amp; Orchestration
+
+### Consul (Service Discovery &amp; Service Mesh)
+
+For compose file and setup, see the [Developer Tools wiki → Consul](https://docs.shani.dev/doc/servers/devtools#consul-service-discovery--service-mesh).
+</code></pre>bash</p>
+<h1>Install Consul CLI — Nix</h1>
+<p>nix-env -iA nixpkgs.consul</p>
+<p>consul members consul kv put myapp/config/db_host "db.home.local" consul kv get myapp/config/db_host consul health service myapp dig @127.0.0.1 -p 8600 myapp.service.consul <pre><code>
+---
+
+### Nomad (Workload Orchestrator)
+
+For compose file and setup, see the [Developer Tools wiki → Nomad](https://docs.shani.dev/doc/servers/devtools#nomad-workload-orchestrator).
+</code></pre>bash</p>
+<h1>Install Nomad CLI — Nix</h1>
+<p>nix-env -iA nixpkgs.nomad</p>
+<p>nomad node status nomad job run ~/nomad/jobs/nginx.nomad nomad job status nginx nomad alloc logs <alloc-id> nomad job scale nginx web 3 <pre><code>
+##### Example job file
+</code></pre>hcl job "nginx" { datacenters = ["dc1"] type        = "service"</p>
+<p>group "web" { count = 1</p>
+<p>network { port "http" { static = 8099 } }</p>
+<p>task "nginx" { driver = "docker" config { image = "nginx:alpine" ports = ["http"] } resources { cpu    = 100 memory = 128 } } } } <pre><code>
+---
+
+## Developer Environments &amp; Utilities
+
+### code-server (VS Code in Browser)
+
+For compose file and setup, see the [Developer Tools wiki → code-server](https://docs.shani.dev/doc/servers/devtools#code-server).
+
+---
+
+### Coder (Cloud Development Environments)
+
+For compose file and setup, see the [Developer Tools wiki → Coder](https://docs.shani.dev/doc/servers/devtools#gitpod--coder-cloud-development-environments).
+
+---
+
+### Windmill (Workflow &amp; Script Automation)
+
+For compose file and setup, see the [Developer Tools wiki → Windmill](https://docs.shani.dev/doc/servers/devtools#windmill-workflow--script-automation).
+
+---
+
+### Web Analytics (Plausible, Umami, Matomo)
+
+For Plausible (privacy-first, cookie-free), Umami (minimal analytics), and Matomo (full session tracking), see the [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools#matomo-web-analytics).
+
+---
+---
+
+## Internal Platforms
+
+### Backstage (Internal Developer Portal)
+
+For compose file and setup, see the [Developer Tools wiki → Backstage](https://docs.shani.dev/doc/servers/devtools#backstage-internal-developer-portal).
+
+&gt; Backstage is most valuable once you have 5+ services. Start small — register services with `catalog-info.yaml` files in their repos, then add plugins incrementally.
+
+---
+
+## Hardware &amp; Embedded
+
+## WLED (LED Controller)
+
+**Purpose:** Open-source firmware and web server for addressable LED strips (WS2812B, SK6812, WS2811, and more) running on ESP8266/ESP32. Flash WLED onto a cheap ESP32 board, wire it to your LED strip, and get a full web UI, Home Assistant integration via MQTT and native API, effects library (100+ built-in animations), segments, palettes, and a JSON API. No cloud — WLED runs entirely on the microcontroller and your LAN.
+
+WLED runs on the ESP32 microcontroller itself — not as a container on your server. Your server hosts the Home Assistant integration and optionally a WLED configuration backup.
+
+#### Flash WLED onto an ESP32 (from your server)</code></pre>bash</p>
+<h1>Install esptool</h1>
+<p>pip install esptool --break-system-packages</p>
+<h1>Download latest WLED firmware</h1>
+<h1>Replace 0.15.0 with the latest version from https://github.com/Aircoookie/WLED/releases</h1>
+<p>curl -LO https://github.com/Aircoookie/WLED/releases/latest/download/WLED_0.15.0_ESP32.bin</p>
+<h1>Flash (replace /dev/ttyUSB0 with your ESP32 port)</h1>
+<p>esptool.py --port /dev/ttyUSB0 write_flash 0x0 WLED_0.15.0_ESP32.bin  # update filename to match downloaded version</p>
+<pre><code>
+##### Or use the browser-based installer at [install.wled.me](https://install.wled.me)
+
+— plug the ESP32 into any computer and flash directly from the browser without installing tools.
+
+#### Wire the circuit</code></pre>
+<p>ESP32 GPIO2 (Data) ──► LED Strip Data In ESP32 GND           ──► LED Strip GND   ──► Power Supply GND 5V Power Supply     ──► LED Strip VCC (do NOT power strip from ESP32 5V) <pre><code>
+&gt; For more than ~30 LEDs, always use an external 5V power supply. A 60-LED strip at full white draws ~3.6A — far more than USB can provide.
+
+#### Home Assistant integration
+
+Once WLED is on your network, Home Assistant auto-discovers it via mDNS. Accept the integration and your LED strip appears as a light entity with brightness, colour, and effect controls.
+
+##### Manual WLED config backup (save to your server)
+</code></pre>bash</p>
+<h1>Export WLED config via its HTTP API</h1>
+<p>curl http://192.168.1.XXX/cfg.json -o /home/user/wled/backups/strip-1-cfg.json curl http://192.168.1.XXX/presets.json -o /home/user/wled/backups/strip-1-presets.json <pre><code>
+#### Control via JSON API</code></pre>bash</p>
+<h1>Set colour to warm white</h1>
+<p>curl -X POST http://192.168.1.XXX/json/state \ -H "Content-Type: application/json" \ -d '{"on":true,"bri":200,"seg":[{"col":[[255,200,100]]}]}'</p>
+<h1>Set a built-in effect (effect ID 9 = "Colorloop")</h1>
+<p>curl -X POST http://192.168.1.XXX/json/state \ -d '{"seg":[{"fx":9,"sx":128,"ix":200}]}'</p>
+<h1>Turn off</h1>
+<p>curl -X POST http://192.168.1.XXX/json/state -d '{"on":false}' <pre><code>
+#### MQTT control (integrates with Mosquitto)
+
+In WLED web UI → Config → Sync → MQTT:
+- Server: `192.168.1.X` (your Mosquitto host)
+- Port: `1883`
+- User/Password: your MQTT credentials
+- Topic: `wled/strip1`
+</code></pre>bash</p>
+<h1>Control via MQTT</h1>
+<p>podman exec mosquitto mosquitto_pub -u user -P password \ -t "wled/strip1" -m "ON"</p>
+<p>podman exec mosquitto mosquitto_pub -u user -P password \ -t "wled/strip1/col" -m "#FF6400" <pre><code>
+&gt; WLED is one of the most popular DIY smart home projects. A single ESP32 (~$4) + WS2812B strip (~$8/m) gives you full-colour, effect-capable smart lighting at a fraction of the cost of Philips Hue or LIFX.
+
+---
+
+## IoT &amp; SCADA Tools
+
+## OpenDataBay / Grafana SCADA Dashboard
+
+**Purpose:** Build SCADA-style dashboards in Grafana using the SCADA panel plugin — P&amp;ID diagrams, process flow animations, valve states, and setpoint controls visualised with industrial symbols.
+</code></pre>bash</p>
+<h1>Install the SCADA plugin in Grafana</h1>
+<p>podman exec grafana grafana-cli plugins install volkovlabs-form-panel podman exec grafana grafana-cli plugins install marcusolsson-dynamictext-panel podman exec grafana grafana-cli plugins install volkovlabs-echarts-panel</p>
+<h1>Restart Grafana to load plugins</h1>
+<p>podman restart grafana <pre><code>
+---
+
+## Security CLI Tools
+
+&gt; Security tooling (osquery, Nuclei, SOPS, Semgrep, Trivy) is covered in the [Security &amp; Identity wiki](https://docs.shani.dev/doc/servers/security). This section covers only the DevOps integration points where security tools gate CI pipelines.
+
+---
+
+&gt; **Education platforms** (Open edX/Tutor) are documented in the [Developer Tools wiki](https://docs.shani.dev/doc/servers/devtools).
+
+
+## Key Concepts
+
+#### CI/CD Pipeline Stages
+A production pipeline typically has these gates in order: (1) **Lint/Format** — `tflint`, `black`, `eslint`; (2) **Unit Tests** — fast, no external deps; (3) **Build** — compile or build container image; (4) **SAST** — Semgrep, Checkov; (5) **Integration Tests** — spin up dependencies; (6) **Container Scan** — Trivy; (7) **Push** — tag and push to registry; (8) **Deploy to Staging** — Argo Rollouts canary; (9) **Smoke Tests**; (10) **Promote to Prod** — manual gate or auto on metrics.
+
+#### Idempotency in automation
+An operation is idempotent if running it multiple times produces the same result as running it once. Ansible modules are idempotent — running `apt: name=nginx state=present` 100 times does not install nginx 100 times. Terraform is idempotent — re-applying the same config changes nothing if the state matches. Write all your automation with idempotency in mind: check before act, not act then check.
+
+#### Immutable infrastructure
+Rather than patching running servers (mutable), you build a new image with the change applied and replace the running instance. Container-based workloads are inherently immutable — you don't patch a running container, you rebuild the image and redeploy. Shani OS is an immutable OS for the same reason: updates replace the root filesystem atomically.
+
+#### GitOps vs traditional CD
+Traditional CD has the pipeline push changes to the cluster (`kubectl apply` from CI). GitOps inverts this — a reconciler inside the cluster (ArgoCD, Flux) watches a Git repo and *pulls* the desired state. Benefits: every change is a Git commit (full audit trail), the cluster can self-heal by re-syncing, and the pipeline never needs cluster credentials.
+
+#### Trunk-based development vs feature branches
+Trunk-based development has everyone committing directly to `main` (or short-lived branches that merge in hours, not weeks). Feature flags gate incomplete work rather than long-lived branches. This reduces merge conflicts and keeps CI fast. Most high-performing teams (per DORA research) practice trunk-based development.
+
+#### Shift-left security
+Moving security checks earlier in the development lifecycle — ideally before code is committed (pre-commit hooks, IDE plugins) rather than post-deployment. Semgrep in pre-commit is more shift-left than ZAP in staging. The earlier a finding, the cheaper it is to fix.
+
+#### Ephemeral environments
+On-demand environments provisioned for a specific PR or feature, then destroyed. Every PR gets its own isolated test environment with a URL like `pr-123.staging.example.com`. Enables parallel testing with no environment contention. Typically provisioned via Kubernetes namespaces + Argo Rollouts or Helm + preview URLs from Ingress.
+
+#### Blue/Green vs Canary vs Rolling — when to use each
+- **Rolling update** (Kubernetes default): replace pods one at a time. Zero downtime but brief period with mixed versions. Good for stateless workloads, low risk.
+- **Blue/Green**: maintain two identical environments, flip traffic instantly. Expensive (2× resources) but instant rollback. Good for scheduled maintenance windows or database migrations.
+- **Canary**: route 5–10% of traffic to new version, watch metrics, then promote. Best for high-traffic services where you want to catch regressions with real traffic before a full rollout.
+
+#### Service mesh concepts (Istio/Linkerd)
+A service mesh adds a sidecar proxy (Envoy for Istio, a lightweight proxy for Linkerd) to every pod. The sidecar intercepts all in/out traffic, enabling: mTLS between services without app code changes, traffic shifting (canary), circuit breaking, retries, and distributed tracing. The control plane (Istiod) pushes policy to all sidecars. This is separate from Cilium, which does similar things at the eBPF kernel level without sidecars.
+
+#### On-call rotation essentials
+DORA's Time to Restore (MTTR) metric is directly tied to how well on-call is set up. The key components are: (1) alerting with high signal-to-noise (no alert fatigue — every page must be actionable), (2) runbooks linked from alerts, (3) a defined escalation chain, (4) postmortems after every incident. Grafana OnCall handles scheduling and escalation; your Prometheus alerts are the input.
+
+#### Rollback vs roll-forward
+Rolling back means deploying the previous known-good version. Roll-forward means quickly patching the broken version and deploying again. For stateless services, rollback is easier — `kubectl argo rollouts undo` or `kubectl rollout undo`. For services with database migrations, rollback may be impossible if the migration isn't reversible — which is why forward-compatible migrations (add column, then backfill, then make non-null) are a standard practice.
+
+#### Environment parity
+Dev, staging, and prod should be as similar as possible in config, dependencies, and infrastructure shape. Differences cause &quot;works on staging&quot; bugs. Using the same Helm chart with different `values.yaml` per environment (or Kustomize overlays) is the standard approach to maintaining parity while allowing necessary differences (replica count, resource limits, domain names).
+
+#### Terraform state — the source of truth for your infrastructure
+Terraform's state file (`terraform.tfstate`) maps your configuration to real infrastructure resources. It tracks resource IDs, attributes, and dependencies. Without state, Terraform can't know what it has already created. Problems with local state: (1) it can't be shared across a team, (2) it's lost if the machine is lost. Remote state (S3/MinIO backend with DynamoDB/Redis locking) is mandatory for team use — it enables state locking (prevents concurrent applies), versioning (rollback if state is corrupted), and separation from the code. `terraform import` adds existing resources to state; `terraform state rm` removes resources from tracking without destroying them.
+
+#### Ansible vs Terraform — what each is for
+Terraform is declarative and idempotent for infrastructure provisioning — it manages the lifecycle of resources (create, update, destroy) by reconciling desired state with actual state. Ansible is procedural and idempotent for configuration management — it runs tasks in sequence on existing hosts (install packages, write config files, restart services). The canonical split: Terraform provisions the VM; Ansible configures what's running on it. Both can overlap (Terraform has file provisioners; Ansible has cloud modules) but the mental models are different. Mixing them without a clear boundary creates maintenance nightmares.
+
+#### Policy-as-code — making compliance automatic
+Policy-as-code tools (Checkov, tfsec, OPA/Rego, Kyverno) express infrastructure and Kubernetes policies as code that can be version-controlled, reviewed, and automatically enforced. Instead of a checklist that relies on humans, a Checkov rule blocks a Terraform plan that opens port 22 to 0.0.0.0/0. OPA Gatekeeper prevents a `kubectl apply` of a deployment with no resource limits. The shift: compliance moves from a post-deployment audit to a pre-deployment gate in the CI pipeline. Every IaC commit passes through policy checks before reaching production.
+
+#### Terraform modules — reusable infrastructure components
+A module is a directory of Terraform files with defined inputs (variables) and outputs. Instead of copy-pasting the same VPC/subnet/security-group configuration across 10 environments, you write it once as a module and call it with different variable values. The public Terraform Registry hosts community modules (AWS VPC, GKE cluster, etc.). Internal modules (stored in your Git repo) encode your organisation's standards — a module that provisions a PostgreSQL instance always includes backup configuration, monitoring, and correct security groups, because those are baked in. Modules are the IaC equivalent of application libraries.
+
+## Caddy Configuration
+
+Services in this wiki that need Caddy proxying:
+</code></pre>caddyfile</p>
+<h1>Code hosting (see Developer Tools wiki for full config)</h1>
+<p>git.home.local        { tls internal; reverse_proxy localhost:3000 } gitlab.example.com    { reverse_proxy localhost:8929 }</p>
+<h1>CI/CD</h1>
+<p>ci.home.local         { tls internal; reverse_proxy localhost:8000 } jenkins.home.local    { tls internal; reverse_proxy localhost:8090 } sonar.home.local      { tls internal; reverse_proxy localhost:9000 }</p>
+<h1>Registries</h1>
+<p>registry.home.local   { tls internal; reverse_proxy localhost:5000 } harbor.home.local     { tls internal; reverse_proxy localhost:8180 } artifactory.home.local { tls internal; reverse_proxy localhost:8181 } nexus.home.local      { tls internal; reverse_proxy localhost:8091 }</p>
+<h1>Kubernetes & observability</h1>
+<p>argocd.home.local     { tls internal; reverse_proxy localhost:8180 { transport http { tls_insecure_skip_verify } } } rancher.home.local    { tls internal; reverse_proxy localhost:8443 { transport http { tls_insecure_skip_verify } } } grafana.home.local    { tls internal; reverse_proxy localhost:3000 } longhorn.home.local   { tls internal; reverse_proxy localhost:8080 }</p>
+<h1>Service discovery & orchestration</h1>
+<p>consul.home.local     { tls internal; reverse_proxy localhost:8500 } nomad.home.local      { tls internal; reverse_proxy localhost:4646 } awx.home.local        { tls internal; reverse_proxy localhost:8052 }</p>
+<h1>Dev environments & tools (see Developer Tools wiki)</h1>
+<p>code.home.local       { tls internal; reverse_proxy localhost:8443 } coder.home.local      { tls internal; reverse_proxy localhost:3001 } windmill.home.local   { tls internal; reverse_proxy localhost:8300 } analytics.home.local  { tls internal; reverse_proxy localhost:8033 } umami.home.local      { tls internal; reverse_proxy localhost:3005 } mail.home.local       { tls internal; reverse_proxy localhost:8025 }</p>
+<h1>Internal platform</h1>
+<p>backstage.home.local  { tls internal; reverse_proxy localhost:7007 } opencost.home.local   { tls internal; reverse_proxy localhost:9090 } <pre><code>
+---
+
+## Troubleshooting
+
+&gt; For troubleshooting Gitea, Woodpecker, Jenkins, SonarQube, Harbor, Forgejo Actions, Renovate, Windmill, code-server, Coder, and Matomo, see the [Developer Tools wiki → Troubleshooting](https://docs.shani.dev/doc/servers/devtools#troubleshooting).
+
+| Issue | Solution |
+|-------|----------|
+| Private registry push rejected | Add `unqualified-search-registries` to `/etc/containers/registries.conf`; restart Podman |
+| `kubectl: connection refused` | Check `k3s`/`k0s` systemd service: `sudo systemctl status k3s`; verify kubeconfig `server:` IP is correct |
+| MicroK8s `permission denied` on kubectl | Run `sudo usermod -aG microk8s $USER` then log out and back in |
+| MicroK8s cluster data lost after snap refresh | Data is in `/var/snap/microk8s/` — loss only happens on `snap remove`, not `snap refresh` |
+| minikube start fails with Podman driver | Ensure Podman socket is active: `systemctl --user start podman.socket`; try `minikube delete` then re-create |
+| Node shows `NotReady` | Check CNI pods in `kube-system`; verify `br_netfilter` is loaded |
+| Pod stuck in `CrashLoopBackOff` | Run `kubectl logs &lt;pod&gt; --previous`; check env vars and volume mounts via `kubectl describe pod` |
+| Pod stuck in `ImagePullBackOff` | Image name or tag wrong; registry unreachable; missing `imagePullSecret` |
+| Longhorn volume stuck `Attaching` | Verify `iscsid` is running on all nodes: `sudo systemctl status iscsid` |
+| ArgoCD app OutOfSync after apply | Add `ignoreDifferences` to the Application spec for server-side mutated fields |
+| Helm upgrade fails mid-release | Run `helm rollback &lt;release&gt; -n &lt;ns&gt;`; if stuck in `pending-upgrade`, delete the stuck secret |
+| k9s shows no resources | Check active namespace with `:ns`; switch context with `:ctx` |
+| Velero backup failing | Check `velero backup logs &lt;n&gt;`; ensure MinIO bucket exists; verify pod has network access to MinIO |
+| Sealed secret not decrypting | Do not delete the `sealed-secrets-key` secret in `kube-system`; back it up: `kubectl get secret -n kube-system sealed-secrets-key -o yaml` |
+| Crossplane provider stuck `Unhealthy` | Check `kubectl describe provider &lt;n&gt;`; verify the provider credentials secret exists in the `crossplane-system` namespace |
+| KEDA ScaledObject not scaling | Run `kubectl describe scaledobject &lt;n&gt;`; verify the trigger connection string is reachable from the KEDA operator pod; check `kubectl logs -n keda -l app=keda-operator` |
+| KEDA not scaling to zero | Ensure `minReplicaCount: 0` is set; some scalers (e.g. HTTP) require the `keda-add-ons-http` addon for scale-to-zero |
+| Cilium pods `CrashLoopBackOff` | Confirm k3s was started with `--flannel-backend=none --disable-kube-proxy`; run `cilium status` and `cilium connectivity test` |
+| Hubble observe shows no flows | Run `cilium hubble port-forward` first; confirm Hubble is enabled with `cilium hubble enable` |
+| Kyverno policy not enforcing | Check `validationFailureAction: Enforce` (not `Audit`); run `kubectl get policyreport -A` to see violations without enforcement |
+| Falco not detecting events | Verify eBPF driver is loaded: `kubectl logs -n falco -l app=falco`; on some kernels try `driver.kind=module` instead of `ebpf` |
+| Falco too many false positives | Tune rules by adding `and not container.image.repository in (known-image)` conditions; start with `priority: WARNING` before `ERROR` |
+| OpenCost shows $0 for all workloads | Set custom pricing in the ConfigMap; verify Prometheus is scraping `node-exporter` and `kube-state-metrics` correctly |
+| LitmusChaos experiment stuck in `Running` | Check `kubectl get chaosengine` and `kubectl describe chaosengine`; verify the `litmus-admin` ServiceAccount exists in the target namespace |
+| LitmusChaos probe verdict `Fail` unexpectedly | Confirm the Prometheus endpoint is reachable from within the cluster; check the PromQL query returns data with `kubectl exec -n litmus` |
+| tfsec scan exits non-zero in CI | Use `--severity HIGH` to only fail on high/critical; add inline `#tfsec:ignore:` annotations for accepted risks |
+| Checkov `ModuleNotFoundError` on Helm charts | Install `checkov[all]` extras: `pip install 'checkov[all]' --break-system-packages` |
+| cosign sign fails `UNAUTHORIZED` | Ensure the registry credentials are available: `podman login registry.home.local` before signing |
+| Kyverno blocks all pods after adding verify policy | Switch `validationFailureAction` to `Audit` first; check `kubectl get policyreport -A` to review violations before enforcing |
+| Terragrunt `Error: No parent terragrunt.hcl` | `find_in_parent_folders()` walks up the directory tree — ensure a root `terragrunt.hcl` exists above the current module directory |
+| Terragrunt `run-all` applies in wrong order | Define `dependency` blocks in child `terragrunt.hcl` files; Terragrunt builds the DAG from these — missing dependencies mean unordered execution |
+| `hcloud server create` returns auth error | Token may have read-only permissions; ensure the API token has read/write scope in Hetzner Cloud Console → Security → API Tokens |
+| cloud-init write_files not appearing | Verify `path` starts with `/` and `permissions` is a quoted string (`'0644'` not `0644`); check `journalctl -u cloud-init` on the VM for parse errors |
+| cloud-init `runcmd` not executing | `runcmd` runs as root; check `/var/log/cloud-init-output.log` on the VM; commands that exit non-zero abort subsequent commands unless wrapped in `|| true` |
+
+---
+
+## Skaffold (Local Kubernetes Dev Loop)
+
+**Purpose:** Watches your source files, rebuilds container images on change, and redeploys to a local Kubernetes cluster (kind, minikube) automatically. Eliminates the manual `podman build → tag → push → kubectl apply` cycle during inner-loop development.
+</code></pre>bash</p>
+<h1>Install via Nix</h1>
+<p>nix-env -iA nixpkgs.skaffold</p>
+<h1>Initialise a skaffold.yaml in your project</h1>
+<p>skaffold init</p>
+<h1>Start the dev loop (watches files, rebuilds, redeploys on save)</h1>
+<p>skaffold dev</p>
+<h1>One-shot build and deploy</h1>
+<p>skaffold run</p>
+<h1>Tear down everything skaffold deployed</h1>
+<p>skaffold delete <pre><code>
+##### Minimal `skaffold.yaml`
+</code></pre>yaml apiVersion: skaffold/v4beta6 kind: Config build: artifacts:</p>
+<ul>
+<li>image: registry.home.local/myapp</li>
+<p>docker: dockerfile: Containerfile deploy: kubectl: manifests:</p>
+<li>k8s/*.yaml</li>
+<p><pre><code>
+---
+
+## Tilt (Fast Multi-Service Dev Workflow)
+
+**Purpose:** Like Skaffold but with a richer UI and a Python-like DSL (`Tiltfile`). Manages multiple services simultaneously — each gets its own build status, log stream, and live-update rules. Best for teams developing microservices locally on Kubernetes.
+</code></pre>bash</p>
+</ul>
+<h1>Install via Nix</h1>
+<p>nix-env -iA nixpkgs.tilt</p>
+<h1>Start Tilt</h1>
+<p>tilt up</p>
+<h1>Tear down</h1>
+<p>tilt down <pre><code>
+##### Minimal `Tiltfile`
+</code></pre>python docker_build('registry.home.local/api', './api') docker_build('registry.home.local/worker', './worker')</p>
+<p>k8s_yaml(['k8s/api.yaml', 'k8s/worker.yaml'])</p>
+<p>k8s_resource('api', port_forwards='8080:8080') k8s_resource('worker', port_forwards='9000:9000') <pre><code>
+---
+
+## Atlantis (Terraform Pull Request Automation)
+
+**Purpose:** Runs `tofu plan` on every PR that touches Terraform files and posts the output as a PR comment. When you comment `atlantis apply`, it runs the apply. Replaces manual CI/CD for IaC — gives teams a reviewable plan before any infrastructure changes.
+</code></pre>yaml</p>
+<h1>~/atlantis/compose.yaml</h1>
+<p>services: atlantis: image: ghcr.io/runatlantis/atlantis:latest ports:</p>
+<ul>
+<li>127.0.0.1:4141:4141</li>
+<p>environment: ATLANTIS_REPO_ALLOWLIST: "git.home.local/myorg/*" ATLANTIS_GITEA_USER: atlantis-bot ATLANTIS_GITEA_TOKEN: <gitea-personal-access-token> ATLANTIS_GITEA_WEBHOOK_SECRET: changeme ATLANTIS_PORT: 4141 ATLANTIS_ATLANTIS_URL: https://atlantis.home.local volumes:</p>
+<li>/home/user/atlantis/repos:/atlantis:Z</li>
+<p>restart: unless-stopped <pre><code></code></pre>bash cd ~/atlantis && podman-compose up -d <pre><code>
+**Caddy:**</code></pre>caddyfile atlantis.home.local { tls internal; reverse_proxy localhost:4141 } ```</p>
+</ul>
+<p>---</p>
+<h2>Key Concepts: DevOps Interviews</h2>
+<h4>The three ways of DevOps</h4>
+<p>From <em>The Phoenix Project</em>: (1) <strong>Flow</strong> — make work visible, limit WIP, reduce batch size, and eliminate waste in the delivery pipeline. (2) <strong>Feedback</strong> — amplify feedback loops so problems are caught early and close to their source. (3) <strong>Continual Learning</strong> — build a culture of experimentation, learning from failure, and knowledge sharing. These map directly to DORA metrics: Flow → Deployment Frequency and Lead Time; Feedback → Change Failure Rate and MTTR; Learning → Postmortems.</p>
+<h4>Container image layering and build performance</h4>
+<p>Each <code>RUN</code>, <code>COPY</code>, and <code>ADD</code> instruction creates a new image layer. Layers are cached by their content hash — if a layer changes, all subsequent layers are invalidated. Best practice: put rarely changing steps (OS packages, runtime install) near the top; frequently changing steps (application code) near the bottom. Multi-stage builds reduce the final image size by copying only build artefacts — the build tools (gcc, npm) are discarded.</p>
+<h4>GitOps vs push-based CD</h4>
+<p>Push-based CD has the pipeline call <code>kubectl apply</code> with cluster credentials. GitOps inverts this — ArgoCD or Flux watches the Git repo from inside the cluster and pulls changes. Benefits: Git is the single source of truth (every change is auditable), the cluster can self-heal by re-syncing, and the CI pipeline never needs direct cluster credentials (lower blast radius if CI is compromised).</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

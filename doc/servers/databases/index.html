@@ -146,7 +146,1295 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Databases &amp; Caches</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+        </div>
+      </div>
+      <div class="prose"><p>Relational, document, caching, time-series, vector, graph, wide-column, streaming, and full-text search engines. All run rootless with bind-mount volumes labelled <code>:Z</code>. Named volumes omit <code>:Z</code> — Podman manages their labels automatically.</p>
+<p>For multi-node, replicated, and HA deployments see the <a href="https://docs.shani.dev/doc/servers/clusters">Clusters wiki</a>.</p>
+<p>---</p>
+<h2>CAP Theorem Quick Reference</h2>
+<p>The CAP theorem states that a distributed system can guarantee at most two of three properties: <strong>Consistency</strong> (all nodes see the same data at the same time), <strong>Availability</strong> (every request gets a response), and <strong>Partition tolerance</strong> (the system continues operating when network partitions occur). Since real networks always partition eventually, the real choice is between CP and AP.</p>
+<p>| Database | CAP Classification | What this means in practice | |----------|-------------------|------------------------------| | PostgreSQL (single node) | CA | No partition tolerance — not distributed. ACID guarantees fully. | | PostgreSQL + Patroni | CP | During failover election, the primary is unavailable. Consistency is never compromised. | | Redis (single) | CA | No partition tolerance. Synchronous but not distributed. | | Redis Sentinel | CP | Primary unavailable during failover election (~5s). | | Cassandra / ScyllaDB | AP | Always available. Eventual consistency — reads may return stale data. Tune with <code>QUORUM</code> consistency level to move toward CP. | | MongoDB Replica Set | CP | Primary unavailable during re-election. Strongly consistent by default. | | Kafka | AP | Brokers stay available; consumers may see stale offsets during partition. | | CockroachDB | CP | Strong consistency (serializable isolation) with partition tolerance. May be temporarily unavailable in split-brain. | | etcd | CP | Refuses requests if quorum is lost. Never returns stale data. |</p>
+<h4>ACID vs BASE — the reliability spectrum</h4>
+<p>ACID (Atomicity, Consistency, Isolation, Durability) is the contract of traditional relational databases: every transaction either fully commits or fully rolls back, leaving the database in a consistent state, isolated from concurrent transactions, and durable on disk. BASE (Basically Available, Soft state, Eventually consistent) is the contract of distributed systems like Cassandra and early DynamoDB: the system is always available, but data may be temporarily inconsistent across nodes and will converge eventually. Most modern systems let you tune where on this spectrum you operate — Cassandra's <code>CONSISTENCY QUORUM</code> leans toward ACID; <code>CONSISTENCY ONE</code> leans toward BASE.</p>
+<h4>Indexing — the single most impactful performance lever</h4>
+<p>An index is a separate data structure (B-tree by default in PostgreSQL/MariaDB) that maps column values to row locations, turning a sequential table scan O(n) into a lookup O(log n). A query on an un-indexed column on a 10M-row table reads every row; the same query with an index reads ~23 rows. Trade-offs: indexes speed up reads but slow down writes (every INSERT/UPDATE must update the index). Partial indexes (PostgreSQL: <code>WHERE deleted_at IS NULL</code>) index only a subset of rows. Composite indexes are ordered — <code>(a, b)</code> helps queries on <code>a</code> or <code>(a, b)</code> but not <code>b</code> alone. <code>EXPLAIN ANALYZE</code> shows whether an index is used.</p>
+<h4>Connection pooling — why PgBouncer exists</h4>
+<p>PostgreSQL spawns a new OS process for every connection (unlike MySQL/MariaDB which use threads). Each process consumes ~5–10 MB of RAM. A web app with 100 concurrent workers each holding an idle connection wastes 500–1000 MB and creates scheduler pressure. PgBouncer sits between the app and PostgreSQL, multiplexing hundreds of app connections onto a small pool of actual database connections (transaction pooling: a connection is only held during a transaction, then returned to the pool). Dragonfly and Redis don't have this problem — they're single-threaded and handle connections via event loops.</p>
+<h4>Message queues vs event streaming — when to use each</h4>
+<p>A message queue (RabbitMQ, NATS) delivers each message to exactly one consumer, then deletes it. It's a task distribution system — ideal for job queues, email sending, and RPC. An event stream (Kafka, Redpanda) retains messages for a configurable period (days/weeks) and lets multiple independent consumers read them at their own pace. It's a shared, replayable log — ideal for audit trails, event sourcing, feeding multiple downstream systems (analytics, search indexing, ML pipelines) from one producer. The key question: do you want messages consumed and forgotten (queue) or permanently recorded and replayable (stream)?</p>
+<h4>Vector databases and embeddings — the AI infrastructure layer</h4>
+<p>A vector database (Qdrant, Weaviate, Chroma, pgvector) stores high-dimensional float vectors (embeddings) and answers "find the N most similar vectors to this query vector" using approximate nearest-neighbour (ANN) algorithms (HNSW, IVF). Embeddings are produced by ML models — a 1536-dimension float array that encodes semantic meaning. Two semantically similar sentences produce nearby vectors. This enables RAG (Retrieval-Augmented Generation): embed your documents, store in Qdrant, embed a user query, find the most similar document chunks, pass them as context to an LLM. pgvector adds this capability to PostgreSQL; Qdrant/Weaviate are purpose-built for scale.</p>
+<h4>Time-series data model — why specialised databases exist</h4>
+<p>Time-series data (metrics, IoT sensor readings, financial ticks) has properties regular databases handle poorly: extremely high write throughput (millions of inserts/second), data is always appended (rarely updated), queries are almost always range-based (last 24h, 7-day average), and old data is downsampled or expired. TimescaleDB adds automatic partitioning by time (hypertables) and continuous aggregates to PostgreSQL. InfluxDB uses a custom storage engine (TSM) optimised for these access patterns. The key concept: <em>retention policies</em> automatically delete data older than N days, preventing unbounded disk growth.</p>
+<h4>OLTP vs OLAP — two different access patterns</h4>
+<p>OLTP (Online Transaction Processing) databases (PostgreSQL, MariaDB, MongoDB) are optimised for high-frequency, low-latency reads and writes of individual rows — your app's operational database. OLAP (Online Analytical Processing) databases (ClickHouse, DuckDB, Redshift) are optimised for aggregate queries over millions of rows — your analytics and reporting layer. OLAP databases use columnar storage: data for one column is stored contiguously on disk, so <code>SELECT AVG(revenue) FROM orders</code> reads only the revenue column, not every field. Row-oriented databases read every column for every matching row. DuckDB runs OLAP queries directly on Parquet files; ClickHouse handles billions of rows per second on a single node.</p>
+<h4>Graph databases — when the relationships are the data</h4>
+<p>In a relational database, joining two tables is a set operation that scans rows. In a graph database (Neo4j), relationships are first-class objects stored with direct pointers — traversing "friends of friends" follows pointers in memory without scanning tables. Graph databases excel at: social networks (mutual connections, influence paths), recommendation engines (people who bought X also bought Y), access control graphs (who can access what via which roles), and network topology (how many hops between two nodes). Cypher (Neo4j's query language) expresses graph patterns naturally: <code>MATCH (a:User)-[:FOLLOWS]-&gt;(b:User)-[:FOLLOWS]-&gt;(c:User) WHERE a.name = 'Alice' RETURN c</code>.</p>
+<h4>Full-text search relevance — why MeiliSearch/Typesense aren't just SQL LIKE</h4>
+<p>SQL <code>LIKE '%query%'</code> does a sequential scan, can't rank by relevance, and doesn't handle typos. A search engine (MeiliSearch, Typesense, Elasticsearch) builds an inverted index — a map from each word to the documents containing it. Relevance ranking uses TF-IDF (term frequency × inverse document frequency) or BM25: rare words that appear often in a specific document are strong signals. Typo tolerance uses Levenshtein distance. Faceted search filters by structured attributes (category, price range) while ranking by full-text relevance. Use a dedicated search engine when you need: typo tolerance, relevance ranking, instant-search UX, or faceting.</p>
+<h4>Sharding vs partitioning</h4>
+<p>Partitioning splits a single table into multiple storage segments on one node — PostgreSQL table partitioning by date, MySQL partitioning by range. This improves query performance (only scan the relevant partition) and maintenance (drop old partitions instead of DELETE). Sharding distributes data across multiple nodes — each shard is a separate database server handling a subset of data. Sharding is for horizontal scale beyond what one node can handle. The challenge: cross-shard queries (join data on shard 1 with data on shard 2) require application-level handling or a distributed query layer (Citus, CockroachDB). The rule: partition first (cheap, always useful), shard only when necessary (expensive operationally). ---</p>
+<h2>Key Concepts</h2>
+<h4>SQL vs NoSQL — the real distinction</h4>
+<p>The choice isn't binary. The real question is: what access patterns does your application need? Relational databases (PostgreSQL, MariaDB) excel at complex joins, ad-hoc queries, and strong consistency. Document stores (MongoDB) excel when records are self-contained and schema flexibility matters. Wide-column stores (Cassandra, ScyllaDB) excel at write-heavy time-series workloads where queries always include a partition key. Use the wrong tool and you're fighting the data model on every query.</p>
+<h4>ACID vs BASE — what these actually mean</h4>
+<ul>
+<li><strong>ACID</strong> (Atomic, Consistent, Isolated, Durable) — every transaction either fully succeeds or fully rolls back; concurrent transactions don't see each other's partial state; committed data survives crashes. PostgreSQL, MySQL (InnoDB). The default expectation in any financial or transactional system.</li>
+<li><strong>BASE</strong> (Basically Available, Soft state, Eventually consistent) — the system stays available even during failures; different nodes may temporarily disagree on state; they will converge eventually. Cassandra, DynamoDB. The default model for high-write, geographically distributed systems.</li>
+</ul>
+<h4>Indexes — how they work and when they hurt</h4>
+<p>An index is a separate data structure (usually a B-tree) that the database maintains alongside a table. Reads using the index skip full table scans — fast. Writes (INSERT, UPDATE, DELETE) are slower because every index must be updated. The pathological case: a table with 15 indexes on a write-heavy workload — each write touches 15 B-trees. Rule of thumb: index columns used in WHERE, JOIN, and ORDER BY clauses on tables with > 10,000 rows. Use <code>EXPLAIN ANALYZE</code> (Postgres) or <code>EXPLAIN</code> (MySQL) to verify an index is actually being used.</p>
+<h4>Connection pooling — why it matters at scale</h4>
+<p>PostgreSQL creates a backend process per connection. At 500 connections, you have 500 processes. PgBouncer sits in front and multiplexes thousands of app-side connections onto a small real pool. The app sees a normal database on port 5432 — pooling is transparent. Standard in any production PostgreSQL deployment handling more than a few dozen concurrent users.</p>
+<h4>N+1 query problem</h4>
+<p>Fetching a list of N items then making N additional queries for related data. Example: fetch 100 users, then loop to fetch each user's profile — 101 queries instead of 1 JOIN. ORM frameworks (ActiveRecord, SQLAlchemy) are the most common source. Fix: eager loading (<code>.includes()</code>, <code>.joinedload()</code>) or an explicit JOIN. A standard interview question for any backend role.</p>
+<h4>Read replicas vs sharding</h4>
+<p>A read replica receives all writes from the primary and serves read queries. Scales reads but not writes — all writes still go to one primary. Sharding splits data across multiple primaries (each handles a subset by user ID or hash). Scales both, but cross-shard joins are expensive or impossible. Default path: add a read replica first; shard only when write throughput is the proven bottleneck.</p>
+<h4>Database migrations — forward-compatible patterns</h4>
+<p>Schema changes that break running app code during deployment cause downtime. Safe pattern for adding a required column: (1) add as nullable — app ignores it, (2) backfill existing rows, (3) make non-null in a later migration after all app instances are updated. For dropping a column: stop reading/writing it in app code first, then drop in a separate migration. Never couple a breaking schema change and the app change in the same deployment.</p>
+<h4>Portability note</h4>
+<p>Compose examples use rootless <strong>Podman</strong> and <code>host.containers.internal</code>. When using Docker, replace <code>podman-compose</code> with <code>docker compose</code> and <code>host.containers.internal</code> with <code>host-gateway</code> (add <code>extra_hosts: [host-gateway:host-gateway]</code> to the service).</p>
+<h4>WAL (Write-Ahead Log) — the foundation of database durability</h4>
+<p>Before any change is written to the actual data files, it's appended to the WAL (also called redo log in MySQL, binlog in some contexts). On crash, the database replays the WAL to recover uncommitted transactions. This is what makes PostgreSQL and MySQL ACID-compliant. The WAL also powers streaming replication (standbys replay the primary's WAL) and point-in-time recovery (replay WAL from a base backup to any point in time). Understanding WAL is essential for explaining how replication, backup, and crash recovery work in interviews.</p>
+<h4>VACUUM and autovacuum in PostgreSQL</h4>
+<p>PostgreSQL uses MVCC (Multi-Version Concurrency Control) — old row versions are kept visible to concurrent transactions rather than being immediately overwritten. Dead tuples (old versions no longer needed) accumulate over time and must be reclaimed by VACUUM. autovacuum runs in the background and handles this automatically, but it can fall behind on high-churn tables. Symptoms of autovacuum lag: table bloat (physical size >> logical data size), slow sequential scans, and eventually transaction ID wraparound (a hard limit at 2 billion transactions that can cause database shutdown). Monitor <code>pg_stat_user_tables.n_dead_tup</code> and <code>autovacuum_count</code>.</p>
+<h4>Database connection limits and pooling tiers</h4>
+<p>PostgreSQL has a <code>max_connections</code> setting (default 100). Each connection is a backend process using ~5–10 MB RAM. At 200 connections you're using 1–2 GB just for connection overhead. The pooling stack: application → PgBouncer (transaction-mode pooling, 1000s of app connections → 20–50 real connections) → PostgreSQL. Transaction-mode pooling means a connection is only held for the duration of a single transaction — prepared statements and <code>SET</code> session variables don't work across transactions in this mode. Session-mode pooling is safer but provides less multiplexing benefit. For Kubernetes workloads, PgBouncer as a sidecar or as a shared service both work.</p>
+<h4>Schema migration tools — Flyway vs Liquibase vs Alembic</h4>
+<p>Schema migrations must be versioned, reproducible, and trackable. <strong>Flyway</strong>: SQL-first, simple, versioned files (<code>V1__create_users.sql</code>), Java or CLI. <strong>Liquibase</strong>: XML/YAML/JSON changesets with rollback support; more complex but supports diff-based migration generation. <strong>Alembic</strong> (Python): generates migration files from SQLAlchemy model diffs — developer-friendly but requires careful review since auto-generated migrations can miss edge cases. All three maintain a migration history table in the database. The rule: every schema change goes through a migration file committed to Git, never run directly against production.</p>
+<p>---</p>
+<h2>MariaDB</h2>
+<p><strong>Purpose:</strong> Open-source relational database for web apps, CMS platforms, and legacy software stacks.</p>
+<pre><code class="language-yaml"># ~/mariadb/compose.yaml
+services:
+  mariadb:
+    image: mariadb:11
+    ports:
+      - 127.0.0.1:3306:3306
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: strongpassword
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: myuserpass
+    restart: unless-stopped
+
+volumes:
+  mariadb_data:</code></pre>
+<pre><code class="language-bash">cd ~/mariadb &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Connect interactively
+podman exec -it mariadb mariadb -u myuser -pmyuserpass mydb
+
+# Run a query non-interactively
+podman exec mariadb mariadb -u myuser -pmyuserpass mydb -e &quot;SHOW TABLES;&quot;
+
+# Dump a database
+podman exec mariadb mariadb-dump -u root -pstrongpassword mydb &gt; backup.sql
+
+# Restore from dump
+cat backup.sql | podman exec -i mariadb mariadb -u root -pstrongpassword mydb
+
+# List all databases
+podman exec mariadb mariadb -u root -pstrongpassword -e &quot;SHOW DATABASES;&quot;
+
+# Check running processes
+podman exec mariadb mariadb -u root -pstrongpassword -e &quot;SHOW PROCESSLIST;&quot;
+
+# Show table sizes
+podman exec mariadb mariadb -u root -pstrongpassword -e \
+  &quot;SELECT table_name, ROUND((data_length+index_length)/1024/1024,2) AS 'Size (MB)'
+   FROM information_schema.tables WHERE table_schema='mydb' ORDER BY 2 DESC;&quot;</code></pre>
+<blockquote><p><strong>Connect</strong>: <code>podman exec -it mariadb mariadb -u myuser -p mydb</code></p></blockquote>
+<blockquote><p><strong>Backup</strong>: <code>podman exec mariadb mariadb-dump -u root -p mydb &gt; backup.sql</code></p></blockquote>
+<p>---</p>
+<h2>PostgreSQL</h2>
+<p><strong>Purpose:</strong> Advanced, standards-compliant relational database known for complex queries, JSONB support, full-text search, and extensibility. Preferred database for most modern self-hosted apps.</p>
+<pre><code class="language-yaml"># ~/postgres/compose.yaml
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - 127.0.0.1:5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: strongpassword
+      POSTGRES_DB: mydb
+    restart: unless-stopped
+
+volumes:
+  postgres_data:</code></pre>
+<pre><code class="language-bash">cd ~/postgres &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p><strong>Connect</strong>: <code>podman exec -it postgres psql -U myuser -d mydb</code></p></blockquote>
+<blockquote><p><strong>Backup</strong>: <code>podman exec postgres pg_dump -U myuser mydb &gt; backup.sql</code></p></blockquote>
+<blockquote><p><strong>GUI</strong>: pgAdmin (see below)</p></blockquote>
+<h3>JSON vs JSONB</h3>
+<p>PostgreSQL has two JSON types with an important difference:</p>
+<ul>
+<li><strong><code>json</code></strong> stores the raw text of the JSON document, preserving whitespace and key order. Every query re-parses the text. Fast to write, slow to query.</li>
+<li><strong><code>jsonb</code></strong> stores a parsed binary representation, normalises key order, and supports GIN indexing. Slightly slower to write, much faster to query. Use <code>jsonb</code> for almost everything.</li>
+</ul>
+<pre><code class="language-sql">-- GIN index on jsonb — makes @&gt;, ?, ?| operators fast
+CREATE INDEX ON documents USING GIN (metadata);
+
+-- Query: find all documents where metadata contains a specific key
+SELECT id FROM documents WHERE metadata ? 'author';
+
+-- Query: containment — metadata must contain this subset
+SELECT id FROM documents WHERE metadata @&gt; '{&quot;status&quot;: &quot;published&quot;}';</code></pre>
+<h3>PostgreSQL Index Types</h3>
+<p>| Index Type | Best For | Notes | |-----------|----------|-------| | <strong>B-tree</strong> (default) | Equality and range queries (<code>=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>BETWEEN</code>) | Works for most cases | | <strong>Hash</strong> | Equality only (<code>=</code>) | Faster than B-tree for pure equality, no range support | | <strong>GIN</strong> | <code>jsonb</code>, arrays, full-text search, <code>LIKE '%pattern%'</code> | Handles multiple values per row | | <strong>BRIN</strong> | Very large tables with naturally ordered data (timestamps, sequential IDs) | Tiny index, useful for append-only logs | | <strong>GiST</strong> | Geometric data, full-text search with ranking, range types | More flexible than GIN for some workloads |</p>
+<p>Use <code>EXPLAIN ANALYZE</code> to verify an index is being used:</p>
+<pre><code class="language-sql">EXPLAIN ANALYZE SELECT * FROM orders WHERE created_at &gt; NOW() - INTERVAL '7 days';
+-- Look for &quot;Index Scan&quot; vs &quot;Seq Scan&quot; — a Seq Scan on a large table indicates a missing index</code></pre>
+<p><strong>Partial indexes:</strong> index only a subset of rows — useful for filtering on a common condition:</p>
+<pre><code class="language-sql">-- Only index active users — much smaller, faster for this specific query
+CREATE INDEX ON users (email) WHERE active = true;</code></pre>
+<p><strong>Covering indexes:</strong> include extra columns so the query can be satisfied from the index alone without touching the table:</p>
+<pre><code class="language-sql">-- Include username so queries that fetch both email+username don't need a table lookup
+CREATE INDEX ON users (email) INCLUDE (username);</code></pre>
+<h4>pgAdmin (PostgreSQL GUI)</h4>
+<pre><code class="language-yaml"># ~/pgadmin/compose.yaml
+services:
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - 127.0.0.1:5050:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/pgadmin &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Connect interactively
+podman exec -it postgres psql -U myuser -d mydb
+
+# Run a query non-interactively
+podman exec postgres psql -U myuser -d mydb -c &quot;SELECT count(*) FROM users;&quot;
+
+# Dump a database
+podman exec postgres pg_dump -U myuser mydb &gt; backup.sql
+
+# Restore from dump
+cat backup.sql | podman exec -i postgres psql -U myuser -d mydb
+
+# List databases
+podman exec postgres psql -U myuser -c &quot;\l&quot;
+
+# List tables in current DB
+podman exec postgres psql -U myuser -d mydb -c &quot;\dt&quot;
+
+# Check active connections
+podman exec postgres psql -U myuser -c &quot;SELECT count(*) FROM pg_stat_activity;&quot;
+
+# Show database sizes
+podman exec postgres psql -U myuser -c \
+  &quot;SELECT pg_database.datname, pg_size_pretty(pg_database_size(pg_database.datname))
+   FROM pg_database ORDER BY pg_database_size(pg_database.datname) DESC;&quot;</code></pre>
+<p>---</p>
+<h2>pgvector (Vector Search in PostgreSQL)</h2>
+<p><strong>Purpose:</strong> PostgreSQL extension that adds a native vector column type and similarity search operators — enabling semantic search, RAG (Retrieval-Augmented Generation) pipelines, and embedding storage without a separate vector database. If you're already using PostgreSQL, this is the lowest-friction path to vector search: one <code>CREATE EXTENSION</code>, one extra column type, and you're done. Use Qdrant or Weaviate when you need billion-scale vector search or advanced ANN indexing; use pgvector when your dataset is under ~10M vectors and you'd rather keep your stack simple.</p>
+<pre><code class="language-yaml"># ~/pgvector/compose.yaml
+services:
+  pgvector:
+    image: pgvector/pgvector:pg16
+    ports:
+      - 127.0.0.1:5432:5432
+    volumes:
+      - pgvector_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: strongpassword
+      POSTGRES_DB: mydb
+    restart: unless-stopped
+
+volumes:
+  pgvector_data:</code></pre>
+<pre><code class="language-bash">cd ~/pgvector &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>The <code>pgvector/pgvector:pg16</code> image is official PostgreSQL 16 with the extension pre-installed. You can also install the extension into an existing PostgreSQL instance:</p></blockquote>
+<blockquote><p><pre><code class="language-bash">&gt; podman exec postgres psql -U myuser -d mydb -c &quot;CREATE EXTENSION vector;&quot;
+&gt; </code></pre></p></blockquote>
+<h5>Set up a vector table and index</h5>
+<pre><code class="language-sql">-- Enable the extension (once per database)
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- Create a table with a vector column (1536 dims for OpenAI, 768 for nomic-embed-text)
+CREATE TABLE documents (
+  id       BIGSERIAL PRIMARY KEY,
+  content  TEXT,
+  metadata JSONB,
+  embedding vector(768)
+);
+
+-- Create an HNSW index for fast approximate nearest-neighbour search
+CREATE INDEX ON documents USING hnsw (embedding vector_cosine_ops)
+  WITH (m = 16, ef_construction = 64);
+
+-- Insert a document with its embedding
+INSERT INTO documents (content, embedding)
+VALUES ('Self-hosting is great', '[0.01, 0.23, ...]'::vector);
+
+-- Semantic similarity search — find the 5 nearest neighbours
+SELECT id, content, 1 - (embedding &lt;=&gt; '[0.02, 0.21, ...]'::vector) AS similarity
+FROM documents
+ORDER BY embedding &lt;=&gt; '[0.02, 0.21, ...]'::vector
+LIMIT 5;</code></pre>
+<h4>Operators</h4>
+<ul>
+<li><code>&lt;=&gt;</code> — cosine distance (most common for text embeddings)</li>
+<li><code>&lt;-&gt;</code> — L2 (Euclidean) distance</li>
+<li><code>&lt;#&gt;</code> — negative inner product (for dot-product similarity)</li>
+</ul>
+<h5>Generate embeddings with Ollama and store them (Python example)</h5>
+<pre><code class="language-python">import psycopg2, requests
+
+def embed(text):
+    r = requests.post(&quot;http://localhost:11434/api/embeddings&quot;,
+                      json={&quot;model&quot;: &quot;nomic-embed-text&quot;, &quot;prompt&quot;: text})
+    return r.json()[&quot;embedding&quot;]
+
+conn = psycopg2.connect(&quot;postgresql://myuser:strongpassword@localhost:5432/mydb&quot;)
+cur = conn.cursor()
+text = &quot;Self-hosting gives you full data ownership&quot;
+vector = embed(text)
+cur.execute(&quot;INSERT INTO documents (content, embedding) VALUES (%s, %s)&quot;, (text, vector))
+conn.commit()</code></pre>
+<blockquote><p>See the <a href="https://docs.shani.dev/doc/servers/ai-llms">AI & LLMs wiki</a> for the full Ollama setup. The <code>nomic-embed-text</code> model produces 768-dimensional vectors — adjust <code>vector(768)</code> to match your chosen model's output dimensions.</p></blockquote>
+<p>---</p>
+<h2>PgBouncer (PostgreSQL Connection Pooler)</h2>
+<p><strong>Purpose:</strong> PostgreSQL is process-based — every client connection spawns a separate backend process. Under high load (hundreds of concurrent connections from an application server), this becomes the bottleneck. PgBouncer sits between your app and PostgreSQL, maintaining a small pool of real database connections and multiplexing many application connections onto them.</p>
+<h4>Pool modes</h4>
+<ul>
+<li><strong>Transaction mode</strong> (recommended) — a database connection is held only for the duration of a single transaction. Most efficient, but prepared statements and session-level features (<code>SET</code>, advisory locks) don't work across transactions.</li>
+<li><strong>Session mode</strong> — a database connection is held for the entire application session. Fully transparent to the app but uses more connections.</li>
+<li><strong>Statement mode</strong> — one database connection per SQL statement. Very aggressive; breaks multi-statement transactions.</li>
+</ul>
+<pre><code class="language-yaml"># ~/pgbouncer/compose.yaml
+services:
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    ports:
+      - 127.0.0.1:5432:5432    # apps connect here instead of directly to postgres
+    environment:
+      DB_HOST: host.containers.internal
+      DB_PORT: 5432
+      DB_USER: myuser
+      DB_PASSWORD: strongpassword
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 1000     # max app-side connections
+      DEFAULT_POOL_SIZE: 25     # actual connections to PostgreSQL
+      AUTH_TYPE: scram-sha-256
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/pgbouncer &amp;&amp; podman-compose up -d</code></pre>
+<h4>Check pool status</h4>
+<pre><code class="language-bash"># Connect to the PgBouncer admin interface
+psql -h localhost -p 5432 -U myuser pgbouncer -c &quot;SHOW POOLS;&quot;
+psql -h localhost -p 5432 -U myuser pgbouncer -c &quot;SHOW STATS;&quot;
+psql -h localhost -p 5432 -U myuser pgbouncer -c &quot;SHOW CLIENTS;&quot;</code></pre>
+<blockquote><p>Applications connect to PgBouncer on port 5432 exactly as they would connect directly to PostgreSQL — the pooling is completely transparent. Change only the host/port in your connection string.</p></blockquote>
+<h2>Redis</h2>
+<p><strong>Purpose:</strong> High-performance in-memory data store used for caching, session management, message brokering, and real-time analytics. Used as a dependency by Nextcloud, Immich, Authentik, and many others.</p>
+<pre><code class="language-yaml"># ~/redis/compose.yaml
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - 127.0.0.1:6379:6379
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+
+volumes:
+  redis_data:</code></pre>
+<pre><code class="language-bash">cd ~/redis &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Interactive CLI
+podman exec -it redis redis-cli
+
+# Ping server
+podman exec redis redis-cli ping
+
+# Set and get a key
+podman exec redis redis-cli set mykey &quot;hello&quot;
+podman exec redis redis-cli get mykey
+
+# Monitor all commands in real time
+podman exec redis redis-cli monitor
+
+# Show server info and stats
+podman exec redis redis-cli info
+
+# List all keys (careful on large datasets)
+podman exec redis redis-cli keys &quot;*&quot;
+
+# Show memory usage
+podman exec redis redis-cli info memory | grep used_memory_human
+
+# Flush all keys (destructive!)
+podman exec redis redis-cli flushall
+
+# Save snapshot now
+podman exec redis redis-cli bgsave
+
+# Show connected clients
+podman exec redis redis-cli client list</code></pre>
+<blockquote><p><strong>Test</strong>: <code>podman exec -it redis redis-cli ping</code></p></blockquote>
+<blockquote><p><strong>Monitor</strong>: <code>podman exec -it redis redis-cli monitor</code></p></blockquote>
+<h3>Redis Data Structures</h3>
+<p>Redis is not just a key-value store — it has five core data types, each suited to different use cases:</p>
+<p><strong>String:</strong> — the default. Any binary-safe value up to 512 MB. Used for caching, counters, rate limiting.</p>
+<pre><code class="language-bash">SET session:abc123 '{&quot;user_id&quot;: 42}' EX 3600   # with 1-hour TTL
+INCR page_views:home                             # atomic counter</code></pre>
+<p><strong>List:</strong> — ordered, allows duplicates. Implemented as a doubly-linked list. Used for queues and activity feeds.</p>
+<pre><code class="language-bash">LPUSH jobs:email '{&quot;to&quot;:&quot;alice@example.com&quot;}'   # push to head (producer)
+BRPOP jobs:email 30                              # blocking pop from tail (consumer, 30s timeout)</code></pre>
+<p><strong>Set:</strong> — unordered, unique members. Used for tags, unique visitors, friend lists.</p>
+<pre><code class="language-bash">SADD online_users user:42 user:99
+SISMEMBER online_users user:42                   # is user:42 online?
+SINTER premium_users active_users               # intersection: premium AND active</code></pre>
+<p><strong>Sorted Set:</strong> — unique members each with a float score. Members are ordered by score. Used for leaderboards, priority queues, rate limiting with sliding windows.</p>
+<pre><code class="language-bash">ZADD leaderboard 9850 &quot;alice&quot; 7200 &quot;bob&quot;
+ZRANGE leaderboard 0 9 REV WITHSCORES           # top 10, highest score first
+ZADD leaderboard INCR 100 &quot;alice&quot;               # add 100 to alice's score</code></pre>
+<p><strong>Hash:</strong> — field-value pairs within a single key. More memory-efficient than storing each field as a separate string key. Used for objects, user profiles, configuration.</p>
+<pre><code class="language-bash">HSET user:42 name &quot;Alice&quot; email &quot;alice@example.com&quot; role &quot;admin&quot;
+HGET user:42 email
+HGETALL user:42</code></pre>
+<h4>Pub/Sub vs Streams vs Lists for messaging</h4>
+<ul>
+<li><strong>Pub/Sub</strong> (<code>SUBSCRIBE</code>, <code>PUBLISH</code>) — fire-and-forget. Messages are delivered to current subscribers only; no persistence, no acknowledgement.</li>
+<li><strong>Lists</strong> with <code>BRPOP</code> — simple work queue. One producer, one consumer per message. Good for tasks.</li>
+<li><strong>Streams</strong> (<code>XADD</code>, <code>XREADGROUP</code>) — persistent, consumer-group-aware event log. Replay, acknowledgement, multiple consumer groups. The closest Redis equivalent to Kafka.</li>
+</ul>
+<h3>Redis Persistence Modes</h3>
+<p>Redis has two persistence mechanisms with fundamentally different trade-offs:</p>
+<p><strong>RDB (Redis Database Snapshot):</strong> — point-in-time snapshots saved to disk periodically. Compact, fast to load on restart, but you lose all writes since the last snapshot if Redis crashes.</p>
+<p><strong>AOF (Append-Only File):</strong> — every write command is appended to a log file. Configurable fsync policy: <code>always</code> (safe, slow), <code>everysec</code> (default, loses at most 1 second of data), <code>no</code> (fastest, OS decides).</p>
+<pre><code class="language-bash"># Enable AOF (what --appendonly yes does)
+redis-server --appendonly yes --appendfsync everysec
+
+# Enable RDB snapshots every 60 seconds if 1000 keys changed
+redis-server --save 60 1000
+
+# Use both (recommended for production)
+redis-server --appendonly yes --save 900 1 --save 300 10 --save 60 10000</code></pre>
+<h4>Trade-off summary</h4>
+<p>RDB gives faster restarts and smaller files; AOF gives better durability. For a homelab cache, losing a few seconds of data on crash is usually acceptable — use AOF with <code>everysec</code>. For session storage or queues where losing data matters, use <code>always</code> or run both.</p>
+<h2>Valkey</h2>
+<p><strong>Purpose:</strong> The Linux Foundation's open-source fork of Redis, created after the Redis licence change. Drop-in compatible with all Redis clients — just swap the image. Recommended if you want fully open-source Redis semantics under the BSD licence going forward.</p>
+<pre><code class="language-yaml"># ~/valkey/compose.yaml
+services:
+  valkey:
+    image: valkey/valkey:8-alpine
+    ports:
+      - 127.0.0.1:6379:6379
+    volumes:
+      - valkey_data:/data
+    command: valkey-server --appendonly yes
+    restart: unless-stopped
+
+volumes:
+  valkey_data:</code></pre>
+<pre><code class="language-bash">cd ~/valkey &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>Valkey is wire-protocol compatible with Redis 7.2. Any Jedis, redis-py, or ioredis client connects without modification.</p></blockquote>
+<p>---</p>
+<h2>KeyDB</h2>
+<p><strong>Purpose:</strong> Multithreaded Redis fork optimised for modern multi-core CPUs. Drop-in compatible with all Redis clients — just swap the image. KeyDB typically achieves 2–5× higher throughput than Redis on multi-core hosts.</p>
+<pre><code class="language-yaml"># ~/keydb/compose.yaml
+services:
+  keydb:
+    image: eqalpha/keydb:alpine
+    ports:
+      - 127.0.0.1:6379:6379
+    volumes:
+      - keydb_data:/data
+    restart: unless-stopped
+
+volumes:
+  keydb_data:</code></pre>
+<pre><code class="language-bash">cd ~/keydb &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>Dragonfly (Modern Redis/Memcached Replacement)</h2>
+<p><strong>Purpose:</strong> High-performance, multi-threaded in-memory data store with full Redis and Memcached API compatibility. Uses a shared-nothing architecture that scales linearly with CPU cores — benchmarks show 25× higher throughput than Redis on a 16-core machine. Also uses 30–40% less RAM than Redis for the same dataset. Drop-in replacement: no code changes, same client libraries, same commands.</p>
+<pre><code class="language-yaml"># ~/dragonfly/compose.yaml
+services:
+  dragonfly:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly
+    ports:
+      - 127.0.0.1:6380:6379
+    volumes:
+      - /home/user/dragonfly/data:/data:Z
+    ulimits:
+      memlock: -1
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/dragonfly &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Connect with redis-cli (Dragonfly is fully compatible)
+podman exec -it dragonfly redis-cli -p 6379
+
+# Ping
+podman exec dragonfly redis-cli -p 6379 ping
+
+# Check info and memory usage
+podman exec dragonfly redis-cli -p 6379 info memory | grep used_memory_human
+
+# Monitor commands in real time
+podman exec dragonfly redis-cli -p 6379 monitor
+
+# Save snapshot
+podman exec dragonfly redis-cli -p 6379 bgsave</code></pre>
+<blockquote><p>Use port <code>6380</code> on the host to avoid conflicts with an existing Redis instance. Any Redis client connects to <code>localhost:6380</code> without modification.</p></blockquote>
+<p>---</p>
+<h2>MongoDB</h2>
+<p><strong>Purpose:</strong> Flexible document database optimised for JSON-like storage, rapid development cycles, and unstructured data models.</p>
+<pre><code class="language-yaml"># ~/mongodb/compose.yaml
+services:
+  mongodb:
+    image: mongo:7
+    ports:
+      - 127.0.0.1:27017:27017
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: strongpassword
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:</code></pre>
+<pre><code class="language-bash">cd ~/mongodb &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Connect with mongosh
+podman exec -it mongodb mongosh -u admin -p strongpassword --authenticationDatabase admin
+
+# List databases
+podman exec mongodb mongosh -u admin -p strongpassword --authenticationDatabase admin \
+  --eval &quot;show dbs&quot;
+
+# Run a query
+podman exec mongodb mongosh -u admin -p strongpassword --authenticationDatabase admin \
+  --eval &quot;db.getSiblingDB('mydb').mycollection.find().limit(5).pretty()&quot;
+
+# Dump a database
+podman exec mongodb mongodump -u admin -p strongpassword --authenticationDatabase admin \
+  --db mydb --out /tmp/dump
+
+# Restore from dump
+podman exec mongodb mongorestore -u admin -p strongpassword --authenticationDatabase admin \
+  --db mydb /tmp/dump/mydb</code></pre>
+<blockquote><p><strong>GUI</strong>: Add Mongo Express to your compose file:</p></blockquote>
+<pre><code class="language-yaml">  mongo-express:
+    image: mongo-express
+    ports:
+      - 127.0.0.1:8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: strongpassword
+      ME_CONFIG_MONGODB_URL: &quot;mongodb://admin:strongpassword@host.containers.internal:27017/&quot;
+    restart: unless-stopped</code></pre>
+<p>---</p>
+<h2>FerretDB (MongoDB-Compatible on PostgreSQL)</h2>
+<p><strong>Purpose:</strong> Open-source MongoDB-compatible proxy that translates the MongoDB wire protocol to PostgreSQL queries. All existing MongoDB drivers, ORMs, and tools (Mongoose, mongosh, MongoDB Compass) connect without changes, but data is stored in PostgreSQL. Ideal when you want MongoDB API compatibility with PostgreSQL's reliability and ACID guarantees.</p>
+<pre><code class="language-yaml"># ~/ferretdb/compose.yaml
+services:
+  ferretdb:
+    image: ghcr.io/ferretdb/ferretdb:latest
+    ports:
+      - 127.0.0.1:27018:27017
+    environment:
+      FERRETDB_POSTGRESQL_URL: postgres://ferretdb:changeme@db:5432/ferretdb
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ferretdb
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: ferretdb
+    volumes:
+      - ferretdb_pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  ferretdb_pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/ferretdb &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Connect with mongosh
+podman run --rm -it mongo:7 mongosh mongodb://localhost:27018/mydb
+
+# Insert a document
+podman run --rm mongo:7 mongosh mongodb://localhost:27018/myapp \
+  --eval 'db.users.insertOne({name: &quot;Alice&quot;, role: &quot;admin&quot;})'
+
+# Query documents
+podman run --rm mongo:7 mongosh mongodb://localhost:27018/myapp \
+  --eval 'db.users.find().pretty()'</code></pre>
+<blockquote><p><strong>FerretDB vs MongoDB:</strong> Use FerretDB when you want MongoDB API compatibility with PostgreSQL's reliability. Use MongoDB directly for workloads relying on change streams, full-text search, or aggregation pipelines not yet covered by FerretDB.</p></blockquote>
+<p>---</p>
+<h2>Apache Kafka</h2>
+<p><strong>Purpose:</strong> Distributed event streaming platform. Producers publish events to topics; consumers read them with durable, replayable, ordered delivery. Handles millions of events per second with configurable retention.</p>
+<blockquote><p><strong>KRaft mode only:</strong> ZooKeeper was removed entirely in Kafka 4.0 (released March 18, 2025). All new deployments must use KRaft.</p></blockquote>
+<pre><code class="language-yaml"># ~/kafka/compose.yaml
+services:
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    ports:
+      - 127.0.0.1:9092:9092
+      - 127.0.0.1:29092:29092
+    environment:
+      CLUSTER_ID: &quot;MkU3OEVBNTcwNTJENDM2Qk&quot;
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://kafka:29092,CONTROLLER://kafka:9093,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: &quot;true&quot;
+      KAFKA_LOG_RETENTION_HOURS: 168
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    restart: unless-stopped
+
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:latest
+    ports:
+      - 127.0.0.1:8080:8080
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+    depends_on: [kafka]
+    restart: unless-stopped
+
+volumes:
+  kafka_data:</code></pre>
+<pre><code class="language-bash">cd ~/kafka &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Create a topic
+podman exec kafka kafka-topics \
+  --bootstrap-server localhost:29092 \
+  --create --topic my-topic --partitions 3 --replication-factor 1
+
+# List topics
+podman exec kafka kafka-topics --bootstrap-server localhost:29092 --list
+
+# Produce messages
+podman exec -it kafka kafka-console-producer \
+  --bootstrap-server localhost:29092 --topic my-topic
+
+# Consume messages from the beginning
+podman exec -it kafka kafka-console-consumer \
+  --bootstrap-server localhost:29092 --topic my-topic --from-beginning
+
+# Check consumer group lag
+podman exec kafka kafka-consumer-groups \
+  --bootstrap-server localhost:29092 --describe --group my-group</code></pre>
+<h5>Access Kafka UI</h5>
+<p>at <code>http://localhost:8080</code> for a web-based view of topics, consumer groups, and message browsing.</p>
+<p>---</p>
+<h2>Redpanda (Kafka-Compatible, No JVM)</h2>
+<p><strong>Purpose:</strong> Kafka-compatible event streaming platform written in C++. Runs without ZooKeeper, uses a fraction of the memory and CPU of Kafka, and starts in seconds. Ideal for development, smaller deployments, and self-hosted setups where Kafka's JVM overhead is undesirable.</p>
+<pre><code class="language-yaml"># ~/redpanda/compose.yaml
+services:
+  redpanda:
+    image: redpandadata/redpanda:latest
+    ports:
+      - 127.0.0.1:9092:9092
+      - 127.0.0.1:9644:9644
+      - 127.0.0.1:8081:8081
+    volumes:
+      - /home/user/redpanda/data:/var/lib/redpanda/data:Z
+    command: &gt;
+      redpanda start
+      --node-id 0
+      --kafka-addr 0.0.0.0:9092
+      --advertise-kafka-addr localhost:9092
+      --schema-registry-addr 0.0.0.0:8081
+      --rpc-addr 0.0.0.0:33145
+      --advertise-rpc-addr redpanda:33145
+      --mode dev-container
+    restart: unless-stopped
+
+  redpanda-console:
+    image: docker.redpanda.com/redpandadata/console:latest
+    ports:
+      - 127.0.0.1:8080:8080
+    environment:
+      KAFKA_BROKERS: host.containers.internal:9092
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/redpanda &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>Redpanda is fully compatible with the Kafka API — any Kafka client (Confluent SDK, librdkafka, kafka-python) connects without modification.</p></blockquote>
+<p>---</p>
+<h2>RabbitMQ (Message Broker)</h2>
+<p><strong>Purpose:</strong> The most widely deployed open-source message broker. Implements AMQP, MQTT, and STOMP. Use RabbitMQ when you need reliable task queues, fanout messaging, dead-letter exchanges, message acknowledgement, and per-message TTL. Used by Celery, Sidekiq, and most web framework background job systems.</p>
+<pre><code class="language-yaml"># ~/rabbitmq/compose.yaml
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - 127.0.0.1:5672:5672
+      - 127.0.0.1:15672:15672
+    volumes:
+      - /home/user/rabbitmq/data:/var/lib/rabbitmq:Z
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: changeme
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/rabbitmq &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p><strong>Management UI:</strong> <code>http://localhost:15672</code> — browse queues, exchanges, bindings, and message rates in real time.</p></blockquote>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># List queues
+podman exec rabbitmq rabbitmqctl list_queues name messages consumers
+
+# Declare a queue and publish a test message
+podman exec rabbitmq rabbitmqadmin \
+  -u admin -p changeme \
+  publish exchange=amq.default routing_key=test payload='{&quot;hello&quot;: &quot;world&quot;}'
+
+# Purge a queue
+podman exec rabbitmq rabbitmqctl purge_queue my-queue</code></pre>
+<blockquote><p><strong>Kafka vs RabbitMQ:</strong> Use Kafka for high-throughput event streaming where consumers need to replay history. Use RabbitMQ for task queues, RPC patterns, and workloads where each message is processed once and discarded.</p></blockquote>
+<p>---</p>
+<h2>NATS (Lightweight Messaging)</h2>
+<p><strong>Purpose:</strong> High-performance, cloud-native messaging. Core NATS is publish/subscribe with at-most-once delivery. JetStream (built-in) adds persistent streams, at-least-once delivery, key-value store, and object store — all in a single ~20 MB binary with no external dependencies.</p>
+<pre><code class="language-yaml"># ~/nats/compose.yaml
+services:
+  nats:
+    image: nats:alpine
+    ports:
+      - 127.0.0.1:4222:4222
+      - 127.0.0.1:8222:8222
+    volumes:
+      - /home/user/nats/data:/data:Z
+      - /home/user/nats/nats.conf:/etc/nats/nats.conf:ro,Z
+    command: -c /etc/nats/nats.conf
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/nats &amp;&amp; podman-compose up -d</code></pre>
+<h5>Minimal <code>nats.conf</code> with JetStream</h5>
+<pre><code class="language-conf">port: 4222
+http_port: 8222
+
+jetstream {
+  store_dir: /data
+  max_memory_store: 1GB
+  max_file_store: 10GB
+}
+
+authorization {
+  user: nats
+  password: changeme
+}</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Check server info
+podman run --rm natsio/nats-box \
+  nats -s nats://nats:changeme@host.containers.internal:4222 server info
+
+# List JetStream streams
+podman run --rm natsio/nats-box \
+  nats -s nats://nats:changeme@host.containers.internal:4222 stream ls
+
+# View JetStream stats
+curl http://localhost:8222/jsz | python3 -m json.tool | head -20
+
+# Create a JetStream stream
+podman run --rm natsio/nats-box \
+  nats -s nats://nats:changeme@host.containers.internal:4222 \
+  stream add ORDERS --subjects &quot;orders.&gt;&quot; --storage file --replicas 1</code></pre>
+<p>---</p>
+<h2>Neo4j (Graph Database)</h2>
+<p><strong>Purpose:</strong> The leading native graph database. Stores data as nodes and relationships — ideal for social networks, recommendation engines, fraud detection, knowledge graphs, and any domain where connections between data points matter as much as the data itself. Queried with the Cypher query language.</p>
+<pre><code class="language-yaml"># ~/neo4j/compose.yaml
+services:
+  neo4j:
+    image: neo4j:5
+    ports:
+      - 127.0.0.1:7474:7474
+      - 127.0.0.1:7687:7687
+    volumes:
+      - /home/user/neo4j/data:/data:Z
+      - /home/user/neo4j/logs:/logs:Z
+      - /home/user/neo4j/import:/var/lib/neo4j/import:Z
+    environment:
+      NEO4J_AUTH: neo4j/strongpassword
+      NEO4J_PLUGINS: '[&quot;apoc&quot;, &quot;graph-data-science&quot;]'
+      NEO4J_dbms_memory_heap_initial__size: 512m
+      NEO4J_dbms_memory_heap_max__size: 2g
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/neo4j &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p><strong>Browser UI</strong>: <code>http://localhost:7474</code> — interactive graph explorer and Cypher query editor.</p></blockquote>
+<blockquote><p><strong>Bolt driver</strong>: <code>bolt://localhost:7687</code></p></blockquote>
+<h5>Example Cypher queries</h5>
+<pre><code class="language-cypher">-- Create nodes and a relationship
+CREATE (alice:Person {name: 'Alice', age: 30})-[:KNOWS]-&gt;(bob:Person {name: 'Bob', age: 25})
+
+-- Find shortest path between two people
+MATCH p=shortestPath((a:Person {name:'Alice'})-[*]-(b:Person {name:'Bob'})) RETURN p
+
+-- Recommendation: friends of friends not already known
+MATCH (me:Person {name: 'Alice'})-[:KNOWS]-(friend)-[:KNOWS]-(fof)
+WHERE NOT (me)-[:KNOWS]-(fof) AND fof &lt;&gt; me
+RETURN fof.name, count(*) AS mutual ORDER BY mutual DESC</code></pre>
+<p><strong>APOC:</strong> adds 450+ utility procedures for data import, refactoring, and graph algorithms — included via <code>NEO4J_PLUGINS</code> above.</p>
+<p>---</p>
+<h2>Apache Cassandra</h2>
+<p><strong>Purpose:</strong> Wide-column NoSQL database designed for massive write throughput and linear horizontal scalability. No single point of failure. Ideal for IoT telemetry, event logs, and any workload where you need to write millions of rows per second across geographically distributed nodes.</p>
+<pre><code class="language-yaml"># ~/cassandra/compose.yaml
+services:
+  cassandra:
+    image: cassandra:5
+    ports:
+      - 127.0.0.1:9042:9042
+    volumes:
+      - /home/user/cassandra/data:/var/lib/cassandra:Z
+    environment:
+      CASSANDRA_CLUSTER_NAME: HomeCluster
+      CASSANDRA_DC: dc1
+      CASSANDRA_RACK: rack1
+      HEAP_NEWSIZE: 128m
+      MAX_HEAP_SIZE: 1g
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/cassandra &amp;&amp; podman-compose up -d</code></pre>
+<h5>Connect and run CQL</h5>
+<pre><code class="language-bash">podman exec -it cassandra cqlsh
+
+# Create keyspace and table
+CREATE KEYSPACE iot WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+USE iot;
+CREATE TABLE sensor_readings (
+  device_id UUID,
+  timestamp TIMESTAMP,
+  temperature FLOAT,
+  humidity    FLOAT,
+  PRIMARY KEY (device_id, timestamp)
+) WITH CLUSTERING ORDER BY (timestamp DESC);
+
+# Insert and query
+INSERT INTO sensor_readings (device_id, timestamp, temperature, humidity)
+  VALUES (uuid(), toTimestamp(now()), 22.5, 65.0);
+SELECT * FROM sensor_readings WHERE device_id = &lt;uuid&gt; LIMIT 100;</code></pre>
+<blockquote><p>Cassandra requires at least 2 GB RAM for a single node. Use <code>MAX_HEAP_SIZE=512m</code> on memory-constrained servers.</p></blockquote>
+<p>---</p>
+<h2>ScyllaDB (Cassandra-Compatible, C++)</h2>
+<p><strong>Purpose:</strong> Drop-in Cassandra replacement written in C++. Uses a shard-per-core architecture that eliminates the JVM and garbage collection pauses — delivering 10× better latency and throughput on the same hardware. Fully compatible with the CQL wire protocol and Cassandra client drivers.</p>
+<pre><code class="language-yaml"># ~/scylladb/compose.yaml
+services:
+  scylladb:
+    image: scylladb/scylla:6
+    ports:
+      - 127.0.0.1:9042:9042
+      - 127.0.0.1:10000:10000
+    volumes:
+      - /home/user/scylladb/data:/var/lib/scylla:Z
+    cpuset: &quot;0-3&quot;
+    command: --developer-mode 1 --seeds scylladb
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/scylladb &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>ScyllaDB is the recommended replacement for Cassandra in new deployments. Any code written against the Cassandra CQL API runs unmodified against ScyllaDB.</p></blockquote>
+<p>---</p>
+<h2>CockroachDB (Distributed PostgreSQL)</h2>
+<p><strong>Purpose:</strong> Distributed SQL database with strong ACID guarantees, automatic sharding, and survivable multi-node operation. Wire-compatible with PostgreSQL — connect with <code>psql</code> or any Postgres driver. Ideal for applications that need horizontal write scaling or multi-region data residency while keeping SQL semantics.</p>
+<pre><code class="language-yaml"># ~/cockroachdb/compose.yaml
+services:
+  cockroachdb:
+    image: cockroachdb/cockroach:latest
+    ports:
+      - 127.0.0.1:26257:26257
+      - 127.0.0.1:8081:8080
+    volumes:
+      - /home/user/cockroachdb/data:/cockroach/cockroach-data:Z
+    command: start-single-node --insecure --http-addr=0.0.0.0:8080
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/cockroachdb &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>The Admin UI is at <code>http://localhost:8081</code> — shows query plans, node health, slow queries, and schema inspector.</p></blockquote>
+<h5>Create a database and user</h5>
+<pre><code class="language-sql">CREATE DATABASE myapp;
+CREATE USER myuser WITH PASSWORD 'strongpassword';
+GRANT ALL ON DATABASE myapp TO myuser;</code></pre>
+<blockquote><p>For production, use TLS and the <code>--secure</code> flag. Insecure mode is suitable for local/internal-only deployments.</p></blockquote>
+<p>---</p>
+<h2>TimescaleDB (Time-Series PostgreSQL)</h2>
+<p><strong>Purpose:</strong> PostgreSQL extension that adds native time-series storage, hypertables, continuous aggregates, compression, and data retention policies. Query with standard SQL. Because it is just PostgreSQL, all your existing tools (pgAdmin, Grafana, ORMs) work without modification — you get 100× faster time-series queries.</p>
+<pre><code class="language-yaml"># ~/timescaledb/compose.yaml
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    ports:
+      - 127.0.0.1:5433:5432
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: strongpassword
+      POSTGRES_DB: metrics
+    restart: unless-stopped
+
+volumes:
+  timescale_data:</code></pre>
+<pre><code class="language-bash">cd ~/timescaledb &amp;&amp; podman-compose up -d</code></pre>
+<h5>Set up a hypertable</h5>
+<pre><code class="language-sql">-- Connect: psql -h localhost -p 5433 -U myuser -d metrics
+
+CREATE EXTENSION IF NOT EXISTS timescaledb;
+
+CREATE TABLE sensor_data (
+  time        TIMESTAMPTZ NOT NULL,
+  device_id   TEXT NOT NULL,
+  temperature DOUBLE PRECISION,
+  humidity    DOUBLE PRECISION
+);
+
+-- Convert to hypertable (auto-partitioned by time)
+SELECT create_hypertable('sensor_data', 'time');
+
+-- Automatic compression after 7 days
+ALTER TABLE sensor_data SET (timescaledb.compress, timescaledb.compress_segmentby = 'device_id');
+SELECT add_compression_policy('sensor_data', INTERVAL '7 days');
+
+-- Data retention: drop data older than 1 year
+SELECT add_retention_policy('sensor_data', INTERVAL '1 year');
+
+-- Continuous aggregate (materialised 1-hour averages, auto-refreshed)
+CREATE MATERIALIZED VIEW sensor_hourly
+WITH (timescaledb.continuous) AS
+SELECT time_bucket('1 hour', time) AS bucket, device_id,
+       AVG(temperature) AS avg_temp, AVG(humidity) AS avg_humidity
+FROM sensor_data GROUP BY bucket, device_id;</code></pre>
+<blockquote><p>Connect Grafana's TimescaleDB datasource to this instance for instant time-series dashboards.</p></blockquote>
+<p>---</p>
+<h2>InfluxDB</h2>
+<p><strong>Purpose:</strong> High-performance time-series database. Optimised for metrics, IoT telemetry, and real-time analytics. Used with Home Assistant and Grafana dashboards.</p>
+<pre><code class="language-yaml"># ~/influxdb/compose.yaml
+services:
+  influxdb:
+    image: influxdb:2
+    ports:
+      - 127.0.0.1:8086:8086
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: strongpassword
+      DOCKER_INFLUXDB_INIT_ORG: home
+      DOCKER_INFLUXDB_INIT_BUCKET: metrics
+    restart: unless-stopped
+
+volumes:
+  influxdb_data:</code></pre>
+<pre><code class="language-bash">cd ~/influxdb &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Open the InfluxDB CLI
+podman exec -it influxdb influx
+
+# List buckets
+podman exec influxdb influx bucket list
+
+# List organisations
+podman exec influxdb influx org list
+
+# Write a data point
+podman exec influxdb influx write \
+  --bucket metrics --org home \
+  --token &quot;$(podman exec influxdb influx auth list --json | python3 -c &quot;import sys,json;print(json.load(sys.stdin)[0]['token'])&quot;)&quot; \
+  'temperature,room=bedroom value=22.5'
+
+# Query data (Flux)
+podman exec influxdb influx query \
+  --org home \
+  'from(bucket:&quot;metrics&quot;) |&gt; range(start:-1h) |&gt; filter(fn:(r) =&gt; r._measurement == &quot;temperature&quot;)'
+
+# Create a backup
+podman exec influxdb influx backup /tmp/backup --org home
+podman cp influxdb:/tmp/backup ./influxdb-backup-$(date +%Y%m%d)</code></pre>
+<p>---</p>
+<h2>Qdrant (Vector Database)</h2>
+<p><strong>Purpose:</strong> High-performance vector similarity search engine. Used with AI/LLM applications for semantic search, RAG pipelines, and recommendation systems. Connect to Ollama and Open WebUI for document-aware AI chat. See the <a href="https://docs.shani.dev/doc/servers/ai-llms">AI & LLMs wiki</a> for the Ollama and Open WebUI setup.</p>
+<pre><code class="language-yaml"># ~/qdrant/compose.yaml
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - 127.0.0.1:6333:6333
+      - 127.0.0.1:6334:6334
+    volumes:
+      - /home/user/qdrant/storage:/qdrant/storage:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/qdrant &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p><strong>REST API</strong>: <code>http://localhost:6333</code></p></blockquote>
+<blockquote><p><strong>gRPC</strong>: <code>localhost:6334</code></p></blockquote>
+<blockquote><p><strong>Web UI</strong>: <code>http://localhost:6333/dashboard</code></p></blockquote>
+<p>---</p>
+<h2>Weaviate (Vector Database with Built-In ML)</h2>
+<p><strong>Purpose:</strong> Vector database with native modules for text, image, and multi-modal embeddings — no separate embedding service required. Supports hybrid search (vector + BM25 keyword), GraphQL API, and REST. The <code>text2vec-ollama</code> module connects directly to a local Ollama instance. See the <a href="https://docs.shani.dev/doc/servers/ai-llms">AI & LLMs wiki</a>.</p>
+<pre><code class="language-yaml"># ~/weaviate/compose.yaml
+services:
+  weaviate:
+    image: cr.weaviate.io/semitechnologies/weaviate:latest
+    ports:
+      - 127.0.0.1:8080:8080
+      - 127.0.0.1:50051:50051
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: &quot;true&quot;
+      PERSISTENCE_DATA_PATH: /var/lib/weaviate
+      DEFAULT_VECTORIZER_MODULE: text2vec-ollama
+      ENABLE_MODULES: text2vec-ollama,generative-ollama
+      TEXT2VEC_OLLAMA_APIENDPOINT: http://host.containers.internal:11434
+      TEXT2VEC_OLLAMA_MODEL: nomic-embed-text
+      GENERATIVE_OLLAMA_APIENDPOINT: http://host.containers.internal:11434
+    restart: unless-stopped
+
+volumes:
+  weaviate_data:</code></pre>
+<pre><code class="language-bash">cd ~/weaviate &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>Weaviate's <code>text2vec-ollama</code> module connects to your local Ollama for embeddings — no OpenAI API key needed.</p></blockquote>
+<p>---</p>
+<h2>Chroma (Lightweight Vector Database)</h2>
+<p><strong>Purpose:</strong> Simple, developer-friendly vector database focused on getting an AI/RAG application running in minutes. Minimal Python and JavaScript SDK, persistent server mode, and an opinionated API designed for LLM use cases — just <code>add</code>, <code>query</code>, and <code>delete</code>. Scale up to Qdrant or Weaviate when you need production-grade indexing at tens of millions of vectors.</p>
+<pre><code class="language-yaml"># ~/chroma/compose.yaml
+services:
+  chroma:
+    image: chromadb/chroma:latest
+    ports:
+      - 127.0.0.1:8000:8000
+    volumes:
+      - /home/user/chroma/data:/chroma/chroma:Z
+    environment:
+      IS_PERSISTENT: &quot;TRUE&quot;
+      ANONYMIZED_TELEMETRY: &quot;FALSE&quot;
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/chroma &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations (via REST API)</h4>
+<pre><code class="language-bash">curl http://localhost:8000/api/v1/heartbeat
+curl http://localhost:8000/api/v1/collections
+curl http://localhost:8000/api/v1/version</code></pre>
+<h4>Use with the Python SDK</h4>
+<pre><code class="language-python">import chromadb
+
+client = chromadb.HttpClient(host=&quot;localhost&quot;, port=8000)
+collection = client.get_or_create_collection(
+    name=&quot;my_docs&quot;,
+    metadata={&quot;hnsw:space&quot;: &quot;cosine&quot;}
+)
+
+collection.add(
+    ids=[&quot;doc1&quot;, &quot;doc2&quot;, &quot;doc3&quot;],
+    documents=[
+        &quot;Self-hosting gives you full control&quot;,
+        &quot;Podman runs containers rootlessly&quot;,
+        &quot;Caddy is a modern reverse proxy&quot;,
+    ],
+    metadatas=[{&quot;source&quot;: &quot;wiki&quot;}, {&quot;source&quot;: &quot;wiki&quot;}, {&quot;source&quot;: &quot;wiki&quot;}]
+)
+
+results = collection.query(
+    query_texts=[&quot;how do I run containers without root?&quot;],
+    n_results=2
+)
+print(results[&quot;documents&quot;])</code></pre>
+<blockquote><p><strong>Chroma vs Qdrant vs pgvector:</strong> Chroma is the fastest to integrate in a Python LLM app. Qdrant offers more indexing control, filtering, and production throughput. pgvector is best if you're already using PostgreSQL and want zero extra infrastructure.</p></blockquote>
+<p>---</p>
+<h2>MeiliSearch</h2>
+<p><strong>Purpose:</strong> Lightning-fast, typo-tolerant full-text search engine with a simple REST API. No query language to learn.</p>
+<pre><code class="language-yaml"># ~/meilisearch/compose.yaml
+services:
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    ports:
+      - 127.0.0.1:7700:7700
+    volumes:
+      - meilisearch_data:/meili_data
+    environment:
+      MEILI_MASTER_KEY: changeme
+    restart: unless-stopped
+
+volumes:
+  meilisearch_data:</code></pre>
+<pre><code class="language-bash">cd ~/meilisearch &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Check server health
+curl http://localhost:7700/health -H &quot;Authorization: Bearer changeme&quot;
+
+# List all indexes
+curl http://localhost:7700/indexes -H &quot;Authorization: Bearer changeme&quot;
+
+# Index documents and search
+curl -X POST http://localhost:7700/indexes/movies/documents \
+  -H &quot;Authorization: Bearer changeme&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '[{&quot;id&quot;:1,&quot;title&quot;:&quot;Inception&quot;,&quot;genre&quot;:&quot;Sci-Fi&quot;},{&quot;id&quot;:2,&quot;title&quot;:&quot;The Matrix&quot;,&quot;genre&quot;:&quot;Sci-Fi&quot;}]'
+
+curl &quot;http://localhost:7700/indexes/movies/search?q=inceptoin&quot; \
+  -H &quot;Authorization: Bearer changeme&quot;</code></pre>
+<p>---</p>
+<h2>Typesense (Fast Search Engine)</h2>
+<p><strong>Purpose:</strong> Open-source typo-tolerant search engine optimised for instant, as-you-type results. Zero configuration needed, sub-50ms queries on millions of documents, and a clean REST API. Ideal for e-commerce search, documentation search, and app-level search.</p>
+<pre><code class="language-yaml"># ~/typesense/compose.yaml
+services:
+  typesense:
+    image: typesense/typesense:latest
+    ports:
+      - 127.0.0.1:8108:8108
+    volumes:
+      - /home/user/typesense/data:/data:Z
+    environment:
+      TYPESENSE_DATA_DIR: /data
+      TYPESENSE_API_KEY: changeme
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/typesense &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Check server health
+curl http://localhost:8108/health -H &quot;X-TYPESENSE-API-KEY: changeme&quot;
+
+# Create a collection and index documents
+curl http://localhost:8108/collections \
+  -H &quot;X-TYPESENSE-API-KEY: changeme&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;name&quot;:&quot;products&quot;,&quot;fields&quot;:[{&quot;name&quot;:&quot;name&quot;,&quot;type&quot;:&quot;string&quot;},{&quot;name&quot;:&quot;price&quot;,&quot;type&quot;:&quot;float&quot;},{&quot;name&quot;:&quot;rating&quot;,&quot;type&quot;:&quot;int32&quot;}],&quot;default_sorting_field&quot;:&quot;rating&quot;}'
+
+# Search (typo-tolerant)
+curl &quot;http://localhost:8108/collections/products/documents/search?q=latp&amp;query_by=name&quot; \
+  -H &quot;X-TYPESENSE-API-KEY: changeme&quot;</code></pre>
+<blockquote><p><strong>MeiliSearch vs Typesense:</strong> Both are fast and typo-tolerant. Typesense has a stricter schema, better multi-tenancy, and faster faceting. MeiliSearch has a more flexible schema-optional API and better out-of-box relevancy tuning.</p></blockquote>
+<p>---</p>
+<h2>DuckDB (Embedded OLAP)</h2>
+<p><strong>Purpose:</strong> In-process analytical database — think SQLite for analytics. Runs inside your application process, needs no server, and executes columnar OLAP queries directly on Parquet, CSV, and JSON files. Ideal for data analysis scripts, Jupyter notebooks, and ETL pipelines where you don't want to spin up a full ClickHouse or Postgres instance.</p>
+<pre><code class="language-yaml"># ~/duckdb-api/compose.yaml
+services:
+  duckdb-api:
+    image: ghcr.io/tobilg/duckdb-api:latest
+    ports:
+      - 127.0.0.1:1294:1294
+    volumes:
+      - /home/user/duckdb:/duckdb:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/duckdb-api &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations (via REST API)</h4>
+<pre><code class="language-bash">curl -X POST http://localhost:1294/query \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;query&quot;: &quot;SELECT 42 AS answer&quot;}'
+
+curl -X POST http://localhost:1294/query \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;query&quot;: &quot;SELECT * FROM read_parquet('\''/duckdb/data.parquet'\'') LIMIT 10&quot;}'</code></pre>
+<blockquote><p>DuckDB can read directly from S3/MinIO, InfluxDB line protocol files, and PostgreSQL — making it a powerful ad-hoc query layer over your existing data stores without ETL.</p></blockquote>
+<p>---</p>
+<h2>ClickHouse (Columnar OLAP Database)</h2>
+<p><strong>Purpose:</strong> Open-source columnar database optimised for real-time analytical queries on large datasets — billions of rows, sub-second aggregations, and high-throughput ingestion. Used by SigNoz, Plausible Analytics, PostHog, and many other self-hosted analytics platforms as their storage backend. Unlike DuckDB (embedded/local files), ClickHouse is a persistent server that accepts concurrent writes and queries from multiple clients.</p>
+<pre><code class="language-yaml"># ~/clickhouse/compose.yaml
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    ports:
+      - 127.0.0.1:8123:8123    # HTTP interface
+      - 127.0.0.1:9000:9000    # Native TCP interface
+    volumes:
+      - /home/user/clickhouse/data:/var/lib/clickhouse:Z
+      - /home/user/clickhouse/logs:/var/log/clickhouse-server:Z
+      - /home/user/clickhouse/config.xml:/etc/clickhouse-server/config.d/custom.xml:ro,Z
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    restart: unless-stopped</code></pre>
+<pre><code class="language-xml">&lt;!-- ~/clickhouse/config.xml — minimal custom config --&gt;
+&lt;clickhouse&gt;
+  &lt;listen_host&gt;0.0.0.0&lt;/listen_host&gt;
+  &lt;max_connections&gt;100&lt;/max_connections&gt;
+  &lt;users&gt;
+    &lt;default&gt;
+      &lt;password&gt;changeme&lt;/password&gt;
+      &lt;networks&gt;&lt;ip&gt;::/0&lt;/ip&gt;&lt;/networks&gt;
+      &lt;profile&gt;default&lt;/profile&gt;
+      &lt;quota&gt;default&lt;/quota&gt;
+    &lt;/default&gt;
+  &lt;/users&gt;
+&lt;/clickhouse&gt;</code></pre>
+<pre><code class="language-bash">cd ~/clickhouse &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Interactive SQL shell
+podman exec -it clickhouse clickhouse-client --password changeme
+
+# Query via HTTP interface
+curl &quot;http://localhost:8123/?query=SELECT+version()&amp;password=changeme&quot;
+
+# Show table sizes
+podman exec clickhouse clickhouse-client --password changeme --query &quot;
+  SELECT database, table,
+    formatReadableSize(sum(bytes_on_disk)) AS size,
+    sum(rows) AS rows
+  FROM system.parts WHERE active
+  GROUP BY database, table
+  ORDER BY sum(bytes_on_disk) DESC&quot;
+
+# Import CSV
+podman exec -i clickhouse clickhouse-client --password changeme \
+  --query &quot;INSERT INTO mydb.events FORMAT CSV&quot; &lt; /path/to/events.csv</code></pre>
+<h5>Create a table optimised for event data</h5>
+<pre><code class="language-sql">CREATE DATABASE IF NOT EXISTS analytics;
+
+CREATE TABLE analytics.events (
+  event_time   DateTime,
+  session_id   String,
+  user_id      UInt64,
+  event_name   LowCardinality(String),
+  properties   String
+)
+ENGINE = MergeTree()
+PARTITION BY toYYYYMM(event_time)
+ORDER BY (event_name, event_time)
+TTL event_time + INTERVAL 1 YEAR;</code></pre>
+<blockquote><p><strong>DuckDB vs ClickHouse:</strong> Use DuckDB for local, one-off analytics on files (CSV, Parquet, Postgres) — no server, no setup. Use ClickHouse when you need a persistent server that ingests data continuously from multiple sources and serves concurrent analytical queries at scale.</p></blockquote>
+<p>---</p>
+<h2>SurrealDB (Multi-Model Database)</h2>
+<p><strong>Purpose:</strong> A single database that acts as relational, document, graph, and time-series store simultaneously. One query language (SurrealQL — SQL-like) handles joins, graph traversals, computed fields, and live queries (WebSocket-based change streams).</p>
+<pre><code class="language-yaml"># ~/surrealdb/compose.yaml
+services:
+  surrealdb:
+    image: surrealdb/surrealdb:latest
+    ports:
+      - 127.0.0.1:8000:8000
+    volumes:
+      - /home/user/surrealdb/data:/data:Z
+    command: start --log debug --user root --pass changeme file:/data/database.db
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/surrealdb &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Connect interactively
+podman exec -it surrealdb surreal sql \
+  --conn http://localhost:8000 \
+  --user root --pass changeme \
+  --ns myns --db mydb
+
+# Export a database
+podman exec surrealdb surreal export \
+  --conn http://localhost:8000 \
+  --user root --pass changeme \
+  --ns myns --db mydb /tmp/export.surql
+podman cp surrealdb:/tmp/export.surql ./surrealdb-$(date +%Y%m%d).surql</code></pre>
+<p>---</p>
+<h2>PocketBase (SQLite Backend-as-a-Service)</h2>
+<p><strong>Purpose:</strong> Single-binary Go backend with a built-in SQLite database, REST and realtime subscriptions API, file storage, authentication (email/password, OAuth), and a clean admin dashboard. No separate database server needed. Perfect for lightweight apps, prototypes, or small-team internal tools.</p>
+<pre><code class="language-yaml"># ~/pocketbase/compose.yaml
+services:
+  pocketbase:
+    image: ghcr.io/muchobien/pocketbase:latest
+    ports:
+      - 127.0.0.1:8090:8090
+    volumes:
+      - /home/user/pocketbase/pb_data:/pb_data:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/pocketbase &amp;&amp; podman-compose up -d</code></pre>
+<p>Access the admin UI at <code>http://localhost:8090/_/</code> to create your first admin account and define collections.</p>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">pb.home.local { tls internal; reverse_proxy localhost:8090 }</code></pre>
+<p>---</p>
+<h2>Supabase (Self-Hosted Firebase Alternative)</h2>
+<p><strong>Purpose:</strong> Full open-source Firebase/Supabase stack — PostgreSQL + Auth + Storage + Realtime subscriptions + Edge Functions + Studio UI in one compose stack. Use when you need a complete BaaS for a production app with no per-seat or per-row fees.</p>
+<pre><code class="language-bash"># Clone the official self-hosted stack
+git clone --depth 1 https://github.com/supabase/supabase
+cd supabase/docker
+
+# Copy and edit the env file
+cp .env.example .env
+# Edit .env: set POSTGRES_PASSWORD, JWT_SECRET, ANON_KEY, SERVICE_ROLE_KEY
+# Generate JWT secrets with: openssl rand -base64 32
+
+podman-compose up -d</code></pre>
+<blockquote><p>The <code>.env.example</code> file contains detailed comments for every variable. At minimum set <code>POSTGRES_PASSWORD</code>, <code>JWT_SECRET</code>, <code>ANON_KEY</code>, and <code>SERVICE_ROLE_KEY</code>.</p></blockquote>
+<p>Access Supabase Studio at <code>http://localhost:3000</code>.</p>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">supabase.home.local { tls internal; reverse_proxy localhost:3000 }</code></pre>
+<p>---</p>
+<h2>NocoDB (Airtable on PostgreSQL)</h2>
+<p><strong>Purpose:</strong> Turns any existing PostgreSQL, MySQL, or SQLite database into an Airtable-style spreadsheet UI with forms, views (grid, gallery, Kanban), and a REST API — without touching your schema. Essential for giving non-technical team members a usable frontend over raw database tables.</p>
+<pre><code class="language-yaml"># ~/nocodb/compose.yaml
+services:
+  nocodb:
+    image: nocodb/nocodb:latest
+    ports:
+      - 127.0.0.1:8180:8080
+    environment:
+      NC_DB: pg://db:5432?u=nocodb&amp;p=changeme&amp;d=nocodb
+      NC_AUTH_JWT_SECRET: changeme-run-openssl-rand-hex-32
+    depends_on: [db]
+    volumes:
+      - /home/user/nocodb/data:/usr/app/data:Z
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: nocodb
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: nocodb
+    volumes:
+      - nocodb_pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  nocodb_pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/nocodb &amp;&amp; podman-compose up -d</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">nocodb.home.local { tls internal; reverse_proxy localhost:8180 }</code></pre>
+<p>---</p>
+<h2>Adminer</h2>
+<p><strong>Purpose:</strong> Lightweight, single-file database management interface supporting MySQL, PostgreSQL, SQLite, and Oracle. Useful for quick inspection without installing a full GUI.</p>
+<pre><code class="language-yaml"># ~/adminer/compose.yaml
+services:
+  adminer:
+    image: adminer
+    ports:
+      - 127.0.0.1:8089:8080
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/adminer &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:8089</code>. Enter <code>host.containers.internal</code> as the server address when connecting to a database in another container.</p>
+<p>---</p>
+<h2>CloudBeaver (Universal Database GUI)</h2>
+<p><strong>Purpose:</strong> Web-based, multi-database IDE from the makers of DBeaver. Supports PostgreSQL, MySQL/MariaDB, SQLite, ClickHouse, MongoDB, Redis, and 40+ other databases — all from a single browser tab. Offers a full SQL editor with autocomplete, ERD diagrams, data export/import, and role-based access controls.</p>
+<pre><code class="language-yaml"># ~/cloudbeaver/compose.yaml
+services:
+  cloudbeaver:
+    image: dbeaver/cloudbeaver:latest
+    ports:
+      - 127.0.0.1:8978:8978
+    volumes:
+      - /home/user/cloudbeaver/workspace:/opt/cloudbeaver/workspace:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/cloudbeaver &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:8978</code>. Complete the initial setup wizard, then add connections under <strong>Connection → New Connection</strong> — use <code>host.containers.internal</code> as the host for other containers.</p>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">db-gui.home.local { tls internal; reverse_proxy localhost:8978 }</code></pre>
+<blockquote><p><strong>Adminer vs CloudBeaver:</strong> Adminer is zero-config, instant-start, ideal for one-off inspection. CloudBeaver is a full web IDE with saved connections, shared team access, query history, and ERD diagrams — better for regular development work.</p></blockquote>
+<p>---</p>
+<h2>Choosing the Right Database</h2>
+<p>| Use Case | Recommended Database | |----------|---------------------| | General-purpose relational, web apps | PostgreSQL | | Legacy PHP apps, WordPress | MariaDB | | Caching, sessions, pub/sub | Redis / Valkey | | High-throughput caching (multi-core) | Dragonfly / KeyDB | | Document storage, flexible schema | MongoDB | | MongoDB API on PostgreSQL storage | FerretDB | | Event streaming, data pipelines | Kafka / Redpanda | | Task queues, worker jobs, RPC | RabbitMQ | | Lightweight pub/sub + KV + streams | NATS JetStream | | Graph data, social networks, recommendations | Neo4j | | IoT telemetry, time-series at scale | Cassandra / ScyllaDB | | Time-series with SQL & PostgreSQL tooling | TimescaleDB | | Horizontal SQL scaling, multi-region | CockroachDB | | Full-text search (simple, fast) | Typesense / MeiliSearch | | Vector/semantic search (AI/RAG) | Qdrant / Weaviate | | Vector search in existing PostgreSQL | pgvector | | Vector search, LLM-app SDK simplicity | Chroma | | SQLite with replication | Litestream | | Metrics & IoT (line protocol) | InfluxDB | | Local OLAP / data analysis on files | DuckDB | | High-throughput server-side OLAP / analytics | ClickHouse | | Multi-model (relational + graph + doc) | SurrealDB | | Lightweight app backend (SQLite + Auth + API) | PocketBase | | Full BaaS (PostgreSQL + Auth + Realtime + Storage) | Supabase | | Visual spreadsheet UI over existing DB | NocoDB | | Universal web-based DB GUI (multi-database) | CloudBeaver |</p>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | PostgreSQL <code>FATAL: password authentication failed</code> | Verify <code>POSTGRES_USER</code> and <code>POSTGRES_PASSWORD</code> match; recreate the volume if the DB was initialised with different credentials | | Redis <code>NOAUTH</code> error | Add <code>--requirepass changeme</code> to the command; update clients to pass the password | | MongoDB <code>auth failed</code> | Ensure client uses <code>admin</code> database for auth: add <code>?authSource=admin</code> to the connection string | | Qdrant collection not found | Collections are created via API or the web UI dashboard; Qdrant does not auto-create on insert | | InfluxDB can't accept writes | Verify the org name and bucket match <code>DOCKER_INFLUXDB_INIT_ORG</code> and <code>DOCKER_INFLUXDB_INIT_BUCKET</code> exactly | | Adminer shows no database | Connect to <code>host.containers.internal</code> (not <code>localhost</code>) when the database is in another container | | Kafka consumer lag growing | Check partition count vs consumer count; increase partitions or add consumer instances; verify no consumer is crashing | | Kafka topic not created | Ensure <code>KAFKA_AUTO_CREATE_TOPICS_ENABLE=true</code> or create manually with <code>kafka-topics --create</code> | | Kafka KRaft broker not starting | Ensure <code>CLUSTER_ID</code> is set (generate with <code>kafka-storage random-uuid</code>); verify <code>KAFKA_PROCESS_ROLES</code>, <code>KAFKA_NODE_ID</code>, and <code>KAFKA_CONTROLLER_QUORUM_VOTERS</code> are all consistent | | Neo4j heap OOM | Increase <code>NEO4J_dbms_memory_heap_max__size</code> — default is 512m; graph queries on large datasets need more | | Cassandra connection refused | Cassandra takes 30–60 s to start; check <code>podman logs cassandra</code> for <code>Starting listening for CQL clients</code> | | CockroachDB <code>node is not ready</code> | Single-node startup takes a few seconds; retry with <code>podman exec cockroachdb cockroach sql --insecure</code> after 10 s | | TimescaleDB extension not found | Run <code>CREATE EXTENSION timescaledb;</code> in <code>psql</code> after first connection; must be enabled per database | | Redpanda schema registry errors | Ensure schema registry port <code>8081</code> is not blocked; it is separate from the Kafka broker port <code>9092</code> | | Weaviate vectorisation fails | Verify Ollama is running and <code>TEXT2VEC_OLLAMA_APIENDPOINT</code> resolves; pull the embedding model: <code>podman exec ollama ollama pull nomic-embed-text</code> | | RabbitMQ management UI unreachable | Ensure port <code>15672</code> is exposed; management plugin is bundled in the <code>-management</code> image tag | | RabbitMQ messages not consumed | Check consumer acknowledgement mode — unacked messages stay in queue; verify the consumer is running and connected | | NATS JetStream not persisting | Ensure <code>store_dir</code> is set in config and the <code>/data</code> volume is mounted; <code>jetstream {}</code> block must be present | | Typesense collection not found | Collections must be explicitly created before indexing; verify the API key matches <code>TYPESENSE_API_KEY</code> | | DuckDB Parquet read error | Ensure the file path inside the container matches the volume mount; DuckDB requires read permissions on the file | | SurrealDB connection refused | Verify the <code>--conn</code> URL uses <code>http://</code> not <code>https://</code> for local connections; check the namespace and database exist | | Dragonfly <code>ulimit</code> warning on startup | Set <code>ulimits: memlock: -1</code> in the compose service; Dragonfly requires unlimited locked memory | | FerretDB command not supported | Check the <a href="https://docs.ferretdb.io/reference/supported-commands/">FerretDB compatibility list</a> — some advanced MongoDB aggregation stages are not yet implemented | | PocketBase admin blank on first load | Visit <code>http://localhost:8090/_/</code> (note the trailing slash) to trigger admin setup | | Supabase Studio not loading | Wait 60–90 s for all services to initialise; Kong and GoTrue must be healthy before Studio loads | | NocoDB <code>Cannot read properties of undefined</code> on connect | Ensure <code>NC_DB</code> uses the <code>pg://</code> URI scheme with correct credentials; check the PostgreSQL container is fully started | | pgvector <code>type &quot;vector&quot; does not exist</code> | Run <code>CREATE EXTENSION IF NOT EXISTS vector;</code> in the target database; must be enabled per database | | Chroma collection not persisting after restart | Ensure <code>IS_PERSISTENT: &quot;TRUE&quot;</code> is set and the <code>/chroma/chroma</code> volume is correctly mounted | | Chroma <code>Connection refused</code> from Python | Verify <code>chromadb.HttpClient(host=&quot;localhost&quot;, port=8000)</code> — the default <code>chromadb.Client()</code> is in-memory only | | ClickHouse <code>Connection refused</code> on port 8123 | Ensure <code>&lt;listen_host&gt;0.0.0.0&lt;/listen_host&gt;</code> is in the custom config; by default ClickHouse only binds to localhost | | CloudBeaver can't connect to container databases | Use <code>host.containers.internal</code> instead of <code>localhost</code>; set the port to the host-side mapped port |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

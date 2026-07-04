@@ -146,7 +146,1190 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Clusters &amp; High Availability</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+        </div>
+      </div>
+      <div class="prose"><blockquote><p><strong>Portability note:</strong> Compose examples use rootless <strong>Podman</strong> and <code>host.containers.internal</code>. When using Docker, replace <code>podman-compose</code> with <code>docker compose</code> and <code>host.containers.internal</code> with <code>host-gateway</code> (add <code>extra_hosts: [host-gateway:host-gateway]</code> to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.</p></blockquote>
+<p>Multi-node, replicated, and highly available deployments. All compose files use rootless Podman with <code>:Z</code> volume labels on bind mounts. Named volumes omit <code>:Z</code> — Podman manages their labels automatically.</p>
+<p>---</p>
+<h2>Key Concepts</h2>
+<p>These patterns appear across every company that runs production infrastructure. Understanding them is the difference between someone who follows runbooks and someone who can write them.</p>
+<h4>Replication vs. clustering</h4>
+<p><em>Replication</em> copies data from one node to others (primary → replicas). <em>Clustering</em> distributes both data and responsibility across nodes. PostgreSQL streaming replication is replication; Cassandra ring is clustering. Many systems combine both — MongoDB replica sets replicate within each shard, while a sharded cluster distributes across shards.</p>
+<h4>Leader election</h4>
+<p>When a primary fails, surviving nodes must agree on a new one without split-brain (two nodes both believing they are primary). This requires a consensus algorithm — Raft (etcd, Kafka KRaft) or Paxos variants. The protocol guarantees that only one node can be elected, even under network partition. You don't need to implement this; you need to understand <em>why</em> etcd is a dependency for Patroni, and <em>why</em> Kafka removed ZooKeeper.</p>
+<h4>Fencing (STONITH — Shoot The Other Node In The Head)</h4>
+<p>In bare-metal HA setups, when a primary node stops responding, the cluster can't be certain whether it crashed or just lost network connectivity. A fencing device (IPMI/BMC, PDU, or cloud API) forcibly powers off or reboots the unresponsive node before promoting a standby — preventing split-brain writes. On cloud and container deployments, fencing is usually handled by the orchestrator (Kubernetes, etcd TTLs, cloud instance termination APIs). Every infrastructure engineer will encounter this concept.</p>
+<h4>Replication lag</h4>
+<p>Async replicas apply writes with a delay. During normal operation this might be milliseconds; under load it can grow to seconds or minutes. Reads from a replica during lag return stale data. This is the fundamental trade-off behind <code>readPreference=secondary</code> (MongoDB), reading from a Postgres standby, and <code>CONSISTENCY LOCAL_ONE</code> (Cassandra). Always know your acceptable staleness before sending reads to replicas.</p>
+<h4>HAProxy health check model</h4>
+<p>HAProxy doesn't connect to the database to check health — it hits a REST endpoint on the HA agent (Patroni port 8008). This is intentional: probing the database port only tells you TCP is open, not whether the node is a writable primary. The agent's REST endpoint knows cluster role and reports it explicitly. This REST-based health check pattern appears across many HA stacks (Consul health checks, Kubernetes liveness/readiness probes, AWS target group health checks).</p>
+<h4>Quorum mathematics — why odd-numbered clusters</h4>
+<p>A cluster with N nodes requires ⌊N/2⌋ + 1 nodes for quorum (a majority). With 3 nodes: quorum = 2, can tolerate 1 failure. With 5 nodes: quorum = 3, can tolerate 2 failures. With 4 nodes: quorum = 3, can still only tolerate 1 failure — same as 3 nodes but with more cost. Even-numbered clusters waste a node. A 2-node cluster can't achieve quorum after any single failure — this is why you should never run a 2-node etcd, Patroni, or Elasticsearch cluster in production.</p>
+<h4>Raft consensus in practice</h4>
+<p>Raft (used by etcd, Kafka KRaft, CockroachDB) works in three roles: Leader (one per cluster, handles all writes), Follower (replicates from leader), Candidate (transitional during election). A leader sends heartbeats; if followers don't hear one within the election timeout, they become candidates and request votes. A candidate wins if it gets votes from a majority of nodes. Raft guarantees: (1) at most one leader at a time, (2) a leader has all committed entries, (3) committed entries are never lost. The practical implication: writes require a majority acknowledgment before committing — if you lose quorum, the cluster stops accepting writes.</p>
+<h4>Kafka partitions and consumer groups</h4>
+<p>A Kafka topic is divided into partitions — the unit of parallelism and ordering. Messages within a partition are strictly ordered; across partitions they are not. A consumer group is a set of consumers that jointly consume all partitions of a topic — each partition is assigned to exactly one consumer in the group at any time. Scaling throughput: add partitions (more parallelism) and consumers (up to the number of partitions — extra consumers idle). This model is why Kafka is "pull-based": consumers control their own offset, enabling replay and independent progress for different consumer groups on the same data.</p>
+<h4>RabbitMQ exchange types — routing patterns</h4>
+<p>RabbitMQ's exchange is the router between producers and queues. Four types: <strong>Direct</strong> — routes to queues whose binding key exactly matches the message routing key (point-to-point). <strong>Fanout</strong> — broadcasts to all bound queues regardless of routing key (pub/sub). <strong>Topic</strong> — routes based on wildcard pattern matching (<code><em>.error</code>, <code>logs.#</code>) — the most flexible. <strong>Headers</strong> — routes based on message headers rather than routing key (rarely used). Knowing these lets you design message routing without application-level filtering: a Topic exchange with <code></em>.error</code> bound to an alert queue handles error routing at the broker.</p>
+<h4>VictoriaMetrics vs Prometheus — architectural differences</h4>
+<p>Prometheus is single-node — one binary, local disk, bounded retention. VictoriaMetrics is Prometheus-compatible (speaks the same scrape format, query language, and remote write API) but designed for higher throughput and longer retention: better compression (10x vs Prometheus), faster ingest, and a cluster mode for horizontal scaling. The key operational difference: VictoriaMetrics accepts Prometheus remote write, so you can run Prometheus for scraping and service discovery while using VictoriaMetrics as the long-term storage backend (the same role as Thanos, but simpler to operate).</p>
+<h4>Cassandra consistent hashing and the ring</h4>
+<p>Cassandra distributes data using consistent hashing — each node owns a range of the token ring (a 64-bit integer space). A row's partition key is hashed to a token, and the node owning that token range stores it. With <code>replication_factor=3</code>, the three consecutive nodes on the ring each store a copy. This means: (1) adding a node only moves ~1/N of data, not all of it, (2) there's no primary — any replica can serve reads/writes, (3) <code>CONSISTENCY QUORUM</code> requires a majority of replicas to agree, moving Cassandra toward CP at the cost of availability during node failures.</p>
+<h4>CAP theorem — the distributed systems interview question</h4>
+<p>Any distributed data store can provide at most two of three guarantees: Consistency (every read gets the most recent write), Availability (every request gets a non-error response), and Partition tolerance (the system continues despite network splits). Network partitions are unavoidable in real systems, so the real choice is CP vs AP. PostgreSQL with Patroni is CP — during a failover it stops accepting writes until a new leader is elected. Cassandra is AP — it stays writable during a partition but can return stale data. Knowing this tells you which database to choose for a given use case.</p>
+<h4>Consistent hashing — how distributed caches and databases partition data</h4>
+<p>Naive sharding (key mod N) breaks when you add or remove nodes — all keys need to be remapped. Consistent hashing places both nodes and keys on a ring; adding a node only moves 1/N of the keys to it. Redis Cluster uses hash slots (16384 fixed buckets) as a simpler consistent-hashing variant. Understanding this lets you explain why Redis Cluster rebalancing is less disruptive than naive partitioning and why adding a Cassandra node to a ring is a smooth operation.</p>
+<h4>Split-brain consequences and prevention</h4>
+<p>Split-brain occurs when two nodes both believe they are the primary and accept writes simultaneously, creating divergent data. Consequences: data loss on reconciliation, double-processing of transactions, or permanent inconsistency. Prevention mechanisms: quorum (requires majority vote to elect a primary), fencing (forcibly stop the old primary before promoting a new one), and epoch numbers (each primary has a monotonically increasing term; writes from a stale term are rejected). The pattern repeats across Patroni (etcd quorum + fencing), Kafka KRaft (Raft epochs), and Elasticsearch (voting configurations).</p>
+<h4>Observability for distributed clusters</h4>
+<p>Cluster health is not just "is the process running." Key metrics to monitor: (1) replication lag — how far behind are replicas? (2) leader stability — how often is leader election happening? Frequent elections indicate network instability; (3) quorum status — is the cluster operating at full quorum or in degraded mode? (4) partition count and distribution — are Kafka partitions evenly distributed, or is one broker hot? Tools: Kafka UI for Kafka, Patroni's REST API (<code>/patroni</code>) for PostgreSQL, <code>_cluster/health</code> for Elasticsearch. Alert on degraded status, not just down status.</p>
+<h4>Replication factor vs availability — the maths</h4>
+<p>In Kafka, a topic with <code>replication.factor=3</code> and <code>min.insync.replicas=2</code> can survive loss of 1 broker (writes still acknowledged by 2). In Cassandra, <code>REPLICATION_FACTOR=3</code> with <code>CONSISTENCY QUORUM</code> can survive 1 node failure. In Elasticsearch, <code>number_of_replicas=1</code> means each shard exists on 2 nodes — lose 1 node and the cluster stays green. The general formula: for fault tolerance of F failures, you need 2F+1 nodes with quorum writes, or F+1 nodes with full replication. Knowing this lets you size clusters correctly at interview: "we need to survive 1 AZ failure, so we need 3 replicas across 3 AZs."</p>
+<h4>When to use a message queue vs a database as a queue</h4>
+<p>Using a relational database as a job queue (polling a <code>jobs</code> table) works at low scale but creates lock contention and high database load as throughput grows. Kafka is not a job queue — it's a log, and all consumers see all messages. RabbitMQ is a job queue — messages are consumed once, then deleted. Use a dedicated queue (RabbitMQ, NATS JetStream) when you have competing consumers (multiple workers processing jobs), require dead-letter handling, or need per-message TTL. Use a database queue only for low-volume (<100 jobs/second) workloads where simplicity matters more than throughput.</p>
+<p>---</p>
+<h2>Elasticsearch Cluster (3-Node)</h2>
+<p><strong>Purpose:</strong> Production ELK cluster with 3 master-eligible/data nodes for quorum-based split-brain prevention. Survives loss of 1 node. Pair with the Logstash and Beats configs in the <a href="https://docs.shani.dev/doc/servers/monitoring">Monitoring wiki</a>.</p>
+<pre><code class="language-yaml"># ~/elk-cluster/compose.yaml
+services:
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    ports:
+      - 127.0.0.1:9200:9200
+    environment:
+      node.name: es01
+      cluster.name: homelab-logs
+      node.roles: master,data
+      discovery.seed_hosts: es02,es03
+      cluster.initial_master_nodes: es01,es02,es03
+      xpack.security.enabled: &quot;false&quot;
+      ES_JAVA_OPTS: &quot;-Xms1g -Xmx1g&quot;
+      bootstrap.memory_lock: &quot;true&quot;
+    volumes:
+      - es01_data:/usr/share/elasticsearch/data
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    restart: unless-stopped
+
+  es02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    environment:
+      node.name: es02
+      cluster.name: homelab-logs
+      node.roles: master,data
+      discovery.seed_hosts: es01,es03
+      cluster.initial_master_nodes: es01,es02,es03
+      xpack.security.enabled: &quot;false&quot;
+      ES_JAVA_OPTS: &quot;-Xms1g -Xmx1g&quot;
+      bootstrap.memory_lock: &quot;true&quot;
+    volumes:
+      - es02_data:/usr/share/elasticsearch/data
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    restart: unless-stopped
+
+  es03:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    environment:
+      node.name: es03
+      cluster.name: homelab-logs
+      node.roles: master,data
+      discovery.seed_hosts: es01,es02
+      cluster.initial_master_nodes: es01,es02,es03
+      xpack.security.enabled: &quot;false&quot;
+      ES_JAVA_OPTS: &quot;-Xms1g -Xmx1g&quot;
+      bootstrap.memory_lock: &quot;true&quot;
+    volumes:
+      - es03_data:/usr/share/elasticsearch/data
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    restart: unless-stopped
+
+  # Coordinating / ingest node — routes requests, no data stored
+  es-ingest:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    environment:
+      node.name: es-ingest
+      cluster.name: homelab-logs
+      node.roles: ingest,coordinating
+      discovery.seed_hosts: es01,es02,es03
+      cluster.initial_master_nodes: es01,es02,es03
+      xpack.security.enabled: &quot;false&quot;
+      ES_JAVA_OPTS: &quot;-Xms512m -Xmx512m&quot;
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    restart: unless-stopped
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    ports:
+      - 127.0.0.1:5601:5601
+    environment:
+      ELASTICSEARCH_HOSTS: '[&quot;http://es01:9200&quot;,&quot;http://es02:9200&quot;,&quot;http://es03:9200&quot;]'
+    depends_on: [es01, es02, es03]
+    restart: unless-stopped
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.13.4
+    ports:
+      - 127.0.0.1:5044:5044
+      - 127.0.0.1:5000:5000/tcp
+      - 127.0.0.1:5000:5000/udp
+    volumes:
+      - /home/user/elk-cluster/logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
+      - /home/user/elk-cluster/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
+    environment:
+      LS_JAVA_OPTS: &quot;-Xms512m -Xmx512m&quot;
+    depends_on: [es01]
+    restart: unless-stopped
+
+volumes:
+  es01_data:
+  es02_data:
+  es03_data:</code></pre>
+<pre><code class="language-bash"># Required on every host node before starting
+sudo sysctl -w vm.max_map_count=262144
+echo &quot;vm.max_map_count=262144&quot; | sudo tee /etc/sysctl.d/99-elasticsearch.conf
+
+cd ~/elk-cluster &amp;&amp; podman-compose up -d
+
+# Verify cluster health
+curl http://localhost:9200/_cluster/health?pretty
+curl &quot;http://localhost:9200/_cat/nodes?v&amp;h=name,role,heap.percent,disk.used_percent,load_1m&quot;</code></pre>
+<h4>Node roles reference</h4>
+<p>| Role | Responsibilities | |------|-----------------| | <code>master</code> | Cluster state, index creation/deletion, shard allocation | | <code>data</code> | Store shards, handle search and indexing requests | | <code>ingest</code> | Pre-process documents via pipelines before indexing | | <code>coordinating</code> | Route requests, merge results — no data stored |</p>
+<blockquote><p><strong>Split-brain prevention:</strong> Always deploy an odd number of master-eligible nodes (3 or 5). With 3 masters the cluster survives loss of 1; with 5, loss of 2. Remove <code>cluster.initial_master_nodes</code> from node configs after first cluster formation or nodes will refuse to rejoin after a full restart.</p></blockquote>
+<p>---</p>
+<h2>How Quorum and Split-Brain Prevention Work</h2>
+<p>Every distributed system in this wiki — Elasticsearch, etcd, Kafka, Patroni, Redis Sentinel — relies on the same underlying idea: a <strong>quorum</strong>.</p>
+<p>A cluster of N nodes requires ⌊N/2⌋ + 1 nodes to agree before making any decision (electing a leader, accepting a write, allocating a shard). With 3 nodes, quorum = 2. If 1 node fails, the remaining 2 can still reach agreement — the cluster stays available. If 2 nodes fail, the 1 remaining node can't form a quorum alone, so it refuses to make decisions rather than risk acting on stale or inconsistent data.</p>
+<h4>Why odd numbers</h4>
+<p>A 4-node cluster has quorum = 3, so it can only tolerate 1 failure — same as a 3-node cluster, but at higher cost. Even-numbered clusters also create a risk of a 2-2 split where neither partition can reach quorum, leaving the whole system stuck. Odd numbers are not required, but they give you the best fault tolerance per node.</p>
+<h4>What split-brain means in practice</h4>
+<p>If a network partition divides a cluster into two halves that can't communicate, and both halves could independently elect a leader and accept writes, you'd end up with two diverged datasets with no way to reconcile them. Quorum prevents this: only the partition with enough nodes to reach quorum can continue operating. The minority partition refuses to act.</p>
+<h4>Why Patroni uses etcd</h4>
+<p>The leader election process requires a distributed consensus store that is itself fault-tolerant. Patroni nodes race to write a leader lock key in etcd. The node that succeeds becomes primary. The lock has a TTL (time-to-live); if the primary fails to renew it before expiry, etcd expires the key and a new election begins. The health check HAProxy hits (port 8008) is the Patroni REST API, not PostgreSQL directly — HAProxy asks Patroni "are you the primary?" rather than probing the database port.</p>
+<p>---</p>
+<h2>OpenSearch Cluster (3-Node)</h2>
+<p><strong>Purpose:</strong> Apache 2.0-licensed ELK alternative. Drop-in API compatible with Elasticsearch — any Logstash output, Filebeat, or Metricbeat works without changes. Includes Data Prepper, OpenSearch's native log pipeline (Logstash equivalent).</p>
+<pre><code class="language-yaml"># ~/opensearch-cluster/compose.yaml
+services:
+  os01:
+    image: opensearchproject/opensearch:2
+    environment:
+      cluster.name: os-logs
+      node.name: os01
+      discovery.seed_hosts: os02,os03
+      cluster.initial_cluster_manager_nodes: os01,os02,os03
+      DISABLE_SECURITY_PLUGIN: &quot;true&quot;
+      OPENSEARCH_JAVA_OPTS: &quot;-Xms1g -Xmx1g&quot;
+      bootstrap.memory_lock: &quot;true&quot;
+    volumes:
+      - os01_data:/usr/share/opensearch/data
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    restart: unless-stopped
+
+  os02:
+    image: opensearchproject/opensearch:2
+    environment:
+      cluster.name: os-logs
+      node.name: os02
+      discovery.seed_hosts: os01,os03
+      cluster.initial_cluster_manager_nodes: os01,os02,os03
+      DISABLE_SECURITY_PLUGIN: &quot;true&quot;
+      OPENSEARCH_JAVA_OPTS: &quot;-Xms1g -Xmx1g&quot;
+      bootstrap.memory_lock: &quot;true&quot;
+    volumes:
+      - os02_data:/usr/share/opensearch/data
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    restart: unless-stopped
+
+  os03:
+    image: opensearchproject/opensearch:2
+    environment:
+      cluster.name: os-logs
+      node.name: os03
+      discovery.seed_hosts: os01,os02
+      cluster.initial_cluster_manager_nodes: os01,os02,os03
+      DISABLE_SECURITY_PLUGIN: &quot;true&quot;
+      OPENSEARCH_JAVA_OPTS: &quot;-Xms1g -Xmx1g&quot;
+      bootstrap.memory_lock: &quot;true&quot;
+    volumes:
+      - os03_data:/usr/share/opensearch/data
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    restart: unless-stopped
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2
+    ports:
+      - 127.0.0.1:5601:5601
+    environment:
+      OPENSEARCH_HOSTS: '[&quot;http://os01:9200&quot;,&quot;http://os02:9200&quot;,&quot;http://os03:9200&quot;]'
+      DISABLE_SECURITY_DASHBOARDS_PLUGIN: &quot;true&quot;
+    depends_on: [os01]
+    restart: unless-stopped
+
+  # Data Prepper — OpenSearch's native log processing pipeline
+  data-prepper:
+    image: opensearchproject/data-prepper:latest
+    ports:
+      - 127.0.0.1:21890:21890   # OTLP gRPC
+      - 127.0.0.1:2021:2021     # HTTP source
+      - 127.0.0.1:4900:4900     # Server API
+    volumes:
+      - /home/user/opensearch-cluster/data-prepper/pipelines.yaml:/usr/share/data-prepper/pipelines/pipelines.yaml:ro,Z
+      - /home/user/opensearch-cluster/data-prepper/data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml:ro,Z
+    depends_on: [os01]
+    restart: unless-stopped
+
+volumes:
+  os01_data:
+  os02_data:
+  os03_data:</code></pre>
+<pre><code class="language-bash">sudo sysctl -w vm.max_map_count=262144
+echo &quot;vm.max_map_count=262144&quot; | sudo tee /etc/sysctl.d/99-elasticsearch.conf
+
+cd ~/opensearch-cluster &amp;&amp; podman-compose up -d
+
+curl http://localhost:9200/_cluster/health?pretty
+curl &quot;http://localhost:9200/_cat/nodes?v&quot;</code></pre>
+<h5>Data Prepper pipeline config</h5>
+<pre><code class="language-yaml"># ~/opensearch-cluster/data-prepper/pipelines.yaml
+log-pipeline:
+  source:
+    http:
+      port: 2021
+  processor:
+    - grok:
+        match:
+          message: ['%{COMMONAPACHELOG}']
+    - date:
+        from_time_received: true
+        destination: &quot;@timestamp&quot;
+  sink:
+    - opensearch:
+        hosts: [&quot;http://os01:9200&quot;, &quot;http://os02:9200&quot;]
+        insecure: true
+        index: logs-%{yyyy.MM.dd}
+
+otel-trace-pipeline:
+  source:
+    otel_trace_source:
+      port: 21890
+  processor:
+    - otel_traces: ~
+  sink:
+    - opensearch:
+        hosts: [&quot;http://os01:9200&quot;]
+        insecure: true
+        index: otel-traces-%{yyyy.MM.dd}</code></pre>
+<h5>OpenSearch ISM — daily rollover, delete after 30 days</h5>
+<pre><code class="language-bash">curl -X PUT http://localhost:9200/_plugins/_ism/policies/logs-policy \
+  -H &quot;Content-Type: application/json&quot; -d '
+{
+  &quot;policy&quot;: {
+    &quot;description&quot;: &quot;Daily rollover, delete after 30d&quot;,
+    &quot;default_state&quot;: &quot;hot&quot;,
+    &quot;states&quot;: [
+      {
+        &quot;name&quot;: &quot;hot&quot;,
+        &quot;actions&quot;: [{ &quot;rollover&quot;: { &quot;min_index_age&quot;: &quot;1d&quot;, &quot;min_primary_shard_size&quot;: &quot;25gb&quot; } }],
+        &quot;transitions&quot;: [{ &quot;state_name&quot;: &quot;delete&quot;, &quot;conditions&quot;: { &quot;min_index_age&quot;: &quot;30d&quot; } }]
+      },
+      {
+        &quot;name&quot;: &quot;delete&quot;,
+        &quot;actions&quot;: [{ &quot;delete&quot;: {} }],
+        &quot;transitions&quot;: []
+      }
+    ],
+    &quot;ism_template&quot;: [{ &quot;index_patterns&quot;: [&quot;logs-*&quot;], &quot;priority&quot;: 100 }]
+  }
+}'</code></pre>
+<p>---</p>
+<h2>Kafka Cluster (KRaft, 3-Node)</h2>
+<p><strong>Purpose:</strong> Production Kafka cluster using KRaft mode (ZooKeeper removed in Kafka 4.0). Three nodes each act as both broker and controller, giving quorum-based fault tolerance — survives loss of 1 node.</p>
+<pre><code class="language-yaml"># ~/kafka-cluster/compose.yaml
+services:
+  kafka1:
+    image: confluentinc/cp-kafka:latest
+    ports:
+      - 127.0.0.1:9092:9092
+    environment:
+      CLUSTER_ID: &quot;MkU3OEVBNTcwNTJENDM2Qk&quot;
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka1:9093,2@kafka2:9093,3@kafka3:9093
+      KAFKA_LISTENERS: PLAINTEXT://kafka1:29092,CONTROLLER://kafka1:9093,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: &quot;true&quot;
+      KAFKA_LOG_RETENTION_HOURS: 168
+    volumes:
+      - kafka1_data:/var/lib/kafka/data
+    restart: unless-stopped
+
+  kafka2:
+    image: confluentinc/cp-kafka:latest
+    environment:
+      CLUSTER_ID: &quot;MkU3OEVBNTcwNTJENDM2Qk&quot;
+      KAFKA_NODE_ID: 2
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka1:9093,2@kafka2:9093,3@kafka3:9093
+      KAFKA_LISTENERS: PLAINTEXT://kafka2:29092,CONTROLLER://kafka2:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+    volumes:
+      - kafka2_data:/var/lib/kafka/data
+    restart: unless-stopped
+
+  kafka3:
+    image: confluentinc/cp-kafka:latest
+    environment:
+      CLUSTER_ID: &quot;MkU3OEVBNTcwNTJENDM2Qk&quot;
+      KAFKA_NODE_ID: 3
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka1:9093,2@kafka2:9093,3@kafka3:9093
+      KAFKA_LISTENERS: PLAINTEXT://kafka3:29092,CONTROLLER://kafka3:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+    volumes:
+      - kafka3_data:/var/lib/kafka/data
+    restart: unless-stopped
+
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:latest
+    ports:
+      - 127.0.0.1:8080:8080
+    environment:
+      KAFKA_CLUSTERS_0_NAME: homelab
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka1:29092,kafka2:29092,kafka3:29092
+    depends_on: [kafka1, kafka2, kafka3]
+    restart: unless-stopped
+
+volumes:
+  kafka1_data:
+  kafka2_data:
+  kafka3_data:</code></pre>
+<pre><code class="language-bash">cd ~/kafka-cluster &amp;&amp; podman-compose up -d
+
+# Verify all brokers are visible
+podman exec kafka1 kafka-broker-api-versions \
+  --bootstrap-server kafka1:29092,kafka2:29092,kafka3:29092
+
+# Create a topic with replication
+podman exec kafka1 kafka-topics \
+  --bootstrap-server kafka1:29092 \
+  --create --topic my-topic --partitions 6 --replication-factor 3
+
+# Check topic replication state
+podman exec kafka1 kafka-topics \
+  --bootstrap-server kafka1:29092 --describe --topic my-topic</code></pre>
+<blockquote><p><code>KAFKA_MIN_INSYNC_REPLICAS: 2</code> means a producer with <code>acks=all</code> requires at least 2 replicas to acknowledge a write — preventing data loss if a node fails mid-write. The cluster tolerates the loss of 1 broker.</p></blockquote>
+<h3>How Kafka Consumer Groups Work</h3>
+<p>A <strong>consumer group</strong> is a set of consumers that collectively read a topic. Kafka assigns each partition to exactly one consumer in the group at a time. If a topic has 6 partitions and your consumer group has 3 instances, each instance gets 2 partitions. If you scale to 6 instances, each gets 1. If you add a 7th, it sits idle — you can't have more active consumers than partitions.</p>
+<p><strong>Rebalancing:</strong> happens when a consumer joins or leaves the group. During a rebalance, all partition assignments are renegotiated — no consumer processes messages until the rebalance completes. This is the "rebalance storm" problem: if consumers join/leave frequently (e.g., due to crashlooping pods), the group never stabilises and consumer lag grows continuously.</p>
+<p><code>max.poll.interval.ms</code> controls how long Kafka waits between calls to <code>poll()</code> before declaring a consumer dead and triggering a rebalance. If your processing logic is slow (e.g., calling an external API per message), increase this value — otherwise Kafka will evict the consumer mid-processing, causing messages to be redelivered.</p>
+<pre><code class="language-bash"># Check consumer group lag — how far behind each consumer is
+podman exec kafka1 kafka-consumer-groups \
+  --bootstrap-server kafka1:29092 \
+  --describe --group my-consumer-group
+
+# Reset offsets to re-process from beginning (use with caution)
+podman exec kafka1 kafka-consumer-groups \
+  --bootstrap-server kafka1:29092 \
+  --group my-consumer-group \
+  --topic my-topic \
+  --reset-offsets --to-earliest --execute</code></pre>
+<p>---</p>
+<h2>Patroni + etcd + HAProxy (PostgreSQL HA)</h2>
+<p><strong>Purpose:</strong> Patroni is the industry-standard PostgreSQL HA solution. It manages automatic failover: if the primary goes down, Patroni promotes a standby to primary within seconds. etcd stores cluster state and is used for distributed leader election.</p>
+<pre><code class="language-yaml"># ~/patroni/compose.yaml
+services:
+  # etcd — distributed consensus store for Patroni
+  etcd:
+    image: bitnami/etcd:latest
+    ports:
+      - 127.0.0.1:2379:2379
+    environment:
+      ETCD_NAME: etcd0
+      ETCD_DATA_DIR: /etcd-data
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd:2379
+      ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: http://etcd:2380
+      ETCD_INITIAL_CLUSTER: etcd0=http://etcd:2380
+      ETCD_INITIAL_CLUSTER_STATE: new
+      ALLOW_NONE_AUTHENTICATION: &quot;yes&quot;
+    volumes:
+      - etcd_data:/etcd-data
+    restart: unless-stopped
+
+  patroni1:
+    image: patroni/patroni:latest
+    ports:
+      - 127.0.0.1:5432:5432
+      - 127.0.0.1:8008:8008    # Patroni REST API
+    environment:
+      PATRONI_NAME: patroni1
+      PATRONI_POSTGRESQL_CONNECT_ADDRESS: patroni1:5432
+      PATRONI_RESTAPI_CONNECT_ADDRESS: patroni1:8008
+      PATRONI_ETCD3_HOSTS: etcd:2379
+      PATRONI_SUPERUSER_USERNAME: postgres
+      PATRONI_SUPERUSER_PASSWORD: strongpassword
+      PATRONI_REPLICATION_USERNAME: replicator
+      PATRONI_REPLICATION_PASSWORD: replpass
+    volumes:
+      - patroni1_data:/var/lib/postgresql/data
+    depends_on: [etcd]
+    restart: unless-stopped
+
+  patroni2:
+    image: patroni/patroni:latest
+    ports:
+      - 127.0.0.1:5433:5432
+      - 127.0.0.1:8009:8008
+    environment:
+      PATRONI_NAME: patroni2
+      PATRONI_POSTGRESQL_CONNECT_ADDRESS: patroni2:5432
+      PATRONI_RESTAPI_CONNECT_ADDRESS: patroni2:8008
+      PATRONI_ETCD3_HOSTS: etcd:2379
+      PATRONI_SUPERUSER_USERNAME: postgres
+      PATRONI_SUPERUSER_PASSWORD: strongpassword
+      PATRONI_REPLICATION_USERNAME: replicator
+      PATRONI_REPLICATION_PASSWORD: replpass
+    volumes:
+      - patroni2_data:/var/lib/postgresql/data
+    depends_on: [etcd]
+    restart: unless-stopped
+
+  # HAProxy — single connection endpoint, routes to current primary
+  haproxy:
+    image: haproxy:alpine
+    ports:
+      - 127.0.0.1:5000:5000    # read/write — primary only
+      - 127.0.0.1:5001:5001    # read-only — all replicas
+      - 127.0.0.1:7000:7000    # HAProxy stats
+    volumes:
+      - /home/user/patroni/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro,Z
+    depends_on: [patroni1, patroni2]
+    restart: unless-stopped
+
+volumes:
+  etcd_data:
+  patroni1_data:
+  patroni2_data:</code></pre>
+<h4><code>haproxy.cfg</code> — routes to Patroni REST API for health checks</h4>
+<pre><code>global
+    maxconn 100
+
+defaults
+    log global
+    mode tcp
+    retries 2
+    timeout client 30m
+    timeout connect 4s
+    timeout server 30m
+    timeout check 5s
+
+listen stats
+    mode http
+    bind *:7000
+    stats enable
+    stats uri /
+
+listen postgres_primary
+    bind *:5000
+    option httpchk OPTIONS /primary
+    http-check expect status 200
+    default-server inter 3s fall 3 rise 2 on-marked-down shutdown-sessions
+    server patroni1 patroni1:5432 maxconn 100 check port 8008
+    server patroni2 patroni2:5432 maxconn 100 check port 8008
+
+listen postgres_replicas
+    bind *:5001
+    option httpchk OPTIONS /replica
+    http-check expect status 200
+    default-server inter 3s fall 3 rise 2 on-marked-down shutdown-sessions
+    server patroni1 patroni1:5432 maxconn 100 check port 8008
+    server patroni2 patroni2:5432 maxconn 100 check port 8008</code></pre>
+<pre><code class="language-bash">cd ~/patroni &amp;&amp; podman-compose up -d
+
+# Check cluster state
+curl http://localhost:8008/cluster | python3 -m json.tool
+
+# Force a manual failover
+curl -X POST http://localhost:8008/failover -d '{&quot;leader&quot;: &quot;patroni1&quot;}'
+
+# Connect to the current primary (always via HAProxy port 5000)
+psql -h localhost -p 5000 -U postgres</code></pre>
+<p>---</p>
+<h2>Redis Sentinel (3-Node HA)</h2>
+<p><strong>Purpose:</strong> Redis Sentinel provides automatic failover for a Redis primary + replicas. Sentinel processes monitor the primary, agree via quorum when it has failed, and promote a replica to primary — all without manual intervention.</p>
+<pre><code class="language-yaml"># ~/redis-sentinel/compose.yaml
+services:
+  redis-primary:
+    image: redis:7-alpine
+    ports:
+      - 127.0.0.1:6379:6379
+    volumes:
+      - redis_primary_data:/data
+    command: redis-server --appendonly yes --requirepass changeme
+    restart: unless-stopped
+
+  redis-replica1:
+    image: redis:7-alpine
+    ports:
+      - 127.0.0.1:6380:6379
+    volumes:
+      - redis_replica1_data:/data
+    command: &gt;
+      redis-server
+      --replicaof redis-primary 6379
+      --requirepass changeme
+      --masterauth changeme
+      --appendonly yes
+    depends_on: [redis-primary]
+    restart: unless-stopped
+
+  redis-replica2:
+    image: redis:7-alpine
+    ports:
+      - 127.0.0.1:6381:6379
+    volumes:
+      - redis_replica2_data:/data
+    command: &gt;
+      redis-server
+      --replicaof redis-primary 6379
+      --requirepass changeme
+      --masterauth changeme
+      --appendonly yes
+    depends_on: [redis-primary]
+    restart: unless-stopped
+
+  sentinel1:
+    image: redis:7-alpine
+    ports:
+      - 127.0.0.1:26379:26379
+    volumes:
+      - /home/user/redis-sentinel/sentinel.conf:/etc/redis/sentinel.conf:Z
+    command: redis-sentinel /etc/redis/sentinel.conf
+    depends_on: [redis-primary]
+    restart: unless-stopped
+
+  sentinel2:
+    image: redis:7-alpine
+    ports:
+      - 127.0.0.1:26380:26379
+    volumes:
+      - /home/user/redis-sentinel/sentinel.conf:/etc/redis/sentinel.conf:Z
+    command: redis-sentinel /etc/redis/sentinel.conf
+    depends_on: [redis-primary]
+    restart: unless-stopped
+
+  sentinel3:
+    image: redis:7-alpine
+    ports:
+      - 127.0.0.1:26381:26379
+    volumes:
+      - /home/user/redis-sentinel/sentinel.conf:/etc/redis/sentinel.conf:Z
+    command: redis-sentinel /etc/redis/sentinel.conf
+    depends_on: [redis-primary]
+    restart: unless-stopped
+
+volumes:
+  redis_primary_data:
+  redis_replica1_data:
+  redis_replica2_data:</code></pre>
+<h4><code>sentinel.conf</code></h4>
+<pre><code class="language-conf">port 26379
+sentinel monitor mymaster redis-primary 6379 2
+sentinel auth-pass mymaster changeme
+sentinel down-after-milliseconds mymaster 5000
+sentinel failover-timeout mymaster 60000
+sentinel parallel-syncs mymaster 1</code></pre>
+<pre><code class="language-bash">cd ~/redis-sentinel &amp;&amp; podman-compose up -d
+
+# Check sentinel state
+podman exec redis-sentinel-sentinel1-1 redis-cli -p 26379 sentinel masters
+
+# Check which node is current primary
+podman exec redis-sentinel-sentinel1-1 redis-cli -p 26379 \
+  sentinel get-master-addr-by-name mymaster
+
+# Check replication state on primary
+podman exec redis-sentinel-redis-primary-1 redis-cli -a changeme info replication</code></pre>
+<blockquote><p>Connect your app to the <strong>Sentinel ports</strong> (26379–26381), not the Redis ports directly. The Sentinel-aware client library (redis-py, ioredis, Jedis) queries Sentinel for the current primary address and reconnects automatically after failover.</p></blockquote>
+<p>---</p>
+<h2>Valkey Cluster (6-Node, Native Redis Cluster Protocol)</h2>
+<p><strong>Purpose:</strong> Native Redis Cluster (hash-slot sharding) using Valkey — the Linux Foundation's open-source Redis fork. Data is automatically sharded across 3 primary nodes with 1 replica each. Survives loss of up to 3 nodes (1 per shard). Unlike Sentinel, Redis Cluster is also horizontally scalable.</p>
+<pre><code class="language-yaml"># ~/valkey-cluster/compose.yaml
+services:
+  valkey1:
+    image: valkey/valkey:8-alpine
+    ports:
+      - 127.0.0.1:7001:6379
+      - 127.0.0.1:17001:16379
+    volumes:
+      - valkey1_data:/data
+    command: &gt;
+      valkey-server
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --appendonly yes
+    restart: unless-stopped
+
+  valkey2:
+    image: valkey/valkey:8-alpine
+    ports:
+      - 127.0.0.1:7002:6379
+      - 127.0.0.1:17002:16379
+    volumes:
+      - valkey2_data:/data
+    command: &gt;
+      valkey-server
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --appendonly yes
+    restart: unless-stopped
+
+  valkey3:
+    image: valkey/valkey:8-alpine
+    ports:
+      - 127.0.0.1:7003:6379
+      - 127.0.0.1:17003:16379
+    volumes:
+      - valkey3_data:/data
+    command: &gt;
+      valkey-server
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --appendonly yes
+    restart: unless-stopped
+
+  valkey4:
+    image: valkey/valkey:8-alpine
+    ports:
+      - 127.0.0.1:7004:6379
+      - 127.0.0.1:17004:16379
+    volumes:
+      - valkey4_data:/data
+    command: &gt;
+      valkey-server
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --appendonly yes
+    restart: unless-stopped
+
+  valkey5:
+    image: valkey/valkey:8-alpine
+    ports:
+      - 127.0.0.1:7005:6379
+      - 127.0.0.1:17005:16379
+    volumes:
+      - valkey5_data:/data
+    command: &gt;
+      valkey-server
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --appendonly yes
+    restart: unless-stopped
+
+  valkey6:
+    image: valkey/valkey:8-alpine
+    ports:
+      - 127.0.0.1:7006:6379
+      - 127.0.0.1:17006:16379
+    volumes:
+      - valkey6_data:/data
+    command: &gt;
+      valkey-server
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --appendonly yes
+    restart: unless-stopped
+
+volumes:
+  valkey1_data:
+  valkey2_data:
+  valkey3_data:
+  valkey4_data:
+  valkey5_data:
+  valkey6_data:</code></pre>
+<pre><code class="language-bash">cd ~/valkey-cluster &amp;&amp; podman-compose up -d
+
+# Bootstrap the cluster (3 primaries + 3 replicas, 1 replica per primary)
+podman exec valkey-cluster-valkey1-1 valkey-cli --cluster create \
+  valkey1:6379 valkey2:6379 valkey3:6379 \
+  valkey4:6379 valkey5:6379 valkey6:6379 \
+  --cluster-replicas 1 --cluster-yes
+
+# Verify cluster state
+podman exec valkey-cluster-valkey1-1 valkey-cli cluster info
+podman exec valkey-cluster-valkey1-1 valkey-cli cluster nodes</code></pre>
+<blockquote><p>The cluster bus port is always <code>Redis port + 10000</code> — that's why port <code>17001</code> (=7001+10000) is exposed alongside <code>7001</code>. Your application connects to any node using a cluster-aware client; the client handles slot routing automatically.</p></blockquote>
+<p>---</p>
+<h2>Cassandra / ScyllaDB Cluster (3-Node)</h2>
+<p><strong>Purpose:</strong> Multi-node wide-column cluster for IoT telemetry and event logs at scale. The seed node bootstraps the ring; additional nodes discover and join through gossip. No single point of failure — survives loss of 1 node with <code>replication_factor=3</code>.</p>
+<h3>Cassandra</h3>
+<pre><code class="language-yaml"># ~/cassandra-cluster/compose.yaml
+services:
+  cassandra1:
+    image: cassandra:5
+    ports:
+      - 127.0.0.1:9042:9042
+    environment:
+      CASSANDRA_CLUSTER_NAME: HomeCluster
+      CASSANDRA_DC: dc1
+      CASSANDRA_RACK: rack1
+      CASSANDRA_SEEDS: cassandra1
+      HEAP_NEWSIZE: 128m
+      MAX_HEAP_SIZE: 1g
+    volumes:
+      - cassandra1_data:/var/lib/cassandra
+    restart: unless-stopped
+
+  cassandra2:
+    image: cassandra:5
+    environment:
+      CASSANDRA_CLUSTER_NAME: HomeCluster
+      CASSANDRA_DC: dc1
+      CASSANDRA_RACK: rack1
+      CASSANDRA_SEEDS: cassandra1
+      HEAP_NEWSIZE: 128m
+      MAX_HEAP_SIZE: 1g
+    volumes:
+      - cassandra2_data:/var/lib/cassandra
+    depends_on: [cassandra1]
+    restart: unless-stopped
+
+  cassandra3:
+    image: cassandra:5
+    environment:
+      CASSANDRA_CLUSTER_NAME: HomeCluster
+      CASSANDRA_DC: dc1
+      CASSANDRA_RACK: rack1
+      CASSANDRA_SEEDS: cassandra1
+      HEAP_NEWSIZE: 128m
+      MAX_HEAP_SIZE: 1g
+    volumes:
+      - cassandra3_data:/var/lib/cassandra
+    depends_on: [cassandra1]
+    restart: unless-stopped
+
+volumes:
+  cassandra1_data:
+  cassandra2_data:
+  cassandra3_data:</code></pre>
+<pre><code class="language-bash">cd ~/cassandra-cluster &amp;&amp; podman-compose up -d
+
+# Wait 60s for cassandra1 to fully start, then bring up the rest
+# Check ring status
+podman exec cassandra-cluster-cassandra1-1 nodetool status
+
+# Create a keyspace with replication across all 3 nodes
+podman exec -it cassandra-cluster-cassandra1-1 cqlsh -e &quot;
+CREATE KEYSPACE iot WITH replication = {
+  'class': 'NetworkTopologyStrategy', 'dc1': 3
+};&quot;</code></pre>
+<h3>ScyllaDB (recommended for new deployments)</h3>
+<pre><code class="language-yaml"># ~/scylladb-cluster/compose.yaml
+services:
+  scylla1:
+    image: scylladb/scylla:6
+    ports:
+      - 127.0.0.1:9042:9042
+      - 127.0.0.1:10000:10000
+    volumes:
+      - scylla1_data:/var/lib/scylla
+    command: --seeds=scylla1 --developer-mode 0
+    restart: unless-stopped
+
+  scylla2:
+    image: scylladb/scylla:6
+    volumes:
+      - scylla2_data:/var/lib/scylla
+    command: --seeds=scylla1 --developer-mode 0
+    depends_on: [scylla1]
+    restart: unless-stopped
+
+  scylla3:
+    image: scylladb/scylla:6
+    volumes:
+      - scylla3_data:/var/lib/scylla
+    command: --seeds=scylla1 --developer-mode 0
+    depends_on: [scylla1]
+    restart: unless-stopped
+
+volumes:
+  scylla1_data:
+  scylla2_data:
+  scylla3_data:</code></pre>
+<pre><code class="language-bash">cd ~/scylladb-cluster &amp;&amp; podman-compose up -d
+
+# Check ring (ScyllaDB uses the same nodetool as Cassandra)
+podman exec scylladb-cluster-scylla1-1 nodetool status
+
+# Repair after adding a node
+podman exec scylladb-cluster-scylla1-1 nodetool repair</code></pre>
+<blockquote><p>Remove <code>--developer-mode 0</code> to enable developer mode (skips disk/CPU checks, suitable for testing). Always use <code>developer-mode 0</code> (off) in production — with it on ScyllaDB skips performance optimisations.</p></blockquote>
+<p>---</p>
+<h2>MongoDB Replica Set (3-Node)</h2>
+<p><strong>Purpose:</strong> MongoDB replica set with 1 primary and 2 secondaries. Provides automatic failover and read scaling. All writes go to the primary; reads can be distributed across secondaries with <code>readPreference=secondary</code>.</p>
+<pre><code class="language-yaml"># ~/mongodb-rs/compose.yaml
+services:
+  mongo1:
+    image: mongo:7
+    ports:
+      - 127.0.0.1:27017:27017
+    volumes:
+      - mongo1_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: strongpassword
+    command: mongod --replSet rs0 --bind_ip_all
+    restart: unless-stopped
+
+  mongo2:
+    image: mongo:7
+    ports:
+      - 127.0.0.1:27018:27017
+    volumes:
+      - mongo2_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: strongpassword
+    command: mongod --replSet rs0 --bind_ip_all
+    restart: unless-stopped
+
+  mongo3:
+    image: mongo:7
+    ports:
+      - 127.0.0.1:27019:27017
+    volumes:
+      - mongo3_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: strongpassword
+    command: mongod --replSet rs0 --bind_ip_all
+    restart: unless-stopped
+
+volumes:
+  mongo1_data:
+  mongo2_data:
+  mongo3_data:</code></pre>
+<pre><code class="language-bash">cd ~/mongodb-rs &amp;&amp; podman-compose up -d
+
+# Initiate the replica set (run once after all 3 nodes are up)
+podman exec mongodb-rs-mongo1-1 mongosh \
+  -u admin -p strongpassword --authenticationDatabase admin --eval '
+rs.initiate({
+  _id: &quot;rs0&quot;,
+  members: [
+    { _id: 0, host: &quot;mongo1:27017&quot; },
+    { _id: 1, host: &quot;mongo2:27017&quot; },
+    { _id: 2, host: &quot;mongo3:27017&quot; }
+  ]
+})'
+
+# Check replica set status
+podman exec mongodb-rs-mongo1-1 mongosh \
+  -u admin -p strongpassword --authenticationDatabase admin \
+  --eval &quot;rs.status()&quot;
+
+# Connect with replica set URI (use host.containers.internal for host-side access)
+# mongodb://admin:strongpassword@localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0&amp;authSource=admin</code></pre>
+<p>---</p>
+<h2>RabbitMQ Cluster (3-Node)</h2>
+<p><strong>Purpose:</strong> RabbitMQ cluster for high-availability task queues. All nodes share queue metadata; with quorum queues enabled, message data is also replicated across nodes. Survives loss of 1 node.</p>
+<pre><code class="language-yaml"># ~/rabbitmq-cluster/compose.yaml
+services:
+  rabbitmq1:
+    image: rabbitmq:3-management-alpine
+    hostname: rabbitmq1
+    ports:
+      - 127.0.0.1:5672:5672
+      - 127.0.0.1:15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: changeme
+      RABBITMQ_ERLANG_COOKIE: &quot;SECRET_COOKIE_CHANGE_ME&quot;
+    volumes:
+      - rabbitmq1_data:/var/lib/rabbitmq
+    restart: unless-stopped
+
+  rabbitmq2:
+    image: rabbitmq:3-management-alpine
+    hostname: rabbitmq2
+    ports:
+      - 127.0.0.1:5673:5672
+      - 127.0.0.1:15673:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: changeme
+      RABBITMQ_ERLANG_COOKIE: &quot;SECRET_COOKIE_CHANGE_ME&quot;
+    volumes:
+      - rabbitmq2_data:/var/lib/rabbitmq
+    depends_on: [rabbitmq1]
+    restart: unless-stopped
+
+  rabbitmq3:
+    image: rabbitmq:3-management-alpine
+    hostname: rabbitmq3
+    ports:
+      - 127.0.0.1:5674:5672
+      - 127.0.0.1:15674:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: changeme
+      RABBITMQ_ERLANG_COOKIE: &quot;SECRET_COOKIE_CHANGE_ME&quot;
+    volumes:
+      - rabbitmq3_data:/var/lib/rabbitmq
+    depends_on: [rabbitmq1]
+    restart: unless-stopped
+
+volumes:
+  rabbitmq1_data:
+  rabbitmq2_data:
+  rabbitmq3_data:</code></pre>
+<pre><code class="language-bash">cd ~/rabbitmq-cluster &amp;&amp; podman-compose up -d
+
+# Join nodes 2 and 3 to node 1
+podman exec rabbitmq-cluster-rabbitmq2-1 rabbitmqctl stop_app
+podman exec rabbitmq-cluster-rabbitmq2-1 rabbitmqctl reset
+podman exec rabbitmq-cluster-rabbitmq2-1 rabbitmqctl join_cluster rabbit@rabbitmq1
+podman exec rabbitmq-cluster-rabbitmq2-1 rabbitmqctl start_app
+
+podman exec rabbitmq-cluster-rabbitmq3-1 rabbitmqctl stop_app
+podman exec rabbitmq-cluster-rabbitmq3-1 rabbitmqctl reset
+podman exec rabbitmq-cluster-rabbitmq3-1 rabbitmqctl join_cluster rabbit@rabbitmq1
+podman exec rabbitmq-cluster-rabbitmq3-1 rabbitmqctl start_app
+
+# Verify cluster membership
+podman exec rabbitmq-cluster-rabbitmq1-1 rabbitmqctl cluster_status
+
+# Create a quorum queue (replicated across all 3 nodes)
+podman exec rabbitmq-cluster-rabbitmq1-1 rabbitmqadmin \
+  -u admin -p changeme declare queue name=my-queue \
+  durable=true arguments='{&quot;x-queue-type&quot;:&quot;quorum&quot;}'</code></pre>
+<blockquote><p>The <code>RABBITMQ_ERLANG_COOKIE</code> must be <strong>identical</strong> on all nodes — this is how RabbitMQ authenticates cluster members. Change the value to something secret before deploying.</p></blockquote>
+<p>---</p>
+<h2>VictoriaMetrics Cluster</h2>
+<p><strong>Purpose:</strong> Horizontally scalable VictoriaMetrics deployment. Separates storage, ingestion, and query into dedicated components — vminsert handles writes, vmselect handles reads, vmstorage holds the data. Each component scales independently.</p>
+<pre><code class="language-yaml"># ~/victoriametrics-cluster/compose.yaml
+services:
+  vmstorage1:
+    image: victoriametrics/vmstorage:latest
+    ports:
+      - 127.0.0.1:8482:8482
+      - 127.0.0.1:8400:8400
+      - 127.0.0.1:8401:8401
+    volumes:
+      - vmstorage1_data:/storage
+    command:
+      - --storageDataPath=/storage
+      - --retentionPeriod=12
+    restart: unless-stopped
+
+  vmstorage2:
+    image: victoriametrics/vmstorage:latest
+    ports:
+      - 127.0.0.1:8483:8482
+      - 127.0.0.1:8402:8400
+      - 127.0.0.1:8403:8401
+    volumes:
+      - vmstorage2_data:/storage
+    command:
+      - --storageDataPath=/storage
+      - --retentionPeriod=12
+    restart: unless-stopped
+
+  vminsert:
+    image: victoriametrics/vminsert:latest
+    ports:
+      - 127.0.0.1:8480:8480
+    command:
+      - --storageNode=vmstorage1:8400
+      - --storageNode=vmstorage2:8400
+    depends_on: [vmstorage1, vmstorage2]
+    restart: unless-stopped
+
+  vmselect:
+    image: victoriametrics/vmselect:latest
+    ports:
+      - 127.0.0.1:8481:8481
+    command:
+      - --storageNode=vmstorage1:8401
+      - --storageNode=vmstorage2:8401
+    depends_on: [vmstorage1, vmstorage2]
+    restart: unless-stopped
+
+  # vmagent — scrapes Prometheus targets and sends to vminsert
+  vmagent:
+    image: victoriametrics/vmagent:latest
+    ports:
+      - 127.0.0.1:8429:8429
+    volumes:
+      - /home/user/victoriametrics-cluster/prometheus.yml:/etc/prometheus/prometheus.yml:ro,Z
+      - vmagent_data:/vmagentdata
+    command:
+      - --promscrape.config=/etc/prometheus/prometheus.yml
+      - --remoteWrite.url=http://vminsert:8480/insert/0/prometheus/api/v1/write
+    depends_on: [vminsert]
+    restart: unless-stopped
+
+volumes:
+  vmstorage1_data:
+  vmstorage2_data:
+  vmagent_data:</code></pre>
+<pre><code class="language-bash">cd ~/victoriametrics-cluster &amp;&amp; podman-compose up -d
+
+# Write endpoint (Prometheus remote-write target)
+# http://localhost:8480/insert/0/prometheus/api/v1/write
+
+# Query endpoint (use in Grafana datasource)
+# http://localhost:8481/select/0/prometheus
+
+# Check storage health
+curl http://localhost:8482/health
+curl http://localhost:8483/health</code></pre>
+<h4>Reconfigure Grafana to use the cluster</h4>
+<ul>
+<li>Data Sources → Prometheus → URL: <code>http://host.containers.internal:8481/select/0/prometheus</code></li>
+</ul>
+<p>---</p>
+<h2>Etcd Cluster (3-Node)</h2>
+<p><strong>Purpose:</strong> Distributed key-value store used for distributed coordination, service discovery, and leader election. Powers Patroni (PostgreSQL HA), Kubernetes, CoreDNS, and many other systems. A 3-node cluster tolerates loss of 1 node.</p>
+<pre><code class="language-yaml"># ~/etcd-cluster/compose.yaml
+services:
+  etcd1:
+    image: bitnami/etcd:latest
+    ports:
+      - 127.0.0.1:2379:2379
+      - 127.0.0.1:2380:2380
+    environment:
+      ETCD_NAME: etcd1
+      ETCD_DATA_DIR: /etcd-data
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd1:2379
+      ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: http://etcd1:2380
+      ETCD_INITIAL_CLUSTER: etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380
+      ETCD_INITIAL_CLUSTER_STATE: new
+      ALLOW_NONE_AUTHENTICATION: &quot;yes&quot;
+    volumes:
+      - etcd1_data:/etcd-data
+    restart: unless-stopped
+
+  etcd2:
+    image: bitnami/etcd:latest
+    ports:
+      - 127.0.0.1:2381:2379
+      - 127.0.0.1:2382:2380
+    environment:
+      ETCD_NAME: etcd2
+      ETCD_DATA_DIR: /etcd-data
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd2:2379
+      ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: http://etcd2:2380
+      ETCD_INITIAL_CLUSTER: etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380
+      ETCD_INITIAL_CLUSTER_STATE: new
+      ALLOW_NONE_AUTHENTICATION: &quot;yes&quot;
+    volumes:
+      - etcd2_data:/etcd-data
+    restart: unless-stopped
+
+  etcd3:
+    image: bitnami/etcd:latest
+    ports:
+      - 127.0.0.1:2383:2379
+      - 127.0.0.1:2384:2380
+    environment:
+      ETCD_NAME: etcd3
+      ETCD_DATA_DIR: /etcd-data
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd3:2379
+      ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: http://etcd3:2380
+      ETCD_INITIAL_CLUSTER: etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380
+      ETCD_INITIAL_CLUSTER_STATE: new
+      ALLOW_NONE_AUTHENTICATION: &quot;yes&quot;
+    volumes:
+      - etcd3_data:/etcd-data
+    restart: unless-stopped
+
+volumes:
+  etcd1_data:
+  etcd2_data:
+  etcd3_data:</code></pre>
+<pre><code class="language-bash">cd ~/etcd-cluster &amp;&amp; podman-compose up -d
+
+# Check member list
+podman exec etcd-cluster-etcd1-1 etcdctl \
+  --endpoints=http://etcd1:2379,http://etcd2:2379,http://etcd3:2379 \
+  member list
+
+# Check cluster health
+podman exec etcd-cluster-etcd1-1 etcdctl \
+  --endpoints=http://etcd1:2379,http://etcd2:2379,http://etcd3:2379 \
+  endpoint health
+
+# Put and get a key
+podman exec etcd-cluster-etcd1-1 etcdctl \
+  --endpoints=http://etcd1:2379 put /mykey &quot;hello&quot;
+podman exec etcd-cluster-etcd1-1 etcdctl \
+  --endpoints=http://etcd1:2379 get /mykey</code></pre>
+<p>---</p>
+<h2>Choosing the Right HA Strategy</h2>
+<p>| Service | Strategy | Compose File | Tolerates Node Loss | |---------|----------|-------------|---------------------| | PostgreSQL | Patroni + etcd + HAProxy | <code>~/patroni/</code> | 1 of 2 | | Redis / Valkey | Sentinel (3 sentinels + replicas) | <code>~/redis-sentinel/</code> | 1 of 3 | | Redis / Valkey | Native Cluster (6 nodes, 3+3) | <code>~/valkey-cluster/</code> | 1 per shard | | MongoDB | Replica Set (3 nodes) | <code>~/mongodb-rs/</code> | 1 of 3 | | Kafka | KRaft (3 nodes) | <code>~/kafka-cluster/</code> | 1 of 3 | | Cassandra | Ring (3 nodes, RF=3) | <code>~/cassandra-cluster/</code> | 1 of 3 | | ScyllaDB | Ring (3 nodes, RF=3) | <code>~/scylladb-cluster/</code> | 1 of 3 | | RabbitMQ | Cluster + Quorum Queues | <code>~/rabbitmq-cluster/</code> | 1 of 3 | | Elasticsearch | 3-node master/data | <code>~/elk-cluster/</code> | 1 of 3 | | OpenSearch | 3-node cluster manager | <code>~/opensearch-cluster/</code> | 1 of 3 | | VictoriaMetrics | vminsert/vmselect/vmstorage | <code>~/victoriametrics-cluster/</code> | 1 of 2 storage | | etcd | 3-node Raft | <code>~/etcd-cluster/</code> | 1 of 3 |</p>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Elasticsearch / OpenSearch <code>vm.max_map_count too low</code> | Run <code>sudo sysctl -w vm.max_map_count=262144</code> on the host and persist in <code>/etc/sysctl.d/99-elasticsearch.conf</code> — required on all nodes | | Elasticsearch cluster status RED | Check unassigned shards: <code>curl localhost:9200/_cat/shards?v \| grep UNASSIGNED</code>; caused by a data node being down or replicas exceeding available nodes | | Elasticsearch <code>master not discovered</code> on start | <code>cluster.initial_master_nodes</code> must list all master-eligible node names exactly; remove this setting after first cluster formation | | Elasticsearch split-brain | Use exactly 3 or 5 master-eligible nodes; verify all nodes can reach each other on port <code>9300</code>; confirm <code>cluster.name</code> is identical across nodes | | OpenSearch <code>cluster_manager not discovered</code> | OpenSearch renamed <code>master</code> → <code>cluster_manager</code>; set <code>cluster.initial_cluster_manager_nodes</code> (not <code>initial_master_nodes</code>) | | OpenSearch UNASSIGNED shards | For single-node test clusters set <code>number_of_replicas: 0</code>; a single node cannot host its own replicas | | Kafka brokers not forming cluster | Confirm all nodes share the same <code>CLUSTER_ID</code>; generate once with <code>kafka-storage random-uuid</code>; verify <code>KAFKA_CONTROLLER_QUORUM_VOTERS</code> lists all node IDs and hostnames correctly | | Kafka consumer lag growing | Increase partition count or add consumer instances; verify no consumer is crashing on startup with <code>podman logs</code> | | Patroni <code>no leader</code> after start | etcd must be fully healthy before Patroni starts; check <code>curl http://etcd:2379/health</code>; verify all Patroni nodes can reach etcd | | Patroni failover not triggering | Check <code>podman logs</code> on all Patroni nodes; verify <code>PATRONI_ETCD3_HOSTS</code> is reachable; confirm <code>down-after-milliseconds</code> hasn't been set too high | | Redis Sentinel not promoting | Quorum requires at least 2 of 3 sentinels to agree the primary is down; ensure all 3 sentinel containers are running; check <code>sentinel masters</code> for the current primary state | | Valkey Cluster <code>MOVED</code> errors | Your client is not cluster-aware; use a Redis Cluster client (redis-py with <code>RedisCluster</code>, ioredis in cluster mode) — plain clients don't follow slot redirects | | Valkey Cluster <code>CLUSTERDOWN</code> | At least one shard has no available primary; check <code>cluster nodes</code> for failed nodes; recover or remove the failed node with <code>cluster forget</code> | | MongoDB replica set not electing primary | Needs 3 nodes for majority quorum (2 of 3); verify all 3 mongod processes are running and can reach each other on port <code>27017</code> | | MongoDB <code>rs.initiate()</code> fails | Run only from mongo1 once all 3 containers are fully started (check <code>podman logs</code>); the hostnames in <code>members[].host</code> must resolve inside the compose network | | RabbitMQ nodes not joining cluster | <code>RABBITMQ_ERLANG_COOKIE</code> must be byte-for-byte identical on all nodes; verify with <code>podman exec rabbitmq1 cat /var/lib/rabbitmq/.erlang.cookie</code> | | RabbitMQ <code>mnesia</code> partition after restart | Run <code>rabbitmqctl cluster_status</code> on all nodes; resolve with <code>rabbitmqctl forget_cluster_node &lt;node&gt;</code> and re-join the stale node | | Cassandra / ScyllaDB node not joining | Cassandra takes 30–60 s to fully start; bring up the seed node first and wait before starting additional nodes; check <code>nodetool status</code> for the token ring | | etcd cluster not reaching quorum | All 3 members must be able to reach each other on peer port <code>2380</code>; verify <code>ETCD_INITIAL_CLUSTER</code> lists the same URLs on all nodes | | VictoriaMetrics vminsert rejected writes | Verify <code>--storageNode</code> addresses resolve from the vminsert container; check <code>podman logs vminsert</code> for connectivity errors to vmstorage nodes |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

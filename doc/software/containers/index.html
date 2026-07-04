@@ -146,7 +146,124 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Containers</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Software &amp; Apps</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-05-07</span>
+        </div>
+      </div>
+      <div class="prose"><h1>Containers on Shanios</h1>
+<p>Shanios is a first-class container platform. The following runtimes are pre-installed and ready to use:</p>
+<p>| Runtime | Best for | Wiki | |---|---|---| | <strong>Podman</strong> | OCI containers, services, databases, Docker-compatible workflows | This page | | <strong>Distrobox</strong> | Mutable Linux envs (apt/pacman/yay) with home dir sharing | <a href="distrobox.md">distrobox</a> | | <strong>LXC / LXD</strong> | Full system containers with init, services, network stack | <a href="lxc-lxd.md">lxc-lxd</a> | | <strong>systemd-nspawn</strong> | Lightweight full-system containers, no daemon | <a href="systemd-nspawn.md">systemd-nspawn</a> | | <strong>Apptainer</strong> | HPC/cluster portable containers (SIF format) | <a href="apptainer.md">apptainer</a> | | <strong>GPU containers</strong> | CUDA / ROCm / oneAPI compute via Distrobox or Podman | <a href="gpu-containers.md">gpu-containers</a> |</p>
+<p>Container storage lives in dedicated Btrfs subvolumes, completely independent of the OS slots:</p>
+<p>| Tool | Storage Location | Btrfs Subvolume | |------|-----------------|-----------------| | <strong>Podman (user)</strong> | <code>~/.local/share/containers/</code> | (in <code>@home</code>) | | <strong>Podman (root)</strong> | <code>/var/lib/containers/storage/</code> | <code>@containers</code> | | <strong>Distrobox</strong> | <code>/var/lib/containers/</code> | <code>@containers</code> | | <strong>LXD</strong> | <code>/var/lib/lxd/</code> | <code>@lxd</code> | | <strong>LXC</strong> | <code>/var/lib/lxc/</code> | <code>@lxc</code> | | <strong>nspawn</strong> | <code>/var/lib/machines/</code> | <code>@machines</code> |</p>
+<p>All subvolumes survive every OS update and atomic rollback untouched.</p>
+<p>---</p>
+<h2>Podman (Default Runtime)</h2>
+<p>Podman is the default daemonless, rootless container runtime. Its CLI is identical to Docker's. <code>podman.socket</code> is socket-activated at boot. The <code>podman-docker</code> drop-in is pre-installed — existing <code>docker</code> commands work without modification.</p>
+<p><strong>Pods</strong> (pre-installed on both editions) provides a graphical interface for managing containers, images, volumes, and networks.</p>
+<h3>Basic Commands</h3>
+<pre><code class="language-bash"># Pull and run an interactive container
+podman run -it --rm ubuntu:24.04 bash
+
+# Run a web server in the background
+podman run -d --name myapp -p 8080:80 nginx
+
+# List containers
+podman ps           # running
+podman ps -a        # all (including stopped)
+
+# Logs
+podman logs myapp
+podman logs -f myapp
+
+# Stop, remove
+podman stop myapp
+podman rm myapp
+
+# Execute in a running container
+podman exec -it myapp bash
+
+# List images
+podman images</code></pre>
+<h3>Common Services</h3>
+<pre><code class="language-bash"># PostgreSQL
+podman volume create postgres-data
+podman run -d \
+  --name postgres \
+  -e POSTGRES_PASSWORD=secret \
+  -e POSTGRES_DB=mydb \
+  -v postgres-data:/var/lib/postgresql/data \
+  -p 127.0.0.1:5432:5432 \
+  postgres:16
+
+# Redis
+podman run -d \
+  --name redis \
+  -p 127.0.0.1:6379:6379 \
+  redis:7-alpine redis-server --appendonly yes</code></pre>
+<h3>Podman Compose</h3>
+<pre><code class="language-bash"># Run a docker-compose.yml
+podman-compose up -d
+podman-compose logs -f
+podman-compose down
+
+# Or via the docker drop-in
+docker compose up -d</code></pre>
+<h3>Auto-Start Containers at Login</h3>
+<pre><code class="language-bash"># Generate a systemd user unit from a running container
+podman generate systemd --new --name myapp &gt; ~/.config/systemd/user/myapp.service
+
+# Enable
+systemctl --user enable --now myapp.service
+systemctl --user status myapp.service</code></pre>
+<h3>Docker Compatibility</h3>
+<p>The <code>podman-docker</code> package provides <code>/usr/bin/docker</code> as a wrapper. For tools that use the Docker API socket:</p>
+<pre><code class="language-bash"># Enable the Podman socket for Docker API compatibility
+systemctl --user start podman.socket
+export DOCKER_HOST=unix:///run/user/$UID/podman/podman.sock</code></pre>
+<p>---</p>
+<h2>Buildah & Skopeo</h2>
+<p><strong>Buildah</strong> builds OCI images without a daemon:</p>
+<pre><code class="language-bash"># Build from a Dockerfile/Containerfile
+buildah bud -t myimage:latest .
+
+# Scripted build without a Dockerfile
+ctr=$(buildah from ubuntu:24.04)
+buildah run $ctr -- apt-get update
+buildah run $ctr -- apt-get install -y curl
+buildah commit $ctr myimage:latest
+buildah rm $ctr</code></pre>
+<p><strong>Skopeo</strong> inspects and copies images between registries without pulling them:</p>
+<pre><code class="language-bash"># Copy between registries
+skopeo copy docker://docker.io/nginx:latest docker://registry.example.com/nginx:latest
+
+# Inspect image metadata without pulling
+skopeo inspect docker://docker.io/ubuntu:24.04
+
+# Delete a remote tag
+skopeo delete docker://registry.example.com/old-image:tag</code></pre>
+<p>---</p>
+<h2>Storage Efficiency</h2>
+<p>Container images use content-addressed storage — layers shared between images are stored once. Btrfs zstd compression and the <code>bees</code> deduplication daemon apply at the block level on top of Podman's own layer sharing.</p>
+<pre><code class="language-bash"># Podman's view of disk usage
+podman system df
+
+# Btrfs compressed view
+sudo compsize /var/lib/containers
+
+# Prune unused images, containers, volumes
+podman system prune -af --volumes</code></pre></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

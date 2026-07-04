@@ -146,7 +146,378 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Business Intelligence &amp; Analytics</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+        </div>
+      </div>
+      <div class="prose"><p>Self-hosted BI platforms, data visualisation tools, SQL explorers, and analytical dashboards. Query your databases, build charts, and share insights — without sending your business data to a cloud analytics vendor.</p>
+<blockquote><p><strong>Why self-host BI?</strong> Your databases already live on your server. Running your analytics stack next to them eliminates egress costs, keeps sensitive data on-premises, and removes per-seat licensing that makes cloud BI prohibitively expensive for small teams.</p></blockquote>
+<p>---</p>
+<h2>Key Concepts</h2>
+<h4>OLAP vs OLTP — the fundamental access pattern split</h4>
+<p>OLTP (Online Transaction Processing) databases (PostgreSQL, MySQL) are row-oriented — optimised for reading/writing single rows quickly. Each INSERT or SELECT retrieves entire rows. OLAP (Online Analytical Processing) databases (ClickHouse, DuckDB, Redshift) are column-oriented — data for one column is stored contiguously on disk. <code>SELECT AVG(revenue) FROM orders</code> reads only the revenue column, skipping all other fields. At 1 billion rows, this is a 10–100× query time difference. BI tools that query OLAP databases feel instant; the same queries against PostgreSQL time out. The architectural decision: use PostgreSQL for your app's operational data, replicate or ETL to ClickHouse/DuckDB for analytics.</p>
+<h4>Star schema and dimensional modelling</h4>
+<p>Dimensional modelling organises analytical data around a central fact table (transactions, events, measurements) surrounded by dimension tables (customers, products, dates). The fact table holds numeric measures (revenue, quantity, duration) and foreign keys to dimensions. Queries join the fact table to dimensions to slice and dice — "total revenue by country and product category this quarter" is one query. This schema is called a star because the fact table is at the centre with dimension tables radiating out. BI tools (Metabase, Superset, Looker) assume this structure and generate SQL against it. A data warehouse without dimensional modelling produces slow, complex, unmaintainable queries.</p>
+<h4>ETL vs ELT — the modern data pipeline shift</h4>
+<p>ETL (Extract, Transform, Load) transforms data before loading it into the warehouse — useful when transformation is expensive or the destination schema is rigid. ELT (Extract, Load, Transform) loads raw data first, then transforms it inside the warehouse using SQL — the modern pattern enabled by cheap columnar storage. Tools: dbt (data build tool) is the standard ELT transformation layer — it defines transformations as SQL <code>SELECT</code> statements, manages dependencies, tests data quality, and generates documentation. Lightdash reads dbt models directly. This is the dominant data engineering stack in 2025: source → Airbyte/Fivetran (extract/load) → dbt (transform) → ClickHouse/Redshift (warehouse) → Metabase/Superset (BI).</p>
+<h4>Data freshness, materialisation, and query performance</h4>
+<p>A dashboard that runs a 30-second query on every page load is unusable. Three solutions: (1) Materialised views — pre-computed query results stored as a table, refreshed on a schedule or trigger. ClickHouse continuous materialised views update in real time as data arrives. (2) Dashboard caching — Metabase and Superset cache query results for a configurable TTL; stale data trades off against query load. (3) Pre-aggregation — aggregate raw events into daily/hourly summaries at ingest time. Cube.js and dbt handle this. The rule: analytical queries should complete in under 2 seconds for interactive use. If they don't, materialise or aggregate.</p>
+<h4>Role-based access control in BI tools</h4>
+<p>BI tools often have access to sensitive data. Row-level security (RLS) restricts which rows a user can see — a sales manager sees only their region's data even when running a global query. Superset implements RLS via SQL WHERE clause injection on the dataset level. Column-level permissions prevent certain roles from seeing PII fields. Data masking replaces sensitive values with asterisks or tokens for lower-trust roles. In interviews for data engineering or analytics engineering roles, RLS and data governance come up frequently — it's the difference between a BI tool that just works internally versus one that can be safely exposed to external users or regulated environments.</p>
+<h4>Metrics layers and semantic consistency</h4>
+<p>Without a metrics layer, the same business metric is defined differently in 20 different Metabase queries — "monthly active users" means different things to different dashboards. A metrics layer (dbt metrics, Cube.js, LookML) defines metrics once and exposes them to all BI tools. The metric definition (SQL logic, time grain, filters) lives in one place; BI tools query the layer rather than raw tables. This is a standard concept in mature data organisations — the distinction between a "data analyst who builds dashboards" and a "analytics engineer who builds the semantic layer the dashboards query."</p>
+<h2>Metabase</h2>
+<p><strong>Purpose:</strong> The most approachable self-hosted BI tool. Non-technical users can build charts and dashboards by clicking through a question builder — no SQL required. For power users, the native query editor supports full SQL with autocomplete, query versioning, and parameterised questions. Connects to PostgreSQL, MySQL, MariaDB, MongoDB, SQLite, ClickHouse, Redshift, BigQuery, Snowflake, and more.</p>
+<pre><code class="language-yaml"># ~/metabase/compose.yaml
+services:
+  metabase:
+    image: metabase/metabase:latest
+    ports:
+      - &quot;127.0.0.1:3000:3000&quot;
+    volumes:
+      - /home/user/metabase/data:/metabase-data:Z
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: metabase
+      MB_DB_PORT: 5432
+      MB_DB_USER: metabase
+      MB_DB_PASS: changeme
+      MB_DB_HOST: host.containers.internal
+      MB_SITE_URL: https://metabase.home.local
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/metabase &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Check Metabase health
+curl http://localhost:3000/api/health
+
+# View logs
+podman logs -f metabase
+
+# Reset admin password (if locked out)
+podman exec metabase java -jar metabase.jar reset-password admin@example.com
+
+# Export a question/dashboard result via API
+curl -X POST http://localhost:3000/api/dataset   -H &quot;X-Metabase-Session: YOUR_SESSION_TOKEN&quot;   -H &quot;Content-Type: application/json&quot;   -d '{&quot;database&quot;:1,&quot;type&quot;:&quot;native&quot;,&quot;native&quot;:{&quot;query&quot;:&quot;SELECT count(*) FROM orders&quot;}}'   | python3 -m json.tool
+
+# Get session token for API use
+curl -X POST http://localhost:3000/api/session   -H &quot;Content-Type: application/json&quot;   -d '{&quot;username&quot;:&quot;admin@example.com&quot;,&quot;password&quot;:&quot;changeme&quot;}'</code></pre>
+<blockquote><p>Metabase can use its built-in H2 database for evaluation, but PostgreSQL is strongly recommended for production — it handles concurrent users and stores question/dashboard history reliably.</p></blockquote>
+<h4>Key features to explore after setup</h4>
+<ul>
+<li><strong>Questions</strong> — saved queries that auto-refresh on a schedule</li>
+<li><strong>Dashboards</strong> — drag-and-drop canvas combining multiple questions with filters</li>
+<li><strong>Subscriptions</strong> — email or Slack delivery of dashboard snapshots on a cron schedule</li>
+<li><strong>Alerts</strong> — notify when a metric crosses a threshold</li>
+<li><strong>Embedding</strong> — embed signed charts into other apps or internal tools via iframes</li>
+<li><strong>Models</strong> — curated, reusable data layers that hide raw table complexity from end users</li>
+</ul>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">metabase.home.local { tls internal; reverse_proxy localhost:3000 }</code></pre>
+<p>---</p>
+<h2>Apache Superset</h2>
+<p><strong>Purpose:</strong> Enterprise-grade BI and data exploration platform from Apache. More powerful and more configurable than Metabase — supports 40+ database connectors, a drag-and-drop chart builder, a full SQL IDE (SQL Lab), role-based access control, row-level security, and advanced chart types (Sankey, sunburst, heatmap, geospatial). Steeper learning curve but no feature ceilings.</p>
+<pre><code class="language-yaml"># ~/superset/compose.yaml
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: superset
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: superset
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  superset:
+    image: apache/superset:latest
+    ports: [&quot;127.0.0.1:8088:8088&quot;]
+    environment:
+      SUPERSET_SECRET_KEY: changeme-run-openssl-rand-base64-42
+      DATABASE_URL: postgresql+psycopg2://superset:changeme@db:5432/superset
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - /home/user/superset/config:/app/superset_home:Z
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  superset-init:
+    image: apache/superset:latest
+    command: &gt;
+      bash -c &quot;
+        superset db upgrade &amp;&amp;
+        superset fab create-admin
+          --username admin --firstname Admin --lastname Admin
+          --email admin@example.com --password changeme &amp;&amp;
+        superset init&quot;
+    environment:
+      SUPERSET_SECRET_KEY: changeme-run-openssl-rand-base64-42
+      DATABASE_URL: postgresql+psycopg2://superset:changeme@db:5432/superset
+    depends_on: [db]
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/superset &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:8088</code>.</p>
+<p><strong>SQL Lab:</strong> — the built-in IDE supports multi-tab SQL editing, query history, schema explorer, result export to CSV/Excel, and saved queries shared across the team. It is a full replacement for tools like DBeaver for query work.</p>
+<p>---</p>
+<h2>Redash</h2>
+<p><strong>Purpose:</strong> Query-first BI tool. Write SQL (or use the query builder), visualise the results, and assemble dashboards. Strong focus on scheduled query refreshes and alerting — ideal for operational dashboards that need to stay current. Supports PostgreSQL, MySQL, MongoDB, Elasticsearch, InfluxDB, Google Sheets, and REST APIs as data sources.</p>
+<pre><code class="language-yaml"># ~/redash/compose.yaml
+x-redash-service: &amp;redash-service
+  image: redash/redash:latest
+  environment:
+    REDASH_DATABASE_URL: postgresql://redash:changeme@postgres/redash
+    REDASH_REDIS_URL: redis://redis:6379/0
+    REDASH_SECRET_KEY: changeme
+    REDASH_COOKIE_SECRET: changeme
+  depends_on: [postgres, redis]
+
+services:
+  server:
+    &lt;&lt;: *redash-service
+    ports: [&quot;127.0.0.1:5000:5000&quot;]
+    command: server
+    restart: unless-stopped
+
+  scheduler:
+    &lt;&lt;: *redash-service
+    command: scheduler
+    restart: unless-stopped
+
+  worker:
+    &lt;&lt;: *redash-service
+    command: worker
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: redash
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: redash
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/redash &amp;&amp; podman-compose up -d</code></pre>
+<h5>Initialise the database (first run only)</h5>
+<pre><code class="language-bash">podman-compose run --rm server create_db</code></pre>
+<blockquote><p><strong>Version note:</strong> Redash jumped from v10.1 to v25.1 in early 2025 (a 3-year release gap). The <code>:latest</code> tag will pull v25.x. If upgrading from v10.x, review the <a href="https://github.com/getredash/redash/releases">release notes</a> — the scheduler service structure changed in v10.</p></blockquote>
+<p>Access at <code>http://localhost:5000</code>.</p>
+<p>---</p>
+<h2>Evidence.dev</h2>
+<p><strong>Purpose:</strong> Code-first BI tool — write SQL queries and Markdown in <code>.md</code> files, and Evidence renders them as a polished interactive report site. Version-controlled in Git, deployed as a static site. Ideal for analysts who prefer code over drag-and-drop and want reports that live in the same repo as the data pipelines that produce them.</p>
+<pre><code class="language-yaml"># ~/evidence/compose.yaml
+services:
+  evidence:
+    image: nginx:alpine
+    ports:
+      - 127.0.0.1:3002:3000
+    volumes:
+      - /home/user/evidence/build:/usr/share/nginx/html:ro,Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/evidence &amp;&amp; podman-compose up -d</code></pre>
+<h5>Example report page (<code>pages/sales.md</code>)</h5>
+<p><pre><code class="language-markdown"># Sales Overview
+</code></pre>sql orders_by_month SELECT date_trunc('month', created_at) AS month, COUNT(*) AS orders, SUM(total) AS revenue FROM orders WHERE created_at >= NOW() - INTERVAL '12 months' GROUP BY 1 ORDER BY 1</p>
+<pre><code>
+&lt;LineChart data={orders_by_month} x=month y=revenue title=&quot;Monthly Revenue&quot; /&gt;
+
+Total orders last 12 months: **&lt;Value data={orders_by_month} column=orders fmt=num0 agg=sum /&gt;**</code></pre>
+<p>---</p>
+<h2>ClickHouse (OLAP Database)</h2>
+<p><strong>Purpose:</strong> Columnar OLAP database that executes analytical queries orders of magnitude faster than row-oriented databases. If you are running Metabase or Superset against a PostgreSQL table with hundreds of millions of rows and queries are slow, ClickHouse is the answer. Used by Cloudflare, Uber, and Bytedance for petabyte-scale analytics.</p>
+<pre><code class="language-yaml"># ~/clickhouse/compose.yaml
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    ports:
+      - &quot;127.0.0.1:8123:8123&quot;
+      - &quot;127.0.0.1:9000:9000&quot;
+    volumes:
+      - /home/user/clickhouse/data:/var/lib/clickhouse:Z
+      - /home/user/clickhouse/logs:/var/log/clickhouse-server:Z
+    environment:
+      CLICKHOUSE_USER: admin
+      CLICKHOUSE_PASSWORD: changeme
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/clickhouse &amp;&amp; podman-compose up -d</code></pre>
+<h5>Connect and run queries</h5>
+<pre><code class="language-bash">podman exec -it clickhouse clickhouse-client --user admin --password changeme
+
+-- Create a table and insert data
+CREATE TABLE events (
+  event_date Date,
+  event_type String,
+  user_id UInt64,
+  properties String
+) ENGINE = MergeTree()
+PARTITION BY toYYYYMM(event_date)
+ORDER BY (event_date, event_type, user_id);
+
+-- ClickHouse can ingest from Kafka directly
+CREATE TABLE kafka_events (...)
+ENGINE = Kafka
+SETTINGS kafka_broker_list = 'localhost:9092',
+         kafka_topic_list = 'events',
+         kafka_group_name = 'clickhouse',
+         kafka_format = 'JSONEachRow';</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Connect to ClickHouse SQL shell
+podman exec -it clickhouse clickhouse-client --user admin --password changeme
+
+# Run a query non-interactively
+podman exec clickhouse clickhouse-client --user admin --password changeme   --query &quot;SELECT count() FROM system.tables&quot;
+
+# Show all databases
+podman exec clickhouse clickhouse-client --user admin --password changeme   --query &quot;SHOW DATABASES&quot;
+
+# Show tables in a database
+podman exec clickhouse clickhouse-client --user admin --password changeme   --query &quot;SHOW TABLES FROM default&quot;
+
+# Ingest CSV data
+cat data.csv | podman exec -i clickhouse clickhouse-client   --user admin --password changeme   --query &quot;INSERT INTO mydb.mytable FORMAT CSV&quot;
+
+# Check disk usage per table
+podman exec clickhouse clickhouse-client --user admin --password changeme   --query &quot;SELECT table, formatReadableSize(sum(bytes)) FROM system.parts GROUP BY table ORDER BY sum(bytes) DESC&quot;
+
+# View running queries
+podman exec clickhouse clickhouse-client --user admin --password changeme   --query &quot;SELECT query_id, elapsed, query FROM system.processes&quot;
+
+# Kill a long-running query
+podman exec clickhouse clickhouse-client --user admin --password changeme   --query &quot;KILL QUERY WHERE query_id='abc123'&quot;</code></pre>
+<blockquote><p>Connect Metabase or Superset to ClickHouse to get sub-second query times on datasets that would take minutes in PostgreSQL.</p></blockquote>
+<p>---</p>
+<h2>Lightdash (dbt-Native BI)</h2>
+<p><strong>Purpose:</strong> Open-source BI tool built on top of dbt (data build tool). If your team already uses dbt for data transformation, Lightdash reads your dbt models and metrics directly — no reimporting schemas, no duplicated definitions. Metrics defined in dbt YAML automatically appear in Lightdash dashboards.</p>
+<pre><code class="language-yaml"># ~/lightdash/compose.yaml
+services:
+  lightdash:
+    image: lightdash/lightdash:latest
+    ports: [&quot;127.0.0.1:8080:8080&quot;]
+    environment:
+      PGHOST: db
+      PGPORT: 5432
+      PGUSER: lightdash
+      PGPASSWORD: changeme
+      PGDATABASE: lightdash
+      SECRET_KEY: changeme-run-openssl-rand-hex-32
+      SITE_URL: https://lightdash.home.local
+    volumes:
+      - /home/user/lightdash/dbt:/usr/app/dbt:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: lightdash
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: lightdash
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/lightdash &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>Plausible Analytics (Web Analytics)</h2>
+<p><strong>Purpose:</strong> Lightweight, GDPR-compliant web analytics. No cookies, no cross-site tracking, no personal data stored. A one-line script tag replaces Google Analytics with a dashboard you own. See pageviews, referrers, top pages, devices, and conversion goals — without privacy violations.</p>
+<pre><code class="language-yaml"># ~/plausible/compose.yaml
+services:
+  plausible_db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: plausible
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: plausible
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  plausible_events_db:
+    image: clickhouse/clickhouse-server:latest
+    volumes: [events_data:/var/lib/clickhouse]
+    restart: unless-stopped
+
+  plausible:
+    image: ghcr.io/plausible/community-edition:v2
+    ports: [&quot;127.0.0.1:8000:8000&quot;]
+    environment:
+      BASE_URL: https://analytics.example.com
+      SECRET_KEY_BASE: changeme-run-openssl-rand-base64-64
+      DATABASE_URL: postgres://plausible:changeme@plausible_db:5432/plausible
+      CLICKHOUSE_DATABASE_URL: http://plausible_events_db:8123/plausible_events
+    depends_on: [plausible_db, plausible_events_db]
+    restart: unless-stopped
+
+volumes: {pg_data: {}, events_data: {}}</code></pre>
+<pre><code class="language-bash">cd ~/plausible &amp;&amp; podman-compose up -d</code></pre>
+<p>Add to any website:</p>
+<pre><code class="language-html">&lt;script defer data-domain=&quot;yoursite.com&quot; src=&quot;https://analytics.example.com/js/script.js&quot;&gt;&lt;/script&gt;</code></pre>
+<p>---</p>
+<h2>Umami (Simple Web Analytics)</h2>
+<p><strong>Purpose:</strong> Simpler Plausible alternative. Single-service analytics with event tracking, funnel analysis, and an OpenAPI. Backed by PostgreSQL or MySQL.</p>
+<pre><code class="language-yaml"># ~/umami/compose.yaml
+services:
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    ports: [&quot;127.0.0.1:3003:3000&quot;]
+    environment:
+      DATABASE_URL: postgresql://umami:umami@db:5432/umami
+      APP_SECRET: changeme
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: umami
+      POSTGRES_DB: umami
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes: {pg_data: {}}</code></pre>
+<pre><code class="language-bash">cd ~/umami &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>Choosing the Right Tool</h2>
+<p>| Use Case | Recommended Tool | |----------|-----------------| | Non-technical users, quick setup | Metabase | | Large teams, enterprise features, 40+ connectors | Apache Superset | | Operational dashboards, alerting on query results | Redash | | Time-series, infrastructure metrics | Grafana | | Code-first reports in Git | Evidence.dev | | dbt-native BI | Lightdash | | Fast analytics on 100M+ row tables | ClickHouse | | GDPR-compliant web analytics | Plausible | | Simple web analytics | Umami |</p>
+<p>---</p>
+<h2>Caddy Configuration</h2>
+<pre><code class="language-caddyfile">metabase.home.local    { tls internal; reverse_proxy localhost:3000 }
+superset.home.local    { tls internal; reverse_proxy localhost:8088 }
+redash.home.local      { tls internal; reverse_proxy localhost:5000 }
+analytics.example.com  { reverse_proxy localhost:8000 }
+lightdash.home.local   { tls internal; reverse_proxy localhost:8080 }</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Metabase blank on first load | Wait 60–90 s for initialisation; check logs with <code>podman logs metabase</code>; ensure PostgreSQL is reachable on <code>host.containers.internal</code> | | Metabase <code>Cannot connect to database</code> | Use <code>host.containers.internal</code> not <code>localhost</code> for the DB host; verify credentials match the PostgreSQL container | | Superset <code>No module named psycopg2</code> | Add <code>psycopg2-binary</code> to the image or use <code>apache/superset:latest</code> which includes it | | Superset charts not loading | Check <code>SUPERSET_SECRET_KEY</code> is set and consistent; clear browser cache | | Redash worker not processing queries | Verify Redis is running; check <code>podman-compose logs worker</code> for connection errors | | ClickHouse OOM | Add <code>--memory 4g</code> to limit container memory; tune <code>max_memory_usage</code> in ClickHouse config | | Plausible no events received | Verify <code>BASE_URL</code> matches your site's script src; check CSP headers aren't blocking the script | | Evidence build fails | Ensure your database credentials in <code>sources/</code> are correct; run <code>npm run sources</code> to retest connections |</p>
+<blockquote><p>💡 <strong>Tip:</strong> For the best Metabase experience, connect it to a <strong>read replica</strong> of your production database rather than the primary — long-running analytical queries won't block application writes.</p></blockquote></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

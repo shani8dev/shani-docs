@@ -146,7 +146,67 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Blue-Green Deployment</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Concepts</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+        </div>
+      </div>
+      <div class="prose"><p>Shanios implements blue-green deployment using Btrfs subvolumes — a strategy adapted from DevOps for desktop Linux.</p>
+<h2>How It Works</h2>
+<ol>
+<li>System maintains <code>@blue</code> and <code>@green</code> subvolumes</li>
+<li>One subvolume is active (mounted as <code>/</code>), the other inactive</li>
+<li>Updates apply to the inactive subvolume</li>
+<li>Bootloader is updated to point to the updated subvolume</li>
+<li>Reboot switches to the updated system</li>
+<li>Previous version remains available for instant rollback</li>
+</ol>
+<h2>Slot Layout</h2>
+<p>| Slot | State | Description | |------|-------|-------------| | <code>@blue</code> | Active or Standby | One complete, bootable root filesystem | | <code>@green</code> | Active or Standby | The other complete, bootable root filesystem |</p>
+<p>Only one slot is active at a time. <code>shani-deploy</code> writes updates to the inactive slot, then switches the bootloader default. On the next reboot, the updated slot becomes active. The previous slot stays intact as an instant rollback target.</p>
+<h2>Shared Subvolumes</h2>
+<p>These subvolumes are shared between both slots and persist across all updates and rollbacks:</p>
+<ul>
+<li><code>@home</code> — user data</li>
+<li><code>@root</code> — root user home</li>
+<li><code>@data</code> — <code>/etc</code> overlay + service state</li>
+<li><code>@flatpak</code> — Flatpak apps and runtimes</li>
+<li><code>@containers</code> — Podman container storage</li>
+<li><code>@nix</code> — Nix package store</li>
+<li><code>@log</code> — system logs</li>
+<li><code>@libvirt</code>, <code>@lxc</code>, etc. — virtualisation data</li>
+</ul>
+<p>Switching slots or rolling back <strong>never</strong> touches these subvolumes.</p>
+<h2>The Cycle</h2>
+<pre><code>@blue active
+↓ update @green
+reboot → @green active
+↓ update @blue
+reboot → @blue active…</code></pre>
+<h2>Advantages</h2>
+<ul>
+<li><strong>Atomic Updates:</strong> All-or-nothing — the running system is never in a partially-updated state</li>
+<li><strong>Zero Downtime:</strong> The active system is never modified during an update</li>
+<li><strong>Instant Rollback:</strong> Boot into the previous version at any time from the boot menu</li>
+<li><strong>Safe Testing:</strong> The old system validates while the new one is prepared</li>
+</ul>
+<h2>Boot Menu Labels</h2>
+<ul>
+<li><strong>shanios-blue (Active):</strong> Currently running system</li>
+<li><strong>shanios-green (Candidate):</strong> Standby system, will be booted after next update</li>
+</ul>
+<p>After each deployment, <code>shani-deploy</code> rewrites both boot entries. The newly updated slot is labelled <strong>(Active)</strong> with <code>+3-0</code> boot-count tries and set as the <code>loader.conf</code> default; the currently running slot is relabelled <strong>(Candidate)</strong> as the stable fallback.</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

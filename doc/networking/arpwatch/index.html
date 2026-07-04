@@ -146,7 +146,71 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">arpwatch (ARP Monitor)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+        </div>
+      </div>
+      <div class="prose"><h1>arpwatch — ARP Activity Monitor</h1>
+<p>arpwatch monitors Ethernet ARP traffic and maintains a database of IP-to-MAC address mappings. It sends an email alert (via the local MTA) when a new device appears on the network, when a known device changes its MAC address, or when an IP address flips between two MAC addresses — all indicators of network changes that may warrant attention (new devices, DHCP lease changes, or potential ARP spoofing).</p>
+<p>arpwatch is pre-installed on Shani OS. <strong>Not active by default.</strong></p>
+<p>---</p>
+<h2>Enable</h2>
+<pre><code class="language-bash"># Enable monitoring on your primary LAN interface (replace eth0 with yours)
+sudo systemctl enable --now arpwatch@eth0
+
+# If you have multiple interfaces
+sudo systemctl enable --now arpwatch@wlan0
+
+# Check status
+systemctl status arpwatch@eth0
+
+# Watch logs
+journalctl -u arpwatch@eth0 -f</code></pre>
+<p>---</p>
+<h2>Configuration</h2>
+<p>Default behaviour is to send email reports to <code>root</code>. Forward root's mail to a real address via <code>/etc/aliases</code> (see the <a href="https://docs.shani.dev/doc/networking/exim">Exim page</a>).</p>
+<p>The ARP database for each interface is stored at <code>/var/lib/arpwatch/&lt;interface&gt;.dat</code>.</p>
+<h3>Customise Per-Interface Options</h3>
+<p>Create a drop-in override for the interface unit:</p>
+<pre><code class="language-bash">sudo systemctl edit arpwatch@eth0</code></pre>
+<p>Add options via <code>ARPWATCH_ARGS</code>:</p>
+<pre><code class="language-ini">[Service]
+Environment=ARPWATCH_ARGS=&quot;-m admin@example.com -n 192.168.1.0/24&quot;</code></pre>
+<p>Common flags:</p>
+<p>| Flag | Effect | |------|--------| | <code>-m address</code> | Send reports to this email address instead of root | | <code>-n network/prefix</code> | Only watch this subnet (ignore others) | | <code>-N</code> | Disable email entirely (log-only mode) | | <code>-p</code> | Disable promiscuous mode (only watch traffic to/from this machine) | | <code>-u user</code> | Drop privileges to this user after starting |</p>
+<p>---</p>
+<h2>Database Management</h2>
+<pre><code class="language-bash"># View the current IP→MAC database
+sudo cat /var/lib/arpwatch/eth0.dat
+
+# Format: MAC  IP  timestamp  hostname
+# Example:
+# aa:bb:cc:dd:ee:ff  192.168.1.50  1713600000  desktop.home.local
+
+# Clear the database (triggers &quot;new activity&quot; alerts for all devices on next run)
+sudo truncate -s 0 /var/lib/arpwatch/eth0.dat
+sudo systemctl restart arpwatch@eth0</code></pre>
+<p>---</p>
+<h2>Log Events</h2>
+<p>arpwatch logs to syslog and via the systemd journal. Event types:</p>
+<p>| Event | Meaning | |-------|---------| | <code>new activity</code> | First time this IP+MAC pair is seen | | <code>new station</code> | New MAC address never seen before | | <code>changed ethernet address</code> | A known IP now has a different MAC — possible ARP spoof or DHCP change | | <code>flip flop</code> | An IP is alternating between two MACs | | <code>reused old ethernet address</code> | A MAC that was previously associated with a different IP is back |</p>
+<pre><code class="language-bash"># See all arpwatch events
+journalctl -u arpwatch@eth0 --no-pager | grep -E &quot;new|changed|flip&quot;</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | No events appearing | Confirm the correct interface name — run <code>ip link</code> to list interfaces; arpwatch only processes traffic it can see | | Email alerts not arriving | Ensure Exim (or another MTA) is running and root's mail is forwarded — see the <a href="https://docs.shani.dev/doc/networking/exim">Exim page</a> | | Too many "new activity" alerts on first run | Normal — arpwatch builds its database from scratch; alerts settle after all known devices have been seen once | | <code>changed ethernet address</code> for a trusted device | Mobile devices use MAC randomisation by default — disable randomisation for that device on your router/AP, or accept the alerts |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

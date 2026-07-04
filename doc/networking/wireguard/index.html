@@ -146,7 +146,138 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">WireGuard (Manual)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-18</span>
+        </div>
+      </div>
+      <div class="prose"><h1>WireGuard — Manual Peer-to-Peer VPN</h1>
+<p>WireGuard kernel support and <code>wireguard-tools</code> are pre-installed on Shani OS. Tailscale uses WireGuard under the hood, but you can configure raw WireGuard tunnels manually — useful for site-to-site VPNs, connecting to a VPS, or any setup where you control both peers and don't want a coordination server.</p>
+<blockquote><p><strong>Tailscale vs raw WireGuard:</strong> Use <strong>Tailscale</strong> when you want zero-config mesh networking with no key management. Use <strong>raw WireGuard</strong> when you control both endpoints, need a static tunnel to a VPS or router, or want full control over routing.</p></blockquote>
+<p>---</p>
+<h2>Key Generation</h2>
+<p>Run this on <strong>each peer</strong> independently:</p>
+<pre><code class="language-bash">wg genkey | tee /tmp/privatekey | wg pubkey &gt; /tmp/publickey
+cat /tmp/privatekey   # keep secret — goes in [Interface] PrivateKey
+cat /tmp/publickey    # share with the other peer — goes in their [Peer] PublicKey</code></pre>
+<p>Store keys securely:</p>
+<pre><code class="language-bash">sudo install -d -m 700 /etc/wireguard
+wg genkey | sudo tee /etc/wireguard/privatekey | wg pubkey | sudo tee /etc/wireguard/publickey
+sudo chmod 600 /etc/wireguard/privatekey</code></pre>
+<p>---</p>
+<h2>Configuration</h2>
+<h3>Peer-to-Peer Tunnel (Site-to-Site)</h3>
+<p>Create <code>/etc/wireguard/wg0.conf</code> on <strong>Peer A</strong>:</p>
+<pre><code class="language-ini">[Interface]
+Address    = 10.0.0.1/24          # this peer's VPN IP
+PrivateKey = &lt;peer-A-private-key&gt;
+ListenPort = 51820                # UDP port to listen on
+
+[Peer]
+PublicKey           = &lt;peer-B-public-key&gt;
+Endpoint            = 203.0.113.10:51820  # peer B's public IP:port
+AllowedIPs          = 10.0.0.2/32         # route only peer B's VPN IP through the tunnel
+PersistentKeepalive = 25                   # keep NAT hole open (set if behind NAT)</code></pre>
+<p>Create <code>/etc/wireguard/wg0.conf</code> on <strong>Peer B</strong>:</p>
+<pre><code class="language-ini">[Interface]
+Address    = 10.0.0.2/24
+PrivateKey = &lt;peer-B-private-key&gt;
+ListenPort = 51820
+
+[Peer]
+PublicKey           = &lt;peer-A-public-key&gt;
+Endpoint            = 203.0.113.20:51820  # peer A's public IP:port
+AllowedIPs          = 10.0.0.1/32
+PersistentKeepalive = 25</code></pre>
+<h3>Road Warrior (Client → Server, Full-Tunnel)</h3>
+<p>Route all client traffic through the server — useful for privacy or bypassing restrictive networks.</p>
+<p><strong>Server</strong> (<code>/etc/wireguard/wg0.conf</code>):</p>
+<pre><code class="language-ini">[Interface]
+Address    = 10.0.0.1/24
+PrivateKey = &lt;server-private-key&gt;
+ListenPort = 51820
+
+# Enable IP forwarding and NAT masquerade (run these once, or add to PostUp/PreDown)
+PostUp   = sysctl -w net.ipv4.ip_forward=1; firewall-cmd --zone=public --add-masquerade
+PreDown  = firewall-cmd --zone=public --remove-masquerade
+
+[Peer]
+# Client 1
+PublicKey  = &lt;client-public-key&gt;
+AllowedIPs = 10.0.0.2/32</code></pre>
+<p><strong>Client</strong> (<code>/etc/wireguard/wg0.conf</code>):</p>
+<pre><code class="language-ini">[Interface]
+Address    = 10.0.0.2/24
+PrivateKey = &lt;client-private-key&gt;
+DNS        = 1.1.1.1              # use a public resolver through the tunnel
+
+[Peer]
+PublicKey           = &lt;server-public-key&gt;
+Endpoint            = &lt;server-public-ip&gt;:51820
+AllowedIPs          = 0.0.0.0/0, ::/0   # route ALL traffic through the tunnel
+PersistentKeepalive = 25</code></pre>
+<h3>Split-Tunnel (Route Only Specific Subnets)</h3>
+<p>To route only LAN traffic (e.g., <code>192.168.1.0/24</code>) through the tunnel and let all other traffic go directly:</p>
+<pre><code class="language-ini">[Peer]
+...
+AllowedIPs = 10.0.0.0/24, 192.168.1.0/24   # only these subnets go through the tunnel</code></pre>
+<p>---</p>
+<h2>Bring Up / Down</h2>
+<pre><code class="language-bash"># Bring up the interface
+sudo wg-quick up wg0
+
+# Bring it down
+sudo wg-quick down wg0
+
+# Start at boot (persists across reboots)
+sudo systemctl enable --now wg-quick@wg0</code></pre>
+<p>---</p>
+<h2>Status & Diagnostics</h2>
+<pre><code class="language-bash"># Show all interfaces: peers, latest handshake time, and traffic counters
+sudo wg show
+
+# Specific interface
+sudo wg show wg0
+
+# Check the assigned IP
+ip addr show wg0
+
+# Check routes going through the tunnel
+ip route show | grep wg0
+
+# Live handshake monitoring (useful for debugging connectivity)
+watch -n 2 sudo wg show</code></pre>
+<p>---</p>
+<h2>Firewall</h2>
+<pre><code class="language-bash"># Open the WireGuard UDP listen port
+sudo firewall-cmd --add-port=51820/udp --permanent
+
+# Add the WireGuard interface to the trusted zone (allow all traffic from peers)
+sudo firewall-cmd --zone=trusted --add-interface=wg0 --permanent
+
+sudo firewall-cmd --reload</code></pre>
+<p>---</p>
+<h2>Adding More Peers</h2>
+<p>Each new peer gets a <code>[Peer]</code> block in the server's config. You can add peers without restarting WireGuard:</p>
+<pre><code class="language-bash"># Add a peer at runtime (no restart needed)
+sudo wg set wg0 peer &lt;new-client-pubkey&gt; allowed-ips 10.0.0.3/32
+
+# Save the runtime state back to the config file
+sudo wg-quick save wg0</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>wg show</code> shows no handshake (or very old) | Check that the remote endpoint is reachable: <code>nc -zu &lt;endpoint-ip&gt; 51820</code>; verify the public key on both sides matches | | Handshake OK but no traffic flowing | Check <code>AllowedIPs</code> — the destination IP must be covered; on the server, confirm IP forwarding is enabled: <code>sysctl net.ipv4.ip_forward</code> | | Full-tunnel: internet stops working | Ensure <code>PostUp</code> masquerade rule is active: <code>sudo firewall-cmd --query-masquerade</code>; check <code>DNS =</code> is set in the client <code>[Interface]</code> | | Client behind NAT won't connect | Set <code>PersistentKeepalive = 25</code> in the client's <code>[Peer]</code> block to keep the NAT hole open | | <code>RTNETLINK answers: Operation not supported</code> | The WireGuard kernel module isn't loaded — run <code>sudo modprobe wireguard</code> | | Config changes not applied | <code>wg-quick</code> does not hot-reload — bring the interface down and up: <code>sudo wg-quick down wg0 &amp;&amp; sudo wg-quick up wg0</code> |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

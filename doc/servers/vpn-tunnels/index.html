@@ -146,7 +146,874 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">VPN &amp; Tunnels</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+        </div>
+      </div>
+      <div class="prose"><blockquote><p><strong>Portability note:</strong> Compose examples use rootless <strong>Podman</strong> and <code>host.containers.internal</code> (the host gateway from a container). When using Docker, replace <code>podman-compose</code> with <code>docker compose</code> and <code>host.containers.internal</code> with <code>host-gateway</code> (add <code>extra_hosts: [host-gateway:host-gateway]</code> to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.</p></blockquote>
+<h1>VPN & Tunnels</h1>
+<p>All VPN and tunnel solutions on this system can run fully containerised. Rootless containers handle traffic routing but require specific capabilities (<code>NET_ADMIN</code>, <code>NET_RAW</code>), kernel modules (<code>tun</code>), and IP forwarding enabled on the host.</p>
+<p>---</p>
+<h2>Key Concepts</h2>
+<h4>WireGuard vs OpenVPN vs IPSec — when interviewers ask</h4>
+<p>WireGuard: modern (2015), small codebase (~4000 lines), fast, kernel-level, uses fixed modern crypto (ChaCha20, Curve25519). No backward compatibility negotiation — a feature, not a limitation. OpenVPN: mature (2001), large ecosystem, configurable cipher suites, userspace TLS so slower, supports TCP mode (useful when UDP is blocked). IPSec: the enterprise/router standard, complex to configure, built into most OSes natively.</p>
+<h4>Mesh VPN topology vs hub-and-spoke</h4>
+<p>Traditional VPNs are hub-and-spoke — all client traffic flows through a central VPN server. Mesh VPNs (Tailscale, NetBird, Nebula, ZeroTier) connect every peer directly to every other peer using STUN/TURN for NAT traversal. Advantages: lower latency (direct peer-to-peer), no single point of failure, no bandwidth bottleneck at the hub. Tailscale's control plane manages the key exchange; the data plane is direct WireGuard.</p>
+<h4>STUN vs TURN vs ICE</h4>
+<ul>
+<li><strong>STUN</strong> (Session Traversal Utilities for NAT) — tells a client its public IP and port as seen from the internet. Used for hole-punching.</li>
+<li><strong>TURN</strong> (Traversal Using Relays around NAT) — a relay that proxies traffic when direct hole-punching fails (symmetric NAT). More expensive (all traffic flows through the relay).</li>
+<li><strong>ICE</strong> (Interactive Connectivity Establishment) — the negotiation protocol that tries STUN first, falls back to TURN. Used by WebRTC and mesh VPNs.</li>
+</ul>
+<h4>Zero-trust network access (ZTNA) vs VPN</h4>
+<p>A traditional VPN grants access to the network — once connected, the user can typically reach everything on the network. ZTNA grants access to specific applications or resources, not the network itself. Firezone and Teleport implement ZTNA: you get access to <code>postgres.internal:5432</code> not to the entire <code>10.0.0.0/8</code> network. Better for the principle of least privilege.</p>
+<h4>Tunnel overhead and MTU</h4>
+<p>Every VPN tunnel adds overhead to each packet (headers, encryption padding). WireGuard adds ~60 bytes. This reduces the effective inner MTU below the standard 1500 bytes — if you send a full-size 1500-byte packet through a WireGuard tunnel, the outer packet exceeds the link MTU and gets fragmented or dropped. Solutions: (1) set the WireGuard client MTU to 1420 (<code>MTU = 1420</code> in wg0.conf), (2) enable MSS clamping on the server's PostUp iptables rule to automatically tell TCP connections about the reduced MTU.</p>
+<h4>Split tunnel security implications</h4>
+<p>With a split tunnel (<code>AllowedIPs = 192.168.1.0/24</code>), only traffic to the home LAN goes through the VPN — all other internet traffic goes directly from the client's ISP. This means: (1) DNS queries for non-<code>.home.local</code> domains don't use your Pi-hole, (2) your ISP can still see your general browsing, (3) a malicious website can't be blocked by your home DNS. A full tunnel (<code>AllowedIPs = 0.0.0.0/0</code>) routes everything through home, but adds latency and uses your home bandwidth. Choose based on the use case.</p>
+<h4>Cloudflare Tunnel vs self-hosted reverse proxy — the trade-off</h4>
+<p>Cloudflare Tunnel (cloudflared) exposes a local service to the internet without opening firewall ports or having a public IP. The tunnel connects outbound to Cloudflare's network, which terminates HTTPS for your domain. Trade-offs: you must trust Cloudflare to terminate your TLS (they see plaintext), your availability depends on Cloudflare's uptime, and all traffic passes through their network (latency + bandwidth cost for large transfers). For services that don't need to bypass Cloudflare, Pangolin (self-hosted) or a VPS-based reverse proxy (frp) gives you the same capability without the dependency.</p>
+<h4>NAT traversal and hole-punching</h4>
+<p>When two peers are both behind NAT (typical home routers), neither can initiate a direct connection to the other because there's no public IP:port mapping. Hole-punching works by having both peers send UDP packets to each other simultaneously — each packet causes the NAT to create a mapping for the return direction, opening a bidirectional path. STUN servers facilitate this by telling each peer their external address. This fails with symmetric NAT (different external port for each destination), which requires a TURN relay. WireGuard-based mesh VPNs (Tailscale, NetBird) handle all of this automatically.</p>
+<h4>Access control at the VPN layer vs application layer</h4>
+<p>A VPN (WireGuard, OpenVPN) controls who can reach the network; the application still controls what authenticated users can do. Zero-Trust tools (Firezone, Teleport) add a third layer: per-application access policies enforced at the gateway — user Alice can SSH to server A but not server B, even though both are on the same VPN subnet. This maps access control to identity (user + device) rather than just network position. Audit logs at the gateway layer (Teleport's session recording) are also available here, not possible with a plain VPN.</p>
+<h4>Protocol obfuscation — when and why</h4>
+<p>Standard WireGuard and OpenVPN traffic patterns are fingerprint-able by deep packet inspection (DPI). ISPs and national firewalls (GFW) identify and block them. Obfuscation tools (Xray/V2Ray with VLESS+XTLS-Reality, Hysteria2) make VPN traffic look like normal HTTPS, video streaming, or QUIC traffic. This is relevant for: (1) countries with internet censorship, (2) corporate networks that block non-HTTP outbound, (3) ISPs that throttle VPN traffic. Hysteria2 additionally uses QUIC's congestion control to improve performance on high-latency, high-loss links (satellite, mobile).</p>
+<h4>WireGuard cryptography — what you're actually running</h4>
+<p>WireGuard uses Curve25519 for key exchange (ECDH), ChaCha20-Poly1305 for symmetric encryption (authenticated, AEAD), and BLAKE2s for hashing. This is a modern, audited cryptographic stack — significantly simpler than OpenVPN's TLS negotiation (which can be misconfigured to use weak ciphers). Each peer has a 32-byte public key derived from its private key. Handshakes are silent — WireGuard never responds to unauthenticated packets, making it invisible to port scanners.</p>
+<h4>Tailscale vs Headscale — what the control plane actually does</h4>
+<p>WireGuard handles data-plane encryption; the control plane distributes public keys, allocates IP addresses, and implements NAT traversal. Tailscale's control plane is managed (tailscale.com servers). Headscale self-hosts the control plane — same WireGuard data plane, but your server handles key distribution and NAT traversal coordination. The trade-off: Headscale means no Tailscale SaaS dependency, but you run the coordination server, and some Tailscale features (MagicDNS via their resolvers, some client apps) may have reduced functionality.</p>
+<h4>Key rotation and peer management at scale</h4>
+<p>WireGuard has no built-in PKI — each peer is a static public key. At small scale (10 peers) this is manageable. At medium scale (50+ peers), use Headscale's API or Netbird's management plane to automate key distribution and rotation. Key compromise in WireGuard requires removing the peer's public key from all other peers' <code>AllowedPeers</code> lists — in a mesh of 50 nodes, this means 49 config updates. This is why a management plane (Headscale, Netbird, Innernet) is not optional at scale.</p>
+<h4>VPN split tunneling — security implications</h4>
+<p>Full tunnel routes all traffic through the VPN — protects DNS queries, prevents local network leakage, but adds latency and routes your ISP's traffic through your home server. Split tunnel routes only specific CIDRs through the VPN — your home LAN is accessible, but public traffic goes direct. Security risk: split tunnel exposes your traffic on the exit network (corporate WiFi, coffee shop) for non-VPN-routed traffic. DNS leak: even with split tunnel, ensure DNS queries for home resources go through the VPN resolver, not the local network's DNS.</p>
+<p>---</p>
+<p>---</p>
+<h2>Prerequisites</h2>
+<p>Before running any VPN container, enable IP forwarding and load the TUN module:</p>
+<pre><code class="language-bash"># Enable IPv4 and IPv6 forwarding
+sudo sysctl -w net.ipv4.ip_forward=1
+sudo sysctl -w net.ipv6.conf.all.forwarding=1
+
+# Make it persistent across reboots
+echo &quot;net.ipv4.ip_forward=1&quot; | sudo tee /etc/sysctl.d/99-ipforward.conf
+echo &quot;net.ipv6.conf.all.forwarding=1&quot; | sudo tee -a /etc/sysctl.d/99-ipforward.conf
+
+# Load the TUN/TAP module (usually auto-loaded on first use)
+sudo modprobe tun</code></pre>
+<p>---</p>
+<h2>Quick Selection Guide</h2>
+<p>| Tool | Best For | Complexity | Web UI | Protocol | |------|----------|------------|--------|----------| | <strong>WG-Easy</strong> | Home/SOHO WireGuard with a clean UI | Low | ✅ | WireGuard | | <strong>Tailscale</strong> | Zero-config mesh for personal/team use | Low | ✅ App | WireGuard (managed) | | <strong>Headscale + Headplane</strong> | Self-hosted Tailscale control server | Medium | ✅ | WireGuard | | <strong>Cloudflared</strong> | Expose services publicly, no port forwarding | Low | ✅ Dashboard | HTTPS/TLS | | <strong>Pangolin + Newt</strong> | Self-hosted tunnel server, full data ownership | Medium | ✅ | WireGuard | | <strong>NetBird</strong> | Open-source self-hosted Tailscale alternative | Medium | ✅ | WireGuard | | <strong>Pritunl</strong> | Enterprise VPN — SSO, multi-site, audit logs | Medium | ✅ | WireGuard / OpenVPN | | <strong>Firezone</strong> | Zero-trust access (ZTNA), granular policies | High | ✅ | WireGuard | | <strong>Nebula</strong> | Decentralised mesh, cert-based auth, GitOps | Medium | ❌ CLI | Nebula (UDP) | | <strong>ZeroTier</strong> | ZeroTier network with self-hosted controller | Medium | ✅ | ZeroTier (UDP) | | <strong>Hysteria 2</strong> | High-loss / censored networks (QUIC) | Medium | ⚠️ Experimental | QUIC (HTTP/3) | | <strong>OpenVPN</strong> | Legacy compatibility, cert-based auth | Medium | ⚠️ Community | UDP/TCP | | <strong>WireGuard Road Warrior</strong> | Manual split-tunnel config for mobile clients | Medium | ❌ CLI | WireGuard | | <strong>Outline VPN</strong> | Simple Shadowsocks proxy for censorship resistance | Low | ✅ App | Shadowsocks | | <strong>Xray / V2Ray</strong> | Protocol-obfuscating proxy for censored networks | Medium | ❌ CLI | VLESS/VMESS/XTLS |</p>
+<p>---</p>
+<h2>WireGuard / WG-Easy</h2>
+<p><strong>Purpose:</strong> Modern, high-performance VPN with state-of-the-art cryptography. WG-Easy adds a lightweight web UI for managing peers, generating QR codes, and controlling routes — no CLI required.</p>
+<pre><code class="language-yaml"># ~/wg-easy/compose.yaml
+services:
+  wg-easy:
+    image: ghcr.io/wg-easy/wg-easy
+    ports:
+      - &quot;127.0.0.1:51821:51821&quot;
+      - &quot;0.0.0.0:51820:51820/udp&quot;
+    volumes:
+      - /home/user/wgeasy:/etc/wireguard:Z
+    environment:
+      WG_HOST: vpn.example.com
+      PASSWORD: changeme
+      WG_DEFAULT_ADDRESS: 10.8.0.x
+      WG_DEFAULT_DNS: 1.1.1.1
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      net.ipv4.ip_forward: &quot;1&quot;
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/wg-easy &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># View connected peers and their traffic stats
+# Get session cookie first
+SESSION=$(curl -s -c - -X POST http://localhost:51821/api/session \
+  -H 'Content-Type: application/json' \
+  -d '{&quot;password&quot;:&quot;changeme&quot;}' | grep -o 'connect.sid=[^;]*')
+# Then use it
+curl http://localhost:51821/api/wireguard/client -H &quot;Cookie: $SESSION&quot;
+
+# View WireGuard interface status on the host
+sudo wg show
+
+# View logs
+podman logs -f wg-easy
+
+# Restart to apply config changes
+podman restart wg-easy</code></pre>
+<ul>
+<li><strong>Management UI:</strong> <code>http://localhost:51821</code> (proxy through Caddy for HTTPS)</li>
+<li><strong>Client data:</strong> persisted in <code>/home/user/wgeasy/</code></li>
+<li><strong>Firewall:</strong> <code>sudo firewall-cmd --add-port=51820/udp --permanent &amp;&amp; sudo firewall-cmd --reload</code></li>
+</ul>
+<h3>How WireGuard Works</h3>
+<p>WireGuard is fundamentally different from older VPN protocols (OpenVPN, IPSec) in both design and implementation.</p>
+<p><strong>Cryptography:</strong> WireGuard uses a fixed, modern cryptographic suite — no negotiation, no cipher selection, no version mismatches:</p>
+<ul>
+<li><strong>ChaCha20-Poly1305</strong> — authenticated symmetric encryption (fast on CPUs without AES hardware acceleration)</li>
+<li><strong>Curve25519</strong> — elliptic-curve Diffie-Hellman key exchange</li>
+<li><strong>BLAKE2s</strong> — fast cryptographic hashing</li>
+<li><strong>SipHash</strong> — for routing table lookups</li>
+</ul>
+<p><strong>No handshake at connection time:</strong> WireGuard peers are configured with each other's public keys in advance. The "tunnel" is stateless — there is no session establishment phase. Packets are just encrypted and sent. This makes WireGuard silent when idle (nothing to detect) and extremely fast to reconnect after a network change (roaming between WiFi and mobile data works seamlessly).</p>
+<p><strong>Kernel-space implementation:</strong> WireGuard runs as a kernel module (or via a wireguard-go userspace implementation on unsupported platforms). This means packet processing happens without crossing the user/kernel boundary, giving it significantly better throughput than OpenVPN's userspace TLS stack.</p>
+<p><strong>Compared to OpenVPN:</strong> OpenVPN is a PKI-based TLS VPN running in userspace. It supports dynamic certificate revocation, many cipher suites, and protocol obfuscation — useful in enterprise environments. WireGuard trades that flexibility for simplicity, speed, and a drastically smaller codebase (~4000 lines vs ~100,000+ for OpenVPN).</p>
+<h3>Kill Switch</h3>
+<p>A kill switch ensures that if the VPN tunnel drops, traffic stops rather than falling back to your clearnet IP. Without it, a brief VPN disconnect leaks your real IP.</p>
+<pre><code class="language-bash"># Add to your WireGuard client config (wg0.conf)
+[Interface]
+PrivateKey = &lt;your-private-key&gt;
+Address = 10.8.0.2/32
+DNS = 10.8.0.1
+
+# Kill switch: block all traffic except through wg0
+PostUp = iptables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT
+PreDown = iptables -D OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT
+
+[Peer]
+...</code></pre>
+<p>This iptables rule allows only traffic marked by the WireGuard interface plus local traffic (LAN). All other outbound traffic is rejected at the kernel level. If WireGuard goes down, <code>PreDown</code> removes the rule and normal routing resumes.</p>
+<h3>Split DNS for VPN Clients</h3>
+<p>When routing LAN traffic through WireGuard, DNS for <code>.home.local</code> domains must resolve to LAN IPs even from a remote client. Configure the WireGuard client to use your home DNS server for <code>.home.local</code> queries only:</p>
+<pre><code class="language-ini"># wg0.conf client config — split DNS
+[Interface]
+DNS = 192.168.1.10          # your home AdGuard Home / Pi-hole IP
+
+[Peer]
+AllowedIPs = 10.8.0.0/24, 192.168.1.0/24   # route LAN traffic through VPN
+# DNS queries for .home.local go to 192.168.1.10, which resolves them correctly</code></pre>
+<p>On Linux clients, <code>systemd-resolved</code> handles split DNS when <code>DNS=</code> is set in the WireGuard interface config. On macOS/Windows, the WireGuard GUI app respects the DNS setting from the config file.</p>
+<p>---</p>
+<h2>Tailscale (Managed) & Headscale (Self-Hosted Control Server)</h2>
+<p><strong>Purpose:</strong> Zero-config mesh VPN built on WireGuard. Tailscale uses managed coordination; Headscale is the fully open-source self-hosted control server — giving you the same experience with no third-party dependency.</p>
+<h3>Tailscale (Managed)</h3>
+<pre><code class="language-bash"># Tailscale is pre-installed on this system — just run:
+sudo tailscale up
+
+# Enable SSH over Tailscale
+sudo tailscale up --ssh
+
+# Advertise as an exit node
+sudo tailscale up --advertise-exit-node
+
+# Advertise local subnets (share your LAN with other tailnet devices)
+sudo tailscale up --advertise-routes=192.168.1.0/24</code></pre>
+<p>Or run as a container:</p>
+<pre><code class="language-yaml"># ~/tailscale/compose.yaml
+services:
+  tailscale:
+    image: tailscale/tailscale
+    command: tailscaled --tun=userspace-networking --socks5-server=:1080
+    volumes:
+      - /home/user/tailscale:/var/lib:Z
+    devices:
+      - /dev/net/tun
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/tailscale &amp;&amp; podman-compose up -d</code></pre>
+<h3>Tailscale ACL Policies</h3>
+<p>By default, all devices in a Tailscale network can reach all other devices. ACL policies (in HuJSON format) let you control exactly which devices can talk to which — essential for separating personal devices from servers, or restricting access to sensitive ports.</p>
+<p>Configure ACLs in the Tailscale admin console under <strong>Access Controls</strong>, or for Headscale via the <code>policy.hujson</code> config:</p>
+<pre><code class="language-json">{
+  // Tags are assigned to devices — servers get &quot;tag:server&quot;, laptops get &quot;tag:laptop&quot;
+  &quot;tagOwners&quot;: {
+    &quot;tag:server&quot;: [&quot;autogroup:admin&quot;],
+    &quot;tag:laptop&quot;: [&quot;autogroup:admin&quot;]
+  },
+
+  &quot;acls&quot;: [
+    // Laptops can SSH to servers
+    {&quot;action&quot;: &quot;accept&quot;, &quot;src&quot;: [&quot;tag:laptop&quot;], &quot;dst&quot;: [&quot;tag:server:22&quot;]},
+    // Servers can reach each other on any port (internal service mesh)
+    {&quot;action&quot;: &quot;accept&quot;, &quot;src&quot;: [&quot;tag:server&quot;], &quot;dst&quot;: [&quot;tag:server:*&quot;]},
+    // Laptops can reach Grafana dashboard on servers
+    {&quot;action&quot;: &quot;accept&quot;, &quot;src&quot;: [&quot;tag:laptop&quot;], &quot;dst&quot;: [&quot;tag:server:3001&quot;]},
+    // All other traffic denied (implicit deny at end of list)
+  ],
+
+  // Tailscale SSH — which users can SSH to which tags
+  &quot;ssh&quot;: [
+    {
+      &quot;action&quot;: &quot;accept&quot;,
+      &quot;src&quot;: [&quot;autogroup:admin&quot;],
+      &quot;dst&quot;: [&quot;tag:server&quot;],
+      &quot;users&quot;: [&quot;autogroup:nonroot&quot;]
+    }
+  ]
+}</code></pre>
+<pre><code class="language-bash"># Apply policy to Headscale
+headscale policy set -f policy.hujson
+
+# Verify policy was applied
+headscale policy get</code></pre>
+<h4>1. Create config directory and config file</h4>
+<pre><code class="language-bash">mkdir -p /home/user/headscale/{config,data}</code></pre>
+<p><code>/home/user/headscale/config/config.yaml</code>:</p>
+<pre><code class="language-yaml">server_url: https://headscale.example.com
+listen_addr: 0.0.0.0:8080
+grpc_listen_addr: 0.0.0.0:9090
+database:
+  type: sqlite3
+  sqlite:
+    path: /var/lib/headscale/db.sqlite
+dns:
+  base_domain: headscale.lan
+  magic_dns: true
+  nameservers:
+    - 1.1.1.1
+    - 8.8.8.8</code></pre>
+<h4>2. Run the container</h4>
+<pre><code class="language-yaml"># ~/headscale/compose.yaml
+services:
+  headscale:
+    image: headscale/headscale:latest
+    ports:
+      - 127.0.0.1:8080:8080
+      - 127.0.0.1:9090:9090
+    volumes:
+      - /home/user/headscale/config:/etc/headscale:Z
+      - /home/user/headscale/data:/var/lib/headscale:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/headscale &amp;&amp; podman-compose up -d</code></pre>
+<h4>3. Create a user and connect devices</h4>
+<pre><code class="language-bash"># Create a namespace
+podman exec headscale headscale users create home
+
+# Generate a reusable pre-auth key (valid 30 days)
+podman exec headscale headscale preauthkeys create --user home --reusable --expiration 30d
+
+# Connect any Tailscale-compatible device to your Headscale server
+tailscale up --login-server https://headscale.example.com --authkey &lt;key&gt;
+
+# List connected nodes
+podman exec headscale headscale nodes list</code></pre>
+<h3>Headplane (Web UI for Headscale)</h3>
+<pre><code class="language-yaml"># ~/headplane/compose.yaml
+services:
+  headplane:
+    image: ghcr.io/tale/headplane:latest
+    ports:
+      - 127.0.0.1:3001:3000
+    volumes:
+      - /home/user/headscale/config:/etc/headscale:ro,Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/headplane &amp;&amp; podman-compose up -d</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Create a user (namespace)
+podman exec headscale headscale users create myuser
+
+# List users
+podman exec headscale headscale users list
+
+# Generate a reusable pre-auth key (30 days)
+podman exec headscale headscale preauthkeys create --user myuser --reusable --expiration 30d
+
+# List pre-auth keys
+podman exec headscale headscale preauthkeys list --user myuser
+
+# List all connected nodes
+podman exec headscale headscale nodes list
+
+# Expire (force-disconnect) a node
+podman exec headscale headscale nodes expire --identifier NODE_ID
+
+# Delete a node
+podman exec headscale headscale nodes delete --identifier NODE_ID
+
+# Get debug info for a node
+podman exec headscale headscale nodes --output json list | python3 -m json.tool
+
+# Generate an API key for Headplane
+podman exec headscale headscale apikeys create
+
+# Check server version
+podman exec headscale headscale version</code></pre>
+<p>---</p>
+<h2>Cloudflare Tunnel (Cloudflared)</h2>
+<p><strong>Purpose:</strong> Expose local services to the internet without opening any firewall ports. Cloudflared makes outbound-only HTTPS connections to Cloudflare's edge — your router needs no changes.</p>
+<pre><code class="language-bash"># Authenticate with your Cloudflare account
+cloudflared login
+
+# Create a tunnel
+cloudflared tunnel create home-server
+
+# Configure services to expose
+cat &gt; ~/.cloudflared/config.yml &lt;&lt; EOF
+tunnel: &lt;tunnel-id&gt;
+credentials-file: /home/user/.cloudflared/&lt;tunnel-id&gt;.json
+
+ingress:
+  - hostname: media.example.com
+    service: http://localhost:8096
+  - hostname: files.example.com
+    service: http://localhost:8384
+  - service: http_status:404
+EOF
+
+# Run as a persistent system service
+sudo cloudflared service install
+sudo systemctl enable --now cloudflared</code></pre>
+<p>Or run as a container using a token from the Cloudflare Zero Trust dashboard:</p>
+<pre><code class="language-yaml"># ~/cloudflared/compose.yaml
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    volumes:
+      - /home/user/cloudflared/config:/etc/cloudflared:Z
+    command: tunnel --no-autoupdate run --token &lt;your-token&gt;
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/cloudflared &amp;&amp; podman-compose up -d</code></pre>
+<ul>
+<li><strong>DNS:</strong> Add a CNAME for each hostname pointing to <code>&lt;tunnel-id&gt;.cfargotunnel.com</code></li>
+<li><strong>Firewall:</strong> None required — all traffic is outbound</li>
+</ul>
+<p>---</p>
+<h2>Pangolin (Self-Hosted Tunnel Server)</h2>
+<p><strong>Purpose:</strong> A fully open-source alternative to Cloudflare Tunnel. Expose local services via a public HTTPS URL through an encrypted WireGuard tunnel to a VPS you control. No third-party cloud — you own the entire path. Supports identity-aware access control per resource.</p>
+<p>Pangolin has two components:</p>
+<ul>
+<li><strong>Pangolin</strong> — the server, runs on a VPS, receives tunnelled traffic and routes it to your services</li>
+<li><strong>Newt</strong> — the agent, runs on your Shani OS machine, creates the outbound WireGuard tunnel</li>
+</ul>
+<h3>1. Server Setup (on a VPS)</h3>
+<p><code>/home/user/pangolin/config/config.yml</code>:</p>
+<pre><code class="language-yaml">app:
+  dashboard_url: https://pangolin.yourdomain.com
+  base_domain: yourdomain.com
+  admin_email: admin@yourdomain.com
+  admin_password: changeme
+  log_level: info
+server:
+  external_port: 443
+  internal_port: 8080
+db:
+  encryption_key: &quot;your-32-char-hex-key&quot;</code></pre>
+<pre><code class="language-yaml"># ~/pangolin/compose.yaml
+services:
+  pangolin:
+    image: fosrl/pangolin:latest
+    ports:
+      - 0.0.0.0:443:443
+      - 0.0.0.0:51820:51820/udp
+    volumes:
+      - /home/user/pangolin/config:/app/config:Z
+      - /home/user/pangolin/data:/app/data:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/pangolin &amp;&amp; podman-compose up -d</code></pre>
+<p>Access the dashboard at <code>https://pangolin.yourdomain.com</code>, create a site, and copy the Newt credentials.</p>
+<h4>VPS firewall</h4>
+<p>open <code>443/tcp</code> and <code>51820/udp</code></p>
+<h3>2. Newt Agent (on this system)</h3>
+<pre><code class="language-yaml"># ~/newt/compose.yaml
+services:
+  newt:
+    image: fosrl/newt:latest
+    environment:
+      PANGOLIN_URL: https://pangolin.yourdomain.com
+      NEWT_ID: &lt;your-newt-id&gt;
+      NEWT_SECRET: &lt;your-newt-secret&gt;
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/newt &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>NetBird</h2>
+<p><strong>Purpose:</strong> Open-source, peer-to-peer WireGuard mesh VPN platform. The most complete self-hosted alternative to Tailscale — management dashboard, STUN/TURN relay, and kernel-level WireGuard all run on hardware you control. Supports SSO (OIDC), ACL policies, DNS routing, and split tunnelling. Clients are available for Linux, macOS, Windows, iOS, and Android.</p>
+<h3>Architecture</h3>
+<p>NetBird has three server components:</p>
+<ul>
+<li><strong>Management</strong> — API, ACL policy store, device registry</li>
+<li><strong>Signal</strong> — WebRTC signalling for peer hole-punching</li>
+<li><strong>Relay (Coturn)</strong> — TURN relay for peers behind strict NAT</li>
+</ul>
+<h3>Full Self-Hosted Deployment</h3>
+<pre><code class="language-bash"># 1. Get the official compose stack
+curl -sSL https://raw.githubusercontent.com/netbirdio/netbird/main/infrastructure_files/docker-compose.yml \
+  -o ~/netbird/compose.yaml
+curl -sSL https://raw.githubusercontent.com/netbirdio/netbird/main/infrastructure_files/.env.example \
+  -o ~/netbird/.env
+
+# 2. Edit .env — set your domain, OIDC provider, and TURN credentials
+nano ~/netbird/.env</code></pre>
+<h4>Key <code>.env</code> variables</h4>
+<pre><code class="language-bash">NETBIRD_DOMAIN=netbird.example.com
+
+# OIDC provider (e.g., Authentik, Keycloak, Zitadel, or Dex)
+NETBIRD_AUTH_OIDC_CONFIGURATION_ENDPOINT=https://auth.example.com/application/o/netbird/.well-known/openid-configuration
+NETBIRD_AUTH_CLIENT_ID=netbird
+NETBIRD_AUTH_CLIENT_SECRET=changeme
+
+# TURN relay credentials
+NETBIRD_TURN_USER=coturn
+NETBIRD_TURN_PASSWORD=changeme</code></pre>
+<h4>3. Start all services</h4>
+<pre><code class="language-bash">cd ~/netbird &amp;&amp; podman-compose up -d</code></pre>
+<h4>Services started</h4>
+<ul>
+<li><code>management</code> on port <code>443</code> (HTTPS/gRPC)</li>
+<li><code>signal</code> on port <code>10000</code></li>
+<li><code>coturn</code> (TURN relay) on port <code>3478/udp</code> and <code>5349/tcp</code></li>
+<li><code>dashboard</code> (React SPA served by Nginx)</li>
+</ul>
+<p><strong>Firewall:</strong></p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=443/tcp \
+  --add-port=10000/tcp \
+  --add-port=3478/udp \
+  --add-port=5349/tcp \
+  --permanent &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<h3>Connect a Client</h3>
+<pre><code class="language-bash"># Install the NetBird client
+curl -fsSL https://pkgs.netbird.io/install.sh | sh
+
+# Connect to your self-hosted management server
+netbird up --management-url https://netbird.example.com:443
+
+# Check status
+netbird status
+
+# Show peers
+netbird peers
+
+# Disconnect
+netbird down</code></pre>
+<h3>ACL Policies</h3>
+<p>NetBird lets you define granular access policies per group in the dashboard:</p>
+<ul>
+<li>Create groups (e.g., <code>servers</code>, <code>laptops</code>, <code>phones</code>)</li>
+<li>Assign devices to groups</li>
+<li>Create policies that allow specific traffic (e.g., <code>laptops</code> → <code>servers</code> on port 22)</li>
+<li>Block all other inter-peer traffic by default</li>
+</ul>
+<h3>DNS Routes</h3>
+<p>Route private DNS to your server's Pi-hole or AdGuard instance:</p>
+<ul>
+<li>In the dashboard: DNS → Nameservers → Add</li>
+<li>Domain: <code>home.local</code>, Nameserver: IP of your Pi-hole peer</li>
+<li>Enable: all peers in the <code>laptops</code> group use this nameserver for <code>.home.local</code></li>
+</ul>
+<h3>Caddy Configuration</h3>
+<pre><code class="language-caddyfile">netbird.example.com {
+  reverse_proxy localhost:80
+  # gRPC for management API
+  @grpc protocol grpc
+  reverse_proxy @grpc localhost:443 {
+    transport http { versions h2c }
+  }
+}</code></pre>
+<p>---</p>
+<h2>Pritunl (Enterprise VPN)</h2>
+<p><strong>Purpose:</strong> Enterprise-grade VPN with a modern web UI. Supports WireGuard and OpenVPN, SSO, multi-site routing, and audit logging. Requires MongoDB.</p>
+<h3>1. MongoDB Backend</h3>
+<pre><code class="language-yaml"># ~/pritunl-mongo/compose.yaml
+services:
+  pritunl-mongo:
+    image: mongo:6
+    ports:
+      - 127.0.0.1:27017:27017
+    volumes:
+      - /home/user/pritunl/mongo:/data/db:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/pritunl-mongo &amp;&amp; podman-compose up -d</code></pre>
+<h3>2. Pritunl Server</h3>
+<pre><code class="language-yaml"># ~/pritunl/compose.yaml
+services:
+  pritunl:
+    image: linuxserver/pritunl:latest
+    network_mode: host
+    volumes:
+      - /home/user/pritunl/config:/etc/pritunl:Z
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/pritunl &amp;&amp; podman-compose up -d</code></pre>
+<h4>Initial setup</h4>
+<ol>
+<li>Generate setup key: <code>podman exec pritunl pritunl setup-key</code></li>
+<li>Access UI: <code>https://&lt;server-ip&gt;:443</code></li>
+<li>Set MongoDB URI: <code>mongodb://127.0.0.1:27017/pritunl</code></li>
+<li>Create Org → Add Users → Create Server → Attach → Start</li>
+</ol>
+<p><strong>Firewall:</strong> <code>sudo firewall-cmd --add-port=443/tcp --add-port=51820/udp --add-port=1194/udp --permanent &amp;&amp; sudo firewall-cmd --reload</code></p>
+<p>---</p>
+<h2>Firezone (Zero-Trust Access)</h2>
+<p><strong>Purpose:</strong> Zero-trust network access (ZTNA) built on WireGuard. Features SSO (OIDC/SAML), granular access policies, device posture checks, and a unified dashboard.</p>
+<pre><code class="language-yaml"># ~/firezone/compose.yaml
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: firezone
+      POSTGRES_PASSWORD: strongpassword
+      POSTGRES_DB: firezone
+    volumes: [db_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  firezone:
+    image: firezone/firezone:latest
+    ports:
+      - &quot;0.0.0.0:4443:443&quot;
+      - &quot;0.0.0.0:51820:51820/udp&quot;
+    environment:
+      DATABASE_URL: postgresql://firezone:strongpassword@db:5432/firezone
+      SECRET_KEY_BASE: changeme-generate-with-openssl-rand-base64-64
+      DEFAULT_ADMIN_EMAIL: admin@example.com
+    cap_add: [NET_ADMIN]
+    sysctls:
+      net.ipv4.ip_forward: &quot;1&quot;
+      net.ipv6.conf.all.disable_ipv6: &quot;0&quot;
+    depends_on: [db]
+    restart: unless-stopped
+
+volumes:
+  db_data:</code></pre>
+<pre><code class="language-bash">cd ~/firezone &amp;&amp; podman-compose up -d</code></pre>
+<ul>
+<li><strong>Access:</strong> <code>https://localhost:4443</code></li>
+<li><strong>Firewall:</strong> <code>sudo firewall-cmd --add-port=4443/tcp --add-port=51820/udp --permanent &amp;&amp; sudo firewall-cmd --reload</code></li>
+</ul>
+<p>---</p>
+<h2>Nebula (Overlay Mesh Network)</h2>
+<p><strong>Purpose:</strong> A scalable, decentralised overlay network developed by Slack. Nodes communicate directly using certificate-based PKI. Designed for GitOps-style config management — no web UI.</p>
+<h3>1. Generate Certificates</h3>
+<pre><code class="language-bash"># Generate CA
+nebula-cert ca -name &quot;Home Network CA&quot;
+
+# Generate lighthouse (coordination node) certificate
+nebula-cert sign -name &quot;lighthouse&quot; -ip &quot;192.168.100.1/24&quot;
+
+# Generate client certificate
+nebula-cert sign -name &quot;shani-server&quot; -ip &quot;192.168.100.2/24&quot;</code></pre>
+<h3>2. Lighthouse Config (<code>config.yml</code>)</h3>
+<pre><code class="language-yaml">pki:
+  ca: /etc/nebula/ca.crt
+  cert: /etc/nebula/lighthouse.crt
+  key: /etc/nebula/lighthouse.key
+
+static_host_map:
+  &quot;192.168.100.1&quot;: [&quot;your-vps-public-ip:4242&quot;]
+
+lighthouse:
+  am_lighthouse: true
+
+listen:
+  host: 0.0.0.0
+  port: 4242
+
+firewall:
+  outbound: [{ port: any, proto: any, host: any }]
+  inbound: [{ port: any, proto: any, host: any }]</code></pre>
+<h3>3. Run Container</h3>
+<pre><code class="language-yaml"># ~/nebula/compose.yaml
+services:
+  nebula:
+    image: slacktechnologiesllc/nebula:latest
+    ports:
+      - 0.0.0.0:4242:4242/udp
+    volumes:
+      - /home/user/nebula:/etc/nebula:Z
+    devices:
+      - /dev/net/tun
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/nebula &amp;&amp; podman-compose up -d</code></pre>
+<p><strong>Firewall:</strong> <code>sudo firewall-cmd --add-port=4242/udp --permanent &amp;&amp; sudo firewall-cmd --reload</code></p>
+<blockquote><p>Nebula has no official web UI. Manage configs via Git and distribute with <code>scp</code> or Ansible.</p></blockquote>
+<p>---</p>
+<h2>ZeroTier (Self-Hosted Controller)</h2>
+<p><strong>Purpose:</strong> Run a private ZeroTier network controller without using ZeroTier's central cloud servers. Manage virtual networks and peers on your own hardware.</p>
+<pre><code class="language-yaml"># ~/zerotier-controller/compose.yaml
+services:
+  zerotier-controller:
+    image: mgk/zerotier-controller:latest
+    ports:
+      - 127.0.0.1:9993:9993/udp
+      - 127.0.0.1:3180:3180/tcp
+    volumes:
+      - /home/user/zerotier-controller:/var/lib/ztnetwork:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/zerotier-controller &amp;&amp; podman-compose up -d</code></pre>
+<ul>
+<li><strong>Dashboard:</strong> <code>http://localhost:3180</code></li>
+<li><strong>Client setup:</strong> <code>zerotier-cli join &lt;network-id&gt; --controller &lt;your-server-ip&gt;:3180</code></li>
+</ul>
+<p>---</p>
+<h2>OpenVPN</h2>
+<p><strong>Purpose:</strong> Legacy, highly configurable VPN standard. Use when you need specific cipher suites, client certificate management, or compatibility with older devices.</p>
+<pre><code class="language-yaml"># ~/openvpn/compose.yaml
+services:
+  openvpn:
+    image: kylemanna/openvpn
+    ports:
+      - 0.0.0.0:1194:1194/udp
+    volumes:
+      - /home/user/openvpn:/etc/openvpn:Z
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      net.ipv4.ip_forward: 1
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/openvpn &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>Hysteria 2 (High-Loss Networks)</h2>
+<p><strong>Purpose:</strong> A QUIC-based proxy and tunnel that performs well in high-latency, high-loss, or censored network environments where WireGuard/TCP struggle. Traffic looks like normal HTTP/3 to firewalls.</p>
+<p><code>/home/user/hysteria/config.yaml</code>:</p>
+<pre><code class="language-yaml">listen: :443
+tls:
+  cert: /etc/hysteria/fullchain.pem
+  key: /etc/hysteria/privkey.pem
+auth:
+  type: password
+  password: &quot;your-strong-password&quot;</code></pre>
+<pre><code class="language-yaml"># ~/hysteria/compose.yaml
+services:
+  hysteria:
+    image: ghcr.io/apernet/hysteria:latest
+    ports:
+      - 0.0.0.0:443:443/udp
+    volumes:
+      - /home/user/hysteria/config.yaml:/etc/hysteria/config.yaml:ro,Z
+      - /home/user/hysteria/certs:/etc/hysteria:ro,Z
+    command: server -c /etc/hysteria/config.yaml
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/hysteria &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>Gluetun (VPN Client Container)</h2>
+<p><strong>Purpose:</strong> Route any container's traffic through a commercial VPN provider — without installing a VPN client on the host. Gluetun supports 50+ providers (Mullvad, ProtonVPN, NordVPN, Private Internet Access, ExpressVPN, etc.) and acts as a network gateway container. Other containers join its network namespace via <code>network_mode: service:gluetun</code> — their traffic exits through the VPN tunnel transparently.</p>
+<h4>Common use case</h4>
+<p>Route qBittorrent through Mullvad so torrent traffic never uses your home IP.</p>
+<pre><code class="language-yaml"># ~/gluetun/compose.yaml
+services:
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    cap_add: [NET_ADMIN]
+    devices:
+      - /dev/net/tun
+    ports:
+      - &quot;127.0.0.1:8080:8080&quot;   # qBittorrent WebUI exposed via gluetun
+    environment:
+      VPN_SERVICE_PROVIDER: mullvad
+      VPN_TYPE: wireguard
+      WIREGUARD_PRIVATE_KEY: your-mullvad-wireguard-private-key
+      WIREGUARD_ADDRESSES: 10.64.222.21/32
+      SERVER_COUNTRIES: Netherlands
+    volumes:
+      - /home/user/gluetun:/gluetun:Z
+    restart: unless-stopped
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    network_mode: &quot;service:gluetun&quot;   # all qbittorrent traffic goes through gluetun
+    environment:
+      PUID: &quot;1000&quot;
+      PGID: &quot;1000&quot;
+      WEBUI_PORT: 8080
+    volumes:
+      - /home/user/qbittorrent:/config:Z
+      - /home/user/downloads:/downloads:Z
+    depends_on: [gluetun]
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/gluetun &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><p>When <code>network_mode: service:gluetun</code> is set, the dependent container shares gluetun's network — all ports are exposed on the gluetun container, not the app container. The qBittorrent WebUI is reached at <code>http://localhost:8080</code> via gluetun's port mapping.</p></blockquote>
+<h4>Check that traffic is routed through the VPN</h4>
+<pre><code class="language-bash">podman exec qbittorrent curl -s https://api.ipify.org
+# Should return the VPN exit IP, not your home IP</code></pre>
+<h4>Common operations</h4>
+<pre><code class="language-bash"># Verify traffic is routed through VPN (should show VPN exit IP)
+podman exec qbittorrent curl -s https://api.ipify.org
+
+# Check Gluetun control server status
+curl http://localhost:8000/v1/openvpn/status 2&gt;/dev/null ||   curl http://localhost:8000/v1/publicip/ip
+
+# View logs to debug connection issues
+podman logs -f gluetun
+
+# Force reconnect (pick a different VPN server)
+podman restart gluetun
+
+# List available servers for your provider (Mullvad example)
+podman exec gluetun cat /gluetun/servers.json | python3 -m json.tool | grep '&quot;city&quot;' | head -20</code></pre>
+<h4>Supported providers include</h4>
+<p>Mullvad, ProtonVPN, NordVPN, ExpressVPN, Private Internet Access, Surfshark, Windscribe, IVPN, AzireVPN, and any custom WireGuard/OpenVPN config.</p>
+<p>---</p>
+<h2>WireGuard Road Warrior (Manual Split-Tunnel Config)</h2>
+<p><strong>Purpose:</strong> A "road warrior" setup lets mobile or laptop clients connect to your home server from anywhere, routing only selected traffic through the VPN (split tunnel) rather than all traffic. Unlike WG-Easy, this is a fully manual config — useful when you want precise control over allowed IPs, DNS, and per-client routing without running a web UI.</p>
+<h3>1. Server Config</h3>
+<p><code>/etc/wireguard/wg0.conf</code> on the <strong>server</strong>:</p>
+<pre><code class="language-ini">[Interface]
+Address = 10.10.0.1/24
+ListenPort = 51820
+PrivateKey = &lt;server-private-key&gt;
+
+# Allow VPN clients to reach the server LAN
+PostUp   = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+
+[Peer]
+# Mobile client — phone or laptop
+PublicKey = &lt;client-public-key&gt;
+AllowedIPs = 10.10.0.2/32</code></pre>
+<pre><code class="language-bash"># Generate server key pair
+wg genkey | tee server.key | wg pubkey &gt; server.pub
+
+# Generate client key pair (on the client or server)
+wg genkey | tee client.key | wg pubkey &gt; client.pub
+
+# Bring the interface up
+sudo wg-quick up wg0
+
+# Enable on boot
+sudo systemctl enable wg-quick@wg0</code></pre>
+<h3>2. Client Config (Split Tunnel)</h3>
+<p><code>/etc/wireguard/wg0.conf</code> on the <strong>client</strong> (phone or laptop):</p>
+<pre><code class="language-ini">[Interface]
+Address = 10.10.0.2/24
+PrivateKey = &lt;client-private-key&gt;
+DNS = 10.10.0.1        # or your Pi-hole / Adguard address
+
+[Peer]
+PublicKey = &lt;server-public-key&gt;
+Endpoint = vpn.example.com:51820
+# Split tunnel — only route home LAN and VPN subnet through WireGuard
+# Change to 0.0.0.0/0 for full tunnel (all traffic)
+AllowedIPs = 10.10.0.0/24, 192.168.1.0/24
+PersistentKeepalive = 25</code></pre>
+<p>Generate a scannable QR code for the mobile WireGuard app:</p>
+<pre><code class="language-bash">nix-env -iA nixpkgs.qrencode
+qrencode -t ansiutf8 &lt; /etc/wireguard/client.conf</code></pre>
+<h3>3. Run in a Container (Podman)</h3>
+<p>For a fully containerised road warrior server without touching the host WireGuard stack:</p>
+<pre><code class="language-yaml"># ~/wireguard-rw/compose.yaml
+services:
+  wireguard:
+    image: lscr.io/linuxserver/wireguard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      net.ipv4.ip_forward: &quot;1&quot;
+    ports:
+      - &quot;0.0.0.0:51820:51820/udp&quot;
+    volumes:
+      - /home/user/wireguard-rw/config:/config:Z
+    environment:
+      PUID: &quot;1000&quot;
+      PGID: &quot;1000&quot;
+      TZ: Asia/Kolkata
+      SERVERURL: vpn.example.com
+      SERVERPORT: &quot;51820&quot;
+      PEERS: phone,laptop           # generates one config per peer name
+      PEERDNS: auto
+      ALLOWEDIPS: 10.13.13.0/24,192.168.1.0/24   # split tunnel
+      INTERNAL_SUBNET: 10.13.13.0
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/wireguard-rw &amp;&amp; podman-compose up -d</code></pre>
+<p>Client configs and QR codes are generated automatically at <code>/home/user/wireguard-rw/config/peer_phone/</code> and <code>peer_laptop/</code>.</p>
+<ul>
+<li><strong>Firewall:</strong> <code>sudo firewall-cmd --add-port=51820/udp --permanent &amp;&amp; sudo firewall-cmd --reload</code></li>
+</ul>
+<blockquote><p><strong>Split tunnel vs full tunnel:</strong> <code>AllowedIPs = 0.0.0.0/0</code> routes all traffic through the VPN (full tunnel — use for privacy on untrusted networks). <code>AllowedIPs = 10.13.13.0/24, 192.168.1.0/24</code> routes only the VPN subnet and home LAN (split tunnel — use when you only need access to home services without affecting other traffic).</p></blockquote>
+<p>---</p>
+<h2>Outline VPN</h2>
+<p><strong>Purpose:</strong> Shadowsocks-based proxy server by Jigsaw (Google). Designed for ease of deployment and resistance to traffic fingerprinting — traffic is indistinguishable from regular HTTPS to deep packet inspection. Unlike WireGuard, Outline is proxy-based rather than a full network tunnel, making it suitable for censorship circumvention where WireGuard is blocked. Management is via the Outline Manager desktop app (Linux/macOS/Windows) which generates a one-line <code>docker run</code> command and per-user access keys.</p>
+<pre><code class="language-yaml"># ~/outline/compose.yaml
+# Note: Outline Manager generates an exact run command including ports and secrets.
+# Use its output directly. The compose below is a representative template.
+services:
+  outline:
+    image: quay.io/outline/shadowbox:stable
+    ports:
+      - &quot;0.0.0.0:8080:8080/tcp&quot;
+      - &quot;0.0.0.0:8080:8080/udp&quot;
+      - &quot;0.0.0.0:9090:9090/tcp&quot;    # management API (bind to 127.0.0.1 if behind a proxy)
+    volumes:
+      - /home/user/outline/persisted-state:/root/shadowbox/persisted-state:Z
+    environment:
+      SB_API_PORT: &quot;9090&quot;
+      SB_API_PREFIX: &quot;your-random-prefix&quot;   # generated by Outline Manager
+      SB_CERTIFICATE_FILE: /root/shadowbox/persisted-state/shadowbox-selfsigned.crt
+      SB_PRIVATE_KEY_FILE: /root/shadowbox/persisted-state/shadowbox-selfsigned.key
+    restart: unless-stopped</code></pre>
+<blockquote><p><strong>Recommended:</strong> Use the <strong>Outline Manager</strong> desktop app to generate the exact command, copy the <code>docker run</code> output and convert it to compose. The Manager handles certificate generation, port selection, and API key management automatically.</p></blockquote>
+<p><strong>Firewall:</strong> Open the data port (default <code>8080/tcp</code> and <code>8080/udp</code>) and the management API port on your server.</p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=8080/tcp --add-port=8080/udp --permanent
+sudo firewall-cmd --reload</code></pre>
+<h4>Clients</h4>
+<p>Distribute per-user access keys (ss:// URIs) generated by the Manager. Users install the Outline Client app on Android, iOS, Windows, macOS, or Linux.</p>
+<blockquote><p>Outline and Hysteria 2 solve different problems. Outline is optimised for <strong>censorship circumvention</strong> (traffic obfuscation). Hysteria 2 is optimised for <strong>high-loss / high-latency networks</strong> (QUIC transport). Use Outline where WireGuard is fingerprinted and blocked; use Hysteria 2 where packet loss degrades TCP-based protocols.</p></blockquote>
+<p>---</p>
+<h2>Xray / V2Ray (Protocol-Obfuscating Proxy)</h2>
+<p><strong>Purpose:</strong> A suite of network proxy tools that wrap traffic in protocols designed to evade deep packet inspection — VLESS, VMESS, and XTLS over WebSocket or gRPC, disguised as ordinary HTTPS. Widely used alongside Hysteria 2 for censorship circumvention. Xray is the actively maintained fork of V2Ray with additional protocols (XTLS, VLESS, XHTTP) and better performance.</p>
+<h4>Use case vs WireGuard</h4>
+<p>Xray is a proxy, not a VPN — it forwards traffic through an HTTPS tunnel that looks like web traffic. WireGuard is a full network tunnel with a distinct UDP fingerprint. In environments where WireGuard and Shadowsocks are actively blocked, Xray VLESS+XTLS over port 443 is significantly harder to detect.</p>
+<p><code>/home/user/xray/config.json</code> (VLESS + XTLS-Reality — the modern recommended config):</p>
+<pre><code class="language-json">{
+  &quot;inbounds&quot;: [{
+    &quot;port&quot;: 443,
+    &quot;protocol&quot;: &quot;vless&quot;,
+    &quot;settings&quot;: {
+      &quot;clients&quot;: [{
+        &quot;id&quot;: &quot;your-uuid-here&quot;,
+        &quot;flow&quot;: &quot;xtls-rprx-vision&quot;
+      }],
+      &quot;decryption&quot;: &quot;none&quot;
+    },
+    &quot;streamSettings&quot;: {
+      &quot;network&quot;: &quot;tcp&quot;,
+      &quot;security&quot;: &quot;reality&quot;,
+      &quot;realitySettings&quot;: {
+        &quot;dest&quot;: &quot;www.google.com:443&quot;,
+        &quot;serverNames&quot;: [&quot;www.google.com&quot;],
+        &quot;privateKey&quot;: &quot;your-reality-private-key&quot;,
+        &quot;shortIds&quot;: [&quot;your-short-id&quot;]
+      }
+    }
+  }],
+  &quot;outbounds&quot;: [{&quot;protocol&quot;: &quot;freedom&quot;}]
+}</code></pre>
+<pre><code class="language-yaml"># ~/xray/compose.yaml
+services:
+  xray:
+    image: ghcr.io/xtls/xray-core:latest
+    ports:
+      - &quot;0.0.0.0:443:443/tcp&quot;
+    volumes:
+      - /home/user/xray/config.json:/etc/xray/config.json:ro,Z
+    command: run -config /etc/xray/config.json
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/xray &amp;&amp; podman-compose up -d</code></pre>
+<h5>Generate a UUID and Reality keys</h5>
+<pre><code class="language-bash"># Generate a UUID for the client ID
+podman run --rm ghcr.io/xtls/xray-core:latest uuid
+
+# Generate a Reality key pair
+podman run --rm ghcr.io/xtls/xray-core:latest x25519</code></pre>
+<h4>Clients</h4>
+<p><a href="https://github.com/2dust/v2rayN">v2rayN</a> (Windows), <a href="https://github.com/2dust/v2rayNG">v2rayNG</a> (Android), <a href="https://apps.apple.com/app/shadowrocket/id932747118">Shadowrocket</a> (iOS), <a href="https://github.com/MatsuriDayo/nekoray">Nekoray</a> (Linux/Windows). Share the connection config as a <code>vless://</code> URI or QR code.</p>
+<blockquote><p><strong>XTLS-Reality</strong> (shown above) is the recommended modern config — it borrows a real TLS certificate fingerprint from a public site (<code>www.google.com</code>), making the server indistinguishable from that site even to active probers. Older VMESS+WS configs are simpler but more detectable.</p></blockquote>
+<p><strong>Firewall:</strong></p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=443/tcp --permanent &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | <code>TUN/TAP device not found</code> | Run <code>sudo modprobe tun</code> on the host | | Clients can't route traffic | Verify <code>net.ipv4.ip_forward=1</code> is set; check <code>--sysctl</code> flags in the container run command | | DNS not resolving for VPN clients | Set <code>WG_DEFAULT_DNS</code> or equivalent to <code>1.1.1.1</code> or your Pi-hole address | | Headscale nodes show offline | Verify Headscale is listening on <code>0.0.0.0:8080</code>; check that <code>server_url</code> in config matches your public domain | | Pangolin tunnel not connecting | Verify Newt credentials (<code>NEWT_ID</code>, <code>NEWT_SECRET</code>); check VPS firewall allows <code>51820/udp</code> | | NetBird peers not connecting | Ensure the TURN relay (Coturn) port <code>3478/udp</code> is open; check signal server is reachable on port <code>10000</code> | | NetBird dashboard blank | OIDC configuration may be wrong — check management logs: <code>podman-compose logs management</code> | | Firezone DB error on startup | Ensure <code>DATABASE_URL</code> host points to the <code>db</code> service name; check <code>podman-compose logs db</code> | | Hysteria QUIC timeout | Ensure UDP port 443 is open on your VPS firewall and not blocked by the ISP | | Nebula nodes can't reach each other | Verify <code>ca.crt</code> matches on all nodes; check <code>static_host_map</code> IPs resolve correctly | | MongoDB connection refused (Pritunl) | Confirm <code>pritunl-mongo</code> is running; use <code>--network host</code> so both containers share the same network namespace | | OpenVPN auth fails | Re-export the client config with <code>ovpn_getclient</code>; verify firewall allows <code>1194/udp</code> | | Gluetun VPN not connecting | Verify <code>WIREGUARD_PRIVATE_KEY</code> and <code>WIREGUARD_ADDRESSES</code> are correct; check <code>podman logs gluetun</code> for auth errors | | Gluetun leaking real IP | Ensure the app container uses <code>network_mode: service:gluetun</code> — any other network mode bypasses the tunnel | | qBittorrent WebUI unreachable via Gluetun | Port must be published on the <code>gluetun</code> container, not <code>qbittorrent</code>; the app container shares gluetun's network | | WireGuard client can't reach LAN | Ensure <code>AllowedIPs</code> includes the home subnet (e.g., <code>192.168.1.0/24</code>) and that <code>PostUp</code> iptables MASQUERADE rule is active on the server | | WireGuard road warrior QR not showing | Install <code>qrencode</code> via Nix: <code>nix-env -iA nixpkgs.qrencode</code>; for the linuxserver container, peer QR PNGs are in <code>config/peer_&lt;name&gt;/peer_&lt;name&gt;.png</code> | | Outline Manager can't connect to server | The management API port (default <code>9090</code>) must be reachable; check firewall and that the <code>SB_API_PREFIX</code> in the environment matches the Manager's saved config | | Outline client times out | Ensure both TCP and UDP on the data port are open; Shadowsocks uses both; check ISP is not blocking the port | | Xray VLESS connection rejected | Verify the client UUID matches exactly; check that port 443 is open; confirm the Reality <code>serverNames</code> is reachable from the server itself | | Xray Reality <code>private key</code> error | Regenerate the key pair with <code>xray x25519</code> — the public key goes in the client config, private key stays on the server |</p>
+<blockquote><p>🔒 <strong>Security tip:</strong> Always bind management UIs (<code>wg-easy</code>, <code>headplane</code>, <code>portainer</code>) to <code>127.0.0.1</code> and proxy through Caddy. Never expose control-plane interfaces directly to the internet. Rotate pre-auth keys periodically and use <code>fail2ban</code> on any publicly facing port.</p></blockquote></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

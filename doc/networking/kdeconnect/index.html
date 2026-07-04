@@ -146,7 +146,94 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">KDE Connect</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-18</span>
+        </div>
+      </div>
+      <div class="prose"><h1>KDE Connect — Link Desktop and Mobile Devices</h1>
+<p>KDE Connect integrates your phone (Android/iOS) with your Shani OS desktop over the local network. It is pre-installed on the KDE Plasma edition. Firewall rules are pre-configured in the <code>public</code> zone — no manual firewall setup is needed after a fresh install.</p>
+<p>Features include: shared clipboard, file transfer, remote input (use your phone as a touchpad/keyboard), notification mirroring, media controls, and running pre-defined remote commands.</p>
+<p>---</p>
+<h2>Pairing a Device</h2>
+<p>Install the KDE Connect app on your phone:</p>
+<ul>
+<li><strong>Android:</strong> <a href="https://play.google.com/store/apps/details?id=org.kde.kdeconnect_tp">Google Play</a> or <a href="https://f-droid.org/packages/org.kde.kdeconnect_tp/">F-Droid</a></li>
+<li><strong>iOS:</strong> <a href="https://apps.apple.com/app/kde-connect/id1580245991">App Store</a></li>
+</ul>
+<p>Both devices must be on the same Wi-Fi network. Open <strong>KDE Connect</strong> from the system tray or app launcher — your phone should appear automatically. Click <strong>Pair</strong> and accept the request on the phone.</p>
+<p>---</p>
+<h2>Command-Line Usage</h2>
+<pre><code class="language-bash"># List all discovered devices (paired and unpaired)
+kdeconnect-cli --list-devices
+
+# List only reachable paired devices
+kdeconnect-cli --list-available
+
+# Pair a device by ID
+kdeconnect-cli --pair --device &lt;device_id&gt;
+
+# Send a file to the phone
+kdeconnect-cli --share /path/to/file --device &lt;device_id&gt;
+
+# Send a URL or text (opens in default browser/app on phone)
+kdeconnect-cli --share https://example.com --device &lt;device_id&gt;
+
+# Ping a device (tests connectivity)
+kdeconnect-cli --ping --device &lt;device_id&gt;
+
+# Ring the phone (to find it)
+kdeconnect-cli --ring --device &lt;device_id&gt;
+
+# Lock the phone screen
+kdeconnect-cli --lock --device &lt;device_id&gt;
+
+# Run a predefined remote command (configured in KDE Connect settings)
+kdeconnect-cli --execute-command &lt;command_name&gt; --device &lt;device_id&gt;</code></pre>
+<p>---</p>
+<h2>Manual Device Discovery</h2>
+<p>If your phone does not appear automatically (e.g., guest Wi-Fi with client isolation):</p>
+<pre><code class="language-bash"># Trigger a refresh scan on the desktop
+kdeconnect-cli --refresh</code></pre>
+<p>On Android: open the KDE Connect app → ⋮ menu → <strong>Add Device by IP</strong> → enter your desktop's IP address.</p>
+<p>---</p>
+<h2>Firewall</h2>
+<p>Shani OS pre-configures firewalld rules for KDE Connect at install time. If you need to re-apply them manually:</p>
+<pre><code class="language-bash"># Add KDE Connect service to the public zone
+sudo firewall-cmd --permanent --zone=public --add-service=kdeconnect
+sudo firewall-cmd --reload
+
+# Or open the raw port range (TCP + UDP 1714–1764)
+sudo firewall-cmd --permanent --zone=public --add-port=1714-1764/tcp
+sudo firewall-cmd --permanent --zone=public --add-port=1714-1764/udp
+sudo firewall-cmd --reload</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<pre><code class="language-bash"># Check the KDE Connect daemon is running
+systemctl --user status kdeconnectd
+
+# Restart the daemon
+systemctl --user restart kdeconnectd
+
+# Reset configuration (fixes corrupt pairing state)
+systemctl --user stop kdeconnectd
+mv ~/.config/kdeconnect ~/.config/kdeconnect.bak
+systemctl --user start kdeconnectd
+
+# View live logs
+journalctl --user -u kdeconnectd -f</code></pre>
+<p>| Issue | Solution | |-------|----------| | Phone not appearing | Both devices must be on the same subnet; check firewall rules with <code>sudo firewall-cmd --list-all</code> — the <code>kdeconnect</code> service must appear | | Pairing request not showing on phone | Dismiss and retry — tap the device name on the desktop to re-send the request | | File transfer failing | Ensure both devices are paired (not just discovered); check available storage on the phone | | Clipboard sync not working | The plugin must be enabled on both the desktop (KDE Connect settings) and in the phone app |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

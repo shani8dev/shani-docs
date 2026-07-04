@@ -146,7 +146,92 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Flatpak</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Software &amp; Apps</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+        </div>
+      </div>
+      <div class="prose"><p>Flatpak is the primary method for installing GUI applications on Shanios. Flathub is pre-configured and ready to use from first boot — no setup required. Flatpak app data lives in the <code>@flatpak</code> Btrfs subvolume, which is shared between both <code>@blue</code> and <code>@green</code> OS slots — your installed apps are available regardless of which slot you have booted, and survive every OS update and rollback untouched.</p>
+<h2>Pre-Installed Apps</h2>
+<p>Both editions ship with these apps pre-installed: <strong>Vivaldi Browser</strong>, <strong>OnlyOffice Desktop Editors</strong>, <strong>Warehouse</strong> (graphical Flatpak manager), <strong>Flatseal</strong> (sandbox permissions), <strong>Pods</strong> (Podman GUI), <strong>BoxBuddy</strong> (Distrobox GUI), and <strong>Gear Lever</strong> (AppImage manager).</p>
+<p>The GNOME edition additionally includes GNOME's core productivity and utility apps. The KDE Plasma edition additionally includes the full gaming stack (Steam, Heroic, Lutris, RetroArch, Bottles, and more), KDE productivity apps, and virt-manager with QEMU extension.</p>
+<h2>Installing Apps</h2>
+<pre><code class="language-bash"># Install from Flathub
+flatpak install flathub org.videolan.VLC
+flatpak install flathub com.spotify.Client
+flatpak install flathub org.gimp.GIMP
+
+# Search for an app
+flatpak search gimp
+
+# Install from GUI
+# Open GNOME Software or KDE Discover — Flathub apps appear automatically</code></pre>
+<h2>Managing Installed Apps</h2>
+<pre><code class="language-bash"># List installed apps
+flatpak list --app
+
+# Update all apps
+flatpak update
+
+# Remove an app
+flatpak uninstall org.videolan.VLC
+
+# Remove an app and its data
+flatpak uninstall --delete-data org.videolan.VLC
+
+# Remove unused runtimes (free space)
+flatpak uninstall --unused</code></pre>
+<h2>Auto-Updates</h2>
+<p>Flatpak apps update automatically via a systemd timer running every 12 hours — one for system-wide installs, one for per-user:</p>
+<pre><code class="language-bash"># Check timer status
+systemctl status flatpak-update-system.timer
+systemctl --user status flatpak-update-user.timer
+
+# Disable auto-updates (not recommended)
+sudo systemctl disable flatpak-update-system.timer</code></pre>
+<h2>Permissions & Sandboxing</h2>
+<p>Flatpak apps run in a sandbox. Use <strong>Flatseal</strong> (pre-installed) to manage permissions via GUI — it shows every permission for every installed app and lets you grant or revoke filesystem, network, device, and portal access per-app. Use the CLI for scripted overrides:</p>
+<pre><code class="language-bash"># View permissions for an app
+flatpak info --show-permissions org.gimp.GIMP
+
+# Grant filesystem access
+flatpak override --user --filesystem=home org.gimp.GIMP
+
+# Reset permissions to defaults
+flatpak override --user --reset org.gimp.GIMP</code></pre>
+<h2>App Data Location</h2>
+<p>| Type | Path | |------|------| | App data | <code>~/.var/app/&lt;app-id&gt;/</code> | | System runtime | <code>/var/lib/flatpak/</code> (<code>@flatpak</code> subvolume — shared between <code>@blue</code> and <code>@green</code>) | | User runtime | <code>~/.local/share/flatpak/</code> |</p>
+<p>The <code>@flatpak</code> subvolume is shared by both <code>@blue</code> and <code>@green</code> slots, so installed apps are available regardless of which slot you booted.</p>
+<h2>Running Apps from Terminal</h2>
+<pre><code class="language-bash"># Run a Flatpak app
+flatpak run org.videolan.VLC
+
+# Run with extra permissions (temporary)
+flatpak run --filesystem=home org.videolan.VLC
+
+# Open a shell inside the Flatpak sandbox
+flatpak run --command=sh org.videolan.VLC</code></pre>
+<h2>Adding Other Remotes</h2>
+<pre><code class="language-bash"># Add a remote (e.g., GNOME nightly)
+flatpak remote-add --if-not-exists gnome-nightly \
+  https://nightly.gnome.org/gnome-nightly.flatpakrepo
+
+# List remotes
+flatpak remotes
+
+# Remove a remote
+flatpak remote-delete gnome-nightly</code></pre></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

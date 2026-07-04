@@ -146,7 +146,376 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Container Management &amp; Lifecycle</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+        </div>
+      </div>
+      <div class="prose"><p>Best practices for running, updating, and maintaining self-hosted containers on Shani OS.</p>
+<p>---</p>
+<h2>Key Concepts</h2>
+<p>These concepts apply identically whether you're using Podman on Shani OS, Docker on Ubuntu, or Kubernetes at work. Podman is OCI-compliant and drop-in compatible with Docker — <code>alias docker=podman</code> works for the vast majority of workflows.</p>
+<h4>OCI (Open Container Initiative)</h4>
+<p>The open standard that defines what a container image is and how a runtime executes it. Docker, Podman, containerd, and CRI-O all implement OCI. This is why images built with <code>docker build</code> run unchanged under Podman and in Kubernetes.</p>
+<h4>Rootless vs. rootful containers</h4>
+<p>Rootless containers run as your user, not root — a security boundary that limits what a compromised container can do to the host. Shani OS defaults to rootless Podman. In most corporate environments you'll encounter both: rootless for application workloads, rootful for system-level tools (network namespaces, privileged devices).</p>
+<h4>Image layers and the build cache</h4>
+<p>Container images are layered — each <code>RUN</code>, <code>COPY</code>, and <code>ADD</code> instruction in a Dockerfile creates a new layer. Layers are cached. If your <code>COPY</code> instruction comes before a large <code>apt install</code>, every code change busts the cache and re-downloads packages. Order matters: stable instructions first, frequently changed ones last.</p>
+<h4>Container networking</h4>
+<p>By default, containers on the same compose stack share a <em>bridge network</em> — they reach each other by service name (e.g. <code>db</code>, <code>redis</code>). The host reaches them only on published ports. <em>Host networking</em> (<code>network_mode: host</code>) skips isolation but is occasionally needed for performance-sensitive services. <em>Overlay networks</em> (Swarm, Kubernetes) span multiple hosts.</p>
+<h4>Secrets management</h4>
+<p>Environment variables (<code>environment:</code> in compose) are readable by anyone who can run <code>podman inspect</code>. For production, use a secrets manager — Docker Swarm secrets, Kubernetes Secrets (ideally with external-secrets-operator + Vault), or Podman secrets (<code>podman secret create</code>). Never hardcode credentials in compose files that are committed to Git.</p>
+<pre><code class="language-bash"># Create a Podman secret
+printf 'mysecretpassword' | podman secret create db_password -
+
+# Reference it in a compose file
+# secrets:
+#   db_password:
+#     external: true
+# services:
+#   db:
+#     secrets: [db_password]</code></pre>
+<h4>Resource limits (cgroups)</h4>
+<p>Without limits, a runaway container can OOM the host. Always set limits on untrusted or production workloads:</p>
+<pre><code class="language-yaml">services:
+  app:
+    image: myapp:latest
+    deploy:
+      resources:
+        limits:
+          cpus: &quot;1.0&quot;
+          memory: 512M
+        reservations:
+          memory: 128M</code></pre>
+<p>This maps to cgroup v2 constraints — the same mechanism Kubernetes <code>requests</code>/<code>limits</code> uses under the hood.</p>
+<h4>Container update strategies — why Watchtower/Diun instead of <code>latest</code></h4>
+<p>Pinning image tags (<code>image: nginx:1.27.2</code>) is safer than <code>latest</code> — <code>latest</code> changes without warning and can break working deployments. But pinned tags go stale. The production pattern: pin tags in compose files, use Renovate or Diun to detect new versions, review the changelog, then update intentionally. <code>latest</code> is acceptable in a homelab dev environment where breakage is tolerable; never in production.</p>
+<h4>Systemd and containers — the integration model</h4>
+<p>On a non-Kubernetes host, systemd is the process supervisor. Podman generates systemd unit files (<code>podman generate systemd</code>) that start containers as system services, handle restart-on-failure, and integrate with <code>journalctl</code> for logs. Quadlet (Podman 4.4+) is the modern approach: drop a <code>.container</code> file in <code>/etc/containers/systemd/</code>, and systemd manages the container lifecycle natively. This is how production bare-metal container deployments work without Kubernetes overhead.</p>
+<h4>Image garbage collection</h4>
+<p>Pulled images accumulate on disk. Unused images (not referenced by any container) should be pruned regularly. <code>podman image prune -a</code> removes all unused images; <code>podman system prune</code> removes unused images, containers, volumes, and networks. Automate this with a systemd timer or cron. On Kubernetes, kubelet performs image GC automatically when disk usage exceeds a threshold (configurable via <code>--image-gc-high-threshold</code>, default 85%).</p>
+<h4>Health checks and auto-healing</h4>
+<p>A health check (<code>HEALTHCHECK</code> in Dockerfile, or <code>healthcheck:</code> in compose) lets the container runtime know if the application inside is actually functioning, not just that the process is running. If a health check fails N consecutive times, the container is marked <code>unhealthy</code>. <code>restart: unless-stopped</code> only restarts on crash — for health-check-based restarts, use <code>autoheal</code> (a container that watches for unhealthy status and restarts) or Kubernetes liveness probes, which restart containers that fail the check.</p>
+<h4>Container image registries — pull-through cache and private registry</h4>
+<p>A pull-through cache (Harbor, Zot) proxies Docker Hub and other registries — when you pull <code>nginx:latest</code>, your cache checks locally first, then fetches and caches from Docker Hub. Benefits: (1) Docker Hub rate limits (100 pulls/6h for anonymous, 200/6h authenticated) stop affecting your CI; (2) offline operation; (3) faster pulls on the LAN. A private registry stores your own built images. Harbor combines both: cache for upstream images and private registry for your own, with vulnerability scanning via Trivy built in.</p>
+<h4>Container update strategies — Watchtower vs Renovate vs manual</h4>
+<p>Three approaches: (1) <strong>Watchtower/Diun</strong> — watch for new upstream image tags and auto-pull/restart. Fast, zero-config, but opaque (you may not know what changed). Appropriate for single-user homelabs where uptime matters more than change control. (2) <strong>Renovate</strong> — creates PRs in your GitOps repo when a new image tag is published. You review the changelog, approve, and the pipeline deploys. Appropriate for production. (3) <strong>Manual</strong> — check release notes, update compose files, run <code>podman-compose pull &amp;&amp; podman-compose up -d</code>. Most controlled, most work. The hybrid: Watchtower for minor patch versions, Renovate PRs for minor/major versions.</p>
+<h4>systemd and Podman integration — the production pattern</h4>
+<p>Podman generates systemd unit files (<code>podman generate systemd</code>) that start containers as services, handle restarts, and integrate with <code>systemctl</code>. Quadlet (Podman 4.4+) is the modern replacement — write a declarative <code>.container</code> file in <code>~/.config/containers/systemd/</code> and systemd manages the container lifecycle. Benefits over bare compose: containers start on boot, restart on failure, log to journald (available via <code>journalctl</code>), and participate in systemd dependencies. This is how production Podman deployments work on systems without Kubernetes.</p>
+<h4>Resource constraints — why cgroups matter for shared hosts</h4>
+<p>Without resource limits, a single misbehaving container can exhaust host CPU, memory, or disk I/O and bring down all co-located services. Podman and Docker both use cgroups for enforcement: <code>--memory 512m</code> kills the container if it exceeds 512 MB RAM; <code>--cpus 0.5</code> limits it to half a CPU core. In compose: <code>mem_limit: 512m</code>, <code>cpus: 0.5</code>. Always set limits on containers that handle untrusted input (web servers, parsers) or that are known to leak memory over time (Java services, browsers in headless mode).</p>
+<p>---</p>
+<h2>Systemd Integration</h2>
+<p>Containers started with <code>--restart unless-stopped</code> restart after crashes but not after a clean reboot if systemd doesn't know about them. The modern approach on Podman 4.4+ is <strong>Quadlet</strong> — drop a <code>.container</code> file and systemd picks it up automatically:</p>
+<pre><code class="language-bash"># Create the Quadlet unit directory
+mkdir -p ~/.config/containers/systemd/
+
+# Write a Quadlet unit for jellyfin (example)
+cat &gt; ~/.config/containers/systemd/jellyfin.container &lt;&lt; 'EOF'
+[Unit]
+Description=Jellyfin Media Server
+
+[Container]
+Image=jellyfin/jellyfin
+PublishPort=8096:8096
+Volume=/home/user/jellyfin/config:/config:Z
+Volume=/home/user/jellyfin/cache:/cache:Z
+Environment=TZ=Asia/Kolkata
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
+EOF
+
+# Reload and start — systemd auto-generates the service from the .container file
+systemctl --user daemon-reload
+systemctl --user enable --now jellyfin
+
+# Enable lingering — starts user services at boot even without an active login session
+loginctl enable-linger $USER</code></pre>
+<h5>Verify it's working</h5>
+<pre><code class="language-bash">systemctl --user status jellyfin
+journalctl --user -u jellyfin -f</code></pre>
+<blockquote><p>💡 For compose-based stacks, continue using <code>podman-compose up -d</code> with <code>restart: unless-stopped</code>. Quadlet is most useful for single containers you want tight systemd integration with. <code>podman generate systemd</code> still works but is deprecated since Podman 4.4 and may be removed in a future release.</p></blockquote>
+<p>---</p>
+<h2>Auto-Update Containers</h2>
+<p>Podman can automatically pull new images and recreate containers on a schedule. Add the label <code>io.containers.autoupdate=registry</code> to any container you want updated automatically:</p>
+<pre><code class="language-yaml"># ~/jellyfin/compose.yaml
+services:
+  jellyfin:
+    image: jellyfin/jellyfin
+    labels:
+      io.containers.autoupdate: registry
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/jellyfin &amp;&amp; podman-compose up -d</code></pre>
+<h5>Run or schedule the update</h5>
+<pre><code class="language-bash"># Update all labelled containers now
+podman auto-update
+
+# Dry run to preview what would update
+podman auto-update --dry-run
+
+# Roll back a failed update
+podman auto-update --rollback</code></pre>
+<h5>Set up a weekly systemd timer using Podman's built-in service</h5>
+<p>Podman ships <code>podman-auto-update.service</code> — just enable the accompanying timer:</p>
+<pre><code class="language-bash">systemctl --user enable --now podman-auto-update.timer</code></pre>
+<blockquote><p>💡 If the built-in timer is unavailable (older Podman), create one manually targeting the same service rather than running <code>podman auto-update</code> directly from <code>ExecStart</code> — this preserves rollback support.</p></blockquote>
+<p>---</p>
+<h2>OS Updates</h2>
+<p>Shani OS updates are atomic — the new image is prepared in the background, and activated on next reboot. Your <code>@containers</code> Btrfs subvolume is completely separate from the OS and is untouched by updates and rollbacks.</p>
+<pre><code class="language-bash"># Check for and apply updates
+sudo shani-deploy
+
+# Roll back to the previous OS generation (leaves containers untouched)
+sudo shani-deploy --rollback</code></pre>
+<p>---</p>
+<h2>Auto-Heal Crashed Containers</h2>
+<p>Autoheal restarts any container that fails its health check — useful for services that hang without crashing outright:</p>
+<pre><code class="language-yaml"># ~/autoheal/compose.yaml
+services:
+  autoheal:
+    image: willfarrell/autoheal
+    volumes:
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    environment:
+      AUTOHEAL_CONTAINER_LABEL: all
+      AUTOHEAL_INTERVAL: 30
+      AUTOHEAL_START_PERIOD: 300
+    restart: unless-stopped</code></pre>
+<blockquote><p>Replace <code>1000</code> with your actual UID (<code>id -u</code>). Unlike compose stacks, the autoheal container needs a literal path here — <code>${UID}</code> is not expanded by the container runtime.</p></blockquote>
+<pre><code class="language-bash">cd ~/autoheal &amp;&amp; podman-compose up -d</code></pre>
+<p>Add health checks to containers you want monitored:</p>
+<pre><code class="language-yaml"># ~/jellyfin/compose.yaml
+services:
+  jellyfin:
+    image: jellyfin/jellyfin
+    healthcheck:
+      test: [&quot;CMD&quot;, &quot;curl&quot;, &quot;-f&quot;, &quot;http://localhost:8096/health&quot;]
+      interval: 30s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/jellyfin &amp;&amp; podman-compose up -d</code></pre>
+<p>---</p>
+<h2>Homepage (Service Dashboard)</h2>
+<p><strong>Purpose:</strong> Modern, highly customisable application dashboard. Shows live status of all your services, system metrics, weather, RSS feeds, and bookmarks from a single page. Configured via YAML files and integrates directly with Docker/Podman via socket for automatic service discovery.</p>
+<pre><code class="language-yaml"># ~/homepage/compose.yaml
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    ports:
+      - 127.0.0.1:3001:3000
+    volumes:
+      - /home/user/homepage/config:/app/config:Z
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/homepage &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:3001</code>. Configure services, bookmarks, and widgets in <code>/home/user/homepage/config/services.yaml</code>.</p>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">dashboard.home.local { tls internal; reverse_proxy localhost:3001 }</code></pre>
+<p>---</p>
+<h2>Portainer CE</h2>
+<p><strong>Purpose:</strong> Full-featured graphical dashboard for managing containers, images, volumes, networks, and stacks. Supports Podman via socket. Best for users who want a single UI for everything.</p>
+<pre><code class="language-yaml"># ~/portainer/compose.yaml
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    ports:
+      - 127.0.0.1:9443:9443
+    volumes:
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - portainer_data:/data
+    restart: unless-stopped
+
+volumes:
+  portainer_data:</code></pre>
+<pre><code class="language-bash">cd ~/portainer &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>https://localhost:9443</code>.</p>
+<p>---</p>
+<h2>Dockge</h2>
+<p><strong>Purpose:</strong> Lightweight, compose-stack-focused container manager. Stacks are stored as files and can be synced via Git. Simpler and faster than Portainer if you primarily use compose files.</p>
+<pre><code class="language-yaml"># ~/dockge/compose.yaml
+services:
+  dockge:
+    image: louislam/dockge:latest
+    ports:
+      - 127.0.0.1:5001:5001
+    volumes:
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /home/user/stacks:/home/runner/stacks:Z
+    environment:
+      DOCKGE_STACKS_DIR: /home/runner/stacks
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/dockge &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:5001</code>.</p>
+<p>---</p>
+<h2>Yacht</h2>
+<p><strong>Purpose:</strong> Template-driven container manager with a clean dashboard and built-in app store. Good middle ground between the simplicity of Dockge and the full feature set of Portainer.</p>
+<pre><code class="language-yaml"># ~/yacht/compose.yaml
+services:
+  yacht:
+    image: selfhostedpro/yacht
+    ports:
+      - 127.0.0.1:8001:8000
+    volumes:
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /home/user/yacht/config:/config:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/yacht &amp;&amp; podman-compose up -d</code></pre>
+<p>Default login: <code>admin@yacht.local</code> / <code>pass</code>. Change immediately after first login.</p>
+<p>---</p>
+<h2>Komodo (Modern Container Manager)</h2>
+<p><strong>Purpose:</strong> A newer, actively developed alternative to Portainer and Dockge. Komodo manages containers, compose stacks, and deployments across multiple servers from a single dashboard. Supports Git-backed stack deployments (push to Git → auto-deploy), resource monitoring, and a clean role-based UI. Good choice for multi-server homelabs.</p>
+<pre><code class="language-yaml"># ~/komodo/compose.yaml
+services:
+  komodo:
+    image: ghcr.io/moghtech/komodo:latest
+    ports:
+      - 127.0.0.1:9120:9120
+    volumes:
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /home/user/komodo/data:/data:Z
+    environment:
+      KOMODO_HOST: https://komodo.home.local
+      KOMODO_PASSKEY: changeme-run-openssl-rand-hex-32
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/komodo &amp;&amp; podman-compose up -d</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">komodo.home.local { tls internal; reverse_proxy localhost:9120 }</code></pre>
+<p>---</p>
+<h2>Diun (Image Update Notifier)</h2>
+<p><strong>Purpose:</strong> Watches your running containers and notifies you when a new image version is available on the registry — before you auto-update. Supports ntfy, Slack, email, Telegram, and more. Useful for reviewing changelogs before pulling updates, especially for security-sensitive containers.</p>
+<pre><code class="language-yaml"># ~/diun/compose.yml
+services:
+  diun:
+    image: crazymax/diun:latest
+    volumes:
+      - /home/user/diun/data:/data:Z
+      - /home/user/diun/config.yml:/diun.yml:ro,Z
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    environment:
+      TZ: Asia/Kolkata
+      LOG_LEVEL: info
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/diun &amp;&amp; podman-compose up -d</code></pre>
+<h5>Minimal <code>config.yml</code></h5>
+<pre><code class="language-yaml">watch:
+  workers: 5
+  schedule: &quot;0 */6 * * *&quot;
+  firstCheckNotif: false
+
+providers:
+  docker:
+    watchStopped: true
+
+notif:
+  ntfy:
+    endpoint: http://host.containers.internal:8090
+    topic: container-updates
+    priority: default
+    tags: [&quot;docker&quot;, &quot;update&quot;]</code></pre>
+<p>---</p>
+<h2>Cleanup & Maintenance</h2>
+<pre><code class="language-bash"># Remove stopped containers, dangling images, and unused build cache
+podman system prune
+
+# Also remove all unused images (not just dangling)
+podman system prune -a
+
+# Check disk usage of container storage
+podman system df
+
+# Check Btrfs subvolume usage for the container store
+sudo btrfs filesystem du -s /var/lib/containers
+
+# Remove a specific unused image
+podman rmi &lt;image-name&gt;
+
+# Remove all unused volumes
+podman volume prune</code></pre>
+<h5>Set up a monthly cleanup timer</h5>
+<pre><code class="language-bash">cat &gt; ~/.config/systemd/user/podman-cleanup.service &lt;&lt; 'EOF'
+[Unit]
+Description=Monthly Podman Cleanup
+
+[Service]
+Type=oneshot
+ExecStart=podman system prune -f
+
+[Install]
+WantedBy=default.target
+EOF
+
+cat &gt; ~/.config/systemd/user/podman-cleanup.timer &lt;&lt; 'EOF'
+[Unit]
+Description=Monthly Podman Cleanup Timer
+
+[Timer]
+OnCalendar=monthly
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
+systemctl --user daemon-reload
+systemctl --user enable --now podman-cleanup.timer</code></pre>
+<p>---</p>
+<h2>Useful Daily Commands</h2>
+<pre><code class="language-bash"># List all running containers
+podman ps
+
+# List all containers including stopped
+podman ps -a
+
+# View live logs for a container
+podman logs -f jellyfin
+
+# Open a shell inside a running container
+podman exec -it jellyfin /bin/bash
+
+# View resource usage for all running containers
+podman stats
+
+# Inspect a container's full configuration
+podman inspect jellyfin
+
+# Check the Podman socket (needed for management UIs)
+systemctl --user status podman.socket
+systemctl --user enable --now podman.socket
+
+# Copy a file from a container to the host
+podman cp jellyfin:/config/config.xml ./jellyfin-config-backup.xml
+
+# Check effective resource limits on a running container
+podman inspect jellyfin | grep -A5 Memory
+
+# Show image layer history (understand what each layer adds)
+podman history jellyfin/jellyfin</code></pre>
+<p>---</p>
+<h2>Caddy Configuration</h2>
+<pre><code class="language-caddyfile">dashboard.home.local  { tls internal; reverse_proxy localhost:3001 }
+portainer.home.local  { tls internal; reverse_proxy localhost:9443 }
+dockge.home.local     { tls internal; reverse_proxy localhost:5001 }
+yacht.home.local      { tls internal; reverse_proxy localhost:8001 }
+komodo.home.local     { tls internal; reverse_proxy localhost:9120 }</code></pre>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Service doesn't start after reboot | Verify <code>loginctl enable-linger $USER</code> was run; check <code>systemctl --user status &lt;service&gt;</code> | | <code>podman.sock: no such file</code> | Enable the Podman socket: <code>systemctl --user enable --now podman.socket</code> | | Container OOM-killed | Add resource limits (<code>deploy.resources.limits.memory</code>) or increase host RAM; check <code>podman inspect</code> for current limits | | Auto-update not pulling new images | Confirm the <code>io.containers.autoupdate=registry</code> label is set; run <code>podman auto-update --dry-run</code> to verify | | Portainer / Komodo / Homepage can't connect to Podman | Use the literal socket path <code>/run/user/$(id -u)/podman/podman.sock</code>; verify with <code>systemctl --user status podman.socket</code> | | Disk full from container images | Run <code>podman system prune -a</code>; check <code>podman system df</code> for what's using space | | Container keeps restarting | Check logs with <code>podman logs &lt;container&gt;</code>; look for startup errors or missing environment variables | | Autoheal not restarting unhealthy container | Verify the health check command exits with code 1 on failure; check autoheal logs with <code>podman logs autoheal</code> | | Komodo servers show offline after update | <code>KOMODO_PASSKEY</code> must be identical between core and any periphery agents; a mismatch shows all servers offline with no clear error message | | listmonk or Postal broken after auto-update | These apps require a DB migration after image updates — run <code>./listmonk --upgrade --yes</code> (listmonk) or <code>postal initialize</code> (Postal) before restarting; always back up the database first | | Diun not sending notifications | Check the ntfy topic and endpoint in <code>config.yml</code>; run <code>podman logs diun</code> to verify registry polling is working | | <code>${UID}</code> not expanding in compose socket path | Run <code>export UID</code> before <code>podman-compose</code>, or substitute your literal UID (e.g. <code>1000</code>) directly in the path |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">

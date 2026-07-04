@@ -146,7 +146,107 @@
   </div>
 
   <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">cronie (Cron Scheduler)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">System</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+        </div>
+      </div>
+      <div class="prose"><h1>cronie — Cron Job Scheduler</h1>
+<p>cronie is the standard cron daemon — it runs commands on a schedule defined in crontab files. It is pre-installed and active by default on Shani OS.</p>
+<p>For most recurring tasks, <strong>systemd timers</strong> are the recommended alternative: they integrate with <code>journalctl</code> for logging, support calendar expressions and monotonic intervals, and handle missed runs via <code>Persistent=true</code>. Use cron when you need the simplicity of a single-line schedule, compatibility with scripts that assume cron, or per-user jobs without root.</p>
+<p>---</p>
+<h2>Crontab Syntax</h2>
+<pre><code># ┌── minute (0–59)
+# │ ┌── hour (0–23)
+# │ │ ┌── day of month (1–31)
+# │ │ │ ┌── month (1–12)
+# │ │ │ │ ┌── day of week (0–7, 0 and 7 = Sunday)
+# │ │ │ │ │
+# * * * * *  command to run</code></pre>
+<p>Common schedule examples:</p>
+<p>| Schedule | Meaning | |----------|---------| | <code><em> </em> <em> </em> <em></code> | Every minute | | <code>0 </em> <em> </em> <em></code> | Every hour (on the hour) | | <code>0 3 </em> <em> </em></code> | Daily at 03:00 | | <code>0 3 <em> </em> 0</code> | Every Sunday at 03:00 | | <code>0 3 1 <em> </em></code> | First of every month at 03:00 | | <code><em>/15 </em> <em> </em> <em></code> | Every 15 minutes | | <code>0 9-17 </em> * 1-5</code> | Every hour from 9 to 17, Mon–Fri |</p>
+<p>---</p>
+<h2>User Crontabs</h2>
+<pre><code class="language-bash"># Edit your own crontab
+crontab -e
+
+# List your crontab
+crontab -l
+
+# Remove your crontab entirely
+crontab -r
+
+# Edit another user's crontab (root only)
+sudo crontab -e -u youruser
+
+# List another user's crontab
+sudo crontab -l -u youruser</code></pre>
+<h3>Example User Crontab</h3>
+<pre><code class="language-crontab"># Send output to a log file instead of local mail
+MAILTO=&quot;&quot;
+
+# Run a backup script daily at 3 AM
+0 3 * * * /home/user/scripts/backup.sh &gt;&gt; /home/user/logs/backup.log 2&gt;&amp;1
+
+# Sync documents to cloud every 30 minutes
+*/30 * * * * rclone sync ~/Documents gdrive:Documents --quiet
+
+# Clear temp files every Sunday at midnight
+0 0 * * 0 find /tmp -user $USER -mtime +7 -delete</code></pre>
+<blockquote><p><strong>Tip:</strong> Redirect both stdout and stderr to a log file with <code>&gt;&gt; /path/to/log 2&gt;&amp;1</code>. Without redirection, cron mails output to the local user — set <code>MAILTO=&quot;&quot;</code> to suppress mail silently.</p></blockquote>
+<p>---</p>
+<h2>System Crontabs</h2>
+<p>System-wide cron jobs are placed directly in <code>/etc/crontab</code> or as files in these directories (no crontab editing required — just drop a script in the right directory):</p>
+<p>| Directory | Frequency | |-----------|-----------| | <code>/etc/cron.hourly/</code> | Every hour | | <code>/etc/cron.daily/</code> | Once daily | | <code>/etc/cron.weekly/</code> | Once weekly | | <code>/etc/cron.monthly/</code> | Once monthly |</p>
+<p>Scripts placed in these directories must be executable and must not have a file extension:</p>
+<pre><code class="language-bash">sudo cp myscript.sh /etc/cron.daily/myscript
+sudo chmod +x /etc/cron.daily/myscript</code></pre>
+<p>For custom schedules, add a line to <code>/etc/crontab</code>:</p>
+<pre><code class="language-crontab"># /etc/crontab — note the extra 'username' field before the command
+0 4 * * * root /usr/local/bin/maintenance.sh</code></pre>
+<p>---</p>
+<h2>Service Management</h2>
+<pre><code class="language-bash"># cronie is enabled by default — check its status
+systemctl status cronie
+
+# Restart if jobs stop running after a config change
+sudo systemctl restart cronie
+
+# View cron execution logs
+journalctl -u cronie -f
+
+# See recent cron activity (last 50 lines)
+journalctl -u cronie -n 50</code></pre>
+<p>---</p>
+<h2>Cron vs Systemd Timers</h2>
+<p>Prefer systemd timers when:</p>
+<ul>
+<li>You need the output captured in <code>journalctl</code> automatically</li>
+<li>The job must run at boot if a scheduled run was missed (<code>Persistent=true</code>)</li>
+<li>The job is already a systemd service</li>
+<li>You want precise control over the environment (working directory, user, resource limits)</li>
+</ul>
+<p>Prefer cron when:</p>
+<ul>
+<li>You need a quick per-user scheduled task without root</li>
+<li>The schedule is simple and the one-liner format is sufficient</li>
+<li>You are adapting an existing cron-based script</li>
+</ul>
+<p>See the <a href="https://docs.shani.dev/doc/system/backup">Backup & Recovery page</a> for an example of a systemd user timer running a restic backup.</p>
+<p>---</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Job not running | Check <code>journalctl -u cronie</code> for errors; verify the script is executable (<code>chmod +x</code>); test the command manually as the cron user | | Job runs but does nothing | Cron has a minimal <code>PATH</code> — use full paths to binaries (e.g., <code>/usr/bin/rsync</code> not <code>rsync</code>), or set <code>PATH=</code> at the top of the crontab | | Output being mailed to root | Add <code>MAILTO=&quot;&quot;</code> to suppress, or <code>MAILTO=youruser</code> to redirect; ensure Exim is running if you want mail delivery | | Missed jobs after suspend/hibernate | cron does not catch up missed jobs after sleep — use a systemd timer with <code>Persistent=true</code> instead | | Editing crontab opens wrong editor | Set <code>VISUAL</code> or <code>EDITOR</code> env variable: <code>export EDITOR=nano</code> |</p></div>
+    </div>
   </main>
 
   <button class="to-top" id="back-top" aria-label="Back to top">
