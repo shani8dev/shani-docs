@@ -229,6 +229,13 @@ function walkDocs(dir, base) {
 // Generates doc/<slug>/index.html so GitHub Pages returns HTTP 200
 // for every doc URL. Googlebot sees full meta tags + JSON-LD.
 // Real users get the full SPA experience via script-docs.js.
+//
+// KEY DESIGN (ported from blog's generate-manifest.js): rather than
+// re-declaring the entire page markup here — which drifts the moment
+// index.html's header/sidebar/scripts change — this reads the REAL
+// index.html once and splices in per-doc <head> SEO tags + prerendered
+// #doc-content. Everything else (topbar, sidebar, script tags, CDN
+// versions) comes from the single source of truth: index.html itself.
 function buildStub(doc) {
   const url           = `${WIKI_URL}/doc/${doc.slug}`;
   const title         = escHtml(doc.title);
@@ -255,160 +262,9 @@ function buildStub(doc) {
     isPartOf: { '@type': 'WebSite', name: SITE_TITLE, url: WIKI_URL },
   });
 
-  const LOGO_IMG_URL = getConfig('LOGO_IMG_URL', FAVICON_URL);
   const bodyHtml = renderCallouts(mdToHtml(stripDuplicateLeadingH1(doc.body || '', doc.title)));
 
-  return `<!DOCTYPE html>
-<html lang="en" data-theme="dark">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-
-  <title>${title} — ${escHtml(SITE_TITLE)}</title>
-  <meta name="description" id="meta-desc"     content="${desc}">
-  <meta name="keywords"    id="meta-keywords" content="${escHtml(doc.keywords || '')}">
-  <meta name="author"      content="${escHtml(AUTHOR)}">
-  <meta name="robots"      content="${robots}">
-  <link rel="canonical"    id="canonical-url" href="${escHtml(url)}">
-
-  <meta property="og:site_name" id="og-site-name" content="${escHtml(SITE_TITLE)}">
-  <meta property="og:type"      id="og-type"       content="article">
-  <meta property="og:title"     id="og-title"      content="${title}">
-  <meta property="og:description" id="og-desc"     content="${desc}">
-  <meta property="og:url"       id="og-url"        content="${escHtml(url)}">
-  <meta property="og:image"     id="og-image"      content="${image}">
-  <meta property="og:image:alt" id="og-image-alt"  content="${title}">
-  ${datePublished ? `<meta property="article:published_time" content="${datePublished}">
-  <meta property="article:modified_time"  content="${datePublished}">` : ''}
-  <meta property="article:author"  content="${escHtml(AUTHOR)}">
-  <meta property="article:section" content="${escHtml(doc.section || '')}">
-
-  <meta name="twitter:card"        content="summary_large_image">
-  <meta name="twitter:site"        id="tw-site"  content="${escHtml(TWITTER_HANDLE)}">
-  <meta name="twitter:title"       id="tw-title" content="${title}">
-  <meta name="twitter:description" id="tw-desc"  content="${desc}">
-  <meta name="twitter:image"       id="tw-image" content="${image}">
-
-  <script type="application/ld+json">${ldJson}</script>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-
-  <link rel="icon" id="favicon" type="image/svg+xml" href="${escHtml(FAVICON_URL)}">
-  <link rel="manifest" href="/manifest.json">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="theme-color" id="pwa-theme-color" content="#161514">
-
-  <script>
-    (function () {
-      var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
-                  ? CONFIG.STORAGE_PREFIX + '_'
-                  : '${STORAGE_PREFIX}_';
-      var t = localStorage.getItem(pfx + 'theme') ||
-              (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      document.documentElement.setAttribute('data-theme', t);
-    })();
-  </script>
-
-  <link rel="stylesheet" href="/brand-shani.css">
-  <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
-</head>
-<body>
-
-  <a class="skip-link" href="#main-content">Skip to content</a>
-
-  <noscript>
-    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
-      <strong>JavaScript is required to view this wiki.</strong>
-    </div>
-  </noscript>
-
-  <div id="page-loader" aria-hidden="true">
-    <div class="loader__logo">
-      <img id="loader-logo-img" src="${escHtml(FAVICON_URL)}" alt="${escHtml(SITE_TITLE)}" height="40">
-    </div>
-    <div class="loader__track"><div class="loader__bar"></div></div>
-    <p class="loader__text">Loading wiki…</p>
-  </div>
-
-  <div class="auspicious-bar" aria-label="${escHtml(SITE_TITLE)}">
-    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
-  </div>
-
-  <header class="topbar" role="banner">
-    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
-      <i class="fa-solid fa-bars"></i>
-    </button>
-    <a href="/" class="topbar__logo" aria-label="${escHtml(SITE_TITLE)} home">
-      <img src="${escHtml(LOGO_IMG_URL)}" alt="${escHtml(SITE_TITLE)}" id="logo-img" height="24">
-      <span class="topbar__logo-word logo__word">docs</span>
-    </a>
-    <div class="topbar__search-wrap" role="search">
-      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-      <input type="search" id="wiki-search" class="topbar__search"
-        placeholder="Search docs… (/ or Ctrl+K)"
-        aria-label="Search documentation" autocomplete="off" spellcheck="false">
-      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
-    </div>
-    <div class="topbar__actions">
-      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
-        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
-      </button>
-      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
-        <i class="fa-solid fa-text-height"></i>
-      </button>
-      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
-        <i class="fa-solid fa-moon" id="theme-icon"></i>
-      </button>
-      <a class="btn-icon" href="https://github.com/shani8dev" target="_blank" rel="noopener" aria-label="View on GitHub">
-        <i class="fa-brands fa-github"></i>
-      </a>
-    </div>
-  </header>
-
-  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
-
-  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
-    <div class="sidebar__header">
-      <div class="sidebar__section-label">Documentation</div>
-    </div>
-    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
-  </aside>
-
-  <div class="reading-progress" aria-hidden="true">
-    <div class="reading-progress__bar" id="reading-bar"></div>
-  </div>
-
-  <main class="content" id="main-content" tabindex="-1">
-    <div class="content__inner" id="doc-content" role="article">
+  const docContentHtml = `
       <!--
         Prerendered content below — real text for crawlers and no-JS
         clients. script-docs.js overwrites this div with the fully
@@ -423,21 +279,93 @@ function buildStub(doc) {
           ${doc.updated ? `<span><i class="fa-regular fa-clock"></i> ${escHtml(doc.updated)}</span>` : ''}
         </div>
       </div>
-      <div class="prose">${bodyHtml}</div>
-    </div>
-  </main>
+      <div class="prose">${bodyHtml}</div>`;
 
-  <button class="to-top" id="back-top" aria-label="Back to top">
-    <i class="fa-solid fa-arrow-up"></i>
-  </button>
+  // ── <head> SEO block to splice in ────────────────────────────────
+  const SEO_INJECTION = `
+  <title>${title} — ${escHtml(SITE_TITLE)}</title>
+  <meta name="description" id="meta-desc"     content="${desc}">
+  <meta name="keywords"    id="meta-keywords" content="${escHtml(doc.keywords || '')}">
+  <meta name="author"      content="${escHtml(AUTHOR)}">
+  <meta name="robots"      content="${robots}">
+  <link rel="canonical"    id="canonical-url" href="${escHtml(url)}">
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <meta property="og:site_name" id="og-site-name" content="${escHtml(SITE_TITLE)}">
+  <meta property="og:title"     id="og-title"     content="${title}">
+  <meta property="og:description" id="og-desc"    content="${desc}">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="${escHtml(url)}">
+  <meta property="og:image"     id="og-image"     content="${image}">
+  <meta property="og:image:alt" id="og-image-alt" content="${title}">
+  <meta property="og:locale"    content="en_IN">
 
-  <script src="/config-docs.js"></script>
-  <script src="/nav-docs.js"></script>
-  <script src="/script-docs.js"></script>
-</body>
-</html>`;
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="${escHtml(TWITTER_HANDLE)}">
+  <meta name="twitter:title"       id="tw-title" content="${title}">
+  <meta name="twitter:description" id="tw-desc"  content="${desc}">
+  <meta name="twitter:image"       id="tw-image" content="${image}">
+
+  <script type="application/ld+json" id="ld-doc">${ldJson}<\/script>
+
+  <link rel="alternate" type="application/rss+xml" title="${escHtml(SITE_TITLE)} Feed" href="/feed.xml">`;
+
+  // Read the root index.html once and cache it
+  if (!buildStub._indexHtml) {
+    const indexPath = path.join(__dirname, 'index.html');
+    if (!fs.existsSync(indexPath)) {
+      throw new Error(`buildStub: index.html not found at ${indexPath}`);
+    }
+    buildStub._indexHtml = fs.readFileSync(indexPath, 'utf8');
+  }
+
+  let html = buildStub._indexHtml;
+
+  // SENTINEL DESIGN: index.html must contain the exact comment lines:
+  //   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+  //   ... (title, meta, OG, twitter, ld+json, RSS link) ...
+  //   <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  // Everything between the two sentinels gets replaced; everything else
+  // (topbar, sidebar, scripts) passes through untouched.
+  const START_SENTINEL = '<!-- ═══ SEO ══════════════════════════════════════════════════════════ -->';
+  const END_SENTINEL   = '<!-- ═══ PERFORMANCE';
+
+  const startIdx = html.indexOf(START_SENTINEL);
+  const endIdx   = html.indexOf(END_SENTINEL, startIdx);
+
+  if (startIdx === -1 || endIdx === -1) {
+    throw new Error(
+      'buildStub: Could not find SEO injection sentinels in index.html.\n' +
+      'Ensure index.html contains the "═══ SEO ═══" comment block and a "═══ PERFORMANCE" comment.'
+    );
+  }
+
+  html = html.slice(0, startIdx) +
+         START_SENTINEL + '\n' +
+         SEO_INJECTION.trimStart() + '\n\n  ' +
+         html.slice(endIdx);
+
+  // Fill the favicon href — it's outside the spliced SEO block (in the
+  // FAVICON/PWA section below) and otherwise sits empty until JS runs.
+  html = html.replace(
+    '<link rel="icon" id="favicon" type="image/svg+xml" href="">',
+    `<link rel="icon" id="favicon" type="image/svg+xml" href="${escHtml(FAVICON_URL)}">`
+  );
+
+  // ── Prerender doc content ────────────────────────────────────────
+  // Without this, every stub ships the same empty #doc-content, which
+  // is the thin/duplicate-content pattern that keeps crawlers from
+  // bothering to index individual doc URLs.
+  const DOC_CONTENT_PLACEHOLDER = '<div class="content__inner" id="doc-content" role="article"></div>';
+  if (html.includes(DOC_CONTENT_PLACEHOLDER)) {
+    html = html.replace(
+      DOC_CONTENT_PLACEHOLDER,
+      `<div class="content__inner" id="doc-content" role="article">${docContentHtml}\n    </div>`
+    );
+  } else {
+    console.warn(`  ⚠  buildStub: #doc-content placeholder not found for "${doc.slug}" — stub will ship with empty content.`);
+  }
+
+  return html;
 }
 
 // ── Extract all slugs from NAV_TREE in nav-docs.js ───────────────
@@ -576,9 +504,17 @@ function build() {
   console.log(`\n✓ docs/manifest.json  (${docs.length} doc(s))`);
 
   // ── sitemap.xml ─────────────────────────────────────────────────
+  // NOTE: no trailing slash on /doc/<slug> — must match the canonical
+  // URL used in buildStub() (const url = `${WIKI_URL}/doc/${doc.slug}`)
+  // and og:url/JSON-LD exactly. Sitemap previously listed .../slug/
+  // (trailing slash) while the page's own <link rel="canonical"> said
+  // .../slug (no slash) — two different signals for the same page,
+  // which Google can read as a soft duplicate-URL/canonicalization
+  // conflict rather than one strong signal. Same convention blog
+  // already uses for /post/<slug>.
   const urls = docs.filter(d => !d.draft).map(d => `
   <url>
-    <loc>${escXml(WIKI_URL)}/doc/${escXml(d.slug)}/</loc>
+    <loc>${escXml(WIKI_URL)}/doc/${escXml(d.slug)}</loc>
     ${d.updated ? `<lastmod>${escXml(d.updated)}</lastmod>` : ''}
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
