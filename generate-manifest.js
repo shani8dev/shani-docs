@@ -164,6 +164,29 @@ function getConfig(key, fallback) {
   return m ? m[1] : fallback;
 }
 
+function getConfigNum(key, fallback) {
+  const m = configRaw.match(new RegExp(key + ":\\s*(-?\\d+(?:\\.\\d+)?)"));
+  return m ? Number(m[1]) : fallback;
+}
+
+// ── SITEMAP_STATIC_URLS — optional extra static pages (e.g. /about,
+// /changelog) parsed from a CONFIG array literal, same convention as the
+// blog generator. Falls back to just the home page if not present/parseable.
+function parseSitemapStaticUrls() {
+  const m = configRaw.match(/SITEMAP_STATIC_URLS\s*:\s*\[([\s\S]*?)\]/);
+  if (!m) return [];
+  const block = m[1];
+  const entries = [];
+  const entryRe = /\{([^}]+)\}/g;
+  let em;
+  while ((em = entryRe.exec(block)) !== null) {
+    const inner = em[1];
+    const get = k => { const r = inner.match(new RegExp(k + "\\s*:\\s*['\"`]([^'\"`]*)['\"`]")); return r ? r[1] : ''; };
+    entries.push({ path: get('path'), priority: get('priority') || '0.6', changefreq: get('changefreq') || 'monthly' });
+  }
+  return entries;
+}
+
 // ── Config values ─────────────────────────────────────────────────
 const WIKI_URL        = getConfig('WIKI_URL',        'https://docs.shani.dev');
 const SITE_TITLE      = getConfig('SITE_TITLE',      'Shanios Docs');
@@ -179,6 +202,7 @@ const FAVICON_URL     = getConfig('FAVICON_URL',     'https://shani.dev/assets/i
 const OG_IMAGE        = getConfig('OG_IMAGE',        FAVICON_URL);
 const TWITTER_HANDLE  = getConfig('TWITTER_HANDLE',  '@shani8dev');
 const STORAGE_PREFIX  = getConfig('STORAGE_PREFIX',  'shanidocs');
+const SITEMAP_STATIC_URLS = parseSitemapStaticUrls();
 
 // ── Helpers ───────────────────────────────────────────────────────
 function escXml(s) {
@@ -337,9 +361,12 @@ function buildStub(doc) {
          SEO_INJECTION.trimStart() + '\n\n  ' +
          html.slice(endIdx);
 
-  // Fill the favicon href
+  // Fill the favicon href — index.html now defaults to the local
+  // /favicon.svg fallback (instead of an empty href) so there's no
+  // blank/broken icon before client JS runs; this still overwrites it
+  // with the configured brand favicon for the prerendered stub.
   html = html.replace(
-    '<link rel="icon" id="favicon" type="image/svg+xml" href="">',
+    '<link rel="icon" id="favicon" type="image/svg+xml" href="/favicon.svg">',
     `<link rel="icon" id="favicon" type="image/svg+xml" href="${escHtml(FAVICON_URL)}">`
   );
 
@@ -484,6 +511,27 @@ function build() {
     console.log(`  [doc] ${slug}`);
   }
 
+  // ── Note drafts (still written to manifest for now — docs relies on
+  // per-page `noindex`/sitemap filtering rather than dropping drafts
+  // outright, since draft docs may still be linked internally) ─────
+  const draftSlugs = docs.filter(d => d.draft).map(d => d.slug);
+  if (draftSlugs.length) {
+    console.log(`\n  ✎ ${draftSlugs.length} draft doc(s) (excluded from sitemap/feed/index): ${draftSlugs.join(', ')}`);
+  }
+
+  // ── Warn on duplicate titles (common sign of copy-paste front-matter) ──
+  const titleCount = {};
+  docs.forEach(d => { titleCount[d.title] = (titleCount[d.title] || 0) + 1; });
+  const dupes = Object.entries(titleCount).filter(([, n]) => n > 1);
+  if (dupes.length) {
+    console.warn('\n  ⚠  Duplicate titles detected (likely wrong title: in front-matter):');
+    dupes.forEach(([title, n]) => {
+      const slugs = docs.filter(d => d.title === title).map(d => d.slug).join(', ');
+      console.warn(`     "${title}" appears ${n}×  →  ${slugs}`);
+    });
+    console.warn('');
+  }
+
   // ── docs/manifest.json ──────────────────────────────────────────
   const manifestDocs = docs.map(({ body, ...rest }) => rest);
   fs.writeFileSync(OUT_PATH, JSON.stringify(manifestDocs, null, 2));
@@ -491,6 +539,13 @@ function build() {
 
   // ── sitemap.xml ─────────────────────────────────────────────────
   // FIX B: trailing slash on every doc URL to match canonical exactly.
+  const staticUrls = SITEMAP_STATIC_URLS.map(u => `
+  <url>
+    <loc>${escXml(WIKI_URL)}${escXml(u.path)}</loc>
+    <changefreq>${escXml(u.changefreq)}</changefreq>
+    <priority>${escXml(u.priority)}</priority>
+  </url>`).join('');
+
   const urls = docs.filter(d => !d.draft).map(d => `
   <url>
     <loc>${escXml(WIKI_URL)}/doc/${escXml(d.slug)}/</loc>
@@ -506,9 +561,9 @@ function build() {
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-  </url>${urls}
+  </url>${staticUrls}${urls}
 </urlset>`);
-  console.log(`✓ sitemap.xml`);
+  console.log(`✓ sitemap.xml${staticUrls ? ` (+${SITEMAP_STATIC_URLS.length} static page(s))` : ''}`);
 
   // ── feed.xml (RSS 2.0) ────────────────────────────────────────────
   const FEED_ITEM_LIMIT = 40;
@@ -578,25 +633,45 @@ function build() {
     stubsWritten++;
   }
 
-  // Remove stubs for docs that no longer exist
+  // Remove stubs for docs that no longer exist.
+  //
+  // BUGFIX: the previous version only recursed into a directory when
+  // `!liveSlugs.has(slugPart)` — so once a slug like "guides" was itself a
+  // live doc (doc/guides/index.html), its subdirectories (e.g. a stale
+  // doc/guides/old/) were never even inspected, let alone removed. We now
+  // always recurse first (post-order), then delete the directory only if,
+  // after cleaning, it contains no index.html for itself and no children.
   function cleanStaleStubs(dir, prefix) {
     if (!fs.existsSync(dir)) return;
     for (const entry of fs.readdirSync(dir)) {
-      const full      = path.join(dir, entry);
-      const slugPart  = prefix ? `${prefix}/${entry}` : entry;
-      const stat      = fs.statSync(full);
-      if (stat.isDirectory()) {
-        if (!liveSlugs.has(slugPart)) {
-          const children = fs.readdirSync(full);
-          const hasLive  = children.some(c => liveSlugs.has(`${slugPart}/${c}`) || liveSlugs.has(slugPart));
-          if (!hasLive && !children.some(c => fs.statSync(path.join(full, c)).isDirectory())) {
-            fs.rmSync(full, { recursive: true, force: true });
-            console.log(`  ✗ Removed stale stub: doc/${slugPart}/`);
-            stubsRemoved++;
-          } else {
-            cleanStaleStubs(full, slugPart);
-          }
+      const full     = path.join(dir, entry);
+      const slugPart = prefix ? `${prefix}/${entry}` : entry;
+      if (!fs.statSync(full).isDirectory()) continue; // skip stray files (.nojekyll, etc.)
+
+      // Recurse first so nested stale stubs are always checked, even
+      // when this directory itself corresponds to a live doc.
+      cleanStaleStubs(full, slugPart);
+
+      const isLive = liveSlugs.has(slugPart);
+      if (isLive) continue; // this directory's own index.html is current — keep it
+
+      const stillHasChildDirs = fs.readdirSync(full)
+        .some(c => fs.statSync(path.join(full, c)).isDirectory());
+
+      if (stillHasChildDirs) {
+        // Not live itself, but a live nested doc still lives underneath
+        // (e.g. doc/guides/ is stale but doc/guides/setup/ is current) —
+        // keep the directory, just drop this level's own stale index.html.
+        const own = path.join(full, 'index.html');
+        if (fs.existsSync(own)) {
+          fs.rmSync(own, { force: true });
+          console.log(`  ✗ Removed stale stub: doc/${slugPart}/index.html`);
+          stubsRemoved++;
         }
+      } else {
+        fs.rmSync(full, { recursive: true, force: true });
+        console.log(`  ✗ Removed stale stub: doc/${slugPart}/`);
+        stubsRemoved++;
       }
     }
   }

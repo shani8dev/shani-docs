@@ -1,3 +1,4 @@
+// sw.js — docs.shani.dev
 const SHELL_CACHE = 'shanidocs-shell-v1';
 const DOC_CACHE   = 'shanidocs-docs-v1';
 const SHELL = [
@@ -14,16 +15,31 @@ const SHELL = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(SHELL_CACHE).then(c => c.addAll(SHELL)));
+  e.waitUntil(
+    caches.open(SHELL_CACHE)
+      .then(c => c.addAll(SHELL))
+      // addAll() is all-or-nothing — if a single SHELL url 404s, the whole
+      // install silently fails and nothing gets cached. Log which one broke
+      // instead of swallowing it, and don't let install() reject outright
+      // (better to have a partially-working SW than none at all).
+      .catch(err => console.error('[sw] shell precache failed:', err))
+  );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', e => {
-  e.waitUntil(self.clients.claim());
+  e.waitUntil(
+    caches.keys().then(keys => Promise.all(
+      keys
+        .filter(k => k !== SHELL_CACHE && k !== DOC_CACHE)
+        .map(k => caches.delete(k))
+    )).then(() => self.clients.claim())
+  );
 });
 
 self.addEventListener('fetch', e => {
   const { request } = e;
+  if (request.method !== 'GET') return;
   const url = new URL(request.url);
 
   // 1) App shell — cache first
@@ -47,6 +63,16 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // 3) Everything else — network with cache fallback
+  // 3) Navigations (doc pages under the SPA router) — network first,
+  //    falling back to the cached shell so a mid-air network drop still
+  //    renders the app instead of the browser's default offline page.
+  if (request.mode === 'navigate') {
+    e.respondWith(
+      fetch(request).catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
+
+  // 4) Everything else — network with cache fallback
   e.respondWith(fetch(request).catch(() => caches.match(request)));
 });
