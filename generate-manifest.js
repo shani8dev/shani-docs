@@ -238,7 +238,7 @@ function buildStub(doc) {
     : '';
   const robots = doc.draft
     ? 'noindex'
-    : 'index, follow, max-snippet:-1, max-image-preview:large';
+    : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1';
 
   const ldJson = JSON.stringify({
     '@context':   'https://schema.org',
@@ -276,6 +276,7 @@ function buildStub(doc) {
   <meta property="og:description" id="og-desc"     content="${desc}">
   <meta property="og:url"       id="og-url"        content="${escHtml(url)}">
   <meta property="og:image"     id="og-image"      content="${image}">
+  <meta property="og:image:alt" id="og-image-alt"  content="${title}">
   ${datePublished ? `<meta property="article:published_time" content="${datePublished}">
   <meta property="article:modified_time"  content="${datePublished}">` : ''}
   <meta property="article:author"  content="${escHtml(AUTHOR)}">
@@ -298,7 +299,8 @@ function buildStub(doc) {
   <link rel="manifest" href="/manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#161514">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
 
   <script>
     (function () {

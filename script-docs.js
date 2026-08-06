@@ -887,6 +887,9 @@ function initTheme() {
     if (icon) icon.className = t === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
     const prism = $('#prism-theme');
     if (prism) prism.href = t === 'dark' ? PRISM_DARK : PRISM_LIGHT;
+    // Keep browser chrome / PWA status bar color in sync with the active theme
+    const themeColorMeta = $('#pwa-theme-color');
+    if (themeColorMeta) themeColorMeta.content = t === 'dark' ? '#161514' : '#faf9f7';
     // Re-apply Monaco editor theme if editor is open
     if (typeof AdminEditor !== 'undefined') AdminEditor._applyMonacoTheme(t);
   };
