@@ -10,13 +10,13 @@
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/servers/vpn-tunnels">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/servers/vpn-tunnels/">
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="VPN &amp; Tunnels">
   <meta property="og:description" id="og-desc"    content="Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …">
   <meta property="og:type"      id="og-type"      content="article">
-  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/vpn-tunnels">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/vpn-tunnels/">
   <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
   <meta property="og:image:alt" id="og-image-alt" content="VPN &amp; Tunnels">
   <meta property="og:locale"    content="en_IN">
@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"VPN & Tunnels","description":"Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …","url":"https://docs.shani.dev/doc/servers/vpn-tunnels","datePublished":"2026-04-22T00:00:00.000Z","dateModified":"2026-04-22T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"VPN & Tunnels","description":"Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …","url":"https://docs.shani.dev/doc/servers/vpn-tunnels/","datePublished":"2026-04-21T18:30:00.000Z","dateModified":"2026-04-21T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -36,6 +36,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
 
   <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
   <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
@@ -110,13 +113,14 @@
   <!-- ── Page loader ──────────────────────────────────────────────── -->
   <div id="page-loader" aria-hidden="true">
     <div class="loader__logo">
-      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
     </div>
     <div class="loader__track"><div class="loader__bar"></div></div>
     <p class="loader__text">Loading wiki…</p>
   </div>
 
-  <!-- ── Auspicious bar — always-visible slim bar above topbar ────── -->
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
   <div class="auspicious-bar" aria-label="Shanios">
     <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
   </div>
@@ -130,7 +134,8 @@
 
     <!-- Logo -->
     <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
-      <img src="" alt="Shanios" id="logo-img" height="24">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
       <span class="topbar__logo-word logo__word">wiki</span>
     </a>
 
@@ -187,7 +192,7 @@
     <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
   </aside>
 
-  <!-- Reading progress bar — must be outside .content (overflow:auto creates new stacking context) -->
+  <!-- Reading progress bar -->
   <div class="reading-progress" aria-hidden="true">
     <div class="reading-progress__bar" id="reading-bar"></div>
   </div>

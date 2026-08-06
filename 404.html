@@ -11,7 +11,8 @@
     // preserving the path, query string, and hash so the SPA router can restore them.
     (function () {
       var ua = navigator.userAgent || '';
-      var isBot = /bot|crawler|spider|googlebot|bingbot|yandex|baidu|facebookexternalhit|twitterbot|linkedinbot|slackbot/i.test(ua);
+      // FIX G: broader bot regex catches Google-InspectionTool and other Google crawlers
+      var isBot = /bot|crawler|spider|google|bingbot|yandex|baidu|facebookexternalhit|twitterbot|linkedinbot|slackbot/i.test(ua);
 
       // NEVER redirect search bots — let them see the real 404
       if (isBot) return;

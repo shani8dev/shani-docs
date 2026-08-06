@@ -146,7 +146,7 @@ function renderCallouts(html) {
 const DOCS_DIR     = path.join(__dirname, 'docs');
 const OUT_PATH     = path.join(DOCS_DIR, 'manifest.json');
 const SITEMAP_PATH = path.join(__dirname, 'sitemap.xml');
-const FEED_PATH     = path.join(__dirname, 'feed.xml');
+const FEED_PATH    = path.join(__dirname, 'feed.xml');
 const PWA_PATH     = path.join(__dirname, 'manifest.json');
 const DOC_DIR      = path.join(__dirname, 'doc');   // static stub output dir
 const NAV_PATH     = path.join(__dirname, 'nav-docs.js');
@@ -227,17 +227,15 @@ function walkDocs(dir, base) {
 
 // ── Static stub builder ───────────────────────────────────────────
 // Generates doc/<slug>/index.html so GitHub Pages returns HTTP 200
-// for every doc URL. Googlebot sees full meta tags + JSON-LD.
-// Real users get the full SPA experience via script-docs.js.
+// for every doc URL. Googlebot indexes the meta tags + JSON-LD immediately.
+// The SPA (script-docs.js) hydrates the page for real users.
 //
-// KEY DESIGN (ported from blog's generate-manifest.js): rather than
-// re-declaring the entire page markup here — which drifts the moment
-// index.html's header/sidebar/scripts change — this reads the REAL
-// index.html once and splices in per-doc <head> SEO tags + prerendered
-// #doc-content. Everything else (topbar, sidebar, script tags, CDN
-// versions) comes from the single source of truth: index.html itself.
+// KEY DESIGN: rather than re-declaring the entire page markup here,
+// this reads the REAL index.html once and splices in per-doc <head>
+// SEO tags + prerendered #doc-content.
 function buildStub(doc) {
-  const url           = `${WIKI_URL}/doc/${doc.slug}`;
+  // FIX B: standardise on trailing slashes (GitHub Pages directory indexes)
+  const url           = `${WIKI_URL}/doc/${doc.slug}/`;
   const title         = escHtml(doc.title);
   const desc          = escHtml(doc.description || SITE_DESC);
   const image         = escHtml(OG_IMAGE);
@@ -320,12 +318,7 @@ function buildStub(doc) {
 
   let html = buildStub._indexHtml;
 
-  // SENTINEL DESIGN: index.html must contain the exact comment lines:
-  //   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
-  //   ... (title, meta, OG, twitter, ld+json, RSS link) ...
-  //   <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
-  // Everything between the two sentinels gets replaced; everything else
-  // (topbar, sidebar, scripts) passes through untouched.
+  // SENTINEL DESIGN
   const START_SENTINEL = '<!-- ═══ SEO ══════════════════════════════════════════════════════════ -->';
   const END_SENTINEL   = '<!-- ═══ PERFORMANCE';
 
@@ -344,17 +337,13 @@ function buildStub(doc) {
          SEO_INJECTION.trimStart() + '\n\n  ' +
          html.slice(endIdx);
 
-  // Fill the favicon href — it's outside the spliced SEO block (in the
-  // FAVICON/PWA section below) and otherwise sits empty until JS runs.
+  // Fill the favicon href
   html = html.replace(
     '<link rel="icon" id="favicon" type="image/svg+xml" href="">',
     `<link rel="icon" id="favicon" type="image/svg+xml" href="${escHtml(FAVICON_URL)}">`
   );
 
   // ── Prerender doc content ────────────────────────────────────────
-  // Without this, every stub ships the same empty #doc-content, which
-  // is the thin/duplicate-content pattern that keeps crawlers from
-  // bothering to index individual doc URLs.
   const DOC_CONTENT_PLACEHOLDER = '<div class="content__inner" id="doc-content" role="article"></div>';
   if (html.includes(DOC_CONTENT_PLACEHOLDER)) {
     html = html.replace(
@@ -496,25 +485,15 @@ function build() {
   }
 
   // ── docs/manifest.json ──────────────────────────────────────────
-  // Strip `body` — it's only carried on the in-memory doc objects so
-  // buildStub() can prerender content; it doesn't belong in the client-
-  // facing manifest (bloats the file the search index loads).
   const manifestDocs = docs.map(({ body, ...rest }) => rest);
   fs.writeFileSync(OUT_PATH, JSON.stringify(manifestDocs, null, 2));
   console.log(`\n✓ docs/manifest.json  (${docs.length} doc(s))`);
 
   // ── sitemap.xml ─────────────────────────────────────────────────
-  // NOTE: no trailing slash on /doc/<slug> — must match the canonical
-  // URL used in buildStub() (const url = `${WIKI_URL}/doc/${doc.slug}`)
-  // and og:url/JSON-LD exactly. Sitemap previously listed .../slug/
-  // (trailing slash) while the page's own <link rel="canonical"> said
-  // .../slug (no slash) — two different signals for the same page,
-  // which Google can read as a soft duplicate-URL/canonicalization
-  // conflict rather than one strong signal. Same convention blog
-  // already uses for /post/<slug>.
+  // FIX B: trailing slash on every doc URL to match canonical exactly.
   const urls = docs.filter(d => !d.draft).map(d => `
   <url>
-    <loc>${escXml(WIKI_URL)}/doc/${escXml(d.slug)}</loc>
+    <loc>${escXml(WIKI_URL)}/doc/${escXml(d.slug)}/</loc>
     ${d.updated ? `<lastmod>${escXml(d.updated)}</lastmod>` : ''}
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -524,6 +503,7 @@ function build() {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>${escXml(WIKI_URL)}/</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>${urls}
@@ -531,10 +511,6 @@ function build() {
   console.log(`✓ sitemap.xml`);
 
   // ── feed.xml (RSS 2.0) ────────────────────────────────────────────
-  // Same doc-walk that already builds manifest.json/sitemap.xml — no
-  // extra parsing pass needed. Sorted newest-first by `updated`
-  // front-matter, capped to the most recent 40 so the feed doesn't
-  // grow unbounded as the wiki accumulates hundreds of pages.
   const FEED_ITEM_LIMIT = 40;
   const rssDocs = docs
     .filter(d => !d.draft)
@@ -550,8 +526,8 @@ function build() {
   const rssItems = rssDocs.map(d => `
     <item>
       <title>${escXml(d.title)}</title>
-      <link>${escXml(WIKI_URL)}/doc/${escXml(d.slug)}</link>
-      <guid isPermaLink="true">${escXml(WIKI_URL)}/doc/${escXml(d.slug)}</guid>
+      <link>${escXml(WIKI_URL)}/doc/${escXml(d.slug)}/</link>
+      <guid isPermaLink="true">${escXml(WIKI_URL)}/doc/${escXml(d.slug)}/</guid>
       <description>${escXml(d.description || SITE_DESC)}</description>
       <pubDate>${toRfc822(d.updated)}</pubDate>
       <category>${escXml(d.section || 'Docs')}</category>
@@ -587,9 +563,6 @@ function build() {
   console.log(`✓ manifest.json (PWA)`);
 
   // ── doc/<slug>/index.html stubs ─────────────────────────────────
-  // Each stub is a real file → GitHub Pages returns HTTP 200 for every
-  // doc URL. Googlebot indexes the meta tags + JSON-LD immediately.
-  // The SPA (script-docs.js) hydrates the page for real users.
   fs.mkdirSync(DOC_DIR, { recursive: true });
 
   const liveSlugs = new Set();
@@ -599,14 +572,13 @@ function build() {
   for (const doc of docs) {
     if (!doc.slug) continue;
     liveSlugs.add(doc.slug);
-    // Support nested slugs like "arch/boot" → doc/arch/boot/index.html
     const dir = path.join(DOC_DIR, ...doc.slug.split('/'));
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(path.join(dir, 'index.html'), buildStub(doc));
     stubsWritten++;
   }
 
-  // Remove stubs for docs that no longer exist (walk only top-level for perf)
+  // Remove stubs for docs that no longer exist
   function cleanStaleStubs(dir, prefix) {
     if (!fs.existsSync(dir)) return;
     for (const entry of fs.readdirSync(dir)) {
@@ -614,9 +586,7 @@ function build() {
       const slugPart  = prefix ? `${prefix}/${entry}` : entry;
       const stat      = fs.statSync(full);
       if (stat.isDirectory()) {
-        // If the directory itself is a valid slug, check children too
         if (!liveSlugs.has(slugPart)) {
-          // It might be a section folder (e.g. "arch/") — recurse before deleting
           const children = fs.readdirSync(full);
           const hasLive  = children.some(c => liveSlugs.has(`${slugPart}/${c}`) || liveSlugs.has(slugPart));
           if (!hasLive && !children.some(c => fs.statSync(path.join(full, c)).isDirectory())) {
