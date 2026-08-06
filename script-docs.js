@@ -29,14 +29,28 @@ const draftKey = slug => `wdraft_${slug}`;
 
 // ── State ─────────────────────────────────────────────────────────
 const State = {
-  theme:      localStorage.getItem(key('theme')) || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
+  theme:      Storage.get(key('theme')) || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
   docCache:   {},
   currentSlug: null,
   searchIndex: [],
-  fontSize:   parseInt(localStorage.getItem(key('fontsize')) || '16'),
+  fontSize:   parseInt(Storage.get(key('fontsize')) || '16'),
   editMode:   false,
 };
 
+// ══════════════════════════════════════════════════════════════════
+//  SAFE STORAGE — wraps localStorage/sessionStorage with try/catch
+//  Prevents crashes in Safari Private Mode and locked-down browsers
+// ══════════════════════════════════════════════════════════════════
+const Storage = {
+  get(k)   { try { return localStorage.getItem(k); }   catch { return null; } },
+  set(k,v) { try { localStorage.setItem(k,v); }       catch {} },
+  remove(k){ try { localStorage.removeItem(k); }      catch {} },
+  session: {
+    get(k)   { try { return sessionStorage.getItem(k); } catch { return null; } },
+    set(k,v) { try { sessionStorage.setItem(k,v); }      catch {} },
+    remove(k){ try { sessionStorage.removeItem(k); }     catch {} }
+  }
+};
 // ── Apply initial theme ───────────────────────────────────────────
 document.documentElement.setAttribute('data-theme', State.theme);
 
@@ -46,15 +60,15 @@ document.documentElement.setAttribute('data-theme', State.theme);
 const ViewCounter = {
   get(slug) {
     if (CONFIG.VIEW_COUNT_ENABLED === false) return 0;
-    return parseInt(localStorage.getItem(key('views:' + slug)) || '0');
+    return parseInt(Storage.get(key('views:' + slug)) || '0');
   },
   increment(slug) {
     if (CONFIG.VIEW_COUNT_ENABLED === false) return;
     const sessionKey = 'view_counted_' + slug;
-    if (sessionStorage.getItem(sessionKey)) return;
-    sessionStorage.setItem(sessionKey, '1');
+    if (Storage.session.get(sessionKey)) return;
+    Storage.session.set(sessionKey, '1');
     const count = this.get(slug) + 1;
-    localStorage.setItem(key('views:' + slug), count);
+    Storage.set(key('views:' + slug), count);
     return count;
   },
   fmt(n) {
@@ -68,17 +82,17 @@ const ViewCounter = {
 // ══════════════════════════════════════════════════════════════════
 const ReadingStreak = {
   get() {
-    return parseInt(localStorage.getItem(key('streak')) || '0');
+    return parseInt(Storage.get(key('streak')) || '0');
   },
   update() {
     if (CONFIG.STREAK_ENABLED === false) return;
     const todayStr  = new Date().toDateString();
-    const last      = localStorage.getItem(key('streak_date'));
+    const last      = Storage.get(key('streak_date'));
     if (last === todayStr) return;
     const yesterday = new Date(Date.now() - 86400000).toDateString();
     const streak    = last === yesterday ? this.get() + 1 : 1;
-    localStorage.setItem(key('streak'), streak);
-    localStorage.setItem(key('streak_date'), todayStr);
+    Storage.set(key('streak'), streak);
+    Storage.set(key('streak_date'), todayStr);
     return streak;
   },
   render() {
@@ -143,13 +157,13 @@ const WordCount = {
 // ══════════════════════════════════════════════════════════════════
 const RecentlyViewed = {
   get() {
-    try { return JSON.parse(localStorage.getItem(key('recently_viewed')) || '[]'); } catch { return []; }
+    try { return JSON.parse(Storage.get(key('recently_viewed')) || '[]'); } catch { return []; }
   },
   add(slug) {
     const max  = CONFIG.RECENTLY_VIEWED_COUNT || 5;
     const list = this.get().filter(s => s !== slug);
     list.unshift(slug);
-    localStorage.setItem(key('recently_viewed'), JSON.stringify(list.slice(0, max)));
+    Storage.set(key('recently_viewed'), JSON.stringify(list.slice(0, max)));
   },
   getSlugs() { return this.get(); }
 };
@@ -163,16 +177,16 @@ const GH = (() => {
   let _user = null;
 
   function getToken()  {
-    return sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY) || '';
+    return Storage.session.get(TOKEN_KEY) || Storage.get(TOKEN_KEY) || '';
   }
   function setToken(t) {
     const v = t.trim();
-    sessionStorage.setItem(TOKEN_KEY, v);
-    localStorage.setItem(TOKEN_KEY, v);
+    Storage.session.set(TOKEN_KEY, v);
+    Storage.set(TOKEN_KEY, v);
   }
   function clearToken(){
-    sessionStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(TOKEN_KEY);
+    Storage.session.remove(TOKEN_KEY);
+    Storage.remove(TOKEN_KEY);
   }
 
   async function request(path, opts = {}) {
@@ -379,7 +393,7 @@ function navigate(slug, pushState = true) {
   if (slug != null && slug === State.currentSlug && pushState) return;
   State.currentSlug = slug;
 
-  if (pushState) history.pushState({ slug }, '', slug ? `/doc/${slug}` : '/');
+  if (pushState) history.pushState({ slug }, '', slug ? `/doc/${slug}/` : '/');
 
   renderNavTree(CONFIG.NAV_TREE, slug);
   closeSearch();
@@ -497,7 +511,7 @@ function renderDoc(slug, raw) {
   const section = fm.section || getGroupTitle(slug);
 
   setPageMeta({
-    url: `${CONFIG.WIKI_URL}/doc/${slug}`,
+    url: `${CONFIG.WIKI_URL}/doc/${slug}/`,
     title,
     description: fm.description || fm.excerpt || CONFIG.SITE_DESCRIPTION
   });
@@ -641,7 +655,20 @@ function renderDoc(slug, raw) {
     });
     pre.appendChild(btn);
   });
+
+  // Prefetch adjacent docs for instant navigation
+  const { prev: _prevSib, next: _nextSib } = getSiblings(slug);
+  [_prevSib, _nextSib].forEach(sib => {
+    if (!sib || State.docCache[sib.slug]) return;
+    const link = document.createElement('link');
+    link.rel = 'prefetch';
+    link.as = 'fetch';
+    const _base = CONFIG.DOCS_BASE_URL ? CONFIG.DOCS_BASE_URL.replace(/\/$/, '') : '';
+    link.href = `${_base}/docs/${sib.slug}.md`;
+    document.head.appendChild(link);
+  });
   initReadingProgress();
+  initTocSpy();
 
   // Apply saved font size to this newly rendered prose
   if (State.fontSize !== 16) {
@@ -762,7 +789,7 @@ function renderSectionPage(groupItem) {
   // back to the site root for canonical rather than leaving a stale
   // canonical pointing at whatever doc page was viewed previously.
   setPageMeta({
-    url: CONFIG.WIKI_URL,
+    url: `${CONFIG.WIKI_URL}/`,
     title: groupItem.title,
     description: CONFIG.SITE_DESCRIPTION
   });
@@ -802,6 +829,24 @@ function renderSectionPage(groupItem) {
     </div>`;
 }
 
+
+// ── TOC Scroll Spy ──────────────────────────────────────────────
+function initTocSpy() {
+  const links = $$('.doc-toc__link');
+  const headings = $$('.prose h2, .prose h3');
+  if (!links.length || !headings.length) return;
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        links.forEach(link => {
+          link.classList.toggle('is-active', link.getAttribute('href') === `#${id}`);
+        });
+      }
+    });
+  }, { root: $('.content'), rootMargin: '-80px 0px -70% 0px', threshold: 0 });
+  headings.forEach(h => observer.observe(h));
+}
 // ── Reading progress ──────────────────────────────────────────────
 function initReadingProgress() {
   const bar     = $('#reading-bar');
@@ -836,7 +881,7 @@ function initTheme() {
   const apply = t => {
     document.documentElement.setAttribute('data-theme', t);
     State.theme = t;
-    localStorage.setItem(key('theme'), t);
+    Storage.set(key('theme'), t);
     // Moon = shown in dark mode (click to go light); Sun = shown in light mode (click to go dark)
     if (icon) icon.className = t === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
     const prism = $('#prism-theme');
@@ -846,6 +891,31 @@ function initTheme() {
   };
   apply(State.theme);
   btn?.addEventListener('click', () => apply(State.theme === 'dark' ? 'light' : 'dark'));
+}
+
+// ── Mobile Sidebar Swipe ────────────────────────────────────────
+function initMobileSwipe() {
+  const sidebar = $('#wiki-sidebar');
+  const overlay = $('#sidebar-overlay');
+  let startX = 0;
+  document.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+  }, { passive: true });
+  document.addEventListener('touchend', e => {
+    const endX = e.changedTouches[0].clientX;
+    const diff = endX - startX;
+    const isOpen = sidebar?.classList.contains('is-open');
+    if (!isOpen && startX < 24 && diff > 60) {
+      sidebar?.classList.add('is-open');
+      overlay?.classList.add('is-visible');
+      $('#menu-toggle')?.setAttribute('aria-expanded', 'true');
+    }
+    if (isOpen && diff < -60) {
+      sidebar?.classList.remove('is-open');
+      overlay?.classList.remove('is-visible');
+      $('#menu-toggle')?.setAttribute('aria-expanded', 'false');
+    }
+  }, { passive: true });
 }
 
 function initMobileSidebar() {
@@ -897,19 +967,32 @@ function doSearch(q) {
   const results = $('#search-results');
   if (!results) return;
   if (!q) { results.innerHTML = ''; results.hidden = true; return; }
-  const lower   = q.toLowerCase();
-  const matches = State.searchIndex.filter(item =>
-    item.title.toLowerCase().includes(lower) || item.group.toLowerCase().includes(lower) || item.slug.toLowerCase().includes(lower)
-  ).slice(0, 8);
+  const terms = q.toLowerCase().trim().split(/\s+/).filter(Boolean);
+  const scored = State.searchIndex.map(item => {
+    let score = 0;
+    const t = item.title.toLowerCase();
+    const g = item.group.toLowerCase();
+    const s = item.slug.toLowerCase();
+    terms.forEach(term => {
+      if (t === term) score += 12;
+      else if (t.startsWith(term)) score += 8;
+      else if (t.includes(term)) score += 5;
+      if (s.includes(term)) score += 3;
+      if (g.includes(term)) score += 2;
+    });
+    return { item, score };
+  }).filter(x => x.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 8);
 
-  if (!matches.length) {
+  if (!scored.length) {
     results.innerHTML = `<div class="search-result__empty">No results for "<strong>${esc(q)}</strong>"</div>`;
     results.hidden = false; return;
   }
-  results.innerHTML = matches.map(m => `
+  results.innerHTML = scored.map(({item: m}) => `
     <div class="search-result" data-slug="${esc(m.slug)}">
       <i class="fa-solid fa-file search-result__icon"></i>
-      <span class="search-result__title">${highlight(esc(m.title), lower)}</span>
+      <span class="search-result__title">${highlight(esc(m.title), terms[0])}</span>
       ${m.group ? `<span class="search-result__path">${esc(m.group)}</span>` : ''}
     </div>`).join('');
   results.hidden = false;
@@ -1161,6 +1244,8 @@ function buildMarkedHtml(body) {
   }
 
   let html = marked.parse(body);
+  // Wrap tables for horizontal scroll on mobile
+  html = html.replace(/<table\b[^>]*>[\s\S]*?<\/table>/g, match => `<div class="table-wrap">${match}</div>`);
   html = renderMath(html);
 
   if (typeof DOMPurify !== 'undefined') {
@@ -1503,7 +1588,7 @@ const AdminEditor = (() => {
 
     // Pre-fill from storage — GH.getToken() is in outer scope, username stored separately
     tokenInput.value    = GH.getToken();
-    usernameInput.value = localStorage.getItem(key('gh_username')) || '';
+    usernameInput.value = Storage.get(key('gh_username')) || '';
     usernameInput.focus();
 
     function showError(msg) {
@@ -1567,7 +1652,7 @@ const AdminEditor = (() => {
 
         // All checks passed — persist credentials
         GH.setToken(token);
-        localStorage.setItem(key('gh_username'), userData.login);
+        Storage.set(key('gh_username'), userData.login);
         overlay.remove();
         toast(`✓ Connected as ${userData.login}`);
         onSuccess();
@@ -1727,7 +1812,7 @@ const AdminEditor = (() => {
   function schedulePreview() {
     clearTimeout(_previewTimer);
     _previewTimer = setTimeout(() => { if (_viewMode !== 'editor') updatePreview(); }, 400);
-    if (_slug && _monacoEditor) sessionStorage.setItem(`wdraft_${_slug}`, _monacoEditor.getValue());
+    if (_slug && _monacoEditor) Storage.session.set(`wdraft_${_slug}`, _monacoEditor.getValue());
     setStatus('unsaved', 'warn');
   }
   function updatePreview() {
@@ -1766,7 +1851,7 @@ const AdminEditor = (() => {
       const { content, sha } = await GH.getFile(`docs/${slug}.md`);
       _sha  = sha || '';
       _slug = slug;
-      const draft    = sessionStorage.getItem(`wdraft_${slug}`);
+      const draft    = Storage.session.get(`wdraft_${slug}`);
       const raw      = (draft && draft !== content) ? draft : content;
       const hasDraft = !!(draft && draft !== content);
       loadIntoMonaco(slug, raw);
@@ -1851,7 +1936,7 @@ const AdminEditor = (() => {
       const { sha } = await GH.getFile(`docs/${_slug}.md`);
       const putResult = await GH.putFile(`docs/${_slug}.md`, raw, msg, sha || _sha || undefined);
       _sha = putResult?.content?.sha || '';
-      sessionStorage.removeItem(`wdraft_${_slug}`);
+      Storage.session.remove(`wdraft_${_slug}`);
       State.docCache[_slug] = raw;
       setStatus('saved', 'ok');
       toast('✓ Committed to GitHub!');
@@ -1897,7 +1982,7 @@ const AdminEditor = (() => {
       // Open the PR
       const pr = await GH.createPR(prBranch, baseBranch, msg, `Updated \`docs/${_slug}.md\`\n\n_Created via Shanios Docs inline editor._`);
 
-      sessionStorage.removeItem(`wdraft_${_slug}`);
+      Storage.session.remove(`wdraft_${_slug}`);
       setStatus('PR opened', 'ok');
       toast(`✓ PR #${pr.number} opened — click to view`);
 
@@ -1920,14 +2005,14 @@ const AdminEditor = (() => {
         _liveNavTree = extractNavTree(content);
         renderNavTreePanel();
         // Cache for offline fallback
-        try { localStorage.setItem(key('nav_cache'), JSON.stringify(_liveNavTree)); } catch {}
+        try { Storage.set(key('nav_cache'), JSON.stringify(_liveNavTree)); } catch {}
         return;
       }
     } catch(e) {
       console.warn('Could not load nav from GitHub:', e.message);
     }
     // Fallback 1: cached nav from previous load
-    const cachedNav = localStorage.getItem(key('nav_cache'));
+    const cachedNav = Storage.get(key('nav_cache'));
     if (cachedNav) {
       try {
         _liveNavTree = JSON.parse(cachedNav);
@@ -2349,7 +2434,7 @@ const AdminEditor = (() => {
     // Build breadcrumb
     const breadcrumb = buildBreadcrumb(slug);
 
-    const draft    = sessionStorage.getItem(`wdraft_${slug}`);
+    const draft    = Storage.session.get(`wdraft_${slug}`);
     const hasDraft = !!(draft && draft !== _rawMd);
     if (hasDraft) _rawMd = draft;
 
@@ -2536,7 +2621,7 @@ const AdminEditor = (() => {
   // ── Discard draft ─────────────────────────────────────────────
   async function _discardDraft() {
     if (!_slug) return;
-    sessionStorage.removeItem(`wdraft_${_slug}`);
+    Storage.session.remove(`wdraft_${_slug}`);
     const banner = document.getElementById('admin-draft-banner');
     if (banner) banner.style.display = 'none';
     try {
@@ -2827,6 +2912,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderNavTree(CONFIG.NAV_TREE, initialSlug);
 
   initMobileSidebar();
+  initMobileSwipe();
   initSearch();
   initBackToTop();
 
@@ -2845,7 +2931,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const applyFontSize = (size) => {
     const prose = document.querySelectorAll('.prose');
     prose.forEach(el => el.style.fontSize = size + 'px');
-    localStorage.setItem(key('fontsize'), size);
+    Storage.set(key('fontsize'), size);
   };
   $('#font-decrease')?.addEventListener('click', () => {
     State.fontSize = Math.max(13, State.fontSize - 1);

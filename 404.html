@@ -10,6 +10,12 @@
     // GitHub Pages SPA redirect — rewrite 404 paths back to index.html
     // preserving the path, query string, and hash so the SPA router can restore them.
     (function () {
+      var ua = navigator.userAgent || '';
+      var isBot = /bot|crawler|spider|googlebot|bingbot|yandex|baidu|facebookexternalhit|twitterbot|linkedinbot|slackbot/i.test(ua);
+
+      // NEVER redirect search bots — let them see the real 404
+      if (isBot) return;
+
       var l = window.location;
       var path   = l.pathname;
       var search = l.search ? l.search.slice(1) : '';
@@ -27,13 +33,16 @@
   </script>
   <script>
     (function () {
-      // Prefix must match CONFIG.STORAGE_PREFIX + '_' used in script-docs.js
-      var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
-                  ? CONFIG.STORAGE_PREFIX + '_'
-                  : 'shanidocs_';
-      var t = localStorage.getItem(pfx + 'theme') ||
-              (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      document.documentElement.setAttribute('data-theme', t);
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
     })();
   </script>
 </head>
