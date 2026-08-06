@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
 
-  <title>Networking &amp; Infrastructure — Shanios Docs</title>
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>Networking &amp; Infrastructure — Shanios Docs</title>
   <meta name="description" id="meta-desc"     content="Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
@@ -12,16 +13,13 @@
   <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/servers/networking">
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
-  <meta property="og:type"      id="og-type"       content="article">
-  <meta property="og:title"     id="og-title"      content="Networking &amp; Infrastructure">
-  <meta property="og:description" id="og-desc"     content="Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …">
-  <meta property="og:url"       id="og-url"        content="https://docs.shani.dev/doc/servers/networking">
-  <meta property="og:image"     id="og-image"      content="https://shani.dev/assets/images/logo.svg">
-  <meta property="og:image:alt" id="og-image-alt"  content="Networking &amp; Infrastructure">
-  <meta property="article:published_time" content="2026-04-22T00:00:00.000Z">
-  <meta property="article:modified_time"  content="2026-04-22T00:00:00.000Z">
-  <meta property="article:author"  content="Shrinivas Kumbhar">
-  <meta property="article:section" content="Self-Hosting &amp; Servers">
+  <meta property="og:title"     id="og-title"     content="Networking &amp; Infrastructure">
+  <meta property="og:description" id="og-desc"    content="Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/networking">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image:alt" id="og-image-alt" content="Networking &amp; Infrastructure">
+  <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
@@ -29,13 +27,17 @@
   <meta name="twitter:description" id="tw-desc"  content="Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Networking & Infrastructure","description":"Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …","url":"https://docs.shani.dev/doc/servers/networking","datePublished":"2026-04-22T00:00:00.000Z","dateModified":"2026-04-22T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Networking & Infrastructure","description":"Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …","url":"https://docs.shani.dev/doc/servers/networking","datePublished":"2026-04-22T00:00:00.000Z","dateModified":"2026-04-22T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
   <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
   <link rel="manifest" href="/manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
@@ -43,43 +45,57 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" id="pwa-theme-color" content="#161514">
 
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
   <script>
     (function () {
-      var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
-                  ? CONFIG.STORAGE_PREFIX + '_'
-                  : 'shanidocs_';
-      var t = localStorage.getItem(pfx + 'theme') ||
-              (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      document.documentElement.setAttribute('data-theme', t);
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
     })();
   </script>
 
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
         href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+
+  <!-- KaTeX math -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
 </head>
 <body>
 
@@ -91,51 +107,79 @@
     </div>
   </noscript>
 
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
   <div id="page-loader" aria-hidden="true">
     <div class="loader__logo">
-      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" height="40">
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs">
     </div>
     <div class="loader__track"><div class="loader__bar"></div></div>
     <p class="loader__text">Loading wiki…</p>
   </div>
 
-  <div class="auspicious-bar" aria-label="Shanios Docs">
+  <!-- ── Auspicious bar — always-visible slim bar above topbar ────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
     <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
   </div>
 
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
   <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
     <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
       <i class="fa-solid fa-bars"></i>
     </button>
+
+    <!-- Logo -->
     <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
-      <img src="https://shani.dev/assets/images/about.svg" alt="Shanios Docs" id="logo-img" height="24">
-      <span class="topbar__logo-word logo__word">docs</span>
+      <img src="" alt="Shanios" id="logo-img" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
     </a>
+
+    <!-- Search -->
     <div class="topbar__search-wrap" role="search">
       <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-      <input type="search" id="wiki-search" class="topbar__search"
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
         placeholder="Search docs… (/ or Ctrl+K)"
-        aria-label="Search documentation" autocomplete="off" spellcheck="false">
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
       <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
     </div>
+
+    <!-- Actions -->
     <div class="topbar__actions">
+
+      <!-- Font size decrease -->
       <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
         <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
       </button>
+
+      <!-- Font size increase -->
       <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
         <i class="fa-solid fa-text-height"></i>
       </button>
+
+      <!-- Theme toggle -->
       <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
         <i class="fa-solid fa-moon" id="theme-icon"></i>
       </button>
-      <a class="btn-icon" href="https://github.com/shani8dev" target="_blank" rel="noopener" aria-label="View on GitHub">
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
         <i class="fa-brands fa-github"></i>
       </a>
     </div>
   </header>
 
+  <!-- Sidebar overlay (mobile) -->
   <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
 
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
   <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
     <div class="sidebar__header">
       <div class="sidebar__section-label">Documentation</div>
@@ -143,11 +187,15 @@
     <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
   </aside>
 
+  <!-- Reading progress bar — must be outside .content (overflow:auto creates new stacking context) -->
   <div class="reading-progress" aria-hidden="true">
     <div class="reading-progress__bar" id="reading-bar"></div>
   </div>
 
+  <!-- ── Main content ──────────────────────────────────────────────── -->
   <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
     <div class="content__inner" id="doc-content" role="article">
       <!--
         Prerendered content below — real text for crawlers and no-JS
@@ -1336,16 +1384,40 @@ ping $(podman inspect jellyfin --format '{{range .NetworkSettings.Networks}}{{.I
 <p>| Issue | Solution | |-------|----------| | Pi-hole not blocking ads on some devices | Verify the device's DNS is pointing at the server IP (not 1.1.1.1 hardcoded); check Pi-hole's query log to confirm queries are reaching it | | AdGuard DoT not working | Ensure <code>853/tcp</code> is open in firewalld; some clients need the full TLS hostname in the format <code>tls://server-ip</code> | | Port 53 conflict | <code>systemd-resolved</code> may be listening on port 53 — run <code>sudo systemctl disable --now systemd-resolved</code> or configure it to use a stub listener only | | Traefik not picking up containers | Ensure <code>--providers.docker=true</code> in the Traefik command args; verify containers have the <code>traefik.enable=true</code> label and are on the same network as Traefik | | Traefik HTTPS cert not issued | Check the ACME email is set; ensure port <code>80</code> is publicly reachable for the HTTP challenge; use DNS challenge for wildcard certs | | HAProxy backend health check fails | Verify the health check path returns HTTP 200 from the backend; confirm <code>option httpchk</code> sends the correct <code>Host</code> header; check <code>podman logs haproxy</code> | | HAProxy stats page blank | Confirm port <code>9000</code> is bound and <code>stats auth</code> credentials are correct; the stats URI defaults to <code>/</code> | | NPM SSL certificate fails | Ensure ports <code>80</code> and <code>443</code> are publicly reachable and DNS points at your server; check Let's Encrypt rate limits if retrying | | Technitium zones not resolving | Ensure the zone type is set to <code>Primary</code> and a valid SOA record exists; test with <code>dig @localhost home.local</code> | | LibreNMS no data after adding device | Verify SNMP community string matches the device; check <code>podman logs dispatcher</code> for polling errors; ensure UDP 161 is accessible | | LibreNMS RRD graphs blank | The dispatcher container must be running; check Redis connectivity between librenms and dispatcher containers | | NetBox <code>SECRET_KEY too short</code> | Generate with <code>openssl rand -base64 50</code>; must be at least 50 characters | | NetBox worker not processing jobs | Ensure the <code>netbox-worker</code> container is running; check Redis is reachable; view logs with <code>podman logs netbox-worker</code> | | Ntopng shows no traffic | Ensure <code>--network host</code> is set and the correct interface is specified; verify the interface has traffic with <code>tcpdump -i eth0 -c 5</code> | | Blocky not blocking ads | Verify the blocklist URLs are reachable from the container on startup; check <code>podman logs blocky</code> for download errors; confirm client DNS points at the server | | PowerDNS zone not resolving | Run <code>pdnsutil check-zone home.local</code> and <code>pdnsutil rectify-zone home.local</code>; confirm the SOA record exists; test with <code>dig @127.0.0.1 -p 5300 home.local</code> | | PowerDNS Admin can't connect to API | Verify <code>PDNS_API_KEY</code> matches <code>api-key</code> in <code>pdns.conf</code>; ensure the <code>webserver</code> is enabled and <code>webserver-allow-from=0.0.0.0/0</code> is set | | Kea DHCP leases not assigned | Confirm <code>network_mode: host</code> is set; verify the interface name in <code>interfaces-config</code> matches your LAN interface (<code>ip link show</code>) | | Kea DHCP conflict with existing DHCP | Disable DHCP on your router before starting Kea; two DHCP servers on the same subnet cause unpredictable address assignment | | phpIPAM database installation fails | Ensure MariaDB is fully started (<code>podman logs db</code>); try refreshing the setup page after 30 seconds | | Squid <code>NONE/400 Bad Request</code> | Confirm the client is sending a proper HTTP proxy request; for HTTPS, the client must send a <code>CONNECT</code> request first | | Squid cache not filling | Verify the cache directory exists and is writable; run <code>squid -z</code> inside the container to initialise the cache structure | | ddns-updater not updating | Check <code>podman logs ddns-updater</code>; verify the API token has <code>Zone:Edit</code> permission in Cloudflare; check <code>config.json</code> syntax with <code>podman exec ddns-updater ddns-updater --help</code> | | ddns-updater shows wrong current IP | The <code>PUBLICIP_FETCHERS: all</code> strategy uses multiple sources and picks the majority result; if behind a corporate NAT you may need to set <code>PUBLICIP_HTTP_PROVIDERS</code> to a specific provider | | frp client can't connect to server | Check port <code>7000/tcp</code> is open on the VPS firewall; verify <code>auth.token</code> matches in both <code>frps.toml</code> and <code>frpc.toml</code>; check <code>podman logs frps</code> for <code>authentication failed</code> errors | | frp HTTP vhost not routing | Ensure the <code>customDomains</code> value resolves to your VPS IP; verify <code>vhostHTTPPort</code> in <code>frps.toml</code> matches the port you're testing; check that <code>type = &quot;http&quot;</code> (not <code>tcp</code>) is set in <code>frpc.toml</code> |</p>
 <p>| FRR container exits immediately | Check <code>~/frr/etc/daemons</code> exists and <code>zebra=yes</code> is set; FRR requires zebra regardless of which other daemons are enabled | | FRR <code>permission denied</code> on routing table | Ensure <code>cap_add: [NET_ADMIN, NET_RAW, SYS_ADMIN]</code> is in compose.yaml; verify <code>network_mode: host</code> is set | | BGP peer stuck in <code>Active</code> state | Confirm the peer IP is reachable (<code>ping</code> from within the container); check both sides have each other's router-id as neighbor; verify AS numbers match the expected iBGP/eBGP setup | | BGP routes received but not in kernel table | Check <code>show ip route bgp</code> vs <code>show ip bgp</code> — missing routes may be filtered by a route-map or have a lower admin distance than a static/connected route | | OSPF neighbor stuck in <code>Init</code> | Both sides must be in the same area and have matching hello/dead timers; check <code>passive-interface</code> isn't blocking the peering interface | | <code>hcloud</code> command not found after Nix install | Ensure <code>~/.nix-profile/bin</code> is on your <code>PATH</code>; run <code>source ~/.nix-profile/etc/profile.d/nix.sh</code> or add it to <code>~/.bashrc</code> | | AWS CLI <code>NoCredentialsError</code> | Run <code>aws configure</code> or export <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code> environment variables | | cloud-init not running on Hetzner VM | Verify the user-data was passed correctly: <code>hcloud server describe &lt;name&gt;</code> shows <code>User Data: yes</code>; SSH in and check <code>cloud-init status</code> and <code>journalctl -u cloud-init</code> | | cloud-init schema validation fails | Common issues: missing <code>#cloud-config</code> header on line 1; YAML indentation errors; <code>runcmd</code> items must be lists (use <code>- command</code> not <code>command</code>) |</p></div>
     </div>
+
   </main>
 
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
   <button class="to-top" id="back-top" aria-label="Back to top">
     <i class="fa-solid fa-arrow-up"></i>
   </button>
 
+  <!-- ── Toast notification ────────────────────────────────────────── -->
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
   <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
 </body>
 </html>

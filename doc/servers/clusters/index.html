@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
 
-  <title>Clusters &amp; High Availability — Shanios Docs</title>
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>Clusters &amp; High Availability — Shanios Docs</title>
   <meta name="description" id="meta-desc"     content="Clusters &amp; High Availability  Portability note: Compose examples use rootless Podman and . When using Docker, replace  with  and  with  (add  to the servic…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
@@ -12,16 +13,13 @@
   <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/servers/clusters">
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
-  <meta property="og:type"      id="og-type"       content="article">
-  <meta property="og:title"     id="og-title"      content="Clusters &amp; High Availability">
-  <meta property="og:description" id="og-desc"     content="Clusters &amp; High Availability  Portability note: Compose examples use rootless Podman and . When using Docker, replace  with  and  with  (add  to the servic…">
-  <meta property="og:url"       id="og-url"        content="https://docs.shani.dev/doc/servers/clusters">
-  <meta property="og:image"     id="og-image"      content="https://shani.dev/assets/images/logo.svg">
-  <meta property="og:image:alt" id="og-image-alt"  content="Clusters &amp; High Availability">
-  <meta property="article:published_time" content="2026-04-22T00:00:00.000Z">
-  <meta property="article:modified_time"  content="2026-04-22T00:00:00.000Z">
-  <meta property="article:author"  content="Shrinivas Kumbhar">
-  <meta property="article:section" content="Self-Hosting &amp; Servers">
+  <meta property="og:title"     id="og-title"     content="Clusters &amp; High Availability">
+  <meta property="og:description" id="og-desc"    content="Clusters &amp; High Availability  Portability note: Compose examples use rootless Podman and . When using Docker, replace  with  and  with  (add  to the servic…">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/clusters">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image:alt" id="og-image-alt" content="Clusters &amp; High Availability">
+  <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
@@ -29,13 +27,17 @@
   <meta name="twitter:description" id="tw-desc"  content="Clusters &amp; High Availability  Portability note: Compose examples use rootless Podman and . When using Docker, replace  with  and  with  (add  to the servic…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Clusters & High Availability","description":"Clusters & High Availability  Portability note: Compose examples use rootless Podman and . When using Docker, replace  with  and  with  (add  to the servic…","url":"https://docs.shani.dev/doc/servers/clusters","datePublished":"2026-04-22T00:00:00.000Z","dateModified":"2026-04-22T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Clusters & High Availability","description":"Clusters & High Availability  Portability note: Compose examples use rootless Podman and . When using Docker, replace  with  and  with  (add  to the servic…","url":"https://docs.shani.dev/doc/servers/clusters","datePublished":"2026-04-22T00:00:00.000Z","dateModified":"2026-04-22T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
   <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
   <link rel="manifest" href="/manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
@@ -43,43 +45,57 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" id="pwa-theme-color" content="#161514">
 
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
   <script>
     (function () {
-      var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
-                  ? CONFIG.STORAGE_PREFIX + '_'
-                  : 'shanidocs_';
-      var t = localStorage.getItem(pfx + 'theme') ||
-              (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      document.documentElement.setAttribute('data-theme', t);
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
     })();
   </script>
 
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
         href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+
+  <!-- KaTeX math -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
 </head>
 <body>
 
@@ -91,51 +107,79 @@
     </div>
   </noscript>
 
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
   <div id="page-loader" aria-hidden="true">
     <div class="loader__logo">
-      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" height="40">
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs">
     </div>
     <div class="loader__track"><div class="loader__bar"></div></div>
     <p class="loader__text">Loading wiki…</p>
   </div>
 
-  <div class="auspicious-bar" aria-label="Shanios Docs">
+  <!-- ── Auspicious bar — always-visible slim bar above topbar ────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
     <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
   </div>
 
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
   <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
     <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
       <i class="fa-solid fa-bars"></i>
     </button>
+
+    <!-- Logo -->
     <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
-      <img src="https://shani.dev/assets/images/about.svg" alt="Shanios Docs" id="logo-img" height="24">
-      <span class="topbar__logo-word logo__word">docs</span>
+      <img src="" alt="Shanios" id="logo-img" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
     </a>
+
+    <!-- Search -->
     <div class="topbar__search-wrap" role="search">
       <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-      <input type="search" id="wiki-search" class="topbar__search"
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
         placeholder="Search docs… (/ or Ctrl+K)"
-        aria-label="Search documentation" autocomplete="off" spellcheck="false">
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
       <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
     </div>
+
+    <!-- Actions -->
     <div class="topbar__actions">
+
+      <!-- Font size decrease -->
       <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
         <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
       </button>
+
+      <!-- Font size increase -->
       <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
         <i class="fa-solid fa-text-height"></i>
       </button>
+
+      <!-- Theme toggle -->
       <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
         <i class="fa-solid fa-moon" id="theme-icon"></i>
       </button>
-      <a class="btn-icon" href="https://github.com/shani8dev" target="_blank" rel="noopener" aria-label="View on GitHub">
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
         <i class="fa-brands fa-github"></i>
       </a>
     </div>
   </header>
 
+  <!-- Sidebar overlay (mobile) -->
   <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
 
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
   <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
     <div class="sidebar__header">
       <div class="sidebar__section-label">Documentation</div>
@@ -143,11 +187,15 @@
     <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
   </aside>
 
+  <!-- Reading progress bar — must be outside .content (overflow:auto creates new stacking context) -->
   <div class="reading-progress" aria-hidden="true">
     <div class="reading-progress__bar" id="reading-bar"></div>
   </div>
 
+  <!-- ── Main content ──────────────────────────────────────────────── -->
   <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
     <div class="content__inner" id="doc-content" role="article">
       <!--
         Prerendered content below — real text for crawlers and no-JS
@@ -1332,16 +1380,40 @@ podman exec etcd-cluster-etcd1-1 etcdctl \
 <h2>Troubleshooting</h2>
 <p>| Issue | Solution | |-------|----------| | Elasticsearch / OpenSearch <code>vm.max_map_count too low</code> | Run <code>sudo sysctl -w vm.max_map_count=262144</code> on the host and persist in <code>/etc/sysctl.d/99-elasticsearch.conf</code> — required on all nodes | | Elasticsearch cluster status RED | Check unassigned shards: <code>curl localhost:9200/_cat/shards?v \| grep UNASSIGNED</code>; caused by a data node being down or replicas exceeding available nodes | | Elasticsearch <code>master not discovered</code> on start | <code>cluster.initial_master_nodes</code> must list all master-eligible node names exactly; remove this setting after first cluster formation | | Elasticsearch split-brain | Use exactly 3 or 5 master-eligible nodes; verify all nodes can reach each other on port <code>9300</code>; confirm <code>cluster.name</code> is identical across nodes | | OpenSearch <code>cluster_manager not discovered</code> | OpenSearch renamed <code>master</code> → <code>cluster_manager</code>; set <code>cluster.initial_cluster_manager_nodes</code> (not <code>initial_master_nodes</code>) | | OpenSearch UNASSIGNED shards | For single-node test clusters set <code>number_of_replicas: 0</code>; a single node cannot host its own replicas | | Kafka brokers not forming cluster | Confirm all nodes share the same <code>CLUSTER_ID</code>; generate once with <code>kafka-storage random-uuid</code>; verify <code>KAFKA_CONTROLLER_QUORUM_VOTERS</code> lists all node IDs and hostnames correctly | | Kafka consumer lag growing | Increase partition count or add consumer instances; verify no consumer is crashing on startup with <code>podman logs</code> | | Patroni <code>no leader</code> after start | etcd must be fully healthy before Patroni starts; check <code>curl http://etcd:2379/health</code>; verify all Patroni nodes can reach etcd | | Patroni failover not triggering | Check <code>podman logs</code> on all Patroni nodes; verify <code>PATRONI_ETCD3_HOSTS</code> is reachable; confirm <code>down-after-milliseconds</code> hasn't been set too high | | Redis Sentinel not promoting | Quorum requires at least 2 of 3 sentinels to agree the primary is down; ensure all 3 sentinel containers are running; check <code>sentinel masters</code> for the current primary state | | Valkey Cluster <code>MOVED</code> errors | Your client is not cluster-aware; use a Redis Cluster client (redis-py with <code>RedisCluster</code>, ioredis in cluster mode) — plain clients don't follow slot redirects | | Valkey Cluster <code>CLUSTERDOWN</code> | At least one shard has no available primary; check <code>cluster nodes</code> for failed nodes; recover or remove the failed node with <code>cluster forget</code> | | MongoDB replica set not electing primary | Needs 3 nodes for majority quorum (2 of 3); verify all 3 mongod processes are running and can reach each other on port <code>27017</code> | | MongoDB <code>rs.initiate()</code> fails | Run only from mongo1 once all 3 containers are fully started (check <code>podman logs</code>); the hostnames in <code>members[].host</code> must resolve inside the compose network | | RabbitMQ nodes not joining cluster | <code>RABBITMQ_ERLANG_COOKIE</code> must be byte-for-byte identical on all nodes; verify with <code>podman exec rabbitmq1 cat /var/lib/rabbitmq/.erlang.cookie</code> | | RabbitMQ <code>mnesia</code> partition after restart | Run <code>rabbitmqctl cluster_status</code> on all nodes; resolve with <code>rabbitmqctl forget_cluster_node &lt;node&gt;</code> and re-join the stale node | | Cassandra / ScyllaDB node not joining | Cassandra takes 30–60 s to fully start; bring up the seed node first and wait before starting additional nodes; check <code>nodetool status</code> for the token ring | | etcd cluster not reaching quorum | All 3 members must be able to reach each other on peer port <code>2380</code>; verify <code>ETCD_INITIAL_CLUSTER</code> lists the same URLs on all nodes | | VictoriaMetrics vminsert rejected writes | Verify <code>--storageNode</code> addresses resolve from the vminsert container; check <code>podman logs vminsert</code> for connectivity errors to vmstorage nodes |</p></div>
     </div>
+
   </main>
 
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
   <button class="to-top" id="back-top" aria-label="Back to top">
     <i class="fa-solid fa-arrow-up"></i>
   </button>
 
+  <!-- ── Toast notification ────────────────────────────────────────── -->
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
   <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
 </body>
 </html>
