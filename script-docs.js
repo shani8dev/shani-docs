@@ -27,16 +27,6 @@ const today    = () => new Date().toISOString().split('T')[0];
 const docPath  = slug => `docs/${slug}.md`;
 const draftKey = slug => `wdraft_${slug}`;
 
-// ── State ─────────────────────────────────────────────────────────
-const State = {
-  theme:      Storage.get(key('theme')) || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
-  docCache:   {},
-  currentSlug: null,
-  searchIndex: [],
-  fontSize:   parseInt(Storage.get(key('fontsize')) || '16'),
-  editMode:   false,
-};
-
 // ══════════════════════════════════════════════════════════════════
 //  SAFE STORAGE — wraps localStorage/sessionStorage with try/catch
 //  Prevents crashes in Safari Private Mode and locked-down browsers
@@ -51,6 +41,17 @@ const Storage = {
     remove(k){ try { sessionStorage.removeItem(k); }     catch {} }
   }
 };
+
+// ── State ─────────────────────────────────────────────────────────
+const State = {
+  theme:      Storage.get(key('theme')) || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
+  docCache:   {},
+  currentSlug: null,
+  searchIndex: [],
+  fontSize:   parseInt(Storage.get(key('fontsize')) || '16'),
+  editMode:   false,
+};
+
 // ── Apply initial theme ───────────────────────────────────────────
 document.documentElement.setAttribute('data-theme', State.theme);
 
