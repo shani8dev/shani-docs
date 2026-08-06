@@ -429,6 +429,10 @@ ON-PAGE TOC
   transition: color 0.15s;
 }
 .doc-toc__link:hover { color: var(--color-accent); }
+.doc-toc__link.is-active {
+  color: var(--color-accent);
+  font-weight: 600;
+}
 .doc-toc__item--h2 { counter-increment: toc-counter; }
 .doc-toc__item--h2 > .doc-toc__link::before {
   content: counter(toc-counter) ". ";
@@ -566,7 +570,6 @@ html[data-theme="light"] .prose pre code { color: var(--prose-pre-color); }
 .prose table {
   width: 100%; border-collapse: collapse;
   margin: 1.5em 0; font-size: 0.875rem;
-  overflow-x: auto; display: block;
 }
 .prose th {
   background: var(--color-bg-elevated); color: var(--color-text);
@@ -605,7 +608,8 @@ html[data-theme="light"] .prose pre code { color: var(--prose-pre-color); }
 /* ── Table wrap + CSV copy ───────────────────── */
 .table-wrap {
   margin: 1.5em 0; border: 1px solid var(--color-border);
-  border-radius: var(--radius-md); overflow: hidden;
+  border-radius: var(--radius-md); overflow-x: auto;
+  -webkit-overflow-scrolling: touch; max-width: 100%;
 }
 .table-bar {
   display: flex; justify-content: flex-end;
@@ -1199,7 +1203,7 @@ ADMIN EDITOR AREA — Monaco wrap & preview
 /* ── Admin panel overlay dim ─────────────────── */
 #admin-panel-overlay {
   display: none; position: fixed;
-  top: var(--topbar-h); left: 0; right: 0; bottom: 0;
+  top: calc(var(--ausbar-h) + var(--topbar-h)); left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.3); z-index: 299;
 }
 #admin-panel-overlay.is-visible { display: block; }
@@ -1306,7 +1310,6 @@ RESPONSIVE
 @media (max-width: 768px) {
   /* Prevent any element from blowing out the viewport width */
   .prose {
-    overflow-x: hidden;
     word-break: break-word;
     overflow-wrap: break-word;
   }
@@ -1319,16 +1322,7 @@ RESPONSIVE
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-  /* Tables: already display:block but need touch scroll */
-  .prose table {
-    -webkit-overflow-scrolling: touch;
-  }
-  /* Table wrap containers from JS: ensure scroll */
-  .table-wrap {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    max-width: 100%;
-  }
+  /* Tables scroll via .table-wrap (base rule already handles touch scroll) */
   /* KaTeX math display: scroll don't overflow */
   .prose .katex-display {
     overflow-x: auto;
@@ -1549,7 +1543,7 @@ SIDEBAR NAV EDITOR — injected by _renderSidebarNavEditor()
 /* ── Admin editor area wrap (full-content editor shell) ── */
 .admin-editor-area-wrap {
   display: flex; flex-direction: column;
-  height: calc(100vh - var(--topbar-h) - 4rem);
+  height: calc(100vh - var(--ausbar-h) - var(--topbar-h));
   min-height: 500px; overflow: hidden;
 }
 /* When editor is active, remove default content padding so editor fills space */
