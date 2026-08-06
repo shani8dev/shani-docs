@@ -14,5 +14,10 @@
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
+  ],
+  "categories": [
+    "education",
+    "reference",
+    "documentation"
   ]
 }

@@ -146,6 +146,7 @@ function renderCallouts(html) {
 const DOCS_DIR     = path.join(__dirname, 'docs');
 const OUT_PATH     = path.join(DOCS_DIR, 'manifest.json');
 const SITEMAP_PATH = path.join(__dirname, 'sitemap.xml');
+const FEED_PATH     = path.join(__dirname, 'feed.xml');
 const PWA_PATH     = path.join(__dirname, 'manifest.json');
 const DOC_DIR      = path.join(__dirname, 'doc');   // static stub output dir
 const NAV_PATH     = path.join(__dirname, 'nav-docs.js');
@@ -593,6 +594,47 @@ function build() {
 </urlset>`);
   console.log(`✓ sitemap.xml`);
 
+  // ── feed.xml (RSS 2.0) ────────────────────────────────────────────
+  // Same doc-walk that already builds manifest.json/sitemap.xml — no
+  // extra parsing pass needed. Sorted newest-first by `updated`
+  // front-matter, capped to the most recent 40 so the feed doesn't
+  // grow unbounded as the wiki accumulates hundreds of pages.
+  const FEED_ITEM_LIMIT = 40;
+  const rssDocs = docs
+    .filter(d => !d.draft)
+    .slice()
+    .sort((a, b) => (b.updated || '').localeCompare(a.updated || ''))
+    .slice(0, FEED_ITEM_LIMIT);
+
+  const toRfc822 = d => {
+    const date = d ? new Date(d + 'T00:00:00Z') : new Date();
+    return isNaN(date) ? new Date().toUTCString() : date.toUTCString();
+  };
+
+  const rssItems = rssDocs.map(d => `
+    <item>
+      <title>${escXml(d.title)}</title>
+      <link>${escXml(WIKI_URL)}/doc/${escXml(d.slug)}</link>
+      <guid isPermaLink="true">${escXml(WIKI_URL)}/doc/${escXml(d.slug)}</guid>
+      <description>${escXml(d.description || SITE_DESC)}</description>
+      <pubDate>${toRfc822(d.updated)}</pubDate>
+      <category>${escXml(d.section || 'Docs')}</category>
+      <author>${escXml(AUTHOR)}</author>
+    </item>`).join('');
+
+  fs.writeFileSync(FEED_PATH, `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>${escXml(SITE_TITLE)}</title>
+    <link>${escXml(WIKI_URL)}/</link>
+    <description>${escXml(SITE_DESC)}</description>
+    <language>${escXml(LANG)}</language>
+    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+    <atom:link href="${escXml(WIKI_URL)}/feed.xml" rel="self" type="application/rss+xml"/>${rssItems}
+  </channel>
+</rss>`);
+  console.log(`✓ feed.xml  (${rssDocs.length} item(s))`);
+
   // ── manifest.json (PWA) ─────────────────────────────────────────
   fs.writeFileSync(PWA_PATH, JSON.stringify({
     name:             PWA_NAME,
@@ -604,6 +646,7 @@ function build() {
     theme_color:      PWA_THEME_COLOR,
     lang:             LANG,
     icons: [{ src: FAVICON_URL, sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }],
+    categories: ['education', 'reference', 'documentation'],
   }, null, 2));
   console.log(`✓ manifest.json (PWA)`);
 

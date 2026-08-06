@@ -945,11 +945,36 @@ function initMobileSidebar() {
 // ── Search ────────────────────────────────────────────────────────
 let searchTimeout = null, searchSelectedIdx = -1;
 
+// Fuse.js fuzzy search — lazy-loaded from jsDelivr on first focus/keystroke
+// so it costs nothing on page load. Falls back to the built-in substring
+// scorer below until (or unless) it finishes loading. Set
+// CONFIG.FUZZY_SEARCH_ENABLED = false to always use the substring scorer.
+let _fuseInstance = null;
+function _buildFuse() {
+  return new Fuse(State.searchIndex, {
+    keys: ['title', 'group', 'slug'],
+    threshold: 0.35,
+    ignoreLocation: true,
+    minMatchCharLength: 2,
+  });
+}
+function loadFuse() {
+  if (!CONFIG.FUZZY_SEARCH_ENABLED) return;
+  if (typeof Fuse !== 'undefined') { if (!_fuseInstance) _fuseInstance = _buildFuse(); return; }
+  if (document.getElementById('fuse-script')) return;
+  const s = document.createElement('script');
+  s.id = 'fuse-script';
+  s.src = 'https://cdn.jsdelivr.net/npm/fuse.js@7/dist/fuse.min.js';
+  s.onload = () => { _fuseInstance = _buildFuse(); };
+  document.head.appendChild(s);
+}
+
 function initSearch() {
   const input   = $('#wiki-search');
   const results = $('#search-results');
   if (!input || !results) return;
 
+  input.addEventListener('focus', loadFuse, { once: true });
   input.addEventListener('input', () => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => doSearch(input.value.trim()), 200);
@@ -972,22 +997,31 @@ function doSearch(q) {
   if (!results) return;
   if (!q) { results.innerHTML = ''; results.hidden = true; return; }
   const terms = q.toLowerCase().trim().split(/\s+/).filter(Boolean);
-  const scored = State.searchIndex.map(item => {
-    let score = 0;
-    const t = item.title.toLowerCase();
-    const g = item.group.toLowerCase();
-    const s = item.slug.toLowerCase();
-    terms.forEach(term => {
-      if (t === term) score += 12;
-      else if (t.startsWith(term)) score += 8;
-      else if (t.includes(term)) score += 5;
-      if (s.includes(term)) score += 3;
-      if (g.includes(term)) score += 2;
-    });
-    return { item, score };
-  }).filter(x => x.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 8);
+
+  // Prefer Fuse.js (typo-tolerant) once it's loaded; otherwise fall back
+  // to the substring/prefix scorer so search still works immediately.
+  let scored;
+  if (CONFIG.FUZZY_SEARCH_ENABLED && typeof Fuse !== 'undefined') {
+    if (!_fuseInstance) _fuseInstance = _buildFuse();
+    scored = _fuseInstance.search(q).slice(0, 8).map(r => ({ item: r.item }));
+  } else {
+    scored = State.searchIndex.map(item => {
+      let score = 0;
+      const t = item.title.toLowerCase();
+      const g = item.group.toLowerCase();
+      const s = item.slug.toLowerCase();
+      terms.forEach(term => {
+        if (t === term) score += 12;
+        else if (t.startsWith(term)) score += 8;
+        else if (t.includes(term)) score += 5;
+        if (s.includes(term)) score += 3;
+        if (g.includes(term)) score += 2;
+      });
+      return { item, score };
+    }).filter(x => x.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8);
+  }
 
   if (!scored.length) {
     results.innerHTML = `<div class="search-result__empty">No results for "<strong>${esc(q)}</strong>"</div>`;
