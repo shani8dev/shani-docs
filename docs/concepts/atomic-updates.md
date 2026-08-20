@@ -118,4 +118,10 @@ For channel switching commands, manual update commands, rollback, and storage ma
 
 ## Storage Efficiency
 
-The dual-slot architecture is not as expensive on disk as it sounds. Btrfs Copy-on-Write shares unchanged data blocks between `@blue` and `@green` — only changed files consume additional space, typically around 18% overhead compared to a single-image system. On top of that, `bees` continuously deduplicates shared content across all subvolumes. Btrfs zstd compression typically reduces image footprint by a further 30–50%.
+The dual-slot architecture is not as expensive on disk as it sounds, for three concrete reasons rather than one fixed number:
+
+- Every subvolume in `fstab` (`@root`, `@home`, `@data`, and the `@data/varlib/*` bind-mount sources) mounts with `compress=zstd`, so file content is transparently compressed on write.
+- `@blue`/`@green` are seeded as Btrfs snapshots of each other, not independent copies — Copy-on-Write means only blocks that actually differ between the two slots consume extra space; identical blocks are shared on disk.
+- `bees` runs continuously in the background (`beesd@<uuid>.service`) deduplicating shared content across all subvolumes, on top of whatever CoW sharing already gives you for free.
+
+There's no fixed "X% overhead" figure to quote here — actual savings depend on how much changes between updates and how compressible your data is — but the combination means a second slot rarely costs anywhere near a second full copy of the OS.

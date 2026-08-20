@@ -265,7 +265,8 @@ Changes in upper (@data) survive OS updates — only the lower is replaced.</cod
 <p>Key bind mounts from <code>@data/varlib/</code> → <code>/var/lib/</code>:</p>
 <p>| Category | Examples | |----------|---------| | System Core | <code>dbus</code>, <code>systemd</code>, <code>fontconfig</code> | | Networking | <code>NetworkManager</code>, <code>bluetooth</code>, <code>firewalld</code> | | File Sharing | <code>samba</code>, <code>nfs</code> | | Remote Access & VPN | <code>caddy</code>, <code>tailscale</code>, <code>cloudflared</code>, <code>geoclue</code> | | Display Manager | <code>gdm</code>, <code>sddm</code>, <code>colord</code> | | Audio & Peripherals | <code>pipewire</code>, <code>cups</code>, <code>sane</code>, <code>upower</code> | | Auth & Security | <code>fprint</code>, <code>AccountsService</code>, <code>boltd</code>, <code>sshd</code>, <code>tpm2-tss</code> | | Spool | <code>cron</code>, <code>at</code>, <code>cups</code> print queue, <code>postfix</code> |</p>
 <p>All bind mounts use:</p>
-<pre><code>bind,nofail,x-systemd.after=var.mount,x-systemd.requires-mounts-for=/data</code></pre></div>
+<pre><code>bind,nofail,x-systemd.after=var.mount,x-systemd.after=data.mount</code></pre>
+<p>(confirmed against the real fstab template in <code>shani-install-media/image_profiles/shared/overlay/rootfs/etc/fstab</code>)</p></div>
     </div>
 
   </main>

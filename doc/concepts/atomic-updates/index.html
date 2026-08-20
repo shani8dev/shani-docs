@@ -287,7 +287,13 @@ btrfs property set -f -ts @green ro true</code></pre>
 <p>| Channel | Cadence | Use Case | |---------|---------|----------| | <code>stable</code> | Monthly | Default — recommended for all users | | <code>latest</code> | More frequent | Early access, testing |</p>
 <p>For channel switching commands, manual update commands, rollback, and storage management, see <a href="../updates/system">System Updates</a>.</p>
 <h2>Storage Efficiency</h2>
-<p>The dual-slot architecture is not as expensive on disk as it sounds. Btrfs Copy-on-Write shares unchanged data blocks between <code>@blue</code> and <code>@green</code> — only changed files consume additional space, typically around 18% overhead compared to a single-image system. On top of that, <code>bees</code> continuously deduplicates shared content across all subvolumes. Btrfs zstd compression typically reduces image footprint by a further 30–50%.</p></div>
+<p>The dual-slot architecture is not as expensive on disk as it sounds, for three concrete reasons rather than one fixed number:</p>
+<ul>
+<li>Every subvolume in <code>fstab</code> (<code>@root</code>, <code>@home</code>, <code>@data</code>, and the <code>@data/varlib/*</code> bind-mount sources) mounts with <code>compress=zstd</code>, so file content is transparently compressed on write.</li>
+<li><code>@blue</code>/<code>@green</code> are seeded as Btrfs snapshots of each other, not independent copies — Copy-on-Write means only blocks that actually differ between the two slots consume extra space; identical blocks are shared on disk.</li>
+<li><code>bees</code> runs continuously in the background (<code>beesd@&lt;uuid&gt;.service</code>) deduplicating shared content across all subvolumes, on top of whatever CoW sharing already gives you for free.</li>
+</ul>
+<p>There's no fixed "X% overhead" figure to quote here — actual savings depend on how much changes between updates and how compressible your data is — but the combination means a second slot rarely costs anywhere near a second full copy of the OS.</p></div>
     </div>
 
   </main>

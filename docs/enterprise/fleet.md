@@ -33,7 +33,7 @@ The result is a fleet model that looks more like container orchestration than tr
 
 ### Unattended and Low-Interaction Installs
 
-The graphical installer (`os-installer`) is driven entirely by `/etc/os-installer/config.yaml`, plus a set of shell scripts (`scripts/prepare.sh`, `scripts/install.sh`, `scripts/configure.sh`) that `os-installer` invokes with the user's choices exported as `OSI_*` environment variables (`OSI_DEVICE_PATH`, `OSI_USE_ENCRYPTION`, `OSI_ENCRYPTION_PIN`, `OSI_USER_AUTOLOGIN`, etc.). Two configs ship in `os-installer-config`: `config.yaml` (general/USB media) and `config-git.yaml` (used for the git-built variant). Both are real, working configs, not templates — an OEM builds a custom image profile with its own `config.yaml` to control the install flow:
+The graphical installer (`os-installer`) is driven entirely by `/etc/os-installer/config.yaml`, plus a set of shell scripts (`scripts/prepare.sh`, `scripts/install.sh`, `scripts/configure.sh`) that `os-installer` invokes with the user's choices exported as `OSI_*` environment variables (`OSI_DEVICE_PATH`, `OSI_USE_ENCRYPTION`, `OSI_ENCRYPTION_PIN`, `OSI_USER_AUTOLOGIN`, etc.). `config.yaml` is the only config file in play — it's a real, working config, not a template — so an OEM builds a custom image profile with its own `config.yaml` to control the install flow:
 
 ```yaml
 # os-installer-config/config.yaml — keys relevant to a low-touch OEM install

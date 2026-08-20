@@ -99,5 +99,6 @@ Key bind mounts from `@data/varlib/` → `/var/lib/`:
 
 All bind mounts use:
 ```
-bind,nofail,x-systemd.after=var.mount,x-systemd.requires-mounts-for=/data
+bind,nofail,x-systemd.after=var.mount,x-systemd.after=data.mount
 ```
+(confirmed against the real fstab template in `shani-install-media/image_profiles/shared/overlay/rootfs/etc/fstab`)

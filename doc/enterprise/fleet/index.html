@@ -226,7 +226,7 @@
 <p>---</p>
 <h2>OEM Deployment</h2>
 <h3>Unattended and Low-Interaction Installs</h3>
-<p>The graphical installer (<code>os-installer</code>) is driven entirely by <code>/etc/os-installer/config.yaml</code>, plus a set of shell scripts (<code>scripts/prepare.sh</code>, <code>scripts/install.sh</code>, <code>scripts/configure.sh</code>) that <code>os-installer</code> invokes with the user's choices exported as <code>OSI_*</code> environment variables (<code>OSI_DEVICE_PATH</code>, <code>OSI_USE_ENCRYPTION</code>, <code>OSI_ENCRYPTION_PIN</code>, <code>OSI_USER_AUTOLOGIN</code>, etc.). Two configs ship in <code>os-installer-config</code>: <code>config.yaml</code> (general/USB media) and <code>config-git.yaml</code> (used for the git-built variant). Both are real, working configs, not templates — an OEM builds a custom image profile with its own <code>config.yaml</code> to control the install flow:</p>
+<p>The graphical installer (<code>os-installer</code>) is driven entirely by <code>/etc/os-installer/config.yaml</code>, plus a set of shell scripts (<code>scripts/prepare.sh</code>, <code>scripts/install.sh</code>, <code>scripts/configure.sh</code>) that <code>os-installer</code> invokes with the user's choices exported as <code>OSI_*</code> environment variables (<code>OSI_DEVICE_PATH</code>, <code>OSI_USE_ENCRYPTION</code>, <code>OSI_ENCRYPTION_PIN</code>, <code>OSI_USER_AUTOLOGIN</code>, etc.). <code>config.yaml</code> is the only config file in play — it's a real, working config, not a template — so an OEM builds a custom image profile with its own <code>config.yaml</code> to control the install flow:</p>
 <pre><code class="language-yaml"># os-installer-config/config.yaml — keys relevant to a low-touch OEM install
 
 internet:
