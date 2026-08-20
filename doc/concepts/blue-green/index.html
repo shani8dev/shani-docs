@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Blue-Green Deployment  Shanios implements blue-green deployment using Btrfs subvolumes — a strategy adapted from DevOps for desktop Linux.  How It Works  1…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Blue-Green Deployment","description":"Blue-Green Deployment  Shanios implements blue-green deployment using Btrfs subvolumes — a strategy adapted from DevOps for desktop Linux.  How It Works  1…","url":"https://docs.shani.dev/doc/concepts/blue-green/","datePublished":"2026-03-31T18:30:00.000Z","dateModified":"2026-03-31T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Blue-Green Deployment","description":"Blue-Green Deployment  Shanios implements blue-green deployment using Btrfs subvolumes — a strategy adapted from DevOps for desktop Linux.  How It Works  1…","url":"https://docs.shani.dev/doc/concepts/blue-green/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,19 +213,20 @@
         <h1 class="doc-title">Blue-Green Deployment</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Concepts</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p>Shanios implements blue-green deployment using Btrfs subvolumes — a strategy adapted from DevOps for desktop Linux.</p>
 <h2>How It Works</h2>
 <ol>
-<li>System maintains <code>@blue</code> and <code>@green</code> subvolumes</li>
-<li>One subvolume is active (mounted as <code>/</code>), the other inactive</li>
-<li>Updates apply to the inactive subvolume</li>
-<li>Bootloader is updated to point to the updated subvolume</li>
+<li>System maintains <code>@blue</code> and <code>@green</code> subvolumes, both created as read-only Btrfs snapshots of the same base image at install time</li>
+<li>One subvolume is active (mounted read-only as <code>/</code>, tracked in <code>/data/current-slot</code>), the other inactive</li>
+<li><code>shani-deploy</code> writes updates to the inactive subvolume only — the active one is never touched</li>
+<li>The bootloader (systemd-boot) is updated to point to the updated subvolume</li>
 <li>Reboot switches to the updated system</li>
 <li>Previous version remains available for instant rollback</li>
 </ol>
+<p>The active slot is identified at runtime by parsing <code>subvol=@blue</code> or <code>subvol=@green</code> out of <code>rootflags=</code> on <code>/proc/cmdline</code> (falling back to <code>btrfs subvolume get-default</code>) — the same detection logic is shared by <code>shani-deploy</code>, <code>shani-update</code>, and <code>check-boot-failure</code> so all three always agree on which slot is running. See <a href="./atomic-updates">Atomic Updates</a> for the full deploy pipeline and <a href="./persistence">Persistence Strategy</a> for what survives a slot swap.</p>
 <h2>Slot Layout</h2>
 <p>| Slot | State | Description | |------|-------|-------------| | <code>@blue</code> | Active or Standby | One complete, bootable root filesystem | | <code>@green</code> | Active or Standby | The other complete, bootable root filesystem |</p>
 <p>Only one slot is active at a time. <code>shani-deploy</code> writes updates to the inactive slot, then switches the bootloader default. On the next reboot, the updated slot becomes active. The previous slot stays intact as an instant rollback target.</p>
@@ -260,7 +261,8 @@ reboot → @blue active…</code></pre>
 <li><strong>shanios-blue (Active):</strong> Currently running system</li>
 <li><strong>shanios-green (Candidate):</strong> Standby system, will be booted after next update</li>
 </ul>
-<p>After each deployment, <code>shani-deploy</code> rewrites both boot entries. The newly updated slot is labelled <strong>(Active)</strong> with <code>+3-0</code> boot-count tries and set as the <code>loader.conf</code> default; the currently running slot is relabelled <strong>(Candidate)</strong> as the stable fallback.</p></div>
+<p>After each deployment, <code>shani-deploy</code> rewrites both boot entries. The newly updated slot is labelled <strong>(Active)</strong> with <code>+3-0</code> boot-count tries and set as the <code>loader.conf</code> default; the currently running slot is relabelled <strong>(Candidate)</strong> as the stable fallback.</p>
+<p>Note the two rollback mechanisms operate at different levels: systemd-boot's boot counting only decides <em>which slot boots next</em> — it never touches subvolume contents. Actually restoring a failed candidate slot's data (from the pre-deploy safety snapshot) is a separate step performed by <code>shani-deploy --rollback</code>, which <code>shani-update</code> offers automatically the next time you log in after a fallback boot. See <a href="./atomic-updates#automatic-rollback">Atomic Updates</a> for the full sequence.</p></div>
     </div>
 
   </main>

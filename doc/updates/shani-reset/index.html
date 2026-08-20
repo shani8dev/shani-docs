@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Factory Reset   wipes all persistent system state stored in  and reboots the machine. On the next boot,  recreates the  structure, the  overlay starts fres…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Factory Reset (shani-reset)","description":"Factory Reset   wipes all persistent system state stored in  and reboots the machine. On the next boot,  recreates the  structure, the  overlay starts fres…","url":"https://docs.shani.dev/doc/updates/shani-reset/","datePublished":"2026-05-12T18:30:00.000Z","dateModified":"2026-05-12T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Factory Reset (shani-reset)","description":"Factory Reset   wipes all persistent system state stored in  and reboots the machine. On the next boot,  recreates the  structure, the  overlay starts fres…","url":"https://docs.shani.dev/doc/updates/shani-reset/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Factory Reset (shani-reset)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Updates &amp; Config</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-05-13</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><h1>Factory Reset</h1>
@@ -242,6 +242,8 @@ sudo shani-reset --home
 
 # Skip the confirmation prompt (for scripted use)
 sudo shani-reset --yes</code></pre>
+<p><code>shani-reset</code> refuses to run while a <code>shani-deploy</code> is mid-flight (<code>/data/deployment_pending</code> exists) — complete or roll back the deployment first (<code>sudo shani-deploy --rollback</code>) before resetting.</p>
+<p>Without <code>--yes</code>, confirmation requires typing the exact word, not just <code>y</code>: type <code>reset</code> to proceed, and — if <code>--home</code> is also given — a second prompt requires typing <code>wipe home</code> to actually wipe user files (declining just continues the reset without touching <code>/home</code>). After the reset completes, <code>shani-reset</code> reboots automatically after a 3-second countdown (Ctrl-C aborts the reboot, but the state has already been wiped by that point).</p>
 <p>---</p>
 <h2>Soft Wipe vs Hard Wipe</h2>
 <p>Both modes produce the same end state after reboot. Choose based on your situation:</p>

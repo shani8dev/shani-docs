@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Pre-Installation Setup  BIOS/UEFI Configuration  Configure your firmware before installation (typically accessed via F2, F10, Del, or Esc during startup): …">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Pre-Installation Setup","description":"Pre-Installation Setup  BIOS/UEFI Configuration  Configure your firmware before installation (typically accessed via F2, F10, Del, or Esc during startup): …","url":"https://docs.shani.dev/doc/install/pre-install/","datePublished":"2026-03-31T18:30:00.000Z","dateModified":"2026-03-31T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Pre-Installation Setup","description":"Pre-Installation Setup  BIOS/UEFI Configuration  Configure your firmware before installation (typically accessed via F2, F10, Del, or Esc during startup): …","url":"https://docs.shani.dev/doc/install/pre-install/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Pre-Installation Setup</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Installation</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><h2>BIOS/UEFI Configuration</h2>
@@ -221,7 +221,7 @@
 <ol>
 <li><strong>Enable UEFI Boot</strong> — Disable legacy/CSM mode. Shanios requires UEFI.</li>
 <li><strong>Disable Fast Boot</strong> — Fast Boot can interfere with USB boot and Linux installation.</li>
-<li><strong>Disable Secure Boot (Temporarily)</strong> — Required for installation. Can be re-enabled after enrolling Shanios MOK keys.</li>
+<li><strong>Secure Boot can stay enabled</strong> — Shanios's installer media is pre-signed with its MOK (Machine Owner Key). If Secure Boot is on, firmware will launch <strong>MokManager</strong> automatically the first time you boot the USB, letting you enroll the key from disk before the live environment starts. If you'd rather skip that extra step during installation, disable Secure Boot temporarily and enroll the key later — the installer stages MOK enrollment for the installed system automatically (see <a href="./first-boot">First Boot</a>).</li>
 <li><strong>Set SATA Mode to AHCI</strong> — Ensures optimal disk performance and compatibility.</li>
 <li><strong>Enable Virtualization</strong> — Enable Intel VT-x or AMD-V for container support.</li>
 </ol>
@@ -232,10 +232,13 @@
 <p><a href="https://sourceforge.net/projects/shanios/files/gnome/20260401/">ISO</a> · SHA256 · GPG signature · Torrent</p>
 <li><strong>KDE Plasma Edition</strong> (2026.04.01, ~7.6 GB):</li>
 <p><a href="https://sourceforge.net/projects/shanios/files/plasma/20260401/">ISO</a> · SHA256 · GPG signature · Torrent</p>
+<li><strong>COSMIC Edition</strong>:</li>
+<p><a href="https://sourceforge.net/projects/shanios/files/cosmic/">ISO</a> · SHA256 · GPG signature · Torrent — check the download page for the current build date and size</p>
 </ul>
+<blockquote><p>There is no separate "Server" ISO. A server image profile exists but is only built as a cloud image (AWS AMI via the packer pipeline), not as installable install media.</p></blockquote>
 <p><strong>Always verify before writing.</strong> Every Shanios ISO is SHA256 checksummed and GPG signed. Verifying the checksum confirms the file downloaded completely and hasn't been tampered with. Place the <code>.iso</code>, <code>.sha256</code>, and <code>.asc</code> files in the same directory before running the commands below.</p>
 <h3>Linux / macOS — Verify SHA256 + GPG</h3>
-<pre><code class="language-bash"># GNOME edition — substitute the Plasma filename for the KDE edition
+<pre><code class="language-bash"># GNOME edition — substitute the Plasma or COSMIC filename for those editions
 
 # 1. Verify checksum
 sha256sum -c signed_shanios-gnome-2026.04.01-x86_64.iso.sha256

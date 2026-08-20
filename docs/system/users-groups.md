@@ -1,7 +1,7 @@
 ---
 title: Users & Groups
 section: System
-updated: 2026-04-25
+updated: 2026-08-20
 ---
 
 # Users & Groups
@@ -221,11 +221,19 @@ getent group
 id alice | grep -w wheel
 ```
 
+### The sambashare Group (Samba/SMB Sharing)
+
+`shani-settings` maintains a `sambashare` group automatically on install/upgrade: it creates the group if missing, adds every account in the normal UID range with a real login shell to it, and `chgrp`s `/var/lib/samba/usershare` to the group. This is what lets an interactive user create SMB usershares (via `net usershare` or a file manager's "Share" option) without any manual `usermod`. A user created *after* that point still needs adding by hand:
+
+```bash
+sudo usermod -aG sambashare alice
+```
+
 ---
 
 ## sudo & Privileges
 
-On Shani OS, `wheel` group members have full sudo access. The configuration lives in `/etc/sudoers` (managed by the OS) and `/etc/sudoers.d/` (your custom rules, captured by the overlay).
+On Shani OS, `wheel` group members have full sudo access — granted not by `/etc/sudoers` itself but by a shipped drop-in at `/etc/sudoers.d/wheel` (`%wheel ALL=(ALL:ALL) ALL`). Both `/etc/sudoers` and `/etc/sudoers.d/` are captured by the `/etc` overlay, so edits (always via `visudo`) persist across updates.
 
 ```bash
 # Edit sudoers safely (validates syntax before saving — never edit /etc/sudoers directly)

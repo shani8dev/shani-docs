@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Dracut Initramfs Module  Shanios ships a custom dracut module () that adds three hooks to the initramfs. These hooks implement the two features that requir…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Dracut Initramfs Module","description":"Dracut Initramfs Module  Shanios ships a custom dracut module () that adds three hooks to the initramfs. These hooks implement the two features that requir…","url":"https://docs.shani.dev/doc/arch/dracut-module/","datePublished":"2026-05-12T18:30:00.000Z","dateModified":"2026-05-12T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Dracut Initramfs Module","description":"Dracut Initramfs Module  Shanios ships a custom dracut module () that adds three hooks to the initramfs. These hooks implement the two features that requir…","url":"https://docs.shani.dev/doc/arch/dracut-module/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Dracut Initramfs Module</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Architecture</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-05-13</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p>Shanios ships a custom dracut module (<code>99shanios</code>) that adds three hooks to the initramfs. These hooks implement the two features that require early-boot access before the root filesystem is available to userspace: <strong>boot failure detection</strong> and <strong><code>/etc</code> OverlayFS mounting</strong>.</p>
@@ -224,7 +224,12 @@
 ├── shanios-boot-failure-hook.sh ← pre-mount (priority 90)
 ├── shanios-overlay-etc.sh       ← pre-pivot (priority 50)
 └── shanios-boot-success-clear.sh ← pre-pivot (priority 90)</code></pre>
-<p>The module is always included in Shanios initramfs builds (<code>check()</code> returns 0 unconditionally). It is rebuilt automatically by <code>gen-efi configure &lt;slot&gt;</code> on every deploy.</p>
+<p>The module is always included in Shanios initramfs builds (<code>check()</code> returns 0 unconditionally, and <code>depends()</code> declares no extra module dependencies beyond dracut's always-present <code>base</code>). It is rebuilt automatically by <code>gen-efi configure &lt;slot&gt;</code> on every deploy.</p>
+<p><code>module-setup.sh</code>'s <code>install()</code> also pulls in what the three hooks need at early boot, since the initramfs is otherwise minimal:</p>
+<ul>
+<li>Binaries: <code>blkid mount umount mountpoint mkdir rmdir rm printf sed</code> (via <code>inst_multiple</code>)</li>
+<li>Kernel module: <code>overlay</code> (via <code>instmods overlay</code>), so <code>mount -t overlay</code> works before the real root's modules are reachable</li>
+</ul>
 <p>---</p>
 <h2>Hook: shanios-boot-failure-hook.sh (pre-mount 90)</h2>
 <p><strong>Runs:</strong> After LUKS unlock and device discovery, <strong>before</strong> the root Btrfs subvolume is mounted.</p>
@@ -234,8 +239,8 @@
 <ol>
 <li>Locates the Btrfs device by filesystem label (<code>shani_root</code>)</li>
 <li>Mounts <code>@data</code> read-write to a temporary mountpoint (<code>/run/shanios-data-tmp</code>)</li>
-<li>Reads the attempted slot from <code>rootflags=subvol=@&lt;slot&gt;</code> in the kernel cmdline</li>
-<li>Writes the slot name to <code>/data/boot_hard_failure</code></li>
+<li>Reads the attempted slot from <code>rootflags=subvol=@&lt;slot&gt;</code> in the kernel cmdline via <code>getarg rootflags</code>, validating it is <code>blue</code> or <code>green</code> (falls back to the sentinel <code>unknown</code> otherwise — <code>shani-update</code> handles that value gracefully)</li>
+<li>Writes the slot name to <code>/data/boot_hard_failure</code>, always overwriting any stale marker so it reflects the current attempt</li>
 <li>Unmounts <code>@data</code> immediately</li>
 </ol>
 <p><strong>Failure handling:</strong> If the <code>@data</code> subvolume cannot be mounted (e.g. disk not found), the hook exits silently with a warning in the boot log rather than halting the boot.</p>
@@ -286,11 +291,12 @@
   │
   └─ pivot_root → systemd PID 1
        │
-       ├─ mark-boot-in-progress.service
-       │    └─ writes /data/boot_in_progress, clears boot-ok
+       ├─ mark-boot-in-progress.service (local-fs.target)
+       │    └─ clears boot-ok/boot_failure.acked/boot_in_progress, then writes boot_in_progress
        │
        ├─ mark-boot-success.service (at multi-user.target)
-       │    └─ writes /data/boot-ok, clears boot_in_progress
+       │    └─ writes /data/boot-ok, clears boot_in_progress, and clears boot_failure
+       │       if the booted slot matches the slot recorded there (stale recovery)
        │
        ├─ bless-boot.service (after mark-boot-success)
        │    └─ bootctl set-good (stops boot counter)

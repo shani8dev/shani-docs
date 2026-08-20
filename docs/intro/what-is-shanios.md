@@ -1,7 +1,7 @@
 ---
 title: What is Shanios?
 section: Introduction
-updated: 2026-04-27
+updated: 2026-08-20
 ---
 
 # What is Shanios?
@@ -14,7 +14,7 @@ Shanios is an immutable Linux distribution that brings enterprise DevOps practic
 - **Blue-Green Deployment:** Two complete system images (`@blue` and `@green`) are maintained. While one is active, updates are written to the other. On reboot you switch to the updated image. The previous one is kept as a one-command rollback target.
 - **Atomic Updates:** Updates are all-or-nothing. The running system is never touched during an update. If something goes wrong, boot failure is detected automatically and the system rolls back — your work is never interrupted.
 - **Selective Persistence:** User data, configuration changes (`/etc` overlay), Flatpak apps, containers, VMs, and service credentials all live in dedicated Btrfs subvolumes that survive every update and rollback, always.
-- **Defence-in-Depth Security:** Six Linux Security Modules run simultaneously (`lsm=landlock,lockdown,yama,integrity,apparmor,bpf`), LUKS2 argon2id full-disk encryption, TPM2 auto-unlock, Secure Boot with MOK, Intel ME disabled by default, and every OS image is SHA256+GPG verified before deployment.
+- **Defence-in-Depth Security:** Six Linux Security Modules run simultaneously (`lsm=landlock,lockdown,yama,integrity,apparmor,bpf`), LUKS2 argon2id full-disk encryption, TPM2 auto-unlock, Secure Boot with MOK, Intel ME kernel modules (`mei`, `mei_me`) blacklisted by default, and every OS image is SHA256+GPG verified before deployment.
 - **Zero Telemetry:** No usage data, crash reports, analytics, or tracking of any kind — ever. The entire codebase is public on GitHub; every claim is independently verifiable.
 
 ## Traditional vs Immutable OS
@@ -53,6 +53,6 @@ The OS that passed build-time verification is the OS that runs, byte for byte, u
 
 ## Built in India
 
-Shanios is built in India 🇮🇳 by [Shrinivas Vishnu Kumbhar](https://github.com/Shrinivasvkumbhar). Indian-language support — Devanagari, Tamil, Telugu, and more — is a first-class feature, pre-configured from first boot with IBus multi-language input.
+Shanios is built in India 🇮🇳 by [Shrinivas Vishnu Kumbhar](https://github.com/Shrinivasvkumbhar). Indian-language support — Devanagari, Bengali, Gujarati, Gurmukhi (Punjabi), Kannada, Malayalam, Oriya, Tamil, and Telugu scripts — is a first-class feature, pre-configured from first boot with IBus multi-language input.
 
 The entire codebase is public at [github.com/shani8dev](https://github.com/shani8dev). Every claim in this documentation is independently verifiable.

@@ -1,7 +1,7 @@
 ---
 title: Backup & Recovery
 section: System
-updated: 2026-05-13
+updated: 2026-08-20
 ---
 
 # Backup & Recovery
@@ -33,6 +33,8 @@ A **backup** is a copy stored **somewhere else** — an external drive, a NAS, a
 | `/var/lib/flatpak` | `@flatpak` | 🟡 Medium | Flatpak runtimes & apps (re-installable) |
 
 The OS itself does not need to be backed up — `shani-deploy` downloads a fresh verified image when needed, and the previous slot is always available for rollback.
+
+Before every update, `shani-deploy` also takes its own Btrfs backup snapshot of the candidate slot (e.g. `@blue_backup_<timestamp>`) so it can automatically roll back if the new slot fails to boot. These update-time snapshots are pruned automatically after a successful deployment, or on demand with `sudo shani-deploy -c` (cleanup of old backup snapshots and stale downloads). This is insurance for the update mechanism itself — it is **not** a substitute for backing up `/home` and container data as described below.
 
 > ⚠️ **Btrfs snapshots are not backups.** The rollback snapshots created by `shani-deploy` reside on the same physical drive. A drive failure destroys both the live data and all snapshots simultaneously.
 

@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Persistence Strategy  Shanios selectively persists data across immutable system updates through bind mounts and dedicated Btrfs subvolumes.  Three Categori…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Persistence Strategy","description":"Persistence Strategy  Shanios selectively persists data across immutable system updates through bind mounts and dedicated Btrfs subvolumes.  Three Categori…","url":"https://docs.shani.dev/doc/concepts/persistence/","datePublished":"2026-03-31T18:30:00.000Z","dateModified":"2026-03-31T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Persistence Strategy","description":"Persistence Strategy  Shanios selectively persists data across immutable system updates through bind mounts and dedicated Btrfs subvolumes.  Three Categori…","url":"https://docs.shani.dev/doc/concepts/persistence/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Persistence Strategy</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Concepts</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p>Shanios selectively persists data across immutable system updates through bind mounts and dedicated Btrfs subvolumes.</p>
@@ -229,7 +229,7 @@
 <h3>✅ Persistent (Survives All Updates)</h3>
 <p>Dedicated Btrfs subvolumes that are never touched by updates:</p>
 <p>| Location | Subvolume | |----------|-----------| | <code>/home</code> | <code>@home</code> | | <code>/root</code> | <code>@root</code> | | <code>/data</code> | <code>@data</code> — overlay + service state | | <code>/var/log</code> | <code>@log</code> | | <code>/var/cache</code> | <code>@cache</code> | | <code>/var/lib/flatpak</code> | <code>@flatpak</code> | | <code>/var/lib/containers</code> | <code>@containers</code> | | <code>/nix</code> | <code>@nix</code> — Nix package store | | <code>/var/lib/libvirt</code> | <code>@libvirt</code> (nodatacow) | | <code>/var/lib/waydroid</code> | <code>@waydroid</code> | | <code>/var/lib/snapd</code> | <code>@snapd</code> |</p>
-<p><code>@nix</code> and <code>@flatpak</code> are shared by both slots.</p>
+<p>All of the subvolumes above are mounted at the Btrfs top level, independent of which slot (<code>@blue</code> or <code>@green</code>) is active — so every one of them, not just <code>@nix</code> and <code>@flatpak</code>, is equally visible to both slots and untouched by a slot switch or rollback.</p>
 <h3>🔄 Volatile (Cleared on Reboot)</h3>
 <p><code>systemd.volatile=state</code> kernel parameter mounts a tmpfs over <code>/var</code>:</p>
 <ul>
@@ -250,10 +250,16 @@
 Upper overrides lower — your changes take precedence.
 Unchanged files are served from the read-only lower layer.
 Changes in upper (@data) survive OS updates — only the lower is replaced.</code></pre>
-<p>fstab entry:</p>
-<pre><code>overlay /etc overlay rw,lowerdir=/etc,upperdir=/data/overlay/etc/upper,workdir=/data/overlay/etc/work,index=off,metacopy=off,x-systemd.requires-mounts-for=/data 0 0</code></pre>
+<p>This overlay is <strong>not</strong> an fstab entry — it's mounted by a dracut hook (<code>shanios-overlay-etc.sh</code>, part of the <code>99shanios</code> dracut module) <em>before</em> <code>pivot_root</code> hands control to systemd. That ordering matters: systemd PID 1 reads <code>/etc</code> the moment it starts, and if the overlay were applied later via fstab, systemd would have already cached the plain read-only <code>/etc</code> and miss anything in <code>/data/overlay/etc/upper</code>. So the sequence at boot is:</p>
+<ol>
+<li>Dracut mounts the <code>@data</code> subvolume read-write onto a temporary path in the initramfs.</li>
+<li>It mounts the OverlayFS directly onto the new root's <code>/etc</code>, with the booted slot's own <code>/etc</code> as the lower layer.</li>
+<li>Only then does dracut <code>pivot_root</code> / <code>switch_root</code> into the new root — <code>/etc</code> is already the merged view on the very first read.</li>
+</ol>
+<p><code>@data</code> is deliberately left mounted through this process (its upper/work directories must stay live for the overlay), and <code>switch_root</code> carries that mount along into the booted system's <code>/run</code>.</p>
 <p>View overlay modifications:</p>
 <pre><code class="language-bash">ls -la /data/overlay/etc/upper</code></pre>
+<p>The same <code>99shanios</code> dracut module also carries the two hooks that make boot-failure detection possible before systemd ever starts — a pre-mount hook writes <code>/data/boot_hard_failure</code> before the root Btrfs subvolume is mounted, and a pre-pivot hook clears it once mount succeeds. See <a href="./atomic-updates#automatic-rollback">Atomic Updates</a> for how that feeds into rollback.</p>
 <h2>Bind-Mounted Service State</h2>
 <p>Because <code>/var</code> is volatile, all service state that must survive reboots is stored in <code>@data</code> and bind-mounted back at boot.</p>
 <p>Key bind mounts from <code>@data/varlib/</code> → <code>/var/lib/</code>:</p>

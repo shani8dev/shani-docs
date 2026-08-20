@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Lynis — Security Auditing  Lynis is a security auditing tool that scans a running Linux system and produces a hardening report. It checks hundreds of items…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Lynis (Security Auditing)","description":"Lynis — Security Auditing  Lynis is a security auditing tool that scans a running Linux system and produces a hardening report. It checks hundreds of items…","url":"https://docs.shani.dev/doc/security/lynis/","datePublished":"2026-04-19T18:30:00.000Z","dateModified":"2026-04-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Lynis (Security Auditing)","description":"Lynis — Security Auditing  Lynis is a security auditing tool that scans a running Linux system and produces a hardening report. It checks hundreds of items…","url":"https://docs.shani.dev/doc/security/lynis/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,11 +213,15 @@
         <h1 class="doc-title">Lynis (Security Auditing)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Security</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
-      <div class="prose"><p>Lynis is a security auditing tool that scans a running Linux system and produces a hardening report. It checks hundreds of items: file permissions, installed software, kernel parameters, authentication settings, network configuration, and more — and produces a prioritised list of findings with remediation suggestions. It is pre-installed on Shani OS.</p>
-<p>Lynis does not change anything — it only reads and reports.</p>
+      <div class="prose"><p>Lynis is a security auditing tool that scans a running Linux system and produces a hardening report. It checks hundreds of items: file permissions, installed software, kernel parameters, authentication settings, network configuration, and more — and produces a prioritised list of findings with remediation suggestions. It is pre-installed on Shani OS as a direct dependency of the <code>shani-core</code> package.</p>
+<p>Lynis does not change anything — it only reads and reports. Several of the sysctl, modprobe, and audit hardening decisions documented on the <a href="features">Security Features</a> page exist specifically to address findings this tool reports (e.g. Lynis IDs <code>KRNL-6000</code>, <code>ACCT-9630</code>, <code>STRG-1846</code>, <code>NETW-3200</code>).</p>
+<p><strong>Lynis audits itself on a schedule by default</strong> — <code>shani-core</code>'s post-install hook runs <code>systemctl enable lynis.timer</code>, so a fresh Shani OS install is already running periodic audits without you setting anything up. Check it with:</p>
+<pre><code class="language-bash">systemctl status lynis.timer
+systemctl list-timers lynis.timer   # shows the exact next run time</code></pre>
+<p>The "Scheduled Audits" section further down is for changing that schedule or adding your own wrapper — most users don't need it.</p>
 <p>---</p>
 <h2>Running an Audit</h2>
 <pre><code class="language-bash"># Full system audit (run as root for maximum coverage)
@@ -266,8 +270,11 @@ grep &quot;^suggestion\|^warning&quot; /var/log/lynis-report.dat
 grep -c &quot;^warning&quot; /var/log/lynis-report.dat</code></pre>
 <p>---</p>
 <h2>Scheduled Audits</h2>
-<p>Run Lynis weekly and save timestamped reports:</p>
-<pre><code class="language-bash">sudo tee /etc/cron.weekly/lynis-audit &lt;&lt; 'EOF'
+<p>The default <code>lynis.timer</code> (enabled automatically, see above) already runs <code>lynis audit system</code> on a schedule and writes to the standard <code>/var/log/lynis.log</code> / <code>/var/log/lynis-report.dat</code> paths described above — most people never need to touch this section.</p>
+<p>If you want a different cadence or your own timestamped reports instead of relying on the timer, disable it and roll your own cron job:</p>
+<pre><code class="language-bash">sudo systemctl disable --now lynis.timer
+
+sudo tee /etc/cron.weekly/lynis-audit &lt;&lt; 'EOF'
 #!/bin/sh
 lynis audit system --no-colors --quiet 2&gt;/dev/null \
   &gt; /var/log/lynis/audit-$(date +%Y%m%d).txt
@@ -286,7 +293,14 @@ lynis show version
 sudo pacman -Su lynis</code></pre>
 <p>---</p>
 <h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | Many <code>FILE_PERMISSIONS</code> warnings | Lynis compares against strict defaults; review each before changing — some are intentional on a desktop OS | | Score seems low | A freshly installed system typically scores 60–70; a locked-down server might reach 85+; the score is relative, not a pass/fail threshold | | <code>lynis: command not found</code> | Run as root or with <code>sudo</code> — Lynis may not be in the non-root <code>PATH</code> | | Audit hangs on a test | A specific test may be probing a slow device or network; interrupt with Ctrl-C and re-run with <code>--skip-test TEST_ID</code> |</p></div>
+<p>| Issue | Solution | |-------|----------| | Many <code>FILE_PERMISSIONS</code> warnings | Lynis compares against strict defaults; review each before changing — some are intentional on a desktop OS | | Score seems low | A freshly installed system typically scores 60–70; a locked-down server might reach 85+; the score is relative, not a pass/fail threshold | | <code>lynis: command not found</code> | Run as root or with <code>sudo</code> — Lynis may not be in the non-root <code>PATH</code> | | Audit hangs on a test | A specific test may be probing a slow device or network; interrupt with Ctrl-C and re-run with <code>--skip-test TEST_ID</code> |</p>
+<p>---</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="features">Security Features</a> — kernel/module hardening decisions made in direct response to Lynis findings</li>
+<li><a href="rkhunter">rkhunter</a> — complementary rootkit scanner; unlike Lynis, not scheduled by default</li>
+<li><a href="../updates/shani-health">shani-health Reference</a> — <code>shani-health --security</code> reports the <code>lynis.timer</code> status, last-scan age, hardening index, and warning count</li>
+</ul></div>
     </div>
 
   </main>

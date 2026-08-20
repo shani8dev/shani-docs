@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Overlay Filesystem  Shanios uses Linux OverlayFS to present a fully writable  on top of a read-only root filesystem. This is what makes the immutable OS fe…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Overlay Filesystem","description":"Overlay Filesystem  Shanios uses Linux OverlayFS to present a fully writable  on top of a read-only root filesystem. This is what makes the immutable OS fe…","url":"https://docs.shani.dev/doc/arch/overlay/","datePublished":"2026-05-12T18:30:00.000Z","dateModified":"2026-05-12T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Overlay Filesystem","description":"Overlay Filesystem  Shanios uses Linux OverlayFS to present a fully writable  on top of a read-only root filesystem. This is what makes the immutable OS fe…","url":"https://docs.shani.dev/doc/arch/overlay/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Overlay Filesystem</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Architecture</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-05-13</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p>Shanios uses Linux OverlayFS to present a fully writable <code>/etc</code> on top of a read-only root filesystem. This is what makes the immutable OS feel transparent — you can edit any config file as normal, and your changes persist across every update and rollback.</p>
@@ -276,7 +276,10 @@ findmnt /etc
 find /data/overlay/etc/upper -mindepth 1 | wc -l
 
 # Use shani-health for a detailed report
-shani-health --boot   # shows &quot;Immutability → /etc: overlay active, N file(s) modified&quot;</code></pre>
+shani-health --boot   # shows &quot;Immutability → /etc: OK  overlay active, N file(s) modified vs base&quot;</code></pre>
+<h2>Optional: A /var Overlay Also Exists (Disabled by Default)</h2>
+<p>The fstab ships a second, commented-out overlay entry for <code>/var</code> at <code>/data/overlay/var/{upper,work}</code>, alongside the <code>/etc</code> one. It is <strong>not active</strong> on a default install — <code>/var</code> is a tmpfs via <code>systemd.volatile=state</code> on the kernel cmdline instead (see <a href="filesystem">Filesystem Structure</a>).</p>
+<p>The two mechanisms are explicitly mutually exclusive: if you enable the <code>/var</code> overlay fstab line without first removing <code>systemd.volatile=state</code> from <code>/etc/kernel/install_cmdline_&lt;slot&gt;</code> (and regenerating the UKI with <code>gen-efi configure &lt;slot&gt;</code>), the kernel creates <code>/var</code> as an empty tmpfs <em>before</em> fstab mounts run, and the overlay then stacks on top of that empty tmpfs as its lowerdir instead of the real read-only <code>/var</code> from the slot — silently discarding all default <code>/var</code> contents with no error. Enabling this is an advanced, opt-in path (used by some server image profiles); do not flip it on without removing the cmdline parameter first.</p>
 <h2>Limitations</h2>
 <ul>
 <li>OverlayFS does not support NFS as a lower layer.</li>

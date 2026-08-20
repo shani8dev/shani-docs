@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="gen-efi Reference   is the Shanios UKI (Unified Kernel Image) builder and Secure Boot key manager. It wraps  and / to produce signed EFI binaries placed in…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"gen-efi Reference","description":"gen-efi Reference   is the Shanios UKI (Unified Kernel Image) builder and Secure Boot key manager. It wraps  and / to produce signed EFI binaries placed in…","url":"https://docs.shani.dev/doc/security/gen-efi/","datePublished":"2026-05-12T18:30:00.000Z","dateModified":"2026-05-12T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"gen-efi Reference","description":"gen-efi Reference   is the Shanios UKI (Unified Kernel Image) builder and Secure Boot key manager. It wraps  and / to produce signed EFI binaries placed in…","url":"https://docs.shani.dev/doc/security/gen-efi/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">gen-efi Reference</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Security</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-05-13</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p><code>gen-efi</code> is the Shanios UKI (Unified Kernel Image) builder and Secure Boot key manager. It wraps <code>dracut --uefi</code> and <code>sbsign</code>/<code>sbverify</code> to produce signed EFI binaries placed in <code>/boot/efi/EFI/shanios/</code>, and manages the full lifecycle of MOK (Machine Owner Key) keys and TPM2 enrollment.</p>
@@ -388,6 +388,7 @@ sudo objcopy -O binary --only-section=.cmdline \
 <li><a href="tpm2">TPM2 Enrollment</a> — detailed TPM2 setup guide</li>
 <li><a href="../arch/boot">Boot Process</a> — how UKIs fit into the boot chain</li>
 <li><a href="../updates/system">System Updates</a> — how <code>shani-deploy</code> uses <code>gen-efi</code></li>
+<li><a href="../updates/shani-health">shani-health Reference</a> — <code>shani-health --security</code> reports Secure Boot state, MOK enrollment/pending status, MOK key file permissions, and TPM2 PCR-policy consistency</li>
 </ul></div>
     </div>
 

@@ -1,7 +1,7 @@
 ---
 title: Factory Reset (shani-reset)
 section: Updates & Config
-updated: 2026-05-13
+updated: 2026-08-20
 ---
 
 # Factory Reset
@@ -55,6 +55,10 @@ sudo shani-reset --home
 # Skip the confirmation prompt (for scripted use)
 sudo shani-reset --yes
 ```
+
+`shani-reset` refuses to run while a `shani-deploy` is mid-flight (`/data/deployment_pending` exists) — complete or roll back the deployment first (`sudo shani-deploy --rollback`) before resetting.
+
+Without `--yes`, confirmation requires typing the exact word, not just `y`: type `reset` to proceed, and — if `--home` is also given — a second prompt requires typing `wipe home` to actually wipe user files (declining just continues the reset without touching `/home`). After the reset completes, `shani-reset` reboots automatically after a 3-second countdown (Ctrl-C aborts the reboot, but the state has already been wiped by that point).
 
 ---
 

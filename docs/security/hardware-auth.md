@@ -1,18 +1,18 @@
 ---
 title: Hardware Authentication
 section: Security
-updated: 2026-04-20
+updated: 2026-08-20
 ---
 
 # Hardware Authentication
 
-Shani OS ships with full support for hardware authentication out of the box — fingerprint readers, YubiKeys, FIDO2/U2F tokens, smart cards (PIV), NFC tokens, and TOTP/HOTP authenticators. All required packages and PAM modules are pre-installed; no driver downloads are needed.
+Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work without a driver download, via packages pulled in by the `shani-peripherals` package. The CLI utilities for YubiKey management and TOTP/HOTP codes are not part of the default image and need a separate install — see the callout in each section below.
 
 ---
 
 ## Fingerprint Authentication
 
-**Package:** `fprintd`, `libfprint`
+**Package:** `fprintd` (pulls in `libfprint` as a dependency) — pre-installed via `shani-peripherals`
 
 Fingerprints can be used to unlock the login screen, sudo prompts, and the lock screen.
 
@@ -46,7 +46,7 @@ fprintd-enroll   # will fail with a clear error if the device is unsupported
 
 ## YubiKey and FIDO2/U2F
 
-**Packages:** `libfido2`, `pam-u2f`, `yubikey-manager`
+**Packages:** `libfido2`, `pam-u2f` — pre-installed via `shani-peripherals`. `yubikey-manager` (the `ykman` CLI used below) is **not** part of the default image — install it first: `sudo pacman -S yubikey-manager`.
 
 ### Setting Up PAM U2F (sudo / login)
 
@@ -103,7 +103,7 @@ ssh-keygen -t ed25519-sk
 
 ## Smart Card / PIV
 
-**Packages:** `opensc`, `pcscd`, `pcsc-tools`
+**Packages:** `opensc`, `ccid`, `acsccid` — pre-installed via `shani-peripherals`; `pcscd`/`pcsc-lite` come along transitively as a dependency of `opensc`/`ccid`. The `pcsc-tools` diagnostic package (used for `pcsc_scan` below) is **not** part of the default image — install it first: `sudo pacman -S pcsc-tools`.
 
 ```bash
 # Start the PC/SC daemon
@@ -134,7 +134,7 @@ ssh -I /usr/lib/opensc-pkcs11.so user@host
 
 ## NFC Authentication
 
-**Packages:** `libnfc`, `pcsc-lite`
+**Packages:** `libnfc`, pre-installed via `shani-peripherals`; NFC access rides on the same `pcscd`/`pcsc-lite` stack pulled in for smart cards above
 
 NFC tokens are accessed via the PC/SC stack. Once `pcscd` is running, NFC cards compatible with pcsc-lite are accessible in the same way as contact smart cards:
 
@@ -147,7 +147,7 @@ pcsc_scan   # shows NFC card when tapped
 
 ## TOTP / HOTP (Two-Factor)
 
-**Package:** `oath-toolkit`
+**Package:** `oath-toolkit` — **not** part of the default image; install it first: `sudo pacman -S oath-toolkit`.
 
 `oathtool` generates TOTP and HOTP codes from a shared secret, compatible with Google Authenticator, Authy, and any RFC 6238/4226 implementation.
 
@@ -181,3 +181,4 @@ oathtool --totp --base32 -w 1 JBSWY3DPEHPK3PXP 123456
 - [Security Features](features) — full list of supported authentication methods
 - [LUKS Management](luks) — using a keyfile for disk unlock
 - [TPM2 Enrollment](tpm2) — TPM-based disk unlock
+- [shani-health Reference](../updates/shani-health) — `shani-health --security` reports fprintd enrollment, pam-u2f configuration, and pcscd status per user

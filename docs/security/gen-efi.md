@@ -1,7 +1,7 @@
 ---
 title: gen-efi Reference
 section: Security
-updated: 2026-05-13
+updated: 2026-08-20
 ---
 
 # gen-efi Reference
@@ -311,3 +311,4 @@ sudo objcopy -O binary --only-section=.cmdline \
 - [TPM2 Enrollment](tpm2) — detailed TPM2 setup guide
 - [Boot Process](../arch/boot) — how UKIs fit into the boot chain
 - [System Updates](../updates/system) — how `shani-deploy` uses `gen-efi`
+- [shani-health Reference](../updates/shani-health) — `shani-health --security` reports Secure Boot state, MOK enrollment/pending status, MOK key file permissions, and TPM2 PCR-policy consistency

@@ -1,12 +1,12 @@
 ---
 title: User Provisioning (shani-user-setup)
 section: Updates & Config
-updated: 2026-05-13
+updated: 2026-08-20
 ---
 
 # User Provisioning
 
-`shani-user-setup` automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix channels, and rootless container namespaces. It runs as root via a systemd path unit that watches `/data/user-setup-needed`, triggered by `shani-deploy` after every OS update and by the first-run wizard when a new user account is created.
+`shani-user-setup` automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix channels, and rootless container namespaces. It runs as root via `shani-user-setup.service`, triggered by a systemd path unit (`shani-user-setup.path`) that watches for any of three conditions: a new/changed `/etc/passwd` in the `/etc` overlay's upper layer (i.e. a user was just added), a modified `/etc/skel`, or the `/data/user-setup-needed` marker file — the marker is written by `shani-deploy` after every slot switch and by `shani-reset` after a factory reset, so newly-applied group assignments and skel changes are picked up on the next boot even without a fresh user account.
 
 ---
 
@@ -57,7 +57,7 @@ wheel,video,input,audio,kvm,storage,network,realtime,scanner,lp,cups,libvirt,lxd
 
 This file is the **single source of truth** shared between `shani-user-setup` and the `adduser`/`useradd` wrappers. Editing it ensures that all future users (and any re-provisioning runs) get the same groups.
 
-If the file is absent, `shani-user-setup` falls back to the built-in default group list.
+If the file is missing or empty, `shani-user-setup` adds **no** extra groups at all — the group-membership step silently has nothing to do. It does not fall back to a built-in list. Shell, Flatpak remote, Nix channel, and subuid/subgid provisioning are unaffected and still run normally. In practice the file is written by the base image install, so this only matters if you delete it yourself.
 
 ```bash
 # View current extra groups
@@ -74,17 +74,21 @@ sudo FORCE_SETUP=1 shani-user-setup
 
 ## Triggering
 
-`shani-user-setup` runs when `/data/user-setup-needed` is created or modified:
+`shani-user-setup.path` watches three things, and running the service is rate-limited to at most 3 triggers per 60 seconds:
+
+1. `/data/overlay/etc/upper/passwd` created or changed — fires the moment a new user is added (via `useradd`/`adduser`, which copy-up `/etc/passwd` into the overlay), without needing any marker file
+2. `/etc/skel` modified — belt-and-suspenders coverage for a slot switch that changes skel contents
+3. `/data/user-setup-needed` created — the explicit marker, written by `shani-deploy` after every slot switch and by `shani-reset` after a factory reset
 
 ```bash
-# systemd path unit watches for this file
+# systemd path unit watches for these
 systemctl status shani-user-setup.path
 
-# Trigger manually (e.g. after adding a new user)
+# Trigger manually (e.g. after adding a new user or editing shani-extra-groups)
 sudo touch /data/user-setup-needed
 ```
 
-`shani-deploy` writes this marker after every slot switch so new group assignments from the updated OS are applied on the next login.
+Whichever trigger fires, the service itself re-provisions every interactive user (UID 1000–59999) on the system, not just the one that changed.
 
 ---
 

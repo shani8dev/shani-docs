@@ -1,7 +1,7 @@
 ---
 title: Dracut Initramfs Module
 section: Architecture
-updated: 2026-05-13
+updated: 2026-08-20
 ---
 
 # Dracut Initramfs Module
@@ -20,7 +20,12 @@ Shanios ships a custom dracut module (`99shanios`) that adds three hooks to the 
 └── shanios-boot-success-clear.sh ← pre-pivot (priority 90)
 ```
 
-The module is always included in Shanios initramfs builds (`check()` returns 0 unconditionally). It is rebuilt automatically by `gen-efi configure <slot>` on every deploy.
+The module is always included in Shanios initramfs builds (`check()` returns 0 unconditionally, and `depends()` declares no extra module dependencies beyond dracut's always-present `base`). It is rebuilt automatically by `gen-efi configure <slot>` on every deploy.
+
+`module-setup.sh`'s `install()` also pulls in what the three hooks need at early boot, since the initramfs is otherwise minimal:
+
+- Binaries: `blkid mount umount mountpoint mkdir rmdir rm printf sed` (via `inst_multiple`)
+- Kernel module: `overlay` (via `instmods overlay`), so `mount -t overlay` works before the real root's modules are reachable
 
 ---
 
@@ -36,8 +41,8 @@ The module is always included in Shanios initramfs builds (`check()` returns 0 u
 
 1. Locates the Btrfs device by filesystem label (`shani_root`)
 2. Mounts `@data` read-write to a temporary mountpoint (`/run/shanios-data-tmp`)
-3. Reads the attempted slot from `rootflags=subvol=@<slot>` in the kernel cmdline
-4. Writes the slot name to `/data/boot_hard_failure`
+3. Reads the attempted slot from `rootflags=subvol=@<slot>` in the kernel cmdline via `getarg rootflags`, validating it is `blue` or `green` (falls back to the sentinel `unknown` otherwise — `shani-update` handles that value gracefully)
+4. Writes the slot name to `/data/boot_hard_failure`, always overwriting any stale marker so it reflects the current attempt
 5. Unmounts `@data` immediately
 
 **Failure handling:** If the `@data` subvolume cannot be mounted (e.g. disk not found), the hook exits silently with a warning in the boot log rather than halting the boot.
@@ -109,11 +114,12 @@ Boot attempt
   │
   └─ pivot_root → systemd PID 1
        │
-       ├─ mark-boot-in-progress.service
-       │    └─ writes /data/boot_in_progress, clears boot-ok
+       ├─ mark-boot-in-progress.service (local-fs.target)
+       │    └─ clears boot-ok/boot_failure.acked/boot_in_progress, then writes boot_in_progress
        │
        ├─ mark-boot-success.service (at multi-user.target)
-       │    └─ writes /data/boot-ok, clears boot_in_progress
+       │    └─ writes /data/boot-ok, clears boot_in_progress, and clears boot_failure
+       │       if the booted slot matches the slot recorded there (stale recovery)
        │
        ├─ bless-boot.service (after mark-boot-success)
        │    └─ bootctl set-good (stops boot counter)

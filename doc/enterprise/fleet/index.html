@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="OEM &amp; Fleet Deployment  Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"OEM & Fleet Deployment","description":"OEM & Fleet Deployment  Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or…","url":"https://docs.shani.dev/doc/enterprise/fleet/","datePublished":"2026-04-26T18:30:00.000Z","dateModified":"2026-04-26T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"OEM & Fleet Deployment","description":"OEM & Fleet Deployment  Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or…","url":"https://docs.shani.dev/doc/enterprise/fleet/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">OEM &amp; Fleet Deployment</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Enterprise</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-27</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p>Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or-nothing. Rollback requires no reimaging. The fleet stays uniform because the OS is replaced wholesale on each update — never patched in place.</p>
@@ -225,6 +225,44 @@
 <p>| Concern | Traditional Mutable Linux | Shanios | |---|---|---| | Fleet uniformity | Drifts over time; requires reconciliation tools | Every machine on same channel runs identical verified image | | Bad update recovery | Reimage or manual rollback; often on-site | One SSH command (<code>shani-deploy -r</code>); automatic if unattended | | Security audit | Hardening guide + config management | Secure by default; auditable public codebase | | Software inventory | <code>dpkg -l</code>, <code>rpm -qa</code> varies per machine | OS image version + Flatpak list — identical across fleet | | Remote management | MDM + SSH + config management stack | SSH or Tailscale; no drift to manage | | Encryption | Configure LUKS separately | LUKS2 + TPM2 at install; no foreign key escrow |</p>
 <p>---</p>
 <h2>OEM Deployment</h2>
+<h3>Unattended and Low-Interaction Installs</h3>
+<p>The graphical installer (<code>os-installer</code>) is driven entirely by <code>/etc/os-installer/config.yaml</code>, plus a set of shell scripts (<code>scripts/prepare.sh</code>, <code>scripts/install.sh</code>, <code>scripts/configure.sh</code>) that <code>os-installer</code> invokes with the user's choices exported as <code>OSI_*</code> environment variables (<code>OSI_DEVICE_PATH</code>, <code>OSI_USE_ENCRYPTION</code>, <code>OSI_ENCRYPTION_PIN</code>, <code>OSI_USER_AUTOLOGIN</code>, etc.). Two configs ship in <code>os-installer-config</code>: <code>config.yaml</code> (general/USB media) and <code>config-git.yaml</code> (used for the git-built variant). Both are real, working configs, not templates — an OEM builds a custom image profile with its own <code>config.yaml</code> to control the install flow:</p>
+<pre><code class="language-yaml"># os-installer-config/config.yaml — keys relevant to a low-touch OEM install
+
+internet:
+  connection_required: no        # allow install without a network connection
+
+fixed_language: en_US            # skip the language-selection page entirely
+
+welcome_page:
+  logo: '/usr/share/pixmaps/shanios-logo.png'
+  text: |
+    Welcome to Shani OS!
+    ...
+
+disk:
+  partition_ok: no
+  min_size: 28                   # minimum target size in GB
+
+disk_encryption:
+  offered: yes
+  forced: no
+  min_length: 1
+  confirmation: yes
+
+user:
+  request_username: no
+  provide_autologin: yes         # offer autologin (kiosk / shared-machine friendly)
+  min_password_length: 1
+  password_confirmation: yes
+
+# gnome-initial-setup handles first-boot region/user pages — these can be
+# skipped so a freshly imaged machine boots straight to a usable desktop
+skip_region: yes
+skip_user: yes</code></pre>
+<p><code>configure.sh</code> reads <code>OSI_USER_AUTOLOGIN</code> and configures autologin for whichever display manager is present on the image — GDM, SDDM, greetd, LightDM, LXDM, or plain <code>agetty</code> on a TTY (<code>os-installer-config/scripts/configure.sh:505</code>, <code>setup_autologin_target</code>). Combined with <code>skip_region</code>/<code>skip_user</code>, an OEM image can go from first boot to a logged-in desktop with no first-run wizard at all.</p>
+<p>Because the install/configure scripts only read <code>OSI_*</code> environment variables — they have no hard dependency on the GTK front-end — an OEM building a factory-imaging pipeline can call <code>install.sh</code>/<code>configure.sh</code> directly with those variables pre-set, skipping the interactive UI entirely for mass provisioning. This is scripting the same code path the GUI installer uses, not a separate "headless mode" — there is no bundled kickstart/autoyast-style single-answer-file format.</p>
+<p><code>failure_help_url</code> can point at an internal support desk instead of the public one, and <code>commands.reboot</code>/<code>commands.browser</code> can be repointed at OEM-specific tooling.</p>
 <h3>Pre-installation Customisation</h3>
 <p><strong>Plymouth branding:</strong> The Plymouth boot theme uses BGRT — it reads the OEM logo directly from UEFI firmware. A machine whose logo is in the UEFI BGRT table automatically displays it during boot without any image customisation. For custom logos beyond BGRT, the Plymouth theme configuration lives in <code>/usr/share/plymouth/themes/</code>.</p>
 <p><strong>Pre-installed Flatpaks:</strong> To ship machines with specific applications pre-installed, add Flatpak refs to the OEM configuration layer. Flatpaks install to <code>@flatpak</code> and are fully independent of the OS image.</p>
@@ -235,11 +273,46 @@ flatpak remote-add --if-not-exists myorg https://flatpak.myorg.com/repo
 # Install an internal app
 flatpak install myorg com.myorg.InternalApp</code></pre>
 <h3>Image Signing</h3>
-<p>Every Shanios release is signed with key <code>7B927BFFD4A9EAAA8B666B77DE217F3DA8014792</code>. For organisations deploying a custom build, the signing key is configurable in <code>shani-deploy</code>. Machines enrolled with your key only accept images signed by your key — a tampered or unofficial image fails verification before it is written.</p>
+<p>Every Shanios release is signed with key <code>7B927BFFD4A9EAAA8B666B77DE217F3DA8014792</code>, and <code>shani-deploy</code> hardcodes that fingerprint (<code>GPG_KEY_ID</code>) plus the CDN endpoint (<code>R2_BASE_URL=&quot;https://downloads.shani.dev&quot;</code>) as <code>readonly</code> constants — there is no runtime flag or config file that repoints a stock <code>shani-deploy</code> binary at a different signing key or a private mirror. Machines running the stock tool always verify against, and download from, the public Shanios infrastructure (R2, with SourceForge-mirror auto-discovery as fallback).</p>
+<p>An OEM that needs its own signing key does so at the <strong>image-build layer</strong>, not at runtime on deployed machines — see <a href="#custom--cloud-image-building">Custom & Cloud Image Building</a> below, where the Packer AMI pipeline accepts <code>PKR_VAR_gpg_public_key</code> to bake in an organisation's own key at build time. Redirecting the <em>ongoing</em> update pipeline (the <code>shani-deploy</code> running on already-deployed machines) to a private CDN or a different signing key requires forking <code>shani-deploy</code> (GPLv3, source available) and rebuilding the image with the patched constants — this is not a supported runtime configuration surface today.</p>
+<p>---</p>
+<h2>Custom & Cloud Image Building</h2>
+<p><a href="https://github.com/shani8dev/shani-install-media">shani-install-media</a> builds the actual OS images and ISOs from four profiles, each with its own <code>package-list.txt</code> under <code>image_profiles/&lt;profile&gt;/</code>:</p>
+<p>| Profile | Desktop | Notes | |---|---|---| | <code>gnome</code> | GNOME | Default desktop image | | <code>plasma</code> | KDE Plasma | Adds Kvantum Flatpak filesystem override | | <code>cosmic</code> | COSMIC | Desktop image | | <code>server</code> | None (headless) | Cloud/AMI-oriented, no GUI stack |</p>
+<h3>The Server Profile</h3>
+<p><code>image_profiles/server/package-list.txt</code> is explicitly built for headless/cloud deployment — its header states the meta-package policy: it deliberately excludes <code>shani-core</code>, <code>shani-network</code>, and <code>shani-desktop-*</code> (which would pull in NetworkManager, Waydroid, snapd-for-desktop, and GUI stacks) and instead installs <code>shani-tools-network</code> plus an explicit package list. Concretely, the server profile differs from the desktop profiles in:</p>
+<ul>
+<li><strong>Networking:</strong> <code>systemd-networkd</code>/<code>systemd-resolved</code> instead of NetworkManager (<code>etc/systemd/network/20-cloud-dhcp.network</code>)</li>
+<li><strong>Cloud integration:</strong> <code>cloud-init</code>, <code>amazon-ssm-agent</code>, <code>amazon-ec2-utils</code> — configured for AWS EC2 out of the box</li>
+<li><strong>Serial console:</strong> <code>serial-getty@ttyS0.service</code> enabled for EC2-style serial access, kernel cmdline set via <code>etc/kernel/install_cmdline</code></li>
+<li><strong>Security baseline enabled by default:</strong> <code>sshd</code>, <code>firewalld</code>, <code>fail2ban</code>, <code>apparmor</code>, <code>auditd</code>, <code>fwupd</code>, <code>cronie</code> (<code>server-customization.sh</code> enables each)</li>
+<li><strong>Containers, not desktop apps:</strong> <code>podman</code>, <code>buildah</code>, <code>skopeo</code>, <code>distrobox</code>, <code>podman-compose</code></li>
+<li><strong>GUI dependencies disabled:</strong> <code>server-customization.sh</code> masks the <code>shani-deploy-notify</code> GUI dialog service so <code>yad</code> never tries to open a display on a headless box</li>
+<li><strong>Optional-until-configured services disabled:</strong> <code>tailscaled</code>, <code>cloudflared</code>, and <code>caddy</code> are installed but disabled until an admin configures them</li>
+</ul>
+<p>The bundled cloud-init datasource config (<code>etc/cloud/cloud.cfg.d/10-shanios-aws.cfg</code>) targets AWS EC2 specifically: IMDSv2 is enforced (<code>strict_id: true</code>), SSH host keys are regenerated per-instance (<code>ssh_deletekeys</code>/<code>ssh_genkeytypes</code>) so cloned AMI instances don't share host keys, root SSH login is disabled, and the default <code>shanios</code> user is created with passwordless sudo and cloud-init-managed key injection — comparable to what AL2023/RHEL9/Ubuntu cloud images do.</p>
+<h3>Building an AWS AMI Directly</h3>
+<p><code>shani-install-media/packer/</code> contains a working Packer template (<code>shanios-ami.pkr.hcl</code>, using the <code>amazon-ebssurrogate</code> builder) that turns a pre-built <code>.zst</code> base image into a bootable AWS AMI with the same blue/green Btrfs layout as physical installs:</p>
+<pre><code class="language-bash">cd packer/
+cp templates/variables.pkrvars.hcl local.pkrvars.hcl
+$EDITOR local.pkrvars.hcl        # set r2_base_url and aws_region at minimum
+
+make init
+make validate
+make build                       # default profile: server
+make build PROFILE=gnome         # or gnome / plasma / cosmic</code></pre>
+<p>The build runs a three-stage provisioner (<code>00-bootstrap-shanios.sh</code> partitions the target volume and receives the Btrfs send-stream; <code>01-configure-aws.sh</code> writes fstab, cloud-init, and the bootloader; <code>02-verify.sh</code> fails the build if anything critical is missing) and takes roughly 15–25 minutes. Key variables an OEM/cloud team would set:</p>
+<p>| Variable | Purpose | |---|---| | <code>r2_base_url</code> / <code>s3_base_url</code> | Where the base <code>.zst</code> image is pulled from during the <em>build</em> | | <code>gpg_public_key</code> | Pass your own signing key via <code>PKR_VAR_gpg_public_key</code> — never stored in the vars file | | <code>shanios_profile</code> | <code>gnome</code> \| <code>plasma</code> \| <code>cosmic</code> (server is the default) | | <code>root_volume_size_gb</code> / <code>efi_volume_size_mb</code> | AMI volume sizing |</p>
+<p>A GitHub Actions workflow (<code>.github/workflows/build-ami.yml</code>) builds the AMI via AWS OIDC (no long-lived keys) on every relevant push.</p>
+<h3>The Underlying Package Build Pipeline</h3>
+<p><a href="https://github.com/shani8dev/shani-builder">shani-builder</a> is the shared build infrastructure an OEM would need if customising further:</p>
+<ul>
+<li><strong><code>docker/</code></strong> — the privileged Arch-based container (<code>shrinivasvkumbhar/shani-builder</code>) that <code>shani-install-media</code> uses to assemble images/ISOs; it pre-imports the Shanios signing key and adds the <code>[shani]</code> pacman repo</li>
+<li><strong><code>pkg/pkg-builder.sh</code></strong> — a fully automated pipeline that builds, GPG-signs, and publishes custom Arch packages to a <code>repo-add</code>-managed package repository, driven entirely by environment variables (<code>SSH_PRIVATE_KEY</code>, <code>GPG_PRIVATE_KEY</code>, <code>GPG_PASSPHRASE</code>) rather than positional CLI args, so credentials never show up in <code>ps aux</code></li>
+</ul>
+<p>Building a fully custom OEM/AMI image is therefore a real, documented pipeline (profile → <code>pacstrap</code> package list → overlay → customisation script → sign → publish), not a manual respin process.</p>
 <p>---</p>
 <h2>Fleet Update Management</h2>
-<h3>Centralised Update Delivery</h3>
-<p>For fleet deployments, mirror the update CDN internally and point machines at your internal mirror by configuring the update URL in <code>shani-deploy</code>'s configuration. Updates are downloaded from your network, not the public CDN. This controls bandwidth and allows offline or air-gapped deployments.</p>
 <h3>Release Channels and Staged Rollouts</h3>
 <p><code>shani-deploy</code> supports two release channels: <code>stable</code> (default, monthly) and <code>latest</code> (more frequent). For staged rollouts, run a canary group on <code>latest</code> before pushing the full fleet on <code>stable</code>:</p>
 <pre><code class="language-bash"># Check current channel
@@ -252,7 +325,7 @@ sudo shani-deploy --set-channel latest
 # Use a channel for a single run without changing the default
 sudo shani-deploy -t latest</code></pre>
 <h3>Automated Unattended Updates</h3>
-<p>For unattended fleet updates, a systemd timer can trigger <code>shani-deploy</code> on a schedule. The update stages the new image and writes <code>/run/shanios/reboot-needed</code>; the reboot can be scheduled separately in a maintenance window:</p>
+<p>For unattended fleet updates, a systemd timer can trigger <code>shani-deploy</code> on a schedule:</p>
 <pre><code class="language-ini"># /etc/systemd/system/shani-autoupdate.timer
 [Unit]
 Description=Automatic Shani OS update check
@@ -271,8 +344,28 @@ Description=Automatic Shani OS update
 Type=oneshot
 ExecStart=/usr/local/bin/shani-deploy</code></pre>
 <pre><code class="language-bash">sudo systemctl enable shani-autoupdate.timer</code></pre>
+<p><code>shani-deploy</code> takes an <code>flock</code>-based lock on <code>/run/shanios-deploy.lock</code> before doing anything (<code>acquire_deploy_lock()</code>), so if a timer-triggered run overlaps with an admin manually running <code>shani-deploy</code> — or a second timer fires before the first finishes — the second invocation exits immediately with "Another shani-deploy is already running" instead of racing the first. This makes scheduled fleet timers safe to layer on top of manual/ad-hoc updates without extra locking of your own.</p>
+<p>The update stages the new image and, once staged, arms a <strong>60-second automatic reboot by default</strong> (<code>AUTO_REBOOT=yes</code>) via a separate one-shot systemd timer. For fleets that want to control the reboot moment precisely (a maintenance window rather than 60 seconds after staging), disable that and drive it yourself off the reboot marker:</p>
+<pre><code class="language-bash"># Stage the update but don't let it auto-reboot in 60s
+sudo AUTO_REBOOT=no shani-deploy
+
+# Check the marker in your maintenance-window logic (tmpfs, cleared on reboot)
+if [ -f /run/shanios/reboot-needed ]; then
+    systemctl reboot
+fi</code></pre>
+<p><code>--download-only</code> splits fetch from deploy — useful for pre-staging an update to many machines over a slow or metered link ahead of the actual maintenance window:</p>
+<pre><code class="language-bash">sudo shani-deploy --download-only     # fetch + verify now, cached under /data/downloads
+# ... later, in the maintenance window:
+sudo shani-deploy                     # deploys the already-verified image</code></pre>
 <p>For managed fleets, disable the <code>shani-update</code> interactive prompt so it does not surface to users:</p>
 <pre><code class="language-bash">sudo rm /etc/xdg/autostart/shani-update.desktop</code></pre>
+<h3>Centralised Update Delivery — What Is (and Isn't) Configurable</h3>
+<p>Update images are served from Cloudflare R2 (<code>https://downloads.shani.dev</code>) with automatic SourceForge-mirror discovery as fallback, and every image is GPG-verified against the fixed key above. Both the CDN base URL and the signing key are <code>readonly</code> constants baked into <code>shani-deploy.sh</code> and <code>shani-update.sh</code> — <strong>there is currently no config file or flag that points a stock installation at an internal mirror or a private signing key for its ongoing updates.</strong> For air-gapped or bandwidth-controlled fleets, the practical options today are:</p>
+<ul>
+<li><code>--download-only</code> on a machine with network access, then distributing the verified image tarball for offline deployment (manual, not automated by the tool)</li>
+<li>Forking <code>shani-deploy</code> to change <code>R2_BASE_URL</code>/<code>GPG_KEY_ID</code> and shipping that build to the fleet instead of the stock tool</li>
+</ul>
+<p>A fully self-hosted "private update CDN" pointed to by an unmodified <code>shani-deploy</code> is not an existing feature — see <a href="#gaps-and-roadmap">Gaps and Roadmap</a>.</p>
 <p>---</p>
 <h2>Remote Rollback Without Reimaging</h2>
 <p><strong>Automatic rollback (no intervention):</strong> systemd-boot's boot-counting mechanism detects a slot that fails to reach <code>multi-user.target</code> within three boot attempts and automatically falls back to the previous slot.</p>
@@ -337,7 +430,17 @@ shani-health --verify
 shani-health --history
 
 # systemd journal entries at error level and above
-shani-health --journal err</code></pre>
+shani-health --journal err
+
+# Bundle logs + state for centralised triage
+shani-health --export-logs /var/tmp/diag</code></pre>
+<p>Most modes (<code>--boot</code>, <code>--security</code>, <code>--storage-info</code>, <code>--network</code>, <code>--hardware</code>, <code>--packages</code>) print a formatted, human-readable report — there is no <code>--json</code>/machine-readable output mode today, so scraping structured data out of them for a monitoring dashboard would mean parsing text.</p>
+<p><code>--verify</code> is the exception worth building fleet automation around: it runs UKI signature checks, a Btrfs scrub of both slots, slot-marker consistency, boot-entry consistency, and immutability checks, then <strong>returns a real exit code</strong> — <code>0</code> if everything passed, <code>1</code> if it found any issue — which is exactly what a cron job or fleet health-check runner needs:</p>
+<pre><code class="language-bash"># Cron-friendly health gate — non-zero exit means alert
+if ! shani-health --verify &gt;/tmp/verify.log 2&gt;&amp;1; then
+    mail -s &quot;shani-health --verify FAILED on $(hostname)&quot; ops@example.com &lt; /tmp/verify.log
+fi</code></pre>
+<p><code>--export-logs</code> bundles diagnostics into a directory for centralized collection (e.g. rsync'd back to a fleet-management box) when a deeper look is needed than the exit code alone provides.</p>
 <h3>Remote Monitoring via Tailscale or SSH</h3>
 <p>Each machine is accessible via SSH over Tailscale without requiring a VPN server or port forwarding. Tailscale state persists across OS updates at <code>/data/varlib/tailscale</code>:</p>
 <pre><code class="language-bash"># Check a remote machine's active slot and boot state
@@ -361,6 +464,16 @@ ssh admin@machine-name.tailnet.ts.net 'sudo shani-deploy -r &amp;&amp; sudo rebo
 <li>Zero telemetry — no usage data, crash reports, or analytics</li>
 </ul>
 <p>LUKS2 keys never leave the device. TPM2 sealing binds to PCRs 0 and 7 — the firmware state and the Secure Boot policy. For government and institutional deployments requiring no foreign key escrow: the encryption key is on the device, sealed in the TPM2 chip, verifiable via the public <code>gen-efi</code> source code.</p>
+<p>---</p>
+<h2>Gaps and Roadmap</h2>
+<p>To keep this page honest about what exists versus what a larger enterprise deployment might expect, the following are <strong>not</strong> currently implemented anywhere in the Shanios codebase, and should not be assumed:</p>
+<ul>
+<li><strong>No centralised fleet dashboard.</strong> There is no web console or MDM-style server for viewing fleet-wide status, pushing configuration, or triggering updates across machines. Fleet coordination today means SSH/Tailscale plus your own scripting (cron + <code>shani-deploy</code> + <code>shani-health --verify</code>), as described above.</li>
+<li><strong>No runtime-configurable private update mirror or signing key.</strong> As covered above, <code>R2_BASE_URL</code> and <code>GPG_KEY_ID</code> are compile-time constants in <code>shani-deploy</code>/<code>shani-update</code>. A private CDN or OEM signing key for <em>ongoing</em> updates requires forking the tool, not a config setting.</li>
+<li><strong>No machine-readable <code>shani-health</code> output.</strong> Reports are formatted text; only <code>--verify</code>'s exit code is designed for automation.</li>
+<li><strong>No remote push/enrollment mechanism.</strong> Machines pull updates on their own schedule (timer or user-triggered); there's no server-initiated "deploy to these 200 machines now" push.</li>
+</ul>
+<p>If your organisation needs one of these, <a href="https://shani.dev#enterprise">contact the project</a> — enterprise/OEM engagement is exactly the context in which contributing this kind of tooling upstream is on the table.</p>
 <p>---</p>
 <h2>See Also</h2>
 <ul>

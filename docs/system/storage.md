@@ -1,7 +1,7 @@
 ---
 title: Storage
 section: System
-updated: 2026-04-28
+updated: 2026-08-20
 ---
 
 # Storage
@@ -176,6 +176,18 @@ sudo xfs_growfs /mountpoint
 
 ---
 
+## Automatic Btrfs Maintenance (Shani OS Defaults)
+
+Shani OS's root and data volumes are Btrfs, laid out as `@blue`/`@green` root subvolumes for atomic updates (see [Btrfs Deep Dive](../arch/btrfs)). Routine maintenance already runs on its own — you rarely need to invoke `btrfs scrub`, `btrfs balance`, or `fstrim` manually:
+
+- **Balance, defrag, scrub, and trim** run via `btrfs-balance.timer`, `btrfs-defrag.timer`, `btrfs-scrub.timer`, and `btrfs-trim.timer` (from `btrfsmaintenance`), enabled by default and scheduled weekly at idle I/O priority. Check them with `systemctl list-timers 'btrfs-*'`.
+- **bees** runs continuously in the background (`beesd@<uuid>.service`), deduplicating extents across the `@blue`/`@green` root subvolumes and their backup snapshots as they diverge — this is what keeps two nearly-identical OS slots from doubling disk usage.
+- **`sudo shani-deploy --optimize`** runs a deeper, one-shot `duperemove` pass across `@blue`, `@green`, and any `*_backup_*` subvolumes. Use it to reclaim space beyond what continuous bees dedup catches; it's skipped automatically if a deployment is pending.
+
+Running `btrfs scrub start /` or `btrfs balance start /` manually (as shown below) is still useful for an on-demand check, but is not required for routine upkeep.
+
+---
+
 ## /etc/fstab — Persistent Mounts
 
 Entries in `/etc/fstab` are captured by the `/etc` overlay and persist across OS updates.
@@ -196,6 +208,8 @@ sudo mount /mnt/backup
 ```
 
 > 💡 Always use UUID (`blkid`) rather than device names like `/dev/sda1` — device names shift when you add or remove drives.
+
+Some Shani OS paths are made persistent via bind mounts instead of fstab entries — e.g. `/var/lib/samba/usershare` is bind-mounted from `/data/varlib/samba` (on the `@data` subvolume), so Samba usershare state survives blue/green slot switches without a manual fstab line.
 
 ---
 
@@ -372,7 +386,7 @@ cat /proc/swaps                  # all active swap sources
 | SMART not available | Some USB enclosures block SMART passthrough; try `smartctl -d sat /dev/sdb` |
 | `e2fsck` finds errors but drive is mounted | Boot from the other slot and run `e2fsck` unmounted |
 | Btrfs reports errors after scrub | Check `dmesg | grep btrfs`; if uncorrectable, restore from backup — the drive may be failing |
-| `No space left` but `df` shows free space | Inode exhaustion: `df -i`; or Btrfs metadata full: `sudo btrfs balance start -m /` |
+| `No space left` but `df` shows free space | Inode exhaustion: `df -i`; or Btrfs metadata full: `sudo btrfs balance start -m /` (balance also runs automatically via `btrfs-balance.timer`, weekly) |
 | UUID changed after mkfs | Update `/etc/fstab` with `blkid`; regenerate initramfs with `sudo dracut --force` |
 
 ---

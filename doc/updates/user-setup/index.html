@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="User Provisioning   automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix channels, and…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"User Provisioning (shani-user-setup)","description":"User Provisioning   automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix channels, and…","url":"https://docs.shani.dev/doc/updates/user-setup/","datePublished":"2026-05-12T18:30:00.000Z","dateModified":"2026-05-12T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"User Provisioning (shani-user-setup)","description":"User Provisioning   automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix channels, and…","url":"https://docs.shani.dev/doc/updates/user-setup/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,11 +213,11 @@
         <h1 class="doc-title">User Provisioning (shani-user-setup)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Updates &amp; Config</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-05-13</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><h1>User Provisioning</h1>
-<p><code>shani-user-setup</code> automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix channels, and rootless container namespaces. It runs as root via a systemd path unit that watches <code>/data/user-setup-needed</code>, triggered by <code>shani-deploy</code> after every OS update and by the first-run wizard when a new user account is created.</p>
+<p><code>shani-user-setup</code> automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix channels, and rootless container namespaces. It runs as root via <code>shani-user-setup.service</code>, triggered by a systemd path unit (<code>shani-user-setup.path</code>) that watches for any of three conditions: a new/changed <code>/etc/passwd</code> in the <code>/etc</code> overlay's upper layer (i.e. a user was just added), a modified <code>/etc/skel</code>, or the <code>/data/user-setup-needed</code> marker file — the marker is written by <code>shani-deploy</code> after every slot switch and by <code>shani-reset</code> after a factory reset, so newly-applied group assignments and skel changes are picked up on the next boot even without a fresh user account.</p>
 <p>---</p>
 <h2>What It Does</h2>
 <p>For each interactive user account on the system, <code>shani-user-setup</code>:</p>
@@ -239,7 +239,7 @@
 <h3>Group Reference</h3>
 <p>| Group | Purpose | |-------|---------| | <code>wheel</code> | Sudo privileges for system administration | | <code>input</code> | Direct input device access (keyboards, mice, controllers) | | <code>realtime</code> | Real-time scheduling, HPET/RTC access for audio production and low-latency gaming | | <code>video</code> | GPU and video hardware access | | <code>sys</code> | Hardware monitoring and sensor access | | <code>cups</code>, <code>lp</code> | Printer management and job submission | | <code>scanner</code> | Scanner device access | | <code>nixbld</code> | Nix build users group — required for the Nix package manager daemon | | <code>lxc</code>, <code>lxd</code> | LXC/LXD container management without root | | <code>kvm</code> | Virtual machine management (KVM hardware access) | | <code>libvirt</code> | libvirt VM management via <code>virsh</code> and virt-manager |</p>
 <p>This file is the <strong>single source of truth</strong> shared between <code>shani-user-setup</code> and the <code>adduser</code>/<code>useradd</code> wrappers. Editing it ensures that all future users (and any re-provisioning runs) get the same groups.</p>
-<p>If the file is absent, <code>shani-user-setup</code> falls back to the built-in default group list.</p>
+<p>If the file is missing or empty, <code>shani-user-setup</code> adds <strong>no</strong> extra groups at all — the group-membership step silently has nothing to do. It does not fall back to a built-in list. Shell, Flatpak remote, Nix channel, and subuid/subgid provisioning are unaffected and still run normally. In practice the file is written by the base image install, so this only matters if you delete it yourself.</p>
 <pre><code class="language-bash"># View current extra groups
 cat /etc/shani-extra-groups
 
@@ -250,13 +250,18 @@ sudo nano /etc/shani-extra-groups
 sudo FORCE_SETUP=1 shani-user-setup</code></pre>
 <p>---</p>
 <h2>Triggering</h2>
-<p><code>shani-user-setup</code> runs when <code>/data/user-setup-needed</code> is created or modified:</p>
-<pre><code class="language-bash"># systemd path unit watches for this file
+<p><code>shani-user-setup.path</code> watches three things, and running the service is rate-limited to at most 3 triggers per 60 seconds:</p>
+<ol>
+<li><code>/data/overlay/etc/upper/passwd</code> created or changed — fires the moment a new user is added (via <code>useradd</code>/<code>adduser</code>, which copy-up <code>/etc/passwd</code> into the overlay), without needing any marker file</li>
+<li><code>/etc/skel</code> modified — belt-and-suspenders coverage for a slot switch that changes skel contents</li>
+<li><code>/data/user-setup-needed</code> created — the explicit marker, written by <code>shani-deploy</code> after every slot switch and by <code>shani-reset</code> after a factory reset</li>
+</ol>
+<pre><code class="language-bash"># systemd path unit watches for these
 systemctl status shani-user-setup.path
 
-# Trigger manually (e.g. after adding a new user)
+# Trigger manually (e.g. after adding a new user or editing shani-extra-groups)
 sudo touch /data/user-setup-needed</code></pre>
-<p><code>shani-deploy</code> writes this marker after every slot switch so new group assignments from the updated OS are applied on the next login.</p>
+<p>Whichever trigger fires, the service itself re-provisions every interactive user (UID 1000–59999) on the system, not just the one that changed.</p>
 <p>---</p>
 <h2>Running Manually</h2>
 <pre><code class="language-bash"># Provision all users (normal run)

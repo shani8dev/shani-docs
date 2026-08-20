@@ -1,7 +1,7 @@
 ---
 title: Logging
 section: System
-updated: 2026-04-28
+updated: 2026-08-20
 ---
 
 # Logging
@@ -104,6 +104,8 @@ MaxLevelWall=emerg
 # Apply config changes
 sudo systemctl restart systemd-journald
 ```
+
+> 💡 Shani OS ships a stricter default than the example above, via a drop-in at `/usr/lib/systemd/journald.conf.d/00-journal-size.conf`: `SystemMaxUse=128M` with `SystemMaxFiles=2`, chosen to keep the journal from eating into a small root image. `/etc/systemd/journald.conf` itself is unmodified out of the box — edit it, or add your own drop-in under `/etc/systemd/journald.conf.d/` (captured by the overlay), to raise the limit.
 
 ---
 
@@ -320,7 +322,7 @@ journalctl -p err --no-pager
 | Issue | Solution |
 |-------|----------|
 | Logs lost after reboot | Enable persistent storage: `sudo mkdir -p /var/log/journal && sudo systemctl restart systemd-journald` |
-| Journal growing too large | Set `SystemMaxUse=` in `journald.conf`; run `sudo journalctl --vacuum-size=500M` |
+| Journal growing too large | Shani OS already caps it at 128M/2 files via a shipped drop-in; if you've raised `SystemMaxUse=` yourself, lower it in `journald.conf` and run `sudo journalctl --vacuum-size=500M` |
 | `journalctl` shows nothing for a service | Check `systemctl status <service>` — if the service never started, there are no logs; verify `StandardOutput=journal` in the unit |
 | Log entries missing (rate limited) | Increase `RateLimitBurst=` in `journald.conf` for noisy services |
 | Can't read journal as a regular user | Add user to the `systemd-journal` group: `sudo usermod -aG systemd-journal $USER` |

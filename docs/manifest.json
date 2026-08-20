@@ -4,7 +4,7 @@
     "title": "Boot Process",
     "section": "Architecture",
     "description": "Boot Process  Shanios uses a fully measured, signed boot chain built on systemd-boot, dracut-generated Unified Kernel Images (UKIs), and optionally TPM2 + …",
-    "updated": "2026-05-13",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -14,7 +14,7 @@
     "title": "Btrfs Deep Dive",
     "section": "Architecture",
     "description": "Btrfs Deep Dive  Shanios leverages advanced Btrfs features for immutability, efficiency, and data integrity.  Copy-on-Write (CoW)  Btrfs CoW minimises stor…",
-    "updated": "2026-05-13",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -24,7 +24,7 @@
     "title": "Dracut Initramfs Module",
     "section": "Architecture",
     "description": "Dracut Initramfs Module  Shanios ships a custom dracut module () that adds three hooks to the initramfs. These hooks implement the two features that requir…",
-    "updated": "2026-05-13",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -34,7 +34,7 @@
     "title": "Filesystem Structure",
     "section": "Architecture",
     "description": "Filesystem Structure  Shanios uses Btrfs with a sophisticated subvolume layout housed in a single Btrfs partition (plus a 1 GB FAT32 ESP). The design separ…",
-    "updated": "2026-05-13",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -44,7 +44,7 @@
     "title": "Overlay Filesystem",
     "section": "Architecture",
     "description": "Overlay Filesystem  Shanios uses Linux OverlayFS to present a fully writable  on top of a read-only root filesystem. This is what makes the immutable OS fe…",
-    "updated": "2026-05-13",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -54,7 +54,7 @@
     "title": "Atomic Updates",
     "section": "Concepts",
     "description": "Atomic Updates  Shanios uses an intelligent multi-layered update system with automatic checking, user notifications, and the  tool for atomic system update…",
-    "updated": "2026-04-27",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -64,7 +64,7 @@
     "title": "Blue-Green Deployment",
     "section": "Concepts",
     "description": "Blue-Green Deployment  Shanios implements blue-green deployment using Btrfs subvolumes — a strategy adapted from DevOps for desktop Linux.  How It Works  1…",
-    "updated": "2026-04-01",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -74,7 +74,7 @@
     "title": "Immutability",
     "section": "Concepts",
     "description": "Understanding Immutability  Shanios's immutability fundamentally changes how you interact with the system. Understanding this concept is key to using Shani…",
-    "updated": "2026-04-01",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -84,7 +84,7 @@
     "title": "Persistence Strategy",
     "section": "Concepts",
     "description": "Persistence Strategy  Shanios selectively persists data across immutable system updates through bind mounts and dedicated Btrfs subvolumes.  Three Categori…",
-    "updated": "2026-04-01",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -94,7 +94,7 @@
     "title": "OEM & Fleet Deployment",
     "section": "Enterprise",
     "description": "OEM & Fleet Deployment  Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or…",
-    "updated": "2026-04-27",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -114,7 +114,7 @@
     "title": "First Boot",
     "section": "Installation",
     "description": "First Boot Configuration  Plymouth BGRT Boot Theme  Shanios uses the Plymouth BGRT boot theme. Plymouth provides a smooth graphical boot experience, suppre…",
-    "updated": "2026-04-01",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -124,7 +124,7 @@
     "title": "Pre-Installation Setup",
     "section": "Installation",
     "description": "Pre-Installation Setup  BIOS/UEFI Configuration  Configure your firmware before installation (typically accessed via F2, F10, Del, or Esc during startup): …",
-    "updated": "2026-04-01",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -134,7 +134,7 @@
     "title": "System Requirements",
     "section": "Installation",
     "description": "System Requirements  Hardware Requirements  | Component | Minimum | Recommended | |-----------|---------|-------------| | Processor | x8664 dual-core with …",
-    "updated": "2026-04-01",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -144,7 +144,7 @@
     "title": "Installation Steps",
     "section": "Installation",
     "description": "Installation Steps  Installation takes approximately 10–15 minutes.  Step-by-Step  1. Boot from USB — Press F12, F2, or Del during startup. Select your USB…",
-    "updated": "2026-04-01",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -154,7 +154,7 @@
     "title": "Getting Started",
     "section": "Introduction",
     "description": "Getting Started  A complete walkthrough: choose your edition, download and verify the ISO, install, and configure Shanios for daily use.  Choosing Your Edi…",
-    "updated": "2026-04-27",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -174,7 +174,7 @@
     "title": "System Optimizations",
     "section": "Introduction",
     "description": "System Optimizations  Shanios includes extensive performance, gaming, and reliability optimizations out of the box, eliminating the need for manual tweakin…",
-    "updated": "2026-04-01",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -184,7 +184,7 @@
     "title": "User Configuration",
     "section": "Introduction",
     "description": "User Configuration  The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created u…",
-    "updated": "2026-04-01",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -194,7 +194,7 @@
     "title": "What is Shanios?",
     "section": "Introduction",
     "description": "What is Shanios?  Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs f…",
-    "updated": "2026-04-27",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -204,7 +204,7 @@
     "title": "What's Included",
     "section": "Introduction",
     "description": "What's Included  Shanios comes fully equipped with a comprehensive software stack, carefully curated for desktop computing, development, gaming, and profes…",
-    "updated": "2026-04-01",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -554,7 +554,7 @@
     "title": "AppArmor (Mandatory Access Control)",
     "section": "Security",
     "description": "AppArmor — Mandatory Access Control  AppArmor is a Linux Security Module that confines programs to a defined set of resources using per-application profile…",
-    "updated": "2026-04-20",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -564,7 +564,7 @@
     "title": "Audit (auditd)",
     "section": "Security",
     "description": "Audit — auditd   is the Linux kernel audit framework daemon. It captures security-relevant kernel events — file access, system calls, authentication, privi…",
-    "updated": "2026-04-20",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -574,7 +574,7 @@
     "title": "Security Features",
     "section": "Security",
     "description": "Security Features  Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot wi…",
-    "updated": "2026-04-27",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -584,7 +584,7 @@
     "title": "Firmware Updates (fwupd)",
     "section": "Security",
     "description": "Firmware Updates — fwupd   is the Linux Vendor Firmware Service client. It downloads firmware updates for BIOS/UEFI, drives, controllers, and other hardwar…",
-    "updated": "2026-04-20",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -594,7 +594,7 @@
     "title": "gen-efi Reference",
     "section": "Security",
     "description": "gen-efi Reference   is the Shanios UKI (Unified Kernel Image) builder and Secure Boot key manager. It wraps  and / to produce signed EFI binaries placed in…",
-    "updated": "2026-05-13",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -604,7 +604,7 @@
     "title": "Directory Encryption (gocryptfs)",
     "section": "Security",
     "description": "Directory Encryption — gocryptfs   encrypts individual directories using FUSE. Each file is stored as a separate encrypted blob, so cloud sync tools (Nextc…",
-    "updated": "2026-04-20",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -613,8 +613,8 @@
     "slug": "security/hardware-auth",
     "title": "Hardware Authentication",
     "section": "Security",
-    "description": "Hardware Authentication  Shani OS ships with full support for hardware authentication out of the box — fingerprint readers, YubiKeys, FIDO2/U2F tokens, sma…",
-    "updated": "2026-04-20",
+    "description": "Hardware Authentication  Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), an…",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -624,7 +624,7 @@
     "title": "LUKS Management",
     "section": "Security",
     "description": "LUKS Management  Full-disk encryption with LUKS2 must be enabled during the Shanios installer — it is a single checkbox on the disk setup screen. There is …",
-    "updated": "2026-05-09",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -634,7 +634,7 @@
     "title": "Lynis (Security Auditing)",
     "section": "Security",
     "description": "Lynis — Security Auditing  Lynis is a security auditing tool that scans a running Linux system and produces a hardening report. It checks hundreds of items…",
-    "updated": "2026-04-20",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -654,7 +654,7 @@
     "title": "rkhunter (Rootkit Hunter)",
     "section": "Security",
     "description": "rkhunter — Rootkit Hunter  rkhunter scans a system for known rootkits, backdoors, and local exploits. It checks system binaries against stored hashes, look…",
-    "updated": "2026-04-20",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -674,7 +674,7 @@
     "title": "TPM2 Enrollment",
     "section": "Security",
     "description": "TPM2 Enrollment  TPM2 enrollment seals your LUKS2 disk encryption key into your machine's Trusted Platform Module. Once enrolled, the disk unlocks automati…",
-    "updated": "2026-04-30",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -1064,7 +1064,7 @@
     "title": "Backup & Recovery",
     "section": "System",
     "description": "Backup & Recovery  Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User data and container state must be backed up independently…",
-    "updated": "2026-05-13",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -1104,7 +1104,7 @@
     "title": "Kernel Modules",
     "section": "System",
     "description": "Kernel Modules  Kernel modules are loadable drivers and extensions that the Linux kernel can load and unload at runtime without rebooting. On Shani OS, mod…",
-    "updated": "2026-04-28",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -1114,7 +1114,7 @@
     "title": "Logging",
     "section": "System",
     "description": "Logging  Shani OS uses systemd-journald as its primary logging system. All kernel messages, service output, and system events flow into a single structured…",
-    "updated": "2026-04-28",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -1134,7 +1134,7 @@
     "title": "Storage",
     "section": "System",
     "description": "Storage  This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring…",
-    "updated": "2026-04-28",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -1144,7 +1144,7 @@
     "title": "Systemd",
     "section": "System",
     "description": "Systemd  Systemd is the init system and service manager on Shani OS. It starts every process at boot, manages all daemons, handles logging via the journal,…",
-    "updated": "2026-04-25",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -1154,7 +1154,7 @@
     "title": "Users & Groups",
     "section": "System",
     "description": "Users & Groups  User accounts on Shani OS follow standard Linux conventions — accounts are stored in , , and , which live in the  overlay and persist acros…",
-    "updated": "2026-04-25",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -1184,7 +1184,7 @@
     "title": "shani-health Reference",
     "section": "Updates & Config",
     "description": "shani-health Reference   is the system health and diagnostics CLI for Shanios. It provides a comprehensive single-command view of your system's state: boot…",
-    "updated": "2026-05-13",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -1194,7 +1194,7 @@
     "title": "Factory Reset (shani-reset)",
     "section": "Updates & Config",
     "description": "Factory Reset   wipes all persistent system state stored in  and reboots the machine. On the next boot,  recreates the  structure, the  overlay starts fres…",
-    "updated": "2026-05-13",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -1204,7 +1204,7 @@
     "title": "Shell & Environment",
     "section": "Updates & Config",
     "description": "Shell & Environment  Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your…",
-    "updated": "2026-04-22",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -1214,7 +1214,7 @@
     "title": "System Updates",
     "section": "Updates & Config",
     "description": "System Updates  Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the…",
-    "updated": "2026-05-13",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -1224,7 +1224,7 @@
     "title": "User Provisioning (shani-user-setup)",
     "section": "Updates & Config",
     "description": "User Provisioning   automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix channels, and…",
-    "updated": "2026-05-13",
+    "updated": "2026-08-20",
     "order": 999,
     "draft": false,
     "keywords": ""

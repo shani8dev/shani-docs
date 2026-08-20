@@ -1,14 +1,14 @@
 ---
 title: AppArmor (Mandatory Access Control)
 section: Security
-updated: 2026-04-20
+updated: 2026-08-20
 ---
 
 # AppArmor — Mandatory Access Control
 
 AppArmor is a Linux Security Module that confines programs to a defined set of resources using per-application profiles. A profile specifies which files, capabilities, network operations, and system calls a program is allowed — anything not explicitly permitted is denied. This limits the damage a compromised or misbehaving process can cause, even if it runs as root.
 
-AppArmor is pre-installed and active by default on Shani OS. Profiles ship with applications and are loaded at boot.
+AppArmor is pre-installed and active by default on Shani OS: it's part of the kernel LSM stack (`lsm=landlock,lockdown,yama,integrity,apparmor,bpf`, embedded in every UKI by `gen-efi`), and the `shani-core` package's post-install hook explicitly enables both `apparmor.service` and `snapd.apparmor.service` (so Snap confinement is enforced too) on every install. Profiles ship with applications and are loaded at boot — Shani OS does not currently ship any of its own custom `/etc/apparmor.d/` profiles beyond what upstream packages provide.
 
 ---
 
@@ -135,3 +135,11 @@ This tells you: `myapp` tried to read `/etc/passwd` and was denied. To allow it,
 | `aa-status` shows no profiles | AppArmor is loaded but no profiles are installed — install application packages that ship profiles, or write your own |
 | Denial for a path that should be allowed | Edit the profile to add the required rule, then reload: `sudo apparmor_parser -r /etc/apparmor.d/profile` |
 | Want to test a profile change safely | Switch to complain mode first (`aa-complain`), test, check logs, then enforce (`aa-enforce`) once the profile is working correctly |
+
+---
+
+## See Also
+
+- [Audit (auditd)](audit) — AppArmor denials are logged to the audit trail when `auditd` is running
+- [Security Features](features) — AppArmor's place in the six-LSM stack
+- [shani-health Reference](../updates/shani-health) — `shani-health --security` reports the enforcing-profile count and counts this boot's AppArmor denials from the kernel log

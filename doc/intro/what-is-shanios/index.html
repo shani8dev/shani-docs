@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="What is Shanios?  Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs f…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"What is Shanios?","description":"What is Shanios?  Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs f…","url":"https://docs.shani.dev/doc/intro/what-is-shanios/","datePublished":"2026-04-26T18:30:00.000Z","dateModified":"2026-04-26T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"What is Shanios?","description":"What is Shanios?  Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs f…","url":"https://docs.shani.dev/doc/intro/what-is-shanios/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">What is Shanios?</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Introduction</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-27</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p>Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs filesystem, it provides atomic updates, instant rollback, and system integrity by design. It ships as two editions — <strong>GNOME</strong> and <strong>KDE Plasma</strong> — and works out of the box with no post-install tweaking required.</p>
@@ -223,7 +223,7 @@
 <li><strong>Blue-Green Deployment:</strong> Two complete system images (<code>@blue</code> and <code>@green</code>) are maintained. While one is active, updates are written to the other. On reboot you switch to the updated image. The previous one is kept as a one-command rollback target.</li>
 <li><strong>Atomic Updates:</strong> Updates are all-or-nothing. The running system is never touched during an update. If something goes wrong, boot failure is detected automatically and the system rolls back — your work is never interrupted.</li>
 <li><strong>Selective Persistence:</strong> User data, configuration changes (<code>/etc</code> overlay), Flatpak apps, containers, VMs, and service credentials all live in dedicated Btrfs subvolumes that survive every update and rollback, always.</li>
-<li><strong>Defence-in-Depth Security:</strong> Six Linux Security Modules run simultaneously (<code>lsm=landlock,lockdown,yama,integrity,apparmor,bpf</code>), LUKS2 argon2id full-disk encryption, TPM2 auto-unlock, Secure Boot with MOK, Intel ME disabled by default, and every OS image is SHA256+GPG verified before deployment.</li>
+<li><strong>Defence-in-Depth Security:</strong> Six Linux Security Modules run simultaneously (<code>lsm=landlock,lockdown,yama,integrity,apparmor,bpf</code>), LUKS2 argon2id full-disk encryption, TPM2 auto-unlock, Secure Boot with MOK, Intel ME kernel modules (<code>mei</code>, <code>mei_me</code>) blacklisted by default, and every OS image is SHA256+GPG verified before deployment.</li>
 <li><strong>Zero Telemetry:</strong> No usage data, crash reports, analytics, or tracking of any kind — ever. The entire codebase is public on GitHub; every claim is independently verifiable.</li>
 </ul>
 <h2>Traditional vs Immutable OS</h2>
@@ -250,7 +250,7 @@
 <p>The immutable root is transparent in daily use. You edit <code>/etc</code> files normally, install Flatpaks and Nix packages freely, run containers, and manage VMs — all exactly as you would on any Linux system. The difference is that updates never break a running system, rollback is always available, and an attacker who gains root access during a session cannot plant a persistent backdoor into system paths.</p>
 <p>The OS that passed build-time verification is the OS that runs, byte for byte, until the next deliberate <code>shani-deploy</code> update.</p>
 <h2>Built in India</h2>
-<p>Shanios is built in India 🇮🇳 by <a href="https://github.com/Shrinivasvkumbhar">Shrinivas Vishnu Kumbhar</a>. Indian-language support — Devanagari, Tamil, Telugu, and more — is a first-class feature, pre-configured from first boot with IBus multi-language input.</p>
+<p>Shanios is built in India 🇮🇳 by <a href="https://github.com/Shrinivasvkumbhar">Shrinivas Vishnu Kumbhar</a>. Indian-language support — Devanagari, Bengali, Gujarati, Gurmukhi (Punjabi), Kannada, Malayalam, Oriya, Tamil, and Telugu scripts — is a first-class feature, pre-configured from first boot with IBus multi-language input.</p>
 <p>The entire codebase is public at <a href="https://github.com/shani8dev">github.com/shani8dev</a>. Every claim in this documentation is independently verifiable.</p></div>
     </div>
 

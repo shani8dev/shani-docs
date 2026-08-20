@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Users &amp; Groups  User accounts on Shani OS follow standard Linux conventions — accounts are stored in , , and , which live in the  overlay and persist acros…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Users & Groups","description":"Users & Groups  User accounts on Shani OS follow standard Linux conventions — accounts are stored in , , and , which live in the  overlay and persist acros…","url":"https://docs.shani.dev/doc/system/users-groups/","datePublished":"2026-04-24T18:30:00.000Z","dateModified":"2026-04-24T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Users & Groups","description":"Users & Groups  User accounts on Shani OS follow standard Linux conventions — accounts are stored in , , and , which live in the  overlay and persist acros…","url":"https://docs.shani.dev/doc/system/users-groups/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Users &amp; Groups</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">System</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-25</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p>User accounts on Shani OS follow standard Linux conventions — accounts are stored in <code>/etc/passwd</code>, <code>/etc/shadow</code>, and <code>/etc/group</code>, which live in the <code>/etc</code> overlay and persist across all OS updates and rollbacks.</p>
@@ -370,9 +370,12 @@ getent group
 
 # Check if a user is in a specific group
 id alice | grep -w wheel</code></pre>
+<h3>The sambashare Group (Samba/SMB Sharing)</h3>
+<p><code>shani-settings</code> maintains a <code>sambashare</code> group automatically on install/upgrade: it creates the group if missing, adds every account in the normal UID range with a real login shell to it, and <code>chgrp</code>s <code>/var/lib/samba/usershare</code> to the group. This is what lets an interactive user create SMB usershares (via <code>net usershare</code> or a file manager's "Share" option) without any manual <code>usermod</code>. A user created <em>after</em> that point still needs adding by hand:</p>
+<pre><code class="language-bash">sudo usermod -aG sambashare alice</code></pre>
 <p>---</p>
 <h2>sudo & Privileges</h2>
-<p>On Shani OS, <code>wheel</code> group members have full sudo access. The configuration lives in <code>/etc/sudoers</code> (managed by the OS) and <code>/etc/sudoers.d/</code> (your custom rules, captured by the overlay).</p>
+<p>On Shani OS, <code>wheel</code> group members have full sudo access — granted not by <code>/etc/sudoers</code> itself but by a shipped drop-in at <code>/etc/sudoers.d/wheel</code> (<code>%wheel ALL=(ALL:ALL) ALL</code>). Both <code>/etc/sudoers</code> and <code>/etc/sudoers.d/</code> are captured by the <code>/etc</code> overlay, so edits (always via <code>visudo</code>) persist across updates.</p>
 <pre><code class="language-bash"># Edit sudoers safely (validates syntax before saving — never edit /etc/sudoers directly)
 sudo visudo
 

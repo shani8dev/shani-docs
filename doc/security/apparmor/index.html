@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="AppArmor — Mandatory Access Control  AppArmor is a Linux Security Module that confines programs to a defined set of resources using per-application profile…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"AppArmor (Mandatory Access Control)","description":"AppArmor — Mandatory Access Control  AppArmor is a Linux Security Module that confines programs to a defined set of resources using per-application profile…","url":"https://docs.shani.dev/doc/security/apparmor/","datePublished":"2026-04-19T18:30:00.000Z","dateModified":"2026-04-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"AppArmor (Mandatory Access Control)","description":"AppArmor — Mandatory Access Control  AppArmor is a Linux Security Module that confines programs to a defined set of resources using per-application profile…","url":"https://docs.shani.dev/doc/security/apparmor/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,11 +213,11 @@
         <h1 class="doc-title">AppArmor (Mandatory Access Control)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Security</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p>AppArmor is a Linux Security Module that confines programs to a defined set of resources using per-application profiles. A profile specifies which files, capabilities, network operations, and system calls a program is allowed — anything not explicitly permitted is denied. This limits the damage a compromised or misbehaving process can cause, even if it runs as root.</p>
-<p>AppArmor is pre-installed and active by default on Shani OS. Profiles ship with applications and are loaded at boot.</p>
+<p>AppArmor is pre-installed and active by default on Shani OS: it's part of the kernel LSM stack (<code>lsm=landlock,lockdown,yama,integrity,apparmor,bpf</code>, embedded in every UKI by <code>gen-efi</code>), and the <code>shani-core</code> package's post-install hook explicitly enables both <code>apparmor.service</code> and <code>snapd.apparmor.service</code> (so Snap confinement is enforced too) on every install. Profiles ship with applications and are loaded at boot — Shani OS does not currently ship any of its own custom <code>/etc/apparmor.d/</code> profiles beyond what upstream packages provide.</p>
 <p>---</p>
 <h2>Status</h2>
 <pre><code class="language-bash"># Check AppArmor is active in the kernel
@@ -292,7 +292,14 @@ name=&quot;/etc/passwd&quot; pid=1234 comm=&quot;myapp&quot; requested_mask=&quo
 <p>This tells you: <code>myapp</code> tried to read <code>/etc/passwd</code> and was denied. To allow it, add <code>/etc/passwd r,</code> to the profile.</p>
 <p>---</p>
 <h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | Application crashes or behaves oddly | Check for AppArmor denials: <code>journalctl -k | grep &quot;apparmor.*denied&quot;</code>; put the profile in complain mode temporarily: <code>sudo aa-complain /path/to/binary</code> | | Profile reload fails | Check syntax: <code>sudo apparmor_parser -p /etc/apparmor.d/profile-name</code>; fix errors and reload | | <code>aa-status</code> shows no profiles | AppArmor is loaded but no profiles are installed — install application packages that ship profiles, or write your own | | Denial for a path that should be allowed | Edit the profile to add the required rule, then reload: <code>sudo apparmor_parser -r /etc/apparmor.d/profile</code> | | Want to test a profile change safely | Switch to complain mode first (<code>aa-complain</code>), test, check logs, then enforce (<code>aa-enforce</code>) once the profile is working correctly |</p></div>
+<p>| Issue | Solution | |-------|----------| | Application crashes or behaves oddly | Check for AppArmor denials: <code>journalctl -k | grep &quot;apparmor.*denied&quot;</code>; put the profile in complain mode temporarily: <code>sudo aa-complain /path/to/binary</code> | | Profile reload fails | Check syntax: <code>sudo apparmor_parser -p /etc/apparmor.d/profile-name</code>; fix errors and reload | | <code>aa-status</code> shows no profiles | AppArmor is loaded but no profiles are installed — install application packages that ship profiles, or write your own | | Denial for a path that should be allowed | Edit the profile to add the required rule, then reload: <code>sudo apparmor_parser -r /etc/apparmor.d/profile</code> | | Want to test a profile change safely | Switch to complain mode first (<code>aa-complain</code>), test, check logs, then enforce (<code>aa-enforce</code>) once the profile is working correctly |</p>
+<p>---</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="audit">Audit (auditd)</a> — AppArmor denials are logged to the audit trail when <code>auditd</code> is running</li>
+<li><a href="features">Security Features</a> — AppArmor's place in the six-LSM stack</li>
+<li><a href="../updates/shani-health">shani-health Reference</a> — <code>shani-health --security</code> reports the enforcing-profile count and counts this boot's AppArmor denials from the kernel log</li>
+</ul></div>
     </div>
 
   </main>

@@ -1,7 +1,7 @@
 ---
 title: LUKS Management
 section: Security
-updated: 2026-05-09
+updated: 2026-08-20
 ---
 
 # LUKS Management
@@ -32,15 +32,15 @@ Attempting to encrypt an existing installation by hand requires: backing up all 
 
 Shanios uses LUKS2 with the `argon2id` key derivation function. `argon2id` is memory-hard — it requires a large amount of RAM to compute, making GPU and ASIC brute-force attacks orders of magnitude more expensive than with older PBKDF2-based setups. LUKS2 also supports up to 32 keyslots, allowing a passphrase, keyfile, and TPM2-sealed key all active simultaneously.
 
-Default encryption parameters used by the installer:
+The installer's disk setup step runs exactly one command for this: `cryptsetup -q luksFormat --pbkdf argon2id <partition>`. It pins the PBKDF to `argon2id` and nothing else — cipher, key size, memory cost, and parallelism all come from cryptsetup 2.x's own LUKS2 defaults:
 
 ```
-Cipher:      aes-xts-plain64
-Key size:    512 bits
-PBKDF:       argon2id
-Memory cost: 1048576 KB (1 GB)
-Time cost:   4 iterations
-Parallelism: 4 threads
+Cipher:           aes-xts-plain64
+Key size:         512 bits (256-bit key, doubled by XTS mode)
+PBKDF:            argon2id
+Memory cost:      1048576 KB (1 GB)
+Parallel threads: 4
+Iteration time:   2000 ms (cryptsetup benchmarks the actual iteration count per-machine — it is not a fixed number)
 ```
 
 ---

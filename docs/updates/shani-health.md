@@ -1,7 +1,7 @@
 ---
 title: shani-health Reference
 section: Updates & Config
-updated: 2026-05-13
+updated: 2026-08-20
 ---
 
 # shani-health Reference
@@ -64,6 +64,7 @@ The default run covers every component in one pass. Sections include:
 - **TPM2** — hardware presence, enrollment status, PCR policy vs current Secure Boot state
 - **Security Services** — AppArmor, firewall, polkit, fail2ban, FIDO2/libfido2, pcscd, fprintd
 - **Security Tools** — lynis hardening index, rkhunter scan history
+- **Kerberos** — realm and KDC reachability from `/etc/krb5.conf` (only shown if `kinit` is installed)
 - **Users & Access** — login users, passwords, wheel group, UID-0 accounts, NOPASSWD sudo, home permissions, SSH key permissions, GnuPG permissions
 - **Groups** — system groups (kvm, video, input, realtime…), group membership from `/etc/shani-extra-groups`
 - **Hardware** — CPU model/flags/microcode, RAM, GPU, virtualization, IOMMU, temperatures, Bluetooth, peripherals
@@ -91,7 +92,7 @@ A focused view of the boot chain and deployment state. Covers OS/Slots, Boot Hea
 
 ### Security Report (`--security`)
 
-Covers Secure Boot, Kernel Security, Encryption, TPM2, Security Services, Security Tools, Users & Access, and Groups. Useful for security audits and hardening checks.
+Covers Secure Boot, Kernel Security, Encryption, TPM2, Security Services, Security Tools, Kerberos, Users & Access, and Groups. Useful for security audits and hardening checks.
 
 ### Hardware Report (`--hardware`)
 
@@ -140,7 +141,7 @@ Mounts the Btrfs root at `subvolid=5` and reports:
 - Snapshot summary with creation dates
 - Reclaim hints: duperemove, bees status, stale snapshots
 
-This is more detailed than `sudo shani-deploy --storage-info`, which only reports compressed OS slot sizes.
+`shani-deploy` has no `--storage-info` flag of its own — the closest it comes is that `sudo shani-deploy --optimize` prints a per-subvolume compression summary (`@blue`/`@green`/`@data`/`@swap`) as a side effect after running deduplication. `shani-health --storage-info` is the dedicated, read-only way to inspect storage and works without triggering a dedup run.
 
 ---
 
@@ -252,7 +253,7 @@ For Nagios/Zabbix-style monitoring, the non-zero exit code on any issue makes `s
 |---------|-------|
 | `shani-health` | Live system health — all components |
 | `shani-health --storage-info` | Deep Btrfs storage analysis |
-| `sudo shani-deploy --storage-info` | Compressed sizes of OS slots only |
+| `sudo shani-deploy --optimize` | Runs Btrfs deduplication; prints per-subvolume compressed sizes as a side effect afterward |
 | `shani-health --verify` | Deep integrity check with scrub |
 | `sudo shani-deploy -r` | Roll back inactive slot |
 

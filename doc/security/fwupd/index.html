@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Firmware Updates — fwupd   is the Linux Vendor Firmware Service client. It downloads firmware updates for BIOS/UEFI, drives, controllers, and other hardwar…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Firmware Updates (fwupd)","description":"Firmware Updates — fwupd   is the Linux Vendor Firmware Service client. It downloads firmware updates for BIOS/UEFI, drives, controllers, and other hardwar…","url":"https://docs.shani.dev/doc/security/fwupd/","datePublished":"2026-04-19T18:30:00.000Z","dateModified":"2026-04-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Firmware Updates (fwupd)","description":"Firmware Updates — fwupd   is the Linux Vendor Firmware Service client. It downloads firmware updates for BIOS/UEFI, drives, controllers, and other hardwar…","url":"https://docs.shani.dev/doc/security/fwupd/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,11 +213,11 @@
         <h1 class="doc-title">Firmware Updates (fwupd)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Security</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p><code>fwupd</code> is the Linux Vendor Firmware Service client. It downloads firmware updates for BIOS/UEFI, drives, controllers, and other hardware components directly from hardware vendors, verifies them cryptographically, and installs them. Keeping firmware current is a security requirement — firmware vulnerabilities (e.g. Spectre, MDS, firmware-level rootkits) are patched through firmware updates.</p>
-<p><code>fwupd</code> is pre-installed on Shani OS.</p>
+<p><code>fwupd</code> is pre-installed on Shani OS as a direct dependency of the <code>shani-core</code> package, and both <code>fwupd.service</code> and <code>fwupd-refresh.timer</code> are enabled automatically by <code>shani-core</code>'s post-install hook — metadata refresh and update checks are already running on a fresh install, with nothing to turn on.</p>
 <blockquote><p><strong>Important:</strong> After a firmware update, the TPM2 PCR 0 value changes. If you use TPM2-sealed LUKS, you will need to re-enroll after the firmware update. See <a href="tpm2">TPM2 Enrollment</a>.</p></blockquote>
 <p>---</p>
 <h2>Checking for Updates</h2>
@@ -266,6 +266,7 @@ sudo systemctl disable --now fwupd-refresh.timer</code></pre>
 <li><a href="tpm2">TPM2 Enrollment</a> — re-enrollment required after firmware updates</li>
 <li><a href="secure-boot">Secure Boot</a> — firmware update interaction with Secure Boot</li>
 <li><a href="features">Security Features</a> — security stack overview</li>
+<li><a href="../updates/shani-health">shani-health Reference</a> — <code>shani-health --hardware</code> reports <code>fwupd.service</code>/<code>fwupd-refresh.timer</code> status and any pending firmware updates</li>
 </ul></div>
     </div>
 

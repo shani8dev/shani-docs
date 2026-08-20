@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Backup &amp; Recovery  Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User data and container state must be backed up independently…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Backup & Recovery","description":"Backup & Recovery  Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User data and container state must be backed up independently…","url":"https://docs.shani.dev/doc/system/backup/","datePublished":"2026-05-12T18:30:00.000Z","dateModified":"2026-05-12T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Backup & Recovery","description":"Backup & Recovery  Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User data and container state must be backed up independently…","url":"https://docs.shani.dev/doc/system/backup/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Backup &amp; Recovery</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">System</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-05-13</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p>Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. <strong>User data and container state must be backed up independently</strong> to protect against drive failure, accidental deletion, or corruption.</p>
@@ -227,6 +227,7 @@
 <h2>What to Back Up</h2>
 <p>| Path | Subvolume | Priority | Notes | |------|-----------|----------|-------| | <code>/home</code> | <code>@home</code> | 🔴 Critical | User files, configs, SSH/GPG keys | | <code>/var/lib/containers</code> | <code>@containers</code> | 🟠 High | Podman/Distrobox images, volumes, layers | | <code>/var/lib/waydroid</code> | <code>@waydroid</code> | 🟠 High | Android apps, data, system image | | <code>/var/lib/lxd</code> | <code>@lxd</code> | 🟠 High | LXD system containers | | <code>/var/lib/flatpak</code> | <code>@flatpak</code> | 🟡 Medium | Flatpak runtimes & apps (re-installable) |</p>
 <p>The OS itself does not need to be backed up — <code>shani-deploy</code> downloads a fresh verified image when needed, and the previous slot is always available for rollback.</p>
+<p>Before every update, <code>shani-deploy</code> also takes its own Btrfs backup snapshot of the candidate slot (e.g. <code>@blue_backup_&lt;timestamp&gt;</code>) so it can automatically roll back if the new slot fails to boot. These update-time snapshots are pruned automatically after a successful deployment, or on demand with <code>sudo shani-deploy -c</code> (cleanup of old backup snapshots and stale downloads). This is insurance for the update mechanism itself — it is <strong>not</strong> a substitute for backing up <code>/home</code> and container data as described below.</p>
 <blockquote><p>⚠️ <strong>Btrfs snapshots are not backups.</strong> The rollback snapshots created by <code>shani-deploy</code> reside on the same physical drive. A drive failure destroys both the live data and all snapshots simultaneously.</p></blockquote>
 <p>---</p>
 <h2>1. Btrfs Snapshots (Local, Instant Recovery)</h2>

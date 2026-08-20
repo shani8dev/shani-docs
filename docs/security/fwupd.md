@@ -1,14 +1,14 @@
 ---
 title: Firmware Updates (fwupd)
 section: Security
-updated: 2026-04-20
+updated: 2026-08-20
 ---
 
 # Firmware Updates — fwupd
 
 `fwupd` is the Linux Vendor Firmware Service client. It downloads firmware updates for BIOS/UEFI, drives, controllers, and other hardware components directly from hardware vendors, verifies them cryptographically, and installs them. Keeping firmware current is a security requirement — firmware vulnerabilities (e.g. Spectre, MDS, firmware-level rootkits) are patched through firmware updates.
 
-`fwupd` is pre-installed on Shani OS.
+`fwupd` is pre-installed on Shani OS as a direct dependency of the `shani-core` package, and both `fwupd.service` and `fwupd-refresh.timer` are enabled automatically by `shani-core`'s post-install hook — metadata refresh and update checks are already running on a fresh install, with nothing to turn on.
 
 > **Important:** After a firmware update, the TPM2 PCR 0 value changes. If you use TPM2-sealed LUKS, you will need to re-enroll after the firmware update. See [TPM2 Enrollment](tpm2).
 
@@ -99,3 +99,4 @@ sudo systemctl disable --now fwupd-refresh.timer
 - [TPM2 Enrollment](tpm2) — re-enrollment required after firmware updates
 - [Secure Boot](secure-boot) — firmware update interaction with Secure Boot
 - [Security Features](features) — security stack overview
+- [shani-health Reference](../updates/shani-health) — `shani-health --hardware` reports `fwupd.service`/`fwupd-refresh.timer` status and any pending firmware updates

@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Btrfs Deep Dive  Shanios leverages advanced Btrfs features for immutability, efficiency, and data integrity.  Copy-on-Write (CoW)  Btrfs CoW minimises stor…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Btrfs Deep Dive","description":"Btrfs Deep Dive  Shanios leverages advanced Btrfs features for immutability, efficiency, and data integrity.  Copy-on-Write (CoW)  Btrfs CoW minimises stor…","url":"https://docs.shani.dev/doc/arch/btrfs/","datePublished":"2026-05-12T18:30:00.000Z","dateModified":"2026-05-12T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Btrfs Deep Dive","description":"Btrfs Deep Dive  Shanios leverages advanced Btrfs features for immutability, efficiency, and data integrity.  Copy-on-Write (CoW)  Btrfs CoW minimises stor…","url":"https://docs.shani.dev/doc/arch/btrfs/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Btrfs Deep Dive</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Architecture</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-05-13</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p>Shanios leverages advanced Btrfs features for immutability, efficiency, and data integrity.</p>
@@ -225,6 +225,7 @@
 <li>Efficient atomic updates: writing to the inactive slot never touches the live one</li>
 <li>Cheap snapshots: snapshot creation is nearly instantaneous regardless of subvolume size</li>
 </ul>
+<p>At install time, <code>@blue</code> and <code>@green</code> are not created independently — the installer extracts the OS image into a subvolume, snapshots it read-only as <code>@blue</code>, then snapshots <code>@blue</code> again as <code>@green</code>. Both slots therefore start out as CoW clones of the exact same data. Every subsequent <code>shani-deploy</code> update repeats the pattern against whichever slot is currently inactive: snapshot the old candidate as a <code>@&lt;slot&gt;_backup_&lt;timestamp&gt;</code> safety copy, <code>btrfs receive</code> the new image, then snapshot it into place as the new <code>@&lt;slot&gt;</code> — so the CoW delta between slots only ever reflects one update's worth of changed blocks.</p>
 <h2>Transparent Compression</h2>
 <p>Default mount options for all data subvolumes:</p>
 <pre><code>compress=zstd,space_cache=v2,autodefrag</code></pre>
@@ -243,7 +244,7 @@
 </ul>
 <p>These subvolumes use <code>nodatacow,nospace_cache</code> and do not participate in bees deduplication.</p>
 <h2>Mount Options by Subvolume</h2>
-<p>| Subvolume(s) | Mount Options | Notes | |---|---|---| | <code>@blue</code> / <code>@green</code> | <code>ro,noatime,compress=zstd,space_cache=v2,autodefrag</code> | Mounted by dracut via kernel cmdline — <strong>not in fstab</strong> | | <code>@root</code>, <code>@home</code>, <code>@data</code> | <code>rw,noatime,compress=zstd,space_cache=v2,autodefrag</code> | Core persistent data — always mounted | | <code>@nix</code> | <code>nofail,noatime,compress=zstd,space_cache=v2,autodefrag</code> | CoW kept for bees deduplication | | <code>@log</code>, <code>@cache</code> | <code>rw,noatime,compress=zstd,space_cache=v2,autodefrag,x-systemd.after=var.mount,x-systemd.requires=var.mount</code> | Requires <code>/var</code> to exist first | | <code>@flatpak</code>, <code>@snapd</code>, <code>@waydroid</code>, <code>@containers</code>, <code>@machines</code>, <code>@lxc</code>, <code>@lxd</code> | <code>nofail,noatime,compress=zstd,space_cache=v2,autodefrag,x-systemd.after=var.mount,x-systemd.requires=var.mount</code> | <code>nofail</code> — boots cleanly even if not yet created | | <code>@libvirt</code>, <code>@qemu</code> | <code>nofail,noatime,nodatacow,nospace_cache,x-systemd.after=var.mount,x-systemd.requires=var.mount</code> | nodatacow required for VM disk performance | | <code>@swap</code> | <code>nofail,noatime,nodatacow,nospace_cache</code> | Mandatory for swapfile correctness on Btrfs |</p>
+<p>| Subvolume(s) | Mount Options | Notes | |---|---|---| | <code>@blue</code> / <code>@green</code> | <code>ro,noatime,compress=zstd,space_cache=v2,autodefrag</code> | Mounted by dracut via kernel cmdline — <strong>not in fstab</strong> | | <code>@root</code>, <code>@home</code>, <code>@data</code> | <code>rw,noatime,compress=zstd,space_cache=v2,autodefrag</code> | Core persistent data — always mounted | | <code>@nix</code> | <code>nofail,noatime,compress=zstd,space_cache=v2,autodefrag</code> | CoW kept for bees deduplication | | <code>@log</code>, <code>@cache</code> | <code>nofail,noatime,compress=zstd,space_cache=v2,autodefrag,x-systemd.after=var.mount,x-systemd.requires=var.mount</code> | <code>nofail</code> plus requires <code>/var</code> to exist first | | <code>@flatpak</code>, <code>@snapd</code>, <code>@waydroid</code>, <code>@containers</code>, <code>@machines</code>, <code>@lxc</code>, <code>@lxd</code> | <code>nofail,noatime,compress=zstd,space_cache=v2,autodefrag,x-systemd.after=var.mount,x-systemd.requires=var.mount</code> | <code>nofail</code> — boots cleanly even if not yet created | | <code>@libvirt</code>, <code>@qemu</code> | <code>nofail,noatime,nodatacow,nospace_cache,x-systemd.after=var.mount,x-systemd.requires=var.mount</code> | nodatacow required for VM disk performance | | <code>@swap</code> | <code>nofail,noatime,nodatacow,nospace_cache</code> | Mandatory for swapfile correctness on Btrfs |</p>
 <h2>Why noatime?</h2>
 <p>All subvolumes use <code>noatime</code>:</p>
 <ul>
@@ -303,7 +304,8 @@ sudo btrfs quota enable /
 sudo btrfs qgroup show --sync /
 
 # Inspect swapfile offset (needed for hibernation resume=)
-sudo btrfs inspect-internal map-swapfile -r /@swap/swapfile</code></pre>
+# This is exactly what gen-efi runs to compute resume_offset= for the UKI cmdline.
+sudo btrfs inspect-internal map-swapfile -r /swap/swapfile</code></pre>
 <h2>Checking Deduplication Status</h2>
 <p>Shanios uses <code>bees</code> (Block-level Extent Enumeration and Sharing) for continuous background deduplication. <code>bees</code> is a block-level deduplicator — it finds identical 128 KB blocks across all subvolumes and shares them via Btrfs extent references.</p>
 <pre><code class="language-bash"># Check bees daemon status (UUID is your Btrfs filesystem UUID)
@@ -321,6 +323,17 @@ sudo compsize /var/lib/flatpak
 # Full storage usage report
 shani-health --storage-info</code></pre>
 <p><code>bees</code> is configured by <code>beesd-setup</code> which writes <code>/etc/bees/&lt;uuid&gt;.conf</code> and enables the <code>beesd@&lt;uuid&gt;.service</code> unit. The hash table size is automatically tuned to 256 MB per TB of filesystem size (capped at 1 GB for 4+ TB filesystems).</p>
+<h2>Manual Deduplication (<code>shani-deploy --optimize</code>)</h2>
+<p><code>bees</code> runs continuously in the background across every subvolume, but <code>shani-deploy</code> also ships a heavier, on-demand pass using <a href="https://github.com/markfasheh/duperemove"><code>duperemove</code></a> — a block-hashing deduplicator rather than a live crawler. Run it manually with:</p>
+<pre><code class="language-bash">sudo shani-deploy --optimize</code></pre>
+<p>This is a different tool with a narrower scope than <code>bees</code>:</p>
+<ul>
+<li><strong>Targets only <code>@blue</code>, <code>@green</code>, and any leftover <code>@&lt;slot&gt;_backup_&lt;timestamp&gt;</code> snapshots</strong> — not the whole filesystem</li>
+<li>Runs <code>duperemove -dhr --skip-zeroes --dedupe-options=same,partial -b 128K --batchsize=256 --io-threads=$(nproc) --cpu-threads=$(nproc)</code>, optionally with <code>--hashfile=/data/.dedupe.db</code> as a persistent cache (skipped if <code>@data</code> is missing)</li>
+<li>Requires <code>duperemove</code> to be installed; refuses to run if a deployment is currently pending (<code>$DEPLOY_PENDING</code>), or if <code>@blue</code>/<code>@green</code> don't both exist</li>
+<li>Reports before/after usage via <code>compsize</code> (or <code>btrfs filesystem du</code> as a fallback) and a final <code>btrfs filesystem df</code></li>
+</ul>
+<p>Use <code>--optimize</code> after a deploy or two if you want to reclaim the CoW delta between root slots immediately rather than waiting for <code>bees</code>' background crawl to catch up — it's a maintenance convenience, not a replacement for the continuous <code>beesd</code> daemon.</p>
 <h2>Automated Maintenance</h2>
 <p>Shanios runs Btrfs maintenance automatically via systemd timers — no manual intervention required:</p>
 <p>| Timer | Action | |-------|--------| | <code>btrfs-scrub.timer</code> | Monthly scrubbing to detect and repair data corruption | | <code>btrfs-balance.timer</code> | Periodic filesystem balancing for optimal performance | | <code>btrfs-defrag.timer</code> | Automatic defragmentation on fragmented files | | <code>btrfs-trim.timer</code> | Regular TRIM operations for SSD optimisation | | <code>beesd</code> daemon | Continuous background block-level deduplication across all Btrfs subvolumes |</p>

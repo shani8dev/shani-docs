@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="System Optimizations  Shanios includes extensive performance, gaming, and reliability optimizations out of the box, eliminating the need for manual tweakin…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"System Optimizations","description":"System Optimizations  Shanios includes extensive performance, gaming, and reliability optimizations out of the box, eliminating the need for manual tweakin…","url":"https://docs.shani.dev/doc/intro/optimizations/","datePublished":"2026-03-31T18:30:00.000Z","dateModified":"2026-03-31T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"System Optimizations","description":"System Optimizations  Shanios includes extensive performance, gaming, and reliability optimizations out of the box, eliminating the need for manual tweakin…","url":"https://docs.shani.dev/doc/intro/optimizations/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">System Optimizations</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Introduction</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p>Shanios includes extensive performance, gaming, and reliability optimizations out of the box, eliminating the need for manual tweaking. These enterprise-grade optimizations are pre-configured and active from first boot.</p>
@@ -222,7 +222,7 @@
 <li><strong>ZRAM Compression:</strong> Automatic RAM compression using the zstd algorithm provides improved memory efficiency without requiring swap partitions.</li>
 <li><strong>Optimized Swappiness:</strong> Tuned to 133 — encourages the kernel to use compressed ZRAM swap before evicting clean page cache, maintaining system responsiveness under memory pressure.</li>
 <li><strong>Btrfs Maintenance:</strong> Automated filesystem maintenance runs in the background — periodic scrubbing for data integrity, balance operations, and defragmentation. Scheduled to minimize impact on system usage.</li>
-<li><strong>Profile Sync Daemon:</strong> Browser profiles are stored in tmpfs (RAM) for dramatically faster load times and reduced disk writes, with periodic sync back to persistent storage.</li>
+<li><strong>Continuous Block-Level Deduplication:</strong> <code>beesd</code> runs as a background daemon, deduplicating identical data blocks across all Btrfs subvolumes to reduce disk usage.</li>
 <li><strong>Optimized Page Lock Unfairness:</strong> Set to 1 to reduce lock contention and improve multi-threaded application performance, particularly for databases and high-concurrency workloads.</li>
 </ul>
 <h2>Gaming & Performance</h2>
@@ -247,19 +247,20 @@
 <li><strong>Ananicy-cpp:</strong> Automatic process priority management with game-aware rules — background tasks are deprioritized when games or media are active</li>
 <li><strong>systemd-oomd:</strong> System-wide OOM daemon enabled by default to prevent system freezes</li>
 <li><strong>IRQBalance:</strong> Optimizes interrupt distribution across CPU cores</li>
+<li><strong>Haveged:</strong> Hardware entropy daemon enabled by default, keeping <code>/dev/random</code> well-seeded for cryptographic operations without stalling on low-entropy hardware</li>
 <li><strong>Increased File & Process Limits:</strong> Default limits raised to 1,048,576 for open files (NOFILE) and processes (NPROC)</li>
 <li><strong>Fast Shutdown:</strong> Reduced timeout values (10s stop, 10s abort) — services that fail to stop gracefully are automatically killed</li>
 </ul>
 <h2>Boot & System Efficiency</h2>
 <ul>
 <li><strong>Plymouth (BGRT Theme):</strong> Smooth graphical boot experience showing manufacturer's logo</li>
-<li><strong>Journal Size Limit:</strong> systemd journal capped at 50 MB to prevent excessive disk usage</li>
+<li><strong>Journal Size Limit:</strong> systemd journal capped at 128 MB across at most 2 rotated files, to prevent excessive disk usage</li>
 <li><strong>Reduced Kernel Messages:</strong> Console printk level set to 3 (errors and critical messages only)</li>
 <li><strong>Time Synchronization:</strong> systemd-timesyncd enabled by default for automatic NTP synchronization</li>
 <li><strong>Socket Activation:</strong> Many services start on-demand — pcscd, lircd, gpsd, cups, avahi-daemon, saned</li>
 </ul>
 <h2>Automated Maintenance (Systemd Timers)</h2>
-<p>| Timer | Action | |-------|--------| | <code>btrfs-scrub.timer</code> | Monthly scrubbing to detect and repair data corruption | | <code>btrfs-balance.timer</code> | Periodic filesystem balancing for optimal performance | | <code>btrfs-defrag.timer</code> | Automatic defragmentation on fragmented files | | <code>btrfs-trim.timer</code> | Regular TRIM operations for SSD optimisation | | <code>beesd</code> daemon | Continuous background block-level deduplication across all Btrfs subvolumes | | <code>flatpak-update-system.timer</code> | System Flatpak auto-updates every 12 hours | | <code>flatpak-update-user.timer</code> | Per-user Flatpak auto-updates every 12 hours | | <code>profile-sync-daemon</code> | Browser cache sync from RAM to disk |</p>
+<p>| Timer | Action | |-------|--------| | <code>btrfs-scrub.timer</code> | Monthly scrubbing to detect and repair data corruption | | <code>btrfs-balance.timer</code> | Periodic filesystem balancing for optimal performance | | <code>btrfs-defrag.timer</code> | Automatic defragmentation on fragmented files | | <code>btrfs-trim.timer</code> | Regular TRIM operations for SSD optimisation | | <code>beesd</code> daemon | Continuous background block-level deduplication across all Btrfs subvolumes | | <code>flatpak-update-system.timer</code> | System Flatpak auto-updates every 12 hours | | <code>flatpak-update-user.timer</code> | Per-user Flatpak auto-updates every 12 hours | | <code>shani-update.timer</code> (per-user) | Checks for a new OS image every 2 hours and prompts before deploying |</p>
 <p>All maintenance operations are scheduled during low-usage periods and use minimal system resources.</p>
 <blockquote><p><strong>Note:</strong> All these optimizations are pre-configured and active from first boot. No manual configuration, tweaking, or performance tuning required.</p></blockquote>
 <blockquote><p>For the full security configuration — AppArmor, firewalld, kernel module blacklist, LSM stack, and hardening parameters — see <a href="../security/features">Security Features</a>.</p></blockquote></div>

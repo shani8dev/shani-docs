@@ -1,7 +1,7 @@
 ---
 title: System Optimizations
 section: Introduction
-updated: 2026-04-01
+updated: 2026-08-20
 ---
 
 # System Optimizations
@@ -13,7 +13,7 @@ Shanios includes extensive performance, gaming, and reliability optimizations ou
 - **ZRAM Compression:** Automatic RAM compression using the zstd algorithm provides improved memory efficiency without requiring swap partitions.
 - **Optimized Swappiness:** Tuned to 133 — encourages the kernel to use compressed ZRAM swap before evicting clean page cache, maintaining system responsiveness under memory pressure.
 - **Btrfs Maintenance:** Automated filesystem maintenance runs in the background — periodic scrubbing for data integrity, balance operations, and defragmentation. Scheduled to minimize impact on system usage.
-- **Profile Sync Daemon:** Browser profiles are stored in tmpfs (RAM) for dramatically faster load times and reduced disk writes, with periodic sync back to persistent storage.
+- **Continuous Block-Level Deduplication:** `beesd` runs as a background daemon, deduplicating identical data blocks across all Btrfs subvolumes to reduce disk usage.
 - **Optimized Page Lock Unfairness:** Set to 1 to reduce lock contention and improve multi-threaded application performance, particularly for databases and high-concurrency workloads.
 
 ## Gaming & Performance
@@ -39,13 +39,14 @@ Shanios includes extensive performance, gaming, and reliability optimizations ou
 - **Ananicy-cpp:** Automatic process priority management with game-aware rules — background tasks are deprioritized when games or media are active
 - **systemd-oomd:** System-wide OOM daemon enabled by default to prevent system freezes
 - **IRQBalance:** Optimizes interrupt distribution across CPU cores
+- **Haveged:** Hardware entropy daemon enabled by default, keeping `/dev/random` well-seeded for cryptographic operations without stalling on low-entropy hardware
 - **Increased File & Process Limits:** Default limits raised to 1,048,576 for open files (NOFILE) and processes (NPROC)
 - **Fast Shutdown:** Reduced timeout values (10s stop, 10s abort) — services that fail to stop gracefully are automatically killed
 
 ## Boot & System Efficiency
 
 - **Plymouth (BGRT Theme):** Smooth graphical boot experience showing manufacturer's logo
-- **Journal Size Limit:** systemd journal capped at 50 MB to prevent excessive disk usage
+- **Journal Size Limit:** systemd journal capped at 128 MB across at most 2 rotated files, to prevent excessive disk usage
 - **Reduced Kernel Messages:** Console printk level set to 3 (errors and critical messages only)
 - **Time Synchronization:** systemd-timesyncd enabled by default for automatic NTP synchronization
 - **Socket Activation:** Many services start on-demand — pcscd, lircd, gpsd, cups, avahi-daemon, saned
@@ -61,7 +62,7 @@ Shanios includes extensive performance, gaming, and reliability optimizations ou
 | `beesd` daemon | Continuous background block-level deduplication across all Btrfs subvolumes |
 | `flatpak-update-system.timer` | System Flatpak auto-updates every 12 hours |
 | `flatpak-update-user.timer` | Per-user Flatpak auto-updates every 12 hours |
-| `profile-sync-daemon` | Browser cache sync from RAM to disk |
+| `shani-update.timer` (per-user) | Checks for a new OS image every 2 hours and prompts before deploying |
 
 All maintenance operations are scheduled during low-usage periods and use minimal system resources.
 

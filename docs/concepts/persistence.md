@@ -1,7 +1,7 @@
 ---
 title: Persistence Strategy
 section: Concepts
-updated: 2026-04-01
+updated: 2026-08-20
 ---
 
 # Persistence Strategy
@@ -37,7 +37,7 @@ Dedicated Btrfs subvolumes that are never touched by updates:
 | `/var/lib/waydroid` | `@waydroid` |
 | `/var/lib/snapd` | `@snapd` |
 
-`@nix` and `@flatpak` are shared by both slots.
+All of the subvolumes above are mounted at the Btrfs top level, independent of which slot (`@blue` or `@green`) is active — so every one of them, not just `@nix` and `@flatpak`, is equally visible to both slots and untouched by a slot switch or rollback.
 
 ### 🔄 Volatile (Cleared on Reboot)
 
@@ -65,15 +65,20 @@ Unchanged files are served from the read-only lower layer.
 Changes in upper (@data) survive OS updates — only the lower is replaced.
 ```
 
-fstab entry:
-```
-overlay /etc overlay rw,lowerdir=/etc,upperdir=/data/overlay/etc/upper,workdir=/data/overlay/etc/work,index=off,metacopy=off,x-systemd.requires-mounts-for=/data 0 0
-```
+This overlay is **not** an fstab entry — it's mounted by a dracut hook (`shanios-overlay-etc.sh`, part of the `99shanios` dracut module) *before* `pivot_root` hands control to systemd. That ordering matters: systemd PID 1 reads `/etc` the moment it starts, and if the overlay were applied later via fstab, systemd would have already cached the plain read-only `/etc` and miss anything in `/data/overlay/etc/upper`. So the sequence at boot is:
+
+1. Dracut mounts the `@data` subvolume read-write onto a temporary path in the initramfs.
+2. It mounts the OverlayFS directly onto the new root's `/etc`, with the booted slot's own `/etc` as the lower layer.
+3. Only then does dracut `pivot_root` / `switch_root` into the new root — `/etc` is already the merged view on the very first read.
+
+`@data` is deliberately left mounted through this process (its upper/work directories must stay live for the overlay), and `switch_root` carries that mount along into the booted system's `/run`.
 
 View overlay modifications:
 ```bash
 ls -la /data/overlay/etc/upper
 ```
+
+The same `99shanios` dracut module also carries the two hooks that make boot-failure detection possible before systemd ever starts — a pre-mount hook writes `/data/boot_hard_failure` before the root Btrfs subvolume is mounted, and a pre-pivot hook clears it once mount succeeds. See [Atomic Updates](./atomic-updates#automatic-rollback) for how that feeds into rollback.
 
 ## Bind-Mounted Service State
 

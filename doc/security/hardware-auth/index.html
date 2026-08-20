@@ -6,7 +6,7 @@
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Hardware Authentication — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Hardware Authentication  Shani OS ships with full support for hardware authentication out of the box — fingerprint readers, YubiKeys, FIDO2/U2F tokens, sma…">
+  <meta name="description" id="meta-desc"     content="Hardware Authentication  Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), an…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,7 +14,7 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Hardware Authentication">
-  <meta property="og:description" id="og-desc"    content="Hardware Authentication  Shani OS ships with full support for hardware authentication out of the box — fingerprint readers, YubiKeys, FIDO2/U2F tokens, sma…">
+  <meta property="og:description" id="og-desc"    content="Hardware Authentication  Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), an…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/security/hardware-auth/">
   <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
@@ -24,10 +24,10 @@
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Hardware Authentication">
-  <meta name="twitter:description" id="tw-desc"  content="Hardware Authentication  Shani OS ships with full support for hardware authentication out of the box — fingerprint readers, YubiKeys, FIDO2/U2F tokens, sma…">
+  <meta name="twitter:description" id="tw-desc"  content="Hardware Authentication  Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), an…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Hardware Authentication","description":"Hardware Authentication  Shani OS ships with full support for hardware authentication out of the box — fingerprint readers, YubiKeys, FIDO2/U2F tokens, sma…","url":"https://docs.shani.dev/doc/security/hardware-auth/","datePublished":"2026-04-19T18:30:00.000Z","dateModified":"2026-04-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Hardware Authentication","description":"Hardware Authentication  Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), an…","url":"https://docs.shani.dev/doc/security/hardware-auth/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,13 +213,13 @@
         <h1 class="doc-title">Hardware Authentication</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Security</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
-      <div class="prose"><p>Shani OS ships with full support for hardware authentication out of the box — fingerprint readers, YubiKeys, FIDO2/U2F tokens, smart cards (PIV), NFC tokens, and TOTP/HOTP authenticators. All required packages and PAM modules are pre-installed; no driver downloads are needed.</p>
+      <div class="prose"><p>Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work without a driver download, via packages pulled in by the <code>shani-peripherals</code> package. The CLI utilities for YubiKey management and TOTP/HOTP codes are not part of the default image and need a separate install — see the callout in each section below.</p>
 <p>---</p>
 <h2>Fingerprint Authentication</h2>
-<p><strong>Package:</strong> <code>fprintd</code>, <code>libfprint</code></p>
+<p><strong>Package:</strong> <code>fprintd</code> (pulls in <code>libfprint</code> as a dependency) — pre-installed via <code>shani-peripherals</code></p>
 <p>Fingerprints can be used to unlock the login screen, sudo prompts, and the lock screen.</p>
 <pre><code class="language-bash"># Enroll a finger (replace 'right-index-finger' with the finger you want)
 fprintd-enroll -f right-index-finger
@@ -240,7 +240,7 @@ lsusb | grep -i finger
 fprintd-enroll   # will fail with a clear error if the device is unsupported</code></pre>
 <p>---</p>
 <h2>YubiKey and FIDO2/U2F</h2>
-<p><strong>Packages:</strong> <code>libfido2</code>, <code>pam-u2f</code>, <code>yubikey-manager</code></p>
+<p><strong>Packages:</strong> <code>libfido2</code>, <code>pam-u2f</code> — pre-installed via <code>shani-peripherals</code>. <code>yubikey-manager</code> (the <code>ykman</code> CLI used below) is <strong>not</strong> part of the default image — install it first: <code>sudo pacman -S yubikey-manager</code>.</p>
 <h3>Setting Up PAM U2F (sudo / login)</h3>
 <pre><code class="language-bash"># 1. Create the U2F key mapping directory
 mkdir -p ~/.config/Yubico
@@ -274,7 +274,7 @@ ssh-keygen -t ed25519-sk -O resident -O application=ssh:myserver
 ssh-keygen -t ed25519-sk</code></pre>
 <p>---</p>
 <h2>Smart Card / PIV</h2>
-<p><strong>Packages:</strong> <code>opensc</code>, <code>pcscd</code>, <code>pcsc-tools</code></p>
+<p><strong>Packages:</strong> <code>opensc</code>, <code>ccid</code>, <code>acsccid</code> — pre-installed via <code>shani-peripherals</code>; <code>pcscd</code>/<code>pcsc-lite</code> come along transitively as a dependency of <code>opensc</code>/<code>ccid</code>. The <code>pcsc-tools</code> diagnostic package (used for <code>pcsc_scan</code> below) is <strong>not</strong> part of the default image — install it first: <code>sudo pacman -S pcsc-tools</code>.</p>
 <pre><code class="language-bash"># Start the PC/SC daemon
 sudo systemctl enable --now pcscd
 
@@ -295,13 +295,13 @@ ssh-keygen -D /usr/lib/opensc-pkcs11.so -e
 ssh -I /usr/lib/opensc-pkcs11.so user@host</code></pre>
 <p>---</p>
 <h2>NFC Authentication</h2>
-<p><strong>Packages:</strong> <code>libnfc</code>, <code>pcsc-lite</code></p>
+<p><strong>Packages:</strong> <code>libnfc</code>, pre-installed via <code>shani-peripherals</code>; NFC access rides on the same <code>pcscd</code>/<code>pcsc-lite</code> stack pulled in for smart cards above</p>
 <p>NFC tokens are accessed via the PC/SC stack. Once <code>pcscd</code> is running, NFC cards compatible with pcsc-lite are accessible in the same way as contact smart cards:</p>
 <pre><code class="language-bash">sudo systemctl enable --now pcscd
 pcsc_scan   # shows NFC card when tapped</code></pre>
 <p>---</p>
 <h2>TOTP / HOTP (Two-Factor)</h2>
-<p><strong>Package:</strong> <code>oath-toolkit</code></p>
+<p><strong>Package:</strong> <code>oath-toolkit</code> — <strong>not</strong> part of the default image; install it first: <code>sudo pacman -S oath-toolkit</code>.</p>
 <p><code>oathtool</code> generates TOTP and HOTP codes from a shared secret, compatible with Google Authenticator, Authy, and any RFC 6238/4226 implementation.</p>
 <pre><code class="language-bash"># Generate a TOTP code from a base32 secret
 oathtool --totp --base32 JBSWY3DPEHPK3PXP
@@ -320,6 +320,7 @@ oathtool --totp --base32 -w 1 JBSWY3DPEHPK3PXP 123456</code></pre>
 <li><a href="features">Security Features</a> — full list of supported authentication methods</li>
 <li><a href="luks">LUKS Management</a> — using a keyfile for disk unlock</li>
 <li><a href="tpm2">TPM2 Enrollment</a> — TPM-based disk unlock</li>
+<li><a href="../updates/shani-health">shani-health Reference</a> — <code>shani-health --security</code> reports fprintd enrollment, pam-u2f configuration, and pcscd status per user</li>
 </ul></div>
     </div>
 

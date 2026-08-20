@@ -1,7 +1,7 @@
 ---
 title: Shell & Environment
 section: Updates & Config
-updated: 2026-04-22
+updated: 2026-08-20
 ---
 
 # Shell & Environment
@@ -19,9 +19,8 @@ Shanios ships a fully configured Zsh environment with modern UX features enabled
 | **zsh-syntax-highlighting** | Fish-style inline syntax colouring (green = valid, red = invalid) |
 | **zsh-autosuggestions** | Ghost-text suggestions from history; press → or End to accept |
 | **zsh-history-substring-search** | Up/Down arrow searches history by substring, not just prefix |
-| **zsh-completions** | Tab completions for git, systemctl, podman, flatpak, nix-env, shani-deploy, and more |
 
-Bash and Fish are also installed if you prefer them.
+Bash and Fish are also installed if you prefer them — both ship with a Starship-enabled prompt and McFly history search in their skeleton config (`~/.bashrc_shani`, `~/.config/fish/config.fish`), though the Zsh-only plugins above (syntax highlighting, autosuggestions, history-substring-search) are not mirrored there.
 
 ## Changing Your Shell
 
@@ -42,7 +41,7 @@ source ~/.zshrc   # reload without restarting the shell
 
 ## Starship Prompt
 
-Starship shows by default: current directory, git branch/status, active Python virtualenv, Node.js version (in Node projects), Rust toolchain version (when `Cargo.toml` is present), exit code of last command (when non-zero), and command duration for long-running commands.
+Starship shows by default: current directory (truncated to the repo root), git branch/status, active Python virtualenv, Node.js version (in Node projects), Rust toolchain version (when `Cargo.toml` is present), exit code of last command (when non-zero), and command duration — the shipped config sets `min_time = 1` (millisecond), so the duration shows for almost every command, not just long-running ones.
 
 ```bash
 nano ~/.config/starship.toml
@@ -60,6 +59,17 @@ McFly replaces `Ctrl+R` with a context-aware, exit-code-aware history search tha
 # McFly database location (grows more useful over time)
 ls ~/.local/share/mcfly/
 ```
+
+Default configuration (set in `~/.zshrc`, and mirrored in `~/.bashrc_shani` / `~/.config/fish/config.fish`):
+
+```bash
+MCFLY_FUZZY=true              # fuzzy matching instead of exact substring
+MCFLY_RESULTS=20              # number of results shown
+MCFLY_INTERFACE_VIEW=BOTTOM   # results list anchored to the bottom of the screen
+MCFLY_RESULTS_SORT=LAST_RUN   # most-recently-run commands surface first
+```
+
+Override any of these in your shell's rc file before the `mcfly init` line.
 
 ## FZF Integration
 
@@ -131,9 +141,11 @@ unzip archive.zip
 ~/.config/environment.d/     — session environment variables (Wayland/X)
 ```
 
-All of these are in `@home` — never touched by OS updates or rollbacks.
+All of these are in `@home` — never touched by OS updates or rollbacks. The one exception is `/etc/environment.d/90-shani.conf` (sets the system-wide `EDITOR=micro` default) — it lives on the read-only root, so overriding it means setting the same variable in `~/.config/environment.d/` or your shell rc, not editing it in place.
 
 ## Environment Variables
+
+Shanios sets one system-wide default out of the box: `EDITOR=micro`, via a drop-in at `/etc/environment.d/90-shani.conf`. This is read by systemd user sessions (not just login shells), so it applies to `sudoedit`, `visudo`, `crontab -e`, and any tool that shells out with `$EDITOR` set — override it per-user rather than editing the drop-in directly, since it lives on the read-only root and any local edit would be lost on the next OS update.
 
 ```bash
 # Shell-specific (Zsh)
@@ -141,12 +153,12 @@ nano ~/.zshrc
 export EDITOR=vim
 export PATH="$HOME/.local/bin:$PATH"
 
-# Session environment (Wayland/X sessions)
+# Session environment (Wayland/X sessions) — overrides the system-wide default
 # ~/.config/environment.d/my-vars.conf
 EDITOR=nvim
 MOZ_ENABLE_WAYLAND=1
 
-# System-wide
+# System-wide (traditional PAM-read file, separate mechanism from environment.d)
 sudo nano /etc/environment
 ```
 

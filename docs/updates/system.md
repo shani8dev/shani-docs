@@ -1,7 +1,7 @@
 ---
 title: System Updates
 section: Updates & Config
-updated: 2026-05-13
+updated: 2026-08-20
 ---
 
 # System Updates
@@ -22,6 +22,8 @@ On each run, `shani-update` works through a fixed priority sequence:
 
 When the user confirms an update, `shani-update` detects the available terminal emulator and launches `shani-deploy` inside it.
 
+> **Auto-reboot applies here too.** Once `shani-deploy` finishes successfully — including when launched unattended by the timer — it arms its own 60-second automatic reboot regardless of who or what started it. See [Automatic Reboot After Deployment](#automatic-reboot-after-deployment) below if you need to cancel it.
+
 ```bash
 # Check timer status
 systemctl --user status shani-update.timer
@@ -34,6 +36,29 @@ journalctl -t shani-update -n 50
 shani-update
 ```
 
+### shani-update Flags
+
+`shani-update` is mostly a GUI-driven wrapper, but it also accepts CLI flags that mirror (and, for install/deploy actions, pass through to) `shani-deploy`:
+
+| Flag | Effect |
+|------|--------|
+| `--startup` | Run the login flow: fallback check → reboot-needed check → candidate check → update check |
+| `-r`, `--rollback` | Roll back the inactive slot immediately |
+| `-f`, `--force` | Force deploy even if the version matches or there's a slot mismatch |
+| `-t`, `--channel <chan>` | Update channel for this run: `stable` or `latest` |
+| `-v`, `--verbose` | Verbose output from `shani-deploy` |
+| `-d`, `--dry-run` | Simulate the deployment without changes |
+| `-c`, `--cleanup` | Passthrough: `shani-deploy --cleanup` |
+| `-o`, `--optimize` | Passthrough: `shani-deploy --optimize` |
+| `--download-only` | Passthrough: `shani-deploy --download-only` |
+| `--set-channel <chan>` | Passthrough: `shani-deploy --set-channel` (persists to `/etc/shani-channel`) |
+| `--skip-self-update` | Passthrough on install: `shani-deploy --skip-self-update` |
+| `--update-genefi` | Passthrough on install: `shani-deploy --update-genefi` |
+| `--health [ARGS...]` | Forwards remaining arguments to `shani-health` (e.g. `shani-update --health --security`) — must be last on the command line |
+| `-h`, `--help` | Show usage |
+
+Running `shani-update` with no flags does the interactive flow: fallback check → reboot-needed check → candidate-boot check → update check, showing a GUI dialog (yad/zenity/kdialog) at whichever step applies, falling back to a desktop notification or console prompt if no GUI toolkit is available.
+
 ## Manual Update
 
 ```bash
@@ -43,7 +68,8 @@ sudo shani-deploy
 # Simulate without making any changes (dry-run)
 sudo shani-deploy -d
 
-# Force redeploy even if already on the latest version
+# Force redeploy even if already on the latest version, or if the
+# candidate slot doesn't match what's expected (boot mismatch)
 sudo shani-deploy -f
 
 # Verbose output
@@ -51,7 +77,46 @@ sudo shani-deploy -v
 
 # Override the update channel for a single run
 sudo shani-deploy -t latest
+
+# Fetch and verify the update image only — exits before deploying
+sudo shani-deploy --download-only
 ```
+
+### Full Flag Reference
+
+| Flag | Effect |
+|------|--------|
+| `-h`, `--help` | Show usage |
+| `-r`, `--rollback` | Roll back the non-booted slot (run from the slot you want to keep) |
+| `-c`, `--cleanup` | Manual cleanup of old backups and cached downloads |
+| `-o`, `--optimize` | Manual Btrfs deduplication (bees handles continuous dedup in the background) |
+| `-t`, `--channel <chan>` | Update channel for this run only: `stable` or `latest` |
+| `-f`, `--force` | Deploy even if the version matches or there's a boot mismatch |
+| `--download-only` | Fetch and verify the update image, then exit without deploying |
+| `-d`, `--dry-run` | Simulate without making changes |
+| `-v`, `--verbose` | Verbose output |
+| `--set-channel <chan>` | Permanently persist the channel to `/etc/shani-channel` |
+| `--skip-self-update` | Skip `shani-deploy`'s own auto-update-and-re-exec step |
+| `--update-genefi` | Download the latest `gen-efi` from upstream and use it inside the deploy chroot only (does not install it to the host) |
+
+`--download-only` cannot be combined with `--rollback`, `--cleanup`, `--optimize`, or `--set-channel`.
+
+## Automatic Reboot After Deployment
+
+**After any successful deployment, `shani-deploy` automatically reboots the machine 60 seconds later** — whether the deploy was started manually, by `shani-update`, or by the timer running unattended in the background. This applies every time, not just to interactive runs.
+
+```bash
+# Cancel a pending automatic reboot (must run before the 60s elapse)
+systemctl stop shanios-auto-reboot.timer
+
+# Disable auto-reboot for a single run
+sudo AUTO_REBOOT=no shani-deploy
+
+# Change the delay for a single run (seconds)
+sudo AUTO_REBOOT_DELAY=300 shani-deploy
+```
+
+Auto-reboot is skipped entirely in `--dry-run` mode. It is armed via a transient systemd timer unit (`shanios-auto-reboot.timer`) so it survives even if the terminal running `shani-deploy` is closed — cancel it with the command above if you need more time before rebooting.
 
 ## Update Process in Detail
 
@@ -66,7 +131,8 @@ sudo shani-deploy -t latest
 9. **Extract** — pipes the verified image into `btrfs receive`
 10. **UKI generation** — runs `gen-efi configure <inactive-slot>` inside a chroot of the new slot
 11. **Boot entry update** — new slot set as next-boot default with `+3-0` boot count tries
-12. **Notify** — writes `/run/shanios/reboot-needed`; your session continues until you choose to reboot
+12. **Notify** — writes `/run/shanios/reboot-needed` so `shani-update` can surface a restart dialog on next login
+13. **Auto-reboot** — arms a 60-second automatic reboot (see [Automatic Reboot After Deployment](#automatic-reboot-after-deployment) below); cancel it if you need more time
 
 Nothing in your running OS is touched at any point.
 
@@ -143,7 +209,7 @@ systemctl status flatpak-update-system.timer
 systemctl --user status flatpak-update-user.timer
 ```
 
-The system timer fires 15 minutes after boot and every 12 hours. The user timer does the same for per-user Flatpak remotes. Both automatically uninstall unused runtimes after updating.
+The system timer fires 15 minutes after boot and every 12 hours; the user timer fires 20 minutes after boot and every 12 hours, for per-user Flatpak remotes. Both automatically uninstall unused runtimes after updating.
 
 ## Firmware Updates (fwupd)
 

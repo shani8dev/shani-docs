@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="System Updates  Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"System Updates","description":"System Updates  Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the…","url":"https://docs.shani.dev/doc/updates/system/","datePublished":"2026-05-12T18:30:00.000Z","dateModified":"2026-05-12T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"System Updates","description":"System Updates  Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the…","url":"https://docs.shani.dev/doc/updates/system/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">System Updates</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Updates &amp; Config</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-05-13</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p>Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the next reboot. The previous slot is preserved as an instant rollback target.</p>
@@ -228,6 +228,7 @@
 <li><strong>Update check</strong> — fetches release metadata and, if a newer version is available, shows an install dialog.</li>
 </ol>
 <p>When the user confirms an update, <code>shani-update</code> detects the available terminal emulator and launches <code>shani-deploy</code> inside it.</p>
+<blockquote><p><strong>Auto-reboot applies here too.</strong> Once <code>shani-deploy</code> finishes successfully — including when launched unattended by the timer — it arms its own 60-second automatic reboot regardless of who or what started it. See <a href="#automatic-reboot-after-deployment">Automatic Reboot After Deployment</a> below if you need to cancel it.</p></blockquote>
 <pre><code class="language-bash"># Check timer status
 systemctl --user status shani-update.timer
 
@@ -237,6 +238,10 @@ journalctl -t shani-update -n 50
 
 # Run an immediate interactive check
 shani-update</code></pre>
+<h3>shani-update Flags</h3>
+<p><code>shani-update</code> is mostly a GUI-driven wrapper, but it also accepts CLI flags that mirror (and, for install/deploy actions, pass through to) <code>shani-deploy</code>:</p>
+<p>| Flag | Effect | |------|--------| | <code>--startup</code> | Run the login flow: fallback check → reboot-needed check → candidate check → update check | | <code>-r</code>, <code>--rollback</code> | Roll back the inactive slot immediately | | <code>-f</code>, <code>--force</code> | Force deploy even if the version matches or there's a slot mismatch | | <code>-t</code>, <code>--channel &lt;chan&gt;</code> | Update channel for this run: <code>stable</code> or <code>latest</code> | | <code>-v</code>, <code>--verbose</code> | Verbose output from <code>shani-deploy</code> | | <code>-d</code>, <code>--dry-run</code> | Simulate the deployment without changes | | <code>-c</code>, <code>--cleanup</code> | Passthrough: <code>shani-deploy --cleanup</code> | | <code>-o</code>, <code>--optimize</code> | Passthrough: <code>shani-deploy --optimize</code> | | <code>--download-only</code> | Passthrough: <code>shani-deploy --download-only</code> | | <code>--set-channel &lt;chan&gt;</code> | Passthrough: <code>shani-deploy --set-channel</code> (persists to <code>/etc/shani-channel</code>) | | <code>--skip-self-update</code> | Passthrough on install: <code>shani-deploy --skip-self-update</code> | | <code>--update-genefi</code> | Passthrough on install: <code>shani-deploy --update-genefi</code> | | <code>--health [ARGS...]</code> | Forwards remaining arguments to <code>shani-health</code> (e.g. <code>shani-update --health --security</code>) — must be last on the command line | | <code>-h</code>, <code>--help</code> | Show usage |</p>
+<p>Running <code>shani-update</code> with no flags does the interactive flow: fallback check → reboot-needed check → candidate-boot check → update check, showing a GUI dialog (yad/zenity/kdialog) at whichever step applies, falling back to a desktop notification or console prompt if no GUI toolkit is available.</p>
 <h2>Manual Update</h2>
 <pre><code class="language-bash"># Download, verify, and stage the update
 sudo shani-deploy
@@ -244,14 +249,32 @@ sudo shani-deploy
 # Simulate without making any changes (dry-run)
 sudo shani-deploy -d
 
-# Force redeploy even if already on the latest version
+# Force redeploy even if already on the latest version, or if the
+# candidate slot doesn't match what's expected (boot mismatch)
 sudo shani-deploy -f
 
 # Verbose output
 sudo shani-deploy -v
 
 # Override the update channel for a single run
-sudo shani-deploy -t latest</code></pre>
+sudo shani-deploy -t latest
+
+# Fetch and verify the update image only — exits before deploying
+sudo shani-deploy --download-only</code></pre>
+<h3>Full Flag Reference</h3>
+<p>| Flag | Effect | |------|--------| | <code>-h</code>, <code>--help</code> | Show usage | | <code>-r</code>, <code>--rollback</code> | Roll back the non-booted slot (run from the slot you want to keep) | | <code>-c</code>, <code>--cleanup</code> | Manual cleanup of old backups and cached downloads | | <code>-o</code>, <code>--optimize</code> | Manual Btrfs deduplication (bees handles continuous dedup in the background) | | <code>-t</code>, <code>--channel &lt;chan&gt;</code> | Update channel for this run only: <code>stable</code> or <code>latest</code> | | <code>-f</code>, <code>--force</code> | Deploy even if the version matches or there's a boot mismatch | | <code>--download-only</code> | Fetch and verify the update image, then exit without deploying | | <code>-d</code>, <code>--dry-run</code> | Simulate without making changes | | <code>-v</code>, <code>--verbose</code> | Verbose output | | <code>--set-channel &lt;chan&gt;</code> | Permanently persist the channel to <code>/etc/shani-channel</code> | | <code>--skip-self-update</code> | Skip <code>shani-deploy</code>'s own auto-update-and-re-exec step | | <code>--update-genefi</code> | Download the latest <code>gen-efi</code> from upstream and use it inside the deploy chroot only (does not install it to the host) |</p>
+<p><code>--download-only</code> cannot be combined with <code>--rollback</code>, <code>--cleanup</code>, <code>--optimize</code>, or <code>--set-channel</code>.</p>
+<h2>Automatic Reboot After Deployment</h2>
+<p><strong>After any successful deployment, <code>shani-deploy</code> automatically reboots the machine 60 seconds later</strong> — whether the deploy was started manually, by <code>shani-update</code>, or by the timer running unattended in the background. This applies every time, not just to interactive runs.</p>
+<pre><code class="language-bash"># Cancel a pending automatic reboot (must run before the 60s elapse)
+systemctl stop shanios-auto-reboot.timer
+
+# Disable auto-reboot for a single run
+sudo AUTO_REBOOT=no shani-deploy
+
+# Change the delay for a single run (seconds)
+sudo AUTO_REBOOT_DELAY=300 shani-deploy</code></pre>
+<p>Auto-reboot is skipped entirely in <code>--dry-run</code> mode. It is armed via a transient systemd timer unit (<code>shanios-auto-reboot.timer</code>) so it survives even if the terminal running <code>shani-deploy</code> is closed — cancel it with the command above if you need more time before rebooting.</p>
 <h2>Update Process in Detail</h2>
 <ol>
 <li><strong>Self-update check</strong> — downloads a newer version of <code>shani-deploy</code> itself if available and re-execs</li>
@@ -265,7 +288,8 @@ sudo shani-deploy -t latest</code></pre>
 <li><strong>Extract</strong> — pipes the verified image into <code>btrfs receive</code></li>
 <li><strong>UKI generation</strong> — runs <code>gen-efi configure &lt;inactive-slot&gt;</code> inside a chroot of the new slot</li>
 <li><strong>Boot entry update</strong> — new slot set as next-boot default with <code>+3-0</code> boot count tries</li>
-<li><strong>Notify</strong> — writes <code>/run/shanios/reboot-needed</code>; your session continues until you choose to reboot</li>
+<li><strong>Notify</strong> — writes <code>/run/shanios/reboot-needed</code> so <code>shani-update</code> can surface a restart dialog on next login</li>
+<li><strong>Auto-reboot</strong> — arms a 60-second automatic reboot (see <a href="#automatic-reboot-after-deployment">Automatic Reboot After Deployment</a> below); cancel it if you need more time</li>
 </ol>
 <p>Nothing in your running OS is touched at any point.</p>
 <h2>Rolling Back</h2>
@@ -314,7 +338,7 @@ flatpak list --app
 # Check Flatpak update timers
 systemctl status flatpak-update-system.timer
 systemctl --user status flatpak-update-user.timer</code></pre>
-<p>The system timer fires 15 minutes after boot and every 12 hours. The user timer does the same for per-user Flatpak remotes. Both automatically uninstall unused runtimes after updating.</p>
+<p>The system timer fires 15 minutes after boot and every 12 hours; the user timer fires 20 minutes after boot and every 12 hours, for per-user Flatpak remotes. Both automatically uninstall unused runtimes after updating.</p>
 <h2>Firmware Updates (fwupd)</h2>
 <pre><code class="language-bash">sudo fwupdmgr refresh
 sudo fwupdmgr get-updates

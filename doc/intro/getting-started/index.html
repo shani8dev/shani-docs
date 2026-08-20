@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Getting Started  A complete walkthrough: choose your edition, download and verify the ISO, install, and configure Shanios for daily use.  Choosing Your Edi…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Getting Started","description":"Getting Started  A complete walkthrough: choose your edition, download and verify the ISO, install, and configure Shanios for daily use.  Choosing Your Edi…","url":"https://docs.shani.dev/doc/intro/getting-started/","datePublished":"2026-04-26T18:30:00.000Z","dateModified":"2026-04-26T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Getting Started","description":"Getting Started  A complete walkthrough: choose your edition, download and verify the ISO, install, and configure Shanios for daily use.  Choosing Your Edi…","url":"https://docs.shani.dev/doc/intro/getting-started/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Getting Started</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Introduction</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-27</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p>A complete walkthrough: choose your edition, download and verify the ISO, install, and configure Shanios for daily use.</p>
@@ -291,7 +291,7 @@ nix-channel --update</code></pre>
 <p>See <a href="../security/tpm2">TPM2 Enrollment</a> for full details.</p>
 <h3>3. Update the system</h3>
 <pre><code class="language-bash">sudo shani-deploy</code></pre>
-<p>This downloads the latest OS image to the inactive slot, verifies it, builds a new UKI, and sets it as the next-boot default. Reboot when ready. If anything goes wrong after the reboot:</p>
+<p>This downloads the latest OS image to the inactive slot, verifies it, builds a new UKI, and sets it as the next-boot default. Reboot when ready. A per-user background timer also checks for new images every 2 hours and prompts you with a dialog before deploying anything — you never have to remember to run <code>shani-deploy</code> yourself, and it never deploys without confirmation. If anything goes wrong after the reboot:</p>
 <pre><code class="language-bash">sudo shani-deploy -r  # rollback to previous slot
 sudo reboot</code></pre>
 <h3>4. Install applications</h3>

@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="System Requirements  Hardware Requirements  | Component | Minimum | Recommended | |-----------|---------|-------------| | Processor | x8664 dual-core with …">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"System Requirements","description":"System Requirements  Hardware Requirements  | Component | Minimum | Recommended | |-----------|---------|-------------| | Processor | x8664 dual-core with …","url":"https://docs.shani.dev/doc/install/requirements/","datePublished":"2026-03-31T18:30:00.000Z","dateModified":"2026-03-31T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"System Requirements","description":"System Requirements  Hardware Requirements  | Component | Minimum | Recommended | |-----------|---------|-------------| | Processor | x8664 dual-core with …","url":"https://docs.shani.dev/doc/install/requirements/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,20 +213,20 @@
         <h1 class="doc-title">System Requirements</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Installation</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><h2>Hardware Requirements</h2>
 <p>| Component | Minimum | Recommended | |-----------|---------|-------------| | Processor | x86_64 dual-core with VT-x/AMD-V | x86_64 quad-core or better | | Memory | 4 GB RAM | 8 GB RAM or more | | Storage | 32 GB (dual-image architecture) | 64 GB or more | | Firmware | UEFI (required) | UEFI with TPM 2.0 | | Installation Media | 8 GB USB drive | 16 GB USB 3.0 drive |</p>
-<blockquote><p><strong>Why 32GB minimum?</strong> Shanios maintains two complete system images (<code>@blue</code> and <code>@green</code>) for atomic updates. However, Btrfs Copy-on-Write shares unchanged data between them, resulting in only ~18% overhead compared to traditional systems.</p></blockquote>
+<blockquote><p><strong>Why 32GB minimum?</strong> Shanios maintains two complete system images (<code>@blue</code> and <code>@green</code>) for atomic updates. However, Btrfs Copy-on-Write shares unchanged data between them, resulting in only ~18% overhead compared to traditional systems. In practice the installer itself only refuses disks smaller than 28 GB — the lower enforced floor accounts for the real usable capacity of media nominally sold as "32 GB" (partition tables, wear-leveling, etc.), but 32 GB+ is still what we recommend for comfortable headroom.</p></blockquote>
 <h2>Disk Partition Layout</h2>
 <p>Shanios uses a simple two-partition layout — there are no separate <code>/home</code>, <code>/var</code>, or swap partitions. All subvolumes live within the single Btrfs partition.</p>
 <p>| Partition | Filesystem | Size | Purpose | |-----------|-----------|------|---------| | EFI System Partition (ESP) | FAT32 | 1 GB | Bootloader, UKI images — mounted at <code>/boot/efi</code> | | Root partition | Btrfs (or LUKS2 → Btrfs) | Remainder of disk | All system subvolumes (<code>@blue</code>, <code>@green</code>, <code>@home</code>, <code>@data</code>, etc.) |</p>
-<p>When full-disk encryption is chosen, the Btrfs partition is wrapped in a LUKS2 container (<code>/dev/mapper/shani_root</code>). The ESP is never encrypted — only the root partition is.</p>
+<p>When full-disk encryption is chosen, the Btrfs partition is wrapped in a LUKS2 container (<code>/dev/mapper/shani_root</code>), formatted with the argon2id key-derivation function. The ESP is never encrypted — only the root partition is.</p>
 <h2>Firmware Requirements</h2>
 <ul>
 <li><strong>UEFI required</strong> — legacy BIOS is not supported</li>
-<li><strong>Secure Boot</strong> — optional but recommended; Shanios ships its own MOK key</li>
+<li><strong>Secure Boot</strong> — optional but recommended; Shanios signs its bootloader and kernel with a MOK (Machine Owner Key) that is baked into the system image at build time — every machine installed from the same signed ISO shares the same key</li>
 <li><strong>TPM 2.0</strong> — optional; required for automatic LUKS2 unlock without passphrase</li>
 </ul>
 <h2>Not Supported</h2>

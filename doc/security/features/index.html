@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Security Features  Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot wi…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Security Features","description":"Security Features  Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot wi…","url":"https://docs.shani.dev/doc/security/features/","datePublished":"2026-04-26T18:30:00.000Z","dateModified":"2026-04-26T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Security Features","description":"Security Features  Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot wi…","url":"https://docs.shani.dev/doc/security/features/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Security Features</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Security</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-27</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p>Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot with no manual configuration required.</p>
@@ -239,13 +239,13 @@
 <p><code>shani-deploy</code> refuses to deploy any image that fails either check. The key is on public keyservers at <code>keys.openpgp.org</code>. The result is a continuous chain: the image verified at download time is the image <code>btrfs receive</code> writes to the slot — byte-for-byte identical to what passed build QA.</p>
 <h2>Full-Disk Encryption (LUKS2 + TPM2)</h2>
 <p>LUKS2 full-disk encryption with <code>argon2id</code> KDF is available at install time (single checkbox). The <code>argon2id</code> KDF is memory-hard — it requires large amounts of RAM to compute, making GPU and ASIC brute-force attacks orders of magnitude more expensive than with older PBKDF2-based setups.</p>
-<p>Default encryption parameters used by the installer:</p>
-<pre><code>Cipher:      aes-xts-plain64
-Key size:    512 bits
-PBKDF:       argon2id
-Memory cost: 1048576 KB (1 GB)
-Time cost:   4 iterations
-Parallelism: 4 threads</code></pre>
+<p>The installer runs <code>cryptsetup luksFormat --pbkdf argon2id</code> and nothing else — it doesn't pin a cipher, key size, or PBKDF cost, so the rest come from cryptsetup 2.x's own LUKS2 defaults:</p>
+<pre><code>Cipher:          aes-xts-plain64
+Key size:        512 bits (256-bit key doubled by XTS mode)
+PBKDF:           argon2id
+Memory cost:     1048576 KB (1 GB)
+Parallel threads: 4
+Iteration time:  2000 ms (benchmarked per-machine, not a fixed iteration count)</code></pre>
 <p>After enabling encryption, enroll TPM2 for passwordless unlock:</p>
 <pre><code class="language-bash">sudo gen-efi enroll-tpm2</code></pre>
 <p>This seals the LUKS key into the TPM2 chip with PCR policy chosen automatically: <strong>PCR 0+7</strong> when Secure Boot is enabled (firmware + Secure Boot certificate state), or <strong>PCR 0 only</strong> when disabled. The disk unlocks silently on your own hardware; if physically moved to another machine or if firmware is tampered with, the TPM withholds the key.</p>
@@ -259,15 +259,28 @@ Parallelism: 4 threads</code></pre>
       → Unified Kernel Image (kernel + initramfs + cmdline, all signed together)</code></pre>
 <p>The bootloader editor is disabled and the kernel command line is embedded in the UKI at build time — it cannot be modified from the boot menu, preventing attacks that inject <code>init=/bin/bash</code> or <code>single</code> to bypass authentication.</p>
 <p>See <a href="secure-boot">Secure Boot</a> for enrollment.</p>
-<h2>Intel ME Disabled</h2>
-<p>The Intel Management Engine kernel modules are blacklisted by default:</p>
-<p>| Module | Reason | |--------|--------| | <code>pcspkr</code> | Eliminates covert timing channel via PC speaker | | <code>mei</code>, <code>mei_me</code> | Intel Management Engine interface — disabled by default |</p>
-<p>This does not remove ME from the hardware (not possible in software), but removes the kernel's interface to it, reducing the attack surface from the OS side.</p>
+<h2>Module and Protocol Blacklisting</h2>
+<p>Several kernel modules and rarely-used network protocols are blacklisted by default, via <code>modprobe.d</code> drop-ins shipped in <code>shani-settings</code>:</p>
+<p>| Module(s) | File | Reason | |-----------|------|--------| | <code>mei</code>, <code>mei_me</code> | <code>modprobe.d/noime.conf</code> | Intel Management Engine / vPro remote-access interface — disabled by default. This does not remove ME from the hardware (not possible in software), but removes the kernel's interface to it, reducing the attack surface from the OS side. | | <code>pcspkr</code> | <code>modprobe.d/nobeep.conf</code> | PC speaker blacklisted to stop the console beep; incidentally also removes it as a data-exfiltration side channel | | <code>firewire-core</code>, <code>firewire-ohci</code>, <code>firewire-sbp2</code>, <code>firewire-net</code> | <code>modprobe.d/blacklist-firewire.conf</code> | FireWire storage/DMA blocked outright (<code>install ... /bin/false</code>) — addresses Lynis <code>STRG-1846</code>, preventing unauthorized memory access via FireWire DMA | | <code>dccp</code>, <code>sctp</code>, <code>rds</code>, <code>tipc</code> | <code>modprobe.d/disable-unused-protocols.conf</code> | Uncommon network protocols disabled — addresses Lynis <code>NETW-3200</code>, reducing kernel attack surface from protocols the desktop doesn't use |</p>
 <h2>Kernel Hardening Parameters</h2>
-<pre><code>kernel.unprivileged_userns_clone = 1   # needed for containers
-kernel.nmi_watchdog = 0                # reduces attack surface
-kernel.sysrq = 1                       # emergency recovery only
-kernel.unprivileged_bpf_disabled = 1   # restrict BPF</code></pre>
+<p>The real values, from <code>usr/lib/sysctl.d/90-security-hardening.conf</code> in <code>shani-settings</code> (addresses Lynis <code>KRNL-6000</code>), tuned to stay compatible with Podman, Distrobox, LXC/LXD, systemd-nspawn, Flatpak, Snap, and Waydroid:</p>
+<pre><code>kernel.kptr_restrict = 2            # hide kernel pointers (requires CAP_SYSLOG)
+kernel.dmesg_restrict = 1           # dmesg root-only
+kernel.perf_event_paranoid = 2      # restrict perf_event_open to privileged users
+kernel.randomize_va_space = 2       # full ASLR
+kernel.sysrq = 0                    # SysRq disabled (set to 1 temporarily for emergency recovery)
+fs.protected_hardlinks = 1
+fs.protected_symlinks = 1
+fs.suid_dumpable = 0                # no core dumps from setuid processes
+net.core.bpf_jit_harden = 2         # hardens the BPF JIT against Spectre/info-leak attacks</code></pre>
+<p>A few upstream Lynis recommendations were deliberately relaxed rather than applied at full strength, with the reasoning kept inline in the file itself:</p>
+<ul>
+<li><strong><code>kernel.unprivileged_bpf_disabled = 0</code></strong> (Lynis recommends <code>1</code>) — the stricter setting breaks rootless Podman's Netavark network backend, which needs unprivileged eBPF for port forwarding and traffic-control hooks; without it, rootless pod port mappings silently fail. <code>bpf_jit_harden = 2</code> is kept on regardless, which mitigates the main Spectre risk from unprivileged eBPF.</li>
+<li><strong><code>fs.protected_fifos</code> / <code>fs.protected_regular</code> stay at <code>2</code></strong> rather than a stricter mode — <code>systemd-nspawn</code> bind-mounts run as root, so the unprivileged-only restriction doesn't affect them either way.</li>
+<li><strong><code>net.ipv4.conf.all.rp_filter = 2</code></strong> (loose) rather than strict <code>1</code> — strict mode silently drops traffic on container bridges (<code>waydroid0</code>, <code>podman0</code>, <code>lxdbr0</code>, <code>cni-podman0</code>) because return traffic legitimately arrives on a different interface than it left on.</li>
+<li><strong><code>kernel.modules_disabled</code> is intentionally not set</strong> — locking it to <code>1</code> permanently blocks all future module loading until reboot, which breaks GPU drivers, USB hot-plug, and gaming peripherals.</li>
+</ul>
+<p><code>kernel.unprivileged_userns_clone = 1</code> (needed for rootless containers) and <code>kernel.nmi_watchdog = 0</code> (faster boot/shutdown, lower power draw) are also set, in the separate performance-tuning file <code>usr/lib/sysctl.d/99-sysctl-shani.conf</code>.</p>
 <h2>Firewall (firewalld)</h2>
 <p>Active from first boot. Default policy: deny inbound, allow outbound.</p>
 <p>Pre-configured rules applied at installation time:</p>
@@ -278,14 +291,20 @@ kernel.unprivileged_bpf_disabled = 1   # restrict BPF</code></pre>
 <p><code>fail2ban</code> runs to ban repeated authentication failures.</p>
 <p>All major VPN protocols are pre-installed: OpenVPN, WireGuard, L2TP, IKEv2/strongSwan, Cisco AnyConnect, Fortinet SSL, VPNC, SSTP. Tailscale and <code>cloudflared</code> are also pre-installed with state persisted across OS updates.</p>
 <h2>Authentication</h2>
-<p>Pre-installed and working at first boot without driver installation:</p>
+<p>Pre-installed via the <code>shani-peripherals</code> package, working at first boot without driver installation:</p>
 <ul>
-<li><strong>Fingerprint</strong> — fprintd with libfprint for supported hardware</li>
-<li><strong>Smart card / PIV</strong> — opensc, pcscd, pcsc-tools</li>
-<li><strong>YubiKey and FIDO2</strong> — libfido2, pam-u2f, yubikey-manager</li>
-<li><strong>NFC authentication</strong> — libnfc, pcsc-lite</li>
-<li><strong>TOTP/HOTP two-factor</strong> — oath-toolkit</li>
+<li><strong>Fingerprint</strong> — <code>fprintd</code> (pulls in <code>libfprint</code>) for supported hardware</li>
+<li><strong>Smart card / PIV</strong> — <code>opensc</code>, <code>ccid</code>, <code>acsccid</code> (these pull in <code>pcscd</code>/<code>pcsc-lite</code> as a dependency)</li>
+<li><strong>YubiKey and FIDO2/U2F</strong> — <code>libfido2</code>, <code>pam-u2f</code></li>
+<li><strong>NFC</strong> — <code>libnfc</code>, riding on the same <code>pcscd</code>/<code>pcsc-lite</code> stack as smart cards</li>
 </ul>
+<p>Not part of the default image — install these yourself if you need the CLI tooling:</p>
+<ul>
+<li><strong>YubiKey Manager</strong> (<code>ykman</code>) — <code>sudo pacman -S yubikey-manager</code></li>
+<li><strong>PC/SC diagnostics</strong> (<code>pcsc_scan</code>) — <code>sudo pacman -S pcsc-tools</code></li>
+<li><strong>TOTP/HOTP two-factor</strong> (<code>oathtool</code>) — <code>sudo pacman -S oath-toolkit</code></li>
+</ul>
+<p>See <a href="hardware-auth">Hardware Authentication</a> for the full breakdown of what ships by default versus what needs installing.</p>
 <h2>Zero Telemetry</h2>
 <p>No background services report hardware, software usage, or system behaviour to any external server. No identifiers are generated or transmitted. No crash reports are collected.</p>
 <p><code>shani-deploy</code> connects to the CDN to download updates and to the GPG keyserver to verify signatures — standard HTTP downloads that send only what any HTTP client sends. Nothing else leaves the machine.</p>

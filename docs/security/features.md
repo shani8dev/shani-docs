@@ -1,7 +1,7 @@
 ---
 title: Security Features
 section: Security
-updated: 2026-04-27
+updated: 2026-08-20
 ---
 
 # Security Features
@@ -64,15 +64,15 @@ Every OS update is verified before deployment:
 
 LUKS2 full-disk encryption with `argon2id` KDF is available at install time (single checkbox). The `argon2id` KDF is memory-hard — it requires large amounts of RAM to compute, making GPU and ASIC brute-force attacks orders of magnitude more expensive than with older PBKDF2-based setups.
 
-Default encryption parameters used by the installer:
+The installer runs `cryptsetup luksFormat --pbkdf argon2id` and nothing else — it doesn't pin a cipher, key size, or PBKDF cost, so the rest come from cryptsetup 2.x's own LUKS2 defaults:
 
 ```
-Cipher:      aes-xts-plain64
-Key size:    512 bits
-PBKDF:       argon2id
-Memory cost: 1048576 KB (1 GB)
-Time cost:   4 iterations
-Parallelism: 4 threads
+Cipher:          aes-xts-plain64
+Key size:        512 bits (256-bit key doubled by XTS mode)
+PBKDF:           argon2id
+Memory cost:     1048576 KB (1 GB)
+Parallel threads: 4
+Iteration time:  2000 ms (benchmarked per-machine, not a fixed iteration count)
 ```
 
 After enabling encryption, enroll TPM2 for passwordless unlock:
@@ -102,25 +102,41 @@ The bootloader editor is disabled and the kernel command line is embedded in the
 
 See [Secure Boot](secure-boot) for enrollment.
 
-## Intel ME Disabled
+## Module and Protocol Blacklisting
 
-The Intel Management Engine kernel modules are blacklisted by default:
+Several kernel modules and rarely-used network protocols are blacklisted by default, via `modprobe.d` drop-ins shipped in `shani-settings`:
 
-| Module | Reason |
-|--------|--------|
-| `pcspkr` | Eliminates covert timing channel via PC speaker |
-| `mei`, `mei_me` | Intel Management Engine interface — disabled by default |
-
-This does not remove ME from the hardware (not possible in software), but removes the kernel's interface to it, reducing the attack surface from the OS side.
+| Module(s) | File | Reason |
+|-----------|------|--------|
+| `mei`, `mei_me` | `modprobe.d/noime.conf` | Intel Management Engine / vPro remote-access interface — disabled by default. This does not remove ME from the hardware (not possible in software), but removes the kernel's interface to it, reducing the attack surface from the OS side. |
+| `pcspkr` | `modprobe.d/nobeep.conf` | PC speaker blacklisted to stop the console beep; incidentally also removes it as a data-exfiltration side channel |
+| `firewire-core`, `firewire-ohci`, `firewire-sbp2`, `firewire-net` | `modprobe.d/blacklist-firewire.conf` | FireWire storage/DMA blocked outright (`install ... /bin/false`) — addresses Lynis `STRG-1846`, preventing unauthorized memory access via FireWire DMA |
+| `dccp`, `sctp`, `rds`, `tipc` | `modprobe.d/disable-unused-protocols.conf` | Uncommon network protocols disabled — addresses Lynis `NETW-3200`, reducing kernel attack surface from protocols the desktop doesn't use |
 
 ## Kernel Hardening Parameters
 
+The real values, from `usr/lib/sysctl.d/90-security-hardening.conf` in `shani-settings` (addresses Lynis `KRNL-6000`), tuned to stay compatible with Podman, Distrobox, LXC/LXD, systemd-nspawn, Flatpak, Snap, and Waydroid:
+
 ```
-kernel.unprivileged_userns_clone = 1   # needed for containers
-kernel.nmi_watchdog = 0                # reduces attack surface
-kernel.sysrq = 1                       # emergency recovery only
-kernel.unprivileged_bpf_disabled = 1   # restrict BPF
+kernel.kptr_restrict = 2            # hide kernel pointers (requires CAP_SYSLOG)
+kernel.dmesg_restrict = 1           # dmesg root-only
+kernel.perf_event_paranoid = 2      # restrict perf_event_open to privileged users
+kernel.randomize_va_space = 2       # full ASLR
+kernel.sysrq = 0                    # SysRq disabled (set to 1 temporarily for emergency recovery)
+fs.protected_hardlinks = 1
+fs.protected_symlinks = 1
+fs.suid_dumpable = 0                # no core dumps from setuid processes
+net.core.bpf_jit_harden = 2         # hardens the BPF JIT against Spectre/info-leak attacks
 ```
+
+A few upstream Lynis recommendations were deliberately relaxed rather than applied at full strength, with the reasoning kept inline in the file itself:
+
+- **`kernel.unprivileged_bpf_disabled = 0`** (Lynis recommends `1`) — the stricter setting breaks rootless Podman's Netavark network backend, which needs unprivileged eBPF for port forwarding and traffic-control hooks; without it, rootless pod port mappings silently fail. `bpf_jit_harden = 2` is kept on regardless, which mitigates the main Spectre risk from unprivileged eBPF.
+- **`fs.protected_fifos` / `fs.protected_regular` stay at `2`** rather than a stricter mode — `systemd-nspawn` bind-mounts run as root, so the unprivileged-only restriction doesn't affect them either way.
+- **`net.ipv4.conf.all.rp_filter = 2`** (loose) rather than strict `1` — strict mode silently drops traffic on container bridges (`waydroid0`, `podman0`, `lxdbr0`, `cni-podman0`) because return traffic legitimately arrives on a different interface than it left on.
+- **`kernel.modules_disabled` is intentionally not set** — locking it to `1` permanently blocks all future module loading until reboot, which breaks GPU drivers, USB hot-plug, and gaming peripherals.
+
+`kernel.unprivileged_userns_clone = 1` (needed for rootless containers) and `kernel.nmi_watchdog = 0` (faster boot/shutdown, lower power draw) are also set, in the separate performance-tuning file `usr/lib/sysctl.d/99-sysctl-shani.conf`.
 
 ## Firewall (firewalld)
 
@@ -137,13 +153,20 @@ All major VPN protocols are pre-installed: OpenVPN, WireGuard, L2TP, IKEv2/stron
 
 ## Authentication
 
-Pre-installed and working at first boot without driver installation:
+Pre-installed via the `shani-peripherals` package, working at first boot without driver installation:
 
-- **Fingerprint** — fprintd with libfprint for supported hardware
-- **Smart card / PIV** — opensc, pcscd, pcsc-tools
-- **YubiKey and FIDO2** — libfido2, pam-u2f, yubikey-manager
-- **NFC authentication** — libnfc, pcsc-lite
-- **TOTP/HOTP two-factor** — oath-toolkit
+- **Fingerprint** — `fprintd` (pulls in `libfprint`) for supported hardware
+- **Smart card / PIV** — `opensc`, `ccid`, `acsccid` (these pull in `pcscd`/`pcsc-lite` as a dependency)
+- **YubiKey and FIDO2/U2F** — `libfido2`, `pam-u2f`
+- **NFC** — `libnfc`, riding on the same `pcscd`/`pcsc-lite` stack as smart cards
+
+Not part of the default image — install these yourself if you need the CLI tooling:
+
+- **YubiKey Manager** (`ykman`) — `sudo pacman -S yubikey-manager`
+- **PC/SC diagnostics** (`pcsc_scan`) — `sudo pacman -S pcsc-tools`
+- **TOTP/HOTP two-factor** (`oathtool`) — `sudo pacman -S oath-toolkit`
+
+See [Hardware Authentication](hardware-auth) for the full breakdown of what ships by default versus what needs installing.
 
 ## Zero Telemetry
 

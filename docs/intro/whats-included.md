@@ -1,7 +1,7 @@
 ---
 title: What's Included
 section: Introduction
-updated: 2026-04-01
+updated: 2026-08-20
 ---
 
 # What's Included
@@ -34,8 +34,8 @@ Shanios comes fully equipped with a comprehensive software stack, carefully cura
 
 - **Desktop Environment:** GNOME or KDE Plasma (chosen at download), Wayland-first with full X11 compatibility
 - **Pre-installed Apps (both editions):** Vivaldi browser, OnlyOffice, Gear Lever, Warehouse, Flatseal, Pods, BoxBuddy
-- **KDE extras:** Kate, Okular, Gwenview, Elisa, Haruna, Kamoso, KolourPaint, and games
-- **GNOME extras:** Papers, Loupe, Showtime, Decibels, GNOME Text Editor, Gnote, Meld, Boxes, and games
+- **KDE extras:** Kate, Okular, Gwenview, Elisa, Haruna, Kamoso, KolourPaint, Kompare, KRDC, KGet, KTorrent, KCalc, Skanlite, ISO Image Writer, and games
+- **GNOME extras:** Papers, Loupe, Showtime, Decibels, GNOME Text Editor, GNOME Calculator, GNOME Calendar, GNOME Maps, Simple Scan, Gnote, Meld, Boxes, and games
 - **Package Formats:** Flatpak (primary, from Flathub, auto-updates every 12 hours), AppImage via Gear Lever, Nix package manager (pre-installed)
 - **Containers:** Podman (rootless), podman-docker, buildah, skopeo, Distrobox, LXC, LXD, Apptainer, Snap
 
@@ -84,6 +84,6 @@ Shanios comes fully equipped with a comprehensive software stack, carefully cura
 
 ## Fonts & Accessibility
 
-- **Fonts:** Noto fonts family (including CJK, emoji), TTF Hack; Indian language support (Devanagari, Tamil, Telugu, etc.) pre-configured
-- **Input Methods:** IBus with typing booster, Chinese, Japanese, Korean, Vietnamese, and Indic scripts
-- **Accessibility:** Orca screen reader, espeak-ng TTS, brltty (braille), speech-dispatcher
+- **Fonts:** Noto fonts family (including CJK, emoji); Indian language support pre-configured via fontconfig for Devanagari, Bengali, Gujarati, Gurmukhi, Kannada, Malayalam, Oriya, Tamil, and Telugu
+- **Input Methods:** IBus with typing booster, Chinese (Pinyin), Japanese (Anthy), Korean (Hangul), Vietnamese (Unikey), and Indic scripts
+- **Accessibility:** Orca screen reader, espeakup (speech synthesis via espeak-ng), brltty (braille)

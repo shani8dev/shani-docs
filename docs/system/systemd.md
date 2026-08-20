@@ -1,7 +1,7 @@
 ---
 title: Systemd
 section: System
-updated: 2026-04-25
+updated: 2026-08-20
 ---
 
 # Systemd
@@ -175,6 +175,31 @@ RemainAfterExit=yes   # systemd considers the service "active" after it exits
 | `notify` | Process sends `sd_notify(READY=1)` when ready |
 | `dbus` | Service is considered ready when it takes a D-Bus name |
 | `idle` | Like `simple` but waits until the boot is complete |
+
+---
+
+## Manager-Wide Defaults (Shani OS)
+
+Shani OS raises the systemd manager's defaults for *every* unit via drop-ins under `/usr/lib/systemd/system.conf.d/` and `/usr/lib/systemd/user.conf.d/` — applied to both the system instance (PID 1) and each user's `--user` instance:
+
+```ini
+# system.conf.d/limits.conf and user.conf.d/limits.conf
+[Manager]
+DefaultLimitNOFILE=1048576
+DefaultLimitNPROC=1048576
+
+# system.conf.d/timeout.conf and user.conf.d/timeout.conf
+[Manager]
+DefaultTimeoutStopSec=10s
+DefaultTimeoutAbortSec=10s
+```
+
+The higher file-descriptor/process limits avoid `EMFILE`/`nproc` errors under containers, browsers, and dev tooling; the shorter stop/abort timeouts make a hung unit fail fast (10s) instead of blocking shutdown or a deploy for systemd's 90s default. These are baseline defaults only — a unit's own `LimitNOFILE=`, `TimeoutStopSec=`, etc. in its `[Service]` section still override them.
+
+```bash
+# Check the effective manager-wide defaults
+systemctl show -p DefaultLimitNOFILE -p DefaultTimeoutStopSec
+```
 
 ---
 

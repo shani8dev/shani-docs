@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Understanding Immutability  Shanios's immutability fundamentally changes how you interact with the system. Understanding this concept is key to using Shani…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Immutability","description":"Understanding Immutability  Shanios's immutability fundamentally changes how you interact with the system. Understanding this concept is key to using Shani…","url":"https://docs.shani.dev/doc/concepts/immutability/","datePublished":"2026-03-31T18:30:00.000Z","dateModified":"2026-03-31T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Immutability","description":"Understanding Immutability  Shanios's immutability fundamentally changes how you interact with the system. Understanding this concept is key to using Shani…","url":"https://docs.shani.dev/doc/concepts/immutability/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,11 +213,13 @@
         <h1 class="doc-title">Immutability</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Concepts</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><h1>Understanding Immutability</h1>
 <p>Shanios's immutability fundamentally changes how you interact with the system. Understanding this concept is key to using Shanios effectively.</p>
+<h2>What "Immutable" Actually Means Here</h2>
+<p>The root filesystem lives in one of two Btrfs subvolumes, <code>@blue</code> or <code>@green</code>, and whichever one is active is mounted read-only (<code>rootflags=...,ro,...</code> on the kernel cmdline). Both are complete, bootable copies of the OS — there is no single shared <code>/</code> that mutates in place. <code>/usr</code>, <code>/bin</code>, <code>/lib</code>, and the rest of the base system are read-only for the entire life of that slot; the only way they change is a full slot replacement by <a href="./atomic-updates"><code>shani-deploy</code></a>, never an in-place write. See <a href="./blue-green">Blue-Green Deployment</a> for how the two slots relate, and <a href="./persistence">Persistence Strategy</a> for exactly what's writable and where it lives.</p>
 <h2>What You CAN Do</h2>
 <ul>
 <li>✅ Install applications via Flatpak</li>

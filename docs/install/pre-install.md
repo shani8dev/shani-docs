@@ -1,7 +1,7 @@
 ---
 title: Pre-Installation Setup
 section: Installation
-updated: 2026-04-01
+updated: 2026-08-20
 ---
 
 # Pre-Installation Setup
@@ -12,7 +12,7 @@ Configure your firmware before installation (typically accessed via F2, F10, Del
 
 1. **Enable UEFI Boot** — Disable legacy/CSM mode. Shanios requires UEFI.
 2. **Disable Fast Boot** — Fast Boot can interfere with USB boot and Linux installation.
-3. **Disable Secure Boot (Temporarily)** — Required for installation. Can be re-enabled after enrolling Shanios MOK keys.
+3. **Secure Boot can stay enabled** — Shanios's installer media is pre-signed with its MOK (Machine Owner Key). If Secure Boot is on, firmware will launch **MokManager** automatically the first time you boot the USB, letting you enroll the key from disk before the live environment starts. If you'd rather skip that extra step during installation, disable Secure Boot temporarily and enroll the key later — the installer stages MOK enrollment for the installed system automatically (see [First Boot](./first-boot)).
 4. **Set SATA Mode to AHCI** — Ensures optimal disk performance and compatibility.
 5. **Enable Virtualization** — Enable Intel VT-x or AMD-V for container support.
 
@@ -26,13 +26,18 @@ Download the Shanios ISO from [shani.dev](https://shani.dev) or directly from So
 - **KDE Plasma Edition** (2026.04.01, ~7.6 GB):
   [ISO](https://sourceforge.net/projects/shanios/files/plasma/20260401/) ·
   SHA256 · GPG signature · Torrent
+- **COSMIC Edition**:
+  [ISO](https://sourceforge.net/projects/shanios/files/cosmic/) ·
+  SHA256 · GPG signature · Torrent — check the download page for the current build date and size
+
+> There is no separate "Server" ISO. A server image profile exists but is only built as a cloud image (AWS AMI via the packer pipeline), not as installable install media.
 
 **Always verify before writing.** Every Shanios ISO is SHA256 checksummed and GPG signed. Verifying the checksum confirms the file downloaded completely and hasn't been tampered with. Place the `.iso`, `.sha256`, and `.asc` files in the same directory before running the commands below.
 
 ### Linux / macOS — Verify SHA256 + GPG
 
 ```bash
-# GNOME edition — substitute the Plasma filename for the KDE edition
+# GNOME edition — substitute the Plasma or COSMIC filename for those editions
 
 # 1. Verify checksum
 sha256sum -c signed_shanios-gnome-2026.04.01-x86_64.iso.sha256

@@ -1,7 +1,7 @@
 ---
 title: TPM2 Enrollment
 section: Security
-updated: 2026-04-30
+updated: 2026-08-20
 ---
 
 # TPM2 Enrollment
@@ -81,9 +81,23 @@ sudo gen-efi enroll-tpm2
 
 ## Removing TPM2 Enrollment
 
+`gen-efi cleanup-tpm2` is **not** the right tool for this — it only prunes *stale* TPM2 slots left over after a re-enrollment (it keeps the highest-numbered slot and wipes the rest). If only one TPM2 slot exists, it finds nothing to clean up and the disk keeps auto-unlocking.
+
+To fully remove TPM2 auto-unlock and fall back to a passphrase at every boot, wipe the TPM2 slot directly with `systemd-cryptenroll`:
+
 ```bash
-# Wipe only the TPM2 keyslots — passphrase keyslot is untouched
-sudo gen-efi cleanup-tpm2
+# Find the underlying LUKS device (the one under /dev/mapper/shani_root)
+sudo cryptsetup status shani_root | grep device
+
+# Wipe all TPM2-type keyslots on that device — passphrase keyslot is untouched
+sudo systemd-cryptenroll --wipe-slot=tpm2 /dev/nvme0n1p2
+```
+
+Confirm removal:
+
+```bash
+sudo cryptsetup luksDump /dev/nvme0n1p2 | grep systemd-tpm2
+# Should print nothing
 ```
 
 After this, the disk requires a passphrase at every boot.
@@ -102,3 +116,9 @@ After this, the disk requires a passphrase at every boot.
 - Boot from Shanios USB
 - `sudo cryptsetup open /dev/nvme0n1p2 shani_root` — enter your recovery passphrase
 - Mount and access data, then re-enroll TPM2 with corrected PCR bindings
+
+## See Also
+
+- [gen-efi Reference](gen-efi) — full detail on `enroll-tpm2`/`cleanup-tpm2` and how PCR policy is chosen
+- [LUKS Management](luks) — keyslot management and header backup
+- [shani-health Reference](../updates/shani-health) — `shani-health --security` reports TPM2 enrollment state and flags a PCR-policy mismatch against the current Secure Boot state

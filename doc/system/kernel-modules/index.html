@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Kernel Modules  Kernel modules are loadable drivers and extensions that the Linux kernel can load and unload at runtime without rebooting. On Shani OS, mod…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Kernel Modules","description":"Kernel Modules  Kernel modules are loadable drivers and extensions that the Linux kernel can load and unload at runtime without rebooting. On Shani OS, mod…","url":"https://docs.shani.dev/doc/system/kernel-modules/","datePublished":"2026-04-27T18:30:00.000Z","dateModified":"2026-04-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Kernel Modules","description":"Kernel Modules  Kernel modules are loadable drivers and extensions that the Linux kernel can load and unload at runtime without rebooting. On Shani OS, mod…","url":"https://docs.shani.dev/doc/system/kernel-modules/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Kernel Modules</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">System</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-28</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p>Kernel modules are loadable drivers and extensions that the Linux kernel can load and unload at runtime without rebooting. On Shani OS, module configuration files placed in <code>/etc/modules-load.d/</code> and <code>/etc/modprobe.d/</code> live in the <code>/etc</code> overlay and persist across all OS updates and rollbacks.</p>
@@ -301,7 +301,7 @@ EOF</code></pre>
 <p>The <code>install &lt;module&gt; /bin/false</code> directive is stronger — it replaces the module's install command with <code>/bin/false</code>, preventing it from loading even as a dependency of another module.</p>
 <pre><code class="language-bash"># Verify a module is blacklisted
 cat /etc/modprobe.d/*.conf | grep blacklist</code></pre>
-<blockquote><p>💡 Common blacklisting use cases on Shani OS: disabling <code>nouveau</code> when using the NVIDIA proprietary driver, blacklisting <code>pcspkr</code> to silence the PC speaker beep, or blacklisting <code>iTCO_wdt</code> to prevent false watchdog triggers.</p></blockquote>
+<blockquote><p>💡 Shani OS ships several blacklists by default in <code>/usr/lib/modprobe.d/</code>: <code>blacklist-firewire.conf</code> blocks <code>firewire-core</code>/<code>firewire-ohci</code>/<code>firewire-sbp2</code>/<code>firewire-net</code> (no firewire hardware is expected, and it closes off a DMA attack vector), <code>nobeep.conf</code> blacklists <code>pcspkr</code> to silence the PC speaker, <code>noime.conf</code> blacklists <code>mei</code>/<code>mei_me</code> (Intel vPro/AMT remote management), and <code>disable-unused-protocols.conf</code> disables the <code>dccp</code>, <code>sctp</code>, <code>rds</code>, and <code>tipc</code> network protocols via <code>install &lt;module&gt; /bin/false</code> to shrink the network attack surface. Run <code>cat /usr/lib/modprobe.d/*.conf</code> to see them; if you need to re-enable one on your own install, add the corresponding override in <code>/etc/modprobe.d/</code> (part of the persistent overlay described above).</p></blockquote>
 <p>---</p>
 <h2>Module Aliases</h2>
 <p>Aliases let you refer to a module by a friendly name or map a hardware ID to a driver.</p>

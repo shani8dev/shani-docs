@@ -1,7 +1,7 @@
 ---
 title: Blue-Green Deployment
 section: Concepts
-updated: 2026-04-01
+updated: 2026-08-20
 ---
 
 # Blue-Green Deployment
@@ -10,12 +10,14 @@ Shanios implements blue-green deployment using Btrfs subvolumes — a strategy a
 
 ## How It Works
 
-1. System maintains `@blue` and `@green` subvolumes
-2. One subvolume is active (mounted as `/`), the other inactive
-3. Updates apply to the inactive subvolume
-4. Bootloader is updated to point to the updated subvolume
+1. System maintains `@blue` and `@green` subvolumes, both created as read-only Btrfs snapshots of the same base image at install time
+2. One subvolume is active (mounted read-only as `/`, tracked in `/data/current-slot`), the other inactive
+3. `shani-deploy` writes updates to the inactive subvolume only — the active one is never touched
+4. The bootloader (systemd-boot) is updated to point to the updated subvolume
 5. Reboot switches to the updated system
 6. Previous version remains available for instant rollback
+
+The active slot is identified at runtime by parsing `subvol=@blue` or `subvol=@green` out of `rootflags=` on `/proc/cmdline` (falling back to `btrfs subvolume get-default`) — the same detection logic is shared by `shani-deploy`, `shani-update`, and `check-boot-failure` so all three always agree on which slot is running. See [Atomic Updates](./atomic-updates) for the full deploy pipeline and [Persistence Strategy](./persistence) for what survives a slot swap.
 
 ## Slot Layout
 
@@ -64,3 +66,5 @@ reboot → @blue active…
 - **shanios-green (Candidate):** Standby system, will be booted after next update
 
 After each deployment, `shani-deploy` rewrites both boot entries. The newly updated slot is labelled **(Active)** with `+3-0` boot-count tries and set as the `loader.conf` default; the currently running slot is relabelled **(Candidate)** as the stable fallback.
+
+Note the two rollback mechanisms operate at different levels: systemd-boot's boot counting only decides *which slot boots next* — it never touches subvolume contents. Actually restoring a failed candidate slot's data (from the pre-deploy safety snapshot) is a separate step performed by `shani-deploy --rollback`, which `shani-update` offers automatically the next time you log in after a fallback boot. See [Atomic Updates](./atomic-updates#automatic-rollback) for the full sequence.

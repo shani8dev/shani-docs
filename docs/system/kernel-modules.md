@@ -1,7 +1,7 @@
 ---
 title: Kernel Modules
 section: System
-updated: 2026-04-28
+updated: 2026-08-20
 ---
 
 # Kernel Modules
@@ -130,7 +130,7 @@ The `install <module> /bin/false` directive is stronger — it replaces the modu
 cat /etc/modprobe.d/*.conf | grep blacklist
 ```
 
-> 💡 Common blacklisting use cases on Shani OS: disabling `nouveau` when using the NVIDIA proprietary driver, blacklisting `pcspkr` to silence the PC speaker beep, or blacklisting `iTCO_wdt` to prevent false watchdog triggers.
+> 💡 Shani OS ships several blacklists by default in `/usr/lib/modprobe.d/`: `blacklist-firewire.conf` blocks `firewire-core`/`firewire-ohci`/`firewire-sbp2`/`firewire-net` (no firewire hardware is expected, and it closes off a DMA attack vector), `nobeep.conf` blacklists `pcspkr` to silence the PC speaker, `noime.conf` blacklists `mei`/`mei_me` (Intel vPro/AMT remote management), and `disable-unused-protocols.conf` disables the `dccp`, `sctp`, `rds`, and `tipc` network protocols via `install <module> /bin/false` to shrink the network attack surface. Run `cat /usr/lib/modprobe.d/*.conf` to see them; if you need to re-enable one on your own install, add the corresponding override in `/etc/modprobe.d/` (part of the persistent overlay described above).
 
 ---
 

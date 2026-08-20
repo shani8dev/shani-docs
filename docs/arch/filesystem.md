@@ -1,7 +1,7 @@
 ---
 title: Filesystem Structure
 section: Architecture
-updated: 2026-05-13
+updated: 2026-08-20
 ---
 
 # Filesystem Structure
@@ -19,8 +19,8 @@ Shanios uses Btrfs with a sophisticated subvolume layout housed in a single Btrf
 | `@nix` | `/nix` | Nix package manager store — shared across both slots |
 | `@log` | `/var/log` | System logs across reboots |
 | `@cache` | `/var/cache` | Package manager cache |
-| `@flatpak` | `/var/lib/flatpak` | Flatpak applications and runtimes |
-| `@snapd` | `/var/lib/snapd` | Snap package storage, revisions, and writable snap data |
+| `@flatpak` | `/var/lib/flatpak` | Flatpak applications and runtimes — seeded at install time from the image's `flatpak_subvol` snapshot, so base runtimes are already present on first boot |
+| `@snapd` | `/var/lib/snapd` | Snap package storage, revisions, and writable snap data — seeded the same way from `snapd_subvol` |
 | `@waydroid` | `/var/lib/waydroid` | Android system images and data |
 | `@containers` | `/var/lib/containers` | Podman/Docker container storage |
 | `@machines` | `/var/lib/machines` | systemd-nspawn containers |
@@ -29,6 +29,8 @@ Shanios uses Btrfs with a sophisticated subvolume layout housed in a single Btrf
 | `@libvirt` | `/var/lib/libvirt` | Virtual machine disk images (nodatacow) |
 | `@qemu` | `/var/lib/qemu` | Bare QEMU VM disk images (nodatacow) |
 | `@swap` | `/swap` | Swap file container (nodatacow) |
+
+Unlike the other subvolumes (created empty with `btrfs subvolume create`), `@blue` and `@green` are seeded from the installed OS image: the installer extracts the base image into a subvolume named `shanios_base`, takes a read-only snapshot of it as `@blue`, then takes a read-only snapshot of `@blue` as `@green` — so both slots start out byte-identical — and deletes `shanios_base`. Every later `shani-deploy` update follows the same pattern against the *candidate* (inactive) slot: it snapshots the current candidate as a timestamped `@<slot>_backup_<timestamp>` safety copy, `btrfs receive`s the new OS image into a `temp_update/shanios_base` subvolume, deletes the old candidate, and snapshots the freshly received image into `@<slot>` (read-only) — so a deploy never touches the booted slot and a failure mid-extraction leaves the candidate untouched.
 
 ## The @data Subvolume
 
@@ -164,7 +166,9 @@ Because `/var` is volatile (tmpfs via `systemd.volatile=state`), critical servic
 ## Mount Options Reference
 
 - **Root slots** (`@blue`/`@green`) — **not in fstab** — mounted read-only by dracut via kernel cmdline
-- **Container/virtualisation subvolumes** — use `nofail` so the system boots cleanly even if not yet created
+- **`@root`, `@home`, `@data`** — the only subvolumes mounted *without* `nofail`; the system is not considered bootable without them
+- **Every other subvolume** (`@nix`, `@log`, `@cache`, container/virtualisation subvolumes, `@swap`) — uses `nofail` so the system boots cleanly even if the subvolume doesn't exist yet
+- **Subvolumes under `/var/*`** (`@log`, `@cache`, and all container/virtualisation subvolumes) — additionally carry `x-systemd.after=var.mount,x-systemd.requires=var.mount` since `/var` itself is a tmpfs that must exist first
 - **VM disk subvolumes** (`@libvirt`, `@qemu`) and `@swap` — use `nodatacow,nospace_cache` (required for correctness and performance)
 - **All other Btrfs subvolumes** — use `noatime,compress=zstd,space_cache=v2,autodefrag`
 - **All bind mounts** — use `bind,nofail,x-systemd.after=var.mount,x-systemd.requires-mounts-for=/data`

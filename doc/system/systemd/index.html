@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Systemd  Systemd is the init system and service manager on Shani OS. It starts every process at boot, manages all daemons, handles logging via the journal,…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Systemd","description":"Systemd  Systemd is the init system and service manager on Shani OS. It starts every process at boot, manages all daemons, handles logging via the journal,…","url":"https://docs.shani.dev/doc/system/systemd/","datePublished":"2026-04-24T18:30:00.000Z","dateModified":"2026-04-24T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Systemd","description":"Systemd  Systemd is the init system and service manager on Shani OS. It starts every process at boot, manages all daemons, handles logging via the journal,…","url":"https://docs.shani.dev/doc/system/systemd/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Systemd</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">System</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-25</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p>Systemd is the init system and service manager on Shani OS. It starts every process at boot, manages all daemons, handles logging via the journal, and runs scheduled tasks via timers. Unit files placed in <code>/etc/systemd/system/</code> are captured by the <code>/etc</code> overlay and persist across all OS updates and rollbacks.</p>
@@ -353,6 +353,21 @@ User=myapp
 RemainAfterExit=yes   # systemd considers the service &quot;active&quot; after it exits</code></pre>
 <h3>Service types</h3>
 <p>| Type | Use | |------|-----| | <code>simple</code> | Default. Process started by <code>ExecStart</code> is the main process | | <code>exec</code> | Like <code>simple</code> but systemd waits until <code>execve()</code> succeeds | | <code>forking</code> | Process forks and the parent exits (traditional daemons) | | <code>oneshot</code> | Short-lived process that exits when done (scripts, migrations) | | <code>notify</code> | Process sends <code>sd_notify(READY=1)</code> when ready | | <code>dbus</code> | Service is considered ready when it takes a D-Bus name | | <code>idle</code> | Like <code>simple</code> but waits until the boot is complete |</p>
+<p>---</p>
+<h2>Manager-Wide Defaults (Shani OS)</h2>
+<p>Shani OS raises the systemd manager's defaults for <em>every</em> unit via drop-ins under <code>/usr/lib/systemd/system.conf.d/</code> and <code>/usr/lib/systemd/user.conf.d/</code> — applied to both the system instance (PID 1) and each user's <code>--user</code> instance:</p>
+<pre><code class="language-ini"># system.conf.d/limits.conf and user.conf.d/limits.conf
+[Manager]
+DefaultLimitNOFILE=1048576
+DefaultLimitNPROC=1048576
+
+# system.conf.d/timeout.conf and user.conf.d/timeout.conf
+[Manager]
+DefaultTimeoutStopSec=10s
+DefaultTimeoutAbortSec=10s</code></pre>
+<p>The higher file-descriptor/process limits avoid <code>EMFILE</code>/<code>nproc</code> errors under containers, browsers, and dev tooling; the shorter stop/abort timeouts make a hung unit fail fast (10s) instead of blocking shutdown or a deploy for systemd's 90s default. These are baseline defaults only — a unit's own <code>LimitNOFILE=</code>, <code>TimeoutStopSec=</code>, etc. in its <code>[Service]</code> section still override them.</p>
+<pre><code class="language-bash"># Check the effective manager-wide defaults
+systemctl show -p DefaultLimitNOFILE -p DefaultTimeoutStopSec</code></pre>
 <p>---</p>
 <h2>Timers</h2>
 <p>Timers replace cron for system services. They integrate with the journal and support <code>Persistent=true</code> to catch up missed runs after sleep or downtime.</p>

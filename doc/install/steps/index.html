@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Installation Steps  Installation takes approximately 10–15 minutes.  Step-by-Step  1. Boot from USB — Press F12, F2, or Del during startup. Select your USB…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Installation Steps","description":"Installation Steps  Installation takes approximately 10–15 minutes.  Step-by-Step  1. Boot from USB — Press F12, F2, or Del during startup. Select your USB…","url":"https://docs.shani.dev/doc/install/steps/","datePublished":"2026-03-31T18:30:00.000Z","dateModified":"2026-03-31T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Installation Steps","description":"Installation Steps  Installation takes approximately 10–15 minutes.  Step-by-Step  1. Boot from USB — Press F12, F2, or Del during startup. Select your USB…","url":"https://docs.shani.dev/doc/install/steps/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Installation Steps</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Installation</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p>Installation takes approximately 10–15 minutes.</p>
@@ -221,9 +221,10 @@
 <ol>
 <li><strong>Boot from USB</strong> — Press F12, F2, or Del during startup. Select your USB drive from the boot menu.</li>
 <li><strong>Select "Install Shanios"</strong> — Choose the installation option from the boot menu.</li>
-<li><strong>Language & Region</strong> — Select language, timezone, and keyboard layout.</li>
+<li><strong>Keyboard Layout</strong> — Always asked, on every edition.</li>
+<li><strong>Language & Region</strong> — Select language and timezone. On the <strong>GNOME and Plasma editions this page is skipped</strong> — locale and timezone are configured later by the first-boot Initial Setup wizard instead. On the <strong>COSMIC edition this page (and a user-account page) is shown during install</strong>, because COSMIC does not yet have an equivalent first-boot wizard to defer to.</li>
 <li><strong>Disk Selection</strong> — Choose target disk and partitioning scheme (automatic recommended).</li>
-<li><strong>Encryption (Optional)</strong> — Enable LUKS2 full-disk encryption. Recommended for laptops and portable systems.</li>
+<li><strong>Encryption (Optional)</strong> — Enable LUKS2 full-disk encryption (argon2id key derivation). You'll be asked to enter the passphrase twice to confirm. Recommended for laptops and portable systems.</li>
 <li><strong>Install</strong> — The installer creates Btrfs subvolumes, installs the base system, and configures the bootloader.</li>
 <li><strong>Reboot</strong> — Remove USB drive when prompted and reboot into Shanios.</li>
 </ol>
@@ -233,13 +234,13 @@
 <li>All Btrfs subvolumes are created: <code>@root</code>, <code>@home</code>, <code>@data</code>, <code>@nix</code>, <code>@cache</code>, <code>@log</code>, <code>@flatpak</code>, <code>@snapd</code>, <code>@waydroid</code>, <code>@containers</code>, <code>@machines</code>, <code>@lxc</code>, <code>@lxd</code>, <code>@libvirt</code>, <code>@qemu</code>, <code>@swap</code></li>
 <li>The system image is extracted into <code>shanios_base</code>, snapshotted to <code>@blue</code> (read-only), then snapshotted again to <code>@green</code>. The active slot is written to <code>/data/current-slot</code> (<code>blue</code>)</li>
 <li>The Flatpak store is extracted and snapshotted into <code>@flatpak</code>. If Snap seed was included on the ISO, it is extracted into <code>@snapd</code></li>
-<li>The swapfile is created in <code>@swap</code> using <code>btrfs filesystem mkswapfile</code> sized to match RAM</li>
-<li>Locale, keyboard, timezone, hostname, user account, and autologin are configured via <code>chroot</code></li>
-<li>MOK keys are generated, Secure Boot components installed, and both UKIs (<code>shanios-blue.efi</code>, <code>shanios-green.efi</code>) are built using <code>dracut --force --uefi</code> and signed with the MOK key</li>
+<li>The swapfile is created in <code>@swap</code> using <code>btrfs filesystem mkswapfile</code> sized to match RAM. If there isn't enough free disk space for a full-RAM swapfile, this step is skipped entirely and the system falls back to zram for swap</li>
+<li>Keyboard layout is always configured via <code>chroot</code>; locale, timezone, user account, and autologin are configured the same way, unless deferred to the first-boot wizard (see step 4 above)</li>
+<li>Secure Boot: the MOK signing key is normally already baked into the system image at build time — the installer just verifies the keypair and re-signs the bootloader/kernel with it. Keys are only generated fresh on the spot if they're missing or invalid, which is a fallback path, not the common case. Either way, both UKIs (<code>shanios-blue.efi</code>, <code>shanios-green.efi</code>) are built using <code>dracut --force --uefi</code> and signed with the MOK key, and MOK enrollment is staged automatically so you just confirm it in MokManager on first boot (see <a href="./first-boot">First Boot</a>)</li>
 <li><code>/etc/crypttab</code> is generated with the LUKS UUID and <code>none</code> key field if encryption was chosen</li>
 <li>Firewall rules for KDE Connect and Waydroid are applied via <code>firewall-offline-cmd</code></li>
 </ul>
-<p>On first boot, <code>beesd-setup.service</code> configures the deduplication daemon for the Btrfs volume UUID. The Initial Setup wizard then runs for user-facing personalisation.</p></div>
+<p>On first boot, <code>beesd-setup.service</code> configures the deduplication daemon for the Btrfs volume UUID. On GNOME and Plasma, the Initial Setup wizard then runs for user-facing personalisation; on COSMIC there is no such wizard since the account, language, and timezone were already collected during install.</p></div>
     </div>
 
   </main>

@@ -1,12 +1,14 @@
 ---
 title: rkhunter (Rootkit Hunter)
 section: Security
-updated: 2026-04-20
+updated: 2026-08-20
 ---
 
 # rkhunter — Rootkit Hunter
 
-rkhunter scans a system for known rootkits, backdoors, and local exploits. It checks system binaries against stored hashes, looks for suspicious file permissions, hidden files in sensitive directories, and known rootkit signatures. It is pre-installed on Shani OS.
+rkhunter scans a system for known rootkits, backdoors, and local exploits. It checks system binaries against stored hashes, looks for suspicious file permissions, hidden files in sensitive directories, and known rootkit signatures. It is pre-installed on Shani OS as a direct dependency of the `shani-core` package (alongside `lynis`, `apparmor`, `audit`, and `fwupd`).
+
+Unlike Lynis, Shani OS does **not** enable a scheduling timer for rkhunter — there's no `rkhunter.timer` unit enabled by `shani-core`'s post-install hook. The scheduled-scan setup below (cron) is a genuine gap you need to fill yourself, not busywork duplicating something already running.
 
 rkhunter does not change anything — it only scans and reports.
 
@@ -145,3 +147,10 @@ sudo grep -i "warning\|infected\|found" /var/log/rkhunter.log
 | False positive for a known-safe binary | Add it to `SCRIPTWHITELIST` in `/etc/rkhunter.conf` |
 | `rkhunter --update` fails | Check network connectivity; the signature database is downloaded from the rkhunter project servers |
 | Scan not finding anything suspicious | That's the expected result on a healthy system — the value of rkhunter is the delta between scans, not finding problems on every run |
+
+---
+
+## See Also
+
+- [Lynis](lynis) — broader hardening audit; Shani OS enables `lynis.timer` by default, unlike rkhunter
+- [shani-health Reference](../updates/shani-health) — `shani-health --security` reports the age of your last rkhunter scan and its warning count, read from `/var/log/rkhunter.log`

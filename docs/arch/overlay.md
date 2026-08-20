@@ -1,7 +1,7 @@
 ---
 title: Overlay Filesystem
 section: Architecture
-updated: 2026-05-13
+updated: 2026-08-20
 ---
 
 # Overlay Filesystem
@@ -96,8 +96,14 @@ findmnt /etc
 find /data/overlay/etc/upper -mindepth 1 | wc -l
 
 # Use shani-health for a detailed report
-shani-health --boot   # shows "Immutability → /etc: overlay active, N file(s) modified"
+shani-health --boot   # shows "Immutability → /etc: OK  overlay active, N file(s) modified vs base"
 ```
+
+## Optional: A /var Overlay Also Exists (Disabled by Default)
+
+The fstab ships a second, commented-out overlay entry for `/var` at `/data/overlay/var/{upper,work}`, alongside the `/etc` one. It is **not active** on a default install — `/var` is a tmpfs via `systemd.volatile=state` on the kernel cmdline instead (see [Filesystem Structure](filesystem)).
+
+The two mechanisms are explicitly mutually exclusive: if you enable the `/var` overlay fstab line without first removing `systemd.volatile=state` from `/etc/kernel/install_cmdline_<slot>` (and regenerating the UKI with `gen-efi configure <slot>`), the kernel creates `/var` as an empty tmpfs *before* fstab mounts run, and the overlay then stacks on top of that empty tmpfs as its lowerdir instead of the real read-only `/var` from the slot — silently discarding all default `/var` contents with no error. Enabling this is an advanced, opt-in path (used by some server image profiles); do not flip it on without removing the cmdline parameter first.
 
 ## Limitations
 

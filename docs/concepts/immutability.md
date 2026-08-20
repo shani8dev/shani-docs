@@ -1,12 +1,16 @@
 ---
 title: Immutability
 section: Concepts
-updated: 2026-04-01
+updated: 2026-08-20
 ---
 
 # Understanding Immutability
 
 Shanios's immutability fundamentally changes how you interact with the system. Understanding this concept is key to using Shanios effectively.
+
+## What "Immutable" Actually Means Here
+
+The root filesystem lives in one of two Btrfs subvolumes, `@blue` or `@green`, and whichever one is active is mounted read-only (`rootflags=...,ro,...` on the kernel cmdline). Both are complete, bootable copies of the OS — there is no single shared `/` that mutates in place. `/usr`, `/bin`, `/lib`, and the rest of the base system are read-only for the entire life of that slot; the only way they change is a full slot replacement by [`shani-deploy`](./atomic-updates), never an in-place write. See [Blue-Green Deployment](./blue-green) for how the two slots relate, and [Persistence Strategy](./persistence) for exactly what's writable and where it lives.
 
 ## What You CAN Do
 

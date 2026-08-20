@@ -1,7 +1,7 @@
 ---
 title: Directory Encryption (gocryptfs)
 section: Security
-updated: 2026-04-20
+updated: 2026-08-20
 ---
 
 # Directory Encryption — gocryptfs
@@ -11,6 +11,8 @@ updated: 2026-04-20
 This complements full-disk LUKS2 encryption — use it when you want a specific directory encrypted at rest even when the disk is unlocked, or when encrypting a synced folder before it leaves your machine.
 
 > Shani OS uses Btrfs for the root filesystem. gocryptfs works on Btrfs without any special configuration.
+
+**ShaniOS integration:** `gocryptfs` ships pre-installed as a dependency of the `shani-storage` package — that's the extent of the ShaniOS-specific integration. There is no Shanios wrapper script, GUI, or systemd unit template for it; everything below is the standard upstream `gocryptfs` workflow, usable as-is.
 
 ---
 

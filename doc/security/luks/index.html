@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="LUKS Management  Full-disk encryption with LUKS2 must be enabled during the Shanios installer — it is a single checkbox on the disk setup screen. There is …">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"LUKS Management","description":"LUKS Management  Full-disk encryption with LUKS2 must be enabled during the Shanios installer — it is a single checkbox on the disk setup screen. There is …","url":"https://docs.shani.dev/doc/security/luks/","datePublished":"2026-05-08T18:30:00.000Z","dateModified":"2026-05-08T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"LUKS Management","description":"LUKS Management  Full-disk encryption with LUKS2 must be enabled during the Shanios installer — it is a single checkbox on the disk setup screen. There is …","url":"https://docs.shani.dev/doc/security/luks/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">LUKS Management</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Security</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-05-09</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p>Full-disk encryption with LUKS2 must be enabled during the Shanios installer — it is a single checkbox on the disk setup screen. There is no in-place conversion from an unencrypted installation.</p>
@@ -229,13 +229,13 @@ restic -r /media/external/backup check</code></pre>
 <p>Attempting to encrypt an existing installation by hand requires: backing up all data, booting from USB, repartitioning, creating a LUKS container, recreating the Btrfs subvolume layout, restoring data, regenerating UKIs, and re-enrolling TPM2 — each step is an opportunity for data loss. The installer does all of this correctly in a few clicks.</p>
 <h2>Why LUKS2 with argon2id</h2>
 <p>Shanios uses LUKS2 with the <code>argon2id</code> key derivation function. <code>argon2id</code> is memory-hard — it requires a large amount of RAM to compute, making GPU and ASIC brute-force attacks orders of magnitude more expensive than with older PBKDF2-based setups. LUKS2 also supports up to 32 keyslots, allowing a passphrase, keyfile, and TPM2-sealed key all active simultaneously.</p>
-<p>Default encryption parameters used by the installer:</p>
-<pre><code>Cipher:      aes-xts-plain64
-Key size:    512 bits
-PBKDF:       argon2id
-Memory cost: 1048576 KB (1 GB)
-Time cost:   4 iterations
-Parallelism: 4 threads</code></pre>
+<p>The installer's disk setup step runs exactly one command for this: <code>cryptsetup -q luksFormat --pbkdf argon2id &lt;partition&gt;</code>. It pins the PBKDF to <code>argon2id</code> and nothing else — cipher, key size, memory cost, and parallelism all come from cryptsetup 2.x's own LUKS2 defaults:</p>
+<pre><code>Cipher:           aes-xts-plain64
+Key size:         512 bits (256-bit key, doubled by XTS mode)
+PBKDF:            argon2id
+Memory cost:      1048576 KB (1 GB)
+Parallel threads: 4
+Iteration time:   2000 ms (cryptsetup benchmarks the actual iteration count per-machine — it is not a fixed number)</code></pre>
 <p>---</p>
 <h2>Checking Encryption Status</h2>
 <pre><code class="language-bash"># Is the root partition encrypted?

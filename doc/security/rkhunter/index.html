@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="rkhunter — Rootkit Hunter  rkhunter scans a system for known rootkits, backdoors, and local exploits. It checks system binaries against stored hashes, look…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"rkhunter (Rootkit Hunter)","description":"rkhunter — Rootkit Hunter  rkhunter scans a system for known rootkits, backdoors, and local exploits. It checks system binaries against stored hashes, look…","url":"https://docs.shani.dev/doc/security/rkhunter/","datePublished":"2026-04-19T18:30:00.000Z","dateModified":"2026-04-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"rkhunter (Rootkit Hunter)","description":"rkhunter — Rootkit Hunter  rkhunter scans a system for known rootkits, backdoors, and local exploits. It checks system binaries against stored hashes, look…","url":"https://docs.shani.dev/doc/security/rkhunter/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,10 +213,11 @@
         <h1 class="doc-title">rkhunter (Rootkit Hunter)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Security</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
-      <div class="prose"><p>rkhunter scans a system for known rootkits, backdoors, and local exploits. It checks system binaries against stored hashes, looks for suspicious file permissions, hidden files in sensitive directories, and known rootkit signatures. It is pre-installed on Shani OS.</p>
+      <div class="prose"><p>rkhunter scans a system for known rootkits, backdoors, and local exploits. It checks system binaries against stored hashes, looks for suspicious file permissions, hidden files in sensitive directories, and known rootkit signatures. It is pre-installed on Shani OS as a direct dependency of the <code>shani-core</code> package (alongside <code>lynis</code>, <code>apparmor</code>, <code>audit</code>, and <code>fwupd</code>).</p>
+<p>Unlike Lynis, Shani OS does <strong>not</strong> enable a scheduling timer for rkhunter — there's no <code>rkhunter.timer</code> unit enabled by <code>shani-core</code>'s post-install hook. The scheduled-scan setup below (cron) is a genuine gap you need to fill yourself, not busywork duplicating something already running.</p>
 <p>rkhunter does not change anything — it only scans and reports.</p>
 <blockquote><p><strong>Important workflow:</strong> rkhunter must build a baseline of known-good file hashes <strong>before</strong> the system is potentially compromised — ideally immediately after installation, and again after every system update. Running it for the first time on an already-compromised system provides little value.</p></blockquote>
 <p>---</p>
@@ -300,7 +301,13 @@ sudo cat /var/log/rkhunter.log
 sudo grep -i &quot;warning\|infected\|found&quot; /var/log/rkhunter.log</code></pre>
 <p>---</p>
 <h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | Many <code>WARNING</code> after a system update | Expected — run <code>sudo rkhunter --propupd</code> to update the baseline, then re-scan | | <code>Unhappy about OS</code> / <code>Unknown OS</code> warning | Cosmetic on Arch-based systems; does not indicate a problem | | False positive for a known-safe binary | Add it to <code>SCRIPTWHITELIST</code> in <code>/etc/rkhunter.conf</code> | | <code>rkhunter --update</code> fails | Check network connectivity; the signature database is downloaded from the rkhunter project servers | | Scan not finding anything suspicious | That's the expected result on a healthy system — the value of rkhunter is the delta between scans, not finding problems on every run |</p></div>
+<p>| Issue | Solution | |-------|----------| | Many <code>WARNING</code> after a system update | Expected — run <code>sudo rkhunter --propupd</code> to update the baseline, then re-scan | | <code>Unhappy about OS</code> / <code>Unknown OS</code> warning | Cosmetic on Arch-based systems; does not indicate a problem | | False positive for a known-safe binary | Add it to <code>SCRIPTWHITELIST</code> in <code>/etc/rkhunter.conf</code> | | <code>rkhunter --update</code> fails | Check network connectivity; the signature database is downloaded from the rkhunter project servers | | Scan not finding anything suspicious | That's the expected result on a healthy system — the value of rkhunter is the delta between scans, not finding problems on every run |</p>
+<p>---</p>
+<h2>See Also</h2>
+<ul>
+<li><a href="lynis">Lynis</a> — broader hardening audit; Shani OS enables <code>lynis.timer</code> by default, unlike rkhunter</li>
+<li><a href="../updates/shani-health">shani-health Reference</a> — <code>shani-health --security</code> reports the age of your last rkhunter scan and its warning count, read from <code>/var/log/rkhunter.log</code></li>
+</ul></div>
     </div>
 
   </main>

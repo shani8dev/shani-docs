@@ -5,8 +5,260 @@
     <link>https://docs.shani.dev/</link>
     <description>Comprehensive technical documentation for Shanios — the immutable Linux OS.</description>
     <language>en-IN</language>
-    <lastBuildDate>Thu, 20 Aug 2026 16:57:59 GMT</lastBuildDate>
+    <lastBuildDate>Thu, 20 Aug 2026 17:16:07 GMT</lastBuildDate>
     <atom:link href="https://docs.shani.dev/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Boot Process</title>
+      <link>https://docs.shani.dev/doc/arch/boot/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/arch/boot/</guid>
+      <description>Boot Process  Shanios uses a fully measured, signed boot chain built on systemd-boot, dracut-generated Unified Kernel Images (UKIs), and optionally TPM2 + …</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Architecture</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Btrfs Deep Dive</title>
+      <link>https://docs.shani.dev/doc/arch/btrfs/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/arch/btrfs/</guid>
+      <description>Btrfs Deep Dive  Shanios leverages advanced Btrfs features for immutability, efficiency, and data integrity.  Copy-on-Write (CoW)  Btrfs CoW minimises stor…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Architecture</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Dracut Initramfs Module</title>
+      <link>https://docs.shani.dev/doc/arch/dracut-module/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/arch/dracut-module/</guid>
+      <description>Dracut Initramfs Module  Shanios ships a custom dracut module () that adds three hooks to the initramfs. These hooks implement the two features that requir…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Architecture</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Filesystem Structure</title>
+      <link>https://docs.shani.dev/doc/arch/filesystem/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/arch/filesystem/</guid>
+      <description>Filesystem Structure  Shanios uses Btrfs with a sophisticated subvolume layout housed in a single Btrfs partition (plus a 1 GB FAT32 ESP). The design separ…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Architecture</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Overlay Filesystem</title>
+      <link>https://docs.shani.dev/doc/arch/overlay/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/arch/overlay/</guid>
+      <description>Overlay Filesystem  Shanios uses Linux OverlayFS to present a fully writable  on top of a read-only root filesystem. This is what makes the immutable OS fe…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Architecture</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Atomic Updates</title>
+      <link>https://docs.shani.dev/doc/concepts/atomic-updates/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/concepts/atomic-updates/</guid>
+      <description>Atomic Updates  Shanios uses an intelligent multi-layered update system with automatic checking, user notifications, and the  tool for atomic system update…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Concepts</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Blue-Green Deployment</title>
+      <link>https://docs.shani.dev/doc/concepts/blue-green/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/concepts/blue-green/</guid>
+      <description>Blue-Green Deployment  Shanios implements blue-green deployment using Btrfs subvolumes — a strategy adapted from DevOps for desktop Linux.  How It Works  1…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Concepts</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Immutability</title>
+      <link>https://docs.shani.dev/doc/concepts/immutability/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/concepts/immutability/</guid>
+      <description>Understanding Immutability  Shanios's immutability fundamentally changes how you interact with the system. Understanding this concept is key to using Shani…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Concepts</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Persistence Strategy</title>
+      <link>https://docs.shani.dev/doc/concepts/persistence/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/concepts/persistence/</guid>
+      <description>Persistence Strategy  Shanios selectively persists data across immutable system updates through bind mounts and dedicated Btrfs subvolumes.  Three Categori…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Concepts</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>OEM &amp; Fleet Deployment</title>
+      <link>https://docs.shani.dev/doc/enterprise/fleet/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/enterprise/fleet/</guid>
+      <description>OEM &amp; Fleet Deployment  Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Enterprise</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>First Boot</title>
+      <link>https://docs.shani.dev/doc/install/first-boot/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/install/first-boot/</guid>
+      <description>First Boot Configuration  Plymouth BGRT Boot Theme  Shanios uses the Plymouth BGRT boot theme. Plymouth provides a smooth graphical boot experience, suppre…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Installation</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Pre-Installation Setup</title>
+      <link>https://docs.shani.dev/doc/install/pre-install/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/install/pre-install/</guid>
+      <description>Pre-Installation Setup  BIOS/UEFI Configuration  Configure your firmware before installation (typically accessed via F2, F10, Del, or Esc during startup): …</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Installation</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>System Requirements</title>
+      <link>https://docs.shani.dev/doc/install/requirements/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/install/requirements/</guid>
+      <description>System Requirements  Hardware Requirements  | Component | Minimum | Recommended | |-----------|---------|-------------| | Processor | x8664 dual-core with …</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Installation</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Installation Steps</title>
+      <link>https://docs.shani.dev/doc/install/steps/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/install/steps/</guid>
+      <description>Installation Steps  Installation takes approximately 10–15 minutes.  Step-by-Step  1. Boot from USB — Press F12, F2, or Del during startup. Select your USB…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Installation</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Getting Started</title>
+      <link>https://docs.shani.dev/doc/intro/getting-started/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/intro/getting-started/</guid>
+      <description>Getting Started  A complete walkthrough: choose your edition, download and verify the ISO, install, and configure Shanios for daily use.  Choosing Your Edi…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Introduction</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>System Optimizations</title>
+      <link>https://docs.shani.dev/doc/intro/optimizations/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/intro/optimizations/</guid>
+      <description>System Optimizations  Shanios includes extensive performance, gaming, and reliability optimizations out of the box, eliminating the need for manual tweakin…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Introduction</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>User Configuration</title>
+      <link>https://docs.shani.dev/doc/intro/user-config/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/intro/user-config/</guid>
+      <description>User Configuration  The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created u…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Introduction</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>What is Shanios?</title>
+      <link>https://docs.shani.dev/doc/intro/what-is-shanios/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/intro/what-is-shanios/</guid>
+      <description>What is Shanios?  Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs f…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Introduction</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>What's Included</title>
+      <link>https://docs.shani.dev/doc/intro/whats-included/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/intro/whats-included/</guid>
+      <description>What's Included  Shanios comes fully equipped with a comprehensive software stack, carefully curated for desktop computing, development, gaming, and profes…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Introduction</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>AppArmor (Mandatory Access Control)</title>
+      <link>https://docs.shani.dev/doc/security/apparmor/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/security/apparmor/</guid>
+      <description>AppArmor — Mandatory Access Control  AppArmor is a Linux Security Module that confines programs to a defined set of resources using per-application profile…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Security</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Audit (auditd)</title>
+      <link>https://docs.shani.dev/doc/security/audit/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/security/audit/</guid>
+      <description>Audit — auditd   is the Linux kernel audit framework daemon. It captures security-relevant kernel events — file access, system calls, authentication, privi…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Security</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Security Features</title>
+      <link>https://docs.shani.dev/doc/security/features/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/security/features/</guid>
+      <description>Security Features  Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot wi…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Security</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Firmware Updates (fwupd)</title>
+      <link>https://docs.shani.dev/doc/security/fwupd/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/security/fwupd/</guid>
+      <description>Firmware Updates — fwupd   is the Linux Vendor Firmware Service client. It downloads firmware updates for BIOS/UEFI, drives, controllers, and other hardwar…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Security</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>gen-efi Reference</title>
+      <link>https://docs.shani.dev/doc/security/gen-efi/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/security/gen-efi/</guid>
+      <description>gen-efi Reference   is the Shanios UKI (Unified Kernel Image) builder and Secure Boot key manager. It wraps  and / to produce signed EFI binaries placed in…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Security</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Directory Encryption (gocryptfs)</title>
+      <link>https://docs.shani.dev/doc/security/gocryptfs/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/security/gocryptfs/</guid>
+      <description>Directory Encryption — gocryptfs   encrypts individual directories using FUSE. Each file is stored as a separate encrypted blob, so cloud sync tools (Nextc…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Security</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Hardware Authentication</title>
+      <link>https://docs.shani.dev/doc/security/hardware-auth/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/security/hardware-auth/</guid>
+      <description>Hardware Authentication  Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), an…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Security</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>LUKS Management</title>
+      <link>https://docs.shani.dev/doc/security/luks/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/security/luks/</guid>
+      <description>LUKS Management  Full-disk encryption with LUKS2 must be enabled during the Shanios installer — it is a single checkbox on the disk setup screen. There is …</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Security</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Lynis (Security Auditing)</title>
+      <link>https://docs.shani.dev/doc/security/lynis/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/security/lynis/</guid>
+      <description>Lynis — Security Auditing  Lynis is a security auditing tool that scans a running Linux system and produces a hardening report. It checks hundreds of items…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Security</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
     <item>
       <title>Permissions &amp; Authorization</title>
       <link>https://docs.shani.dev/doc/security/permissions/</link>
@@ -17,191 +269,11 @@
       <author>Shrinivas Kumbhar</author>
     </item>
     <item>
-      <title>Boot Process</title>
-      <link>https://docs.shani.dev/doc/arch/boot/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/arch/boot/</guid>
-      <description>Boot Process  Shanios uses a fully measured, signed boot chain built on systemd-boot, dracut-generated Unified Kernel Images (UKIs), and optionally TPM2 + …</description>
-      <pubDate>Wed, 13 May 2026 00:00:00 GMT</pubDate>
-      <category>Architecture</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Btrfs Deep Dive</title>
-      <link>https://docs.shani.dev/doc/arch/btrfs/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/arch/btrfs/</guid>
-      <description>Btrfs Deep Dive  Shanios leverages advanced Btrfs features for immutability, efficiency, and data integrity.  Copy-on-Write (CoW)  Btrfs CoW minimises stor…</description>
-      <pubDate>Wed, 13 May 2026 00:00:00 GMT</pubDate>
-      <category>Architecture</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Dracut Initramfs Module</title>
-      <link>https://docs.shani.dev/doc/arch/dracut-module/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/arch/dracut-module/</guid>
-      <description>Dracut Initramfs Module  Shanios ships a custom dracut module () that adds three hooks to the initramfs. These hooks implement the two features that requir…</description>
-      <pubDate>Wed, 13 May 2026 00:00:00 GMT</pubDate>
-      <category>Architecture</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Filesystem Structure</title>
-      <link>https://docs.shani.dev/doc/arch/filesystem/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/arch/filesystem/</guid>
-      <description>Filesystem Structure  Shanios uses Btrfs with a sophisticated subvolume layout housed in a single Btrfs partition (plus a 1 GB FAT32 ESP). The design separ…</description>
-      <pubDate>Wed, 13 May 2026 00:00:00 GMT</pubDate>
-      <category>Architecture</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Overlay Filesystem</title>
-      <link>https://docs.shani.dev/doc/arch/overlay/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/arch/overlay/</guid>
-      <description>Overlay Filesystem  Shanios uses Linux OverlayFS to present a fully writable  on top of a read-only root filesystem. This is what makes the immutable OS fe…</description>
-      <pubDate>Wed, 13 May 2026 00:00:00 GMT</pubDate>
-      <category>Architecture</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>FAQ</title>
-      <link>https://docs.shani.dev/doc/faq/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/faq/</guid>
-      <description>Frequently Asked Questions  Answers to the most common questions about Shanios — software installation, updates, hardware, security, and the immutable arch…</description>
-      <pubDate>Wed, 13 May 2026 00:00:00 GMT</pubDate>
-      <category>FAQ</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>gen-efi Reference</title>
-      <link>https://docs.shani.dev/doc/security/gen-efi/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/security/gen-efi/</guid>
-      <description>gen-efi Reference   is the Shanios UKI (Unified Kernel Image) builder and Secure Boot key manager. It wraps  and / to produce signed EFI binaries placed in…</description>
-      <pubDate>Wed, 13 May 2026 00:00:00 GMT</pubDate>
-      <category>Security</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Backup &amp; Recovery</title>
-      <link>https://docs.shani.dev/doc/system/backup/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/system/backup/</guid>
-      <description>Backup &amp; Recovery  Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User data and container state must be backed up independently…</description>
-      <pubDate>Wed, 13 May 2026 00:00:00 GMT</pubDate>
-      <category>System</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Troubleshooting Guide</title>
-      <link>https://docs.shani.dev/doc/troubleshooting/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/troubleshooting/</guid>
-      <description>Troubleshooting Guide  The most important thing to know about troubleshooting Shanios is that the worst case is almost always &quot;rollback and reboot.&quot; The ar…</description>
-      <pubDate>Wed, 13 May 2026 00:00:00 GMT</pubDate>
-      <category>System Management</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>shani-health Reference</title>
-      <link>https://docs.shani.dev/doc/updates/shani-health/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/updates/shani-health/</guid>
-      <description>shani-health Reference   is the system health and diagnostics CLI for Shanios. It provides a comprehensive single-command view of your system's state: boot…</description>
-      <pubDate>Wed, 13 May 2026 00:00:00 GMT</pubDate>
-      <category>Updates &amp; Config</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Factory Reset (shani-reset)</title>
-      <link>https://docs.shani.dev/doc/updates/shani-reset/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/updates/shani-reset/</guid>
-      <description>Factory Reset   wipes all persistent system state stored in  and reboots the machine. On the next boot,  recreates the  structure, the  overlay starts fres…</description>
-      <pubDate>Wed, 13 May 2026 00:00:00 GMT</pubDate>
-      <category>Updates &amp; Config</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>System Updates</title>
-      <link>https://docs.shani.dev/doc/updates/system/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/updates/system/</guid>
-      <description>System Updates  Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the…</description>
-      <pubDate>Wed, 13 May 2026 00:00:00 GMT</pubDate>
-      <category>Updates &amp; Config</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>User Provisioning (shani-user-setup)</title>
-      <link>https://docs.shani.dev/doc/updates/user-setup/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/updates/user-setup/</guid>
-      <description>User Provisioning   automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix channels, and…</description>
-      <pubDate>Wed, 13 May 2026 00:00:00 GMT</pubDate>
-      <category>Updates &amp; Config</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>LUKS Management</title>
-      <link>https://docs.shani.dev/doc/security/luks/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/security/luks/</guid>
-      <description>LUKS Management  Full-disk encryption with LUKS2 must be enabled during the Shanios installer — it is a single checkbox on the disk setup screen. There is …</description>
-      <pubDate>Sat, 09 May 2026 00:00:00 GMT</pubDate>
-      <category>Security</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Bottles (Windows Compatibility)</title>
-      <link>https://docs.shani.dev/doc/software/bottles/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/software/bottles/</guid>
-      <description>Bottles (Windows Compatibility)  Bottles is the recommended tool for running non-gaming Windows software on Shanios. It manages Wine environments (&quot;bottles…</description>
-      <pubDate>Fri, 08 May 2026 00:00:00 GMT</pubDate>
-      <category>Software &amp; Apps</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Apptainer (HPC Containers)</title>
-      <link>https://docs.shani.dev/doc/software/apptainer/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/software/apptainer/</guid>
-      <description>Apptainer (HPC Containers)  Apptainer (formerly Singularity) is the container runtime built for HPC. It packages your entire software environment into a si…</description>
-      <pubDate>Thu, 07 May 2026 00:00:00 GMT</pubDate>
-      <category>Software &amp; Apps</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Containers</title>
-      <link>https://docs.shani.dev/doc/software/containers/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/software/containers/</guid>
-      <description>Containers on Shanios  Shanios is a first-class container platform. The following runtimes are pre-installed and ready to use:  | Runtime | Best for | Wiki…</description>
-      <pubDate>Thu, 07 May 2026 00:00:00 GMT</pubDate>
-      <category>Software &amp; Apps</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>LXC and LXD</title>
-      <link>https://docs.shani.dev/doc/software/lxc-lxd/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/software/lxc-lxd/</guid>
-      <description>LXC and LXD  LXC and LXD provide full Linux system containers — a complete operating system (init system, services, network stack) inside an isolated envir…</description>
-      <pubDate>Thu, 07 May 2026 00:00:00 GMT</pubDate>
-      <category>Software &amp; Apps</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>systemd-nspawn</title>
-      <link>https://docs.shani.dev/doc/software/systemd-nspawn/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/software/systemd-nspawn/</guid>
-      <description>systemd-nspawn   is a lightweight container mechanism built directly into systemd. It runs a full Linux distribution — complete with an init system and its…</description>
-      <pubDate>Thu, 07 May 2026 00:00:00 GMT</pubDate>
-      <category>Software &amp; Apps</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>System Config</title>
-      <link>https://docs.shani.dev/doc/updates/config/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/updates/config/</guid>
-      <description>System Config  All system configuration in Shanios follows standard Linux conventions — edit files in , manage services with . Your changes are captured by…</description>
-      <pubDate>Wed, 06 May 2026 00:00:00 GMT</pubDate>
-      <category>Updates &amp; Config</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Secure Boot</title>
-      <link>https://docs.shani.dev/doc/security/secure-boot/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/security/secure-boot/</guid>
-      <description>Secure Boot  Shanios ships with its own MOK (Machine Owner Key) and signs all UKI images at install time. Secure Boot can be enabled after installation to …</description>
-      <pubDate>Thu, 30 Apr 2026 00:00:00 GMT</pubDate>
+      <title>rkhunter (Rootkit Hunter)</title>
+      <link>https://docs.shani.dev/doc/security/rkhunter/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/security/rkhunter/</guid>
+      <description>rkhunter — Rootkit Hunter  rkhunter scans a system for known rootkits, backdoors, and local exploits. It checks system binaries against stored hashes, look…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
       <category>Security</category>
       <author>Shrinivas Kumbhar</author>
     </item>
@@ -210,25 +282,16 @@
       <link>https://docs.shani.dev/doc/security/tpm2/</link>
       <guid isPermaLink="true">https://docs.shani.dev/doc/security/tpm2/</guid>
       <description>TPM2 Enrollment  TPM2 enrollment seals your LUKS2 disk encryption key into your machine's Trusted Platform Module. Once enrolled, the disk unlocks automati…</description>
-      <pubDate>Thu, 30 Apr 2026 00:00:00 GMT</pubDate>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
       <category>Security</category>
       <author>Shrinivas Kumbhar</author>
     </item>
     <item>
-      <title>IP Addressing &amp; Routing</title>
-      <link>https://docs.shani.dev/doc/networking/ip-addressing/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/networking/ip-addressing/</guid>
-      <description>IP Addressing &amp; Routing  This page covers IP addressing fundamentals — CIDR notation, subnetting, IPv4 and IPv6 — and practical  command usage for managing…</description>
-      <pubDate>Tue, 28 Apr 2026 00:00:00 GMT</pubDate>
-      <category>Networking</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Hardware</title>
-      <link>https://docs.shani.dev/doc/system/hardware/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/system/hardware/</guid>
-      <description>Hardware  This page covers inspecting and diagnosing hardware on Shani OS: CPUs, memory, GPUs, storage controllers, USB devices, sensors, and firmware. All…</description>
-      <pubDate>Tue, 28 Apr 2026 00:00:00 GMT</pubDate>
+      <title>Backup &amp; Recovery</title>
+      <link>https://docs.shani.dev/doc/system/backup/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/system/backup/</guid>
+      <description>Backup &amp; Recovery  Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User data and container state must be backed up independently…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
       <category>System</category>
       <author>Shrinivas Kumbhar</author>
     </item>
@@ -237,7 +300,7 @@
       <link>https://docs.shani.dev/doc/system/kernel-modules/</link>
       <guid isPermaLink="true">https://docs.shani.dev/doc/system/kernel-modules/</guid>
       <description>Kernel Modules  Kernel modules are loadable drivers and extensions that the Linux kernel can load and unload at runtime without rebooting. On Shani OS, mod…</description>
-      <pubDate>Tue, 28 Apr 2026 00:00:00 GMT</pubDate>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
       <category>System</category>
       <author>Shrinivas Kumbhar</author>
     </item>
@@ -246,7 +309,7 @@
       <link>https://docs.shani.dev/doc/system/logging/</link>
       <guid isPermaLink="true">https://docs.shani.dev/doc/system/logging/</guid>
       <description>Logging  Shani OS uses systemd-journald as its primary logging system. All kernel messages, service output, and system events flow into a single structured…</description>
-      <pubDate>Tue, 28 Apr 2026 00:00:00 GMT</pubDate>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
       <category>System</category>
       <author>Shrinivas Kumbhar</author>
     </item>
@@ -255,106 +318,7 @@
       <link>https://docs.shani.dev/doc/system/storage/</link>
       <guid isPermaLink="true">https://docs.shani.dev/doc/system/storage/</guid>
       <description>Storage  This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring…</description>
-      <pubDate>Tue, 28 Apr 2026 00:00:00 GMT</pubDate>
-      <category>System</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Atomic Updates</title>
-      <link>https://docs.shani.dev/doc/concepts/atomic-updates/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/concepts/atomic-updates/</guid>
-      <description>Atomic Updates  Shanios uses an intelligent multi-layered update system with automatic checking, user notifications, and the  tool for atomic system update…</description>
-      <pubDate>Mon, 27 Apr 2026 00:00:00 GMT</pubDate>
-      <category>Concepts</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>OEM &amp; Fleet Deployment</title>
-      <link>https://docs.shani.dev/doc/enterprise/fleet/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/enterprise/fleet/</guid>
-      <description>OEM &amp; Fleet Deployment  Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or…</description>
-      <pubDate>Mon, 27 Apr 2026 00:00:00 GMT</pubDate>
-      <category>Enterprise</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Getting Started</title>
-      <link>https://docs.shani.dev/doc/intro/getting-started/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/intro/getting-started/</guid>
-      <description>Getting Started  A complete walkthrough: choose your edition, download and verify the ISO, install, and configure Shanios for daily use.  Choosing Your Edi…</description>
-      <pubDate>Mon, 27 Apr 2026 00:00:00 GMT</pubDate>
-      <category>Introduction</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>What is Shanios?</title>
-      <link>https://docs.shani.dev/doc/intro/what-is-shanios/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/intro/what-is-shanios/</guid>
-      <description>What is Shanios?  Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs f…</description>
-      <pubDate>Mon, 27 Apr 2026 00:00:00 GMT</pubDate>
-      <category>Introduction</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Overview</title>
-      <link>https://docs.shani.dev/doc/overview/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/overview/</guid>
-      <description>Shanios Technical Documentation  Comprehensive guide to the immutable Linux OS with atomic updates.  Welcome to the Shanios technical documentation. This w…</description>
-      <pubDate>Mon, 27 Apr 2026 00:00:00 GMT</pubDate>
-      <category>Overview</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Security Features</title>
-      <link>https://docs.shani.dev/doc/security/features/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/security/features/</guid>
-      <description>Security Features  Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot wi…</description>
-      <pubDate>Mon, 27 Apr 2026 00:00:00 GMT</pubDate>
-      <category>Security</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Kubernetes &amp; Container Orchestration</title>
-      <link>https://docs.shani.dev/doc/servers/kubernetes/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/servers/kubernetes/</guid>
-      <description>Portability note: Compose examples use rootless Podman and . When using Docker, replace  with  and  with . All concepts, architecture patterns, and CLI com…</description>
-      <pubDate>Mon, 27 Apr 2026 00:00:00 GMT</pubDate>
-      <category>Self-Hosting &amp; Servers</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Virtual Networking</title>
-      <link>https://docs.shani.dev/doc/networking/virtual-networking/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/networking/virtual-networking/</guid>
-      <description>Virtual Networking  Linux exposes a rich set of virtual network devices and primitives for building software-defined networks, container networking, VMs, V…</description>
-      <pubDate>Sat, 25 Apr 2026 00:00:00 GMT</pubDate>
-      <category>Networking</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>OpenStack &amp; Private Cloud</title>
-      <link>https://docs.shani.dev/doc/servers/openstack/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/servers/openstack/</guid>
-      <description>Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …</description>
-      <pubDate>Sat, 25 Apr 2026 00:00:00 GMT</pubDate>
-      <category>Self-Hosting &amp; Servers</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>File Permissions &amp; Attributes</title>
-      <link>https://docs.shani.dev/doc/system/ch-commands/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/system/ch-commands/</guid>
-      <description>ch* Commands  The  family covers the core &quot;change&quot; utilities — tools that modify permissions, ownership, file attributes, and user account properties. All …</description>
-      <pubDate>Sat, 25 Apr 2026 00:00:00 GMT</pubDate>
-      <category>System</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Process Management</title>
-      <link>https://docs.shani.dev/doc/system/process-management/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/system/process-management/</guid>
-      <description>Process Management  Standard Linux process management tools are all available on Shani OS. This page covers inspecting, controlling, and debugging running …</description>
-      <pubDate>Sat, 25 Apr 2026 00:00:00 GMT</pubDate>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
       <category>System</category>
       <author>Shrinivas Kumbhar</author>
     </item>
@@ -363,8 +327,44 @@
       <link>https://docs.shani.dev/doc/system/systemd/</link>
       <guid isPermaLink="true">https://docs.shani.dev/doc/system/systemd/</guid>
       <description>Systemd  Systemd is the init system and service manager on Shani OS. It starts every process at boot, manages all daemons, handles logging via the journal,…</description>
-      <pubDate>Sat, 25 Apr 2026 00:00:00 GMT</pubDate>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
       <category>System</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Users &amp; Groups</title>
+      <link>https://docs.shani.dev/doc/system/users-groups/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/system/users-groups/</guid>
+      <description>Users &amp; Groups  User accounts on Shani OS follow standard Linux conventions — accounts are stored in , , and , which live in the  overlay and persist acros…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>System</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>shani-health Reference</title>
+      <link>https://docs.shani.dev/doc/updates/shani-health/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/updates/shani-health/</guid>
+      <description>shani-health Reference   is the system health and diagnostics CLI for Shanios. It provides a comprehensive single-command view of your system's state: boot…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Updates &amp; Config</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Factory Reset (shani-reset)</title>
+      <link>https://docs.shani.dev/doc/updates/shani-reset/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/updates/shani-reset/</guid>
+      <description>Factory Reset   wipes all persistent system state stored in  and reboots the machine. On the next boot,  recreates the  structure, the  overlay starts fres…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Updates &amp; Config</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Shell &amp; Environment</title>
+      <link>https://docs.shani.dev/doc/updates/shell/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/updates/shell/</guid>
+      <description>Shell &amp; Environment  Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Updates &amp; Config</category>
       <author>Shrinivas Kumbhar</author>
     </item>
   </channel>

@@ -1,7 +1,7 @@
 ---
 title: Getting Started
 section: Introduction
-updated: 2026-04-27
+updated: 2026-08-20
 ---
 
 # Getting Started
@@ -125,7 +125,7 @@ See [TPM2 Enrollment](../security/tpm2) for full details.
 sudo shani-deploy
 ```
 
-This downloads the latest OS image to the inactive slot, verifies it, builds a new UKI, and sets it as the next-boot default. Reboot when ready. If anything goes wrong after the reboot:
+This downloads the latest OS image to the inactive slot, verifies it, builds a new UKI, and sets it as the next-boot default. Reboot when ready. A per-user background timer also checks for new images every 2 hours and prompts you with a dialog before deploying anything — you never have to remember to run `shani-deploy` yourself, and it never deploys without confirmation. If anything goes wrong after the reboot:
 
 ```bash
 sudo shani-deploy -r  # rollback to previous slot

@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="TPM2 Enrollment  TPM2 enrollment seals your LUKS2 disk encryption key into your machine's Trusted Platform Module. Once enrolled, the disk unlocks automati…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"TPM2 Enrollment","description":"TPM2 Enrollment  TPM2 enrollment seals your LUKS2 disk encryption key into your machine's Trusted Platform Module. Once enrolled, the disk unlocks automati…","url":"https://docs.shani.dev/doc/security/tpm2/","datePublished":"2026-04-29T18:30:00.000Z","dateModified":"2026-04-29T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"TPM2 Enrollment","description":"TPM2 Enrollment  TPM2 enrollment seals your LUKS2 disk encryption key into your machine's Trusted Platform Module. Once enrolled, the disk unlocks automati…","url":"https://docs.shani.dev/doc/security/tpm2/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">TPM2 Enrollment</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Security</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-30</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p>TPM2 enrollment seals your LUKS2 disk encryption key into your machine's Trusted Platform Module. Once enrolled, the disk unlocks automatically at boot — no passphrase prompt — as long as the boot chain is unmodified. Any tampering causes the TPM to withhold the key, and Plymouth falls back to asking for your passphrase. Your LUKS passphrase always remains valid as a fallback.</p>
@@ -254,8 +254,16 @@ sudo gen-efi enroll-tpm2</code></pre>
 <pre><code class="language-bash">sudo gen-efi cleanup-tpm2
 sudo gen-efi enroll-tpm2</code></pre>
 <h2>Removing TPM2 Enrollment</h2>
-<pre><code class="language-bash"># Wipe only the TPM2 keyslots — passphrase keyslot is untouched
-sudo gen-efi cleanup-tpm2</code></pre>
+<p><code>gen-efi cleanup-tpm2</code> is <strong>not</strong> the right tool for this — it only prunes <em>stale</em> TPM2 slots left over after a re-enrollment (it keeps the highest-numbered slot and wipes the rest). If only one TPM2 slot exists, it finds nothing to clean up and the disk keeps auto-unlocking.</p>
+<p>To fully remove TPM2 auto-unlock and fall back to a passphrase at every boot, wipe the TPM2 slot directly with <code>systemd-cryptenroll</code>:</p>
+<pre><code class="language-bash"># Find the underlying LUKS device (the one under /dev/mapper/shani_root)
+sudo cryptsetup status shani_root | grep device
+
+# Wipe all TPM2-type keyslots on that device — passphrase keyslot is untouched
+sudo systemd-cryptenroll --wipe-slot=tpm2 /dev/nvme0n1p2</code></pre>
+<p>Confirm removal:</p>
+<pre><code class="language-bash">sudo cryptsetup luksDump /dev/nvme0n1p2 | grep systemd-tpm2
+# Should print nothing</code></pre>
 <p>After this, the disk requires a passphrase at every boot.</p>
 <h2>Troubleshooting</h2>
 <p><strong>TPM falls back to passphrase prompt at boot:</strong></p>
@@ -273,6 +281,12 @@ sudo gen-efi cleanup-tpm2</code></pre>
 <li>Boot from Shanios USB</li>
 <li><code>sudo cryptsetup open /dev/nvme0n1p2 shani_root</code> — enter your recovery passphrase</li>
 <li>Mount and access data, then re-enroll TPM2 with corrected PCR bindings</li>
+</ul>
+<h2>See Also</h2>
+<ul>
+<li><a href="gen-efi">gen-efi Reference</a> — full detail on <code>enroll-tpm2</code>/<code>cleanup-tpm2</code> and how PCR policy is chosen</li>
+<li><a href="luks">LUKS Management</a> — keyslot management and header backup</li>
+<li><a href="../updates/shani-health">shani-health Reference</a> — <code>shani-health --security</code> reports TPM2 enrollment state and flags a PCR-policy mismatch against the current Secure Boot state</li>
 </ul></div>
     </div>
 

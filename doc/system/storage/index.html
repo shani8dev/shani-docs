@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Storage  This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Storage","description":"Storage  This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring…","url":"https://docs.shani.dev/doc/system/storage/","datePublished":"2026-04-27T18:30:00.000Z","dateModified":"2026-04-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Storage","description":"Storage  This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring…","url":"https://docs.shani.dev/doc/system/storage/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Storage</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">System</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-28</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p>This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring, and the udisks2 layer used by desktop tools.</p>
@@ -335,6 +335,15 @@ sudo btrfs filesystem resize max /mountpoint   # fill partition
 # XFS — grow only, must be mounted
 sudo xfs_growfs /mountpoint</code></pre>
 <p>---</p>
+<h2>Automatic Btrfs Maintenance (Shani OS Defaults)</h2>
+<p>Shani OS's root and data volumes are Btrfs, laid out as <code>@blue</code>/<code>@green</code> root subvolumes for atomic updates (see <a href="../arch/btrfs">Btrfs Deep Dive</a>). Routine maintenance already runs on its own — you rarely need to invoke <code>btrfs scrub</code>, <code>btrfs balance</code>, or <code>fstrim</code> manually:</p>
+<ul>
+<li><strong>Balance, defrag, scrub, and trim</strong> run via <code>btrfs-balance.timer</code>, <code>btrfs-defrag.timer</code>, <code>btrfs-scrub.timer</code>, and <code>btrfs-trim.timer</code> (from <code>btrfsmaintenance</code>), enabled by default and scheduled weekly at idle I/O priority. Check them with <code>systemctl list-timers 'btrfs-*'</code>.</li>
+<li><strong>bees</strong> runs continuously in the background (<code>beesd@&lt;uuid&gt;.service</code>), deduplicating extents across the <code>@blue</code>/<code>@green</code> root subvolumes and their backup snapshots as they diverge — this is what keeps two nearly-identical OS slots from doubling disk usage.</li>
+<li><strong><code>sudo shani-deploy --optimize</code></strong> runs a deeper, one-shot <code>duperemove</code> pass across <code>@blue</code>, <code>@green</code>, and any <code><em>_backup_</em></code> subvolumes. Use it to reclaim space beyond what continuous bees dedup catches; it's skipped automatically if a deployment is pending.</li>
+</ul>
+<p>Running <code>btrfs scrub start /</code> or <code>btrfs balance start /</code> manually (as shown below) is still useful for an on-demand check, but is not required for routine upkeep.</p>
+<p>---</p>
 <h2>/etc/fstab — Persistent Mounts</h2>
 <p>Entries in <code>/etc/fstab</code> are captured by the <code>/etc</code> overlay and persist across OS updates.</p>
 <pre><code># &lt;device&gt;                                &lt;mountpoint&gt;  &lt;type&gt;   &lt;options&gt;                    &lt;dump&gt; &lt;pass&gt;
@@ -347,6 +356,7 @@ sudo mount -a
 # Verify a specific entry
 sudo mount /mnt/backup</code></pre>
 <blockquote><p>💡 Always use UUID (<code>blkid</code>) rather than device names like <code>/dev/sda1</code> — device names shift when you add or remove drives.</p></blockquote>
+<p>Some Shani OS paths are made persistent via bind mounts instead of fstab entries — e.g. <code>/var/lib/samba/usershare</code> is bind-mounted from <code>/data/varlib/samba</code> (on the <code>@data</code> subvolume), so Samba usershare state survives blue/green slot switches without a manual fstab line.</p>
 <p>---</p>
 <h2>Disk Usage</h2>
 <pre><code class="language-bash"># Free space on all mounted filesystems
@@ -475,7 +485,7 @@ zramctl                          # show ZRAM devices and compression ratio
 cat /proc/swaps                  # all active swap sources</code></pre>
 <p>---</p>
 <h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | <code>umount: target is busy</code> | Find what's using it: <code>lsof +D /mountpoint</code> or <code>fuser -mv /mountpoint</code>; then kill or <code>umount -l</code> | | Drive not appearing in <code>lsblk</code> | Check <code>dmesg | tail -30</code> for kernel errors; try a different port or cable | | SMART not available | Some USB enclosures block SMART passthrough; try <code>smartctl -d sat /dev/sdb</code> | | <code>e2fsck</code> finds errors but drive is mounted | Boot from the other slot and run <code>e2fsck</code> unmounted | | Btrfs reports errors after scrub | Check <code>dmesg | grep btrfs</code>; if uncorrectable, restore from backup — the drive may be failing | | <code>No space left</code> but <code>df</code> shows free space | Inode exhaustion: <code>df -i</code>; or Btrfs metadata full: <code>sudo btrfs balance start -m /</code> | | UUID changed after mkfs | Update <code>/etc/fstab</code> with <code>blkid</code>; regenerate initramfs with <code>sudo dracut --force</code> |</p>
+<p>| Issue | Solution | |-------|----------| | <code>umount: target is busy</code> | Find what's using it: <code>lsof +D /mountpoint</code> or <code>fuser -mv /mountpoint</code>; then kill or <code>umount -l</code> | | Drive not appearing in <code>lsblk</code> | Check <code>dmesg | tail -30</code> for kernel errors; try a different port or cable | | SMART not available | Some USB enclosures block SMART passthrough; try <code>smartctl -d sat /dev/sdb</code> | | <code>e2fsck</code> finds errors but drive is mounted | Boot from the other slot and run <code>e2fsck</code> unmounted | | Btrfs reports errors after scrub | Check <code>dmesg | grep btrfs</code>; if uncorrectable, restore from backup — the drive may be failing | | <code>No space left</code> but <code>df</code> shows free space | Inode exhaustion: <code>df -i</code>; or Btrfs metadata full: <code>sudo btrfs balance start -m /</code> (balance also runs automatically via <code>btrfs-balance.timer</code>, weekly) | | UUID changed after mkfs | Update <code>/etc/fstab</code> with <code>blkid</code>; regenerate initramfs with <code>sudo dracut --force</code> |</p>
 <p>---</p>
 <h2>See Also</h2>
 <ul>

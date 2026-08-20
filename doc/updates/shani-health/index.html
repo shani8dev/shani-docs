@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="shani-health Reference   is the system health and diagnostics CLI for Shanios. It provides a comprehensive single-command view of your system's state: boot…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"shani-health Reference","description":"shani-health Reference   is the system health and diagnostics CLI for Shanios. It provides a comprehensive single-command view of your system's state: boot…","url":"https://docs.shani.dev/doc/updates/shani-health/","datePublished":"2026-05-12T18:30:00.000Z","dateModified":"2026-05-12T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"shani-health Reference","description":"shani-health Reference   is the system health and diagnostics CLI for Shanios. It provides a comprehensive single-command view of your system's state: boot…","url":"https://docs.shani.dev/doc/updates/shani-health/","datePublished":"2026-08-19T18:30:00.000Z","dateModified":"2026-08-19T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">shani-health Reference</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Updates &amp; Config</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-05-13</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
         </div>
       </div>
       <div class="prose"><p><code>shani-health</code> is the system health and diagnostics CLI for Shanios. It provides a comprehensive single-command view of your system's state: boot chain, security posture, storage, hardware, networking, packages, containers, and more. It is the primary tool for diagnosing issues and checking system integrity.</p>
@@ -265,6 +265,7 @@ shani-health -v                         # Verbose/debug output</code></pre>
 <li><strong>TPM2</strong> — hardware presence, enrollment status, PCR policy vs current Secure Boot state</li>
 <li><strong>Security Services</strong> — AppArmor, firewall, polkit, fail2ban, FIDO2/libfido2, pcscd, fprintd</li>
 <li><strong>Security Tools</strong> — lynis hardening index, rkhunter scan history</li>
+<li><strong>Kerberos</strong> — realm and KDC reachability from <code>/etc/krb5.conf</code> (only shown if <code>kinit</code> is installed)</li>
 <li><strong>Users & Access</strong> — login users, passwords, wheel group, UID-0 accounts, NOPASSWD sudo, home permissions, SSH key permissions, GnuPG permissions</li>
 <li><strong>Groups</strong> — system groups (kvm, video, input, realtime…), group membership from <code>/etc/shani-extra-groups</code></li>
 <li><strong>Hardware</strong> — CPU model/flags/microcode, RAM, GPU, virtualization, IOMMU, temperatures, Bluetooth, peripherals</li>
@@ -289,7 +290,7 @@ shani-health -v                         # Verbose/debug output</code></pre>
 <h3>Boot Report (<code>--boot</code>)</h3>
 <p>A focused view of the boot chain and deployment state. Covers OS/Slots, Boot Health, Boot Entries, Deployment, Update Tools, Data State, and Secure Boot. Use this after an update or when debugging boot issues.</p>
 <h3>Security Report (<code>--security</code>)</h3>
-<p>Covers Secure Boot, Kernel Security, Encryption, TPM2, Security Services, Security Tools, Users & Access, and Groups. Useful for security audits and hardening checks.</p>
+<p>Covers Secure Boot, Kernel Security, Encryption, TPM2, Security Services, Security Tools, Kerberos, Users & Access, and Groups. Useful for security audits and hardening checks.</p>
 <h3>Hardware Report (<code>--hardware</code>)</h3>
 <p>Covers Hardware, Disk, Battery, Storage, and Firmware. Use when checking for disk health, temperatures, or firmware updates.</p>
 <h3>Network Report (<code>--network</code>)</h3>
@@ -313,7 +314,7 @@ shani-health -v                         # Verbose/debug output</code></pre>
 <li>Snapshot summary with creation dates</li>
 <li>Reclaim hints: duperemove, bees status, stale snapshots</li>
 </ul>
-<p>This is more detailed than <code>sudo shani-deploy --storage-info</code>, which only reports compressed OS slot sizes.</p>
+<p><code>shani-deploy</code> has no <code>--storage-info</code> flag of its own — the closest it comes is that <code>sudo shani-deploy --optimize</code> prints a per-subvolume compression summary (<code>@blue</code>/<code>@green</code>/<code>@data</code>/<code>@swap</code>) as a side effect after running deduplication. <code>shani-health --storage-info</code> is the dedicated, read-only way to inspect storage and works without triggering a dedup run.</p>
 <p>---</p>
 <h2>Log Management (<code>--clean-logs</code>)</h2>
 <pre><code class="language-bash"># Remove logs older than 30 days (default)
@@ -385,7 +386,7 @@ WantedBy=timers.target</code></pre>
 <p>For Nagios/Zabbix-style monitoring, the non-zero exit code on any issue makes <code>shani-health</code> usable directly as a check script. For Prometheus/Grafana, wrap the output in a custom exporter that parses the coloured rows.</p>
 <p>---</p>
 <h2>Relationship to Other Tools</h2>
-<p>| Command | Focus | |---------|-------| | <code>shani-health</code> | Live system health — all components | | <code>shani-health --storage-info</code> | Deep Btrfs storage analysis | | <code>sudo shani-deploy --storage-info</code> | Compressed sizes of OS slots only | | <code>shani-health --verify</code> | Deep integrity check with scrub | | <code>sudo shani-deploy -r</code> | Roll back inactive slot |</p>
+<p>| Command | Focus | |---------|-------| | <code>shani-health</code> | Live system health — all components | | <code>shani-health --storage-info</code> | Deep Btrfs storage analysis | | <code>sudo shani-deploy --optimize</code> | Runs Btrfs deduplication; prints per-subvolume compressed sizes as a side effect afterward | | <code>shani-health --verify</code> | Deep integrity check with scrub | | <code>sudo shani-deploy -r</code> | Roll back inactive slot |</p>
 <p>---</p>
 <h2>See Also</h2>
 <ul>
