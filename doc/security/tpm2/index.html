@@ -255,12 +255,9 @@ sudo gen-efi enroll-tpm2</code></pre>
 sudo gen-efi enroll-tpm2</code></pre>
 <h2>Removing TPM2 Enrollment</h2>
 <p><code>gen-efi cleanup-tpm2</code> is <strong>not</strong> the right tool for this — it only prunes <em>stale</em> TPM2 slots left over after a re-enrollment (it keeps the highest-numbered slot and wipes the rest). If only one TPM2 slot exists, it finds nothing to clean up and the disk keeps auto-unlocking.</p>
-<p>To fully remove TPM2 auto-unlock and fall back to a passphrase at every boot, wipe the TPM2 slot directly with <code>systemd-cryptenroll</code>:</p>
-<pre><code class="language-bash"># Find the underlying LUKS device (the one under /dev/mapper/shani_root)
-sudo cryptsetup status shani_root | grep device
-
-# Wipe all TPM2-type keyslots on that device — passphrase keyslot is untouched
-sudo systemd-cryptenroll --wipe-slot=tpm2 /dev/nvme0n1p2</code></pre>
+<p>To fully remove TPM2 auto-unlock and fall back to a passphrase at every boot, use <code>gen-efi remove-tpm2</code>:</p>
+<pre><code class="language-bash">sudo gen-efi remove-tpm2</code></pre>
+<p>It refuses to run if TPM2 is the only enrolled unlock method (so you can't lock yourself out), reports how many other slots — passphrase included — will remain, and asks for confirmation before wiping every TPM2 slot. Your LUKS passphrase is required to authorize the wipe itself.</p>
 <p>Confirm removal:</p>
 <pre><code class="language-bash">sudo cryptsetup luksDump /dev/nvme0n1p2 | grep systemd-tpm2
 # Should print nothing</code></pre>

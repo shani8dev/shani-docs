@@ -83,15 +83,13 @@ sudo gen-efi enroll-tpm2
 
 `gen-efi cleanup-tpm2` is **not** the right tool for this — it only prunes *stale* TPM2 slots left over after a re-enrollment (it keeps the highest-numbered slot and wipes the rest). If only one TPM2 slot exists, it finds nothing to clean up and the disk keeps auto-unlocking.
 
-To fully remove TPM2 auto-unlock and fall back to a passphrase at every boot, wipe the TPM2 slot directly with `systemd-cryptenroll`:
+To fully remove TPM2 auto-unlock and fall back to a passphrase at every boot, use `gen-efi remove-tpm2`:
 
 ```bash
-# Find the underlying LUKS device (the one under /dev/mapper/shani_root)
-sudo cryptsetup status shani_root | grep device
-
-# Wipe all TPM2-type keyslots on that device — passphrase keyslot is untouched
-sudo systemd-cryptenroll --wipe-slot=tpm2 /dev/nvme0n1p2
+sudo gen-efi remove-tpm2
 ```
+
+It refuses to run if TPM2 is the only enrolled unlock method (so you can't lock yourself out), reports how many other slots — passphrase included — will remain, and asks for confirmation before wiping every TPM2 slot. Your LUKS passphrase is required to authorize the wipe itself.
 
 Confirm removal:
 
