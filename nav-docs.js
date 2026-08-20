@@ -53,6 +53,7 @@ CONFIG.NAV_TREE = [
     icon: 'fa-solid fa-shield-halved',
     children: [
       { title: 'Security Features', slug: 'security/features' },
+      { title: 'Permissions & Authorization', slug: 'security/permissions' },
       { title: 'Secure Boot', slug: 'security/secure-boot' },
       { title: 'LUKS Management', slug: 'security/luks' },
       { title: 'Directory Encryption (gocryptfs)', slug: 'security/gocryptfs' },

@@ -640,6 +640,16 @@
     "keywords": ""
   },
   {
+    "slug": "security/permissions",
+    "title": "Permissions & Authorization",
+    "section": "Security",
+    "description": "Permissions & Authorization  Shanios controls what a logged-in user can do — install software, format a disk, change the hostname — through a deliberate tw…",
+    "updated": "2026-08-20",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
     "slug": "security/rkhunter",
     "title": "rkhunter (Rootkit Hunter)",
     "section": "Security",

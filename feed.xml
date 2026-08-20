@@ -5,8 +5,17 @@
     <link>https://docs.shani.dev/</link>
     <description>Comprehensive technical documentation for Shanios — the immutable Linux OS.</description>
     <language>en-IN</language>
-    <lastBuildDate>Thu, 06 Aug 2026 07:15:29 GMT</lastBuildDate>
+    <lastBuildDate>Thu, 20 Aug 2026 16:57:59 GMT</lastBuildDate>
     <atom:link href="https://docs.shani.dev/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Permissions &amp; Authorization</title>
+      <link>https://docs.shani.dev/doc/security/permissions/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/security/permissions/</guid>
+      <description>Permissions &amp; Authorization  Shanios controls what a logged-in user can do — install software, format a disk, change the hostname — through a deliberate tw…</description>
+      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Security</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
     <item>
       <title>Boot Process</title>
       <link>https://docs.shani.dev/doc/arch/boot/</link>
@@ -354,15 +363,6 @@
       <link>https://docs.shani.dev/doc/system/systemd/</link>
       <guid isPermaLink="true">https://docs.shani.dev/doc/system/systemd/</guid>
       <description>Systemd  Systemd is the init system and service manager on Shani OS. It starts every process at boot, manages all daemons, handles logging via the journal,…</description>
-      <pubDate>Sat, 25 Apr 2026 00:00:00 GMT</pubDate>
-      <category>System</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Users &amp; Groups</title>
-      <link>https://docs.shani.dev/doc/system/users-groups/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/system/users-groups/</guid>
-      <description>Users &amp; Groups  User accounts on Shani OS follow standard Linux conventions — accounts are stored in , , and , which live in the  overlay and persist acros…</description>
       <pubDate>Sat, 25 Apr 2026 00:00:00 GMT</pubDate>
       <category>System</category>
       <author>Shrinivas Kumbhar</author>
