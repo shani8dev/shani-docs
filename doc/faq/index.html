@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Frequently Asked Questions  Answers to the most common questions about Shanios — software installation, updates, hardware, security, and the immutable arch…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"FAQ","description":"Frequently Asked Questions  Answers to the most common questions about Shanios — software installation, updates, hardware, security, and the immutable arch…","url":"https://docs.shani.dev/doc/faq/","datePublished":"2026-05-13T00:00:00.000Z","dateModified":"2026-05-13T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"FAQ","description":"Frequently Asked Questions  Answers to the most common questions about Shanios — software installation, updates, hardware, security, and the immutable arch…","url":"https://docs.shani.dev/doc/faq/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">FAQ</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">FAQ</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-05-13</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
       <div class="prose"><h1>Frequently Asked Questions</h1>
@@ -292,9 +292,9 @@ sudo reboot</code></pre>
 <p><strong>Will my <code>/etc</code> configuration survive an update?</strong></p>
 <p>Yes. Your <code>/etc</code> changes are stored in the OverlayFS upper layer at <code>/data/overlay/etc/upper/</code>, completely separate from the OS image. They survive every update and rollback. New OS defaults appear for files you have never touched; your customised files remain yours.</p>
 <p><strong>Can I update Flatpak apps and the OS independently?</strong></p>
-<p>Yes. <code>flatpak update</code> and <code>sudo shani-deploy update</code> are completely independent. You can update apps without touching the OS, update the OS without touching apps, or update both in any order. An OS rollback does not roll back your apps.</p>
+<p>Yes. <code>flatpak update</code> and <code>sudo shani-deploy</code> are completely independent. You can update apps without touching the OS, update the OS without touching apps, or update both in any order. An OS rollback does not roll back your apps.</p>
 <p><strong>How much disk space do two OS copies take?</strong></p>
-<p>Less than you might expect. <code>@blue</code> and <code>@green</code> share unchanged data blocks via Btrfs CoW — only changed files consume additional space, typically around 18% overhead. Btrfs zstd compression reduces the effective size by 30–50%. Run <code>sudo shani-deploy --storage-info</code> to see accurate compressed sizes.</p>
+<p>Less than you might expect. <code>@blue</code> and <code>@green</code> share unchanged data blocks via Btrfs CoW — only changed files consume additional space, typically around 18% overhead. Btrfs zstd compression reduces the effective size by 30–50%. Run <code>shani-health --storage-info</code> (or <code>-s</code>) to see accurate compressed sizes.</p>
 <p><strong>What if I run out of disk space?</strong></p>
 <pre><code class="language-bash">sudo shani-deploy -c          # remove slot backup snapshots and download cache
 flatpak uninstall --unused    # remove unused Flatpak runtimes (can reclaim several GB)

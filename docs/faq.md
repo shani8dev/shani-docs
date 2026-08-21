@@ -1,7 +1,7 @@
 ---
 title: FAQ
 section: FAQ
-updated: 2026-05-13
+updated: 2026-08-21
 ---
 
 # Frequently Asked Questions
@@ -147,11 +147,11 @@ Yes. Your `/etc` changes are stored in the OverlayFS upper layer at `/data/overl
 
 **Can I update Flatpak apps and the OS independently?**
 
-Yes. `flatpak update` and `sudo shani-deploy update` are completely independent. You can update apps without touching the OS, update the OS without touching apps, or update both in any order. An OS rollback does not roll back your apps.
+Yes. `flatpak update` and `sudo shani-deploy` are completely independent. You can update apps without touching the OS, update the OS without touching apps, or update both in any order. An OS rollback does not roll back your apps.
 
 **How much disk space do two OS copies take?**
 
-Less than you might expect. `@blue` and `@green` share unchanged data blocks via Btrfs CoW — only changed files consume additional space, typically around 18% overhead. Btrfs zstd compression reduces the effective size by 30–50%. Run `sudo shani-deploy --storage-info` to see accurate compressed sizes.
+Less than you might expect. `@blue` and `@green` share unchanged data blocks via Btrfs CoW — only changed files consume additional space, typically around 18% overhead. Btrfs zstd compression reduces the effective size by 30–50%. Run `shani-health --storage-info` (or `-s`) to see accurate compressed sizes.
 
 **What if I run out of disk space?**
 

@@ -5,7 +5,7 @@
     <link>https://docs.shani.dev/</link>
     <description>Comprehensive technical documentation for Shanios — the immutable Linux OS.</description>
     <language>en-IN</language>
-    <lastBuildDate>Fri, 21 Aug 2026 06:07:47 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 21 Aug 2026 06:17:03 GMT</lastBuildDate>
     <atom:link href="https://docs.shani.dev/feed.xml" rel="self" type="application/rss+xml"/>
     <item>
       <title>OEM &amp; Fleet Deployment</title>
@@ -14,6 +14,15 @@
       <description>OEM &amp; Fleet Deployment  Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or…</description>
       <pubDate>Fri, 21 Aug 2026 00:00:00 GMT</pubDate>
       <category>Enterprise</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>FAQ</title>
+      <link>https://docs.shani.dev/doc/faq/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/faq/</guid>
+      <description>Frequently Asked Questions  Answers to the most common questions about Shanios — software installation, updates, hardware, security, and the immutable arch…</description>
+      <pubDate>Fri, 21 Aug 2026 00:00:00 GMT</pubDate>
+      <category>FAQ</category>
       <author>Shrinivas Kumbhar</author>
     </item>
     <item>
@@ -59,6 +68,15 @@
       <description>Shanios Technical Documentation  Comprehensive guide to the immutable Linux OS with atomic updates.  Welcome to the Shanios technical documentation. This w…</description>
       <pubDate>Fri, 21 Aug 2026 00:00:00 GMT</pubDate>
       <category>Overview</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Troubleshooting Guide</title>
+      <link>https://docs.shani.dev/doc/troubleshooting/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/troubleshooting/</guid>
+      <description>Troubleshooting Guide  The most important thing to know about troubleshooting Shanios is that the worst case is almost always &quot;rollback and reboot.&quot; The ar…</description>
+      <pubDate>Fri, 21 Aug 2026 00:00:00 GMT</pubDate>
+      <category>System Management</category>
       <author>Shrinivas Kumbhar</author>
     </item>
     <item>
@@ -345,24 +363,6 @@
       <link>https://docs.shani.dev/doc/system/storage/</link>
       <guid isPermaLink="true">https://docs.shani.dev/doc/system/storage/</guid>
       <description>Storage  This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring…</description>
-      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
-      <category>System</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Systemd</title>
-      <link>https://docs.shani.dev/doc/system/systemd/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/system/systemd/</guid>
-      <description>Systemd  Systemd is the init system and service manager on Shani OS. It starts every process at boot, manages all daemons, handles logging via the journal,…</description>
-      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
-      <category>System</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Users &amp; Groups</title>
-      <link>https://docs.shani.dev/doc/system/users-groups/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/system/users-groups/</guid>
-      <description>Users &amp; Groups  User accounts on Shani OS follow standard Linux conventions — accounts are stored in , , and , which live in the  overlay and persist acros…</description>
       <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
       <category>System</category>
       <author>Shrinivas Kumbhar</author>

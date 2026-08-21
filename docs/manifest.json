@@ -104,7 +104,7 @@
     "title": "FAQ",
     "section": "FAQ",
     "description": "Frequently Asked Questions  Answers to the most common questions about Shanios — software installation, updates, hardware, security, and the immutable arch…",
-    "updated": "2026-05-13",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -1164,7 +1164,7 @@
     "title": "Troubleshooting Guide",
     "section": "System Management",
     "description": "Troubleshooting Guide  The most important thing to know about troubleshooting Shanios is that the worst case is almost always \"rollback and reboot.\" The ar…",
-    "updated": "2026-05-13",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""

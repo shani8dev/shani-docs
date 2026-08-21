@@ -1,7 +1,7 @@
 ---
 title: Troubleshooting Guide
 section: System Management
-updated: 2026-05-13
+updated: 2026-08-21
 ---
 
 # Troubleshooting Guide
@@ -597,7 +597,7 @@ shani-health
 shani-health -v
 
 # Storage summary
-sudo shani-deploy --storage-info
+shani-health --storage-info
 ```
 
 ---
