@@ -1,7 +1,7 @@
 ---
 title: First Boot
 section: Installation
-updated: 2026-08-20
+updated: 2026-08-21
 ---
 
 # First Boot Configuration
@@ -24,8 +24,6 @@ After first deployment completes, the Initial Setup wizard guides you through:
 - Customising appearance settings
 
 The wizard runs automatically. If you skip it, re-run with `gnome-initial-setup` (GNOME) or from System Settings → Welcome (KDE).
-
-**COSMIC edition:** there is no first-boot wizard. Your user account, language, and timezone were already collected by the installer itself, since COSMIC doesn't yet have an equivalent post-install setup app.
 
 ## After the Wizard — Recommended First Steps
 

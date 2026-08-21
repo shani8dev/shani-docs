@@ -1,7 +1,7 @@
 ---
 title: Installation Steps
 section: Installation
-updated: 2026-08-20
+updated: 2026-08-21
 ---
 
 # Installation Steps
@@ -13,7 +13,7 @@ Installation takes approximately 10–15 minutes.
 1. **Boot from USB** — Press F12, F2, or Del during startup. Select your USB drive from the boot menu.
 2. **Select "Install Shanios"** — Choose the installation option from the boot menu.
 3. **Keyboard Layout** — Always asked, on every edition.
-4. **Language & Region** — Select language and timezone. On the **GNOME and Plasma editions this page is skipped** — locale and timezone are configured later by the first-boot Initial Setup wizard instead. On the **COSMIC edition this page (and a user-account page) is shown during install**, because COSMIC does not yet have an equivalent first-boot wizard to defer to.
+4. **Language & Region** — This page is skipped on both editions — locale and timezone are configured later by the first-boot Initial Setup wizard instead.
 5. **Disk Selection** — Choose target disk and partitioning scheme (automatic recommended).
 6. **Encryption (Optional)** — Enable LUKS2 full-disk encryption (argon2id key derivation). You'll be asked to enter the passphrase twice to confirm. Recommended for laptops and portable systems.
 7. **Install** — The installer creates Btrfs subvolumes, installs the base system, and configures the bootloader.
@@ -32,4 +32,4 @@ All of the following is completed by the installer (`install.sh` + `configure.sh
 - `/etc/crypttab` is generated with the LUKS UUID and `none` key field if encryption was chosen
 - Firewall rules for KDE Connect and Waydroid are applied via `firewall-offline-cmd`
 
-On first boot, `beesd-setup.service` configures the deduplication daemon for the Btrfs volume UUID. On GNOME and Plasma, the Initial Setup wizard then runs for user-facing personalisation; on COSMIC there is no such wizard since the account, language, and timezone were already collected during install.
+On first boot, `beesd-setup.service` configures the deduplication daemon for the Btrfs volume UUID, then the Initial Setup wizard runs for user-facing personalisation.

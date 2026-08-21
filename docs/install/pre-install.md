@@ -26,9 +26,6 @@ Download the Shanios ISO from [shani.dev](https://shani.dev) or directly from So
 - **KDE Plasma Edition** (2026.04.01, ~7.6 GB):
   [ISO](https://sourceforge.net/projects/shanios/files/plasma/20260401/) ·
   SHA256 · GPG signature · Torrent
-- **COSMIC Edition**:
-  [ISO](https://sourceforge.net/projects/shanios/files/cosmic/) ·
-  SHA256 · GPG signature · Torrent — check the download page for the current build date and size
 
 > There is no separate "Server" ISO. A server image profile exists but is only built as a cloud image (AWS AMI via the packer pipeline), not as installable install media.
 
@@ -37,7 +34,7 @@ Download the Shanios ISO from [shani.dev](https://shani.dev) or directly from So
 ### Linux / macOS — Verify SHA256 + GPG
 
 ```bash
-# GNOME edition — substitute the Plasma or COSMIC filename for those editions
+# GNOME edition — substitute the Plasma filename for that edition
 
 # 1. Verify checksum
 sha256sum -c signed_shanios-gnome-2026.04.01-x86_64.iso.sha256
