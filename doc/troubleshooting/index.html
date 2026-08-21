@@ -378,6 +378,7 @@ flatpak override --user --device=all com.example.App
 # Or use Flatseal (pre-installed) for graphical permission management</code></pre>
 <p>---</p>
 <h2>Audio Problems</h2>
+<p>See <a href="system/audio">Audio (PipeWire)</a> for a full guide to the audio stack — the essentials for common failures are below.</p>
 <h3>No Audio at Boot</h3>
 <pre><code class="language-bash"># Restart the full PipeWire stack
 systemctl --user restart pipewire pipewire-pulse wireplumber
@@ -405,6 +406,7 @@ cat /proc/asound/cards
 journalctl --user -u wireplumber -n 50</code></pre>
 <p>---</p>
 <h2>Bluetooth Problems</h2>
+<p>See <a href="networking/bluetooth">Bluetooth</a> for a full pairing/management guide — the essentials for common failures are below.</p>
 <h3>Adapter Not Found</h3>
 <pre><code class="language-bash">hciconfig -a
 rfkill list bluetooth

@@ -264,6 +264,8 @@ flatpak override --user --device=all com.example.App
 
 ## Audio Problems
 
+See [Audio (PipeWire)](system/audio) for a full guide to the audio stack — the essentials for common failures are below.
+
 ### No Audio at Boot
 
 ```bash
@@ -305,6 +307,8 @@ journalctl --user -u wireplumber -n 50
 ---
 
 ## Bluetooth Problems
+
+See [Bluetooth](networking/bluetooth) for a full pairing/management guide — the essentials for common failures are below.
 
 ### Adapter Not Found
 

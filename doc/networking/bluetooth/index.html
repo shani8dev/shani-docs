@@ -5,29 +5,29 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
-<title>What's Included — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="What's Included  Shanios comes fully equipped with a comprehensive software stack, carefully curated for desktop computing, development, gaming, and profes…">
+<title>Bluetooth — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Bluetooth  Shanios pre-installs the full BlueZ stack () and enables the Bluetooth daemon by default on every edition — pairing works out of the box with no…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/intro/whats-included/">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/networking/bluetooth/">
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
-  <meta property="og:title"     id="og-title"     content="What's Included">
-  <meta property="og:description" id="og-desc"    content="What's Included  Shanios comes fully equipped with a comprehensive software stack, carefully curated for desktop computing, development, gaming, and profes…">
+  <meta property="og:title"     id="og-title"     content="Bluetooth">
+  <meta property="og:description" id="og-desc"    content="Bluetooth  Shanios pre-installs the full BlueZ stack () and enables the Bluetooth daemon by default on every edition — pairing works out of the box with no…">
   <meta property="og:type"      id="og-type"      content="article">
-  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/intro/whats-included/">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/networking/bluetooth/">
   <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
-  <meta property="og:image:alt" id="og-image-alt" content="What's Included">
+  <meta property="og:image:alt" id="og-image-alt" content="Bluetooth">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
-  <meta name="twitter:title"       id="tw-title" content="What's Included">
-  <meta name="twitter:description" id="tw-desc"  content="What's Included  Shanios comes fully equipped with a comprehensive software stack, carefully curated for desktop computing, development, gaming, and profes…">
+  <meta name="twitter:title"       id="tw-title" content="Bluetooth">
+  <meta name="twitter:description" id="tw-desc"  content="Bluetooth  Shanios pre-installs the full BlueZ stack () and enables the Bluetooth daemon by default on every edition — pairing works out of the box with no…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"What's Included","description":"What's Included  Shanios comes fully equipped with a comprehensive software stack, carefully curated for desktop computing, development, gaming, and profes…","url":"https://docs.shani.dev/doc/intro/whats-included/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Bluetooth","description":"Bluetooth  Shanios pre-installs the full BlueZ stack () and enables the Bluetooth daemon by default on every edition — pairing works out of the box with no…","url":"https://docs.shani.dev/doc/networking/bluetooth/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -210,96 +210,85 @@
         semantically correct, not byte-identical to the client render.
       -->
       <div class="doc-header">
-        <h1 class="doc-title">What's Included</h1>
+        <h1 class="doc-title">Bluetooth</h1>
         <div class="doc-meta">
-          <span class="doc-meta__badge">Introduction</span>
+          <span class="doc-meta__badge">Networking</span>
           <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
-      <div class="prose"><p>Shanios comes fully equipped with a comprehensive software stack, carefully curated for desktop computing, development, gaming, and professional workloads. Everything works out of the box—no configuration required.</p>
-<h2>System Foundation</h2>
+      <div class="prose"><p>Shanios pre-installs the full BlueZ stack (<code>shani-bluetooth</code>) and enables the Bluetooth daemon by default on every edition — pairing works out of the box with no setup.</p>
+<h2>What's Pre-Installed</h2>
 <ul>
-<li><strong>Base:</strong> Arch Linux with rolling release updates, latest stable kernel with Intel and AMD microcode</li>
-<li><strong>Firmware:</strong> Comprehensive collection split by vendor: AMD GPU, Atheros, Broadcom, Cirrus, Intel, MediaTek, NVIDIA, Radeon, Realtek, and others</li>
-<li><strong>Bootloader:</strong> systemd-boot with UEFI and Secure Boot support</li>
-<li><strong>Boot Graphics:</strong> Plymouth with BGRT theme (displays manufacturer logo during boot)</li>
-<li><strong>Initramfs:</strong> dracut with full UKI (Unified Kernel Image) generation via <code>gen-efi</code></li>
-<li><strong>Filesystem:</strong> Btrfs with compression, CoW snapshots, automated maintenance and continuous background deduplication via bees</li>
-<li><strong>Encryption:</strong> LUKS2 (cryptsetup), fscrypt, ecryptfs-utils, gocryptfs</li>
-<li><strong>Network Storage:</strong> NFS client/server, Samba/CIFS, SSHFS</li>
-<li><strong>Updates:</strong> Atomic deployment via <strong>shani-deploy</strong> with automatic rollback on failed boot</li>
+<li><strong>bluez</strong> / <strong>bluez-utils</strong> — the core Bluetooth protocol stack and CLI tools (<code>bluetoothctl</code>)</li>
+<li><strong>bluez-obex</strong> — OBEX file transfer support (sending/receiving files over Bluetooth)</li>
+<li><strong>bluez-mesh</strong> — Bluetooth Mesh networking support</li>
+<li><strong>bluez-hid2hci</strong> — HID-to-HCI mode switching for some older Bluetooth mice/keyboards that boot in a legacy USB-HID compatibility mode</li>
+<li><strong>bluez-cups</strong> — lets Bluetooth-connected printers register with CUPS (see <a href="../system/printing">Printing & Scanning</a>)</li>
+<li><strong>bluez-tools</strong> — additional CLI utilities (<code>bt-adapter</code>, <code>bt-agent</code>, <code>bt-obex</code>)</li>
 </ul>
-<h2>Security</h2>
+<p><code>bluetooth.service</code> is enabled and running from first boot.</p>
+<h2>Pairing a Device — GUI</h2>
+<p><strong>GNOME:</strong> Settings → Bluetooth → toggle on, select the device, click <strong>Pair</strong>. <strong>KDE Plasma:</strong> System Settings → Bluetooth → select the device → <strong>Pair</strong>. Plasma's Bluetooth applet (<code>bluedevil</code>) also shows a pairing notification automatically when a device is discoverable nearby.</p>
+<h2>Pairing a Device — CLI</h2>
+<pre><code class="language-bash"># Enter the interactive bluetoothctl shell
+bluetoothctl
+
+# Inside bluetoothctl:
+power on
+agent on
+default-agent
+scan on
+# Wait for your device to appear, then note its MAC address
+pair XX:XX:XX:XX:XX:XX
+trust XX:XX:XX:XX:XX:XX
+connect XX:XX:XX:XX:XX:XX
+scan off
+exit</code></pre>
+<pre><code class="language-bash"># Non-interactive one-liners (same effect)
+bluetoothctl power on
+bluetoothctl scan on &amp;
+bluetoothctl pair XX:XX:XX:XX:XX:XX
+bluetoothctl trust XX:XX:XX:XX:XX:XX
+bluetoothctl connect XX:XX:XX:XX:XX:XX</code></pre>
+<h2>Managing Devices</h2>
+<pre><code class="language-bash"># List paired devices
+bluetoothctl devices
+
+# List currently connected devices
+bluetoothctl devices Connected
+
+# Check adapter and device info
+bluetoothctl show
+bluetoothctl info XX:XX:XX:XX:XX:XX
+
+# Disconnect without unpairing
+bluetoothctl disconnect XX:XX:XX:XX:XX:XX
+
+# Remove a paired device entirely
+bluetoothctl remove XX:XX:XX:XX:XX:XX
+
+# Enable/disable the adapter
+bluetoothctl power off
+bluetoothctl power on</code></pre>
+<h2>Audio Devices</h2>
+<p>Bluetooth headphones/speakers route through PipeWire once paired — see <a href="../system/audio">Audio (PipeWire)</a> for switching the default output device and troubleshooting sound quality. Most modern Bluetooth audio codecs (aptX, LDAC, LC3) are supported out of the box via the pre-installed <code>libldac</code>/<code>liblc3</code>/<code>libfreeaptx</code> libraries.</p>
+<pre><code class="language-bash"># Confirm the Bluetooth device appears as an audio sink
+pactl list sinks short | grep -i bluez
+
+# Set it as the default output
+pactl set-default-sink bluez_output.XX_XX_XX_XX_XX_XX.1</code></pre>
+<h2>File Transfer (OBEX)</h2>
+<pre><code class="language-bash"># Send a file to a paired phone
+bluetoothctl connect XX:XX:XX:XX:XX:XX
+obexftp -b XX:XX:XX:XX:XX:XX -B 10 -p file.jpg   # requires obexftp, not pre-installed</code></pre>
+<p>Most desktop environments also support drag-and-drop file sending directly from the Bluetooth settings panel once a device is paired and marked as trusted.</p>
+<h2>Troubleshooting</h2>
+<p>| Issue | Solution | |-------|----------| | Adapter not found | <code>rfkill list</code> — check Bluetooth isn't blocked; <code>rfkill unblock bluetooth</code> if it is | | Device won't pair | Remove any stale pairing first: <code>bluetoothctl remove XX:XX:XX:XX:XX:XX</code>, then retry; make sure the device is in pairing/discoverable mode | | Paired but won't connect | <code>sudo systemctl restart bluetooth</code>; check <code>journalctl -u bluetooth -n 30</code> for the actual error | | Headphones connected but no audio | See <a href="../system/audio">Audio (PipeWire)</a>'s Bluetooth section — usually a default-sink or codec negotiation issue | | Mouse/keyboard connects but doesn't work | Some older HID devices need <code>bluez-hid2hci</code> mode switching — confirmed pre-installed; try re-pairing after a fresh boot | | Bluetooth works then disappears after suspend | <code>sudo systemctl restart bluetooth</code> after resume; check for a known adapter-specific suspend bug via <code>dmesg \| grep -i bluetooth</code> |</p>
+<h2>See Also</h2>
 <ul>
-<li><strong>Mandatory Access Control:</strong> AppArmor enabled by default with policies enforced at boot</li>
-<li><strong>Firewall:</strong> firewalld active with pre-configured rules for KDE Connect and Waydroid</li>
-<li><strong>Intrusion Prevention:</strong> fail2ban for automated log-based banning</li>
-<li><strong>TPM:</strong> tpm2-tools and tpm2-tss for hardware security module interaction</li>
-<li><strong>Smart Card & Hardware Keys:</strong> opensc, ccid, libfido2 (FIDO2/U2F security keys)</li>
-<li><strong>Remote Access:</strong> OpenSSH 10.x, Tailscale mesh VPN, cloudflared zero-trust tunnels</li>
-<li><strong>VPN Protocols:</strong> OpenVPN, WireGuard, L2TP, PPTP, strongSwan/IKEv2, Cisco AnyConnect, SSTP, Fortinet SSL, Cisco VPNC — all pre-installed</li>
-</ul>
-<h2>Desktop & Applications</h2>
-<ul>
-<li><strong>Desktop Environment:</strong> GNOME or KDE Plasma (chosen at download), Wayland-first with full X11 compatibility</li>
-<li><strong>Pre-installed Apps (both editions):</strong> Vivaldi browser, OnlyOffice, Gear Lever, Warehouse, Flatseal, Pods, BoxBuddy</li>
-<li><strong>KDE extras:</strong> Kate, Okular, Gwenview, Elisa, Haruna, Kamoso, KolourPaint, KRDC, KGet, KTorrent, KCalc, Skanlite, ISO Image Writer, Filelight (disk usage), Partitionmanager, KBackup, Spectacle (screenshots), Sweeper (cache/history cleaner), Print Manager, and games</li>
-<li><strong>GNOME extras:</strong> Papers, Loupe, Showtime, Decibels, GNOME Text Editor, GNOME Calculator, GNOME Calendar, GNOME Maps, Simple Scan, Gnote, Meld, Boxes, GPaste (clipboard manager), Malcontent (parental controls), Rygel (DLNA/UPnP media sharing), Deja Dup (backup), GNOME Firmware, GSmartControl, and games</li>
-<li><strong>Package Formats:</strong> Flatpak (primary, from Flathub, auto-updates every 12 hours), AppImage via Gear Lever, Nix package manager (pre-installed)</li>
-<li><strong>Containers:</strong> Podman (rootless), podman-docker, buildah, skopeo, Distrobox, LXC, LXD, Apptainer, Snap</li>
-</ul>
-<h2>Multimedia</h2>
-<ul>
-<li><strong>Audio:</strong> PipeWire 1.4.x with full ALSA, JACK, and PulseAudio compatibility; WirePlumber session manager — see <a href="../system/audio">Audio (PipeWire)</a></li>
-<li><strong>Audio Codecs:</strong> FLAC, OPUS, Vorbis, MP3, AAC, AC3/DTS, ALAC, Speex, SBC, LDAC, aptX, LC3, WavPack</li>
-<li><strong>Video:</strong> Complete GStreamer plugin suite; FFmpeg (full build); AV1, HEVC, VP8/VP9, H.264, H.265, AVIF, HEIF, JPEG XL, WebP</li>
-<li><strong>Image Processing:</strong> ImageMagick, camera RAW via libraw; HDR via libplacebo and libdovi</li>
-</ul>
-<h2>Graphics Drivers & APIs</h2>
-<ul>
-<li><strong>OpenGL/GLES:</strong> Mesa 3D 25.x for Intel, AMD, NVIDIA (nouveau), and software rendering</li>
-<li><strong>Vulkan:</strong> Drivers for Intel, AMD, NVIDIA open, software, VMs, DirectX-on-Vulkan, Qualcomm, Apple Silicon</li>
-<li><strong>Hardware Video Acceleration:</strong> Intel iHD driver, NVIDIA open kernel module, VDPAU, VA-API</li>
-<li><strong>Hybrid Graphics:</strong> nvidia-prime (PRIME render offload), switcheroo-control</li>
-</ul>
-<h2>Printing & Scanning</h2>
-<ul>
-<li><strong>Print System:</strong> CUPS 2.4 with filters, PDF printer, network browsing, ipp-usb for driverless printers</li>
-<li><strong>Printer Drivers:</strong> HP, Canon, Brother, and generic PCL/Foomatic/Gutenprint drivers</li>
-<li><strong>Scanning:</strong> SANE with sane-airscan (driverless network scanning via IPP)</li>
-</ul>
-<p>Full setup and troubleshooting guide: <a href="../system/printing">Printing & Scanning</a>.</p>
-<h2>Networking</h2>
-<ul>
-<li><strong>Connection Management:</strong> NetworkManager 1.54.x, ModemManager (3G/4G/5G), wpa_supplicant</li>
-<li><strong>Mesh VPN / Tunneling:</strong> Tailscale, cloudflared</li>
-<li><strong>DNS & Discovery:</strong> dnsmasq, openresolv, Avahi (mDNS/DNS-SD)</li>
-<li><strong>Web Server:</strong> Caddy 2.10.x with automatic HTTPS via Let's Encrypt</li>
-<li><strong>Remote Desktop:</strong> FreeRDP client; kRDP/kRFB (KDE); gnome-remote-desktop (GNOME)</li>
-<li><strong>Bluetooth:</strong> Full BlueZ stack, active by default — see <a href="../networking/bluetooth">Bluetooth</a></li>
-</ul>
-<h2>Gaming</h2>
-<ul>
-<li><strong>Controllers:</strong> 8BitDo, PlayStation DS3/DS4/DualSense, Xbox, Nintendo Switch Pro, Joy-Cons, and many more</li>
-<li><strong>Racing Wheels:</strong> Logitech, Thrustmaster, Fanatec with full force feedback</li>
-<li><strong>RGB Peripherals:</strong> OpenRGB udev rules for keyboards, mice, headsets, fans from all major manufacturers</li>
-<li><strong>GameMode:</strong> Auto-applies CPU governor, I/O priority, and GPU performance mode when games are launched</li>
-<li><strong>Full stack (KDE Plasma only):</strong> Steam, Heroic, Lutris, RetroArch, Bottles, GOverlay, Oversteer, Piper, AntiMicroX pre-installed as Flatpaks — install the same apps yourself on GNOME</li>
-</ul>
-<p>Full guide: <a href="../software/gaming">Gaming</a>.</p>
-<h2>Shell Experience</h2>
-<ul>
-<li><strong>Default Shell:</strong> Zsh 5.9 with fish-style syntax highlighting, autosuggestions, and history substring search</li>
-<li><strong>Prompt:</strong> Starship — fast cross-shell prompt with git integration</li>
-<li><strong>Smart History:</strong> McFly — neural network command history search</li>
-<li><strong>Fuzzy Finder:</strong> FZF — integrated into Zsh for Ctrl+R, Ctrl+T, and Alt+C</li>
-<li><strong>Alternatives:</strong> Bash 5.3 and Fish 4.5 also installed</li>
-</ul>
-<h2>Fonts & Accessibility</h2>
-<ul>
-<li><strong>Fonts:</strong> Noto fonts family (including CJK, emoji); Indian language support pre-configured via fontconfig for Devanagari, Bengali, Gujarati, Gurmukhi, Kannada, Malayalam, Oriya, Tamil, and Telugu</li>
-<li><strong>Input Methods:</strong> IBus with typing booster, Chinese (Pinyin), Japanese (Anthy), Korean (Hangul), Vietnamese (Unikey), and Indic scripts</li>
-<li><strong>Accessibility:</strong> Orca screen reader, espeakup (speech synthesis via espeak-ng), brltty (braille) — full guide: <a href="../system/accessibility">Accessibility</a></li>
+<li><a href="../system/audio">Audio (PipeWire)</a> — Bluetooth audio device switching and codec issues</li>
+<li><a href="../system/hardware">Hardware</a> — general USB/wireless device detection</li>
+<li><a href="../system/printing">Printing & Scanning</a> — Bluetooth-connected printers via <code>bluez-cups</code></li>
 </ul></div>
     </div>
 

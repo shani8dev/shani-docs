@@ -41,7 +41,7 @@ Shanios comes fully equipped with a comprehensive software stack, carefully cura
 
 ## Multimedia
 
-- **Audio:** PipeWire 1.4.x with full ALSA, JACK, and PulseAudio compatibility; WirePlumber session manager
+- **Audio:** PipeWire 1.4.x with full ALSA, JACK, and PulseAudio compatibility; WirePlumber session manager — see [Audio (PipeWire)](../system/audio)
 - **Audio Codecs:** FLAC, OPUS, Vorbis, MP3, AAC, AC3/DTS, ALAC, Speex, SBC, LDAC, aptX, LC3, WavPack
 - **Video:** Complete GStreamer plugin suite; FFmpeg (full build); AV1, HEVC, VP8/VP9, H.264, H.265, AVIF, HEIF, JPEG XL, WebP
 - **Image Processing:** ImageMagick, camera RAW via libraw; HDR via libplacebo and libdovi
@@ -68,6 +68,7 @@ Full setup and troubleshooting guide: [Printing & Scanning](../system/printing).
 - **DNS & Discovery:** dnsmasq, openresolv, Avahi (mDNS/DNS-SD)
 - **Web Server:** Caddy 2.10.x with automatic HTTPS via Let's Encrypt
 - **Remote Desktop:** FreeRDP client; kRDP/kRFB (KDE); gnome-remote-desktop (GNOME)
+- **Bluetooth:** Full BlueZ stack, active by default — see [Bluetooth](../networking/bluetooth)
 
 ## Gaming
 
@@ -75,6 +76,9 @@ Full setup and troubleshooting guide: [Printing & Scanning](../system/printing).
 - **Racing Wheels:** Logitech, Thrustmaster, Fanatec with full force feedback
 - **RGB Peripherals:** OpenRGB udev rules for keyboards, mice, headsets, fans from all major manufacturers
 - **GameMode:** Auto-applies CPU governor, I/O priority, and GPU performance mode when games are launched
+- **Full stack (KDE Plasma only):** Steam, Heroic, Lutris, RetroArch, Bottles, GOverlay, Oversteer, Piper, AntiMicroX pre-installed as Flatpaks — install the same apps yourself on GNOME
+
+Full guide: [Gaming](../software/gaming).
 
 ## Shell Experience
 

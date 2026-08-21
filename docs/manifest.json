@@ -260,6 +260,16 @@
     "keywords": ""
   },
   {
+    "slug": "networking/bluetooth",
+    "title": "Bluetooth",
+    "section": "Networking",
+    "description": "Bluetooth  Shanios pre-installs the full BlueZ stack () and enables the Bluetooth daemon by default on every edition — pairing works out of the box with no…",
+    "updated": "2026-08-21",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
     "slug": "networking/caddy",
     "title": "Caddy",
     "section": "Networking",
@@ -980,6 +990,16 @@
     "keywords": ""
   },
   {
+    "slug": "software/gaming",
+    "title": "Gaming",
+    "section": "Software & Apps",
+    "description": "Gaming  Shanios pre-installs GameMode and broad controller/RGB hardware support on every edition. The full gaming app stack (Steam, Lutris, Heroic, RetroAr…",
+    "updated": "2026-08-21",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
     "slug": "software/gpu-containers",
     "title": "GPU Acceleration & HPC Containers",
     "section": "Software & Apps",
@@ -1064,6 +1084,16 @@
     "title": "Accessibility",
     "section": "System",
     "description": "Accessibility  Shanios pre-installs a full accessibility stack on every desktop edition (GNOME, KDE Plasma, and COSMIC) — a screen reader, speech synthesis…",
+    "updated": "2026-08-21",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "system/audio",
+    "title": "Audio (PipeWire)",
+    "section": "System",
+    "description": "Audio (PipeWire)  Shanios uses PipeWire as the entire audio (and video) server on every edition — it replaces PulseAudio and JACK with a single unified dae…",
     "updated": "2026-08-21",
     "order": 999,
     "draft": false,

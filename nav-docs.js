@@ -99,6 +99,7 @@ CONFIG.NAV_TREE = [
       { title: 'Bottles (Windows Compatibility)', slug: 'software/bottles' },
       { title: 'Android (Waydroid)', slug: 'software/waydroid' },
       { title: 'GPU Acceleration & HPC Containers', slug: 'software/gpu-containers' },
+      { title: 'Gaming', slug: 'software/gaming' },
     ]
   },
 
@@ -133,6 +134,7 @@ CONFIG.NAV_TREE = [
 
       { title: 'Remote Desktop', slug: 'networking/remote-desktop' },
       { title: 'KDE Connect', slug: 'networking/kdeconnect' },
+      { title: 'Bluetooth', slug: 'networking/bluetooth' },
 
       { title: 'Firewall (firewalld)', slug: 'networking/firewalld' },
       { title: 'Fail2ban (Brute-Force Protection)', slug: 'networking/fail2ban' },
@@ -160,6 +162,7 @@ CONFIG.NAV_TREE = [
       { title: 'Storage', slug: 'system/storage' },
       { title: 'Kernel Modules', slug: 'system/kernel-modules' },
       { title: 'Hardware', slug: 'system/hardware' },
+      { title: 'Audio (PipeWire)', slug: 'system/audio' },
       { title: 'Printing & Scanning', slug: 'system/printing' },
       { title: 'Accessibility', slug: 'system/accessibility' },
       { title: 'Logging', slug: 'system/logging' },
