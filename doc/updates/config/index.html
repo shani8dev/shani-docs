@@ -268,11 +268,27 @@ localectl list-keymaps
 timedatectl list-timezones
 
 localectl status
-timedatectl status</code></pre>
+timedatectl status
+
+# Temporary console-only keymap switch for the current session (not persisted,
+# doesn't touch /etc/vconsole.conf) — useful for a one-off TTY session
+sudo loadkeys dvorak
+sudo loadkeys us   # revert</code></pre>
+<p><code>localectl set-keymap</code> writes the persistent console layout to <code>/etc/vconsole.conf</code>, which <code>gen-efi</code> also reads to set the keyboard layout for the early-boot LUKS passphrase prompt (see <a href="../arch/boot">Boot Process</a>) — run <code>sudo gen-efi configure &lt;slot&gt;</code> after changing it if you use disk encryption, so the new layout takes effect before the passphrase prompt too.</p>
 <h2>Hostname</h2>
 <pre><code class="language-bash">sudo hostnamectl set-hostname my-machine
-hostnamectl</code></pre>
+hostnamectl
+
+# Just the current hostname, no other details
+hostname
+
+# A separate, human-friendly display name (spaces/punctuation allowed) —
+# shown by some desktop apps and file-sharing tools, doesn't affect networking
+sudo hostnamectl set-hostname &quot;Alice's Laptop&quot; --pretty</code></pre>
 <p>Your machine is reachable as <code>hostname.local</code> on the local network via Avahi (mDNS), active by default.</p>
+<p><code>hostnamectl set-hostname</code> without a scope flag sets the static, transient, and pretty hostnames together. To set only one (e.g. a temporary override that reverts on reboot):</p>
+<pre><code class="language-bash">sudo hostnamectl set-hostname temp-name --transient   # runtime only, not written to /etc/hostname
+sudo hostnamectl set-hostname my-machine --static     # persistent, written to /etc/hostname</code></pre>
 <h2>Managing Services</h2>
 <pre><code class="language-bash"># Enable/disable a service (persists across reboots via overlay)
 sudo systemctl enable --now sshd
@@ -338,6 +354,26 @@ sudo timedatectl set-ntp true
 # Manually set date/time (only takes effect while NTP sync is off)
 sudo timedatectl set-time '2026-08-21 14:30:00'</code></pre>
 <h2>PAM & sudo</h2>
+<p>PAM (Pluggable Authentication Modules) configuration lives in <code>/etc/pam.d/</code> — one file per service (<code>login</code>, <code>sudo</code>, <code>sshd</code>, <code>system-login</code>, etc.), all captured by the <code>/etc</code> overlay. Shanios ships stock Arch PAM defaults — account lockout after repeated failed logins is <strong>not</strong> enabled out of the box and must be configured manually if you want it:</p>
+<pre><code class="language-bash"># Add faillock to the login stack (edit both auth and account sections)
+sudo nano /etc/pam.d/system-login
+# auth      required                    pam_faillock.so preauth
+# auth      [success=1 default=ignore]  pam_unix.so
+# auth      [default=die]               pam_faillock.so authfail
+# account   required                    pam_faillock.so
+
+# Tune lockout behaviour
+sudo nano /etc/security/faillock.conf
+# deny = 5        # lock after 5 failed attempts
+# unlock_time = 900   # unlock after 15 minutes
+
+# Check an account's failure count
+faillock --user alice
+
+# Manually clear a lockout
+sudo faillock --user alice --reset</code></pre>
+<p>Password complexity requirements (minimum length, character classes) are enforced via <code>pam_pwquality</code>, configured in <code>/etc/security/pwquality.conf</code> — see <a href="../system/ch-commands">ch* Commands</a> for the <code>pwscore</code>/<code>pwmake</code> tools that check against the same policy.</p>
+<h3>sudo</h3>
 <pre><code class="language-bash">sudo visudo
 
 # Add a sudoers drop-in (safer than editing /etc/sudoers directly)

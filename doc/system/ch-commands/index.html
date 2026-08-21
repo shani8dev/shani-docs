@@ -313,6 +313,13 @@ sudo chage -d 0 alice             # Force password change on next login</code></
 # Minimum number of days between changes      : 7
 # Maximum number of days between changes      : 90
 # Number of days of warning before expiry     : 14</code></pre>
+<h3>Password Strength — pwscore / pwmake</h3>
+<p><code>libpwquality</code> (pre-installed) checks passwords against the same complexity policy PAM enforces at password-change time (<code>/etc/security/pwquality.conf</code>) — useful for testing a password before setting it, or generating a random one that already passes.</p>
+<pre><code class="language-bash"># Score a password against the configured policy (0-100, or an error if it fails)
+echo &quot;MyP@ssw0rd123&quot; | pwscore
+
+# Generate a random password that passes the policy (length in bits of entropy)
+pwmake 128</code></pre>
 <p>---</p>
 <h2>chsh — Change Login Shell</h2>
 <p><code>chsh</code> changes a user's default login shell.</p>
@@ -346,7 +353,7 @@ sudo shred -u /tmp/passwords.txt</code></pre>
 <blockquote><p>⚠️ Avoid embedding plain-text passwords in scripts. Use <code>chpasswd</code> only in controlled provisioning environments, and always shred the input file after use.</p></blockquote>
 <p>---</p>
 <h2>Quick Reference</h2>
-<p>| Command | Purpose | |---------|---------| | <code>chmod</code> | File/directory permissions (rwx) | | <code>chown</code> | File owner and group | | <code>chgrp</code> | File group only | | <code>chattr</code> | Kernel-level file attributes (immutable, append-only) | | <code>lsattr</code> | List extended file attributes | | <code>setfacl</code> | Grant permissions to specific extra users/groups (ACLs) | | <code>getfacl</code> | View ACL entries on a file | | <code>chage</code> | Password aging and account expiry | | <code>chsh</code> | Login shell | | <code>chfn</code> | GECOS / display name fields | | <code>chpasswd</code> | Batch password updates |</p>
+<p>| Command | Purpose | |---------|---------| | <code>chmod</code> | File/directory permissions (rwx) | | <code>chown</code> | File owner and group | | <code>chgrp</code> | File group only | | <code>chattr</code> | Kernel-level file attributes (immutable, append-only) | | <code>lsattr</code> | List extended file attributes | | <code>setfacl</code> | Grant permissions to specific extra users/groups (ACLs) | | <code>getfacl</code> | View ACL entries on a file | | <code>pwscore</code> / <code>pwmake</code> | Check or generate a password against the pwquality policy | | <code>chage</code> | Password aging and account expiry | | <code>chsh</code> | Login shell | | <code>chfn</code> | GECOS / display name fields | | <code>chpasswd</code> | Batch password updates |</p>
 <p>---</p>
 <h2>See Also</h2>
 <ul>

@@ -87,16 +87,37 @@ timedatectl list-timezones
 
 localectl status
 timedatectl status
+
+# Temporary console-only keymap switch for the current session (not persisted,
+# doesn't touch /etc/vconsole.conf) — useful for a one-off TTY session
+sudo loadkeys dvorak
+sudo loadkeys us   # revert
 ```
+
+`localectl set-keymap` writes the persistent console layout to `/etc/vconsole.conf`, which `gen-efi` also reads to set the keyboard layout for the early-boot LUKS passphrase prompt (see [Boot Process](../arch/boot)) — run `sudo gen-efi configure <slot>` after changing it if you use disk encryption, so the new layout takes effect before the passphrase prompt too.
 
 ## Hostname
 
 ```bash
 sudo hostnamectl set-hostname my-machine
 hostnamectl
+
+# Just the current hostname, no other details
+hostname
+
+# A separate, human-friendly display name (spaces/punctuation allowed) —
+# shown by some desktop apps and file-sharing tools, doesn't affect networking
+sudo hostnamectl set-hostname "Alice's Laptop" --pretty
 ```
 
 Your machine is reachable as `hostname.local` on the local network via Avahi (mDNS), active by default.
+
+`hostnamectl set-hostname` without a scope flag sets the static, transient, and pretty hostnames together. To set only one (e.g. a temporary override that reverts on reboot):
+
+```bash
+sudo hostnamectl set-hostname temp-name --transient   # runtime only, not written to /etc/hostname
+sudo hostnamectl set-hostname my-machine --static     # persistent, written to /etc/hostname
+```
 
 ## Managing Services
 
@@ -201,6 +222,32 @@ sudo timedatectl set-time '2026-08-21 14:30:00'
 ```
 
 ## PAM & sudo
+
+PAM (Pluggable Authentication Modules) configuration lives in `/etc/pam.d/` — one file per service (`login`, `sudo`, `sshd`, `system-login`, etc.), all captured by the `/etc` overlay. Shanios ships stock Arch PAM defaults — account lockout after repeated failed logins is **not** enabled out of the box and must be configured manually if you want it:
+
+```bash
+# Add faillock to the login stack (edit both auth and account sections)
+sudo nano /etc/pam.d/system-login
+# auth      required                    pam_faillock.so preauth
+# auth      [success=1 default=ignore]  pam_unix.so
+# auth      [default=die]               pam_faillock.so authfail
+# account   required                    pam_faillock.so
+
+# Tune lockout behaviour
+sudo nano /etc/security/faillock.conf
+# deny = 5        # lock after 5 failed attempts
+# unlock_time = 900   # unlock after 15 minutes
+
+# Check an account's failure count
+faillock --user alice
+
+# Manually clear a lockout
+sudo faillock --user alice --reset
+```
+
+Password complexity requirements (minimum length, character classes) are enforced via `pam_pwquality`, configured in `/etc/security/pwquality.conf` — see [ch* Commands](../system/ch-commands) for the `pwscore`/`pwmake` tools that check against the same policy.
+
+### sudo
 
 ```bash
 sudo visudo

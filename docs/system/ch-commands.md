@@ -181,6 +181,18 @@ sudo chage -l alice
 # Number of days of warning before expiry     : 14
 ```
 
+### Password Strength — pwscore / pwmake
+
+`libpwquality` (pre-installed) checks passwords against the same complexity policy PAM enforces at password-change time (`/etc/security/pwquality.conf`) — useful for testing a password before setting it, or generating a random one that already passes.
+
+```bash
+# Score a password against the configured policy (0-100, or an error if it fails)
+echo "MyP@ssw0rd123" | pwscore
+
+# Generate a random password that passes the policy (length in bits of entropy)
+pwmake 128
+```
+
 ---
 
 ## chsh — Change Login Shell
@@ -250,6 +262,7 @@ sudo shred -u /tmp/passwords.txt
 | `lsattr` | List extended file attributes |
 | `setfacl` | Grant permissions to specific extra users/groups (ACLs) |
 | `getfacl` | View ACL entries on a file |
+| `pwscore` / `pwmake` | Check or generate a password against the pwquality policy |
 | `chage` | Password aging and account expiry |
 | `chsh` | Login shell |
 | `chfn` | GECOS / display name fields |
