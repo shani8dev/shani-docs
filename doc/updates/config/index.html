@@ -256,10 +256,16 @@ sudo shani-reset --dry-run
 # Keep previously downloaded OS images
 sudo shani-reset --keep-downloads</code></pre>
 <h2>Locale & Timezone</h2>
+<p><code>glibc-locales</code> is pre-installed with every locale glibc supports already generated — unlike vanilla Arch, <code>localectl set-locale</code> works immediately with no <code>locale-gen</code> step first.</p>
 <pre><code class="language-bash">sudo localectl set-locale LANG=en_IN.UTF-8
 sudo localectl set-keymap us
 sudo localectl set-x11-keymap us
 sudo timedatectl set-timezone Asia/Kolkata
+
+# Discover available options
+localectl list-locales
+localectl list-keymaps
+timedatectl list-timezones
 
 localectl status
 timedatectl status</code></pre>
@@ -323,7 +329,14 @@ nmcli device status</code></pre>
 # FallbackNTP=pool.ntp.org
 
 sudo systemctl restart systemd-timesyncd
-timedatectl timesync-status</code></pre>
+timedatectl timesync-status
+
+# Toggle automatic NTP sync on/off
+sudo timedatectl set-ntp false
+sudo timedatectl set-ntp true
+
+# Manually set date/time (only takes effect while NTP sync is off)
+sudo timedatectl set-time '2026-08-21 14:30:00'</code></pre>
 <h2>PAM & sudo</h2>
 <pre><code class="language-bash">sudo visudo
 

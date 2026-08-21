@@ -1,7 +1,7 @@
 ---
 title: File Permissions & Attributes
 section: System
-updated: 2026-04-25
+updated: 2026-08-21
 ---
 
 # ch* Commands
@@ -122,6 +122,37 @@ Common attribute flags:
 
 ---
 
+## ACLs — Beyond Owner/Group/Other
+
+Standard `chmod`/`chown` only give you one owner and one group per file. `acl` (pre-installed) adds Access Control Lists — extra permission entries for specific additional users or groups on the same file, without changing its actual owner or group.
+
+```bash
+# Grant a specific user read+write on a file, without changing its owner
+sudo setfacl -m u:bob:rw file.txt
+
+# Grant a specific group read-only access to a directory
+sudo setfacl -m g:developers:rx /shared/project
+
+# View the ACL entries on a file (also shown by ls -l as a trailing '+')
+getfacl file.txt
+
+# Apply recursively to a directory tree
+sudo setfacl -R -m u:bob:rwx /shared/project
+
+# Set a default ACL so new files created inside a directory inherit it
+sudo setfacl -d -m g:developers:rwx /shared/project
+
+# Remove one entry
+sudo setfacl -x u:bob file.txt
+
+# Remove all ACL entries (back to plain owner/group/other)
+sudo setfacl -b file.txt
+```
+
+Filesystems must be mounted with ACL support for this to work — ext4 and XFS enable it by default; Btrfs (Shanios's own root and `@home`) supports ACLs natively with no mount option needed.
+
+---
+
 ## chage — Change Password Aging Policy
 
 `chage` manages password expiry and account aging for local users. Useful for enforcing security policies without a directory service.
@@ -217,6 +248,8 @@ sudo shred -u /tmp/passwords.txt
 | `chgrp` | File group only |
 | `chattr` | Kernel-level file attributes (immutable, append-only) |
 | `lsattr` | List extended file attributes |
+| `setfacl` | Grant permissions to specific extra users/groups (ACLs) |
+| `getfacl` | View ACL entries on a file |
 | `chage` | Password aging and account expiry |
 | `chsh` | Login shell |
 | `chfn` | GECOS / display name fields |
@@ -226,6 +259,6 @@ sudo shred -u /tmp/passwords.txt
 
 ## See Also
 
-- [Users & Groups](../system/users) — account management, `useradd`, `usermod`
+- [Users & Groups](users-groups) — account management, `useradd`, `usermod`
 - [Filesystem Structure](../arch/filesystem) — subvolume layout and permissions
-- [SSH Hardening](../network/ssh) — key permissions (`chmod 600`)
+- [OpenSSH](../networking/openssh) — key permissions (`chmod 600`)

@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="ch* Commands  The  family covers the core &quot;change&quot; utilities — tools that modify permissions, ownership, file attributes, and user account properties. All …">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"File Permissions & Attributes","description":"ch* Commands  The  family covers the core \"change\" utilities — tools that modify permissions, ownership, file attributes, and user account properties. All …","url":"https://docs.shani.dev/doc/system/ch-commands/","datePublished":"2026-04-25T00:00:00.000Z","dateModified":"2026-04-25T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"File Permissions & Attributes","description":"ch* Commands  The  family covers the core \"change\" utilities — tools that modify permissions, ownership, file attributes, and user account properties. All …","url":"https://docs.shani.dev/doc/system/ch-commands/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">File Permissions &amp; Attributes</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">System</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-25</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
       <div class="prose"><h1>ch* Commands</h1>
@@ -270,6 +270,30 @@ lsattr -R /etc/               # Recursive listing</code></pre>
 <p>| Flag | Meaning | |------|---------| | <code>i</code> | Immutable — no modifications, no deletion, even by root | | <code>a</code> | Append-only — data can be added but not overwritten | | <code>u</code> | Undeletable — kernel keeps data recoverable after deletion | | <code>c</code> | Transparent compression | | <code>e</code> | Extents in use (set automatically, do not modify) |</p>
 <blockquote><p>⚠️ The <code>+i</code> flag is useful for protecting config files from accidental changes, but remember to remove it before package updates that modify the file.</p></blockquote>
 <p>---</p>
+<h2>ACLs — Beyond Owner/Group/Other</h2>
+<p>Standard <code>chmod</code>/<code>chown</code> only give you one owner and one group per file. <code>acl</code> (pre-installed) adds Access Control Lists — extra permission entries for specific additional users or groups on the same file, without changing its actual owner or group.</p>
+<pre><code class="language-bash"># Grant a specific user read+write on a file, without changing its owner
+sudo setfacl -m u:bob:rw file.txt
+
+# Grant a specific group read-only access to a directory
+sudo setfacl -m g:developers:rx /shared/project
+
+# View the ACL entries on a file (also shown by ls -l as a trailing '+')
+getfacl file.txt
+
+# Apply recursively to a directory tree
+sudo setfacl -R -m u:bob:rwx /shared/project
+
+# Set a default ACL so new files created inside a directory inherit it
+sudo setfacl -d -m g:developers:rwx /shared/project
+
+# Remove one entry
+sudo setfacl -x u:bob file.txt
+
+# Remove all ACL entries (back to plain owner/group/other)
+sudo setfacl -b file.txt</code></pre>
+<p>Filesystems must be mounted with ACL support for this to work — ext4 and XFS enable it by default; Btrfs (Shanios's own root and <code>@home</code>) supports ACLs natively with no mount option needed.</p>
+<p>---</p>
 <h2>chage — Change Password Aging Policy</h2>
 <p><code>chage</code> manages password expiry and account aging for local users. Useful for enforcing security policies without a directory service.</p>
 <pre><code class="language-bash">sudo chage -l alice               # List current aging settings
@@ -322,13 +346,13 @@ sudo shred -u /tmp/passwords.txt</code></pre>
 <blockquote><p>⚠️ Avoid embedding plain-text passwords in scripts. Use <code>chpasswd</code> only in controlled provisioning environments, and always shred the input file after use.</p></blockquote>
 <p>---</p>
 <h2>Quick Reference</h2>
-<p>| Command | Purpose | |---------|---------| | <code>chmod</code> | File/directory permissions (rwx) | | <code>chown</code> | File owner and group | | <code>chgrp</code> | File group only | | <code>chattr</code> | Kernel-level file attributes (immutable, append-only) | | <code>lsattr</code> | List extended file attributes | | <code>chage</code> | Password aging and account expiry | | <code>chsh</code> | Login shell | | <code>chfn</code> | GECOS / display name fields | | <code>chpasswd</code> | Batch password updates |</p>
+<p>| Command | Purpose | |---------|---------| | <code>chmod</code> | File/directory permissions (rwx) | | <code>chown</code> | File owner and group | | <code>chgrp</code> | File group only | | <code>chattr</code> | Kernel-level file attributes (immutable, append-only) | | <code>lsattr</code> | List extended file attributes | | <code>setfacl</code> | Grant permissions to specific extra users/groups (ACLs) | | <code>getfacl</code> | View ACL entries on a file | | <code>chage</code> | Password aging and account expiry | | <code>chsh</code> | Login shell | | <code>chfn</code> | GECOS / display name fields | | <code>chpasswd</code> | Batch password updates |</p>
 <p>---</p>
 <h2>See Also</h2>
 <ul>
-<li><a href="../system/users">Users & Groups</a> — account management, <code>useradd</code>, <code>usermod</code></li>
+<li><a href="users-groups">Users & Groups</a> — account management, <code>useradd</code>, <code>usermod</code></li>
 <li><a href="../arch/filesystem">Filesystem Structure</a> — subvolume layout and permissions</li>
-<li><a href="../network/ssh">SSH Hardening</a> — key permissions (<code>chmod 600</code>)</li>
+<li><a href="../networking/openssh">OpenSSH</a> — key permissions (<code>chmod 600</code>)</li>
 </ul></div>
     </div>
 

@@ -1084,7 +1084,7 @@
     "title": "File Permissions & Attributes",
     "section": "System",
     "description": "ch* Commands  The  family covers the core \"change\" utilities — tools that modify permissions, ownership, file attributes, and user account properties. All …",
-    "updated": "2026-04-25",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""
