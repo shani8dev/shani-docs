@@ -34,7 +34,7 @@ Shanios comes fully equipped with a comprehensive software stack, carefully cura
 
 - **Desktop Environment:** GNOME or KDE Plasma (chosen at download), Wayland-first with full X11 compatibility
 - **Pre-installed Apps (both editions):** Vivaldi browser, OnlyOffice, Gear Lever, Warehouse, Flatseal, Pods, BoxBuddy
-- **KDE extras:** Kate, Okular, Gwenview, Elisa, Haruna, Kamoso, KolourPaint, KRDC, KGet, KTorrent, KCalc, Skanlite, ISO Image Writer, Filelight (disk usage), Partitionmanager, KBackup, and games
+- **KDE extras:** Kate, Okular, Gwenview, Elisa, Haruna, Kamoso, KolourPaint, KRDC, KGet, KTorrent, KCalc, Skanlite, ISO Image Writer, Filelight (disk usage), Partitionmanager, KBackup, Spectacle (screenshots), Sweeper (cache/history cleaner), Print Manager, and games
 - **GNOME extras:** Papers, Loupe, Showtime, Decibels, GNOME Text Editor, GNOME Calculator, GNOME Calendar, GNOME Maps, Simple Scan, Gnote, Meld, Boxes, GPaste (clipboard manager), Malcontent (parental controls), Rygel (DLNA/UPnP media sharing), Deja Dup (backup), GNOME Firmware, GSmartControl, and games
 - **Package Formats:** Flatpak (primary, from Flathub, auto-updates every 12 hours), AppImage via Gear Lever, Nix package manager (pre-installed)
 - **Containers:** Podman (rootless), podman-docker, buildah, skopeo, Distrobox, LXC, LXD, Apptainer, Snap

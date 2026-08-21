@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Firewall (firewalld)  firewalld is active by default on Shani OS with a restrictive inbound policy. It manages nftables under the hood using a zone-based m…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Firewall (firewalld)","description":"Firewall (firewalld)  firewalld is active by default on Shani OS with a restrictive inbound policy. It manages nftables under the hood using a zone-based m…","url":"https://docs.shani.dev/doc/networking/firewalld/","datePublished":"2026-04-20T00:00:00.000Z","dateModified":"2026-04-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Firewall (firewalld)","description":"Firewall (firewalld)  firewalld is active by default on Shani OS with a restrictive inbound policy. It manages nftables under the hood using a zone-based m…","url":"https://docs.shani.dev/doc/networking/firewalld/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Firewall (firewalld)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Networking</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
       <div class="prose"><p>firewalld is <strong>active by default</strong> on Shani OS with a restrictive inbound policy. It manages nftables under the hood using a zone-based model — every interface belongs to a zone, and each zone has its own allow/deny rules. Do not mix direct <code>nft</code> commands with firewalld rules as they will conflict.</p>
@@ -323,6 +323,7 @@ sudo firewall-cmd --runtime-to-permanent</code></pre>
 <h2>GUI</h2>
 <pre><code class="language-bash"># Launch the graphical firewall manager (pre-installed)
 sudo firewall-config</code></pre>
+<p><strong>KDE Plasma</strong> additionally has <strong>Plasma Firewall</strong> (pre-installed), a native module in System Settings that's a simpler front-end to the same firewalld backend — good for basic zone/service toggling; use <code>firewall-config</code> or the CLI above for rich rules and advanced zone configuration.</p>
 <p>---</p>
 <h2>Common Port Reference</h2>
 <p>| Service | Port | Protocol | |---------|------|----------| | SSH | 22 | TCP | | HTTP | 80 | TCP | | HTTPS | 443 | TCP | | DNS | 53 | TCP/UDP | | WireGuard | 51820 | UDP | | Tailscale | 41641 | UDP | | Syncthing | 22000 | TCP/UDP | | KDE Connect | 1714–1764 | TCP/UDP | | Minecraft | 25565 | TCP |</p>

@@ -324,7 +324,7 @@
     "title": "Firewall (firewalld)",
     "section": "Networking",
     "description": "Firewall (firewalld)  firewalld is active by default on Shani OS with a restrictive inbound policy. It manages nftables under the hood using a zone-based m…",
-    "updated": "2026-04-20",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -604,7 +604,7 @@
     "title": "Directory Encryption (gocryptfs)",
     "section": "Security",
     "description": "Directory Encryption — gocryptfs   encrypts individual directories using FUSE. Each file is stored as a separate encrypted blob, so cloud sync tools (Nextc…",
-    "updated": "2026-08-20",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -1124,7 +1124,7 @@
     "title": "Logging",
     "section": "System",
     "description": "Logging  Shani OS uses systemd-journald as its primary logging system. All kernel messages, service output, and system events flow into a single structured…",
-    "updated": "2026-08-20",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -1164,7 +1164,7 @@
     "title": "Systemd",
     "section": "System",
     "description": "Systemd  Systemd is the init system and service manager on Shani OS. It starts every process at boot, manages all daemons, handles logging via the journal,…",
-    "updated": "2026-08-20",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""

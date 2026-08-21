@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Directory Encryption — gocryptfs   encrypts individual directories using FUSE. Each file is stored as a separate encrypted blob, so cloud sync tools (Nextc…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Directory Encryption (gocryptfs)","description":"Directory Encryption — gocryptfs   encrypts individual directories using FUSE. Each file is stored as a separate encrypted blob, so cloud sync tools (Nextc…","url":"https://docs.shani.dev/doc/security/gocryptfs/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Directory Encryption (gocryptfs)","description":"Directory Encryption — gocryptfs   encrypts individual directories using FUSE. Each file is stored as a separate encrypted blob, so cloud sync tools (Nextc…","url":"https://docs.shani.dev/doc/security/gocryptfs/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,13 +213,14 @@
         <h1 class="doc-title">Directory Encryption (gocryptfs)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Security</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
       <div class="prose"><p><code>gocryptfs</code> encrypts individual directories using FUSE. Each file is stored as a separate encrypted blob, so cloud sync tools (Nextcloud, Syncthing, rclone) can sync incrementally without re-uploading everything on each change.</p>
 <p>This complements full-disk LUKS2 encryption — use it when you want a specific directory encrypted at rest even when the disk is unlocked, or when encrypting a synced folder before it leaves your machine.</p>
 <blockquote><p>Shani OS uses Btrfs for the root filesystem. gocryptfs works on Btrfs without any special configuration.</p></blockquote>
-<p><strong>ShaniOS integration:</strong> <code>gocryptfs</code> ships pre-installed as a dependency of the <code>shani-storage</code> package — that's the extent of the ShaniOS-specific integration. There is no Shanios wrapper script, GUI, or systemd unit template for it; everything below is the standard upstream <code>gocryptfs</code> workflow, usable as-is.</p>
+<p><strong>ShaniOS integration:</strong> <code>gocryptfs</code> ships pre-installed as a dependency of the <code>shani-storage</code> package — Shanios itself adds no wrapper script or systemd unit template for it; everything below is the standard upstream <code>gocryptfs</code> workflow, usable as-is.</p>
+<p><strong>KDE Plasma users:</strong> <strong>Plasma Vault</strong> (pre-installed, in System Settings and the system tray) provides a GUI for creating and mounting encrypted folders, with <code>gocryptfs</code> as one of its supported backends alongside legacy EncFS/CryFS vault support (for opening vaults created on other systems). It's a convenient GUI layer over the same underlying tool described here, not a separate encryption mechanism.</p>
 <p>---</p>
 <h2>Basic Usage</h2>
 <pre><code class="language-bash"># Create a new encrypted store

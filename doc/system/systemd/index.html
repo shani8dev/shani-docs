@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Systemd  Systemd is the init system and service manager on Shani OS. It starts every process at boot, manages all daemons, handles logging via the journal,…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Systemd","description":"Systemd  Systemd is the init system and service manager on Shani OS. It starts every process at boot, manages all daemons, handles logging via the journal,…","url":"https://docs.shani.dev/doc/system/systemd/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Systemd","description":"Systemd  Systemd is the init system and service manager on Shani OS. It starts every process at boot, manages all daemons, handles logging via the journal,…","url":"https://docs.shani.dev/doc/system/systemd/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Systemd</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">System</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
       <div class="prose"><p>Systemd is the init system and service manager on Shani OS. It starts every process at boot, manages all daemons, handles logging via the journal, and runs scheduled tasks via timers. Unit files placed in <code>/etc/systemd/system/</code> are captured by the <code>/etc</code> overlay and persist across all OS updates and rollbacks.</p>
@@ -570,7 +570,7 @@ ExecStart=/opt/myapp/bin/server
 StandardInput=socket</code></pre>
 <pre><code class="language-bash">sudo systemctl enable --now myapp.socket
 # myapp.service starts automatically when a connection arrives</code></pre>
-<p><code>sshd.socket</code> on Shani OS uses this pattern — see <a href="openssh">OpenSSH</a>.</p>
+<p><code>sshd.socket</code> is available as an opt-in alternative on Shani OS for machines that rarely accept SSH connections — the default is the persistent <code>sshd.service</code>. See <a href="../networking/openssh">OpenSSH</a>.</p>
 <p>---</p>
 <h2>Useful Patterns</h2>
 <h3>Restart on failure with back-off</h3>
@@ -608,11 +608,11 @@ ExecStopPost=/bin/rm -rf /var/run/myapp</code></pre>
 <p>---</p>
 <h2>See Also</h2>
 <ul>
-<li><a href="config">System Config</a> — overlay persistence, <code>systemctl edit</code>, sysctl via systemd</li>
+<li><a href="../updates/config">System Config</a> — overlay persistence, <code>systemctl edit</code>, sysctl via systemd</li>
 <li><a href="backup">Backup & Recovery</a> — full example of a user timer with <code>loginctl enable-linger</code></li>
 <li><a href="cronie">cronie</a> — cron as an alternative for simple per-user schedules</li>
 <li><a href="process-management">Process Management</a> — <code>systemd-cgls</code>, <code>systemd-cgtop</code>, cgroup resource usage</li>
-<li><a href="shani-health">shani-health</a> — reports on failed units, journal errors, and boot time</li>
+<li><a href="../updates/shani-health">shani-health</a> — reports on failed units, journal errors, and boot time</li>
 </ul></div>
     </div>
 

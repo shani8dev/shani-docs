@@ -1,7 +1,7 @@
 ---
 title: Firewall (firewalld)
 section: Networking
-updated: 2026-04-20
+updated: 2026-08-21
 ---
 
 # Firewall (firewalld)
@@ -162,6 +162,8 @@ Omit `--permanent` to test a rule without committing it — it disappears on the
 # Launch the graphical firewall manager (pre-installed)
 sudo firewall-config
 ```
+
+**KDE Plasma** additionally has **Plasma Firewall** (pre-installed), a native module in System Settings that's a simpler front-end to the same firewalld backend — good for basic zone/service toggling; use `firewall-config` or the CLI above for rich rules and advanced zone configuration.
 
 ---
 

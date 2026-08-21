@@ -13,7 +13,7 @@ Shanios ships a complete printing and scanning stack out of the box — CUPS, a 
 - **Print system:** CUPS 2.4 with `cups-filters`, `cups-pdf` (print-to-PDF), `cups-browsed` (automatic network printer discovery), `cups-pk-helper` (Polkit integration for GUI printer management), `ipp-usb` (driverless IPP-over-USB for AirPrint-capable printers)
 - **Drivers:** `hplip-minimal` (HP), `cnijfilter2` (Canon), `brlaser` (Brother laser), `foo2zjs-nightly` (various ZjStream-based printers), `gutenprint` and `splix` (broad generic/open-source coverage), the full Foomatic database (`foomatic-db`, `foomatic-db-engine`, `foomatic-db-ppds`, `foomatic-db-gutenprint-ppds`) for wide legacy driver coverage, plus `ghostscript`, `gsfonts`, and `a2ps` for PostScript/text rendering
 - **Scanning:** SANE-based, with `sane-airscan` for driverless network scanning (eSCL/AirScan and WSD), plus `colord-sane` and `argyllcms` for scanner colour profiles
-- **GUI apps:** GNOME Simple Scan / KDE Skanlite for scanning; both desktops' Settings apps for printer management; `system-config-printer` is also available for advanced CUPS configuration
+- **GUI apps:** GNOME Simple Scan / KDE Skanlite for scanning; printer management is built into each desktop's Settings app (KDE Plasma's is provided by `print-manager`, integrated into System Settings and showing a print-queue icon in the system tray while jobs are active); `system-config-printer` is also available for advanced CUPS configuration
 
 `cups.socket`, `cups-browsed.service`, `saned.socket`, and `ipp-usb.service` are all enabled by default — nothing to turn on manually.
 

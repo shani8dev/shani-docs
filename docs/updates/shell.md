@@ -22,6 +22,15 @@ Shanios ships a fully configured Zsh environment with modern UX features enabled
 
 Bash and Fish are also installed if you prefer them — both ship with a Starship-enabled prompt and McFly history search in their skeleton config (`~/.bashrc_shani`, `~/.config/fish/config.fish`), though the Zsh-only plugins above (syntax highlighting, autosuggestions, history-substring-search) are not mirrored there.
 
+## Terminal Emulator
+
+The default terminal app differs by edition — both run the same shell stack above.
+
+- **KDE Plasma:** **Konsole**, pre-installed. **Yakuake** (a drop-down/quake-style variant of Konsole) is also pre-installed — press `F12` to toggle it from anywhere.
+- **GNOME:** **GNOME Console**, pre-installed.
+
+Any terminal emulator you install separately (via Flatpak, Nix, etc.) uses the same Zsh config and prompt — the shell environment isn't tied to a specific terminal app.
+
 ## Changing Your Shell
 
 ```bash
@@ -94,19 +103,19 @@ git branch | fzf | xargs git checkout
 
 ### File Search and Navigation
 
+`ripgrep` (`rg`) is present on **KDE Plasma only**, pulled in transitively by KTextEditor's search-in-files feature (`ripgrep-all` depends on it) — not deliberately curated, and absent on GNOME. `fd` is **not pre-installed on either edition**. The standard POSIX tools always work:
+
 ```bash
-rg "search term"           # ripgrep — fast recursive search
-rg --type py "import"      # search only Python files
-fd "filename"              # fd — modern find replacement
-fd -e py                   # find by extension
+grep -r "search term" .    # recursive text search
+find . -name "filename"    # find by name
+plocate filename           # indexed filename search — see Storage
 ```
+
+For a consistent experience across editions, install both via Nix: `nix-env -iA nixpkgs.ripgrep nixpkgs.fd`.
 
 ### File Viewing
 
-```bash
-bat file.py                # bat — cat with syntax highlighting
-eza -la --git              # eza — modern ls with git status
-```
+`bat` and `eza` (modern `cat`/`ls` alternatives) are also **not pre-installed** — only standard `cat`/`less`/`ls` are. Install via Nix if wanted: `nix-env -iA nixpkgs.bat nixpkgs.eza`.
 
 ### System Monitoring
 

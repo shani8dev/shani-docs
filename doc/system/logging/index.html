@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Logging  Shani OS uses systemd-journald as its primary logging system. All kernel messages, service output, and system events flow into a single structured…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Logging","description":"Logging  Shani OS uses systemd-journald as its primary logging system. All kernel messages, service output, and system events flow into a single structured…","url":"https://docs.shani.dev/doc/system/logging/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Logging","description":"Logging  Shani OS uses systemd-journald as its primary logging system. All kernel messages, service output, and system events flow into a single structured…","url":"https://docs.shani.dev/doc/system/logging/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Logging</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">System</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
       <div class="prose"><p>Shani OS uses <strong>systemd-journald</strong> as its primary logging system. All kernel messages, service output, and system events flow into a single structured binary journal. There are no scattered <code>/var/log/*.log</code> text files to hunt through — <code>journalctl</code> is the single interface for everything.</p>
@@ -230,7 +230,7 @@
 <li><strong>audit</strong> — kernel audit subsystem</li>
 <li><strong>Native journald API</strong> — <code>sd_journal_send()</code>, <code>systemd-cat</code></li>
 </ul>
-<p>By default on Shani OS, logs are stored in <code>/run/journal/</code> (volatile, in RAM) and are lost on reboot. Persistent storage can be enabled — see below.</p>
+<p>By default on Shani OS, logs are stored in <code>/run/log/journal/</code> (volatile, in RAM) and are lost on reboot. Persistent storage can be enabled — see below.</p>
 <p>---</p>
 <h2>Enabling Persistent Logs</h2>
 <pre><code class="language-bash"># Create the persistent journal directory
@@ -243,7 +243,7 @@ sudo systemctl restart systemd-journald
 # Verify logs are now persisting
 journalctl --disk-usage
 ls /var/log/journal/</code></pre>
-<p>Once <code>/var/log/journal/</code> exists, journald automatically writes there instead of <code>/run/journal/</code>. Logs survive reboots and you can query previous boots with <code>journalctl -b -1</code>, <code>-b -2</code>, etc.</p>
+<p>Once <code>/var/log/journal/</code> exists, journald automatically writes there instead of <code>/run/log/journal/</code>. Logs survive reboots and you can query previous boots with <code>journalctl -b -1</code>, <code>-b -2</code>, etc.</p>
 <blockquote><p>💡 On Shani OS, <code>/var/log/journal/</code> persists across OS updates because <code>/var</code> is a separate data partition. You do not need to re-enable persistent logging after an update.</p></blockquote>
 <p>---</p>
 <h2>journald Configuration</h2>

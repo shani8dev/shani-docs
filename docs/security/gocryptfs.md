@@ -1,7 +1,7 @@
 ---
 title: Directory Encryption (gocryptfs)
 section: Security
-updated: 2026-08-20
+updated: 2026-08-21
 ---
 
 # Directory Encryption — gocryptfs
@@ -12,7 +12,9 @@ This complements full-disk LUKS2 encryption — use it when you want a specific 
 
 > Shani OS uses Btrfs for the root filesystem. gocryptfs works on Btrfs without any special configuration.
 
-**ShaniOS integration:** `gocryptfs` ships pre-installed as a dependency of the `shani-storage` package — that's the extent of the ShaniOS-specific integration. There is no Shanios wrapper script, GUI, or systemd unit template for it; everything below is the standard upstream `gocryptfs` workflow, usable as-is.
+**ShaniOS integration:** `gocryptfs` ships pre-installed as a dependency of the `shani-storage` package — Shanios itself adds no wrapper script or systemd unit template for it; everything below is the standard upstream `gocryptfs` workflow, usable as-is.
+
+**KDE Plasma users:** **Plasma Vault** (pre-installed, in System Settings and the system tray) provides a GUI for creating and mounting encrypted folders, with `gocryptfs` as one of its supported backends alongside legacy EncFS/CryFS vault support (for opening vaults created on other systems). It's a convenient GUI layer over the same underlying tool described here, not a separate encryption mechanism.
 
 ---
 

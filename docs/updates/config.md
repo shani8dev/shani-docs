@@ -182,10 +182,10 @@ fs.file-max=2097152
 
 ## Kernel Parameters
 
-Permanent kernel parameter changes are embedded in the UKI via `gen-efi`, not via `/etc/default/grub`. The generated command line is written to `/etc/kernel/install_cmdline_<slot>` on each run and cannot be manually pre-edited (it is overwritten). To add a permanent parameter, contact the project or use a `dracut.conf.d` snippet — then rebuild:
+Permanent kernel parameter changes are embedded in the UKI via `gen-efi`, not via `/etc/default/grub`. The generated command line is written to `/etc/kernel/install_cmdline_<slot>` on each run and cannot be manually pre-edited (it is overwritten) — `gen-efi.sh` builds it entirely from its own hardcoded logic (`root=`, `rd.luks.*`, `rd.vconsole.keymap=`, `resume=`). There is currently no user-facing way to add a custom permanent kernel parameter; doing so would require a code change to `gen-efi` itself.
 
 ```bash
-sudo gen-efi configure blue   # rebuild UKI for the currently booted slot
+sudo gen-efi configure blue   # rebuild UKI for the currently booted slot (e.g. after changing /etc/vconsole.conf)
 ```
 
 See [gen-efi Reference](../security/gen-efi) for details.

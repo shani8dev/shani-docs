@@ -404,5 +404,5 @@ cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq
 ## See Also
 
 - [Systemd](systemd) — service management, unit files, resource limits with `MemoryMax=` and `CPUQuota=`
-- [Shell & Environment](shell) — `htop`, `ncdu`, and other pre-installed monitoring tools
-- [shani-health](shani-health) — `--hardware` report includes CPU load, memory, OOM events, and zombie processes
+- [Shell & Environment](../updates/shell) — `htop`, `ncdu`, and other pre-installed monitoring tools
+- [shani-health](../updates/shani-health) — default report includes CPU load, memory, OOM events, and zombie processes

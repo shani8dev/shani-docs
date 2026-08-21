@@ -1,7 +1,7 @@
 ---
 title: Logging
 section: System
-updated: 2026-08-20
+updated: 2026-08-21
 ---
 
 # Logging
@@ -24,7 +24,7 @@ journald collects log entries from:
 - **audit** — kernel audit subsystem
 - **Native journald API** — `sd_journal_send()`, `systemd-cat`
 
-By default on Shani OS, logs are stored in `/run/journal/` (volatile, in RAM) and are lost on reboot. Persistent storage can be enabled — see below.
+By default on Shani OS, logs are stored in `/run/log/journal/` (volatile, in RAM) and are lost on reboot. Persistent storage can be enabled — see below.
 
 ---
 
@@ -43,7 +43,7 @@ journalctl --disk-usage
 ls /var/log/journal/
 ```
 
-Once `/var/log/journal/` exists, journald automatically writes there instead of `/run/journal/`. Logs survive reboots and you can query previous boots with `journalctl -b -1`, `-b -2`, etc.
+Once `/var/log/journal/` exists, journald automatically writes there instead of `/run/log/journal/`. Logs survive reboots and you can query previous boots with `journalctl -b -1`, `-b -2`, etc.
 
 > 💡 On Shani OS, `/var/log/journal/` persists across OS updates because `/var` is a separate data partition. You do not need to re-enable persistent logging after an update.
 

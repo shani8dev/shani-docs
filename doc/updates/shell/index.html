@@ -220,6 +220,13 @@
 <h2>Default Shell Stack</h2>
 <p>| Tool | Role | |------|------| | <strong>Zsh</strong> | Default shell for all users | | <strong>Starship</strong> | Cross-shell prompt with git, language runtime, exit-code, and timing info | | <strong>McFly</strong> | Neural-network command history search (replaces Ctrl+R) | | <strong>FZF</strong> | Fuzzy finder — integrated for Ctrl+T (files) and Alt+C (cd) | | <strong>zsh-syntax-highlighting</strong> | Fish-style inline syntax colouring (green = valid, red = invalid) | | <strong>zsh-autosuggestions</strong> | Ghost-text suggestions from history; press → or End to accept | | <strong>zsh-history-substring-search</strong> | Up/Down arrow searches history by substring, not just prefix |</p>
 <p>Bash and Fish are also installed if you prefer them — both ship with a Starship-enabled prompt and McFly history search in their skeleton config (<code>~/.bashrc_shani</code>, <code>~/.config/fish/config.fish</code>), though the Zsh-only plugins above (syntax highlighting, autosuggestions, history-substring-search) are not mirrored there.</p>
+<h2>Terminal Emulator</h2>
+<p>The default terminal app differs by edition — both run the same shell stack above.</p>
+<ul>
+<li><strong>KDE Plasma:</strong> <strong>Konsole</strong>, pre-installed. <strong>Yakuake</strong> (a drop-down/quake-style variant of Konsole) is also pre-installed — press <code>F12</code> to toggle it from anywhere.</li>
+<li><strong>GNOME:</strong> <strong>GNOME Console</strong>, pre-installed.</li>
+</ul>
+<p>Any terminal emulator you install separately (via Flatpak, Nix, etc.) uses the same Zsh config and prompt — the shell environment isn't tied to a specific terminal app.</p>
 <h2>Changing Your Shell</h2>
 <pre><code class="language-bash">chsh -s /bin/bash    # switch to Bash
 chsh -s /bin/fish    # switch to Fish
@@ -256,13 +263,13 @@ fzf --preview 'cat {}'
 git branch | fzf | xargs git checkout</code></pre>
 <h2>Pre-Installed CLI Tools</h2>
 <h3>File Search and Navigation</h3>
-<pre><code class="language-bash">rg &quot;search term&quot;           # ripgrep — fast recursive search
-rg --type py &quot;import&quot;      # search only Python files
-fd &quot;filename&quot;              # fd — modern find replacement
-fd -e py                   # find by extension</code></pre>
+<p><code>ripgrep</code> (<code>rg</code>) is present on <strong>KDE Plasma only</strong>, pulled in transitively by KTextEditor's search-in-files feature (<code>ripgrep-all</code> depends on it) — not deliberately curated, and absent on GNOME. <code>fd</code> is <strong>not pre-installed on either edition</strong>. The standard POSIX tools always work:</p>
+<pre><code class="language-bash">grep -r &quot;search term&quot; .    # recursive text search
+find . -name &quot;filename&quot;    # find by name
+plocate filename           # indexed filename search — see Storage</code></pre>
+<p>For a consistent experience across editions, install both via Nix: <code>nix-env -iA nixpkgs.ripgrep nixpkgs.fd</code>.</p>
 <h3>File Viewing</h3>
-<pre><code class="language-bash">bat file.py                # bat — cat with syntax highlighting
-eza -la --git              # eza — modern ls with git status</code></pre>
+<p><code>bat</code> and <code>eza</code> (modern <code>cat</code>/<code>ls</code> alternatives) are also <strong>not pre-installed</strong> — only standard <code>cat</code>/<code>less</code>/<code>ls</code> are. Install via Nix if wanted: <code>nix-env -iA nixpkgs.bat nixpkgs.eza</code>.</p>
 <h3>System Monitoring</h3>
 <pre><code class="language-bash">htop                       # interactive process viewer
 fastfetch                  # system information summary

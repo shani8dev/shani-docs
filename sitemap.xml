@@ -200,7 +200,7 @@
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/networking/firewalld/</loc>
-    <lastmod>2026-04-20</lastmod>
+    <lastmod>2026-08-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -368,7 +368,7 @@
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/security/gocryptfs/</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -680,7 +680,7 @@
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/system/logging/</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -704,7 +704,7 @@
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/system/systemd/</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
