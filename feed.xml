@@ -5,7 +5,7 @@
     <link>https://docs.shani.dev/</link>
     <description>Comprehensive technical documentation for Shanios — the immutable Linux OS.</description>
     <language>en-IN</language>
-    <lastBuildDate>Fri, 21 Aug 2026 05:55:53 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 21 Aug 2026 06:07:47 GMT</lastBuildDate>
     <atom:link href="https://docs.shani.dev/feed.xml" rel="self" type="application/rss+xml"/>
     <item>
       <title>OEM &amp; Fleet Deployment</title>
@@ -32,6 +32,33 @@
       <description>Installation Steps  Installation takes approximately 10–15 minutes.  Step-by-Step  1. Boot from USB — Press F12, F2, or Del during startup. Select your USB…</description>
       <pubDate>Fri, 21 Aug 2026 00:00:00 GMT</pubDate>
       <category>Installation</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Getting Started</title>
+      <link>https://docs.shani.dev/doc/intro/getting-started/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/intro/getting-started/</guid>
+      <description>Getting Started  A complete walkthrough: choose your edition, download and verify the ISO, install, and configure Shanios for daily use.  Choosing Your Edi…</description>
+      <pubDate>Fri, 21 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Introduction</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Fail2ban (Brute-Force Protection)</title>
+      <link>https://docs.shani.dev/doc/networking/fail2ban/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/networking/fail2ban/</guid>
+      <description>Fail2ban — Brute-Force Protection  fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs via firewalld. It in…</description>
+      <pubDate>Fri, 21 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Networking</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Overview</title>
+      <link>https://docs.shani.dev/doc/overview/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/overview/</guid>
+      <description>Shanios Technical Documentation  Comprehensive guide to the immutable Linux OS with atomic updates.  Welcome to the Shanios technical documentation. This w…</description>
+      <pubDate>Fri, 21 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Overview</category>
       <author>Shrinivas Kumbhar</author>
     </item>
     <item>
@@ -140,15 +167,6 @@
       <description>System Requirements  Hardware Requirements  | Component | Minimum | Recommended | |-----------|---------|-------------| | Processor | x8664 dual-core with …</description>
       <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
       <category>Installation</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Getting Started</title>
-      <link>https://docs.shani.dev/doc/intro/getting-started/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/intro/getting-started/</guid>
-      <description>Getting Started  A complete walkthrough: choose your edition, download and verify the ISO, install, and configure Shanios for daily use.  Choosing Your Edi…</description>
-      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
-      <category>Introduction</category>
       <author>Shrinivas Kumbhar</author>
     </item>
     <item>
@@ -347,24 +365,6 @@
       <description>Users &amp; Groups  User accounts on Shani OS follow standard Linux conventions — accounts are stored in , , and , which live in the  overlay and persist acros…</description>
       <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
       <category>System</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>shani-health Reference</title>
-      <link>https://docs.shani.dev/doc/updates/shani-health/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/updates/shani-health/</guid>
-      <description>shani-health Reference   is the system health and diagnostics CLI for Shanios. It provides a comprehensive single-command view of your system's state: boot…</description>
-      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
-      <category>Updates &amp; Config</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Factory Reset (shani-reset)</title>
-      <link>https://docs.shani.dev/doc/updates/shani-reset/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/updates/shani-reset/</guid>
-      <description>Factory Reset   wipes all persistent system state stored in  and reboots the machine. On the next boot,  recreates the  structure, the  overlay starts fres…</description>
-      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
-      <category>Updates &amp; Config</category>
       <author>Shrinivas Kumbhar</author>
     </item>
   </channel>

@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Getting Started  A complete walkthrough: choose your edition, download and verify the ISO, install, and configure Shanios for daily use.  Choosing Your Edi…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Getting Started","description":"Getting Started  A complete walkthrough: choose your edition, download and verify the ISO, install, and configure Shanios for daily use.  Choosing Your Edi…","url":"https://docs.shani.dev/doc/intro/getting-started/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Getting Started","description":"Getting Started  A complete walkthrough: choose your edition, download and verify the ISO, install, and configure Shanios for daily use.  Choosing Your Edi…","url":"https://docs.shani.dev/doc/intro/getting-started/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Getting Started</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Introduction</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
       <div class="prose"><p>A complete walkthrough: choose your edition, download and verify the ISO, install, and configure Shanios for daily use.</p>
@@ -242,26 +242,26 @@
 <h2>Download and Verify</h2>
 <p>Download from <a href="https://shani.dev">shani.dev</a>:</p>
 <ul>
-<li><strong>GNOME Edition</strong>: <code>signed_shanios-gnome-2026.04.15-x86_64.iso</code></li>
-<li><strong>KDE Plasma Edition</strong>: <code>signed_shanios-plasma-2026.04.15-x86_64.iso</code></li>
+<li><strong>GNOME Edition</strong>: <code>signed_shanios-gnome-2026.05.18-x86_64.iso</code></li>
+<li><strong>KDE Plasma Edition</strong>: <code>signed_shanios-plasma-2026.05.18-x86_64.iso</code></li>
 </ul>
 <p>Always verify before writing. Place the <code>.iso</code>, <code>.sha256</code>, and <code>.asc</code> files in the same directory, then:</p>
 <pre><code class="language-bash"># Verify checksum
-sha256sum -c signed_shanios-gnome-2026.04.15-x86_64.iso.sha256
+sha256sum -c signed_shanios-gnome-2026.05.18-x86_64.iso.sha256
 
 # Import signing key (once)
 gpg --keyserver keys.openpgp.org --recv-keys 7B927BFFD4A9EAAA8B666B77DE217F3DA8014792
 
 # Verify GPG signature
-gpg --verify signed_shanios-gnome-2026.04.15-x86_64.iso.asc \
-    signed_shanios-gnome-2026.04.15-x86_64.iso</code></pre>
+gpg --verify signed_shanios-gnome-2026.05.18-x86_64.iso.asc \
+    signed_shanios-gnome-2026.05.18-x86_64.iso</code></pre>
 <p>Both should report OK / Good signature.</p>
 <h2>Write to USB</h2>
 <p><strong>Recommended:</strong> <a href="https://etcher.balena.io">Balena Etcher</a> — select ISO, select USB, flash. Works on Windows, macOS, and Linux.</p>
 <p><strong>Windows alternative:</strong> <a href="https://rufus.ie">Rufus</a> — select your USB, select the ISO, change the write mode to <strong>DD Image</strong> (not ISO), click Start.</p>
 <p><strong>Linux with dd:</strong></p>
 <pre><code class="language-bash">lsblk   # find your USB device
-sudo dd bs=4M if=signed_shanios-gnome-2026.04.15-x86_64.iso \
+sudo dd bs=4M if=signed_shanios-gnome-2026.05.18-x86_64.iso \
     of=/dev/sdX status=progress oflag=sync</code></pre>
 <blockquote><p><strong>Do not use Ventoy.</strong> Ventoy's ISO mounting method conflicts with the Shanios bootloader.</p></blockquote>
 <h2>Installation</h2>

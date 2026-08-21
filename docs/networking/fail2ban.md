@@ -1,23 +1,20 @@
 ---
 title: Fail2ban (Brute-Force Protection)
 section: Networking
-updated: 2026-04-20
+updated: 2026-08-21
 ---
 
 # Fail2ban — Brute-Force Protection
 
 fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs via firewalld. It integrates with firewalld automatically on Shani OS — no extra backend configuration is required.
 
-**Not enabled by default.** Enable it whenever you run any public-facing service — especially SSH, Caddy, or Vaultwarden.
+**Active from first boot.** `shani-network` enables it unconditionally at install time alongside firewalld — no setup needed to get baseline protection, though tuning the jails below is still recommended for any public-facing service.
 
 ---
 
-## Enable & Status
+## Status & Tuning
 
 ```bash
-# Enable and start (persists across reboots)
-sudo systemctl enable --now fail2ban
-
 # Overall status — shows all active jails and ban counts
 sudo fail2ban-client status
 

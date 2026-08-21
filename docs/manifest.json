@@ -154,7 +154,7 @@
     "title": "Getting Started",
     "section": "Introduction",
     "description": "Getting Started  A complete walkthrough: choose your edition, download and verify the ISO, install, and configure Shanios for daily use.  Choosing Your Edi…",
-    "updated": "2026-08-20",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -314,7 +314,7 @@
     "title": "Fail2ban (Brute-Force Protection)",
     "section": "Networking",
     "description": "Fail2ban — Brute-Force Protection  fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs via firewalld. It in…",
-    "updated": "2026-04-20",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -544,7 +544,7 @@
     "title": "Overview",
     "section": "Overview",
     "description": "Shanios Technical Documentation  Comprehensive guide to the immutable Linux OS with atomic updates.  Welcome to the Shanios technical documentation. This w…",
-    "updated": "2026-04-27",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""

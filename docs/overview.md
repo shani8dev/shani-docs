@@ -1,7 +1,7 @@
 ---
 title: Overview
 section: Overview
-updated: 2026-04-27
+updated: 2026-08-21
 ---
 
 # Shanios Technical Documentation
@@ -12,7 +12,7 @@ Welcome to the Shanios technical documentation. This wiki provides comprehensive
 
 Shanios is an **immutable Linux desktop** built on Arch Linux. The OS core is permanently read-only — nothing running on your machine can modify it, not even root. It always keeps two complete, bootable copies of the OS on disk. You run on one; updates are prepared on the other. When you're ready, reboot into the new one. If anything goes wrong, reboot back. It ships in two editions — **GNOME** and **KDE Plasma** — and works out of the box with no post-install tweaking required.
 
-Current stable release: **2026.04.15** · GNOME edition ~5.4 GB · KDE Plasma edition ~7.6 GB · Both SHA256 + GPG signed.
+Current stable release: **2026.05.18** · GNOME edition ~5.4 GB · KDE Plasma edition ~7.6 GB · Both SHA256 + GPG signed.
 
 ## Five Core Ideas
 

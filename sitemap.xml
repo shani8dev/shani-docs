@@ -98,7 +98,7 @@
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/intro/getting-started/</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -194,7 +194,7 @@
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/networking/fail2ban/</loc>
-    <lastmod>2026-04-20</lastmod>
+    <lastmod>2026-08-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -332,7 +332,7 @@
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/overview/</loc>
-    <lastmod>2026-04-27</lastmod>
+    <lastmod>2026-08-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

@@ -1,7 +1,7 @@
 ---
 title: Getting Started
 section: Introduction
-updated: 2026-08-20
+updated: 2026-08-21
 ---
 
 # Getting Started
@@ -39,21 +39,21 @@ Access your BIOS/UEFI via F2, F10, Del, or Esc at startup, then:
 
 Download from [shani.dev](https://shani.dev):
 
-- **GNOME Edition**: `signed_shanios-gnome-2026.04.15-x86_64.iso`
-- **KDE Plasma Edition**: `signed_shanios-plasma-2026.04.15-x86_64.iso`
+- **GNOME Edition**: `signed_shanios-gnome-2026.05.18-x86_64.iso`
+- **KDE Plasma Edition**: `signed_shanios-plasma-2026.05.18-x86_64.iso`
 
 Always verify before writing. Place the `.iso`, `.sha256`, and `.asc` files in the same directory, then:
 
 ```bash
 # Verify checksum
-sha256sum -c signed_shanios-gnome-2026.04.15-x86_64.iso.sha256
+sha256sum -c signed_shanios-gnome-2026.05.18-x86_64.iso.sha256
 
 # Import signing key (once)
 gpg --keyserver keys.openpgp.org --recv-keys 7B927BFFD4A9EAAA8B666B77DE217F3DA8014792
 
 # Verify GPG signature
-gpg --verify signed_shanios-gnome-2026.04.15-x86_64.iso.asc \
-    signed_shanios-gnome-2026.04.15-x86_64.iso
+gpg --verify signed_shanios-gnome-2026.05.18-x86_64.iso.asc \
+    signed_shanios-gnome-2026.05.18-x86_64.iso
 ```
 
 Both should report OK / Good signature.
@@ -67,7 +67,7 @@ Both should report OK / Good signature.
 **Linux with dd:**
 ```bash
 lsblk   # find your USB device
-sudo dd bs=4M if=signed_shanios-gnome-2026.04.15-x86_64.iso \
+sudo dd bs=4M if=signed_shanios-gnome-2026.05.18-x86_64.iso \
     of=/dev/sdX status=progress oflag=sync
 ```
 
