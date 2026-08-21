@@ -353,8 +353,8 @@
     "slug": "networking/kdeconnect",
     "title": "KDE Connect",
     "section": "Networking",
-    "description": "KDE Connect — Link Desktop and Mobile Devices  KDE Connect integrates your phone (Android/iOS) with your Shani OS desktop over the local network. It is pre…",
-    "updated": "2026-04-18",
+    "description": "KDE Connect — Link Desktop and Mobile Devices  KDE Connect integrates your phone (Android/iOS) with your Shani OS desktop over the local network. It's pre-…",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""

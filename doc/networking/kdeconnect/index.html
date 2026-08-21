@@ -6,7 +6,7 @@
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>KDE Connect — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="KDE Connect — Link Desktop and Mobile Devices  KDE Connect integrates your phone (Android/iOS) with your Shani OS desktop over the local network. It is pre…">
+  <meta name="description" id="meta-desc"     content="KDE Connect — Link Desktop and Mobile Devices  KDE Connect integrates your phone (Android/iOS) with your Shani OS desktop over the local network. It's pre-…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,7 +14,7 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="KDE Connect">
-  <meta property="og:description" id="og-desc"    content="KDE Connect — Link Desktop and Mobile Devices  KDE Connect integrates your phone (Android/iOS) with your Shani OS desktop over the local network. It is pre…">
+  <meta property="og:description" id="og-desc"    content="KDE Connect — Link Desktop and Mobile Devices  KDE Connect integrates your phone (Android/iOS) with your Shani OS desktop over the local network. It's pre-…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/networking/kdeconnect/">
   <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
@@ -24,10 +24,10 @@
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="KDE Connect">
-  <meta name="twitter:description" id="tw-desc"  content="KDE Connect — Link Desktop and Mobile Devices  KDE Connect integrates your phone (Android/iOS) with your Shani OS desktop over the local network. It is pre…">
+  <meta name="twitter:description" id="tw-desc"  content="KDE Connect — Link Desktop and Mobile Devices  KDE Connect integrates your phone (Android/iOS) with your Shani OS desktop over the local network. It's pre-…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"KDE Connect","description":"KDE Connect — Link Desktop and Mobile Devices  KDE Connect integrates your phone (Android/iOS) with your Shani OS desktop over the local network. It is pre…","url":"https://docs.shani.dev/doc/networking/kdeconnect/","datePublished":"2026-04-18T00:00:00.000Z","dateModified":"2026-04-18T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"KDE Connect","description":"KDE Connect — Link Desktop and Mobile Devices  KDE Connect integrates your phone (Android/iOS) with your Shani OS desktop over the local network. It's pre-…","url":"https://docs.shani.dev/doc/networking/kdeconnect/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,12 +213,12 @@
         <h1 class="doc-title">KDE Connect</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Networking</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-18</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
       <div class="prose"><h1>KDE Connect — Link Desktop and Mobile Devices</h1>
-<p>KDE Connect integrates your phone (Android/iOS) with your Shani OS desktop over the local network. It is pre-installed on the KDE Plasma edition. Firewall rules are pre-configured in the <code>public</code> zone — no manual firewall setup is needed after a fresh install.</p>
-<p>Features include: shared clipboard, file transfer, remote input (use your phone as a touchpad/keyboard), notification mirroring, media controls, and running pre-defined remote commands.</p>
+<p>KDE Connect integrates your phone (Android/iOS) with your Shani OS desktop over the local network. It's pre-installed on <strong>both</strong> desktop editions — natively on KDE Plasma, and as <strong>GSConnect</strong> (a GNOME Shell extension implementing the same KDE Connect protocol) on GNOME. Firewall rules are pre-configured in the <code>public</code> zone on both editions — no manual firewall setup is needed after a fresh install.</p>
+<p>Features include: shared clipboard, file transfer, remote input (use your phone as a touchpad/keyboard), notification mirroring, media controls, and running pre-defined remote commands. GSConnect's feature set closely mirrors native KDE Connect, though a few advanced features (custom remote commands, some plugin settings) are more limited in its GNOME Extensions preferences UI than in KDE's System Settings module.</p>
 <p>---</p>
 <h2>Pairing a Device</h2>
 <p>Install the KDE Connect app on your phone:</p>
@@ -226,9 +226,12 @@
 <li><strong>Android:</strong> <a href="https://play.google.com/store/apps/details?id=org.kde.kdeconnect_tp">Google Play</a> or <a href="https://f-droid.org/packages/org.kde.kdeconnect_tp/">F-Droid</a></li>
 <li><strong>iOS:</strong> <a href="https://apps.apple.com/app/kde-connect/id1580245991">App Store</a></li>
 </ul>
-<p>Both devices must be on the same Wi-Fi network. Open <strong>KDE Connect</strong> from the system tray or app launcher — your phone should appear automatically. Click <strong>Pair</strong> and accept the request on the phone.</p>
+<p>Both devices must be on the same Wi-Fi network.</p>
+<p><strong>KDE Plasma:</strong> Open <strong>KDE Connect</strong> from the system tray or app launcher — your phone should appear automatically. Click <strong>Pair</strong> and accept the request on the phone.</p>
+<p><strong>GNOME (GSConnect):</strong> Open the <strong>GSConnect</strong> icon from the top bar (or Settings → GSConnect if you don't see it), enable it if prompted, and your phone should appear automatically. Click on the device, then <strong>Pair</strong>, and accept the request on the phone. If the icon isn't visible, check that the extension is enabled in the <strong>Extensions</strong> app (pre-installed).</p>
 <p>---</p>
 <h2>Command-Line Usage</h2>
+<p><code>kdeconnect-cli</code> is part of the native <code>kdeconnect</code> package (KDE Plasma only) — GSConnect on GNOME does not provide this or any equivalent CLI; use its GUI (top bar icon, or Settings → GSConnect) for all device management.</p>
 <pre><code class="language-bash"># List all discovered devices (paired and unpaired)
 kdeconnect-cli --list-devices
 
@@ -274,6 +277,7 @@ sudo firewall-cmd --permanent --zone=public --add-port=1714-1764/udp
 sudo firewall-cmd --reload</code></pre>
 <p>---</p>
 <h2>Troubleshooting</h2>
+<p><strong>KDE Plasma</strong> runs KDE Connect as a user service:</p>
 <pre><code class="language-bash"># Check the KDE Connect daemon is running
 systemctl --user status kdeconnectd
 
@@ -287,7 +291,18 @@ systemctl --user start kdeconnectd
 
 # View live logs
 journalctl --user -u kdeconnectd -f</code></pre>
-<p>| Issue | Solution | |-------|----------| | Phone not appearing | Both devices must be on the same subnet; check firewall rules with <code>sudo firewall-cmd --list-all</code> — the <code>kdeconnect</code> service must appear | | Pairing request not showing on phone | Dismiss and retry — tap the device name on the desktop to re-send the request | | File transfer failing | Ensure both devices are paired (not just discovered); check available storage on the phone | | Clipboard sync not working | The plugin must be enabled on both the desktop (KDE Connect settings) and in the phone app |</p></div>
+<p><strong>GNOME (GSConnect)</strong> runs inside the GNOME Shell process itself — there's no separate systemd unit to restart. Instead:</p>
+<pre><code class="language-bash"># Restart GNOME Shell (X11 only — logs you out on Wayland)
+# On Wayland, log out and back in instead
+Alt+F2, type 'r', Enter
+
+# Reset configuration (fixes corrupt pairing state)
+rm -rf ~/.cache/gsconnect
+gsettings reset-recursively org.gnome.shell.extensions.gsconnect
+
+# View live logs
+journalctl --user -f | grep -i gsconnect</code></pre>
+<p>| Issue | Solution | |-------|----------| | Phone not appearing | Both devices must be on the same subnet; check firewall rules with <code>sudo firewall-cmd --list-all</code> — the <code>kdeconnect</code> service must appear | | Pairing request not showing on phone | Dismiss and retry — tap the device name on the desktop to re-send the request | | File transfer failing | Ensure both devices are paired (not just discovered); check available storage on the phone | | Clipboard sync not working | The plugin must be enabled on both the desktop (KDE Connect settings, or GSConnect's device preferences) and in the phone app | | GSConnect icon missing from top bar (GNOME) | Open the <strong>Extensions</strong> app and confirm GSConnect is toggled on |</p></div>
     </div>
 
   </main>

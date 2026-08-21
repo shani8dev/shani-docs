@@ -1,14 +1,14 @@
 ---
 title: KDE Connect
 section: Networking
-updated: 2026-04-18
+updated: 2026-08-21
 ---
 
 # KDE Connect — Link Desktop and Mobile Devices
 
-KDE Connect integrates your phone (Android/iOS) with your Shani OS desktop over the local network. It is pre-installed on the KDE Plasma edition. Firewall rules are pre-configured in the `public` zone — no manual firewall setup is needed after a fresh install.
+KDE Connect integrates your phone (Android/iOS) with your Shani OS desktop over the local network. It's pre-installed on **both** desktop editions — natively on KDE Plasma, and as **GSConnect** (a GNOME Shell extension implementing the same KDE Connect protocol) on GNOME. Firewall rules are pre-configured in the `public` zone on both editions — no manual firewall setup is needed after a fresh install.
 
-Features include: shared clipboard, file transfer, remote input (use your phone as a touchpad/keyboard), notification mirroring, media controls, and running pre-defined remote commands.
+Features include: shared clipboard, file transfer, remote input (use your phone as a touchpad/keyboard), notification mirroring, media controls, and running pre-defined remote commands. GSConnect's feature set closely mirrors native KDE Connect, though a few advanced features (custom remote commands, some plugin settings) are more limited in its GNOME Extensions preferences UI than in KDE's System Settings module.
 
 ---
 
@@ -19,11 +19,17 @@ Install the KDE Connect app on your phone:
 - **Android:** [Google Play](https://play.google.com/store/apps/details?id=org.kde.kdeconnect_tp) or [F-Droid](https://f-droid.org/packages/org.kde.kdeconnect_tp/)
 - **iOS:** [App Store](https://apps.apple.com/app/kde-connect/id1580245991)
 
-Both devices must be on the same Wi-Fi network. Open **KDE Connect** from the system tray or app launcher — your phone should appear automatically. Click **Pair** and accept the request on the phone.
+Both devices must be on the same Wi-Fi network.
+
+**KDE Plasma:** Open **KDE Connect** from the system tray or app launcher — your phone should appear automatically. Click **Pair** and accept the request on the phone.
+
+**GNOME (GSConnect):** Open the **GSConnect** icon from the top bar (or Settings → GSConnect if you don't see it), enable it if prompted, and your phone should appear automatically. Click on the device, then **Pair**, and accept the request on the phone. If the icon isn't visible, check that the extension is enabled in the **Extensions** app (pre-installed).
 
 ---
 
 ## Command-Line Usage
+
+`kdeconnect-cli` is part of the native `kdeconnect` package (KDE Plasma only) — GSConnect on GNOME does not provide this or any equivalent CLI; use its GUI (top bar icon, or Settings → GSConnect) for all device management.
 
 ```bash
 # List all discovered devices (paired and unpaired)
@@ -88,6 +94,8 @@ sudo firewall-cmd --reload
 
 ## Troubleshooting
 
+**KDE Plasma** runs KDE Connect as a user service:
+
 ```bash
 # Check the KDE Connect daemon is running
 systemctl --user status kdeconnectd
@@ -104,9 +112,25 @@ systemctl --user start kdeconnectd
 journalctl --user -u kdeconnectd -f
 ```
 
+**GNOME (GSConnect)** runs inside the GNOME Shell process itself — there's no separate systemd unit to restart. Instead:
+
+```bash
+# Restart GNOME Shell (X11 only — logs you out on Wayland)
+# On Wayland, log out and back in instead
+Alt+F2, type 'r', Enter
+
+# Reset configuration (fixes corrupt pairing state)
+rm -rf ~/.cache/gsconnect
+gsettings reset-recursively org.gnome.shell.extensions.gsconnect
+
+# View live logs
+journalctl --user -f | grep -i gsconnect
+```
+
 | Issue | Solution |
 |-------|----------|
 | Phone not appearing | Both devices must be on the same subnet; check firewall rules with `sudo firewall-cmd --list-all` — the `kdeconnect` service must appear |
 | Pairing request not showing on phone | Dismiss and retry — tap the device name on the desktop to re-send the request |
 | File transfer failing | Ensure both devices are paired (not just discovered); check available storage on the phone |
-| Clipboard sync not working | The plugin must be enabled on both the desktop (KDE Connect settings) and in the phone app |
+| Clipboard sync not working | The plugin must be enabled on both the desktop (KDE Connect settings, or GSConnect's device preferences) and in the phone app |
+| GSConnect icon missing from top bar (GNOME) | Open the **Extensions** app and confirm GSConnect is toggled on |

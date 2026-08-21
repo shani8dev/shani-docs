@@ -5,7 +5,7 @@
     <link>https://docs.shani.dev/</link>
     <description>Comprehensive technical documentation for Shanios — the immutable Linux OS.</description>
     <language>en-IN</language>
-    <lastBuildDate>Fri, 21 Aug 2026 07:37:35 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 21 Aug 2026 07:45:00 GMT</lastBuildDate>
     <atom:link href="https://docs.shani.dev/feed.xml" rel="self" type="application/rss+xml"/>
     <item>
       <title>OEM &amp; Fleet Deployment</title>
@@ -75,6 +75,15 @@
       <link>https://docs.shani.dev/doc/networking/fail2ban/</link>
       <guid isPermaLink="true">https://docs.shani.dev/doc/networking/fail2ban/</guid>
       <description>Fail2ban — Brute-Force Protection  fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs via firewalld. It in…</description>
+      <pubDate>Fri, 21 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Networking</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>KDE Connect</title>
+      <link>https://docs.shani.dev/doc/networking/kdeconnect/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/networking/kdeconnect/</guid>
+      <description>KDE Connect — Link Desktop and Mobile Devices  KDE Connect integrates your phone (Android/iOS) with your Shani OS desktop over the local network. It's pre-…</description>
       <pubDate>Fri, 21 Aug 2026 00:00:00 GMT</pubDate>
       <category>Networking</category>
       <author>Shrinivas Kumbhar</author>
@@ -354,15 +363,6 @@
       <link>https://docs.shani.dev/doc/security/hardware-auth/</link>
       <guid isPermaLink="true">https://docs.shani.dev/doc/security/hardware-auth/</guid>
       <description>Hardware Authentication  Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), an…</description>
-      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
-      <category>Security</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>LUKS Management</title>
-      <link>https://docs.shani.dev/doc/security/luks/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/security/luks/</guid>
-      <description>LUKS Management  Full-disk encryption with LUKS2 must be enabled during the Shanios installer — it is a single checkbox on the disk setup screen. There is …</description>
       <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
       <category>Security</category>
       <author>Shrinivas Kumbhar</author>
