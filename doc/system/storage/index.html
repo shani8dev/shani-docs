@@ -336,6 +336,57 @@ sudo btrfs filesystem resize max /mountpoint   # fill partition
 # XFS — grow only, must be mounted
 sudo xfs_growfs /mountpoint</code></pre>
 <p>---</p>
+<h2>LVM — Logical Volume Management</h2>
+<p><code>lvm2</code> is pre-installed, giving you a resizable-volume layer beneath any non-Btrfs filesystem (the Shanios OS itself uses Btrfs subvolumes instead of LVM — this is for additional drives or manual partitioning where you want LVM's flexibility).</p>
+<pre><code class="language-bash"># Create a physical volume on a partition
+sudo pvcreate /dev/sdb1
+
+# Create a volume group from one or more physical volumes
+sudo vgcreate data-vg /dev/sdb1 /dev/sdc1
+
+# Create a logical volume (10G) inside the volume group
+sudo lvcreate -L 10G -n data-lv data-vg
+
+# Format and mount it like any block device
+sudo mkfs.ext4 /dev/data-vg/data-lv
+sudo mount /dev/data-vg/data-lv /mnt/data
+
+# Inspect PVs, VGs, and LVs
+sudo pvs
+sudo vgs
+sudo lvs
+
+# Grow a logical volume and its filesystem
+sudo lvextend -L +5G /dev/data-vg/data-lv
+sudo resize2fs /dev/data-vg/data-lv   # ext4; use xfs_growfs for XFS
+
+# LVM snapshots (point-in-time copy-on-write)
+sudo lvcreate -L 2G -s -n data-lv-snap /dev/data-vg/data-lv</code></pre>
+<p><code>udisks2-lvm2</code> (also pre-installed) exposes basic LVM management through the desktop's disk utility GUI (GNOME Disks, KDE Partition Manager) for simple cases.</p>
+<p>---</p>
+<h2>mdadm — Software RAID</h2>
+<p><code>mdadm</code> is pre-installed for Linux software RAID (<code>md</code> devices) — an alternative to LVM or hardware RAID for combining multiple drives.</p>
+<pre><code class="language-bash"># Create a RAID 1 (mirror) array from two drives
+sudo mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/sdb1 /dev/sdc1
+
+# Check array status
+cat /proc/mdstat
+sudo mdadm --detail /dev/md0
+
+# Save the array configuration so it reassembles automatically on boot
+sudo mdadm --detail --scan | sudo tee -a /etc/mdadm.conf
+
+# Assemble an existing array (e.g. after moving drives to a new machine)
+sudo mdadm --assemble --scan
+
+# Replace a failed drive
+sudo mdadm /dev/md0 --fail /dev/sdb1 --remove /dev/sdb1
+sudo mdadm /dev/md0 --add /dev/sdd1
+
+# Stop an array
+sudo mdadm --stop /dev/md0</code></pre>
+<blockquote><p>As with LVM, this is for additional drives you manage yourself — Shanios's own OS storage uses Btrfs subvolumes, not <code>md</code> RAID.</p></blockquote>
+<p>---</p>
 <h2>Automatic Btrfs Maintenance (Shani OS Defaults)</h2>
 <p>Shani OS's root and data volumes are Btrfs, laid out as <code>@blue</code>/<code>@green</code> root subvolumes for atomic updates (see <a href="../arch/btrfs">Btrfs Deep Dive</a>). Routine maintenance already runs on its own — you rarely need to invoke <code>btrfs scrub</code>, <code>btrfs balance</code>, or <code>fstrim</code> manually:</p>
 <ul>
