@@ -365,15 +365,18 @@ shani-health --journal err
 shani-health --export-logs /var/tmp/diag
 ```
 
-Most modes (`--boot`, `--security`, `--storage-info`, `--network`, `--hardware`, `--packages`) print a formatted, human-readable report — there is no `--json`/machine-readable output mode today, so scraping structured data out of them for a monitoring dashboard would mean parsing text.
+Most modes (`--boot`, `--security`, `--storage-info`, `--network`, `--hardware`, `--packages`) print a formatted, human-readable report only — scraping structured data out of them for a monitoring dashboard means parsing text.
 
-`--verify` is the exception worth building fleet automation around: it runs UKI signature checks, a Btrfs scrub of both slots, slot-marker consistency, boot-entry consistency, and immutability checks, then **returns a real exit code** — `0` if everything passed, `1` if it found any issue — which is exactly what a cron job or fleet health-check runner needs:
+`--verify` is the one built for fleet automation: it runs UKI signature checks, a Btrfs scrub of both slots, slot-marker consistency, boot-entry consistency, and immutability checks, then **returns a real exit code** — `0` if everything passed, `1` if it found any issue — plus, with `--json`, a structured summary of exactly which check(s) failed:
 
 ```bash
 # Cron-friendly health gate — non-zero exit means alert
 if ! shani-health --verify >/tmp/verify.log 2>&1; then
     mail -s "shani-health --verify FAILED on $(hostname)" ops@example.com < /tmp/verify.log
 fi
+
+# Machine-readable summary for a monitoring dashboard
+shani-health --verify --json | jq '.checks[] | select(.status == "fail")'
 ```
 
 `--export-logs` bundles diagnostics into a directory for centralized collection (e.g. rsync'd back to a fleet-management box) when a deeper look is needed than the exit code alone provides.
@@ -417,7 +420,7 @@ To keep this page honest about what exists versus what a larger enterprise deplo
 
 - **No centralised fleet dashboard.** There is no web console or MDM-style server for viewing fleet-wide status, pushing configuration, or triggering updates across machines. Fleet coordination today means SSH/Tailscale plus your own scripting (cron + `shani-deploy` + `shani-health --verify`), as described above.
 - **No runtime-configurable private update mirror or signing key.** As covered above, `R2_BASE_URL` and `GPG_KEY_ID` are compile-time constants in `shani-deploy`/`shani-update`. A private CDN or OEM signing key for *ongoing* updates requires forking the tool, not a config setting.
-- **No machine-readable `shani-health` output.** Reports are formatted text; only `--verify`'s exit code is designed for automation.
+- **Only `--verify` has machine-readable output.** `shani-health --verify --json` gives a structured pass/fail summary; every other mode (`--boot`, `--security`, `--storage-info`, `--network`, `--hardware`, `--packages`) is still formatted text only.
 - **No remote push/enrollment mechanism.** Machines pull updates on their own schedule (timer or user-triggered); there's no server-initiated "deploy to these 200 machines now" push.
 
 If your organisation needs one of these, [contact the project](https://shani.dev#enterprise) — enterprise/OEM engagement is exactly the context in which contributing this kind of tooling upstream is on the table.
