@@ -1224,7 +1224,7 @@
     "title": "Shell & Environment",
     "section": "Updates & Config",
     "description": "Shell & Environment  Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your…",
-    "updated": "2026-08-20",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""

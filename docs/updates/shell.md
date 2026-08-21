@@ -1,7 +1,7 @@
 ---
 title: Shell & Environment
 section: Updates & Config
-updated: 2026-08-20
+updated: 2026-08-21
 ---
 
 # Shell & Environment
@@ -128,6 +128,9 @@ echo '{"key": "value"}' | jq .    # jq — JSON processor
 7z a archive.7z file.txt
 tar xzf archive.tar.gz
 unzip archive.zip
+unrar x archive.rar          # extract a RAR archive (extraction only — RAR is proprietary)
+lrzip -o archive.lrz file    # long-range compression, best ratio on large/redundant files
+lzop -o file.lzo file        # fast, low-ratio compression — optimised for speed over size
 ```
 
 ## Shell Configuration Files
