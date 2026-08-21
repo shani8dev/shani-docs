@@ -1,7 +1,7 @@
 ---
 title: Virtual Machines
 section: Software & Apps
-updated: 2026-04-01
+updated: 2026-08-21
 ---
 
 # Virtual Machines
@@ -11,7 +11,7 @@ Shanios ships a full virtualisation stack pre-installed and ready to use. VM dis
 ## Pre-installed Stack
 
 - **libvirt** — VM management daemon (`libvirtd`), accessible via `virsh` and virt-manager
-- **QEMU/KVM** — hardware-accelerated virtualisation (no system QEMU package; all VM tooling is delivered via Flatpak which bundles its own QEMU)
+- **QEMU/KVM** — hardware-accelerated virtualisation; `qemu-base` and `libvirt` are installed as system packages on every edition (`shani-core`), with `libvirtd`/`virtlogd` sockets enabled from first boot
 - **systemd-nspawn** — lightweight OS containers managed as systemd units (stored in `@machines`)
 - **LXC/LXD** — full system containers with near-VM isolation (stored in `@lxc` / `@lxd`, `lxd.socket` enabled at boot)
 - **GNOME Boxes** — simple VM manager, pre-installed on the GNOME edition as a Flatpak (`org.gnome.Boxes`)

@@ -1044,7 +1044,7 @@
     "title": "Virtual Machines",
     "section": "Software & Apps",
     "description": "Virtual Machines  Shanios ships a full virtualisation stack pre-installed and ready to use. VM disk images live in dedicated Btrfs subvolumes ( and ) with …",
-    "updated": "2026-04-01",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""
