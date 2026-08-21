@@ -94,7 +94,7 @@
     "title": "OEM & Fleet Deployment",
     "section": "Enterprise",
     "description": "OEM & Fleet Deployment  Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or…",
-    "updated": "2026-08-20",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -1214,7 +1214,7 @@
     "title": "System Updates",
     "section": "Updates & Config",
     "description": "System Updates  Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the…",
-    "updated": "2026-08-20",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""

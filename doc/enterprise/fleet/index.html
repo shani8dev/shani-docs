@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="OEM &amp; Fleet Deployment  Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"OEM & Fleet Deployment","description":"OEM & Fleet Deployment  Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or…","url":"https://docs.shani.dev/doc/enterprise/fleet/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"OEM & Fleet Deployment","description":"OEM & Fleet Deployment  Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or…","url":"https://docs.shani.dev/doc/enterprise/fleet/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">OEM &amp; Fleet Deployment</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Enterprise</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
       <div class="prose"><p>Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or-nothing. Rollback requires no reimaging. The fleet stays uniform because the OS is replaced wholesale on each update — never patched in place.</p>
@@ -357,6 +357,9 @@ fi</code></pre>
 <pre><code class="language-bash">sudo shani-deploy --download-only     # fetch + verify now, cached under /data/downloads
 # ... later, in the maintenance window:
 sudo shani-deploy                     # deploys the already-verified image</code></pre>
+<p>shani-deploy ships a ready-made, opt-in timer for this instead of a hand-rolled unit — disabled by default, enable it explicitly on machines/fleets that want updates pre-staged automatically:</p>
+<pre><code class="language-bash">sudo systemctl enable --now shani-download-only.timer</code></pre>
+<p>It runs 30 minutes after boot and once a day thereafter (randomized by up to 2 hours, to avoid every machine hitting the CDN at once), and is idempotent — if the current image is already cached and verified, it's a no-op. If <code>zsync2</code> is installed and a previous image is still cached, the fetch it triggers is differential (see <a href="../updates/system#differential-downloads-zsync2">System Updates → Differential Downloads</a>).</p>
 <p>For managed fleets, disable the <code>shani-update</code> interactive prompt so it does not surface to users:</p>
 <pre><code class="language-bash">sudo rm /etc/xdg/autostart/shani-update.desktop</code></pre>
 <h3>Centralised Update Delivery — What Is (and Isn't) Configurable</h3>
@@ -434,12 +437,15 @@ shani-health --journal err
 
 # Bundle logs + state for centralised triage
 shani-health --export-logs /var/tmp/diag</code></pre>
-<p>Most modes (<code>--boot</code>, <code>--security</code>, <code>--storage-info</code>, <code>--network</code>, <code>--hardware</code>, <code>--packages</code>) print a formatted, human-readable report — there is no <code>--json</code>/machine-readable output mode today, so scraping structured data out of them for a monitoring dashboard would mean parsing text.</p>
-<p><code>--verify</code> is the exception worth building fleet automation around: it runs UKI signature checks, a Btrfs scrub of both slots, slot-marker consistency, boot-entry consistency, and immutability checks, then <strong>returns a real exit code</strong> — <code>0</code> if everything passed, <code>1</code> if it found any issue — which is exactly what a cron job or fleet health-check runner needs:</p>
+<p>Most modes (<code>--boot</code>, <code>--security</code>, <code>--storage-info</code>, <code>--network</code>, <code>--hardware</code>, <code>--packages</code>) print a formatted, human-readable report only — scraping structured data out of them for a monitoring dashboard means parsing text.</p>
+<p><code>--verify</code> is the one built for fleet automation: it runs UKI signature checks, a Btrfs scrub of both slots, slot-marker consistency, boot-entry consistency, and immutability checks, then <strong>returns a real exit code</strong> — <code>0</code> if everything passed, <code>1</code> if it found any issue — plus, with <code>--json</code>, a structured summary of exactly which check(s) failed:</p>
 <pre><code class="language-bash"># Cron-friendly health gate — non-zero exit means alert
 if ! shani-health --verify &gt;/tmp/verify.log 2&gt;&amp;1; then
     mail -s &quot;shani-health --verify FAILED on $(hostname)&quot; ops@example.com &lt; /tmp/verify.log
-fi</code></pre>
+fi
+
+# Machine-readable summary for a monitoring dashboard
+shani-health --verify --json | jq '.checks[] | select(.status == &quot;fail&quot;)'</code></pre>
 <p><code>--export-logs</code> bundles diagnostics into a directory for centralized collection (e.g. rsync'd back to a fleet-management box) when a deeper look is needed than the exit code alone provides.</p>
 <h3>Remote Monitoring via Tailscale or SSH</h3>
 <p>Each machine is accessible via SSH over Tailscale without requiring a VPN server or port forwarding. Tailscale state persists across OS updates at <code>/data/varlib/tailscale</code>:</p>
@@ -470,7 +476,7 @@ ssh admin@machine-name.tailnet.ts.net 'sudo shani-deploy -r &amp;&amp; sudo rebo
 <ul>
 <li><strong>No centralised fleet dashboard.</strong> There is no web console or MDM-style server for viewing fleet-wide status, pushing configuration, or triggering updates across machines. Fleet coordination today means SSH/Tailscale plus your own scripting (cron + <code>shani-deploy</code> + <code>shani-health --verify</code>), as described above.</li>
 <li><strong>No runtime-configurable private update mirror or signing key.</strong> As covered above, <code>R2_BASE_URL</code> and <code>GPG_KEY_ID</code> are compile-time constants in <code>shani-deploy</code>/<code>shani-update</code>. A private CDN or OEM signing key for <em>ongoing</em> updates requires forking the tool, not a config setting.</li>
-<li><strong>No machine-readable <code>shani-health</code> output.</strong> Reports are formatted text; only <code>--verify</code>'s exit code is designed for automation.</li>
+<li><strong>Only <code>--verify</code> has machine-readable output.</strong> <code>shani-health --verify --json</code> gives a structured pass/fail summary; every other mode (<code>--boot</code>, <code>--security</code>, <code>--storage-info</code>, <code>--network</code>, <code>--hardware</code>, <code>--packages</code>) is still formatted text only.</li>
 <li><strong>No remote push/enrollment mechanism.</strong> Machines pull updates on their own schedule (timer or user-triggered); there's no server-initiated "deploy to these 200 machines now" push.</li>
 </ul>
 <p>If your organisation needs one of these, <a href="https://shani.dev#enterprise">contact the project</a> — enterprise/OEM engagement is exactly the context in which contributing this kind of tooling upstream is on the table.</p>

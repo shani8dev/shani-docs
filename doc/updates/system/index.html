@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="System Updates  Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"System Updates","description":"System Updates  Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the…","url":"https://docs.shani.dev/doc/updates/system/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"System Updates","description":"System Updates  Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the…","url":"https://docs.shani.dev/doc/updates/system/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">System Updates</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Updates &amp; Config</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
       <div class="prose"><p>Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the next reboot. The previous slot is preserved as an instant rollback target.</p>
@@ -281,8 +281,8 @@ sudo AUTO_REBOOT_DELAY=300 shani-deploy</code></pre>
 <li><strong>Slot detection</strong> — determines the active and candidate slots</li>
 <li><strong>Space check</strong> — verifies at least 10 GB free on the Btrfs filesystem</li>
 <li><strong>Fetch metadata</strong> — downloads the latest release manifest from the CDN (R2 primary, SourceForge fallback)</li>
-<li><strong>Download</strong> — streams the image with resume support via <code>aria2c</code>, <code>wget</code>, or <code>curl</code></li>
-<li><strong>SHA256 verify</strong> — verifies checksum after download</li>
+<li><strong>Download</strong> — if a previous image is still cached locally and <code>zsync2</code> is installed, tries a differential fetch first (only the changed blocks); otherwise streams the full image with resume support via <code>aria2c</code>, <code>wget</code>, or <code>curl</code>. See <a href="#differential-downloads-zsync2">Differential Downloads</a> below.</li>
+<li><strong>SHA256 verify</strong> — verifies checksum after download, regardless of which download path produced the file</li>
 <li><strong>GPG verify</strong> — verifies signature against the Shani OS GPG key (<code>7B927BFFD4A9EAAA8B666B77DE217F3DA8014792</code>)</li>
 <li><strong>Snapshot</strong> — takes a timestamped Btrfs snapshot of the inactive slot before writing</li>
 <li><strong>Extract</strong> — pipes the verified image into <code>btrfs receive</code></li>
@@ -292,6 +292,10 @@ sudo AUTO_REBOOT_DELAY=300 shani-deploy</code></pre>
 <li><strong>Auto-reboot</strong> — arms a 60-second automatic reboot (see <a href="#automatic-reboot-after-deployment">Automatic Reboot After Deployment</a> below); cancel it if you need more time</li>
 </ol>
 <p>Nothing in your running OS is touched at any point.</p>
+<h2>Differential Downloads (zsync2)</h2>
+<p>Each release image gets a <code>.zsync</code> control file alongside it, generated at build time. When <code>zsync2</code> is installed and a previous image is still cached in <code>/data/downloads/</code> (normally left there from your last update), <code>shani-deploy</code> tries a differential fetch first — pulling only the blocks that changed since that cached image — before falling back to a full download.</p>
+<p>This is an optimization, not a trust boundary: <code>zsync2</code> is an actively developing, upstream-experimental tool, so any problem with it (not installed, no cached image to diff against, timeout, failure) silently falls through to the ordinary full download via <code>aria2c</code>/<code>wget</code>/<code>curl</code>. Whichever path produced the file, it still goes through the same SHA256 and GPG verification afterward — a differential download is never trusted on its own, only the verified result is.</p>
+<p>There's nothing to configure: this only ever runs against R2 (where the control file's embedded URL always points), and only when a local seed image is actually available.</p>
 <h2>Rolling Back</h2>
 <pre><code class="language-bash"># Roll back from the currently booted slot (restores the inactive slot from its last snapshot)
 sudo shani-deploy -r
