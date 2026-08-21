@@ -1,7 +1,7 @@
 ---
 title: OEM & Fleet Deployment
 section: Enterprise
-updated: 2026-08-20
+updated: 2026-08-21
 ---
 
 # OEM & Fleet Deployment
@@ -233,6 +233,14 @@ sudo shani-deploy --download-only     # fetch + verify now, cached under /data/d
 # ... later, in the maintenance window:
 sudo shani-deploy                     # deploys the already-verified image
 ```
+
+shani-deploy ships a ready-made, opt-in timer for this instead of a hand-rolled unit — disabled by default, enable it explicitly on machines/fleets that want updates pre-staged automatically:
+
+```bash
+sudo systemctl enable --now shani-download-only.timer
+```
+
+It runs 30 minutes after boot and once a day thereafter (randomized by up to 2 hours, to avoid every machine hitting the CDN at once), and is idempotent — if the current image is already cached and verified, it's a no-op. If `zsync2` is installed and a previous image is still cached, the fetch it triggers is differential (see [System Updates → Differential Downloads](../updates/system#differential-downloads-zsync2)).
 
 For managed fleets, disable the `shani-update` interactive prompt so it does not surface to users:
 
