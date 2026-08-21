@@ -4,7 +4,7 @@
     "title": "Boot Process",
     "section": "Architecture",
     "description": "Boot Process  Shanios uses a fully measured, signed boot chain built on systemd-boot, dracut-generated Unified Kernel Images (UKIs), and optionally TPM2 + …",
-    "updated": "2026-08-20",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""

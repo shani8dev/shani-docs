@@ -1,7 +1,7 @@
 ---
 title: Boot Process
 section: Architecture
-updated: 2026-08-20
+updated: 2026-08-21
 ---
 
 # Boot Process
@@ -57,6 +57,24 @@ shanios-green (Candidate)   ← standby / previous slot
 ```
 
 The `(Active)` entry is written as `shanios-<slot>+3-0.conf` (3 tries left, 0 done) and set as the `loader.conf` default; systemd-boot matches the default against the entry *ID* (`shanios-<slot>.conf`, tries suffix stripped), so the tries-suffixed filename still resolves correctly no matter how many boots have elapsed. The `(Candidate)` entry is written as a plain `shanios-<slot>.conf` with no tries suffix — it is the unconditional fallback if the active slot's tries run out.
+
+### UEFI Firmware Boot Entries (efibootmgr)
+
+The entries above are systemd-boot's own internal menu. Separately, the UEFI firmware itself keeps a boot menu (visible via your firmware setup or a one-time boot-device key like F12) that decides which bootloader to launch at all — this is managed by `efibootmgr` (pre-installed), and is what the installer registers automatically during setup.
+
+```bash
+# List current UEFI firmware boot entries and boot order
+sudo efibootmgr -v
+
+# Re-register Shanios's boot entry (e.g. after it was removed by another OS's installer)
+sudo efibootmgr --create --disk /dev/sda --part 1 --label "Shanios" --loader '\EFI\systemd\systemd-bootx64.efi'
+
+# Change boot order (comma-separated boot entry numbers, first = highest priority)
+sudo efibootmgr --bootorder 0000,0001,0002
+
+# Remove a stale/duplicate entry
+sudo efibootmgr --bootnum 0003 --delete-bootnum
+```
 
 ## Kernel Command Line
 

@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Boot Process  Shanios uses a fully measured, signed boot chain built on systemd-boot, dracut-generated Unified Kernel Images (UKIs), and optionally TPM2 + …">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Boot Process","description":"Boot Process  Shanios uses a fully measured, signed boot chain built on systemd-boot, dracut-generated Unified Kernel Images (UKIs), and optionally TPM2 + …","url":"https://docs.shani.dev/doc/arch/boot/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Boot Process","description":"Boot Process  Shanios uses a fully measured, signed boot chain built on systemd-boot, dracut-generated Unified Kernel Images (UKIs), and optionally TPM2 + …","url":"https://docs.shani.dev/doc/arch/boot/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Boot Process</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Architecture</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
       <div class="prose"><p>Shanios uses a fully measured, signed boot chain built on systemd-boot, dracut-generated Unified Kernel Images (UKIs), and optionally TPM2 + Secure Boot verification.</p>
@@ -250,6 +250,19 @@
 <pre><code>shanios-blue  (Active)      ← currently running slot
 shanios-green (Candidate)   ← standby / previous slot</code></pre>
 <p>The <code>(Active)</code> entry is written as <code>shanios-&lt;slot&gt;+3-0.conf</code> (3 tries left, 0 done) and set as the <code>loader.conf</code> default; systemd-boot matches the default against the entry <em>ID</em> (<code>shanios-&lt;slot&gt;.conf</code>, tries suffix stripped), so the tries-suffixed filename still resolves correctly no matter how many boots have elapsed. The <code>(Candidate)</code> entry is written as a plain <code>shanios-&lt;slot&gt;.conf</code> with no tries suffix — it is the unconditional fallback if the active slot's tries run out.</p>
+<h3>UEFI Firmware Boot Entries (efibootmgr)</h3>
+<p>The entries above are systemd-boot's own internal menu. Separately, the UEFI firmware itself keeps a boot menu (visible via your firmware setup or a one-time boot-device key like F12) that decides which bootloader to launch at all — this is managed by <code>efibootmgr</code> (pre-installed), and is what the installer registers automatically during setup.</p>
+<pre><code class="language-bash"># List current UEFI firmware boot entries and boot order
+sudo efibootmgr -v
+
+# Re-register Shanios's boot entry (e.g. after it was removed by another OS's installer)
+sudo efibootmgr --create --disk /dev/sda --part 1 --label &quot;Shanios&quot; --loader '\EFI\systemd\systemd-bootx64.efi'
+
+# Change boot order (comma-separated boot entry numbers, first = highest priority)
+sudo efibootmgr --bootorder 0000,0001,0002
+
+# Remove a stale/duplicate entry
+sudo efibootmgr --bootnum 0003 --delete-bootnum</code></pre>
 <h2>Kernel Command Line</h2>
 <p>Key parameters embedded in each UKI:</p>
 <pre><code>quiet splash                         # suppress kernel messages; show Plymouth

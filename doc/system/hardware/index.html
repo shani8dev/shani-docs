@@ -235,7 +235,11 @@ sudo dmidecode -t baseboard
 
 # Kernel and OS info
 uname -a
-hostnamectl</code></pre>
+hostnamectl
+
+# Distro identification (useful for scripts that branch on distro)
+lsb_release -a
+cat /etc/os-release</code></pre>
 <p>---</p>
 <h2>CPU</h2>
 <pre><code class="language-bash"># CPU model, cores, threads, cache

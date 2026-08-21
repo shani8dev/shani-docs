@@ -30,6 +30,10 @@ sudo dmidecode -t baseboard
 # Kernel and OS info
 uname -a
 hostnamectl
+
+# Distro identification (useful for scripts that branch on distro)
+lsb_release -a
+cat /etc/os-release
 ```
 
 ---

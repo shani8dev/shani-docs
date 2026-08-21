@@ -113,6 +113,18 @@ sudo mkfs.vfat -F32 /dev/sdb1
 
 # exFAT
 sudo mkfs.exfat /dev/sdb1
+
+# F2FS (flash-optimized, good for SD cards/USB flash)
+sudo mkfs.f2fs /dev/sdb1
+
+# NTFS (for drives shared with Windows)
+sudo mkfs.ntfs -f /dev/sdb1
+```
+
+Resizing a FAT partition specifically (rather than the generic `parted`/`gdisk` steps above) can be done with `fatresize`:
+
+```bash
+sudo fatresize -s 8G /dev/sdb1
 ```
 
 ### Mounting
@@ -303,6 +315,25 @@ ncdu /
 compsize /home
 sudo btrfs filesystem usage /
 ```
+
+---
+
+## Finding Files — plocate
+
+`plocate` (pre-installed) indexes the filesystem for near-instant filename search — much faster than `find` for a full-system search, at the cost of only being as current as the last index update.
+
+```bash
+# Search for files by name (case-sensitive substring match)
+plocate myfile.txt
+
+# Case-insensitive search
+plocate -i myfile.txt
+
+# Manually refresh the index (updates automatically via a daily systemd timer)
+sudo updatedb
+```
+
+`locate` is a symlink to `plocate` — either command works the same way.
 
 ---
 

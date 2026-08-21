@@ -285,7 +285,15 @@ sudo mkfs.xfs /dev/sda1
 sudo mkfs.vfat -F32 /dev/sdb1
 
 # exFAT
-sudo mkfs.exfat /dev/sdb1</code></pre>
+sudo mkfs.exfat /dev/sdb1
+
+# F2FS (flash-optimized, good for SD cards/USB flash)
+sudo mkfs.f2fs /dev/sdb1
+
+# NTFS (for drives shared with Windows)
+sudo mkfs.ntfs -f /dev/sdb1</code></pre>
+<p>Resizing a FAT partition specifically (rather than the generic <code>parted</code>/<code>gdisk</code> steps above) can be done with <code>fatresize</code>:</p>
+<pre><code class="language-bash">sudo fatresize -s 8G /dev/sdb1</code></pre>
 <h3>Mounting</h3>
 <pre><code class="language-bash"># Mount a filesystem
 sudo mount /dev/sda1 /mnt
@@ -426,6 +434,18 @@ ncdu /</code></pre>
 <pre><code class="language-bash"># Btrfs-specific: actual space used after compression and deduplication
 compsize /home
 sudo btrfs filesystem usage /</code></pre>
+<p>---</p>
+<h2>Finding Files — plocate</h2>
+<p><code>plocate</code> (pre-installed) indexes the filesystem for near-instant filename search — much faster than <code>find</code> for a full-system search, at the cost of only being as current as the last index update.</p>
+<pre><code class="language-bash"># Search for files by name (case-sensitive substring match)
+plocate myfile.txt
+
+# Case-insensitive search
+plocate -i myfile.txt
+
+# Manually refresh the index (updates automatically via a daily systemd timer)
+sudo updatedb</code></pre>
+<p><code>locate</code> is a symlink to <code>plocate</code> — either command works the same way.</p>
 <p>---</p>
 <h2>SMART — Disk Health Monitoring</h2>
 <p>SMART (Self-Monitoring, Analysis and Reporting Technology) provides drive health data. <code>smartmontools</code> is pre-installed.</p>
