@@ -574,7 +574,7 @@
     "title": "Security Features",
     "section": "Security",
     "description": "Security Features  Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot wi…",
-    "updated": "2026-08-20",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -664,7 +664,7 @@
     "title": "Secure Boot",
     "section": "Security",
     "description": "Secure Boot  Shanios ships with its own MOK (Machine Owner Key) and signs all UKI images at install time. Secure Boot can be enabled after installation to …",
-    "updated": "2026-04-30",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""

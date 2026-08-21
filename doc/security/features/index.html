@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Security Features  Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot wi…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Security Features","description":"Security Features  Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot wi…","url":"https://docs.shani.dev/doc/security/features/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Security Features","description":"Security Features  Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot wi…","url":"https://docs.shani.dev/doc/security/features/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Security Features</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Security</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
       <div class="prose"><p>Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot with no manual configuration required.</p>
@@ -251,7 +251,7 @@ Iteration time:  2000 ms (benchmarked per-machine, not a fixed iteration count)<
 <p>This seals the LUKS key into the TPM2 chip with PCR policy chosen automatically: <strong>PCR 0+7</strong> when Secure Boot is enabled (firmware + Secure Boot certificate state), or <strong>PCR 0 only</strong> when disabled. The disk unlocks silently on your own hardware; if physically moved to another machine or if firmware is tampered with, the TPM withholds the key.</p>
 <p>See <a href="tpm2">TPM2 Enrollment</a> for setup and <a href="luks">LUKS Management</a> for keyslot management.</p>
 <h2>Secure Boot</h2>
-<p>Shanios uses Shim for Secure Boot — the same mechanism used by mainstream Linux distributions. The MOK is generated during installation. Every UKI that <code>gen-efi</code> generates is signed with this key.</p>
+<p>Shanios uses Shim for Secure Boot — the same mechanism used by mainstream Linux distributions. The MOK (Machine Owner Key) is baked into the system image at build time — every machine installed from the same signed ISO shares the same key. A fresh keypair is only generated on the spot as a fallback, if keys are missing or invalid on a given image. Every UKI that <code>gen-efi</code> generates is signed with this key.</p>
 <p>The full boot chain:</p>
 <pre><code>UEFI Firmware (verifies Shim via Microsoft CA)
   → Shim (verifies systemd-boot via MOK)

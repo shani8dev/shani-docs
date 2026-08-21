@@ -1,7 +1,7 @@
 ---
 title: Security Features
 section: Security
-updated: 2026-08-20
+updated: 2026-08-21
 ---
 
 # Security Features
@@ -87,7 +87,7 @@ See [TPM2 Enrollment](tpm2) for setup and [LUKS Management](luks) for keyslot ma
 
 ## Secure Boot
 
-Shanios uses Shim for Secure Boot — the same mechanism used by mainstream Linux distributions. The MOK is generated during installation. Every UKI that `gen-efi` generates is signed with this key.
+Shanios uses Shim for Secure Boot — the same mechanism used by mainstream Linux distributions. The MOK (Machine Owner Key) is baked into the system image at build time — every machine installed from the same signed ISO shares the same key. A fresh keypair is only generated on the spot as a fallback, if keys are missing or invalid on a given image. Every UKI that `gen-efi` generates is signed with this key.
 
 The full boot chain:
 

@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Secure Boot  Shanios ships with its own MOK (Machine Owner Key) and signs all UKI images at install time. Secure Boot can be enabled after installation to …">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Secure Boot","description":"Secure Boot  Shanios ships with its own MOK (Machine Owner Key) and signs all UKI images at install time. Secure Boot can be enabled after installation to …","url":"https://docs.shani.dev/doc/security/secure-boot/","datePublished":"2026-04-30T00:00:00.000Z","dateModified":"2026-04-30T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Secure Boot","description":"Secure Boot  Shanios ships with its own MOK (Machine Owner Key) and signs all UKI images at install time. Secure Boot can be enabled after installation to …","url":"https://docs.shani.dev/doc/security/secure-boot/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Secure Boot</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Security</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-30</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
       <div class="prose"><p>Shanios ships with its own MOK (Machine Owner Key) and signs all UKI images at install time. Secure Boot can be enabled after installation to ensure only verified OS images can boot.</p>
@@ -224,7 +224,7 @@
     → systemd-boot (verifies the UKI via MOK)
       → Unified Kernel Image (kernel + initramfs + cmdline, all signed together)</code></pre>
 <ol>
-<li>The Shanios installer generates a unique MOK key pair on your machine</li>
+<li>The MOK key pair is baked into the system image at build time — every machine installed from the same signed ISO shares the same key (the installer just verifies the keypair and re-signs with it; a fresh keypair is only generated on the spot as a fallback, if keys are missing or invalid)</li>
 <li>Both UKIs (<code>shanios-blue.efi</code>, <code>shanios-green.efi</code>) are signed with this key</li>
 <li>You enroll the public MOK in your firmware's MOK database</li>
 <li>Enable Secure Boot in UEFI settings</li>

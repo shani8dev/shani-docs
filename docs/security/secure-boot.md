@@ -1,7 +1,7 @@
 ---
 title: Secure Boot
 section: Security
-updated: 2026-04-30
+updated: 2026-08-21
 ---
 
 # Secure Boot
@@ -19,7 +19,7 @@ UEFI Firmware (verifies Shim via Microsoft CA)
       → Unified Kernel Image (kernel + initramfs + cmdline, all signed together)
 ```
 
-1. The Shanios installer generates a unique MOK key pair on your machine
+1. The MOK key pair is baked into the system image at build time — every machine installed from the same signed ISO shares the same key (the installer just verifies the keypair and re-signs with it; a fresh keypair is only generated on the spot as a fallback, if keys are missing or invalid)
 2. Both UKIs (`shanios-blue.efi`, `shanios-green.efi`) are signed with this key
 3. You enroll the public MOK in your firmware's MOK database
 4. Enable Secure Boot in UEFI settings
