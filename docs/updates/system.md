@@ -22,7 +22,7 @@ On each run, `shani-update` works through a fixed priority sequence:
 
 When the user confirms an update, `shani-update` detects the available terminal emulator and launches `shani-deploy` inside it.
 
-> **Auto-reboot applies here too.** Once `shani-deploy` finishes successfully — including when launched unattended by the timer — it arms its own 60-second automatic reboot regardless of who or what started it. See [Automatic Reboot After Deployment](#automatic-reboot-after-deployment) below if you need to cancel it.
+> **Auto-reboot is opt-in here too.** Once `shani-deploy` finishes successfully — whether launched unattended by the timer or manually — the new slot is ready to boot into whenever convenient; it does not reboot on its own unless `AUTO_REBOOT=yes` was set. See [Automatic Reboot After Deployment](#automatic-reboot-after-deployment) below.
 
 ```bash
 # Check timer status
@@ -103,20 +103,20 @@ sudo shani-deploy --download-only
 
 ## Automatic Reboot After Deployment
 
-**After any successful deployment, `shani-deploy` automatically reboots the machine 60 seconds later** — whether the deploy was started manually, by `shani-update`, or by the timer running unattended in the background. This applies every time, not just to interactive runs.
+**The new slot is fully deployed and bootable as soon as `shani-deploy` finishes — rebooting promptly is not required.** By default, `shani-deploy` does **not** reboot automatically; reboot whenever it's convenient to switch into the new slot. This applies every time, not just to interactive runs.
 
 ```bash
-# Cancel a pending automatic reboot (must run before the 60s elapse)
-systemctl stop shanios-auto-reboot.timer
-
-# Disable auto-reboot for a single run
-sudo AUTO_REBOOT=no shani-deploy
+# Opt into an automatic reboot 60 seconds after a successful deployment
+sudo AUTO_REBOOT=yes shani-deploy
 
 # Change the delay for a single run (seconds)
-sudo AUTO_REBOOT_DELAY=300 shani-deploy
+sudo AUTO_REBOOT=yes AUTO_REBOOT_DELAY=300 shani-deploy
+
+# Cancel a pending automatic reboot (if AUTO_REBOOT=yes armed one)
+systemctl stop shanios-auto-reboot.timer
 ```
 
-Auto-reboot is skipped entirely in `--dry-run` mode. It is armed via a transient systemd timer unit (`shanios-auto-reboot.timer`) so it survives even if the terminal running `shani-deploy` is closed — cancel it with the command above if you need more time before rebooting.
+When enabled, auto-reboot is still skipped entirely in `--dry-run` mode, and is armed via a transient systemd timer unit (`shanios-auto-reboot.timer`) so it survives even if the terminal running `shani-deploy` is closed — cancel it with the command above if you need more time before rebooting.
 
 ## Update Process in Detail
 
@@ -132,7 +132,7 @@ Auto-reboot is skipped entirely in `--dry-run` mode. It is armed via a transient
 10. **UKI generation** — runs `gen-efi configure <inactive-slot>` inside a chroot of the new slot
 11. **Boot entry update** — new slot set as next-boot default with `+3-0` boot count tries
 12. **Notify** — writes `/run/shanios/reboot-needed` so `shani-update` can surface a restart dialog on next login
-13. **Auto-reboot** — arms a 60-second automatic reboot (see [Automatic Reboot After Deployment](#automatic-reboot-after-deployment) below); cancel it if you need more time
+13. **Auto-reboot** — opt-in only (`AUTO_REBOOT=yes`); the new slot is ready immediately and reboot is left to your convenience by default (see [Automatic Reboot After Deployment](#automatic-reboot-after-deployment) below)
 
 Nothing in your running OS is touched at any point.
 

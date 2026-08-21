@@ -214,17 +214,19 @@ sudo systemctl enable shani-autoupdate.timer
 
 `shani-deploy` takes an `flock`-based lock on `/run/shanios-deploy.lock` before doing anything (`acquire_deploy_lock()`), so if a timer-triggered run overlaps with an admin manually running `shani-deploy` — or a second timer fires before the first finishes — the second invocation exits immediately with "Another shani-deploy is already running" instead of racing the first. This makes scheduled fleet timers safe to layer on top of manual/ad-hoc updates without extra locking of your own.
 
-The update stages the new image and, once staged, arms a **60-second automatic reboot by default** (`AUTO_REBOOT=yes`) via a separate one-shot systemd timer. For fleets that want to control the reboot moment precisely (a maintenance window rather than 60 seconds after staging), disable that and drive it yourself off the reboot marker:
+The update stages the new image and, by default, **does not reboot automatically** — the new slot is fully deployed and bootable immediately, so `shani-deploy` leaves the reboot moment up to you. This is exactly what fleets generally want: control the reboot moment precisely (a maintenance window) by driving it yourself off the reboot marker, with no override needed:
 
 ```bash
-# Stage the update but don't let it auto-reboot in 60s
-sudo AUTO_REBOOT=no shani-deploy
+# Stage the update — no reboot happens on its own
+sudo shani-deploy
 
 # Check the marker in your maintenance-window logic (tmpfs, cleared on reboot)
 if [ -f /run/shanios/reboot-needed ]; then
     systemctl reboot
 fi
 ```
+
+If you instead want `shani-deploy` itself to reboot automatically a fixed delay after staging (e.g. for single-machine, non-fleet use), opt in with `AUTO_REBOOT=yes` (and optionally `AUTO_REBOOT_DELAY=<seconds>`, default 60).
 
 `--download-only` splits fetch from deploy — useful for pre-staging an update to many machines over a slow or metered link ahead of the actual maintenance window:
 

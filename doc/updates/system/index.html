@@ -228,7 +228,7 @@
 <li><strong>Update check</strong> — fetches release metadata and, if a newer version is available, shows an install dialog.</li>
 </ol>
 <p>When the user confirms an update, <code>shani-update</code> detects the available terminal emulator and launches <code>shani-deploy</code> inside it.</p>
-<blockquote><p><strong>Auto-reboot applies here too.</strong> Once <code>shani-deploy</code> finishes successfully — including when launched unattended by the timer — it arms its own 60-second automatic reboot regardless of who or what started it. See <a href="#automatic-reboot-after-deployment">Automatic Reboot After Deployment</a> below if you need to cancel it.</p></blockquote>
+<blockquote><p><strong>Auto-reboot is opt-in here too.</strong> Once <code>shani-deploy</code> finishes successfully — whether launched unattended by the timer or manually — the new slot is ready to boot into whenever convenient; it does not reboot on its own unless <code>AUTO_REBOOT=yes</code> was set. See <a href="#automatic-reboot-after-deployment">Automatic Reboot After Deployment</a> below.</p></blockquote>
 <pre><code class="language-bash"># Check timer status
 systemctl --user status shani-update.timer
 
@@ -265,16 +265,16 @@ sudo shani-deploy --download-only</code></pre>
 <p>| Flag | Effect | |------|--------| | <code>-h</code>, <code>--help</code> | Show usage | | <code>-r</code>, <code>--rollback</code> | Roll back the non-booted slot (run from the slot you want to keep) | | <code>-c</code>, <code>--cleanup</code> | Manual cleanup of old backups and cached downloads | | <code>-o</code>, <code>--optimize</code> | Manual Btrfs deduplication (bees handles continuous dedup in the background) | | <code>-t</code>, <code>--channel &lt;chan&gt;</code> | Update channel for this run only: <code>stable</code> or <code>latest</code> | | <code>-f</code>, <code>--force</code> | Deploy even if the version matches or there's a boot mismatch | | <code>--download-only</code> | Fetch and verify the update image, then exit without deploying | | <code>-d</code>, <code>--dry-run</code> | Simulate without making changes | | <code>-v</code>, <code>--verbose</code> | Verbose output | | <code>--set-channel &lt;chan&gt;</code> | Permanently persist the channel to <code>/etc/shani-channel</code> | | <code>--skip-self-update</code> | Skip <code>shani-deploy</code>'s own auto-update-and-re-exec step | | <code>--update-genefi</code> | Download the latest <code>gen-efi</code> from upstream and use it inside the deploy chroot only (does not install it to the host) |</p>
 <p><code>--download-only</code> cannot be combined with <code>--rollback</code>, <code>--cleanup</code>, <code>--optimize</code>, or <code>--set-channel</code>.</p>
 <h2>Automatic Reboot After Deployment</h2>
-<p><strong>After any successful deployment, <code>shani-deploy</code> automatically reboots the machine 60 seconds later</strong> — whether the deploy was started manually, by <code>shani-update</code>, or by the timer running unattended in the background. This applies every time, not just to interactive runs.</p>
-<pre><code class="language-bash"># Cancel a pending automatic reboot (must run before the 60s elapse)
-systemctl stop shanios-auto-reboot.timer
-
-# Disable auto-reboot for a single run
-sudo AUTO_REBOOT=no shani-deploy
+<p><strong>The new slot is fully deployed and bootable as soon as <code>shani-deploy</code> finishes — rebooting promptly is not required.</strong> By default, <code>shani-deploy</code> does <strong>not</strong> reboot automatically; reboot whenever it's convenient to switch into the new slot. This applies every time, not just to interactive runs.</p>
+<pre><code class="language-bash"># Opt into an automatic reboot 60 seconds after a successful deployment
+sudo AUTO_REBOOT=yes shani-deploy
 
 # Change the delay for a single run (seconds)
-sudo AUTO_REBOOT_DELAY=300 shani-deploy</code></pre>
-<p>Auto-reboot is skipped entirely in <code>--dry-run</code> mode. It is armed via a transient systemd timer unit (<code>shanios-auto-reboot.timer</code>) so it survives even if the terminal running <code>shani-deploy</code> is closed — cancel it with the command above if you need more time before rebooting.</p>
+sudo AUTO_REBOOT=yes AUTO_REBOOT_DELAY=300 shani-deploy
+
+# Cancel a pending automatic reboot (if AUTO_REBOOT=yes armed one)
+systemctl stop shanios-auto-reboot.timer</code></pre>
+<p>When enabled, auto-reboot is still skipped entirely in <code>--dry-run</code> mode, and is armed via a transient systemd timer unit (<code>shanios-auto-reboot.timer</code>) so it survives even if the terminal running <code>shani-deploy</code> is closed — cancel it with the command above if you need more time before rebooting.</p>
 <h2>Update Process in Detail</h2>
 <ol>
 <li><strong>Self-update check</strong> — downloads a newer version of <code>shani-deploy</code> itself if available and re-execs</li>
@@ -289,7 +289,7 @@ sudo AUTO_REBOOT_DELAY=300 shani-deploy</code></pre>
 <li><strong>UKI generation</strong> — runs <code>gen-efi configure &lt;inactive-slot&gt;</code> inside a chroot of the new slot</li>
 <li><strong>Boot entry update</strong> — new slot set as next-boot default with <code>+3-0</code> boot count tries</li>
 <li><strong>Notify</strong> — writes <code>/run/shanios/reboot-needed</code> so <code>shani-update</code> can surface a restart dialog on next login</li>
-<li><strong>Auto-reboot</strong> — arms a 60-second automatic reboot (see <a href="#automatic-reboot-after-deployment">Automatic Reboot After Deployment</a> below); cancel it if you need more time</li>
+<li><strong>Auto-reboot</strong> — opt-in only (<code>AUTO_REBOOT=yes</code>); the new slot is ready immediately and reboot is left to your convenience by default (see <a href="#automatic-reboot-after-deployment">Automatic Reboot After Deployment</a> below)</li>
 </ol>
 <p>Nothing in your running OS is touched at any point.</p>
 <h2>Differential Downloads (zsync2)</h2>
