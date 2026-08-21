@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="System Config  All system configuration in Shanios follows standard Linux conventions — edit files in , manage services with . Your changes are captured by…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"System Config","description":"System Config  All system configuration in Shanios follows standard Linux conventions — edit files in , manage services with . Your changes are captured by…","url":"https://docs.shani.dev/doc/updates/config/","datePublished":"2026-05-06T00:00:00.000Z","dateModified":"2026-05-06T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"System Config","description":"System Config  All system configuration in Shanios follows standard Linux conventions — edit files in , manage services with . Your changes are captured by…","url":"https://docs.shani.dev/doc/updates/config/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">System Config</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Updates &amp; Config</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-05-06</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
       <div class="prose"><p>All system configuration in Shanios follows standard Linux conventions — edit files in <code>/etc</code>, manage services with <code>systemctl</code>. Your changes are captured by the OverlayFS upper layer and survive every OS update and rollback.</p>
@@ -329,7 +329,17 @@ timedatectl timesync-status</code></pre>
 
 # Add a sudoers drop-in (safer than editing /etc/sudoers directly)
 sudo nano /etc/sudoers.d/my-rules
-# username ALL=(ALL) NOPASSWD: /usr/bin/specific-command</code></pre></div>
+# username ALL=(ALL) NOPASSWD: /usr/bin/specific-command</code></pre>
+<h2>Hiding App-Launcher Entries</h2>
+<p>Some CLI-only tools ship a <code>.desktop</code> file upstream even though they have no real GUI (<code>htop</code>, <code>vim</code>, <code>nvim</code>, <code>cups</code>, and similar packages) — without intervention these would clutter your application launcher. Shanios ships a pacman hook, <code>desktop-entry-hider</code>, that runs automatically after every package install or upgrade touching <code>/usr/share/applications/*.desktop</code>. It applies a curated list of overrides from <code>/etc/desktop-entry-hider/configs/</code> — one file per app, each appending a <code>NotShowIn=</code> line to that app's <code>.desktop</code> file so it's suppressed from the launcher without removing the file itself.</p>
+<pre><code class="language-bash"># See what desktop-entry-hider has configured
+ls /etc/desktop-entry-hider/configs/
+
+# Example: how an entry is hidden (appended to the .desktop file)
+cat /etc/desktop-entry-hider/configs/htop.desktop
+# contain='NotShowIn=GNOME;KDE;Pantheon;'</code></pre>
+<p><strong>To un-hide an app</strong>, remove the <code>NotShowIn=</code> line the hook added from <code>/usr/share/applications/&lt;name&gt;.desktop</code> — it will be re-added on the next update unless you also delete or edit the corresponding file in <code>/etc/desktop-entry-hider/configs/</code>.</p>
+<p><strong>To hide an additional app yourself</strong>, add a new file there following the same pattern, then run <code>sudo desktop-entry-hider</code> to apply it immediately (it otherwise only runs on package transactions).</p></div>
     </div>
 
   </main>

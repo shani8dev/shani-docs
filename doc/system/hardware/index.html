@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Hardware  This page covers inspecting and diagnosing hardware on Shani OS: CPUs, memory, GPUs, storage controllers, USB devices, sensors, and firmware. All…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Hardware","description":"Hardware  This page covers inspecting and diagnosing hardware on Shani OS: CPUs, memory, GPUs, storage controllers, USB devices, sensors, and firmware. All…","url":"https://docs.shani.dev/doc/system/hardware/","datePublished":"2026-04-28T00:00:00.000Z","dateModified":"2026-04-28T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Hardware","description":"Hardware  This page covers inspecting and diagnosing hardware on Shani OS: CPUs, memory, GPUs, storage controllers, USB devices, sensors, and firmware. All…","url":"https://docs.shani.dev/doc/system/hardware/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Hardware</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">System</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-28</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
       <div class="prose"><p>This page covers inspecting and diagnosing hardware on Shani OS: CPUs, memory, GPUs, storage controllers, USB devices, sensors, and firmware. All tools listed here are pre-installed unless noted.</p>
@@ -401,6 +401,35 @@ sudo systemctl enable --now fancontrol
 cat /sys/class/hwmon/hwmon0/pwm1_enable    # 0=full speed, 1=manual, 2=auto
 echo 1 | sudo tee /sys/class/hwmon/hwmon0/pwm1_enable  # manual mode
 echo 180 | sudo tee /sys/class/hwmon/hwmon0/pwm1        # 0–255</code></pre>
+<p><strong>AIO coolers, pumps, and RGB — liquidctl:</strong> pre-installed for devices with USB-controlled cooling (NZXT Kraken, Corsair Commander, EVGA CLC, and others liquidctl supports).</p>
+<pre><code class="language-bash"># List detected devices
+sudo liquidctl list
+
+# Read current status (pump/fan speed, coolant temp)
+sudo liquidctl status
+
+# Set pump/fan speed
+sudo liquidctl set pump speed 70
+sudo liquidctl set fan speed 50
+
+# Set RGB lighting
+sudo liquidctl set led color fixed ff0000</code></pre>
+<p>Full device support list: <a href="https://liquidctl.github.io/liquidctl/">liquidctl.github.io/liquidctl</a>.</p>
+<p>---</p>
+<h2>Monitor Control</h2>
+<p><strong>ddcutil</strong> (pre-installed) controls monitor settings over DDC/CI — brightness, contrast, and input source — without needing physical buttons on the monitor. Useful for monitors without OSD controls, or scripting brightness changes.</p>
+<pre><code class="language-bash"># List detected displays
+sudo ddcutil detect
+
+# Read a setting (e.g. brightness, VCP code 10)
+sudo ddcutil getvcp 10
+
+# Set brightness (0-100)
+sudo ddcutil setvcp 10 75
+
+# Switch input source (VCP code 60; values are monitor-specific — check with detect)
+sudo ddcutil setvcp 60 0x0f</code></pre>
+<p>Not all monitors support DDC/CI, and some require enabling it in the monitor's OSD menu first. Run <code>ddcutil</code> with <code>sudo</code> — Shanios doesn't grant any user group direct access to <code>/dev/i2c-*</code> by default. If <code>sudo ddcutil detect</code> still finds nothing, check <code>sudo ddcutil detect --verbose</code> for I2C bus errors.</p>
 <p>---</p>
 <h2>Power Management</h2>
 <pre><code class="language-bash"># Current power profile

@@ -1,7 +1,7 @@
 ---
 title: System Config
 section: Updates & Config
-updated: 2026-05-06
+updated: 2026-08-21
 ---
 
 # System Config
@@ -195,3 +195,20 @@ sudo visudo
 sudo nano /etc/sudoers.d/my-rules
 # username ALL=(ALL) NOPASSWD: /usr/bin/specific-command
 ```
+
+## Hiding App-Launcher Entries
+
+Some CLI-only tools ship a `.desktop` file upstream even though they have no real GUI (`htop`, `vim`, `nvim`, `cups`, and similar packages) — without intervention these would clutter your application launcher. Shanios ships a pacman hook, `desktop-entry-hider`, that runs automatically after every package install or upgrade touching `/usr/share/applications/*.desktop`. It applies a curated list of overrides from `/etc/desktop-entry-hider/configs/` — one file per app, each appending a `NotShowIn=` line to that app's `.desktop` file so it's suppressed from the launcher without removing the file itself.
+
+```bash
+# See what desktop-entry-hider has configured
+ls /etc/desktop-entry-hider/configs/
+
+# Example: how an entry is hidden (appended to the .desktop file)
+cat /etc/desktop-entry-hider/configs/htop.desktop
+# contain='NotShowIn=GNOME;KDE;Pantheon;'
+```
+
+**To un-hide an app**, remove the `NotShowIn=` line the hook added from `/usr/share/applications/<name>.desktop` — it will be re-added on the next update unless you also delete or edit the corresponding file in `/etc/desktop-entry-hider/configs/`.
+
+**To hide an additional app yourself**, add a new file there following the same pattern, then run `sudo desktop-entry-hider` to apply it immediately (it otherwise only runs on package transactions).

@@ -1,7 +1,7 @@
 ---
 title: Hardware
 section: System
-updated: 2026-04-28
+updated: 2026-08-21
 ---
 
 # Hardware
@@ -232,6 +232,47 @@ cat /sys/class/hwmon/hwmon0/pwm1_enable    # 0=full speed, 1=manual, 2=auto
 echo 1 | sudo tee /sys/class/hwmon/hwmon0/pwm1_enable  # manual mode
 echo 180 | sudo tee /sys/class/hwmon/hwmon0/pwm1        # 0–255
 ```
+
+**AIO coolers, pumps, and RGB — liquidctl:** pre-installed for devices with USB-controlled cooling (NZXT Kraken, Corsair Commander, EVGA CLC, and others liquidctl supports).
+
+```bash
+# List detected devices
+sudo liquidctl list
+
+# Read current status (pump/fan speed, coolant temp)
+sudo liquidctl status
+
+# Set pump/fan speed
+sudo liquidctl set pump speed 70
+sudo liquidctl set fan speed 50
+
+# Set RGB lighting
+sudo liquidctl set led color fixed ff0000
+```
+
+Full device support list: [liquidctl.github.io/liquidctl](https://liquidctl.github.io/liquidctl/).
+
+---
+
+## Monitor Control
+
+**ddcutil** (pre-installed) controls monitor settings over DDC/CI — brightness, contrast, and input source — without needing physical buttons on the monitor. Useful for monitors without OSD controls, or scripting brightness changes.
+
+```bash
+# List detected displays
+sudo ddcutil detect
+
+# Read a setting (e.g. brightness, VCP code 10)
+sudo ddcutil getvcp 10
+
+# Set brightness (0-100)
+sudo ddcutil setvcp 10 75
+
+# Switch input source (VCP code 60; values are monitor-specific — check with detect)
+sudo ddcutil setvcp 60 0x0f
+```
+
+Not all monitors support DDC/CI, and some require enabling it in the monitor's OSD menu first. Run `ddcutil` with `sudo` — Shanios doesn't grant any user group direct access to `/dev/i2c-*` by default. If `sudo ddcutil detect` still finds nothing, check `sudo ddcutil detect --verbose` for I2C bus errors.
 
 ---
 

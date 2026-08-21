@@ -1094,7 +1094,7 @@
     "title": "Hardware",
     "section": "System",
     "description": "Hardware  This page covers inspecting and diagnosing hardware on Shani OS: CPUs, memory, GPUs, storage controllers, USB devices, sensors, and firmware. All…",
-    "updated": "2026-04-28",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -1174,7 +1174,7 @@
     "title": "System Config",
     "section": "Updates & Config",
     "description": "System Config  All system configuration in Shanios follows standard Linux conventions — edit files in , manage services with . Your changes are captured by…",
-    "updated": "2026-05-06",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""
