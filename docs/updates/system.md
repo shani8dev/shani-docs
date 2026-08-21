@@ -1,7 +1,7 @@
 ---
 title: System Updates
 section: Updates & Config
-updated: 2026-08-20
+updated: 2026-08-21
 ---
 
 # System Updates
@@ -124,8 +124,8 @@ Auto-reboot is skipped entirely in `--dry-run` mode. It is armed via a transient
 2. **Slot detection** — determines the active and candidate slots
 3. **Space check** — verifies at least 10 GB free on the Btrfs filesystem
 4. **Fetch metadata** — downloads the latest release manifest from the CDN (R2 primary, SourceForge fallback)
-5. **Download** — streams the image with resume support via `aria2c`, `wget`, or `curl`
-6. **SHA256 verify** — verifies checksum after download
+5. **Download** — if a previous image is still cached locally and `zsync2` is installed, tries a differential fetch first (only the changed blocks); otherwise streams the full image with resume support via `aria2c`, `wget`, or `curl`. See [Differential Downloads](#differential-downloads-zsync2) below.
+6. **SHA256 verify** — verifies checksum after download, regardless of which download path produced the file
 7. **GPG verify** — verifies signature against the Shani OS GPG key (`7B927BFFD4A9EAAA8B666B77DE217F3DA8014792`)
 8. **Snapshot** — takes a timestamped Btrfs snapshot of the inactive slot before writing
 9. **Extract** — pipes the verified image into `btrfs receive`
@@ -135,6 +135,14 @@ Auto-reboot is skipped entirely in `--dry-run` mode. It is armed via a transient
 13. **Auto-reboot** — arms a 60-second automatic reboot (see [Automatic Reboot After Deployment](#automatic-reboot-after-deployment) below); cancel it if you need more time
 
 Nothing in your running OS is touched at any point.
+
+## Differential Downloads (zsync2)
+
+Each release image gets a `.zsync` control file alongside it, generated at build time. When `zsync2` is installed and a previous image is still cached in `/data/downloads/` (normally left there from your last update), `shani-deploy` tries a differential fetch first — pulling only the blocks that changed since that cached image — before falling back to a full download.
+
+This is an optimization, not a trust boundary: `zsync2` is an actively developing, upstream-experimental tool, so any problem with it (not installed, no cached image to diff against, timeout, failure) silently falls through to the ordinary full download via `aria2c`/`wget`/`curl`. Whichever path produced the file, it still goes through the same SHA256 and GPG verification afterward — a differential download is never trusted on its own, only the verified result is.
+
+There's nothing to configure: this only ever runs against R2 (where the control file's embedded URL always points), and only when a local seed image is actually available.
 
 ## Rolling Back
 
