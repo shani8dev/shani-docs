@@ -272,7 +272,7 @@ sudo ddcutil setvcp 10 75
 sudo ddcutil setvcp 60 0x0f
 ```
 
-Not all monitors support DDC/CI, and some require enabling it in the monitor's OSD menu first. Run `ddcutil` with `sudo` — Shanios doesn't grant any user group direct access to `/dev/i2c-*` by default. If `sudo ddcutil detect` still finds nothing, check `sudo ddcutil detect --verbose` for I2C bus errors.
+Not all monitors support DDC/CI, and some require enabling it in the monitor's OSD menu first. Run `ddcutil` with `sudo` — Shanios doesn't grant any user group direct access to `/dev/i2c-*` by default. If `sudo ddcutil detect` still finds nothing, check `sudo ddcutil detect --verbose` for I2C bus errors. `i2c-tools` (`i2cdetect`, `i2cget`, `i2cset`) is also pre-installed for lower-level I2C bus inspection.
 
 ---
 

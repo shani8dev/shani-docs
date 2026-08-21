@@ -429,7 +429,7 @@ sudo ddcutil setvcp 10 75
 
 # Switch input source (VCP code 60; values are monitor-specific — check with detect)
 sudo ddcutil setvcp 60 0x0f</code></pre>
-<p>Not all monitors support DDC/CI, and some require enabling it in the monitor's OSD menu first. Run <code>ddcutil</code> with <code>sudo</code> — Shanios doesn't grant any user group direct access to <code>/dev/i2c-*</code> by default. If <code>sudo ddcutil detect</code> still finds nothing, check <code>sudo ddcutil detect --verbose</code> for I2C bus errors.</p>
+<p>Not all monitors support DDC/CI, and some require enabling it in the monitor's OSD menu first. Run <code>ddcutil</code> with <code>sudo</code> — Shanios doesn't grant any user group direct access to <code>/dev/i2c-*</code> by default. If <code>sudo ddcutil detect</code> still finds nothing, check <code>sudo ddcutil detect --verbose</code> for I2C bus errors. <code>i2c-tools</code> (<code>i2cdetect</code>, <code>i2cget</code>, <code>i2cset</code>) is also pre-installed for lower-level I2C bus inspection.</p>
 <p>---</p>
 <h2>Power Management</h2>
 <pre><code class="language-bash"># Current power profile
