@@ -5,8 +5,44 @@
     <link>https://docs.shani.dev/</link>
     <description>Comprehensive technical documentation for Shanios — the immutable Linux OS.</description>
     <language>en-IN</language>
-    <lastBuildDate>Thu, 20 Aug 2026 17:30:21 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 21 Aug 2026 05:55:53 GMT</lastBuildDate>
     <atom:link href="https://docs.shani.dev/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>OEM &amp; Fleet Deployment</title>
+      <link>https://docs.shani.dev/doc/enterprise/fleet/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/enterprise/fleet/</guid>
+      <description>OEM &amp; Fleet Deployment  Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or…</description>
+      <pubDate>Fri, 21 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Enterprise</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>First Boot</title>
+      <link>https://docs.shani.dev/doc/install/first-boot/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/install/first-boot/</guid>
+      <description>First Boot Configuration  Plymouth BGRT Boot Theme  Shanios uses the Plymouth BGRT boot theme. Plymouth provides a smooth graphical boot experience, suppre…</description>
+      <pubDate>Fri, 21 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Installation</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Installation Steps</title>
+      <link>https://docs.shani.dev/doc/install/steps/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/install/steps/</guid>
+      <description>Installation Steps  Installation takes approximately 10–15 minutes.  Step-by-Step  1. Boot from USB — Press F12, F2, or Del during startup. Select your USB…</description>
+      <pubDate>Fri, 21 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Installation</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>System Updates</title>
+      <link>https://docs.shani.dev/doc/updates/system/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/updates/system/</guid>
+      <description>System Updates  Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the…</description>
+      <pubDate>Fri, 21 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Updates &amp; Config</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
     <item>
       <title>Boot Process</title>
       <link>https://docs.shani.dev/doc/arch/boot/</link>
@@ -89,24 +125,6 @@
       <author>Shrinivas Kumbhar</author>
     </item>
     <item>
-      <title>OEM &amp; Fleet Deployment</title>
-      <link>https://docs.shani.dev/doc/enterprise/fleet/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/enterprise/fleet/</guid>
-      <description>OEM &amp; Fleet Deployment  Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or…</description>
-      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
-      <category>Enterprise</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>First Boot</title>
-      <link>https://docs.shani.dev/doc/install/first-boot/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/install/first-boot/</guid>
-      <description>First Boot Configuration  Plymouth BGRT Boot Theme  Shanios uses the Plymouth BGRT boot theme. Plymouth provides a smooth graphical boot experience, suppre…</description>
-      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
-      <category>Installation</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
       <title>Pre-Installation Setup</title>
       <link>https://docs.shani.dev/doc/install/pre-install/</link>
       <guid isPermaLink="true">https://docs.shani.dev/doc/install/pre-install/</guid>
@@ -120,15 +138,6 @@
       <link>https://docs.shani.dev/doc/install/requirements/</link>
       <guid isPermaLink="true">https://docs.shani.dev/doc/install/requirements/</guid>
       <description>System Requirements  Hardware Requirements  | Component | Minimum | Recommended | |-----------|---------|-------------| | Processor | x8664 dual-core with …</description>
-      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
-      <category>Installation</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Installation Steps</title>
-      <link>https://docs.shani.dev/doc/install/steps/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/install/steps/</guid>
-      <description>Installation Steps  Installation takes approximately 10–15 minutes.  Step-by-Step  1. Boot from USB — Press F12, F2, or Del during startup. Select your USB…</description>
       <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
       <category>Installation</category>
       <author>Shrinivas Kumbhar</author>
@@ -354,15 +363,6 @@
       <link>https://docs.shani.dev/doc/updates/shani-reset/</link>
       <guid isPermaLink="true">https://docs.shani.dev/doc/updates/shani-reset/</guid>
       <description>Factory Reset   wipes all persistent system state stored in  and reboots the machine. On the next boot,  recreates the  structure, the  overlay starts fres…</description>
-      <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
-      <category>Updates &amp; Config</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Shell &amp; Environment</title>
-      <link>https://docs.shani.dev/doc/updates/shell/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/updates/shell/</guid>
-      <description>Shell &amp; Environment  Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your…</description>
       <pubDate>Thu, 20 Aug 2026 00:00:00 GMT</pubDate>
       <category>Updates &amp; Config</category>
       <author>Shrinivas Kumbhar</author>

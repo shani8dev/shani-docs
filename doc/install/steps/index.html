@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Installation Steps  Installation takes approximately 10–15 minutes.  Step-by-Step  1. Boot from USB — Press F12, F2, or Del during startup. Select your USB…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Installation Steps","description":"Installation Steps  Installation takes approximately 10–15 minutes.  Step-by-Step  1. Boot from USB — Press F12, F2, or Del during startup. Select your USB…","url":"https://docs.shani.dev/doc/install/steps/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Installation Steps","description":"Installation Steps  Installation takes approximately 10–15 minutes.  Step-by-Step  1. Boot from USB — Press F12, F2, or Del during startup. Select your USB…","url":"https://docs.shani.dev/doc/install/steps/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Installation Steps</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Installation</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
       <div class="prose"><p>Installation takes approximately 10–15 minutes.</p>
@@ -222,7 +222,7 @@
 <li><strong>Boot from USB</strong> — Press F12, F2, or Del during startup. Select your USB drive from the boot menu.</li>
 <li><strong>Select "Install Shanios"</strong> — Choose the installation option from the boot menu.</li>
 <li><strong>Keyboard Layout</strong> — Always asked, on every edition.</li>
-<li><strong>Language & Region</strong> — Select language and timezone. On the <strong>GNOME and Plasma editions this page is skipped</strong> — locale and timezone are configured later by the first-boot Initial Setup wizard instead. On the <strong>COSMIC edition this page (and a user-account page) is shown during install</strong>, because COSMIC does not yet have an equivalent first-boot wizard to defer to.</li>
+<li><strong>Language & Region</strong> — This page is skipped on both editions — locale and timezone are configured later by the first-boot Initial Setup wizard instead.</li>
 <li><strong>Disk Selection</strong> — Choose target disk and partitioning scheme (automatic recommended).</li>
 <li><strong>Encryption (Optional)</strong> — Enable LUKS2 full-disk encryption (argon2id key derivation). You'll be asked to enter the passphrase twice to confirm. Recommended for laptops and portable systems.</li>
 <li><strong>Install</strong> — The installer creates Btrfs subvolumes, installs the base system, and configures the bootloader.</li>
@@ -240,7 +240,7 @@
 <li><code>/etc/crypttab</code> is generated with the LUKS UUID and <code>none</code> key field if encryption was chosen</li>
 <li>Firewall rules for KDE Connect and Waydroid are applied via <code>firewall-offline-cmd</code></li>
 </ul>
-<p>On first boot, <code>beesd-setup.service</code> configures the deduplication daemon for the Btrfs volume UUID. On GNOME and Plasma, the Initial Setup wizard then runs for user-facing personalisation; on COSMIC there is no such wizard since the account, language, and timezone were already collected during install.</p></div>
+<p>On first boot, <code>beesd-setup.service</code> configures the deduplication daemon for the Btrfs volume UUID, then the Initial Setup wizard runs for user-facing personalisation.</p></div>
     </div>
 
   </main>

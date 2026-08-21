@@ -232,13 +232,11 @@
 <p><a href="https://sourceforge.net/projects/shanios/files/gnome/20260401/">ISO</a> · SHA256 · GPG signature · Torrent</p>
 <li><strong>KDE Plasma Edition</strong> (2026.04.01, ~7.6 GB):</li>
 <p><a href="https://sourceforge.net/projects/shanios/files/plasma/20260401/">ISO</a> · SHA256 · GPG signature · Torrent</p>
-<li><strong>COSMIC Edition</strong>:</li>
-<p><a href="https://sourceforge.net/projects/shanios/files/cosmic/">ISO</a> · SHA256 · GPG signature · Torrent — check the download page for the current build date and size</p>
 </ul>
 <blockquote><p>There is no separate "Server" ISO. A server image profile exists but is only built as a cloud image (AWS AMI via the packer pipeline), not as installable install media.</p></blockquote>
 <p><strong>Always verify before writing.</strong> Every Shanios ISO is SHA256 checksummed and GPG signed. Verifying the checksum confirms the file downloaded completely and hasn't been tampered with. Place the <code>.iso</code>, <code>.sha256</code>, and <code>.asc</code> files in the same directory before running the commands below.</p>
 <h3>Linux / macOS — Verify SHA256 + GPG</h3>
-<pre><code class="language-bash"># GNOME edition — substitute the Plasma or COSMIC filename for those editions
+<pre><code class="language-bash"># GNOME edition — substitute the Plasma filename for that edition
 
 # 1. Verify checksum
 sha256sum -c signed_shanios-gnome-2026.04.01-x86_64.iso.sha256

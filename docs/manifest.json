@@ -114,7 +114,7 @@
     "title": "First Boot",
     "section": "Installation",
     "description": "First Boot Configuration  Plymouth BGRT Boot Theme  Shanios uses the Plymouth BGRT boot theme. Plymouth provides a smooth graphical boot experience, suppre…",
-    "updated": "2026-08-20",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -144,7 +144,7 @@
     "title": "Installation Steps",
     "section": "Installation",
     "description": "Installation Steps  Installation takes approximately 10–15 minutes.  Step-by-Step  1. Boot from USB — Press F12, F2, or Del during startup. Select your USB…",
-    "updated": "2026-08-20",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""
