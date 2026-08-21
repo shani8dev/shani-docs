@@ -1,7 +1,7 @@
 ---
 title: User Configuration
 section: Introduction
-updated: 2026-08-20
+updated: 2026-08-21
 ---
 
 # User Configuration
@@ -13,3 +13,7 @@ This means any user created post-installation — via the desktop first-run wiza
 For the full list of groups provisioned to each user, the mechanism that controls them, and how to customise group membership, see [User Provisioning](../updates/user-setup).
 
 For pre-configured firewall rules (KDE Connect, Waydroid, and other system-level rules applied at installation), see [Security Features](../security/features).
+
+## Parental Controls (GNOME)
+
+**Malcontent** is pre-installed on the GNOME edition, providing per-user app restrictions, content filtering, and screen-time limits. Configure it from Settings → Parental Controls, or the standalone **Parental Controls** app — it must be set up from an administrator account for a standard (non-admin) user account.

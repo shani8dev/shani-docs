@@ -1,7 +1,7 @@
 ---
 title: Process Management
 section: System
-updated: 2026-04-25
+updated: 2026-08-21
 ---
 
 # Process Management
@@ -77,6 +77,8 @@ Useful htop shortcuts:
 | `H` | Toggle user threads |
 | `K` | Toggle kernel threads |
 | `Space` | Tag a process (for batch operations) |
+
+**btop** is a more visual alternative (graphs for CPU/memory/network/disk per-core and over time) — pre-installed on the server/cloud image profile only, not the GNOME/Plasma/COSMIC desktop editions.
 
 ---
 

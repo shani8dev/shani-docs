@@ -184,7 +184,7 @@
     "title": "User Configuration",
     "section": "Introduction",
     "description": "User Configuration  The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created u…",
-    "updated": "2026-08-20",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -204,7 +204,7 @@
     "title": "What's Included",
     "section": "Introduction",
     "description": "What's Included  Shanios comes fully equipped with a comprehensive software stack, carefully curated for desktop computing, development, gaming, and profes…",
-    "updated": "2026-08-20",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -584,7 +584,7 @@
     "title": "Firmware Updates (fwupd)",
     "section": "Security",
     "description": "Firmware Updates — fwupd   is the Linux Vendor Firmware Service client. It downloads firmware updates for BIOS/UEFI, drives, controllers, and other hardwar…",
-    "updated": "2026-08-20",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -1060,11 +1060,21 @@
     "keywords": ""
   },
   {
+    "slug": "system/accessibility",
+    "title": "Accessibility",
+    "section": "System",
+    "description": "Accessibility  Shanios pre-installs a full accessibility stack on every desktop edition (GNOME, KDE Plasma, and COSMIC) — a screen reader, speech synthesis…",
+    "updated": "2026-08-21",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
     "slug": "system/backup",
     "title": "Backup & Recovery",
     "section": "System",
     "description": "Backup & Recovery  Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User data and container state must be backed up independently…",
-    "updated": "2026-08-20",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -1120,11 +1130,21 @@
     "keywords": ""
   },
   {
+    "slug": "system/printing",
+    "title": "Printing & Scanning",
+    "section": "System",
+    "description": "Printing & Scanning  Shanios ships a complete printing and scanning stack out of the box — CUPS, a wide range of vendor drivers, and driverless IPP/network…",
+    "updated": "2026-08-21",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
     "slug": "system/process-management",
     "title": "Process Management",
     "section": "System",
     "description": "Process Management  Standard Linux process management tools are all available on Shani OS. This page covers inspecting, controlling, and debugging running …",
-    "updated": "2026-04-25",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -1134,7 +1154,7 @@
     "title": "Storage",
     "section": "System",
     "description": "Storage  This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring…",
-    "updated": "2026-08-20",
+    "updated": "2026-08-21",
     "order": 999,
     "draft": false,
     "keywords": ""

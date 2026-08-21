@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Backup &amp; Recovery  Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User data and container state must be backed up independently…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Backup & Recovery","description":"Backup & Recovery  Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User data and container state must be backed up independently…","url":"https://docs.shani.dev/doc/system/backup/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Backup & Recovery","description":"Backup & Recovery  Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User data and container state must be backed up independently…","url":"https://docs.shani.dev/doc/system/backup/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,11 +213,12 @@
         <h1 class="doc-title">Backup &amp; Recovery</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">System</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
       <div class="prose"><p>Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. <strong>User data and container state must be backed up independently</strong> to protect against drive failure, accidental deletion, or corruption.</p>
 <p>The recommended backup stack is <strong>restic</strong> (encrypted, incremental, deduplicated) combined with <strong>rclone</strong> (cloud storage transport). Both are pre-installed. restic configuration persists in <code>/data/varlib/restic</code> and rclone configuration in <code>/data/varlib/rclone</code> — both survive OS updates.</p>
+<p><strong>GUI alternative:</strong> if you'd rather not use the terminal, <strong>Deja Dup</strong> (pre-installed on GNOME) and <strong>KBackup</strong> (pre-installed on KDE Plasma) both provide simple scheduled backups to a local folder, external drive, or cloud storage through a graphical wizard. They're less flexible than restic/rclone (no client-side dedup, more limited destination support) but require no configuration file editing.</p>
 <p>---</p>
 <h2>Snapshots vs Backups: The Critical Distinction</h2>
 <p>A <strong>Btrfs snapshot</strong> is a point-in-time copy stored on the <strong>same disk</strong>. If your disk fails, you lose both the data and its snapshots. Snapshots protect against accidental deletion and corruption — not hardware failure.</p>

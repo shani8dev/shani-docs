@@ -1,7 +1,7 @@
 ---
 title: Storage
 section: System
-updated: 2026-08-20
+updated: 2026-08-21
 ---
 
 # Storage
@@ -87,6 +87,8 @@ sudo parted /dev/sda resizepart 1 200GiB
 # Non-interactive (scripted)
 sudo parted -s /dev/sdb mklabel gpt mkpart primary 1MiB 100%
 ```
+
+**GUI:** `partitionmanager` (pre-installed on KDE Plasma) wraps the same partitioning operations above in a graphical interface, including resizing filesystems in place.
 
 ---
 
@@ -227,7 +229,11 @@ du -h /var | sort -rh | head -20
 
 # Interactive disk usage explorer (pre-installed)
 ncdu /
+```
 
+**GUI:** `filelight` (pre-installed on KDE Plasma) shows disk usage as an interactive radial map — a graphical alternative to `ncdu`/`du`.
+
+```bash
 # Btrfs-specific: actual space used after compression and deduplication
 compsize /home
 sudo btrfs filesystem usage /
@@ -276,6 +282,8 @@ journalctl -u smartd -n 50
 ```
 
 The default `/etc/smartd.conf` monitors all drives and writes to the journal. For email alerts, add `-m your@email.com` to the `DEVICESCAN` line.
+
+**GUI:** `gsmartcontrol` (pre-installed on GNOME) provides a graphical front-end to the same SMART data and self-tests above, if you'd rather not use the terminal.
 
 ---
 

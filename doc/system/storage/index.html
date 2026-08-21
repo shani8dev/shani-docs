@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Storage  This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Storage","description":"Storage  This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring…","url":"https://docs.shani.dev/doc/system/storage/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Storage","description":"Storage  This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring…","url":"https://docs.shani.dev/doc/system/storage/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Storage</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">System</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
       <div class="prose"><p>This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring, and the udisks2 layer used by desktop tools.</p>
@@ -266,6 +266,7 @@ sudo parted /dev/sda resizepart 1 200GiB
 
 # Non-interactive (scripted)
 sudo parted -s /dev/sdb mklabel gpt mkpart primary 1MiB 100%</code></pre>
+<p><strong>GUI:</strong> <code>partitionmanager</code> (pre-installed on KDE Plasma) wraps the same partitioning operations above in a graphical interface, including resizing filesystems in place.</p>
 <p>---</p>
 <h2>Filesystems</h2>
 <h3>Creating Filesystems</h3>
@@ -369,9 +370,9 @@ du -sh /home
 du -h /var | sort -rh | head -20
 
 # Interactive disk usage explorer (pre-installed)
-ncdu /
-
-# Btrfs-specific: actual space used after compression and deduplication
+ncdu /</code></pre>
+<p><strong>GUI:</strong> <code>filelight</code> (pre-installed on KDE Plasma) shows disk usage as an interactive radial map — a graphical alternative to <code>ncdu</code>/<code>du</code>.</p>
+<pre><code class="language-bash"># Btrfs-specific: actual space used after compression and deduplication
 compsize /home
 sudo btrfs filesystem usage /</code></pre>
 <p>---</p>
@@ -407,6 +408,7 @@ systemctl status smartd
 # View smartd alerts
 journalctl -u smartd -n 50</code></pre>
 <p>The default <code>/etc/smartd.conf</code> monitors all drives and writes to the journal. For email alerts, add <code>-m your@email.com</code> to the <code>DEVICESCAN</code> line.</p>
+<p><strong>GUI:</strong> <code>gsmartcontrol</code> (pre-installed on GNOME) provides a graphical front-end to the same SMART data and self-tests above, if you'd rather not use the terminal.</p>
 <p>---</p>
 <h2>NVMe Tools</h2>
 <pre><code class="language-bash"># List NVMe drives

@@ -1,7 +1,7 @@
 ---
 title: Backup & Recovery
 section: System
-updated: 2026-08-20
+updated: 2026-08-21
 ---
 
 # Backup & Recovery
@@ -9,6 +9,8 @@ updated: 2026-08-20
 Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. **User data and container state must be backed up independently** to protect against drive failure, accidental deletion, or corruption.
 
 The recommended backup stack is **restic** (encrypted, incremental, deduplicated) combined with **rclone** (cloud storage transport). Both are pre-installed. restic configuration persists in `/data/varlib/restic` and rclone configuration in `/data/varlib/rclone` — both survive OS updates.
+
+**GUI alternative:** if you'd rather not use the terminal, **Deja Dup** (pre-installed on GNOME) and **KBackup** (pre-installed on KDE Plasma) both provide simple scheduled backups to a local folder, external drive, or cloud storage through a graphical wizard. They're less flexible than restic/rclone (no client-side dedup, more limited destination support) but require no configuration file editing.
 
 ---
 

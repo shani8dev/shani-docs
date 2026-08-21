@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Process Management  Standard Linux process management tools are all available on Shani OS. This page covers inspecting, controlling, and debugging running …">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Process Management","description":"Process Management  Standard Linux process management tools are all available on Shani OS. This page covers inspecting, controlling, and debugging running …","url":"https://docs.shani.dev/doc/system/process-management/","datePublished":"2026-04-25T00:00:00.000Z","dateModified":"2026-04-25T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Process Management","description":"Process Management  Standard Linux process management tools are all available on Shani OS. This page covers inspecting, controlling, and debugging running …","url":"https://docs.shani.dev/doc/system/process-management/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,7 +213,7 @@
         <h1 class="doc-title">Process Management</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">System</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-25</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
       <div class="prose"><p>Standard Linux process management tools are all available on Shani OS. This page covers inspecting, controlling, and debugging running processes.</p>
@@ -262,6 +262,7 @@ htop -u alice
 htop -p 1234,5678</code></pre>
 <p>Useful htop shortcuts:</p>
 <p>| Key | Action | |-----|--------| | <code>F6</code> | Sort by column | | <code>F4</code> | Filter by name | | <code>F9</code> | Send signal to selected process | | <code>t</code> | Toggle tree view | | <code>H</code> | Toggle user threads | | <code>K</code> | Toggle kernel threads | | <code>Space</code> | Tag a process (for batch operations) |</p>
+<p><strong>btop</strong> is a more visual alternative (graphs for CPU/memory/network/disk per-core and over time) — pre-installed on the server/cloud image profile only, not the GNOME/Plasma/COSMIC desktop editions.</p>
 <p>---</p>
 <h2>Signals & Killing Processes</h2>
 <h3>kill / killall / pkill</h3>

@@ -5,29 +5,29 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
-<title>Firmware Updates (fwupd) — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Firmware Updates — fwupd   is the Linux Vendor Firmware Service client. It downloads firmware updates for BIOS/UEFI, drives, controllers, and other hardwar…">
+<title>Printing &amp; Scanning — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Printing &amp; Scanning  Shanios ships a complete printing and scanning stack out of the box — CUPS, a wide range of vendor drivers, and driverless IPP/network…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/security/fwupd/">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/system/printing/">
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
-  <meta property="og:title"     id="og-title"     content="Firmware Updates (fwupd)">
-  <meta property="og:description" id="og-desc"    content="Firmware Updates — fwupd   is the Linux Vendor Firmware Service client. It downloads firmware updates for BIOS/UEFI, drives, controllers, and other hardwar…">
+  <meta property="og:title"     id="og-title"     content="Printing &amp; Scanning">
+  <meta property="og:description" id="og-desc"    content="Printing &amp; Scanning  Shanios ships a complete printing and scanning stack out of the box — CUPS, a wide range of vendor drivers, and driverless IPP/network…">
   <meta property="og:type"      id="og-type"      content="article">
-  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/security/fwupd/">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/system/printing/">
   <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
-  <meta property="og:image:alt" id="og-image-alt" content="Firmware Updates (fwupd)">
+  <meta property="og:image:alt" id="og-image-alt" content="Printing &amp; Scanning">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
-  <meta name="twitter:title"       id="tw-title" content="Firmware Updates (fwupd)">
-  <meta name="twitter:description" id="tw-desc"  content="Firmware Updates — fwupd   is the Linux Vendor Firmware Service client. It downloads firmware updates for BIOS/UEFI, drives, controllers, and other hardwar…">
+  <meta name="twitter:title"       id="tw-title" content="Printing &amp; Scanning">
+  <meta name="twitter:description" id="tw-desc"  content="Printing &amp; Scanning  Shanios ships a complete printing and scanning stack out of the box — CUPS, a wide range of vendor drivers, and driverless IPP/network…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Firmware Updates (fwupd)","description":"Firmware Updates — fwupd   is the Linux Vendor Firmware Service client. It downloads firmware updates for BIOS/UEFI, drives, controllers, and other hardwar…","url":"https://docs.shani.dev/doc/security/fwupd/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Printing & Scanning","description":"Printing & Scanning  Shanios ships a complete printing and scanning stack out of the box — CUPS, a wide range of vendor drivers, and driverless IPP/network…","url":"https://docs.shani.dev/doc/system/printing/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -210,64 +210,71 @@
         semantically correct, not byte-identical to the client render.
       -->
       <div class="doc-header">
-        <h1 class="doc-title">Firmware Updates (fwupd)</h1>
+        <h1 class="doc-title">Printing &amp; Scanning</h1>
         <div class="doc-meta">
-          <span class="doc-meta__badge">Security</span>
+          <span class="doc-meta__badge">System</span>
           <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
-      <div class="prose"><p><code>fwupd</code> is the Linux Vendor Firmware Service client. It downloads firmware updates for BIOS/UEFI, drives, controllers, and other hardware components directly from hardware vendors, verifies them cryptographically, and installs them. Keeping firmware current is a security requirement — firmware vulnerabilities (e.g. Spectre, MDS, firmware-level rootkits) are patched through firmware updates.</p>
-<p><code>fwupd</code> is pre-installed on Shani OS as a direct dependency of the <code>shani-core</code> package, and both <code>fwupd.service</code> and <code>fwupd-refresh.timer</code> are enabled automatically by <code>shani-core</code>'s post-install hook — metadata refresh and update checks are already running on a fresh install, with nothing to turn on.</p>
-<blockquote><p><strong>Important:</strong> After a firmware update, the TPM2 PCR 0 value changes. If you use TPM2-sealed LUKS, you will need to re-enroll after the firmware update. See <a href="tpm2">TPM2 Enrollment</a>.</p></blockquote>
-<p>---</p>
-<h2>Checking for Updates</h2>
-<pre><code class="language-bash"># Refresh the firmware metadata from LVFS
-sudo fwupdmgr refresh
+      <div class="prose"><p>Shanios ships a complete printing and scanning stack out of the box — CUPS, a wide range of vendor drivers, and driverless IPP/network scanning support are all pre-installed and active from first boot. No package installation is needed to add most printers or scanners.</p>
+<h2>What's Pre-Installed</h2>
+<ul>
+<li><strong>Print system:</strong> CUPS 2.4 with <code>cups-filters</code>, <code>cups-pdf</code> (print-to-PDF), <code>cups-browsed</code> (automatic network printer discovery), <code>cups-pk-helper</code> (Polkit integration for GUI printer management), <code>ipp-usb</code> (driverless IPP-over-USB for AirPrint-capable printers)</li>
+<li><strong>Drivers:</strong> <code>hplip-minimal</code> (HP), <code>cnijfilter2</code> (Canon), <code>brlaser</code> (Brother laser), <code>foo2zjs-nightly</code> (various ZjStream-based printers), <code>gutenprint</code> and <code>splix</code> (broad generic/open-source coverage), the full Foomatic database (<code>foomatic-db</code>, <code>foomatic-db-engine</code>, <code>foomatic-db-ppds</code>, <code>foomatic-db-gutenprint-ppds</code>) for wide legacy driver coverage, plus <code>ghostscript</code>, <code>gsfonts</code>, and <code>a2ps</code> for PostScript/text rendering</li>
+<li><strong>Scanning:</strong> SANE-based, with <code>sane-airscan</code> for driverless network scanning (eSCL/AirScan and WSD), plus <code>colord-sane</code> and <code>argyllcms</code> for scanner colour profiles</li>
+<li><strong>GUI apps:</strong> GNOME Simple Scan / KDE Skanlite for scanning; both desktops' Settings apps for printer management; <code>system-config-printer</code> is also available for advanced CUPS configuration</li>
+</ul>
+<p><code>cups.socket</code>, <code>cups-browsed.service</code>, <code>saned.socket</code>, and <code>ipp-usb.service</code> are all enabled by default — nothing to turn on manually.</p>
+<h2>Adding a Printer</h2>
+<p><strong>GUI (recommended):</strong></p>
+<ul>
+<li>GNOME: Settings → Printers → Add Printer</li>
+<li>KDE Plasma: System Settings → Printers → Add a New Printer</li>
+</ul>
+<p>Both auto-discover printers on the local network via <code>cups-browsed</code> (mDNS/DNS-SD through <a href="avahi">Avahi</a>) and USB-connected printers via <code>ipp-usb</code>. For most modern printers, discovery and driver selection happen automatically.</p>
+<p><strong>CLI / advanced:</strong> CUPS also exposes a local web UI at <a href="http://localhost:631">http://localhost:631</a> for adding printers, managing queues, and tweaking driver options — useful when you need PPD-level control the GUI doesn't expose. <code>system-config-printer</code> provides a more traditional standalone GUI for the same tasks.</p>
+<pre><code class="language-bash"># List configured printers
+lpstat -p -d
 
-# Check for available firmware updates
-sudo fwupdmgr get-updates</code></pre>
-<p>If no updates appear, either your hardware is already current or the vendor hasn't published firmware to LVFS for your device.</p>
-<p>---</p>
-<h2>Installing Updates</h2>
-<pre><code class="language-bash"># Download and install all available firmware updates
-sudo fwupdmgr update
+# Add a printer manually with a specific driver (rarely needed — GUI/auto-discovery covers most cases)
+sudo lpadmin -p MyPrinter -E -v ipp://192.168.1.50/ipp/print -m everywhere</code></pre>
+<h2>Managing Print Jobs</h2>
+<pre><code class="language-bash"># Print a file
+lp document.pdf
+lp -d MyPrinter -o sides=two-sided-long-edge document.pdf
 
-# Some updates require a reboot to apply (BIOS/UEFI updates are applied during POST)</code></pre>
-<p>After a BIOS/UEFI update, if you use TPM2-sealed disk encryption:</p>
-<pre><code class="language-bash"># Boot, enter your LUKS passphrase when prompted, then re-enroll TPM2
-sudo gen-efi cleanup-tpm2
-sudo gen-efi enroll-tpm2</code></pre>
-<p>---</p>
-<h2>Listing Devices</h2>
-<pre><code class="language-bash"># List all devices fwupd can manage
-fwupdmgr get-devices
+# View the print queue
+lpq
+lpstat -o
 
-# List devices with firmware version info
-fwupdmgr get-devices --show-all-devices</code></pre>
-<p><strong>GUI:</strong> <code>gnome-firmware</code> (pre-installed on GNOME) provides a graphical front-end to the same device list, update check, and install flow above.</p>
-<p>---</p>
-<h2>History and Verification</h2>
-<pre><code class="language-bash"># Show firmware update history
-fwupdmgr get-history
+# Cancel a job
+lprm &lt;job-id&gt;
+cancel &lt;job-id&gt;
 
-# Verify installed firmware against LVFS checksums
-sudo fwupdmgr verify
-sudo fwupdmgr verify-update</code></pre>
-<p>---</p>
-<h2>Disabling fwupd</h2>
-<p>If you prefer to manage firmware manually or do not want automatic metadata refreshes:</p>
-<pre><code class="language-bash">sudo systemctl disable --now fwupd
-sudo systemctl disable --now fwupd-refresh.timer</code></pre>
-<p>---</p>
+# Pause / resume a printer
+cupsdisable MyPrinter
+cupsenable MyPrinter</code></pre>
+<h2>Scanning</h2>
+<p><strong>GUI:</strong> Simple Scan (GNOME) or Skanlite (KDE) — both detect USB and network scanners automatically via SANE and <code>sane-airscan</code>.</p>
+<pre><code class="language-bash"># List detected scanners
+scanimage -L
+
+# Scan from the command line
+scanimage --format=png -o scan.png --resolution=300
+
+# Driverless network scanner discovery (eSCL/AirScan) is handled by sane-airscan automatically</code></pre>
+<p>If a network scanner doesn't appear, confirm it's on the same subnet and that Avahi/mDNS traffic isn't being blocked — see <a href="../networking/firewalld">Firewall (firewalld)</a> if you've added custom rules.</p>
+<h2>Groups & Permissions</h2>
+<p>New users are automatically added to the <code>cups</code>, <code>lp</code>, and <code>scanner</code> groups at creation time via <code>/etc/shani-extra-groups</code> — see <a href="../updates/user-setup">User Provisioning</a> for the full mechanism. No manual group changes are needed for printing or scanning to work for a normal user account.</p>
 <h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | <code>get-updates</code> shows nothing | Device may not be in the LVFS database; check <code>fwupdmgr get-devices</code> for "Update Error" or "No firmware" | | BIOS update fails to apply after reboot | Ensure Secure Boot is not blocking the fwupd EFI capsule; check UEFI event log | | Disk not unlocking after firmware update | Expected — PCR 0 changed; enter passphrase, then <code>sudo gen-efi cleanup-tpm2 &amp;&amp; sudo gen-efi enroll-tpm2</code> | | <code>fwupdmgr refresh</code> fails | Check network; corporate proxies may block LVFS CDN |</p>
-<p>---</p>
+<p>| Issue | Solution | |-------|----------| | Printer not discovered | Confirm it's on the same network/subnet; check <code>cups-browsed</code> is running (<code>systemctl status cups-browsed</code>); check the CUPS web UI at <code>localhost:631</code> | | USB printer not detected | Check <code>lsusb</code>; confirm <code>ipp-usb.service</code> is running for AirPrint-capable USB printers | | Wrong or missing driver | Check the CUPS web UI's driver search — the Foomatic/Gutenprint databases cover most non-vendor-specific printers; some vendor drivers (e.g. Epson) are not pre-installed and must be added manually | | Print jobs stuck in queue | <code>cupsenable &lt;printer&gt;</code> if paused; check <code>journalctl -u cups</code> for filter errors | | Scanner not detected | Run <code>scanimage -L</code>; for network scanners, confirm <code>sane-airscan</code> supports the device's protocol (eSCL/AirScan or WSD) | | Can't manage printers without a password prompt every time | This is expected — <code>cups-pk-helper</code> gates printer administration via Polkit; see <a href="../security/permissions">Permissions & Authorization</a> |</p>
 <h2>See Also</h2>
 <ul>
-<li><a href="tpm2">TPM2 Enrollment</a> — re-enrollment required after firmware updates</li>
-<li><a href="secure-boot">Secure Boot</a> — firmware update interaction with Secure Boot</li>
-<li><a href="features">Security Features</a> — security stack overview</li>
-<li><a href="../updates/shani-health">shani-health Reference</a> — <code>shani-health --hardware</code> reports <code>fwupd.service</code>/<code>fwupd-refresh.timer</code> status and any pending firmware updates</li>
+<li><a href="hardware">Hardware</a> — general device detection and troubleshooting</li>
+<li><a href="../networking/avahi">Avahi (mDNS)</a> — the discovery mechanism behind network printer/scanner auto-detection</li>
+<li><a href="../networking/firewalld">Firewall (firewalld)</a> — if custom firewall rules block discovery traffic</li>
+<li><a href="../updates/user-setup">User Provisioning</a> — how the <code>cups</code>/<code>lp</code>/<code>scanner</code> groups are assigned</li>
+<li><a href="https://blog.shani.dev/post/shani-os-printing-and-scanning">Printing and Scanning on Shani OS</a> — extended walkthrough with per-manufacturer driver notes</li>
 </ul></div>
     </div>
 

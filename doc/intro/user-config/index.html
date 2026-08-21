@@ -27,7 +27,7 @@
   <meta name="twitter:description" id="tw-desc"  content="User Configuration  The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created u…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"User Configuration","description":"User Configuration  The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created u…","url":"https://docs.shani.dev/doc/intro/user-config/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"User Configuration","description":"User Configuration  The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created u…","url":"https://docs.shani.dev/doc/intro/user-config/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -213,13 +213,15 @@
         <h1 class="doc-title">User Configuration</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Introduction</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
         </div>
       </div>
       <div class="prose"><p>The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created users: the <code>shani-user-setup.path</code> unit watches the <code>/etc</code> overlay's upper-layer <code>passwd</code> file and the <code>/data/user-setup-needed</code> marker (written by <code>shani-deploy</code> after every OS update and by the first-run wizard on a fresh install), and triggers <code>shani-user-setup.service</code> whenever either changes. That service processes every regular user (UID 1000–59999) on the system, adding any missing required groups and setting the default shell to Zsh (falling back to Bash if Zsh isn't installed) — it is idempotent, so re-running it is always safe.</p>
 <p>This means any user created post-installation — via the desktop first-run wizard, or with <code>useradd</code>/<code>adduser</code> on the command line — gets the same setup automatically, and the same run also re-syncs existing users after an OS update.</p>
 <p>For the full list of groups provisioned to each user, the mechanism that controls them, and how to customise group membership, see <a href="../updates/user-setup">User Provisioning</a>.</p>
-<p>For pre-configured firewall rules (KDE Connect, Waydroid, and other system-level rules applied at installation), see <a href="../security/features">Security Features</a>.</p></div>
+<p>For pre-configured firewall rules (KDE Connect, Waydroid, and other system-level rules applied at installation), see <a href="../security/features">Security Features</a>.</p>
+<h2>Parental Controls (GNOME)</h2>
+<p><strong>Malcontent</strong> is pre-installed on the GNOME edition, providing per-user app restrictions, content filtering, and screen-time limits. Configure it from Settings → Parental Controls, or the standalone <strong>Parental Controls</strong> app — it must be set up from an administrator account for a standard (non-admin) user account.</p></div>
     </div>
 
   </main>

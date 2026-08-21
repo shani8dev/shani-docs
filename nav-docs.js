@@ -160,6 +160,8 @@ CONFIG.NAV_TREE = [
       { title: 'Storage', slug: 'system/storage' },
       { title: 'Kernel Modules', slug: 'system/kernel-modules' },
       { title: 'Hardware', slug: 'system/hardware' },
+      { title: 'Printing & Scanning', slug: 'system/printing' },
+      { title: 'Accessibility', slug: 'system/accessibility' },
       { title: 'Logging', slug: 'system/logging' },
       { title: 'Cron Jobs (cronie)', slug: 'system/cronie' },
       { title: 'Backup & Recovery', slug: 'system/backup' },

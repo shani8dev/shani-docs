@@ -1,7 +1,7 @@
 ---
 title: What's Included
 section: Introduction
-updated: 2026-08-20
+updated: 2026-08-21
 ---
 
 # What's Included
@@ -34,8 +34,8 @@ Shanios comes fully equipped with a comprehensive software stack, carefully cura
 
 - **Desktop Environment:** GNOME or KDE Plasma (chosen at download), Wayland-first with full X11 compatibility
 - **Pre-installed Apps (both editions):** Vivaldi browser, OnlyOffice, Gear Lever, Warehouse, Flatseal, Pods, BoxBuddy
-- **KDE extras:** Kate, Okular, Gwenview, Elisa, Haruna, Kamoso, KolourPaint, Kompare, KRDC, KGet, KTorrent, KCalc, Skanlite, ISO Image Writer, and games
-- **GNOME extras:** Papers, Loupe, Showtime, Decibels, GNOME Text Editor, GNOME Calculator, GNOME Calendar, GNOME Maps, Simple Scan, Gnote, Meld, Boxes, and games
+- **KDE extras:** Kate, Okular, Gwenview, Elisa, Haruna, Kamoso, KolourPaint, Kompare, KRDC, KGet, KTorrent, KCalc, Skanlite, ISO Image Writer, Filelight (disk usage), Partitionmanager, KBackup, and games
+- **GNOME extras:** Papers, Loupe, Showtime, Decibels, GNOME Text Editor, GNOME Calculator, GNOME Calendar, GNOME Maps, Simple Scan, Gnote, Meld, Boxes, GPaste (clipboard manager), Malcontent (parental controls), Rygel (DLNA/UPnP media sharing), Deja Dup (backup), GNOME Firmware, GSmartControl, and games
 - **Package Formats:** Flatpak (primary, from Flathub, auto-updates every 12 hours), AppImage via Gear Lever, Nix package manager (pre-installed)
 - **Containers:** Podman (rootless), podman-docker, buildah, skopeo, Distrobox, LXC, LXD, Apptainer, Snap
 
@@ -56,8 +56,10 @@ Shanios comes fully equipped with a comprehensive software stack, carefully cura
 ## Printing & Scanning
 
 - **Print System:** CUPS 2.4 with filters, PDF printer, network browsing, ipp-usb for driverless printers
-- **Printer Drivers:** HP, Epson, Brother, Canon, and generic PCL drivers
+- **Printer Drivers:** HP, Canon, Brother, and generic PCL/Foomatic/Gutenprint drivers
 - **Scanning:** SANE with sane-airscan (driverless network scanning via IPP)
+
+Full setup and troubleshooting guide: [Printing & Scanning](../system/printing).
 
 ## Networking
 
@@ -86,4 +88,4 @@ Shanios comes fully equipped with a comprehensive software stack, carefully cura
 
 - **Fonts:** Noto fonts family (including CJK, emoji); Indian language support pre-configured via fontconfig for Devanagari, Bengali, Gujarati, Gurmukhi, Kannada, Malayalam, Oriya, Tamil, and Telugu
 - **Input Methods:** IBus with typing booster, Chinese (Pinyin), Japanese (Anthy), Korean (Hangul), Vietnamese (Unikey), and Indic scripts
-- **Accessibility:** Orca screen reader, espeakup (speech synthesis via espeak-ng), brltty (braille)
+- **Accessibility:** Orca screen reader, espeakup (speech synthesis via espeak-ng), brltty (braille) — full guide: [Accessibility](../system/accessibility)

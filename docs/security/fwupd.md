@@ -1,7 +1,7 @@
 ---
 title: Firmware Updates (fwupd)
 section: Security
-updated: 2026-08-20
+updated: 2026-08-21
 ---
 
 # Firmware Updates — fwupd
@@ -56,6 +56,8 @@ fwupdmgr get-devices
 # List devices with firmware version info
 fwupdmgr get-devices --show-all-devices
 ```
+
+**GUI:** `gnome-firmware` (pre-installed on GNOME) provides a graphical front-end to the same device list, update check, and install flow above.
 
 ---
 
