@@ -1,7 +1,7 @@
 ---
 title: Education & E-Learning
 section: Self-Hosting & Servers
-updated: 2026-04-22
+updated: 2026-08-28
 ---
 
 # Education & E-Learning
@@ -60,7 +60,7 @@ services:
 cd ~/moodle && podman-compose up -d
 ```
 
-> Moodle requires a database. Run MariaDB first from the [Databases wiki](https://docs.shani.dev/doc/servers/databases).
+> Moodle requires a database. Run MariaDB first from the [Databases wiki](https://docs.shani.dev/doc/servers/databases/other).
 
 #### Recommended plugins to install via admin panel
 - **H5P** — rich interactive content (drag-and-drop, interactive videos, flashcards)
@@ -156,6 +156,8 @@ volumes:
 cd ~/canvas && podman-compose up -d
 ```
 
+Access at `http://localhost:3000`.
+
 > Canvas is resource-heavy — plan for at least 4 GB RAM dedicated to the stack.
 
 ---
@@ -179,6 +181,8 @@ cd ~/bbb-demo && podman-compose up -d
 ```
 
 > BBB needs ports `443/tcp` and `16384-32768/udp` open for WebRTC media. It works best on a server with at least 8 GB RAM.
+
+> Production BigBlueButton requires **bare metal** installed via the upstream `bbb-install.sh` script — it is not supported in compose. The `bbb-demo` container below only previews the API and recording interface, not a full conference server.
 
 ---
 
@@ -216,6 +220,8 @@ volumes:
 ```bash
 cd ~/greenlight && podman-compose up -d
 ```
+
+Access at `http://localhost:5050`.
 
 ---
 
@@ -388,6 +394,8 @@ services:
 ```bash
 cd ~/kolibri && podman-compose up -d
 ```
+
+Access at `http://localhost:8090`.
 
 > Kolibri can serve an entire classroom over Wi-Fi from a single Raspberry Pi or mini PC — no internet required after content import.
 
@@ -601,5 +609,78 @@ h5p.home.local         { tls internal; reverse_proxy localhost:8100 }
 
 > 💡 **Tip:** For Moodle and Canvas, enable Redis as a caching backend (set under `config.php` → `$CFG->cache_*`) to significantly improve page load times and handle more concurrent users.
 
+| Issue | Fix |
+|-------|-----|
 | H5P content type missing | Download content types from the H5P Hub inside the editor — libraries must be installed before content of that type can be created |
 | H5P iframe not loading | Ensure `H5P_EDITOR_DOMAIN` matches the domain used in the iframe src; check CSP headers aren't blocking the embed |
+
+---
+
+## Education & Training
+
+## Open edX (Tutor)
+
+**Purpose:** The platform powering edX.org and hundreds of MOOCs. Full MOOC toolkit: video courses, peer-graded assignments, timed exams, discussion forums, certificates, and XBlocks for custom content types. **Tutor** is the recommended way to deploy it — a Docker-based wrapper that makes the famously complex edX deployment manageable.
+
+```bash
+# Install Tutor
+pip install "tutor[full]" --break-system-packages
+
+# Initialise (interactive — sets domain, admin account, etc.)
+tutor config save --interactive
+
+# Launch the full stack
+tutor local launch
+
+# Create a superuser
+tutor local run lms manage.py createsuperuser
+
+# Import a demo course
+tutor local do importdemocourse
+```
+
+> Tutor manages all containers, volumes, and configuration. Run `tutor local status` to see all services.
+
+**Caddy:**
+```caddyfile
+lms.example.com { reverse_proxy localhost:80 }
+studio.example.com { reverse_proxy localhost:80 }
+```
+
+---
+
+
+## Gitea Classroom (Teaching & Learning)
+
+**Purpose:** Gitea's built-in Classroom feature (modelled after GitHub Classroom) lets instructors create assignment repositories, fork them per student, set deadlines, and review submissions. Pairs with Woodpecker CI for automatic grading pipelines.
+
+```bash
+# Enable in Site Administration → Gitea Configuration
+# Navigate to: /admin/self-check → enable classroom features
+
+# Create a classroom organisation
+# Users → Organisations → Create Organisation → enable "Classroom"
+
+# Assign a template repo to a classroom — students get a personal fork
+# Classroom → Create Assignment → select template repo
+```
+
+##### Automated grading with Woodpecker
+
+```yaml
+# .woodpecker.yml — in the template repo
+steps:
+  grade:
+    image: python:3.12-slim
+    commands:
+      - pip install pytest --quiet
+      - pytest tests/ --tb=short --json-report --json-report-file=grade-report.json
+      - python grader.py grade-report.json   # posts score to Gitea issue
+```
+
+---
+
+## See Also
+
+- [Communication (BigBlueButton)](communication)
+- [Databases (Moodle)](databases)

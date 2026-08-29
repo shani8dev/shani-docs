@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Process Management — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Process Management  Standard Linux process management tools are all available on Shani OS. This page covers inspecting, controlling, and debugging running …">
+  <meta name="description" id="meta-desc"     content="Standard Linux process management tools are all available on Shani OS. This page covers inspecting, controlling, and debugging running processes. Viewing P…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Process Management">
-  <meta property="og:description" id="og-desc"    content="Process Management  Standard Linux process management tools are all available on Shani OS. This page covers inspecting, controlling, and debugging running …">
+  <meta property="og:description" id="og-desc"    content="Standard Linux process management tools are all available on Shani OS. This page covers inspecting, controlling, and debugging running processes. Viewing P…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/system/process-management/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Process Management">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Process Management">
-  <meta name="twitter:description" id="tw-desc"  content="Process Management  Standard Linux process management tools are all available on Shani OS. This page covers inspecting, controlling, and debugging running …">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Standard Linux process management tools are all available on Shani OS. This page covers inspecting, controlling, and debugging running processes. Viewing P…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Process Management","description":"Process Management  Standard Linux process management tools are all available on Shani OS. This page covers inspecting, controlling, and debugging running …","url":"https://docs.shani.dev/doc/system/process-management/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Process Management","description":"Standard Linux process management tools are all available on Shani OS. This page covers inspecting, controlling, and debugging running processes. Viewing P…","url":"https://docs.shani.dev/doc/system/process-management/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Process Management","item":"https://docs.shani.dev/doc/system/process-management/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,13 +215,13 @@
         <h1 class="doc-title">Process Management</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">System</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Standard Linux process management tools are all available on Shani OS. This page covers inspecting, controlling, and debugging running processes.</p>
-<p>---</p>
-<h2>Viewing Processes</h2>
-<h3>ps — snapshot of running processes</h3>
+<hr>
+<h2 id="viewing-processes">Viewing Processes</h2>
+<h3 id="ps-snapshot-of-running-processes">ps — snapshot of running processes</h3>
 <pre><code class="language-bash"># All processes, full format (most useful general view)
 ps aux
 
@@ -243,7 +245,7 @@ ps aux --sort=-%mem | head -20
 
 # Show a specific PID
 ps -p 1234 -o pid,ppid,user,cmd,%cpu,%mem</code></pre>
-<h3>pgrep / pidof — find PIDs by name</h3>
+<h3 id="pgrep-pidof-find-pids-by-name">pgrep / pidof — find PIDs by name</h3>
 <pre><code class="language-bash"># Find PIDs matching a name
 pgrep caddy
 pgrep -u alice          # all PIDs owned by alice
@@ -251,7 +253,7 @@ pgrep -la caddy         # with full command line
 
 # Get PID of an exact binary name
 pidof sshd</code></pre>
-<h3>htop — interactive process viewer</h3>
+<h3 id="htop-interactive-process-viewer">htop — interactive process viewer</h3>
 <p><code>htop</code> is pre-installed. Press <code>F1</code> for help, <code>F6</code> to sort, <code>F9</code> to kill, <code>q</code> to quit.</p>
 <pre><code class="language-bash">htop
 
@@ -261,11 +263,11 @@ htop -u alice
 # Filter to a specific PID
 htop -p 1234,5678</code></pre>
 <p>Useful htop shortcuts:</p>
-<p>| Key | Action | |-----|--------| | <code>F6</code> | Sort by column | | <code>F4</code> | Filter by name | | <code>F9</code> | Send signal to selected process | | <code>t</code> | Toggle tree view | | <code>H</code> | Toggle user threads | | <code>K</code> | Toggle kernel threads | | <code>Space</code> | Tag a process (for batch operations) |</p>
+<table><thead><tr><th>Key</th><th>Action</th></tr></thead><tbody><tr><td><code>F6</code></td><td>Sort by column</td></tr><tr><td><code>F4</code></td><td>Filter by name</td></tr><tr><td><code>F9</code></td><td>Send signal to selected process</td></tr><tr><td><code>t</code></td><td>Toggle tree view</td></tr><tr><td><code>H</code></td><td>Toggle user threads</td></tr><tr><td><code>K</code></td><td>Toggle kernel threads</td></tr><tr><td><code>Space</code></td><td>Tag a process (for batch operations)</td></tr></tbody></table>
 <p><strong>btop</strong> is a more visual alternative (graphs for CPU/memory/network/disk per-core and over time) — pre-installed on the server/cloud image profile only, not the GNOME/Plasma/COSMIC desktop editions.</p>
-<p>---</p>
-<h2>Signals & Killing Processes</h2>
-<h3>kill / killall / pkill</h3>
+<hr>
+<h2 id="signals-killing-processes">Signals & Killing Processes</h2>
+<h3 id="kill-killall-pkill">kill / killall / pkill</h3>
 <pre><code class="language-bash"># Send SIGTERM (15) — graceful shutdown request
 kill 1234
 kill -TERM 1234
@@ -287,13 +289,13 @@ pkill -u alice                # kill all of alice's processes
 
 # Kill all processes for a user (also terminates their session)
 sudo loginctl kill-user alice</code></pre>
-<h3>Common signals</h3>
-<p>| Signal | Number | Default action | Use | |--------|--------|----------------|-----| | <code>SIGTERM</code> | 15 | Terminate (graceful) | Normal shutdown — gives process time to clean up | | <code>SIGKILL</code> | 9 | Terminate (forced) | Last resort — process cannot catch or ignore this | | <code>SIGHUP</code> | 1 | Terminate (or reload) | Reload config in daemons (nginx, sshd, etc.) | | <code>SIGINT</code> | 2 | Terminate | Same as Ctrl+C | | <code>SIGSTOP</code> | 19 | Pause | Pause a process (cannot be caught) | | <code>SIGCONT</code> | 18 | Resume | Resume a paused process | | <code>SIGUSR1/2</code> | 10/12 | User-defined | App-specific (e.g. log rotation) |</p>
+<h3 id="common-signals">Common signals</h3>
+<table><thead><tr><th>Signal</th><th>Number</th><th>Default action</th><th>Use</th></tr></thead><tbody><tr><td><code>SIGTERM</code></td><td>15</td><td>Terminate (graceful)</td><td>Normal shutdown — gives process time to clean up</td></tr><tr><td><code>SIGKILL</code></td><td>9</td><td>Terminate (forced)</td><td>Last resort — process cannot catch or ignore this</td></tr><tr><td><code>SIGHUP</code></td><td>1</td><td>Terminate (or reload)</td><td>Reload config in daemons (nginx, sshd, etc.)</td></tr><tr><td><code>SIGINT</code></td><td>2</td><td>Terminate</td><td>Same as Ctrl+C</td></tr><tr><td><code>SIGSTOP</code></td><td>19</td><td>Pause</td><td>Pause a process (cannot be caught)</td></tr><tr><td><code>SIGCONT</code></td><td>18</td><td>Resume</td><td>Resume a paused process</td></tr><tr><td><code>SIGUSR1/2</code></td><td>10/12</td><td>User-defined</td><td>App-specific (e.g. log rotation)</td></tr></tbody></table>
 <pre><code class="language-bash"># List all signal names and numbers
 kill -l</code></pre>
-<p>---</p>
-<h2>Priority & Scheduling</h2>
-<h3>nice / renice — CPU priority</h3>
+<hr>
+<h2 id="priority-scheduling">Priority & Scheduling</h2>
+<h3 id="nice-renice-cpu-priority">nice / renice — CPU priority</h3>
 <p>Priority ranges from -20 (highest) to +19 (lowest). Default is 0. Only root can set negative (higher priority) values.</p>
 <pre><code class="language-bash"># Start a process with low priority (nice value 10)
 nice -n 10 make -j8
@@ -307,7 +309,7 @@ sudo renice -n 10 -u alice     # all of alice's processes
 
 # Check current nice value
 ps -o pid,ni,comm -p 1234</code></pre>
-<h3>ionice — I/O scheduling priority</h3>
+<h3 id="ionice-io-scheduling-priority">ionice — I/O scheduling priority</h3>
 <p>Controls how the kernel schedules disk I/O for a process.</p>
 <pre><code class="language-bash"># Run with idle I/O priority (only gets disk when nothing else needs it)
 ionice -c 3 rsync -a /home /backup
@@ -320,8 +322,8 @@ ionice -p 1234
 
 # Change I/O priority of a running process
 sudo ionice -c 3 -p 1234</code></pre>
-<p>---</p>
-<h2>Background Jobs & Job Control</h2>
+<hr>
+<h2 id="background-jobs-job-control">Background Jobs & Job Control</h2>
 <pre><code class="language-bash"># Run a command in the background
 long-running-command &amp;
 
@@ -348,8 +350,8 @@ disown %1</code></pre>
 # run your command
 Ctrl+B then D   # detach — command keeps running
 tmux attach -t backup   # reattach later</code></pre>
-<p>---</p>
-<h2>/proc — Process Information</h2>
+<hr>
+<h2 id="proc-process-information">/proc — Process Information</h2>
 <p>Every process has a directory at <code>/proc/&lt;PID&gt;/</code> exposing its state as virtual files.</p>
 <pre><code class="language-bash"># Command line of a process
 cat /proc/1234/cmdline | tr '\0' ' '
@@ -381,8 +383,8 @@ cat /proc/cpuinfo       # CPU details
 cat /proc/meminfo       # memory usage
 cat /proc/loadavg       # 1/5/15-minute load averages, running/total threads, last PID
 cat /proc/uptime        # seconds since boot</code></pre>
-<p>---</p>
-<h2>lsof — Open Files & Sockets</h2>
+<hr>
+<h2 id="lsof-open-files-sockets">lsof — Open Files & Sockets</h2>
 <p><code>lsof</code> lists all open files, including network sockets, pipes, and device files.</p>
 <pre><code class="language-bash"># All open files (large output)
 sudo lsof
@@ -409,8 +411,8 @@ lsof +D /home/alice
 
 # Files opened by a specific command name
 lsof -c caddy</code></pre>
-<p>---</p>
-<h2>strace — System Call Tracing</h2>
+<hr>
+<h2 id="strace-system-call-tracing">strace — System Call Tracing</h2>
 <p><code>strace</code> traces system calls made by a process — useful for debugging why something is failing.</p>
 <pre><code class="language-bash"># Trace a new command
 strace ls /tmp
@@ -438,8 +440,8 @@ strace -o /tmp/trace.txt ls /tmp
 
 # Practical: why is a service failing to start?
 sudo strace -f -e trace=file systemctl start myservice 2&gt;&amp;1 | grep -E &quot;ENOENT|EACCES|open&quot;</code></pre>
-<p>---</p>
-<h2>systemd-cgls / systemctl — Process Hierarchy</h2>
+<hr>
+<h2 id="systemd-cgls-systemctl-process-hierarchy">systemd-cgls / systemctl — Process Hierarchy</h2>
 <p>Systemd organises all processes into control groups (cgroups). This is the authoritative view of what's running and under which service.</p>
 <pre><code class="language-bash"># Show the full cgroup tree (which service owns which processes)
 systemd-cgls
@@ -453,8 +455,8 @@ systemctl status caddy
 
 # Which service owns a PID?
 systemctl status 1234</code></pre>
-<p>---</p>
-<h2>Memory & Resource Usage</h2>
+<hr>
+<h2 id="memory-resource-usage">Memory & Resource Usage</h2>
 <pre><code class="language-bash"># Memory overview
 free -h
 
@@ -476,8 +478,8 @@ ipcs -m
 
 # ZRAM swap usage (Shani OS uses ZRAM by default)
 zramctl</code></pre>
-<p>---</p>
-<h2>Monitoring CPU Load</h2>
+<hr>
+<h2 id="monitoring-cpu-load">Monitoring CPU Load</h2>
 <pre><code class="language-bash"># Current load averages (1, 5, 15 minutes)
 uptime
 cat /proc/loadavg
@@ -494,15 +496,15 @@ mpstat -P ALL 1 3
 # CPU frequency and governor
 cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | Process won't die with <code>kill -9</code> | The process is in an uninterruptible sleep (D state) — usually waiting on I/O. Check <code>ps aux</code> for <code>D</code> state; may need to wait for I/O to complete or reboot | | <code>kill: Operation not permitted</code> | You don't own the process — use <code>sudo kill</code> | | High load but low CPU usage | Check I/O wait: <code>top</code> → look at <code>%wa</code> in the CPU line; <code>iostat -x 1</code> for disk I/O | | Process keeps respawning after kill | It's managed by systemd — use <code>sudo systemctl stop &lt;service&gt;</code> instead | | Can't find which process owns a port | <code>sudo ss -tlnp | grep :PORT</code> or <code>sudo lsof -i :PORT</code> | | <code>strace</code> shows permission denied | Run with <code>sudo</code>; or check <code>/proc/sys/kernel/yama/ptrace_scope</code> (0 = unrestricted, 1 = parent only) | | Process using too much memory | Check <code>cat /proc/&lt;PID&gt;/status | grep VmRSS</code>; consider setting memory limits in the service unit with <code>MemoryMax=</code> |</p>
-<p>---</p>
-<h2>See Also</h2>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Process won't die with <code>kill -9</code></td><td>The process is in an uninterruptible sleep (D state) — usually waiting on I/O. Check <code>ps aux</code> for <code>D</code> state; may need to wait for I/O to complete or reboot</td></tr><tr><td><code>kill: Operation not permitted</code></td><td>You don't own the process — use <code>sudo kill</code></td></tr><tr><td>High load but low CPU usage</td><td>Check I/O wait: <code>top</code> → look at <code>%wa</code> in the CPU line; <code>iostat -x 1</code> for disk I/O</td></tr><tr><td>Process keeps respawning after kill</td><td>It's managed by systemd — use <code>sudo systemctl stop &lt;service&gt;</code> instead</td></tr><tr><td>Can't find which process owns a port</td><td>`sudo ss -tlnp</td><td>grep :PORT<code> or </code>sudo lsof -i :PORT`</td></tr><tr><td><code>strace</code> shows permission denied</td><td>Run with <code>sudo</code>; or check <code>/proc/sys/kernel/yama/ptrace_scope</code> (0 = unrestricted, 1 = parent only)</td></tr><tr><td>Process using too much memory</td><td>Check `cat /proc/<PID>/status</td><td>grep VmRSS<code>; consider setting memory limits in the service unit with </code>MemoryMax=`</td></tr></tbody></table>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="systemd">Systemd</a> — service management, unit files, resource limits with <code>MemoryMax=</code> and <code>CPUQuota=</code></li>
-<li><a href="../updates/shell">Shell & Environment</a> — <code>htop</code>, <code>ncdu</code>, and other pre-installed monitoring tools</li>
-<li><a href="../updates/shani-health">shani-health</a> — default report includes CPU load, memory, OOM events, and zombie processes</li>
+<li><a href="../updates/shell.md">Shell & Environment</a> — <code>htop</code>, <code>ncdu</code>, and other pre-installed monitoring tools</li>
+<li><a href="../updates/shani-health.md">shani-health</a> — default report includes CPU load, memory, OOM events, and zombie processes</li>
 </ul></div>
     </div>
 

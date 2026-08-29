@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Nix Package Manager — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Nix Package Manager  Nix is pre-installed on Shanios and is the recommended way to install CLI tools, language runtimes, and developer libraries. All Nix d…">
+  <meta name="description" id="meta-desc"     content="Nix is pre-installed on Shanios and is the recommended way to install CLI tools, language runtimes, and developer libraries. All Nix data lives in the dedi…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Nix Package Manager">
-  <meta property="og:description" id="og-desc"    content="Nix Package Manager  Nix is pre-installed on Shanios and is the recommended way to install CLI tools, language runtimes, and developer libraries. All Nix d…">
+  <meta property="og:description" id="og-desc"    content="Nix is pre-installed on Shanios and is the recommended way to install CLI tools, language runtimes, and developer libraries. All Nix data lives in the dedi…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/software/nix/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Nix Package Manager">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Nix Package Manager">
-  <meta name="twitter:description" id="tw-desc"  content="Nix Package Manager  Nix is pre-installed on Shanios and is the recommended way to install CLI tools, language runtimes, and developer libraries. All Nix d…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Nix is pre-installed on Shanios and is the recommended way to install CLI tools, language runtimes, and developer libraries. All Nix data lives in the dedi…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Nix Package Manager","description":"Nix Package Manager  Nix is pre-installed on Shanios and is the recommended way to install CLI tools, language runtimes, and developer libraries. All Nix d…","url":"https://docs.shani.dev/doc/software/nix/","datePublished":"2026-04-01T00:00:00.000Z","dateModified":"2026-04-01T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Nix Package Manager","description":"Nix is pre-installed on Shanios and is the recommended way to install CLI tools, language runtimes, and developer libraries. All Nix data lives in the dedi…","url":"https://docs.shani.dev/doc/software/nix/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Nix Package Manager","item":"https://docs.shani.dev/doc/software/nix/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,16 +215,16 @@
         <h1 class="doc-title">Nix Package Manager</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Software &amp; Apps</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Nix is pre-installed on Shanios and is the recommended way to install CLI tools, language runtimes, and developer libraries. All Nix data lives in the dedicated <code>@nix</code> Btrfs subvolume mounted at <code>/nix</code>, which is shared across both <code>@blue</code> and <code>@green</code> slots — installed Nix packages survive all system updates and rollbacks.</p>
 <p><code>nix-daemon.socket</code> is enabled at boot. A channel must be added before installing packages for the first time.</p>
-<h2>First-Time Setup</h2>
+<h2 id="first-time-setup">First-Time Setup</h2>
 <pre><code class="language-bash"># Add the unstable channel (do this once after installation)
 nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
 nix-channel --update</code></pre>
-<h2>Installing Packages</h2>
+<h2 id="installing-packages">Installing Packages</h2>
 <pre><code class="language-bash"># Install a package into your profile
 nix-env -iA nixpkgs.ripgrep
 nix-env -iA nixpkgs.nodejs
@@ -246,21 +248,21 @@ nix-env -e packagename
 
 # Rollback to previous Nix profile generation
 nix-env --rollback</code></pre>
-<h2>Python via Nix</h2>
+<h2 id="python-via-nix">Python via Nix</h2>
 <pre><code class="language-bash"># Install a Python package globally via Nix
 nix-env -iA nixpkgs.python3Packages.requests
 nix-env -iA nixpkgs.python3Packages.numpy
 
 # Or use a temporary shell with specific Python packages
 nix shell nixpkgs#python3 nixpkgs#python3Packages.flask</code></pre>
-<h2>Node.js via Nix</h2>
+<h2 id="nodejs-via-nix">Node.js via Nix</h2>
 <pre><code class="language-bash"># Install Node.js and npm
 nix-env -iA nixpkgs.nodejs
 
 # Or a specific version
 nix shell nixpkgs#nodejs_20
 nix shell nixpkgs#nodejs_22</code></pre>
-<h2>Nix Flakes (Experimental)</h2>
+<h2 id="nix-flakes-experimental">Nix Flakes (Experimental)</h2>
 <pre><code class="language-bash"># Enable flakes (add to ~/.config/nix/nix.conf)
 # experimental-features = nix-command flakes
 
@@ -272,13 +274,21 @@ nix develop
 
 # Update flake inputs
 nix flake update</code></pre>
-<h2>Tips</h2>
+<h2 id="tips">Tips</h2>
 <ul>
 <li>Nix packages live in <code>/nix/store</code> — the <code>@nix</code> subvolume is preserved across every OS update and rollback</li>
 <li>Use <code>nix-env</code> for persistent installs; use <code>nix shell</code> for temporary/one-off usage</li>
 <li>Prefer <code>nix-env -iA nixpkgs.&lt;package&gt;</code> over <code>nix-env -i &lt;package&gt;</code> — the <code>-A</code> (attribute) form is faster and unambiguous</li>
 <li>The <code>@nix</code> subvolume has Copy-on-Write enabled so <code>bees</code> can deduplicate its content over time</li>
 <li>For complex development environments, consider using <code>nix shell</code> with a <code>shell.nix</code> or flake instead of polluting your global profile</li>
+</ul>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="flatpak">Flatpak</a> — GUI app store</li>
+<li><a href="homebrew">Homebrew</a> — macOS-style package manager</li>
+<li><a href="distrobox">Distrobox</a> — full mutable environments</li>
+<li><a href="../updates/shell.md">Shell & Environment</a> — Zsh, Starship, Nix integration</li>
+<li><a href="../intro/migrating.md">Migrating from Traditional Linux</a> — Nix vs pacman workflow</li>
 </ul></div>
     </div>
 

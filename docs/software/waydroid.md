@@ -1,7 +1,7 @@
 ---
 title: Android (Waydroid)
 section: Software & Apps
-updated: 2026-04-01
+updated: 2026-08-28
 ---
 
 # Android (Waydroid)
@@ -170,3 +170,10 @@ sudo waydroid init -f
 - For Google Play Store support, use a community GApps package (not included by default)
 - Battery and suspend management: stop the `waydroid-container` service when not in use to save power
 - Android apps are sandboxed inside the Waydroid container and cannot access your Linux files unless you explicitly share them via the `~/.local/share/waydroid/data/media/0/` path
+
+## See Also
+
+- [Containers](containers) — overview of all container runtimes
+- [Gaming](gaming) — Steam, Proton, game controllers
+- [Firewall](../networking/firewalld.md) — pre-configured rules for Waydroid
+- [First Boot](../install/first-boot.md) — initial Waydroid setup

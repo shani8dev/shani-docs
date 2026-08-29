@@ -1,7 +1,7 @@
 ---
 title: Virtual Networking
 section: Networking
-updated: 2026-04-25
+updated: 2026-08-28
 ---
 
 # Virtual Networking
@@ -196,7 +196,9 @@ Enable IP forwarding and NAT to give namespaces internet access:
 
 ```bash
 echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
-sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/24 -j MASQUERADE
+
+# Masquerade namespace traffic out the external zone
+sudo firewall-cmd --zone=external --add-masquerade --permanent && sudo firewall-cmd --reload
 ```
 
 ---
@@ -415,7 +417,7 @@ networkctl status          # Verify interfaces came up correctly
 
 ## See Also
 
-- [Network Diagnostics & Tools](../troubleshooting/network-diag) — `ip`, `ss`, `tcpdump`, `nmap`
-- [Containers](../system/containers) — Podman networking and CNI plugins
-- [Firewall](../system/firewall) — nftables rules for virtual interfaces
-- [WireGuard VPN](../network/wireguard) — TUN-based VPN setup
+- [Network Tools](../networking/network-tools.md) — `ip`, `ss`, `tcpdump`, `nmap`
+- [Containers](../software/containers.md) — Podman networking and CNI plugins
+- [Firewall (firewalld)](../networking/firewalld.md) — nftables rules for virtual interfaces
+- [WireGuard VPN](../networking/wireguard.md) — TUN-based VPN setup

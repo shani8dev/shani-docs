@@ -1,7 +1,7 @@
 ---
 title: Gaming
 section: Software & Apps
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Gaming
@@ -83,14 +83,14 @@ glxinfo | grep "OpenGL renderer"
 
 | Issue | Solution |
 |-------|----------|
-| Controller not detected | Check `ls /dev/input/js*`; unplug/replug; some Bluetooth controllers need pairing first — see [Bluetooth](../networking/bluetooth) |
+| Controller not detected | Check `ls /dev/input/js*`; unplug/replug; some Bluetooth controllers need pairing first — see [Bluetooth](../networking/bluetooth.md) |
 | Game runs but GameMode isn't engaging | Confirm `gamemoded -s` shows an active client while the game runs; some games need `gamemoderun %command%` as a Steam launch option to opt in explicitly |
-| Poor performance vs. Windows | Check `vulkaninfo --summary` confirms the right GPU/driver is in use, especially on hybrid (laptop) graphics — see [Hardware](../system/hardware) for `switcheroo-control` |
+| Poor performance vs. Windows | Check `vulkaninfo --summary` confirms the right GPU/driver is in use, especially on hybrid (laptop) graphics — see [Hardware](../system/hardware.md) for `switcheroo-control` |
 | Proton game won't launch | Try a different Proton version (Steam → game Properties → Compatibility); check [ProtonDB](https://www.protondb.com) for known workarounds |
 | RGB lighting not controllable | The udev *permissions* are pre-installed but OpenRGB itself is not — install it via Flatpak |
 
 ## See Also
 
 - [Bottles (Windows Compatibility)](bottles) — detailed Wine prefix management
-- [Hardware](../system/hardware) — GPU drivers, hybrid graphics (`switcheroo-control`)
-- [What's Included](../intro/whats-included) — full controller/RGB/wheel hardware list
+- [Hardware](../system/hardware.md) — GPU drivers, hybrid graphics (`switcheroo-control`)
+- [What's Included](../intro/whats-included.md) — full controller/RGB/wheel hardware list

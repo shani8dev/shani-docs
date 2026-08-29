@@ -1,7 +1,7 @@
 ---
 title: Installation Steps
 section: Installation
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Installation Steps
@@ -13,7 +13,7 @@ Installation takes approximately 10–15 minutes.
 1. **Boot from USB** — Press F12, F2, or Del during startup. Select your USB drive from the boot menu.
 2. **Select "Install Shanios"** — Choose the installation option from the boot menu.
 3. **Keyboard Layout** — Always asked, on every edition.
-4. **Language & Region** — This page is skipped on both editions — locale and timezone are configured later by the first-boot Initial Setup wizard instead.
+4. **Language & Region** — This page is skipped on all editions — locale and timezone are configured later by the first-boot Initial Setup wizard instead.
 5. **Disk Selection** — Choose target disk and partitioning scheme (automatic recommended).
 6. **Encryption (Optional)** — Enable LUKS2 full-disk encryption (argon2id key derivation). You'll be asked to enter the passphrase twice to confirm. Recommended for laptops and portable systems.
 7. **Install** — The installer creates Btrfs subvolumes, installs the base system, and configures the bootloader.
@@ -28,8 +28,46 @@ All of the following is completed by the installer (`install.sh` + `configure.sh
 - The Flatpak store is extracted and snapshotted into `@flatpak`. If Snap seed was included on the ISO, it is extracted into `@snapd`
 - The swapfile is created in `@swap` using `btrfs filesystem mkswapfile` sized to match RAM. If there isn't enough free disk space for a full-RAM swapfile, this step is skipped entirely and the system falls back to zram for swap
 - Keyboard layout is always configured via `chroot`; locale, timezone, user account, and autologin are configured the same way, unless deferred to the first-boot wizard (see step 4 above)
-- Secure Boot: the MOK signing key is normally already baked into the system image at build time — the installer just verifies the keypair and re-signs the bootloader/kernel with it. Keys are only generated fresh on the spot if they're missing or invalid, which is a fallback path, not the common case. Either way, both UKIs (`shanios-blue.efi`, `shanios-green.efi`) are built using `dracut --force --uefi` and signed with the MOK key, and MOK enrollment is staged automatically so you just confirm it in MokManager on first boot (see [First Boot](./first-boot))
+- Secure Boot: the MOK signing key is normally already baked into the system image at build time — the installer just verifies the keypair and re-signs the bootloader/kernel with it. Keys are only generated fresh on the spot if they're missing or invalid, which is a fallback path, not the common case. Either way, both UKIs (`shanios-blue.efi`, `shanios-green.efi`) are built using `dracut --force --uefi` and signed with the MOK key, and MOK enrollment is staged automatically so you just confirm it in MokManager on first boot (see [First Boot](./first-boot.md))
 - `/etc/crypttab` is generated with the LUKS UUID and `none` key field if encryption was chosen
 - Firewall rules for KDE Connect and Waydroid are applied via `firewall-offline-cmd`
 
 On first boot, `beesd-setup.service` configures the deduplication daemon for the Btrfs volume UUID, then the Initial Setup wizard runs for user-facing personalisation.
+
+## Verifying the Installation
+
+After reboot, confirm the install succeeded:
+
+```bash
+# Check which slot is active
+cat /data/current-slot
+# @blue (first install always boots into blue)
+
+# Verify Btrfs subvolumes
+sudo btrfs subvolume list /
+# Should show: @root, @home, @data, @nix, @cache, @log, @flatpak, @snapd, @waydroid, @containers, @machines, @lxc, @lxd, @libvirt, @qemu, @swap
+
+# Check disk usage
+df -h /
+```
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| USB doesn't appear in boot menu | Secure Boot may block unsigned USB media | Try disabling Secure Boot temporarily, or use a different USB port |
+| "Failed to mount" errors during install | Corrupted installation media | Re-download ISO, re-flash with `dd` (or Rufus in DD image mode), verify SHA256 checksum |
+| Disk selection shows no disks | NVMe/RAID not detected; driver missing from initramfs | Check BIOS settings for NVMe/RAID mode; ensure AHCI is selected (not RAID for single disks) |
+| Btrfs error during install | Corrupted filesystem or bad disk | Run `sudo btrfs check /dev/sdX` from live USB, or try a different disk |
+| Secure Boot MokManager prompt doesn't appear on first boot | Firmware skipped MOK enrollment | Reboot and enter firmware settings; look for "Security" → "MOK" or "Secure Boot Key Management" |
+| Installer fails with "insufficient disk space" | Disk nominally 32 GB but below 28 GB usable floor | Use a disk with ≥32 GB total; the 28 GB floor accounts for partition tables and wear-leveling overhead |
+| Wi-Fi doesn't work during install | Wireless firmware not loaded | This is expected — the installer doesn't load Wi-Fi firmware; use wired connection or configure Wi-Fi after first boot |
+| Swap not created | Not enough free space for full-RAM swapfile | System will fall back to zram automatically — this is expected behavior, not an error |
+
+## See Also
+
+- [System Requirements](./requirements.md) — hardware and firmware requirements
+- [First Boot](./first-boot.md) — what happens after installation completes
+- [Pre-Install Checklist](./pre-install.md) — what to prepare before starting
+- [Getting Started](../intro/getting-started.md) — download, verify, install walkthrough
+- [Troubleshooting](../troubleshooting.md) — general troubleshooting guide

@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Immutability — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Understanding Immutability  Shanios's immutability fundamentally changes how you interact with the system. Understanding this concept is key to using Shani…">
+  <meta name="description" id="meta-desc"     content="Shanios's immutability fundamentally changes how you interact with the system. Understanding this concept is key to using Shanios effectively. What &quot;Immuta…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Immutability">
-  <meta property="og:description" id="og-desc"    content="Understanding Immutability  Shanios's immutability fundamentally changes how you interact with the system. Understanding this concept is key to using Shani…">
+  <meta property="og:description" id="og-desc"    content="Shanios's immutability fundamentally changes how you interact with the system. Understanding this concept is key to using Shanios effectively. What &quot;Immuta…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/concepts/immutability/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Immutability">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Immutability">
-  <meta name="twitter:description" id="tw-desc"  content="Understanding Immutability  Shanios's immutability fundamentally changes how you interact with the system. Understanding this concept is key to using Shani…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios's immutability fundamentally changes how you interact with the system. Understanding this concept is key to using Shanios effectively. What &quot;Immuta…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Immutability","description":"Understanding Immutability  Shanios's immutability fundamentally changes how you interact with the system. Understanding this concept is key to using Shani…","url":"https://docs.shani.dev/doc/concepts/immutability/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Immutability","description":"Shanios's immutability fundamentally changes how you interact with the system. Understanding this concept is key to using Shanios effectively. What \"Immuta…","url":"https://docs.shani.dev/doc/concepts/immutability/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Immutability","item":"https://docs.shani.dev/doc/concepts/immutability/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,14 +215,13 @@
         <h1 class="doc-title">Immutability</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Concepts</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><h1>Understanding Immutability</h1>
-<p>Shanios's immutability fundamentally changes how you interact with the system. Understanding this concept is key to using Shanios effectively.</p>
-<h2>What "Immutable" Actually Means Here</h2>
-<p>The root filesystem lives in one of two Btrfs subvolumes, <code>@blue</code> or <code>@green</code>, and whichever one is active is mounted read-only (<code>rootflags=...,ro,...</code> on the kernel cmdline). Both are complete, bootable copies of the OS — there is no single shared <code>/</code> that mutates in place. <code>/usr</code>, <code>/bin</code>, <code>/lib</code>, and the rest of the base system are read-only for the entire life of that slot; the only way they change is a full slot replacement by <a href="./atomic-updates"><code>shani-deploy</code></a>, never an in-place write. See <a href="./blue-green">Blue-Green Deployment</a> for how the two slots relate, and <a href="./persistence">Persistence Strategy</a> for exactly what's writable and where it lives.</p>
-<h2>What You CAN Do</h2>
+      <div class="prose"><p>Shanios's immutability fundamentally changes how you interact with the system. Understanding this concept is key to using Shanios effectively.</p>
+<h2 id="what-immutable-actually-means-here">What "Immutable" Actually Means Here</h2>
+<p>The root filesystem lives in one of two Btrfs subvolumes, <code>@blue</code> or <code>@green</code>, and whichever one is active is mounted read-only (<code>rootflags=...,ro,...</code> on the kernel cmdline). Both are complete, bootable copies of the OS — there is no single shared <code>/</code> that mutates in place. <code>/usr</code>, <code>/bin</code>, <code>/lib</code>, and the rest of the base system are read-only for the entire life of that slot; the only way they change is a full slot replacement by <a href="./atomic-updates.md"><code>shani-deploy</code></a>, never an in-place write. See <a href="./blue-green.md">Blue-Green Deployment</a> for how the two slots relate, and <a href="./persistence.md">Persistence Strategy</a> for exactly what's writable and where it lives.</p>
+<h2 id="what-you-can-do">What You CAN Do</h2>
 <ul>
 <li>✅ Install applications via Flatpak</li>
 <li>✅ Edit configuration files in <code>/etc</code></li>
@@ -229,7 +230,7 @@
 <li>✅ Update the entire system atomically</li>
 <li>✅ Store data in <code>/data</code> and persistent subvolumes</li>
 </ul>
-<h2>What You CANNOT Do</h2>
+<h2 id="what-you-cannot-do">What You CANNOT Do</h2>
 <ul>
 <li>❌ Use pacman to install traditional packages (<em>use Flatpak, Nix, or Distrobox</em>)</li>
 <li>❌ Modify files in <code>/</code> (root filesystem) (<em>read-only by design</em>)</li>
@@ -240,15 +241,43 @@
 <li>❌ Use <code>make install</code> to install built software into system directories (<em>build and export from Distrobox</em>)</li>
 <li>❌ Modify files in <code>/opt</code> or <code>/usr/share</code> directly (<em>/etc overlay for config; Distrobox for everything else</em>)</li>
 </ul>
-<h2>Why This Design?</h2>
-<h3>Security</h3>
+<h2 id="why-this-design">Why This Design?</h2>
+<h3 id="security">Security</h3>
 <p>Malware cannot modify system files or persist across reboots.</p>
-<h3>Reliability</h3>
+<h3 id="reliability">Reliability</h3>
 <p>Updates are atomic — they either work completely or fail safely.</p>
-<h3>Rollback</h3>
+<h3 id="rollback">Rollback</h3>
 <p>Instant recovery from failed updates or system issues.</p>
-<h3>Consistency</h3>
-<p>System state is always predictable and reproducible. The same image that was deployed is the same image that runs — indefinitely, regardless of what software is installed or run on top.</p></div>
+<h3 id="consistency">Consistency</h3>
+<p>System state is always predictable and reproducible. The same image that was deployed is the same image that runs — indefinitely, regardless of what software is installed or run on top.</p>
+<h2 id="try-it-yourself">Try It Yourself</h2>
+<p>Open a terminal and try these to see immutability in action:</p>
+<pre><code class="language-bash"># Try to create a file in /usr — this will FAIL
+sudo touch /usr/test-file
+# touch: cannot touch '/usr/test-file': Read-only file system
+
+# Try to modify /etc — this will SUCCEED (writable overlay)
+sudo nano /etc/hostname
+# You can edit this file — it lives in the OverlayFS
+
+# Check that /usr is genuinely read-only
+mount | grep &quot; / &quot;
+# ... ro,... — the &quot;ro&quot; confirms read-only root
+
+# Check your current slot
+cat /data/current-slot
+# @blue or @green
+
+# See which subvolumes are writable
+df -h /home /data
+# These live in separate writable subvolumes</code></pre>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="./blue-green.md">Blue-Green Deployment</a> — how the two OS slots relate</li>
+<li><a href="./persistence.md">Persistence Strategy</a> — what's writable and where data lives</li>
+<li><a href="./atomic-updates.md">Atomic Updates</a> — how <code>shani-deploy</code> replaces system images</li>
+<li><a href="../intro/migrating.md">Migrating from Traditional Linux</a> — workflow changes to expect</li>
+</ul></div>
     </div>
 
   </main>

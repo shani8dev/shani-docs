@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Media &amp; Entertainment — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Media &amp; Entertainment  Self-hosted streaming servers, personal photo libraries, music servers, and download automation.  All containers bind to  by default…">
+  <meta name="description" id="meta-desc"     content="Self-hosted streaming servers, personal photo libraries, music servers, and download automation. All containers bind to 127.0.0.1 by default. Proxy through…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Media &amp; Entertainment">
-  <meta property="og:description" id="og-desc"    content="Media &amp; Entertainment  Self-hosted streaming servers, personal photo libraries, music servers, and download automation.  All containers bind to  by default…">
+  <meta property="og:description" id="og-desc"    content="Self-hosted streaming servers, personal photo libraries, music servers, and download automation. All containers bind to 127.0.0.1 by default. Proxy through…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/media/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Media &amp; Entertainment">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Media &amp; Entertainment">
-  <meta name="twitter:description" id="tw-desc"  content="Media &amp; Entertainment  Self-hosted streaming servers, personal photo libraries, music servers, and download automation.  All containers bind to  by default…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Self-hosted streaming servers, personal photo libraries, music servers, and download automation. All containers bind to 127.0.0.1 by default. Proxy through…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Media & Entertainment","description":"Media & Entertainment  Self-hosted streaming servers, personal photo libraries, music servers, and download automation.  All containers bind to  by default…","url":"https://docs.shani.dev/doc/servers/media/","datePublished":"2026-04-22T00:00:00.000Z","dateModified":"2026-04-22T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Media & Entertainment","description":"Self-hosted streaming servers, personal photo libraries, music servers, and download automation. All containers bind to 127.0.0.1 by default. Proxy through…","url":"https://docs.shani.dev/doc/servers/media/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Media & Entertainment","item":"https://docs.shani.dev/doc/servers/media/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,26 +215,26 @@
         <h1 class="doc-title">Media &amp; Entertainment</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Self-hosted streaming servers, personal photo libraries, music servers, and download automation.</p>
-<blockquote><p>All containers bind to <code>127.0.0.1</code> by default. Proxy through Caddy for HTTPS and expose via Tailscale or Cloudflare Tunnel for remote access.</p></blockquote>
-<p>---</p>
-<h2>Key Concepts</h2>
-<h4>Video transcoding — codecs, containers, and hardware acceleration</h4>
+<blockquote>All containers bind to <code>127.0.0.1</code> by default. Proxy through Caddy for HTTPS and expose via Tailscale or Cloudflare Tunnel for remote access.</blockquote>
+<hr>
+<h2 id="key-concepts">Key Concepts</h2>
+<h4 id="video-transcoding-codecs-containers-and-hardware-acceleration">Video transcoding — codecs, containers, and hardware acceleration</h4>
 <p>A video file has two layers: a container (MKV, MP4, AVI — the wrapper format) and codec (H.264, H.265/HEVC, AV1 — the compression algorithm). Jellyfin transcodes on-the-fly when a client can't decode the source codec natively (a Roku doesn't decode H.265; it needs an H.264 stream). Transcoding is CPU-intensive — a single 1080p H.265 → H.264 transcode saturates 2–4 CPU cores. Hardware transcoding (Intel Quick Sync via <code>/dev/dri</code>, NVIDIA NVENC, AMD VCE) offloads this to dedicated silicon, supporting 10–20 simultaneous streams on the same hardware that would support 1–2 in software. The key operational decision: ensure clients support direct play (no transcoding) by choosing a codec supported by your device ecosystem. H.264 + AAC in MKV direct plays on virtually everything.</p>
-<h4>HLS, DASH, and adaptive bitrate streaming</h4>
+<h4 id="hls-dash-and-adaptive-bitrate-streaming">HLS, DASH, and adaptive bitrate streaming</h4>
 <p>HTTP Live Streaming (HLS) and Dynamic Adaptive Streaming over HTTP (DASH) are the two dominant streaming protocols. Both work by splitting video into short segments (2–10 seconds) served as regular HTTP files. The client fetches a manifest (<code>.m3u8</code> for HLS, <code>.mpd</code> for DASH) listing available quality levels and segment URLs, then requests segments at the appropriate quality based on measured bandwidth. Jellyfin and Plex use HLS for their web and app streaming — there is no persistent connection, just regular HTTP requests. Adaptive bitrate (ABR) is why video quality changes dynamically when your network fluctuates. PeerTube uses WebTorrent (peer-assisted HLS) to distribute bandwidth across viewers.</p>
-<h4>EXIF metadata and photo library management</h4>
+<h4 id="exif-metadata-and-photo-library-management">EXIF metadata and photo library management</h4>
 <p>Digital photos embed EXIF metadata: camera model, lens, shutter speed, ISO, GPS coordinates, timestamp. Photo managers (Immich, PhotoPrism) extract this to enable timeline browsing, map view, and searchable camera/lens filters. GPS coordinates require the device to have location services enabled when the photo is taken — many camera apps default to off. The timestamp in EXIF is the camera's local time without timezone — this causes sorting errors when photos are taken across timezones. Immich normalises timestamps using timezone data. Face recognition in PhotoPrism and Immich uses a local ML model (no cloud) — it clusters face embeddings from photo crops and asks you to name each cluster.</p>
-<h4>BitTorrent protocol and the *arr stack automation pipeline</h4>
+<h4 id="bittorrent-protocol-and-the-arr-stack-automation-pipeline">BitTorrent protocol and the *arr stack automation pipeline</h4>
 <p>BitTorrent is a peer-to-peer file distribution protocol: a <code>.torrent</code> file or magnet link describes the content and a list of trackers (or uses DHT for trackerless discovery). Peers download pieces from multiple sources simultaneously and upload to others. qBittorrent manages this. The *arr stack (Radarr, Sonarr, Lidarr) automates the full pipeline: monitor Prowlarr for new releases matching your watch list → send download request to qBittorrent → monitor download completion → rename and move to media library → notify Jellyfin to scan the new file. The result: a new movie you added to Radarr's wanted list appears in Jellyfin within minutes of a release. This pipeline is a concrete example of event-driven workflow automation.</p>
-<h4>Content delivery and the bandwidth cost of self-hosted streaming</h4>
+<h4 id="content-delivery-and-the-bandwidth-cost-of-self-hosted-streaming">Content delivery and the bandwidth cost of self-hosted streaming</h4>
 <p>A 1080p H.264 stream at 8 Mbps consumed 8 hours per day = ~28 GB/month per viewer. 4K HDR at 40 Mbps = ~140 GB/month per viewer. Home internet upload bandwidth is the limiting factor for remote access — a typical 50 Mbps upload supports 6 simultaneous 1080p streams or 1 4K stream. CDN strategies for self-hosting: Cloudflare Tunnel proxies the HTTP stream (counts against Cloudflare's fair use for video — against their ToS for high-volume streaming). Tailscale routes directly to your server, using your actual upload bandwidth. A VPS reverse proxy (via frp or Pangolin) shifts the bandwidth cost to the VPS. The practical answer for personal use: Tailscale for remote access, direct LAN for most viewing.</p>
-<h4>Digital rights management (DRM) and Plex/Jellyfin differences</h4>
+<h4 id="digital-rights-management-drm-and-plexjellyfin-differences">Digital rights management (DRM) and Plex/Jellyfin differences</h4>
 <p>Plex Pass is required for hardware transcoding and features like mobile sync — this is a commercial layer on top of open-source foundations. Jellyfin is fully open-source with no paid tier, and includes hardware transcoding in the base installation. Neither Plex nor Jellyfin can transcode DRM-protected content (Netflix, Disney+) — they are for personal media libraries of content you own. This distinction matters for recommending the right tool: if a user asks about ripping Blu-rays and streaming them, Jellyfin with MakeMKV-ripped files is the workflow. Streaming licensed content from Netflix-equivalent services still requires those services' apps.</p>
-<h2>Jellyfin</h2>
+<h2 id="jellyfin">Jellyfin</h2>
 <p><strong>Purpose:</strong> Free, open-source media server with hardware transcoding, multi-user accounts, parental controls, and native client apps for every platform (Android, iOS, Roku, Apple TV, Fire TV, web, Android TV).</p>
 <pre><code class="language-yaml"># ~/jellyfin/compose.yaml
 services:
@@ -248,7 +250,7 @@ services:
       - /dev/dri
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/jellyfin &amp;&amp; podman-compose up -d</code></pre>
-<h4>Common operations</h4>
+<h4 id="common-operations">Common operations</h4>
 <pre><code class="language-bash"># Check Jellyfin health endpoint
 curl http://localhost:8096/health
 
@@ -267,19 +269,19 @@ podman exec jellyfin ffmpeg -hwaccels 2&gt;&amp;1 | head -20
 
 # Get server info via API
 curl &quot;http://localhost:8096/System/Info?api_key=YOUR_API_KEY&quot;</code></pre>
-<blockquote><p><code>--device /dev/dri</code> enables Intel/AMD VA-API hardware transcoding. Remove if you have no GPU.</p></blockquote>
+<blockquote><code>--device /dev/dri</code> enables Intel/AMD VA-API hardware transcoding. Remove if you have no GPU.</blockquote>
 <p><strong>Caddy:</strong></p>
 <pre><code class="language-caddyfile">media.home.local { tls internal; reverse_proxy localhost:8096 }</code></pre>
-<h4>Transcoding vs direct play vs direct stream</h4>
+<h4 id="transcoding-vs-direct-play-vs-direct-stream">Transcoding vs direct play vs direct stream</h4>
 <p>Three modes in Jellyfin/Plex: <strong>Direct play</strong> — the client supports the exact codec and container; no server processing. <strong>Direct stream</strong> — the container is rewrapped (remuxed) but the video codec is passed through unchanged; low CPU. <strong>Transcoding</strong> — the server decodes and re-encodes to a format the client supports; CPU or GPU-intensive. Target direct play wherever possible — it uses no server resources. The main causes of forced transcoding: client doesn't support HEVC/H.265, audio codec not supported (TrueHD, Atmos), or subtitle format (image-based PGS/VOBSUB forces video transcode because subtitles must be burned in). Hardware transcoding (Intel QSV, AMD VCE, NVIDIA NVENC) reduces CPU load by 10–20× for transcoding workloads.</p>
-<h4>The *arr stack and Usenet vs BitTorrent</h4>
+<h4 id="the-arr-stack-and-usenet-vs-bittorrent">The *arr stack and Usenet vs BitTorrent</h4>
 <p>The <em>arr stack (Radarr, Sonarr, Lidarr, Readarr) provides automated media acquisition: search indexers, match against quality profiles, send to a download client, and import to your library. Usenet (SABnzbd) is binary newsgroups — centralised, fast (full ISP bandwidth), requires a Usenet provider subscription and an NZB indexer. BitTorrent (qBittorrent) is peer-to-peer — free, but slower and requires a VPN or seedbox for privacy in most jurisdictions. Prowlarr manages all indexers centrally for the </em>arr stack. The automation pipeline: new release appears on indexer → Radarr/Sonarr picks it up → sends to download client → client downloads → *arr imports and renames → Jellyfin picks it up via library scan.</p>
-<h4>Storage planning for media libraries</h4>
+<h4 id="storage-planning-for-media-libraries">Storage planning for media libraries</h4>
 <p>Video bitrates: 1080p H.264 Blu-ray rip ~15–25 GB, 1080p x265 ~4–8 GB, 4K HDR x265 ~40–80 GB, 4K remux ~60–100 GB. Music: FLAC ~300 MB/album, MP3 320kbps ~100 MB/album. A modest 500-film 1080p library at 8 GB average = 4 TB. Plan for 2–3× growth headroom. RAID is not a backup — it protects against disk failure but not accidental deletion, ransomware, or controller failure. Run RAID + Restic to offsite. ZFS with snapshots provides additional protection against silent data corruption (bit rot) via checksums.</p>
-<h4>Metadata, NFO files, and library management</h4>
+<h4 id="metadata-nfo-files-and-library-management">Metadata, NFO files, and library management</h4>
 <p>Jellyfin and Plex fetch metadata (posters, backdrops, descriptions, cast) from TMDB, TVDB, and MusicBrainz. Correct file naming is essential: <code>Movie Name (2023)/Movie Name (2023).mkv</code> for films; <code>Show Name/Season 01/Show Name S01E01.mkv</code> for TV. NFO files are sidecar XML files that store metadata locally — useful when an API source has wrong data or for content not in public databases. Unmanic automates post-processing: watch a directory, transcode new files to a target format (H.265), and handle the replace-in-place workflow safely with Jellyfin library refresh hooks.</p>
-<p>---</p>
-<h2>Plex</h2>
+<hr>
+<h2 id="plex">Plex</h2>
 <p><strong>Purpose:</strong> Polished media server with a premium client ecosystem, live TV/DVR support, and Plex Pass features (hardware transcoding, mobile sync, lyrics).</p>
 <pre><code class="language-yaml"># ~/plex/compose.yaml
 services:
@@ -296,9 +298,9 @@ services:
       PLEX_CLAIM: claim-xxxxxxxxxxxx
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/plex &amp;&amp; podman-compose up -d</code></pre>
-<blockquote><p>Get your claim token from <a href="https://plex.tv/claim">plex.tv/claim</a>. It is only needed on first run.</p></blockquote>
-<p>---</p>
-<h2>Navidrome</h2>
+<blockquote>Get your claim token from <a href="https://plex.tv/claim">plex.tv/claim</a>. It is only needed on first run.</blockquote>
+<hr>
+<h2 id="navidrome">Navidrome</h2>
 <p><strong>Purpose:</strong> Lightweight Subsonic-compatible music server. Streams your local music library to any Subsonic client — DSub, Symfonium, Ultrasonic, Feishin, and more.</p>
 <pre><code class="language-yaml"># ~/navidrome/compose.yaml
 services:
@@ -315,7 +317,7 @@ services:
       ND_SESSIONTIMEOUT: 24h
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/navidrome &amp;&amp; podman-compose up -d</code></pre>
-<h4>Common operations</h4>
+<h4 id="common-operations-2">Common operations</h4>
 <pre><code class="language-bash"># Trigger a full library rescan
 curl -u admin:changeme http://localhost:4533/rest/startScan.view?v=1.16.1&amp;c=cli&amp;f=json
 
@@ -331,8 +333,8 @@ podman logs -f navidrome
 # Backup Navidrome DB
 cp /home/user/navidrome/data/navidrome.db /home/user/backups/navidrome-$(date +%Y%m%d).db</code></pre>
 <p>Access at <code>http://localhost:4533</code>. Navidrome auto-scans on the schedule set by <code>ND_SCANSCHEDULE</code>.</p>
-<p>---</p>
-<h2>Immich</h2>
+<hr>
+<h2 id="immich">Immich</h2>
 <p><strong>Purpose:</strong> High-performance self-hosted Google Photos alternative. Automatic mobile backup, AI-powered face recognition and object detection, timeline browsing, shared albums, and a polished web and mobile UI.</p>
 <pre><code class="language-yaml"># ~/immich/compose.yaml
 services:
@@ -374,8 +376,8 @@ volumes:
   model_cache:</code></pre>
 <pre><code class="language-bash">cd ~/immich &amp;&amp; podman-compose up -d</code></pre>
 <p>Access at <code>http://localhost:2283</code>. Install the Immich mobile app and point it at your server for automatic photo backup.</p>
-<p>---</p>
-<h2>Jellyseerr</h2>
+<hr>
+<h2 id="jellyseerr">Jellyseerr</h2>
 <p><strong>Purpose:</strong> Media request manager for Jellyfin (and Plex). Lets family and friends request movies and shows through a polished UI — requests go straight to Radarr/Sonarr for automated downloading.</p>
 <pre><code class="language-yaml"># ~/jellyseerr/compose.yaml
 services:
@@ -389,8 +391,9 @@ services:
       TZ: Asia/Kolkata
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/jellyseerr &amp;&amp; podman-compose up -d</code></pre>
-<p>---</p>
-<h2>The *Arr Stack (Download Automation)</h2>
+<p>Access at <code>http://localhost:5055</code>.</p>
+<hr>
+<h2 id="the-arr-stack-download-automation">The *Arr Stack (Download Automation)</h2>
 <p><strong>Purpose:</strong> Automate the discovery, downloading, and organisation of movies (Radarr), TV shows (Sonarr), music (Lidarr), and indexers (Prowlarr). Integrates with Jellyfin so your library stays current automatically.</p>
 <pre><code class="language-yaml"># ~/radarr/compose.yaml
 services:
@@ -441,9 +444,9 @@ services:
       PGID: &quot;1000&quot;
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/radarr &amp;&amp; podman-compose up -d</code></pre>
-<blockquote><p>Use the same <code>/downloads</code> volume mount across all *arr apps and your download client so they can hardlink files instead of copying.</p></blockquote>
-<p>---</p>
-<h2>qBittorrent (Download Client)</h2>
+<blockquote>Use the same <code>/downloads</code> volume mount across all *arr apps and your download client so they can hardlink files instead of copying.</blockquote>
+<hr>
+<h2 id="qbittorrent-download-client">qBittorrent (Download Client)</h2>
 <p><strong>Purpose:</strong> Feature-rich torrent client with a web UI. Integrates with the *arr stack as a download client.</p>
 <pre><code class="language-yaml"># ~/qbittorrent/compose.yaml
 services:
@@ -463,22 +466,23 @@ services:
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/qbittorrent &amp;&amp; podman-compose up -d</code></pre>
 <p>Access at <code>http://localhost:8080</code>. Default password is displayed in the container logs on first run.</p>
-<p>---</p>
-<h2>Pinchflat (YouTube Archiver)</h2>
+<hr>
+<h2 id="pinchflat-youtube-archiver">Pinchflat (YouTube Archiver)</h2>
 <p><strong>Purpose:</strong> Automatically download and archive YouTube channels, playlists, and individual videos. Clean web UI, scheduled fetching, and Jellyfin-friendly naming.</p>
 <pre><code class="language-yaml"># ~/pinchflat/compose.yaml
 services:
   pinchflat:
     image: ghcr.io/kieraneglin/pinchflat:latest
     ports:
-      - 127.0.0.1:8088:8088
+      - 127.0.0.1:8945:8945
     volumes:
       - /home/user/pinchflat/data:/app/data:Z
       - /home/user/downloads/youtube:/downloads:Z
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/pinchflat &amp;&amp; podman-compose up -d</code></pre>
-<p>---</p>
-<h2>Kavita (Comics, Manga & eBooks)</h2>
+<p>Access at <code>http://localhost:8945</code>.</p>
+<hr>
+<h2 id="kavita-comics-manga-ebooks">Kavita (Comics, Manga & eBooks)</h2>
 <p><strong>Purpose:</strong> Digital library server for comics, manga, and e-books. Supports CBZ, CBR, PDF, EPUB, and more. Web reader, reading progress sync, and OPDS support for mobile apps.</p>
 <pre><code class="language-yaml"># ~/kavita/compose.yaml
 services:
@@ -491,8 +495,9 @@ services:
       - /home/user/books:/books:ro,Z
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/kavita &amp;&amp; podman-compose up -d</code></pre>
-<p>---</p>
-<h2>Audiobookshelf</h2>
+<p>Access at <code>http://localhost:5000</code>.</p>
+<hr>
+<h2 id="audiobookshelf">Audiobookshelf</h2>
 <p><strong>Purpose:</strong> Audiobook and podcast server with progress sync across devices, mobile apps (iOS and Android), and metadata management.</p>
 <pre><code class="language-yaml"># ~/audiobookshelf/compose.yaml
 services:
@@ -507,8 +512,9 @@ services:
       - /home/user/audiobookshelf/metadata:/metadata:Z
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/audiobookshelf &amp;&amp; podman-compose up -d</code></pre>
-<p>---</p>
-<h2>PhotoPrism</h2>
+<p>Access at <code>http://localhost:13378</code>.</p>
+<hr>
+<h2 id="photoprism">PhotoPrism</h2>
 <p><strong>Purpose:</strong> AI-powered photo management with automatic subject tagging, geolocation mapping, duplicate detection, and a timeline browser. Good Immich alternative if you prefer a lighter-weight option without the machine learning stack.</p>
 <pre><code class="language-yaml"># ~/photoprism/compose.yaml
 services:
@@ -525,8 +531,8 @@ services:
       PHOTOPRISM_DATABASE_DRIVER: sqlite
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/photoprism &amp;&amp; podman-compose up -d</code></pre>
-<p>---</p>
-<h2>Calibre-Web (eBook Library)</h2>
+<hr>
+<h2 id="calibre-web-ebook-library">Calibre-Web (eBook Library)</h2>
 <p><strong>Purpose:</strong> Web interface for browsing, reading, and downloading your Calibre eBook library. Supports OPDS for ebook reader apps (Koreader, Moon+ Reader), Kobo wireless sync, user accounts with restrictions, and basic metadata editing — without needing the Calibre desktop app running.</p>
 <pre><code class="language-yaml"># ~/calibre-web/compose.yaml
 services:
@@ -544,9 +550,9 @@ services:
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/calibre-web &amp;&amp; podman-compose up -d</code></pre>
 <p>Default login: <code>admin</code> / <code>admin123</code>. Point Calibre-Web at your existing Calibre library (<code>/books</code>) during setup.</p>
-<blockquote><p><strong>Kobo sync:</strong> Enable Kobo sync in Admin → Edit Basic Configuration → Feature Configuration. On your Kobo, add a new search provider with the URL <code>https://calibre.home.local/kobo/&lt;token&gt;/</code>.</p></blockquote>
-<p>---</p>
-<h2>Readarr (Book Download Automation)</h2>
+<blockquote><strong>Kobo sync:</strong> Enable Kobo sync in Admin → Edit Basic Configuration → Feature Configuration. On your Kobo, add a new search provider with the URL <code>https://calibre.home.local/kobo/&lt;token&gt;/</code>.</blockquote>
+<hr>
+<h2 id="readarr-book-download-automation">Readarr (Book Download Automation)</h2>
 <p><strong>Purpose:</strong> The books equivalent of Sonarr and Radarr. Monitors for new releases from your favourite authors, integrates with download clients (qBittorrent, NZBGet), and organises your ebook and audiobook library automatically. Connects to Calibre-Web and Audiobookshelf.</p>
 <pre><code class="language-yaml"># ~/readarr/compose.yaml
 services:
@@ -563,8 +569,8 @@ services:
       PGID: &quot;1000&quot;
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/readarr &amp;&amp; podman-compose up -d</code></pre>
-<p>---</p>
-<h2>Bazarr (Subtitle Management)</h2>
+<hr>
+<h2 id="bazarr-subtitle-management">Bazarr (Subtitle Management)</h2>
 <p><strong>Purpose:</strong> Companion app to Sonarr and Radarr that automatically downloads and manages subtitles for your media library. Supports 50+ subtitle providers, multiple languages, and custom scoring rules. Integrates directly with Jellyfin and Plex.</p>
 <pre><code class="language-yaml"># ~/bazarr/compose.yaml
 services:
@@ -582,8 +588,8 @@ services:
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/bazarr &amp;&amp; podman-compose up -d</code></pre>
 <p>Access at <code>http://localhost:6767</code>. Configure Sonarr and Radarr connection under Settings → Sonarr/Radarr, then add subtitle providers under Settings → Providers.</p>
-<p>---</p>
-<h2>Overseerr</h2>
+<hr>
+<h2 id="overseerr">Overseerr</h2>
 <p>Plex-native equivalent of Jellyseerr — same media request concept, optimised for Plex users. For Jellyfin, see <a href="#jellyseerr">Jellyseerr above</a>.</p>
 <pre><code class="language-yaml"># ~/overseerr/compose.yaml
 services:
@@ -597,8 +603,8 @@ services:
       TZ: Asia/Kolkata
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/overseerr &amp;&amp; podman-compose up -d</code></pre>
-<p>---</p>
-<h2>Tdarr (Video Transcoding Automation)</h2>
+<hr>
+<h2 id="tdarr-video-transcoding-automation">Tdarr (Video Transcoding Automation)</h2>
 <p><strong>Purpose:</strong> Distributed video transcoding pipeline. Automatically detects media that doesn't meet your quality or format requirements (wrong codec, too high bitrate, no HDR tonemapping) and re-encodes it using FFmpeg or Handbrake. Runs workers on multiple machines, including GPU-accelerated workers.</p>
 <pre><code class="language-yaml"># ~/tdarr/compose.yaml
 services:
@@ -626,9 +632,9 @@ services:
       - /dev/dri:/dev/dri  # Intel/AMD GPU for hardware encoding
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/tdarr &amp;&amp; podman-compose up -d</code></pre>
-<blockquote><p>Use Tdarr to batch-convert your library to H.265/HEVC or AV1 to save 40–60% disk space while maintaining the same visual quality.</p></blockquote>
-<p>---</p>
-<h2>MeTube (yt-dlp Web UI)</h2>
+<blockquote>Use Tdarr to batch-convert your library to H.265/HEVC or AV1 to save 40–60% disk space while maintaining the same visual quality.</blockquote>
+<hr>
+<h2 id="metube-yt-dlp-web-ui">MeTube (yt-dlp Web UI)</h2>
 <p><strong>Purpose:</strong> Lightweight web interface for yt-dlp — paste a URL from YouTube, Vimeo, SoundCloud, Twitter, or 1,000+ other sites and download the video or audio in your chosen format and quality. Simpler than Pinchflat (which is designed for automated channel archiving) — MeTube is for on-demand, one-off downloads with a clean queue UI.</p>
 <pre><code class="language-yaml"># ~/metube/compose.yaml
 services:
@@ -644,9 +650,9 @@ services:
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/metube &amp;&amp; podman-compose up -d</code></pre>
 <p>Access at <code>http://localhost:8081</code>. Paste any video URL, choose format (MP4, MKV, MP3, FLAC), and quality — the download appears in the queue, then lands in <code>/downloads</code>.</p>
-<blockquote><p><strong>vs Pinchflat:</strong> Use MeTube for one-off downloads. Use Pinchflat when you want to subscribe to a channel and automatically archive every new upload.</p></blockquote>
-<p>---</p>
-<h2>Stash (Media Library Organiser)</h2>
+<blockquote><strong>vs Pinchflat:</strong> Use MeTube for one-off downloads. Use Pinchflat when you want to subscribe to a channel and automatically archive every new upload.</blockquote>
+<hr>
+<h2 id="stash-media-library-organiser">Stash (Media Library Organiser)</h2>
 <p><strong>Purpose:</strong> Self-hosted media library manager with a web UI, tagging system, scene/performer metadata, scraping from 50+ sites, smart playlists, and a REST/GraphQL API. Designed for organising large personal video libraries with structured metadata — tags, studios, performers, ratings, and markers for jumping to specific moments.</p>
 <pre><code class="language-yaml"># ~/stash/compose.yaml
 services:
@@ -663,8 +669,8 @@ services:
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/stash &amp;&amp; podman-compose up -d</code></pre>
 <p>Access at <code>http://localhost:9999</code>. Add your video directories under Settings → Libraries, run a scan, and Stash builds a browsable library with thumbnail generation and metadata scraping.</p>
-<p>---</p>
-<h2>Komga (Comics & Manga Server)</h2>
+<hr>
+<h2 id="komga-comics-manga-server">Komga (Comics & Manga Server)</h2>
 <p><strong>Purpose:</strong> A polished, OPDS-compatible comics and manga server. Reads CBZ, CBR, PDF, and EPUB files; generates cover thumbnails; tracks read progress per user; and supports series/collections metadata. A more actively developed alternative to Kavita with a cleaner library management UI and better metadata editing.</p>
 <pre><code class="language-yaml"># ~/komga/compose.yaml
 services:
@@ -680,8 +686,8 @@ services:
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/komga &amp;&amp; podman-compose up -d</code></pre>
 <p>Access at <code>http://localhost:8097</code>. Add libraries pointing at your comic directories. Use the Tachiyomi (Android) or Paperback (iOS) app with the Komga plugin for mobile reading.</p>
-<p>---</p>
-<h2>TubeArchivist (YouTube Channel Archiver)</h2>
+<hr>
+<h2 id="tubearchivist-youtube-channel-archiver">TubeArchivist (YouTube Channel Archiver)</h2>
 <p><strong>Purpose:</strong> Archive and self-host entire YouTube channels, playlists, and individual videos with metadata, thumbnails, and subtitles. TubeArchivist downloads via yt-dlp, indexes everything in Elasticsearch, and serves a clean web UI where you can browse, search, and play your archived videos — your own private YouTube. It complements Pinchflat (which is better for ongoing subscriptions) and MeTube (which is better for one-off downloads): TubeArchivist is the right tool when you want to archive a complete channel and browse it as a library.</p>
 <pre><code class="language-yaml"># ~/tubearchivist/compose.yaml
 services:
@@ -724,8 +730,8 @@ volumes: {redis_data: {}, es_data: {}}</code></pre>
 <p>Access at <code>http://localhost:8000</code>. Add a YouTube channel URL and click Download to start archiving. Set a download schedule for automatic new-video ingestion.</p>
 <p><strong>Caddy:</strong></p>
 <pre><code class="language-caddyfile">tubearchivist.home.local { tls internal; reverse_proxy localhost:8000 }</code></pre>
-<p>---</p>
-<h2>Lidarr (Music Download Automation)</h2>
+<hr>
+<h2 id="lidarr-music-download-automation">Lidarr (Music Download Automation)</h2>
 <p><strong>Purpose:</strong> The music counterpart to Radarr and Sonarr — automatically searches for, downloads, and organises music albums and discographies. Integrates with Prowlarr for indexer management, qBittorrent for downloading, and supports MusicBrainz for metadata. Lidarr is included in the *arr stack compose above — this section covers standalone deployment and Navidrome integration.</p>
 <pre><code class="language-yaml"># ~/lidarr/compose.yaml
 services:
@@ -744,9 +750,9 @@ services:
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/lidarr &amp;&amp; podman-compose up -d</code></pre>
 <p>Access at <code>http://localhost:8686</code>. Configure your music root folder, connect Prowlarr as the indexer manager, and add qBittorrent as the download client. Lidarr discovers albums via MusicBrainz and automatically imports organised files into your Navidrome or other music server library.</p>
-<blockquote><p>*<em>Full </em>arr stack:** Prowlarr (indexers) → Sonarr (TV) + Radarr (movies) + Lidarr (music) + Readarr (books) → qBittorrent (downloads) → Jellyfin / Navidrome (playback).</p></blockquote>
-<p>---</p>
-<h2>Kometa (Plex/Jellyfin Metadata Manager)</h2>
+<blockquote>*<em>Full </em>arr stack:** Prowlarr (indexers) → Sonarr (TV) + Radarr (movies) + Lidarr (music) + Readarr (books) → qBittorrent (downloads) → Jellyfin / Navidrome (playback).</blockquote>
+<hr>
+<h2 id="kometa-plexjellyfin-metadata-manager">Kometa (Plex/Jellyfin Metadata Manager)</h2>
 <p><strong>Purpose:</strong> Automated metadata management for Plex and Jellyfin libraries — creates and updates collections (e.g., "Christoper Nolan Films", "Oscar Winners", "Top Rated on IMDB"), overlays (4K/HDR badges, ratings, awards), playlists, and library sorting. Runs on a schedule and keeps your media library rich and organised without manual effort. Formerly known as Plex Meta Manager.</p>
 <pre><code class="language-yaml"># ~/kometa/compose.yaml
 services:
@@ -758,7 +764,7 @@ services:
       TZ: Asia/Kolkata
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/kometa &amp;&amp; podman-compose up -d</code></pre>
-<h5>Minimal <code>config.yml</code></h5>
+<h5 id="minimal-configyml">Minimal <code>config.yml</code></h5>
 <pre><code class="language-yaml"># /home/user/kometa/config/config.yml
 plex:
   url: http://host.containers.internal:32400
@@ -774,14 +780,14 @@ libraries:
     overlay_path:
       - pmm: resolution
       - pmm: ratings</code></pre>
-<blockquote><p>Get your Plex token: sign in to Plex web, open any media item, click the three dots → Get Info → View XML. The token is in the URL as <code>?X-Plex-Token=</code>.</p></blockquote>
+<blockquote>Get your Plex token: sign in to Plex web, open any media item, click the three dots → Get Info → View XML. The token is in the URL as <code>?X-Plex-Token=</code>.</blockquote>
 <p><strong>For Jellyfin</strong>, replace the <code>plex:</code> block:</p>
 <pre><code class="language-yaml">jellyfin:
   url: http://host.containers.internal:8096
   apikey: your-jellyfin-api-key
   user_library: your-username</code></pre>
-<p>---</p>
-<h2>Caddy Configuration</h2>
+<hr>
+<h2 id="caddy-configuration">Caddy Configuration</h2>
 <pre><code class="language-caddyfile">media.home.local       { tls internal; reverse_proxy localhost:8096 }
 plex.home.local        { tls internal; reverse_proxy localhost:32400 }
 music.home.local       { tls internal; reverse_proxy localhost:4533 }
@@ -792,7 +798,7 @@ sonarr.home.local      { tls internal; reverse_proxy localhost:8989 }
 lidarr.home.local      { tls internal; reverse_proxy localhost:8686 }
 prowlarr.home.local    { tls internal; reverse_proxy localhost:9696 }
 torrent.home.local     { tls internal; reverse_proxy localhost:8080 }
-youtube.home.local     { tls internal; reverse_proxy localhost:8088 }
+youtube.home.local     { tls internal; reverse_proxy localhost:8945 }
 books.home.local       { tls internal; reverse_proxy localhost:5000 }
 audiobooks.home.local  { tls internal; reverse_proxy localhost:13378 }
 calibre.home.local     { tls internal; reverse_proxy localhost:8083 }
@@ -804,9 +810,14 @@ stash.home.local       { tls internal; reverse_proxy localhost:9999 }
 komga.home.local          { tls internal; reverse_proxy localhost:8097 }
 tubearchivist.home.local  { tls internal; reverse_proxy localhost:8000 }
 photoprism.example.com    { reverse_proxy localhost:2342 }</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | Jellyfin transcoding is slow | Verify GPU passthrough: check <code>--device /dev/dri</code> is present and <code>renderD128</code> device exists on the host | | Media not appearing in Jellyfin | Trigger a manual library scan; check that the media path uses correct naming conventions (TMDB naming recommended) | | Radarr/Sonarr can't move files | Ensure <code>/downloads</code> and <code>/movies</code> or <code>/tv</code> are on the same volume — cross-device moves disable hardlinking | | Immich mobile backup not working | Ensure the server is reachable (Tailscale or Cloudflare Tunnel); check the app is pointed at the correct server URL including port | | Navidrome not finding music | Check volume mount path matches your actual music directory; confirm files are in a supported format (FLAC, MP3, AAC, OGG) | | Plex not claiming server | Ensure <code>PLEX_CLAIM</code> token is fresh (valid for 4 minutes); remove the variable after first startup | | qBittorrent can't connect from *arr | Verify the WebUI URL in Radarr/Sonarr uses <code>host.containers.internal</code> if they're in separate containers | | Lidarr can't find albums | Ensure your music files are correctly tagged (Artist, Album, Year) — MusicBrainz Picard is a good tagger | | Calibre-Web can't find library | Ensure the <code>/books</code> volume mount points to the directory containing your <code>metadata.db</code> Calibre database file | | Readarr missing books | Readarr searches Goodreads and BookInfo — ensure the author name matches exactly; use the author search in the UI | | Bazarr subtitles not downloading | Check API keys for subtitle providers (OpenSubtitles, Subscene); verify language codes match your Sonarr/Radarr profiles | | Tdarr not processing files | Verify the media volume is mounted correctly; check the health check plugin outputs in the Tdarr logs panel | | Tdarr GPU encoding fails | Ensure <code>--device /dev/dri</code> is passed; test GPU access with <code>podman exec tdarr ffmpeg -hwaccels</code> | | MeTube download fails | Check yt-dlp supports the URL with <code>podman exec metube yt-dlp --list-formats &lt;url&gt;</code>; update the container for the latest yt-dlp version | | Stash scan finds no files | Verify the <code>/data</code> volume mount path; ensure video file extensions are in supported formats list (Settings → General) | | Komga library not updating | Trigger a manual scan under Libraries → Scan; ensure the comics volume is mounted correctly with file read permissions | | TubeArchivist Elasticsearch not ready | ES takes 30–60 s to initialise; check <code>podman logs archivist-es</code>; increase <code>ES_JAVA_OPTS</code> heap if OOM-killed | | TubeArchivist downloads stuck | Check <code>podman logs tubearchivist</code> for yt-dlp errors; update the container for the latest yt-dlp; verify the cache volume is writable | | Kometa collections not created | Verify your Plex token is valid; check <code>podman logs kometa</code> for YAML parse errors in <code>config.yml</code>; run with <code>--run</code> flag for a one-shot debug pass |</p></div>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Jellyfin transcoding is slow</td><td>Verify GPU passthrough: check <code>--device /dev/dri</code> is present and <code>renderD128</code> device exists on the host</td></tr><tr><td>Media not appearing in Jellyfin</td><td>Trigger a manual library scan; check that the media path uses correct naming conventions (TMDB naming recommended)</td></tr><tr><td>Radarr/Sonarr can't move files</td><td>Ensure <code>/downloads</code> and <code>/movies</code> or <code>/tv</code> are on the same volume — cross-device moves disable hardlinking</td></tr><tr><td>Immich mobile backup not working</td><td>Ensure the server is reachable (Tailscale or Cloudflare Tunnel); check the app is pointed at the correct server URL including port</td></tr><tr><td>Navidrome not finding music</td><td>Check volume mount path matches your actual music directory; confirm files are in a supported format (FLAC, MP3, AAC, OGG)</td></tr><tr><td>Plex not claiming server</td><td>Ensure <code>PLEX_CLAIM</code> token is fresh (valid for 4 minutes); remove the variable after first startup</td></tr><tr><td>qBittorrent can't connect from *arr</td><td>Verify the WebUI URL in Radarr/Sonarr uses <code>host.containers.internal</code> if they're in separate containers</td></tr><tr><td>Lidarr can't find albums</td><td>Ensure your music files are correctly tagged (Artist, Album, Year) — MusicBrainz Picard is a good tagger</td></tr><tr><td>Calibre-Web can't find library</td><td>Ensure the <code>/books</code> volume mount points to the directory containing your <code>metadata.db</code> Calibre database file</td></tr><tr><td>Readarr missing books</td><td>Readarr searches Goodreads and BookInfo — ensure the author name matches exactly; use the author search in the UI</td></tr><tr><td>Bazarr subtitles not downloading</td><td>Check API keys for subtitle providers (OpenSubtitles, Subscene); verify language codes match your Sonarr/Radarr profiles</td></tr><tr><td>Tdarr not processing files</td><td>Verify the media volume is mounted correctly; check the health check plugin outputs in the Tdarr logs panel</td></tr><tr><td>Tdarr GPU encoding fails</td><td>Ensure <code>--device /dev/dri</code> is passed; test GPU access with <code>podman exec tdarr ffmpeg -hwaccels</code></td></tr><tr><td>MeTube download fails</td><td>Check yt-dlp supports the URL with <code>podman exec metube yt-dlp --list-formats &lt;url&gt;</code>; update the container for the latest yt-dlp version</td></tr><tr><td>Stash scan finds no files</td><td>Verify the <code>/data</code> volume mount path; ensure video file extensions are in supported formats list (Settings → General)</td></tr><tr><td>Komga library not updating</td><td>Trigger a manual scan under Libraries → Scan; ensure the comics volume is mounted correctly with file read permissions</td></tr><tr><td>TubeArchivist Elasticsearch not ready</td><td>ES takes 30–60 s to initialise; check <code>podman logs archivist-es</code>; increase <code>ES_JAVA_OPTS</code> heap if OOM-killed</td></tr><tr><td>TubeArchivist downloads stuck</td><td>Check <code>podman logs tubearchivist</code> for yt-dlp errors; update the container for the latest yt-dlp; verify the cache volume is writable</td></tr><tr><td>Kometa collections not created</td><td>Verify your Plex token is valid; check <code>podman logs kometa</code> for YAML parse errors in <code>config.yml</code>; run with <code>--run</code> flag for a one-shot debug pass</td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="productivity">Productivity</a></li>
+<li><a href="../system/storage.md">Storage for media libraries</a></li>
+</ul></div>
     </div>
 
   </main>

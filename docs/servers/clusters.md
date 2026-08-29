@@ -1,7 +1,7 @@
 ---
 title: Clusters & High Availability
 section: Self-Hosting & Servers
-updated: 2026-04-22
+updated: 2026-08-28
 ---
 
 # Clusters & High Availability
@@ -71,7 +71,7 @@ Using a relational database as a job queue (polling a `jobs` table) works at low
 
 ## Elasticsearch Cluster (3-Node)
 
-**Purpose:** Production ELK cluster with 3 master-eligible/data nodes for quorum-based split-brain prevention. Survives loss of 1 node. Pair with the Logstash and Beats configs in the [Monitoring wiki](https://docs.shani.dev/doc/servers/monitoring).
+**Purpose:** Production ELK cluster with 3 master-eligible/data nodes for quorum-based split-brain prevention. Survives loss of 1 node. Pair with the Logstash and Beats configs in the [Monitoring wiki](https://docs.shani.dev/doc/servers/monitoring/logs).
 
 ```yaml
 # ~/elk-cluster/compose.yaml
@@ -1382,3 +1382,9 @@ podman exec etcd-cluster-etcd1-1 etcdctl \
 | Cassandra / ScyllaDB node not joining | Cassandra takes 30–60 s to fully start; bring up the seed node first and wait before starting additional nodes; check `nodetool status` for the token ring |
 | etcd cluster not reaching quorum | All 3 members must be able to reach each other on peer port `2380`; verify `ETCD_INITIAL_CLUSTER` lists the same URLs on all nodes |
 | VictoriaMetrics vminsert rejected writes | Verify `--storageNode` addresses resolve from the vminsert container; check `podman logs vminsert` for connectivity errors to vmstorage nodes |
+
+## See Also
+
+- [Databases](databases)
+- [Monitoring](monitoring)
+- [Kubernetes](kubernetes)

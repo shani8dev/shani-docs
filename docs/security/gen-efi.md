@@ -1,7 +1,7 @@
 ---
 title: gen-efi Reference
 section: Security
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # gen-efi Reference
@@ -20,6 +20,7 @@ gen-efi enroll-mok         # Stage MOK key enrollment (re-signs EFI binaries, no
 gen-efi enroll-tpm2        # Enroll TPM2 chip for automatic LUKS unlock
 gen-efi cleanup-mok        # Delete old enrolled MOK keys after key rotation
 gen-efi cleanup-tpm2       # Remove stale TPM2 LUKS keyslots after re-enrollment
+gen-efi remove-tpm2        # Fully remove TPM2 enrollment and LUKS keyslots
 ```
 
 > **Important:** `gen-efi configure` enforces that the target slot matches the currently booted slot when run directly on the live system. Running it for the inactive slot is only permitted inside a chroot, which `shani-deploy` does automatically.
@@ -309,6 +310,6 @@ sudo objcopy -O binary --only-section=.cmdline \
 
 - [Secure Boot](secure-boot) — enrolling keys and enabling Secure Boot
 - [TPM2 Enrollment](tpm2) — detailed TPM2 setup guide
-- [Boot Process](../arch/boot) — how UKIs fit into the boot chain
-- [System Updates](../updates/system) — how `shani-deploy` uses `gen-efi`
-- [shani-health Reference](../updates/shani-health) — `shani-health --security` reports Secure Boot state, MOK enrollment/pending status, MOK key file permissions, and TPM2 PCR-policy consistency
+- [Boot Process](../arch/boot.md) — how UKIs fit into the boot chain
+- [System Updates](../updates/system.md) — how `shani-deploy` uses `gen-efi`
+- [shani-health Reference](../updates/shani-health.md) — `shani-health --security` reports Secure Boot state, MOK enrollment/pending status, MOK key file permissions, and TPM2 PCR-policy consistency

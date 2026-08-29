@@ -1,7 +1,7 @@
 ---
 title: IP Addressing & Routing
 section: Networking
-updated: 2026-04-28
+updated: 2026-08-28
 ---
 
 # IP Addressing & Routing

@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Security Features — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Security Features  Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot wi…">
+  <meta name="description" id="meta-desc"     content="Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot with no manual config…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Security Features">
-  <meta property="og:description" id="og-desc"    content="Security Features  Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot wi…">
+  <meta property="og:description" id="og-desc"    content="Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot with no manual config…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/security/features/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Security Features">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Security Features">
-  <meta name="twitter:description" id="tw-desc"  content="Security Features  Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot wi…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot with no manual config…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Security Features","description":"Security Features  Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot wi…","url":"https://docs.shani.dev/doc/security/features/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Security Features","description":"Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot with no manual config…","url":"https://docs.shani.dev/doc/security/features/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Security Features","item":"https://docs.shani.dev/doc/security/features/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,23 +215,23 @@
         <h1 class="doc-title">Security Features</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Security</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot with no manual configuration required.</p>
-<h2>Security Stack Overview</h2>
-<p>| Layer | Technology | Status | |-------|-----------|--------| | Firmware | Secure Boot (MOK), TPM 2.0 | Optional (recommended) | | Bootloader | systemd-boot, signed UKIs | Always active | | Full-disk encryption | LUKS2 argon2id | Optional (recommended) | | Kernel LSMs | Landlock, Lockdown, Yama, Integrity, AppArmor, BPF | Always active | | Runtime integrity | IMA/EVM | Always active | | Firewall | firewalld | Always active | | Intrusion prevention | fail2ban | Always active | | Hardware key support | FIDO2/U2F, smart cards, fingerprint | Ready, configure as needed |</p>
-<h2>Immutability as a Security Primitive</h2>
+<h2 id="security-stack-overview">Security Stack Overview</h2>
+<table><thead><tr><th>Layer</th><th>Technology</th><th>Status</th></tr></thead><tbody><tr><td>Firmware</td><td>Secure Boot (MOK), TPM 2.0</td><td>Optional (recommended)</td></tr><tr><td>Bootloader</td><td>systemd-boot, signed UKIs</td><td>Always active</td></tr><tr><td>Full-disk encryption</td><td>LUKS2 argon2id</td><td>Optional (recommended)</td></tr><tr><td>Kernel LSMs</td><td>Landlock, Lockdown, Yama, Integrity, AppArmor, BPF</td><td>Always active</td></tr><tr><td>Runtime integrity</td><td>IMA/EVM</td><td>Always active</td></tr><tr><td>Firewall</td><td>firewalld</td><td>Always active</td></tr><tr><td>Intrusion prevention</td><td>fail2ban</td><td>Always active</td></tr><tr><td>Hardware key support</td><td>FIDO2/U2F, smart cards, fingerprint</td><td>Ready, configure as needed</td></tr></tbody></table>
+<h2 id="immutability-as-a-security-primitive">Immutability as a Security Primitive</h2>
 <p>The root filesystem is mounted read-only at the VFS layer — enforced by the kernel, not by DAC/MAC policy. A process running as root cannot write to <code>/usr/bin</code>, <code>/lib</code>, <code>/etc/systemd/system</code>, or any other system path.</p>
 <p>Most persistent malware works by writing a backdoor to a system path that survives reboot. On Shanios, there is nowhere to write it. The system that passed build-time GPG verification is the system that runs — byte for byte — until the next deliberate <code>shani-deploy</code> update. An attacker who compromises a running session has a session, not persistence.</p>
 <p>The <code>/etc</code> OverlayFS and the <code>@data</code> subvolume are writable, but they are user-visible and auditable. The OS binaries are not.</p>
-<h2>Linux Security Modules</h2>
+<h2 id="linux-security-modules">Linux Security Modules</h2>
 <p>Six LSMs run simultaneously, loaded in order:</p>
 <pre><code>lsm=landlock,lockdown,yama,integrity,apparmor,bpf</code></pre>
 <p>Most Linux distributions enable one or two LSMs. Shanios enables all six simultaneously — each layer providing independent protection that remains in effect even if another is bypassed.</p>
-<p>| LSM | What it does | |-----|-------------| | <strong>Landlock</strong> | Unprivileged sandboxing — applications can restrict their own filesystem access without requiring root to write a policy. Works bottom-up, complementing AppArmor's top-down enforcement. | | <strong>Lockdown</strong> | Prevents kernel tampering from userspace (e.g. <code>/dev/mem</code> access, loading unsigned modules, PCI BAR access). Blocks a compromised root process from escaping other LSMs via low-level hardware access. | | <strong>Yama</strong> | Restricts <code>ptrace</code> scope — a process can only be ptraced by its own children or explicitly permitted processes, blocking process injection and credential theft attacks. | | <strong>Integrity (IMA/EVM)</strong> | Measures file integrity at runtime. IMA records cryptographic hashes of executed files. EVM protects file metadata (ownership, permissions, xattrs) using HMAC. Provides a runtime audit trail and detects tampered files in writable filesystem areas. | | <strong>AppArmor</strong> | Per-process capability profiles enforced by the kernel. System daemons and Snap packages are confined. Custom profiles loaded at boot. | | <strong>BPF</strong> | Restricts BPF program loading to privileged users. Container runtimes (Podman, LXC) use BPF LSM hooks for container isolation. Enables custom eBPF security policies for decisions that cannot be expressed as static AppArmor profiles. |</p>
+<table><thead><tr><th>LSM</th><th>What it does</th></tr></thead><tbody><tr><td><strong>Landlock</strong></td><td>Unprivileged sandboxing — applications can restrict their own filesystem access without requiring root to write a policy. Works bottom-up, complementing AppArmor's top-down enforcement.</td></tr><tr><td><strong>Lockdown</strong></td><td>Prevents kernel tampering from userspace (e.g. <code>/dev/mem</code> access, loading unsigned modules, PCI BAR access). Blocks a compromised root process from escaping other LSMs via low-level hardware access.</td></tr><tr><td><strong>Yama</strong></td><td>Restricts <code>ptrace</code> scope — a process can only be ptraced by its own children or explicitly permitted processes, blocking process injection and credential theft attacks.</td></tr><tr><td><strong>Integrity (IMA/EVM)</strong></td><td>Measures file integrity at runtime. IMA records cryptographic hashes of executed files. EVM protects file metadata (ownership, permissions, xattrs) using HMAC. Provides a runtime audit trail and detects tampered files in writable filesystem areas.</td></tr><tr><td><strong>AppArmor</strong></td><td>Per-process capability profiles enforced by the kernel. System daemons and Snap packages are confined. Custom profiles loaded at boot.</td></tr><tr><td><strong>BPF</strong></td><td>Restricts BPF program loading to privileged users. Container runtimes (Podman, LXC) use BPF LSM hooks for container isolation. Enables custom eBPF security policies for decisions that cannot be expressed as static AppArmor profiles.</td></tr></tbody></table>
 <p><code>auditd</code> logs kernel security events to a persistent audit trail.</p>
-<h2>Signed OS Images</h2>
+<h2 id="signed-os-images">Signed OS Images</h2>
 <p>Every OS update is verified before deployment:</p>
 <ol>
 <li><strong>SHA256 checksum</strong> — confirms file integrity after download</li>
@@ -237,7 +239,7 @@
 <li><strong>Btrfs snapshot</strong> — taken of the inactive slot before overwriting, providing an additional rollback point</li>
 </ol>
 <p><code>shani-deploy</code> refuses to deploy any image that fails either check. The key is on public keyservers at <code>keys.openpgp.org</code>. The result is a continuous chain: the image verified at download time is the image <code>btrfs receive</code> writes to the slot — byte-for-byte identical to what passed build QA.</p>
-<h2>Full-Disk Encryption (LUKS2 + TPM2)</h2>
+<h2 id="full-disk-encryption-luks2-tpm2">Full-Disk Encryption (LUKS2 + TPM2)</h2>
 <p>LUKS2 full-disk encryption with <code>argon2id</code> KDF is available at install time (single checkbox). The <code>argon2id</code> KDF is memory-hard — it requires large amounts of RAM to compute, making GPU and ASIC brute-force attacks orders of magnitude more expensive than with older PBKDF2-based setups.</p>
 <p>The installer runs <code>cryptsetup luksFormat --pbkdf argon2id</code> and nothing else — it doesn't pin a cipher, key size, or PBKDF cost, so the rest come from cryptsetup 2.x's own LUKS2 defaults:</p>
 <pre><code>Cipher:          aes-xts-plain64
@@ -250,7 +252,7 @@ Iteration time:  2000 ms (benchmarked per-machine, not a fixed iteration count)<
 <pre><code class="language-bash">sudo gen-efi enroll-tpm2</code></pre>
 <p>This seals the LUKS key into the TPM2 chip with PCR policy chosen automatically: <strong>PCR 0+7</strong> when Secure Boot is enabled (firmware + Secure Boot certificate state), or <strong>PCR 0 only</strong> when disabled. The disk unlocks silently on your own hardware; if physically moved to another machine or if firmware is tampered with, the TPM withholds the key.</p>
 <p>See <a href="tpm2">TPM2 Enrollment</a> for setup and <a href="luks">LUKS Management</a> for keyslot management.</p>
-<h2>Secure Boot</h2>
+<h2 id="secure-boot">Secure Boot</h2>
 <p>Shanios uses Shim for Secure Boot — the same mechanism used by mainstream Linux distributions. The MOK (Machine Owner Key) is baked into the system image at build time — every machine installed from the same signed ISO shares the same key. A fresh keypair is only generated on the spot as a fallback, if keys are missing or invalid on a given image. Every UKI that <code>gen-efi</code> generates is signed with this key.</p>
 <p>The full boot chain:</p>
 <pre><code>UEFI Firmware (verifies Shim via Microsoft CA)
@@ -259,10 +261,10 @@ Iteration time:  2000 ms (benchmarked per-machine, not a fixed iteration count)<
       → Unified Kernel Image (kernel + initramfs + cmdline, all signed together)</code></pre>
 <p>The bootloader editor is disabled and the kernel command line is embedded in the UKI at build time — it cannot be modified from the boot menu, preventing attacks that inject <code>init=/bin/bash</code> or <code>single</code> to bypass authentication.</p>
 <p>See <a href="secure-boot">Secure Boot</a> for enrollment.</p>
-<h2>Module and Protocol Blacklisting</h2>
+<h2 id="module-and-protocol-blacklisting">Module and Protocol Blacklisting</h2>
 <p>Several kernel modules and rarely-used network protocols are blacklisted by default, via <code>modprobe.d</code> drop-ins shipped in <code>shani-settings</code>:</p>
-<p>| Module(s) | File | Reason | |-----------|------|--------| | <code>mei</code>, <code>mei_me</code> | <code>modprobe.d/noime.conf</code> | Intel Management Engine / vPro remote-access interface — disabled by default. This does not remove ME from the hardware (not possible in software), but removes the kernel's interface to it, reducing the attack surface from the OS side. | | <code>pcspkr</code> | <code>modprobe.d/nobeep.conf</code> | PC speaker blacklisted to stop the console beep; incidentally also removes it as a data-exfiltration side channel | | <code>firewire-core</code>, <code>firewire-ohci</code>, <code>firewire-sbp2</code>, <code>firewire-net</code> | <code>modprobe.d/blacklist-firewire.conf</code> | FireWire storage/DMA blocked outright (<code>install ... /bin/false</code>) — addresses Lynis <code>STRG-1846</code>, preventing unauthorized memory access via FireWire DMA | | <code>dccp</code>, <code>sctp</code>, <code>rds</code>, <code>tipc</code> | <code>modprobe.d/disable-unused-protocols.conf</code> | Uncommon network protocols disabled — addresses Lynis <code>NETW-3200</code>, reducing kernel attack surface from protocols the desktop doesn't use |</p>
-<h2>Kernel Hardening Parameters</h2>
+<table><thead><tr><th>Module(s)</th><th>File</th><th>Reason</th></tr></thead><tbody><tr><td><code>mei</code>, <code>mei_me</code></td><td><code>modprobe.d/noime.conf</code></td><td>Intel Management Engine / vPro remote-access interface — disabled by default. This does not remove ME from the hardware (not possible in software), but removes the kernel's interface to it, reducing the attack surface from the OS side.</td></tr><tr><td><code>pcspkr</code></td><td><code>modprobe.d/nobeep.conf</code></td><td>PC speaker blacklisted to stop the console beep; incidentally also removes it as a data-exfiltration side channel</td></tr><tr><td><code>firewire-core</code>, <code>firewire-ohci</code>, <code>firewire-sbp2</code>, <code>firewire-net</code></td><td><code>modprobe.d/blacklist-firewire.conf</code></td><td>FireWire storage/DMA blocked outright (<code>install ... /bin/false</code>) — addresses Lynis <code>STRG-1846</code>, preventing unauthorized memory access via FireWire DMA</td></tr><tr><td><code>dccp</code>, <code>sctp</code>, <code>rds</code>, <code>tipc</code></td><td><code>modprobe.d/disable-unused-protocols.conf</code></td><td>Uncommon network protocols disabled — addresses Lynis <code>NETW-3200</code>, reducing kernel attack surface from protocols the desktop doesn't use</td></tr></tbody></table>
+<h2 id="kernel-hardening-parameters">Kernel Hardening Parameters</h2>
 <p>The real values, from <code>usr/lib/sysctl.d/90-security-hardening.conf</code> in <code>shani-settings</code> (addresses Lynis <code>KRNL-6000</code>), tuned to stay compatible with Podman, Distrobox, LXC/LXD, systemd-nspawn, Flatpak, Snap, and Waydroid:</p>
 <pre><code>kernel.kptr_restrict = 2            # hide kernel pointers (requires CAP_SYSLOG)
 kernel.dmesg_restrict = 1           # dmesg root-only
@@ -281,7 +283,7 @@ net.core.bpf_jit_harden = 2         # hardens the BPF JIT against Spectre/info-l
 <li><strong><code>kernel.modules_disabled</code> is intentionally not set</strong> — locking it to <code>1</code> permanently blocks all future module loading until reboot, which breaks GPU drivers, USB hot-plug, and gaming peripherals.</li>
 </ul>
 <p><code>kernel.unprivileged_userns_clone = 1</code> (needed for rootless containers) and <code>kernel.nmi_watchdog = 0</code> (faster boot/shutdown, lower power draw) are also set, in the separate performance-tuning file <code>usr/lib/sysctl.d/99-sysctl-shani.conf</code>.</p>
-<h2>Firewall (firewalld)</h2>
+<h2 id="firewall-firewalld">Firewall (firewalld)</h2>
 <p>Active from first boot. Default policy: deny inbound, allow outbound.</p>
 <p>Pre-configured rules applied at installation time:</p>
 <ul>
@@ -290,7 +292,7 @@ net.core.bpf_jit_harden = 2         # hardens the BPF JIT against Spectre/info-l
 </ul>
 <p><code>fail2ban</code> runs to ban repeated authentication failures.</p>
 <p>All major VPN protocols are pre-installed: OpenVPN, WireGuard, L2TP, IKEv2/strongSwan, Cisco AnyConnect, Fortinet SSL, VPNC, SSTP. Tailscale and <code>cloudflared</code> are also pre-installed with state persisted across OS updates.</p>
-<h2>Authentication</h2>
+<h2 id="authentication">Authentication</h2>
 <p>Pre-installed via the <code>shani-peripherals</code> package, working at first boot without driver installation:</p>
 <ul>
 <li><strong>Fingerprint</strong> — <code>fprintd</code> (pulls in <code>libfprint</code>) for supported hardware</li>
@@ -298,18 +300,18 @@ net.core.bpf_jit_harden = 2         # hardens the BPF JIT against Spectre/info-l
 <li><strong>YubiKey and FIDO2/U2F</strong> — <code>libfido2</code>, <code>pam-u2f</code></li>
 <li><strong>NFC</strong> — <code>libnfc</code>, riding on the same <code>pcscd</code>/<code>pcsc-lite</code> stack as smart cards</li>
 </ul>
-<p>Not part of the default image — install these yourself if you need the CLI tooling:</p>
+<p>Not part of the default image — and because the host is immutable, they cannot be added with <code>pacman</code> at runtime. Install them via Nix (<code>nix-env -iA nixpkgs.&lt;pkg&gt;</code>) or run them inside a Distrobox container:</p>
 <ul>
-<li><strong>YubiKey Manager</strong> (<code>ykman</code>) — <code>sudo pacman -S yubikey-manager</code></li>
-<li><strong>PC/SC diagnostics</strong> (<code>pcsc_scan</code>) — <code>sudo pacman -S pcsc-tools</code></li>
-<li><strong>TOTP/HOTP two-factor</strong> (<code>oathtool</code>) — <code>sudo pacman -S oath-toolkit</code></li>
+<li><strong>YubiKey Manager</strong> (<code>ykman</code>) — <code>nix-env -iA nixpkgs.yubikey-manager</code></li>
+<li><strong>PC/SC diagnostics</strong> (<code>pcsc_scan</code>) — <code>nix-env -iA nixpkgs.pcsc-tools</code></li>
+<li><strong>TOTP/HOTP two-factor</strong> (<code>oathtool</code>) — <code>nix-env -iA nixpkgs.oath-toolkit</code></li>
 </ul>
-<p>See <a href="hardware-auth">Hardware Authentication</a> for the full breakdown of what ships by default versus what needs installing.</p>
-<h2>Zero Telemetry</h2>
+<p>See <a href="hardware-auth">Hardware Authentication</a> for the full breakdown of what ships by default, the exact install commands, and the Distrobox alternative.</p>
+<h2 id="zero-telemetry">Zero Telemetry</h2>
 <p>No background services report hardware, software usage, or system behaviour to any external server. No identifiers are generated or transmitted. No crash reports are collected.</p>
 <p><code>shani-deploy</code> connects to the CDN to download updates and to the GPG keyserver to verify signatures — standard HTTP downloads that send only what any HTTP client sends. Nothing else leaves the machine.</p>
 <p>The entire codebase is public at <a href="https://github.com/shani8dev">github.com/shani8dev</a>. Every claim is independently verifiable.</p>
-<h2>Audit & Monitoring</h2>
+<h2 id="audit-monitoring">Audit & Monitoring</h2>
 <pre><code class="language-bash"># AppArmor status
 sudo aa-status
 
@@ -322,7 +324,7 @@ sudo firewall-cmd --list-all
 # fail2ban status
 sudo fail2ban-client status
 sudo fail2ban-client status sshd</code></pre>
-<h2>What These Layers Compose</h2>
+<h2 id="what-these-layers-compose">What These Layers Compose</h2>
 <p>These are not independent features — they compose into a coherent security model:</p>
 <ul>
 <li>The read-only root means attackers cannot persist to system paths</li>
@@ -332,7 +334,23 @@ sudo fail2ban-client status sshd</code></pre>
 <li>Signed images mean the update path cannot be poisoned</li>
 <li>Zero telemetry means there is no built-in data exfiltration channel</li>
 </ul>
-<p>The attack surface is reduced by design, not by configuration.</p></div>
+<p>The attack surface is reduced by design, not by configuration.</p>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="tpm2">TPM2 Enrollment</a> — automatic LUKS unlock setup</li>
+<li><a href="luks">LUKS Management</a> — encryption key management and recovery</li>
+<li><a href="secure-boot">Secure Boot</a> — MOK enrollment and firmware setup</li>
+<li><a href="apparmor">AppArmor</a> — mandatory access control profiles</li>
+<li><a href="audit">Audit Framework</a> — auditd rules and log analysis</li>
+<li><a href="fwupd">Firmware Updates (fwupd)</a> — firmware upgrade workflow</li>
+<li><a href="hardware-auth">Hardware Authentication</a> — fingerprint, smart card, YubiKey, NFC</li>
+<li><a href="lynis">Lynis Audit</a> — CIS benchmark scanning and hardening</li>
+<li><a href="keyring">Keyring & Secrets</a> — GNOME Keyring and credential storage</li>
+<li><a href="../security/permissions.md">Permissions & Authorization</a> — Polkit tier system</li>
+<li><a href="../updates/system.md">System Updates</a> — how signed images are deployed</li>
+<li><a href="../servers/security/policies">Security & Identity</a> — Vaultwarden, Authelia, Keycloak, CrowdSec, secrets management</li>
+<li><a href="../troubleshooting.md">Troubleshooting</a> — diagnosing security-related issues</li>
+</ul></div>
     </div>
 
   </main>

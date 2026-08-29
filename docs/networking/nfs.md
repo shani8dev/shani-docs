@@ -1,7 +1,7 @@
 ---
 title: NFS File Sharing
 section: Networking
-updated: 2026-04-18
+updated: 2026-08-28
 ---
 
 # NFS — Network File System
@@ -168,3 +168,9 @@ NFS clients do not enforce quotas locally — writes that exceed a quota are rej
 | `Access denied by server` | Check `journalctl -u nfs-server` on the host for detailed errors |
 | Mount hangs at boot | Add `_netdev` and `timeo=14` to fstab options; ensure `nfs-server` is running on the host |
 | `showmount` fails from client | Open `rpcbind` and `mountd` firewall services on the server in addition to `nfs` |
+
+## See Also
+
+- [Samba (SMB shares)](samba)
+- [SSHFS](sshfs)
+- [Storage management](../system/storage.md)

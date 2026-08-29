@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>apcupsd (UPS Daemon) — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="apcupsd — APC UPS Daemon  apcupsd monitors APC Uninterruptible Power Supplies and triggers a graceful system shutdown when battery runs low. It is pre-inst…">
+  <meta name="description" id="meta-desc"     content="apcupsd monitors APC Uninterruptible Power Supplies and triggers a graceful system shutdown when battery runs low. It is pre-installed on Shani OS. Connect…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="apcupsd (UPS Daemon)">
-  <meta property="og:description" id="og-desc"    content="apcupsd — APC UPS Daemon  apcupsd monitors APC Uninterruptible Power Supplies and triggers a graceful system shutdown when battery runs low. It is pre-inst…">
+  <meta property="og:description" id="og-desc"    content="apcupsd monitors APC Uninterruptible Power Supplies and triggers a graceful system shutdown when battery runs low. It is pre-installed on Shani OS. Connect…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/networking/apcupsd/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="apcupsd (UPS Daemon)">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="apcupsd (UPS Daemon)">
-  <meta name="twitter:description" id="tw-desc"  content="apcupsd — APC UPS Daemon  apcupsd monitors APC Uninterruptible Power Supplies and triggers a graceful system shutdown when battery runs low. It is pre-inst…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="apcupsd monitors APC Uninterruptible Power Supplies and triggers a graceful system shutdown when battery runs low. It is pre-installed on Shani OS. Connect…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"apcupsd (UPS Daemon)","description":"apcupsd — APC UPS Daemon  apcupsd monitors APC Uninterruptible Power Supplies and triggers a graceful system shutdown when battery runs low. It is pre-inst…","url":"https://docs.shani.dev/doc/networking/apcupsd/","datePublished":"2026-04-20T00:00:00.000Z","dateModified":"2026-04-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"apcupsd (UPS Daemon)","description":"apcupsd monitors APC Uninterruptible Power Supplies and triggers a graceful system shutdown when battery runs low. It is pre-installed on Shani OS. Connect…","url":"https://docs.shani.dev/doc/networking/apcupsd/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"apcupsd (UPS Daemon)","item":"https://docs.shani.dev/doc/networking/apcupsd/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,19 +215,18 @@
         <h1 class="doc-title">apcupsd (UPS Daemon)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Networking</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><h1>apcupsd — APC UPS Daemon</h1>
-<p>apcupsd monitors APC Uninterruptible Power Supplies and triggers a graceful system shutdown when battery runs low. It is pre-installed on Shani OS. Connect your APC UPS via USB — most models are detected automatically with no additional drivers.</p>
+      <div class="prose"><p>apcupsd monitors APC Uninterruptible Power Supplies and triggers a graceful system shutdown when battery runs low. It is pre-installed on Shani OS. Connect your APC UPS via USB — most models are detected automatically with no additional drivers.</p>
 <p><strong>Not active by default.</strong> Enable it only if a UPS is connected.</p>
-<p>---</p>
-<h2>Enable</h2>
+<hr>
+<h2 id="enable">Enable</h2>
 <pre><code class="language-bash">sudo systemctl enable --now apcupsd
 
 systemctl status apcupsd</code></pre>
-<p>---</p>
-<h2>Configuration</h2>
+<hr>
+<h2 id="configuration">Configuration</h2>
 <p>Edit <code>/etc/apcupsd/apcupsd.conf</code>:</p>
 <pre><code class="language-bash"># UPS name (label only — for log messages)
 UPSNAME myups
@@ -253,8 +254,8 @@ NISIP 127.0.0.1           # 0.0.0.0 to allow LAN access
 NISPORT 3551</code></pre>
 <p>After editing:</p>
 <pre><code class="language-bash">sudo systemctl restart apcupsd</code></pre>
-<p>---</p>
-<h2>Status & Monitoring</h2>
+<hr>
+<h2 id="status-monitoring">Status & Monitoring</h2>
 <pre><code class="language-bash"># Live UPS status (battery level, load, runtime estimate, events)
 apcaccess status
 
@@ -267,18 +268,19 @@ sudo tail -f /var/log/apcupsd.events
 # Run a battery self-test
 apctest</code></pre>
 <p>Key fields in <code>apcaccess status</code>:</p>
-<p>| Field | Meaning | |-------|---------| | <code>STATUS</code> | <code>ONLINE</code>, <code>ONBATT</code>, <code>LOWBATT</code> | | <code>BCHARGE</code> | Battery charge percentage | | <code>TIMELEFT</code> | Estimated runtime on battery | | <code>LOADPCT</code> | Load on the UPS as percentage of capacity | | <code>LINEV</code> | Input mains voltage | | <code>BATTV</code> | Battery voltage |</p>
-<p>---</p>
-<h2>Event Scripts</h2>
+<table><thead><tr><th>Field</th><th>Meaning</th></tr></thead><tbody><tr><td><code>STATUS</code></td><td><code>ONLINE</code>, <code>ONBATT</code>, <code>LOWBATT</code></td></tr><tr><td><code>BCHARGE</code></td><td>Battery charge percentage</td></tr><tr><td><code>TIMELEFT</code></td><td>Estimated runtime on battery</td></tr><tr><td><code>LOADPCT</code></td><td>Load on the UPS as percentage of capacity</td></tr><tr><td><code>LINEV</code></td><td>Input mains voltage</td></tr><tr><td><code>BATTV</code></td><td>Battery voltage</td></tr></tbody></table>
+<hr>
+<h2 id="event-scripts">Event Scripts</h2>
 <p>apcupsd runs scripts from <code>/etc/apcupsd/</code> when power events occur. The key events and their script names:</p>
-<p>| Event | Script | Triggered when | |-------|--------|----------------| | Power failure | <code>onbattery</code> | Mains power lost | | Power restored | <code>offbattery</code> | Mains power returns | | Low battery | <code>doshutdown</code> | Battery/runtime threshold reached | | Battery test done | <code>endapctest</code> | Self-test completes |</p>
+<table><thead><tr><th>Event</th><th>Script</th><th>Triggered when</th></tr></thead><tbody><tr><td>Power failure</td><td><code>onbattery</code></td><td>Mains power lost</td></tr><tr><td>Power restored</td><td><code>offbattery</code></td><td>Mains power returns</td></tr><tr><td>Low battery</td><td><code>doshutdown</code></td><td>Battery/runtime threshold reached</td></tr><tr><td>Battery test done</td><td><code>endapctest</code></td><td>Self-test completes</td></tr></tbody></table>
 <p>Edit <code>/etc/apcupsd/onbattery</code> to send a notification when power fails:</p>
 <pre><code class="language-bash">#!/bin/sh
 echo &quot;Power failure at $(date)&quot; | mail -s &quot;UPS: On Battery&quot; root</code></pre>
 <p>Make scripts executable:</p>
 <pre><code class="language-bash">sudo chmod +x /etc/apcupsd/onbattery</code></pre>
-<p>---</p>
-<h2>Network Status Server</h2>
+<blockquote>The <code>mail</code> example above requires <code>mailx</code> to be installed and configured. To log events to the journal instead: <code>logger -t apcupsd &quot;on battery&quot;</code></blockquote>
+<hr>
+<h2 id="network-status-server">Network Status Server</h2>
 <p>apcupsd includes a small status server (NIS) on port 3551. Query a remote apcupsd instance from another machine:</p>
 <pre><code class="language-bash"># Query local daemon
 apcaccess status localhost
@@ -288,9 +290,14 @@ apcaccess status 192.168.1.10:3551</code></pre>
 <p>Open the firewall if you need LAN access to the status server:</p>
 <pre><code class="language-bash">sudo firewall-cmd --add-port=3551/tcp --permanent
 sudo firewall-cmd --reload</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | <code>apcupsd</code> won't start | Check <code>journalctl -u apcupsd</code>; common cause is wrong <code>UPSCABLE</code>/<code>UPSTYPE</code> — use <code>usb</code> for USB-connected APC units | | <code>apcaccess</code> returns <code>NETWORK ERROR</code> | Daemon isn't running or NIS is disabled — check <code>systemctl status apcupsd</code> | | UPS not detected | Run <code>lsusb</code> to confirm the UPS appears; APC USB devices use the standard HID UPS class — no extra driver needed | | Shutdown not triggering on low battery | Check <code>BATTERYLEVEL</code> and <code>MINUTES</code> thresholds in the config; test with <code>apctest</code> → option 7 (simulate power failure) | | <code>STATFLAG</code> shows <code>0x060000</code> (communication lost) | Cable issue or wrong port — unplug/replug USB; check <code>DEVICE</code> is blank for USB |</p></div>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>apcupsd</code> won't start</td><td>Check <code>journalctl -u apcupsd</code>; common cause is wrong <code>UPSCABLE</code>/<code>UPSTYPE</code> — use <code>usb</code> for USB-connected APC units</td></tr><tr><td><code>apcaccess</code> returns <code>NETWORK ERROR</code></td><td>Daemon isn't running or NIS is disabled — check <code>systemctl status apcupsd</code></td></tr><tr><td>UPS not detected</td><td>Run <code>lsusb</code> to confirm the UPS appears; APC USB devices use the standard HID UPS class — no extra driver needed</td></tr><tr><td>Shutdown not triggering on low battery</td><td>Check <code>BATTERYLEVEL</code> and <code>MINUTES</code> thresholds in the config; test with <code>apctest</code> → option 7 (simulate power failure)</td></tr><tr><td><code>STATFLAG</code> shows <code>0x060000</code> (communication lost)</td><td>Cable issue or wrong port — unplug/replug USB; check <code>DEVICE</code> is blank for USB</td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="https://blog.shani.dev/post/shani-os-home-server">UPS monitoring in practice</a></li>
+<li><a href="../system/cronie.md">systemd timers</a></li>
+</ul></div>
     </div>
 
   </main>

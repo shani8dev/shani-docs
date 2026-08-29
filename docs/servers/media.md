@@ -1,7 +1,7 @@
 ---
 title: Media & Entertainment
 section: Self-Hosting & Servers
-updated: 2026-04-22
+updated: 2026-08-28
 ---
 
 # Media & Entertainment
@@ -250,6 +250,8 @@ services:
 cd ~/jellyseerr && podman-compose up -d
 ```
 
+Access at `http://localhost:5055`.
+
 ---
 
 ## The *Arr Stack (Download Automation)
@@ -356,7 +358,7 @@ services:
   pinchflat:
     image: ghcr.io/kieraneglin/pinchflat:latest
     ports:
-      - 127.0.0.1:8088:8088
+      - 127.0.0.1:8945:8945
     volumes:
       - /home/user/pinchflat/data:/app/data:Z
       - /home/user/downloads/youtube:/downloads:Z
@@ -366,6 +368,8 @@ services:
 ```bash
 cd ~/pinchflat && podman-compose up -d
 ```
+
+Access at `http://localhost:8945`.
 
 ---
 
@@ -389,6 +393,8 @@ services:
 ```bash
 cd ~/kavita && podman-compose up -d
 ```
+
+Access at `http://localhost:5000`.
 
 ---
 
@@ -414,6 +420,8 @@ services:
 ```bash
 cd ~/audiobookshelf && podman-compose up -d
 ```
+
+Access at `http://localhost:13378`.
 
 ---
 
@@ -833,7 +841,7 @@ sonarr.home.local      { tls internal; reverse_proxy localhost:8989 }
 lidarr.home.local      { tls internal; reverse_proxy localhost:8686 }
 prowlarr.home.local    { tls internal; reverse_proxy localhost:9696 }
 torrent.home.local     { tls internal; reverse_proxy localhost:8080 }
-youtube.home.local     { tls internal; reverse_proxy localhost:8088 }
+youtube.home.local     { tls internal; reverse_proxy localhost:8945 }
 books.home.local       { tls internal; reverse_proxy localhost:5000 }
 audiobooks.home.local  { tls internal; reverse_proxy localhost:13378 }
 calibre.home.local     { tls internal; reverse_proxy localhost:8083 }
@@ -872,3 +880,8 @@ photoprism.example.com    { reverse_proxy localhost:2342 }
 | TubeArchivist Elasticsearch not ready | ES takes 30–60 s to initialise; check `podman logs archivist-es`; increase `ES_JAVA_OPTS` heap if OOM-killed |
 | TubeArchivist downloads stuck | Check `podman logs tubearchivist` for yt-dlp errors; update the container for the latest yt-dlp; verify the cache volume is writable |
 | Kometa collections not created | Verify your Plex token is valid; check `podman logs kometa` for YAML parse errors in `config.yml`; run with `--run` flag for a one-shot debug pass |
+
+## See Also
+
+- [Productivity](productivity)
+- [Storage for media libraries](../system/storage.md)

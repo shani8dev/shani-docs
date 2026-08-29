@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>BIND (Authoritative DNS) — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="BIND — Authoritative DNS Server  BIND () is the most widely deployed DNS server. On Shani OS it is pre-installed and provides two distinct functions that a…">
+  <meta name="description" id="meta-desc"     content="BIND (named) is the most widely deployed DNS server. On Shani OS it is pre-installed and provides two distinct functions that are often combined but can be…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="BIND (Authoritative DNS)">
-  <meta property="og:description" id="og-desc"    content="BIND — Authoritative DNS Server  BIND () is the most widely deployed DNS server. On Shani OS it is pre-installed and provides two distinct functions that a…">
+  <meta property="og:description" id="og-desc"    content="BIND (named) is the most widely deployed DNS server. On Shani OS it is pre-installed and provides two distinct functions that are often combined but can be…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/networking/bind/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="BIND (Authoritative DNS)">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="BIND (Authoritative DNS)">
-  <meta name="twitter:description" id="tw-desc"  content="BIND — Authoritative DNS Server  BIND () is the most widely deployed DNS server. On Shani OS it is pre-installed and provides two distinct functions that a…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="BIND (named) is the most widely deployed DNS server. On Shani OS it is pre-installed and provides two distinct functions that are often combined but can be…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"BIND (Authoritative DNS)","description":"BIND — Authoritative DNS Server  BIND () is the most widely deployed DNS server. On Shani OS it is pre-installed and provides two distinct functions that a…","url":"https://docs.shani.dev/doc/networking/bind/","datePublished":"2026-04-20T00:00:00.000Z","dateModified":"2026-04-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"BIND (Authoritative DNS)","description":"BIND (named) is the most widely deployed DNS server. On Shani OS it is pre-installed and provides two distinct functions that are often combined but can be…","url":"https://docs.shani.dev/doc/networking/bind/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"BIND (Authoritative DNS)","item":"https://docs.shani.dev/doc/networking/bind/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,19 +215,18 @@
         <h1 class="doc-title">BIND (Authoritative DNS)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Networking</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><h1>BIND — Authoritative DNS Server</h1>
-<p>BIND (<code>named</code>) is the most widely deployed DNS server. On Shani OS it is pre-installed and provides two distinct functions that are often combined but can be used independently:</p>
+      <div class="prose"><p>BIND (<code>named</code>) is the most widely deployed DNS server. On Shani OS it is pre-installed and provides two distinct functions that are often combined but can be used independently:</p>
 <ul>
 <li><strong>Authoritative server</strong> — the canonical source of truth for a zone (e.g., <code>home.local</code>). Other resolvers query it for answers about your domain.</li>
 <li><strong>Recursive / caching resolver</strong> — forwards queries upstream and caches results locally.</li>
 </ul>
 <p>For simple local DNS and DHCP on a homelab, <strong>dnsmasq</strong> is lighter and easier to configure. Use BIND when you need a full authoritative zone with proper SOA/NS records, zone transfers to secondary servers, DNSSEC signing, or split-horizon DNS.</p>
 <p><code>named</code> state and zone files persist in <code>/var/named</code>, bind-mounted from <code>/data/varlib/named</code>, and survive OS updates.</p>
-<p>---</p>
-<h2>Enable</h2>
+<hr>
+<h2 id="enable">Enable</h2>
 <pre><code class="language-bash">sudo systemctl enable --now named
 
 # Check status
@@ -233,10 +234,10 @@ systemctl status named
 
 # Watch logs
 journalctl -u named -f</code></pre>
-<p>---</p>
-<h2>Configuration</h2>
+<hr>
+<h2 id="configuration">Configuration</h2>
 <p>The main config is <code>/etc/named.conf</code>. Zones are typically stored in <code>/var/named/</code>.</p>
-<h3>Caching / Forwarding Resolver Only</h3>
+<h3 id="caching-forwarding-resolver-only">Caching / Forwarding Resolver Only</h3>
 <p>Use this when you want a local caching resolver that forwards to an upstream (e.g., to use alongside dnsmasq for split DNS, or as a standalone resolver):</p>
 <pre><code>// /etc/named.conf
 options {
@@ -253,7 +254,7 @@ options {
 
     dnssec-validation auto;
 };</code></pre>
-<h3>Authoritative Zone for <code>home.local</code></h3>
+<h3 id="authoritative-zone-for-homelocal">Authoritative Zone for <code>home.local</code></h3>
 <p>A split-horizon setup: BIND is authoritative for <code>home.local</code> while forwarding all other queries upstream. This is the recommended homelab pattern.</p>
 <pre><code>// /etc/named.conf
 options {
@@ -281,7 +282,7 @@ zone &quot;1.168.192.in-addr.arpa&quot; IN {
     file &quot;192.168.1.rev&quot;;
     allow-update { none; };
 };</code></pre>
-<h3>Zone File: <code>/var/named/home.local.zone</code></h3>
+<h3 id="zone-file-varnamedhomelocalzone">Zone File: <code>/var/named/home.local.zone</code></h3>
 <pre><code class="language-dns">$TTL 86400
 @   IN  SOA  ns1.home.local. admin.home.local. (
         2026042001  ; Serial (date + increment: YYYYMMDDnn)
@@ -302,7 +303,7 @@ desktop IN  A    192.168.1.50
 
 ; CNAME aliases
 files   IN  CNAME nas.home.local.</code></pre>
-<h3>Reverse Zone File: <code>/var/named/192.168.1.rev</code></h3>
+<h3 id="reverse-zone-file-varnamed1921681rev">Reverse Zone File: <code>/var/named/192.168.1.rev</code></h3>
 <pre><code class="language-dns">$TTL 86400
 @   IN  SOA  ns1.home.local. admin.home.local. (
         2026042001
@@ -318,13 +319,16 @@ files   IN  CNAME nas.home.local.</code></pre>
 10      IN  PTR  nas.home.local.
 20      IN  PTR  printer.home.local.
 50      IN  PTR  desktop.home.local.</code></pre>
-<p>---</p>
-<h2>Applying Changes</h2>
+<hr>
+<h2 id="applying-changes">Applying Changes</h2>
 <pre><code class="language-bash"># Check config syntax
 sudo named-checkconf
 
 # Check a zone file
 sudo named-checkzone home.local /var/named/home.local.zone
+
+# Ensure named can read the zone files (it runs as the named user)
+sudo chown named:named /var/named/*.zone &amp;&amp; sudo chmod 640 /var/named/*.zone
 
 # Reload zones without restarting (increment Serial first)
 sudo systemctl reload named
@@ -337,9 +341,9 @@ sudo rndc reload home.local
 
 # Flush the DNS cache
 sudo rndc flush</code></pre>
-<blockquote><p><strong>Always increment the Serial number</strong> in the SOA record before reloading — secondary servers and caches use this to detect changes. The convention is <code>YYYYMMDDnn</code> (e.g., <code>2026042001</code> for the first change on 2026-04-20).</p></blockquote>
-<p>---</p>
-<h2>Zone Transfers (Primary → Secondary)</h2>
+<blockquote><strong>Always increment the Serial number</strong> in the SOA record before reloading — secondary servers and caches use this to detect changes. The convention is <code>YYYYMMDDnn</code> (e.g., <code>2026042001</code> for the first change on 2026-04-20).</blockquote>
+<hr>
+<h2 id="zone-transfers-primary-secondary">Zone Transfers (Primary → Secondary)</h2>
 <p>Allow a secondary BIND server to receive zone transfers:</p>
 <pre><code>// On the primary — add to the zone block:
 zone &quot;home.local&quot; IN {
@@ -354,12 +358,12 @@ zone &quot;home.local&quot; IN {
     file &quot;slaves/home.local.zone&quot;;
     masters { 192.168.1.1; };
 };</code></pre>
-<p>---</p>
-<h2>Firewall</h2>
+<hr>
+<h2 id="firewall">Firewall</h2>
 <pre><code class="language-bash">sudo firewall-cmd --add-service=dns --permanent
 sudo firewall-cmd --reload</code></pre>
-<p>---</p>
-<h2>Testing</h2>
+<hr>
+<h2 id="testing">Testing</h2>
 <pre><code class="language-bash"># Query your BIND server directly
 dig @127.0.0.1 nas.home.local
 dig @127.0.0.1 -x 192.168.1.10    # reverse lookup
@@ -369,9 +373,15 @@ dig @127.0.0.1 home.local SOA
 
 # Check from another machine on the LAN
 dig @192.168.1.1 nas.home.local</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | <code>named</code> won't start | Run <code>sudo named-checkconf</code> — syntax errors in <code>named.conf</code> prevent startup; check <code>journalctl -u named</code> | | Zone not loading | Run <code>sudo named-checkzone home.local /var/named/home.local.zone</code> — common causes are missing trailing dots on FQDNs and wrong Serial format | | Queries returning <code>SERVFAIL</code> | DNSSEC validation failing — set <code>dnssec-validation no;</code> temporarily to isolate; or ensure <code>dnssec-validation auto;</code> and that upstream resolvers support DNSSEC | | Recursive queries not working from LAN | Check <code>allow-query</code> and <code>recursion yes</code> are set in <code>options {}</code> | | Changes not picked up | Increment the Serial in the zone file, then run <code>sudo rndc reload home.local</code> | | Port 53 conflict with dnsmasq | Run only one resolver on port 53 — either configure dnsmasq to forward <code>.home.local</code> to BIND on a non-standard port, or replace dnsmasq with BIND entirely |</p></div>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>named</code> won't start</td><td>Run <code>sudo named-checkconf</code> — syntax errors in <code>named.conf</code> prevent startup; check <code>journalctl -u named</code></td></tr><tr><td>Zone not loading</td><td>Run <code>sudo named-checkzone home.local /var/named/home.local.zone</code> — common causes are missing trailing dots on FQDNs and wrong Serial format</td></tr><tr><td>Zone fails to load silently</td><td>Check ownership (<code>named:named</code>) and mode (<code>640</code>) on <code>/var/named/*.zone</code>; confirm with <code>journalctl -u named</code></td></tr><tr><td>Queries returning <code>SERVFAIL</code></td><td>DNSSEC validation failing — set <code>dnssec-validation no;</code> temporarily to isolate; or ensure <code>dnssec-validation auto;</code> and that upstream resolvers support DNSSEC</td></tr><tr><td>Recursive queries not working from LAN</td><td>Check <code>allow-query</code> and <code>recursion yes</code> are set in <code>options {}</code></td></tr><tr><td>Changes not picked up</td><td>Increment the Serial in the zone file, then run <code>sudo rndc reload home.local</code></td></tr><tr><td>Port 53 conflict with dnsmasq</td><td>Run only one resolver on port 53 — either configure dnsmasq to forward <code>.home.local</code> to BIND on a non-standard port, or replace dnsmasq with BIND entirely</td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="dnsmasq">dnsmasq (local DNS)</a></li>
+<li><a href="openresolv">openresolv</a></li>
+<li><a href="ip-addressing">IP addressing & routing</a></li>
+</ul></div>
     </div>
 
   </main>

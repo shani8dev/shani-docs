@@ -1,7 +1,7 @@
 ---
 title: Game Servers
 section: Self-Hosting & Servers
-updated: 2026-04-22
+updated: 2026-08-28
 ---
 
 # Game Servers
@@ -123,6 +123,9 @@ podman exec minecraft rcon-cli kick GrieferName "Reason"
 
 # Show connected players
 podman exec minecraft rcon-cli list
+
+# Verify the server is up and responding (run from any machine with mcstatus)
+mcstatus localhost ping
 
 # View server logs
 podman logs -f minecraft
@@ -371,6 +374,9 @@ sudo firewall-cmd --add-port=34197/udp --add-port=27015/tcp --permanent && sudo 
 ```bash
 # View server logs
 podman logs -f factorio
+
+# Confirm the server is actually hosting the game (log check)
+podman logs factorio | grep "Hosting game"
 
 # Backup the save file
 cp /home/user/factorio/data/saves/my-factory.zip    /home/user/backups/factorio-$(date +%Y%m%d).zip
@@ -722,9 +728,15 @@ WantedBy=timers.target
 | Minecraft world corruption after crash | Always stop cleanly before server maintenance: `podman exec minecraft rcon-cli stop`; never force-kill a running Minecraft server |
 | Modded server fails to start | Mod version mismatch — ensure all mods target the same Minecraft and mod-loader version; check logs for `ClassNotFoundException` |
 | Velocity players see wrong server | Ensure backend servers have `online-mode=false` and the matching `velocity-secret` set in `paper.yml` |
-
-> 💡 **Performance tip:** For Minecraft, use **Paper** instead of vanilla — it uses async chunk loading, mob AI optimisations, and dozens of performance patches. At 10+ players on modded servers, also look at **Aikar's JVM flags** which are available at aikar.co/2018/07/02/tuning-the-jvm-g1gc-garbage-collector-flags-for-minecraft.
 | Palworld server not appearing in list | Confirm `8211/udp` and `27015/udp` are open in firewall and router; Palworld uses UDP exclusively for game traffic |
 | Palworld save corruption after crash | Enable `RCON_ENABLED=true` and use `rcon-cli save` before stopping the container; avoid `podman kill` |
 | Rust server stuck at SteamCMD download | Large initial download (~8 GB) — normal; check disk space with `df -h`; if download hangs, restart the container |
 | Rust world not persisting after restart | Verify the `/steamcmd/rust` volume mount path; confirm `RUST_SERVER_SAVE_INTERVAL` is set and the data directory has write permissions |
+
+> **Performance tip:** For Minecraft, use **Paper** instead of vanilla — it uses async chunk loading, mob AI optimisations, and dozens of performance patches. At 10+ players on modded servers, also look at **Aikar's JVM flags** which are available at aikar.co/2018/07/02/tuning-the-jvm-g1gc-garbage-collector-flags-for-minecraft.
+
+## See Also
+
+- [VPN & Tunnels](vpn-tunnels)
+- [Monitoring](monitoring)
+- [Gaming on Shanios](https://blog.shani.dev/post/shani-os-gaming-deep-dive)

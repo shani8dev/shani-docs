@@ -1,7 +1,7 @@
 ---
 title: Accessibility
 section: System
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Accessibility
@@ -66,7 +66,7 @@ ibus-daemon --version
 ibus list-engine    # list all available engines
 ```
 
-For Indic scripts (Devanagari, Bengali, Gujarati, Gurmukhi, Kannada, Malayalam, Oriya, Tamil, Telugu), rendering is handled by pre-configured fontconfig rules and Noto fonts rather than a dedicated IBus engine — see [What's Included](../intro/whats-included).
+For Indic scripts (Devanagari, Bengali, Gujarati, Gurmukhi, Kannada, Malayalam, Oriya, Tamil, Telugu), rendering is handled by pre-configured fontconfig rules and Noto fonts rather than a dedicated IBus engine — see [What's Included](../intro/whats-included.md).
 
 ## Other Desktop Accessibility Settings
 
@@ -87,8 +87,8 @@ Beyond the tools above, both desktops expose standard accessibility options that
 
 ## See Also
 
-- [What's Included](../intro/whats-included) — full font and language support list
+- [What's Included](../intro/whats-included.md) — full font and language support list
 - [Hardware](hardware) — general USB device detection
-- [User Configuration](../intro/user-config) — per-user settings and provisioning
+- [User Configuration](../intro/user-config.md) — per-user settings and provisioning
 - [Accessibility on Shani OS](https://blog.shani.dev/post/shani-os-accessibility) — extended walkthrough covering magnification, high contrast, and keyboard accessibility
 - [Indian Language Support on Shani OS](https://blog.shani.dev/post/shani-os-indian-language-support) — Indic script rendering and fonts

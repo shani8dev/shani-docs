@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>Kubernetes Overview — Key Concepts &amp; Distributions — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Table of Contents Core Concepts &amp; Distributions 1. Key Concepts (Control Plane, Networking, RBAC, Storage, eBPF, GitOps, Namespaces, Labels, Deployments, E…">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/servers/kubernetes/overview/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="Kubernetes Overview — Key Concepts &amp; Distributions">
+  <meta property="og:description" id="og-desc"    content="Table of Contents Core Concepts &amp; Distributions 1. Key Concepts (Control Plane, Networking, RBAC, Storage, eBPF, GitOps, Namespaces, Labels, Deployments, E…">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/kubernetes/overview/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="Kubernetes Overview — Key Concepts &amp; Distributions">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="Kubernetes Overview — Key Concepts &amp; Distributions">
+  <meta name="twitter:description" id="tw-desc"  content="Table of Contents Core Concepts &amp; Distributions 1. Key Concepts (Control Plane, Networking, RBAC, Storage, eBPF, GitOps, Namespaces, Labels, Deployments, E…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Kubernetes Overview — Key Concepts & Distributions","description":"Table of Contents Core Concepts & Distributions 1. Key Concepts (Control Plane, Networking, RBAC, Storage, eBPF, GitOps, Namespaces, Labels, Deployments, E…","url":"https://docs.shani.dev/doc/servers/kubernetes/overview/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Kubernetes Overview — Key Concepts & Distributions","item":"https://docs.shani.dev/doc/servers/kubernetes/overview/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Kubernetes Overview — Key Concepts &amp; Distributions</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><h2 id="table-of-contents">Table of Contents</h2>
+<p><strong>Core Concepts & Distributions</strong></p>
+<ol>
+<li><a href="#key-concepts">Key Concepts</a> <em>(Control Plane, Networking, RBAC, Storage, eBPF, GitOps, Namespaces, Labels, Deployments, Events, and more)</em></li>
+<li><a href="#distributions">Distributions</a></li>
+<li><a href="#disk-layout-cli-tools">Disk Layout & CLI Tools</a></li>
+</ol>
+<p><strong>Networking</strong></p>
+<ol>
+<li><a href="#networking-ingress">Networking & Ingress</a></li>
+<li><a href="#dns">DNS</a></li>
+<li><a href="#networkpolicy-default-deny-patterns">NetworkPolicy — Default Deny Patterns</a></li>
+<li><a href="#tls-certificate-management">TLS & Certificate Management</a></li>
+<li><a href="#service-mesh">Service Mesh</a></li>
+<li><a href="#gateway-api-advanced-patterns">Gateway API — Advanced Patterns</a></li>
+<li><a href="#network-troubleshooting">Network Troubleshooting</a></li>
+</ol>
+<p><strong>Storage</strong></p>
+<ol>
+<li><a href="#storage">Storage</a></li>
+<li><a href="#nfs-shared-storage">NFS & Shared Storage</a></li>
+<li><a href="#minio-self-hosted-s3">MinIO (Self-Hosted S3)</a></li>
+</ol>
+<p><strong>Security</strong></p>
+<ol>
+<li><a href="#security-policy">Security & Policy</a> <em>(includes Resource Quotas & LimitRanges)</em></li>
+<li><a href="#secrets-management">Secrets Management</a></li>
+<li><a href="#image-supply-chain-security">Image Supply Chain Security</a></li>
+<li><a href="#spiffespire-workload-identity">SPIFFE/SPIRE — Workload Identity</a></li>
+<li><a href="#cluster-hardening">Cluster Hardening</a></li>
+</ol>
+<p><strong>Workloads & Scheduling</strong></p>
+<ol>
+<li><a href="#workload-patterns">Workload Patterns</a> <em>(includes Init Containers, Sidecars, StatefulSets, Jobs, DaemonSets, Affinity, Lifecycle Hooks, and more)</em></li>
+<li><a href="#deployment-strategies-deep-dive">Deployment Strategies Deep Dive</a></li>
+<li><a href="#autoscaling">Autoscaling</a> <em>(includes Cluster Autoscaler, Karpenter, HPA, VPA, KEDA, Goldilocks)</em></li>
+<li><a href="#gpu-aiml-workloads">GPU & AI/ML Workloads</a></li>
+<li><a href="#kubevirt-vms-in-kubernetes">KubeVirt — VMs in Kubernetes</a></li>
+<li><a href="#webassembly-wasm-workloads">WebAssembly (WASM) Workloads</a></li>
+</ol>
+<p><strong>GitOps & Delivery</strong></p>
+<ol>
+<li><a href="#gitops-continuous-delivery">GitOps & Continuous Delivery</a></li>
+<li><a href="#advanced-gitops-patterns">Advanced GitOps Patterns</a></li>
+<li><a href="#progressive-delivery">Progressive Delivery</a></li>
+<li><a href="#in-cluster-cicd-build">In-Cluster CI/CD & Build</a></li>
+<li><a href="#local-development-cluster-intercept">Local Development & Cluster Intercept</a> <em>(includes minikube, kind)</em></li>
+<li><a href="#policy-as-code-ci-gates">Policy as Code — CI Gates</a></li>
+<li><a href="#buildpacks-image-build-strategies">Buildpacks & Image Build Strategies</a></li>
+<li><a href="#multi-architecture-builds">Multi-Architecture Builds</a></li>
+</ol>
+<p><strong>Observability</strong></p>
+<ol>
+<li><a href="#observability">Observability</a> <em>(includes Prometheus AlertManager config, ServiceMonitor/PodMonitor, DORA metrics)</em></li>
+<li><a href="#grafana-dashboards-as-code">Grafana Dashboards as Code</a></li>
+<li><a href="#slo-management">SLO Management</a></li>
+<li><a href="#beyla-ebpf-auto-instrumentation-no-code-changes">Beyla (eBPF Auto-Instrumentation — No Code Changes)</a></li>
+<li><a href="#grafana-oncall-on-call-scheduling-escalation">Grafana OnCall (On-Call Scheduling & Escalation)</a></li>
+</ol>
+<p><strong>Operations & Reliability</strong></p>
+<ol>
+<li><a href="#backup-disaster-recovery">Backup & Disaster Recovery</a></li>
+<li><a href="#etcd-operations-disaster-recovery">etcd Operations & Disaster Recovery</a></li>
+<li><a href="#cost-management-resource-efficiency">Cost Management & Resource Efficiency</a></li>
+<li><a href="#cluster-upgrade-strategies">Cluster Upgrade Strategies</a></li>
+</ol>
+<p><strong>Platform & Multi-Cluster</strong></p>
+<ol>
+<li><a href="#platform-engineering">Platform Engineering</a> <em>(Crossplane, LitmusChaos, Keptn, Golden Paths, Port)</em></li>
+<li><a href="#operator-pattern-custom-resources">Operator Pattern & Custom Resources</a></li>
+<li><a href="#cluster-api-capi">Cluster API (CAPI)</a></li>
+<li><a href="#multi-cluster">Multi-Cluster</a></li>
+<li><a href="#multi-tenancy-audit">Multi-Tenancy & Audit</a></li>
+<li><a href="#cluster-management-uis">Cluster Management UIs</a></li>
+</ol>
+<p><strong>Tooling Reference</strong></p>
+<ol>
+<li><a href="#helm-advanced-usage">Helm — Advanced Usage</a></li>
+<li><a href="#kubectl-power-usage">kubectl Power Usage</a></li>
+<li><a href="#deprecated-api-migration">Deprecated API Migration</a></li>
+<li><a href="#daily-operations">Daily Operations</a></li>
+<li><a href="#caddy-configuration-reference">Caddy Configuration Reference</a></li>
+<li><a href="#zot-lightweight-oci-registry">Zot (Lightweight OCI Registry)</a></li>
+<li><a href="#robusta-kubernetes-operations-platform">Robusta — Kubernetes Operations Platform</a></li>
+<li><a href="#dagger-portable-ci-engine">Dagger — Portable CI Engine</a></li>
+</ol>
+<p><strong>Troubleshooting</strong></p>
+<ol>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+<li><a href="#troubleshooting-advanced-debug-flows">Troubleshooting — Advanced Debug Flows</a></li>
+</ol>
+<h2 id="key-concepts">Key Concepts</h2>
+<h4 id="control-plane-components">Control plane components</h4>
+<table><thead><tr><th>Component</th><th>Role</th></tr></thead><tbody><tr><td><strong>kube-apiserver</strong></td><td>Front door — all kubectl commands hit this. Validates, authenticates, and persists objects to etcd.</td></tr><tr><td><strong>etcd</strong></td><td>Distributed key-value store where all cluster state lives. Losing etcd without a backup = losing the cluster.</td></tr><tr><td><strong>kube-scheduler</strong></td><td>Watches for unscheduled pods; assigns them to nodes based on resources, taints/tolerations, affinity.</td></tr><tr><td><strong>kube-controller-manager</strong></td><td>Runs reconciliation loops: Deployment controller, ReplicaSet controller, Node controller, etc.</td></tr><tr><td><strong>cloud-controller-manager</strong></td><td>Talks to the cloud API to provision LoadBalancers, PersistentVolumes (EBS, GCE PD), etc.</td></tr></tbody></table>
+<h4 id="node-components">Node components</h4>
+<table><thead><tr><th>Component</th><th>Role</th></tr></thead><tbody><tr><td><strong>kubelet</strong></td><td>Runs on every node; ensures pod containers are running and healthy.</td></tr><tr><td><strong>kube-proxy</strong></td><td>Maintains iptables/ipvs rules for Service routing. Replaced by Cilium eBPF in this stack.</td></tr><tr><td><strong>Container runtime</strong></td><td>containerd, CRI-O, or Docker (via shim).</td></tr><tr><td><strong>CNI plugin</strong></td><td>Provides pod networking. This stack uses <strong>Cilium</strong> (eBPF) — replaces Flannel and kube-proxy.</td></tr></tbody></table>
+<h4 id="what-happens-when-you-run-kubectl-apply">What happens when you run <code>kubectl apply</code></h4>
+<ol>
+<li>kubectl sends a <code>PATCH</code> or <code>POST</code> to kube-apiserver</li>
+<li>API server <strong>authenticates</strong> the request (client cert or bearer token)</li>
+<li>API server <strong>authorises</strong> via RBAC — is this subject allowed to perform this verb on this resource?</li>
+<li><strong>Mutating admission webhooks</strong> run (Kyverno mutate, inject sidecars, set defaults) — object may be changed</li>
+<li>Object is <strong>validated</strong> against the OpenAPI schema</li>
+<li><strong>Validating admission webhooks</strong> run (Kyverno validate, OPA/Gatekeeper) — may reject the request</li>
+<li>Object is <strong>persisted to etcd</strong></li>
+<li>The relevant controller's informer detects the change and its reconciliation loop runs</li>
+<li>The controller creates/updates child objects (Deployment → ReplicaSet → Pods)</li>
+<li>Scheduler assigns pending pods to nodes based on resources, taints, affinity</li>
+<li>kubelet on the target node pulls the image and creates containers via the container runtime</li>
+</ol>
+<blockquote><strong>Server-side apply (SSA):</strong> <code>kubectl apply --server-side</code> moves the field ownership tracking to the API server. Preferred for GitOps — prevents field manager conflicts when multiple tools (ArgoCD, Helm, kubectl) manage overlapping objects. Use <code>--force-conflicts</code> to take ownership of conflicting fields.</blockquote>
+<h4 id="pod-lifecycle-states">Pod lifecycle states</h4>
+<p>Kubernetes reports two distinct concepts: the <strong>phase</strong> (official API field <code>status.phase</code>) and the <strong>status reason</strong> shown by <code>kubectl get pods</code> in the STATUS column.</p>
+<p><strong>Official phases:</strong></p>
+<table><thead><tr><th>Phase</th><th>Meaning</th></tr></thead><tbody><tr><td><code>Pending</code></td><td>Pod accepted but containers not yet running — scheduling, image pull, or PVC binding in progress</td></tr><tr><td><code>Running</code></td><td>Pod bound to a node; at least one container is running, starting, or restarting</td></tr><tr><td><code>Succeeded</code></td><td>All containers exited with code 0 (terminal — used by Jobs)</td></tr><tr><td><code>Failed</code></td><td>All containers have terminated; at least one exited non-zero or was killed</td></tr><tr><td><code>Unknown</code></td><td>Pod state cannot be determined — typically the node is unreachable</td></tr></tbody></table>
+<p><strong>Common STATUS reasons (not phases, shown in <code>kubectl get pods</code>):</strong></p>
+<table><thead><tr><th>Status</th><th>What it means</th></tr></thead><tbody><tr><td><code>Terminating</code></td><td>Pod received a delete request; waiting for graceful shutdown and finalizer removal</td></tr><tr><td><code>CrashLoopBackOff</code></td><td>Container repeatedly crashes; kubelet backs off exponentially (1s → 2s → 4s → … → 5m max)</td></tr><tr><td><code>ImagePullBackOff</code> / <code>ErrImagePull</code></td><td>Registry unreachable, or image/tag not found</td></tr><tr><td><code>Init:0/2</code></td><td>Waiting for init containers (0 of 2 complete)</td></tr><tr><td><code>PodInitializing</code></td><td>Init containers done; app containers starting</td></tr><tr><td><code>ContainerCreating</code></td><td>Image pulled; container runtime is creating the container</td></tr><tr><td><code>OOMKilled</code></td><td>Container exceeded <code>limits.memory</code>; killed by the Linux OOM killer</td></tr><tr><td><code>Completed</code></td><td>All containers exited 0 (Job/CronJob pod)</td></tr></tbody></table>
+<h4 id="kubernetes-networking-model">Kubernetes networking model</h4>
+<ol>
+<li>Every pod gets a unique cluster-routable IP — no port mapping needed between pods</li>
+<li>Pods on a node can communicate with all pods on all nodes without NAT</li>
+<li>Agents on a node can communicate with all pods on that node</li>
+<li>Pods don't know or care about their host IP</li>
+</ol>
+<p>Network Policies are <strong>additive whitelists</strong> — by default, all pod-to-pod traffic is allowed. The moment any NetworkPolicy selects a pod, only traffic explicitly permitted by <em>any</em> matching policy is allowed. Production pattern: apply a default-deny-all policy to every namespace, then add explicit ingress/egress allow rules per service. Cilium extends standard NetworkPolicy with L7 (HTTP/gRPC/DNS) rules.</p>
+<h4 id="service-types">Service types</h4>
+<table><thead><tr><th>Type</th><th>Scope</th><th>Notes</th></tr></thead><tbody><tr><td><code>ClusterIP</code></td><td>In-cluster only</td><td>Default</td></tr><tr><td><code>NodePort</code></td><td>External via <code>nodeIP:nodePort</code></td><td>Static port on every node</td></tr><tr><td><code>LoadBalancer</code></td><td>Cloud LB or Cilium LB / MetalLB on bare-metal</td><td>Provisions LB IP</td></tr><tr><td><code>ExternalName</code></td><td>CNAME to external DNS</td><td>No proxying</td></tr><tr><td><code>Headless</code> (<code>clusterIP: None</code>)</td><td>DNS returns pod IPs directly</td><td>Used by StatefulSets</td></tr></tbody></table>
+<h4 id="resources-requests-vs-limits">Resources: requests vs limits</h4>
+<p><code>resources.requests</code> is what the scheduler uses to decide which node can fit the pod. <code>resources.limits</code> is enforced at runtime by cgroups.</p>
+<p><strong>How limits are enforced:</strong></p>
+<ul>
+<li><strong>Memory:</strong> hard limit — exceed it and the container is OOMKilled immediately</li>
+<li><strong>CPU:</strong> soft throttle — the container's CPU is rate-limited (not killed); it just runs slower</li>
+</ul>
+<pre><code class="language-yaml">resources:
+  requests:
+    cpu: 100m       # 0.1 vCPU — used by scheduler to place the pod
+    memory: 256Mi   # used by scheduler and OOM killer
+  limits:
+    cpu: 500m       # throttled at 0.5 vCPU — never OOMKilled for CPU
+    memory: 512Mi   # OOMKilled if exceeded</code></pre>
+<p><strong>Golden path:</strong> set <code>requests</code> to typical (p50) usage, <code>limits</code> to burst ceiling (p99). Avoid:</p>
+<ul>
+<li>Setting neither: scheduler is blind, QoS becomes BestEffort (first evicted)</li>
+<li><code>requests == limits</code> for memory: prevents kernel from reclaiming unused pages (can waste RAM)</li>
+<li>No memory limit at all: one runaway container can crash the node</li>
+</ul>
+<blockquote>Use <strong>Goldilocks</strong> to derive right-sized values from VPA recommendations based on actual traffic.</blockquote>
+<h4 id="taints-tolerations-and-affinity">Taints, tolerations, and affinity</h4>
+<p>A <strong>taint</strong> marks a node as unsuitable for pods that don't explicitly tolerate it. A <strong>toleration</strong> on a pod opts it in to a tainted node.</p>
+<p><strong>Taint effects:</strong></p>
+<table><thead><tr><th>Effect</th><th>Behaviour</th></tr></thead><tbody><tr><td><code>NoSchedule</code></td><td>New pods without a matching toleration are not scheduled here; existing pods stay</td></tr><tr><td><code>PreferNoSchedule</code></td><td>Scheduler tries to avoid placing pods here, but will if no other node fits</td></tr><tr><td><code>NoExecute</code></td><td>Existing pods without a matching toleration are evicted; new ones are not scheduled</td></tr></tbody></table>
+<pre><code class="language-bash"># Taint a GPU node — only GPU workloads get scheduled
+kubectl taint node gpu-node1 gpu=true:NoSchedule
+
+# Add toleration to a pod spec
+tolerations:
+  - key: &quot;gpu&quot;
+    operator: &quot;Equal&quot;
+    value: &quot;true&quot;
+    effect: &quot;NoSchedule&quot;
+
+# Remove a taint (note the trailing -)
+kubectl taint node gpu-node1 gpu=true:NoSchedule-</code></pre>
+<p><strong>Node affinity vs node selector:</strong></p>
+<ul>
+<li><code>nodeSelector</code>: simple key/value match (legacy, less flexible)</li>
+<li><code>nodeAffinity</code>: <code>requiredDuringSchedulingIgnoredDuringExecution</code> = hard requirement; <code>preferredDuringSchedulingIgnoredDuringExecution</code> = soft preference (weighted)</li>
+</ul>
+<blockquote><strong>Taints + tolerations vs affinity:</strong> Taints <em>repel</em> pods (node says "not you"). Affinity <em>attracts</em> pods (pod says "I want that node"). Use both together: taint GPU nodes AND add affinity to GPU pods so they land on GPU nodes and nowhere else.</blockquote>
+<h4 id="probes">Probes</h4>
+<table><thead><tr><th>Probe</th><th>Failure action</th><th>Use case</th></tr></thead><tbody><tr><td><code>livenessProbe</code></td><td>kubelet kills and restarts the container</td><td>Deadlock detection — use conservatively</td></tr><tr><td><code>readinessProbe</code></td><td>Pod removed from Service endpoints</td><td>Startup delays, temporary unhealthiness (DB reconnect, cache warm)</td></tr><tr><td><code>startupProbe</code></td><td>Disables liveness/readiness until it passes</td><td>Slow-starting apps (JVM, ML model load)</td></tr></tbody></table>
+<p><strong>Probe mechanisms</strong> (all three probes support all mechanisms):</p>
+<ul>
+<li><code>exec</code> — runs a command inside the container; exit 0 = healthy</li>
+<li><code>httpGet</code> — HTTP GET; status 200–399 = healthy</li>
+<li><code>tcpSocket</code> — TCP connect; success = healthy</li>
+<li><code>grpc</code> — gRPC health check protocol (1.24+)</li>
+</ul>
+<pre><code class="language-yaml">livenessProbe:
+  httpGet:
+    path: /healthz
+    port: 8080
+  initialDelaySeconds: 15    # wait before first probe — tune per app startup time
+  periodSeconds: 10
+  failureThreshold: 3        # 3 consecutive failures → restart
+  timeoutSeconds: 5
+
+startupProbe:
+  httpGet:
+    path: /healthz
+    port: 8080
+  failureThreshold: 30       # 30 × 10s = 5 min max startup time
+  periodSeconds: 10</code></pre>
+<blockquote><strong>Common mistake:</strong> A liveness probe that hits your app's external DB will kill the pod when the DB is slow — making an outage worse. Liveness probes should only check the process itself (deadlock, infinite loop). Readiness probes can check DB connectivity.</blockquote>
+<h4 id="configmap-vs-secret">ConfigMap vs Secret</h4>
+<p>Both are key-value stores mounted into pods as volumes or environment variables.</p>
+<table><thead><tr><th></th><th>ConfigMap</th><th>Secret</th></tr></thead><tbody><tr><td><strong>Content</strong></td><td>Non-sensitive config (feature flags, app settings)</td><td>Sensitive data (passwords, tokens, TLS certs)</td></tr><tr><td><strong>Encoding</strong></td><td>Plain text</td><td>Base64-encoded (not encrypted — just encoded)</td></tr><tr><td><strong>RBAC</strong></td><td>Standard</td><td>Separate <code>get secrets</code> permission; restrict tightly</td></tr><tr><td><strong>Encryption at rest</strong></td><td>No</td><td>Only with EncryptionConfiguration or external KMS</td></tr></tbody></table>
+<pre><code class="language-yaml"># Volume mount (preferred) — changes take effect without pod restart (~60s propagation)
+volumes:
+  - name: config
+    configMap:
+      name: myapp-config
+  - name: creds
+    secret:
+      secretName: myapp-secrets
+      defaultMode: 0400    # read-only for owner
+
+# Env var (less preferred — requires pod restart to pick up changes)
+env:
+  - name: DB_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: myapp-secrets
+        key: db-password</code></pre>
+<blockquote><strong>Encryption at rest:</strong> By default, Secrets are stored as base64 in etcd — anyone with etcd access can read them. Enable Kubernetes EncryptionConfiguration with an AES-GCM provider, or use ESO + OpenBao/Vault for proper secret management. Sealed Secrets encrypts the manifest itself (safe to commit to Git).</blockquote>
+<h4 id="statefulsets-vs-deployments">StatefulSets vs Deployments</h4>
+<table><thead><tr><th></th><th>Deployment</th><th>StatefulSet</th></tr></thead><tbody><tr><td><strong>Pod identity</strong></td><td>Random names (<code>myapp-xyz</code>)</td><td>Stable ordinal names (<code>myapp-0</code>, <code>myapp-1</code>)</td></tr><tr><td><strong>DNS</strong></td><td>Single service DNS</td><td>Per-pod DNS (<code>myapp-0.myapp.ns.svc.cluster.local</code>)</td></tr><tr><td><strong>Storage</strong></td><td>Shared PVC or ephemeral</td><td>Per-pod PVCs (via <code>volumeClaimTemplates</code>)</td></tr><tr><td><strong>Startup order</strong></td><td>All pods start in parallel</td><td>Sequential by default (0 → 1 → 2)</td></tr><tr><td><strong>Use case</strong></td><td>Stateless apps, APIs, workers</td><td>Databases, Kafka, Elasticsearch, ZooKeeper</td></tr><tr><td><strong>PVC on scale-down</strong></td><td>N/A</td><td>PVCs are <strong>not</strong> deleted — manual cleanup required</td></tr></tbody></table>
+<pre><code class="language-bash"># Stateful DNS — predictable and stable even after pod restart
+nslookup postgres-0.postgres.data.svc.cluster.local</code></pre>
+<h4 id="qos-classes">QoS Classes</h4>
+<p>Kubernetes assigns every pod a Quality of Service class based on its resource configuration. This determines eviction order under memory pressure.</p>
+<table><thead><tr><th>QoS Class</th><th>Condition</th><th>Eviction priority</th></tr></thead><tbody><tr><td><code>Guaranteed</code></td><td>Every container has <code>requests == limits</code> for CPU <strong>and</strong> memory</td><td>Last evicted</td></tr><tr><td><code>Burstable</code></td><td>At least one container has a request or limit set</td><td>Middle</td></tr><tr><td><code>BestEffort</code></td><td>No requests or limits set on any container</td><td>First evicted</td></tr></tbody></table>
+<pre><code class="language-bash">kubectl get pod myapp-xyz -n myapp -o jsonpath='{.status.qosClass}'</code></pre>
+<blockquote><strong>Rule of thumb:</strong> Production services should be <code>Guaranteed</code> (avoids OOMKill surprises) or <code>Burstable</code> with memory limits set. <code>BestEffort</code> is only appropriate for non-critical batch jobs.</blockquote>
+<h4 id="ownerreferences-garbage-collection">OwnerReferences & Garbage Collection</h4>
+<p>Every object created by a controller carries an <code>ownerReferences</code> field pointing back to its parent. When the parent is deleted, the garbage collector cascades deletion to all owned objects (unless <code>--cascade=orphan</code> is used).</p>
+<pre><code class="language-bash"># See who owns a ReplicaSet
+kubectl get replicaset myapp-abc123 -n myapp -o jsonpath='{.metadata.ownerReferences}'
+
+# Delete a Deployment but keep its pods (orphan)
+kubectl delete deployment myapp -n myapp --cascade=orphan</code></pre>
+<h4 id="resourceversion-optimistic-concurrency">ResourceVersion & Optimistic Concurrency</h4>
+<p>Every Kubernetes object has a <code>resourceVersion</code> field that changes on every write. The API server uses it for <strong>optimistic concurrency</strong> — if you <code>PUT</code> an object with a stale <code>resourceVersion</code>, the request is rejected with <code>409 Conflict</code>. This prevents lost updates when two controllers modify the same object simultaneously.</p>
+<pre><code class="language-bash">kubectl get deployment myapp -n myapp -o jsonpath='{.metadata.resourceVersion}'</code></pre>
+<h4 id="rbac-fundamentals">RBAC fundamentals</h4>
+<p>Every action is: a <strong>verb</strong> (<code>get</code>, <code>list</code>, <code>watch</code>, <code>create</code>, <code>update</code>, <code>patch</code>, <code>delete</code>) on a <strong>resource</strong> (<code>pods</code>, <code>deployments</code>, <code>secrets</code>) in a <strong>namespace</strong>. A Role defines allowed combinations; a RoleBinding binds it to a subject. ClusterRole/ClusterRoleBinding apply cluster-wide.</p>
+<pre><code class="language-bash">kubectl auth can-i --list --as system:serviceaccount:default:myapp</code></pre>
+<h4 id="kubectl-explain-built-in-api-reference"><code>kubectl explain</code> — built-in API reference</h4>
+<p>Never leave the terminal to look up YAML fields:</p>
+<pre><code class="language-bash">kubectl explain pod.spec.containers.securityContext
+kubectl explain deployment.spec.strategy.rollingUpdate
+kubectl explain --recursive deployment.spec    # show full tree
+kubectl api-resources                          # list all resource kinds
+kubectl api-resources --api-group=cilium.io    # filter by API group</code></pre>
+<h4 id="admission-webhooks">Admission webhooks</h4>
+<p>Before any object is persisted to etcd, it passes through two phases of admission control:</p>
+<ol>
+<li><strong>Mutating admission</strong> — webhooks may modify the object (inject sidecars, add labels, set resource defaults). Runs first so validators see the final object.</li>
+<li><strong>Validating admission</strong> — webhooks may reject the object but cannot modify it (block unsigned images, enforce policy). Runs second.</li>
+</ol>
+<p>Both phases run in parallel across all registered webhooks within each phase. A single webhook can implement both. Tools: Kyverno (YAML-native), OPA/Gatekeeper (Rego).</p>
+<blockquote>If a webhook is unavailable and its <code>failurePolicy</code> is <code>Fail</code>, all matching requests are rejected. Set <code>failurePolicy: Ignore</code> for non-critical webhooks, and ensure webhook pods have <code>priorityClass: system-cluster-critical</code>.</blockquote>
+<h4 id="persistent-storage-the-csi-model">Persistent storage — the CSI model</h4>
+<p>Container Storage Interface (CSI) is the plugin standard. A CSI driver (Longhorn, Rook-Ceph, AWS EBS) implements the Create/Attach/Mount lifecycle.</p>
+<ul>
+<li><strong>PersistentVolume (PV):</strong> the actual storage resource (provisioned manually or dynamically by a StorageClass)</li>
+<li><strong>PersistentVolumeClaim (PVC):</strong> a pod's request for storage — size, access mode, and StorageClass</li>
+<li><strong>StorageClass:</strong> defines the provisioner and parameters; <code>reclaimPolicy: Retain</code> (keep data on PVC delete) vs <code>Delete</code> (destroy it)</li>
+</ul>
+<p><strong>Access modes:</strong></p>
+<ul>
+<li><code>ReadWriteOnce</code> (RWO) — mounted read/write by one node at a time; block storage (Longhorn, EBS)</li>
+<li><code>ReadWriteMany</code> (RWX) — mounted read/write by multiple nodes; NFS, CephFS</li>
+<li><code>ReadOnlyMany</code> (ROX) — mounted read-only by multiple nodes</li>
+</ul>
+<pre><code class="language-bash">kubectl get pv           # cluster-scoped — shows all volumes and their RECLAIM POLICY
+kubectl get pvc -A       # namespace-scoped — pod's view of storage
+kubectl describe pv &lt;pv-name&gt;   # see which PVC is bound and the reclaim policy</code></pre>
+<h4 id="ebpf-the-technology-behind-cilium">eBPF — the technology behind Cilium</h4>
+<p><strong>eBPF</strong> (extended Berkeley Packet Filter) lets sandboxed programs run in the Linux kernel without writing kernel modules. The kernel verifies programs are safe (no infinite loops, no out-of-bounds access) before loading them.</p>
+<p><strong>Why it matters for Kubernetes:</strong></p>
+<ul>
+<li><strong>Traditional path:</strong> packets hit iptables → kube-proxy → userspace proxy → pod. Slow, stateful, hard to debug.</li>
+<li><strong>Cilium/eBPF path:</strong> packets are processed at the kernel network layer by eBPF programs — no iptables rules, no kube-proxy, no extra hops.</li>
+</ul>
+<table><thead><tr><th>Capability</th><th>How Cilium uses eBPF</th></tr></thead><tbody><tr><td><strong>Networking</strong></td><td>Replaces kube-proxy; pod routing at kernel speed</td></tr><tr><td><strong>L7 Policy</strong></td><td>HTTP/gRPC/DNS-aware NetworkPolicy without Envoy sidecar injection</td></tr><tr><td><strong>Encryption</strong></td><td>Transparent WireGuard node-to-node via eBPF</td></tr><tr><td><strong>Observability</strong></td><td>Hubble captures all pod flows at kernel level; zero app changes</td></tr><tr><td><strong>Load balancing</strong></td><td>Maglev consistent hashing in kernel (DSR mode for direct return)</td></tr></tbody></table>
+<blockquote>Kernel version ≥5.10 recommended for full Cilium features; ≥5.8 for Beyla eBPF auto-instrumentation.</blockquote>
+<h4 id="gitops-mental-model">GitOps mental model</h4>
+<p>Git is the <strong>single source of truth</strong> for cluster state. Nobody applies manifests manually — everything flows through Git.</p>
+<pre><code>Code repo ──→ CI (build/test/push image)
+                    │
+                    ↓
+           Manifests repo (update image tag, Helm values)
+                    │
+                    ↓
+           ArgoCD / Flux (detects diff every ~3 min or via webhook)
+                    │
+                    ↓
+           Kubernetes cluster (reconciled to match Git)</code></pre>
+<p><strong>Key properties:</strong></p>
+<ul>
+<li><strong>Rollback</strong> = <code>git revert</code> → automatic re-sync, no <code>kubectl rollout undo</code></li>
+<li><strong>Audit trail</strong> = git history and PR comments (who changed what, when, and why)</li>
+<li><strong>Drift detection</strong> = ArgoCD/Flux detects and can auto-correct manual <code>kubectl</code> changes</li>
+<li><strong>Disaster recovery</strong> = re-apply the Git repo to a new cluster to recreate state</li>
+</ul>
+<blockquote><strong>Drift:</strong> any change made directly with <code>kubectl apply</code> that wasn't committed to Git. GitOps tools report this as <code>OutOfSync</code> and can auto-revert it. Use <code>kubectl apply --dry-run=server</code> to preview without drifting.</blockquote>
+<h4 id="observability-pillars">Observability pillars</h4>
+<table><thead><tr><th>Pillar</th><th>Tool in this stack</th><th>What it shows</th></tr></thead><tbody><tr><td><strong>Metrics</strong></td><td>Prometheus + Grafana</td><td>CPU, memory, error rates, latency percentiles</td></tr><tr><td><strong>Logs</strong></td><td>Loki + Promtail/Alloy</td><td>Full log lines with LogQL querying</td></tr><tr><td><strong>Traces</strong></td><td>OpenTelemetry + Tempo</td><td>Request path across microservices, per-span latency</td></tr><tr><td><strong>Flows</strong></td><td>Cilium Hubble</td><td>Pod-to-pod network flows, dropped packets, L7 requests</td></tr></tbody></table>
+<h4 id="opentelemetry-collector-central-signal-pipeline">OpenTelemetry Collector (Central Signal Pipeline)</h4>
+<p>The OpenTelemetry Collector is the recommended way to receive, process, and export all three signal types (metrics, logs, traces) in one place. It decouples your apps from the backend — swap Tempo for Jaeger, or Loki for Elasticsearch, by changing the Collector config, not your code.</p>
+<pre><code class="language-bash">helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+helm upgrade --install otel-collector open-telemetry/opentelemetry-collector \
+  --namespace monitoring \
+  -f ~/k8s/values/otel-collector.yaml</code></pre>
+<pre><code class="language-yaml"># ~/k8s/values/otel-collector.yaml
+mode: deployment   # or 'daemonset' to collect from every node
+
+config:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+    prometheus:
+      config:
+        scrape_configs:
+          - job_name: otel-collector
+            static_configs:
+              - targets: [localhost:8888]
+
+  processors:
+    batch:
+      timeout: 5s
+      send_batch_size: 512
+    memory_limiter:
+      check_interval: 1s
+      limit_mib: 512
+
+  exporters:
+    otlp/tempo:
+      endpoint: http://tempo.monitoring.svc:4317
+      tls:
+        insecure: true
+    loki:
+      endpoint: http://loki.monitoring.svc:3100/loki/api/v1/push
+    prometheus:
+      endpoint: 0.0.0.0:8889   # scrape endpoint for Prometheus
+
+  service:
+    pipelines:
+      traces:
+        receivers: [otlp]
+        processors: [memory_limiter, batch]
+        exporters: [otlp/tempo]
+      logs:
+        receivers: [otlp]
+        processors: [memory_limiter, batch]
+        exporters: [loki]
+      metrics:
+        receivers: [otlp, prometheus]
+        processors: [memory_limiter, batch]
+        exporters: [prometheus]</code></pre>
+<pre><code class="language-bash"># Instrument your app — point OTLP endpoint to the collector
+# OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.monitoring.svc:4317
+
+kubectl get pods -n monitoring -l app.kubernetes.io/name=opentelemetry-collector
+kubectl logs -n monitoring -l app.kubernetes.io/name=opentelemetry-collector -f</code></pre>
+<h4 id="dora-metrics">DORA metrics</h4>
+<p>Four metrics measure software delivery performance: <strong>Deployment Frequency</strong>, <strong>Lead Time for Changes</strong> (commit to production), <strong>Change Failure Rate</strong> (% of deployments causing incidents), and <strong>Time to Restore</strong> (MTTR). Elite teams: multiple deploys/day, <1h lead time, <5% failure rate, <1h recovery. These predict team health — low deployment frequency predicts burnout; high failure rate predicts firefighting culture.</p>
+<h4 id="finalizers">Finalizers</h4>
+<p>Finalizers are keys stored in <code>metadata.finalizers</code> that block deletion of an object until removed. When you <code>kubectl delete</code> an object with finalizers, Kubernetes marks it <code>Terminating</code> but doesn't remove it — it waits for a controller to do cleanup work and remove the finalizer. Common example: a PVC with a finalizer that prevents deletion while a pod is still using it.</p>
+<pre><code class="language-bash"># See finalizers on a resource
+kubectl get pvc myapp-data -n myapp -o jsonpath='{.metadata.finalizers}'
+
+# Remove a stuck finalizer manually (use with caution — bypasses cleanup)
+kubectl patch pvc myapp-data -n myapp --type=json   -p='[{&quot;op&quot;:&quot;remove&quot;,&quot;path&quot;:&quot;/metadata/finalizers/0&quot;}]'</code></pre>
+<h4 id="field-managers-server-side-apply-ssa">Field Managers & Server-Side Apply (SSA)</h4>
+<p>Server-Side Apply (SSA) moves field ownership tracking to the API server. Each tool (kubectl, ArgoCD, Helm) is a named <strong>field manager</strong> that "owns" the fields it sets. Conflicts arise when two managers try to own the same field.</p>
+<pre><code class="language-bash"># Check who owns which fields
+kubectl get deployment myapp -n myapp   -o jsonpath='{.metadata.managedFields}' | jq .
+
+# SSA apply — take ownership of fields declared in the manifest
+kubectl apply --server-side -f deployment.yaml
+
+# Force-take ownership of a conflicting field
+kubectl apply --server-side --force-conflicts -f deployment.yaml
+
+# Set a custom field manager name (important when multiple tools manage the same object)
+kubectl apply --server-side --field-manager=argocd -f deployment.yaml</code></pre>
+<h4 id="lease-leader-election">Lease & Leader Election</h4>
+<p>Kubernetes controllers use <code>Lease</code> objects in the <code>kube-node-lease</code> namespace for leader election — ensuring only one replica of a controller is active at a time. Node heartbeats are also tracked via Leases.</p>
+<pre><code class="language-bash"># View node heartbeat leases
+kubectl get lease -n kube-node-lease
+
+# View leader election leases for controllers
+kubectl get lease -n kube-system
+
+# Check which controller replica is the current leader
+kubectl get lease kube-controller-manager -n kube-system -o json | jq .spec.holderIdentity</code></pre>
+<h4 id="imagepullpolicy">imagePullPolicy</h4>
+<p>Controls when the kubelet re-pulls an image from the registry.</p>
+<table><thead><tr><th>Policy</th><th>Behaviour</th><th>When to use</th></tr></thead><tbody><tr><td><code>IfNotPresent</code></td><td>Pull only if image not cached on node</td><td>Default for versioned tags — fastest restarts</td></tr><tr><td><code>Always</code></td><td>Pull on every pod start</td><td>Required when tag is mutable (e.g. <code>latest</code>, <code>main</code>)</td></tr><tr><td><code>Never</code></td><td>Never pull — fail if image not present</td><td>Air-gapped nodes; pre-loaded images</td></tr></tbody></table>
+<pre><code class="language-yaml">containers:
+  - name: myapp
+    image: harbor.home.local/myorg/myapp:v1.4.2   # versioned tag → IfNotPresent is safe
+    imagePullPolicy: IfNotPresent</code></pre>
+<blockquote><strong>Rule:</strong> Always use a specific digest or immutable tag in production — <code>imagePullPolicy: Always</code> with <code>:latest</code> is a reliability footgun (different nodes may pull different versions).</blockquote>
+<h4 id="externaltrafficpolicy-and-internaltrafficpolicy">externalTrafficPolicy and internalTrafficPolicy</h4>
+<p><code>externalTrafficPolicy</code> controls whether a <code>NodePort</code> or <code>LoadBalancer</code> service distributes traffic across all nodes (<code>Cluster</code>) or only routes to nodes that have a local pod (<code>Local</code>).</p>
+<table><thead><tr><th>Policy</th><th>Behaviour</th><th>Trade-off</th></tr></thead><tbody><tr><td><code>Cluster</code> (default)</td><td>Any node can receive traffic; kube-proxy/Cilium forwards to any pod</td><td>Source IP is SNAT'd — pod sees node IP, not client IP</td></tr><tr><td><code>Local</code></td><td>Only nodes with a running pod receive traffic</td><td>Preserves client source IP; uneven load if pods are on few nodes</td></tr></tbody></table>
+<pre><code class="language-yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: myapp
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local    # preserve client IP; Cilium/MetalLB only routes to nodes with pods
+  internalTrafficPolicy: Local    # cluster-internal traffic also prefers local pod (avoids extra hop)
+  selector:
+    app: myapp
+  ports:
+    - port: 80
+      targetPort: 8080</code></pre>
+<blockquote>Use <code>Local</code> when you need real client IPs in access logs or when you use Cilium's DSR (Direct Server Return) mode for extra performance.</blockquote>
+<h4 id="readinessgates">ReadinessGates</h4>
+<p><code>readinessGates</code> let external controllers (like a load balancer controller or Argo Rollouts) declare additional conditions that must be <code>True</code> before a pod is considered ready and added to Service endpoints.</p>
+<pre><code class="language-yaml">spec:
+  readinessGates:
+    - conditionType: target-health.elbv2.k8s.aws/my-tg   # example: AWS ALB controller</code></pre>
+<pre><code class="language-bash"># Check pod readiness gate status
+kubectl get pod myapp-xyz -n myapp -o jsonpath='{.status.conditions}'  | jq .
+# Look for conditionType entries with status &quot;True&quot; / &quot;False&quot;</code></pre>
+<h4 id="autoscaling-recap">Autoscaling recap</h4>
+<table><thead><tr><th>Tool</th><th>Mechanism</th></tr></thead><tbody><tr><td><strong>HPA</strong></td><td>Scales pod replicas on CPU/memory or custom metrics</td></tr><tr><td><strong>VPA</strong></td><td>Adjusts resource requests/limits (recommendation mode via Goldilocks)</td></tr><tr><td><strong>KEDA</strong></td><td>Event-driven scaling including scale-to-zero</td></tr><tr><td><strong>Cluster Autoscaler / Karpenter</strong></td><td>Adds/removes nodes based on pending pods</td></tr></tbody></table>
+<hr>
+<h4 id="namespaces">Namespaces</h4>
+<p>Namespaces are a virtual partition of a cluster — they scope names, RBAC, ResourceQuotas, NetworkPolicies, and LimitRanges. Objects with the same name can exist in different namespaces. <code>kube-system</code> holds control-plane components; <code>default</code> is the initial user namespace. Namespaces do <strong>not</strong> provide network isolation on their own — use NetworkPolicies for that.</p>
+<pre><code class="language-bash">kubectl get namespaces
+kubectl create namespace myapp
+kubectl config set-context --current --namespace=myapp   # set default namespace
+kubectl get pods -A                                       # all namespaces
+kubectl get pods -n kube-system                          # specific namespace</code></pre>
+<blockquote><strong>Production pattern:</strong> One namespace per application/service. Use <code>ResourceQuota</code> and <code>LimitRange</code> to cap what each namespace can consume.</blockquote>
+<hr>
+<h4 id="labels-selectors">Labels & Selectors</h4>
+<p>Labels are <code>key: value</code> pairs attached to any Kubernetes object. They are the <strong>primary mechanism</strong> Kubernetes uses to group and target objects — Services use them to find pods, Deployments use them to own ReplicaSets, NetworkPolicies use them to apply rules, and node affinity uses node labels.</p>
+<pre><code class="language-yaml">metadata:
+  labels:
+    app: myapp
+    version: v1.4.2
+    environment: production
+    team: backend</code></pre>
+<pre><code class="language-bash">kubectl get pods -l app=myapp                            # equality selector
+kubectl get pods -l 'environment in (production,staging)'  # set-based selector
+kubectl label pod myapp-xyz canary=true                  # add label
+kubectl label pod myapp-xyz canary-                      # remove label
+kubectl get pods --show-labels</code></pre>
+<p><strong>Selector types:</strong></p>
+<ul>
+<li><strong>Equality-based</strong> (<code>=</code>, <code>==</code>, <code>!=</code>): used in Services, ReplicationControllers</li>
+<li><strong>Set-based</strong> (<code>in</code>, <code>notin</code>, <code>exists</code>): used in Deployments, Jobs, DaemonSets, affinity rules</li>
+</ul>
+<blockquote>Labels are indexed and queryable. Keep them consistent across your fleet — <code>app</code>, <code>version</code>, <code>environment</code>, <code>team</code>, <code>component</code> are common conventions (see <code>app.kubernetes.io/</code> well-known labels).</blockquote>
+<hr>
+<h4 id="annotations">Annotations</h4>
+<p>Annotations are also <code>key: value</code> pairs but are <strong>not</strong> used for selection. They carry arbitrary metadata — tool configuration, last-applied values, build IDs, Slack channel, runbook URLs.</p>
+<pre><code class="language-yaml">metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: &quot;...&quot;
+    prometheus.io/scrape: &quot;true&quot;                       # Prometheus scrape hint
+    prometheus.io/port: &quot;8080&quot;
+    kubernetes.io/change-cause: &quot;deploy v1.4.2 fix OOM&quot;  # shown in rollout history
+    link/runbook: &quot;https://wiki.home.local/runbooks/myapp&quot;</code></pre>
+<blockquote>Values can be any string including JSON. Unlike labels, annotations are not indexed — don't use them as selectors.</blockquote>
+<hr>
+<h4 id="deployments-replicasets">Deployments & ReplicaSets</h4>
+<p>A <strong>Deployment</strong> manages the desired state of a stateless application. You declare <code>replicas: 3</code> and <code>image: myapp:v2</code>, and the Deployment controller creates a <strong>ReplicaSet</strong> to maintain that count. On update, the Deployment creates a new ReplicaSet and scales it up while scaling the old one down — this is the rolling update.</p>
+<pre><code>Deployment
+  └── ReplicaSet (v2 — active)       3/3 pods
+  └── ReplicaSet (v1 — scaled down)  0/3 pods  ← kept for rollback</code></pre>
+<pre><code class="language-bash">kubectl get replicasets -n myapp        # see all RSes owned by the Deployment
+kubectl rollout history deployment/myapp -n myapp   # see revision history
+kubectl rollout undo deployment/myapp -n myapp      # roll back to previous RS</code></pre>
+<blockquote><code>revisionHistoryLimit</code> (default 10) controls how many old ReplicaSets are kept. Set to 3–5 in production to avoid cluttering the namespace.</blockquote>
+<hr>
+<h4 id="events">Events</h4>
+<p>Kubernetes Events record what happened to an object — image pulls, scheduling decisions, probe failures, OOMKills. They are the first thing to check when a pod won't start.</p>
+<pre><code class="language-bash">kubectl describe pod myapp-xyz -n myapp          # events at the bottom
+kubectl get events -n myapp --sort-by='.lastTimestamp' | tail -30
+kubectl get events -n myapp --field-selector reason=OOMKilling
+kubectl get events -A --field-selector type=Warning   # all warnings cluster-wide</code></pre>
+<p>Events expire after ~1 hour by default. For persistent event storage, use a tool like <code>event-exporter</code> to ship events to Loki.</p>
+<hr>
+<h4 id="restartpolicy">restartPolicy</h4>
+<p>Controls what happens when a container in a pod exits.</p>
+<table><thead><tr><th>Policy</th><th>Behaviour</th><th>Use Case</th></tr></thead><tbody><tr><td><code>Always</code></td><td>Restart on any exit (default for Deployments/DaemonSets)</td><td>Long-running services</td></tr><tr><td><code>OnFailure</code></td><td>Restart only on non-zero exit</td><td>Jobs that should retry</td></tr><tr><td><code>Never</code></td><td>Never restart</td><td>One-shot jobs; debugging</td></tr></tbody></table>
+<blockquote>Pods with <code>restartPolicy: Never</code> move to <code>Failed</code> phase on non-zero exit. Pods with <code>Always</code> go to <code>CrashLoopBackOff</code> if they keep crashing.</blockquote>
+<hr>
+<h4 id="hostnetwork-hostpid-hostipc">hostNetwork, hostPID, hostIPC</h4>
+<p>These pod-level flags break container isolation in exchange for performance or access to host resources. <strong>Avoid in production unless absolutely necessary</strong> — they are blocked by <code>restricted</code> PSA profile.</p>
+<table><thead><tr><th>Flag</th><th>Effect</th><th>Legitimate use</th></tr></thead><tbody><tr><td><code>hostNetwork: true</code></td><td>Pod uses the node's network namespace; bypasses CNI</td><td>Node-local monitoring agents (Cilium, Falco)</td></tr><tr><td><code>hostPID: true</code></td><td>Pod can see all processes on the node</td><td>Debugging tools, eBPF profilers</td></tr><tr><td><code>hostIPC: true</code></td><td>Pod shares the node's IPC namespace</td><td>High-performance shared-memory workloads</td></tr></tbody></table>
+<hr>
+<h2 id="distributions">Distributions</h2>
+<table><thead><tr><th>Distribution</th><th>Best For</th><th>RAM (min)</th><th>Install via</th><th>Notes</th></tr></thead><tbody><tr><td><strong>k3s</strong></td><td>Single-node homelabs, edge</td><td>512 MB</td><td>curl installer (<code>~/.local/bin</code>)</td><td>Batteries-included, easiest to start</td></tr><tr><td><strong>k0s</strong></td><td>Minimal, air-gapped</td><td>1 GB</td><td>curl installer (<code>~/.local/bin</code>)</td><td>Single binary, no external deps</td></tr><tr><td><strong>MicroK8s</strong></td><td>Quick local cluster, addons</td><td>2 GB</td><td><strong>Snap</strong></td><td>Canonical-maintained; DNS, ingress, registry as addons</td></tr><tr><td><strong>minikube</strong></td><td>Local dev, driver choice</td><td>2 GB</td><td>Nix or <strong>Snap</strong></td><td>Runs via Podman driver</td></tr><tr><td><strong>kind</strong></td><td>Lightweight dev/CI</td><td>2 GB</td><td>Nix</td><td>Runs K8s inside Podman containers</td></tr><tr><td><strong>RKE2</strong></td><td>Hardened, production</td><td>4 GB</td><td>curl installer (<code>~/.local/bin</code>)</td><td>CIS-benchmarked, STIG-ready</td></tr><tr><td><strong>Talos</strong></td><td>Immutable infra, GitOps</td><td>2 GB</td><td>talosctl</td><td>API-only, no SSH, extremely secure</td></tr><tr><td><strong>kubeadm</strong></td><td>Vanilla upstream, CKA study</td><td>2 GB</td><td>Nix</td><td>Full manual setup; deepest understanding</td></tr></tbody></table>
+<hr>
+<h3 id="k3s-lightweight-cncf-kubernetes">k3s (Lightweight CNCF Kubernetes)</h3>
+<p><strong>Purpose:</strong> Lightweight, CNCF-certified Kubernetes. Ships with containerd, CoreDNS, and local-path provisioner. Single binary under 70 MB. Install with <code>--flannel-backend=none --disable-kube-proxy</code> to use Cilium as the CNI (see <a href="#networking--ingress">Networking & Ingress</a>).</p>
+<h4 id="single-node-install-with-cilium-cni">Single-node install (with Cilium CNI)</h4>
+<pre><code class="language-bash">sudo sysctl -w vm.max_map_count=524288
+echo &quot;vm.max_map_count=524288&quot; | sudo tee /etc/sysctl.d/99-k8s.conf
+sudo modprobe br_netfilter
+echo &quot;br_netfilter&quot; | sudo tee /etc/modules-load.d/br_netfilter.conf
+
+mkdir -p ~/.local/bin
+curl -sfL https://get.k3s.io | INSTALL_K3S_BIN_DIR=~/.local/bin sh -s - \
+  --flannel-backend=none \
+  --disable-kube-proxy \
+  --disable-network-policy \
+  --disable=traefik          # remove if using NGF
+
+mkdir -p ~/.kube
+sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
+sudo chown $USER:$USER ~/.kube/config
+chmod 600 ~/.kube/config
+export KUBECONFIG=~/.kube/config
+# Now install Cilium — see Networking &amp; Ingress</code></pre>
+<h4 id="adding-worker-nodes">Adding worker nodes</h4>
+<pre><code class="language-bash">sudo cat /var/lib/rancher/k3s/server/node-token   # on server
+
+mkdir -p ~/.local/bin
+curl -sfL https://get.k3s.io | INSTALL_K3S_BIN_DIR=~/.local/bin \
+  K3S_URL=https://&lt;server-ip&gt;:6443 K3S_TOKEN=&lt;token&gt; sh -</code></pre>
+<h4 id="common-k3s-operations">Common k3s operations</h4>
+<pre><code class="language-bash">kubectl get nodes -o wide
+kubectl get pods -A
+sudo journalctl -u k3s -f
+kubectl drain &lt;node-name&gt; --ignore-daemonsets --delete-emptydir-data
+kubectl uncordon &lt;node-name&gt;
+sudo k3s etcd-snapshot save --name homelab-$(date +%Y%m%d)
+~/.local/bin/k3s-uninstall.sh
+~/.local/bin/k3s-agent-uninstall.sh</code></pre>
+<hr>
+<h3 id="k0s-minimal-single-binary">k0s (Minimal Single Binary)</h3>
+<pre><code class="language-bash">mkdir -p ~/.local/bin
+curl -sSLf https://get.k0s.sh | K0S_INSTALL_PATH=~/.local/bin sudo sh
+sudo k0s install controller --single
+sudo k0s start
+sudo k0s kubeconfig admin &gt; ~/.kube/config &amp;&amp; chmod 600 ~/.kube/config
+kubectl get nodes</code></pre>
+<pre><code class="language-bash">sudo k0s status
+sudo journalctl -u k0scontroller -f
+sudo k0s stop &amp;&amp; sudo k0s reset</code></pre>
+<hr>
+<h3 id="microk8s-snap-addon-driven">MicroK8s (Snap — Addon-Driven)</h3>
+<pre><code class="language-bash">sudo snap install microk8s --classic --channel=1.33/stable
+sudo usermod -aG microk8s $USER &amp;&amp; mkdir -p ~/.kube &amp;&amp; chmod 0700 ~/.kube
+# Log out and back in
+
+microk8s status --wait-ready
+microk8s enable dns ingress hostpath-storage registry dashboard metrics-server
+microk8s enable observability   # full Prometheus + Grafana stack
+
+microk8s config &gt; ~/.kube/config &amp;&amp; chmod 600 ~/.kube/config</code></pre>
+<blockquote>MicroK8s stores data in <code>/var/snap/microk8s/</code> — persists across <code>snap refresh</code>, lost only on <code>snap remove</code>.</blockquote>
+<p><strong>Firewall:</strong></p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=16443/tcp --add-port=10250/tcp --permanent &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<hr>
+<h3 id="talos-linux-immutable-kubernetes-os">Talos Linux (Immutable Kubernetes OS)</h3>
+<p><strong>Purpose:</strong> Minimal, API-only, immutable Linux distribution purpose-built for Kubernetes. No SSH, no shell, no package manager — all operations go through <code>talosctl</code>.</p>
+<pre><code class="language-bash">nix-env -iA nixpkgs.talosctl
+
+talosctl gen config homelab https://&lt;node-ip&gt;:6443 --output-dir ~/talos-config/
+talosctl apply-config --insecure --nodes &lt;node-ip&gt; --file ~/talos-config/controlplane.yaml
+talosctl bootstrap --nodes &lt;node-ip&gt; --talosconfig ~/talos-config/talosconfig
+talosctl kubeconfig ~/.kube/config --nodes &lt;node-ip&gt; --talosconfig ~/talos-config/talosconfig
+
+kubectl get nodes</code></pre>
+<pre><code class="language-bash">talosctl health --nodes &lt;node-ip&gt;
+talosctl dmesg --nodes &lt;node-ip&gt;
+talosctl upgrade --nodes &lt;node-ip&gt; --image ghcr.io/siderolabs/installer:&lt;version&gt;
+talosctl upgrade-k8s --to 1.31.0 --nodes &lt;node-ip&gt;</code></pre>
+<hr>
+<h3 id="rke2-hardened-production-kubernetes">RKE2 (Hardened Production Kubernetes)</h3>
+<pre><code class="language-bash">mkdir -p ~/.local/bin
+curl -sfL https://get.rke2.io | INSTALL_RKE2_BIN_DIR=~/.local/bin sh -
+sudo systemctl enable --now rke2-server
+sudo cp /etc/rancher/rke2/rke2.yaml ~/.kube/config
+sudo chown $USER:$USER ~/.kube/config &amp;&amp; chmod 600 ~/.kube/config
+export PATH=&quot;$HOME/.local/bin:/var/lib/rancher/rke2/bin:$PATH&quot;
+kubectl get nodes</code></pre>
+<hr>
+<h3 id="kubeadm-upstream-reference-install">kubeadm (Upstream Reference Install)</h3>
+<blockquote><strong>When to use:</strong> exact upstream behaviour, CKA/CKS study, or specific version without distribution packaging. k3s is almost always easier for homelab.</blockquote>
+<h4 id="prerequisites">Prerequisites</h4>
+<pre><code class="language-bash">sudo modprobe overlay &amp;&amp; sudo modprobe br_netfilter
+cat &lt;&lt;EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+EOF
+sudo sysctl --system
+
+nix-env -iA nixpkgs.containerd
+sudo mkdir -p /etc/containerd
+containerd config default | sudo tee /etc/containerd/config.toml
+sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
+sudo systemctl enable --now containerd
+
+nix-env -iA nixpkgs.kubeadm nixpkgs.kubelet nixpkgs.kubectl
+sudo systemctl enable kubelet</code></pre>
+<h4 id="initialise-control-plane">Initialise control plane</h4>
+<pre><code class="language-bash">sudo kubeadm init \
+  --pod-network-cidr=10.244.0.0/16 \
+  --apiserver-advertise-address=&lt;node-ip&gt; \
+  --cri-socket=unix:///run/containerd/containerd.sock
+
+mkdir -p ~/.kube
+sudo cp /etc/kubernetes/admin.conf ~/.kube/config
+sudo chown $USER:$USER ~/.kube/config
+
+# Install CNI — Cilium preferred (eBPF, kube-proxy replacement, L7 policy)
+helm repo add cilium https://helm.cilium.io/
+helm install cilium cilium/cilium --namespace kube-system \
+  --set kubeProxyReplacement=true \
+  --set k8sServiceHost=&lt;node-ip&gt; --set k8sServicePort=6443
+# Flannel fallback (simpler, no L7): kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml</code></pre>
+<h4 id="ha-control-plane-3-nodes">HA control plane (3 nodes)</h4>
+<pre><code class="language-bash">sudo kubeadm init \
+  --control-plane-endpoint &quot;lb.home.local:6443&quot; \
+  --upload-certs \
+  --pod-network-cidr=10.244.0.0/16
+# Run the printed --control-plane join command on nodes 2 and 3
+# Run the standard join command on workers</code></pre>
+<h4 id="certificate-management">Certificate management</h4>
+<pre><code class="language-bash">kubeadm certs check-expiration
+sudo kubeadm certs renew all
+sudo systemctl restart kubelet</code></pre>
+<blockquote>Set a calendar reminder every 11 months — kubeadm certs expire after 1 year and break the cluster silently.</blockquote>
+<h4 id="cluster-upgrade">Cluster upgrade</h4>
+<pre><code class="language-bash">sudo kubeadm upgrade plan
+sudo kubeadm upgrade apply v1.31.0
+nix-env -iA nixpkgs.kubelet nixpkgs.kubectl &amp;&amp; sudo systemctl restart kubelet
+kubectl drain &lt;worker-node&gt; --ignore-daemonsets --delete-emptydir-data
+# On worker: sudo kubeadm upgrade node &amp;&amp; sudo systemctl restart kubelet
+kubectl uncordon &lt;worker-node&gt;</code></pre>
+<h4 id="join-workers">Join workers</h4>
+<pre><code class="language-bash">kubeadm token create --print-join-command   # regenerate join command if needed
+sudo kubeadm join &lt;control-plane-ip&gt;:6443 \
+  --token &lt;token&gt; \
+  --discovery-token-ca-cert-hash sha256:&lt;hash&gt; \
+  --cri-socket=unix:///run/containerd/containerd.sock</code></pre>
+<hr>
+<h2 id="disk-layout-cli-tools">Disk Layout & CLI Tools</h2>
+<pre><code>/var/lib/rancher/k3s/    ← k3s data, etcd snapshots
+/var/lib/k0s/            ← k0s data
+~/.kube/config           ← kubeconfig (in @home, survives OS updates)
+~/.config/helm/          ← Helm repos and release cache
+~/k8s/                   ← your manifests, values files, helmfile.yaml</code></pre>
+<h4 id="install-all-cli-tools-nix-primary">Install all CLI tools — Nix (primary)</h4>
+<pre><code class="language-bash">nix-env -iA nixpkgs.kubectl nixpkgs.kubernetes-helm nixpkgs.k9s \
+  nixpkgs.argocd nixpkgs.fluxcd nixpkgs.velero nixpkgs.kubeseal \
+  nixpkgs.kind nixpkgs.minikube nixpkgs.clusterctl nixpkgs.talosctl \
+  nixpkgs.cilium-cli nixpkgs.hubble nixpkgs.krew nixpkgs.tekton-client \
+  nixpkgs.helmfile nixpkgs.cosign nixpkgs.trivy nixpkgs.linkerd</code></pre>
+<p><strong>Snap alternatives</strong> (for <code>kubectl</code> and <code>helm</code> only):</p>
+<pre><code class="language-bash">snap install kubectl --classic &amp;&amp; snap install helm --classic</code></pre>
+<blockquote><code>k9s</code> on Snap is unmaintained — use Nix. <code>argocd</code>, <code>flux</code>, <code>velero</code>, <code>kubeseal</code> are Nix-only.</blockquote>
+<h4 id="kubectl-plugins-krew">Kubectl plugins (krew)</h4>
+<pre><code class="language-bash">nix-env -iA nixpkgs.krew
+kubectl krew update
+
+kubectl krew install ctx         # kubectl ctx — switch contexts fast
+kubectl krew install ns          # kubectl ns — switch namespaces
+kubectl krew install neat        # clean kubectl get -o yaml output
+kubectl krew install tree        # resource ownership tree
+kubectl krew install whoami      # show current auth identity
+kubectl krew install node-shell  # shell into a node
+kubectl krew install df-pv       # disk usage of PersistentVolumes
+kubectl krew install images      # list all container images in cluster
+kubectl krew install konfig      # merge/split kubeconfig files
+kubectl krew install gadget      # eBPF-based cluster debugging (Inspektor Gadget)
+kubectl krew install stern       # multi-pod log tailing (alternative: via nix)
+kubectl krew install popeye      # cluster resource linter
+kubectl krew install score       # Kubernetes manifest quality scoring
+
+kubectl ctx k3s-homelab
+kubectl ns monitoring
+kubectl tree deployment myapp
+kubectl neat get pod myapp-xyz
+kubectl df-pv</code></pre>
+<h4 id="stern-multi-pod-log-tailing">stern — multi-pod log tailing</h4>
+<p><code>stern</code> tails logs from multiple pods simultaneously, with coloured output and regex filtering. Installed via Nix (preferred) or the krew <code>stern</code> plugin.</p>
+<pre><code class="language-bash">nix-env -iA nixpkgs.stern
+
+# Tail all pods matching a regex
+stern myapp -n myapp
+
+# Tail across namespaces
+stern myapp -A
+
+# Filter by container
+stern myapp -c api -n myapp
+
+# Tail with timestamps and JSON parsing
+stern myapp -n myapp --timestamps --output json | jq '.message'
+
+# Tail only error logs
+stern myapp -n myapp -i &quot;error|ERROR|WARN&quot;
+
+# Tail since a time window
+stern myapp -n myapp --since 1h</code></pre>
+<h4 id="k9s-tui-cluster-dashboard">k9s — TUI cluster dashboard</h4>
+<pre><code class="language-bash">nix-env -iA nixpkgs.k9s
+k9s</code></pre>
+<p>Key bindings inside k9s:</p>
+<table><thead><tr><th>Key</th><th>Action</th></tr></thead><tbody><tr><td><code>:pod</code></td><td>Switch to pods view</td></tr><tr><td><code>:ns</code></td><td>Switch namespace</td></tr><tr><td><code>:ctx</code></td><td>Switch context</td></tr><tr><td><code>l</code></td><td>Logs</td></tr><tr><td><code>s</code></td><td>Shell exec</td></tr><tr><td><code>d</code></td><td>Describe</td></tr><tr><td><code>e</code></td><td>Edit YAML</td></tr><tr><td><code>Ctrl+d</code></td><td>Delete</td></tr><tr><td><code>Shift+f</code></td><td>Port-forward</td></tr><tr><td><code>?</code></td><td>All shortcuts</td></tr><tr><td><code>/</code></td><td>Filter</td></tr><tr><td><code>x</code></td><td>Decode secrets</td></tr></tbody></table>
+<hr></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

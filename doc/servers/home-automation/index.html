@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Home Automation — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Home Automation  Smart home hubs, IoT bridges, camera NVRs, and automation pipelines — all running locally with no cloud dependency.  Why local? Cloud-depe…">
+  <meta name="description" id="meta-desc"     content="Smart home hubs, IoT bridges, camera NVRs, and automation pipelines — all running locally with no cloud dependency. Why local? Cloud-dependent smart home d…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Home Automation">
-  <meta property="og:description" id="og-desc"    content="Home Automation  Smart home hubs, IoT bridges, camera NVRs, and automation pipelines — all running locally with no cloud dependency.  Why local? Cloud-depe…">
+  <meta property="og:description" id="og-desc"    content="Smart home hubs, IoT bridges, camera NVRs, and automation pipelines — all running locally with no cloud dependency. Why local? Cloud-dependent smart home d…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/home-automation/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Home Automation">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Home Automation">
-  <meta name="twitter:description" id="tw-desc"  content="Home Automation  Smart home hubs, IoT bridges, camera NVRs, and automation pipelines — all running locally with no cloud dependency.  Why local? Cloud-depe…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Smart home hubs, IoT bridges, camera NVRs, and automation pipelines — all running locally with no cloud dependency. Why local? Cloud-dependent smart home d…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Home Automation","description":"Home Automation  Smart home hubs, IoT bridges, camera NVRs, and automation pipelines — all running locally with no cloud dependency.  Why local? Cloud-depe…","url":"https://docs.shani.dev/doc/servers/home-automation/","datePublished":"2026-04-22T00:00:00.000Z","dateModified":"2026-04-22T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Home Automation","description":"Smart home hubs, IoT bridges, camera NVRs, and automation pipelines — all running locally with no cloud dependency. Why local? Cloud-dependent smart home d…","url":"https://docs.shani.dev/doc/servers/home-automation/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Home Automation","item":"https://docs.shani.dev/doc/servers/home-automation/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,26 +215,26 @@
         <h1 class="doc-title">Home Automation</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Smart home hubs, IoT bridges, camera NVRs, and automation pipelines — all running locally with no cloud dependency.</p>
-<blockquote><p><strong>Why local?</strong> Cloud-dependent smart home devices can stop working when manufacturers shut down servers or change APIs. Local automation gives you sub-50ms response times, works during internet outages, and keeps all your sensor data on your own hardware.</p></blockquote>
-<p>---</p>
-<h2>Key Concepts</h2>
-<h4>MQTT — the IoT messaging backbone</h4>
+<blockquote><strong>Why local?</strong> Cloud-dependent smart home devices can stop working when manufacturers shut down servers or change APIs. Local automation gives you sub-50ms response times, works during internet outages, and keeps all your sensor data on your own hardware.</blockquote>
+<hr>
+<h2 id="key-concepts">Key Concepts</h2>
+<h4 id="mqtt-the-iot-messaging-backbone">MQTT — the IoT messaging backbone</h4>
 <p>MQTT (Message Queuing Telemetry Transport) is a publish-subscribe protocol designed for constrained devices on unreliable networks. A device (ESP32, Shelly plug, Zigbee sensor via zigbee2mqtt) publishes a message to a topic (<code>home/livingroom/temperature</code>); any subscriber (Home Assistant, Node-RED, Telegraf) receives it. The broker (Mosquitto, EMQX) routes messages without the publisher knowing who reads them. Key concepts: QoS levels (0 = fire-and-forget, 1 = at-least-once with acknowledgement, 2 = exactly-once), retained messages (the broker stores the last message on a topic, so new subscribers immediately get the current state), and will messages (sent by the broker when a client disconnects unexpectedly — useful for device-offline detection). MQTT is ubiquitous in IoT engineering roles.</p>
-<h4>Zigbee, Z-Wave, and Matter — wireless protocol comparison</h4>
+<h4 id="zigbee-z-wave-and-matter-wireless-protocol-comparison">Zigbee, Z-Wave, and Matter — wireless protocol comparison</h4>
 <p>Three competing wireless protocols for smart home devices: Zigbee (2.4 GHz mesh, 250 kbps, up to 65,000 devices, most widely supported, requires a coordinator dongle), Z-Wave (sub-GHz mesh, less interference than Zigbee/WiFi, maximum 232 devices per network, better range through walls, proprietary silicon requires certification), and Matter (IP-based standard on Thread or WiFi, Apple/Google/Amazon/Amazon-endorsed, designed to unify the ecosystem, still maturing). The operational reality: Zigbee has the broadest device support and lowest device cost; Z-Wave is more reliable in RF-noisy environments; Matter is the future but current device selection is limited. Zigbee2MQTT's device database of 3,000+ supported devices makes it the practical choice today.</p>
-<h4>Home Assistant's entity model</h4>
+<h4 id="home-assistants-entity-model">Home Assistant's entity model</h4>
 <p>Home Assistant's core abstraction is the entity — a representation of a single capability of a device (a smart bulb has entities for brightness, colour temperature, power state, and energy consumption). Entities have states (<code>on</code>, <code>off</code>, <code>23.5</code>) and attributes (additional metadata). Automations, dashboards, and integrations all operate on entities. The entity registry maps entity IDs to their underlying devices and integration source. Understanding this model is essential for debugging: when a device behaves unexpectedly, you inspect the entity's state history in the developer tools to determine whether the problem is in the device, the integration, or the automation.</p>
-<h4>Event-driven automation and state machines</h4>
+<h4 id="event-driven-automation-and-state-machines">Event-driven automation and state machines</h4>
 <p>Home Assistant automations are event-driven: a trigger (state change, time, webhook, sunrise) fires the automation; conditions gate whether actions execute; actions change states or call services. Complex automations are state machines — a "good night" script transitions the house from "awake" to "sleeping" mode by setting multiple devices in sequence. The <code>input_boolean</code> and <code>input_select</code> helpers act as stateful flags for multi-step automations. AppDaemon exposes this same model in Python, enabling loops, timers, and external API calls that YAML automations can't express. Event-driven architecture is a core backend engineering pattern; Home Assistant is a concrete, hands-on implementation.</p>
-<h4>ESPHome and firmware-over-the-air updates</h4>
+<h4 id="esphome-and-firmware-over-the-air-updates">ESPHome and firmware-over-the-air updates</h4>
 <p>ESPHome compiles YAML device definitions to C++ and flashes them to ESP32/ESP8266 microcontrollers. Once a device has ESPHome flashed, subsequent updates happen over-the-air (OTA) via the WiFi network — no physical access required. ESPHome's native API (a protobuf-based binary protocol) integrates directly with Home Assistant without MQTT. The compilation and OTA update pipeline is a miniature CI/CD system: edit the YAML, compile, push to device, verify. This experience with embedded firmware deployment maps directly to IoT engineering roles dealing with fleet management and OTA update pipelines at scale.</p>
-<h4>WebRTC and zero-latency camera streams</h4>
+<h4 id="webrtc-and-zero-latency-camera-streams">WebRTC and zero-latency camera streams</h4>
 <p>go2rtc introduces the difference between streaming protocols: RTSP (Real-Time Streaming Protocol, used by IP cameras) has 2–10 second latency due to buffering. WebRTC (used by browsers and go2rtc) achieves sub-second latency by using UDP with SRTP (Secure Real-time Transport Protocol) and a direct peer connection to the browser. HLS (HTTP Live Streaming) has the lowest compatibility requirements but highest latency (5–30 seconds). For home security applications, WebRTC is required for live view of camera streams; HLS is acceptable for recorded playback. Frigate uses go2rtc internally for its live view.</p>
-<h2>Home Assistant</h2>
+<h2 id="home-assistant">Home Assistant</h2>
 <p><strong>Purpose:</strong> The leading open-source home automation platform. Integrates with 3,000+ devices and services — lights, sensors, thermostats, cameras, locks, media players, energy monitors. Supports automations, dashboards, voice assistants (local and cloud), and a mobile app.</p>
 <pre><code class="language-yaml"># ~/homeassistant/compose.yaml
 services:
@@ -245,13 +247,13 @@ services:
       TZ: Asia/Kolkata
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/homeassistant &amp;&amp; podman-compose up -d</code></pre>
-<blockquote><p><code>--network host</code> is required for Home Assistant to discover devices on your local network via mDNS and UPnP.</p></blockquote>
+<blockquote><code>--network host</code> is required for Home Assistant to discover devices on your local network via mDNS and UPnP.</blockquote>
 <p>Access at <code>http://localhost:8123</code>. On first run, Home Assistant automatically discovers many devices on your network.</p>
-<h5>Backup your config</h5>
+<h5 id="backup-your-config">Backup your config</h5>
 <pre><code class="language-bash"># The built-in backup tool (Settings → System → Backups) creates .tar archives
 # Back them up offsite with Restic
 restic backup /home/user/homeassistant/config</code></pre>
-<h4>Common operations</h4>
+<h4 id="common-operations">Common operations</h4>
 <pre><code class="language-bash"># Check Home Assistant config validity
 podman exec homeassistant hass --script check_config -c /config
 
@@ -272,10 +274,10 @@ curl http://localhost:8123/api/states   -H &quot;Authorization: Bearer YOUR_LONG
 
 # Run a one-off backup
 curl -X POST http://localhost:8123/api/backup   -H &quot;Authorization: Bearer YOUR_LONG_LIVED_TOKEN&quot;</code></pre>
-<h4>Recommended HACS integrations</h4>
+<h4 id="recommended-hacs-integrations">Recommended HACS integrations</h4>
 <p>Mushroom Cards, Mini Graph Card, Browser Mod, Local Tuya, Adaptive Lighting.</p>
-<p>---</p>
-<h2>Mosquitto (MQTT Broker)</h2>
+<hr>
+<h2 id="mosquitto-mqtt-broker">Mosquitto (MQTT Broker)</h2>
 <p><strong>Purpose:</strong> Lightweight MQTT message broker. Required for Zigbee2MQTT, ESPHome, and many other IoT integrations. Acts as the communication backbone between devices and Home Assistant.</p>
 <pre><code class="language-yaml"># ~/mosquitto/compose.yaml
 services:
@@ -289,10 +291,23 @@ services:
       - /home/user/mosquitto/log:/mosquitto/log:Z
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/mosquitto &amp;&amp; podman-compose up -d</code></pre>
-<h4>Monitor MQTT traffic</h4>
+<h5 id="require-authentication-do-this-before-anything-connects">Require authentication (do this before anything connects)</h5>
+<p>Mosquitto ships with no config — create one that rejects anonymous clients:</p>
+<pre><code class="language-bash">cat &gt; /home/user/mosquitto/config/mosquitto.conf &lt;&lt; 'EOF'
+listener 1883 0.0.0.0
+allow_anonymous false
+password_file /mosquitto/config/passwd
+EOF
+
+# Create the password file (user &quot;user&quot;, prompts for a password)
+podman run --rm -v /home/user/mosquitto/config:/mosquitto/config:Z \
+  eclipse-mosquitto mosquitto_passwd -c /mosquitto/config/passwd user
+
+podman-compose restart</code></pre>
+<h4 id="monitor-mqtt-traffic">Monitor MQTT traffic</h4>
 <pre><code class="language-bash"># Subscribe to all topics (useful for debugging)
 podman exec mosquitto mosquitto_sub -u user -P yourpassword -t '#' -v</code></pre>
-<h4>Common operations</h4>
+<h4 id="common-operations-2">Common operations</h4>
 <pre><code class="language-bash"># Subscribe to all topics (debug)
 podman exec mosquitto mosquitto_sub -h localhost -u user -P yourpassword -t '#' -v
 
@@ -307,10 +322,10 @@ podman exec mosquitto mosquitto_sub -h localhost -u user -P yourpassword   -t '$
 
 # View connected clients count
 podman exec mosquitto mosquitto_sub -h localhost -u user -P yourpassword   -t '$SYS/broker/clients/connected' -C 1</code></pre>
-<p>---</p>
-<h2>Zigbee2MQTT</h2>
+<hr>
+<h2 id="zigbee2mqtt">Zigbee2MQTT</h2>
 <p><strong>Purpose:</strong> Bridges Zigbee devices (lights, sensors, plugs, locks) to MQTT using a $10–15 USB Zigbee coordinator. Works with 3,000+ Zigbee devices from any manufacturer — no proprietary hubs, no cloud bridges, no subscriptions.</p>
-<h4>Supported coordinators</h4>
+<h4 id="supported-coordinators">Supported coordinators</h4>
 <p>Sonoff Zigbee 3.0 USB Dongle Plus, CC2652R/P, HUSBZB-1, Conbee II.</p>
 <pre><code class="language-yaml"># ~/zigbee2mqtt/compose.yaml
 services:
@@ -324,7 +339,7 @@ services:
       TZ: Asia/Kolkata
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/zigbee2mqtt &amp;&amp; podman-compose up -d</code></pre>
-<h4>Common operations</h4>
+<h4 id="common-operations-3">Common operations</h4>
 <pre><code class="language-bash"># Enable pairing mode (permit join for 60 seconds)
 podman exec mosquitto mosquitto_pub -h localhost -u user -P yourpassword   -t 'zigbee2mqtt/bridge/request/permit_join' -m '{&quot;value&quot;:true,&quot;time&quot;:60}'
 
@@ -342,8 +357,8 @@ podman exec mosquitto mosquitto_pub -h localhost -u user -P yourpassword   -t 'z
 
 # View Z2M logs
 podman logs -f zigbee2mqtt</code></pre>
-<blockquote><p>Find your coordinator: <code>ls /dev/tty*</code> or <code>dmesg | grep tty</code> after plugging it in.</p></blockquote>
-<h5>Minimal <code>configuration.yaml</code></h5>
+<blockquote>Find your coordinator: <code>ls /dev/tty*</code> or <code>dmesg | grep tty</code> after plugging it in.</blockquote>
+<h5 id="minimal-configurationyaml">Minimal <code>configuration.yaml</code></h5>
 <pre><code class="language-yaml">homeassistant: true
 mqtt:
   server: mqtt://localhost:1883
@@ -354,8 +369,8 @@ serial:
 frontend:
   port: 8080</code></pre>
 <p>Access the web UI at <code>http://localhost:8080</code> to pair devices and view the network map.</p>
-<p>---</p>
-<h2>ESPHome</h2>
+<hr>
+<h2 id="esphome">ESPHome</h2>
 <p><strong>Purpose:</strong> Compile and flash YAML-based firmware to ESP32/ESP8266 microcontrollers. Build custom sensors, switches, displays, and automations that integrate directly with Home Assistant over Wi-Fi — no cloud, no pairing apps.</p>
 <pre><code class="language-yaml"># ~/esphome/compose.yaml
 services:
@@ -369,7 +384,7 @@ services:
       TZ: Asia/Kolkata
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/esphome &amp;&amp; podman-compose up -d</code></pre>
-<h5>Example device config (temperature + humidity sensor)</h5>
+<h5 id="example-device-config-temperature-humidity-sensor">Example device config (temperature + humidity sensor)</h5>
 <pre><code class="language-yaml"># /home/user/esphome/config/bedroom-sensor.yaml
 esphome:
   name: bedroom-sensor
@@ -396,8 +411,9 @@ sensor:
     humidity:
       name: &quot;Bedroom Humidity&quot;
     update_interval: 60s</code></pre>
-<p>---</p>
-<h2>Node-RED</h2>
+<p>Create a <code>secrets.yaml</code> alongside your device configs defining every <code>!secret</code> key (<code>wifi_ssid</code>, <code>wifi_password</code>, <code>api_key</code>, <code>ota_password</code>) — the dashboard compiles each device against it.</p>
+<hr>
+<h2 id="node-red">Node-RED</h2>
 <p><strong>Purpose:</strong> Flow-based visual programming for wiring devices, APIs, and automations. Great for complex logic that is easier to build visually than in Home Assistant's YAML automations. Useful for integrating non-HA services (e.g., MQTT → database → notification).</p>
 <pre><code class="language-yaml"># ~/node-red/compose.yaml
 services:
@@ -412,8 +428,8 @@ services:
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/node-red &amp;&amp; podman-compose up -d</code></pre>
 <p>Access at <code>http://localhost:1880</code>. Install the <code>node-red-contrib-home-assistant-websocket</code> palette to connect to Home Assistant. Install <code>node-red-node-sqlite</code> to log sensor data locally.</p>
-<p>---</p>
-<h2>Matter Server</h2>
+<hr>
+<h2 id="matter-server">Matter Server</h2>
 <p><strong>Purpose:</strong> Bridges Matter/Thread smart home devices to Home Assistant. Matter is the new unified smart home standard supported by Apple, Google, Amazon, and hundreds of device manufacturers — all locally, no cloud required.</p>
 <pre><code class="language-yaml"># ~/matter-server/compose.yaml
 services:
@@ -425,9 +441,9 @@ services:
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/matter-server &amp;&amp; podman-compose up -d</code></pre>
 <p>In Home Assistant: Settings → Devices & Services → Add Integration → Matter (BETA). Point it at <code>ws://localhost:5580/ws</code>.</p>
-<blockquote><p>You need a Thread border router to use Thread devices. Apple HomePod mini, Google Nest Hub, or a dedicated USB Thread dongle all work.</p></blockquote>
-<p>---</p>
-<h2>Frigate</h2>
+<blockquote>You need a Thread border router to use Thread devices. Apple HomePod mini, Google Nest Hub, or a dedicated USB Thread dongle all work.</blockquote>
+<hr>
+<h2 id="frigate">Frigate</h2>
 <p><strong>Purpose:</strong> Network Video Recorder (NVR) with real-time AI object detection — people, cars, animals, packages. Runs detection locally using your GPU or a Coral TPU. Integrates deeply with Home Assistant for automations triggered by detections.</p>
 <pre><code class="language-yaml"># ~/frigate/compose.yaml
 services:
@@ -445,7 +461,7 @@ services:
     shm_size: 256m
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/frigate &amp;&amp; podman-compose up -d</code></pre>
-<h5>Minimal <code>config.yml</code></h5>
+<h5 id="minimal-configyml">Minimal <code>config.yml</code></h5>
 <pre><code class="language-yaml">mqtt:
   enabled: true
   host: localhost
@@ -466,9 +482,9 @@ cameras:
 detectors:
   cpu1:
     type: cpu</code></pre>
-<blockquote><p>Add a Google Coral USB TPU (<code>--device /dev/bus/usb</code>) for hardware-accelerated detection at 100+ FPS with minimal CPU usage.</p></blockquote>
-<p>---</p>
-<h2>Double Take (Facial Recognition)</h2>
+<blockquote>Add a Google Coral USB TPU (<code>--device /dev/bus/usb</code>) for hardware-accelerated detection at 100+ FPS with minimal CPU usage.</blockquote>
+<hr>
+<h2 id="double-take-facial-recognition">Double Take (Facial Recognition)</h2>
 <p><strong>Purpose:</strong> Integrates with Frigate to identify specific people by face. When Frigate detects a person, Double Take runs recognition against a library of known faces and publishes the result to MQTT — letting Home Assistant trigger "welcome home" automations by person.</p>
 <pre><code class="language-yaml"># ~/double-take/compose.yaml
 services:
@@ -481,8 +497,8 @@ services:
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/double-take &amp;&amp; podman-compose up -d</code></pre>
 <p>Configure recognisers (CompreFace, DeepStack, or CodeProject.AI) in the Double Take UI, then add face images to the library.</p>
-<p>---</p>
-<h2>go2rtc (WebRTC Camera Gateway)</h2>
+<hr>
+<h2 id="go2rtc-webrtc-camera-gateway">go2rtc (WebRTC Camera Gateway)</h2>
 <p><strong>Purpose:</strong> Universal camera streaming gateway. Takes any RTSP, RTMP, ONVIF, USB, or HTTP camera stream and re-serves it as WebRTC (browser-viewable), MSE, HLS, or RTSP. Zero-latency browser previews, multi-stream support, and deep Frigate and Home Assistant integration — go2rtc powers the camera streams in Frigate 0.13+ and Home Assistant's WebRTC camera card.</p>
 <pre><code class="language-yaml"># ~/go2rtc/compose.yaml
 services:
@@ -497,7 +513,7 @@ services:
       - /home/user/go2rtc/go2rtc.yaml:/config/go2rtc.yaml:ro,Z
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/go2rtc &amp;&amp; podman-compose up -d</code></pre>
-<h5>Example <code>go2rtc.yaml</code></h5>
+<h5 id="example-go2rtcyaml">Example <code>go2rtc.yaml</code></h5>
 <pre><code class="language-yaml">streams:
   front-door: rtsp://admin:password@192.168.1.101:554/stream1
   back-yard: rtsp://admin:password@192.168.1.102:554/h264Preview_01_main
@@ -510,8 +526,8 @@ webrtc:
 api:
   listen: &quot;:1984&quot;</code></pre>
 <p>Access the web UI at <code>http://localhost:1984</code> to view live streams in the browser. In Frigate config, set <code>go2rtc.streams</code> to reference the same stream names.</p>
-<p>---</p>
-<h2>Z-Wave JS UI (Z-Wave Device Bridge)</h2>
+<hr>
+<h2 id="z-wave-js-ui-z-wave-device-bridge">Z-Wave JS UI (Z-Wave Device Bridge)</h2>
 <p><strong>Purpose:</strong> Full-featured Z-Wave device manager and MQTT bridge. Similar to Zigbee2MQTT but for Z-Wave — manages your Z-Wave USB controller (Aeotec Z-Stick, HUSBZB-1, Zooz ZST10), pairs devices, exposes them to Home Assistant via MQTT or WebSocket, and provides a visual mesh network map. Required for Z-Wave devices like Yale/Schlage smart locks, Fibaro sensors, and Qubino modules.</p>
 <pre><code class="language-yaml"># ~/zwave-js-ui/compose.yaml
 services:
@@ -519,7 +535,7 @@ services:
     image: zwavejs/zwave-js-ui:latest
     ports:
       - 127.0.0.1:8091:8091
-      - 127.0.0.1:3002:3000
+      - 127.0.0.1:3003:3000   # host port 3002 is used by Double Take — mapped to 3003 here
     volumes:
       - /home/user/zwave-js-ui/store:/usr/src/app/store:Z
     devices:
@@ -528,10 +544,10 @@ services:
       TZ: Asia/Kolkata
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/zwave-js-ui &amp;&amp; podman-compose up -d</code></pre>
-<blockquote><p>Find your Z-Wave stick: <code>ls /dev/ttyUSB*</code> after plugging it in (may be <code>ttyUSB0</code> or <code>ttyACM0</code> depending on the model).</p></blockquote>
-<p>In Home Assistant: Settings → Devices & Services → Add Integration → Z-Wave JS → use WebSocket URL <code>ws://host.containers.internal:3000</code>.</p>
-<p>---</p>
-<h2>Scrypted (Camera Hub & NVR)</h2>
+<blockquote>Find your Z-Wave stick: <code>ls /dev/ttyUSB*</code> after plugging it in (may be <code>ttyUSB0</code> or <code>ttyACM0</code> depending on the model).</blockquote>
+<p>In Home Assistant: Settings → Devices & Services → Add Integration → Z-Wave JS → use WebSocket URL <code>ws://host.containers.internal:3003</code>.</p>
+<hr>
+<h2 id="scrypted-camera-hub-nvr">Scrypted (Camera Hub & NVR)</h2>
 <p><strong>Purpose:</strong> Camera management and NVR platform with a focus on HomeKit Secure Video integration. Supports 40+ camera brands, transcodes streams to HomeKit format, and integrates with Google Home, Alexa, Home Assistant, and Frigate. If you want your RTSP cameras to appear natively in Apple Home or Google Home, Scrypted is the bridge.</p>
 <pre><code class="language-yaml"># ~/scrypted/compose.yaml
 services:
@@ -542,11 +558,11 @@ services:
       - /home/user/scrypted/volume:/server/volume:Z
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/scrypted &amp;&amp; podman-compose up -d</code></pre>
-<blockquote><p><code>--network host</code> is required for mDNS discovery of cameras and HomeKit pairing. Access the UI at <code>https://localhost:10443</code> (self-signed cert on first run).</p></blockquote>
+<blockquote><code>--network host</code> is required for mDNS discovery of cameras and HomeKit pairing. Access the UI at <code>https://localhost:10443</code> (self-signed cert on first run).</blockquote>
 <p><strong>Caddy:</strong></p>
 <pre><code class="language-caddyfile">scrypted.home.local { tls internal; reverse_proxy localhost:10443 }</code></pre>
-<p>---</p>
-<h2>AppDaemon (Python Automation Engine)</h2>
+<hr>
+<h2 id="appdaemon-python-automation-engine">AppDaemon (Python Automation Engine)</h2>
 <p><strong>Purpose:</strong> Python scripting environment for Home Assistant automations. Write complex automation logic in Python instead of YAML — full access to Home Assistant's state machine, events, and services. Ideal for automations that require loops, data structures, external API calls, or logic that would be unwieldy in HA's built-in automation editor. Also includes HADashboard for building kiosk-style tablet wall panels.</p>
 <pre><code class="language-yaml"># ~/appdaemon/compose.yaml
 services:
@@ -562,7 +578,7 @@ services:
       TZ: Asia/Kolkata
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/appdaemon &amp;&amp; podman-compose up -d</code></pre>
-<h5>Example app (<code>/conf/apps/notify_on_door.py</code>)</h5>
+<h5 id="example-app-confappsnotify_on_doorpy">Example app (<code>/conf/apps/notify_on_door.py</code>)</h5>
 <pre><code class="language-python">import appdaemon.plugins.hass.hassapi as hass
 
 class DoorNotifier(hass.Hass):
@@ -572,8 +588,8 @@ class DoorNotifier(hass.Hass):
     def door_opened(self, entity, attribute, old, new, kwargs):
         self.notify(&quot;Front door opened!&quot;, name=&quot;mobile_app_phone&quot;)
         self.call_service(&quot;light/turn_on&quot;, entity_id=&quot;light.porch&quot;, brightness=255)</code></pre>
-<p>---</p>
-<h2>evcc (EV Charging Optimiser)</h2>
+<hr>
+<h2 id="evcc-ev-charging-optimiser">evcc (EV Charging Optimiser)</h2>
 <p><strong>Purpose:</strong> Electric vehicle charging automation — charges your EV using surplus solar power, off-peak tariff windows, or a combination of both. Integrates with 200+ EV chargers (go-e, Wallbox, ABB, etc.), inverters (SMA, Fronius, Huawei, Shelly EM), and energy meters. Displays a real-time dashboard showing solar yield, grid import/export, and charging state.</p>
 <pre><code class="language-yaml"># ~/evcc/compose.yml
 services:
@@ -587,7 +603,7 @@ services:
       TZ: Asia/Kolkata
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/evcc &amp;&amp; podman-compose up -d</code></pre>
-<h5>Minimal <code>evcc.yaml</code></h5>
+<h5 id="minimal-evccyaml">Minimal <code>evcc.yaml</code></h5>
 <pre><code class="language-yaml">network:
   schema: http
   host: evcc.home.local
@@ -614,8 +630,8 @@ vehicles:
     title: My EV
     capacity: 60  # kWh</code></pre>
 <p>Access at <code>http://localhost:7070</code>. Set charging mode to <strong>PV</strong> for solar-only charging, <strong>MinPV</strong> for guaranteed minimum current topped up by solar, or <strong>Now</strong> for maximum speed regardless of source.</p>
-<p>---</p>
-<h2>Caddy Configuration</h2>
+<hr>
+<h2 id="caddy-configuration">Caddy Configuration</h2>
 <pre><code class="language-caddyfile">homeassistant.home.local  { tls internal; reverse_proxy localhost:8123 }
 zigbee.home.local         { tls internal; reverse_proxy localhost:8080 }
 esphome.home.local        { tls internal; reverse_proxy localhost:6052 }
@@ -624,9 +640,70 @@ frigate.home.local        { tls internal; reverse_proxy localhost:5000 }
 doubletake.home.local     { tls internal; reverse_proxy localhost:3000 }
 appdaemon.home.local      { tls internal; reverse_proxy localhost:5050 }
 evcc.home.local           { tls internal; reverse_proxy localhost:7070 }</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | Home Assistant can't discover devices | Ensure <code>--network host</code> is set; check that mDNS/multicast is not blocked on your LAN | | Zigbee2MQTT can't open serial port | Verify the device path with <code>ls /dev/ttyUSB*</code>; add your user to the <code>dialout</code> group: <code>sudo usermod -aG dialout $USER</code> | | MQTT connection refused | Check Mosquitto is running and the password file is correct; verify the port is not blocked by firewalld | | Frigate using too much CPU | Set <code>fps: 5</code> or lower in detect config; add a Coral TPU or use GPU detection with <code>--device /dev/dri</code> | | ESPHome OTA upload fails | Ensure the ESP32 is on the same network as the server; check the API encryption key matches in both config and device | | Node-RED flows lost after update | Flows are stored in <code>/home/user/nodered/data/flows.json</code> — ensure the volume is mounted correctly | | Home Assistant automations not triggering | Check logs (Settings → System → Logs); verify MQTT messages are arriving with <code>mosquitto_sub -t '#' -v</code> | | Matter pairing fails | Ensure both the Matter Server and Home Assistant are on the same LAN/VLAN; Matter devices need mDNS broadcast to work | | Double Take not recognising faces | Ensure Frigate is publishing snapshots to MQTT; check the face library has enough reference images per person (5+ recommended) | | WLED not discovered by Home Assistant | Ensure WLED and Home Assistant are on the same LAN/VLAN; mDNS must be allowed between them; try adding via IP manually in the WLED integration | | WLED LEDs flicker or show wrong colours | Check data wire connection quality; add a 300–500 Ohm resistor on the data line; ensure GND is shared between the ESP32 and LED strip power supply |</p></div>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Home Assistant can't discover devices</td><td>Ensure <code>--network host</code> is set; check that mDNS/multicast is not blocked on your LAN</td></tr><tr><td>Zigbee2MQTT can't open serial port</td><td>Verify the device path with <code>ls /dev/ttyUSB*</code>; add your user to the <code>dialout</code> group: <code>sudo usermod -aG dialout $USER</code></td></tr><tr><td>MQTT connection refused</td><td>Check Mosquitto is running and the password file is correct; verify the port is not blocked by firewalld</td></tr><tr><td>Frigate using too much CPU</td><td>Set <code>fps: 5</code> or lower in detect config; add a Coral TPU or use GPU detection with <code>--device /dev/dri</code></td></tr><tr><td>ESPHome OTA upload fails</td><td>Ensure the ESP32 is on the same network as the server; check the API encryption key matches in both config and device</td></tr><tr><td>Node-RED flows lost after update</td><td>Flows are stored in <code>/home/user/nodered/data/flows.json</code> — ensure the volume is mounted correctly</td></tr><tr><td>Home Assistant automations not triggering</td><td>Check logs (Settings → System → Logs); verify MQTT messages are arriving with <code>mosquitto_sub -t '#' -v</code></td></tr><tr><td>Matter pairing fails</td><td>Ensure both the Matter Server and Home Assistant are on the same LAN/VLAN; Matter devices need mDNS broadcast to work</td></tr><tr><td>Double Take not recognising faces</td><td>Ensure Frigate is publishing snapshots to MQTT; check the face library has enough reference images per person (5+ recommended)</td></tr><tr><td>WLED not discovered by Home Assistant</td><td>Ensure WLED and Home Assistant are on the same LAN/VLAN; mDNS must be allowed between them; try adding via IP manually in the WLED integration</td></tr><tr><td>WLED LEDs flicker or show wrong colours</td><td>Check data wire connection quality; add a 300–500 Ohm resistor on the data line; ensure GND is shared between the ESP32 and LED strip power supply</td></tr></tbody></table>
+<hr>
+<h2 id="wled-led-controller">WLED (LED Controller)</h2>
+<p><strong>Purpose:</strong> Open-source firmware and web server for addressable LED strips (WS2812B, SK6812, WS2811, and more) running on ESP8266/ESP32. Flash WLED onto a cheap ESP32 board, wire it to your LED strip, and get a full web UI, Home Assistant integration via MQTT and native API, effects library (100+ built-in animations), segments, palettes, and a JSON API. No cloud — WLED runs entirely on the microcontroller and your LAN.</p>
+<p>WLED runs on the ESP32 microcontroller itself — not as a container on your server. Your server hosts the Home Assistant integration and optionally a WLED configuration backup.</p>
+<h4 id="flash-wled-onto-an-esp32-from-your-server">Flash WLED onto an ESP32 (from your server)</h4>
+<pre><code class="language-bash"># Install esptool
+pip install esptool --break-system-packages
+
+# Download latest WLED firmware
+# Replace 0.15.0 with the latest version from https://github.com/Aircoookie/WLED/releases
+curl -LO https://github.com/Aircoookie/WLED/releases/latest/download/WLED_0.15.0_ESP32.bin
+
+# Flash (replace /dev/ttyUSB0 with your ESP32 port)
+esptool.py --port /dev/ttyUSB0 write_flash 0x0 WLED_0.15.0_ESP32.bin  # update filename to match downloaded version</code></pre>
+<h5 id="or-use-the-browser-based-installer-at-installwledmehttpsinstallwledme">Or use the browser-based installer at <a href="https://install.wled.me">install.wled.me</a></h5>
+<p>— plug the ESP32 into any computer and flash directly from the browser without installing tools.</p>
+<h4 id="wire-the-circuit">Wire the circuit</h4>
+<pre><code>ESP32 GPIO2 (Data) ──► LED Strip Data In
+ESP32 GND           ──► LED Strip GND   ──► Power Supply GND
+5V Power Supply     ──► LED Strip VCC
+                                         (do NOT power strip from ESP32 5V)</code></pre>
+<blockquote>For more than ~30 LEDs, always use an external 5V power supply. A 60-LED strip at full white draws ~3.6A — far more than USB can provide.</blockquote>
+<h4 id="home-assistant-integration">Home Assistant integration</h4>
+<p>Once WLED is on your network, Home Assistant auto-discovers it via mDNS. Accept the integration and your LED strip appears as a light entity with brightness, colour, and effect controls.</p>
+<h5 id="manual-wled-config-backup-save-to-your-server">Manual WLED config backup (save to your server)</h5>
+<pre><code class="language-bash"># Export WLED config via its HTTP API
+curl http://192.168.1.XXX/cfg.json -o /home/user/wled/backups/strip-1-cfg.json
+curl http://192.168.1.XXX/presets.json -o /home/user/wled/backups/strip-1-presets.json</code></pre>
+<h4 id="control-via-json-api">Control via JSON API</h4>
+<pre><code class="language-bash"># Set colour to warm white
+curl -X POST http://192.168.1.XXX/json/state \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;on&quot;:true,&quot;bri&quot;:200,&quot;seg&quot;:[{&quot;col&quot;:[[255,200,100]]}]}'
+
+# Set a built-in effect (effect ID 9 = &quot;Colorloop&quot;)
+curl -X POST http://192.168.1.XXX/json/state \
+  -d '{&quot;seg&quot;:[{&quot;fx&quot;:9,&quot;sx&quot;:128,&quot;ix&quot;:200}]}'
+
+# Turn off
+curl -X POST http://192.168.1.XXX/json/state -d '{&quot;on&quot;:false}'</code></pre>
+<h4 id="mqtt-control-integrates-with-mosquitto">MQTT control (integrates with Mosquitto)</h4>
+<p>In WLED web UI → Config → Sync → MQTT:</p>
+<ul>
+<li>Server: <code>192.168.1.X</code> (your Mosquitto host)</li>
+<li>Port: <code>1883</code></li>
+<li>User/Password: your MQTT credentials</li>
+<li>Topic: <code>wled/strip1</code></li>
+</ul>
+<pre><code class="language-bash"># Control via MQTT
+podman exec mosquitto mosquitto_pub -u user -P password \
+  -t &quot;wled/strip1&quot; -m &quot;ON&quot;
+
+podman exec mosquitto mosquitto_pub -u user -P password \
+  -t &quot;wled/strip1/col&quot; -m &quot;#FF6400&quot;</code></pre>
+<blockquote>WLED is one of the most popular DIY smart home projects. A single ESP32 (~$4) + WS2812B strip (~$8/m) gives you full-colour, effect-capable smart lighting at a fraction of the cost of Philips Hue or LIFX.</blockquote>
+<hr>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="iot">IoT data infrastructure</a></li>
+<li><a href="vpn-tunnels">VPN & Tunnels</a></li>
+</ul></div>
     </div>
 
   </main>

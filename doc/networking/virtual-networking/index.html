@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Virtual Networking — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Virtual Networking  Linux exposes a rich set of virtual network devices and primitives for building software-defined networks, container networking, VMs, V…">
+  <meta name="description" id="meta-desc"     content="Linux exposes a rich set of virtual network devices and primitives for building software-defined networks, container networking, VMs, VPN tunnels, and isol…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Virtual Networking">
-  <meta property="og:description" id="og-desc"    content="Virtual Networking  Linux exposes a rich set of virtual network devices and primitives for building software-defined networks, container networking, VMs, V…">
+  <meta property="og:description" id="og-desc"    content="Linux exposes a rich set of virtual network devices and primitives for building software-defined networks, container networking, VMs, VPN tunnels, and isol…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/networking/virtual-networking/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Virtual Networking">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Virtual Networking">
-  <meta name="twitter:description" id="tw-desc"  content="Virtual Networking  Linux exposes a rich set of virtual network devices and primitives for building software-defined networks, container networking, VMs, V…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Linux exposes a rich set of virtual network devices and primitives for building software-defined networks, container networking, VMs, VPN tunnels, and isol…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Virtual Networking","description":"Virtual Networking  Linux exposes a rich set of virtual network devices and primitives for building software-defined networks, container networking, VMs, V…","url":"https://docs.shani.dev/doc/networking/virtual-networking/","datePublished":"2026-04-25T00:00:00.000Z","dateModified":"2026-04-25T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Virtual Networking","description":"Linux exposes a rich set of virtual network devices and primitives for building software-defined networks, container networking, VMs, VPN tunnels, and isol…","url":"https://docs.shani.dev/doc/networking/virtual-networking/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Virtual Networking","item":"https://docs.shani.dev/doc/networking/virtual-networking/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,16 +215,16 @@
         <h1 class="doc-title">Virtual Networking</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Networking</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-25</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Linux exposes a rich set of virtual network devices and primitives for building software-defined networks, container networking, VMs, VPN tunnels, and isolated test environments. All operations use <code>iproute2</code> (<code>ip</code> command), which is pre-installed on Shani OS.</p>
-<blockquote><p>💡 Virtual interfaces created with <code>ip link add</code> are ephemeral — they disappear on reboot. To make them persistent, define them as systemd-networkd <code>.netdev</code> and <code>.network</code> files (see <a href="#persistent-configuration-systemd-networkd">Persistent Configuration</a>).</p></blockquote>
-<p>---</p>
-<h2>Virtual Interface Types at a Glance</h2>
-<p>| Type | Purpose | |------|---------| | <strong>bridge</strong> | Software Layer 2 switch — connects multiple interfaces to one segment | | <strong>vlan</strong> | 802.1Q VLAN tagging on an existing interface | | <strong>veth</strong> | Virtual Ethernet pair — two ends of a virtual cable | | <strong>tun</strong> | Layer 3 (IP) tunnel — used by WireGuard, OpenVPN, VPNs | | <strong>tap</strong> | Layer 2 (Ethernet) tunnel — used by QEMU/KVM VMs, Libvirt | | <strong>dummy</strong> | Loopback-like stub — useful for testing and stable routing | | <strong>macvlan</strong> | Multiple MAC addresses on one physical NIC | | <strong>ipvlan</strong> | Multiple IP addresses on one physical NIC, shared MAC | | <strong>vrf</strong> | Virtual Routing and Forwarding — separate routing tables per tenant | | <strong>bond</strong> | Aggregate multiple NICs (active-backup, LACP, etc.) | | <strong>team</strong> | Like bonding but with a userspace daemon and richer policy |</p>
-<p>---</p>
-<h2>1. Bridge — Software Layer 2 Switch</h2>
+<blockquote>💡 Virtual interfaces created with <code>ip link add</code> are ephemeral — they disappear on reboot. To make them persistent, define them as systemd-networkd <code>.netdev</code> and <code>.network</code> files (see <a href="#persistent-configuration-systemd-networkd">Persistent Configuration</a>).</blockquote>
+<hr>
+<h2 id="virtual-interface-types-at-a-glance">Virtual Interface Types at a Glance</h2>
+<table><thead><tr><th>Type</th><th>Purpose</th></tr></thead><tbody><tr><td><strong>bridge</strong></td><td>Software Layer 2 switch — connects multiple interfaces to one segment</td></tr><tr><td><strong>vlan</strong></td><td>802.1Q VLAN tagging on an existing interface</td></tr><tr><td><strong>veth</strong></td><td>Virtual Ethernet pair — two ends of a virtual cable</td></tr><tr><td><strong>tun</strong></td><td>Layer 3 (IP) tunnel — used by WireGuard, OpenVPN, VPNs</td></tr><tr><td><strong>tap</strong></td><td>Layer 2 (Ethernet) tunnel — used by QEMU/KVM VMs, Libvirt</td></tr><tr><td><strong>dummy</strong></td><td>Loopback-like stub — useful for testing and stable routing</td></tr><tr><td><strong>macvlan</strong></td><td>Multiple MAC addresses on one physical NIC</td></tr><tr><td><strong>ipvlan</strong></td><td>Multiple IP addresses on one physical NIC, shared MAC</td></tr><tr><td><strong>vrf</strong></td><td>Virtual Routing and Forwarding — separate routing tables per tenant</td></tr><tr><td><strong>bond</strong></td><td>Aggregate multiple NICs (active-backup, LACP, etc.)</td></tr><tr><td><strong>team</strong></td><td>Like bonding but with a userspace daemon and richer policy</td></tr></tbody></table>
+<hr>
+<h2 id="1-bridge-software-layer-2-switch">1. Bridge — Software Layer 2 Switch</h2>
 <p>A bridge connects multiple network interfaces at Layer 2, acting like a virtual switch. Containers, VMs, and physical NICs can all be members of the same bridge.</p>
 <pre><code class="language-bash"># Create the bridge
 sudo ip link add name br0 type bridge
@@ -245,9 +247,9 @@ bridge fdb show br0
 
 # Delete the bridge
 sudo ip link delete br0 type bridge</code></pre>
-<blockquote><p>💡 For QEMU/KVM VMs, the typical pattern is: create <code>br0</code> → bridge it to the physical NIC → attach each VM's TAP device to <code>br0</code>. The VM gets a real Layer 2 presence on the LAN.</p></blockquote>
-<p>---</p>
-<h2>2. VLAN — 802.1Q Tagged Sub-interfaces</h2>
+<blockquote>💡 For QEMU/KVM VMs, the typical pattern is: create <code>br0</code> → bridge it to the physical NIC → attach each VM's TAP device to <code>br0</code>. The VM gets a real Layer 2 presence on the LAN.</blockquote>
+<hr>
+<h2 id="2-vlan-8021q-tagged-sub-interfaces">2. VLAN — 802.1Q Tagged Sub-interfaces</h2>
 <p>VLANs create sub-interfaces that tag frames with a VLAN ID. Useful for segmenting traffic on a trunk port.</p>
 <pre><code class="language-bash"># Create VLAN 10 on eth0
 sudo ip link add link eth0 name eth0.10 type vlan id 10
@@ -267,8 +269,8 @@ sudo ip link delete eth0.10</code></pre>
 sudo ip link add link eth0 name eth0.30 type vlan id 30
 sudo ip link set eth0.20 up &amp;&amp; sudo ip addr add 10.20.0.1/24 dev eth0.20
 sudo ip link set eth0.30 up &amp;&amp; sudo ip addr add 10.30.0.1/24 dev eth0.30</code></pre>
-<p>---</p>
-<h2>3. veth Pairs — Virtual Ethernet Cables</h2>
+<hr>
+<h2 id="3-veth-pairs-virtual-ethernet-cables">3. veth Pairs — Virtual Ethernet Cables</h2>
 <p>A veth pair is two virtual NICs connected back-to-back — anything sent into one end emerges from the other. Used heavily by containers (one end goes into a network namespace, the other into a bridge).</p>
 <pre><code class="language-bash"># Create a pair: veth0 &lt;--&gt; veth1
 sudo ip link add veth0 type veth peer name veth1
@@ -290,10 +292,10 @@ sudo ip netns exec myns ip addr add 192.168.200.2/24 dev veth1
 
 # Delete the pair (deleting either end removes both)
 sudo ip link delete veth0</code></pre>
-<p>---</p>
-<h2>4. TUN / TAP — Userspace Tunnel Devices</h2>
+<hr>
+<h2 id="4-tun-tap-userspace-tunnel-devices">4. TUN / TAP — Userspace Tunnel Devices</h2>
 <p>TUN (Layer 3) and TAP (Layer 2) devices expose a virtual NIC to a userspace process via a file descriptor on <code>/dev/net/tun</code>. VPN daemons (WireGuard, OpenVPN, WireProxy) use TUN; QEMU/KVM uses TAP for VM networking.</p>
-<h3>Manual TUN</h3>
+<h3 id="manual-tun">Manual TUN</h3>
 <pre><code class="language-bash"># Create a persistent TUN device owned by your user
 sudo ip tuntap add name tun0 mode tun user $USER
 
@@ -302,7 +304,7 @@ sudo ip addr add 10.99.0.1 peer 10.99.0.2 dev tun0
 
 # Remove it
 sudo ip tuntap del name tun0 mode tun</code></pre>
-<h3>Manual TAP (for VMs)</h3>
+<h3 id="manual-tap-for-vms">Manual TAP (for VMs)</h3>
 <pre><code class="language-bash"># Create a TAP device and attach it to a bridge
 sudo ip tuntap add name tap0 mode tap user $USER
 sudo ip link set tap0 master br0
@@ -310,9 +312,9 @@ sudo ip link set tap0 up
 
 # Remove it
 sudo ip link delete tap0</code></pre>
-<blockquote><p>💡 QEMU creates and destroys TAP devices automatically when using <code>-netdev tap,id=net0,ifname=tap0,script=no</code> — you rarely need to manage them by hand unless writing a custom networking script.</p></blockquote>
-<p>---</p>
-<h2>5. Network Namespaces — Full Isolation</h2>
+<blockquote>💡 QEMU creates and destroys TAP devices automatically when using <code>-netdev tap,id=net0,ifname=tap0,script=no</code> — you rarely need to manage them by hand unless writing a custom networking script.</blockquote>
+<hr>
+<h2 id="5-network-namespaces-full-isolation">5. Network Namespaces — Full Isolation</h2>
 <p>A network namespace gives a process its own private network stack: interfaces, routes, firewall rules, and sockets are completely isolated from the host.</p>
 <pre><code class="language-bash"># Create a namespace
 sudo ip netns add isolated
@@ -346,9 +348,11 @@ sudo ip netns delete isolated
 sudo ip link delete veth-host</code></pre>
 <p>Enable IP forwarding and NAT to give namespaces internet access:</p>
 <pre><code class="language-bash">echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
-sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/24 -j MASQUERADE</code></pre>
-<p>---</p>
-<h2>6. Dummy Interface — Stable Stub</h2>
+
+# Masquerade namespace traffic out the external zone
+sudo firewall-cmd --zone=external --add-masquerade --permanent &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<hr>
+<h2 id="6-dummy-interface-stable-stub">6. Dummy Interface — Stable Stub</h2>
 <p>A dummy interface is like an extra loopback — useful for assigning stable IPs that don't depend on a physical link being present. Common in routing daemons, BGP anycast, and testing.</p>
 <pre><code class="language-bash">sudo ip link add dummy0 type dummy
 sudo ip link set dummy0 up
@@ -356,8 +360,8 @@ sudo ip addr add 203.0.113.1/32 dev dummy0
 
 # Remove
 sudo ip link delete dummy0</code></pre>
-<p>---</p>
-<h2>7. macvlan — Multiple MACs on One NIC</h2>
+<hr>
+<h2 id="7-macvlan-multiple-macs-on-one-nic">7. macvlan — Multiple MACs on One NIC</h2>
 <p>macvlan creates virtual interfaces with distinct MAC addresses that share a physical NIC. Each macvlan interface is addressable separately on the LAN. Useful for containers that need a real LAN presence without a bridge.</p>
 <pre><code class="language-bash"># Modes: bridge, private, vepa, passthru
 sudo ip link add macvlan0 link eth0 type macvlan mode bridge
@@ -368,9 +372,9 @@ sudo ip addr add 192.168.1.200/24 dev macvlan0
 sudo ip link set macvlan0 netns mycontainer
 
 sudo ip link delete macvlan0</code></pre>
-<blockquote><p>⚠️ A macvlan interface <strong>cannot communicate with its parent</strong> (<code>eth0</code>) directly — the host and the macvlan exist on different internal segments. Use a bridge instead if host-to-container communication is needed.</p></blockquote>
-<p>---</p>
-<h2>8. VRF — Virtual Routing and Forwarding</h2>
+<blockquote>⚠️ A macvlan interface <strong>cannot communicate with its parent</strong> (<code>eth0</code>) directly — the host and the macvlan exist on different internal segments. Use a bridge instead if host-to-container communication is needed.</blockquote>
+<hr>
+<h2 id="8-vrf-virtual-routing-and-forwarding">8. VRF — Virtual Routing and Forwarding</h2>
 <p>A VRF assigns interfaces to an isolated routing table. Traffic in one VRF cannot leak into another — useful for multi-tenant setups, management plane separation, or testing routing policies.</p>
 <pre><code class="language-bash"># Create a VRF with routing table ID 10
 sudo ip link add vrf-mgmt type vrf table 10
@@ -388,8 +392,8 @@ sudo ip vrf exec vrf-mgmt ping 10.200.0.2
 
 # Remove VRF
 sudo ip link delete vrf-mgmt</code></pre>
-<p>---</p>
-<h2>9. Bonding — NIC Aggregation</h2>
+<hr>
+<h2 id="9-bonding-nic-aggregation">9. Bonding — NIC Aggregation</h2>
 <p>Bonding combines multiple physical NICs into a single logical interface for redundancy or throughput.</p>
 <pre><code class="language-bash"># Load the bonding module
 sudo modprobe bonding
@@ -413,9 +417,9 @@ sudo ip addr add 192.168.1.50/24 dev bond0
 # Show bond status
 cat /proc/net/bonding/bond0</code></pre>
 <p>Common bond modes:</p>
-<p>| Mode | Name | Description | |------|------|-------------| | 0 | balance-rr | Round-robin — requires switch support | | 1 | active-backup | One active, one standby — no switch config needed | | 2 | balance-xor | XOR hash — requires switch support | | 4 | 802.3ad | LACP — requires managed switch with LACP | | 5 | balance-tlb | Adaptive transmit — no switch config needed | | 6 | balance-alb | Adaptive load balancing — no switch config needed |</p>
-<p>---</p>
-<h2>10. Useful Inspection Commands</h2>
+<table><thead><tr><th>Mode</th><th>Name</th><th>Description</th></tr></thead><tbody><tr><td>0</td><td>balance-rr</td><td>Round-robin — requires switch support</td></tr><tr><td>1</td><td>active-backup</td><td>One active, one standby — no switch config needed</td></tr><tr><td>2</td><td>balance-xor</td><td>XOR hash — requires switch support</td></tr><tr><td>4</td><td>802.3ad</td><td>LACP — requires managed switch with LACP</td></tr><tr><td>5</td><td>balance-tlb</td><td>Adaptive transmit — no switch config needed</td></tr><tr><td>6</td><td>balance-alb</td><td>Adaptive load balancing — no switch config needed</td></tr></tbody></table>
+<hr>
+<h2 id="10-useful-inspection-commands">10. Useful Inspection Commands</h2>
 <pre><code class="language-bash"># List all interfaces with type
 ip -d link show
 
@@ -440,10 +444,10 @@ ip monitor
 # Show bridge ports and state (STP, etc.)
 bridge link show
 bridge vlan show</code></pre>
-<p>---</p>
-<h2>Persistent Configuration (systemd-networkd)</h2>
+<hr>
+<h2 id="persistent-configuration-systemd-networkd">Persistent Configuration (systemd-networkd)</h2>
 <p>To survive reboots, define virtual devices in <code>/etc/systemd/network/</code>.</p>
-<h3>Persistent bridge with a member</h3>
+<h3 id="persistent-bridge-with-a-member">Persistent bridge with a member</h3>
 <p><strong><code>/etc/systemd/network/10-br0.netdev</code></strong></p>
 <pre><code class="language-ini">[NetDev]
 Name=br0
@@ -460,7 +464,7 @@ Name=eth1
 
 [Network]
 Bridge=br0</code></pre>
-<h3>Persistent VLAN</h3>
+<h3 id="persistent-vlan">Persistent VLAN</h3>
 <p><strong><code>/etc/systemd/network/30-vlan10.netdev</code></strong></p>
 <pre><code class="language-ini">[NetDev]
 Name=eth0.10
@@ -477,16 +481,16 @@ Address=10.10.0.1/24</code></pre>
 <p>Apply changes:</p>
 <pre><code class="language-bash">sudo systemctl restart systemd-networkd
 networkctl status          # Verify interfaces came up correctly</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | Interface not forwarding between bridge ports | Check <code>net.ipv4.ip_forward</code> (<code>sysctl net.ipv4.ip_forward</code>); ensure it is <code>1</code> | | Bridge member goes <code>blocking</code> or <code>listening</code> | STP convergence is normal — wait ~30s, or disable STP on the bridge: <code>sudo ip link set br0 type bridge stp_state 0</code> | | macvlan can't reach host | Expected — macvlan parent and child can't communicate. Use a bridge or a veth pair to the host instead | | Namespace has no internet | Add a default route inside the namespace and enable NAT on the host (see <a href="#5-network-namespaces--full-isolation">Network Namespaces</a>) | | Bond not failing over | Verify <code>miimon</code> is non-zero; check that both member NICs are actually <code>up</code> | | Changes lost after reboot | Create systemd-networkd <code>.netdev</code>/<code>.network</code> files for persistence | | <code>RTNETLINK answers: File exists</code> | Interface or route already exists — delete the old one first: <code>sudo ip link delete &lt;name&gt;</code> |</p>
-<p>---</p>
-<h2>See Also</h2>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Interface not forwarding between bridge ports</td><td>Check <code>net.ipv4.ip_forward</code> (<code>sysctl net.ipv4.ip_forward</code>); ensure it is <code>1</code></td></tr><tr><td>Bridge member goes <code>blocking</code> or <code>listening</code></td><td>STP convergence is normal — wait ~30s, or disable STP on the bridge: <code>sudo ip link set br0 type bridge stp_state 0</code></td></tr><tr><td>macvlan can't reach host</td><td>Expected — macvlan parent and child can't communicate. Use a bridge or a veth pair to the host instead</td></tr><tr><td>Namespace has no internet</td><td>Add a default route inside the namespace and enable NAT on the host (see <a href="#5-network-namespaces--full-isolation">Network Namespaces</a>)</td></tr><tr><td>Bond not failing over</td><td>Verify <code>miimon</code> is non-zero; check that both member NICs are actually <code>up</code></td></tr><tr><td>Changes lost after reboot</td><td>Create systemd-networkd <code>.netdev</code>/<code>.network</code> files for persistence</td></tr><tr><td><code>RTNETLINK answers: File exists</code></td><td>Interface or route already exists — delete the old one first: <code>sudo ip link delete &lt;name&gt;</code></td></tr></tbody></table>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../troubleshooting/network-diag">Network Diagnostics & Tools</a> — <code>ip</code>, <code>ss</code>, <code>tcpdump</code>, <code>nmap</code></li>
-<li><a href="../system/containers">Containers</a> — Podman networking and CNI plugins</li>
-<li><a href="../system/firewall">Firewall</a> — nftables rules for virtual interfaces</li>
-<li><a href="../network/wireguard">WireGuard VPN</a> — TUN-based VPN setup</li>
+<li><a href="../networking/network-tools.md">Network Tools</a> — <code>ip</code>, <code>ss</code>, <code>tcpdump</code>, <code>nmap</code></li>
+<li><a href="../software/containers.md">Containers</a> — Podman networking and CNI plugins</li>
+<li><a href="../networking/firewalld.md">Firewall (firewalld)</a> — nftables rules for virtual interfaces</li>
+<li><a href="../networking/wireguard.md">WireGuard VPN</a> — TUN-based VPN setup</li>
 </ul></div>
     </div>
 

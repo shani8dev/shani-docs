@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>Security &amp; Identity — Scanning, SBOM &amp; Policy Enforcement — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Syft + Grype (SBOM &amp; Vulnerability Scanning) Purpose: Syft generates a Software Bill of Materials (SBOM) — a complete inventory of every package, library, …">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/servers/security/policies/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="Security &amp; Identity — Scanning, SBOM &amp; Policy Enforcement">
+  <meta property="og:description" id="og-desc"    content="Syft + Grype (SBOM &amp; Vulnerability Scanning) Purpose: Syft generates a Software Bill of Materials (SBOM) — a complete inventory of every package, library, …">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/security/policies/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="Security &amp; Identity — Scanning, SBOM &amp; Policy Enforcement">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="Security &amp; Identity — Scanning, SBOM &amp; Policy Enforcement">
+  <meta name="twitter:description" id="tw-desc"  content="Syft + Grype (SBOM &amp; Vulnerability Scanning) Purpose: Syft generates a Software Bill of Materials (SBOM) — a complete inventory of every package, library, …">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Security & Identity — Scanning, SBOM & Policy Enforcement","description":"Syft + Grype (SBOM & Vulnerability Scanning) Purpose: Syft generates a Software Bill of Materials (SBOM) — a complete inventory of every package, library, …","url":"https://docs.shani.dev/doc/servers/security/policies/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Security & Identity — Scanning, SBOM & Policy Enforcement","item":"https://docs.shani.dev/doc/servers/security/policies/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Security &amp; Identity — Scanning, SBOM &amp; Policy Enforcement</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><h2 id="syft-grype-sbom-vulnerability-scanning">Syft + Grype (SBOM & Vulnerability Scanning)</h2>
+<p><strong>Purpose:</strong> Syft generates a Software Bill of Materials (SBOM) — a complete inventory of every package, library, and binary in a container image or directory. Grype scans that SBOM against vulnerability databases (NVD, GitHub Advisory, OSV) to find known CVEs. The two-step Syft → Grype workflow is preferred when you want to store SBOMs as artefacts and scan them separately, or feed them to Dependency-Track for continuous monitoring.</p>
+<pre><code class="language-bash"># Install via Nix
+nix-env -iA nixpkgs.syft nixpkgs.grype</code></pre>
+<h5 id="generate-an-sbom">Generate an SBOM</h5>
+<pre><code class="language-bash"># SBOM for a container image (CycloneDX JSON)
+syft jellyfin/jellyfin:latest -o cyclonedx-json &gt; jellyfin-sbom.cdx.json
+
+# SBOM for a local directory
+syft dir:/home/user/myapp -o spdx-json &gt; myapp-sbom.spdx.json
+
+# Quick package list (table format)
+syft nginx:alpine -o table</code></pre>
+<h4 id="scan-for-cves">Scan for CVEs</h4>
+<pre><code class="language-bash"># Scan an image directly
+grype jellyfin/jellyfin:latest
+
+# Scan a previously generated SBOM
+grype sbom:jellyfin-sbom.cdx.json
+
+# Fail CI on critical CVEs
+grype nginx:alpine --fail-on critical
+
+# JSON output for automation
+grype nginx:alpine -o json &gt; nginx-vulns.json</code></pre>
+<h4 id="ci-integration">CI integration</h4>
+<pre><code class="language-yaml"># .forgejo/workflows/sbom.yml
+steps:
+  - name: Generate SBOM
+    image: anchore/syft:latest
+    commands:
+      - syft . -o cyclonedx-json &gt; sbom.cdx.json
+
+  - name: Scan CVEs
+    image: anchore/grype:latest
+    commands:
+      - grype sbom:sbom.cdx.json --fail-on critical</code></pre>
+<hr>
+<h2 id="dependency-track-sbom-management-platform">Dependency-Track (SBOM Management Platform)</h2>
+<p><strong>Purpose:</strong> Continuous SBOM analysis platform. Ingest SBOMs from Syft, Trivy, or your CI pipeline, and Dependency-Track continuously monitors them against NVD, OSV, GitHub Advisory, and VulnDB — alerting you when a new CVE is published that affects a component in any registered project. Unlike point-in-time CI scans, Dependency-Track gives ongoing visibility: a CVE disclosed today against a library ingested a month ago triggers an alert automatically.</p>
+<pre><code class="language-yaml"># ~/dependency-track/compose.yaml
+services:
+  dtrack-apiserver:
+    image: dependencytrack/apiserver:latest
+    ports:
+      - 127.0.0.1:8081:8080
+    volumes:
+      - /home/user/dependency-track/data:/data:Z
+    environment:
+      ALPINE_DATABASE_MODE: internal
+    restart: unless-stopped
+
+  dtrack-frontend:
+    image: dependencytrack/frontend:latest
+    ports:
+      - 127.0.0.1:8082:8080
+    environment:
+      API_BASE_URL: http://localhost:8081
+    depends_on: [dtrack-apiserver]
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/dependency-track &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:8082</code>. Default credentials: <code>admin</code> / <code>admin</code> — change immediately.</p>
+<h4 id="upload-an-sbom-via-api">Upload an SBOM via API</h4>
+<pre><code class="language-bash">SBOM_B64=$(base64 -w 0 myapp-sbom.cdx.json)
+curl -X PUT http://localhost:8081/api/v1/bom \
+  -H &quot;X-Api-Key: YOUR_API_KEY&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &quot;{\&quot;projectName\&quot;:\&quot;myapp\&quot;,\&quot;projectVersion\&quot;:\&quot;1.0\&quot;,\&quot;autoCreate\&quot;:true,\&quot;bom\&quot;:\&quot;${SBOM_B64}\&quot;}&quot;</code></pre>
+<h4 id="ci-auto-upload-sbom-on-every-build">CI — auto-upload SBOM on every build</h4>
+<pre><code class="language-yaml"># .woodpecker.yml
+steps:
+  sbom:
+    image: anchore/syft:latest
+    commands:
+      - syft . -o cyclonedx-json &gt; sbom.cdx.json
+  upload:
+    image: curlimages/curl:latest
+    secrets: [DTRACK_API_KEY]
+    commands:
+      - |
+        curl -X PUT http://dtrack.home.local/api/v1/bom \
+          -H &quot;X-Api-Key: $DTRACK_API_KEY&quot; -H &quot;Content-Type: application/json&quot; \
+          -d &quot;{\&quot;projectName\&quot;:\&quot;${CI_REPO_NAME}\&quot;,\&quot;projectVersion\&quot;:\&quot;${CI_COMMIT_SHA:0:8}\&quot;,\&quot;autoCreate\&quot;:true,\&quot;bom\&quot;:\&quot;$(base64 -w 0 sbom.cdx.json)\&quot;}&quot;</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">dtrack.home.local { tls internal; reverse_proxy localhost:8082 }</code></pre>
+<hr>
+<h2 id="fail2ban-intrusion-prevention">Fail2ban (Intrusion Prevention)</h2>
+<p><strong>Purpose:</strong> Monitors log files for repeated authentication failures and bans the source IP via firewall rules. Protects SSH, Caddy, Authelia, Vaultwarden, and any service that logs failed login attempts — automatically blocking brute-force attacks without manual intervention. Integrates with <code>firewalld</code> (used on this system) natively.</p>
+<pre><code class="language-yaml"># ~/fail2ban/compose.yaml
+services:
+  fail2ban:
+    image: crazymax/fail2ban:latest
+    network_mode: host
+    volumes:
+      - /home/user/fail2ban/config:/data:Z
+      - /var/log:/var/log:ro
+      - /run/firewalld:/run/firewalld:Z
+    environment:
+      TZ: Asia/Kolkata
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/fail2ban &amp;&amp; podman-compose up -d</code></pre>
+<h5 id="example-jail-config-homeuserfail2banconfigjaildcaddyconf">Example jail config (<code>/home/user/fail2ban/config/jail.d/caddy.conf</code>)</h5>
+<pre><code class="language-ini">[caddy-auth]
+enabled  = true
+port     = http,https
+filter   = caddy-auth
+logpath  = /var/log/caddy/access.log
+maxretry = 5
+bantime  = 1h
+findtime = 10m
+action   = firewallcmd-rich-rules[actiontype=&lt;multiport&gt;]</code></pre>
+<h4 id="useful-commands">Useful commands</h4>
+<pre><code class="language-bash"># List banned IPs
+podman exec fail2ban fail2ban-client status caddy-auth
+
+# Unban an IP
+podman exec fail2ban fail2ban-client set caddy-auth unbanip 1.2.3.4
+
+# Test a filter against a log file
+podman exec fail2ban fail2ban-regex /var/log/caddy/access.log caddy-auth</code></pre>
+<blockquote>Fail2ban complements CrowdSec — CrowdSec uses community threat intelligence, Fail2ban reacts to your own logs. Run both for defence in depth.</blockquote>
+<hr>
+<h2 id="trivy-container-code-security-scanner">Trivy (Container & Code Security Scanner)</h2>
+<p><strong>Purpose:</strong> Comprehensive vulnerability scanner for container images, filesystems, Git repositories, and Kubernetes manifests. Detects known CVEs in OS packages, language libraries (pip, npm, go, cargo), misconfigurations (Dockerfile, Terraform, Helm), and secrets accidentally committed to code. Run it in CI/CD pipelines to gate deployments on security findings.</p>
+<pre><code class="language-bash"># Pull and run Trivy as a one-shot scanner (no persistent container needed)
+podman run --rm \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  -v /home/user/trivy-cache:/root/.cache/trivy:Z \
+  aquasec/trivy:latest image jellyfin/jellyfin:latest
+
+# Scan a local filesystem or Git repo
+podman run --rm \
+  -v /home/user/myproject:/repo:ro,Z \
+  -v /home/user/trivy-cache:/root/.cache/trivy:Z \
+  aquasec/trivy:latest fs /repo
+
+# Scan a running container's filesystem
+podman run --rm \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  -v /home/user/trivy-cache:/root/.cache/trivy:Z \
+  aquasec/trivy:latest image --input jellyfin</code></pre>
+<h5 id="run-as-a-server-for-ci-integration">Run as a server for CI integration</h5>
+<pre><code class="language-yaml"># ~/trivy-server/compose.yaml
+services:
+  trivy-server:
+    image: aquasec/trivy:latest
+    ports:
+      - 127.0.0.1:4954:4954
+    volumes:
+      - /home/user/trivy-cache:/root/.cache/trivy:Z
+    command: server --listen 0.0.0.0:4954
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/trivy-server &amp;&amp; podman-compose up -d</code></pre>
+<p>Then scan from CI with: <code>trivy image --server http://trivy.home.local:4954 myapp:latest</code></p>
+<blockquote>Run Trivy as a weekly scheduled scan across all your container images to catch newly disclosed CVEs before attackers do. Pipe the JSON output to a Grafana dashboard or ntfy alert.</blockquote>
+<hr>
+<h2 id="checkov-tfsec-iac-security-scanning">Checkov + tfsec (IaC Security Scanning)</h2>
+<p><strong>Purpose:</strong> Static analysis for Infrastructure as Code files — Terraform, Kubernetes YAML, Dockerfiles, Helm charts, GitHub Actions, and Compose files. Catches misconfigurations before they reach production: containers running as root, missing resource limits, secrets in environment variables, public S3 buckets, overly permissive IAM, and hundreds of other checks. Part of a DevSecOps pipeline alongside Trivy (images) and Semgrep (code).</p>
+<pre><code class="language-bash"># Install Checkov via pip (multi-framework: Terraform, K8s, Dockerfile, Helm, GHA, Compose)
+pip install checkov --break-system-packages
+
+# Install tfsec via Nix (Terraform-focused, fast, no Python dep — good for pre-commit)
+nix-env -iA nixpkgs.tfsec</code></pre>
+<h4 id="scan-terraform">Scan Terraform</h4>
+<pre><code class="language-bash"># Full scan with CLI + JSON output
+checkov -d terraform/ -o cli -o json --output-file-path /dev/null,checkov-results.json
+
+# Fail only on HIGH and CRITICAL
+checkov -d terraform/ --soft-fail-on LOW,MEDIUM
+
+# Fast tfsec gate before checkov
+tfsec terraform/
+tfsec terraform/ --severity CRITICAL --format json --out tfsec-results.json</code></pre>
+<h4 id="scan-kubernetes-manifests-and-helm-charts">Scan Kubernetes manifests and Helm charts</h4>
+<pre><code class="language-bash"># Scan raw YAML manifests
+checkov -d k8s/ --framework kubernetes
+
+# Scan a Helm chart (renders first, then checks)
+checkov -d charts/myapp --framework helm
+
+# Specific checks relevant to K8s security hardening:
+# CKV_K8S_6   — do not admit root containers
+# CKV_K8S_8   — liveness probe must be defined
+# CKV_K8S_9   — readiness probe must be defined
+# CKV_K8S_14  — image tag must not be 'latest'
+# CKV_K8S_28  — do not allow privileged containers
+# CKV_K8S_30  — do not allow privilege escalation
+# CKV_K8S_35  — secrets must not be in environment variables
+# CKV_K8S_37  — minimise the admission of containers with added capabilities</code></pre>
+<h4 id="scan-compose-files">Scan Compose files</h4>
+<pre><code class="language-bash"># Check compose.yaml for security issues (privileged mode, host network, writable mounts)
+checkov -f compose.yaml --framework dockerfile</code></pre>
+<h4 id="ci-integration-forgejo-actions-woodpecker">CI integration (Forgejo Actions / Woodpecker)</h4>
+<pre><code class="language-yaml"># .forgejo/workflows/iac-scan.yml
+on: [push]
+jobs:
+  iac-security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkov IaC scan
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          soft_fail: true          # set to false to block PRs on findings
+          output_format: cli,sarif
+          output_file_path: console,results.sarif
+
+      - name: tfsec scan
+        run: |
+          docker run --rm -v &quot;$(pwd):/src&quot; aquasec/tfsec /src/terraform \
+            --format json --out /src/tfsec.json || true</code></pre>
+<h4 id="send-findings-to-defect-dojo">Send findings to Defect Dojo</h4>
+<pre><code class="language-bash"># After CI scan, upload JSON results to Defect Dojo for centralised triage
+curl -X POST https://defectdojo.home.local/api/v2/import-scan/ \
+  -H &quot;Authorization: Token $DEFECTDOJO_API_TOKEN&quot; \
+  -F &quot;scan_type=Checkov Scan&quot; \
+  -F &quot;file=@checkov-results.json&quot; \
+  -F &quot;engagement=$ENGAGEMENT_ID&quot; \
+  -F &quot;product_name=infra&quot;</code></pre>
+<blockquote><strong>Checkov vs tfsec:</strong> Use both. Checkov is multi-framework (Terraform + K8s + Dockerfile + Helm + Compose + GHA) and integrates with Defect Dojo natively. tfsec is Terraform-only but faster — run it as a pre-commit gate, Checkov as the full CI scan. Both catch different findings; overlap is intentional.</blockquote>
+<hr>
+<h2 id="slsa-provenance-supply-chain-security">SLSA Provenance (Supply Chain Security)</h2>
+<p><strong>Purpose:</strong> SLSA (Supply chain Levels for Software Artifacts) is a framework for securing your build pipeline. SLSA Level 2 requires that every build produces a signed provenance attestation — a cryptographically signed record of <em>what was built, from what source, by what pipeline, on what system</em>. This prevents tampering between source and deployed image. On Shani OS the implementation path is: <strong>Tekton Chains</strong> (provenance generation) + <strong>cosign</strong> (signing) + <strong>Rekor</strong> (transparency log) + <strong>Syft</strong> (SBOM) + <strong>Grype</strong> (vulnerability check on the SBOM).</p>
+<pre><code class="language-bash"># Install cosign via Nix
+nix-env -iA nixpkgs.cosign
+
+# Generate a cosign key pair (store private key in OpenBao/Infisical)
+cosign generate-key-pair
+# Outputs: cosign.key (private — keep secret) and cosign.pub (public — commit to repo)
+
+# Sign an image after pushing to your registry
+cosign sign --key cosign.key registry.home.local/myapp:v1.2.3
+
+# Verify a signed image before deploying
+cosign verify --key cosign.pub registry.home.local/myapp:v1.2.3
+
+# Attach an SBOM to the image (pairs with Syft)
+syft registry.home.local/myapp:v1.2.3 -o cyclonedx-json &gt; sbom.json
+cosign attach sbom --sbom sbom.json registry.home.local/myapp:v1.2.3
+
+# Verify the attached SBOM
+cosign verify-attestation --key cosign.pub registry.home.local/myapp:v1.2.3</code></pre>
+<h4 id="tekton-chains-slsa-level-2-provenance-requires-k3sk0s">Tekton Chains (SLSA Level 2 provenance — requires k3s/k0s)</h4>
+<pre><code class="language-bash"># Install Tekton Pipelines first (see CI/CD section)
+kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
+
+# Install Tekton Chains
+kubectl apply -f https://storage.googleapis.com/tekton-releases/chains/latest/release.yaml
+
+# Configure Chains to sign with cosign and store provenance in the OCI registry
+kubectl patch configmap chains-config -n tekton-chains -p='{&quot;data&quot;:{
+  &quot;artifacts.oci.format&quot;: &quot;simplesigning&quot;,
+  &quot;artifacts.oci.storage&quot;: &quot;oci&quot;,
+  &quot;artifacts.taskrun.format&quot;: &quot;slsa/v1&quot;,
+  &quot;artifacts.taskrun.storage&quot;: &quot;oci&quot;,
+  &quot;signers.x509.fulcio.enabled&quot;: &quot;false&quot;
+}}'
+
+# Create a secret with your cosign key
+kubectl create secret generic signing-secrets \
+  --from-file=cosign.key=./cosign.key \
+  --from-literal=cosign.password=&quot;&quot; \
+  -n tekton-chains
+
+# After any TaskRun that builds and pushes an image, Chains automatically:
+# 1. Captures the build inputs (git commit, Dockerfile, pipeline params)
+# 2. Signs the provenance with your cosign key
+# 3. Pushes the signed attestation alongside the image in the registry</code></pre>
+<h5 id="verify-provenance-in-a-kyverno-policy-block-unsigned-images-cluster-wide">Verify provenance in a Kyverno policy (block unsigned images cluster-wide)</h5>
+<pre><code class="language-yaml"># ~/k8s/kyverno-verify-image.yaml
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-image-signature
+spec:
+  validationFailureAction: Enforce
+  rules:
+    - name: check-image-signature
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+      verifyImages:
+        - imageReferences:
+            - &quot;registry.home.local/*&quot;
+          attestors:
+            - entries:
+                - keys:
+                    publicKeys: |-
+                      -----BEGIN PUBLIC KEY-----
+                      &lt;paste contents of cosign.pub here&gt;
+                      -----END PUBLIC KEY-----</code></pre>
+<pre><code class="language-bash">kubectl apply -f ~/k8s/kyverno-verify-image.yaml
+
+# Test: try deploying an unsigned image — should be blocked
+kubectl run test --image=registry.home.local/myapp:unsigned
+# Error: image signature verification failed</code></pre>
+<blockquote><strong>SLSA levels in practice:</strong> Level 1 = build script (you probably have this). Level 2 = hosted build + signed provenance (achievable with Tekton Chains + cosign). Level 3 = hardened build platform (Talos + isolated build pods). Start with Level 2 — cosign sign in CI + Kyverno enforce in the cluster — before pursuing Level 3.</blockquote>
+<hr>
+<h2 id="teleport-zero-trust-access-platform">Teleport (Zero-Trust Access Platform)</h2>
+<p><strong>Purpose:</strong> Self-hosted zero-trust access platform for SSH, Kubernetes, databases, and web applications. Teleport replaces VPN + bastion host setups with identity-aware, audited access — every session is recorded, every login requires a certificate issued for a short TTL, and access can be conditioned on MFA, device trust, and role-based policies. The self-hosted alternative to HashiCorp Boundary or commercial PAM solutions.</p>
+<pre><code class="language-yaml"># ~/teleport/compose.yml
+services:
+  teleport:
+    image: public.ecr.aws/gravitational/teleport:latest
+    ports:
+      - &quot;0.0.0.0:3023:3023&quot;   # SSH proxy
+      - &quot;0.0.0.0:3024:3024&quot;   # SSH tunnel
+      - &quot;0.0.0.0:3025:3025&quot;   # Auth server
+      - &quot;0.0.0.0:3080:3080&quot;   # HTTPS Web UI + API
+    volumes:
+      - /home/user/teleport/config:/etc/teleport:Z
+      - /home/user/teleport/data:/var/lib/teleport:Z
+    command: teleport start --config=/etc/teleport/teleport.yaml
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/teleport &amp;&amp; podman-compose up -d</code></pre>
+<h5 id="generate-initial-config">Generate initial config</h5>
+<pre><code class="language-bash">podman run --rm \
+  -v /home/user/teleport/config:/etc/teleport:Z \
+  public.ecr.aws/gravitational/teleport:latest \
+  teleport configure \
+    --cluster-name=home.example.com \
+    --public-addr=teleport.example.com:3080 \
+    --data-dir=/var/lib/teleport \
+    -o /etc/teleport/teleport.yaml</code></pre>
+<h5 id="minimal-teleportyaml">Minimal <code>teleport.yaml</code></h5>
+<pre><code class="language-yaml">teleport:
+  data_dir: /var/lib/teleport
+  log:
+    output: stderr
+    severity: INFO
+
+auth_service:
+  enabled: true
+  cluster_name: home.example.com
+  listen_addr: 0.0.0.0:3025
+  tokens:
+    - &quot;node:your-join-token&quot;
+
+ssh_service:
+  enabled: true
+  listen_addr: 0.0.0.0:3022
+
+proxy_service:
+  enabled: true
+  listen_addr: 0.0.0.0:3023
+  web_listen_addr: 0.0.0.0:3080
+  public_addr: teleport.example.com:3080
+  https_cert: /etc/teleport/certs/fullchain.pem
+  https_key: /etc/teleport/certs/privkey.pem</code></pre>
+<p><strong>Create the first admin user:</strong></p>
+<pre><code class="language-bash">podman exec teleport tctl users add admin --roles=editor,access --logins=root,user
+# Follow the invite URL printed to set a password and enrol MFA</code></pre>
+<h4 id="add-a-server-node-install-teleport-agent-on-target-host">Add a server node (install Teleport agent on target host)</h4>
+<pre><code class="language-bash"># On the target server
+curl https://goteleport.com/static/install.sh | bash
+teleport node configure \
+  --auth-server=teleport.example.com:3025 \
+  --token=your-join-token \
+  --output=/etc/teleport.yaml
+systemctl enable --now teleport</code></pre>
+<h4 id="connect-via-tsh-teleport-shell-client">Connect via <code>tsh</code> (Teleport shell client)</h4>
+<pre><code class="language-bash"># Login
+tsh login --proxy=teleport.example.com:3080 --user=admin
+
+# List registered nodes
+tsh ls
+
+# SSH to a registered node
+tsh ssh root@my-server
+
+# Forward a database port
+tsh db connect my-postgres
+
+# Session is recorded and viewable in the web UI</code></pre>
+<p><strong>Firewall:</strong></p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=3023-3025/tcp --add-port=3080/tcp --permanent
+sudo firewall-cmd --reload</code></pre>
+<blockquote>For homelab use, Teleport Community Edition is free and covers SSH access, session recording, and web application proxy. Run it on a small public VPS (not on your home server) so it stays reachable even if your home connection goes down.</blockquote>
+<hr>
+<h2 id="coraza-waf-embedded-waf-for-caddy">Coraza WAF (Embedded WAF for Caddy)</h2>
+<p><strong>Purpose:</strong> OWASP-compliant Web Application Firewall embedded directly in Caddy as a plugin. Runs the OWASP Core Rule Set (CRS) — the industry-standard ruleset that blocks SQL injection, XSS, command injection, path traversal, and hundreds of other attack classes — without an extra reverse proxy hop. Coraza is the modern, Go-native successor to ModSecurity and the recommended WAF for Shani OS because it integrates with the Caddy you are already running.</p>
+<h4 id="build-a-caddy-image-with-coraza">Build a Caddy image with Coraza</h4>
+<pre><code class="language-bash">podman build -t caddy-coraza - &lt;&lt; 'EOF'
+FROM caddy:builder AS builder
+RUN xcaddy build \
+    --with github.com/corazawaf/coraza-caddy/v2
+
+FROM caddy:latest
+COPY --from=builder /usr/bin/caddy /usr/bin/caddy
+EOF</code></pre>
+<h5 id="download-the-owasp-crs-ruleset">Download the OWASP CRS ruleset</h5>
+<pre><code class="language-bash">mkdir -p /home/user/caddy/waf/crs
+curl -L https://github.com/coreruleset/coreruleset/archive/refs/tags/v4.7.0.tar.gz \
+  | tar -xz -C /home/user/caddy/waf/crs --strip-components=1</code></pre>
+<h5 id="run-the-custom-caddy-image">Run the custom Caddy image</h5>
+<pre><code class="language-yaml"># ~/caddy/compose.yaml
+services:
+  caddy:
+    image: caddy-coraza
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /home/user/caddy/Caddyfile:/etc/caddy/Caddyfile:ro,Z
+      - /home/user/caddy/data:/data:Z
+      - /home/user/caddy/config:/config:Z
+      - /home/user/caddy/waf:/etc/coraza-waf:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/caddy &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="caddyfile-with-waf-enabled-for-a-specific-service">Caddyfile with WAF enabled for a specific service</h4>
+<pre><code class="language-caddyfile">{
+  order coraza_waf first
+}
+
+app.example.com {
+  coraza_waf {
+    load_owasp_crs
+    directives `
+      Include /etc/coraza-waf/crs/crs-setup.conf.example
+      Include /etc/coraza-waf/crs/rules/*.conf
+      SecRuleEngine On
+      SecRequestBodyAccess On
+      SecResponseBodyAccess On
+      SecAuditEngine RelevantOnly
+      SecAuditLog /var/log/caddy/coraza-audit.log
+      SecAuditLogFormat JSON
+      SecDefaultAction &quot;phase:2,log,auditlog,deny,status:403&quot;
+    `
+  }
+  reverse_proxy localhost:8080
+}</code></pre>
+<h5 id="tune-detection-sensitivity">Tune detection sensitivity</h5>
+<p>— start at paranoia level 1 and raise gradually after reviewing false positives:</p>
+<pre><code># In crs-setup.conf.example — set the paranoia level
+SecAction &quot;id:900000,phase:1,nolog,pass,t:none,setvar:tx.paranoia_level=1&quot;</code></pre>
+<h4 id="suppress-a-rule-causing-false-positives">Suppress a rule causing false positives</h4>
+<pre><code>SecRuleRemoveById 941100         # Remove a specific rule by ID
+SecRuleRemoveByTag &quot;attack-sqli&quot; # Remove all SQLi rules</code></pre>
+<blockquote>Set <code>SecRuleEngine DetectionOnly</code> while tuning — this logs violations without blocking, so you can identify false positives before going live. Switch to <code>SecRuleEngine On</code> once stable.</blockquote>
+<hr>
+<h2 id="safeline-waf-standalone-waf-with-web-ui">SafeLine WAF (Standalone WAF with Web UI)</h2>
+<p><strong>Purpose:</strong> Self-contained WAF with a polished dashboard, sitting in front of your apps as its own reverse proxy. Built on nginx with a semantic detection engine. Easier to configure than Coraza for users who prefer a GUI. Use it when you want WAF + reverse proxy in one product rather than Coraza embedded in Caddy.</p>
+<pre><code class="language-yaml"># ~/safeline/compose.yml
+services:
+  safeline-mgt:
+    image: chaitin/safeline-mgt:latest
+    ports: [&quot;127.0.0.1:9443:1443&quot;]
+    environment:
+      MGT_PG: &quot;host=safeline-pg port=5432 user=safeline password=changeme dbname=safeline_mgt sslmode=disable&quot;
+      DISABLE_SIGNUP: &quot;true&quot;
+    volumes:
+      - /home/user/safeline/resources:/resources:Z
+      - /home/user/safeline/logs:/logs:Z
+      - /home/user/safeline/nginx:/etc/nginx:Z
+    depends_on: [safeline-pg]
+    restart: unless-stopped
+
+  safeline-tengine:
+    image: chaitin/safeline-tengine:latest
+    ports:
+      - &quot;0.0.0.0:80:80&quot;
+      - &quot;0.0.0.0:443:443&quot;
+    environment:
+      TCD_MGT_API: https://safeline-mgt:1443
+    volumes:
+      - /home/user/safeline/resources:/resources:Z
+      - /home/user/safeline/logs:/logs:Z
+      - /home/user/safeline/nginx:/etc/nginx:Z
+    depends_on: [safeline-mgt]
+    restart: unless-stopped
+
+  safeline-detector:
+    image: chaitin/safeline-detector:latest
+    volumes:
+      - /home/user/safeline/resources:/resources:Z
+      - /home/user/safeline/logs/detector:/logs/detector:Z
+    restart: unless-stopped
+
+  safeline-pg:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: safeline
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: safeline_mgt
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/safeline &amp;&amp; podman-compose up -d</code></pre>
+<p>Access the admin UI at <code>https://localhost:9443</code>. Add your upstream services as protected sites and configure detection sensitivity per service.</p>
+<hr>
+<h2 id="suricata-network-idsips">Suricata (Network IDS/IPS)</h2>
+<p><strong>Purpose:</strong> High-performance Network Intrusion Detection and Prevention System (IDS/IPS). Suricata inspects raw network traffic using the Emerging Threats and ETPRO rule sets to detect port scans, exploit attempts, C2 beaconing, DNS tunnelling, and malware traffic patterns — not just failed logins like Fail2ban and CrowdSec, but actual wire-level attack signatures. In IPS mode it drops malicious packets before they reach your services. In IDS mode it logs and alerts without blocking, which is safer to start with.</p>
+<pre><code class="language-yaml"># ~/suricata/compose.yaml
+services:
+  suricata:
+    image: jasonish/suricata:latest
+    network_mode: host
+    volumes:
+      - /home/user/suricata/config:/etc/suricata:Z
+      - /home/user/suricata/logs:/var/log/suricata:Z
+      - /home/user/suricata/rules:/var/lib/suricata/rules:Z
+    environment:
+      SURICATA_OPTIONS: -i eth0
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+      - SYS_NICE
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/suricata &amp;&amp; podman-compose up -d</code></pre>
+<blockquote>Replace <code>eth0</code> with your primary interface (<code>ip link show</code>). <code>--network host</code> is required to see actual traffic.</blockquote>
+<h4 id="update-rules-emerging-threats-open-free">Update rules (Emerging Threats Open — free)</h4>
+<pre><code class="language-bash">podman exec suricata suricata-update update-sources
+podman exec suricata suricata-update enable-source et/open
+podman exec suricata suricata-update
+podman exec suricata kill -USR2 1  # Reload rules live</code></pre>
+<h5 id="minimal-suricatayaml-additions-for-homelab">Minimal <code>suricata.yaml</code> additions for homelab</h5>
+<pre><code class="language-yaml"># /home/user/suricata/config/suricata.yaml
+outputs:
+  - eve-log:
+      enabled: yes
+      filename: /var/log/suricata/eve.json
+      types:
+        - alert
+        - dns
+        - http
+        - tls
+
+af-packet:
+  - interface: eth0
+    threads: auto
+    cluster-id: 99
+    cluster-type: cluster_flow
+    defrag: yes
+
+# IDS mode (detection only — safe to start)
+# For IPS mode, switch to nfqueue and set drop policy
+detect:
+  profile: medium
+  custom-values:
+    toclient-groups: 3
+    toserver-groups: 25</code></pre>
+<h4 id="forward-alerts-to-crowdsec-or-ntfy">Forward alerts to CrowdSec or ntfy</h4>
+<pre><code class="language-bash"># Watch eve.json and forward critical alerts to ntfy
+tail -f /home/user/suricata/logs/eve.json | \
+  jq -c 'select(.event_type==&quot;alert&quot; and .alert.severity==1)' | \
+  while read -r line; do
+    curl -s -d &quot;Suricata alert: $(echo $line | jq -r '.alert.signature')&quot; \
+      http://localhost:8090/suricata-alerts
+  done</code></pre>
+<blockquote>Pair Suricata (network-level IDS) with Wazuh (host-level SIEM) and CrowdSec (IP reputation + blocking) for layered defence. Suricata sees what's happening on the wire; Wazuh sees what's happening inside your hosts.</blockquote>
+<hr>
+<h2 id="owasp-zap-web-application-scanner">OWASP ZAP (Web Application Scanner)</h2>
+<p><strong>Purpose:</strong> OWASP's flagship dynamic application security testing (DAST) tool. ZAP proxies traffic between your browser and your apps, passively analysing every request, and can actively probe for SQLi, XSS, SSRF, broken auth, insecure redirects, and 100+ other vulnerabilities. Use it to audit your self-hosted services before exposing them publicly, and in CI/CD pipelines to catch regressions.</p>
+<h5 id="run-as-a-daemon-with-rest-api">Run as a daemon with REST API</h5>
+<pre><code class="language-yaml"># ~/zap/compose.yaml
+services:
+  zap:
+    image: ghcr.io/zaproxy/zaproxy:stable
+    ports:
+      - 127.0.0.1:8088:8080
+    volumes:
+      - /home/user/zap:/zap/wrk:Z
+    command: &gt;
+      zap.sh -daemon -port 8080 -host 0.0.0.0
+      -config api.addrs.addr.name=.*
+      -config api.addrs.addr.regex=true
+      -config api.key=changeme
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/zap &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="scan-types">Scan types</h4>
+<pre><code class="language-bash"># Baseline scan — passive only, safe to run against production
+podman run --rm \
+  -v /home/user/zap/reports:/zap/wrk:Z \
+  ghcr.io/zaproxy/zaproxy:stable \
+  zap-baseline.py -t https://app.home.local \
+    -r /zap/wrk/baseline-report.html
+
+# Full active scan — probes for vulnerabilities, run against test/staging only
+podman run --rm \
+  -v /home/user/zap/reports:/zap/wrk:Z \
+  ghcr.io/zaproxy/zaproxy:stable \
+  zap-full-scan.py -t https://app.home.local \
+    -r /zap/wrk/full-report.html
+
+# API scan — OpenAPI/Swagger-aware
+podman run --rm \
+  -v /home/user/zap/reports:/zap/wrk:Z \
+  ghcr.io/zaproxy/zaproxy:stable \
+  zap-api-scan.py -t https://app.home.local/openapi.json \
+    -f openapi -r /zap/wrk/api-report.html</code></pre>
+<blockquote>Run baseline scans in CI/CD on every deployment to staging. Reserve full active scans for dedicated security review cycles — they generate significant traffic and may disrupt services.</blockquote>
+<hr>
+<h2 id="defect-dojo-vulnerability-management">Defect Dojo (Vulnerability Management)</h2>
+<p><strong>Purpose:</strong> Centralised vulnerability management platform. Aggregates security findings from Trivy, Semgrep, OWASP ZAP, Nuclei, Greenbone, and other scanners into one triage dashboard with deduplication, risk scoring, SLA tracking, and JIRA/Slack integration. The self-hosted alternative to paying for a dedicated AppSec platform.</p>
+<pre><code class="language-yaml"># ~/defectdojo/compose.yaml
+services:
+  django:
+    image: defectdojo/defectdojo-django:latest
+    ports:
+      - 127.0.0.1:8080:8080
+    environment:
+      DD_DATABASE_URL: postgresql://defectdojo:changeme@postgres:5432/defectdojo
+      DD_SECRET_KEY: changeme-run-openssl-rand-base64-42
+      DD_CREDENTIAL_AES_256_KEY: changeme-16chars
+      DD_ALLOWED_HOSTS: defectdojo.home.local
+      DD_CELERY_BROKER_URL: redis://redis:6379/0
+      DD_SOCIAL_AUTH_KEYCLOAK_ENABLED: &quot;False&quot;
+    volumes:
+      - /home/user/defectdojo/media:/app/media:Z
+    depends_on: [postgres, redis]
+    restart: unless-stopped
+
+  celeryworker:
+    image: defectdojo/defectdojo-django:latest
+    command: /entrypoint-celery-worker.sh
+    environment:
+      DD_DATABASE_URL: postgresql://defectdojo:changeme@postgres:5432/defectdojo
+      DD_SECRET_KEY: changeme-run-openssl-rand-base64-42
+      DD_CELERY_BROKER_URL: redis://redis:6379/0
+    depends_on: [postgres, redis]
+    restart: unless-stopped
+
+  nginx:
+    image: defectdojo/defectdojo-nginx:latest
+    ports:
+      - 127.0.0.1:8081:8080
+    depends_on: [django]
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: defectdojo
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: defectdojo
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/defectdojo &amp;&amp; podman-compose up -d</code></pre>
+<h5 id="initialise-the-database-first-run">Initialise the database (first run)</h5>
+<pre><code class="language-bash">podman-compose run --rm django bash -c &quot;python manage.py migrate &amp;&amp; python manage.py createsuperuser&quot;</code></pre>
+<p>Access at <code>http://localhost:8081</code>. Create a Product, then import scanner results under Findings → Import Scan Results — select the scanner type (Trivy, Semgrep SARIF, ZAP XML, Nuclei JSON) and upload the output file.</p>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">defectdojo.home.local { tls internal; reverse_proxy localhost:8081 }</code></pre>
+<hr>
+<h2 id="osquery-host-security-monitoring-query-language">osquery (Host Security Monitoring & Query Language)</h2>
+<p><strong>Purpose:</strong> Treats your OS as a relational database — query processes, network connections, users, kernel modules, cron jobs, loaded kernel extensions, open files, and hardware state using plain SQL. Used by security teams for threat hunting, compliance auditing, and incident response. Feeds into Wazuh, Elastic SIEM, and Splunk for centralised host visibility.</p>
+<pre><code class="language-bash"># Install osquery via Nix (installs osqueryi + osqueryd)
+nix-env -iA nixpkgs.osquery
+
+# Or via the official RPM/DEB on non-immutable systems
+# On Shani OS: Nix only (OS root is read-only)</code></pre>
+<h4 id="interactive-queries-osqueryi">Interactive queries (<code>osqueryi</code>)</h4>
+<pre><code class="language-sql">-- Running processes and their open network connections
+SELECT p.pid, p.name, p.cmdline, lp.port, lp.protocol, lp.address
+FROM processes AS p JOIN listening_ports AS lp USING (pid)
+WHERE lp.port &gt; 0;
+
+-- All users with a valid login shell (spot rogue accounts)
+SELECT username, uid, gid, description, directory, shell
+FROM users WHERE shell NOT LIKE '%nologin%' AND shell NOT LIKE '%false%';
+
+-- Currently established outbound connections (threat hunting)
+SELECT pid, remote_address, remote_port, local_port, state
+FROM process_open_sockets
+WHERE remote_address NOT IN ('0.0.0.0', '::')
+  AND state = 'ESTABLISHED';
+
+-- Cron jobs (detect persistence mechanisms)
+SELECT event, minute, hour, day_of_month, month, day_of_week, command, path
+FROM crontab;
+
+-- Loaded kernel modules (detect rootkits)
+SELECT name, size, used_by FROM kernel_modules ORDER BY name;
+
+-- Recently modified files in /etc (detect config tampering)
+SELECT path, mtime, atime, ctime, sha256
+FROM file
+WHERE path LIKE '/etc/%' AND mtime &gt; (strftime('%s', 'now') - 3600);
+
+-- Listening ports and processes (quick attack surface audit)
+SELECT DISTINCT lp.port, lp.protocol, lp.address, p.name, p.cmdline
+FROM listening_ports AS lp JOIN processes AS p USING (pid)
+ORDER BY lp.port;
+
+-- Docker/Podman containers (detect container escapes)
+SELECT id, name, image, status, created
+FROM docker_containers;
+
+-- SSH authorized keys (audit backdoor keys)
+SELECT username, key_file, key, comment FROM user_ssh_keys;
+
+-- Installed packages (software inventory for CVE mapping)
+SELECT name, version, arch FROM deb_packages;   -- Debian/Ubuntu
+-- or
+SELECT name, version, arch FROM rpm_packages;   -- RHEL/Fedora
+
+-- Processes with root UID not launched by root
+SELECT pid, name, uid, gid, root, cmdline
+FROM processes WHERE uid = 0 AND parent != 1;</code></pre>
+<h4 id="continuous-monitoring-with-osqueryd-daemon-mode">Continuous monitoring with <code>osqueryd</code> (daemon mode)</h4>
+<pre><code class="language-bash"># /etc/osquery/osquery.conf
+{
+  &quot;options&quot;: {
+    &quot;logger_plugin&quot;: &quot;filesystem&quot;,
+    &quot;logger_path&quot;: &quot;/var/log/osquery&quot;,
+    &quot;disable_logging&quot;: &quot;false&quot;,
+    &quot;log_result_events&quot;: &quot;true&quot;,
+    &quot;schedule_splay_percent&quot;: &quot;10&quot;,
+    &quot;utc&quot;: &quot;true&quot;
+  },
+  &quot;schedule&quot;: {
+    &quot;process_events&quot;: {
+      &quot;query&quot;: &quot;SELECT pid, name, cmdline, uid, gid FROM process_events;&quot;,
+      &quot;interval&quot;: 60
+    },
+    &quot;listening_ports&quot;: {
+      &quot;query&quot;: &quot;SELECT pid, port, protocol, address FROM listening_ports;&quot;,
+      &quot;interval&quot;: 300,
+      &quot;removed&quot;: false
+    },
+    &quot;socket_events&quot;: {
+      &quot;query&quot;: &quot;SELECT action, auid, family, remote_address, remote_port, local_address, local_port, path FROM socket_events WHERE action = 'connect';&quot;,
+      &quot;interval&quot;: 60
+    },
+    &quot;file_events&quot;: {
+      &quot;query&quot;: &quot;SELECT path, action, transaction_id FROM file_events WHERE path LIKE '/etc/%' OR path LIKE '/home/%/.ssh/%';&quot;,
+      &quot;interval&quot;: 30
+    },
+    &quot;users&quot;: {
+      &quot;query&quot;: &quot;SELECT uid, username, description, shell FROM users;&quot;,
+      &quot;interval&quot;: 600,
+      &quot;removed&quot;: false
+    }
+  },
+  &quot;file_paths&quot;: {
+    &quot;config_files&quot;: [&quot;/etc/%%&quot;],
+    &quot;ssh_keys&quot;: [&quot;/home/%/.ssh/%%&quot;]
+  }
+}</code></pre>
+<pre><code class="language-bash"># Start osqueryd
+sudo systemctl enable --now osqueryd
+
+# View osquery logs
+sudo tail -f /var/log/osquery/osqueryd.results.log | python3 -m json.tool
+
+# Forward osquery logs to Wazuh (add to wazuh-agent config)
+# /var/ossec/etc/ossec.conf — add a localfile block:
+# &lt;localfile&gt;
+#   &lt;log_format&gt;json&lt;/log_format&gt;
+#   &lt;location&gt;/var/log/osquery/osqueryd.results.log&lt;/location&gt;
+# &lt;/localfile&gt;</code></pre>
+<h4 id="fleet-multi-host-osquery-management-ui">Fleet (Multi-host osquery management UI)</h4>
+<pre><code class="language-yaml"># ~/fleet/compose.yaml
+services:
+  fleet:
+    image: fleetdm/fleet:latest
+    ports: [&quot;127.0.0.1:8412:8080&quot;]
+    environment:
+      FLEET_MYSQL_ADDRESS: mysql:3306
+      FLEET_MYSQL_DATABASE: fleet
+      FLEET_MYSQL_USERNAME: fleet
+      FLEET_MYSQL_PASSWORD: changeme
+      FLEET_REDIS_ADDRESS: redis:6379
+      FLEET_SERVER_ADDRESS: 0.0.0.0:8080
+      FLEET_LOGGING_JSON: &quot;true&quot;
+    depends_on: [mysql, redis]
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: fleet
+      MYSQL_USER: fleet
+      MYSQL_PASSWORD: changeme
+    volumes: [mysql_data:/var/lib/mysql]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  mysql_data:</code></pre>
+<pre><code class="language-bash">cd ~/fleet &amp;&amp; podman-compose up -d
+# Initialise Fleet DB
+podman-compose run --rm fleet fleet prepare db --config /etc/fleet/fleet.yml</code></pre>
+<hr>
+<h2 id="nuclei-fast-vulnerability-exposure-scanner">Nuclei (Fast Vulnerability & Exposure Scanner)</h2>
+<p><strong>Purpose:</strong> Template-based vulnerability scanner — runs 9,000+ community-maintained YAML templates against HTTP/HTTPS targets, detecting misconfigurations, CVEs, exposed panels, default credentials, path traversal, SSRF, CORS misconfig, and hundreds of other issues. Faster and more scriptable than OWASP ZAP for specific CVE checks and exposure detection. Feed results into Defect Dojo.</p>
+<pre><code class="language-bash"># Install via Nix
+nix-env -iA nixpkgs.nuclei
+
+# Or install the latest binary directly
+sh -c &quot;$(curl -fsSL https://nuclei.projectdiscovery.io/install.sh)&quot;
+
+# Update templates (run before first scan and weekly)
+nuclei -update-templates</code></pre>
+<h4 id="common-scan-patterns">Common scan patterns</h4>
+<pre><code class="language-bash"># Scan a single target with all templates
+nuclei -u https://app.example.com
+
+# Scan only for critical and high severity findings
+nuclei -u https://app.example.com -s critical,high
+
+# Scan for specific CVEs (e.g., recently published)
+nuclei -u https://app.example.com -tags cve -s critical,high
+
+# Scan multiple targets from a file
+nuclei -l targets.txt -s critical,high -o findings.json -j
+
+# Scan with specific technology templates (e.g., nginx, wordpress)
+nuclei -u https://example.com -tags nginx,apache
+
+# Scan for exposed admin panels and default credentials
+nuclei -u https://example.com -tags panel,default-login
+
+# Scan internal services (homelab sweep)
+nuclei -l internal-hosts.txt -tags misconfig,exposure,default-login \
+  -s medium,high,critical -o internal-scan.json -j
+
+# Run a fast sweep with concurrency controls
+nuclei -l targets.txt -c 20 -rate-limit 100 -timeout 10 \
+  -s high,critical -j -o output.json
+
+# Template-specific scan (single CVE check)
+nuclei -u https://example.com \
+  -t cves/2023/CVE-2023-44487.yaml   # HTTP/2 Rapid Reset
+
+# Silent mode + JSON (for CI pipeline output)
+nuclei -u https://staging.example.com \
+  -s critical,high -silent -j -o nuclei-report.json
+
+# Fail CI if any critical findings
+[ &quot;$(jq '[.[] | select(.info.severity==&quot;critical&quot;)] | length' nuclei-report.json)&quot; -eq 0 ] \
+  || { echo &quot;Critical findings detected!&quot;; exit 1; }</code></pre>
+<h4 id="woodpecker-ci-integration">Woodpecker CI integration</h4>
+<pre><code class="language-yaml"># .woodpecker.yml — add Nuclei scan after deployment to staging
+- name: security-scan
+  image: projectdiscovery/nuclei:latest
+  commands:
+    - nuclei -u https://staging.example.com
+        -s critical,high -silent -j -o /tmp/nuclei.json
+    - |
+      CRITS=$(jq '[.[] | select(.info.severity==&quot;critical&quot;)] | length' /tmp/nuclei.json)
+      if [ &quot;$CRITS&quot; -gt 0 ]; then
+        echo &quot;FAIL: $CRITS critical findings&quot;; cat /tmp/nuclei.json | jq '.info.name, .info.severity, .matched-at'; exit 1
+      fi</code></pre>
+<h4 id="key-template-categories-for-devopshomelab">Key template categories for DevOps/homelab</h4>
+<table><thead><tr><th>Tag</th><th>What it detects</th></tr></thead><tbody><tr><td><code>misconfig</code></td><td>CORS, security header gaps, path traversal</td></tr><tr><td><code>default-login</code></td><td>Admin/admin, admin/password on 1,000+ apps</td></tr><tr><td><code>exposure</code></td><td>Exposed <code>.git</code>, <code>.env</code>, backup files, debug endpoints</td></tr><tr><td><code>cve</code></td><td>Known CVEs with public PoCs</td></tr><tr><td><code>panel</code></td><td>Admin panels exposed without auth</td></tr><tr><td><code>takeover</code></td><td>Subdomain/dangling DNS takeover opportunities</td></tr><tr><td><code>tech</code></td><td>Technology fingerprinting</td></tr><tr><td><code>ssl</code></td><td>TLS misconfigurations, expired certs, weak ciphers</td></tr></tbody></table>
+<hr>
+<h2 id="semgrep-sast-static-application-security-testing">Semgrep (SAST — Static Application Security Testing)</h2>
+<p><strong>Purpose:</strong> Fast, pattern-based static analysis for code and IaC. Finds real bugs and security vulnerabilities in Python, Go, JavaScript, TypeScript, Java, Ruby, PHP, and 30+ other languages using declarative rules. Unlike compiler-aware SASTs (Checkmarx, Coverity), Semgrep is fast enough to run in CI on every push. Use for: OWASP A03 (injection), A05 (misconfiguration), A08 (integrity), and custom business logic rules. Output feeds into Defect Dojo as SARIF.</p>
+<pre><code class="language-bash"># Install via Nix
+nix-env -iA nixpkgs.semgrep
+
+# Or via pip
+pip install semgrep --break-system-packages</code></pre>
+<h4 id="common-scan-patterns-2">Common scan patterns</h4>
+<pre><code class="language-bash"># Scan with the auto ruleset (recommended default — curated OSS rules)
+semgrep --config=auto .
+
+# Scan with the security-focused OWASP ruleset
+semgrep --config=p/owasp-top-ten .
+
+# Scan with community Go rules (language-specific)
+semgrep --config=p/golang .
+
+# Scan with Python security rules
+semgrep --config=p/python .
+
+# CI scan — output SARIF for upload to GitHub/Defect Dojo
+semgrep --config=auto --sarif --output=semgrep.sarif .
+
+# CI scan — JSON output
+semgrep --config=p/security-audit --json --output=semgrep.json .
+
+# Only show error-severity findings (fail CI on these)
+semgrep --config=auto --severity=ERROR --error .
+
+# Scan IaC files (Terraform, Dockerfiles)
+semgrep --config=p/terraform --config=p/dockerfile .
+
+# Scan secrets (hardcoded API keys, tokens, passwords)
+semgrep --config=p/secrets .
+
+# Custom rule (inline — detect SQL string concatenation)
+semgrep --pattern 'query = &quot;...&quot; + $X' --lang python .</code></pre>
+<h4 id="writing-custom-semgrep-rules">Writing custom Semgrep rules</h4>
+<pre><code class="language-yaml"># ~/.semgrep/custom-rules.yaml
+rules:
+  - id: hardcoded-db-password
+    patterns:
+      - pattern: |
+          DB_PASSWORD = &quot;$PASS&quot;
+      - pattern-not: |
+          DB_PASSWORD = os.environ[...]
+    message: &quot;Hardcoded database password — use environment variables&quot;
+    languages: [python]
+    severity: ERROR
+    metadata:
+      cwe: &quot;CWE-798&quot;
+      owasp: &quot;A02:2021&quot;
+
+  - id: subprocess-shell-true
+    pattern: subprocess.run(..., shell=True, ...)
+    message: &quot;shell=True with subprocess is a command injection risk — use a list&quot;
+    languages: [python]
+    severity: WARNING
+    metadata:
+      cwe: &quot;CWE-78&quot;
+
+  - id: jwt-none-alg
+    pattern: jwt.decode($TOKEN, options={&quot;verify_signature&quot;: False, ...})
+    message: &quot;JWT signature verification disabled — attacker can forge tokens&quot;
+    languages: [python]
+    severity: ERROR</code></pre>
+<pre><code class="language-bash"># Run custom rules
+semgrep --config=~/.semgrep/custom-rules.yaml .
+
+# Combine auto with custom
+semgrep --config=auto --config=~/.semgrep/custom-rules.yaml .</code></pre>
+<h4 id="woodpecker-ci-integration-sast-gate-on-every-pr">Woodpecker CI integration (SAST gate on every PR)</h4>
+<pre><code class="language-yaml"># .woodpecker.yml
+- name: sast-semgrep
+  image: returntocorp/semgrep:latest
+  commands:
+    - semgrep --config=p/security-audit --config=p/secrets
+        --severity=ERROR --error
+        --sarif --output=semgrep.sarif .
+  when:
+    event: [push, pull_request]</code></pre>
+<h4 id="semgrep-vs-checkov-vs-tfsec">Semgrep vs Checkov vs tfsec</h4>
+<table><thead><tr><th>Tool</th><th>Focus</th><th>Best for</th></tr></thead><tbody><tr><td>Semgrep</td><td>Application code + IaC</td><td>Python/Go/JS bugs, injection, secrets in code</td></tr><tr><td>Checkov</td><td>IaC (multi-framework)</td><td>Terraform, K8s YAML, Dockerfile, Helm policy</td></tr><tr><td>tfsec</td><td>Terraform-only</td><td>Fast Terraform security gate</td></tr></tbody></table>
+<p>Use all three in CI: Semgrep for code, Checkov for IaC policy, tfsec for Terraform speed gate. Feed SARIF output from all three into Defect Dojo.</p>
+<hr>
+<h2 id="sops-age-secrets-encryption-for-git">SOPS + age (Secrets Encryption for Git)</h2>
+<p><strong>Purpose:</strong> SOPS (Secrets OPerationS) encrypts specific values in YAML/JSON/ENV/TOML/INI files — the keys remain readable (for diffs and reviews) but values are ciphertext. Committed to Git safely. <code>age</code> is the modern, simple encryption backend (replaces GPG). Used to store Kubernetes Secrets, Terraform variables, Ansible vault alternatives, and <code>.env</code> files in Git without exposing secrets. Works natively with FluxCD and ArgoCD via the KSOPS or flux-system plugins.</p>
+<pre><code class="language-bash"># Install SOPS + age via Nix
+nix-env -iA nixpkgs.sops nixpkgs.age</code></pre>
+<h4 id="key-setup">Key setup</h4>
+<pre><code class="language-bash"># Generate an age key pair (one per person/machine)
+age-keygen -o ~/.config/sops/age/keys.txt
+# Public key output: age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p
+
+# Set the env var so SOPS can find your private key
+export SOPS_AGE_KEY_FILE=&quot;$HOME/.config/sops/age/keys.txt&quot;
+# Add to ~/.bashrc or ~/.zshrc to persist
+
+# Create a .sops.yaml in your repo root to define who can decrypt
+cat &gt; .sops.yaml &lt;&lt; 'EOF'
+creation_rules:
+  - path_regex: .*\.secrets\.yaml$
+    age: &gt;-
+      age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p,
+      age1another_teammate_public_key_here
+  - path_regex: k8s/.*secrets.*\.yaml$
+    age: age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p
+EOF</code></pre>
+<h4 id="encrypting-and-editing-secrets">Encrypting and editing secrets</h4>
+<pre><code class="language-bash"># Encrypt a new secrets file (SOPS reads .sops.yaml for the key config)
+sops --encrypt --in-place secrets.yaml
+# or equivalently (SOPS detects .sops.yaml automatically):
+sops -e -i secrets.yaml
+
+# Edit an encrypted file in-place (decrypts to $EDITOR, re-encrypts on save)
+sops secrets.yaml
+
+# Decrypt to stdout (pipe to kubectl apply)
+sops -d secrets.yaml | kubectl apply -f -
+
+# Decrypt to a file (for local testing — never commit the decrypted file!)
+sops -d secrets.yaml &gt; /tmp/secrets-plain.yaml
+
+# Encrypt a single value on the command line
+sops -e --input-type raw --output-type raw &lt;(echo &quot;my-secret-value&quot;)
+
+# Encrypt a Kubernetes Secret manifest
+sops -e -i k8s/myapp-secret.yaml
+
+# Apply encrypted K8s secret directly
+sops -d k8s/myapp-secret.yaml | kubectl apply -f -</code></pre>
+<h5 id="example-encrypted-yaml-structure">Example encrypted YAML structure</h5>
+<pre><code class="language-yaml"># app.secrets.yaml (after sops -e -i)
+database:
+    host: db.home.local          # not encrypted — key only
+    password: ENC[AES256_GCM,data:xyz123...,type:str]
+    port: 5432                   # not encrypted — not sensitive
+api_keys:
+    stripe: ENC[AES256_GCM,data:abc456...,type:str]
+    sendgrid: ENC[AES256_GCM,data:def789...,type:str]
+sops:
+    age:
+        - recipient: age1ql3z7hjy54pw3hyww5ayyfg7zqgvc7w3j2elw8zmrj2kg5sfn9aqmcac8p
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            ...</code></pre>
+<h4 id="sops-with-flux-cd-gitops-secrets-decryption-in-cluster">SOPS with Flux CD (GitOps secrets decryption in-cluster)</h4>
+<pre><code class="language-bash"># Create a Flux decryption secret from your age private key
+cat ~/.config/sops/age/keys.txt | kubectl create secret generic sops-age \
+  --namespace=flux-system \
+  --from-file=age.agekey=/dev/stdin
+
+# Add a .sops.yaml to your GitOps repo root (as above)
+
+# Add a Kustomization with decryption enabled
+cat &gt; k8s/flux-system/kustomization.yaml &lt;&lt; 'EOF'
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: myapp
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./k8s/myapp
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+EOF</code></pre>
+<h4 id="sops-with-ansible-replace-ansible-vault">SOPS with Ansible (replace ansible-vault)</h4>
+<pre><code class="language-bash"># Encrypt your vars file
+sops -e -i group_vars/all/vault.yaml
+
+# Decrypt before running playbook (or pipe directly)
+sops -d group_vars/all/vault.yaml &gt; /tmp/vault-plain.yaml
+ansible-playbook -i inventory.ini playbook.yaml \
+  -e @/tmp/vault-plain.yaml; rm /tmp/vault-plain.yaml
+
+# Or use sops exec-env to inject vars as environment variables
+sops exec-env secrets.env ansible-playbook playbook.yaml</code></pre>
+<h4 id="sops-with-terraform-opentofu">SOPS with Terraform / OpenTofu</h4>
+<pre><code class="language-bash"># Decrypt a .tfvars secrets file, pass to tofu
+sops -d prod.secrets.tfvars.enc &gt; /tmp/prod.secrets.tfvars
+tofu apply -var-file=prod.secrets.tfvars -var-file=/tmp/prod.secrets.tfvars
+rm /tmp/prod.secrets.tfvars
+
+# Or use the terraform-sops provider
+# In main.tf:
+# data &quot;sops_file&quot; &quot;secrets&quot; { source_file = &quot;secrets.sops.yaml&quot; }
+# resource &quot;...&quot; { password = data.sops_file.secrets.data[&quot;db_password&quot;] }</code></pre>
+<h4 id="gitignore-additions-when-using-sops"><code>.gitignore</code> additions when using SOPS</h4>
+<pre><code class="language-gitignore"># Never commit decrypted secrets — only commit *.sops.yaml or *.enc.yaml
+*-plain.yaml
+*-decrypted.yaml
+/tmp/*.yaml</code></pre>
+<blockquote><strong>Key rotation:</strong> When a team member leaves, re-encrypt all SOPS files with their key removed from <code>.sops.yaml</code>. Run <code>sops updatekeys secrets.yaml</code> to rotate encryption without decrypting/re-encrypting manually — SOPS re-encrypts the data key for the new recipient set.</blockquote>
+<h2 id="caddy-configuration">Caddy Configuration</h2>
+<pre><code class="language-caddyfile">secrets.home.local    { tls internal; reverse_proxy localhost:8090 }
+trivy.home.local      { tls internal; reverse_proxy localhost:4954 }
+teleport.example.com  { reverse_proxy localhost:3080 }
+zap.home.local        { tls internal; reverse_proxy localhost:8088 }
+safeline.home.local   { tls internal; reverse_proxy localhost:9443 }
+fleet.home.local      { tls internal; reverse_proxy localhost:8412 }
+defectdojo.home.local { tls internal; reverse_proxy localhost:8081 }</code></pre>
+<hr>
+<h2 id="owasp-top-10-quick-reference">OWASP Top 10 Quick Reference</h2>
+<p>The OWASP Top 10 is the standard framework for web application security risk. Understanding what each category means helps you configure your scanning tools (ZAP, Semgrep, Trivy) with appropriate scope:</p>
+<table><thead><tr><th>#</th><th>Category</th><th>What it means</th><th>How to address</th></tr></thead><tbody><tr><td>A01</td><td><strong>Broken Access Control</strong></td><td>Users can act outside their intended permissions (IDOR, privilege escalation)</td><td>Enforce role-based access; deny by default; test all endpoints</td></tr><tr><td>A02</td><td><strong>Cryptographic Failures</strong></td><td>Sensitive data exposed due to weak/missing encryption</td><td>TLS everywhere; use modern cipher suites; never MD5/SHA1 for passwords</td></tr><tr><td>A03</td><td><strong>Injection</strong></td><td>Untrusted data interpreted as code (SQL, LDAP, command injection)</td><td>Parameterised queries; input validation; Semgrep SAST rules</td></tr><tr><td>A04</td><td><strong>Insecure Design</strong></td><td>Missing security controls at the design level</td><td>Threat modelling before building; security requirements in design docs</td></tr><tr><td>A05</td><td><strong>Security Misconfiguration</strong></td><td>Default credentials, unnecessary services, verbose error messages</td><td>Hardened defaults; remove unused services; ZAP scanner</td></tr><tr><td>A06</td><td><strong>Vulnerable Components</strong></td><td>Outdated libraries with known CVEs</td><td>Trivy scanning; Renovate for dependency updates; Dependabot</td></tr><tr><td>A07</td><td><strong>Auth & Session Failures</strong></td><td>Weak passwords, missing MFA, session fixation</td><td>Authelia/Authentik; strong session cookies; MFA everywhere</td></tr><tr><td>A08</td><td><strong>Software & Data Integrity</strong></td><td>Untrusted updates, CI/CD pipeline compromise</td><td>SLSA provenance; cosign image signing; Kyverno verification</td></tr><tr><td>A09</td><td><strong>Logging & Monitoring Failures</strong></td><td>Attacks go undetected due to insufficient logging</td><td>Audit logging; Graylog/OpenSearch; Grafana alerts on anomalies</td></tr><tr><td>A10</td><td><strong>Server-Side Request Forgery</strong></td><td>Server fetches attacker-controlled URLs, bypassing firewalls</td><td>Validate and restrict outbound URLs; network egress controls</td></tr></tbody></table>
+<p>ZAP (below) tests for A01, A02, A03, A05, A07, A10. Semgrep covers A03, A05, A08. Trivy covers A06.</p>
+<hr>
+<h2 id="mtls-mutual-tls-with-caddy">mTLS (Mutual TLS) with Caddy</h2>
+<p>Standard TLS proves the server's identity to the client. <strong>Mutual TLS (mTLS)</strong> requires the client to also present a certificate, so the server can verify the client's identity. This is the foundation of zero-trust service-to-service authentication.</p>
+<p>Use cases on a homelab: restricting an internal API to specific clients (e.g., only your monitoring server can call <code>/metrics</code>), protecting admin endpoints without a username/password flow, or securing inter-service communication.</p>
+<h5 id="generate-a-ca-and-client-certificate-with-step-ca">Generate a CA and client certificate with Step-CA</h5>
+<pre><code class="language-bash"># Install step CLI
+nix-env -iA nixpkgs.step-cli
+
+# Create a local CA
+step certificate create &quot;Home Lab CA&quot; ca.crt ca.key --profile root-ca --no-password --insecure
+
+# Issue a client certificate valid for 1 year
+step certificate create &quot;grafana-client&quot; client.crt client.key \
+  --profile leaf --ca ca.crt --ca-key ca.key \
+  --not-after 8760h --no-password --insecure</code></pre>
+<h5 id="configure-caddy-to-require-a-client-certificate">Configure Caddy to require a client certificate</h5>
+<pre><code class="language-caddyfile"># ~/caddy/Caddyfile
+api.home.local {
+  tls internal
+  tls {
+    client_auth {
+      mode require_and_verify
+      trusted_ca_cert_file /etc/caddy/client-ca.crt
+    }
+  }
+  reverse_proxy localhost:8080
+}</code></pre>
+<pre><code class="language-bash"># Copy the CA cert into the Caddy config directory
+cp ca.crt ~/caddy/client-ca.crt
+cd ~/caddy &amp;&amp; podman-compose restart</code></pre>
+<h5 id="test-with-the-client-certificate">Test with the client certificate</h5>
+<pre><code class="language-bash"># Without cert — rejected
+curl https://api.home.local/health
+
+# With cert — allowed
+curl --cert client.crt --key client.key https://api.home.local/health</code></pre>
+<hr>
+<h2 id="pod-security-standards">Pod Security Standards</h2>
+<p>Pod Security Standards (PSS) replaced PodSecurityPolicies in Kubernetes 1.25. PSS defines three policy levels enforced at the namespace level via labels — no webhook or CRD required.</p>
+<table><thead><tr><th>Level</th><th>What it restricts</th></tr></thead><tbody><tr><td><strong>Privileged</strong></td><td>No restrictions — for trusted system workloads</td></tr><tr><td><strong>Baseline</strong></td><td>Blocks the most dangerous configurations (privileged containers, hostNetwork, hostPID)</td></tr><tr><td><strong>Restricted</strong></td><td>Requires non-root user, drops all capabilities, enforces read-only root filesystem</td></tr></tbody></table>
+<pre><code class="language-yaml"># Label a namespace to enforce the restricted policy
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: production
+  labels:
+    pod-security.kubernetes.io/enforce: restricted     # reject violating pods
+    pod-security.kubernetes.io/warn: restricted        # warn even if not enforced
+    pod-security.kubernetes.io/audit: restricted       # log violations to audit log</code></pre>
+<pre><code class="language-bash"># Check which namespaces have PSS labels
+kubectl get namespaces -o json | jq -r '.items[] | select(.metadata.labels | has(&quot;pod-security.kubernetes.io/enforce&quot;)) | &quot;\(.metadata.name): \(.metadata.labels[&quot;pod-security.kubernetes.io/enforce&quot;])&quot;'
+
+# Dry-run: what would be blocked in this namespace?
+kubectl label namespace myapp \
+  pod-security.kubernetes.io/enforce=restricted \
+  --dry-run=server</code></pre>
+<p>Start with <code>warn</code> mode on existing namespaces to discover violations without breaking anything, then migrate to <code>enforce</code> once pods are compliant. Use Kyverno policies (documented elsewhere in the Kubernetes wiki) for more granular control beyond what PSS provides.</p>
+<hr>
+<h2 id="secrets-rotation-workflow">Secrets Rotation Workflow</h2>
+<p>Rotating a secret without restarting every pod that uses it requires a coordinated flow between your secrets store and the Kubernetes secrets layer. With External Secrets Operator (ESO):</p>
+<ol>
+<li><strong>Rotate the secret in OpenBao or Infisical</strong> — update the value in the secrets engine. The old value is no longer valid.</li>
+</ol>
+<ol>
+<li><strong>ESO syncs automatically</strong> — ESO polls the external store on the <code>refreshInterval</code> (default: 1h, configurable per <code>ExternalSecret</code>). To force immediate sync:</li>
+<p>``<code>bash kubectl annotate externalsecret myapp-secret \ force-sync=$(date +%s) \ --overwrite -n myapp </code>``</p>
+</ol>
+<ol>
+<li><strong>Kubernetes Secret is updated</strong> — ESO updates the <code>Secret</code> object in Kubernetes with the new value.</li>
+</ol>
+<ol>
+<li><strong>Application picks up the new value</strong> — depends on how the secret is consumed:</li>
+</ol>
+<ul>
+<li><strong>Volume mount</strong> — Kubernetes updates the mounted file automatically within 60–90 seconds (kubelet sync period). The application must watch the file for changes or be restarted.</li>
+<li><strong>Environment variable</strong> — environment variables are set at pod startup. The pod must be restarted to see the new value: <code>kubectl rollout restart deployment/myapp</code></li>
+<li><strong>Reloader</strong> — use <a href="https://github.com/stakater/Reloader">Reloader</a> to automatically restart pods when their referenced Secret changes:</li>
+<p>``<code>yaml # Add annotation to your Deployment annotations: reloader.stakater.com/auto: &quot;true&quot; </code>``</p>
+</ul>
+<p>The full flow from rotate to running with new value takes: ESO sync interval + Kubernetes propagation delay + pod restart time. Reduce <code>refreshInterval</code> on high-sensitivity secrets.</p>
+<hr>
+<h2 id="supply-chain-attack-vectors">Supply Chain Attack Vectors</h2>
+<p>The SLSA provenance and cosign signing setup (documented above) defends against specific supply chain attacks. Understanding the vectors helps you prioritise:</p>
+<p><strong>Typosquatting:</strong> — a malicious image <code>ngiinx:latest</code> or package <code>lodahs</code> waiting for a typo. Mitigation: use a private registry mirror that only allows approved images; pin images to digests (<code>nginx@sha256:abc123</code>) not tags.</p>
+<p><strong>Dependency confusion:</strong> — an attacker publishes a public package with the same name as your internal private package, betting that the build tool resolves the public one. Mitigation: scope all internal packages (e.g., <code>@mycompany/utils</code>), configure package managers to only resolve scoped packages from your internal registry.</p>
+<p><strong>Base image poisoning:</strong> — a compromised upstream base image (<code>FROM node:20</code>) introduces malware before your build runs. Mitigation: pin base images to their digest; Trivy scan every build; use images from verified publishers; consider distroless bases (smaller surface).</p>
+<p><strong>CI/CD pipeline compromise:</strong> — an attacker gains write access to your CI system and injects malicious build steps. Mitigation: separate build credentials from deployment credentials; use OIDC short-lived tokens instead of long-lived secrets in CI; audit pipeline logs; use Tekton Chains for SLSA attestations.</p>
+<hr>
+<h2 id="vaultwarden-emergency-kit">Vaultwarden Emergency Kit</h2>
+<p>If you lose access to your Vaultwarden vault (lost 2FA device, forgotten master password), you need recovery options set up <em>before</em> the emergency. Bitwarden/Vaultwarden provides two:</p>
+<p><strong>Emergency Access:</strong> — grant a trusted contact the ability to request access to your vault. You have a configurable window (1–90 days) to deny the request. If you don't deny it, they gain read or takeover access. Set this up under <em>Settings → Emergency Access</em> while you have normal access.</p>
+<p><strong>Printed Recovery Code (Two-Factor Recovery):</strong> — if you lose your 2FA device, you need a recovery code to bypass 2FA. In Vaultwarden: <em>Settings → Two-step Login → View Recovery Code</em>. Print this code or store it in a fireproof safe offline. Without this code and without your 2FA device, your vault is locked permanently — there is no admin bypass.</p>
+<pre><code class="language-bash"># Admin: view all users (confirm emergency access is configured)
+curl -H &quot;Authorization: Bearer $VAULTWARDEN_ADMIN_TOKEN&quot; \
+  http://localhost:8222/admin/users
+
+# Admin: if a user is completely locked out, disable 2FA for their account
+# Go to /admin → Users → [username] → Deactivate two-factor authentication
+# Then have the user set up 2FA again from scratch</code></pre>
+<p>Store recovery codes separately from the device and separately from the password manager itself. A paper copy in a fireproof safe, or a laminated card in a safety deposit box, are both valid options.</p>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Vaultwarden WebSocket not working</td><td>Ensure the <code>/notifications/hub</code> path is proxied to port <code>3012</code> in Caddy</td></tr><tr><td>Authelia redirect loop</td><td>Verify <code>session.domain</code> in Authelia config matches the root domain of your services</td></tr><tr><td>Authentik worker not starting</td><td>Check that <code>AUTHENTIK_SECRET_KEY</code> is set and consistent across <code>server</code> and <code>worker</code> services</td></tr><tr><td>Keycloak <code>HTTPS required</code> error</td><td>Either enable HTTPS or use <code>start-dev</code> mode for local testing only</td></tr><tr><td>Zitadel masterkey error</td><td><code>ZITADEL_MASTERKEY</code> must be exactly 32 characters; generate with `openssl rand -base64 24 \</td><td>tr -d '='`</td></tr><tr><td>CrowdSec not blocking IPs</td><td>Confirm the firewall bouncer is installed and running on the host; check <code>cscli bouncers list</code></td></tr><tr><td>Step-CA cert not trusted by browser</td><td>Export and trust the root CA: <code>step ca root &gt; root.crt &amp;&amp; sudo trust anchor root.crt &amp;&amp; sudo update-ca-trust</code></td></tr><tr><td>Vaultwarden admin panel 404</td><td>The admin panel is at <code>/admin</code> — ensure <code>ADMIN_TOKEN</code> is set in the environment</td></tr><tr><td>Passbolt blank after first load</td><td>Ensure <code>APP_FULL_BASE_URL</code> includes <code>https://</code> and matches your Caddy domain exactly</td></tr><tr><td>Teleport node not joining</td><td>Verify the join token matches exactly and hasn't expired; check port <code>3025/tcp</code> is reachable from the node</td></tr><tr><td>Teleport SSH connection refused</td><td>Ensure the Teleport agent is running on the target node (<code>systemctl status teleport</code>); check <code>tsh ls</code> shows the node as online</td></tr><tr><td>Passbolt GPG key error</td><td>The <code>/etc/passbolt/gpg</code> volume must be writable; Passbolt generates its server key on first boot</td></tr><tr><td>OpenBao sealed after restart</td><td>OpenBao must be manually unsealed after every restart; automate with a startup script using stored unseal keys in a secure location</td></tr><tr><td>OpenBao <code>permission denied</code></td><td>Each path requires an explicit policy; run <code>bao policy write myapp-policy policy.hcl</code> to grant access</td></tr><tr><td>Wazuh agent not connecting</td><td>Verify port <code>1514/udp</code> and <code>1515/tcp</code> are open; check <code>WAZUH_MANAGER</code> env var points at the correct host</td></tr><tr><td>Wazuh dashboard blank</td><td>Feed sync takes 15–30 min after first boot; check <code>podman logs wazuh.manager</code> for sync progress</td></tr><tr><td>Greenbone scan shows no results</td><td>Wait for VT feed sync to complete (check <code>podman logs gvmd</code>); ensure the scan target IP is reachable</td></tr><tr><td>Greenbone <code>ospd not running</code></td><td>The <code>ospd-openvas</code> container needs <code>NET_ADMIN</code> and <code>NET_RAW</code> capabilities; verify they are in the compose file</td></tr><tr><td>Fail2ban not banning IPs</td><td>Confirm <code>cap-add NET_ADMIN</code> and <code>NET_RAW</code> are set; verify the log path inside the container matches the volume mount; test the filter with <code>fail2ban-regex</code></td></tr><tr><td>Fail2ban banning legitimate users</td><td>Whitelist trusted IPs in <code>jail.d/</code> with <code>ignoreip = 127.0.0.1/8 192.168.1.0/24 100.64.0.0/10</code> (last range covers Tailscale)</td></tr><tr><td>Trivy CVE database stale</td><td>The database auto-updates on each scan run; for the server mode, restart the container to force a refresh or set <code>--cache-ttl 1h</code></td></tr><tr><td>Trivy scan very slow on first run</td><td>The first run downloads the full vulnerability database (~200 MB); subsequent runs use the cache mounted at <code>/root/.cache/trivy</code></td></tr><tr><td>Coraza WAF blocking legitimate requests</td><td>Switch to <code>SecRuleEngine DetectionOnly</code>, review the audit log at <code>/var/log/caddy/coraza-audit.log</code>, suppress false positives with <code>SecRuleRemoveById</code>, then re-enable blocking</td></tr><tr><td>Coraza Caddy build fails</td><td>Ensure the host has Go and <code>xcaddy</code> in the builder stage; verify the Coraza plugin version is compatible with the Caddy version</td></tr><tr><td>SafeLine detector not starting</td><td>Check <code>podman logs safeline-detector</code> for shared memory errors; add <code>--shm-size 256m</code> to the container if needed; verify the <code>/resources</code> volume is writable</td></tr><tr><td>Suricata not detecting traffic</td><td>Verify <code>--network host</code> is set and the correct interface name is used (<code>ip link show</code>); confirm <code>af-packet</code> interface in <code>suricata.yaml</code> matches</td></tr><tr><td>Suricata rules not updating</td><td>Check internet access from the container; run <code>suricata-update list-sources</code> to confirm the source is registered; verify <code>/var/lib/suricata/rules</code> is writable</td></tr><tr><td>osquery not starting</td><td>Confirm <code>osqueryd</code> is enabled (<code>systemctl status osqueryd</code>); check <code>/var/log/osquery/osqueryd.ERROR</code> for config parse errors</td></tr><tr><td>osquery queries return no rows</td><td>Some tables require root or specific capabilities; run <code>sudo osqueryi</code> to test interactively</td></tr><tr><td>ZAP scan returns no findings</td><td>Ensure the target is reachable from within the container; for internal services use <code>--network host</code>; verify the API key matches</td></tr><tr><td>Nuclei templates out of date</td><td>Add <code>-update-templates</code> flag to the scan command, or run <code>nuclei -update-templates</code> explicitly before scanning</td></tr><tr><td>SOPS <code>age: no identity found</code></td><td>Ensure <code>SOPS_AGE_KEY_FILE</code> points to your Age private key file, or set <code>SOPS_AGE_KEY</code> env var with the key contents</td></tr><tr><td>SOPS decrypt fails with <code>mac check failed</code></td><td>The encrypted file was modified outside SOPS (e.g. a Git merge conflict marker was introduced); restore the original encrypted file from Git history</td></tr></tbody></table>
+<blockquote>🔒 <strong>Security checklist:</strong> - Disable Vaultwarden signups after creating your account - Rotate the Vaultwarden <code>ADMIN_TOKEN</code> after initial setup - Back up <code>/home/user/vaultwarden/data</code> daily — losing your password vault is catastrophic - Use Authelia or Authentik in front of any service exposed via Cloudflare Tunnel or Pangolin - Keep Fail2ban active and configured to watch Caddy logs - Review CrowdSec decisions weekly to catch false positives before they affect real users - Run a Nuclei sweep weekly across all exposed subdomains; schedule it via a systemd timer - Run a ZAP baseline scan before making any service publicly accessible - Start Suricata in IDS (detection-only) mode before switching to IPS (blocking) mode - Run <code>osquery</code> on every server and feed results to Wazuh or Loki for centralised host visibility</blockquote>
+<hr>
+<h2 id="caido-web-security-testing-proxy">Caido (Web Security Testing Proxy)</h2>
+<p><strong>Purpose:</strong> Modern alternative to Burp Suite Community — HTTP/HTTPS interception proxy with a clean UI, replay, fuzzing, and workflow automation. Written in Rust, significantly faster than Burp for large responses. Free tier is generous for personal/homelab security audits. Use alongside OWASP ZAP (automated scanning) for manual request inspection and testing.</p>
+<pre><code class="language-bash"># Install Caido via the official installer
+curl -fsSL https://caido.io/install.sh | bash
+
+# Or download the AppImage and run directly
+# https://caido.io/download
+
+# Start Caido (defaults to http://localhost:8080 as proxy, http://localhost:7777 as UI)
+caido</code></pre>
+<hr>
+<h2 id="rekor-software-transparency-log">Rekor (Software Transparency Log)</h2>
+<p><strong>Purpose:</strong> Sigstore's tamper-evident transparency log for software supply chain artefacts. Every cosign signature, SLSA provenance attestation, and SBOM attachment can be published to Rekor, creating an immutable, auditable record of what was signed and when. Clients verify that a signature appears in the log before trusting it — even if the signing key is compromised later, the time-stamp in Rekor proves when the signature was made.</p>
+<pre><code class="language-yaml"># ~/rekor/compose.yaml
+services:
+  rekor-server:
+    image: gcr.io/projectsigstore/rekor-server:latest
+    ports:
+      - 127.0.0.1:3000:3000
+    environment:
+      REKOR_TRILLIAN_LOG_SERVER_ADDRESS: trillian-log-server:8090
+      REKOR_ENABLE_RETRIEVE_API: &quot;true&quot;
+    depends_on: [trillian-log-server, trillian-log-signer, mysql]
+    restart: unless-stopped
+
+  trillian-log-server:
+    image: gcr.io/projectsigstore/trillian_log_server:latest
+    environment:
+      MYSQL_ADDR: mysql:3306
+      MYSQL_DB: trillian
+      MYSQL_USER: trillian
+      MYSQL_PASSWORD: changeme
+    depends_on: [mysql]
+    restart: unless-stopped
+
+  trillian-log-signer:
+    image: gcr.io/projectsigstore/trillian_log_signer:latest
+    environment:
+      MYSQL_ADDR: mysql:3306
+      MYSQL_DB: trillian
+      MYSQL_USER: trillian
+      MYSQL_PASSWORD: changeme
+    depends_on: [mysql]
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: trillian
+      MYSQL_USER: trillian
+      MYSQL_PASSWORD: changeme
+    volumes: [mysql_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  mysql_data:</code></pre>
+<pre><code class="language-bash">cd ~/rekor &amp;&amp; podman-compose up -d
+
+# Sign an image and upload provenance to your local Rekor
+cosign sign --key cosign.key \
+  --rekor-url http://rekor.home.local:3000 \
+  registry.home.local/myapp:v1.2.3
+
+# Verify against your local Rekor
+cosign verify --key cosign.pub \
+  --rekor-url http://rekor.home.local:3000 \
+  registry.home.local/myapp:v1.2.3</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">rekor.home.local { tls internal; reverse_proxy localhost:3000 }</code></pre>
+<hr>
+<h2 id="security-hardening-checklist">Security Hardening Checklist</h2>
+<p>A practical checklist for any new self-hosted service before exposing it:</p>
+<p><strong>Network layer:</strong></p>
+<ul>
+<li><input type="checkbox" disabled> Caddy is the only listener on 80/443; service binds to <code>127.0.0.1</code> only</li>
+<li><input type="checkbox" disabled> <code>firewalld</code> drops all inbound except 22, 80, 443 (and any intentional ports)</li>
+<li><input type="checkbox" disabled> CrowdSec bouncer is active and watching Caddy logs</li>
+<li><input type="checkbox" disabled> Fail2ban is watching Caddy/Authelia for brute-force</li>
+</ul>
+<p><strong>Authentication:</strong></p>
+<ul>
+<li><input type="checkbox" disabled> Default credentials changed (check docs for defaults)</li>
+<li><input type="checkbox" disabled> Admin registration disabled after first account created</li>
+<li><input type="checkbox" disabled> MFA configured for any admin accounts</li>
+<li><input type="checkbox" disabled> Authelia or Authentik placed in front if the app has weak auth</li>
+</ul>
+<p><strong>Secrets:</strong></p>
+<ul>
+<li><input type="checkbox" disabled> No secrets in environment variables that get printed to logs</li>
+<li><input type="checkbox" disabled> Compose files with secrets stored in SOPS-encrypted Git</li>
+<li><input type="checkbox" disabled> Long-lived API tokens rotated; short-lived tokens used where possible</li>
+</ul>
+<p><strong>Container security:</strong></p>
+<ul>
+<li><input type="checkbox" disabled> Container runs as non-root (check with <code>podman inspect --format '{{.Config.User}}'</code>)</li>
+<li><input type="checkbox" disabled> No <code>privileged: true</code> unless absolutely necessary</li>
+<li><input type="checkbox" disabled> Volumes mounted <code>:Z</code> for SELinux labelling</li>
+<li><input type="checkbox" disabled> No <code>host.docker.sock</code> mounted unless the service explicitly needs container access</li>
+</ul>
+<p><strong>Monitoring:</strong></p>
+<ul>
+<li><input type="checkbox" disabled> Service is in Uptime Kuma or Gatus for uptime monitoring</li>
+<li><input type="checkbox" disabled> Logs forwarded to Loki or Graylog</li>
+<li><input type="checkbox" disabled> Prometheus scraping if service exposes <code>/metrics</code></li>
+<li><input type="checkbox" disabled> Alertmanager rule for <code>service_down</code></li>
+</ul>
+<p><strong>Backup:</strong></p>
+<ul>
+<li><input type="checkbox" disabled> Data volume path identified and added to Restic backup config</li>
+<li><input type="checkbox" disabled> Backup tested (restore smoke test)</li>
+</ul>
+<hr>
+<h2 id="gitleaks-pre-commit-configuration">Gitleaks Pre-commit Configuration</h2>
+<p>Full team configuration for preventing secret leaks across all common secret types:</p>
+<pre><code class="language-toml"># .gitleaks.toml — place in repo root
+title = &quot;Gitleaks Config&quot;
+
+[[rules]]
+id = &quot;generic-api-key&quot;
+description = &quot;Generic API Key&quot;
+regex = '''(?i)(api[_-]?key|apikey|api[_-]?secret)['&quot;:\s=]+['&quot;]{0,1}([a-zA-Z0-9_\-]{20,})'''
+secretGroup = 2
+[rules.allowlist]
+  regexes = ['''EXAMPLE''', '''changeme''', '''placeholder''']
+
+[[rules]]
+id = &quot;aws-access-key-id&quot;
+description = &quot;AWS Access Key ID&quot;
+regex = '''(A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}'''
+
+[[rules]]
+id = &quot;private-key&quot;
+description = &quot;Private key&quot;
+regex = '''-----BEGIN (RSA|DSA|EC|OPENSSH|PGP) PRIVATE KEY'''
+
+[allowlist]
+  paths = [
+    '''.gitleaks.toml''',
+    '''vendor/''',
+    '''node_modules/''',
+    '''*.lock''',
+  ]
+  commits = [
+    # Add SHAs of commits with known false positives that have already been rotated
+  ]</code></pre>
+<pre><code class="language-bash"># Run gitleaks on entire git history
+gitleaks detect --source . --log-opts=&quot;--all&quot;
+
+# Run on staged files only (fast pre-commit check)
+gitleaks protect --staged</code></pre>
+<hr>
+<h2 id="security-incident-response-playbook">Security Incident Response Playbook</h2>
+<p>A lightweight IR playbook for a self-hosted homelab:</p>
+<h3 id="detection">Detection</h3>
+<ol>
+<li>Grafana OnCall / ntfy alert fires (Falco rule, Suricata signature, CrowdSec ban, Wazuh alert)</li>
+<li>Review the alert — is this a true positive?</li>
+<li>Escalate immediately if: shell spawned in container, unexpected outbound connection to external IP, rootkit indicators, mass file encryption (ransomware)</li>
+</ol>
+<h3 id="containment">Containment</h3>
+<pre><code class="language-bash"># Isolate a suspicious container
+podman stop &lt;container-name&gt;
+
+# Block a suspicious IP immediately
+sudo firewall-cmd --add-rich-rule='rule family=ipv4 source address=1.2.3.4 reject'
+
+# Revoke a compromised API token (example: Gitea)
+curl -X DELETE https://git.home.local/api/v1/user/keys/&lt;key-id&gt; \
+  -H &quot;Authorization: token YOUR_ADMIN_TOKEN&quot;
+
+# Check what processes are making outbound connections
+ss -tnp | grep ESTABLISHED
+osqueryi &quot;SELECT pid, name, remote_address, remote_port FROM process_open_sockets WHERE remote_address NOT IN ('0.0.0.0', '::');&quot;</code></pre>
+<h3 id="evidence-collection">Evidence Collection</h3>
+<pre><code class="language-bash"># Capture container filesystem snapshot before stopping
+podman export &lt;container&gt; &gt; container-snapshot-$(date +%Y%m%d-%H%M).tar
+
+# Save relevant logs
+journalctl --since &quot;2 hours ago&quot; &gt; /tmp/system-logs-$(date +%Y%m%d).txt
+podman logs &lt;container&gt; &gt; /tmp/container-logs-$(date +%Y%m%d).txt
+
+# List all active connections at time of incident
+ss -tnp &gt; /tmp/connections-$(date +%Y%m%d-%H%M).txt
+
+# List all running processes
+ps auxf &gt; /tmp/processes-$(date +%Y%m%d-%H%M).txt</code></pre>
+<h3 id="recovery">Recovery</h3>
+<ol>
+<li>Rotate all secrets the compromised service had access to</li>
+<li>Re-provision from a clean backup (verify backup predates compromise)</li>
+<li>Patch the exploited vulnerability before bringing service back online</li>
+<li>Write a blameless postmortem (template in productivity.md)</li>
+</ol>
+<hr>
+<h2 id="caddy-additional-routes">Caddy (additional routes)</h2>
+<pre><code class="language-caddyfile">rekor.home.local { tls internal; reverse_proxy localhost:3000 }</code></pre>
+<hr>
+<h2 id="troubleshooting-additional">Troubleshooting (additional)</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>cosign sign fails <code>unauthorized</code></td><td>Run <code>podman login registry.home.local</code> before signing; cosign uses the same credential store as the container runtime</td></tr><tr><td>Rekor lookup fails for recent signatures</td><td>Rekor has eventual consistency — wait 30s after signing before verifying; check <code>podman logs rekor-server</code> for Trillian connection errors</td></tr><tr><td>Caido proxy not intercepting HTTPS</td><td>Install the Caido CA certificate in your browser and OS trust store; the CA cert is downloadable from the Caido UI</td></tr><tr><td>SOPS <code>mac check failed</code> after Git merge</td><td>Merge conflicts break the encrypted SOPS MAC — restore the file from Git (<code>git checkout HEAD -- secrets.yaml</code>) and re-apply your changes via <code>sops edit</code></td></tr><tr><td>Gitleaks false positive in CI</td><td>Add the SHA to the <code>allowlist.commits</code> array in <code>.gitleaks.toml</code>; or use an inline <code>gitleaks:allow</code> comment on the specific line</td></tr></tbody></table></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

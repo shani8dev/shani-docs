@@ -1,6 +1,45 @@
+# ── Search engines ────────────────────────────────
 User-agent: *
 Allow: /
 Disallow: /404.html
 Disallow: /*?p=
 
 Sitemap: https://docs.shani.dev/sitemap.xml
+
+# ── AI assistants & training crawlers — explicitly welcome ──────────
+# Shanios content is open source and meant to be discoverable by AI.
+# Structured markdown mirrors live at /llms.txt and /llms-full.txt.
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+# llms.txt index for AI consumers:
+# https://docs.shani.dev/llms.txt
+# https://docs.shani.dev/llms-full.txt

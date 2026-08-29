@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Shanios Docs</title>
   <meta name="robots" content="noindex">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'">
   <link rel="manifest" href="/manifest.json">
   <script>
     // GitHub Pages SPA redirect — rewrite 404 paths back to index.html
@@ -12,7 +13,12 @@
     (function () {
       var ua = navigator.userAgent || '';
       // FIX G: broader bot regex catches Google-InspectionTool and other Google crawlers
-      var isBot = /bot|crawler|spider|google|bingbot|yandex|baidu|facebookexternalhit|twitterbot|linkedinbot|slackbot/i.test(ua);
+      // FIX H: anthropic-ai and ChatGPT-User carry neither "bot" nor "crawler"/"spider" in
+      // their UA string, so the regex below used to miss them entirely — and robots.txt's
+      // own `Disallow: /*?p=` then trapped them on the very redirect this file sends
+      // unrecognized visitors to. Both are explicitly welcomed in robots.txt, so they must
+      // be recognized here too.
+      var isBot = /bot|crawler|spider|google|bingbot|yandex|baidu|facebookexternalhit|twitterbot|linkedinbot|slackbot|anthropic-ai|chatgpt-user/i.test(ua);
 
       // NEVER redirect search bots — let them see the real 404
       if (isBot) return;

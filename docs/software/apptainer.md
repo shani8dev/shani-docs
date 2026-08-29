@@ -1,7 +1,7 @@
 ---
 title: Apptainer (HPC Containers)
 section: Software & Apps
-updated: 2026-05-07
+updated: 2026-08-28
 ---
 
 # Apptainer (HPC Containers)
@@ -270,3 +270,10 @@ export APPTAINER_CACHEDIR=/scratch/$USER/apptainer-cache
 - **Keep the `.def` in version control.** The `.sif` is a build artefact; the `.def` is the source.
 - **Test locally before submitting to cluster.** Run on a small dataset locally first.
 - **Use `--bind` explicitly for data directories.** Don't rely on automatic home binding for large datasets.
+
+## See Also
+
+- [Containers](containers) — overview of all container runtimes
+- [GPU Containers](gpu-containers) — NVIDIA/AMD access in containers
+- [Distrobox](distrobox) — mutable dev environments with host integration
+- [Linux Containers (LXC/LXD)](lxc-lxd) — system containers

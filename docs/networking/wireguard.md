@@ -1,7 +1,7 @@
 ---
 title: WireGuard (Manual)
 section: Networking
-updated: 2026-04-18
+updated: 2026-08-28
 ---
 
 # WireGuard — Manual Peer-to-Peer VPN
@@ -189,3 +189,9 @@ sudo wg-quick save wg0
 | Client behind NAT won't connect | Set `PersistentKeepalive = 25` in the client's `[Peer]` block to keep the NAT hole open |
 | `RTNETLINK answers: Operation not supported` | The WireGuard kernel module isn't loaded — run `sudo modprobe wireguard` |
 | Config changes not applied | `wg-quick` does not hot-reload — bring the interface down and up: `sudo wg-quick down wg0 && sudo wg-quick up wg0` |
+
+## See Also
+
+- [NetworkManager VPN GUI setup](networkmanager-vpn)
+- [openresolv DNS handling](openresolv)
+- [Networking guide blog](https://blog.shani.dev/post/shani-os-networking-guide)

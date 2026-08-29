@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>shani-health Reference — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="shani-health Reference   is the system health and diagnostics CLI for Shanios. It provides a comprehensive single-command view of your system's state: boot…">
+  <meta name="description" id="meta-desc"     content="shani-health is the system health and diagnostics CLI for Shanios. It provides a comprehensive single-command view of your system's state: boot chain, secu…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="shani-health Reference">
-  <meta property="og:description" id="og-desc"    content="shani-health Reference   is the system health and diagnostics CLI for Shanios. It provides a comprehensive single-command view of your system's state: boot…">
+  <meta property="og:description" id="og-desc"    content="shani-health is the system health and diagnostics CLI for Shanios. It provides a comprehensive single-command view of your system's state: boot chain, secu…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/updates/shani-health/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="shani-health Reference">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="shani-health Reference">
-  <meta name="twitter:description" id="tw-desc"  content="shani-health Reference   is the system health and diagnostics CLI for Shanios. It provides a comprehensive single-command view of your system's state: boot…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="shani-health is the system health and diagnostics CLI for Shanios. It provides a comprehensive single-command view of your system's state: boot chain, secu…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"shani-health Reference","description":"shani-health Reference   is the system health and diagnostics CLI for Shanios. It provides a comprehensive single-command view of your system's state: boot…","url":"https://docs.shani.dev/doc/updates/shani-health/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"shani-health Reference","description":"shani-health is the system health and diagnostics CLI for Shanios. It provides a comprehensive single-command view of your system's state: boot chain, secu…","url":"https://docs.shani.dev/doc/updates/shani-health/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"shani-health Reference","item":"https://docs.shani.dev/doc/updates/shani-health/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,12 +215,12 @@
         <h1 class="doc-title">shani-health Reference</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Updates &amp; Config</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p><code>shani-health</code> is the system health and diagnostics CLI for Shanios. It provides a comprehensive single-command view of your system's state: boot chain, security posture, storage, hardware, networking, packages, containers, and more. It is the primary tool for diagnosing issues and checking system integrity.</p>
-<p>---</p>
-<h2>Basic Usage</h2>
+<hr>
+<h2 id="basic-usage">Basic Usage</h2>
 <pre><code class="language-bash"># Full system status report (default)
 shani-health
 
@@ -244,12 +246,17 @@ shani-health --export-logs ~/           # Bundle diagnostics for bug reports
 shani-health --history 100              # Last 100 deploy/rollback events
 shani-health --verify                   # Deep integrity check (runs Btrfs scrub)
 shani-health --clear-boot-failure       # Clear a stale boot failure marker
+shani-health --fix                      # Apply safe automatic fixes where offered
 
 # Output options
-shani-health -v                         # Verbose/debug output</code></pre>
-<p>---</p>
-<h2>What shani-health Checks</h2>
-<h3>Full Report (default / <code>--info</code>)</h3>
+shani-health -v                         # Verbose/debug output
+shani-health --json                     # Machine-readable JSON (scripting/CI)
+shani-health --nagios                   # Nagios plugin output (single-line + exit code)
+shani-health -h, --help                 # Usage summary</code></pre>
+<p>Only one of <code>--json</code>, <code>--nagios</code>, or <code>--prometheus</code> may be used per run — combining them exits with an error. All three imply root is required (<code>_require_root</code> runs before any report).</p>
+<hr>
+<h2 id="what-shani-health-checks">What shani-health Checks</h2>
+<h3 id="full-report-default---info">Full Report (default / <code>--info</code>)</h3>
 <p>The default run covers every component in one pass. Sections include:</p>
 <ul>
 <li><strong>OS & Slots</strong> — version, profile, channel, uptime, hostname, locale, timezone, machine-id, and the current/expected/candidate slot state</li>
@@ -287,23 +294,23 @@ shani-health -v                         # Verbose/debug output</code></pre>
 <li><strong>Core Dumps</strong> — systemd-coredump handler, recorded dumps</li>
 <li><strong>System Health</strong> — D-Bus, logind, nsswitch, failed logins, boot time, kernel version, home usage</li>
 </ul>
-<h3>Boot Report (<code>--boot</code>)</h3>
+<h3 id="boot-report---boot">Boot Report (<code>--boot</code>)</h3>
 <p>A focused view of the boot chain and deployment state. Covers OS/Slots, Boot Health, Boot Entries, Deployment, Update Tools, Data State, and Secure Boot. Use this after an update or when debugging boot issues.</p>
-<h3>Security Report (<code>--security</code>)</h3>
+<h3 id="security-report---security">Security Report (<code>--security</code>)</h3>
 <p>Covers Secure Boot, Kernel Security, Encryption, TPM2, Security Services, Security Tools, Kerberos, Users & Access, and Groups. Useful for security audits and hardening checks.</p>
-<h3>Hardware Report (<code>--hardware</code>)</h3>
+<h3 id="hardware-report---hardware">Hardware Report (<code>--hardware</code>)</h3>
 <p>Covers Hardware, Disk, Battery, Storage, and Firmware. Use when checking for disk health, temperatures, or firmware updates.</p>
-<h3>Network Report (<code>--network</code>)</h3>
+<h3 id="network-report---network">Network Report (<code>--network</code>)</h3>
 <p>Covers Network and Servers. Use when debugging connectivity, DNS, or server configuration issues.</p>
-<h3>Package Report (<code>--packages</code>)</h3>
+<h3 id="package-report---packages">Package Report (<code>--packages</code>)</h3>
 <p>Covers Package Managers, Backup Tools, Containers, Virtualisation, and Monitoring.</p>
-<p>---</p>
-<h2>Reading the Output</h2>
+<hr>
+<h2 id="reading-the-output">Reading the Output</h2>
 <p>Each row uses a colour-coded status prefix:</p>
-<p>| Prefix | Symbol | Meaning | |--------|--------|---------| | <code>OK</code> | ✓ green | Healthy | | <code>!</code> | ⚠ yellow | Warning — degraded but functional | | <code>!!</code> | ✗ red | Error — action required | | <code>--</code> | — dim | Informational | | <code>~~</code> | ○ cyan | Not enabled (optional feature) | | <code>&gt;&gt;</code> | ◉ green/dim | Enabled, idle (socket-activated) | | <code>-&gt;</code> | ↻ cyan | In progress |</p>
+<table><thead><tr><th>Prefix</th><th>Symbol</th><th>Meaning</th></tr></thead><tbody><tr><td><code>OK</code></td><td>✓ green</td><td>Healthy</td></tr><tr><td><code>!</code></td><td>⚠ yellow</td><td>Warning — degraded but functional</td></tr><tr><td><code>!!</code></td><td>✗ red</td><td>Error — action required</td></tr><tr><td><code>--</code></td><td>— dim</td><td>Informational</td></tr><tr><td><code>~~</code></td><td>○ cyan</td><td>Not enabled (optional feature)</td></tr><tr><td><code>&gt;&gt;</code></td><td>◉ green/dim</td><td>Enabled, idle (socket-activated)</td></tr><tr><td><code>-&gt;</code></td><td>↻ cyan</td><td>In progress</td></tr></tbody></table>
 <p>Recommendations are collected and printed as a numbered list at the bottom of the report.</p>
-<p>---</p>
-<h2>Storage Analysis (<code>--storage-info</code>)</h2>
+<hr>
+<h2 id="storage-analysis---storage-info">Storage Analysis (<code>--storage-info</code>)</h2>
 <pre><code class="language-bash">shani-health --storage-info</code></pre>
 <p>Mounts the Btrfs root at <code>subvolid=5</code> and reports:</p>
 <ul>
@@ -315,8 +322,8 @@ shani-health -v                         # Verbose/debug output</code></pre>
 <li>Reclaim hints: duperemove, bees status, stale snapshots</li>
 </ul>
 <p><code>shani-deploy</code> has no <code>--storage-info</code> flag of its own — the closest it comes is that <code>sudo shani-deploy --optimize</code> prints a per-subvolume compression summary (<code>@blue</code>/<code>@green</code>/<code>@data</code>/<code>@swap</code>) as a side effect after running deduplication. <code>shani-health --storage-info</code> is the dedicated, read-only way to inspect storage and works without triggering a dedup run.</p>
-<p>---</p>
-<h2>Log Management (<code>--clean-logs</code>)</h2>
+<hr>
+<h2 id="log-management---clean-logs">Log Management (<code>--clean-logs</code>)</h2>
 <pre><code class="language-bash"># Remove logs older than 30 days (default)
 shani-health --clean-logs
 
@@ -331,8 +338,8 @@ shani-health --clean-logs 7</code></pre>
 <li>sysstat daily files beyond the retention window</li>
 <li>Leaves current active log files untouched</li>
 </ul>
-<p>---</p>
-<h2>Integrity Verification (<code>--verify</code>)</h2>
+<hr>
+<h2 id="integrity-verification---verify">Integrity Verification (<code>--verify</code>)</h2>
 <pre><code class="language-bash">shani-health --verify</code></pre>
 <p>Performs a deep integrity check that includes:</p>
 <ol>
@@ -343,17 +350,17 @@ shani-health --clean-logs 7</code></pre>
 <li>Immutability checks (root read-only, <code>/var</code> tmpfs, <code>/etc</code> overlay)</li>
 <li>Critical subvolume mount verification</li>
 </ol>
-<blockquote><p><strong>Note:</strong> Btrfs scrub reads and checksums every block. On large volumes this can take minutes to hours. The command waits for completion.</p></blockquote>
+<blockquote><strong>Note:</strong> Btrfs scrub reads and checksums every block. On large volumes this can take minutes to hours. The command waits for completion.</blockquote>
 <p>Returns exit code <code>1</code> if any integrity issues are found.</p>
-<p>---</p>
-<h2>Journal Viewer (<code>--journal</code>)</h2>
+<hr>
+<h2 id="journal-viewer---journal">Journal Viewer (<code>--journal</code>)</h2>
 <pre><code class="language-bash">shani-health --journal                    # Critical messages (default)
 shani-health --journal err                # Errors and above
 shani-health --journal warning            # Warnings and above
 shani-health --journal err --since -2h    # Errors in the last 2 hours</code></pre>
 <p>Shows categorised journal messages grouped by priority level, AppArmor denials with top offending profiles, OOM kill events, and currently failed units.</p>
-<p>---</p>
-<h2>Bug Report Bundle (<code>--export-logs</code>)</h2>
+<hr>
+<h2 id="bug-report-bundle---export-logs">Bug Report Bundle (<code>--export-logs</code>)</h2>
 <pre><code class="language-bash">shani-health --export-logs ~/</code></pre>
 <p>Creates a compressed bundle at <code>~/shanios-report-&lt;timestamp&gt;.tar.gz</code> containing:</p>
 <ul>
@@ -363,11 +370,11 @@ shani-health --journal err --since -2h    # Errors in the last 2 hours</code></p
 <li><code>loader.conf</code>, <code>loader-entries.txt</code>, <code>efi-binaries.txt</code> from the ESP</li>
 </ul>
 <p>Safe to attach to bug reports — no private keys or passwords are included.</p>
-<p>---</p>
-<h2>Scripting with shani-health</h2>
-<h3>Exit Codes</h3>
-<p>| Code | Meaning | |------|---------| | <code>0</code> | No issues found | | <code>1</code> | Issues found (warnings or errors) |</p>
-<h3>Fleet Health Monitoring</h3>
+<hr>
+<h2 id="scripting-with-shani-health">Scripting with shani-health</h2>
+<h3 id="exit-codes">Exit Codes</h3>
+<table><thead><tr><th>Code</th><th>Meaning</th></tr></thead><tbody><tr><td><code>0</code></td><td>No issues found</td></tr><tr><td><code>1</code></td><td>Issues found (warnings or errors)</td></tr></tbody></table>
+<h3 id="fleet-health-monitoring">Fleet Health Monitoring</h3>
 <pre><code class="language-bash"># Remote check via SSH or Tailscale
 ssh admin@machine-name.tailnet.ts.net 'shani-health --boot'
 
@@ -384,15 +391,15 @@ Persistent=true
 [Install]
 WantedBy=timers.target</code></pre>
 <p>For Nagios/Zabbix-style monitoring, the non-zero exit code on any issue makes <code>shani-health</code> usable directly as a check script. For Prometheus/Grafana, wrap the output in a custom exporter that parses the coloured rows.</p>
-<p>---</p>
-<h2>Relationship to Other Tools</h2>
-<p>| Command | Focus | |---------|-------| | <code>shani-health</code> | Live system health — all components | | <code>shani-health --storage-info</code> | Deep Btrfs storage analysis | | <code>sudo shani-deploy --optimize</code> | Runs Btrfs deduplication; prints per-subvolume compressed sizes as a side effect afterward | | <code>shani-health --verify</code> | Deep integrity check with scrub | | <code>sudo shani-deploy -r</code> | Roll back inactive slot |</p>
-<p>---</p>
-<h2>See Also</h2>
+<hr>
+<h2 id="relationship-to-other-tools">Relationship to Other Tools</h2>
+<table><thead><tr><th>Command</th><th>Focus</th></tr></thead><tbody><tr><td><code>shani-health</code></td><td>Live system health — all components</td></tr><tr><td><code>shani-health --storage-info</code></td><td>Deep Btrfs storage analysis</td></tr><tr><td><code>sudo shani-deploy --optimize</code></td><td>Runs Btrfs deduplication; prints per-subvolume compressed sizes as a side effect afterward</td></tr><tr><td><code>shani-health --verify</code></td><td>Deep integrity check with scrub</td></tr><tr><td><code>sudo shani-deploy -r</code></td><td>Roll back inactive slot</td></tr></tbody></table>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="system">System Updates</a> — how <code>shani-deploy</code> works</li>
-<li><a href="../arch/boot">Boot Process</a> — boot chain and health services</li>
-<li><a href="../security/gen-efi">gen-efi Reference</a> — UKI generation and signing</li>
+<li><a href="../arch/boot.md">Boot Process</a> — boot chain and health services</li>
+<li><a href="../security/gen-efi.md">gen-efi Reference</a> — UKI generation and signing</li>
 </ul></div>
     </div>
 

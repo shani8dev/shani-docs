@@ -36,24 +36,37 @@ function mdToHtmlFallback(md) {
   const blocks = [];
   let src = String(md || '').replace(/\r\n/g, '\n');
 
-  // Pull out fenced code blocks first so nothing inside them gets mangled
-  src = src.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
-    const idx = blocks.push(
-      `<pre><code${lang ? ` class="language-${escXml(lang)}"` : ''}>${escXml(code.replace(/\n$/, ''))}</code></pre>`
-    ) - 1;
-    return `\u0000BLOCK${idx}\u0000`;
-  });
 
   const inline = s => s
     .replace(/`([^`]+)`/g, (_, c) => `<code>${escXml(c)}</code>`)
+    .replace(/!\[([^\]]*)\]\(([^)\s]+)[^)]*\)/g, (_, a, u) => `<img src="${escXml(u)}" alt="${escXml(a)}" loading="lazy">`)
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    .replace(/~~([^~]+)~~/g, '<del>$1</del>')
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, t, u) => `<a href="${escXml(u)}">${t}</a>`);
 
   const lines = src.split('\n');
+  const slugifyH = t => t.toLowerCase().replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'-');
+  let inQuoteFence = false, qfLang = '', qfBuf = [];
+  const usedIds = new Set();
+  const uniqId = t => { let id = slugifyH(t) || 'section'; let n = id; let k = 2;
+    while (usedIds.has(n)) n = id + '-' + k++; usedIds.add(n); return n; };
+
+  // Blockquoted fences ("> ```bash … > ```"): convert to a quoted code
+  // block before line processing so the fence scanner sees clean fences.
+  src = src.replace(
+    /^> ```([\w-]*)\n([\s\S]*?)^> ```[ \t]*$/gm,
+    (_, lang, body) => {
+      const lines = body.split('\n').map(l => l.replace(/^> ?/, ''));
+      const esc2 = t => t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return `<blockquote><pre><code${lang ? ` class="language-${lang}"` : ''}>${esc2(lines.join('\n').replace(/\n$/,''))}</code></pre></blockquote>`;
+    });
+  let inFence = false, fenceChar = '`', fenceLen = 0, fenceLang = '', fenceBuf = [];
   const out = [];
   let para = [];
   let list = null; // 'ul' | 'ol'
+  let quote = null; // collected blockquote lines
+  let table = null; // { head:[], rows:[][] }
 
   const flushPara = () => {
     if (para.length) { out.push(`<p>${inline(para.join(' ').trim())}</p>`); para = []; }
@@ -61,39 +74,106 @@ function mdToHtmlFallback(md) {
   const flushList = () => {
     if (list) { out.push(`</${list}>`); list = null; }
   };
+  const flushQuote = () => {
+    if (quote) { out.push(`<blockquote>${inline(quote.join(' ').trim())}</blockquote>`); quote = null; }
+  };
+  const flushTable = () => {
+    if (!table) return;
+    const cell = c => `<td>${inline(c.trim())}</td>`;
+    let h = '<thead><tr>' + table.head.map(c => `<th>${inline(c.trim())}</th>`).join('') + '</tr></thead>';
+    let b = '';
+    for (const row of table.rows) b += '<tr>' + row.map(cell).join('') + '</tr>';
+    out.push(`<table>${h}<tbody>${b}</tbody></table>`);
+    table = null;
+  };
+  const flushAll = () => { flushPara(); flushList(); flushQuote(); flushTable(); };
 
-  for (const line of lines) {
-    if (/^\u0000BLOCK\d+\u0000$/.test(line.trim())) {
-      flushPara(); flushList();
-      out.push(line.trim());
+  for (let li = 0; li < lines.length; li++) {
+    const line = lines[li];
+
+    // ── Fenced code (CommonMark-style): a fence OPENER may carry an info
+    // string; a CLOSER is backticks/tildes only, ≥ opener length. Lines
+    // inside a fence are always literal — nested ``` examples can never
+    // desync the parser.
+    {
+      const m = line.match(/^(`{3,}|~{3,})(.*)$/);
+      if (inFence) {
+        if (m && m[1][0] === fenceChar && m[1].length >= fenceLen && !m[2].trim()) {
+          const idx = blocks.push(
+            `<pre><code${fenceLang ? ` class="language-${escXml(fenceLang)}"` : ''}>${escXml(fenceBuf.join('\n'))}</code></pre>`
+          ) - 1;
+          flushAll();
+          out.push(`\u0000BLOCK${idx}\u0000`);
+          inFence = false; fenceBuf = [];
+        } else {
+          fenceBuf.push(line);
+        }
+        continue;
+      }
+      if (m && m[2].trim()) { // opener requires info string (or bare ``` handled below)
+        flushAll();
+        inFence = true; fenceChar = m[1][0]; fenceLen = m[1].length;
+        fenceLang = m[2].trim().split(/\s+/)[0]; fenceBuf = [];
+        continue;
+      }
+      if (m && !m[2].trim()) { // bare fence with no info string: treat as opener too
+        flushAll();
+        inFence = true; fenceChar = m[1][0]; fenceLen = m[1].length;
+        fenceLang = ''; fenceBuf = [];
+        continue;
+      }
+    }
+
+    if (/^\u0000BLOCK\d+\u0000$/.test(line.trim())) { flushAll(); out.push(line.trim()); continue; }
+
+    // GFM table: current line has |, next line is a |---|---| separator
+    if (line.includes('|') && li + 1 < lines.length &&
+        /^\s*\|(\s*:?-+:?\s*\|)+\s*$/.test(lines[li + 1]) &&
+        /\|/.test(lines[li + 1])) {
+      flushAll();
+      const splitRow = r => r.trim().replace(/^\||\|$/g, '').split('|');
+      table = { head: splitRow(line), rows: [] };
+      li++; // skip separator
       continue;
     }
+    if (table && line.includes('|')) { table.rows.push(line.trim().replace(/^\||\|$/g, '').split('|')); continue; }
+    flushTable();
+
     const h = line.match(/^(#{1,6})\s+(.*)$/);
-    if (h) {
-      flushPara(); flushList();
-      const lvl = h[1].length;
-      out.push(`<h${lvl}>${inline(h[2].trim())}</h${lvl}>`);
-      continue;
-    }
+    if (h) { flushAll(); const lvl = h[1].length; const ht = inline(h[2].trim()); out.push(`<h${lvl} id="${uniqId(h[2].trim())}">${ht}</h${lvl}>`); continue; }
+
+    // Horizontal rule (standalone --- / *** with blank-ish context)
+    if (/^\s*(-{3,}|\*{3,})\s*$/.test(line)) { flushAll(); out.push('<hr>'); continue; }
+
+    const task = line.match(/^\s*[-*+]\s+\[([ xX])\]\s+(.*)$/);
     const ul = line.match(/^\s*[-*+]\s+(.*)$/);
     const ol = line.match(/^\s*\d+\.\s+(.*)$/);
-    if (ul || ol) {
-      flushPara();
-      const tag = ul ? 'ul' : 'ol';
+    if (task || ul || ol) {
+      flushPara(); flushQuote();
+      const tag = ol ? 'ol' : 'ul';
       if (list !== tag) { flushList(); out.push(`<${tag}>`); list = tag; }
-      out.push(`<li>${inline((ul || ol)[1].trim())}</li>`);
+      if (task) {
+        const checked = task[1].toLowerCase() === 'x';
+        out.push(`<li><input type="checkbox" disabled${checked ? ' checked' : ''}> ${inline(task[2].trim())}</li>`);
+      } else {
+        out.push(`<li>${inline((ul || ol)[1].trim())}</li>`);
+      }
       continue;
     }
+
     const bq = line.match(/^\s*>\s?(.*)$/);
     if (bq) {
       flushPara(); flushList();
-      out.push(`<blockquote><p>${inline(bq[1].trim())}</p></blockquote>`);
+      if (!quote) quote = [];
+      quote.push(bq[1]);
       continue;
     }
+    flushQuote();
+
     if (!line.trim()) { flushPara(); flushList(); continue; }
     para.push(line.trim());
   }
-  flushPara(); flushList();
+  flushAll();
 
   let html = out.join('\n');
   blocks.forEach((b, i) => { html = html.replace(`\u0000BLOCK${i}\u0000`, b); });
@@ -108,14 +188,24 @@ function mdToHtml(md) {
   return mdToHtmlFallback(md);
 }
 
-// Strip a leading "# Title" line from the body if it duplicates the doc's
-// title (which the stub already renders in <h1 class="doc-title">) —
-// otherwise every page ships two H1s, which is bad for SEO/structure.
-function stripDuplicateLeadingH1(body, title) {
-  const m = String(body || '').match(/^\s*#\s+(.+?)\s*\n([\s\S]*)$/);
-  if (!m) return body;
-  const norm = s => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
-  return norm(m[1]) === norm(title) ? m[2] : body;
+// Strip a leading "# Heading" line from the body — the stub always
+// renders its own <h1 class="doc-title">{title}</h1> immediately before
+// `.prose`, so ANY genuinely-leading H1 is redundant by construction,
+// not just one that happens to match the frontmatter title verbatim.
+// (Originally this only stripped on an exact title match, which missed
+// ~36 pages whose body H1 is a fuller/differently-worded restatement of
+// the title, e.g. "Troubleshooting Guide" vs. title "Troubleshooting" —
+// those still shipped two H1s. See AGENTS.md.)
+function stripDuplicateLeadingH1(body) {
+  const text = String(body || '');
+  // Skip a leading blockquote note (e.g. "> **Portability note:** ...")
+  // before looking for the H1 — the note itself must stay in the output,
+  // only the redundant H1 after it gets removed.
+  const leadMatch = text.match(/^\s*((?:>.*\n?)+\n*)/);
+  const lead = leadMatch ? leadMatch[0] : '';
+  const rest = text.slice(lead.length);
+  const m = rest.match(/^\s*#\s+.+?\s*\n([\s\S]*)$/);
+  return m ? lead + m[1] : body;
 }
 
 // Same admonition syntax the client renders (> [!NOTE] ...), turned into
@@ -160,8 +250,30 @@ const configRaw = fs.existsSync(CONFIG_PATH)
   : '';
 
 function getConfig(key, fallback) {
-  const m = configRaw.match(new RegExp(key + ":\\s*['\"`]([^'\"`]+)['\"`]"));
-  return m ? m[1] : fallback;
+  // The closing delimiter must be the SAME character as the opening one,
+  // so a value may contain the other quote types (e.g. "team's OS").
+  // A naive [^'"`]+ would truncate at the first quote of any kind.
+  const esc = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const m = configRaw.match(new RegExp(esc + ":\\s*('([^']*)'|\"([^\"]*)\"|`([^`]*)`)"));
+  if (!m) return fallback;
+  return m[2] !== undefined ? m[2] : (m[3] !== undefined ? m[3] : m[4]);
+}
+
+// ── Service-worker cache busting ─────────────────────────────────
+// Rewrites SHELL_CACHE's version suffix in sw.js with today's build stamp.
+function bumpServiceWorkerCache(baseName) {
+  const swPath = path.join(__dirname, 'sw.js');
+  if (!fs.existsSync(swPath)) return;
+  let sw = fs.readFileSync(swPath, 'utf8');
+  const m = sw.match(/^const SHELL_CACHE = '([^-]+)-[^']*';$/m);
+  if (!m) {
+    console.warn('⚠  sw.js SHELL_CACHE format unrecognized — not bumping');
+    return;
+  }
+  const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  sw = sw.replace(/^const SHELL_CACHE = '.*';$/m, `const SHELL_CACHE = '${baseName}-${stamp}';`);
+  fs.writeFileSync(swPath, sw);
+  console.log(`✓ sw.js SHELL_CACHE → ${baseName}-${stamp}`);
 }
 
 function getConfigNum(key, fallback) {
@@ -181,7 +293,7 @@ function parseSitemapStaticUrls() {
   let em;
   while ((em = entryRe.exec(block)) !== null) {
     const inner = em[1];
-    const get = k => { const r = inner.match(new RegExp(k + "\\s*:\\s*['\"`]([^'\"`]*)['\"`]")); return r ? r[1] : ''; };
+    const get = k => { const r = inner.match(new RegExp(k + ":\\s*('([^']*)'|\"([^\"]*)\"|`([^`]*)`)")); if (!r) return ''; return r[2] !== undefined ? r[2] : (r[3] !== undefined ? r[3] : r[4]); };
     entries.push({ path: get('path'), priority: get('priority') || '0.6', changefreq: get('changefreq') || 'monthly' });
   }
   return entries;
@@ -189,6 +301,9 @@ function parseSitemapStaticUrls() {
 
 // ── Config values ─────────────────────────────────────────────────
 const WIKI_URL        = getConfig('WIKI_URL',        'https://docs.shani.dev');
+const DOC_CONTENT_PLACEHOLDER = '<div class="content__inner" id="doc-content" role="article"></div>';
+const HOME_MARKER_START = '<!--PRERENDERED-DOCS-START-->';
+const HOME_MARKER_END   = '<!--PRERENDERED-DOCS-END-->';
 const SITE_TITLE      = getConfig('SITE_TITLE',      'Shanios Docs');
 const SITE_DESC       = getConfig('SITE_DESCRIPTION','Technical documentation for Shanios.');
 const AUTHOR          = getConfig('AUTHOR_NAME',     'Shrinivas Kumbhar');
@@ -220,18 +335,81 @@ function slugToTitle(slug) {
     .join(' ');
 }
 
-function autoExcerpt(body) {
-  const plain = body
+function mdToPlainText(text) {
+  return text
     .replace(/```[\s\S]*?```/g, '')
-    .replace(/`[^`]+`/g, '')
-    .replace(/!?\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
     .replace(/[*_~]{1,3}([^*_~]+)[*_~]{1,3}/g, '$1')
     .replace(/^#{1,6}\s+/gm, '')
     .replace(/^>\s*/gm, '')
     .replace(/^[-*+]\s+/gm, '')
+    .replace(/^(?:-{3,}|\*{3,}|_{3,})$/gm, '')
     .replace(/\n/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim();
+}
+
+function autoExcerpt(body) {
+  // Drop a leading H1 that just repeats the page title \u2014 it's already
+  // shown separately as <title>/og:title, so restating it here wastes
+  // the excerpt's ~155-char budget on a redundant repeat.
+  let text = body.replace(/^\s+/, '');
+  text = text.replace(/^#\s+.+\n+/, '').replace(/^\s+/, '');
+  // Drop a leading blockquote note (e.g. "> **Portability note:** ...")
+  // as long as real content remains after it \u2014 these are disclaimers,
+  // not page-specific summaries, and were producing identical excerpts
+  // across every page that opens with the same boilerplate note.
+  const stripped = text.replace(/^(?:>.*\n?)+\n*/, '');
+  if (stripped.trim().length > 40) text = stripped;
+
+  const plain = mdToPlainText(text);
   return plain.substring(0, 155) + (plain.length > 155 ? '\u2026' : '');
+}
+
+// \u2500\u2500 FAQPage schema extraction (docs/faq.md only) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// FAQ entries in this repo follow a strict, hand-authored convention:
+// a lone bolded question line ("**Does X work?**") followed by its
+// answer, up to the next question or a "## Section" / "---" boundary.
+// Mechanically reliable to extract \u2014 verified against the real file
+// before this was wired in (see AGENTS.md).
+function extractFaqPairs(body) {
+  const lines = body.split('\n');
+  const pairs = [];
+  let current = null;
+
+  function flush() {
+    if (!current) return;
+    const answer = mdToPlainText(current.answerLines.join('\n'));
+    // Skip fragments left behind when a code block was the actual
+    // payload and stripping it leaves a dangling lead-in ("...then
+    // run:") or an orphaned continuation ("Or select the...") \u2014 better
+    // to omit the pair than emit a broken-looking answer in search
+    // results.
+    const isFragment = /:$/.test(answer.trim())
+      || /^(Or|And|But|Then)\s+[a-z]/.test(answer.trim());
+    if (answer.length >= 15 && !isFragment) {
+      pairs.push({ question: current.q, answer });
+    }
+    current = null;
+  }
+
+  for (const line of lines) {
+    const qMatch = line.match(/^\*\*(.+\?)\*\*$/);
+    if (qMatch) {
+      flush();
+      current = { q: mdToPlainText(qMatch[1]), answerLines: [] };
+      continue;
+    }
+    if (/^##\s+/.test(line) || /^-{3,}$/.test(line.trim())) {
+      flush();
+      continue;
+    }
+    if (current) current.answerLines.push(line);
+  }
+  flush();
+  return pairs;
 }
 
 function walkDocs(dir, base) {
@@ -284,7 +462,35 @@ function buildStub(doc) {
     isPartOf: { '@type': 'WebSite', name: SITE_TITLE, url: WIKI_URL },
   });
 
-  const bodyHtml = renderCallouts(mdToHtml(stripDuplicateLeadingH1(doc.body || '', doc.title)));
+  // Two-level breadcrumb (Home > Page). Deliberately not three levels
+  // (Home > Section > Page): section groupings have no landing page of
+  // their own on this site (confirmed — see AGENTS.md), so a middle
+  // breadcrumb entry would have to point at a URL that doesn't exist.
+  const breadcrumbJson = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type':    'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: SITE_TITLE, item: `${WIKI_URL}/` },
+      { '@type': 'ListItem', position: 2, name: doc.title,  item: url },
+    ],
+  });
+
+  // FAQPage schema — only for docs/faq.md, whose Q&A pairs are
+  // mechanically extractable (see extractFaqPairs). Wrong/absent on
+  // every other page is correct: FAQPage is only valid for content that
+  // actually is a list of questions and answers.
+  const faqPairs = doc.slug === 'faq' ? extractFaqPairs(doc.body || '') : [];
+  const faqJson = faqPairs.length ? JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type':    'FAQPage',
+    mainEntity: faqPairs.map(p => ({
+      '@type': 'Question',
+      name: p.question,
+      acceptedAnswer: { '@type': 'Answer', text: p.answer },
+    })),
+  }) : '';
+
+  const bodyHtml = renderCallouts(mdToHtml(stripDuplicateLeadingH1(doc.body || '')));
 
   const docContentHtml = `
       <!--
@@ -328,6 +534,8 @@ function buildStub(doc) {
   <meta name="twitter:image"       id="tw-image" content="${image}">
 
   <script type="application/ld+json" id="ld-doc">${ldJson}<\/script>
+  <script type="application/ld+json" id="ld-breadcrumb">${breadcrumbJson}<\/script>${faqJson ? `
+  <script type="application/ld+json" id="ld-faq">${faqJson}<\/script>` : ''}
 
   <link rel="alternate" type="application/rss+xml" title="${escHtml(SITE_TITLE)} Feed" href="/feed.xml">`;
 
@@ -337,7 +545,10 @@ function buildStub(doc) {
     if (!fs.existsSync(indexPath)) {
       throw new Error(`buildStub: index.html not found at ${indexPath}`);
     }
-    buildStub._indexHtml = fs.readFileSync(indexPath, 'utf8');
+    // Strip the prerendered-home block so doc stubs never inherit it
+    // (prerenderHome runs last, but a previous run's markers may persist).
+    buildStub._indexHtml = fs.readFileSync(indexPath, 'utf8')
+      .replace(new RegExp(`${HOME_MARKER_START}[\\s\\S]*?${HOME_MARKER_END}`), DOC_CONTENT_PLACEHOLDER);
   }
 
   let html = buildStub._indexHtml;
@@ -371,7 +582,7 @@ function buildStub(doc) {
   );
 
   // ── Prerender doc content ────────────────────────────────────────
-  const DOC_CONTENT_PLACEHOLDER = '<div class="content__inner" id="doc-content" role="article"></div>';
+  // (DOC_CONTENT_PLACEHOLDER defined at module scope)
   if (html.includes(DOC_CONTENT_PLACEHOLDER)) {
     html = html.replace(
       DOC_CONTENT_PLACEHOLDER,
@@ -389,11 +600,113 @@ function extractNavSlugs(navPath) {
   if (!fs.existsSync(navPath)) return null;
   const src = fs.readFileSync(navPath, 'utf8');
   const slugs = new Set();
-  const re = /\bslug\s*:\s*['"`]([^'"`]+)['"`]/g;
+  const re = /["']?slug["']?\s*:\s*['"`]([^'"`]+)['"`]/g;
   let m;
   while ((m = re.exec(src)) !== null) slugs.add(m[1]);
   return slugs;
 }
+
+// ── Generate nav-docs.js from docs/ (merge-preserving) ───────────
+// nav-docs.js used to be hand-maintained and could silently drift from
+// docs/. It is now REGENERATED on every build:
+//   • truth = docs/*.md frontmatter (title, section)
+//   • curated titles/icons/order from the previous file are preserved
+//   • phantoms (nav entries with no .md) are dropped
+//   • orphans (new .md files) are inserted into their frontmatter section
+function parseExistingNavTree(navPath) {
+  if (!fs.existsSync(navPath)) return { tree: [], sections: {} };
+  const src = fs.readFileSync(navPath, 'utf8');
+  try {
+    const fn = new Function(
+      'const CONFIG = {};\n' + src.replace(/^\s*CONFIG\.NAV_TREE\s*=/, 'CONFIG.NAV_TREE =') +
+      ';\nreturn CONFIG.NAV_TREE;'
+    );
+    const tree = fn() || [];
+    const sections = {};
+    const walk = nodes => {
+      for (const n of nodes || []) {
+        if (n.children) {
+          if (n.title && !sections[n.title]) {
+            sections[n.title] = { icon: n.icon || '', titles: {} };
+          }
+          for (const c of n.children) {
+            if (sections[n.title]) sections[n.title].titles[c.slug] = { title: c.title, icon: c.icon };
+          }
+        } else if (n.slug) {
+          // Top-level leaf page (e.g. Overview).
+          (sections.__top = sections.__top || { icon: n.icon || '', leaves: [], titles: {} });
+          if (!sections.__top.titles[n.slug]) sections.__top.titles[n.slug] = { title: n.title };
+        }
+      }
+    };
+    walk(tree);
+    return { tree, sections, topOrder: tree.map(n => ({ title: n.title, slug: n.slug, hasChildren: !!n.children })) };
+  } catch (e) {
+    console.warn(`⚠  Could not parse existing nav-docs.js (${e.message}) — regenerating from scratch`);
+    return { tree: [], sections: {}, topOrder: [] };
+  }
+}
+
+function generateNavDocs(docList, navPath) {
+  const prev = parseExistingNavTree(navPath);
+  const secMeta = prev.sections || {};
+
+  // Group docs by frontmatter section (fallback: slug prefix).
+  const grouped = new Map();      // section -> [{slug,title}]
+  for (const d of docList) {
+    if (!d.slug || d.draft) continue;
+    const section = d.section || d.slug.split('/')[0] || 'Reference';
+    if (!grouped.has(section)) grouped.set(section, []);
+    grouped.get(section).push({ slug: d.slug, title: d.title });
+  }
+
+  // Values are emitted via JSON.stringify (not hand-rolled quoting) and
+  // keys are double-quoted, so the array body is valid JSON — the browser
+  // side (script-docs.js's extractNavTree) parses it with JSON.parse
+  // instead of `new Function`, since it may be parsing content fetched
+  // live from GitHub rather than this trusted local build script's own
+  // output. Trailing commas are still emitted here for readability/diff
+  // stability; the JSON.parse consumer strips them first.
+  let out = '// AUTO-GENERATED by generate-manifest.js — do not edit by hand.\n';
+  out += '// Titles/icons below are preserved from previous manual curation where\n';
+  out += "// they existed; additions/removals come from docs/*.md frontmatter.\n";
+  out += '// Array body is valid JSON (double-quoted keys/strings) — see extractNavTree\n';
+  out += '// in script-docs.js, which JSON.parses this rather than evaluating it as JS.\n';
+  out += 'CONFIG.NAV_TREE = [\n';
+
+  // Top-level standalone pages (previous tree order, only if still live).
+  const live = new Set(docList.filter(d => d.slug && !d.draft).map(d => d.slug));
+  const topLeaves = (secMeta.__top?.titles) || {};
+  for (const slug of Object.keys(topLeaves)) {
+    if (!live.has(slug)) continue;
+    const icon = secMeta.__top.icon || 'fa-solid fa-house';
+    out += `  { "title": ${JSON.stringify(topLeaves[slug].title)}, "icon": ${JSON.stringify(icon)}, "slug": ${JSON.stringify(slug)} },\n`;
+  }
+
+  // Sections: previous order first, then any newly discovered ones.
+  const prevOrder = prev.topOrder ? prev.topOrder.filter(t => t.hasChildren).map(t => t.title) : [];
+  const allSections = [
+    ...prevOrder.filter(s => grouped.has(s)),
+    ...[...grouped.keys()].filter(s => !prevOrder.includes(s)).sort(),
+  ];
+
+  for (const section of allSections) {
+    const meta = secMeta[section] || {};
+    const icon = meta.icon || 'fa-solid fa-folder';
+    out += `\n  {\n    "title": ${JSON.stringify(section)},\n    "icon": ${JSON.stringify(icon)},\n    "children": [\n`;
+    for (const d of grouped.get(section)) {
+      const kept = meta.titles?.[d.slug];
+      const title = kept?.title || d.title;
+      out += `      { "title": ${JSON.stringify(title)}, "slug": ${JSON.stringify(d.slug)} },\n`;
+    }
+    out += '    ]\n  },\n';
+  }
+
+  out += '];\n';
+  fs.writeFileSync(navPath, out);
+  console.log(`✓ nav-docs.js regenerated (${allSections.length} sections, ${live.size} pages)`);
+}
+
 
 // ── Drift check ───────────────────────────────────────────────────
 function checkDrift(docSlugs, navSlugs) {
@@ -498,7 +811,7 @@ function build() {
     const doc = {
       slug,
       title:       fm.title       || slugToTitle(slug),
-      section:     fm.section     || 'Other',
+      section:     fm.section     || slug.split('/')[0] || 'Reference',
       description: fm.description || autoExcerpt(body),
       updated:     fm.updated     || '',
       order:       Number(fm.order || 999),
@@ -617,6 +930,105 @@ function build() {
   }, null, 2));
   console.log(`✓ manifest.json (PWA)`);
 
+// ── Static homepage prerender ────────────────────────────────────
+// Inject the full docs section tree into the root index.html placeholder
+// so crawlers/AI hitting / see every page title + link without JS.
+// script-docs.js already understands prerendered #doc-content content.
+function buildStaticDocsHomeHtml() {
+  const sections = {};
+  const order = [];
+  for (const doc of docs) {
+    if (!doc.slug || doc.draft) continue;
+    const section = doc.section || doc.slug.split('/')[0] || 'Reference';
+    if (!sections[section]) { sections[section] = []; order.push(section); }
+    sections[section].push(doc);
+  }
+  let html = `\n<h1>${escHtml(SITE_TITLE)}</h1>\n<p>${escHtml(SITE_DESC)}</p>\n`;
+  for (const section of order) {
+    html += `\n<h2>${escHtml(section)}</h2>\n<ul>\n`;
+    for (const d of sections[section]) {
+      html += `  <li><a href="/doc/${d.slug}/">${escHtml(d.title)}</a>${d.description ? ` — ${escHtml(d.description.slice(0, 140))}` : ''}</li>\n`;
+    }
+    html += '</ul>\n';
+  }
+  return html;
+}
+
+function prerenderHome() {
+  const indexPath = path.join(__dirname, 'index.html');
+  let html = fs.readFileSync(indexPath, 'utf8');
+
+  // Idempotent: restore placeholder from any previous injection first.
+  const prev = new RegExp(`${HOME_MARKER_START}[\\s\\S]*?${HOME_MARKER_END}`);
+  if (prev.test(html)) {
+    html = html.replace(prev, DOC_CONTENT_PLACEHOLDER);
+  }
+  if (!html.includes(DOC_CONTENT_PLACEHOLDER)) return;
+
+  html = html.replace(
+    DOC_CONTENT_PLACEHOLDER,
+    `${HOME_MARKER_START}${buildStaticDocsHomeHtml()}${HOME_MARKER_END}`
+  );
+  fs.writeFileSync(indexPath, html);
+  console.log('✓ index.html homepage prerendered (static docs tree)');
+}
+
+// ── llms.txt / llms-full.txt (AI discoverability) ────────────────
+// llmstxt.org convention: curated markdown index + full corpus so AI
+// crawlers (GPTBot, ClaudeBot, PerplexityBot, …) can ingest the docs
+// without executing JavaScript.
+function generateLlmsFiles() {
+  const summary = 'Comprehensive technical documentation for Shanios — the immutable Linux OS with atomic blue-green updates. Architecture, installation, networking, security hardening, servers, containers, and troubleshooting reference for every subsystem.';
+
+  // Group by top-level section (slug prefix), preserving nav order.
+  const sections = {};
+  const order = [];
+  for (const doc of docs) {
+    if (!doc.slug || doc.draft) continue;
+    const section = doc.section || doc.slug.split('/')[0] || 'Reference';
+    if (!sections[section]) { sections[section] = []; order.push(section); }
+    sections[section].push(doc);
+  }
+
+  let idx = `# ${SITE_TITLE}\n\n> ${summary}\n\n`;
+  idx += `Every page is also available as full-content HTML at ${WIKI_URL}/doc/<slug>/ and in the complete corpus at ${WIKI_URL}/llms-full.txt\n`;
+
+  for (const section of order) {
+    idx += `\n## ${section}\n\n`;
+    for (const d of sections[section]) {
+      const url = `${WIKI_URL}/doc/${d.slug}/`;
+      idx += `- [${d.title}](${url}): ${(d.description || '').replace(/\n+/g, ' ').trim() || 'Documentation page'}\n`;
+    }
+  }
+  fs.writeFileSync(path.join(__dirname, 'llms.txt'), idx);
+
+  // Full corpus: every doc's complete markdown body, grouped by section.
+  let full = `# ${SITE_TITLE} — Complete Documentation\n\n> ${summary}\n`;
+  for (const section of order) {
+    full += `\n\n# Section: ${section}\n`;
+    for (const d of sections[section]) {
+      const url = `${WIKI_URL}/doc/${d.slug}/`;
+      full += `\n---\n\n# ${d.title}\n\nURL: ${url}\n${d.updated ? `Updated: ${d.updated}\n` : ''}${d.description ? `\n${d.description}\n` : ''}\n${(d.body || '').trim()}\n`;
+    }
+  }
+  fs.writeFileSync(path.join(__dirname, 'llms-full.txt'), full);
+
+  console.log(`✓ llms.txt (${order.length} sections, ${docs.filter(d => !d.draft).length} docs indexed)`);
+  console.log(`✓ llms-full.txt (full corpus: ${Math.round(full.length / 1024)} KB)`);
+}
+
+// ── Service-worker cache busting ─────────────────────────────────
+  // Same rationale as the blog generator: without a bump, the cache-first
+  // SW serves stale script-docs.js/config-docs.js after every deploy.
+  bumpServiceWorkerCache('shanidocs');
+
+  // ── AI discoverability ───────────────────────────────────────────
+  generateLlmsFiles();
+
+  // ── Static homepage prerender (run last) ────────────────────────
+  prerenderHome();
+
+
   // ── doc/<slug>/index.html stubs ─────────────────────────────────
   fs.mkdirSync(DOC_DIR, { recursive: true });
 
@@ -678,6 +1090,10 @@ function build() {
   cleanStaleStubs(DOC_DIR, '');
 
   console.log(`✓ doc/ stubs: ${stubsWritten} written${stubsRemoved ? `, ${stubsRemoved} stale removed` : ''}`);
+
+  // ── Regenerate nav-docs.js from docs/ frontmatter ───────────────
+  // Runs BEFORE the drift check so the check validates the fresh file.
+  generateNavDocs(docs, NAV_PATH);
 
   // ── Drift check ─────────────────────────────────────────────────
   const docSlugs = docs.map(d => d.slug);

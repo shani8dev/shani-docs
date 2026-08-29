@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>Security &amp; Identity — SSO, Directory &amp; Passwordless (Authelia, Authentik, Keycloak, Zitadel, LLDAP, Kanidm) — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Key Concepts Zero Trust principles &quot;Never trust, always verify.&quot; Traditional perimeter security trusts anything inside the network. Zero trust verifies eve…">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/servers/security/authelia/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="Security &amp; Identity — SSO, Directory &amp; Passwordless (Authelia, Authentik, Keycloak, Zitadel, LLDAP, Kanidm)">
+  <meta property="og:description" id="og-desc"    content="Key Concepts Zero Trust principles &quot;Never trust, always verify.&quot; Traditional perimeter security trusts anything inside the network. Zero trust verifies eve…">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/security/authelia/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="Security &amp; Identity — SSO, Directory &amp; Passwordless (Authelia, Authentik, Keycloak, Zitadel, LLDAP, Kanidm)">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="Security &amp; Identity — SSO, Directory &amp; Passwordless (Authelia, Authentik, Keycloak, Zitadel, LLDAP, Kanidm)">
+  <meta name="twitter:description" id="tw-desc"  content="Key Concepts Zero Trust principles &quot;Never trust, always verify.&quot; Traditional perimeter security trusts anything inside the network. Zero trust verifies eve…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Security & Identity — SSO, Directory & Passwordless (Authelia, Authentik, Keycloak, Zitadel, LLDAP, Kanidm)","description":"Key Concepts Zero Trust principles \"Never trust, always verify.\" Traditional perimeter security trusts anything inside the network. Zero trust verifies eve…","url":"https://docs.shani.dev/doc/servers/security/authelia/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Security & Identity — SSO, Directory & Passwordless (Authelia, Authentik, Keycloak, Zitadel, LLDAP, Kanidm)","item":"https://docs.shani.dev/doc/servers/security/authelia/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Security &amp; Identity — SSO, Directory &amp; Passwordless (Authelia, Authentik, Keycloak, Zitadel, LLDAP, Kanidm)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><h2 id="key-concepts">Key Concepts</h2>
+<h4 id="zero-trust-principles">Zero Trust principles</h4>
+<p>"Never trust, always verify." Traditional perimeter security trusts anything inside the network. Zero trust verifies every request regardless of source — inside or outside the network — using identity, device posture, and minimal-privilege access. Implementation: mTLS between services, short-lived certificates (not long-lived API keys), device posture checks (is the OS patched?), least-privilege RBAC, and session recording for privileged access (Teleport).</p>
+<h4 id="principle-of-least-privilege-polp">Principle of least privilege (PoLP)</h4>
+<p>Every user, process, and service gets only the permissions it needs — nothing more. In Kubernetes: ServiceAccounts with narrow Roles, not cluster-admin. In AWS: IAM roles scoped to specific S3 buckets and actions. In Linux: non-root containers, no <code>SYS_ADMIN</code> unless necessary. Violations are the root cause of most lateral movement after a breach.</p>
+<h4 id="defence-in-depth">Defence in depth</h4>
+<p>Multiple layers of security so that no single failure compromises the entire system. Example stack: WAF (Coraza) → reverse proxy authentication (Authelia) → network segmentation (NetworkPolicy) → container sandboxing (seccomp, AppArmor) → runtime detection (Falco) → SIEM (Wazuh). An attacker who defeats one layer still faces the next.</p>
+<h4 id="oauth2-flows-which-to-use-when">OAuth2 flows — which to use when</h4>
+<ul>
+<li><strong>Authorization Code + PKCE</strong> — for web and mobile apps where a user logs in. The current gold standard. PKCE prevents code interception.</li>
+<li><strong>Client Credentials</strong> — for machine-to-machine (service-to-service). No user involved. Use for CI/CD tokens and API-to-API calls.</li>
+<li><strong>Device Code</strong> — for CLI tools and devices without a browser (headless servers, smart TVs).</li>
+<li><strong>Implicit flow</strong> — deprecated. Do not use.</li>
+</ul>
+<h4 id="jwt-structure-and-common-mistakes">JWT structure and common mistakes</h4>
+<p>A JWT has three base64url-encoded parts: <code>header.payload.signature</code>. The header declares the algorithm; the payload contains claims (sub, exp, iat, scopes); the signature verifies integrity. Common mistakes: (1) accepting <code>alg: none</code> — always reject this; (2) not verifying <code>exp</code> — always check expiry; (3) putting sensitive data in the payload — it's encoded, not encrypted (anyone can read it with base64 decode); (4) not rotating signing keys.</p>
+<h4 id="owasp-top-10-in-one-line-each-for-interviews">OWASP Top 10 in one line each (for interviews)</h4>
+<p>A01 Broken Access Control: users can access data/actions they shouldn't (IDOR, privilege escalation). A02 Cryptographic Failures: sensitive data exposed due to weak/missing encryption. A03 Injection: user input interpreted as code (SQL, command). A04 Insecure Design: security not considered in architecture. A05 Security Misconfiguration: default credentials, unnecessary services. A06 Vulnerable Components: outdated dependencies with CVEs. A07 Auth Failures: weak passwords, no MFA, session fixation. A08 Software Integrity: unsigned updates, compromised CI/CD pipeline. A09 Logging Failures: breaches go undetected. A10 SSRF: server fetches attacker-controlled URLs.</p>
+<h4 id="hash-functions-vs-encryption-vs-encoding">Hash functions vs encryption vs encoding</h4>
+<ul>
+<li><strong>Encoding</strong> (base64, hex) — reversible transformation, no key, provides no security — just a format change</li>
+<li><strong>Hashing</strong> (SHA-256, bcrypt) — one-way, no key; used for integrity checks and password storage; bcrypt adds a work factor (slow by design)</li>
+<li><strong>Symmetric encryption</strong> (AES-256-GCM) — reversible with the same key; fast; used for data at rest</li>
+<li><strong>Asymmetric encryption</strong> (RSA, ECDSA) — public key encrypts/verifies, private key decrypts/signs; used for TLS, JWT signing, SSH keys</li>
+</ul>
+<h4 id="supply-chain-security-basics">Supply chain security basics</h4>
+<p>Three vectors to understand: (1) Source — code in your repo (Semgrep SAST, secret scanning). (2) Build — CI pipeline integrity (Tekton Chains SLSA provenance, cosign signing). (3) Dependency — third-party packages and base images (Trivy, Grype, Renovate, Dependency-Track). The 2020 SolarWinds attack and 2021 Log4Shell are canonical examples of each vector.</p>
+<h4 id="secrets-management-anti-patterns">Secrets management anti-patterns</h4>
+<ul>
+<li>Hardcoded secrets in source code (most common, caught by Semgrep <code>p/secrets</code>)</li>
+<li>Secrets in environment variables that get printed to logs</li>
+<li>Long-lived API keys that never rotate</li>
+<li>Sharing credentials across environments (staging DB password = prod DB password)</li>
+<li>Secrets in Kubernetes manifests committed to Git without encryption (use SOPS + age or Sealed Secrets)</li>
+</ul>
+<h4 id="vulnerability-severity-levels-cvss">Vulnerability severity levels (CVSS)</h4>
+<p>CVSS (Common Vulnerability Scoring System) scores 0–10. Critical 9.0–10.0, High 7.0–8.9, Medium 4.0–6.9, Low 0.1–3.9. For triaging: fix Criticals within 24h, Highs within 7 days. Tools (Trivy, Grype, Nuclei) report these severities. In Defect Dojo you set SLA targets per severity.</p>
+<h4 id="identity-provider-architecture-ldap-vs-oidc-vs-saml">Identity provider architecture — LDAP vs OIDC vs SAML</h4>
+<p>Three generations of identity federation. LDAP (Lightweight Directory Access Protocol) is the enterprise standard for directory services — Active Directory is LDAP. Applications authenticate by doing a bind to the LDAP server. OIDC (OpenID Connect) is the modern web standard, built on OAuth2 — applications redirect users to an IdP (Authentik, Keycloak), receive a JWT, and verify it locally. SAML is the enterprise web SSO standard (older than OIDC, XML-based) — you'll encounter it when integrating with corporate SSO. Most modern self-hosted apps support OIDC; legacy apps often only support LDAP. Authentik and Keycloak speak all three.</p>
+<h4 id="certificate-lifecycle-management">Certificate lifecycle management</h4>
+<p>Certificates expire. Expired certificates cause outages. step-ca and cert-manager automate issuance and renewal — but you still need to understand the concepts. A CA (Certificate Authority) signs certificates with its private key. Clients trust certificates signed by CAs in their trust store. Short-lived certificates (24h–7 days, used by Teleport and service meshes) are more secure than long-lived ones (1 year) because there's less window for a compromised cert to be misused. Intermediate CAs (step-ca creates one automatically) limit blast radius if the root key is compromised.</p>
+<h4 id="siem-soc-and-log-correlation">SIEM, SOC, and log correlation</h4>
+<p>A SIEM (Security Information and Event Management system — Wazuh, Elastic SIEM) collects logs from all sources, normalises them, and applies correlation rules to detect attack patterns. A single failed SSH login is noise; 1000 failed logins from one IP in 10 seconds is a brute-force attempt. SIEM rules encode this logic. A SOC (Security Operations Centre) is the team that watches the SIEM. For self-hosters: Wazuh agents on every host, log forwarding from containers, and alerting to a notification channel gives you >80% of enterprise SOC capability.</p>
+<h4 id="container-and-kubernetes-hardening-checklist">Container and Kubernetes hardening checklist</h4>
+<p>The most common misconfigurations, in order of frequency: (1) running as root (<code>runAsNonRoot: true</code> fixes this), (2) <code>hostPID: true</code> / <code>hostNetwork: true</code> (gives container access to host namespaces — almost never needed), (3) <code>privileged: true</code> (full host access — equivalent to root on the node), (4) no seccomp profile (allows all ~300+ syscalls — use <code>RuntimeDefault</code>), (5) writable root filesystem (<code>readOnlyRootFilesystem: true</code> limits malware persistence), (6) no resource limits (a compromised container can consume all host resources).</p>
+<h4 id="vulnerability-management-workflow">Vulnerability management workflow</h4>
+<p>Scanning finds vulnerabilities; management decides what to do with them. The workflow: scan (Trivy, Grype) → import to tracker (Defect Dojo) → triage by severity and exploitability → assign owner → fix (update dependency, apply patch, add WAF rule) → rescan to verify. Not all Criticals are equal: a Critical CVE in a library that's never called from your code path is lower priority than a High in your authentication path. Context matters. SLA targets (Critical: 24h, High: 7 days) provide an objective standard.</p>
+<h4 id="passkeys-and-webauthn-replacing-passwords">Passkeys and WebAuthn — replacing passwords</h4>
+<p>WebAuthn (the standard behind passkeys) uses public-key cryptography for authentication. The private key never leaves the device (stored in secure enclave or hardware key). Login: the server sends a challenge, the device signs it with the private key, the server verifies with the stored public key. This eliminates: phishing (the signature is bound to the origin domain), credential stuffing (no reusable password), and password database breaches (only public keys are stored). Pocket ID and Kanidm are purpose-built for passkey-only auth. Vaultwarden supports WebAuthn for 2FA.</p>
+<hr>
+<hr>
+<hr>
+<h2 id="authelia">Authelia</h2>
+<p><strong>Purpose:</strong> Lightweight single sign-on and two-factor authentication (TOTP, WebAuthn/passkeys) via Caddy forward auth. One login page protects your entire self-hosted stack — no per-app configuration needed.</p>
+<pre><code class="language-yaml"># ~/authelia/compose.yml
+services:
+  authelia:
+    image: authelia/authelia:latest
+    ports: [&quot;127.0.0.1:9091:9091&quot;]
+    volumes:
+      - /home/user/authelia/config:/config:Z
+    environment:
+      TZ: Asia/Kolkata
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/authelia &amp;&amp; podman-compose up -d</code></pre>
+<h5 id="minimal-configurationyml">Minimal <code>configuration.yml</code></h5>
+<pre><code class="language-yaml"># /home/user/authelia/config/configuration.yml
+jwt_secret: changeme-run-openssl-rand-base64-32
+session:
+  secret: changeme
+  domain: example.com
+  redis:
+    host: redis
+
+authentication_backend:
+  file:
+    path: /config/users_database.yml
+
+access_control:
+  default_policy: deny
+  rules:
+    - domain: &quot;*.example.com&quot;
+      policy: two_factor
+
+storage:
+  local:
+    path: /config/db.sqlite3</code></pre>
+<h5 id="create-a-user">Create a user</h5>
+<pre><code class="language-bash">podman exec authelia authelia crypto hash generate argon2 --password 'yourpassword'
+# Add the hash to /home/user/authelia/config/users_database.yml</code></pre>
+<h4 id="common-operations">Common operations</h4>
+<pre><code class="language-bash"># Generate a password hash for users_database.yml
+podman exec authelia authelia crypto hash generate argon2 --password 'mypassword'
+
+# Validate config
+podman exec authelia authelia validate-config --config /config/configuration.yml
+
+# View logs
+podman logs -f authelia
+
+# Test authentication (dry run)
+curl -X POST http://localhost:9091/api/firstfactor   -H &quot;Content-Type: application/json&quot;   -d '{&quot;username&quot;:&quot;myuser&quot;,&quot;password&quot;:&quot;mypassword&quot;,&quot;keepMeLoggedIn&quot;:false}'
+
+# Reload users database (no restart needed)
+podman kill --signal=HUP authelia</code></pre>
+<h4 id="caddy-integration-protect-any-service">Caddy integration (protect any service)</h4>
+<pre><code class="language-caddyfile">auth.example.com {
+  reverse_proxy localhost:9091
+}
+
+service.example.com {
+  forward_auth localhost:9091 {
+    uri /api/verify?rd=https://auth.example.com
+    copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+  }
+  reverse_proxy localhost:SERVICE_PORT
+}</code></pre>
+<blockquote><strong>PostgreSQL backend (multi-instance / HA):</strong> The default <code>storage.local</code> uses SQLite, which is fine for a single instance. For multiple Authelia replicas or if you want a more robust backend, switch to PostgreSQL: ``<code>yaml storage:   postgres:     host: host.containers.internal     port: 5432     database: authelia     schema: public     username: authelia     password: changeme </code>`<code> Add a </code>db<code> service using </code>postgres:16-alpine<code> to the compose stack (same pattern as Authentik below) and remove the </code>storage.local` block.</blockquote>
+<hr>
+<h2 id="authentik">Authentik</h2>
+<p><strong>Purpose:</strong> Full-featured Identity Provider (IdP) with OIDC, SAML, LDAP, and OAuth2 support. Use when you need SSO across many applications, user provisioning, or integration with external identity sources. Powers SSO for NetBird, Gitea, Nextcloud, and more from a single login.</p>
+<pre><code class="language-yaml"># ~/authentik/compose.yml
+services:
+  postgresql:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: authentik
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: authentik
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  server:
+    image: ghcr.io/goauthentik/server:latest
+    command: server
+    ports: [&quot;127.0.0.1:9000:9000&quot;]
+    environment:
+      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_POSTGRESQL__HOST: postgresql
+      AUTHENTIK_POSTGRESQL__USER: authentik
+      AUTHENTIK_POSTGRESQL__PASSWORD: changeme
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_SECRET_KEY: changeme-generate-with-openssl-rand-base64-60
+    volumes:
+      - /home/user/authentik/media:/media:Z
+      - /home/user/authentik/custom-templates:/templates:Z
+    depends_on: [postgresql, redis]
+    restart: unless-stopped
+
+  worker:
+    image: ghcr.io/goauthentik/server:latest
+    command: worker
+    environment:
+      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_POSTGRESQL__HOST: postgresql
+      AUTHENTIK_POSTGRESQL__USER: authentik
+      AUTHENTIK_POSTGRESQL__PASSWORD: changeme
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_SECRET_KEY: changeme-generate-with-openssl-rand-base64-60
+    volumes:
+      - /home/user/authentik/media:/media:Z
+    depends_on: [postgresql, redis]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/authentik &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:9000/if/flow/initial-setup/</code> to create the admin account.</p>
+<hr>
+<h2 id="keycloak">Keycloak</h2>
+<p><strong>Purpose:</strong> Enterprise-grade Identity & Access Management. OIDC, SAML 2.0, LDAP federation, fine-grained authorisation, and a comprehensive admin UI. The right choice for complex IAM requirements or when integrating with enterprise directory services.</p>
+<pre><code class="language-yaml"># ~/keycloak/compose.yml
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: keycloak
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    ports: [&quot;127.0.0.1:8080:8080&quot;]
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: changeme
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: changeme
+      KC_HOSTNAME: keycloak.example.com
+    command: [&quot;start-dev&quot;]
+    depends_on: [db]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/keycloak &amp;&amp; podman-compose up -d</code></pre>
+<blockquote>⚠️ <strong>Production:</strong> Replace <code>start-dev</code> with <code>start</code> before exposing Keycloak publicly. <code>start-dev</code> disables HTTPS enforcement, TLS verification, and production-grade caches — it is for initial setup only.</blockquote>
+<hr>
+<h2 id="zitadel">Zitadel</h2>
+<p><strong>Purpose:</strong> Modern, cloud-native identity provider with a clean UI and strong developer experience. Supports OIDC, OAuth2, SAML, and passwordless auth (passkeys). Lighter and easier to operate than Keycloak while being more capable than Authentik.</p>
+<pre><code class="language-yaml"># ~/zitadel/compose.yml
+services:
+  zitadel:
+    image: ghcr.io/zitadel/zitadel:latest
+    ports: [&quot;127.0.0.1:8080:8080&quot;]
+    command: start-from-init --masterkeyFromEnv
+    environment:
+      # Must be exactly 32 characters. Generate with: openssl rand -base64 24 | tr -d '=' | head -c 32
+      ZITADEL_MASTERKEY: changeme-exactly-32-chars-here
+      ZITADEL_DATABASE_POSTGRES_HOST: db
+      ZITADEL_DATABASE_POSTGRES_PORT: 5432
+      ZITADEL_DATABASE_POSTGRES_DATABASE: zitadel
+      ZITADEL_DATABASE_POSTGRES_USER_USERNAME: zitadel
+      ZITADEL_DATABASE_POSTGRES_USER_PASSWORD: changeme
+      ZITADEL_EXTERNALDOMAIN: auth.example.com
+      ZITADEL_EXTERNALPORT: 443
+      ZITADEL_EXTERNALSECURE: &quot;true&quot;
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: zitadel
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: zitadel
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/zitadel &amp;&amp; podman-compose up -d</code></pre>
+<hr>
+<hr>
+<h2 id="comparison-authelia-vs-authentik-vs-keycloak-vs-zitadel">Comparison: Authelia vs Authentik vs Keycloak vs Zitadel</h2>
+<table><thead><tr><th>Feature</th><th>Authelia</th><th>Authentik</th><th>Keycloak</th><th>Zitadel</th></tr></thead><tbody><tr><td>Complexity</td><td>Low</td><td>Medium</td><td>High</td><td>Medium</td></tr><tr><td>Resource usage</td><td>~50 MB RAM</td><td>~500 MB RAM</td><td>~1 GB RAM</td><td>~250 MB RAM</td></tr><tr><td>OIDC provider</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr><tr><td>SAML</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr><tr><td>LDAP</td><td>✅ Read</td><td>✅ Read/Write</td><td>✅ Full</td><td>✅ Read</td></tr><tr><td>Passkeys</td><td>✅ WebAuthn</td><td>✅</td><td>✅</td><td>✅ Native</td></tr><tr><td>User provisioning</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr><tr><td>Best for</td><td>Protecting services with 2FA</td><td>SSO for a homelab</td><td>Enterprise IAM</td><td>Modern IdP with good UX</td></tr></tbody></table>
+<hr>
+<h2 id="lldap-lightweight-ldap">LLDAP (Lightweight LDAP)</h2>
+<p><strong>Purpose:</strong> Minimal LDAP server written in Rust, purpose-built for self-hosters who need a user directory without the complexity of OpenLDAP or Keycloak. LLDAP exposes just enough LDAP to satisfy apps that require it (Nextcloud, Authentik, Gitea, Authelia) and includes a clean web UI for managing users and groups. If you want SSO via Authentik or Authelia but need a proper user store they can federate against, LLDAP is the lightest way to provide one.</p>
+<pre><code class="language-yaml"># ~/lldap/compose.yaml
+services:
+  lldap:
+    image: lldap/lldap:stable
+    ports:
+      - 127.0.0.1:3890:3890   # LDAP
+      - 127.0.0.1:17170:17170 # Web UI
+    volumes:
+      - /home/user/lldap/data:/data:Z
+    environment:
+      TZ: Asia/Kolkata
+      UID: &quot;1000&quot;
+      GID: &quot;1000&quot;
+      LLDAP_JWT_SECRET: changeme-run-openssl-rand-hex-32
+      LLDAP_KEY_SEED: changeme-run-openssl-rand-hex-32
+      LLDAP_LDAP_BASE_DN: dc=home,dc=local
+      LLDAP_LDAP_USER_PASS: adminpassword
+      LLDAP_LDAP_USER_EMAIL: admin@home.local
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/lldap &amp;&amp; podman-compose up -d</code></pre>
+<p>Access the web UI at <code>http://localhost:17170</code>. Create users and groups via the dashboard.</p>
+<h4 id="connect-authelia-to-lldap">Connect Authelia to LLDAP</h4>
+<pre><code class="language-yaml"># In Authelia configuration.yml
+authentication_backend:
+  ldap:
+    implementation: custom
+    url: ldap://host.containers.internal:3890
+    base_dn: DC=home,DC=local
+    username_attribute: uid
+    additional_users_dn: OU=people
+    users_filter: (&amp;({username_attribute}={input})(objectclass=person))
+    additional_groups_dn: OU=groups
+    groups_filter: (member={dn})
+    group_name_attribute: cn
+    mail_attribute: mail
+    display_name_attribute: displayName
+    user: uid=admin,ou=people,dc=home,dc=local
+    password: adminpassword</code></pre>
+<h4 id="connect-nextcloud-to-lldap">Connect Nextcloud to LLDAP</h4>
+<pre><code class="language-bash">podman exec nextcloud php occ app:enable user_ldap
+podman exec nextcloud php occ ldap:set-config &quot;&quot; ldapHost host.containers.internal
+podman exec nextcloud php occ ldap:set-config &quot;&quot; ldapPort 3890
+podman exec nextcloud php occ ldap:set-config &quot;&quot; ldapBase dc=home,dc=local
+podman exec nextcloud php occ ldap:set-config &quot;&quot; ldapAgentName uid=admin,ou=people,dc=home,dc=local
+podman exec nextcloud php occ ldap:set-config &quot;&quot; ldapAgentPassword adminpassword
+podman exec nextcloud php occ ldap:set-config &quot;&quot; ldapLoginFilter &quot;(&amp;(objectclass=person)(uid=%uid))&quot;
+podman exec nextcloud php occ ldap:test-config &quot;&quot;</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">lldap.home.local { tls internal; reverse_proxy localhost:17170 }</code></pre>
+<hr>
+<h2 id="pocket-id-passkey-only-oidc-provider">Pocket ID (Passkey-Only OIDC Provider)</h2>
+<p><strong>Purpose:</strong> Ultra-minimal OIDC provider that uses <strong>passkeys only</strong> — no passwords, no TOTP, no email codes. Users register a passkey (Face ID, Touch ID, Windows Hello, hardware key) and that's their credential. If your goal is SSO for internal services and you want the simplest possible setup without running Keycloak or Authentik, Pocket ID is a single binary with a SQLite database. Supports any OIDC-compatible app.</p>
+<pre><code class="language-yaml"># ~/pocket-id/compose.yaml
+services:
+  pocket-id:
+    image: ghcr.io/pocket-id/pocket-id:latest
+    ports:
+      - 127.0.0.1:1411:1411
+    volumes:
+      - /home/user/pocket-id/data:/app/data:Z
+    environment:
+      PUBLIC_APP_URL: https://auth.home.local
+      TRUST_PROXY: &quot;true&quot;
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/pocket-id &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:1411</code>. On first run, create the admin account by visiting <code>/admin/setup</code>. Add OIDC clients for each app you want to protect.</p>
+<h5 id="register-a-gitea-oidc-client">Register a Gitea OIDC client</h5>
+<p>In Pocket ID Admin → OIDC Clients → Add:</p>
+<ul>
+<li>Callback URL: <code>https://git.home.local/user/oauth2/pocket-id/callback</code></li>
+</ul>
+<p>Then in Gitea Admin → Authentication Sources → Add OAuth2:</p>
+<ul>
+<li>Provider: OpenID Connect</li>
+<li>Discovery URL: <code>https://auth.home.local/.well-known/openid-configuration</code></li>
+</ul>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">auth.home.local { tls internal; reverse_proxy localhost:1411 }</code></pre>
+<blockquote>Pocket ID is the right choice when you want SSO for a small number of internal services, all users are trusted (family/team), and you want zero password management overhead. For external-facing or enterprise setups, use Authentik or Keycloak.</blockquote>
+<hr>
+<h2 id="kanidm-modern-rust-identity-server">Kanidm (Modern Rust Identity Server)</h2>
+<p><strong>Purpose:</strong> Modern, opinionated identity management server built in Rust. Provides LDAP, RADIUS, OAuth2/OIDC, and SSH key management with strong security defaults — accounts auto-lock on repeated failures, credential compromise detection is built in, and everything is append-only for auditability. Enforces MFA and passkeys by default rather than making them optional.</p>
+<pre><code class="language-yaml"># ~/kanidm/compose.yaml
+services:
+  kanidm:
+    image: kanidm/server:latest
+    ports:
+      - 127.0.0.1:8443:8443
+      - 127.0.0.1:3636:3636   # LDAPS
+    volumes:
+      - /home/user/kanidm/data:/data:Z
+      - /home/user/kanidm/server.toml:/data/server.toml:ro,Z
+    restart: unless-stopped</code></pre>
+<h5 id="minimal-servertoml">Minimal <code>server.toml</code></h5>
+<pre><code class="language-toml">bindaddress = &quot;0.0.0.0:8443&quot;
+ldapbindaddress = &quot;0.0.0.0:3636&quot;
+origin = &quot;https://idm.home.local&quot;
+domain = &quot;home.local&quot;
+db_path = &quot;/data/kanidm.db&quot;
+tls_chain = &quot;/data/chain.pem&quot;
+tls_key = &quot;/data/key.pem&quot;
+log_level = &quot;info&quot;</code></pre>
+<pre><code class="language-bash">cd ~/kanidm &amp;&amp; podman-compose up -d
+
+# Install Kanidm CLI via Nix
+nix-env -iA nixpkgs.kanidm
+
+# Log in as admin
+kanidm login -D idm_admin -H https://localhost:8443
+
+# Create a user and group
+kanidm account create -D idm_admin myuser &quot;My User&quot; myuser@home.local
+kanidm group create -D idm_admin homelab-users
+kanidm group add-members -D idm_admin homelab-users myuser
+
+# Create an OAuth2 client (e.g. Gitea)
+kanidm system oauth2 create -D idm_admin gitea &quot;Gitea&quot; https://git.home.local/user/oauth2/kanidm/callback
+kanidm system oauth2 show-basic-secret -D idm_admin gitea</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">idm.home.local { tls internal; reverse_proxy localhost:8443 { transport http { tls_insecure_skip_verify } } }</code></pre>
+<hr></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

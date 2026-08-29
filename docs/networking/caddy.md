@@ -1,7 +1,7 @@
 ---
 title: Caddy
 section: Networking
-updated: 2026-04-22
+updated: 2026-08-28
 ---
 
 # Caddy Web Server
@@ -315,3 +315,9 @@ For internal-only Caddy serving `.home.local` addresses over Tailscale or the LA
 | Config change not taking effect | Run `sudo systemctl reload caddy` — Caddy must be explicitly reloaded to pick up Caddyfile changes |
 | HTTPS certificate not renewing | Check `journalctl -u caddy` for ACME errors; confirm port 80 is reachable from the internet for HTTP-01 challenges |
 | WebSocket connections dropping | Add `@ws { header Connection *Upgrade* }` matcher and `handle @ws { reverse_proxy ... }` with explicit WebSocket header passthrough |
+
+## See Also
+
+- [Cloudflared Tunnels](cloudflared)
+- [Apache HTTP Server](apache)
+- [Home server blog](https://blog.shani.dev/post/shani-os-home-server)

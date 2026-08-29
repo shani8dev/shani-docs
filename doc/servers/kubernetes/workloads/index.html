@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>Kubernetes — Workload Patterns — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Workload Patterns StatefulSets Use for databases, Kafka, Elasticsearch, Redis Cluster — anything needing stable identity or per-pod PVCs. Jobs Purpose: Run…">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/servers/kubernetes/workloads/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="Kubernetes — Workload Patterns">
+  <meta property="og:description" id="og-desc"    content="Workload Patterns StatefulSets Use for databases, Kafka, Elasticsearch, Redis Cluster — anything needing stable identity or per-pod PVCs. Jobs Purpose: Run…">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/kubernetes/workloads/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="Kubernetes — Workload Patterns">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="Kubernetes — Workload Patterns">
+  <meta name="twitter:description" id="tw-desc"  content="Workload Patterns StatefulSets Use for databases, Kafka, Elasticsearch, Redis Cluster — anything needing stable identity or per-pod PVCs. Jobs Purpose: Run…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Kubernetes — Workload Patterns","description":"Workload Patterns StatefulSets Use for databases, Kafka, Elasticsearch, Redis Cluster — anything needing stable identity or per-pod PVCs. Jobs Purpose: Run…","url":"https://docs.shani.dev/doc/servers/kubernetes/workloads/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Kubernetes — Workload Patterns","item":"https://docs.shani.dev/doc/servers/kubernetes/workloads/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Kubernetes — Workload Patterns</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><h2 id="workload-patterns">Workload Patterns</h2>
+<h3 id="statefulsets">StatefulSets</h3>
+<p>Use for databases, Kafka, Elasticsearch, Redis Cluster — anything needing stable identity or per-pod PVCs.</p>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: data
+spec:
+  serviceName: postgres
+  replicas: 3
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          env:
+            - { name: PGDATA, value: /var/lib/postgresql/data/pgdata }
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/postgresql/data }
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [&quot;ReadWriteOnce&quot;]
+        resources:
+          requests:
+            storage: 20Gi
+  # updateStrategy controls how rolling updates work for StatefulSets
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0     # only update pods with index &gt;= partition; set &gt; 0 for phased rollout
+  
+  # podManagementPolicy: OrderedReady (default) | Parallel
+  # OrderedReady: start/stop pods one at a time in order (0, 1, 2...)
+  # Parallel: start/stop all pods simultaneously — faster but less safe for DBs
+  podManagementPolicy: OrderedReady
+---
+# Headless Service for stable DNS (postgres-0.postgres.data.svc.cluster.local)
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: data
+spec:
+  clusterIP: None
+  selector:
+    app: postgres
+  ports:
+    - port: 5432</code></pre>
+<pre><code class="language-bash"># StatefulSet-specific operations
+kubectl rollout status statefulset/postgres -n data
+kubectl rollout undo statefulset/postgres -n data
+
+# Scale down safely (pods deleted highest-index first: 2 → 1 → 0)
+kubectl scale statefulset postgres --replicas=1 -n data
+
+# Note: PVCs are NOT deleted on scale-down — manual cleanup required
+kubectl get pvc -n data -l app=postgres
+kubectl delete pvc data-postgres-2 -n data    # only after verifying data is safe</code></pre>
+<hr>
+<h3 id="jobs">Jobs</h3>
+<p><strong>Purpose:</strong> Run a pod to completion — batch processing, DB migrations, one-off tasks.</p>
+<pre><code class="language-yaml">apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-seed
+  namespace: myapp
+spec:
+  completions: 1
+  parallelism: 1
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 3600
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: seed
+          image: myapp:latest
+          command: [&quot;python&quot;, &quot;manage.py&quot;, &quot;seed_db&quot;]
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: myapp-secrets
+                  key: database-url</code></pre>
+<pre><code class="language-bash">kubectl apply -f ~/k8s/job-db-seed.yaml
+kubectl logs job/db-seed -n myapp
+kubectl wait --for=condition=complete job/db-seed -n myapp --timeout=300s</code></pre>
+<h4 id="indexed-jobs-parallel-processing-with-stable-shard-ids">Indexed jobs (parallel processing with stable shard IDs)</h4>
+<pre><code class="language-yaml">apiVersion: batch/v1
+kind: Job
+metadata:
+  name: process-shards
+spec:
+  completions: 10
+  parallelism: 3
+  completionMode: Indexed    # each pod gets JOB_COMPLETION_INDEX (0-9)
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: worker
+          image: myapp:latest
+          command: [&quot;python&quot;, &quot;process.py&quot;, &quot;--shard=$(JOB_COMPLETION_INDEX)&quot;]</code></pre>
+<hr>
+<h3 id="cronjobs">CronJobs</h3>
+<pre><code class="language-yaml">apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: daily-report
+  namespace: myapp
+spec:
+  schedule: &quot;0 6 * * *&quot;
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  startingDeadlineSeconds: 300
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: report
+              image: myapp:latest
+              command: [&quot;python&quot;, &quot;generate_report.py&quot;]
+              resources:
+                requests: { cpu: 200m, memory: 256Mi }
+                limits: { cpu: 500m, memory: 512Mi }</code></pre>
+<pre><code class="language-bash">kubectl create job --from=cronjob/daily-report manual-$(date +%s) -n myapp
+kubectl patch cronjob daily-report -n myapp -p '{&quot;spec&quot;:{&quot;suspend&quot;:true}}'
+kubectl get jobs -n myapp --sort-by='.metadata.creationTimestamp'</code></pre>
+<table><thead><tr><th>Schedule</th><th>Meaning</th></tr></thead><tbody><tr><td><code>0 <em> </em> <em> </em></code></td><td>Every hour</td></tr><tr><td><code><em>/15 </em> <em> </em> *</code></td><td>Every 15 minutes</td></tr><tr><td><code>0 2 <em> </em> *</code></td><td>Daily at 2 AM</td></tr><tr><td><code>0 2 <em> </em> 0</code></td><td>Weekly, Sunday 2 AM</td></tr><tr><td><code>0 2 1 <em> </em></code></td><td>Monthly, 1st at 2 AM</td></tr><tr><td><code>@hourly</code></td><td>Shorthand for <code>0 <em> </em> <em> </em></code></td></tr></tbody></table>
+<hr>
+<h3 id="init-containers">Init Containers</h3>
+<p>Init containers run to completion <strong>before</strong> any app containers start. They share volumes with app containers but run sequentially in order. Common uses: database migration, waiting for dependencies, pre-populating config from Vault, downloading ML models.</p>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+  namespace: myapp
+spec:
+  template:
+    spec:
+      # Init containers run sequentially, each must exit 0 before the next starts
+      initContainers:
+
+        # 1. Wait for the database to be ready before the app starts
+        - name: wait-for-db
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z postgres.data.svc.cluster.local 5432; do
+                echo &quot;waiting for postgres...&quot;; sleep 2
+              done
+              echo &quot;postgres is ready&quot;
+
+        # 2. Run DB migration (uses same image as app for schema access)
+        - name: db-migrate
+          image: myapp:v1.4.2
+          command: [&quot;python&quot;, &quot;manage.py&quot;, &quot;migrate&quot;, &quot;--noinput&quot;]
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: myapp-secrets
+                  key: database-url
+
+        # 3. Download a large model file into a shared emptyDir
+        - name: model-download
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - |
+              curl -fsSL https://models.example.com/v1/model.bin \
+                -o /shared/model.bin
+          volumeMounts:
+            - name: model-volume
+              mountPath: /shared
+
+      containers:
+        - name: myapp
+          image: myapp:v1.4.2
+          volumeMounts:
+            - name: model-volume
+              mountPath: /app/models
+
+      volumes:
+        - name: model-volume
+          emptyDir: {}</code></pre>
+<p><strong>Key properties of init containers:</strong></p>
+<ul>
+<li><code>resources</code> are tracked separately — scheduler sums <code>max(init container resources, sum(app container resources))</code></li>
+<li><code>restartPolicy: Always</code> applies to the pod, not init containers — a failed init container is retried according to pod <code>restartPolicy</code></li>
+<li>Init containers do NOT have <code>livenessProbe</code> or <code>readinessProbe</code></li>
+<li>Kubernetes 1.29+ supports <strong>native sidecar containers</strong> via <code>initContainers[].restartPolicy: Always</code> — see below</li>
+</ul>
+<hr>
+<h3 id="native-sidecar-containers-kubernetes-129">Native Sidecar Containers (Kubernetes 1.29+)</h3>
+<p>Before 1.29, sidecars were regular containers that ran alongside the main container. The problem: if the main container exited (Job complete), the sidecar would keep running and block pod completion. Native sidecars solve this.</p>
+<pre><code class="language-yaml">spec:
+  initContainers:
+    # Native sidecar — starts before app containers, runs for pod lifetime,
+    # but does NOT block pod completion when the main container exits
+    - name: log-shipper
+      image: fluent/fluent-bit:3.0
+      restartPolicy: Always     # this flag makes it a native sidecar (1.29+)
+      volumeMounts:
+        - name: log-volume
+          mountPath: /var/log/app
+      resources:
+        requests: { cpu: 50m, memory: 64Mi }
+        limits: { cpu: 100m, memory: 128Mi }
+
+    - name: vault-agent
+      image: hashicorp/vault-agent:latest
+      restartPolicy: Always
+      args: [&quot;agent&quot;, &quot;-config=/vault/config/agent.hcl&quot;]
+      volumeMounts:
+        - name: vault-config
+          mountPath: /vault/config
+
+  containers:
+    - name: myapp
+      image: myapp:latest
+      volumeMounts:
+        - name: log-volume
+          mountPath: /app/logs</code></pre>
+<blockquote><strong>Without native sidecars (< 1.29):</strong> Use a regular container with a <code>preStop</code> lifecycle hook that polls for a shared file written by the main container upon exit.</blockquote>
+<hr>
+<h3 id="istio-sidecar-injection-vs-cilium">Istio Sidecar Injection vs Cilium</h3>
+<p>If you're using <strong>Cilium</strong> as your CNI (this stack), you do <strong>not</strong> need Istio's Envoy sidecar for L7 visibility, mTLS, or traffic shaping — Cilium provides all of this at the eBPF layer without sidecars. Adding Istio on top of Cilium is redundant and increases pod overhead (~50 MB per pod).</p>
+<p>Use Istio sidecars when: you need advanced traffic management features Cilium doesn't offer (retries, circuit breakers, traffic mirroring per-service), or your team already has Istio expertise and invested tooling.</p>
+<hr>
+<h3 id="topology-spread-constraints">Topology Spread Constraints</h3>
+<p><strong>Purpose:</strong> Spread pods evenly across nodes/zones — preventing all replicas landing on one node.</p>
+<pre><code class="language-yaml">spec:
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: DoNotSchedule   # hard: pod stays Pending if can't spread
+      labelSelector:
+        matchLabels:
+          app: myapp
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway  # soft: best-effort
+      labelSelector:
+        matchLabels:
+          app: myapp</code></pre>
+<hr>
+<h3 id="priority-classes">Priority Classes</h3>
+<p><strong>Purpose:</strong> Ensure critical workloads get scheduled, even at the cost of evicting lower-priority pods.</p>
+<pre><code class="language-yaml">apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: critical-workload
+value: 1000000
+globalDefault: false
+description: &quot;Production critical. Preempts best-effort pods.&quot;
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: best-effort
+value: -100
+preemptionPolicy: Never
+description: &quot;Background batch. Evicted first under pressure.&quot;</code></pre>
+<pre><code class="language-yaml">spec:
+  template:
+    spec:
+      priorityClassName: critical-workload</code></pre>
+<blockquote>Built-in system classes: <code>system-cluster-critical</code> (2000000999) and <code>system-node-critical</code> (2000001000) — used by kube-dns, Cilium.</blockquote>
+<hr>
+<h3 id="pod-disruption-budgets">Pod Disruption Budgets</h3>
+<pre><code class="language-yaml">apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: myapp-pdb
+  namespace: myapp
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: myapp</code></pre>
+<pre><code class="language-bash">kubectl apply -f myapp-pdb.yaml
+kubectl get pdb -n myapp
+kubectl describe pdb myapp-pdb -n myapp</code></pre>
+<p>PDBs only protect against <strong>voluntary</strong> disruptions (drains, upgrades) — not node crashes.</p>
+<hr>
+<h3 id="pod-affinity-anti-affinity">Pod Affinity & Anti-Affinity</h3>
+<p><strong>Purpose:</strong> Co-locate pods with related services (affinity) or spread replicas so no two land on the same node/zone (anti-affinity).</p>
+<pre><code class="language-yaml">spec:
+  affinity:
+    # Hard anti-affinity — never two replicas on the same node
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              app: myapp
+          topologyKey: kubernetes.io/hostname
+
+    # Soft preference — prefer to run near the cache pod
+    podAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 80
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app: redis-cache
+            topologyKey: kubernetes.io/hostname
+
+    # Hard node affinity — only schedule on nodes with SSD
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: disktype
+                operator: In
+                values: [ssd]</code></pre>
+<pre><code class="language-bash"># Label nodes for affinity rules
+kubectl label node k3s-node1 disktype=ssd zone=a gpu=true
+kubectl label node k3s-node2 disktype=hdd zone=b
+
+# Show node labels
+kubectl get nodes --show-labels
+kubectl describe node k3s-node1 | grep Labels -A 20</code></pre>
+<hr>
+<h3 id="lifecycle-hooks-graceful-shutdown">Lifecycle Hooks & Graceful Shutdown</h3>
+<p><strong>Purpose:</strong> <code>postStart</code> runs immediately after container start (useful for warming caches). <code>preStop</code> runs before the container receives SIGTERM — use it for graceful draining. <code>terminationGracePeriodSeconds</code> controls how long Kubernetes waits before sending SIGKILL.</p>
+<pre><code class="language-yaml">spec:
+  terminationGracePeriodSeconds: 60   # default 30 — increase for slow-shutdown apps
+  containers:
+    - name: myapp
+      lifecycle:
+        postStart:
+          exec:
+            command: [&quot;/bin/sh&quot;, &quot;-c&quot;, &quot;sleep 2 &amp;&amp; curl -s http://localhost:8080/warmup&quot;]
+        preStop:
+          exec:
+            # Drain in-flight requests before SIGTERM is sent
+            command: [&quot;/bin/sh&quot;, &quot;-c&quot;, &quot;sleep 5&quot;]
+      # For HTTP servers — wait for connections to drain
+      # lifecycle:
+      #   preStop:
+      #     httpGet:
+      #       path: /drain
+      #       port: 8080</code></pre>
+<blockquote><strong>The SIGTERM race:</strong> Kubernetes simultaneously removes the pod from Service endpoints AND sends SIGTERM. Without a <code>preStop</code> sleep, requests already routed to the pod arrive after SIGTERM — causing 502s. A 5-second <code>preStop</code> sleep is the most common fix.</blockquote>
+<pre><code class="language-yaml"># Pod-level sysctl (for latency-tuned apps)
+spec:
+  securityContext:
+    sysctls:
+      - name: net.core.somaxconn
+        value: &quot;65535&quot;
+      - name: net.ipv4.tcp_tw_reuse
+        value: &quot;1&quot;
+  # Note: unsafe sysctls require kubelet --allowed-unsafe-sysctls flag</code></pre>
+<hr>
+<h3 id="projected-volumes-downward-api">Projected Volumes & Downward API</h3>
+<p><strong>Purpose:</strong> Inject cluster metadata — pod name, namespace, node name, resource limits — into the container without hardcoding. Projected volumes combine multiple sources (ServiceAccount tokens, ConfigMaps, Secrets, DownwardAPI) into one mount.</p>
+<pre><code class="language-yaml">spec:
+  containers:
+    - name: myapp
+      env:
+        # Downward API as env vars
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: MEMORY_LIMIT
+          valueFrom:
+            resourceFieldRef:
+              containerName: myapp
+              resource: limits.memory
+      volumeMounts:
+        - name: podinfo
+          mountPath: /etc/podinfo
+        - name: combined
+          mountPath: /etc/projected
+  volumes:
+    # Downward API as files (useful for labelling metrics)
+    - name: podinfo
+      downwardAPI:
+        items:
+          - path: labels
+            fieldRef:
+              fieldPath: metadata.labels
+          - path: annotations
+            fieldRef:
+              fieldPath: metadata.annotations
+
+    # Projected volume — merge token + configmap + secret into one mount
+    - name: combined
+      projected:
+        sources:
+          - serviceAccountToken:
+              path: token
+              expirationSeconds: 3600
+              audience: myapp
+          - configMap:
+              name: myapp-config
+          - secret:
+              name: myapp-secrets</code></pre>
+<hr>
+<h3 id="pvc-resize-expanding-volumes">PVC Resize (Expanding Volumes)</h3>
+<p><strong>Purpose:</strong> Expand a PVC without data loss — supported by Longhorn, Rook-Ceph, and most cloud CSI drivers.</p>
+<pre><code class="language-bash"># Confirm the StorageClass allows expansion
+kubectl get sc longhorn -o jsonpath='{.allowVolumeExpansion}'   # → true
+
+# Patch the PVC — Kubernetes will expand the underlying volume
+kubectl patch pvc myapp-data -n myapp \
+  --type='json' \
+  -p='[{&quot;op&quot;:&quot;replace&quot;,&quot;path&quot;:&quot;/spec/resources/requests/storage&quot;,&quot;value&quot;:&quot;20Gi&quot;}]'
+
+# Watch until expansion completes (may require pod restart for filesystem resize)
+kubectl get pvc myapp-data -n myapp -w
+
+# For pods that need to see the new size: delete pod (StatefulSet restarts it)
+# For Deployments: rolling restart
+kubectl rollout restart deployment myapp -n myapp</code></pre>
+<pre><code class="language-yaml"># Force online resize (supported by ext4/xfs with resizefs)
+spec:
+  resources:
+    requests:
+      storage: 20Gi    # just edit this value — kubectl apply -f or kubectl edit pvc</code></pre>
+<hr>
+<h3 id="daemonset-patterns">DaemonSet Patterns</h3>
+<p><strong>Purpose:</strong> DaemonSets run exactly one pod per node — used for node-level agents, log shippers, CNI, monitoring.</p>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: log-shipper
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: log-shipper
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1     # update one node at a time
+  template:
+    metadata:
+      labels:
+        app: log-shipper
+    spec:
+      # DaemonSets often need to tolerate all taints
+      tolerations:
+        - operator: Exists
+      # Access host filesystem for log collection
+      volumes:
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: varlibdockercontainers
+          hostPath:
+            path: /var/lib/docker/containers
+      containers:
+        - name: fluent-bit
+          image: fluent/fluent-bit:latest
+          securityContext:
+            runAsNonRoot: false   # log shippers often need root for host file access
+          volumeMounts:
+            - name: varlog
+              mountPath: /var/log
+              readOnly: true</code></pre>
+<pre><code class="language-bash"># Only run on specific nodes
+kubectl label node k3s-node1 role=logging
+# Add nodeSelector to DaemonSet spec:
+#   nodeSelector:
+#     role: logging
+
+kubectl get daemonset -A
+kubectl rollout status daemonset/log-shipper -n monitoring
+kubectl rollout history daemonset/log-shipper -n monitoring
+kubectl rollout undo daemonset/log-shipper -n monitoring</code></pre>
+<hr>
+<h3 id="imagepullsecrets-private-registry-auth">ImagePullSecrets & Private Registry Auth</h3>
+<p><strong>Purpose:</strong> Pull images from private registries (Harbor, Gitea, GHCR, ECR). Create a <code>docker-registry</code> Secret and reference it in the Pod spec or ServiceAccount.</p>
+<pre><code class="language-bash"># Create a registry credential secret
+kubectl create secret docker-registry regcred \
+  --docker-server=harbor.home.local \
+  --docker-username=robot$ci-push \
+  --docker-password=&lt;robot-token&gt; \
+  --namespace myapp
+
+# Or from an existing Docker/Podman config
+kubectl create secret generic regcred \
+  --from-file=.dockerconfigjson=$HOME/.docker/config.json \
+  --type=kubernetes.io/dockerconfigjson \
+  --namespace myapp</code></pre>
+<pre><code class="language-yaml"># Reference in a Pod/Deployment
+spec:
+  imagePullSecrets:
+    - name: regcred
+  containers:
+    - name: myapp
+      image: harbor.home.local/myorg/myapp:v1.4.2</code></pre>
+<pre><code class="language-yaml"># Attach to a ServiceAccount — all pods using this SA inherit the pull secret
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: myapp
+imagePullSecrets:
+  - name: regcred</code></pre>
+<pre><code class="language-bash"># For ECR — token rotates every 12h, use a CronJob to refresh:
+kubectl create cronjob ecr-refresh --schedule=&quot;0 */10 * * *&quot; \
+  --image=amazon/aws-cli \
+  -- sh -c '
+    TOKEN=$(aws ecr get-login-password --region eu-west-1)
+    kubectl create secret docker-registry regcred \
+      --docker-server=&lt;account&gt;.dkr.ecr.eu-west-1.amazonaws.com \
+      --docker-username=AWS --docker-password=$TOKEN \
+      --namespace myapp --dry-run=client -o yaml | kubectl apply -f -'</code></pre>
+<hr>
+<h3 id="debugging-with-kubectl-debug">Debugging with kubectl debug</h3>
+<pre><code class="language-bash"># Attach netshoot to a running pod (curl, dig, tcpdump, ss, iperf3)
+kubectl debug -it myapp-pod-xyz --image=nicolaka/netshoot --target=myapp -n myapp
+
+# Debug a distroless container (exec is impossible — use ephemeral container)
+kubectl debug -it myapp-pod-xyz --image=busybox --target=myapp -n myapp
+
+# Shell into a node
+kubectl debug node/k3s-node1 --image=busybox -it -- chroot /host</code></pre>
+<hr>
+<h2 id="deployment-strategies-deep-dive">Deployment Strategies Deep Dive</h2>
+<h3 id="rolling-update-tuning">Rolling Update Tuning</h3>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+spec:
+  replicas: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2          # allow 2 extra pods above desired during rollout
+      maxUnavailable: 0    # never go below desired count (zero-downtime)
+      # maxSurge: 25%      # percentage form also valid
+      # maxUnavailable: 25%
+
+  # Minimum time a pod must be ready before it's considered available
+  minReadySeconds: 10
+  
+  # Keep old ReplicaSets for rollback history
+  revisionHistoryLimit: 5</code></pre>
+<pre><code class="language-bash"># Pause a rollout mid-way (inspect canary behaviour)
+kubectl rollout pause deployment/myapp -n myapp
+kubectl rollout resume deployment/myapp -n myapp
+
+# Check rollout status
+kubectl rollout status deployment/myapp -n myapp --timeout=5m
+
+# Full rollout history with annotations
+kubectl rollout history deployment/myapp -n myapp
+kubectl rollout history deployment/myapp -n myapp --revision=3
+
+# Rollback to a specific revision
+kubectl rollout undo deployment/myapp -n myapp --to-revision=3</code></pre>
+<h3 id="recreate-strategy-downtime-deployments">Recreate Strategy (Downtime Deployments)</h3>
+<pre><code class="language-yaml">spec:
+  strategy:
+    type: Recreate     # kill ALL old pods, then start new ones — accepts downtime
+                       # use for: DB schema migrations that break backward compat</code></pre>
+<hr>
+<h2 id="autoscaling">Autoscaling</h2>
+<h3 id="hpa-horizontal-pod-autoscaler">HPA — Horizontal Pod Autoscaler</h3>
+<pre><code class="language-yaml">apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: myapp-hpa
+  namespace: myapp
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: myapp
+  minReplicas: 2
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: AverageValue
+          averageValue: 512Mi
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Pods
+          value: 4
+          periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 25
+          periodSeconds: 60</code></pre>
+<pre><code class="language-bash">kubectl autoscale deployment myapp --cpu-percent=70 --min=2 --max=10 -n myapp
+kubectl describe hpa myapp-hpa -n myapp
+kubectl get hpa -n myapp -w
+kubectl top pods -n myapp</code></pre>
+<blockquote><strong>HPA requires resource requests.</strong> Without <code>resources.requests.cpu</code>, HPA shows <code>&lt;unknown&gt;</code> — it calculates utilisation as <code>current / requested</code>. Use Goldilocks to find the right values.</blockquote>
+<hr>
+<h3 id="keda-event-driven-autoscaling">KEDA (Event-Driven Autoscaling)</h3>
+<p><strong>Purpose:</strong> Scale to zero and back based on external event sources — queue depth (RabbitMQ, Kafka, NATS), cron schedules, Prometheus metrics, HTTP traffic, and 60+ scalers.</p>
+<pre><code class="language-bash">helm repo add kedacore https://kedacore.github.io/charts
+helm install keda kedacore/keda --namespace keda --create-namespace</code></pre>
+<pre><code class="language-yaml"># Scale on RabbitMQ queue depth (scale to zero when idle)
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: worker-scaler
+  namespace: myapp
+spec:
+  scaleTargetRef:
+    name: worker-deployment
+  minReplicaCount: 0
+  maxReplicaCount: 20
+  triggers:
+    - type: rabbitmq
+      metadata:
+        host: amqp://user:pass@rabbitmq.myapp.svc:5672/
+        queueName: jobs
+        queueLength: &quot;5&quot;
+---
+# Scale on Prometheus metric
+triggers:
+  - type: prometheus
+    metadata:
+      serverAddress: http://prometheus.monitoring.svc:9090
+      metricName: http_requests_pending
+      threshold: &quot;100&quot;
+      query: sum(http_requests_pending{job=&quot;myapp&quot;})</code></pre>
+<pre><code class="language-bash">kubectl get scaledobjects -n myapp
+kubectl describe scaledobject worker-scaler -n myapp</code></pre>
+<hr>
+<h3 id="prometheus-adapter-custom-metrics-for-hpa">Prometheus Adapter (Custom Metrics for HPA)</h3>
+<p><strong>Purpose:</strong> Bridges Prometheus metrics to the Kubernetes <code>custom.metrics.k8s.io</code> API so HPA can scale on arbitrary application metrics (request rate, queue depth, error ratio) without KEDA.</p>
+<pre><code class="language-bash">helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm upgrade --install prometheus-adapter prometheus-community/prometheus-adapter \
+  --namespace monitoring \
+  -f ~/k8s/values/prometheus-adapter.yaml</code></pre>
+<pre><code class="language-yaml"># ~/k8s/values/prometheus-adapter.yaml
+prometheus:
+  url: http://kube-prometheus-stack-prometheus.monitoring.svc
+  port: 9090
+rules:
+  custom:
+    # Expose http_requests_per_second as a custom metric for HPA
+    - seriesQuery: 'http_requests_total{namespace!=&quot;&quot;,pod!=&quot;&quot;}'
+      resources:
+        overrides:
+          namespace: { resource: namespace }
+          pod: { resource: pod }
+      name:
+        matches: &quot;^(.*)_total BLOCK37 quot;
+        as: &quot;${1}_per_second&quot;
+      metricsQuery: 'rate(&lt;&lt;.Series&gt;&gt;{&lt;&lt;.LabelMatchers&gt;&gt;}[2m])'</code></pre>
+<pre><code class="language-yaml"># HPA using the custom metric
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: myapp-custom-hpa
+  namespace: myapp
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: myapp
+  minReplicas: 2
+  maxReplicas: 20
+  metrics:
+    - type: Pods
+      pods:
+        metric:
+          name: http_requests_per_second
+        target:
+          type: AverageValue
+          averageValue: 100    # scale up when avg &gt; 100 req/s per pod</code></pre>
+<pre><code class="language-bash"># Verify the metric is registered
+kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1 | jq '.resources[].name'
+kubectl get --raw &quot;/apis/custom.metrics.k8s.io/v1beta1/namespaces/myapp/pods/*/http_requests_per_second&quot; | jq .</code></pre>
+<blockquote><strong>KEDA vs Prometheus Adapter:</strong> KEDA is simpler to configure and supports scale-to-zero. Prometheus Adapter is lighter weight (no extra CRDs) and doesn't require a separate operator. Use KEDA for event-driven scale-to-zero; use Prometheus Adapter when you just need custom metrics for standard HPA.</blockquote>
+<hr>
+<h3 id="cluster-autoscaler">Cluster Autoscaler</h3>
+<p><strong>Purpose:</strong> The standard Kubernetes node autoscaler — watches for unschedulable pods and triggers scale-up of a cloud node group (AWS ASG, GCE MIG, Azure VMSS). Scales down idle nodes after a configurable cool-down period. Use <strong>Karpenter</strong> on AWS/Azure for faster, more cost-efficient provisioning; use Cluster Autoscaler for GKE, generic cloud, or on-prem with custom node groups.</p>
+<pre><code class="language-bash">helm repo add autoscaler https://kubernetes.github.io/autoscaler
+helm upgrade --install cluster-autoscaler autoscaler/cluster-autoscaler   --namespace kube-system   --set autoDiscovery.clusterName=homelab   --set awsRegion=eu-central-1   --set rbac.serviceAccount.annotations.&quot;eks\.amazonaws\.com/role-arn&quot;=arn:aws:iam::ACCOUNT:role/ClusterAutoscaler</code></pre>
+<pre><code class="language-bash">kubectl -n kube-system logs -l app.kubernetes.io/name=cluster-autoscaler -f
+
+# Annotate a node group to allow scale-down of specific nodes
+kubectl annotate node k3s-worker-1 cluster-autoscaler.kubernetes.io/scale-down-disabled=true
+
+# Check CA decisions
+kubectl -n kube-system get configmap cluster-autoscaler-status -o yaml</code></pre>
+<blockquote><strong>CA vs Karpenter:</strong> Cluster Autoscaler works with pre-defined node groups (fixed instance types). Karpenter provisions any instance type that fits pending pod requirements — often cheaper. For homelab/bare-metal, neither applies; use manual node management or CAPI.</blockquote>
+<hr>
+<h3 id="karpenter-cloud-node-autoscaler">Karpenter (Cloud Node Autoscaler)</h3>
+<p><strong>Purpose:</strong> Node autoscaler that provisions exactly the right cloud VM instance type for pending pods.</p>
+<pre><code class="language-bash">helm repo add karpenter https://charts.karpenter.sh
+helm upgrade --install karpenter karpenter/karpenter \
+  --namespace karpenter --create-namespace \
+  --set settings.clusterName=homelab \
+  --set settings.interruptionQueue=homelab-karpenter</code></pre>
+<pre><code class="language-yaml">apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: default
+spec:
+  template:
+    spec:
+      requirements:
+        - key: kubernetes.io/arch
+          operator: In
+          values: [amd64]
+        - key: karpenter.k8s.aws/instance-category
+          operator: In
+          values: [c, m, r]
+      nodeClassRef:
+        group: karpenter.k8s.aws
+        kind: EC2NodeClass
+        name: default
+  limits:
+    cpu: 100
+  disruption:
+    consolidationPolicy: WhenEmptyOrUnderutilized
+    consolidateAfter: 1m</code></pre>
+<hr>
+<h3 id="vpa-vertical-pod-autoscaler">VPA — Vertical Pod Autoscaler</h3>
+<p><strong>Purpose:</strong> Automatically right-sizes pod resource requests/limits based on observed usage. Operates in three modes: <code>Off</code> (generate recommendations only), <code>Initial</code> (set requests at pod creation), <code>Auto</code> (update requests and restart pods when needed).</p>
+<pre><code class="language-bash"># Install VPA (required by Goldilocks and usable standalone)
+kubectl apply -f https://github.com/kubernetes/autoscaler/releases/latest/download/vertical-pod-autoscaler.yaml
+
+kubectl get pods -n kube-system -l app=vpa-admission-controller
+kubectl get pods -n kube-system -l app=vpa-recommender
+kubectl get pods -n kube-system -l app=vpa-updater</code></pre>
+<pre><code class="language-yaml"># VPA in recommendation mode — reads suggestions, no automatic restarts
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: myapp-vpa
+  namespace: myapp
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: myapp
+  updatePolicy:
+    updateMode: &quot;Off&quot;   # Off | Initial | Recreate | Auto
+  resourcePolicy:
+    containerPolicies:
+      - containerName: myapp
+        minAllowed:
+          cpu: 50m
+          memory: 64Mi
+        maxAllowed:
+          cpu: &quot;2&quot;
+          memory: 2Gi
+        controlledResources: [cpu, memory]
+        controlledValues: RequestsAndLimits</code></pre>
+<pre><code class="language-bash"># Read VPA recommendations
+kubectl get vpa myapp-vpa -n myapp -o jsonpath='{.status.recommendation}' | jq .
+kubectl describe vpa myapp-vpa -n myapp
+
+# Example output — use these values in your Deployment
+# containerRecommendations:
+#   - containerName: myapp
+#     lowerBound: { cpu: 25m, memory: 52Mi }
+#     target: { cpu: 100m, memory: 256Mi }     ← set this in requests
+#     upperBound: { cpu: 500m, memory: 1Gi }
+#     uncappedTarget: { cpu: 100m, memory: 256Mi }</code></pre>
+<blockquote>Let VPA collect 24–48 hours of traffic before trusting recommendations. Run in <code>Off</code> mode in production (recommendation only) — <code>Auto</code> mode restarts pods, which can cause brief downtime.</blockquote>
+<hr>
+<h3 id="goldilocks-resource-right-sizing">Goldilocks (Resource Right-Sizing)</h3>
+<p><strong>Purpose:</strong> Uses VPA in recommendation mode to suggest the right CPU/memory requests per container based on actual usage.</p>
+<pre><code class="language-bash">kubectl apply -f https://github.com/kubernetes/autoscaler/releases/latest/download/vertical-pod-autoscaler.yaml
+
+helm repo add fairwinds-stable https://charts.fairwinds.com/stable
+helm upgrade --install goldilocks fairwinds-stable/goldilocks \
+  --namespace goldilocks --create-namespace
+
+kubectl label namespace myapp goldilocks.fairwinds.com/enabled=true
+kubectl -n goldilocks port-forward svc/goldilocks-dashboard 8080:80</code></pre>
+<blockquote>VPA is in recommendation mode only — it does not change pods automatically. Safe to run in production. Let it collect a few hours of real traffic before trusting its suggestions.  <strong>VPA + HPA:</strong> Never run both scaling on the same metric (CPU/memory). Safe combination: HPA on custom/external metrics (KEDA) + VPA for right-sizing requests.</blockquote>
+<hr>
+<h2 id="gpu-aiml-workloads">GPU & AI/ML Workloads</h2>
+<p>Running GPU-accelerated workloads on Kubernetes requires exposing GPU resources to pods via a device plugin. The NVIDIA GPU Operator automates driver installation, the device plugin, and monitoring. Node Feature Discovery (NFD) labels nodes with hardware capabilities so the scheduler can target GPU nodes correctly.</p>
+<h3 id="node-feature-discovery-nfd">Node Feature Discovery (NFD)</h3>
+<p><strong>Purpose:</strong> Automatically labels nodes with detected hardware features (CPU flags, PCIe devices, kernel features). Required by the GPU Operator and useful for any workload targeting specific hardware.</p>
+<pre><code class="language-bash">helm repo add nfd https://kubernetes-sigs.github.io/node-feature-discovery/charts
+helm upgrade --install nfd nfd/node-feature-discovery \
+  --namespace nfd --create-namespace \
+  --set worker.config.sources.pci.deviceClassWhitelist=[&quot;0200&quot;,&quot;03&quot;,&quot;12&quot;]</code></pre>
+<pre><code class="language-bash"># See what labels NFD applied to a GPU node
+kubectl describe node &lt;gpu-node&gt; | grep -i nvidia
+kubectl get node &lt;gpu-node&gt; -o json | jq '.metadata.labels | to_entries[] | select(.key | test(&quot;feature.node.kubernetes.io&quot;))'</code></pre>
+<hr>
+<h3 id="nvidia-gpu-operator">NVIDIA GPU Operator</h3>
+<p><strong>Purpose:</strong> Single Helm chart that installs NVIDIA drivers, <code>nvidia-container-toolkit</code>, the device plugin, DCGM exporter (GPU metrics), and MIG manager on GPU nodes. Works with k3s, RKE2, and kubeadm.</p>
+<pre><code class="language-bash">helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
+helm repo update
+
+helm upgrade --install gpu-operator nvidia/gpu-operator \
+  --namespace gpu-operator --create-namespace \
+  --set driver.enabled=true \
+  --set toolkit.enabled=true \
+  --set devicePlugin.enabled=true \
+  --set dcgmExporter.enabled=true \
+  --set migManager.enabled=false     # enable only for A100/H100 with MIG</code></pre>
+<pre><code class="language-bash"># Verify GPUs are visible
+kubectl get nodes -l nvidia.com/gpu.present=true
+kubectl describe node &lt;gpu-node&gt; | grep &quot;nvidia.com/gpu&quot;
+# Should show: nvidia.com/gpu: 1 (or N for multi-GPU nodes)
+
+# Run a quick GPU smoke-test
+kubectl run gpu-test --rm -it --restart=Never \
+  --image=nvcr.io/nvidia/cuda:12.4.0-base-ubuntu22.04 \
+  --limits=nvidia.com/gpu=1 \
+  -- nvidia-smi</code></pre>
+<hr>
+<h3 id="requesting-gpu-resources-in-pods">Requesting GPU Resources in Pods</h3>
+<p>GPU resources are exposed as <code>nvidia.com/gpu</code> extended resources. Unlike CPU/memory, GPU limits == requests (the scheduler allocates the whole GPU or not at all).</p>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: model-inference
+  namespace: ai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: model-inference
+  template:
+    metadata:
+      labels:
+        app: model-inference
+    spec:
+      # Schedule only on GPU nodes
+      nodeSelector:
+        nvidia.com/gpu.present: &quot;true&quot;
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: inference
+          image: harbor.home.local/myorg/model-server:latest
+          resources:
+            limits:
+              nvidia.com/gpu: 1      # always set limits = requests for GPUs
+              memory: 16Gi
+              cpu: &quot;4&quot;
+            requests:
+              memory: 16Gi
+              cpu: &quot;4&quot;
+          env:
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: all
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: compute,utility</code></pre>
+<blockquote><strong>GPU sharing:</strong> By default one pod = one GPU. For multi-tenant GPU sharing, use NVIDIA Time-Slicing (set <code>devicePlugin.config.sharing.timeSlicing.replicas</code>) or MIG (A100/H100 only).</blockquote>
+<hr>
+<h3 id="gpu-time-slicing-shared-gpu-for-devbatch-workloads">GPU Time-Slicing (Shared GPU for Dev/Batch Workloads)</h3>
+<pre><code class="language-yaml"># ~/k8s/gpu-time-slicing-config.yaml
+# Apply as ConfigMap in gpu-operator namespace
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: time-slicing-config
+  namespace: gpu-operator
+data:
+  any: |-
+    version: v1
+    flags:
+      migStrategy: none
+    sharing:
+      timeSlicing:
+        renameByDefault: false
+        failRequestsGreaterThanOne: false
+        resources:
+          - name: nvidia.com/gpu
+            replicas: 4    # expose 1 physical GPU as 4 virtual GPUs</code></pre>
+<pre><code class="language-bash">kubectl apply -f ~/k8s/gpu-time-slicing-config.yaml
+helm upgrade gpu-operator nvidia/gpu-operator \
+  --namespace gpu-operator \
+  --set devicePlugin.config.name=time-slicing-config</code></pre>
+<hr>
+<h3 id="keda-gpu-autoscaling-scale-to-zero-inference">KEDA GPU Autoscaling (Scale-to-Zero Inference)</h3>
+<p>Combine KEDA with GPU nodes — scale inference deployments to zero when no requests, back up when queue fills.</p>
+<pre><code class="language-yaml">apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: inference-scaler
+  namespace: ai
+spec:
+  scaleTargetRef:
+    name: model-inference
+  minReplicaCount: 0          # scale to zero when idle
+  maxReplicaCount: 4
+  cooldownPeriod: 300
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus.monitoring.svc:9090
+        query: sum(inference_queue_depth{namespace=&quot;ai&quot;})
+        threshold: &quot;1&quot;</code></pre>
+<hr>
+<h3 id="gpu-metrics-with-dcgm-exporter">GPU Metrics with DCGM Exporter</h3>
+<p>The GPU Operator installs DCGM Exporter which exposes Prometheus metrics for GPU utilisation, memory, temperature, and power draw.</p>
+<pre><code class="language-bash"># Port-forward or use existing Prometheus scrape
+kubectl -n gpu-operator port-forward svc/gpu-operator-dcgm-exporter 9400:9400 &amp;
+curl http://localhost:9400/metrics | grep DCGM_FI_DEV_GPU_UTIL</code></pre>
+<p>Key metrics: <code>DCGM_FI_DEV_GPU_UTIL</code> (%), <code>DCGM_FI_DEV_MEM_COPY_UTIL</code> (%), <code>DCGM_FI_DEV_POWER_USAGE</code> (W), <code>DCGM_FI_DEV_GPU_TEMP</code> (°C).</p>
+<pre><code class="language-yaml"># Grafana dashboard: import ID 12239 from grafana.com — NVIDIA DCGM Exporter Dashboard</code></pre>
+<hr>
+<h2 id="kubevirt-vms-in-kubernetes">KubeVirt — VMs in Kubernetes</h2>
+<p><strong>Purpose:</strong> Run full virtual machines as Kubernetes workloads. Uses the same scheduling, networking, storage, and RBAC as pod workloads — but the workload is a KVM VM, not a container. Useful for legacy apps that can't be containerized, Windows workloads, or when you need stronger isolation than containers provide.</p>
+<pre><code class="language-bash"># Deploy the KubeVirt operator
+export KUBEVIRT_VERSION=$(curl -s https://api.github.com/repos/kubevirt/kubevirt/releases/latest | jq -r .tag_name)
+kubectl apply -f https://github.com/kubevirt/kubevirt/releases/download/${KUBEVIRT_VERSION}/kubevirt-operator.yaml
+kubectl apply -f https://github.com/kubevirt/kubevirt/releases/download/${KUBEVIRT_VERSION}/kubevirt-cr.yaml
+
+# Wait for KubeVirt to be ready
+kubectl -n kubevirt wait kv kubevirt --for condition=Available --timeout=300s
+
+# Install virtctl CLI
+curl -L https://github.com/kubevirt/kubevirt/releases/download/${KUBEVIRT_VERSION}/virtctl-${KUBEVIRT_VERSION}-linux-amd64 \
+  -o ~/.local/bin/virtctl &amp;&amp; chmod +x ~/.local/bin/virtctl</code></pre>
+<pre><code class="language-yaml"># Create a simple VM
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: ubuntu-vm
+  namespace: default
+spec:
+  running: true
+  template:
+    metadata:
+      labels:
+        kubevirt.io/vm: ubuntu-vm
+    spec:
+      domain:
+        devices:
+          disks:
+            - name: containerdisk
+              disk:
+                bus: virtio
+            - name: cloudinitdisk
+              disk:
+                bus: virtio
+          interfaces:
+            - name: default
+              masquerade: {}
+        resources:
+          requests:
+            memory: 2Gi
+            cpu: &quot;2&quot;
+      networks:
+        - name: default
+          pod: {}
+      volumes:
+        - name: containerdisk
+          containerDisk:
+            image: quay.io/kubevirt/ubuntu-container-disk:latest
+        - name: cloudinitdisk
+          cloudInitNoCloud:
+            userDataBase64: |
+              I2Nsb3VkLWNvbmZpZwp1c2VyczoKICAtIG5hbWU6IHVidW50dQo=</code></pre>
+<pre><code class="language-bash"># VM lifecycle
+virtctl start ubuntu-vm
+virtctl stop ubuntu-vm
+virtctl restart ubuntu-vm
+
+# Console access
+virtctl console ubuntu-vm
+virtctl vnc ubuntu-vm
+
+# SSH (if VM has SSH server)
+virtctl ssh ubuntu-vm --local-ssh=true
+
+# Live migrate a VM to another node (zero-downtime)
+virtctl migrate ubuntu-vm
+
+# Expose VM as a Service
+virtctl expose vm ubuntu-vm --name ubuntu-ssh --port 22 --type NodePort</code></pre>
+<hr>
+<h2 id="webassembly-wasm-workloads">WebAssembly (WASM) Workloads</h2>
+<p><strong>Purpose:</strong> Run WebAssembly modules directly in Kubernetes as workloads — smaller images (KB instead of MB), near-native performance, stronger sandboxing than containers, and true multi-architecture portability without multi-arch builds.</p>
+<h3 id="runwasi-wasm-in-containerd">runwasi (WASM in containerd)</h3>
+<p><strong>Purpose:</strong> containerd shim that allows WASM OCI images to run directly alongside container workloads — using the same Kubernetes pod spec, just a different runtime class.</p>
+<pre><code class="language-bash"># Install the wasmtime or spin runtime shim (on each node)
+# k3s bundles runwasi — enable it:
+cat &gt;&gt; /etc/rancher/k3s/config.yaml &lt;&lt; 'EOF'
+disable:
+  - traefik
+kubelet-arg:
+  - &quot;allowed-unsafe-sysctls=*&quot;
+EOF
+
+# Install the containerd-wasm-shims
+curl -sfL https://github.com/deislabs/containerd-wasm-shims/releases/latest/download/containerd-wasm-shims-installer-linux-amd64.sh | sh
+
+# Apply RuntimeClass for WASM
+kubectl apply -f - &lt;&lt;EOF
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: wasmtime
+handler: wasmtime
+EOF</code></pre>
+<pre><code class="language-yaml"># Deploy a WASM workload
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wasm-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: wasm-app
+  template:
+    metadata:
+      labels:
+        app: wasm-app
+    spec:
+      runtimeClassName: wasmtime    # use the WASM shim
+      containers:
+        - name: wasm-app
+          image: ghcr.io/myorg/myapp:latest    # OCI image containing .wasm module
+          resources:
+            requests: { memory: 32Mi, cpu: 100m }
+            limits: { memory: 64Mi, cpu: 200m }</code></pre>
+<h3 id="spinkube-fermyon-spin-on-kubernetes">SpinKube (Fermyon Spin on Kubernetes)</h3>
+<p><strong>Purpose:</strong> Run Fermyon Spin WASM applications natively in Kubernetes. Spin applications start in <1ms, scale to zero instantly, and use the same Kubernetes primitives.</p>
+<pre><code class="language-bash">helm repo add spinoperator https://spinoperator.fermyon.dev
+helm install spin-operator spinoperator/spin-operator \
+  --namespace spin-operator --create-namespace \
+  --wait
+
+# Deploy a Spin app
+kubectl apply -f - &lt;&lt;EOF
+apiVersion: core.spinoperator.dev/v1alpha1
+kind: SpinApp
+metadata:
+  name: my-spin-app
+spec:
+  image: &quot;ghcr.io/myorg/my-spin-app:latest&quot;
+  replicas: 2
+  executor: containerd-shim-spin
+EOF</code></pre>
+<hr></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

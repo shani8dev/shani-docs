@@ -3,31 +3,33 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
-<title>Troubleshooting Guide — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Troubleshooting Guide  The most important thing to know about troubleshooting Shanios is that the worst case is almost always &quot;rollback and reboot.&quot; The ar…">
+<title>Troubleshooting — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="The most important thing to know about troubleshooting Shanios is that the worst case is almost always &quot;rollback and reboot.&quot; The architecture is built to …">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/troubleshooting/">
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
-  <meta property="og:title"     id="og-title"     content="Troubleshooting Guide">
-  <meta property="og:description" id="og-desc"    content="Troubleshooting Guide  The most important thing to know about troubleshooting Shanios is that the worst case is almost always &quot;rollback and reboot.&quot; The ar…">
+  <meta property="og:title"     id="og-title"     content="Troubleshooting">
+  <meta property="og:description" id="og-desc"    content="The most important thing to know about troubleshooting Shanios is that the worst case is almost always &quot;rollback and reboot.&quot; The architecture is built to …">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/troubleshooting/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
-  <meta property="og:image:alt" id="og-image-alt" content="Troubleshooting Guide">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="Troubleshooting">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
-  <meta name="twitter:title"       id="tw-title" content="Troubleshooting Guide">
-  <meta name="twitter:description" id="tw-desc"  content="Troubleshooting Guide  The most important thing to know about troubleshooting Shanios is that the worst case is almost always &quot;rollback and reboot.&quot; The ar…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:title"       id="tw-title" content="Troubleshooting">
+  <meta name="twitter:description" id="tw-desc"  content="The most important thing to know about troubleshooting Shanios is that the worst case is almost always &quot;rollback and reboot.&quot; The architecture is built to …">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Troubleshooting Guide","description":"Troubleshooting Guide  The most important thing to know about troubleshooting Shanios is that the worst case is almost always \"rollback and reboot.\" The ar…","url":"https://docs.shani.dev/doc/troubleshooting/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Troubleshooting","description":"The most important thing to know about troubleshooting Shanios is that the worst case is almost always \"rollback and reboot.\" The architecture is built to …","url":"https://docs.shani.dev/doc/troubleshooting/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Troubleshooting","item":"https://docs.shani.dev/doc/troubleshooting/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -210,23 +212,19 @@
         semantically correct, not byte-identical to the client render.
       -->
       <div class="doc-header">
-        <h1 class="doc-title">Troubleshooting Guide</h1>
+        <h1 class="doc-title">Troubleshooting</h1>
         <div class="doc-meta">
-          <span class="doc-meta__badge">System Management</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
+          <span class="doc-meta__badge">Troubleshooting</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>The most important thing to know about troubleshooting Shanios is that the worst case is almost always <strong>"rollback and reboot."</strong> The architecture is built to make recovery fast, reliable, and non-destructive.</p>
-<blockquote><p><strong>The Golden Rule:</strong> Before debugging anything after a system update, try rolling back first. It is always safe, always reversible, and takes under a minute:</p></blockquote>
-<blockquote><p><pre><code class="language-bash">&gt; sudo shani-deploy --rollback
-&gt; sudo reboot
-&gt; </code></pre></p></blockquote>
-<blockquote><p>Your home directory, Flatpak apps, Nix packages, and containers are completely unaffected. Only the OS slot changes.</p></blockquote>
+<blockquote><strong>The Golden Rule:</strong> Before debugging anything after a system update, try rolling back first. It is always safe, always reversible, and takes under a minute: ``<code>bash sudo shani-deploy --rollback sudo reboot </code>`` Your home directory, Flatpak apps, Nix packages, and containers are completely unaffected. Only the OS slot changes.</blockquote>
 <p>To check which slot you are currently running:</p>
 <pre><code class="language-bash">cat /data/current-slot   # prints: blue  or  green</code></pre>
-<p>---</p>
-<h2>Boot Problems</h2>
-<h3>System Won't Boot — Automatic Fallback</h3>
+<hr>
+<h2 id="boot-problems">Boot Problems</h2>
+<h3 id="system-wont-boot-automatic-fallback">System Won't Boot — Automatic Fallback</h3>
 <p>If your system fails to reach the login prompt three times after an update, systemd-boot's boot-counting mechanism activates and falls back to the previous slot automatically. On the next successful login, <code>shani-update</code> detects the fallback and offers to clean the failed slot.</p>
 <p>To check what happened:</p>
 <pre><code class="language-bash"># Which slot are you actually running?
@@ -246,7 +244,7 @@ journalctl -b -1 -u startup-check.service</code></pre>
 <p>To restore the failed slot and try again:</p>
 <pre><code class="language-bash">sudo shani-deploy -r
 sudo reboot</code></pre>
-<h3>System Boots to the Wrong Slot</h3>
+<h3 id="system-boots-to-the-wrong-slot">System Boots to the Wrong Slot</h3>
 <p>After an update, the bootloader entry may not have updated correctly.</p>
 <ol>
 <li>Press <code>Space</code> or <code>Enter</code> at the systemd-boot splash screen to bring up the boot menu.</li>
@@ -255,7 +253,7 @@ sudo reboot</code></pre>
 </ol>
 <pre><code class="language-bash">cat /data/current-slot
 sudo shani-deploy --repair-boot</code></pre>
-<h3>Black Screen After Update (GPU / NVIDIA)</h3>
+<h3 id="black-screen-after-update-gpu-nvidia">Black Screen After Update (GPU / NVIDIA)</h3>
 <p>A black screen after a kernel or driver update usually means the NVIDIA module failed to load, or Secure Boot is rejecting the new UKI.</p>
 <pre><code class="language-bash"># Switch to a TTY (Ctrl+Alt+F2 or F3) and log in
 
@@ -274,14 +272,14 @@ sudo reboot
 <p>If the display manager failed:</p>
 <pre><code class="language-bash">journalctl -u gdm -b 0 -n 50    # GNOME
 journalctl -u sddm -b 0 -n 50   # KDE</code></pre>
-<h3>Black Screen After LUKS Passphrase (TPM2 Enrolled)</h3>
+<h3 id="black-screen-after-luks-passphrase-tpm2-enrolled">Black Screen After LUKS Passphrase (TPM2 Enrolled)</h3>
 <p>The TPM2-sealed key may have been invalidated by a firmware or Secure Boot state change. The system should fall back to passphrase entry automatically — type your LUKS passphrase manually. After booting:</p>
 <pre><code class="language-bash">sudo gen-efi cleanup-tpm2
 sudo gen-efi enroll-tpm2</code></pre>
 <p>If TPM2 enrollment fails repeatedly after a firmware update, confirm Secure Boot is still enabled and the MOK is intact:</p>
 <pre><code class="language-bash">mokutil --sb-state
-sbctl status</code></pre>
-<h3>Drops to Emergency Shell at Boot</h3>
+bootctl status</code></pre>
+<h3 id="drops-to-emergency-shell-at-boot">Drops to Emergency Shell at Boot</h3>
 <p>Usually a filesystem mount failure. The most common cause is a stale <code>/etc/fstab</code> or <code>/etc/crypttab</code> entry.</p>
 <pre><code class="language-bash"># From the emergency shell:
 journalctl -b 0 -p err | grep -i &quot;mount\|fstab\|crypttab&quot;
@@ -291,7 +289,7 @@ blkid | grep crypto_LUKS
 
 # Fix if needed
 sudo nano /etc/crypttab</code></pre>
-<h3>Emergency USB Recovery</h3>
+<h3 id="emergency-usb-recovery">Emergency USB Recovery</h3>
 <p>Boot from a Shanios USB and select the recovery option. From there:</p>
 <pre><code class="language-bash"># Mount the Btrfs root
 mount -o subvol=@data /dev/nvme0n1p2 /mnt/data
@@ -304,13 +302,13 @@ mount -o subvol=@blue,ro /dev/nvme0n1p2 /mnt/blue
 
 # Examine boot logs from the failed system
 journalctl --directory=/mnt/data/journal</code></pre>
-<p>---</p>
-<h2>Update Problems</h2>
-<h3>shani-deploy Fails Mid-Download</h3>
+<hr>
+<h2 id="update-problems">Update Problems</h2>
+<h3 id="shani-deploy-fails-mid-download">shani-deploy Fails Mid-Download</h3>
 <p><code>shani-deploy</code> uses <code>aria2c</code> with resume support. Simply re-run the command — it resumes automatically. If the partial file is corrupted:</p>
 <pre><code class="language-bash">sudo shani-deploy -c    # clean download cache
 sudo shani-deploy       # re-download fresh</code></pre>
-<h3>"Not Enough Space" Error</h3>
+<h3 id="not-enough-space-error">"Not Enough Space" Error</h3>
 <pre><code class="language-bash"># Check available space
 df -h /
 sudo btrfs filesystem usage /
@@ -324,20 +322,20 @@ nix-collect-garbage -d       # remove old Nix generations
 
 # Fix Btrfs space imbalance
 sudo btrfs balance start -dusage=50 /</code></pre>
-<h3>GPG Verification Fails</h3>
+<h3 id="gpg-verification-fails">GPG Verification Fails</h3>
 <pre><code class="language-bash">gpg --keyserver keys.openpgp.org --recv-keys 7B927BFFD4A9EAAA8B666B77DE217F3DA8014792
 sudo shani-deploy</code></pre>
-<h3>Update Downloaded but Slot Won't Activate</h3>
-<pre><code class="language-bash">shani-deploy --status
+<h3 id="update-downloaded-but-slot-wont-activate">Update Downloaded but Slot Won't Activate</h3>
+<pre><code class="language-bash">shani-deploy --verify-existing
 
 # Check if the UKI was generated
 ls /boot/efi/EFI/shanios/
 
 # Manually regenerate UKI for a slot
 sudo gen-efi configure green   # or blue</code></pre>
-<p>---</p>
-<h2>Application Problems</h2>
-<h3>Can't Install a Package with <code>pacman</code></h3>
+<hr>
+<h2 id="application-problems">Application Problems</h2>
+<h3 id="cant-install-a-package-with-pacman">Can't Install a Package with <code>pacman</code></h3>
 <p>This is by design — the OS root is read-only. Use the appropriate layer:</p>
 <pre><code class="language-bash"># GUI apps → Flatpak
 flatpak install flathub app.name
@@ -349,7 +347,7 @@ nix-env -iA nixpkgs.tool-name
 distrobox create --name mydev --image archlinux:latest
 distrobox enter mydev
 # Full pacman, yay, everything works here</code></pre>
-<h3>A Flatpak App Fails to Launch or Behaves Unexpectedly</h3>
+<h3 id="a-flatpak-app-fails-to-launch-or-behaves-unexpectedly">A Flatpak App Fails to Launch or Behaves Unexpectedly</h3>
 <pre><code class="language-bash"># Run from terminal to see the error
 flatpak run com.example.App
 
@@ -359,27 +357,27 @@ flatpak run --log-session-bus com.example.App 2&gt;&amp;1 | grep -i &quot;deny\|
 # Uninstall and reinstall cleanly
 flatpak remove com.example.App
 flatpak install flathub com.example.App</code></pre>
-<h3>Flatpak App Can't Access Files</h3>
+<h3 id="flatpak-app-cant-access-files">Flatpak App Can't Access Files</h3>
 <p>Flatpak apps are sandboxed. Open <strong>Flatseal</strong> (pre-installed) to manage permissions, or from the terminal:</p>
 <pre><code class="language-bash"># Grant access to home directory
 flatpak override --user --filesystem=home com.example.App
 
 # Grant access to a specific path
 flatpak override --user --filesystem=/home/user/Documents com.example.App</code></pre>
-<h3>Flatpak Update Breaks an App</h3>
+<h3 id="flatpak-update-breaks-an-app">Flatpak Update Breaks an App</h3>
 <pre><code class="language-bash"># Pin the app to its current version
 flatpak mask com.example.App
 
 # Unpin when the issue is resolved
 flatpak mask --remove com.example.App</code></pre>
-<h3>Microphone Not Working in Flatpak Apps</h3>
+<h3 id="microphone-not-working-in-flatpak-apps">Microphone Not Working in Flatpak Apps</h3>
 <pre><code class="language-bash"># Grant microphone permission
 flatpak override --user --device=all com.example.App
 # Or use Flatseal (pre-installed) for graphical permission management</code></pre>
-<p>---</p>
-<h2>Audio Problems</h2>
+<hr>
+<h2 id="audio-problems">Audio Problems</h2>
 <p>See <a href="system/audio">Audio (PipeWire)</a> for a full guide to the audio stack — the essentials for common failures are below.</p>
-<h3>No Audio at Boot</h3>
+<h3 id="no-audio-at-boot">No Audio at Boot</h3>
 <pre><code class="language-bash"># Restart the full PipeWire stack
 systemctl --user restart pipewire pipewire-pulse wireplumber
 
@@ -389,7 +387,7 @@ wpctl status
 
 # Check status
 systemctl --user status pipewire pipewire-pulse wireplumber</code></pre>
-<h3>Audio Works But Sounds Distorted</h3>
+<h3 id="audio-works-but-sounds-distorted">Audio Works But Sounds Distorted</h3>
 <p>Usually a sample rate mismatch:</p>
 <pre><code class="language-bash"># Check current sample rate
 pactl list sinks | grep &quot;Sample Spec&quot;
@@ -397,53 +395,53 @@ pactl list sinks | grep &quot;Sample Spec&quot;
 # Reset PipeWire config to defaults
 rm ~/.config/pipewire/pipewire.conf 2&gt;/dev/null
 systemctl --user restart pipewire wireplumber</code></pre>
-<h3>No Audio on New Intel Laptop (SOF)</h3>
+<h3 id="no-audio-on-new-intel-laptop-sof">No Audio on New Intel Laptop (SOF)</h3>
 <pre><code class="language-bash"># Check if SOF firmware loaded
 dmesg | grep -i &quot;sof\|sound open&quot;
 cat /proc/asound/cards
 
 # Check WirePlumber logs
 journalctl --user -u wireplumber -n 50</code></pre>
-<p>---</p>
-<h2>Bluetooth Problems</h2>
+<hr>
+<h2 id="bluetooth-problems">Bluetooth Problems</h2>
 <p>See <a href="networking/bluetooth">Bluetooth</a> for a full pairing/management guide — the essentials for common failures are below.</p>
-<h3>Adapter Not Found</h3>
+<h3 id="adapter-not-found">Adapter Not Found</h3>
 <pre><code class="language-bash">hciconfig -a
 rfkill list bluetooth
 
 # Unblock if soft-blocked
 rfkill unblock bluetooth
 sudo systemctl restart bluetooth</code></pre>
-<h3>Device Pairs But Won't Connect</h3>
+<h3 id="device-pairs-but-wont-connect">Device Pairs But Won't Connect</h3>
 <pre><code class="language-bash">bluetoothctl remove XX:XX:XX:XX:XX:XX
 bluetoothctl scan on
 bluetoothctl pair XX:XX:XX:XX:XX:XX
 bluetoothctl trust XX:XX:XX:XX:XX:XX
 journalctl -u bluetooth -n 30</code></pre>
-<h3>Headphones Connected But No Audio</h3>
+<h3 id="headphones-connected-but-no-audio">Headphones Connected But No Audio</h3>
 <pre><code class="language-bash">pactl list cards | grep -i bluetooth
 systemctl --user restart pipewire pipewire-pulse wireplumber
 pactl set-default-sink bluez_output.XX_XX_XX_XX_XX_XX.1</code></pre>
-<p>---</p>
-<h2>Encryption / TPM2 Problems</h2>
-<h3>TPM2 Won't Unlock After Firmware Update</h3>
+<hr>
+<h2 id="encryption-tpm2-problems">Encryption / TPM2 Problems</h2>
+<h3 id="tpm2-wont-unlock-after-firmware-update">TPM2 Won't Unlock After Firmware Update</h3>
 <p>PCR 0 changes when firmware is updated. You'll be prompted for your passphrase. After booting:</p>
 <pre><code class="language-bash">sudo gen-efi cleanup-tpm2
 sudo gen-efi enroll-tpm2</code></pre>
-<h3>TPM2 Won't Unlock After Secure Boot Change</h3>
+<h3 id="tpm2-wont-unlock-after-secure-boot-change">TPM2 Won't Unlock After Secure Boot Change</h3>
 <p>PCR 7 changes when Secure Boot settings change. Same fix:</p>
 <pre><code class="language-bash">sudo gen-efi cleanup-tpm2
 sudo gen-efi enroll-tpm2</code></pre>
-<h3>Forgot LUKS Passphrase</h3>
+<h3 id="forgot-luks-passphrase">Forgot LUKS Passphrase</h3>
 <p>If you have no backup passphrase, no keyfile, and no TPM2 enrollment, the data is <strong>unrecoverable</strong> — this is the intended LUKS2 security guarantee. Boot from the Shanios USB, reinstall, and restore from backups.</p>
 <p>If you have a backup keyfile:</p>
 <pre><code class="language-bash"># Boot from Shanios USB
 sudo cryptsetup open /dev/nvme0n1p2 shani_root --key-file /path/to/luks-keyfile
 sudo mount -o subvol=@home /dev/mapper/shani_root /mnt/home</code></pre>
 <p>See <a href="security/luks">LUKS Management</a> for full recovery procedures.</p>
-<p>---</p>
-<h2>Display / GPU Problems</h2>
-<h3>NVIDIA GPU Not Detected</h3>
+<hr>
+<h2 id="display-gpu-problems">Display / GPU Problems</h2>
+<h3 id="nvidia-gpu-not-detected">NVIDIA GPU Not Detected</h3>
 <pre><code class="language-bash">nvidia-smi
 lsmod | grep nvidia
 dmesg | grep -i nvidia | head -20
@@ -454,7 +452,7 @@ mokutil --list-enrolled | grep -i shani
 # If MOK not enrolled:
 sudo gen-efi enroll-mok
 sudo reboot</code></pre>
-<h3>Hybrid GPU (Optimus) — Wrong GPU Used</h3>
+<h3 id="hybrid-gpu-optimus-wrong-gpu-used">Hybrid GPU (Optimus) — Wrong GPU Used</h3>
 <pre><code class="language-bash"># Force discrete GPU for a specific application
 prime-run application-name
 
@@ -463,15 +461,15 @@ prime-run application-name
 
 # Check which GPU is active
 glxinfo | grep &quot;OpenGL renderer&quot;</code></pre>
-<h3>External Monitor Not Detected</h3>
+<h3 id="external-monitor-not-detected">External Monitor Not Detected</h3>
 <pre><code class="language-bash">kscreen-doctor --outputs   # KDE
 xrandr --listmonitors      # under XWayland
 cat /sys/class/drm/*/status</code></pre>
-<h3>Display Tearing (AMD/Intel)</h3>
+<h3 id="display-tearing-amdintel">Display Tearing (AMD/Intel)</h3>
 <p>Verify Wayland is active: <code>echo $XDG_SESSION_TYPE</code> (should print <code>wayland</code>). On KDE: System Settings → Display → Compositor → enable Tear-free rendering.</p>
-<p>---</p>
-<h2>Networking Problems</h2>
-<h3>Wi-Fi Connection Not Remembered After Update</h3>
+<hr>
+<h2 id="networking-problems">Networking Problems</h2>
+<h3 id="wi-fi-connection-not-remembered-after-update">Wi-Fi Connection Not Remembered After Update</h3>
 <p>Wi-Fi configurations persist in <code>/data/varlib/NetworkManager</code>. If they disappeared:</p>
 <pre><code class="language-bash">ls /data/varlib/NetworkManager/
 nmcli connection show
@@ -480,15 +478,15 @@ nmcli connection show
 mount | grep NetworkManager
 
 sudo systemctl restart NetworkManager</code></pre>
-<h3>Wi-Fi Disconnects Frequently</h3>
+<h3 id="wi-fi-disconnects-frequently">Wi-Fi Disconnects Frequently</h3>
 <pre><code class="language-bash">journalctl -u NetworkManager -n 100
 
 # Disable power management on the Wi-Fi adapter
 nmcli connection modify &quot;Your Connection Name&quot; wifi.powersave 2</code></pre>
-<h3>Tailscale Disconnects After Update</h3>
+<h3 id="tailscale-disconnects-after-update">Tailscale Disconnects After Update</h3>
 <p>Tailscale state persists in <code>/data/varlib/tailscale</code> across OS updates. If it disconnects:</p>
 <pre><code class="language-bash">sudo tailscale up</code></pre>
-<h3>firewalld Blocks an Application Unexpectedly</h3>
+<h3 id="firewalld-blocks-an-application-unexpectedly">firewalld Blocks an Application Unexpectedly</h3>
 <pre><code class="language-bash">sudo firewall-cmd --list-all
 sudo firewall-cmd --get-active-zones
 
@@ -499,9 +497,9 @@ sudo firewall-cmd --reload
 # Allow a specific port
 sudo firewall-cmd --permanent --add-port=PORT/tcp
 sudo firewall-cmd --reload</code></pre>
-<p>---</p>
-<h2>Storage Problems</h2>
-<h3>Disk Filling Up Unexpectedly</h3>
+<hr>
+<h2 id="storage-problems">Storage Problems</h2>
+<h3 id="disk-filling-up-unexpectedly">Disk Filling Up Unexpectedly</h3>
 <pre><code class="language-bash">df -h
 sudo compsize /    # compressed + deduplicated sizes
 
@@ -513,7 +511,7 @@ flatpak uninstall --unused
 nix-collect-garbage -d
 podman system prune -af
 distrobox list   # remove unused containers: distrobox rm container-name</code></pre>
-<h3>Btrfs Errors in dmesg</h3>
+<h3 id="btrfs-errors-in-dmesg">Btrfs Errors in dmesg</h3>
 <pre><code class="language-bash">sudo btrfs scrub start /
 sudo btrfs scrub status /
 
@@ -522,34 +520,35 @@ sudo btrfs balance start -dusage=85 -musage=85 /
 
 # Read-only consistency check
 sudo btrfs check --readonly /dev/nvme0n1p2</code></pre>
-<p>---</p>
-<h2>Waydroid Problems</h2>
-<h3>Waydroid Session Fails to Start</h3>
+<hr>
+<h2 id="waydroid-problems">Waydroid Problems</h2>
+<h3 id="waydroid-session-fails-to-start">Waydroid Session Fails to Start</h3>
 <pre><code class="language-bash">systemctl status waydroid-container.service
 journalctl -u waydroid-container.service -n 50
 lsmod | grep binder
 
 # Re-initialise
 sudo waydroid-helper init</code></pre>
-<h3>Play Store Says Device Not Certified</h3>
+<h3 id="play-store-says-device-not-certified">Play Store Says Device Not Certified</h3>
 <p>After installing GApps, Google requires device registration:</p>
 <pre><code class="language-bash">adb shell settings get secure android_id</code></pre>
 <p>Visit <code>google.com/android/uncertified</code> in a browser and register the Android ID. Wait 15 minutes, then retry the Play Store.</p>
-<h3>App Crashes Immediately (ARM Translation)</h3>
+<h3 id="app-crashes-immediately-arm-translation">App Crashes Immediately (ARM Translation)</h3>
 <p>Most crashes are ARM-to-x86 translation failures via <code>libhoudini</code>. Check if an x86 APK is available from the developer. If not, a PWA (web app) is often a practical alternative.</p>
-<p>---</p>
-<h2>OverlayFS / <code>/etc</code> Customisations</h2>
+<hr>
+<h2 id="overlayfs-etc-customisations">OverlayFS / <code>/etc</code> Customisations</h2>
 <p>To see what <code>/etc</code> files you have customised:</p>
 <pre><code class="language-bash">find /data/overlay/etc/upper/ -type f | sort</code></pre>
-<h3>Revert a Specific File to OS Default</h3>
+<h3 id="revert-a-specific-file-to-os-default">Revert a Specific File to OS Default</h3>
 <pre><code class="language-bash">sudo rm /data/overlay/etc/upper/path/to/file
 # The OS default (lower layer) becomes active again immediately</code></pre>
-<h3>Revert All <code>/etc</code> Customisations</h3>
-<pre><code class="language-bash">sudo rm -rf /data/overlay/etc/upper/*
-sudo reboot</code></pre>
-<p>---</p>
-<h2>General Diagnostics</h2>
-<h3>Reading the System Journal</h3>
+<h3 id="revert-all-etc-customisations">Revert All <code>/etc</code> Customisations</h3>
+<p>Don't delete the overlay upper layer by hand — raw <code>rm -rf</code> can leave the overlay work directory in an inconsistent state. Use <code>shani-reset</code> (see <a href="updates/config">System Config</a> and <a href="updates/shani-reset">Factory Reset</a>):</p>
+<pre><code class="language-bash">sudo shani-reset --dry-run   # preview first
+sudo shani-reset             # wipes persistent system state in /data and reboots</code></pre>
+<hr>
+<h2 id="general-diagnostics">General Diagnostics</h2>
+<h3 id="reading-the-system-journal">Reading the System Journal</h3>
 <pre><code class="language-bash"># All errors from the current boot
 journalctl -b 0 -p err --no-pager
 
@@ -564,7 +563,7 @@ journalctl -u service-name -b 0 -n 100
 
 # Filter by time
 journalctl --since &quot;10 minutes ago&quot;</code></pre>
-<h3>Checking What Changed</h3>
+<h3 id="checking-what-changed">Checking What Changed</h3>
 <pre><code class="language-bash"># What /etc files have you customised?
 find /data/overlay/etc/upper/ -type f | sort
 
@@ -573,7 +572,7 @@ systemctl list-unit-files --state=enabled
 
 # What Flatpak overrides are active?
 flatpak override --user --show</code></pre>
-<h3>System Health Summary</h3>
+<h3 id="system-health-summary">System Health Summary</h3>
 <pre><code class="language-bash"># Full health check
 shani-health
 
@@ -582,16 +581,25 @@ shani-health -v
 
 # Storage summary
 shani-health --storage-info</code></pre>
-<p>---</p>
-<h2>Gathering Logs for Bug Reports</h2>
+<hr>
+<h2 id="gathering-logs-for-bug-reports">Gathering Logs for Bug Reports</h2>
 <p>When reporting a bug, include:</p>
 <pre><code class="language-bash">cat /etc/shani-version
 cat /data/current-slot
 shani-deploy --version
-shani-health --json
+shani-health --verify --json   # --json output requires --verify
 journalctl -b 0 -p err --no-pager | tail -30
 lspci | grep -E &quot;VGA|Audio|Network&quot;</code></pre>
-<p>Report bugs at <a href="https://github.com/shani8dev/shani-os/issues">github.com/shani8dev/shani-os/issues</a> or ask in the <a href="https://t.me/shani8dev">Telegram community</a>.</p></div>
+<p>Report bugs at <a href="https://github.com/shani8dev/shani-os/issues">github.com/shani8dev/shani-os/issues</a> or ask in the <a href="https://t.me/shani8dev">Telegram community</a>.</p>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="updates/shani-health">System Health Checks</a> — automated health monitoring and diagnostics</li>
+<li><a href="updates/system">System Updates</a> — how updates and rollback work</li>
+<li><a href="updates/config">System Config</a> — managing /etc customisations</li>
+<li><a href="security/features">Security Features</a> — security model and hardening</li>
+<li><a href="concepts/blue-green">Blue-Green Deployment</a> — understanding the two-slot architecture</li>
+<li><a href="install/steps">Installation Steps</a> — installer troubleshooting</li>
+</ul></div>
     </div>
 
   </main>

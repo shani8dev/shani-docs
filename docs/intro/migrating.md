@@ -1,7 +1,7 @@
 ---
 title: Migrating from Traditional Linux
 section: Introduction
-updated: 2026-04-19
+updated: 2026-08-28
 ---
 
 # Migrating from Traditional Linux
@@ -80,11 +80,11 @@ Windows `.exe` software runs through Wine — no Windows licence required, no VM
 |---|---|
 | Run a Windows `.exe` installer | Open with Bottles — creates an isolated Wine environment |
 | Install a Windows productivity tool | Bottles → Create bottle → Run Executable |
-| Run legacy Windows software | Bottles with Wine Staging or Wine-GE runner |
-| `apt install wine` / `pacman -S wine` | Bottles (pre-installed on KDE) or Flatpak Wine |
-| Windows game (non-Steam) | Bottles with Wine-GE, or Heroic Games Launcher |
+| Run legacy Windows software | Bottles with the Caffe or GE-Proton runner |
+| `apt install wine` / `pacman -S wine` | Bottles (pre-installed on KDE Plasma; Flatpak on GNOME and COSMIC) |
+| Windows game (non-Steam) | Bottles with GE-Proton, or Heroic Games Launcher |
 
-**Bottles** (`com.usebottles.bottles`) is pre-installed on KDE Plasma and available on Flathub for the GNOME edition. For applications requiring a real Windows kernel (hardware drivers, anti-cheat, enterprise software with kernel-level components), use a Windows VM via virt-manager (pre-installed on KDE Plasma) or GNOME Boxes.
+**Bottles** (`com.usebottles.bottles`) is pre-installed on KDE Plasma and available on Flathub for the GNOME and COSMIC editions. For applications requiring a real Windows kernel (hardware drivers, anti-cheat, enterprise software with kernel-level components), use a Windows VM via virt-manager (pre-installed on KDE Plasma) or GNOME Boxes.
 
 For portable AppImage tools: download the `.AppImage`, make it executable, and run — or open with **Gear Lever** (pre-installed) to add it permanently to your launcher with automatic update checking.
 
@@ -275,8 +275,8 @@ Both `restic` and `rclone` configurations persist in `/data/varlib/` and survive
 
 ## See Also
 
-- [Immutability](../concepts/immutability) — what you can and cannot do and why
-- [Persistence Strategy](../concepts/persistence) — what survives updates and rollbacks
+- [Immutability](../concepts/immutability.md) — what you can and cannot do and why
+- [Persistence Strategy](../concepts/persistence.md) — what survives updates and rollbacks
 - [Getting Started](getting-started) — full setup walkthrough
 - [docs.shani.dev — Nix](https://docs.shani.dev/doc/software/nix)
 - [docs.shani.dev — Flatpak](https://docs.shani.dev/doc/software/flatpak)

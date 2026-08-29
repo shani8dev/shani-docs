@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Filesystem Structure — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Filesystem Structure  Shanios uses Btrfs with a sophisticated subvolume layout housed in a single Btrfs partition (plus a 1 GB FAT32 ESP). The design separ…">
+  <meta name="description" id="meta-desc"     content="Shanios uses Btrfs with a sophisticated subvolume layout housed in a single Btrfs partition (plus a 1 GB FAT32 ESP). The design separates the immutable OS …">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Filesystem Structure">
-  <meta property="og:description" id="og-desc"    content="Filesystem Structure  Shanios uses Btrfs with a sophisticated subvolume layout housed in a single Btrfs partition (plus a 1 GB FAT32 ESP). The design separ…">
+  <meta property="og:description" id="og-desc"    content="Shanios uses Btrfs with a sophisticated subvolume layout housed in a single Btrfs partition (plus a 1 GB FAT32 ESP). The design separates the immutable OS …">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/arch/filesystem/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Filesystem Structure">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Filesystem Structure">
-  <meta name="twitter:description" id="tw-desc"  content="Filesystem Structure  Shanios uses Btrfs with a sophisticated subvolume layout housed in a single Btrfs partition (plus a 1 GB FAT32 ESP). The design separ…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios uses Btrfs with a sophisticated subvolume layout housed in a single Btrfs partition (plus a 1 GB FAT32 ESP). The design separates the immutable OS …">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Filesystem Structure","description":"Filesystem Structure  Shanios uses Btrfs with a sophisticated subvolume layout housed in a single Btrfs partition (plus a 1 GB FAT32 ESP). The design separ…","url":"https://docs.shani.dev/doc/arch/filesystem/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Filesystem Structure","description":"Shanios uses Btrfs with a sophisticated subvolume layout housed in a single Btrfs partition (plus a 1 GB FAT32 ESP). The design separates the immutable OS …","url":"https://docs.shani.dev/doc/arch/filesystem/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Filesystem Structure","item":"https://docs.shani.dev/doc/arch/filesystem/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,14 +215,14 @@
         <h1 class="doc-title">Filesystem Structure</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Architecture</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Shanios uses Btrfs with a sophisticated subvolume layout housed in a single Btrfs partition (plus a 1 GB FAT32 ESP). The design separates the immutable OS from all persistent state, so updates and rollbacks are atomic and data survives every slot switch.</p>
-<h2>Subvolume Layout</h2>
-<p>| Subvolume | Mount Point | Purpose | |-----------|------------|---------| | <code>@blue</code> / <code>@green</code> | <code>/</code> | Root filesystems for blue-green deployment — alternates as active/standby. Mounted <strong>read-only</strong> by dracut; never in fstab. | | <code>@root</code> | <code>/root</code> | Root user home — persists across slot switches | | <code>@home</code> | <code>/home</code> | User data and personal configurations | | <code>@data</code> | <code>/data</code> | Overlay storage and persistent service data (bind-mount source tree) | | <code>@nix</code> | <code>/nix</code> | Nix package manager store — shared across both slots | | <code>@log</code> | <code>/var/log</code> | System logs across reboots | | <code>@cache</code> | <code>/var/cache</code> | Package manager cache | | <code>@flatpak</code> | <code>/var/lib/flatpak</code> | Flatpak applications and runtimes — seeded at install time from the image's <code>flatpak_subvol</code> snapshot, so base runtimes are already present on first boot | | <code>@snapd</code> | <code>/var/lib/snapd</code> | Snap package storage, revisions, and writable snap data — seeded the same way from <code>snapd_subvol</code> | | <code>@waydroid</code> | <code>/var/lib/waydroid</code> | Android system images and data | | <code>@containers</code> | <code>/var/lib/containers</code> | Podman/Docker container storage | | <code>@machines</code> | <code>/var/lib/machines</code> | systemd-nspawn containers | | <code>@lxc</code> | <code>/var/lib/lxc</code> | LXC containers | | <code>@lxd</code> | <code>/var/lib/lxd</code> | LXD container and VM storage | | <code>@libvirt</code> | <code>/var/lib/libvirt</code> | Virtual machine disk images (nodatacow) | | <code>@qemu</code> | <code>/var/lib/qemu</code> | Bare QEMU VM disk images (nodatacow) | | <code>@swap</code> | <code>/swap</code> | Swap file container (nodatacow) |</p>
+<h2 id="subvolume-layout">Subvolume Layout</h2>
+<table><thead><tr><th>Subvolume</th><th>Mount Point</th><th>Purpose</th></tr></thead><tbody><tr><td><code>@blue</code> / <code>@green</code></td><td><code>/</code></td><td>Root filesystems for blue-green deployment — alternates as active/standby. Mounted <strong>read-only</strong> by dracut; never in fstab.</td></tr><tr><td><code>@root</code></td><td><code>/root</code></td><td>Root user home — persists across slot switches</td></tr><tr><td><code>@home</code></td><td><code>/home</code></td><td>User data and personal configurations</td></tr><tr><td><code>@data</code></td><td><code>/data</code></td><td>Overlay storage and persistent service data (bind-mount source tree)</td></tr><tr><td><code>@nix</code></td><td><code>/nix</code></td><td>Nix package manager store — shared across both slots</td></tr><tr><td><code>@log</code></td><td><code>/var/log</code></td><td>System logs across reboots</td></tr><tr><td><code>@cache</code></td><td><code>/var/cache</code></td><td>Package manager cache</td></tr><tr><td><code>@flatpak</code></td><td><code>/var/lib/flatpak</code></td><td>Flatpak applications and runtimes — seeded at install time from the image's <code>flatpak_subvol</code> snapshot, so base runtimes are already present on first boot</td></tr><tr><td><code>@snapd</code></td><td><code>/var/lib/snapd</code></td><td>Snap package storage, revisions, and writable snap data — seeded the same way from <code>snapd_subvol</code></td></tr><tr><td><code>@waydroid</code></td><td><code>/var/lib/waydroid</code></td><td>Android system images and data</td></tr><tr><td><code>@containers</code></td><td><code>/var/lib/containers</code></td><td>Podman/Docker container storage</td></tr><tr><td><code>@machines</code></td><td><code>/var/lib/machines</code></td><td>systemd-nspawn containers</td></tr><tr><td><code>@lxc</code></td><td><code>/var/lib/lxc</code></td><td>LXC containers</td></tr><tr><td><code>@lxd</code></td><td><code>/var/lib/lxd</code></td><td>LXD container and VM storage</td></tr><tr><td><code>@libvirt</code></td><td><code>/var/lib/libvirt</code></td><td>Virtual machine disk images (nodatacow)</td></tr><tr><td><code>@qemu</code></td><td><code>/var/lib/qemu</code></td><td>Bare QEMU VM disk images (nodatacow)</td></tr><tr><td><code>@swap</code></td><td><code>/swap</code></td><td>Swap file container (nodatacow)</td></tr></tbody></table>
 <p>Unlike the other subvolumes (created empty with <code>btrfs subvolume create</code>), <code>@blue</code> and <code>@green</code> are seeded from the installed OS image: the installer extracts the base image into a subvolume named <code>shanios_base</code>, takes a read-only snapshot of it as <code>@blue</code>, then takes a read-only snapshot of <code>@blue</code> as <code>@green</code> — so both slots start out byte-identical — and deletes <code>shanios_base</code>. Every later <code>shani-deploy</code> update follows the same pattern against the <em>candidate</em> (inactive) slot: it snapshots the current candidate as a timestamped <code>@&lt;slot&gt;_backup_&lt;timestamp&gt;</code> safety copy, <code>btrfs receive</code>s the new OS image into a <code>temp_update/shanios_base</code> subvolume, deletes the old candidate, and snapshots the freshly received image into <code>@&lt;slot&gt;</code> (read-only) — so a deploy never touches the booted slot and a failure mid-extraction leaves the candidate untouched.</p>
-<h2>The @data Subvolume</h2>
+<h2 id="the-data-subvolume">The @data Subvolume</h2>
 <p><code>@data</code> is the heart of Shanios persistence. Its internal structure:</p>
 <pre><code>/data/
 ├── overlay/
@@ -269,23 +271,23 @@
 ├── boot_failure       ← written by check-boot-failure on soft boot failure
 ├── boot_failure.acked ← written when user acknowledges failure dialog
 └── boot_hard_failure  ← written by dracut hook if root mount fails</code></pre>
-<h2>Persistent Bind Mounts from @data</h2>
+<h2 id="persistent-bind-mounts-from-data">Persistent Bind Mounts from @data</h2>
 <p>Because <code>/var</code> is volatile (tmpfs via <code>systemd.volatile=state</code>), critical service state is bind-mounted from <code>@data</code>. Every bind mount uses <code>nofail,x-systemd.after=var.mount,x-systemd.requires-mounts-for=/data</code> so the system boots cleanly even if individual services are not installed.</p>
-<h3>System Core</h3>
-<p>| Source (<code>@data</code>) | Target | |---|---| | <code>/data/varlib/dbus</code> | <code>/var/lib/dbus</code> | | <code>/data/varlib/systemd</code> | <code>/var/lib/systemd</code> | | <code>/data/varlib/fontconfig</code> | <code>/var/lib/fontconfig</code> |</p>
-<h3>Networking</h3>
-<p>| Source | Target | |---|---| | <code>/data/varlib/NetworkManager</code> | <code>/var/lib/NetworkManager</code> | | <code>/data/varlib/bluetooth</code> | <code>/var/lib/bluetooth</code> | | <code>/data/varlib/firewalld</code> | <code>/var/lib/firewalld</code> | | <code>/data/varlib/samba</code> | <code>/var/lib/samba</code> | | <code>/data/varlib/nfs</code> | <code>/var/lib/nfs</code> |</p>
-<h3>Remote Access & VPN</h3>
-<p>| Source | Target | |---|---| | <code>/data/varlib/caddy</code> | <code>/var/lib/caddy</code> | | <code>/data/varlib/tailscale</code> | <code>/var/lib/tailscale</code> | | <code>/data/varlib/cloudflared</code> | <code>/var/lib/cloudflared</code> | | <code>/data/varlib/geoclue</code> | <code>/var/lib/geoclue</code> |</p>
-<h3>Display, Audio & Peripherals</h3>
-<p>| Source | Target | |---|---| | <code>/data/varlib/gdm</code> | <code>/var/lib/gdm</code> | | <code>/data/varlib/sddm</code> | <code>/var/lib/sddm</code> | | <code>/data/varlib/colord</code> | <code>/var/lib/colord</code> | | <code>/data/varlib/pipewire</code> | <code>/var/lib/pipewire</code> | | <code>/data/varlib/rtkit</code> | <code>/var/lib/rtkit</code> | | <code>/data/varlib/cups</code> | <code>/var/lib/cups</code> | | <code>/data/varlib/sane</code> | <code>/var/lib/sane</code> | | <code>/data/varlib/upower</code> | <code>/var/lib/upower</code> |</p>
-<h3>Auth & Security</h3>
-<p>| Source | Target | |---|---| | <code>/data/varlib/fprint</code> | <code>/var/lib/fprint</code> | | <code>/data/varlib/AccountsService</code> | <code>/var/lib/AccountsService</code> | | <code>/data/varlib/boltd</code> | <code>/var/lib/boltd</code> | | <code>/data/varlib/sudo</code> | <code>/var/lib/sudo</code> | | <code>/data/varlib/sshd</code> | <code>/var/lib/sshd</code> | | <code>/data/varlib/polkit-1</code> | <code>/var/lib/polkit-1</code> | | <code>/data/varlib/tpm2-tss</code> | <code>/var/lib/tpm2-tss</code> |</p>
-<h3>Hardware & Data Protection</h3>
-<p>| Source | Target | |---|---| | <code>/data/varlib/fwupd</code> | <code>/var/lib/fwupd</code> | | <code>/data/varlib/fail2ban</code> | <code>/var/lib/fail2ban</code> | | <code>/data/varlib/restic</code> | <code>/var/lib/restic</code> | | <code>/data/varlib/rclone</code> | <code>/var/lib/rclone</code> | | <code>/data/varlib/appimage</code> | <code>/var/lib/appimage</code> |</p>
-<h3>Scheduling & Spools</h3>
-<p>| Source | Target | |---|---| | <code>/data/varspool/anacron</code> | <code>/var/spool/anacron</code> | | <code>/data/varspool/cron</code> | <code>/var/spool/cron</code> | | <code>/data/varspool/at</code> | <code>/var/spool/at</code> | | <code>/data/varspool/cups</code> | <code>/var/spool/cups</code> | | <code>/data/varspool/samba</code> | <code>/var/spool/samba</code> | | <code>/data/varspool/postfix</code> | <code>/var/spool/postfix</code> |</p>
-<h2>Mount Options Reference</h2>
+<h3 id="system-core">System Core</h3>
+<table><thead><tr><th>Source (<code>@data</code>)</th><th>Target</th></tr></thead><tbody><tr><td><code>/data/varlib/dbus</code></td><td><code>/var/lib/dbus</code></td></tr><tr><td><code>/data/varlib/systemd</code></td><td><code>/var/lib/systemd</code></td></tr><tr><td><code>/data/varlib/fontconfig</code></td><td><code>/var/lib/fontconfig</code></td></tr></tbody></table>
+<h3 id="networking">Networking</h3>
+<table><thead><tr><th>Source</th><th>Target</th></tr></thead><tbody><tr><td><code>/data/varlib/NetworkManager</code></td><td><code>/var/lib/NetworkManager</code></td></tr><tr><td><code>/data/varlib/bluetooth</code></td><td><code>/var/lib/bluetooth</code></td></tr><tr><td><code>/data/varlib/firewalld</code></td><td><code>/var/lib/firewalld</code></td></tr><tr><td><code>/data/varlib/samba</code></td><td><code>/var/lib/samba</code></td></tr><tr><td><code>/data/varlib/nfs</code></td><td><code>/var/lib/nfs</code></td></tr></tbody></table>
+<h3 id="remote-access-vpn">Remote Access & VPN</h3>
+<table><thead><tr><th>Source</th><th>Target</th></tr></thead><tbody><tr><td><code>/data/varlib/caddy</code></td><td><code>/var/lib/caddy</code></td></tr><tr><td><code>/data/varlib/tailscale</code></td><td><code>/var/lib/tailscale</code></td></tr><tr><td><code>/data/varlib/cloudflared</code></td><td><code>/var/lib/cloudflared</code></td></tr><tr><td><code>/data/varlib/geoclue</code></td><td><code>/var/lib/geoclue</code></td></tr></tbody></table>
+<h3 id="display-audio-peripherals">Display, Audio & Peripherals</h3>
+<table><thead><tr><th>Source</th><th>Target</th></tr></thead><tbody><tr><td><code>/data/varlib/gdm</code></td><td><code>/var/lib/gdm</code></td></tr><tr><td><code>/data/varlib/sddm</code></td><td><code>/var/lib/sddm</code></td></tr><tr><td><code>/data/varlib/colord</code></td><td><code>/var/lib/colord</code></td></tr><tr><td><code>/data/varlib/pipewire</code></td><td><code>/var/lib/pipewire</code></td></tr><tr><td><code>/data/varlib/rtkit</code></td><td><code>/var/lib/rtkit</code></td></tr><tr><td><code>/data/varlib/cups</code></td><td><code>/var/lib/cups</code></td></tr><tr><td><code>/data/varlib/sane</code></td><td><code>/var/lib/sane</code></td></tr><tr><td><code>/data/varlib/upower</code></td><td><code>/var/lib/upower</code></td></tr></tbody></table>
+<h3 id="auth-security">Auth & Security</h3>
+<table><thead><tr><th>Source</th><th>Target</th></tr></thead><tbody><tr><td><code>/data/varlib/fprint</code></td><td><code>/var/lib/fprint</code></td></tr><tr><td><code>/data/varlib/AccountsService</code></td><td><code>/var/lib/AccountsService</code></td></tr><tr><td><code>/data/varlib/boltd</code></td><td><code>/var/lib/boltd</code></td></tr><tr><td><code>/data/varlib/sudo</code></td><td><code>/var/lib/sudo</code></td></tr><tr><td><code>/data/varlib/sshd</code></td><td><code>/var/lib/sshd</code></td></tr><tr><td><code>/data/varlib/polkit-1</code></td><td><code>/var/lib/polkit-1</code></td></tr><tr><td><code>/data/varlib/tpm2-tss</code></td><td><code>/var/lib/tpm2-tss</code></td></tr></tbody></table>
+<h3 id="hardware-data-protection">Hardware & Data Protection</h3>
+<table><thead><tr><th>Source</th><th>Target</th></tr></thead><tbody><tr><td><code>/data/varlib/fwupd</code></td><td><code>/var/lib/fwupd</code></td></tr><tr><td><code>/data/varlib/fail2ban</code></td><td><code>/var/lib/fail2ban</code></td></tr><tr><td><code>/data/varlib/restic</code></td><td><code>/var/lib/restic</code></td></tr><tr><td><code>/data/varlib/rclone</code></td><td><code>/var/lib/rclone</code></td></tr><tr><td><code>/data/varlib/appimage</code></td><td><code>/var/lib/appimage</code></td></tr></tbody></table>
+<h3 id="scheduling-spools">Scheduling & Spools</h3>
+<table><thead><tr><th>Source</th><th>Target</th></tr></thead><tbody><tr><td><code>/data/varspool/anacron</code></td><td><code>/var/spool/anacron</code></td></tr><tr><td><code>/data/varspool/cron</code></td><td><code>/var/spool/cron</code></td></tr><tr><td><code>/data/varspool/at</code></td><td><code>/var/spool/at</code></td></tr><tr><td><code>/data/varspool/cups</code></td><td><code>/var/spool/cups</code></td></tr><tr><td><code>/data/varspool/samba</code></td><td><code>/var/spool/samba</code></td></tr><tr><td><code>/data/varspool/postfix</code></td><td><code>/var/spool/postfix</code></td></tr></tbody></table>
+<h2 id="mount-options-reference">Mount Options Reference</h2>
 <ul>
 <li><strong>Root slots</strong> (<code>@blue</code>/<code>@green</code>) — <strong>not in fstab</strong> — mounted read-only by dracut via kernel cmdline</li>
 <li><strong><code>@root</code>, <code>@home</code>, <code>@data</code></strong> — the only subvolumes mounted <em>without</em> <code>nofail</code>; the system is not considered bootable without them</li>
@@ -295,11 +297,11 @@
 <li><strong>All other Btrfs subvolumes</strong> — use <code>noatime,compress=zstd,space_cache=v2,autodefrag</code></li>
 <li><strong>All bind mounts</strong> — use <code>bind,nofail,x-systemd.after=var.mount,x-systemd.requires-mounts-for=/data</code></li>
 </ul>
-<h3>Why noatime?</h3>
+<h3 id="why-noatime">Why noatime?</h3>
 <p>Writing an access timestamp on every file read would generate massive write traffic on a busy system. All subvolumes use <code>noatime</code> to prevent this — reducing SSD wear, improving battery life, and eliminating pointless write amplification.</p>
-<h3>Why systemd.volatile=state?</h3>
+<h3 id="why-systemdvolatilestate">Why systemd.volatile=state?</h3>
 <p><code>/var</code> is a tmpfs cleared on every reboot. This keeps the OS truly stateless — log files, caches, and runtime state cannot accumulate across reboots and affect behaviour. The bind mounts from <code>@data</code> selectively restore only the service state that should persist.</p>
-<h2>Adding a New Persistent Service</h2>
+<h2 id="adding-a-new-persistent-service">Adding a New Persistent Service</h2>
 <p>If you self-host a service that needs state to survive reboots:</p>
 <pre><code class="language-bash"># 1. Create the backing directory in @data
 sudo mkdir -p /data/varlib/myservice
@@ -311,7 +313,13 @@ sudo nano /etc/fstab
 # 3. Reload and mount
 sudo systemctl daemon-reload
 sudo mount /var/lib/myservice</code></pre>
-<p>Changes to <code>/etc/fstab</code> are captured by the OverlayFS overlay and survive every OS update.</p></div>
+<p>Changes to <code>/etc/fstab</code> are captured by the OverlayFS overlay and survive every OS update.</p>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="overlay">Overlay Filesystem</a></li>
+<li><a href="btrfs">Btrfs Deep Dive</a></li>
+<li><a href="https://blog.shani.dev/post/shani-os-architecture-deep-dive">Architecture deep dive blog</a></li>
+</ul></div>
     </div>
 
   </main>

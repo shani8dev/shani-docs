@@ -1,7 +1,7 @@
 ---
 title: BIND (Authoritative DNS)
 section: Networking
-updated: 2026-04-20
+updated: 2026-08-28
 ---
 
 # BIND — Authoritative DNS Server
@@ -146,6 +146,9 @@ sudo named-checkconf
 # Check a zone file
 sudo named-checkzone home.local /var/named/home.local.zone
 
+# Ensure named can read the zone files (it runs as the named user)
+sudo chown named:named /var/named/*.zone && sudo chmod 640 /var/named/*.zone
+
 # Reload zones without restarting (increment Serial first)
 sudo systemctl reload named
 
@@ -219,7 +222,14 @@ dig @192.168.1.1 nas.home.local
 |-------|----------|
 | `named` won't start | Run `sudo named-checkconf` — syntax errors in `named.conf` prevent startup; check `journalctl -u named` |
 | Zone not loading | Run `sudo named-checkzone home.local /var/named/home.local.zone` — common causes are missing trailing dots on FQDNs and wrong Serial format |
+| Zone fails to load silently | Check ownership (`named:named`) and mode (`640`) on `/var/named/*.zone`; confirm with `journalctl -u named` |
 | Queries returning `SERVFAIL` | DNSSEC validation failing — set `dnssec-validation no;` temporarily to isolate; or ensure `dnssec-validation auto;` and that upstream resolvers support DNSSEC |
 | Recursive queries not working from LAN | Check `allow-query` and `recursion yes` are set in `options {}` |
 | Changes not picked up | Increment the Serial in the zone file, then run `sudo rndc reload home.local` |
 | Port 53 conflict with dnsmasq | Run only one resolver on port 53 — either configure dnsmasq to forward `.home.local` to BIND on a non-standard port, or replace dnsmasq with BIND entirely |
+
+## See Also
+
+- [dnsmasq (local DNS)](dnsmasq)
+- [openresolv](openresolv)
+- [IP addressing & routing](ip-addressing)

@@ -1,7 +1,7 @@
 ---
 title: LUKS Management
 section: Security
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # LUKS Management
@@ -186,3 +186,11 @@ sudo cryptsetup open /dev/nvme0n1p2 shani_root
 sudo gen-efi cleanup-tpm2
 sudo gen-efi enroll-tpm2
 ```
+
+## See Also
+
+- [TPM2 Enrollment](tpm2) — automatic LUKS unlock setup
+- [Secure Boot](secure-boot) — MOK enrollment and firmware setup
+- [Security Features](features) — full security model overview
+- [Hardware Authentication](hardware-auth) — fingerprint, smart card, YubiKey
+- [Emergency USB Recovery](../troubleshooting.md) — boot from USB and access encrypted data

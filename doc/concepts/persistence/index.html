@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Persistence Strategy — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Persistence Strategy  Shanios selectively persists data across immutable system updates through bind mounts and dedicated Btrfs subvolumes.  Three Categori…">
+  <meta name="description" id="meta-desc"     content="Shanios selectively persists data across immutable system updates through bind mounts and dedicated Btrfs subvolumes. Three Categories ❌ Replaced on Update…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Persistence Strategy">
-  <meta property="og:description" id="og-desc"    content="Persistence Strategy  Shanios selectively persists data across immutable system updates through bind mounts and dedicated Btrfs subvolumes.  Three Categori…">
+  <meta property="og:description" id="og-desc"    content="Shanios selectively persists data across immutable system updates through bind mounts and dedicated Btrfs subvolumes. Three Categories ❌ Replaced on Update…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/concepts/persistence/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Persistence Strategy">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Persistence Strategy">
-  <meta name="twitter:description" id="tw-desc"  content="Persistence Strategy  Shanios selectively persists data across immutable system updates through bind mounts and dedicated Btrfs subvolumes.  Three Categori…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios selectively persists data across immutable system updates through bind mounts and dedicated Btrfs subvolumes. Three Categories ❌ Replaced on Update…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Persistence Strategy","description":"Persistence Strategy  Shanios selectively persists data across immutable system updates through bind mounts and dedicated Btrfs subvolumes.  Three Categori…","url":"https://docs.shani.dev/doc/concepts/persistence/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Persistence Strategy","description":"Shanios selectively persists data across immutable system updates through bind mounts and dedicated Btrfs subvolumes. Three Categories ❌ Replaced on Update…","url":"https://docs.shani.dev/doc/concepts/persistence/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Persistence Strategy","item":"https://docs.shani.dev/doc/concepts/persistence/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,12 +215,12 @@
         <h1 class="doc-title">Persistence Strategy</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Concepts</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Shanios selectively persists data across immutable system updates through bind mounts and dedicated Btrfs subvolumes.</p>
-<h2>Three Categories</h2>
-<h3>❌ Replaced on Update</h3>
+<h2 id="three-categories">Three Categories</h2>
+<h3 id="replaced-on-update">❌ Replaced on Update</h3>
 <p>The active slot (<code>@blue</code> or <code>@green</code>) is overwritten:</p>
 <ul>
 <li><code>/</code> (root — <code>@blue</code> or <code>@green</code>)</li>
@@ -226,11 +228,11 @@
 <li><code>/opt /srv</code> (pre-installed)</li>
 <li><code>/boot/efi</code> (ESP — UKI updated)</li>
 </ul>
-<h3>✅ Persistent (Survives All Updates)</h3>
+<h3 id="persistent-survives-all-updates">✅ Persistent (Survives All Updates)</h3>
 <p>Dedicated Btrfs subvolumes that are never touched by updates:</p>
-<p>| Location | Subvolume | |----------|-----------| | <code>/home</code> | <code>@home</code> | | <code>/root</code> | <code>@root</code> | | <code>/data</code> | <code>@data</code> — overlay + service state | | <code>/var/log</code> | <code>@log</code> | | <code>/var/cache</code> | <code>@cache</code> | | <code>/var/lib/flatpak</code> | <code>@flatpak</code> | | <code>/var/lib/containers</code> | <code>@containers</code> | | <code>/nix</code> | <code>@nix</code> — Nix package store | | <code>/var/lib/libvirt</code> | <code>@libvirt</code> (nodatacow) | | <code>/var/lib/waydroid</code> | <code>@waydroid</code> | | <code>/var/lib/snapd</code> | <code>@snapd</code> |</p>
+<table><thead><tr><th>Location</th><th>Subvolume</th></tr></thead><tbody><tr><td><code>/home</code></td><td><code>@home</code></td></tr><tr><td><code>/root</code></td><td><code>@root</code></td></tr><tr><td><code>/data</code></td><td><code>@data</code> — overlay + service state</td></tr><tr><td><code>/var/log</code></td><td><code>@log</code></td></tr><tr><td><code>/var/cache</code></td><td><code>@cache</code></td></tr><tr><td><code>/var/lib/flatpak</code></td><td><code>@flatpak</code></td></tr><tr><td><code>/var/lib/containers</code></td><td><code>@containers</code></td></tr><tr><td><code>/nix</code></td><td><code>@nix</code> — Nix package store</td></tr><tr><td><code>/var/lib/libvirt</code></td><td><code>@libvirt</code> (nodatacow)</td></tr><tr><td><code>/var/lib/waydroid</code></td><td><code>@waydroid</code></td></tr><tr><td><code>/var/lib/snapd</code></td><td><code>@snapd</code></td></tr></tbody></table>
 <p>All of the subvolumes above are mounted at the Btrfs top level, independent of which slot (<code>@blue</code> or <code>@green</code>) is active — so every one of them, not just <code>@nix</code> and <code>@flatpak</code>, is equally visible to both slots and untouched by a slot switch or rollback.</p>
-<h3>🔄 Volatile (Cleared on Reboot)</h3>
+<h3 id="volatile-cleared-on-reboot">🔄 Volatile (Cleared on Reboot)</h3>
 <p><code>systemd.volatile=state</code> kernel parameter mounts a tmpfs over <code>/var</code>:</p>
 <ul>
 <li><code>/var</code> (tmpfs)</li>
@@ -239,7 +241,7 @@
 <li><code>/dev /proc /sys</code> (virtual filesystems)</li>
 </ul>
 <p>Critical service state is <strong>bind-mounted back</strong> from <code>@data</code> on every boot.</p>
-<h2>The /etc Overlay</h2>
+<h2 id="the-etc-overlay">The /etc Overlay</h2>
 <p><code>/etc</code> is an OverlayFS — a three-layer combination:</p>
 <ul>
 <li><strong>Lower layer (read-only):</strong> <code>/etc</code> from the active slot (<code>@blue</code> or <code>@green</code>)</li>
@@ -259,14 +261,20 @@ Changes in upper (@data) survive OS updates — only the lower is replaced.</cod
 <p><code>@data</code> is deliberately left mounted through this process (its upper/work directories must stay live for the overlay), and <code>switch_root</code> carries that mount along into the booted system's <code>/run</code>.</p>
 <p>View overlay modifications:</p>
 <pre><code class="language-bash">ls -la /data/overlay/etc/upper</code></pre>
-<p>The same <code>99shanios</code> dracut module also carries the two hooks that make boot-failure detection possible before systemd ever starts — a pre-mount hook writes <code>/data/boot_hard_failure</code> before the root Btrfs subvolume is mounted, and a pre-pivot hook clears it once mount succeeds. See <a href="./atomic-updates#automatic-rollback">Atomic Updates</a> for how that feeds into rollback.</p>
-<h2>Bind-Mounted Service State</h2>
+<p>The same <code>99shanios</code> dracut module also carries the two hooks that make boot-failure detection possible before systemd ever starts — a pre-mount hook writes <code>/data/boot_hard_failure</code> before the root Btrfs subvolume is mounted, and a pre-pivot hook clears it once mount succeeds. See <a href="./atomic-updates.md#automatic-rollback">Atomic Updates</a> for how that feeds into rollback.</p>
+<h2 id="bind-mounted-service-state">Bind-Mounted Service State</h2>
 <p>Because <code>/var</code> is volatile, all service state that must survive reboots is stored in <code>@data</code> and bind-mounted back at boot.</p>
 <p>Key bind mounts from <code>@data/varlib/</code> → <code>/var/lib/</code>:</p>
-<p>| Category | Examples | |----------|---------| | System Core | <code>dbus</code>, <code>systemd</code>, <code>fontconfig</code> | | Networking | <code>NetworkManager</code>, <code>bluetooth</code>, <code>firewalld</code> | | File Sharing | <code>samba</code>, <code>nfs</code> | | Remote Access & VPN | <code>caddy</code>, <code>tailscale</code>, <code>cloudflared</code>, <code>geoclue</code> | | Display Manager | <code>gdm</code>, <code>sddm</code>, <code>colord</code> | | Audio & Peripherals | <code>pipewire</code>, <code>cups</code>, <code>sane</code>, <code>upower</code> | | Auth & Security | <code>fprint</code>, <code>AccountsService</code>, <code>boltd</code>, <code>sshd</code>, <code>tpm2-tss</code> | | Spool | <code>cron</code>, <code>at</code>, <code>cups</code> print queue, <code>postfix</code> |</p>
+<table><thead><tr><th>Category</th><th>Examples</th></tr></thead><tbody><tr><td>System Core</td><td><code>dbus</code>, <code>systemd</code>, <code>fontconfig</code></td></tr><tr><td>Networking</td><td><code>NetworkManager</code>, <code>bluetooth</code>, <code>firewalld</code></td></tr><tr><td>File Sharing</td><td><code>samba</code>, <code>nfs</code></td></tr><tr><td>Remote Access & VPN</td><td><code>caddy</code>, <code>tailscale</code>, <code>cloudflared</code>, <code>geoclue</code></td></tr><tr><td>Display Manager</td><td><code>gdm</code>, <code>sddm</code>, <code>colord</code></td></tr><tr><td>Audio & Peripherals</td><td><code>pipewire</code>, <code>cups</code>, <code>sane</code>, <code>upower</code></td></tr><tr><td>Auth & Security</td><td><code>fprint</code>, <code>AccountsService</code>, <code>boltd</code>, <code>sshd</code>, <code>tpm2-tss</code></td></tr><tr><td>Spool</td><td><code>cron</code>, <code>at</code>, <code>cups</code> print queue, <code>postfix</code></td></tr></tbody></table>
 <p>All bind mounts use:</p>
-<pre><code>bind,nofail,x-systemd.after=var.mount,x-systemd.after=data.mount</code></pre>
-<p>(confirmed against the real fstab template in <code>shani-install-media/image_profiles/shared/overlay/rootfs/etc/fstab</code>)</p></div>
+<pre><code>bind,nofail,x-systemd.after=var.mount,x-systemd.requires-mounts-for=/data</code></pre>
+<p>(confirmed against the real fstab template in <code>shani-install-media/image_profiles/shared/overlay/rootfs/etc/fstab</code>)</p>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="immutability">Immutability</a></li>
+<li><a href="../intro/user-config.md">User Configuration</a></li>
+<li><a href="../updates/shell.md">Shell & Environment</a></li>
+</ul></div>
     </div>
 
   </main>

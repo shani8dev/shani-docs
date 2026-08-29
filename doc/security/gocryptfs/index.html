@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Directory Encryption (gocryptfs) — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Directory Encryption — gocryptfs   encrypts individual directories using FUSE. Each file is stored as a separate encrypted blob, so cloud sync tools (Nextc…">
+  <meta name="description" id="meta-desc"     content="gocryptfs encrypts individual directories using FUSE. Each file is stored as a separate encrypted blob, so cloud sync tools (Nextcloud, Syncthing, rclone) …">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Directory Encryption (gocryptfs)">
-  <meta property="og:description" id="og-desc"    content="Directory Encryption — gocryptfs   encrypts individual directories using FUSE. Each file is stored as a separate encrypted blob, so cloud sync tools (Nextc…">
+  <meta property="og:description" id="og-desc"    content="gocryptfs encrypts individual directories using FUSE. Each file is stored as a separate encrypted blob, so cloud sync tools (Nextcloud, Syncthing, rclone) …">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/security/gocryptfs/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Directory Encryption (gocryptfs)">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Directory Encryption (gocryptfs)">
-  <meta name="twitter:description" id="tw-desc"  content="Directory Encryption — gocryptfs   encrypts individual directories using FUSE. Each file is stored as a separate encrypted blob, so cloud sync tools (Nextc…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="gocryptfs encrypts individual directories using FUSE. Each file is stored as a separate encrypted blob, so cloud sync tools (Nextcloud, Syncthing, rclone) …">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Directory Encryption (gocryptfs)","description":"Directory Encryption — gocryptfs   encrypts individual directories using FUSE. Each file is stored as a separate encrypted blob, so cloud sync tools (Nextc…","url":"https://docs.shani.dev/doc/security/gocryptfs/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Directory Encryption (gocryptfs)","description":"gocryptfs encrypts individual directories using FUSE. Each file is stored as a separate encrypted blob, so cloud sync tools (Nextcloud, Syncthing, rclone) …","url":"https://docs.shani.dev/doc/security/gocryptfs/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Directory Encryption (gocryptfs)","item":"https://docs.shani.dev/doc/security/gocryptfs/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,16 +215,16 @@
         <h1 class="doc-title">Directory Encryption (gocryptfs)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Security</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p><code>gocryptfs</code> encrypts individual directories using FUSE. Each file is stored as a separate encrypted blob, so cloud sync tools (Nextcloud, Syncthing, rclone) can sync incrementally without re-uploading everything on each change.</p>
 <p>This complements full-disk LUKS2 encryption — use it when you want a specific directory encrypted at rest even when the disk is unlocked, or when encrypting a synced folder before it leaves your machine.</p>
-<blockquote><p>Shani OS uses Btrfs for the root filesystem. gocryptfs works on Btrfs without any special configuration.</p></blockquote>
+<blockquote>Shani OS uses Btrfs for the root filesystem. gocryptfs works on Btrfs without any special configuration.</blockquote>
 <p><strong>ShaniOS integration:</strong> <code>gocryptfs</code> ships pre-installed as a dependency of the <code>shani-storage</code> package — Shanios itself adds no wrapper script or systemd unit template for it; everything below is the standard upstream <code>gocryptfs</code> workflow, usable as-is.</p>
 <p><strong>KDE Plasma users:</strong> <strong>Plasma Vault</strong> (pre-installed, in System Settings and the system tray) provides a GUI for creating and mounting encrypted folders, with <code>gocryptfs</code> as one of its supported backends alongside legacy EncFS/CryFS vault support (for opening vaults created on other systems). It's a convenient GUI layer over the same underlying tool described here, not a separate encryption mechanism.</p>
-<p>---</p>
-<h2>Basic Usage</h2>
+<hr>
+<h2 id="basic-usage">Basic Usage</h2>
 <pre><code class="language-bash"># Create a new encrypted store
 mkdir ~/vault ~/vault-plain
 gocryptfs -init ~/vault
@@ -237,8 +239,8 @@ cp secret.pdf ~/vault-plain/
 # Unmount when done
 fusermount -u ~/vault-plain</code></pre>
 <p><code>~/vault</code> holds the ciphertext and can be safely synced or backed up. <code>~/vault-plain</code> is the live decrypted view — it only exists while mounted.</p>
-<p>---</p>
-<h2>Encrypted Cloud Sync</h2>
+<hr>
+<h2 id="encrypted-cloud-sync">Encrypted Cloud Sync</h2>
 <p>The per-file encryption model means your sync tool sees individual encrypted files and only uploads what changed:</p>
 <pre><code class="language-bash"># Keep vault in a synced folder (e.g. Nextcloud, rclone remote)
 mkdir ~/Nextcloud/vault ~/vault-plain
@@ -246,8 +248,8 @@ gocryptfs -init ~/Nextcloud/vault
 gocryptfs ~/Nextcloud/vault ~/vault-plain
 
 # Files written to ~/vault-plain are encrypted and synced automatically</code></pre>
-<p>---</p>
-<h2>Reverse Mode (encrypt existing data for backup)</h2>
+<hr>
+<h2 id="reverse-mode-encrypt-existing-data-for-backup">Reverse Mode (encrypt existing data for backup)</h2>
 <p>Reverse mode presents an encrypted view of a plaintext directory without moving files. Use it to push an encrypted backup to untrusted storage:</p>
 <pre><code class="language-bash"># Mount an encrypted view of ~/documents
 mkdir ~/documents-enc
@@ -257,8 +259,8 @@ gocryptfs -reverse ~/documents ~/documents-enc
 rclone sync ~/documents-enc remote:backup-documents
 
 fusermount -u ~/documents-enc</code></pre>
-<p>---</p>
-<h2>Automounting at Login</h2>
+<hr>
+<h2 id="automounting-at-login">Automounting at Login</h2>
 <p>Create a systemd user service:</p>
 <pre><code class="language-bash">mkdir -p ~/.config/systemd/user
 
@@ -278,20 +280,20 @@ EOF
 
 systemctl --user enable gocryptfs-vault</code></pre>
 <p>Or use a simpler login script — <code>gocryptfs</code> will prompt for the passphrase on mount.</p>
-<p>---</p>
-<h2>Changing the Passphrase</h2>
+<hr>
+<h2 id="changing-the-passphrase">Changing the Passphrase</h2>
 <pre><code class="language-bash">gocryptfs -passwd ~/vault
 # Enter current passphrase, then set the new one</code></pre>
 <p>The master key is re-wrapped with the new passphrase. No re-encryption of file content is needed.</p>
-<p>---</p>
-<h2>Checking Vault Info</h2>
+<hr>
+<h2 id="checking-vault-info">Checking Vault Info</h2>
 <pre><code class="language-bash"># Show cipher, feature flags, and gocryptfs version used to create the vault
 gocryptfs -info ~/vault</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | Mount fails: "fusermount: fuse device not found" | Load the FUSE module: <code>sudo modprobe fuse</code> | | Passphrase correct but mount fails | Check <code>~/vault/gocryptfs.conf</code> exists and is not corrupted | | Files visible in sync before mounting | You are syncing the ciphertext directory — this is correct and expected | | Forgot passphrase | Data is unrecoverable — gocryptfs has no backdoor | | Performance feels slow on large files | gocryptfs has per-file overhead; for large media files consider LUKS on a separate partition instead |</p>
-<p>---</p>
-<h2>See Also</h2>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Mount fails: "fusermount: fuse device not found"</td><td>Load the FUSE module: <code>sudo modprobe fuse</code></td></tr><tr><td>Passphrase correct but mount fails</td><td>Check <code>~/vault/gocryptfs.conf</code> exists and is not corrupted</td></tr><tr><td>Files visible in sync before mounting</td><td>You are syncing the ciphertext directory — this is correct and expected</td></tr><tr><td>Forgot passphrase</td><td>Data is unrecoverable — gocryptfs has no backdoor</td></tr><tr><td>Performance feels slow on large files</td><td>gocryptfs has per-file overhead; for large media files consider LUKS on a separate partition instead</td></tr></tbody></table>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="luks">LUKS Management</a> — full-disk encryption (protects everything including swap and temp files)</li>
 <li><a href="features">Security Features</a> — encryption in the Shani OS security model</li>

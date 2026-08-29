@@ -1,7 +1,7 @@
 ---
 title: Kerberos
 section: Networking
-updated: 2026-04-18
+updated: 2026-08-28
 ---
 
 # Kerberos 5 (KDC)
@@ -61,6 +61,20 @@ delprinc olduser              # delete a principal
 quit
 ```
 
+### Remote Admin Access (kadm5.acl)
+
+Remote `kadmin` requires an ACL file. Create `/var/lib/kerberos/krb5kdc/kadm5.acl` granting admin principals full rights (match the realm to yours):
+
+```text
+*/admin@SHANIOS.LOCAL *
+```
+
+Then restart the KDC to pick it up:
+
+```bash
+sudo systemctl restart krb5kdc
+```
+
 ### Firewall
 
 ```bash
@@ -104,6 +118,27 @@ kinit admin/admin@SHANIOS.LOCAL
 host kdc.shanios.local
 ```
 
+### SSH with Kerberos (GSSAPI)
+
+On the SSH server, enable GSSAPI authentication in `/etc/ssh/sshd_config`:
+
+```text
+GSSAPIAuthentication yes
+```
+
+```bash
+sudo systemctl restart sshd
+```
+
+On the client, obtain a ticket first, then connect — no password prompt:
+
+```bash
+kinit youruser@SHANIOS.LOCAL
+ssh youruser@kdc.shanios.local
+```
+
+Confirm the ticket was accepted with `klist` on either machine.
+
 ---
 
 ## Troubleshooting
@@ -114,3 +149,8 @@ host kdc.shanios.local
 | `Clock skew too great` | Kerberos requires clocks within 5 minutes — sync with `sudo timedatectl set-ntp true` |
 | `Client not found in Kerberos database` | The principal does not exist — create it with `sudo kadmin.local` → `addprinc username` |
 | `Decrypt integrity check failed` | Wrong password, or the keytab is stale — regenerate with `ktadd` in `kadmin.local` |
+
+## See Also
+
+- [OpenSSH](openssh)
+- [Security features](../security/features.md)

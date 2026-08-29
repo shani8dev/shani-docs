@@ -1,7 +1,7 @@
 ---
 title: Printing & Scanning
 section: System
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Printing & Scanning
@@ -23,7 +23,7 @@ Shanios ships a complete printing and scanning stack out of the box — CUPS, a 
 - GNOME: Settings → Printers → Add Printer
 - KDE Plasma: System Settings → Printers → Add a New Printer
 
-Both auto-discover printers on the local network via `cups-browsed` (mDNS/DNS-SD through [Avahi](avahi)) and USB-connected printers via `ipp-usb`. For most modern printers, discovery and driver selection happen automatically.
+Both auto-discover printers on the local network via `cups-browsed` (mDNS/DNS-SD through [Avahi](../networking/avahi.md)) and USB-connected printers via `ipp-usb`. For most modern printers, discovery and driver selection happen automatically.
 
 **CLI / advanced:** CUPS also exposes a local web UI at [http://localhost:631](http://localhost:631) for adding printers, managing queues, and tweaking driver options — useful when you need PPD-level control the GUI doesn't expose. `system-config-printer` provides a more traditional standalone GUI for the same tasks.
 
@@ -69,11 +69,11 @@ scanimage --format=png -o scan.png --resolution=300
 # Driverless network scanner discovery (eSCL/AirScan) is handled by sane-airscan automatically
 ```
 
-If a network scanner doesn't appear, confirm it's on the same subnet and that Avahi/mDNS traffic isn't being blocked — see [Firewall (firewalld)](../networking/firewalld) if you've added custom rules.
+If a network scanner doesn't appear, confirm it's on the same subnet and that Avahi/mDNS traffic isn't being blocked — see [Firewall (firewalld)](../networking/firewalld.md) if you've added custom rules.
 
 ## Groups & Permissions
 
-New users are automatically added to the `cups`, `lp`, and `scanner` groups at creation time via `/etc/shani-extra-groups` — see [User Provisioning](../updates/user-setup) for the full mechanism. No manual group changes are needed for printing or scanning to work for a normal user account.
+New users are automatically added to the `cups`, `lp`, and `scanner` groups at creation time via `/etc/shani-extra-groups` — see [User Provisioning](../updates/user-setup.md) for the full mechanism. No manual group changes are needed for printing or scanning to work for a normal user account.
 
 ## Troubleshooting
 
@@ -84,12 +84,12 @@ New users are automatically added to the `cups`, `lp`, and `scanner` groups at c
 | Wrong or missing driver | Check the CUPS web UI's driver search — the Foomatic/Gutenprint databases cover most non-vendor-specific printers; some vendor drivers (e.g. Epson) are not pre-installed and must be added manually |
 | Print jobs stuck in queue | `cupsenable <printer>` if paused; check `journalctl -u cups` for filter errors |
 | Scanner not detected | Run `scanimage -L`; for network scanners, confirm `sane-airscan` supports the device's protocol (eSCL/AirScan or WSD) |
-| Can't manage printers without a password prompt every time | This is expected — `cups-pk-helper` gates printer administration via Polkit; see [Permissions & Authorization](../security/permissions) |
+| Can't manage printers without a password prompt every time | This is expected — `cups-pk-helper` gates printer administration via Polkit; see [Permissions & Authorization](../security/permissions.md) |
 
 ## See Also
 
 - [Hardware](hardware) — general device detection and troubleshooting
-- [Avahi (mDNS)](../networking/avahi) — the discovery mechanism behind network printer/scanner auto-detection
-- [Firewall (firewalld)](../networking/firewalld) — if custom firewall rules block discovery traffic
-- [User Provisioning](../updates/user-setup) — how the `cups`/`lp`/`scanner` groups are assigned
+- [Avahi (mDNS)](../networking/avahi.md) — the discovery mechanism behind network printer/scanner auto-detection
+- [Firewall (firewalld)](../networking/firewalld.md) — if custom firewall rules block discovery traffic
+- [User Provisioning](../updates/user-setup.md) — how the `cups`/`lp`/`scanner` groups are assigned
 - [Printing and Scanning on Shani OS](https://blog.shani.dev/post/shani-os-printing-and-scanning) — extended walkthrough with per-manufacturer driver notes

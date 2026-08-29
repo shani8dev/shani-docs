@@ -1,7 +1,7 @@
 ---
 title: Medical & Health
 section: Self-Hosting & Servers
-updated: 2026-04-22
+updated: 2026-08-28
 ---
 
 # Medical & Health
@@ -86,7 +86,7 @@ volumes:
 cd ~/openmrs && podman-compose up -d
 ```
 
-Access the backend at `http://localhost:8080/openmrs` and the React SPA frontend at `http://localhost:8081`.
+Access the backend at `http://localhost:8080/openmrs` and the React SPA frontend at `http://localhost:8081`. First login opens the setup wizard — allow several minutes on first boot while the database schema is created, then complete the wizard before installing modules.
 
 #### Key OpenMRS modules to install
 - **EMR API** — core clinical workflows
@@ -282,11 +282,13 @@ volumes:
 cd ~/medplum && podman-compose up -d
 ```
 
+Health check: `curl localhost:8103/healthz` returns `{"status":"ok"}` once the server is up.
+
 ---
 
 ## Tandoor (Recipe & Nutrition Tracking)
 
-**Purpose:** Self-hosted recipe manager with ingredient-level nutritional data, meal planning, and shopping list generation. Useful for health-focused users who want to log macros and nutrition against specific recipes. See also [Mealie in the Productivity wiki](https://docs.shani.dev/doc/servers/productivity#mealie-recipe-manager) for a lighter-weight recipe manager without the nutrition tracking focus.
+**Purpose:** Self-hosted recipe manager with ingredient-level nutritional data, meal planning, and shopping list generation. Useful for health-focused users who want to log macros and nutrition against specific recipes. See also [Mealie in the Productivity wiki](https://docs.shani.dev/doc/servers/productivity/utilities#mealie-recipe-manager) for a lighter-weight recipe manager without the nutrition tracking focus.
 
 ```yaml
 # ~/tandoor/compose.yml
@@ -325,6 +327,8 @@ volumes:
 ```bash
 cd ~/tandoor && podman-compose up -d
 ```
+
+Access at `http://localhost:8085`.
 
 ---
 
@@ -373,6 +377,8 @@ volumes:
 ```bash
 cd ~/wger && podman-compose up -d
 ```
+
+Access at `http://localhost:8086`.
 
 #### Mobile apps
 wger has iOS and Android apps that sync to a self-hosted server via the REST API.
@@ -462,3 +468,9 @@ wger.home.local     { tls internal; reverse_proxy localhost:8086 }
 > - Enable audit logging in OpenMRS and OpenEMR — every record access should be logged
 > - Back up health databases daily with Restic to an encrypted offsite destination
 > - Rotate database passwords and service credentials on a schedule
+
+## See Also
+
+- [Productivity (Mealie)](productivity)
+- [Security baseline](security)
+- [Backups](backups-sync)

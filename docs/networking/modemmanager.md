@@ -1,7 +1,7 @@
 ---
 title: ModemManager (Mobile Broadband)
 section: Networking
-updated: 2026-04-18
+updated: 2026-08-28
 ---
 
 # ModemManager — Mobile Broadband (3G/4G/5G)
@@ -119,3 +119,8 @@ mmcli -m 0 --3gpp-ussd-cancel
 | Low signal / frequent disconnects | Run `mmcli -m 0 --signal-get` to check signal quality; reposition the modem or antenna |
 | SMS not sending | Confirm SMS support: `mmcli -m 0 | grep -i sms`; modem must be registered on a network first |
 | ModemManager interfering with a serial GPS | Create `/etc/udev/rules.d/99-mm-ignore-gps.rules` with `ATTRS{idVendor}=="XXXX", ATTRS{idProduct}=="YYYY", ENV{ID_MM_DEVICE_IGNORE}="1"` (replace XX values from `lsusb` output) |
+
+## See Also
+
+- [NetworkManager VPN](networkmanager-vpn)
+- [Network tools](network-tools)

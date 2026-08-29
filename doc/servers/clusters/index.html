@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Clusters &amp; High Availability — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Clusters &amp; High Availability  Portability note: Compose examples use rootless Podman and . When using Docker, replace  with  and  with  (add  to the servic…">
+  <meta name="description" id="meta-desc"     content="Multi-node, replicated, and highly available deployments. All compose files use rootless Podman with :Z volume labels on bind mounts. Named volumes omit :Z…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Clusters &amp; High Availability">
-  <meta property="og:description" id="og-desc"    content="Clusters &amp; High Availability  Portability note: Compose examples use rootless Podman and . When using Docker, replace  with  and  with  (add  to the servic…">
+  <meta property="og:description" id="og-desc"    content="Multi-node, replicated, and highly available deployments. All compose files use rootless Podman with :Z volume labels on bind mounts. Named volumes omit :Z…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/clusters/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Clusters &amp; High Availability">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Clusters &amp; High Availability">
-  <meta name="twitter:description" id="tw-desc"  content="Clusters &amp; High Availability  Portability note: Compose examples use rootless Podman and . When using Docker, replace  with  and  with  (add  to the servic…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Multi-node, replicated, and highly available deployments. All compose files use rootless Podman with :Z volume labels on bind mounts. Named volumes omit :Z…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Clusters & High Availability","description":"Clusters & High Availability  Portability note: Compose examples use rootless Podman and . When using Docker, replace  with  and  with  (add  to the servic…","url":"https://docs.shani.dev/doc/servers/clusters/","datePublished":"2026-04-22T00:00:00.000Z","dateModified":"2026-04-22T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Clusters & High Availability","description":"Multi-node, replicated, and highly available deployments. All compose files use rootless Podman with :Z volume labels on bind mounts. Named volumes omit :Z…","url":"https://docs.shani.dev/doc/servers/clusters/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Clusters & High Availability","item":"https://docs.shani.dev/doc/servers/clusters/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,51 +215,51 @@
         <h1 class="doc-title">Clusters &amp; High Availability</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><blockquote><p><strong>Portability note:</strong> Compose examples use rootless <strong>Podman</strong> and <code>host.containers.internal</code>. When using Docker, replace <code>podman-compose</code> with <code>docker compose</code> and <code>host.containers.internal</code> with <code>host-gateway</code> (add <code>extra_hosts: [host-gateway:host-gateway]</code> to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.</p></blockquote>
+      <div class="prose"><blockquote><strong>Portability note:</strong> Compose examples use rootless <strong>Podman</strong> and <code>host.containers.internal</code>. When using Docker, replace <code>podman-compose</code> with <code>docker compose</code> and <code>host.containers.internal</code> with <code>host-gateway</code> (add <code>extra_hosts: [host-gateway:host-gateway]</code> to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.</blockquote>
 <p>Multi-node, replicated, and highly available deployments. All compose files use rootless Podman with <code>:Z</code> volume labels on bind mounts. Named volumes omit <code>:Z</code> — Podman manages their labels automatically.</p>
-<p>---</p>
-<h2>Key Concepts</h2>
+<hr>
+<h2 id="key-concepts">Key Concepts</h2>
 <p>These patterns appear across every company that runs production infrastructure. Understanding them is the difference between someone who follows runbooks and someone who can write them.</p>
-<h4>Replication vs. clustering</h4>
+<h4 id="replication-vs-clustering">Replication vs. clustering</h4>
 <p><em>Replication</em> copies data from one node to others (primary → replicas). <em>Clustering</em> distributes both data and responsibility across nodes. PostgreSQL streaming replication is replication; Cassandra ring is clustering. Many systems combine both — MongoDB replica sets replicate within each shard, while a sharded cluster distributes across shards.</p>
-<h4>Leader election</h4>
+<h4 id="leader-election">Leader election</h4>
 <p>When a primary fails, surviving nodes must agree on a new one without split-brain (two nodes both believing they are primary). This requires a consensus algorithm — Raft (etcd, Kafka KRaft) or Paxos variants. The protocol guarantees that only one node can be elected, even under network partition. You don't need to implement this; you need to understand <em>why</em> etcd is a dependency for Patroni, and <em>why</em> Kafka removed ZooKeeper.</p>
-<h4>Fencing (STONITH — Shoot The Other Node In The Head)</h4>
+<h4 id="fencing-stonith-shoot-the-other-node-in-the-head">Fencing (STONITH — Shoot The Other Node In The Head)</h4>
 <p>In bare-metal HA setups, when a primary node stops responding, the cluster can't be certain whether it crashed or just lost network connectivity. A fencing device (IPMI/BMC, PDU, or cloud API) forcibly powers off or reboots the unresponsive node before promoting a standby — preventing split-brain writes. On cloud and container deployments, fencing is usually handled by the orchestrator (Kubernetes, etcd TTLs, cloud instance termination APIs). Every infrastructure engineer will encounter this concept.</p>
-<h4>Replication lag</h4>
+<h4 id="replication-lag">Replication lag</h4>
 <p>Async replicas apply writes with a delay. During normal operation this might be milliseconds; under load it can grow to seconds or minutes. Reads from a replica during lag return stale data. This is the fundamental trade-off behind <code>readPreference=secondary</code> (MongoDB), reading from a Postgres standby, and <code>CONSISTENCY LOCAL_ONE</code> (Cassandra). Always know your acceptable staleness before sending reads to replicas.</p>
-<h4>HAProxy health check model</h4>
+<h4 id="haproxy-health-check-model">HAProxy health check model</h4>
 <p>HAProxy doesn't connect to the database to check health — it hits a REST endpoint on the HA agent (Patroni port 8008). This is intentional: probing the database port only tells you TCP is open, not whether the node is a writable primary. The agent's REST endpoint knows cluster role and reports it explicitly. This REST-based health check pattern appears across many HA stacks (Consul health checks, Kubernetes liveness/readiness probes, AWS target group health checks).</p>
-<h4>Quorum mathematics — why odd-numbered clusters</h4>
+<h4 id="quorum-mathematics-why-odd-numbered-clusters">Quorum mathematics — why odd-numbered clusters</h4>
 <p>A cluster with N nodes requires ⌊N/2⌋ + 1 nodes for quorum (a majority). With 3 nodes: quorum = 2, can tolerate 1 failure. With 5 nodes: quorum = 3, can tolerate 2 failures. With 4 nodes: quorum = 3, can still only tolerate 1 failure — same as 3 nodes but with more cost. Even-numbered clusters waste a node. A 2-node cluster can't achieve quorum after any single failure — this is why you should never run a 2-node etcd, Patroni, or Elasticsearch cluster in production.</p>
-<h4>Raft consensus in practice</h4>
+<h4 id="raft-consensus-in-practice">Raft consensus in practice</h4>
 <p>Raft (used by etcd, Kafka KRaft, CockroachDB) works in three roles: Leader (one per cluster, handles all writes), Follower (replicates from leader), Candidate (transitional during election). A leader sends heartbeats; if followers don't hear one within the election timeout, they become candidates and request votes. A candidate wins if it gets votes from a majority of nodes. Raft guarantees: (1) at most one leader at a time, (2) a leader has all committed entries, (3) committed entries are never lost. The practical implication: writes require a majority acknowledgment before committing — if you lose quorum, the cluster stops accepting writes.</p>
-<h4>Kafka partitions and consumer groups</h4>
+<h4 id="kafka-partitions-and-consumer-groups">Kafka partitions and consumer groups</h4>
 <p>A Kafka topic is divided into partitions — the unit of parallelism and ordering. Messages within a partition are strictly ordered; across partitions they are not. A consumer group is a set of consumers that jointly consume all partitions of a topic — each partition is assigned to exactly one consumer in the group at any time. Scaling throughput: add partitions (more parallelism) and consumers (up to the number of partitions — extra consumers idle). This model is why Kafka is "pull-based": consumers control their own offset, enabling replay and independent progress for different consumer groups on the same data.</p>
-<h4>RabbitMQ exchange types — routing patterns</h4>
+<h4 id="rabbitmq-exchange-types-routing-patterns">RabbitMQ exchange types — routing patterns</h4>
 <p>RabbitMQ's exchange is the router between producers and queues. Four types: <strong>Direct</strong> — routes to queues whose binding key exactly matches the message routing key (point-to-point). <strong>Fanout</strong> — broadcasts to all bound queues regardless of routing key (pub/sub). <strong>Topic</strong> — routes based on wildcard pattern matching (<code><em>.error</code>, <code>logs.#</code>) — the most flexible. <strong>Headers</strong> — routes based on message headers rather than routing key (rarely used). Knowing these lets you design message routing without application-level filtering: a Topic exchange with <code></em>.error</code> bound to an alert queue handles error routing at the broker.</p>
-<h4>VictoriaMetrics vs Prometheus — architectural differences</h4>
+<h4 id="victoriametrics-vs-prometheus-architectural-differences">VictoriaMetrics vs Prometheus — architectural differences</h4>
 <p>Prometheus is single-node — one binary, local disk, bounded retention. VictoriaMetrics is Prometheus-compatible (speaks the same scrape format, query language, and remote write API) but designed for higher throughput and longer retention: better compression (10x vs Prometheus), faster ingest, and a cluster mode for horizontal scaling. The key operational difference: VictoriaMetrics accepts Prometheus remote write, so you can run Prometheus for scraping and service discovery while using VictoriaMetrics as the long-term storage backend (the same role as Thanos, but simpler to operate).</p>
-<h4>Cassandra consistent hashing and the ring</h4>
+<h4 id="cassandra-consistent-hashing-and-the-ring">Cassandra consistent hashing and the ring</h4>
 <p>Cassandra distributes data using consistent hashing — each node owns a range of the token ring (a 64-bit integer space). A row's partition key is hashed to a token, and the node owning that token range stores it. With <code>replication_factor=3</code>, the three consecutive nodes on the ring each store a copy. This means: (1) adding a node only moves ~1/N of data, not all of it, (2) there's no primary — any replica can serve reads/writes, (3) <code>CONSISTENCY QUORUM</code> requires a majority of replicas to agree, moving Cassandra toward CP at the cost of availability during node failures.</p>
-<h4>CAP theorem — the distributed systems interview question</h4>
+<h4 id="cap-theorem-the-distributed-systems-interview-question">CAP theorem — the distributed systems interview question</h4>
 <p>Any distributed data store can provide at most two of three guarantees: Consistency (every read gets the most recent write), Availability (every request gets a non-error response), and Partition tolerance (the system continues despite network splits). Network partitions are unavoidable in real systems, so the real choice is CP vs AP. PostgreSQL with Patroni is CP — during a failover it stops accepting writes until a new leader is elected. Cassandra is AP — it stays writable during a partition but can return stale data. Knowing this tells you which database to choose for a given use case.</p>
-<h4>Consistent hashing — how distributed caches and databases partition data</h4>
+<h4 id="consistent-hashing-how-distributed-caches-and-databases-partition-data">Consistent hashing — how distributed caches and databases partition data</h4>
 <p>Naive sharding (key mod N) breaks when you add or remove nodes — all keys need to be remapped. Consistent hashing places both nodes and keys on a ring; adding a node only moves 1/N of the keys to it. Redis Cluster uses hash slots (16384 fixed buckets) as a simpler consistent-hashing variant. Understanding this lets you explain why Redis Cluster rebalancing is less disruptive than naive partitioning and why adding a Cassandra node to a ring is a smooth operation.</p>
-<h4>Split-brain consequences and prevention</h4>
+<h4 id="split-brain-consequences-and-prevention">Split-brain consequences and prevention</h4>
 <p>Split-brain occurs when two nodes both believe they are the primary and accept writes simultaneously, creating divergent data. Consequences: data loss on reconciliation, double-processing of transactions, or permanent inconsistency. Prevention mechanisms: quorum (requires majority vote to elect a primary), fencing (forcibly stop the old primary before promoting a new one), and epoch numbers (each primary has a monotonically increasing term; writes from a stale term are rejected). The pattern repeats across Patroni (etcd quorum + fencing), Kafka KRaft (Raft epochs), and Elasticsearch (voting configurations).</p>
-<h4>Observability for distributed clusters</h4>
+<h4 id="observability-for-distributed-clusters">Observability for distributed clusters</h4>
 <p>Cluster health is not just "is the process running." Key metrics to monitor: (1) replication lag — how far behind are replicas? (2) leader stability — how often is leader election happening? Frequent elections indicate network instability; (3) quorum status — is the cluster operating at full quorum or in degraded mode? (4) partition count and distribution — are Kafka partitions evenly distributed, or is one broker hot? Tools: Kafka UI for Kafka, Patroni's REST API (<code>/patroni</code>) for PostgreSQL, <code>_cluster/health</code> for Elasticsearch. Alert on degraded status, not just down status.</p>
-<h4>Replication factor vs availability — the maths</h4>
+<h4 id="replication-factor-vs-availability-the-maths">Replication factor vs availability — the maths</h4>
 <p>In Kafka, a topic with <code>replication.factor=3</code> and <code>min.insync.replicas=2</code> can survive loss of 1 broker (writes still acknowledged by 2). In Cassandra, <code>REPLICATION_FACTOR=3</code> with <code>CONSISTENCY QUORUM</code> can survive 1 node failure. In Elasticsearch, <code>number_of_replicas=1</code> means each shard exists on 2 nodes — lose 1 node and the cluster stays green. The general formula: for fault tolerance of F failures, you need 2F+1 nodes with quorum writes, or F+1 nodes with full replication. Knowing this lets you size clusters correctly at interview: "we need to survive 1 AZ failure, so we need 3 replicas across 3 AZs."</p>
-<h4>When to use a message queue vs a database as a queue</h4>
+<h4 id="when-to-use-a-message-queue-vs-a-database-as-a-queue">When to use a message queue vs a database as a queue</h4>
 <p>Using a relational database as a job queue (polling a <code>jobs</code> table) works at low scale but creates lock contention and high database load as throughput grows. Kafka is not a job queue — it's a log, and all consumers see all messages. RabbitMQ is a job queue — messages are consumed once, then deleted. Use a dedicated queue (RabbitMQ, NATS JetStream) when you have competing consumers (multiple workers processing jobs), require dead-letter handling, or need per-message TTL. Use a database queue only for low-volume (<100 jobs/second) workloads where simplicity matters more than throughput.</p>
-<p>---</p>
-<h2>Elasticsearch Cluster (3-Node)</h2>
-<p><strong>Purpose:</strong> Production ELK cluster with 3 master-eligible/data nodes for quorum-based split-brain prevention. Survives loss of 1 node. Pair with the Logstash and Beats configs in the <a href="https://docs.shani.dev/doc/servers/monitoring">Monitoring wiki</a>.</p>
+<hr>
+<h2 id="elasticsearch-cluster-3-node">Elasticsearch Cluster (3-Node)</h2>
+<p><strong>Purpose:</strong> Production ELK cluster with 3 master-eligible/data nodes for quorum-based split-brain prevention. Survives loss of 1 node. Pair with the Logstash and Beats configs in the <a href="https://docs.shani.dev/doc/servers/monitoring/logs">Monitoring wiki</a>.</p>
 <pre><code class="language-yaml"># ~/elk-cluster/compose.yaml
 services:
   es01:
@@ -368,21 +370,21 @@ cd ~/elk-cluster &amp;&amp; podman-compose up -d
 # Verify cluster health
 curl http://localhost:9200/_cluster/health?pretty
 curl &quot;http://localhost:9200/_cat/nodes?v&amp;h=name,role,heap.percent,disk.used_percent,load_1m&quot;</code></pre>
-<h4>Node roles reference</h4>
-<p>| Role | Responsibilities | |------|-----------------| | <code>master</code> | Cluster state, index creation/deletion, shard allocation | | <code>data</code> | Store shards, handle search and indexing requests | | <code>ingest</code> | Pre-process documents via pipelines before indexing | | <code>coordinating</code> | Route requests, merge results — no data stored |</p>
-<blockquote><p><strong>Split-brain prevention:</strong> Always deploy an odd number of master-eligible nodes (3 or 5). With 3 masters the cluster survives loss of 1; with 5, loss of 2. Remove <code>cluster.initial_master_nodes</code> from node configs after first cluster formation or nodes will refuse to rejoin after a full restart.</p></blockquote>
-<p>---</p>
-<h2>How Quorum and Split-Brain Prevention Work</h2>
+<h4 id="node-roles-reference">Node roles reference</h4>
+<table><thead><tr><th>Role</th><th>Responsibilities</th></tr></thead><tbody><tr><td><code>master</code></td><td>Cluster state, index creation/deletion, shard allocation</td></tr><tr><td><code>data</code></td><td>Store shards, handle search and indexing requests</td></tr><tr><td><code>ingest</code></td><td>Pre-process documents via pipelines before indexing</td></tr><tr><td><code>coordinating</code></td><td>Route requests, merge results — no data stored</td></tr></tbody></table>
+<blockquote><strong>Split-brain prevention:</strong> Always deploy an odd number of master-eligible nodes (3 or 5). With 3 masters the cluster survives loss of 1; with 5, loss of 2. Remove <code>cluster.initial_master_nodes</code> from node configs after first cluster formation or nodes will refuse to rejoin after a full restart.</blockquote>
+<hr>
+<h2 id="how-quorum-and-split-brain-prevention-work">How Quorum and Split-Brain Prevention Work</h2>
 <p>Every distributed system in this wiki — Elasticsearch, etcd, Kafka, Patroni, Redis Sentinel — relies on the same underlying idea: a <strong>quorum</strong>.</p>
 <p>A cluster of N nodes requires ⌊N/2⌋ + 1 nodes to agree before making any decision (electing a leader, accepting a write, allocating a shard). With 3 nodes, quorum = 2. If 1 node fails, the remaining 2 can still reach agreement — the cluster stays available. If 2 nodes fail, the 1 remaining node can't form a quorum alone, so it refuses to make decisions rather than risk acting on stale or inconsistent data.</p>
-<h4>Why odd numbers</h4>
+<h4 id="why-odd-numbers">Why odd numbers</h4>
 <p>A 4-node cluster has quorum = 3, so it can only tolerate 1 failure — same as a 3-node cluster, but at higher cost. Even-numbered clusters also create a risk of a 2-2 split where neither partition can reach quorum, leaving the whole system stuck. Odd numbers are not required, but they give you the best fault tolerance per node.</p>
-<h4>What split-brain means in practice</h4>
+<h4 id="what-split-brain-means-in-practice">What split-brain means in practice</h4>
 <p>If a network partition divides a cluster into two halves that can't communicate, and both halves could independently elect a leader and accept writes, you'd end up with two diverged datasets with no way to reconcile them. Quorum prevents this: only the partition with enough nodes to reach quorum can continue operating. The minority partition refuses to act.</p>
-<h4>Why Patroni uses etcd</h4>
+<h4 id="why-patroni-uses-etcd">Why Patroni uses etcd</h4>
 <p>The leader election process requires a distributed consensus store that is itself fault-tolerant. Patroni nodes race to write a leader lock key in etcd. The node that succeeds becomes primary. The lock has a TTL (time-to-live); if the primary fails to renew it before expiry, etcd expires the key and a new election begins. The health check HAProxy hits (port 8008) is the Patroni REST API, not PostgreSQL directly — HAProxy asks Patroni "are you the primary?" rather than probing the database port.</p>
-<p>---</p>
-<h2>OpenSearch Cluster (3-Node)</h2>
+<hr>
+<h2 id="opensearch-cluster-3-node">OpenSearch Cluster (3-Node)</h2>
 <p><strong>Purpose:</strong> Apache 2.0-licensed ELK alternative. Drop-in API compatible with Elasticsearch — any Logstash output, Filebeat, or Metricbeat works without changes. Includes Data Prepper, OpenSearch's native log pipeline (Logstash equivalent).</p>
 <pre><code class="language-yaml"># ~/opensearch-cluster/compose.yaml
 services:
@@ -471,7 +473,7 @@ cd ~/opensearch-cluster &amp;&amp; podman-compose up -d
 
 curl http://localhost:9200/_cluster/health?pretty
 curl &quot;http://localhost:9200/_cat/nodes?v&quot;</code></pre>
-<h5>Data Prepper pipeline config</h5>
+<h5 id="data-prepper-pipeline-config">Data Prepper pipeline config</h5>
 <pre><code class="language-yaml"># ~/opensearch-cluster/data-prepper/pipelines.yaml
 log-pipeline:
   source:
@@ -501,7 +503,7 @@ otel-trace-pipeline:
         hosts: [&quot;http://os01:9200&quot;]
         insecure: true
         index: otel-traces-%{yyyy.MM.dd}</code></pre>
-<h5>OpenSearch ISM — daily rollover, delete after 30 days</h5>
+<h5 id="opensearch-ism-daily-rollover-delete-after-30-days">OpenSearch ISM — daily rollover, delete after 30 days</h5>
 <pre><code class="language-bash">curl -X PUT http://localhost:9200/_plugins/_ism/policies/logs-policy \
   -H &quot;Content-Type: application/json&quot; -d '
 {
@@ -523,8 +525,8 @@ otel-trace-pipeline:
     &quot;ism_template&quot;: [{ &quot;index_patterns&quot;: [&quot;logs-*&quot;], &quot;priority&quot;: 100 }]
   }
 }'</code></pre>
-<p>---</p>
-<h2>Kafka Cluster (KRaft, 3-Node)</h2>
+<hr>
+<h2 id="kafka-cluster-kraft-3-node">Kafka Cluster (KRaft, 3-Node)</h2>
 <p><strong>Purpose:</strong> Production Kafka cluster using KRaft mode (ZooKeeper removed in Kafka 4.0). Three nodes each act as both broker and controller, giving quorum-based fault tolerance — survives loss of 1 node.</p>
 <pre><code class="language-yaml"># ~/kafka-cluster/compose.yaml
 services:
@@ -617,8 +619,8 @@ podman exec kafka1 kafka-topics \
 # Check topic replication state
 podman exec kafka1 kafka-topics \
   --bootstrap-server kafka1:29092 --describe --topic my-topic</code></pre>
-<blockquote><p><code>KAFKA_MIN_INSYNC_REPLICAS: 2</code> means a producer with <code>acks=all</code> requires at least 2 replicas to acknowledge a write — preventing data loss if a node fails mid-write. The cluster tolerates the loss of 1 broker.</p></blockquote>
-<h3>How Kafka Consumer Groups Work</h3>
+<blockquote><code>KAFKA_MIN_INSYNC_REPLICAS: 2</code> means a producer with <code>acks=all</code> requires at least 2 replicas to acknowledge a write — preventing data loss if a node fails mid-write. The cluster tolerates the loss of 1 broker.</blockquote>
+<h3 id="how-kafka-consumer-groups-work">How Kafka Consumer Groups Work</h3>
 <p>A <strong>consumer group</strong> is a set of consumers that collectively read a topic. Kafka assigns each partition to exactly one consumer in the group at a time. If a topic has 6 partitions and your consumer group has 3 instances, each instance gets 2 partitions. If you scale to 6 instances, each gets 1. If you add a 7th, it sits idle — you can't have more active consumers than partitions.</p>
 <p><strong>Rebalancing:</strong> happens when a consumer joins or leaves the group. During a rebalance, all partition assignments are renegotiated — no consumer processes messages until the rebalance completes. This is the "rebalance storm" problem: if consumers join/leave frequently (e.g., due to crashlooping pods), the group never stabilises and consumer lag grows continuously.</p>
 <p><code>max.poll.interval.ms</code> controls how long Kafka waits between calls to <code>poll()</code> before declaring a consumer dead and triggering a rebalance. If your processing logic is slow (e.g., calling an external API per message), increase this value — otherwise Kafka will evict the consumer mid-processing, causing messages to be redelivered.</p>
@@ -633,8 +635,8 @@ podman exec kafka1 kafka-consumer-groups \
   --group my-consumer-group \
   --topic my-topic \
   --reset-offsets --to-earliest --execute</code></pre>
-<p>---</p>
-<h2>Patroni + etcd + HAProxy (PostgreSQL HA)</h2>
+<hr>
+<h2 id="patroni-etcd-haproxy-postgresql-ha">Patroni + etcd + HAProxy (PostgreSQL HA)</h2>
 <p><strong>Purpose:</strong> Patroni is the industry-standard PostgreSQL HA solution. It manages automatic failover: if the primary goes down, Patroni promotes a standby to primary within seconds. etcd stores cluster state and is used for distributed leader election.</p>
 <pre><code class="language-yaml"># ~/patroni/compose.yaml
 services:
@@ -711,7 +713,7 @@ volumes:
   etcd_data:
   patroni1_data:
   patroni2_data:</code></pre>
-<h4><code>haproxy.cfg</code> — routes to Patroni REST API for health checks</h4>
+<h4 id="haproxycfg-routes-to-patroni-rest-api-for-health-checks"><code>haproxy.cfg</code> — routes to Patroni REST API for health checks</h4>
 <pre><code>global
     maxconn 100
 
@@ -755,8 +757,8 @@ curl -X POST http://localhost:8008/failover -d '{&quot;leader&quot;: &quot;patro
 
 # Connect to the current primary (always via HAProxy port 5000)
 psql -h localhost -p 5000 -U postgres</code></pre>
-<p>---</p>
-<h2>Redis Sentinel (3-Node HA)</h2>
+<hr>
+<h2 id="redis-sentinel-3-node-ha">Redis Sentinel (3-Node HA)</h2>
 <p><strong>Purpose:</strong> Redis Sentinel provides automatic failover for a Redis primary + replicas. Sentinel processes monitor the primary, agree via quorum when it has failed, and promote a replica to primary — all without manual intervention.</p>
 <pre><code class="language-yaml"># ~/redis-sentinel/compose.yaml
 services:
@@ -833,7 +835,7 @@ volumes:
   redis_primary_data:
   redis_replica1_data:
   redis_replica2_data:</code></pre>
-<h4><code>sentinel.conf</code></h4>
+<h4 id="sentinelconf"><code>sentinel.conf</code></h4>
 <pre><code class="language-conf">port 26379
 sentinel monitor mymaster redis-primary 6379 2
 sentinel auth-pass mymaster changeme
@@ -851,9 +853,9 @@ podman exec redis-sentinel-sentinel1-1 redis-cli -p 26379 \
 
 # Check replication state on primary
 podman exec redis-sentinel-redis-primary-1 redis-cli -a changeme info replication</code></pre>
-<blockquote><p>Connect your app to the <strong>Sentinel ports</strong> (26379–26381), not the Redis ports directly. The Sentinel-aware client library (redis-py, ioredis, Jedis) queries Sentinel for the current primary address and reconnects automatically after failover.</p></blockquote>
-<p>---</p>
-<h2>Valkey Cluster (6-Node, Native Redis Cluster Protocol)</h2>
+<blockquote>Connect your app to the <strong>Sentinel ports</strong> (26379–26381), not the Redis ports directly. The Sentinel-aware client library (redis-py, ioredis, Jedis) queries Sentinel for the current primary address and reconnects automatically after failover.</blockquote>
+<hr>
+<h2 id="valkey-cluster-6-node-native-redis-cluster-protocol">Valkey Cluster (6-Node, Native Redis Cluster Protocol)</h2>
 <p><strong>Purpose:</strong> Native Redis Cluster (hash-slot sharding) using Valkey — the Linux Foundation's open-source Redis fork. Data is automatically sharded across 3 primary nodes with 1 replica each. Survives loss of up to 3 nodes (1 per shard). Unlike Sentinel, Redis Cluster is also horizontally scalable.</p>
 <pre><code class="language-yaml"># ~/valkey-cluster/compose.yaml
 services:
@@ -965,11 +967,11 @@ podman exec valkey-cluster-valkey1-1 valkey-cli --cluster create \
 # Verify cluster state
 podman exec valkey-cluster-valkey1-1 valkey-cli cluster info
 podman exec valkey-cluster-valkey1-1 valkey-cli cluster nodes</code></pre>
-<blockquote><p>The cluster bus port is always <code>Redis port + 10000</code> — that's why port <code>17001</code> (=7001+10000) is exposed alongside <code>7001</code>. Your application connects to any node using a cluster-aware client; the client handles slot routing automatically.</p></blockquote>
-<p>---</p>
-<h2>Cassandra / ScyllaDB Cluster (3-Node)</h2>
+<blockquote>The cluster bus port is always <code>Redis port + 10000</code> — that's why port <code>17001</code> (=7001+10000) is exposed alongside <code>7001</code>. Your application connects to any node using a cluster-aware client; the client handles slot routing automatically.</blockquote>
+<hr>
+<h2 id="cassandra-scylladb-cluster-3-node">Cassandra / ScyllaDB Cluster (3-Node)</h2>
 <p><strong>Purpose:</strong> Multi-node wide-column cluster for IoT telemetry and event logs at scale. The seed node bootstraps the ring; additional nodes discover and join through gossip. No single point of failure — survives loss of 1 node with <code>replication_factor=3</code>.</p>
-<h3>Cassandra</h3>
+<h3 id="cassandra">Cassandra</h3>
 <pre><code class="language-yaml"># ~/cassandra-cluster/compose.yaml
 services:
   cassandra1:
@@ -1030,7 +1032,7 @@ podman exec -it cassandra-cluster-cassandra1-1 cqlsh -e &quot;
 CREATE KEYSPACE iot WITH replication = {
   'class': 'NetworkTopologyStrategy', 'dc1': 3
 };&quot;</code></pre>
-<h3>ScyllaDB (recommended for new deployments)</h3>
+<h3 id="scylladb-recommended-for-new-deployments">ScyllaDB (recommended for new deployments)</h3>
 <pre><code class="language-yaml"># ~/scylladb-cluster/compose.yaml
 services:
   scylla1:
@@ -1070,9 +1072,9 @@ podman exec scylladb-cluster-scylla1-1 nodetool status
 
 # Repair after adding a node
 podman exec scylladb-cluster-scylla1-1 nodetool repair</code></pre>
-<blockquote><p>Remove <code>--developer-mode 0</code> to enable developer mode (skips disk/CPU checks, suitable for testing). Always use <code>developer-mode 0</code> (off) in production — with it on ScyllaDB skips performance optimisations.</p></blockquote>
-<p>---</p>
-<h2>MongoDB Replica Set (3-Node)</h2>
+<blockquote>Remove <code>--developer-mode 0</code> to enable developer mode (skips disk/CPU checks, suitable for testing). Always use <code>developer-mode 0</code> (off) in production — with it on ScyllaDB skips performance optimisations.</blockquote>
+<hr>
+<h2 id="mongodb-replica-set-3-node">MongoDB Replica Set (3-Node)</h2>
 <p><strong>Purpose:</strong> MongoDB replica set with 1 primary and 2 secondaries. Provides automatic failover and read scaling. All writes go to the primary; reads can be distributed across secondaries with <code>readPreference=secondary</code>.</p>
 <pre><code class="language-yaml"># ~/mongodb-rs/compose.yaml
 services:
@@ -1137,8 +1139,8 @@ podman exec mongodb-rs-mongo1-1 mongosh \
 
 # Connect with replica set URI (use host.containers.internal for host-side access)
 # mongodb://admin:strongpassword@localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0&amp;authSource=admin</code></pre>
-<p>---</p>
-<h2>RabbitMQ Cluster (3-Node)</h2>
+<hr>
+<h2 id="rabbitmq-cluster-3-node">RabbitMQ Cluster (3-Node)</h2>
 <p><strong>Purpose:</strong> RabbitMQ cluster for high-availability task queues. All nodes share queue metadata; with quorum queues enabled, message data is also replicated across nodes. Survives loss of 1 node.</p>
 <pre><code class="language-yaml"># ~/rabbitmq-cluster/compose.yaml
 services:
@@ -1210,9 +1212,9 @@ podman exec rabbitmq-cluster-rabbitmq1-1 rabbitmqctl cluster_status
 podman exec rabbitmq-cluster-rabbitmq1-1 rabbitmqadmin \
   -u admin -p changeme declare queue name=my-queue \
   durable=true arguments='{&quot;x-queue-type&quot;:&quot;quorum&quot;}'</code></pre>
-<blockquote><p>The <code>RABBITMQ_ERLANG_COOKIE</code> must be <strong>identical</strong> on all nodes — this is how RabbitMQ authenticates cluster members. Change the value to something secret before deploying.</p></blockquote>
-<p>---</p>
-<h2>VictoriaMetrics Cluster</h2>
+<blockquote>The <code>RABBITMQ_ERLANG_COOKIE</code> must be <strong>identical</strong> on all nodes — this is how RabbitMQ authenticates cluster members. Change the value to something secret before deploying.</blockquote>
+<hr>
+<h2 id="victoriametrics-cluster">VictoriaMetrics Cluster</h2>
 <p><strong>Purpose:</strong> Horizontally scalable VictoriaMetrics deployment. Separates storage, ingestion, and query into dedicated components — vminsert handles writes, vmselect handles reads, vmstorage holds the data. Each component scales independently.</p>
 <pre><code class="language-yaml"># ~/victoriametrics-cluster/compose.yaml
 services:
@@ -1291,12 +1293,12 @@ volumes:
 # Check storage health
 curl http://localhost:8482/health
 curl http://localhost:8483/health</code></pre>
-<h4>Reconfigure Grafana to use the cluster</h4>
+<h4 id="reconfigure-grafana-to-use-the-cluster">Reconfigure Grafana to use the cluster</h4>
 <ul>
 <li>Data Sources → Prometheus → URL: <code>http://host.containers.internal:8481/select/0/prometheus</code></li>
 </ul>
-<p>---</p>
-<h2>Etcd Cluster (3-Node)</h2>
+<hr>
+<h2 id="etcd-cluster-3-node">Etcd Cluster (3-Node)</h2>
 <p><strong>Purpose:</strong> Distributed key-value store used for distributed coordination, service discovery, and leader election. Powers Patroni (PostgreSQL HA), Kubernetes, CoreDNS, and many other systems. A 3-node cluster tolerates loss of 1 node.</p>
 <pre><code class="language-yaml"># ~/etcd-cluster/compose.yaml
 services:
@@ -1378,12 +1380,18 @@ podman exec etcd-cluster-etcd1-1 etcdctl \
   --endpoints=http://etcd1:2379 put /mykey &quot;hello&quot;
 podman exec etcd-cluster-etcd1-1 etcdctl \
   --endpoints=http://etcd1:2379 get /mykey</code></pre>
-<p>---</p>
-<h2>Choosing the Right HA Strategy</h2>
-<p>| Service | Strategy | Compose File | Tolerates Node Loss | |---------|----------|-------------|---------------------| | PostgreSQL | Patroni + etcd + HAProxy | <code>~/patroni/</code> | 1 of 2 | | Redis / Valkey | Sentinel (3 sentinels + replicas) | <code>~/redis-sentinel/</code> | 1 of 3 | | Redis / Valkey | Native Cluster (6 nodes, 3+3) | <code>~/valkey-cluster/</code> | 1 per shard | | MongoDB | Replica Set (3 nodes) | <code>~/mongodb-rs/</code> | 1 of 3 | | Kafka | KRaft (3 nodes) | <code>~/kafka-cluster/</code> | 1 of 3 | | Cassandra | Ring (3 nodes, RF=3) | <code>~/cassandra-cluster/</code> | 1 of 3 | | ScyllaDB | Ring (3 nodes, RF=3) | <code>~/scylladb-cluster/</code> | 1 of 3 | | RabbitMQ | Cluster + Quorum Queues | <code>~/rabbitmq-cluster/</code> | 1 of 3 | | Elasticsearch | 3-node master/data | <code>~/elk-cluster/</code> | 1 of 3 | | OpenSearch | 3-node cluster manager | <code>~/opensearch-cluster/</code> | 1 of 3 | | VictoriaMetrics | vminsert/vmselect/vmstorage | <code>~/victoriametrics-cluster/</code> | 1 of 2 storage | | etcd | 3-node Raft | <code>~/etcd-cluster/</code> | 1 of 3 |</p>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | Elasticsearch / OpenSearch <code>vm.max_map_count too low</code> | Run <code>sudo sysctl -w vm.max_map_count=262144</code> on the host and persist in <code>/etc/sysctl.d/99-elasticsearch.conf</code> — required on all nodes | | Elasticsearch cluster status RED | Check unassigned shards: <code>curl localhost:9200/_cat/shards?v \| grep UNASSIGNED</code>; caused by a data node being down or replicas exceeding available nodes | | Elasticsearch <code>master not discovered</code> on start | <code>cluster.initial_master_nodes</code> must list all master-eligible node names exactly; remove this setting after first cluster formation | | Elasticsearch split-brain | Use exactly 3 or 5 master-eligible nodes; verify all nodes can reach each other on port <code>9300</code>; confirm <code>cluster.name</code> is identical across nodes | | OpenSearch <code>cluster_manager not discovered</code> | OpenSearch renamed <code>master</code> → <code>cluster_manager</code>; set <code>cluster.initial_cluster_manager_nodes</code> (not <code>initial_master_nodes</code>) | | OpenSearch UNASSIGNED shards | For single-node test clusters set <code>number_of_replicas: 0</code>; a single node cannot host its own replicas | | Kafka brokers not forming cluster | Confirm all nodes share the same <code>CLUSTER_ID</code>; generate once with <code>kafka-storage random-uuid</code>; verify <code>KAFKA_CONTROLLER_QUORUM_VOTERS</code> lists all node IDs and hostnames correctly | | Kafka consumer lag growing | Increase partition count or add consumer instances; verify no consumer is crashing on startup with <code>podman logs</code> | | Patroni <code>no leader</code> after start | etcd must be fully healthy before Patroni starts; check <code>curl http://etcd:2379/health</code>; verify all Patroni nodes can reach etcd | | Patroni failover not triggering | Check <code>podman logs</code> on all Patroni nodes; verify <code>PATRONI_ETCD3_HOSTS</code> is reachable; confirm <code>down-after-milliseconds</code> hasn't been set too high | | Redis Sentinel not promoting | Quorum requires at least 2 of 3 sentinels to agree the primary is down; ensure all 3 sentinel containers are running; check <code>sentinel masters</code> for the current primary state | | Valkey Cluster <code>MOVED</code> errors | Your client is not cluster-aware; use a Redis Cluster client (redis-py with <code>RedisCluster</code>, ioredis in cluster mode) — plain clients don't follow slot redirects | | Valkey Cluster <code>CLUSTERDOWN</code> | At least one shard has no available primary; check <code>cluster nodes</code> for failed nodes; recover or remove the failed node with <code>cluster forget</code> | | MongoDB replica set not electing primary | Needs 3 nodes for majority quorum (2 of 3); verify all 3 mongod processes are running and can reach each other on port <code>27017</code> | | MongoDB <code>rs.initiate()</code> fails | Run only from mongo1 once all 3 containers are fully started (check <code>podman logs</code>); the hostnames in <code>members[].host</code> must resolve inside the compose network | | RabbitMQ nodes not joining cluster | <code>RABBITMQ_ERLANG_COOKIE</code> must be byte-for-byte identical on all nodes; verify with <code>podman exec rabbitmq1 cat /var/lib/rabbitmq/.erlang.cookie</code> | | RabbitMQ <code>mnesia</code> partition after restart | Run <code>rabbitmqctl cluster_status</code> on all nodes; resolve with <code>rabbitmqctl forget_cluster_node &lt;node&gt;</code> and re-join the stale node | | Cassandra / ScyllaDB node not joining | Cassandra takes 30–60 s to fully start; bring up the seed node first and wait before starting additional nodes; check <code>nodetool status</code> for the token ring | | etcd cluster not reaching quorum | All 3 members must be able to reach each other on peer port <code>2380</code>; verify <code>ETCD_INITIAL_CLUSTER</code> lists the same URLs on all nodes | | VictoriaMetrics vminsert rejected writes | Verify <code>--storageNode</code> addresses resolve from the vminsert container; check <code>podman logs vminsert</code> for connectivity errors to vmstorage nodes |</p></div>
+<hr>
+<h2 id="choosing-the-right-ha-strategy">Choosing the Right HA Strategy</h2>
+<table><thead><tr><th>Service</th><th>Strategy</th><th>Compose File</th><th>Tolerates Node Loss</th></tr></thead><tbody><tr><td>PostgreSQL</td><td>Patroni + etcd + HAProxy</td><td><code>~/patroni/</code></td><td>1 of 2</td></tr><tr><td>Redis / Valkey</td><td>Sentinel (3 sentinels + replicas)</td><td><code>~/redis-sentinel/</code></td><td>1 of 3</td></tr><tr><td>Redis / Valkey</td><td>Native Cluster (6 nodes, 3+3)</td><td><code>~/valkey-cluster/</code></td><td>1 per shard</td></tr><tr><td>MongoDB</td><td>Replica Set (3 nodes)</td><td><code>~/mongodb-rs/</code></td><td>1 of 3</td></tr><tr><td>Kafka</td><td>KRaft (3 nodes)</td><td><code>~/kafka-cluster/</code></td><td>1 of 3</td></tr><tr><td>Cassandra</td><td>Ring (3 nodes, RF=3)</td><td><code>~/cassandra-cluster/</code></td><td>1 of 3</td></tr><tr><td>ScyllaDB</td><td>Ring (3 nodes, RF=3)</td><td><code>~/scylladb-cluster/</code></td><td>1 of 3</td></tr><tr><td>RabbitMQ</td><td>Cluster + Quorum Queues</td><td><code>~/rabbitmq-cluster/</code></td><td>1 of 3</td></tr><tr><td>Elasticsearch</td><td>3-node master/data</td><td><code>~/elk-cluster/</code></td><td>1 of 3</td></tr><tr><td>OpenSearch</td><td>3-node cluster manager</td><td><code>~/opensearch-cluster/</code></td><td>1 of 3</td></tr><tr><td>VictoriaMetrics</td><td>vminsert/vmselect/vmstorage</td><td><code>~/victoriametrics-cluster/</code></td><td>1 of 2 storage</td></tr><tr><td>etcd</td><td>3-node Raft</td><td><code>~/etcd-cluster/</code></td><td>1 of 3</td></tr></tbody></table>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Elasticsearch / OpenSearch <code>vm.max_map_count too low</code></td><td>Run <code>sudo sysctl -w vm.max_map_count=262144</code> on the host and persist in <code>/etc/sysctl.d/99-elasticsearch.conf</code> — required on all nodes</td></tr><tr><td>Elasticsearch cluster status RED</td><td>Check unassigned shards: `curl localhost:9200/_cat/shards?v \</td><td>grep UNASSIGNED`; caused by a data node being down or replicas exceeding available nodes</td></tr><tr><td>Elasticsearch <code>master not discovered</code> on start</td><td><code>cluster.initial_master_nodes</code> must list all master-eligible node names exactly; remove this setting after first cluster formation</td></tr><tr><td>Elasticsearch split-brain</td><td>Use exactly 3 or 5 master-eligible nodes; verify all nodes can reach each other on port <code>9300</code>; confirm <code>cluster.name</code> is identical across nodes</td></tr><tr><td>OpenSearch <code>cluster_manager not discovered</code></td><td>OpenSearch renamed <code>master</code> → <code>cluster_manager</code>; set <code>cluster.initial_cluster_manager_nodes</code> (not <code>initial_master_nodes</code>)</td></tr><tr><td>OpenSearch UNASSIGNED shards</td><td>For single-node test clusters set <code>number_of_replicas: 0</code>; a single node cannot host its own replicas</td></tr><tr><td>Kafka brokers not forming cluster</td><td>Confirm all nodes share the same <code>CLUSTER_ID</code>; generate once with <code>kafka-storage random-uuid</code>; verify <code>KAFKA_CONTROLLER_QUORUM_VOTERS</code> lists all node IDs and hostnames correctly</td></tr><tr><td>Kafka consumer lag growing</td><td>Increase partition count or add consumer instances; verify no consumer is crashing on startup with <code>podman logs</code></td></tr><tr><td>Patroni <code>no leader</code> after start</td><td>etcd must be fully healthy before Patroni starts; check <code>curl http://etcd:2379/health</code>; verify all Patroni nodes can reach etcd</td></tr><tr><td>Patroni failover not triggering</td><td>Check <code>podman logs</code> on all Patroni nodes; verify <code>PATRONI_ETCD3_HOSTS</code> is reachable; confirm <code>down-after-milliseconds</code> hasn't been set too high</td></tr><tr><td>Redis Sentinel not promoting</td><td>Quorum requires at least 2 of 3 sentinels to agree the primary is down; ensure all 3 sentinel containers are running; check <code>sentinel masters</code> for the current primary state</td></tr><tr><td>Valkey Cluster <code>MOVED</code> errors</td><td>Your client is not cluster-aware; use a Redis Cluster client (redis-py with <code>RedisCluster</code>, ioredis in cluster mode) — plain clients don't follow slot redirects</td></tr><tr><td>Valkey Cluster <code>CLUSTERDOWN</code></td><td>At least one shard has no available primary; check <code>cluster nodes</code> for failed nodes; recover or remove the failed node with <code>cluster forget</code></td></tr><tr><td>MongoDB replica set not electing primary</td><td>Needs 3 nodes for majority quorum (2 of 3); verify all 3 mongod processes are running and can reach each other on port <code>27017</code></td></tr><tr><td>MongoDB <code>rs.initiate()</code> fails</td><td>Run only from mongo1 once all 3 containers are fully started (check <code>podman logs</code>); the hostnames in <code>members[].host</code> must resolve inside the compose network</td></tr><tr><td>RabbitMQ nodes not joining cluster</td><td><code>RABBITMQ_ERLANG_COOKIE</code> must be byte-for-byte identical on all nodes; verify with <code>podman exec rabbitmq1 cat /var/lib/rabbitmq/.erlang.cookie</code></td></tr><tr><td>RabbitMQ <code>mnesia</code> partition after restart</td><td>Run <code>rabbitmqctl cluster_status</code> on all nodes; resolve with <code>rabbitmqctl forget_cluster_node &lt;node&gt;</code> and re-join the stale node</td></tr><tr><td>Cassandra / ScyllaDB node not joining</td><td>Cassandra takes 30–60 s to fully start; bring up the seed node first and wait before starting additional nodes; check <code>nodetool status</code> for the token ring</td></tr><tr><td>etcd cluster not reaching quorum</td><td>All 3 members must be able to reach each other on peer port <code>2380</code>; verify <code>ETCD_INITIAL_CLUSTER</code> lists the same URLs on all nodes</td></tr><tr><td>VictoriaMetrics vminsert rejected writes</td><td>Verify <code>--storageNode</code> addresses resolve from the vminsert container; check <code>podman logs vminsert</code> for connectivity errors to vmstorage nodes</td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="databases">Databases</a></li>
+<li><a href="monitoring">Monitoring</a></li>
+<li><a href="kubernetes">Kubernetes</a></li>
+</ul></div>
     </div>
 
   </main>

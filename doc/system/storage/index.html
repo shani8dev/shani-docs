@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Storage — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Storage  This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring…">
+  <meta name="description" id="meta-desc"     content="This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring, and the…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Storage">
-  <meta property="og:description" id="og-desc"    content="Storage  This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring…">
+  <meta property="og:description" id="og-desc"    content="This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring, and the…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/system/storage/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Storage">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Storage">
-  <meta name="twitter:description" id="tw-desc"  content="Storage  This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring, and the…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Storage","description":"Storage  This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring…","url":"https://docs.shani.dev/doc/system/storage/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Storage","description":"This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring, and the…","url":"https://docs.shani.dev/doc/system/storage/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Storage","item":"https://docs.shani.dev/doc/system/storage/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,13 +215,13 @@
         <h1 class="doc-title">Storage</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">System</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring, and the udisks2 layer used by desktop tools.</p>
-<p>For encrypted volumes see <a href="../security/luks">LUKS Management</a>. For Btrfs-specific operations (snapshots, subvolumes, scrub) see <a href="../arch/btrfs">Btrfs Deep Dive</a>. For backup strategy see <a href="backup">Backup & Recovery</a>.</p>
-<p>---</p>
-<h2>Inspecting Block Devices</h2>
+<p>For encrypted volumes see <a href="../security/luks.md">LUKS Management</a>. For Btrfs-specific operations (snapshots, subvolumes, scrub) see <a href="../arch/btrfs.md">Btrfs Deep Dive</a>. For backup strategy see <a href="backup">Backup & Recovery</a>.</p>
+<hr>
+<h2 id="inspecting-block-devices">Inspecting Block Devices</h2>
 <pre><code class="language-bash"># List all block devices with sizes and mount points
 lsblk
 
@@ -243,15 +245,15 @@ sudo nvme id-ctrl /dev/nvme0     # NVMe drives
 
 # Show disk serial, firmware, and transport
 sudo smartctl -i /dev/sda</code></pre>
-<p>---</p>
-<h2>Partitioning</h2>
-<h3>fdisk — Interactive Partitioner (MBR & GPT)</h3>
+<hr>
+<h2 id="partitioning">Partitioning</h2>
+<h3 id="fdisk-interactive-partitioner-mbr-gpt">fdisk — Interactive Partitioner (MBR & GPT)</h3>
 <pre><code class="language-bash">sudo fdisk /dev/sda</code></pre>
 <p>Common fdisk commands inside the prompt:</p>
-<p>| Key | Action | |-----|--------| | <code>p</code> | Print current partition table | | <code>n</code> | New partition | | <code>d</code> | Delete partition | | <code>t</code> | Change partition type | | <code>g</code> | Create new GPT table | | <code>o</code> | Create new MBR table | | <code>w</code> | Write and exit | | <code>q</code> | Quit without saving |</p>
-<h3>gdisk — GPT-only Partitioner</h3>
+<table><thead><tr><th>Key</th><th>Action</th></tr></thead><tbody><tr><td><code>p</code></td><td>Print current partition table</td></tr><tr><td><code>n</code></td><td>New partition</td></tr><tr><td><code>d</code></td><td>Delete partition</td></tr><tr><td><code>t</code></td><td>Change partition type</td></tr><tr><td><code>g</code></td><td>Create new GPT table</td></tr><tr><td><code>o</code></td><td>Create new MBR table</td></tr><tr><td><code>w</code></td><td>Write and exit</td></tr><tr><td><code>q</code></td><td>Quit without saving</td></tr></tbody></table>
+<h3 id="gdisk-gpt-only-partitioner">gdisk — GPT-only Partitioner</h3>
 <pre><code class="language-bash">sudo gdisk /dev/sda</code></pre>
-<h3>parted — Scriptable Partitioner</h3>
+<h3 id="parted-scriptable-partitioner">parted — Scriptable Partitioner</h3>
 <pre><code class="language-bash"># Print partition table
 sudo parted /dev/sda print
 
@@ -267,9 +269,9 @@ sudo parted /dev/sda resizepart 1 200GiB
 # Non-interactive (scripted)
 sudo parted -s /dev/sdb mklabel gpt mkpart primary 1MiB 100%</code></pre>
 <p><strong>GUI:</strong> <code>partitionmanager</code> (pre-installed on KDE Plasma) wraps the same partitioning operations above in a graphical interface, including resizing filesystems in place.</p>
-<p>---</p>
-<h2>Filesystems</h2>
-<h3>Creating Filesystems</h3>
+<hr>
+<h2 id="filesystems">Filesystems</h2>
+<h3 id="creating-filesystems">Creating Filesystems</h3>
 <pre><code class="language-bash"># ext4
 sudo mkfs.ext4 /dev/sda1
 sudo mkfs.ext4 -L &quot;mydata&quot; /dev/sda1    # with label
@@ -294,7 +296,7 @@ sudo mkfs.f2fs /dev/sdb1
 sudo mkfs.ntfs -f /dev/sdb1</code></pre>
 <p>Resizing a FAT partition specifically (rather than the generic <code>parted</code>/<code>gdisk</code> steps above) can be done with <code>fatresize</code>:</p>
 <pre><code class="language-bash">sudo fatresize -s 8G /dev/sdb1</code></pre>
-<h3>Mounting</h3>
+<h3 id="mounting">Mounting</h3>
 <pre><code class="language-bash"># Mount a filesystem
 sudo mount /dev/sda1 /mnt
 
@@ -318,7 +320,7 @@ sudo umount -l /mnt
 mount | column -t
 findmnt
 findmnt --real    # physical mounts only</code></pre>
-<h3>Checking and Repairing</h3>
+<h3 id="checking-and-repairing">Checking and Repairing</h3>
 <pre><code class="language-bash"># ext4 — must be unmounted first
 sudo e2fsck -f /dev/sda1
 
@@ -332,7 +334,7 @@ sudo xfs_repair /dev/sda1
 
 # FAT/exFAT
 sudo fsck.vfat /dev/sdb1</code></pre>
-<h3>Resizing</h3>
+<h3 id="resizing">Resizing</h3>
 <pre><code class="language-bash"># ext4 — grow (filesystem must be mounted or unmounted)
 sudo resize2fs /dev/sda1           # fill the partition
 sudo resize2fs /dev/sda1 50G       # specific size
@@ -343,8 +345,8 @@ sudo btrfs filesystem resize max /mountpoint   # fill partition
 
 # XFS — grow only, must be mounted
 sudo xfs_growfs /mountpoint</code></pre>
-<p>---</p>
-<h2>LVM — Logical Volume Management</h2>
+<hr>
+<h2 id="lvm-logical-volume-management">LVM — Logical Volume Management</h2>
 <p><code>lvm2</code> is pre-installed, giving you a resizable-volume layer beneath any non-Btrfs filesystem (the Shanios OS itself uses Btrfs subvolumes instead of LVM — this is for additional drives or manual partitioning where you want LVM's flexibility).</p>
 <pre><code class="language-bash"># Create a physical volume on a partition
 sudo pvcreate /dev/sdb1
@@ -371,8 +373,8 @@ sudo resize2fs /dev/data-vg/data-lv   # ext4; use xfs_growfs for XFS
 # LVM snapshots (point-in-time copy-on-write)
 sudo lvcreate -L 2G -s -n data-lv-snap /dev/data-vg/data-lv</code></pre>
 <p><code>udisks2-lvm2</code> (also pre-installed) exposes basic LVM management through the desktop's disk utility GUI (GNOME Disks, KDE Partition Manager) for simple cases.</p>
-<p>---</p>
-<h2>mdadm — Software RAID</h2>
+<hr>
+<h2 id="mdadm-software-raid">mdadm — Software RAID</h2>
 <p><code>mdadm</code> is pre-installed for Linux software RAID (<code>md</code> devices) — an alternative to LVM or hardware RAID for combining multiple drives.</p>
 <pre><code class="language-bash"># Create a RAID 1 (mirror) array from two drives
 sudo mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/sdb1 /dev/sdc1
@@ -393,18 +395,18 @@ sudo mdadm /dev/md0 --add /dev/sdd1
 
 # Stop an array
 sudo mdadm --stop /dev/md0</code></pre>
-<blockquote><p>As with LVM, this is for additional drives you manage yourself — Shanios's own OS storage uses Btrfs subvolumes, not <code>md</code> RAID.</p></blockquote>
-<p>---</p>
-<h2>Automatic Btrfs Maintenance (Shani OS Defaults)</h2>
-<p>Shani OS's root and data volumes are Btrfs, laid out as <code>@blue</code>/<code>@green</code> root subvolumes for atomic updates (see <a href="../arch/btrfs">Btrfs Deep Dive</a>). Routine maintenance already runs on its own — you rarely need to invoke <code>btrfs scrub</code>, <code>btrfs balance</code>, or <code>fstrim</code> manually:</p>
+<blockquote>As with LVM, this is for additional drives you manage yourself — Shanios's own OS storage uses Btrfs subvolumes, not <code>md</code> RAID.</blockquote>
+<hr>
+<h2 id="automatic-btrfs-maintenance-shani-os-defaults">Automatic Btrfs Maintenance (Shani OS Defaults)</h2>
+<p>Shani OS's root and data volumes are Btrfs, laid out as <code>@blue</code>/<code>@green</code> root subvolumes for atomic updates (see <a href="../arch/btrfs.md">Btrfs Deep Dive</a>). Routine maintenance already runs on its own — you rarely need to invoke <code>btrfs scrub</code>, <code>btrfs balance</code>, or <code>fstrim</code> manually:</p>
 <ul>
 <li><strong>Balance, defrag, scrub, and trim</strong> run via <code>btrfs-balance.timer</code>, <code>btrfs-defrag.timer</code>, <code>btrfs-scrub.timer</code>, and <code>btrfs-trim.timer</code> (from <code>btrfsmaintenance</code>), enabled by default and scheduled weekly at idle I/O priority. Check them with <code>systemctl list-timers 'btrfs-*'</code>.</li>
 <li><strong>bees</strong> runs continuously in the background (<code>beesd@&lt;uuid&gt;.service</code>), deduplicating extents across the <code>@blue</code>/<code>@green</code> root subvolumes and their backup snapshots as they diverge — this is what keeps two nearly-identical OS slots from doubling disk usage.</li>
 <li><strong><code>sudo shani-deploy --optimize</code></strong> runs a deeper, one-shot <code>duperemove</code> pass across <code>@blue</code>, <code>@green</code>, and any <code><em>_backup_</em></code> subvolumes. Use it to reclaim space beyond what continuous bees dedup catches; it's skipped automatically if a deployment is pending.</li>
 </ul>
 <p>Running <code>btrfs scrub start /</code> or <code>btrfs balance start /</code> manually (as shown below) is still useful for an on-demand check, but is not required for routine upkeep.</p>
-<p>---</p>
-<h2>/etc/fstab — Persistent Mounts</h2>
+<hr>
+<h2 id="etcfstab-persistent-mounts">/etc/fstab — Persistent Mounts</h2>
 <p>Entries in <code>/etc/fstab</code> are captured by the <code>/etc</code> overlay and persist across OS updates.</p>
 <pre><code># &lt;device&gt;                                &lt;mountpoint&gt;  &lt;type&gt;   &lt;options&gt;                    &lt;dump&gt; &lt;pass&gt;
 UUID=aaaa-bbbb-cccc                       /data         btrfs    defaults,noatime,compress=zstd  0      0
@@ -415,10 +417,10 @@ sudo mount -a
 
 # Verify a specific entry
 sudo mount /mnt/backup</code></pre>
-<blockquote><p>💡 Always use UUID (<code>blkid</code>) rather than device names like <code>/dev/sda1</code> — device names shift when you add or remove drives.</p></blockquote>
+<blockquote>💡 Always use UUID (<code>blkid</code>) rather than device names like <code>/dev/sda1</code> — device names shift when you add or remove drives.</blockquote>
 <p>Some Shani OS paths are made persistent via bind mounts instead of fstab entries — e.g. <code>/var/lib/samba/usershare</code> is bind-mounted from <code>/data/varlib/samba</code> (on the <code>@data</code> subvolume), so Samba usershare state survives blue/green slot switches without a manual fstab line.</p>
-<p>---</p>
-<h2>Disk Usage</h2>
+<hr>
+<h2 id="disk-usage">Disk Usage</h2>
 <pre><code class="language-bash"># Free space on all mounted filesystems
 df -h
 
@@ -434,8 +436,8 @@ ncdu /</code></pre>
 <pre><code class="language-bash"># Btrfs-specific: actual space used after compression and deduplication
 compsize /home
 sudo btrfs filesystem usage /</code></pre>
-<p>---</p>
-<h2>Finding Files — plocate</h2>
+<hr>
+<h2 id="finding-files-plocate">Finding Files — plocate</h2>
 <p><code>plocate</code> (pre-installed) indexes the filesystem for near-instant filename search — much faster than <code>find</code> for a full-system search, at the cost of only being as current as the last index update.</p>
 <pre><code class="language-bash"># Search for files by name (case-sensitive substring match)
 plocate myfile.txt
@@ -446,8 +448,8 @@ plocate -i myfile.txt
 # Manually refresh the index (updates automatically via a daily systemd timer)
 sudo updatedb</code></pre>
 <p><code>locate</code> is a symlink to <code>plocate</code> — either command works the same way.</p>
-<p>---</p>
-<h2>SMART — Disk Health Monitoring</h2>
+<hr>
+<h2 id="smart-disk-health-monitoring">SMART — Disk Health Monitoring</h2>
 <p>SMART (Self-Monitoring, Analysis and Reporting Technology) provides drive health data. <code>smartmontools</code> is pre-installed.</p>
 <pre><code class="language-bash"># Quick health summary
 sudo smartctl -H /dev/sda
@@ -469,7 +471,7 @@ sudo smartctl -l selftest /dev/sda
 
 # Enable SMART if disabled
 sudo smartctl -s on /dev/sda</code></pre>
-<h3>Automated SMART Monitoring (smartd)</h3>
+<h3 id="automated-smart-monitoring-smartd">Automated SMART Monitoring (smartd)</h3>
 <pre><code class="language-bash"># Enable the smartd daemon to monitor all drives and alert on errors
 sudo systemctl enable --now smartd
 
@@ -480,8 +482,8 @@ systemctl status smartd
 journalctl -u smartd -n 50</code></pre>
 <p>The default <code>/etc/smartd.conf</code> monitors all drives and writes to the journal. For email alerts, add <code>-m your@email.com</code> to the <code>DEVICESCAN</code> line.</p>
 <p><strong>GUI:</strong> <code>gsmartcontrol</code> (pre-installed on GNOME) provides a graphical front-end to the same SMART data and self-tests above, if you'd rather not use the terminal.</p>
-<p>---</p>
-<h2>NVMe Tools</h2>
+<hr>
+<h2 id="nvme-tools">NVMe Tools</h2>
 <pre><code class="language-bash"># List NVMe drives
 sudo nvme list
 
@@ -496,8 +498,8 @@ sudo nvme format /dev/nvme0 --ses=1
 
 # NVMe error log
 sudo nvme error-log /dev/nvme0</code></pre>
-<p>---</p>
-<h2>udisks2 — Desktop Storage Layer</h2>
+<hr>
+<h2 id="udisks2-desktop-storage-layer">udisks2 — Desktop Storage Layer</h2>
 <p>udisks2 is the D-Bus service that GNOME Disks, KDE's Removable Media, and file managers use to mount/unmount drives without root.</p>
 <pre><code class="language-bash"># List all drives and block devices
 udisksctl status
@@ -516,8 +518,8 @@ udisksctl unlock -b /dev/sdb1
 
 # Show detailed info for a device
 udisksctl info -b /dev/sda</code></pre>
-<p>---</p>
-<h2>Loop Devices</h2>
+<hr>
+<h2 id="loop-devices">Loop Devices</h2>
 <p>Loop devices let you mount image files as block devices.</p>
 <pre><code class="language-bash"># Attach an image to a loop device
 sudo losetup -fP disk.img        # -f = find free, -P = scan partitions
@@ -535,37 +537,44 @@ sudo losetup -d /dev/loop0
 dd if=/dev/zero of=disk.img bs=1M count=2048
 # or (sparse, instant):
 truncate -s 2G disk.img</code></pre>
-<p>---</p>
-<h2>Swap</h2>
+<hr>
+<h2 id="swap">Swap</h2>
 <pre><code class="language-bash"># Show current swap usage
 swapon --show
 free -h
 
-# Add a swap file
-sudo fallocate -l 4G /swapfile
-sudo chmod 600 /swapfile
-sudo mkswap /swapfile
-sudo swapon /swapfile
-
-# Make permanent (add to /etc/fstab)
-echo '/swapfile none swap defaults 0 0' | sudo tee -a /etc/fstab
-
-# Disable a swap file
-sudo swapoff /swapfile
-
 # ZRAM swap (Shani OS default)
 zramctl                          # show ZRAM devices and compression ratio
 cat /proc/swaps                  # all active swap sources</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | <code>umount: target is busy</code> | Find what's using it: <code>lsof +D /mountpoint</code> or <code>fuser -mv /mountpoint</code>; then kill or <code>umount -l</code> | | Drive not appearing in <code>lsblk</code> | Check <code>dmesg | tail -30</code> for kernel errors; try a different port or cable | | SMART not available | Some USB enclosures block SMART passthrough; try <code>smartctl -d sat /dev/sdb</code> | | <code>e2fsck</code> finds errors but drive is mounted | Boot from the other slot and run <code>e2fsck</code> unmounted | | Btrfs reports errors after scrub | Check <code>dmesg | grep btrfs</code>; if uncorrectable, restore from backup — the drive may be failing | | <code>No space left</code> but <code>df</code> shows free space | Inode exhaustion: <code>df -i</code>; or Btrfs metadata full: <code>sudo btrfs balance start -m /</code> (balance also runs automatically via <code>btrfs-balance.timer</code>, weekly) | | UUID changed after mkfs | Update <code>/etc/fstab</code> with <code>blkid</code>; regenerate initramfs with <code>sudo dracut --force</code> |</p>
-<p>---</p>
-<h2>See Also</h2>
+<p>Shanios sets up swap at install time: ZRAM plus a swapfile created in the dedicated <code>@swap</code> Btrfs subvolume, sized to RAM (skipped automatically if disk space is tight — the system then falls back to zram alone). The root filesystem is read-only, so a <code>/swapfile</code> on <code>/</code> via <code>fallocate</code> is not possible — any extra swapfile must live under <code>/swap</code>, which is mounted from <code>@swap</code> with <code>nodatacow</code> (NOCOW semantics are required for swapfiles on Btrfs).</p>
+<p>To add another swapfile under <code>/swap</code>:</p>
+<pre><code class="language-bash"># Create an 8 GiB swapfile in the @swap subvolume (handles NOCOW for you)
+sudo btrfs filesystem mkswapfile --size 8g /swap/swapfile
+
+# If your btrfs-progs lacks mkswapfile, fall back to dd + chattr +C under /swap:
+sudo dd if=/dev/zero of=/swap/swapfile bs=1M count=8192 status=progress
+sudo chmod 600 /swap/swapfile
+sudo chattr +C /swap/swapfile    # disable CoW (must be set before data is written)
+
+sudo mkswap /swap/swapfile
+sudo swapon /swap/swapfile
+
+# Make permanent
+echo '/swap/swapfile none swap defaults 0 0' | sudo tee -a /etc/fstab
+
+# Disable a swap file
+sudo swapoff /swap/swapfile</code></pre>
+<blockquote>Hibernation (<code>resume=</code>) setup is baked into the image's UKI kernel command line at build/deploy time — there is no manual dracut/resume configuration to apply.</blockquote>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>umount: target is busy</code></td><td>Find what's using it: <code>lsof +D /mountpoint</code> or <code>fuser -mv /mountpoint</code>; then kill or <code>umount -l</code></td></tr><tr><td>Drive not appearing in <code>lsblk</code></td><td>Check `dmesg</td><td>tail -30` for kernel errors; try a different port or cable</td></tr><tr><td>SMART not available</td><td>Some USB enclosures block SMART passthrough; try <code>smartctl -d sat /dev/sdb</code></td></tr><tr><td><code>e2fsck</code> finds errors but drive is mounted</td><td>Boot from the other slot and run <code>e2fsck</code> unmounted</td></tr><tr><td>Btrfs reports errors after scrub</td><td>Check `dmesg</td><td>grep btrfs`; if uncorrectable, restore from backup — the drive may be failing</td></tr><tr><td><code>No space left</code> but <code>df</code> shows free space</td><td>Inode exhaustion: <code>df -i</code>; or Btrfs metadata full: <code>sudo btrfs balance start -m /</code> (balance also runs automatically via <code>btrfs-balance.timer</code>, weekly)</td></tr><tr><td>UUID changed after mkfs</td><td>Update <code>/etc/fstab</code> with <code>blkid</code>; UKIs are rebuilt and re-signed by <code>gen-efi</code> on the next <code>sudo shani-deploy</code> (or run <code>sudo gen-efi configure &lt;slot&gt;</code>)</td></tr></tbody></table>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../arch/btrfs">Btrfs Deep Dive</a> — subvolumes, snapshots, send/receive, balance</li>
-<li><a href="../security/luks">LUKS Management</a> — encrypted volumes</li>
+<li><a href="../arch/btrfs.md">Btrfs Deep Dive</a> — subvolumes, snapshots, send/receive, balance</li>
+<li><a href="../security/luks.md">LUKS Management</a> — encrypted volumes</li>
 <li><a href="backup">Backup & Recovery</a> — restic, rclone, snapshot strategy</li>
-<li><a href="../arch/filesystem">Filesystem Structure</a> — Shani OS subvolume layout</li>
+<li><a href="../arch/filesystem.md">Filesystem Structure</a> — Shani OS subvolume layout</li>
 </ul></div>
     </div>
 

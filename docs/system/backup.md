@@ -1,7 +1,7 @@
 ---
 title: Backup & Recovery
 section: System
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Backup & Recovery
@@ -322,7 +322,7 @@ journalctl --user -u backup.service -f
 
 A backup that runs silently and fails is worse than no backup at all. Wire your timer to a dead man's switch: a monitoring service that alerts you when the expected ping does not arrive on schedule.
 
-The self-hosted option is **Healthchecks** — see the [Monitoring wiki](https://docs.shani.dev/doc/servers/monitoring). For a no-setup option, [healthchecks.io](https://healthchecks.io) offers a free tier. The `trap ... ERR` and final `curl` lines in the backup script above handle both failure and success pings automatically.
+The self-hosted option is **Healthchecks** — see the [Monitoring wiki](https://docs.shani.dev/doc/servers/monitoring/uptime). For a no-setup option, [healthchecks.io](https://healthchecks.io) offers a free tier. The `trap ... ERR` and final `curl` lines in the backup script above handle both failure and success pings automatically.
 
 ---
 
@@ -350,6 +350,7 @@ The self-hosted option is **Healthchecks** — see the [Monitoring wiki](https:/
 
 ## See Also
 
-- [Btrfs Deep Dive](../arch/btrfs) — snapshots, send/receive, maintenance
-- [Filesystem Structure](../arch/filesystem) — subvolume layout
-- [Atomic Updates](../concepts/atomic-updates) — OS update and rollback
+- [Backups & Sync](../servers/backups-sync.md) — self-hosted backup servers (Restic, Borgmatic, Duplicati)
+- [Btrfs Deep Dive](../arch/btrfs.md) — snapshots, send/receive, maintenance
+- [Filesystem Structure](../arch/filesystem.md) — subvolume layout
+- [Atomic Updates](../concepts/atomic-updates.md) — OS update and rollback

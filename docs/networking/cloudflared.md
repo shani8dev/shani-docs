@@ -1,7 +1,7 @@
 ---
 title: Cloudflared Tunnels
 section: Networking
-updated: 2026-04-22
+updated: 2026-08-28
 ---
 
 # Cloudflared — Zero-Trust Tunnels
@@ -237,3 +237,8 @@ sudo systemctl reload cloudflared
 | High latency to the tunnel | Cloudflare connects to the nearest edge PoP — check `cloudflared tunnel connections` to see which regions are being used; opening UDP 7844 enables QUIC (faster than HTTP/2) |
 | Access policy not triggering | Ensure the Cloudflare Access application is configured for the exact hostname (no wildcards unless explicitly set); check that the application type is "Self-hosted" |
 | `credentials file not found` error | The JSON credentials file path in config.yml must be absolute and match the actual file location; run `cloudflared tunnel list` to confirm the UUID |
+
+## See Also
+
+- [Caddy reverse proxy](caddy)
+- [Tailscale mesh VPN](tailscale)

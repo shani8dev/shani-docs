@@ -1,7 +1,7 @@
 ---
 title: nbd-server (Network Block Device)
 section: Networking
-updated: 2026-04-18
+updated: 2026-08-28
 ---
 
 # Network Block Device (NBD)
@@ -76,6 +76,34 @@ sudo nbd-client -d /dev/nbd0
 
 ---
 
+## Persistent Client Connections
+
+Create a oneshot service that connects the NBD device at boot, ordered after the network is online:
+
+```ini
+# /etc/systemd/system/nbd-connect.service
+[Unit]
+Description=NBD client connection
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/nbd-client 192.168.1.100 10809 /dev/nbd0
+ExecStop=/usr/bin/nbd-client -d /dev/nbd0
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now nbd-connect
+```
+
+---
+
 ## Troubleshooting
 
 | Issue | Solution |
@@ -84,3 +112,9 @@ sudo nbd-client -d /dev/nbd0
 | `Connection refused` on the client | Check `systemctl status nbd-server` on the server; verify the port and firewall with `sudo firewall-cmd --list-all` |
 | Filesystem errors after disconnect | Always unmount before disconnecting — `umount` first, then `nbd-client -d` |
 | Server crashes on large writes | Add `flush = true` and `sync = true` to the export section in the config |
+
+## See Also
+
+- [SSH Server](openssh) — remote access
+- [WireGuard](wireguard) — VPN tunnel for secure NBD access
+- [Backup & Restore](../system/backup.md) — offsite backup strategies

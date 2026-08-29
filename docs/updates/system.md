@@ -1,7 +1,7 @@
 ---
 title: System Updates
 section: Updates & Config
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # System Updates
@@ -170,6 +170,27 @@ sudo shani-deploy --set-channel latest   # more frequent, pre-QA releases
 sudo shani-deploy -t latest
 ```
 
+### Channel Mechanics
+
+The two channels differ in how builds reach them, not in what they contain:
+
+- **`latest`** receives every build that passes automated checks, continuously — as soon as a build is published, it's available on this channel.
+- **`stable`** is promoted from `latest`, never built separately. A build only reaches `stable` after soaking there through a QA window and passing validation.
+
+Promotion is done via `build.sh promote-stable` upstream. Because the QA soak is qualitative rather than time-boxed, there's no fixed lag between `latest` and `stable` — expect days, not hours, but don't treat any specific number as an SLA.
+
+Switching channels persists to `/etc/shani-channel` and applies to all future runs:
+
+```bash
+sudo shani-deploy --set-channel latest
+
+# Check what each remote currently offers before switching
+sudo shani-deploy --channel-status stable
+sudo shani-deploy --channel-status latest
+```
+
+Recommendation: for personal machines, `latest` is fine — rollback exists either way. For fleets or mission-critical systems, stay on `stable` and stagger deployments across machines so one bad build can't hit everything at once.
+
 ## Boot Counting and Automatic Fallback
 
 After an update, the new slot is registered in systemd-boot with `+3-0` boot count tries. If the new slot fails to boot three times, systemd-boot automatically falls back to the previous slot — no user action required.
@@ -232,4 +253,14 @@ sudo fwupdmgr update
 > sudo gen-efi cleanup-tpm2
 > sudo gen-efi enroll-tpm2
 > ```
-> See [TPM2 Enrollment](../security/tpm2).
+> See [TPM2 Enrollment](../security/tpm2.md).
+
+## See Also
+
+- [System Health Checks](shani-health) — automated monitoring and diagnostics
+- [System Config](config) — /etc overlay, locale, hostname, services
+- [Shell & Environment](shell) — Zsh, Starship, Nix, CLI tools
+- [User Provisioning](user-setup) — automatic group and shell setup
+- [Shani Reset](shani-reset) — factory reset of persistent state
+- [Blue-Green Deployment](../concepts/blue-green.md) — the two-slot architecture
+- [Troubleshooting](../troubleshooting.md) — diagnosing update and boot issues

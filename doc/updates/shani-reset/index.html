@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Factory Reset (shani-reset) — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Factory Reset   wipes all persistent system state stored in  and reboots the machine. On the next boot,  recreates the  structure, the  overlay starts fres…">
+  <meta name="description" id="meta-desc"     content="shani-reset wipes all persistent system state stored in /data and reboots the machine. On the next boot, systemd-tmpfiles recreates the /data structure, th…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Factory Reset (shani-reset)">
-  <meta property="og:description" id="og-desc"    content="Factory Reset   wipes all persistent system state stored in  and reboots the machine. On the next boot,  recreates the  structure, the  overlay starts fres…">
+  <meta property="og:description" id="og-desc"    content="shani-reset wipes all persistent system state stored in /data and reboots the machine. On the next boot, systemd-tmpfiles recreates the /data structure, th…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/updates/shani-reset/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Factory Reset (shani-reset)">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Factory Reset (shani-reset)">
-  <meta name="twitter:description" id="tw-desc"  content="Factory Reset   wipes all persistent system state stored in  and reboots the machine. On the next boot,  recreates the  structure, the  overlay starts fres…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="shani-reset wipes all persistent system state stored in /data and reboots the machine. On the next boot, systemd-tmpfiles recreates the /data structure, th…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Factory Reset (shani-reset)","description":"Factory Reset   wipes all persistent system state stored in  and reboots the machine. On the next boot,  recreates the  structure, the  overlay starts fres…","url":"https://docs.shani.dev/doc/updates/shani-reset/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Factory Reset (shani-reset)","description":"shani-reset wipes all persistent system state stored in /data and reboots the machine. On the next boot, systemd-tmpfiles recreates the /data structure, th…","url":"https://docs.shani.dev/doc/updates/shani-reset/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Factory Reset (shani-reset)","item":"https://docs.shani.dev/doc/updates/shani-reset/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,18 +215,17 @@
         <h1 class="doc-title">Factory Reset (shani-reset)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Updates &amp; Config</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><h1>Factory Reset</h1>
-<p><code>shani-reset</code> wipes all persistent system state stored in <code>/data</code> and reboots the machine. On the next boot, <code>systemd-tmpfiles</code> recreates the <code>/data</code> structure, the <code>/etc</code> overlay starts fresh from the read-only root, and all services start as if this were a first-run.</p>
-<p>---</p>
-<h2>What Gets Wiped</h2>
-<p>| What | Location | Notes | |------|----------|-------| | All <code>/etc</code> modifications | <code>/data/overlay/etc/upper/</code> | <strong>Includes user accounts</strong> (<code>/etc/passwd</code>, <code>/etc/shadow</code>, <code>/etc/group</code>), hostname, locale, sshd config, enabled units, <code>subuid</code>/<code>subgid</code> | | All <code>/var</code> overlay changes | <code>/data/overlay/var/upper/</code> | Only if <code>/var</code> overlay is in use | | All persistent service state | <code>/data/varlib/<em>/</code> | Wi-Fi passwords, Bluetooth pairings, Tailscale key, TPM2 state, printer configs, etc. | | Job scheduler spools | <code>/data/varspool/</em>/</code> | Cron jobs, at jobs, mail queue | | Cached OS downloads | <code>/data/downloads/</code> | Skipped with <code>--keep-downloads</code> | | Boot state markers | <code>/data/boot_*</code> | All failure and success markers | | Deployment flag | <code>/data/deployment_pending</code> | Any in-flight deployment |</p>
-<h2>What Is NOT Wiped</h2>
-<p>| What | Notes | |------|-------| | <code>/home</code> | User files in the <code>@home</code> subvolume — separate from <code>/data</code> | | <code>/root</code> | Root home in the <code>@root</code> subvolume | | <code>@blue</code> / <code>@green</code> | OS root subvolumes — system still boots the same slot | | ESP / UKI boot images | System still boots correctly after reset | | <code>/data/current-slot</code> | Preserved so the system boots into the correct slot |</p>
-<p>---</p>
-<h2>Usage</h2>
+      <div class="prose"><p><code>shani-reset</code> wipes all persistent system state stored in <code>/data</code> and reboots the machine. On the next boot, <code>systemd-tmpfiles</code> recreates the <code>/data</code> structure, the <code>/etc</code> overlay starts fresh from the read-only root, and all services start as if this were a first-run.</p>
+<hr>
+<h2 id="what-gets-wiped">What Gets Wiped</h2>
+<table><thead><tr><th>What</th><th>Location</th><th>Notes</th></tr></thead><tbody><tr><td>All <code>/etc</code> modifications</td><td><code>/data/overlay/etc/upper/</code></td><td><strong>Includes user accounts</strong> (<code>/etc/passwd</code>, <code>/etc/shadow</code>, <code>/etc/group</code>), hostname, locale, sshd config, enabled units, <code>subuid</code>/<code>subgid</code></td></tr><tr><td>All <code>/var</code> overlay changes</td><td><code>/data/overlay/var/upper/</code></td><td>Only if <code>/var</code> overlay is in use</td></tr><tr><td>All persistent service state</td><td><code>/data/varlib/*/</code></td><td>Wi-Fi passwords, Bluetooth pairings, Tailscale key, TPM2 state, printer configs, etc.</td></tr><tr><td>Job scheduler spools</td><td><code>/data/varspool/*/</code></td><td>Cron jobs, at jobs, mail queue</td></tr><tr><td>Cached OS downloads</td><td><code>/data/downloads/</code></td><td>Skipped with <code>--keep-downloads</code></td></tr><tr><td>Boot state markers</td><td><code>/data/boot_*</code></td><td>All failure and success markers</td></tr><tr><td>Deployment flag</td><td><code>/data/deployment_pending</code></td><td>Any in-flight deployment</td></tr></tbody></table>
+<h2 id="what-is-not-wiped">What Is NOT Wiped</h2>
+<table><thead><tr><th>What</th><th>Notes</th></tr></thead><tbody><tr><td><code>/home</code></td><td>User files in the <code>@home</code> subvolume — separate from <code>/data</code></td></tr><tr><td><code>/root</code></td><td>Root home in the <code>@root</code> subvolume</td></tr><tr><td><code>@blue</code> / <code>@green</code></td><td>OS root subvolumes — system still boots the same slot</td></tr><tr><td>ESP / UKI boot images</td><td>System still boots correctly after reset</td></tr><tr><td><code>/data/current-slot</code></td><td>Preserved so the system boots into the correct slot</td></tr></tbody></table>
+<hr>
+<h2 id="usage">Usage</h2>
 <pre><code class="language-bash"># Default: selective wipe of /data state directories, then reboot
 sudo shani-reset
 
@@ -244,14 +245,14 @@ sudo shani-reset --home
 sudo shani-reset --yes</code></pre>
 <p><code>shani-reset</code> refuses to run while a <code>shani-deploy</code> is mid-flight (<code>/data/deployment_pending</code> exists) — complete or roll back the deployment first (<code>sudo shani-deploy --rollback</code>) before resetting.</p>
 <p>Without <code>--yes</code>, confirmation requires typing the exact word, not just <code>y</code>: type <code>reset</code> to proceed, and — if <code>--home</code> is also given — a second prompt requires typing <code>wipe home</code> to actually wipe user files (declining just continues the reset without touching <code>/home</code>). After the reset completes, <code>shani-reset</code> reboots automatically after a 3-second countdown (Ctrl-C aborts the reboot, but the state has already been wiped by that point).</p>
-<p>---</p>
-<h2>Soft Wipe vs Hard Wipe</h2>
+<hr>
+<h2 id="soft-wipe-vs-hard-wipe">Soft Wipe vs Hard Wipe</h2>
 <p>Both modes produce the same end state after reboot. Choose based on your situation:</p>
 <p><strong>Soft wipe (default):</strong> Selectively clears the state directories. The bind-mount targets (e.g. <code>/data/varlib/NetworkManager</code>) are preserved as empty directories, which is required for the bind mounts to work immediately after reboot without a <code>systemd-tmpfiles</code> run.</p>
 <p><strong>Hard wipe (<code>--hard</code>):</strong> Removes everything under <code>/data</code> in one pass, including any files that accumulated outside the expected structure. <code>systemd-tmpfiles</code> recreates the full directory tree on the next boot. This is cleaner but requires tmpfiles to run before services can bind-mount their state.</p>
-<p>---</p>
-<h2>User Accounts After Reset</h2>
-<blockquote><p><strong>Important:</strong> User accounts are stored in <code>/etc/passwd</code>, <code>/etc/shadow</code>, and <code>/etc/group</code> — which live in the <code>/etc</code> overlay (<code>/data/overlay/etc/upper/</code>). Resetting the overlay wipes all user accounts created after installation.</p></blockquote>
+<hr>
+<h2 id="user-accounts-after-reset">User Accounts After Reset</h2>
+<blockquote><strong>Important:</strong> User accounts are stored in <code>/etc/passwd</code>, <code>/etc/shadow</code>, and <code>/etc/group</code> — which live in the <code>/etc</code> overlay (<code>/data/overlay/etc/upper/</code>). Resetting the overlay wipes all user accounts created after installation.</blockquote>
 <p><strong>What happens after reboot:</strong></p>
 <ol>
 <li>The system boots into the reset state with only the default accounts from the read-only root</li>
@@ -267,8 +268,8 @@ sudo adduser myuser
 sudo useradd -m myuser
 sudo usermod -aG wheel,video,input,audio myuser
 sudo passwd myuser</code></pre>
-<p>---</p>
-<h2>What Happens After Reboot</h2>
+<hr>
+<h2 id="what-happens-after-reboot">What Happens After Reboot</h2>
 <ol>
 <li><code>systemd-tmpfiles</code> recreates <code>/data</code> structure from <code>shanios-data-structure.conf</code></li>
 <li><code>/etc</code> overlay starts fresh from the <code>@blue</code> or <code>@green</code> read-only root</li>
@@ -276,26 +277,26 @@ sudo passwd myuser</code></pre>
 <li><code>shani-update</code> runs automatically and offers to update to the latest version</li>
 <li>Desktop first-run wizard guides through locale, timezone, and user account creation</li>
 </ol>
-<p>---</p>
-<h2>Examples</h2>
-<h3>Reset a misconfigured system</h3>
+<hr>
+<h2 id="examples">Examples</h2>
+<h3 id="reset-a-misconfigured-system">Reset a misconfigured system</h3>
 <pre><code class="language-bash"># Preview what would be wiped
 sudo shani-reset --dry-run
 
 # Perform the reset
 sudo shani-reset</code></pre>
-<h3>Reset while preserving large OS downloads</h3>
+<h3 id="reset-while-preserving-large-os-downloads">Reset while preserving large OS downloads</h3>
 <pre><code class="language-bash">sudo shani-reset --keep-downloads</code></pre>
-<h3>Complete factory reset including user files</h3>
+<h3 id="complete-factory-reset-including-user-files">Complete factory reset including user files</h3>
 <pre><code class="language-bash"># This is irreversible — all personal files in /home will be deleted
 sudo shani-reset --home</code></pre>
-<h3>Scripted reset (no prompts)</h3>
+<h3 id="scripted-reset-no-prompts">Scripted reset (no prompts)</h3>
 <pre><code class="language-bash">sudo shani-reset --yes --keep-downloads</code></pre>
-<p>---</p>
-<h2>See Also</h2>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="config">System Config</a> — editing <code>/etc</code> files and managing the overlay</li>
-<li><a href="../arch/overlay">Overlay Filesystem</a> — how the <code>/etc</code> overlay works</li>
+<li><a href="../arch/overlay.md">Overlay Filesystem</a> — how the <code>/etc</code> overlay works</li>
 <li><a href="system">System Updates</a> — rolling back an update without a full reset</li>
 </ul></div>
     </div>

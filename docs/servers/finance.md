@@ -1,7 +1,7 @@
 ---
 title: Finance & Accounting
 section: Self-Hosting & Servers
-updated: 2026-04-22
+updated: 2026-08-28
 ---
 
 # Finance & Accounting
@@ -375,6 +375,16 @@ services:
 cd ~/bitcoin && podman-compose up -d
 ```
 
+##### Verify sync status
+
+```bash
+# Bitcoin — initial sync complete when blocks equals headers
+podman exec bitcoin bitcoin-cli getblockchaininfo
+
+# LND — shows synced_to_chain, node info, and channel state
+podman exec lnd lncli getinfo
+```
+
 > **Storage:** A full Bitcoin node requires ~740 GB of disk space for the full chain (growing ~50–60 GB/year). Use `prune=550` (MB) in bitcoind config for a pruned node that verifies without storing the full history — sufficient for most use cases.
 
 **Firewall:**
@@ -406,6 +416,13 @@ services:
 
 ```bash
 cd ~/monero && podman-compose up -d
+```
+
+##### Verify sync status
+
+```bash
+# Check node height — compare "height" against the current chain tip while syncing
+curl localhost:18081/json_rpc -d '{"jsonrpc":"2.0","id":"0","method":"get_info"}' | python3 -m json.tool
 ```
 
 ---
@@ -570,3 +587,8 @@ kresus.home.local     { tls internal; reverse_proxy localhost:9876 }
 | Kresus transactions not importing | Some bank connectors require 2FA — Kresus will prompt for the code during the first sync; check `podman logs kresus` for authentication errors |
 
 > 💡 **Backup tip:** Financial data deserves extra backup care. Run Restic backups of `/home/user/firefly`, `/home/user/actual`, and `/home/user/ghostfolio` daily to an encrypted offsite destination. A lost transaction history is hard to reconstruct.
+
+## See Also
+
+- [Databases](databases)
+- [Backups](backups-sync)

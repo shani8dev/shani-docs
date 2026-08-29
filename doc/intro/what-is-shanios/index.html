@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>What is Shanios? — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="What is Shanios?  Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs f…">
+  <meta name="description" id="meta-desc"     content="Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs filesystem, it prov…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="What is Shanios?">
-  <meta property="og:description" id="og-desc"    content="What is Shanios?  Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs f…">
+  <meta property="og:description" id="og-desc"    content="Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs filesystem, it prov…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/intro/what-is-shanios/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="What is Shanios?">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="What is Shanios?">
-  <meta name="twitter:description" id="tw-desc"  content="What is Shanios?  Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs f…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs filesystem, it prov…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"What is Shanios?","description":"What is Shanios?  Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs f…","url":"https://docs.shani.dev/doc/intro/what-is-shanios/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"What is Shanios?","description":"Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs filesystem, it prov…","url":"https://docs.shani.dev/doc/intro/what-is-shanios/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"What is Shanios?","item":"https://docs.shani.dev/doc/intro/what-is-shanios/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,11 +215,11 @@
         <h1 class="doc-title">What is Shanios?</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Introduction</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><p>Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs filesystem, it provides atomic updates, instant rollback, and system integrity by design. It ships as two editions — <strong>GNOME</strong> and <strong>KDE Plasma</strong> — and works out of the box with no post-install tweaking required.</p>
-<h2>Core Pillars</h2>
+      <div class="prose"><p>Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs filesystem, it provides atomic updates, instant rollback, and system integrity by design. It ships in two desktop editions today — <strong>GNOME</strong> and <strong>KDE Plasma</strong> — with a third, <strong>COSMIC</strong>, announced and in development, a <strong>Kiosk</strong> profile for single-purpose deployments, plus a headless <strong>Server</strong> profile. It works out of the box with no post-install tweaking required.</p>
+<h2 id="core-pillars">Core Pillars</h2>
 <ul>
 <li><strong>Immutability:</strong> The root filesystem (<code>/</code>) is mounted read-only. System binaries and libraries cannot be changed at runtime — by you, by software, or by malware. The only way to modify the OS is through the controlled <code>shani-deploy</code> update pipeline.</li>
 <li><strong>Blue-Green Deployment:</strong> Two complete system images (<code>@blue</code> and <code>@green</code>) are maintained. While one is active, updates are written to the other. On reboot you switch to the updated image. The previous one is kept as a one-command rollback target.</li>
@@ -226,9 +228,9 @@
 <li><strong>Defence-in-Depth Security:</strong> Six Linux Security Modules run simultaneously (<code>lsm=landlock,lockdown,yama,integrity,apparmor,bpf</code>), LUKS2 argon2id full-disk encryption, TPM2 auto-unlock, Secure Boot with MOK, Intel ME kernel modules (<code>mei</code>, <code>mei_me</code>) blacklisted by default, and every OS image is SHA256+GPG verified before deployment.</li>
 <li><strong>Zero Telemetry:</strong> No usage data, crash reports, analytics, or tracking of any kind — ever. The entire codebase is public on GitHub; every claim is independently verifiable.</li>
 </ul>
-<h2>Traditional vs Immutable OS</h2>
-<p>| Layer | Traditional Linux | Shanios (Immutable) | |-------|------------------|---------------------| | <code>/boot/efi</code> (ESP — FAT32) | ✏️ Writable — accidental overwrites possible | 🔒 Mounted only during updates — UKIs Secure Boot signed per slot | | <code>/usr /bin /lib /sbin</code> | ✏️ Writable — any process can corrupt system binaries | 🔒 Read-only root — kernel-enforced, no writes possible | | <code>/etc /opt</code> | ✏️ Writable — config drift accumulates silently | ⚙️ Writable overlay — changes persist, base untouched | | <code>/var</code> (logs, state, spool) | ✏️ Mixed — grows unbounded, hard to audit | 🔄 Volatile base + selectively persisted service state | | <code>/home</code> (user data) | ✏️ Writable — no snapshot isolation by default | ✅ Persistent — Btrfs snapshots available on demand |</p>
-<h3>Traditional Consequences</h3>
+<h2 id="traditional-vs-immutable-os">Traditional vs Immutable OS</h2>
+<table><thead><tr><th>Layer</th><th>Traditional Linux</th><th>Shanios (Immutable)</th></tr></thead><tbody><tr><td><code>/boot/efi</code> (ESP — FAT32)</td><td>✏️ Writable — accidental overwrites possible</td><td>🔒 Mounted only during updates — UKIs Secure Boot signed per slot</td></tr><tr><td><code>/usr /bin /lib /sbin</code></td><td>✏️ Writable — any process can corrupt system binaries</td><td>🔒 Read-only root — kernel-enforced, no writes possible</td></tr><tr><td><code>/etc /opt</code></td><td>✏️ Writable — config drift accumulates silently</td><td>⚙️ Writable overlay — changes persist, base untouched</td></tr><tr><td><code>/var</code> (logs, state, spool)</td><td>✏️ Mixed — grows unbounded, hard to audit</td><td>🔄 Volatile base + selectively persisted service state</td></tr><tr><td><code>/home</code> (user data)</td><td>✏️ Writable — no snapshot isolation by default</td><td>✅ Persistent — Btrfs snapshots available on demand</td></tr></tbody></table>
+<h3 id="traditional-consequences">Traditional Consequences</h3>
 <ul>
 <li>❌ A bad update can leave the system unbootable</li>
 <li>❌ Dependency conflicts corrupt shared libraries</li>
@@ -237,7 +239,7 @@
 <li>❌ Any exploited process can modify <code>/usr /bin</code></li>
 <li>❌ No cryptographic verification of the boot chain</li>
 </ul>
-<h3>Shanios Guarantees</h3>
+<h3 id="shanios-guarantees">Shanios Guarantees</h3>
 <ul>
 <li>✅ Atomic updates — all or nothing, never half-applied</li>
 <li>✅ Instant rollback — previous slot always on disk</li>
@@ -246,12 +248,32 @@
 <li>✅ IMA/EVM runtime integrity measurement active</li>
 <li>✅ Six LSMs active simultaneously (AppArmor, Landlock…)</li>
 </ul>
-<h2>How This Feels in Practice</h2>
+<h2 id="project-structure">Project Structure</h2>
+<p>Shanios is built across 15 repositories, each with a specific responsibility:</p>
+<ul>
+<li><strong>OS Build:</strong> <code>shani-install-media</code> (images/ISOs), <code>shani-builder</code> (build env), <code>shani-pkgbuilds</code> (packages)</li>
+<li><strong>Deployment:</strong> <code>shani-deploy</code> (transactional updates), <code>shani-settings</code> (filesystem overlay), <code>shani-keyring</code> (trust root)</li>
+<li><strong>Management:</strong> <code>shani-platform</code> (server), <code>shani-fleet</code> (agent), <code>shani-insights</code> (analytics)</li>
+<li><strong>Distribution:</strong> <code>shani-repo</code> (package repository), <code>os-installer-config</code> (installer)</li>
+<li><strong>Web:</strong> <code>shani-website</code> (marketing), <code>shani-docs</code> (documentation), <code>shani-wiki</code> (wiki), <code>shani-blog</code> (blog)</li>
+</ul>
+<h2 id="license">License</h2>
+<p>The Shanios OS and all build/tooling repos are GPL v3. Server products (<code>shani-platform</code>, <code>shani-insights</code>) have their own licensing.</p>
+<h2 id="how-this-feels-in-practice">How This Feels in Practice</h2>
 <p>The immutable root is transparent in daily use. You edit <code>/etc</code> files normally, install Flatpaks and Nix packages freely, run containers, and manage VMs — all exactly as you would on any Linux system. The difference is that updates never break a running system, rollback is always available, and an attacker who gains root access during a session cannot plant a persistent backdoor into system paths.</p>
 <p>The OS that passed build-time verification is the OS that runs, byte for byte, until the next deliberate <code>shani-deploy</code> update.</p>
-<h2>Built in India</h2>
+<h2 id="built-in-india">Built in India</h2>
 <p>Shanios is built in India 🇮🇳 by <a href="https://github.com/Shrinivasvkumbhar">Shrinivas Vishnu Kumbhar</a>. Indian-language support — Devanagari, Bengali, Gujarati, Gurmukhi (Punjabi), Kannada, Malayalam, Oriya, Tamil, and Telugu scripts — is a first-class feature, pre-configured from first boot with IBus multi-language input.</p>
-<p>The entire codebase is public at <a href="https://github.com/shani8dev">github.com/shani8dev</a>. Every claim in this documentation is independently verifiable.</p></div>
+<p>The entire codebase is public at <a href="https://github.com/shani8dev">github.com/shani8dev</a>. Every claim in this documentation is independently verifiable.</p>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="whats-included">What's Included</a> — the full software stack</li>
+<li><a href="optimizations">System Optimizations</a> — performance tuning that ships enabled</li>
+<li><a href="../concepts/immutability.md">Immutability</a> — how the read-only root works</li>
+<li><a href="../concepts/blue-green.md">Blue-Green Deployment</a> — the two-slot update model</li>
+<li><a href="../concepts/atomic-updates.md">Atomic Updates</a> — the all-or-nothing guarantee</li>
+<li><a href="getting-started">Getting Started</a> — first steps after install</li>
+</ul></div>
     </div>
 
   </main>

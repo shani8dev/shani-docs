@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Logging — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Logging  Shani OS uses systemd-journald as its primary logging system. All kernel messages, service output, and system events flow into a single structured…">
+  <meta name="description" id="meta-desc"     content="Shani OS uses systemd-journald as its primary logging system. All kernel messages, service output, and system events flow into a single structured binary j…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Logging">
-  <meta property="og:description" id="og-desc"    content="Logging  Shani OS uses systemd-journald as its primary logging system. All kernel messages, service output, and system events flow into a single structured…">
+  <meta property="og:description" id="og-desc"    content="Shani OS uses systemd-journald as its primary logging system. All kernel messages, service output, and system events flow into a single structured binary j…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/system/logging/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Logging">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Logging">
-  <meta name="twitter:description" id="tw-desc"  content="Logging  Shani OS uses systemd-journald as its primary logging system. All kernel messages, service output, and system events flow into a single structured…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shani OS uses systemd-journald as its primary logging system. All kernel messages, service output, and system events flow into a single structured binary j…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Logging","description":"Logging  Shani OS uses systemd-journald as its primary logging system. All kernel messages, service output, and system events flow into a single structured…","url":"https://docs.shani.dev/doc/system/logging/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Logging","description":"Shani OS uses systemd-journald as its primary logging system. All kernel messages, service output, and system events flow into a single structured binary j…","url":"https://docs.shani.dev/doc/system/logging/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Logging","item":"https://docs.shani.dev/doc/system/logging/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,14 +215,14 @@
         <h1 class="doc-title">Logging</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">System</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Shani OS uses <strong>systemd-journald</strong> as its primary logging system. All kernel messages, service output, and system events flow into a single structured binary journal. There are no scattered <code>/var/log/*.log</code> text files to hunt through — <code>journalctl</code> is the single interface for everything.</p>
 <p>This page covers journald configuration, log retention, forwarding to syslog, and persistent log storage across reboots.</p>
 <p>For <code>journalctl</code> usage within service debugging, see <a href="systemd">Systemd</a>.</p>
-<p>---</p>
-<h2>How Journald Works</h2>
+<hr>
+<h2 id="how-journald-works">How Journald Works</h2>
 <p>journald collects log entries from:</p>
 <ul>
 <li><strong>Kernel</strong> — dmesg / kernel ring buffer</li>
@@ -231,8 +233,8 @@
 <li><strong>Native journald API</strong> — <code>sd_journal_send()</code>, <code>systemd-cat</code></li>
 </ul>
 <p>By default on Shani OS, logs are stored in <code>/run/log/journal/</code> (volatile, in RAM) and are lost on reboot. Persistent storage can be enabled — see below.</p>
-<p>---</p>
-<h2>Enabling Persistent Logs</h2>
+<hr>
+<h2 id="enabling-persistent-logs">Enabling Persistent Logs</h2>
 <pre><code class="language-bash"># Create the persistent journal directory
 sudo mkdir -p /var/log/journal
 sudo systemd-tmpfiles --create --prefix /var/log/journal
@@ -244,9 +246,9 @@ sudo systemctl restart systemd-journald
 journalctl --disk-usage
 ls /var/log/journal/</code></pre>
 <p>Once <code>/var/log/journal/</code> exists, journald automatically writes there instead of <code>/run/log/journal/</code>. Logs survive reboots and you can query previous boots with <code>journalctl -b -1</code>, <code>-b -2</code>, etc.</p>
-<blockquote><p>💡 On Shani OS, <code>/var/log/journal/</code> persists across OS updates because <code>/var</code> is a separate data partition. You do not need to re-enable persistent logging after an update.</p></blockquote>
-<p>---</p>
-<h2>journald Configuration</h2>
+<blockquote>💡 On Shani OS, <code>/var/log/journal/</code> persists across OS updates because <code>/var</code> is a separate data partition. You do not need to re-enable persistent logging after an update.</blockquote>
+<hr>
+<h2 id="journald-configuration">journald Configuration</h2>
 <p>The main config file is <code>/etc/systemd/journald.conf</code>. Changes here are captured by the <code>/etc</code> overlay.</p>
 <pre><code class="language-bash">sudo nano /etc/systemd/journald.conf</code></pre>
 <p>Key settings:</p>
@@ -290,9 +292,9 @@ MaxLevelConsole=emerg
 MaxLevelWall=emerg</code></pre>
 <pre><code class="language-bash"># Apply config changes
 sudo systemctl restart systemd-journald</code></pre>
-<blockquote><p>💡 Shani OS ships a stricter default than the example above, via a drop-in at <code>/usr/lib/systemd/journald.conf.d/00-journal-size.conf</code>: <code>SystemMaxUse=128M</code> with <code>SystemMaxFiles=2</code>, chosen to keep the journal from eating into a small root image. <code>/etc/systemd/journald.conf</code> itself is unmodified out of the box — edit it, or add your own drop-in under <code>/etc/systemd/journald.conf.d/</code> (captured by the overlay), to raise the limit.</p></blockquote>
-<p>---</p>
-<h2>Retention and Vacuuming</h2>
+<blockquote>💡 Shani OS ships a stricter default than the example above, via a drop-in at <code>/usr/lib/systemd/journald.conf.d/00-journal-size.conf</code>: <code>SystemMaxUse=128M</code> with <code>SystemMaxFiles=2</code>, chosen to keep the journal from eating into a small root image. <code>/etc/systemd/journald.conf</code> itself is unmodified out of the box — edit it, or add your own drop-in under <code>/etc/systemd/journald.conf.d/</code> (captured by the overlay), to raise the limit.</blockquote>
+<hr>
+<h2 id="retention-and-vacuuming">Retention and Vacuuming</h2>
 <pre><code class="language-bash"># Show how much disk space the journal is using
 journalctl --disk-usage
 
@@ -311,9 +313,9 @@ sudo journalctl --rotate
 
 # Verify journal file integrity
 sudo journalctl --verify</code></pre>
-<blockquote><p>💡 Combine <code>--rotate</code> and <code>--vacuum-*</code> to immediately free space: rotate first (seals the active file), then vacuum the sealed files.</p></blockquote>
-<p>---</p>
-<h2>Querying Logs</h2>
+<blockquote>💡 Combine <code>--rotate</code> and <code>--vacuum-*</code> to immediately free space: rotate first (seals the active file), then vacuum the sealed files.</blockquote>
+<hr>
+<h2 id="querying-logs">Querying Logs</h2>
 <pre><code class="language-bash"># All logs from current boot
 journalctl -b
 
@@ -365,8 +367,8 @@ journalctl -u caddy -n 50 -o json-pretty
 
 # Export for archiving or transfer
 journalctl -b -o export &gt; /tmp/boot-logs.export</code></pre>
-<p>---</p>
-<h2>Writing to the Journal</h2>
+<hr>
+<h2 id="writing-to-the-journal">Writing to the Journal</h2>
 <pre><code class="language-bash"># Write a message directly to the journal from a script
 systemd-cat echo &quot;Backup completed successfully&quot;
 
@@ -377,21 +379,22 @@ echo &quot;deploy failed&quot;   | systemd-cat -t myapp -p err
 # Pipe a command's output to the journal
 my-script.sh 2&gt;&amp;1 | systemd-cat -t my-script -p info</code></pre>
 <p>In systemd service units, <code>StandardOutput=journal</code> and <code>StandardError=journal</code> (the default) automatically route all stdout/stderr to the journal with the unit name as the identifier.</p>
-<p>---</p>
-<h2>Forwarding to a Syslog Daemon</h2>
+<hr>
+<h2 id="forwarding-to-a-syslog-daemon">Forwarding to a Syslog Daemon</h2>
 <p>If you need traditional text-file logging (e.g. for log shippers like Filebeat, or for compatibility with tools that parse <code>/var/log/</code>), you can forward from journald to a syslog daemon.</p>
-<h3>rsyslog</h3>
-<pre><code class="language-bash"># Install rsyslog (not pre-installed)
-# It is available but not part of the default image — install via the system overlay
-sudo pacman -S rsyslog
-
-sudo systemctl enable --now rsyslog</code></pre>
-<p>Enable forwarding in journald:</p>
+<h3 id="rsyslog">rsyslog</h3>
+<p>rsyslog is <strong>not pre-installed and cannot be installed on the immutable host</strong> — the read-only root does not accept <code>pacman</code> installs. Your options:</p>
+<ol>
+<li><strong>Stick with journald</strong> — persistent journald logs (shown above) cover most text-file needs; <code>journalctl -o short</code> exports plain text on demand.</li>
+<li><strong>Run rsyslog centrally</strong> — point Shanios at a rsyslog server elsewhere on your network that receives remote syslog.</li>
+<li><strong>Run rsyslog in a container</strong> — e.g. inside a Distrobox container, receiving forwarded syslog from the host.</li>
+</ol>
+<p>For option 3, enable forwarding from journald to the syslog socket first:</p>
 <pre><code class="language-ini"># /etc/systemd/journald.conf
 [Journal]
 ForwardToSyslog=yes</code></pre>
-<p>Then configure rsyslog normally in <code>/etc/rsyslog.conf</code>.</p>
-<h3>Remote log forwarding (journald native)</h3>
+<p>Then configure rsyslog normally in <code>/etc/rsyslog.conf</code> inside the container.</p>
+<h3 id="remote-log-forwarding-journald-native">Remote log forwarding (journald native)</h3>
 <p>journald can forward to a remote journal instance over a secure TLS connection using <code>systemd-journal-remote</code> and <code>systemd-journal-upload</code> — useful for centralising logs from multiple Shani OS machines.</p>
 <pre><code class="language-bash"># On the log server
 sudo systemctl enable --now systemd-journal-remote.socket
@@ -403,8 +406,8 @@ sudo systemctl enable --now systemd-journal-upload
 # /etc/systemd/journal-upload.conf
 [Upload]
 URL=https://log-server:19532</code></pre>
-<p>---</p>
-<h2>Per-Service Log Limits</h2>
+<hr>
+<h2 id="per-service-log-limits">Per-Service Log Limits</h2>
 <p>You can cap how fast or how much a specific service can log by adding a drop-in:</p>
 <pre><code class="language-ini"># /etc/systemd/system/myapp.service.d/logging.conf
 [Service]
@@ -414,8 +417,8 @@ LogRateLimitBurst=500</code></pre>
 <pre><code class="language-ini">[Service]
 StandardOutput=append:/var/log/myapp/output.log
 StandardError=append:/var/log/myapp/error.log</code></pre>
-<p>---</p>
-<h2>Boot and Early Boot Logs</h2>
+<hr>
+<h2 id="boot-and-early-boot-logs">Boot and Early Boot Logs</h2>
 <pre><code class="language-bash"># Show the kernel ring buffer (dmesg equivalent)
 journalctl -k
 
@@ -427,23 +430,23 @@ systemd-analyze blame
 
 # Critical chain — what determined total boot time
 systemd-analyze critical-chain</code></pre>
-<p>---</p>
-<h2>Log Levels Reference</h2>
-<p>| Priority | Value | Meaning | |----------|-------|---------| | <code>emerg</code> | 0 | System is unusable | | <code>alert</code> | 1 | Immediate action required | | <code>crit</code> | 2 | Critical condition | | <code>err</code> | 3 | Error condition | | <code>warning</code> | 4 | Warning condition | | <code>notice</code> | 5 | Normal but significant | | <code>info</code> | 6 | Informational | | <code>debug</code> | 7 | Debug-level messages |</p>
+<hr>
+<h2 id="log-levels-reference">Log Levels Reference</h2>
+<table><thead><tr><th>Priority</th><th>Value</th><th>Meaning</th></tr></thead><tbody><tr><td><code>emerg</code></td><td>0</td><td>System is unusable</td></tr><tr><td><code>alert</code></td><td>1</td><td>Immediate action required</td></tr><tr><td><code>crit</code></td><td>2</td><td>Critical condition</td></tr><tr><td><code>err</code></td><td>3</td><td>Error condition</td></tr><tr><td><code>warning</code></td><td>4</td><td>Warning condition</td></tr><tr><td><code>notice</code></td><td>5</td><td>Normal but significant</td></tr><tr><td><code>info</code></td><td>6</td><td>Informational</td></tr><tr><td><code>debug</code></td><td>7</td><td>Debug-level messages</td></tr></tbody></table>
 <pre><code class="language-bash"># Show only warnings and above
 journalctl -p 4
 
 # Show only errors and above across all boots
 journalctl -p err --no-pager</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | Logs lost after reboot | Enable persistent storage: <code>sudo mkdir -p /var/log/journal &amp;&amp; sudo systemctl restart systemd-journald</code> | | Journal growing too large | Shani OS already caps it at 128M/2 files via a shipped drop-in; if you've raised <code>SystemMaxUse=</code> yourself, lower it in <code>journald.conf</code> and run <code>sudo journalctl --vacuum-size=500M</code> | | <code>journalctl</code> shows nothing for a service | Check <code>systemctl status &lt;service&gt;</code> — if the service never started, there are no logs; verify <code>StandardOutput=journal</code> in the unit | | Log entries missing (rate limited) | Increase <code>RateLimitBurst=</code> in <code>journald.conf</code> for noisy services | | Can't read journal as a regular user | Add user to the <code>systemd-journal</code> group: <code>sudo usermod -aG systemd-journal $USER</code> | | <code>--verify</code> reports errors | Journal file may be corrupt — delete the corrupt file from <code>/var/log/journal/&lt;machine-id&gt;/</code> and restart journald | | Need logs in text format | Use <code>journalctl -o short &gt; /tmp/log.txt</code> or forward to rsyslog with <code>ForwardToSyslog=yes</code> |</p>
-<p>---</p>
-<h2>See Also</h2>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Logs lost after reboot</td><td>Enable persistent storage: <code>sudo mkdir -p /var/log/journal &amp;&amp; sudo systemctl restart systemd-journald</code></td></tr><tr><td>Journal growing too large</td><td>Shani OS already caps it at 128M/2 files via a shipped drop-in; if you've raised <code>SystemMaxUse=</code> yourself, lower it in <code>journald.conf</code> and run <code>sudo journalctl --vacuum-size=500M</code></td></tr><tr><td><code>journalctl</code> shows nothing for a service</td><td>Check <code>systemctl status &lt;service&gt;</code> — if the service never started, there are no logs; verify <code>StandardOutput=journal</code> in the unit</td></tr><tr><td>Log entries missing (rate limited)</td><td>Increase <code>RateLimitBurst=</code> in <code>journald.conf</code> for noisy services</td></tr><tr><td>Can't read journal as a regular user</td><td>Add user to the <code>systemd-journal</code> group: <code>sudo usermod -aG systemd-journal $USER</code></td></tr><tr><td><code>--verify</code> reports errors</td><td>Journal file may be corrupt — delete the corrupt file from <code>/var/log/journal/&lt;machine-id&gt;/</code> and restart journald</td></tr><tr><td>Need logs in text format</td><td>Use <code>journalctl -o short &gt; /tmp/log.txt</code> or forward to rsyslog with <code>ForwardToSyslog=yes</code></td></tr></tbody></table>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="systemd">Systemd</a> — service logs, <code>journalctl -u</code>, unit file logging options</li>
 <li><a href="process-management">Process Management</a> — OOM killer events, <code>journalctl -k | grep oom</code></li>
-<li><a href="../updates/shani-health">shani-health Reference</a> — automated journal error reporting</li>
+<li><a href="../updates/shani-health.md">shani-health Reference</a> — automated journal error reporting</li>
 <li><a href="backup">Backup & Recovery</a> — backing up <code>/var/log/journal/</code> if persistent logs are enabled</li>
 </ul></div>
     </div>

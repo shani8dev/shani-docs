@@ -1,7 +1,7 @@
 ---
 title: AppArmor (Mandatory Access Control)
 section: Security
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # AppArmor — Mandatory Access Control
@@ -142,4 +142,4 @@ This tells you: `myapp` tried to read `/etc/passwd` and was denied. To allow it,
 
 - [Audit (auditd)](audit) — AppArmor denials are logged to the audit trail when `auditd` is running
 - [Security Features](features) — AppArmor's place in the six-LSM stack
-- [shani-health Reference](../updates/shani-health) — `shani-health --security` reports the enforcing-profile count and counts this boot's AppArmor denials from the kernel log
+- [shani-health Reference](../updates/shani-health.md) — `shani-health --security` reports the enforcing-profile count and counts this boot's AppArmor denials from the kernel log

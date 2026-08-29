@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Permissions &amp; Authorization — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Permissions &amp; Authorization  Shanios controls what a logged-in user can do — install software, format a disk, change the hostname — through a deliberate tw…">
+  <meta name="description" id="meta-desc"     content="Shanios controls what a logged-in user can do — install software, format a disk, change the hostname — through a deliberate two-tier Polkit policy, defined…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Permissions &amp; Authorization">
-  <meta property="og:description" id="og-desc"    content="Permissions &amp; Authorization  Shanios controls what a logged-in user can do — install software, format a disk, change the hostname — through a deliberate tw…">
+  <meta property="og:description" id="og-desc"    content="Shanios controls what a logged-in user can do — install software, format a disk, change the hostname — through a deliberate two-tier Polkit policy, defined…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/security/permissions/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Permissions &amp; Authorization">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Permissions &amp; Authorization">
-  <meta name="twitter:description" id="tw-desc"  content="Permissions &amp; Authorization  Shanios controls what a logged-in user can do — install software, format a disk, change the hostname — through a deliberate tw…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios controls what a logged-in user can do — install software, format a disk, change the hostname — through a deliberate two-tier Polkit policy, defined…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Permissions & Authorization","description":"Permissions & Authorization  Shanios controls what a logged-in user can do — install software, format a disk, change the hostname — through a deliberate tw…","url":"https://docs.shani.dev/doc/security/permissions/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Permissions & Authorization","description":"Shanios controls what a logged-in user can do — install software, format a disk, change the hostname — through a deliberate two-tier Polkit policy, defined…","url":"https://docs.shani.dev/doc/security/permissions/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Permissions & Authorization","item":"https://docs.shani.dev/doc/security/permissions/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,22 +215,56 @@
         <h1 class="doc-title">Permissions &amp; Authorization</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Security</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Shanios controls what a logged-in user can do — install software, format a disk, change the hostname — through a deliberate two-tier Polkit policy, defined in <a href="https://github.com/shani8dev/shani-settings"><code>shani-settings</code></a>'s <code>usr/share/polkit-1/rules.d/99-shani.rules</code> and shipped on every image.</p>
-<h2>Why two tiers</h2>
+<h2 id="why-two-tiers">Why two tiers</h2>
 <p>Most desktop distros gate privileged actions on membership in a <code>wheel</code> (or <code>sudo</code>) group. Shanios doesn't assume that group is provisioned or that every account should need it just to use the desktop normally — so the policy splits into two tiers instead of one:</p>
 <ul>
 <li><strong>Tier 1 — any active local session.</strong> Covers full day-to-day desktop use: package management, firmware updates, Flatpak, Snap, and OS updates. This works whether or not a <code>wheel</code> group exists on the system, so a single-user install with no group management still gets a complete desktop. Most Tier 1 actions require the user's own password (<code>AUTH_SELF</code>); routine, low-risk actions (power management, mounting removable media, network configuration) are passwordless.</li>
 <li><strong>Tier 2 — <code>wheel</code> group membership, on top of an active local session.</strong> Reserved for destructive or system-structural operations: disk formatting, hostname changes (<code>AUTH_SELF</code>), and anything irreversible (<code>AUTH_ADMIN</code>, requiring an administrator credential rather than just the acting user's own password).</li>
 </ul>
 <p>If a system has no <code>wheel</code> group provisioned, Tier 1 already covers everything a normal user needs — Tier 2 operations simply stay unavailable until a <code>wheel</code> group exists and the user is added to it.</p>
-<h2>The tradeoff</h2>
+<h2 id="the-tradeoff">The tradeoff</h2>
 <p>This is a deliberate choice, not an oversight: it weighs the convenience of a group-optional desktop against the risk that a compromised (but non-<code>wheel</code>) local account can still reach genuine system actions under Tier 1, and accepts that risk in exchange for not requiring group setup on every install. <code>99-shani.rules</code> documents this reasoning inline for each rule, alongside <code>sudoers.d</code> entries (in the same repo) that separately grant the <code>wheel</code> group broader <code>sudo</code> access for administrative work outside the desktop session.</p>
-<h2>Where this lives</h2>
-<p>| Layer | File | |---|---| | Polkit policy (Tier 1 / Tier 2 rules) | <code>usr/share/polkit-1/rules.d/99-shani.rules</code> | | <code>sudo</code> access for <code>wheel</code> | <code>etc/sudoers.d/wheel</code> | | Kernel/auditd hardening that backs this model | <code>usr/lib/sysctl.d/90-security-hardening.conf</code>, <code>etc/audit/rules.d/10-shani-base.rules</code> |</p>
-<p>All three ship from <a href="https://github.com/shani8dev/shani-settings"><code>shani-settings</code></a> and overlay onto the live system through the <code>shani-settings</code> package — see that repo's README for how the overlay is built and applied.</p></div>
+<h2 id="where-this-lives">Where this lives</h2>
+<table><thead><tr><th>Layer</th><th>File</th></tr></thead><tbody><tr><td>Polkit policy (Tier 1 / Tier 2 rules)</td><td><code>usr/share/polkit-1/rules.d/99-shani.rules</code></td></tr><tr><td><code>sudo</code> access for <code>wheel</code></td><td><code>etc/sudoers.d/wheel</code></td></tr><tr><td>Kernel/auditd hardening that backs this model</td><td><code>usr/lib/sysctl.d/90-security-hardening.conf</code>, <code>etc/audit/rules.d/10-shani-base.rules</code></td></tr></tbody></table>
+<p>All three ship from <a href="https://github.com/shani8dev/shani-settings"><code>shani-settings</code></a> and overlay onto the live system through the <code>shani-settings</code> package — see that repo's README for how the overlay is built and applied.</p>
+<h2 id="testing-your-configuration">Testing Your Configuration</h2>
+<p>You can verify which tier an action falls under and whether your user is authorized:</p>
+<pre><code class="language-bash"># Check if the current user can perform a Polkit action (Tier 1 / Tier 2)
+pkaction --action-id org.freedesktop.packagekit.package-install --verbose
+
+# List all registered Polkit actions
+pkaction | head -20
+
+# Check your Polkit result for a specific action
+pkcheck --action-id org.freedesktop.packagekit.package-install --process $ --enable-internal-agent
+
+# Check which groups you belong to (relevant for Tier 2)
+groups
+id -nG</code></pre>
+<h3 id="verifying-tier-assignments">Verifying Tier Assignments</h3>
+<table><thead><tr><th>Action</th><th>Tier</th><th>Auth Required</th></tr></thead><tbody><tr><td>Install Flatpak app</td><td>1</td><td><code>AUTH_SELF</code> (your password)</td></tr><tr><td>Mount removable media</td><td>1</td><td>Passwordless</td></tr><tr><td>Install Snap package</td><td>1</td><td><code>AUTH_SELF</code> (your password)</td></tr><tr><td>Firmware update via fwupd</td><td>1</td><td><code>AUTH_SELF</code> (your password)</td></tr><tr><td>Format a disk</td><td>2</td><td><code>AUTH_ADMIN</code> (admin credential)</td></tr><tr><td>Change hostname</td><td>2</td><td><code>AUTH_SELF</code> but requires <code>wheel</code></td></tr><tr><td>Reinstall kernel/initramfs</td><td>2</td><td><code>AUTH_ADMIN</code></td></tr></tbody></table>
+<h2 id="how-it-works-at-runtime">How It Works at Runtime</h2>
+<p>When you click "Install" in GNOME Software or KDE Discover:</p>
+<ol>
+<li>The package manager requests a Polkit authorization check</li>
+<li>Polkit evaluates <code>99-shani.rules</code> based on the action ID</li>
+<li>If Tier 1: prompt appears asking for <strong>your</strong> password — success grants access</li>
+<li>If Tier 2 + you're in <code>wheel</code>: prompt appears asking for <strong>admin</strong> credential</li>
+<li>If Tier 2 + you're NOT in <code>wheel</code>: access is denied — no prompt appears</li>
+</ol>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><td>Action requires password unexpectedly</td><td>You're in <code>wheel</code> and this is a Tier 2 action requiring <code>AUTH_ADMIN</code></td><td>Use an admin credential or check if the action is Tier 1-compatible</td></tr><tr><td>Can't format disk, no prompt appears</td><td>You're not in the <code>wheel</code> group</td><td>Add yourself: <code>sudo usermod -aG wheel $USER</code>, then log out and back in</td></tr><tr><td>"Not authorized" error in terminal</td><td>Action is Tier 2 and you lack <code>wheel</code> membership</td><td>Same as above — join <code>wheel</code></td></tr><tr><td>Flatpak install prompts for root password</td><td>Should only prompt for your own password</td><td>Check <code>99-shani.rules</code> is loaded: <code>pkaction --verbose</code></td></tr><tr><td><code>sudo</code> works but Polkit doesn't</td><td>Different auth mechanisms — Polkit uses <code>99-shani.rules</code>, sudo uses <code>sudoers.d/wheel</code></td><td>Both are expected to be independent; sudo bypasses Polkit entirely</td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="../security/features.md">Security Features</a> — full security model overview</li>
+<li><a href="../security/audit.md">Audit Framework</a> — auditd rules and hardening</li>
+<li><a href="../updates/user-setup.md">User Provisioning</a> — how wheel group membership is managed</li>
+<li><a href="https://github.com/shani8dev/shani-settings"><code>shani-settings</code> repo</a> — source for all rules</li>
+</ul></div>
     </div>
 
   </main>

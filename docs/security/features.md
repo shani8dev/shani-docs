@@ -1,7 +1,7 @@
 ---
 title: Security Features
 section: Security
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Security Features
@@ -160,13 +160,13 @@ Pre-installed via the `shani-peripherals` package, working at first boot without
 - **YubiKey and FIDO2/U2F** — `libfido2`, `pam-u2f`
 - **NFC** — `libnfc`, riding on the same `pcscd`/`pcsc-lite` stack as smart cards
 
-Not part of the default image — install these yourself if you need the CLI tooling:
+Not part of the default image — and because the host is immutable, they cannot be added with `pacman` at runtime. Install them via Nix (`nix-env -iA nixpkgs.<pkg>`) or run them inside a Distrobox container:
 
-- **YubiKey Manager** (`ykman`) — `sudo pacman -S yubikey-manager`
-- **PC/SC diagnostics** (`pcsc_scan`) — `sudo pacman -S pcsc-tools`
-- **TOTP/HOTP two-factor** (`oathtool`) — `sudo pacman -S oath-toolkit`
+- **YubiKey Manager** (`ykman`) — `nix-env -iA nixpkgs.yubikey-manager`
+- **PC/SC diagnostics** (`pcsc_scan`) — `nix-env -iA nixpkgs.pcsc-tools`
+- **TOTP/HOTP two-factor** (`oathtool`) — `nix-env -iA nixpkgs.oath-toolkit`
 
-See [Hardware Authentication](hardware-auth) for the full breakdown of what ships by default versus what needs installing.
+See [Hardware Authentication](hardware-auth) for the full breakdown of what ships by default, the exact install commands, and the Distrobox alternative.
 
 ## Zero Telemetry
 
@@ -205,3 +205,19 @@ These are not independent features — they compose into a coherent security mod
 - Zero telemetry means there is no built-in data exfiltration channel
 
 The attack surface is reduced by design, not by configuration.
+
+## See Also
+
+- [TPM2 Enrollment](tpm2) — automatic LUKS unlock setup
+- [LUKS Management](luks) — encryption key management and recovery
+- [Secure Boot](secure-boot) — MOK enrollment and firmware setup
+- [AppArmor](apparmor) — mandatory access control profiles
+- [Audit Framework](audit) — auditd rules and log analysis
+- [Firmware Updates (fwupd)](fwupd) — firmware upgrade workflow
+- [Hardware Authentication](hardware-auth) — fingerprint, smart card, YubiKey, NFC
+- [Lynis Audit](lynis) — CIS benchmark scanning and hardening
+- [Keyring & Secrets](keyring) — GNOME Keyring and credential storage
+- [Permissions & Authorization](../security/permissions.md) — Polkit tier system
+- [System Updates](../updates/system.md) — how signed images are deployed
+- [Security & Identity](../servers/security/policies) — Vaultwarden, Authelia, Keycloak, CrowdSec, secrets management
+- [Troubleshooting](../troubleshooting.md) — diagnosing security-related issues

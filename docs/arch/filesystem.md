@@ -1,7 +1,7 @@
 ---
 title: Filesystem Structure
 section: Architecture
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # Filesystem Structure
@@ -199,3 +199,9 @@ sudo mount /var/lib/myservice
 ```
 
 Changes to `/etc/fstab` are captured by the OverlayFS overlay and survive every OS update.
+
+## See Also
+
+- [Overlay Filesystem](overlay)
+- [Btrfs Deep Dive](btrfs)
+- [Architecture deep dive blog](https://blog.shani.dev/post/shani-os-architecture-deep-dive)

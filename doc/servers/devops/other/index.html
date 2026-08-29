@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>DevOps — Infrastructure as Code, Containers &amp; Utilities — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Infrastructure as Code OpenTofu / Terraform Purpose: Declarative cloud and on-premise infrastructure provisioning. OpenTofu is the open-source, BSL-free fo…">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/servers/devops/other/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="DevOps — Infrastructure as Code, Containers &amp; Utilities">
+  <meta property="og:description" id="og-desc"    content="Infrastructure as Code OpenTofu / Terraform Purpose: Declarative cloud and on-premise infrastructure provisioning. OpenTofu is the open-source, BSL-free fo…">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/devops/other/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="DevOps — Infrastructure as Code, Containers &amp; Utilities">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="DevOps — Infrastructure as Code, Containers &amp; Utilities">
+  <meta name="twitter:description" id="tw-desc"  content="Infrastructure as Code OpenTofu / Terraform Purpose: Declarative cloud and on-premise infrastructure provisioning. OpenTofu is the open-source, BSL-free fo…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"DevOps — Infrastructure as Code, Containers & Utilities","description":"Infrastructure as Code OpenTofu / Terraform Purpose: Declarative cloud and on-premise infrastructure provisioning. OpenTofu is the open-source, BSL-free fo…","url":"https://docs.shani.dev/doc/servers/devops/other/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"DevOps — Infrastructure as Code, Containers & Utilities","item":"https://docs.shani.dev/doc/servers/devops/other/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">DevOps — Infrastructure as Code, Containers &amp; Utilities</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><h2 id="infrastructure-as-code">Infrastructure as Code</h2>
+<h3 id="opentofu-terraform">OpenTofu / Terraform</h3>
+<p><strong>Purpose:</strong> Declarative cloud and on-premise infrastructure provisioning. OpenTofu is the open-source, BSL-free fork of Terraform and is drop-in compatible.</p>
+<pre><code class="language-bash"># Install OpenTofu via Nix (preferred — open source)
+nix-env -iA nixpkgs.opentofu
+
+# Or Terraform via Nix
+nix-env -iA nixpkgs.terraform
+
+# Both also available via Snap
+snap install opentofu --classic
+snap install terraform --classic</code></pre>
+<pre><code class="language-bash">tofu init        # download providers
+tofu plan        # preview changes
+tofu apply       # apply
+tofu destroy     # remove all managed resources
+tofu fmt -recursive
+tofu validate
+tofu import aws_instance.web i-1234567890abcdef0</code></pre>
+<h5 id="example-maintf-manage-a-podman-container">Example <code>main.tf</code> — manage a Podman container</h5>
+<pre><code class="language-hcl">terraform {
+  required_providers {
+    docker = {
+      source  = &quot;kreuzwerker/docker&quot;
+      version = &quot;~&gt; 3.0&quot;
+    }
+  }
+}
+
+provider &quot;docker&quot; {
+  host = &quot;unix:///run/user/1000/podman/podman.sock&quot;
+}
+
+resource &quot;docker_container&quot; &quot;nginx&quot; {
+  name  = &quot;nginx-tf&quot;
+  image = &quot;nginx:alpine&quot;
+  ports {
+    internal = 80
+    external = 8099
+  }
+}</code></pre>
+<h4 id="remote-state-in-minio-self-hosted-s3">Remote state in MinIO (self-hosted S3)</h4>
+<pre><code class="language-hcl">terraform {
+  backend &quot;s3&quot; {
+    bucket                      = &quot;tofu-state&quot;
+    key                         = &quot;homelab/terraform.tfstate&quot;
+    region                      = &quot;us-east-1&quot;
+    endpoint                    = &quot;http://minio.home.local:9000&quot;
+    access_key                  = &quot;minioadmin&quot;
+    secret_key                  = &quot;changeme&quot;
+    skip_credentials_validation = true
+    skip_metadata_api_check     = true
+    skip_region_validation      = true
+    force_path_style            = true
+  }
+}</code></pre>
+<blockquote>Never commit <code>terraform.tfstate</code> to Git — it contains secrets in plaintext. Use the MinIO backend from the <a href="https://docs.shani.dev/doc/servers/backups-sync#minio-self-hosted-s3-backup-target">Backups wiki</a>.</blockquote>
+<h4 id="terraform-module-structure-modularization-best-practice">Terraform Module Structure (modularization best practice)</h4>
+<pre><code>terraform/
+├── modules/
+│   ├── k8s-namespace/        # reusable module: creates namespace + RBAC + quota
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   ├── monitoring-stack/     # reusable module: deploys Prometheus + Grafana
+│   └── network/              # reusable module: VPC, subnets, firewall rules
+├── environments/
+│   ├── dev/
+│   │   ├── main.tf           # calls modules with dev-specific vars
+│   │   ├── terraform.tfvars  # dev values
+│   │   └── backend.tf        # remote state: s3://tofu-state/dev/terraform.tfstate
+│   ├── staging/
+│   └── prod/
+└── .terraform.lock.hcl       # provider version lock — always commit this</code></pre>
+<pre><code class="language-hcl"># modules/k8s-namespace/variables.tf
+variable &quot;name&quot;        { type = string }
+variable &quot;environment&quot; { type = string }
+variable &quot;team&quot;        { type = string }
+variable &quot;cpu_limit&quot;   { type = string; default = &quot;4&quot; }
+variable &quot;mem_limit&quot;   { type = string; default = &quot;8Gi&quot; }
+
+# modules/k8s-namespace/main.tf
+resource &quot;kubernetes_namespace&quot; &quot;this&quot; {
+  metadata {
+    name = var.name
+    labels = {
+      environment = var.environment
+      team        = var.team
+      managed-by  = &quot;terraform&quot;      # tagging policy: always present
+    }
+  }
+}
+
+resource &quot;kubernetes_resource_quota&quot; &quot;this&quot; {
+  metadata { name = &quot;default-quota&quot;; namespace = kubernetes_namespace.this.metadata[0].name }
+  spec {
+    hard = {
+      &quot;limits.cpu&quot;    = var.cpu_limit
+      &quot;limits.memory&quot; = var.mem_limit
+    }
+  }
+}
+
+# environments/prod/main.tf — consume the module
+module &quot;myapp_ns&quot; {
+  source      = &quot;../../modules/k8s-namespace&quot;
+  name        = &quot;myapp&quot;
+  environment = &quot;prod&quot;
+  team        = &quot;platform&quot;
+  cpu_limit   = &quot;8&quot;
+  mem_limit   = &quot;16Gi&quot;
+}</code></pre>
+<h4 id="remote-state-with-state-locking-prevents-concurrent-apply-conflicts">Remote state with state locking (prevents concurrent apply conflicts)</h4>
+<pre><code class="language-hcl"># environments/prod/backend.tf
+terraform {
+  backend &quot;s3&quot; {
+    bucket                      = &quot;tofu-state&quot;
+    key                         = &quot;prod/terraform.tfstate&quot;
+    region                      = &quot;us-east-1&quot;
+    endpoint                    = &quot;http://minio.home.local:9000&quot;
+    access_key                  = &quot;minioadmin&quot;
+    secret_key                  = &quot;changeme&quot;
+    skip_credentials_validation = true
+    skip_metadata_api_check     = true
+    skip_region_validation      = true
+    force_path_style            = true
+
+    # State locking via DynamoDB (for AWS) or the S3 backend's built-in locking
+    # MinIO's S3 backend supports native state locking (no DynamoDB needed with OpenTofu 1.7+)
+    use_lockfile = true
+  }
+}</code></pre>
+<h4 id="drift-detection-detect-infrastructure-changes-made-outside-terraform">Drift detection (detect infrastructure changes made outside Terraform)</h4>
+<pre><code class="language-bash"># Detect drift between state and real infrastructure
+tofu plan -detailed-exitcode
+# Exit code 0 = no changes; 1 = error; 2 = changes detected (drift)
+
+# Refresh state from real infrastructure (updates state without changing infra)
+tofu refresh
+
+# Import a resource created manually (bring it under Terraform management)
+tofu import kubernetes_namespace.myapp myapp
+
+# Automated drift detection via systemd timer
+cat &gt; ~/.config/systemd/user/tofu-drift.service &lt;&lt; 'EOF'
+[Unit]
+Description=OpenTofu Drift Detection
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/user/terraform/environments/prod
+ExecStart=/bin/bash -c 'tofu plan -detailed-exitcode 2&gt;&amp;1 | \
+  grep -E &quot;(must be replaced|will be destroyed|has changed)&quot; &amp;&amp; \
+  curl -s -d &quot;Terraform drift detected in prod&quot; http://ntfy.home.local/infra-alerts || true'
+EOF
+
+cat &gt; ~/.config/systemd/user/tofu-drift.timer &lt;&lt; 'EOF'
+[Unit]
+Description=Daily Terraform Drift Check
+[Timer]
+OnCalendar=daily
+Persistent=true
+[Install]
+WantedBy=timers.target
+EOF
+
+systemctl --user enable --now tofu-drift.timer</code></pre>
+<h4 id="policy-guardrails-with-tflint-checkov-tfsec">Policy guardrails with tflint + Checkov + tfsec</h4>
+<pre><code class="language-bash"># Install tflint (Terraform linter — catches provider-specific mistakes)
+nix-env -iA nixpkgs.tflint
+
+# Install Checkov (security policy scanner for IaC — multi-framework)
+pip install checkov --break-system-packages
+
+# Install tfsec (focused Terraform security scanner, fast, no Python dep)
+nix-env -iA nixpkgs.tfsec
+
+# tflint: lint all modules
+tflint --recursive --format=compact
+
+# Checkov: security scan (fails on critical findings)
+checkov -d terraform/ \
+  --check CKV_K8S_8,CKV_K8S_9,CKV_K8S_14,CKV_K8S_35 \
+  --soft-fail-on MEDIUM \
+  -o cli
+
+# Common checks relevant to Kubernetes Terraform:
+# CKV_K8S_8  — containers must have readiness probes
+# CKV_K8S_9  — containers must have liveness probes
+# CKV_K8S_14 — image tag must not be 'latest'
+# CKV_K8S_35 — secrets must not be in environment variables
+# CKV_K8S_43 — image must use digest (not mutable tag)
+
+# tfsec: fast, Terraform-native security scan (good for CI gates)
+tfsec terraform/
+tfsec terraform/ --severity CRITICAL   # fail only on critical
+tfsec terraform/ --format json         # machine-readable output
+tfsec terraform/ --out results.json    # write to file for ingestion by Defect Dojo
+
+# Inline suppression (when a finding is intentional — add to the .tf resource):
+# #tfsec:ignore:aws-s3-enable-bucket-logging</code></pre>
+<blockquote><strong>Checkov vs tfsec:</strong> Use both. Checkov covers Terraform, Kubernetes YAML, Dockerfiles, GitHub Actions, Helm charts, and CloudFormation in one tool. tfsec is Terraform-only but faster and catches different edge cases. Run tfsec as a fast pre-commit gate and Checkov as the full CI scan. Both integrate with Defect Dojo via JSON output.</blockquote>
+<h4 id="integrate-in-ci-woodpecker-forgejo-actions">Integrate in CI (Woodpecker / Forgejo Actions)</h4>
+<pre><code class="language-yaml"># .woodpecker.yml — add after the tofu plan step
+- name: iac-security-scan
+  image: bridgecrew/checkov
+  commands:
+    - checkov -d terraform/ -o cli -o json --output-file-path /dev/null,results.json
+    - &quot;[ $(jq '.summary.failed' results.json) -eq 0 ] || exit 1&quot;</code></pre>
+<h4 id="tagging-and-naming-policy-enforced-via-tflint-rules">Tagging and naming policy (enforced via tflint rules)</h4>
+<pre><code class="language-hcl"># .tflint.hcl — project-level tflint config
+plugin &quot;aws&quot; { enabled = true; version = &quot;0.32.0&quot;; source = &quot;github.com/terraform-linters/tflint-ruleset-aws&quot; }
+plugin &quot;kubernetes&quot; { enabled = true }
+
+rule &quot;terraform_required_tags&quot; {
+  enabled = true
+  # Enforce that every resource has these tags:
+  required_tags = [&quot;environment&quot;, &quot;team&quot;, &quot;managed-by&quot;, &quot;cost-center&quot;]
+}
+
+rule &quot;terraform_naming_convention&quot; {
+  enabled = true
+  # Enforce snake_case naming for all resources
+  format = &quot;snake_case&quot;
+}</code></pre>
+<h4 id="promote-changes-across-dev-uat-prod">Promote changes across Dev → UAT → Prod</h4>
+<pre><code class="language-bash"># Pattern: same module, different tfvars per environment
+# Dev:     tofu apply -var-file=dev.tfvars    (auto-applied on merge to develop)
+# UAT:     tofu apply -var-file=uat.tfvars    (requires PR approval)
+# Prod:    tofu apply -var-file=prod.tfvars   (requires second approval + plan review)
+
+# Workspace approach (alternative — single state tree, multiple workspaces):
+tofu workspace new dev
+tofu workspace new uat
+tofu workspace new prod
+tofu workspace select prod
+tofu plan -var-file=prod.tfvars
+tofu apply -var-file=prod.tfvars
+
+# Always plan before apply in prod
+tofu plan -out=prod.tfplan -var-file=prod.tfvars
+# (review prod.tfplan output)
+tofu apply prod.tfplan   # applies exactly what was planned — no surprises</code></pre>
+<hr>
+<h3 id="ansible-configuration-management">Ansible (Configuration Management)</h3>
+<p><strong>Purpose:</strong> Agentless configuration management and automation over SSH. Define desired server state in YAML playbooks. No agent on remote hosts — just SSH and Python.</p>
+<pre><code class="language-bash"># Install via Nix
+nix-env -iA nixpkgs.ansible
+
+# Or via Snap
+snap install ansible --classic</code></pre>
+<h4 id="inventory-ansibleinventoryini">Inventory (<code>~/ansible/inventory.ini</code>)</h4>
+<pre><code class="language-ini">[webservers]
+web1.home.local ansible_user=user
+web2.home.local ansible_user=user
+
+[databases]
+db1.home.local ansible_user=user
+
+[all:vars]
+ansible_ssh_private_key_file=~/.ssh/id_ed25519</code></pre>
+<h4 id="common-ad-hoc-commands">Common ad-hoc commands</h4>
+<pre><code class="language-bash">ansible all -i inventory.ini -m ping
+ansible webservers -i inventory.ini -m shell -a &quot;uptime&quot;
+ansible all -i inventory.ini -m copy -a &quot;src=./config.conf dest=/etc/myapp/config.conf&quot;
+ansible-playbook -i inventory.ini playbook.yaml --check --diff</code></pre>
+<h5 id="example-playbook">Example playbook</h5>
+<pre><code class="language-yaml">---
+- name: Configure web servers
+  hosts: webservers
+  become: true
+  tasks:
+    - name: Ensure nginx is installed
+      package:
+        name: nginx
+        state: present
+
+    - name: Deploy nginx config
+      template:
+        src: templates/nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+      notify: Restart nginx
+
+    - name: Ensure nginx is running
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+  handlers:
+    - name: Restart nginx
+      service:
+        name: nginx
+        state: restarted</code></pre>
+<pre><code class="language-bash">ansible-playbook -i inventory.ini playbook.yaml
+ansible-playbook -i inventory.ini playbook.yaml --tags &quot;deploy&quot;
+ansible-playbook -i inventory.ini playbook.yaml --limit web1.home.local
+ansible-vault encrypt vars/secrets.yaml
+ansible-playbook -i inventory.ini playbook.yaml --ask-vault-pass</code></pre>
+<h4 id="awx-ansible-tower-oss-web-ui">AWX (Ansible Tower OSS — Web UI)</h4>
+<p>AWX provides a web UI, RBAC, job scheduling, inventory management, and notifications on top of Ansible. The recommended install method is the AWX Operator on Kubernetes, but a standalone Docker Compose setup is available for homelab use.</p>
+<pre><code class="language-yaml"># ~/awx/compose.yaml
+# AWX requires postgres and redis; the operator handles this on k8s
+# For a quick homelab setup, use the AWX operator on k3s instead:
+#   kubectl apply -f https://raw.githubusercontent.com/ansible/awx-operator/main/deploy/awx-operator.yaml
+# Then create an AWX custom resource — see AWX operator docs.
+# Direct compose: use the community awx-on-docker project:
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: awx
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: awx
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  awx_web:
+    image: ansible/awx:latest
+    ports: [&quot;127.0.0.1:8052:8052&quot;]
+    environment:
+      SECRET_KEY: &quot;run: openssl rand -hex 32&quot;
+      DATABASE_HOST: postgres
+      DATABASE_USER: awx
+      DATABASE_PASSWORD: changeme
+      DATABASE_NAME: awx
+      REDIS_HOST: redis
+      AWX_ADMIN_USER: admin
+      AWX_ADMIN_PASSWORD: changeme
+    depends_on: [postgres, redis]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/awx &amp;&amp; podman-compose up -d
+# Access at http://localhost:8052 — default login: admin / changeme</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">awx.home.local { tls internal; reverse_proxy localhost:8052 }</code></pre>
+<hr>
+<h3 id="pulumi-iac-in-real-languages">Pulumi (IaC in Real Languages)</h3>
+<p><strong>Purpose:</strong> IaC using Python, TypeScript, Go, C#, or Java — no DSL. State stored in Pulumi Cloud or self-hosted in S3-compatible storage. Popular in developer-centric teams.</p>
+<pre><code class="language-bash"># Install via Nix
+nix-env -iA nixpkgs.pulumi
+# Or via Snap
+snap install pulumi --classic
+
+# Login to self-hosted MinIO backend
+pulumi login s3://pulumi-state?endpoint=http://minio.home.local:9000&amp;region=us-east-1&amp;s3ForcePathStyle=true
+
+pulumi new python
+pulumi preview
+pulumi up
+pulumi destroy
+pulumi stack output</code></pre>
+<hr>
+<h3 id="terragrunt-opentofu-terraform-wrapper">Terragrunt (OpenTofu / Terraform Wrapper)</h3>
+<p><strong>Purpose:</strong> Thin wrapper around OpenTofu/Terraform that solves two real problems at scale: <strong>DRY remote state configuration</strong> (define your MinIO backend once, inherit it across all modules) and <strong>multi-module orchestration</strong> (deploy 20 modules in dependency order with one command). Essential once you outgrow a single <code>main.tf</code> — typical use case is a <code>live/</code> directory tree where every folder is an independent tofu root with no copy-pasted backend blocks.</p>
+<pre><code class="language-bash"># Install via Nix
+nix-env -iA nixpkgs.terragrunt
+
+# Or via Snap
+snap install terragrunt --classic</code></pre>
+<h4 id="recommended-directory-structure">Recommended directory structure</h4>
+<pre><code>live/
+├── terragrunt.hcl          ← root config: shared remote state + provider defaults
+├── homelab/
+│   ├── k8s-cluster/
+│   │   └── terragrunt.hcl  ← module config: inherits root, declares dependencies
+│   ├── dns/
+│   │   └── terragrunt.hcl
+│   └── namespaces/
+│       └── terragrunt.hcl
+└── prod/
+    └── ...</code></pre>
+<h4 id="root-terragrunthcl-define-minio-backend-once">Root <code>terragrunt.hcl</code> — define MinIO backend once</h4>
+<pre><code class="language-hcl"># live/terragrunt.hcl
+remote_state {
+  backend = &quot;s3&quot;
+  generate = {
+    path      = &quot;backend.tf&quot;
+    if_exists = &quot;overwrite_terragrunt&quot;
+  }
+  config = {
+    bucket   = &quot;tofu-state&quot;
+    key      = &quot;${path_relative_to_include()}/terraform.tfstate&quot;
+    region   = &quot;us-east-1&quot;
+    endpoint = &quot;http://minio.home.local:9000&quot;
+    access_key                  = get_env(&quot;MINIO_ACCESS_KEY&quot;, &quot;minioadmin&quot;)
+    secret_key                  = get_env(&quot;MINIO_SECRET_KEY&quot;, &quot;changeme&quot;)
+    skip_credentials_validation = true
+    skip_metadata_api_check     = true
+    skip_region_validation      = true
+    force_path_style            = true
+  }
+}
+
+# Inject default provider config into every child module
+generate &quot;provider&quot; {
+  path      = &quot;provider.tf&quot;
+  if_exists = &quot;overwrite_terragrunt&quot;
+  contents  = &lt;&lt;EOF
+provider &quot;hetzner&quot; {
+  token = get_env(&quot;HCLOUD_TOKEN&quot;)
+}
+EOF
+}</code></pre>
+<h4 id="child-terragrunthcl-inherit-root-declare-dependency">Child <code>terragrunt.hcl</code> — inherit root, declare dependency</h4>
+<pre><code class="language-hcl"># live/homelab/namespaces/terragrunt.hcl
+include &quot;root&quot; {
+  path = find_in_parent_folders()   # walks up until it finds the root terragrunt.hcl
+}
+
+terraform {
+  source = &quot;../../../modules//k8s-namespace&quot;
+}
+
+dependency &quot;cluster&quot; {
+  config_path = &quot;../k8s-cluster&quot;
+  mock_outputs = {
+    cluster_endpoint = &quot;https://127.0.0.1:6443&quot;  # used in plan when cluster doesn't exist yet
+  }
+}
+
+inputs = {
+  cluster_endpoint = dependency.cluster.outputs.cluster_endpoint
+  namespaces       = [&quot;monitoring&quot;, &quot;apps&quot;, &quot;security&quot;]
+}</code></pre>
+<h4 id="common-commands">Common commands</h4>
+<pre><code class="language-bash"># Plan/apply a single module
+cd live/homelab/k8s-cluster &amp;&amp; terragrunt plan
+cd live/homelab/k8s-cluster &amp;&amp; terragrunt apply
+
+# Apply ALL modules in dependency order (the killer feature)
+cd live/homelab &amp;&amp; terragrunt run-all apply
+
+# Destroy all modules in reverse dependency order
+cd live/homelab &amp;&amp; terragrunt run-all destroy
+
+# Plan all — great for PRs to see the full blast radius
+cd live &amp;&amp; terragrunt run-all plan
+
+# Only run modules that changed (compares to last apply state)
+terragrunt run-all apply --terragrunt-modules-that-include root.hcl
+
+# Graph the dependency tree
+terragrunt graph-dependencies | dot -Tpng &gt; deps.png</code></pre>
+<blockquote><strong>OpenTofu + Terragrunt + MinIO</strong> is the fully self-hosted, BSL-free equivalent of the Terraform Cloud / HCP Terraform stack. All state stays in your MinIO bucket; Terragrunt handles the DRY config and orchestration.</blockquote>
+<hr>
+<h3 id="packer-machine-image-builder">Packer (Machine Image Builder)</h3>
+<p><strong>Purpose:</strong> Build identical VM templates, cloud AMIs, container base images, or ISOs from a single HCL template. Common for teams using vSphere, AWS, Azure, or bare-metal.</p>
+<pre><code class="language-bash"># Install via Nix
+nix-env -iA nixpkgs.packer
+
+packer init .
+packer validate myimage.pkr.hcl
+packer build myimage.pkr.hcl
+packer build -var &quot;version=1.2.3&quot; myimage.pkr.hcl
+PACKER_LOG=1 packer build myimage.pkr.hcl   # debug mode</code></pre>
+<h3 id="cloud-provider-clis-aws-gcp-azure-hetzner">Cloud Provider CLIs (AWS / GCP / Azure / Hetzner)</h3>
+<p><strong>Purpose:</strong> Command-line interfaces for managing cloud resources directly — provisioning VMs, managing object storage, configuring DNS, pulling logs, and scripting infrastructure tasks. On Shani OS all CLIs install via Nix; none require a system-level package manager.</p>
+<blockquote><strong>Homelab + cloud hybrid:</strong> The most common this system pattern is running core services on-prem and using a VPS (Hetzner, DigitalOcean, Vultr) for public-facing ingress, offsite backups, or a WireGuard exit node. Hetzner Cloud is the primary cloud provider referenced throughout these docs — best price/performance ratio in Europe with a clean API.</blockquote>
+<h4 id="hetzner-cloud-cli-hcloud-primary">Hetzner Cloud CLI (<code>hcloud</code>) — primary</h4>
+<pre><code class="language-bash"># Install via Nix
+nix-env -iA nixpkgs.hcloud
+
+# Authenticate (get token from Hetzner Cloud Console → Project → API Tokens)
+hcloud context create homelab
+# Paste token when prompted — stored in ~/.config/hcloud/cli.toml
+
+# Common operations
+hcloud server list
+hcloud server create --name vpn-node --type cx22 --image ubuntu-24.04 --location nbg1 \
+  --ssh-key ~/.ssh/id_ed25519.pub
+
+hcloud server ssh vpn-node
+hcloud server delete vpn-node
+
+# Volumes (persistent block storage)
+hcloud volume create --name data --size 50 --server vpn-node
+hcloud volume list
+
+# Firewall
+hcloud firewall create --name homelab-fw
+hcloud firewall add-rule homelab-fw --direction in --protocol tcp --port 22 --source-ips 0.0.0.0/0
+hcloud firewall apply-to-resource homelab-fw --type server --server vpn-node
+
+# Floating IPs (static public IP that survives server recreation)
+hcloud floating-ip create --type ipv4 --home-location nbg1
+hcloud floating-ip assign &lt;ip-id&gt; vpn-node
+
+# Private networks (connect VMs without public IPs)
+hcloud network create --name homelab-net --ip-range 10.0.0.0/16
+hcloud network add-subnet homelab-net --network-zone eu-central --type server --ip-range 10.0.1.0/24
+hcloud server attach-to-network vpn-node --network homelab-net --ip 10.0.1.1</code></pre>
+<h4 id="aws-cli">AWS CLI</h4>
+<pre><code class="language-bash"># Install via Nix
+nix-env -iA nixpkgs.awscli2
+
+# Configure (credentials from IAM → Users → Security credentials)
+aws configure
+# Or use environment variables (preferred for CI):
+# AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION
+
+# Common operations
+aws s3 ls
+aws s3 cp backup.tar.gz s3://my-bucket/backups/
+aws s3 sync /home/user/data/ s3://my-bucket/data/ --delete
+
+# EC2
+aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId,State.Name,PublicIpAddress]' --output table
+aws ec2 start-instances --instance-ids i-1234567890abcdef0
+aws ec2 stop-instances --instance-ids i-1234567890abcdef0
+
+# SSM (connect without opening port 22)
+aws ssm start-session --target i-1234567890abcdef0
+
+# ECR (container registry)
+aws ecr get-login-password --region eu-west-1 | \
+  podman login --username AWS --password-stdin 123456789.dkr.ecr.eu-west-1.amazonaws.com
+
+# CloudWatch logs
+aws logs tail /aws/lambda/my-function --follow</code></pre>
+<h4 id="gcp-cli-gcloud">GCP CLI (<code>gcloud</code>)</h4>
+<pre><code class="language-bash"># Install via Nix
+nix-env -iA nixpkgs.google-cloud-sdk
+
+# Authenticate
+gcloud auth login
+gcloud config set project my-project-id
+
+# Common operations
+gcloud compute instances list
+gcloud compute ssh my-vm --zone europe-west1-b
+
+# GCS (Cloud Storage)
+gcloud storage ls
+gcloud storage cp backup.tar.gz gs://my-bucket/backups/
+gcloud storage rsync -r /home/user/data/ gs://my-bucket/data/
+
+# GCR (Artifact Registry)
+gcloud auth configure-docker europe-west1-docker.pkg.dev
+podman push europe-west1-docker.pkg.dev/my-project/my-repo/myapp:latest
+
+# Cloud Run
+gcloud run deploy myapp --image europe-west1-docker.pkg.dev/my-project/my-repo/myapp:latest \
+  --region europe-west1 --allow-unauthenticated</code></pre>
+<h4 id="azure-cli">Azure CLI</h4>
+<pre><code class="language-bash"># Install via Nix
+nix-env -iA nixpkgs.azure-cli
+
+# Authenticate
+az login                          # browser-based
+az login --use-device-code        # for headless/SSH sessions
+
+# Common operations
+az vm list --output table
+az vm start --resource-group myRG --name myVM
+az vm stop  --resource-group myRG --name myVM
+
+# Azure Blob Storage
+az storage blob upload --account-name mystorageacct \
+  --container-name backups --name backup.tar.gz --file backup.tar.gz
+
+# ACR (container registry)
+az acr login --name myregistry
+podman push myregistry.azurecr.io/myapp:latest
+
+# AKS
+az aks get-credentials --resource-group myRG --name myAKS
+kubectl get nodes</code></pre>
+<hr>
+<h3 id="cloud-init-vm-bootstrap-automation">cloud-init (VM Bootstrap Automation)</h3>
+<p><strong>Purpose:</strong> Industry-standard mechanism for bootstrapping cloud VMs and bare-metal nodes on first boot. A <code>user-data</code> YAML file is passed to the instance at creation time (via the cloud provider API or a local <code>nocloud</code> source) — cloud-init runs it once, before your configuration management tool takes over. Used to: create users and SSH keys, install base packages, write files, run bootstrap scripts, and configure the system for Ansible/OpenTofu to manage.</p>
+<blockquote>On Shani OS itself, cloud-init is not used (Shani uses its own atomic update mechanism). This section covers provisioning <em>other</em> machines from Shani OS — Hetzner VMs, bare-metal nodes, Proxmox VMs — using cloud-init user-data files you create and pass via <code>hcloud</code> or Proxmox.</blockquote>
+<h5 id="minimal-user-data-hetzner-ubuntu-vm">Minimal user-data (Hetzner Ubuntu VM)</h5>
+<pre><code class="language-yaml"># ~/cloud-init/base-server.yaml
+#cloud-config
+
+# Create a non-root admin user
+users:
+  - name: ops
+    groups: [sudo, docker]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAA...your-public-key... ops@shani
+
+# Disable password auth entirely
+ssh_pwauth: false
+disable_root: true
+
+# Install base packages
+packages:
+  - curl
+  - git
+  - htop
+  - fail2ban
+  - ufw
+
+# Run once on first boot
+runcmd:
+  - ufw allow 22/tcp
+  - ufw allow 80/tcp
+  - ufw allow 443/tcp
+  - ufw --force enable
+  - systemctl enable --now fail2ban
+  - curl -fsSL https://get.docker.com | sh    # or install Podman
+
+# Write a file on the new VM
+write_files:
+  - path: /etc/motd
+    content: |
+      Managed by Shani homelab. Do not edit manually.
+    permissions: '0644'</code></pre>
+<h4 id="provision-a-hetzner-vm-with-cloud-init">Provision a Hetzner VM with cloud-init</h4>
+<pre><code class="language-bash">hcloud server create \
+  --name vpn-exit-01 \
+  --type cx22 \
+  --image ubuntu-24.04 \
+  --location nbg1 \
+  --ssh-key ~/.ssh/id_ed25519.pub \
+  --user-data-from-file ~/cloud-init/base-server.yaml
+
+# Watch the bootstrap complete (takes 60–90 seconds)
+hcloud server ssh vpn-exit-01 -- &quot;cloud-init status --wait &amp;&amp; journalctl -u cloud-init --no-pager&quot;</code></pre>
+<h4 id="provision-a-proxmox-vm-with-cloud-init-nocloud-source">Provision a Proxmox VM with cloud-init (nocloud source)</h4>
+<pre><code class="language-bash"># Download a cloud image (Ubuntu 24.04 cloud-ready)
+wget https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
+
+# Create a VM template in Proxmox
+qm create 9000 --name ubuntu-template --memory 2048 --cores 2 --net0 virtio,bridge=vmbr0
+qm importdisk 9000 noble-server-cloudimg-amd64.img local-lvm
+qm set 9000 --scsihw virtio-scsi-pci --scsi0 local-lvm:vm-9000-disk-0
+qm set 9000 --ide2 local-lvm:cloudinit   # attach cloud-init drive
+qm set 9000 --boot c --bootdisk scsi0
+qm set 9000 --serial0 socket --vga serial0
+qm set 9000 --ipconfig0 ip=dhcp
+qm template 9000
+
+# Clone template and pass your user-data
+qm clone 9000 101 --name worker-01 --full
+qm set 101 --cicustom &quot;user=local:snippets/base-server.yaml&quot;
+qm set 101 --ipconfig0 &quot;ip=192.168.1.101/24,gw=192.168.1.1&quot;
+qm start 101</code></pre>
+<h4 id="wireguard-exit-node-via-cloud-init-one-shot-vpn-provisioning">WireGuard exit node via cloud-init (one-shot VPN provisioning)</h4>
+<pre><code class="language-yaml"># ~/cloud-init/wireguard-exit.yaml
+#cloud-config
+packages: [wireguard]
+
+write_files:
+  - path: /etc/wireguard/wg0.conf
+    permissions: '0600'
+    content: |
+      [Interface]
+      PrivateKey = &lt;server-private-key&gt;
+      Address = 10.8.0.1/24
+      ListenPort = 51820
+      PostUp   = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+      PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+
+      [Peer]
+      PublicKey = &lt;client-public-key&gt;
+      AllowedIPs = 10.8.0.2/32
+
+runcmd:
+  - sysctl -w net.ipv4.ip_forward=1
+  - echo &quot;net.ipv4.ip_forward=1&quot; &gt;&gt; /etc/sysctl.d/99-wireguard.conf
+  - systemctl enable --now wg-quick@wg0
+  - ufw allow 51820/udp
+  - ufw --force enable</code></pre>
+<pre><code class="language-bash">hcloud server create --name wg-exit-eu --type cx22 --image ubuntu-24.04 \
+  --location nbg1 --user-data-from-file ~/cloud-init/wireguard-exit.yaml</code></pre>
+<h4 id="validate-user-data-before-sending">Validate user-data before sending</h4>
+<pre><code class="language-bash"># Install cloud-init validator
+pip install cloud-init --break-system-packages
+
+# Validate syntax
+cloud-init schema --config-file ~/cloud-init/base-server.yaml</code></pre>
+<hr>
+<h3 id="chef-puppet">Chef / Puppet</h3>
+<blockquote><strong>Note:</strong> Chef and Puppet use persistent agents installed on managed hosts — incompatible with Shani OS's immutable, read-only root. Use <strong>Ansible</strong> (agentless, SSH + Python) for configuration management on this system. Chef/Puppet are listed here for awareness when working in enterprise environments that already use them; on this system, Ansible with AWX is the supported path.</blockquote>
+<hr>
+<h2 id="artifact-dependency-management">Artifact & Dependency Management</h2>
+<h3 id="jfrog-artifactory-oss">JFrog Artifactory OSS</h3>
+<p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#jfrog-artifactory-oss-universal-artifact-repository">Developer Tools wiki → JFrog Artifactory OSS</a>.</p>
+<pre><code class="language-bash"># Push a Docker image
+podman tag myapp:latest localhost:8182/my-docker-local/myapp:latest
+podman push localhost:8182/my-docker-local/myapp:latest
+
+# Upload a generic artifact
+curl -u admin:password -T ./myapp.tar.gz \
+  &quot;http://localhost:8181/artifactory/generic-local/myapp-1.0.tar.gz&quot;</code></pre>
+<hr>
+<h3 id="nexus-repository-oss">Nexus Repository OSS</h3>
+<p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#nexus-repository-oss-maven-npm-pypi-docker-proxy">Developer Tools wiki → Nexus Repository OSS</a>.</p>
+<pre><code class="language-bash"># Configure npm to proxy through Nexus
+npm config set registry http://localhost:8091/repository/npm-proxy/
+
+# Push a Docker image
+podman tag myapp:latest localhost:8092/myapp:latest
+podman push localhost:8092/myapp:latest</code></pre>
+<blockquote>⚠️ Nexus requires at least 4 GB RAM. Set <code>-Xms2703m -Xmx2703m</code> via <code>INSTALL4J_ADD_VM_PARAMS</code> to cap memory.</blockquote>
+<hr>
+<h2 id="service-discovery-orchestration">Service Discovery & Orchestration</h2>
+<h3 id="consul-service-discovery-service-mesh">Consul (Service Discovery & Service Mesh)</h3>
+<p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#consul-service-discovery--service-mesh">Developer Tools wiki → Consul</a>.</p>
+<pre><code class="language-bash"># Install Consul CLI — Nix
+nix-env -iA nixpkgs.consul
+
+consul members
+consul kv put myapp/config/db_host &quot;db.home.local&quot;
+consul kv get myapp/config/db_host
+consul health service myapp
+dig @127.0.0.1 -p 8600 myapp.service.consul</code></pre>
+<hr>
+<h3 id="nomad-workload-orchestrator">Nomad (Workload Orchestrator)</h3>
+<p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#nomad-workload-orchestrator">Developer Tools wiki → Nomad</a>.</p>
+<pre><code class="language-bash"># Install Nomad CLI — Nix
+nix-env -iA nixpkgs.nomad
+
+nomad node status
+nomad job run ~/nomad/jobs/nginx.nomad
+nomad job status nginx
+nomad alloc logs &lt;alloc-id&gt;
+nomad job scale nginx web 3</code></pre>
+<h5 id="example-job-file">Example job file</h5>
+<pre><code class="language-hcl">job &quot;nginx&quot; {
+  datacenters = [&quot;dc1&quot;]
+  type        = &quot;service&quot;
+
+  group &quot;web&quot; {
+    count = 1
+
+    network {
+      port &quot;http&quot; { static = 8099 }
+    }
+
+    task &quot;nginx&quot; {
+      driver = &quot;docker&quot;
+      config {
+        image = &quot;nginx:alpine&quot;
+        ports = [&quot;http&quot;]
+      }
+      resources {
+        cpu    = 100
+        memory = 128
+      }
+    }
+  }
+}</code></pre>
+<hr>
+<h2 id="developer-environments-utilities">Developer Environments & Utilities</h2>
+<h3 id="code-server-vs-code-in-browser">code-server (VS Code in Browser)</h3>
+<p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#code-server">Developer Tools wiki → code-server</a>.</p>
+<hr>
+<h3 id="coder-cloud-development-environments">Coder (Cloud Development Environments)</h3>
+<p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#gitpod--coder-cloud-development-environments">Developer Tools wiki → Coder</a>.</p>
+<hr>
+<h3 id="windmill-workflow-script-automation">Windmill (Workflow & Script Automation)</h3>
+<p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#windmill-workflow--script-automation">Developer Tools wiki → Windmill</a>.</p>
+<hr>
+<h3 id="web-analytics-plausible-umami-matomo">Web Analytics (Plausible, Umami, Matomo)</h3>
+<p>For Plausible (privacy-first, cookie-free), Umami (minimal analytics), and Matomo (full session tracking), see the <a href="https://docs.shani.dev/doc/servers/business-intelligence#matomo-web-analytics">Developer Tools wiki</a>.</p>
+<hr>
+<hr>
+<h2 id="internal-platforms">Internal Platforms</h2>
+<h3 id="backstage-internal-developer-portal">Backstage (Internal Developer Portal)</h3>
+<p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#backstage-internal-developer-portal">Developer Tools wiki → Backstage</a>.</p>
+<blockquote>Backstage is most valuable once you have 5+ services. Start small — register services with <code>catalog-info.yaml</code> files in their repos, then add plugins incrementally.</blockquote>
+<hr>
+<h2 id="security-cli-tools">Security CLI Tools</h2>
+<blockquote>Security tooling (osquery, Nuclei, SOPS, Semgrep, Trivy) is covered in the <a href="https://docs.shani.dev/doc/servers/security/policies">Security & Identity wiki</a>. This section covers only the DevOps integration points where security tools gate CI pipelines.</blockquote>
+<hr>
+<blockquote><strong>Education platforms</strong> (Open edX/Tutor) are documented in the <a href="https://docs.shani.dev/doc/servers/education">Developer Tools wiki</a>.</blockquote>
+<h2 id="key-concepts">Key Concepts</h2>
+<h4 id="cicd-pipeline-stages">CI/CD Pipeline Stages</h4>
+<p>A production pipeline typically has these gates in order: (1) <strong>Lint/Format</strong> — <code>tflint</code>, <code>black</code>, <code>eslint</code>; (2) <strong>Unit Tests</strong> — fast, no external deps; (3) <strong>Build</strong> — compile or build container image; (4) <strong>SAST</strong> — Semgrep, Checkov; (5) <strong>Integration Tests</strong> — spin up dependencies; (6) <strong>Container Scan</strong> — Trivy; (7) <strong>Push</strong> — tag and push to registry; (8) <strong>Deploy to Staging</strong> — Argo Rollouts canary; (9) <strong>Smoke Tests</strong>; (10) <strong>Promote to Prod</strong> — manual gate or auto on metrics.</p>
+<h4 id="idempotency-in-automation">Idempotency in automation</h4>
+<p>An operation is idempotent if running it multiple times produces the same result as running it once. Ansible modules are idempotent — running <code>apt: name=nginx state=present</code> 100 times does not install nginx 100 times. Terraform is idempotent — re-applying the same config changes nothing if the state matches. Write all your automation with idempotency in mind: check before act, not act then check.</p>
+<h4 id="immutable-infrastructure">Immutable infrastructure</h4>
+<p>Rather than patching running servers (mutable), you build a new image with the change applied and replace the running instance. Container-based workloads are inherently immutable — you don't patch a running container, you rebuild the image and redeploy. Shani OS is an immutable OS for the same reason: updates replace the root filesystem atomically.</p>
+<h4 id="gitops-vs-traditional-cd">GitOps vs traditional CD</h4>
+<p>Traditional CD has the pipeline push changes to the cluster (<code>kubectl apply</code> from CI). GitOps inverts this — a reconciler inside the cluster (ArgoCD, Flux) watches a Git repo and <em>pulls</em> the desired state. Benefits: every change is a Git commit (full audit trail), the cluster can self-heal by re-syncing, and the pipeline never needs cluster credentials.</p>
+<h4 id="trunk-based-development-vs-feature-branches">Trunk-based development vs feature branches</h4>
+<p>Trunk-based development has everyone committing directly to <code>main</code> (or short-lived branches that merge in hours, not weeks). Feature flags gate incomplete work rather than long-lived branches. This reduces merge conflicts and keeps CI fast. Most high-performing teams (per DORA research) practice trunk-based development.</p>
+<h4 id="shift-left-security">Shift-left security</h4>
+<p>Moving security checks earlier in the development lifecycle — ideally before code is committed (pre-commit hooks, IDE plugins) rather than post-deployment. Semgrep in pre-commit is more shift-left than ZAP in staging. The earlier a finding, the cheaper it is to fix.</p>
+<h4 id="ephemeral-environments">Ephemeral environments</h4>
+<p>On-demand environments provisioned for a specific PR or feature, then destroyed. Every PR gets its own isolated test environment with a URL like <code>pr-123.staging.example.com</code>. Enables parallel testing with no environment contention. Typically provisioned via Kubernetes namespaces + Argo Rollouts or Helm + preview URLs from Ingress.</p>
+<h4 id="bluegreen-vs-canary-vs-rolling-when-to-use-each">Blue/Green vs Canary vs Rolling — when to use each</h4>
+<ul>
+<li><strong>Rolling update</strong> (Kubernetes default): replace pods one at a time. Zero downtime but brief period with mixed versions. Good for stateless workloads, low risk.</li>
+<li><strong>Blue/Green</strong>: maintain two identical environments, flip traffic instantly. Expensive (2× resources) but instant rollback. Good for scheduled maintenance windows or database migrations.</li>
+<li><strong>Canary</strong>: route 5–10% of traffic to new version, watch metrics, then promote. Best for high-traffic services where you want to catch regressions with real traffic before a full rollout.</li>
+</ul>
+<h4 id="service-mesh-concepts-istiolinkerd">Service mesh concepts (Istio/Linkerd)</h4>
+<p>A service mesh adds a sidecar proxy (Envoy for Istio, a lightweight proxy for Linkerd) to every pod. The sidecar intercepts all in/out traffic, enabling: mTLS between services without app code changes, traffic shifting (canary), circuit breaking, retries, and distributed tracing. The control plane (Istiod) pushes policy to all sidecars. This is separate from Cilium, which does similar things at the eBPF kernel level without sidecars.</p>
+<h4 id="on-call-rotation-essentials">On-call rotation essentials</h4>
+<p>DORA's Time to Restore (MTTR) metric is directly tied to how well on-call is set up. The key components are: (1) alerting with high signal-to-noise (no alert fatigue — every page must be actionable), (2) runbooks linked from alerts, (3) a defined escalation chain, (4) postmortems after every incident. Grafana OnCall handles scheduling and escalation; your Prometheus alerts are the input.</p>
+<h4 id="rollback-vs-roll-forward">Rollback vs roll-forward</h4>
+<p>Rolling back means deploying the previous known-good version. Roll-forward means quickly patching the broken version and deploying again. For stateless services, rollback is easier — <code>kubectl argo rollouts undo</code> or <code>kubectl rollout undo</code>. For services with database migrations, rollback may be impossible if the migration isn't reversible — which is why forward-compatible migrations (add column, then backfill, then make non-null) are a standard practice.</p>
+<h4 id="environment-parity">Environment parity</h4>
+<p>Dev, staging, and prod should be as similar as possible in config, dependencies, and infrastructure shape. Differences cause "works on staging" bugs. Using the same Helm chart with different <code>values.yaml</code> per environment (or Kustomize overlays) is the standard approach to maintaining parity while allowing necessary differences (replica count, resource limits, domain names).</p>
+<h4 id="terraform-state-the-source-of-truth-for-your-infrastructure">Terraform state — the source of truth for your infrastructure</h4>
+<p>Terraform's state file (<code>terraform.tfstate</code>) maps your configuration to real infrastructure resources. It tracks resource IDs, attributes, and dependencies. Without state, Terraform can't know what it has already created. Problems with local state: (1) it can't be shared across a team, (2) it's lost if the machine is lost. Remote state (S3/MinIO backend with DynamoDB/Redis locking) is mandatory for team use — it enables state locking (prevents concurrent applies), versioning (rollback if state is corrupted), and separation from the code. <code>terraform import</code> adds existing resources to state; <code>terraform state rm</code> removes resources from tracking without destroying them.</p>
+<h4 id="ansible-vs-terraform-what-each-is-for">Ansible vs Terraform — what each is for</h4>
+<p>Terraform is declarative and idempotent for infrastructure provisioning — it manages the lifecycle of resources (create, update, destroy) by reconciling desired state with actual state. Ansible is procedural and idempotent for configuration management — it runs tasks in sequence on existing hosts (install packages, write config files, restart services). The canonical split: Terraform provisions the VM; Ansible configures what's running on it. Both can overlap (Terraform has file provisioners; Ansible has cloud modules) but the mental models are different. Mixing them without a clear boundary creates maintenance nightmares.</p>
+<h4 id="policy-as-code-making-compliance-automatic">Policy-as-code — making compliance automatic</h4>
+<p>Policy-as-code tools (Checkov, tfsec, OPA/Rego, Kyverno) express infrastructure and Kubernetes policies as code that can be version-controlled, reviewed, and automatically enforced. Instead of a checklist that relies on humans, a Checkov rule blocks a Terraform plan that opens port 22 to 0.0.0.0/0. OPA Gatekeeper prevents a <code>kubectl apply</code> of a deployment with no resource limits. The shift: compliance moves from a post-deployment audit to a pre-deployment gate in the CI pipeline. Every IaC commit passes through policy checks before reaching production.</p>
+<h4 id="terraform-modules-reusable-infrastructure-components">Terraform modules — reusable infrastructure components</h4>
+<p>A module is a directory of Terraform files with defined inputs (variables) and outputs. Instead of copy-pasting the same VPC/subnet/security-group configuration across 10 environments, you write it once as a module and call it with different variable values. The public Terraform Registry hosts community modules (AWS VPC, GKE cluster, etc.). Internal modules (stored in your Git repo) encode your organisation's standards — a module that provisions a PostgreSQL instance always includes backup configuration, monitoring, and correct security groups, because those are baked in. Modules are the IaC equivalent of application libraries.</p>
+<h2 id="caddy-configuration">Caddy Configuration</h2>
+<p>Services in this wiki that need Caddy proxying:</p>
+<pre><code class="language-caddyfile"># Code hosting (see Developer Tools wiki for full config)
+git.home.local        { tls internal; reverse_proxy localhost:3000 }
+gitlab.example.com    { reverse_proxy localhost:8929 }
+
+# CI/CD
+ci.home.local         { tls internal; reverse_proxy localhost:8000 }
+jenkins.home.local    { tls internal; reverse_proxy localhost:8090 }
+sonar.home.local      { tls internal; reverse_proxy localhost:9000 }
+
+# Registries
+registry.home.local   { tls internal; reverse_proxy localhost:5000 }
+harbor.home.local     { tls internal; reverse_proxy localhost:8180 }
+artifactory.home.local { tls internal; reverse_proxy localhost:8181 }
+nexus.home.local      { tls internal; reverse_proxy localhost:8091 }
+
+# Kubernetes &amp; observability
+argocd.home.local     { tls internal; reverse_proxy localhost:8180 { transport http { tls_insecure_skip_verify } } }
+rancher.home.local    { tls internal; reverse_proxy localhost:8443 { transport http { tls_insecure_skip_verify } } }
+grafana.home.local    { tls internal; reverse_proxy localhost:3000 }
+longhorn.home.local   { tls internal; reverse_proxy localhost:8080 }
+
+# Service discovery &amp; orchestration
+consul.home.local     { tls internal; reverse_proxy localhost:8500 }
+nomad.home.local      { tls internal; reverse_proxy localhost:4646 }
+awx.home.local        { tls internal; reverse_proxy localhost:8052 }
+
+# Dev environments &amp; tools (see Developer Tools wiki)
+code.home.local       { tls internal; reverse_proxy localhost:8443 }
+coder.home.local      { tls internal; reverse_proxy localhost:3001 }
+windmill.home.local   { tls internal; reverse_proxy localhost:8300 }
+analytics.home.local  { tls internal; reverse_proxy localhost:8033 }
+umami.home.local      { tls internal; reverse_proxy localhost:3005 }
+mail.home.local       { tls internal; reverse_proxy localhost:8025 }
+
+# Internal platform
+backstage.home.local  { tls internal; reverse_proxy localhost:7007 }
+opencost.home.local   { tls internal; reverse_proxy localhost:9090 }</code></pre>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<blockquote>For troubleshooting Gitea, Woodpecker, Jenkins, SonarQube, Harbor, Forgejo Actions, Renovate, Windmill, code-server, Coder, and Matomo, see the <a href="https://docs.shani.dev/doc/servers/devtools#troubleshooting">Developer Tools wiki → Troubleshooting</a>.</blockquote>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Private registry push rejected</td><td>Add <code>unqualified-search-registries</code> to <code>/etc/containers/registries.conf</code>; restart Podman</td></tr><tr><td><code>kubectl: connection refused</code></td><td>Check <code>k3s</code>/<code>k0s</code> systemd service: <code>sudo systemctl status k3s</code>; verify kubeconfig <code>server:</code> IP is correct</td></tr><tr><td>MicroK8s <code>permission denied</code> on kubectl</td><td>Run <code>sudo usermod -aG microk8s $USER</code> then log out and back in</td></tr><tr><td>MicroK8s cluster data lost after snap refresh</td><td>Data is in <code>/var/snap/microk8s/</code> — loss only happens on <code>snap remove</code>, not <code>snap refresh</code></td></tr><tr><td>minikube start fails with Podman driver</td><td>Ensure Podman socket is active: <code>systemctl --user start podman.socket</code>; try <code>minikube delete</code> then re-create</td></tr><tr><td>Node shows <code>NotReady</code></td><td>Check CNI pods in <code>kube-system</code>; verify <code>br_netfilter</code> is loaded</td></tr><tr><td>Pod stuck in <code>CrashLoopBackOff</code></td><td>Run <code>kubectl logs &lt;pod&gt; --previous</code>; check env vars and volume mounts via <code>kubectl describe pod</code></td></tr><tr><td>Pod stuck in <code>ImagePullBackOff</code></td><td>Image name or tag wrong; registry unreachable; missing <code>imagePullSecret</code></td></tr><tr><td>Longhorn volume stuck <code>Attaching</code></td><td>Verify <code>iscsid</code> is running on all nodes: <code>sudo systemctl status iscsid</code></td></tr><tr><td>ArgoCD app OutOfSync after apply</td><td>Add <code>ignoreDifferences</code> to the Application spec for server-side mutated fields</td></tr><tr><td>Helm upgrade fails mid-release</td><td>Run <code>helm rollback &lt;release&gt; -n &lt;ns&gt;</code>; if stuck in <code>pending-upgrade</code>, delete the stuck secret</td></tr><tr><td>k9s shows no resources</td><td>Check active namespace with <code>:ns</code>; switch context with <code>:ctx</code></td></tr><tr><td>Velero backup failing</td><td>Check <code>velero backup logs &lt;n&gt;</code>; ensure MinIO bucket exists; verify pod has network access to MinIO</td></tr><tr><td>Sealed secret not decrypting</td><td>Do not delete the <code>sealed-secrets-key</code> secret in <code>kube-system</code>; back it up: <code>kubectl get secret -n kube-system sealed-secrets-key -o yaml</code></td></tr><tr><td>Crossplane provider stuck <code>Unhealthy</code></td><td>Check <code>kubectl describe provider &lt;n&gt;</code>; verify the provider credentials secret exists in the <code>crossplane-system</code> namespace</td></tr><tr><td>KEDA ScaledObject not scaling</td><td>Run <code>kubectl describe scaledobject &lt;n&gt;</code>; verify the trigger connection string is reachable from the KEDA operator pod; check <code>kubectl logs -n keda -l app=keda-operator</code></td></tr><tr><td>KEDA not scaling to zero</td><td>Ensure <code>minReplicaCount: 0</code> is set; some scalers (e.g. HTTP) require the <code>keda-add-ons-http</code> addon for scale-to-zero</td></tr><tr><td>Cilium pods <code>CrashLoopBackOff</code></td><td>Confirm k3s was started with <code>--flannel-backend=none --disable-kube-proxy</code>; run <code>cilium status</code> and <code>cilium connectivity test</code></td></tr><tr><td>Hubble observe shows no flows</td><td>Run <code>cilium hubble port-forward</code> first; confirm Hubble is enabled with <code>cilium hubble enable</code></td></tr><tr><td>Kyverno policy not enforcing</td><td>Check <code>validationFailureAction: Enforce</code> (not <code>Audit</code>); run <code>kubectl get policyreport -A</code> to see violations without enforcement</td></tr><tr><td>Falco not detecting events</td><td>Verify eBPF driver is loaded: <code>kubectl logs -n falco -l app=falco</code>; on some kernels try <code>driver.kind=module</code> instead of <code>ebpf</code></td></tr><tr><td>Falco too many false positives</td><td>Tune rules by adding <code>and not container.image.repository in (known-image)</code> conditions; start with <code>priority: WARNING</code> before <code>ERROR</code></td></tr><tr><td>OpenCost shows $0 for all workloads</td><td>Set custom pricing in the ConfigMap; verify Prometheus is scraping <code>node-exporter</code> and <code>kube-state-metrics</code> correctly</td></tr><tr><td>LitmusChaos experiment stuck in <code>Running</code></td><td>Check <code>kubectl get chaosengine</code> and <code>kubectl describe chaosengine</code>; verify the <code>litmus-admin</code> ServiceAccount exists in the target namespace</td></tr><tr><td>LitmusChaos probe verdict <code>Fail</code> unexpectedly</td><td>Confirm the Prometheus endpoint is reachable from within the cluster; check the PromQL query returns data with <code>kubectl exec -n litmus</code></td></tr><tr><td>tfsec scan exits non-zero in CI</td><td>Use <code>--severity HIGH</code> to only fail on high/critical; add inline <code>#tfsec:ignore:</code> annotations for accepted risks</td></tr><tr><td>Checkov <code>ModuleNotFoundError</code> on Helm charts</td><td>Install <code>checkov[all]</code> extras: <code>pip install 'checkov[all]' --break-system-packages</code></td></tr><tr><td>cosign sign fails <code>UNAUTHORIZED</code></td><td>Ensure the registry credentials are available: <code>podman login registry.home.local</code> before signing</td></tr><tr><td>Kyverno blocks all pods after adding verify policy</td><td>Switch <code>validationFailureAction</code> to <code>Audit</code> first; check <code>kubectl get policyreport -A</code> to review violations before enforcing</td></tr><tr><td>Terragrunt <code>Error: No parent terragrunt.hcl</code></td><td><code>find_in_parent_folders()</code> walks up the directory tree — ensure a root <code>terragrunt.hcl</code> exists above the current module directory</td></tr><tr><td>Terragrunt <code>run-all</code> applies in wrong order</td><td>Define <code>dependency</code> blocks in child <code>terragrunt.hcl</code> files; Terragrunt builds the DAG from these — missing dependencies mean unordered execution</td></tr><tr><td><code>hcloud server create</code> returns auth error</td><td>Token may have read-only permissions; ensure the API token has read/write scope in Hetzner Cloud Console → Security → API Tokens</td></tr><tr><td>cloud-init write_files not appearing</td><td>Verify <code>path</code> starts with <code>/</code> and <code>permissions</code> is a quoted string (<code>'0644'</code> not <code>0644</code>); check <code>journalctl -u cloud-init</code> on the VM for parse errors</td></tr><tr><td>cloud-init <code>runcmd</code> not executing</td><td><code>runcmd</code> runs as root; check <code>/var/log/cloud-init-output.log</code> on the VM; commands that exit non-zero abort subsequent commands unless wrapped in `</td><td></td><td>true`</td></tr></tbody></table>
+<hr>
+<h2 id="skaffold-local-kubernetes-dev-loop">Skaffold (Local Kubernetes Dev Loop)</h2>
+<p><strong>Purpose:</strong> Watches your source files, rebuilds container images on change, and redeploys to a local Kubernetes cluster (kind, minikube) automatically. Eliminates the manual <code>podman build → tag → push → kubectl apply</code> cycle during inner-loop development.</p>
+<pre><code class="language-bash"># Install via Nix
+nix-env -iA nixpkgs.skaffold
+
+# Initialise a skaffold.yaml in your project
+skaffold init
+
+# Start the dev loop (watches files, rebuilds, redeploys on save)
+skaffold dev
+
+# One-shot build and deploy
+skaffold run
+
+# Tear down everything skaffold deployed
+skaffold delete</code></pre>
+<h5 id="minimal-skaffoldyaml">Minimal <code>skaffold.yaml</code></h5>
+<pre><code class="language-yaml">apiVersion: skaffold/v4beta6
+kind: Config
+build:
+  artifacts:
+    - image: registry.home.local/myapp
+      docker:
+        dockerfile: Containerfile
+deploy:
+  kubectl:
+    manifests:
+      - k8s/*.yaml</code></pre>
+<hr>
+<h2 id="tilt-fast-multi-service-dev-workflow">Tilt (Fast Multi-Service Dev Workflow)</h2>
+<p><strong>Purpose:</strong> Like Skaffold but with a richer UI and a Python-like DSL (<code>Tiltfile</code>). Manages multiple services simultaneously — each gets its own build status, log stream, and live-update rules. Best for teams developing microservices locally on Kubernetes.</p>
+<pre><code class="language-bash"># Install via Nix
+nix-env -iA nixpkgs.tilt
+
+# Start Tilt
+tilt up
+
+# Tear down
+tilt down</code></pre>
+<h5 id="minimal-tiltfile">Minimal <code>Tiltfile</code></h5>
+<pre><code class="language-python">docker_build('registry.home.local/api', './api')
+docker_build('registry.home.local/worker', './worker')
+
+k8s_yaml(['k8s/api.yaml', 'k8s/worker.yaml'])
+
+k8s_resource('api', port_forwards='8080:8080')
+k8s_resource('worker', port_forwards='9000:9000')</code></pre>
+<hr>
+<h2 id="atlantis-terraform-pull-request-automation">Atlantis (Terraform Pull Request Automation)</h2>
+<p><strong>Purpose:</strong> Runs <code>tofu plan</code> on every PR that touches Terraform files and posts the output as a PR comment. When you comment <code>atlantis apply</code>, it runs the apply. Replaces manual CI/CD for IaC — gives teams a reviewable plan before any infrastructure changes.</p>
+<pre><code class="language-yaml"># ~/atlantis/compose.yaml
+services:
+  atlantis:
+    image: ghcr.io/runatlantis/atlantis:latest
+    ports:
+      - 127.0.0.1:4141:4141
+    environment:
+      ATLANTIS_REPO_ALLOWLIST: &quot;git.home.local/myorg/*&quot;
+      ATLANTIS_GITEA_USER: atlantis-bot
+      ATLANTIS_GITEA_TOKEN: &lt;gitea-personal-access-token&gt;
+      ATLANTIS_GITEA_WEBHOOK_SECRET: changeme
+      ATLANTIS_PORT: 4141
+      ATLANTIS_ATLANTIS_URL: https://atlantis.home.local
+    volumes:
+      - /home/user/atlantis/repos:/atlantis:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/atlantis &amp;&amp; podman-compose up -d</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">atlantis.home.local { tls internal; reverse_proxy localhost:4141 }</code></pre>
+<hr>
+<h2 id="key-concepts-devops-interviews">Key Concepts: DevOps Interviews</h2>
+<h4 id="the-three-ways-of-devops">The three ways of DevOps</h4>
+<p>From <em>The Phoenix Project</em>: (1) <strong>Flow</strong> — make work visible, limit WIP, reduce batch size, and eliminate waste in the delivery pipeline. (2) <strong>Feedback</strong> — amplify feedback loops so problems are caught early and close to their source. (3) <strong>Continual Learning</strong> — build a culture of experimentation, learning from failure, and knowledge sharing. These map directly to DORA metrics: Flow → Deployment Frequency and Lead Time; Feedback → Change Failure Rate and MTTR; Learning → Postmortems.</p>
+<h4 id="container-image-layering-and-build-performance">Container image layering and build performance</h4>
+<p>Each <code>RUN</code>, <code>COPY</code>, and <code>ADD</code> instruction creates a new image layer. Layers are cached by their content hash — if a layer changes, all subsequent layers are invalidated. Best practice: put rarely changing steps (OS packages, runtime install) near the top; frequently changing steps (application code) near the bottom. Multi-stage builds reduce the final image size by copying only build artefacts — the build tools (gcc, npm) are discarded.</p>
+<h4 id="gitops-vs-push-based-cd">GitOps vs push-based CD</h4>
+<p>Push-based CD has the pipeline call <code>kubectl apply</code> with cluster credentials. GitOps inverts this — ArgoCD or Flux watches the Git repo from inside the cluster and pulls changes. Benefits: Git is the single source of truth (every change is auditable), the cluster can self-heal by re-syncing, and the CI pipeline never needs direct cluster credentials (lower blast radius if CI is compromised).</p>
+<hr>
+<h2 id="k6-grafana-k6-load-testing">k6 / Grafana k6 (Load Testing)</h2>
+<p><strong>Purpose:</strong> Open-source load testing tool with a JavaScript scripting API. Write realistic traffic simulations in JS, run them locally or in CI, and push metrics directly into your existing Prometheus stack via remote-write — then visualise results in Grafana with the official k6 dashboard. Native companion to the Prometheus + Grafana stack already documented here.</p>
+<pre><code class="language-bash"># Install k6 via Nix
+nix-env -iA nixpkgs.k6
+
+# Or via Snap
+snap install k6</code></pre>
+<h4 id="basic-load-test-script-k6smoke-testjs">Basic load test script (<code>~/k6/smoke-test.js</code>)</h4>
+<pre><code class="language-javascript">import http from 'k6/http';
+import { check, sleep } from 'k6';
+
+export const options = {
+  stages: [
+    { duration: '1m', target: 20 },   // ramp up to 20 VUs
+    { duration: '3m', target: 20 },   // hold for 3 min
+    { duration: '1m', target: 0 },    // ramp down
+  ],
+  thresholds: {
+    http_req_failed: ['rate&lt;0.01'],           // &lt;1% errors
+    http_req_duration: ['p(95)&lt;500'],         // 95th percentile &lt; 500ms
+  },
+};
+
+export default function () {
+  const res = http.get('https://myapp.home.local/api/health');
+  check(res, { 'status is 200': (r) =&gt; r.status === 200 });
+  sleep(1);
+}</code></pre>
+<h5 id="run-locally">Run locally</h5>
+<pre><code class="language-bash">k6 run ~/k6/smoke-test.js
+
+# Run with more VUs and a duration override
+k6 run --vus 50 --duration 60s ~/k6/smoke-test.js</code></pre>
+<h4 id="push-results-to-prometheus-remote-write-to-victoriametrics-or-prometheus">Push results to Prometheus (remote-write to VictoriaMetrics or Prometheus)</h4>
+<pre><code class="language-bash"># Using the experimental Prometheus remote-write output
+K6_PROMETHEUS_RW_SERVER_URL=http://localhost:9090/api/v1/write \
+K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM=true \
+  k6 run --out=experimental-prometheus-rw ~/k6/smoke-test.js</code></pre>
+<h5 id="run-as-a-podman-container-in-ci-woodpecker-example">Run as a Podman container in CI (Woodpecker example)</h5>
+<pre><code class="language-yaml"># .woodpecker.yml
+steps:
+  load-test:
+    image: grafana/k6:latest
+    environment:
+      K6_PROMETHEUS_RW_SERVER_URL: http://prometheus.home.local:9090/api/v1/write
+    commands:
+      - k6 run --out=experimental-prometheus-rw /k6/smoke-test.js
+    volumes:
+      - /home/user/k6:/k6:ro</code></pre>
+<h4 id="import-the-k6-grafana-dashboard">Import the k6 Grafana dashboard</h4>
+<p>In Grafana → Dashboards → Import → Dashboard ID <strong>18030</strong> (official k6 Prometheus dashboard). This gives you p50/p95/p99 latency, VU count, request rate, and error rate per test run, all correlated with your application metrics.</p>
+<hr>
+<h2 id="toxiproxy-network-failure-simulation">Toxiproxy (Network Failure Simulation)</h2>
+<p><strong>Purpose:</strong> A programmable TCP proxy that injects network failures — latency, packet loss, bandwidth throttling, connection resets, and timeouts — between your services. Use Toxiproxy to test how your monitored services behave when dependencies are degraded: does Alertmanager fire? Do your Prometheus alerts have the right thresholds? Does your application retry correctly? Essential for chaos engineering and validating monitoring alert fidelity.</p>
+<pre><code class="language-yaml"># ~/toxiproxy/compose.yaml
+services:
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:latest
+    ports:
+      - &quot;127.0.0.1:8474:8474&quot;    # Toxiproxy REST API
+      - &quot;127.0.0.1:15432:15432&quot;  # proxied postgres (example)
+      - &quot;127.0.0.1:16379:16379&quot;  # proxied redis (example)
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/toxiproxy &amp;&amp; podman-compose up -d
+
+# Install the CLI
+nix-env -iA nixpkgs.toxiproxy   # or: go install github.com/Shopify/toxiproxy/v2/cli/toxiproxy-cli@latest</code></pre>
+<h5 id="create-proxies-for-your-services">Create proxies for your services</h5>
+<pre><code class="language-bash"># Proxy for Postgres (real Postgres at localhost:5432, proxied at localhost:15432)
+toxiproxy-cli create postgres --listen 0.0.0.0:15432 --upstream localhost:5432
+
+# Proxy for Redis
+toxiproxy-cli create redis --listen 0.0.0.0:16379 --upstream localhost:6379
+
+# List all proxies
+toxiproxy-cli list</code></pre>
+<h4 id="inject-failures-via-rest-api-or-cli">Inject failures via REST API or CLI</h4>
+<pre><code class="language-bash"># Add 200ms latency to all Postgres connections
+toxiproxy-cli toxic add postgres --type latency --attribute latency=200 --attribute jitter=50
+
+# Simulate 30% packet loss on Redis
+toxiproxy-cli toxic add redis --type slicer --attribute average_size=1 --attribute delay_us=0
+
+# Bandwidth throttle to 100 KB/s (simulates slow link)
+toxiproxy-cli toxic add postgres --type bandwidth --attribute rate=100
+
+# Timeout — close connections after 2s of inactivity
+toxiproxy-cli toxic add postgres --type timeout --attribute timeout=2000
+
+# Remove a toxic
+toxiproxy-cli toxic remove postgres --toxicName latency_downstream
+
+# Take a proxy completely offline (simulates full outage)
+toxiproxy-cli toggle postgres</code></pre>
+<h4 id="use-in-integration-tests-python-example">Use in integration tests (Python example)</h4>
+<pre><code class="language-python">import requests
+
+TOXIPROXY_API = &quot;http://localhost:8474&quot;
+
+def add_latency(proxy_name, latency_ms):
+    requests.post(f&quot;{TOXIPROXY_API}/proxies/{proxy_name}/toxics&quot;, json={
+        &quot;type&quot;: &quot;latency&quot;, &quot;name&quot;: &quot;db_slow&quot;,
+        &quot;attributes&quot;: {&quot;latency&quot;: latency_ms, &quot;jitter&quot;: 10}
+    })
+
+def remove_toxic(proxy_name, toxic_name):
+    requests.delete(f&quot;{TOXIPROXY_API}/proxies/{proxy_name}/toxics/{toxic_name}&quot;)
+
+# In your test:
+add_latency(&quot;postgres&quot;, 500)
+# ... run test that should degrade gracefully ...
+remove_toxic(&quot;postgres&quot;, &quot;db_slow&quot;)</code></pre>
+<blockquote>Pair Toxiproxy with your Prometheus + Alertmanager stack: inject a fault, verify the correct alert fires within the expected <code>for:</code> duration, then check that it resolves when you remove the toxic. This validates your alert thresholds are calibrated to actual failure modes rather than theoretical ones.</blockquote>
+<hr>
+<hr>
+<h2 id="container-image-tools">Container & Image Tools</h2>
+<h3 id="private-container-registry">Private Container Registry</h3>
+<p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#private-container-registry">Developer Tools wiki → Private Container Registry</a>.</p>
+<pre><code class="language-bash"># Tag and push
+podman tag myimage localhost:5000/myimage:latest
+podman push localhost:5000/myimage:latest</code></pre>
+<p>Add <code>unqualified-search-registries = [&quot;localhost:5000&quot;]</code> to <code>/etc/containers/registries.conf</code> to allow unverified pushes in development.</p>
+<hr>
+<h3 id="harbor-enterprise-container-registry">Harbor (Enterprise Container Registry)</h3>
+<p>For compose file (official installer) and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#harbor-enterprise-container-registry">Developer Tools wiki → Harbor</a>.</p>
+<pre><code class="language-bash"># Push images
+podman login registry.home.local
+podman tag myapp:latest registry.home.local/myproject/myapp:latest
+podman push registry.home.local/myproject/myapp:latest</code></pre>
+<h4 id="woodpecker-ci-push-step">Woodpecker CI push step</h4>
+<pre><code class="language-yaml"># .woodpecker.yml
+steps:
+  build-and-push:
+    image: woodpeckerci/plugin-docker-buildx
+    settings:
+      registry: registry.home.local
+      repo: registry.home.local/myproject/myapp
+      username:
+        from_secret: harbor_user
+      password:
+        from_secret: harbor_password
+      tags: [latest, &quot;${CI_COMMIT_SHA}&quot;]</code></pre>
+<hr>
+<h3 id="buildah-skopeo-oci-image-tools">Buildah & Skopeo (OCI Image Tools)</h3>
+<p><strong>Purpose:</strong> Buildah builds OCI images without a daemon and without root — perfect for rootless CI. Skopeo inspects, copies, and signs images across registries without pulling them fully.</p>
+<pre><code class="language-bash"># Install via Nix (primary)
+nix-env -iA nixpkgs.buildah nixpkgs.skopeo</code></pre>
+<h4 id="buildah">Buildah</h4>
+<pre><code class="language-bash"># Build from a Containerfile
+buildah build -t myapp:latest .
+
+# Scripted build (no Containerfile)
+ctr=$(buildah from alpine:latest)
+buildah run $ctr -- apk add --no-cache python3
+buildah config --entrypoint '[&quot;python3&quot;, &quot;-m&quot;, &quot;http.server&quot;]' $ctr
+buildah commit $ctr myapp:latest
+buildah rm $ctr
+
+# Push to registry
+buildah push myapp:latest docker://localhost:5000/myapp:latest</code></pre>
+<h4 id="skopeo">Skopeo</h4>
+<pre><code class="language-bash"># Inspect without pulling
+skopeo inspect docker://nginx:alpine
+
+# Copy between registries (no full pull)
+skopeo copy docker://nginx:alpine docker://localhost:5000/nginx:alpine
+
+# Copy all tags
+skopeo copy --all docker://nginx docker://localhost:5000/nginx
+
+# Delete from registry
+skopeo delete docker://localhost:5000/myapp:old
+
+# Sync an entire repo to a local mirror
+skopeo sync --src docker --dest dir nginx:alpine /tmp/mirror/</code></pre>
+<hr>
+<h3 id="mailpit-email-testing">Mailpit (Email Testing)</h3>
+<p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#mailpit-email-testing">Developer Tools wiki → Mailpit</a>.</p>
+<hr>
+<h2 id="kubernetes-orchestration">Kubernetes & Orchestration</h2>
+<p>For all Kubernetes distributions (k3s, k0s, MicroK8s, RKE2, Talos), cluster management, GitOps tooling, ingress, storage, and platform engineering tools, see the <a href="https://docs.shani.dev/doc/servers/kubernetes/overview">Kubernetes & Container Orchestration wiki</a>.</p>
+<hr>
+<h2 id="ha-clusters">HA Clusters</h2>
+<p>All HA cluster compose files (PostgreSQL/Patroni, Redis Sentinel, Valkey Cluster, MongoDB, Kafka, Cassandra, ScyllaDB, RabbitMQ, Elasticsearch, OpenSearch, VictoriaMetrics, etcd) are in the dedicated <a href="https://docs.shani.dev/doc/servers/clusters">Clusters wiki</a>.</p>
+<h3 id="choosing-the-right-ha-strategy">Choosing the Right HA Strategy</h3>
+<table><thead><tr><th>Service</th><th>Strategy</th><th>Compose Path</th><th>Tolerates Node Loss</th></tr></thead><tbody><tr><td>PostgreSQL</td><td>Patroni + etcd + HAProxy</td><td><code>~/patroni/</code></td><td>1 of 2</td></tr><tr><td>Redis / Valkey</td><td>Sentinel (3 sentinels + replicas)</td><td><code>~/redis-sentinel/</code></td><td>1 of 3</td></tr><tr><td>Redis / Valkey</td><td>Native Cluster (6 nodes, 3+3)</td><td><code>~/valkey-cluster/</code></td><td>1 per shard</td></tr><tr><td>MongoDB</td><td>Replica Set (3 nodes)</td><td><code>~/mongodb-rs/</code></td><td>1 of 3</td></tr><tr><td>Kafka</td><td>KRaft (3 nodes)</td><td><code>~/kafka-cluster/</code></td><td>1 of 3</td></tr><tr><td>Cassandra</td><td>Ring (3 nodes, RF=3)</td><td><code>~/cassandra-cluster/</code></td><td>1 of 3</td></tr><tr><td>ScyllaDB</td><td>Ring (3 nodes, RF=3)</td><td><code>~/scylladb-cluster/</code></td><td>1 of 3</td></tr><tr><td>RabbitMQ</td><td>Cluster + Quorum Queues</td><td><code>~/rabbitmq-cluster/</code></td><td>1 of 3</td></tr><tr><td>Elasticsearch</td><td>3-node master/data</td><td><code>~/elk-cluster/</code></td><td>1 of 3</td></tr><tr><td>OpenSearch</td><td>3-node cluster manager</td><td><code>~/opensearch-cluster/</code></td><td>1 of 3</td></tr><tr><td>VictoriaMetrics</td><td>vminsert/vmselect/vmstorage</td><td><code>~/victoriametrics-cluster/</code></td><td>1 of 2 storage</td></tr><tr><td>etcd</td><td>3-node Raft</td><td><code>~/etcd-cluster/</code></td><td>1 of 3</td></tr></tbody></table>
+<hr>
+<hr>
+<h2 id="nginx-apache-httpd">Nginx & Apache HTTPD</h2>
+<p><strong>Purpose:</strong> High-performance web servers and reverse proxies. Nginx excels at static content and proxying; Apache provides <code>.htaccess</code> support. Use these when you need full server-level config, not just a reverse proxy.</p>
+<pre><code class="language-yaml"># ~/nginx/compose.yaml
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - 127.0.0.1:8081:80
+    volumes:
+      - /home/user/www:/usr/share/nginx/html:ro,Z
+      - /home/user/nginx.conf:/etc/nginx/nginx.conf:ro,Z
+    restart: unless-stopped
+  apache:
+    image: httpd:alpine
+    ports:
+      - 127.0.0.1:8082:80
+    volumes:
+      - /home/user/www:/usr/local/apache2/htdocs:ro,Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/nginx &amp;&amp; podman-compose up -d</code></pre>
+<hr></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

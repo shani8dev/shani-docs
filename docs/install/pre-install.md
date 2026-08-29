@@ -1,7 +1,7 @@
 ---
 title: Pre-Installation Setup
 section: Installation
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # Pre-Installation Setup
@@ -12,20 +12,22 @@ Configure your firmware before installation (typically accessed via F2, F10, Del
 
 1. **Enable UEFI Boot** — Disable legacy/CSM mode. Shanios requires UEFI.
 2. **Disable Fast Boot** — Fast Boot can interfere with USB boot and Linux installation.
-3. **Secure Boot can stay enabled** — Shanios's installer media is pre-signed with its MOK (Machine Owner Key). If Secure Boot is on, firmware will launch **MokManager** automatically the first time you boot the USB, letting you enroll the key from disk before the live environment starts. If you'd rather skip that extra step during installation, disable Secure Boot temporarily and enroll the key later — the installer stages MOK enrollment for the installed system automatically (see [First Boot](./first-boot)).
+3. **Secure Boot can stay enabled** — Shanios's installer media is pre-signed with its MOK (Machine Owner Key). If Secure Boot is on, firmware will launch **MokManager** automatically the first time you boot the USB, letting you enroll the key from disk before the live environment starts. If you'd rather skip that extra step during installation, disable Secure Boot temporarily and enroll the key later — the installer stages MOK enrollment for the installed system automatically (see [First Boot](./first-boot.md)).
 4. **Set SATA Mode to AHCI** — Ensures optimal disk performance and compatibility.
 5. **Enable Virtualization** — Enable Intel VT-x or AMD-V for container support.
 
 ## Downloading & Verifying the ISO
 
-Download the Shanios ISO from [shani.dev](https://shani.dev) or directly from SourceForge:
+Download the Shanios ISO from [shani.dev](https://shani.dev) (primary, served from Cloudflare R2). SourceForge mirrors the base images and past releases.
 
-- **GNOME Edition** (2026.04.01, ~5.4 GB):
-  [ISO](https://sourceforge.net/projects/shanios/files/gnome/20260401/) ·
-  SHA256 · GPG signature · Torrent
-- **KDE Plasma Edition** (2026.04.01, ~7.6 GB):
-  [ISO](https://sourceforge.net/projects/shanios/files/plasma/20260401/) ·
-  SHA256 · GPG signature · Torrent
+- **GNOME Edition** (2026.05.18, ~5.4 GB):
+  [ISO](https://downloads.shani.dev/gnome/20260518/signed_shanios-gnome-2026.05.18-x86_64.iso) ·
+  [SHA256](https://downloads.shani.dev/gnome/20260518/signed_shanios-gnome-2026.05.18-x86_64.iso.sha256) · [GPG signature](https://downloads.shani.dev/gnome/20260518/signed_shanios-gnome-2026.05.18-x86_64.iso.asc)
+- **KDE Plasma Edition** (2026.05.18, ~7.6 GB):
+  [ISO](https://downloads.shani.dev/plasma/20260518/signed_shanios-plasma-2026.05.18-x86_64.iso) ·
+  [SHA256](https://downloads.shani.dev/plasma/20260518/signed_shanios-plasma-2026.05.18-x86_64.iso.sha256) · [GPG signature](https://downloads.shani.dev/plasma/20260518/signed_shanios-plasma-2026.05.18-x86_64.iso.asc)
+
+> **COSMIC, Kiosk, and Server** profiles are available as base images (`.zst` send-streams) only — they do not have signed install ISOs. See [Cloud Images Beyond AWS](../enterprise/cloud-images.md) for how to deploy these profiles.
 
 > There is no separate "Server" ISO. A server image profile exists but is only built as a cloud image (AWS AMI via the packer pipeline), not as installable install media.
 
@@ -37,21 +39,21 @@ Download the Shanios ISO from [shani.dev](https://shani.dev) or directly from So
 # GNOME edition — substitute the Plasma filename for that edition
 
 # 1. Verify checksum
-sha256sum -c signed_shanios-gnome-2026.04.01-x86_64.iso.sha256
+sha256sum -c signed_shanios-gnome-2026.05.18-x86_64.iso.sha256
 
 # 2. Import the Shanios signing key (once)
 gpg --keyserver keys.openpgp.org --recv-keys 7B927BFFD4A9EAAA8B666B77DE217F3DA8014792
 
 # 3. Verify GPG signature
-gpg --verify signed_shanios-gnome-2026.04.01-x86_64.iso.asc signed_shanios-gnome-2026.04.01-x86_64.iso
+gpg --verify signed_shanios-gnome-2026.05.18-x86_64.iso.asc signed_shanios-gnome-2026.05.18-x86_64.iso
 ```
 
-SHA256 expected output: `signed_shanios-gnome-2026.04.01-x86_64.iso: OK`. GPG should report `Good signature from "Shani OS"`. Any other result means the download is corrupt or tampered — delete it and re-download.
+SHA256 expected output: `signed_shanios-gnome-2026.05.18-x86_64.iso: OK`. GPG should report `Good signature from "Shani OS"`. Any other result means the download is corrupt or tampered — delete it and re-download.
 
 ### Windows (PowerShell) — Verify SHA256
 
 ```powershell
-Get-FileHash signed_shanios-gnome-2026.04.01-x86_64.iso -Algorithm SHA256
+Get-FileHash signed_shanios-gnome-2026.05.18-x86_64.iso -Algorithm SHA256
 ```
 
 Compare the output hash against the contents of the downloaded `.sha256` file — they must match exactly.
@@ -67,7 +69,14 @@ Compare the output hash against the contents of the downloaded `.sha256` file �
 lsblk
 
 # Write (replace /dev/sdX with your actual USB device, e.g. /dev/sdb)
-sudo dd bs=4M if=signed_shanios-gnome-2026.04.01-x86_64.iso of=/dev/sdX status=progress oflag=sync
+sudo dd bs=4M if=signed_shanios-gnome-2026.05.18-x86_64.iso of=/dev/sdX status=progress oflag=sync
 ```
 
 > **Do not use Ventoy.** Ventoy's ISO mounting method conflicts with Shanios's bootloader and will cause installation failures. Use Balena Etcher or Rufus instead.
+
+## See Also
+
+- [Installation Steps](steps)
+- [System Requirements](requirements)
+- [First Boot](first-boot)
+- [LUKS after installation](https://blog.shani.dev/post/shani-os-luks-after-installation)

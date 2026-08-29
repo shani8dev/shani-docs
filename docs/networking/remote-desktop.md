@@ -1,7 +1,7 @@
 ---
 title: Remote Desktop
 section: Networking
-updated: 2026-04-18
+updated: 2026-08-28
 ---
 
 # Remote Desktop — RDP & VNC
@@ -107,3 +107,10 @@ sudo firewall-cmd --reload
 | Poor performance / lag | Use RDP instead of VNC for LAN connections — RDP is hardware-accelerated; for VNC, enable compression in your viewer |
 | Windows RDP client shows certificate warning | This is expected for self-signed certificates — accept and remember the certificate |
 | krfb prompts "someone is trying to connect" every time | Disable confirmation in **System Settings → Remote Desktop → Ask for confirmation** |
+
+## See Also
+
+- [SSH Server](openssh) — remote access and tunneling
+- [Tailscale](tailscale) — VPN-based remote access
+- [WireGuard](wireguard) — VPN tunnel setup
+- [Firewall](firewalld) — port configuration

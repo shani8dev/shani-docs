@@ -1,7 +1,7 @@
 ---
 title: Firmware Updates (fwupd)
 section: Security
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Firmware Updates — fwupd
@@ -101,4 +101,4 @@ sudo systemctl disable --now fwupd-refresh.timer
 - [TPM2 Enrollment](tpm2) — re-enrollment required after firmware updates
 - [Secure Boot](secure-boot) — firmware update interaction with Secure Boot
 - [Security Features](features) — security stack overview
-- [shani-health Reference](../updates/shani-health) — `shani-health --hardware` reports `fwupd.service`/`fwupd-refresh.timer` status and any pending firmware updates
+- [shani-health Reference](../updates/shani-health.md) — `shani-health --hardware` reports `fwupd.service`/`fwupd-refresh.timer` status and any pending firmware updates

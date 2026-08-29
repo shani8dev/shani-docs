@@ -1,8 +1,7 @@
 ---
-
 title: Backups & Storage
 section: Self-Hosting & Servers
-updated: 2026-04-21
+updated: 2026-08-28
 ---
 
 > **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
@@ -807,3 +806,9 @@ duplicati.home.local { tls internal; reverse_proxy localhost:8200 }
 minio.home.local   { tls internal; reverse_proxy localhost:9001 }
 restic.home.local  { tls internal; reverse_proxy localhost:8000 }
 ```
+
+## See Also
+
+- [Btrfs snapshots guide](https://blog.shani.dev/post/shani-os-btrfs-snapshots-and-backup)
+- [Monitoring (Healthchecks)](monitoring)
+- [Storage management](../system/storage.md)

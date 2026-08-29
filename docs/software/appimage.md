@@ -1,7 +1,7 @@
 ---
 title: AppImage
 section: Software & Apps
-updated: 2026-04-01
+updated: 2026-08-28
 ---
 
 # AppImage
@@ -81,3 +81,10 @@ AppImages and their data live entirely in your home directory — they are unaff
 ## Sandboxing
 
 Unlike Flatpak, AppImages are **not sandboxed** by default. They run with the same permissions as your user. For untrusted AppImages, consider running them inside a Distrobox container.
+
+## See Also
+
+- [Flatpak](flatpak) — sandboxed app store
+- [Bottles](bottles) — Wine-based Windows app compatibility
+- [Gaming](gaming) — Steam, Proton, game controllers
+- [Immutability](../concepts/immutability.md) — how AppImages persist on an immutable OS

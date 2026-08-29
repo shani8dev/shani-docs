@@ -1,7 +1,7 @@
 ---
 title: Business Intelligence & Analytics
 section: Self-Hosting & Servers
-updated: 2026-04-22
+updated: 2026-08-28
 ---
 
 # Business Intelligence & Analytics
@@ -149,7 +149,7 @@ volumes:
 cd ~/superset && podman-compose up -d
 ```
 
-Access at `http://localhost:8088`.
+Access at `http://localhost:8088`. Health check: `curl localhost:8088/health` returns `true` once the app is ready.
 
 **SQL Lab:** — the built-in IDE supports multi-tab SQL editing, query history, schema explorer, result export to CSV/Excel, and saved queries shared across the team. It is a full replacement for tools like DBeaver for query work.
 
@@ -240,6 +240,18 @@ services:
 cd ~/evidence && podman-compose up -d
 ```
 
+##### Build the site first (required)
+
+Evidence is a build tool first — the container only serves static output. Scaffold a project, preview it, then produce the production build:
+
+```bash
+npm init evidence@latest   # scaffold a new project (or clone github.com/evidence-dev/evidence starter)
+npx evidence dev           # live dev preview with hot reload at localhost:3000
+npx evidence build         # production build — outputs to build/
+```
+
+The nginx container above serves `/home/user/evidence/build` — an empty or missing `build/` directory means an empty site.
+
 ##### Example report page (`pages/sales.md`)
 
 ```markdown
@@ -263,88 +275,8 @@ Total orders last 12 months: **<Value data={orders_by_month} column=orders fmt=n
 
 ## ClickHouse (OLAP Database)
 
-**Purpose:** Columnar OLAP database that executes analytical queries orders of magnitude faster than row-oriented databases. If you are running Metabase or Superset against a PostgreSQL table with hundreds of millions of rows and queries are slow, ClickHouse is the answer. Used by Cloudflare, Uber, and Bytedance for petabyte-scale analytics.
+**Purpose:** Columnar OLAP database that executes analytical queries orders of magnitude faster than row-oriented databases — the storage backend of choice when Metabase or Superset queries against Postgres get slow at hundreds of millions of rows. Full setup and compose file: [Databases wiki → ClickHouse](https://docs.shani.dev/doc/servers/databases/other#clickhouse-columnar-olap-database).
 
-```yaml
-# ~/clickhouse/compose.yaml
-services:
-  clickhouse:
-    image: clickhouse/clickhouse-server:latest
-    ports:
-      - "127.0.0.1:8123:8123"
-      - "127.0.0.1:9000:9000"
-    volumes:
-      - /home/user/clickhouse/data:/var/lib/clickhouse:Z
-      - /home/user/clickhouse/logs:/var/log/clickhouse-server:Z
-    environment:
-      CLICKHOUSE_USER: admin
-      CLICKHOUSE_PASSWORD: changeme
-      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
-    ulimits:
-      nofile:
-        soft: 262144
-        hard: 262144
-    restart: unless-stopped
-```
-
-```bash
-cd ~/clickhouse && podman-compose up -d
-```
-
-##### Connect and run queries
-
-```bash
-podman exec -it clickhouse clickhouse-client --user admin --password changeme
-
--- Create a table and insert data
-CREATE TABLE events (
-  event_date Date,
-  event_type String,
-  user_id UInt64,
-  properties String
-) ENGINE = MergeTree()
-PARTITION BY toYYYYMM(event_date)
-ORDER BY (event_date, event_type, user_id);
-
--- ClickHouse can ingest from Kafka directly
-CREATE TABLE kafka_events (...)
-ENGINE = Kafka
-SETTINGS kafka_broker_list = 'localhost:9092',
-         kafka_topic_list = 'events',
-         kafka_group_name = 'clickhouse',
-         kafka_format = 'JSONEachRow';
-```
-
-#### Common operations
-```bash
-# Connect to ClickHouse SQL shell
-podman exec -it clickhouse clickhouse-client --user admin --password changeme
-
-# Run a query non-interactively
-podman exec clickhouse clickhouse-client --user admin --password changeme   --query "SELECT count() FROM system.tables"
-
-# Show all databases
-podman exec clickhouse clickhouse-client --user admin --password changeme   --query "SHOW DATABASES"
-
-# Show tables in a database
-podman exec clickhouse clickhouse-client --user admin --password changeme   --query "SHOW TABLES FROM default"
-
-# Ingest CSV data
-cat data.csv | podman exec -i clickhouse clickhouse-client   --user admin --password changeme   --query "INSERT INTO mydb.mytable FORMAT CSV"
-
-# Check disk usage per table
-podman exec clickhouse clickhouse-client --user admin --password changeme   --query "SELECT table, formatReadableSize(sum(bytes)) FROM system.parts GROUP BY table ORDER BY sum(bytes) DESC"
-
-# View running queries
-podman exec clickhouse clickhouse-client --user admin --password changeme   --query "SELECT query_id, elapsed, query FROM system.processes"
-
-# Kill a long-running query
-podman exec clickhouse clickhouse-client --user admin --password changeme   --query "KILL QUERY WHERE query_id='abc123'"
-```
-
-> Connect Metabase or Superset to ClickHouse to get sub-second query times on datasets that would take minutes in PostgreSQL.
-
----
 
 ## Lightdash (dbt-Native BI)
 
@@ -385,6 +317,8 @@ volumes:
 ```bash
 cd ~/lightdash && podman-compose up -d
 ```
+
+Access at `http://localhost:8080`. Health check: `curl localhost:8080/api/v1/health`.
 
 ---
 
@@ -466,6 +400,8 @@ volumes: {pg_data: {}}
 cd ~/umami && podman-compose up -d
 ```
 
+> Default login: `admin` / `umami` — change the password immediately under **Settings → Profile**.
+
 ---
 
 ## Choosing the Right Tool
@@ -510,3 +446,55 @@ lightdash.home.local   { tls internal; reverse_proxy localhost:8080 }
 | Evidence build fails | Ensure your database credentials in `sources/` are correct; run `npm run sources` to retest connections |
 
 > 💡 **Tip:** For the best Metabase experience, connect it to a **read replica** of your production database rather than the primary — long-running analytical queries won't block application writes.
+
+---
+
+## Matomo (Web Analytics)
+
+**Purpose:** The leading open-source web analytics platform — a complete, self-hosted Google Analytics replacement. Tracks pageviews, sessions, bounce rate, goal conversions, funnels, heatmaps (with plugin), and e-commerce. GDPR-compliant by default when configured correctly. Unlike Plausible or Umami, Matomo tracks individual visitor sessions for deep funnel analysis.
+
+```yaml
+# ~/matomo/compose.yml
+services:
+  matomo:
+    image: matomo:latest
+    ports: ["127.0.0.1:8500:80"]
+    environment:
+      MATOMO_DATABASE_HOST: db
+      MATOMO_DATABASE_ADAPTER: mysql
+      MATOMO_DATABASE_DBNAME: matomo
+      MATOMO_DATABASE_USERNAME: matomo
+      MATOMO_DATABASE_PASSWORD: changeme
+    volumes:
+      - /home/user/matomo/data:/var/www/html:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: matomo
+      MYSQL_USER: matomo
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  db_data:
+```
+
+```bash
+cd ~/matomo && podman-compose up -d
+```
+
+Access at `http://localhost:8500` to complete the setup wizard. Add the tracking snippet to your sites.
+
+> **Choosing between Matomo, Plausible, and Umami:** Matomo is the choice when you need session-level tracking, funnel analysis, and A/B testing. Use Plausible or Umami for privacy-first aggregate-only analytics with no cookies.
+
+---
+
+## See Also
+
+- [Databases](databases)
+- [Monitoring (Grafana)](monitoring)

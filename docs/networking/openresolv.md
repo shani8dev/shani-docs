@@ -1,7 +1,7 @@
 ---
 title: openresolv (DNS)
 section: Networking
-updated: 2026-04-18
+updated: 2026-08-28
 ---
 
 # openresolv — DNS Resolution Management
@@ -141,3 +141,8 @@ sudo resolvconf -u
 | `/etc/resolv.conf` shows only 127.0.0.1 | This is correct when dnsmasq is set as `name_servers=127.0.0.1`; check that dnsmasq is running: `systemctl status dnsmasq` |
 | Tailscale MagicDNS not resolving | Confirm `tailscale0` appears in `resolvconf -l`; ensure `--accept-dns=true` was passed to `tailscale up` |
 | DNS slow after switching networks | Enable dnsmasq as a local cache (`name_servers=127.0.0.1`) to avoid cold-start latency on every lookup |
+
+## See Also
+
+- [dnsmasq integration](dnsmasq)
+- [dnscrypt-proxy](dnscrypt-proxy)

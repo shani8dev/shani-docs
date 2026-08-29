@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Backup &amp; Recovery — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Backup &amp; Recovery  Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User data and container state must be backed up independently…">
+  <meta name="description" id="meta-desc"     content="Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User data and container state must be backed up independently to protect against…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Backup &amp; Recovery">
-  <meta property="og:description" id="og-desc"    content="Backup &amp; Recovery  Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User data and container state must be backed up independently…">
+  <meta property="og:description" id="og-desc"    content="Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User data and container state must be backed up independently to protect against…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/system/backup/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Backup &amp; Recovery">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Backup &amp; Recovery">
-  <meta name="twitter:description" id="tw-desc"  content="Backup &amp; Recovery  Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User data and container state must be backed up independently…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User data and container state must be backed up independently to protect against…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Backup & Recovery","description":"Backup & Recovery  Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User data and container state must be backed up independently…","url":"https://docs.shani.dev/doc/system/backup/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Backup & Recovery","description":"Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User data and container state must be backed up independently to protect against…","url":"https://docs.shani.dev/doc/system/backup/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Backup & Recovery","item":"https://docs.shani.dev/doc/system/backup/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,27 +215,27 @@
         <h1 class="doc-title">Backup &amp; Recovery</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">System</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. <strong>User data and container state must be backed up independently</strong> to protect against drive failure, accidental deletion, or corruption.</p>
 <p>The recommended backup stack is <strong>restic</strong> (encrypted, incremental, deduplicated) combined with <strong>rclone</strong> (cloud storage transport). Both are pre-installed. restic configuration persists in <code>/data/varlib/restic</code> and rclone configuration in <code>/data/varlib/rclone</code> — both survive OS updates.</p>
 <p><strong>GUI alternative:</strong> if you'd rather not use the terminal, <strong>Deja Dup</strong> (pre-installed on GNOME) and <strong>KBackup</strong> (pre-installed on KDE Plasma) both provide simple scheduled backups to a local folder, external drive, or cloud storage through a graphical wizard. They're less flexible than restic/rclone (no client-side dedup, more limited destination support) but require no configuration file editing.</p>
-<p>---</p>
-<h2>Snapshots vs Backups: The Critical Distinction</h2>
+<hr>
+<h2 id="snapshots-vs-backups-the-critical-distinction">Snapshots vs Backups: The Critical Distinction</h2>
 <p>A <strong>Btrfs snapshot</strong> is a point-in-time copy stored on the <strong>same disk</strong>. If your disk fails, you lose both the data and its snapshots. Snapshots protect against accidental deletion and corruption — not hardware failure.</p>
 <p>A <strong>backup</strong> is a copy stored <strong>somewhere else</strong> — an external drive, a NAS, a cloud service. Backups protect against hardware failure, theft, fire, and anything that destroys the primary disk.</p>
-<blockquote><p>You need both. Snapshots for quick local recovery; off-device backups for disaster recovery.</p></blockquote>
-<p>---</p>
-<h2>What to Back Up</h2>
-<p>| Path | Subvolume | Priority | Notes | |------|-----------|----------|-------| | <code>/home</code> | <code>@home</code> | 🔴 Critical | User files, configs, SSH/GPG keys | | <code>/var/lib/containers</code> | <code>@containers</code> | 🟠 High | Podman/Distrobox images, volumes, layers | | <code>/var/lib/waydroid</code> | <code>@waydroid</code> | 🟠 High | Android apps, data, system image | | <code>/var/lib/lxd</code> | <code>@lxd</code> | 🟠 High | LXD system containers | | <code>/var/lib/flatpak</code> | <code>@flatpak</code> | 🟡 Medium | Flatpak runtimes & apps (re-installable) |</p>
+<blockquote>You need both. Snapshots for quick local recovery; off-device backups for disaster recovery.</blockquote>
+<hr>
+<h2 id="what-to-back-up">What to Back Up</h2>
+<table><thead><tr><th>Path</th><th>Subvolume</th><th>Priority</th><th>Notes</th></tr></thead><tbody><tr><td><code>/home</code></td><td><code>@home</code></td><td>🔴 Critical</td><td>User files, configs, SSH/GPG keys</td></tr><tr><td><code>/var/lib/containers</code></td><td><code>@containers</code></td><td>🟠 High</td><td>Podman/Distrobox images, volumes, layers</td></tr><tr><td><code>/var/lib/waydroid</code></td><td><code>@waydroid</code></td><td>🟠 High</td><td>Android apps, data, system image</td></tr><tr><td><code>/var/lib/lxd</code></td><td><code>@lxd</code></td><td>🟠 High</td><td>LXD system containers</td></tr><tr><td><code>/var/lib/flatpak</code></td><td><code>@flatpak</code></td><td>🟡 Medium</td><td>Flatpak runtimes & apps (re-installable)</td></tr></tbody></table>
 <p>The OS itself does not need to be backed up — <code>shani-deploy</code> downloads a fresh verified image when needed, and the previous slot is always available for rollback.</p>
 <p>Before every update, <code>shani-deploy</code> also takes its own Btrfs backup snapshot of the candidate slot (e.g. <code>@blue_backup_&lt;timestamp&gt;</code>) so it can automatically roll back if the new slot fails to boot. These update-time snapshots are pruned automatically after a successful deployment, or on demand with <code>sudo shani-deploy -c</code> (cleanup of old backup snapshots and stale downloads). This is insurance for the update mechanism itself — it is <strong>not</strong> a substitute for backing up <code>/home</code> and container data as described below.</p>
-<blockquote><p>⚠️ <strong>Btrfs snapshots are not backups.</strong> The rollback snapshots created by <code>shani-deploy</code> reside on the same physical drive. A drive failure destroys both the live data and all snapshots simultaneously.</p></blockquote>
-<p>---</p>
-<h2>1. Btrfs Snapshots (Local, Instant Recovery)</h2>
+<blockquote>⚠️ <strong>Btrfs snapshots are not backups.</strong> The rollback snapshots created by <code>shani-deploy</code> reside on the same physical drive. A drive failure destroys both the live data and all snapshots simultaneously.</blockquote>
+<hr>
+<h2 id="1-btrfs-snapshots-local-instant-recovery">1. Btrfs Snapshots (Local, Instant Recovery)</h2>
 <p>Btrfs snapshots are near-instantaneous and use minimal space — only files that change after the snapshot consume new space.</p>
-<h3>Taking a Snapshot</h3>
+<h3 id="taking-a-snapshot">Taking a Snapshot</h3>
 <pre><code class="language-bash">sudo mkdir -p /data/snapshots/home
 
 # Read-only snapshot (preferred — immutable reference point)
@@ -241,15 +243,15 @@ sudo btrfs subvolume snapshot -r /home /data/snapshots/home/home-$(date +%Y%m%d-
 
 # Writable snapshot (for testing — experiment, then delete)
 sudo btrfs subvolume snapshot /home /data/snapshots/home/home-writable-$(date +%Y%m%d)</code></pre>
-<h3>Restoring from a Snapshot</h3>
+<h3 id="restoring-from-a-snapshot">Restoring from a Snapshot</h3>
 <p><strong>Restoring a specific file:</strong></p>
 <pre><code class="language-bash">cp /data/snapshots/home/home-20260427-1430/Documents/important.pdf ~/Documents/</code></pre>
 <p><strong>Restoring the entire home directory</strong> (boot from the other slot or a live USB):</p>
 <pre><code class="language-bash">sudo btrfs subvolume delete /home
 sudo btrfs subvolume snapshot /data/snapshots/home/home-20260427-1430 /home</code></pre>
-<h3>Deleting Old Snapshots</h3>
+<h3 id="deleting-old-snapshots">Deleting Old Snapshots</h3>
 <pre><code class="language-bash">sudo btrfs subvolume delete /data/snapshots/home/home-20260420-0900</code></pre>
-<h3>Automating Daily Snapshots</h3>
+<h3 id="automating-daily-snapshots">Automating Daily Snapshots</h3>
 <pre><code class="language-bash">sudo tee /etc/systemd/system/home-snapshot.service &lt;&lt; 'EOF'
 [Unit]
 Description=Daily home directory snapshot
@@ -273,15 +275,15 @@ WantedBy=timers.target
 EOF
 
 sudo systemctl enable --now home-snapshot.timer</code></pre>
-<p>---</p>
-<h2>2. restic — Encrypted Off-Device Backups</h2>
+<hr>
+<h2 id="2-restic-encrypted-off-device-backups">2. restic — Encrypted Off-Device Backups</h2>
 <p>restic is fast, cryptographically secure, and content-addressed. Every file is deduplicated across snapshots — only new or changed blocks are stored. restic verifies checksums on every operation.</p>
-<h3>Store the Repository Password Securely</h3>
+<h3 id="store-the-repository-password-securely">Store the Repository Password Securely</h3>
 <pre><code class="language-bash">mkdir -p ~/.config/restic
 printf 'YOUR_STRONG_PASSWORD' &gt; ~/.config/restic/password
 chmod 600 ~/.config/restic/password</code></pre>
 <p>Never hardcode passwords in scripts or environment variables. Always use <code>RESTIC_PASSWORD_FILE</code>.</p>
-<h3>Initialise a Repository</h3>
+<h3 id="initialise-a-repository">Initialise a Repository</h3>
 <p><strong>Local / external drive:</strong></p>
 <pre><code class="language-bash">mkdir -p /run/media/backup-disk/restic-repo
 
@@ -300,7 +302,7 @@ export RESTIC_REPOSITORY=&quot;rclone:gdrive:shanios-backups&quot;
 export RESTIC_PASSWORD_FILE=&quot;$HOME/.config/restic/password&quot;
 restic init</code></pre>
 <p>Using restic over rclone means your data is encrypted <strong>before it ever leaves your machine</strong> — the cloud provider sees only opaque blobs.</p>
-<h3>Running a Backup</h3>
+<h3 id="running-a-backup">Running a Backup</h3>
 <pre><code class="language-bash">restic backup \
   --repo /run/media/backup-disk/restic-repo \
   --password-file ~/.config/restic/password \
@@ -311,7 +313,7 @@ restic init</code></pre>
   /home \
   /var/lib/containers \
   /var/lib/waydroid</code></pre>
-<h3>Snapshot Management</h3>
+<h3 id="snapshot-management">Snapshot Management</h3>
 <pre><code class="language-bash"># List all snapshots
 restic snapshots --repo ... --password-file ...
 
@@ -336,7 +338,7 @@ restic forget --repo ... --password-file ... \
 
 # Verify repository integrity (always run after --prune)
 restic check --repo ... --password-file ...</code></pre>
-<h3>Backup Script</h3>
+<h3 id="backup-script">Backup Script</h3>
 <pre><code class="language-bash">#!/usr/bin/env bash
 set -euo pipefail
 
@@ -366,8 +368,8 @@ log &quot;Backup complete&quot;
 # Ping dead man's switch on success
 curl -fsS --retry 3 &quot;https://hc.home.local/ping/YOUR-UUID&quot; &gt; /dev/null 2&gt;&amp;1 || true</code></pre>
 <pre><code class="language-bash">chmod +x ~/scripts/backup.sh</code></pre>
-<p>---</p>
-<h2>3. rclone — Cloud Sync</h2>
+<hr>
+<h2 id="3-rclone-cloud-sync">3. rclone — Cloud Sync</h2>
 <p>rclone syncs files directly to 70+ cloud providers. Use it for cloud mirroring of specific directories.</p>
 <pre><code class="language-bash"># Interactive setup wizard
 rclone config
@@ -386,8 +388,8 @@ rclone mount gdrive: ~/Cloud --vfs-cache-mode writes --daemon
 
 # Unmount
 fusermount -u ~/Cloud</code></pre>
-<p>---</p>
-<h2>4. Automation (Systemd User Timer)</h2>
+<hr>
+<h2 id="4-automation-systemd-user-timer">4. Automation (Systemd User Timer)</h2>
 <p>Run backups automatically without root. Requires <code>loginctl enable-linger $USER</code> so the timer fires even when you are not logged in.</p>
 <pre><code class="language-bash">loginctl enable-linger $USER</code></pre>
 <p><strong><code>~/.config/systemd/user/backup.service</code></strong></p>
@@ -422,12 +424,12 @@ systemctl --user start backup.service
 
 # Watch output
 journalctl --user -u backup.service -f</code></pre>
-<p>---</p>
-<h2>5. Monitoring Backup Health</h2>
+<hr>
+<h2 id="5-monitoring-backup-health">5. Monitoring Backup Health</h2>
 <p>A backup that runs silently and fails is worse than no backup at all. Wire your timer to a dead man's switch: a monitoring service that alerts you when the expected ping does not arrive on schedule.</p>
-<p>The self-hosted option is <strong>Healthchecks</strong> — see the <a href="https://docs.shani.dev/doc/servers/monitoring">Monitoring wiki</a>. For a no-setup option, <a href="https://healthchecks.io">healthchecks.io</a> offers a free tier. The <code>trap ... ERR</code> and final <code>curl</code> lines in the backup script above handle both failure and success pings automatically.</p>
-<p>---</p>
-<h2>Best Practices</h2>
+<p>The self-hosted option is <strong>Healthchecks</strong> — see the <a href="https://docs.shani.dev/doc/servers/monitoring/uptime">Monitoring wiki</a>. For a no-setup option, <a href="https://healthchecks.io">healthchecks.io</a> offers a free tier. The <code>trap ... ERR</code> and final <code>curl</code> lines in the backup script above handle both failure and success pings automatically.</p>
+<hr>
+<h2 id="best-practices">Best Practices</h2>
 <ol>
 <li><strong>Password file, not env vars</strong> — Use <code>RESTIC_PASSWORD_FILE</code> pointing to a <code>chmod 600</code> file. Never hardcode passwords in scripts.</li>
 <li><strong>Test restores regularly</strong> — Run <code>restic restore latest --target /tmp/test-restore</code> monthly. A backup you have never restored from is a backup you do not know works.</li>
@@ -437,17 +439,18 @@ journalctl --user -u backup.service -f</code></pre>
 <li><strong>Verify after prune</strong> — Always run <code>restic check</code> after <code>forget --prune</code> to confirm the repository is consistent.</li>
 <li><strong>Enable linger</strong> — Run <code>loginctl enable-linger $USER</code> so user systemd timers fire at boot even without an active login session.</li>
 </ol>
-<p>---</p>
-<h2>The Complete Strategy</h2>
+<hr>
+<h2 id="the-complete-strategy">The Complete Strategy</h2>
 <p><strong>Layer 1 — Daily Btrfs snapshots</strong> of <code>@home</code> to <code>/data/snapshots/home/</code>. Fast local recovery from accidental deletion.</p>
 <p><strong>Layer 2 — Daily/weekly restic backups</strong> to an external drive or NAS. Off-disk, encrypted, versioned protection against hardware failure.</p>
 <p><strong>Layer 3 — Cloud sync via rclone (or restic over rclone)</strong> to Google Drive, S3, Backblaze, etc. Off-site protection against fire, theft, or local disaster.</p>
-<p>---</p>
-<h2>See Also</h2>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../arch/btrfs">Btrfs Deep Dive</a> — snapshots, send/receive, maintenance</li>
-<li><a href="../arch/filesystem">Filesystem Structure</a> — subvolume layout</li>
-<li><a href="../concepts/atomic-updates">Atomic Updates</a> — OS update and rollback</li>
+<li><a href="../servers/backups-sync.md">Backups & Sync</a> — self-hosted backup servers (Restic, Borgmatic, Duplicati)</li>
+<li><a href="../arch/btrfs.md">Btrfs Deep Dive</a> — snapshots, send/receive, maintenance</li>
+<li><a href="../arch/filesystem.md">Filesystem Structure</a> — subvolume layout</li>
+<li><a href="../concepts/atomic-updates.md">Atomic Updates</a> — OS update and rollback</li>
 </ul></div>
     </div>
 

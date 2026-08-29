@@ -1,7 +1,7 @@
 ---
 title: TPM2 Enrollment
 section: Security
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # TPM2 Enrollment
@@ -119,4 +119,4 @@ After this, the disk requires a passphrase at every boot.
 
 - [gen-efi Reference](gen-efi) — full detail on `enroll-tpm2`/`cleanup-tpm2` and how PCR policy is chosen
 - [LUKS Management](luks) — keyslot management and header backup
-- [shani-health Reference](../updates/shani-health) — `shani-health --security` reports TPM2 enrollment state and flags a PCR-policy mismatch against the current Secure Boot state
+- [shani-health Reference](../updates/shani-health.md) — `shani-health --security` reports TPM2 enrollment state and flags a PCR-policy mismatch against the current Secure Boot state

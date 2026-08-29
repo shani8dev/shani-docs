@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>gen-efi Reference — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="gen-efi Reference   is the Shanios UKI (Unified Kernel Image) builder and Secure Boot key manager. It wraps  and / to produce signed EFI binaries placed in…">
+  <meta name="description" id="meta-desc"     content="gen-efi is the Shanios UKI (Unified Kernel Image) builder and Secure Boot key manager. It wraps dracut --uefi and sbsign/sbverify to produce signed EFI bin…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="gen-efi Reference">
-  <meta property="og:description" id="og-desc"    content="gen-efi Reference   is the Shanios UKI (Unified Kernel Image) builder and Secure Boot key manager. It wraps  and / to produce signed EFI binaries placed in…">
+  <meta property="og:description" id="og-desc"    content="gen-efi is the Shanios UKI (Unified Kernel Image) builder and Secure Boot key manager. It wraps dracut --uefi and sbsign/sbverify to produce signed EFI bin…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/security/gen-efi/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="gen-efi Reference">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="gen-efi Reference">
-  <meta name="twitter:description" id="tw-desc"  content="gen-efi Reference   is the Shanios UKI (Unified Kernel Image) builder and Secure Boot key manager. It wraps  and / to produce signed EFI binaries placed in…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="gen-efi is the Shanios UKI (Unified Kernel Image) builder and Secure Boot key manager. It wraps dracut --uefi and sbsign/sbverify to produce signed EFI bin…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"gen-efi Reference","description":"gen-efi Reference   is the Shanios UKI (Unified Kernel Image) builder and Secure Boot key manager. It wraps  and / to produce signed EFI binaries placed in…","url":"https://docs.shani.dev/doc/security/gen-efi/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"gen-efi Reference","description":"gen-efi is the Shanios UKI (Unified Kernel Image) builder and Secure Boot key manager. It wraps dracut --uefi and sbsign/sbverify to produce signed EFI bin…","url":"https://docs.shani.dev/doc/security/gen-efi/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"gen-efi Reference","item":"https://docs.shani.dev/doc/security/gen-efi/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,21 +215,22 @@
         <h1 class="doc-title">gen-efi Reference</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Security</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p><code>gen-efi</code> is the Shanios UKI (Unified Kernel Image) builder and Secure Boot key manager. It wraps <code>dracut --uefi</code> and <code>sbsign</code>/<code>sbverify</code> to produce signed EFI binaries placed in <code>/boot/efi/EFI/shanios/</code>, and manages the full lifecycle of MOK (Machine Owner Key) keys and TPM2 enrollment.</p>
 <p><code>shani-deploy</code> calls <code>gen-efi configure &lt;slot&gt;</code> automatically inside a chroot of the new slot after every update. You only need to run <code>gen-efi</code> directly when managing security keys, rebuilding a UKI manually, troubleshooting boot issues, or diagnosing a corrupt UKI.</p>
-<p>---</p>
-<h2>Commands</h2>
+<hr>
+<h2 id="commands">Commands</h2>
 <pre><code class="language-bash">gen-efi configure &lt;slot&gt;   # Build and sign UKI for a slot (blue or green)
 gen-efi enroll-mok         # Stage MOK key enrollment (re-signs EFI binaries, no UKI rebuild)
 gen-efi enroll-tpm2        # Enroll TPM2 chip for automatic LUKS unlock
 gen-efi cleanup-mok        # Delete old enrolled MOK keys after key rotation
-gen-efi cleanup-tpm2       # Remove stale TPM2 LUKS keyslots after re-enrollment</code></pre>
-<blockquote><p><strong>Important:</strong> <code>gen-efi configure</code> enforces that the target slot matches the currently booted slot when run directly on the live system. Running it for the inactive slot is only permitted inside a chroot, which <code>shani-deploy</code> does automatically.</p></blockquote>
-<p>---</p>
-<h2>gen-efi configure</h2>
+gen-efi cleanup-tpm2       # Remove stale TPM2 LUKS keyslots after re-enrollment
+gen-efi remove-tpm2        # Fully remove TPM2 enrollment and LUKS keyslots</code></pre>
+<blockquote><strong>Important:</strong> <code>gen-efi configure</code> enforces that the target slot matches the currently booted slot when run directly on the live system. Running it for the inactive slot is only permitted inside a chroot, which <code>shani-deploy</code> does automatically.</blockquote>
+<hr>
+<h2 id="gen-efi-configure">gen-efi configure</h2>
 <p>Builds, signs, and installs the UKI for a slot.</p>
 <pre><code class="language-bash">sudo gen-efi configure blue
 sudo gen-efi configure green</code></pre>
@@ -245,13 +248,13 @@ sudo gen-efi configure green</code></pre>
 <li>Installs the signed UKI to <code>$ESP/EFI/shanios/shanios-&lt;slot&gt;.efi</code></li>
 <li>Stages MOK enrollment automatically if the current key is not yet enrolled in firmware</li>
 </ol>
-<h3>Slot Validation</h3>
+<h3 id="slot-validation">Slot Validation</h3>
 <p><code>gen-efi configure</code> checks that <code>&lt;slot&gt;</code> matches the currently booted slot. Rebuilding the inactive slot from the live system would embed the wrong kernel version in the UKI.</p>
 <pre><code>ERROR: Cannot generate UKI for inactive slot from live system!
 ERROR: You are booted in: @blue
 ERROR: You are trying to generate for: @green</code></pre>
 <p>To rebuild the inactive slot's UKI, use <code>shani-deploy</code> (which runs <code>gen-efi</code> inside a chroot of that slot).</p>
-<h3>Kernel Cmdline Generation</h3>
+<h3 id="kernel-cmdline-generation">Kernel Cmdline Generation</h3>
 <p>The cmdline is always regenerated from scratch — it cannot be manually pre-edited. <code>gen-efi</code> embeds:</p>
 <ul>
 <li><code>root=</code>, <code>rootflags=</code> — device and Btrfs subvolume for the slot</li>
@@ -261,11 +264,11 @@ ERROR: You are trying to generate for: @green</code></pre>
 <li><code>rd.vconsole.keymap=</code> — keyboard layout from <code>/etc/vconsole.conf</code></li>
 <li><code>resume=</code>, <code>resume_offset=</code> — hibernation parameters (when swapfile exists)</li>
 </ul>
-<h3>Output Files</h3>
-<p>| File | Description | |------|-------------| | <code>/boot/efi/EFI/shanios/shanios-blue.efi</code> | Signed UKI for the <code>@blue</code> slot | | <code>/boot/efi/EFI/shanios/shanios-green.efi</code> | Signed UKI for the <code>@green</code> slot |</p>
+<h3 id="output-files">Output Files</h3>
+<table><thead><tr><th>File</th><th>Description</th></tr></thead><tbody><tr><td><code>/boot/efi/EFI/shanios/shanios-blue.efi</code></td><td>Signed UKI for the <code>@blue</code> slot</td></tr><tr><td><code>/boot/efi/EFI/shanios/shanios-green.efi</code></td><td>Signed UKI for the <code>@green</code> slot</td></tr></tbody></table>
 <p>Each UKI bundles the Linux kernel, an initramfs built by dracut, an embedded kernel command line, and is signed with the MOK key from <code>/etc/secureboot/keys/MOK.key</code>.</p>
-<p>---</p>
-<h2>gen-efi enroll-mok</h2>
+<hr>
+<h2 id="gen-efi-enroll-mok">gen-efi enroll-mok</h2>
 <p>Stages MOK key enrollment without rebuilding the UKI. Use this when the MOK key needs to be (re-)enrolled in firmware but the UKIs are otherwise valid.</p>
 <pre><code class="language-bash">sudo gen-efi enroll-mok</code></pre>
 <p><strong>What it does:</strong></p>
@@ -277,18 +280,18 @@ ERROR: You are trying to generate for: @green</code></pre>
 <li>Stages enrollment via <code>mokutil --import --hash-file</code></li>
 </ol>
 <p><strong>After running:</strong> reboot and confirm MOK enrollment in the MokManager UEFI prompt. The MokManager password is <code>shanios</code>.</p>
-<h3>MOK Enrollment States</h3>
+<h3 id="mok-enrollment-states">MOK Enrollment States</h3>
 <p><code>gen-efi</code> handles all enrollment states automatically:</p>
-<p>| State | Action | |-------|--------| | Current key already enrolled | Silent — nothing to do | | Current key not enrolled, none pending | Stages enrollment via <code>mokutil --import</code> | | Current key not enrolled, same key already pending | Reminds to reboot and confirm | | Current key not enrolled, different key pending | Clears pending queue, re-stages | | Old keys enrolled alongside current key | Warns — run <code>gen-efi cleanup-mok</code> after confirming new key |</p>
-<p>---</p>
-<h2>gen-efi enroll-tpm2</h2>
+<table><thead><tr><th>State</th><th>Action</th></tr></thead><tbody><tr><td>Current key already enrolled</td><td>Silent — nothing to do</td></tr><tr><td>Current key not enrolled, none pending</td><td>Stages enrollment via <code>mokutil --import</code></td></tr><tr><td>Current key not enrolled, same key already pending</td><td>Reminds to reboot and confirm</td></tr><tr><td>Current key not enrolled, different key pending</td><td>Clears pending queue, re-stages</td></tr><tr><td>Old keys enrolled alongside current key</td><td>Warns — run <code>gen-efi cleanup-mok</code> after confirming new key</td></tr></tbody></table>
+<hr>
+<h2 id="gen-efi-enroll-tpm2">gen-efi enroll-tpm2</h2>
 <p>Enrolls the TPM2 chip into the LUKS2 volume for automatic disk unlock at boot.</p>
 <pre><code class="language-bash">sudo gen-efi enroll-tpm2</code></pre>
 <p><strong>Requirements:</strong> LUKS encryption must be active (<code>/dev/mapper/shani_root</code> must exist), and a TPM 2.0 device must be present and enabled in BIOS/UEFI.</p>
-<h3>PCR Policy</h3>
-<p>| Secure Boot State | PCR Policy | Protection | |---|---|---| | Enabled | PCR 0+7 | Firmware measurements + Secure Boot state | | Disabled | PCR 0 only | Firmware measurements only |</p>
+<h3 id="pcr-policy">PCR Policy</h3>
+<table><thead><tr><th>Secure Boot State</th><th>PCR Policy</th><th>Protection</th></tr></thead><tbody><tr><td>Enabled</td><td>PCR 0+7</td><td>Firmware measurements + Secure Boot state</td></tr><tr><td>Disabled</td><td>PCR 0 only</td><td>Firmware measurements only</td></tr></tbody></table>
 <p>With Secure Boot enabled, an attacker cannot unseal the LUKS key with a different bootloader or modified UKI.</p>
-<h3>TPM2 PIN</h3>
+<h3 id="tpm2-pin">TPM2 PIN</h3>
 <p>The enrollment prompts whether to require a PIN at boot. With a PIN, the TPM requires user input even when PCRs match — providing a second factor. Without it, the disk unlocks automatically on matching hardware.</p>
 <p><strong>Your LUKS passphrase remains valid at all times</strong> as a fallback.</p>
 <p><strong>Re-enrollment is required after:</strong></p>
@@ -300,24 +303,24 @@ ERROR: You are trying to generate for: @green</code></pre>
 <pre><code class="language-bash"># Re-enroll after firmware update
 sudo gen-efi cleanup-tpm2   # remove stale slots
 sudo gen-efi enroll-tpm2    # enroll with new PCR values</code></pre>
-<p>---</p>
-<h2>gen-efi cleanup-mok</h2>
+<hr>
+<h2 id="gen-efi-cleanup-mok">gen-efi cleanup-mok</h2>
 <p>Removes MOK keys enrolled in firmware that do not match the current <code>MOK.der</code>. Run this after a key rotation has been confirmed.</p>
 <pre><code class="language-bash">sudo gen-efi cleanup-mok</code></pre>
 <p><strong>Safety:</strong> Verifies the current key is enrolled before deleting anything. If the current key is not yet confirmed, the command aborts with an error.</p>
 <p>Each deletion is staged via <code>mokutil --delete</code> and confirmed in MokManager on the next reboot — same one-time prompt as enrollment.</p>
-<p>---</p>
-<h2>gen-efi cleanup-tpm2</h2>
+<hr>
+<h2 id="gen-efi-cleanup-tpm2">gen-efi cleanup-tpm2</h2>
 <p>Removes stale TPM2 LUKS keyslots left over after re-enrollment.</p>
 <pre><code class="language-bash">sudo gen-efi cleanup-tpm2</code></pre>
 <p>Keeps the highest-numbered (most recently written) TPM2 slot and wipes all others. Prompts for the LUKS passphrase to authorise each wipe.</p>
-<p>---</p>
-<h2>Signing Keys</h2>
-<p>| File | Purpose | |------|---------| | <code>/etc/secureboot/keys/MOK.key</code> | RSA-2048 private signing key (mode 0600) — signs UKIs, never leaves the device | | <code>/etc/secureboot/keys/MOK.crt</code> | PEM certificate — used by sbsign | | <code>/etc/secureboot/keys/MOK.der</code> | DER-encoded public key — enrolled in firmware MOK database |</p>
+<hr>
+<h2 id="signing-keys">Signing Keys</h2>
+<table><thead><tr><th>File</th><th>Purpose</th></tr></thead><tbody><tr><td><code>/etc/secureboot/keys/MOK.key</code></td><td>RSA-2048 private signing key (mode 0600) — signs UKIs, never leaves the device</td></tr><tr><td><code>/etc/secureboot/keys/MOK.crt</code></td><td>PEM certificate — used by sbsign</td></tr><tr><td><code>/etc/secureboot/keys/MOK.der</code></td><td>DER-encoded public key — enrolled in firmware MOK database</td></tr></tbody></table>
 <p>Keys are generated by <code>gen-efi configure</code> if missing. They are stored in the <code>/etc</code> overlay upper layer (inside <code>@data</code>) and persist across all OS updates and rollbacks. If <code>MOK.key</code> and <code>MOK.crt</code> are missing or mismatched, <code>gen-efi</code> automatically regenerates the full keypair.</p>
-<blockquote><p><strong>Never share <code>MOK.key</code>.</strong> It is the private key used to sign all boot components. If compromised, an attacker can sign malicious UKIs that Secure Boot will accept.</p></blockquote>
-<p>---</p>
-<h2>ESP Layout</h2>
+<blockquote><strong>Never share <code>MOK.key</code>.</strong> It is the private key used to sign all boot components. If compromised, an attacker can sign malicious UKIs that Secure Boot will accept.</blockquote>
+<hr>
+<h2 id="esp-layout">ESP Layout</h2>
 <pre><code>/boot/efi/
 ├── EFI/
 │   ├── BOOT/
@@ -333,15 +336,15 @@ sudo gen-efi enroll-tpm2    # enroll with new PCR values</code></pre>
     └── entries/
         ├── shanios-blue+3-0.conf
         └── shanios-green.conf</code></pre>
-<p>---</p>
-<h2>Common Operations</h2>
-<h3>After a kernel update (no shani-deploy)</h3>
+<hr>
+<h2 id="common-operations">Common Operations</h2>
+<h3 id="after-a-kernel-update-no-shani-deploy">After a kernel update (no shani-deploy)</h3>
 <p><code>shani-deploy</code> handles this automatically. If you need to do it manually, run from the currently booted slot:</p>
 <pre><code class="language-bash">sudo gen-efi configure blue   # if booted into @blue
 sudo gen-efi configure green  # if booted into @green</code></pre>
-<h3>After LUKS UUID change or enabling encryption</h3>
+<h3 id="after-luks-uuid-change-or-enabling-encryption">After LUKS UUID change or enabling encryption</h3>
 <pre><code class="language-bash">sudo gen-efi configure blue</code></pre>
-<h3>After Secure Boot key regeneration</h3>
+<h3 id="after-secure-boot-key-regeneration">After Secure Boot key regeneration</h3>
 <p>If <code>gen-efi</code> regenerates the MOK keypair automatically, or you need to force re-enrollment:</p>
 <pre><code class="language-bash">sudo gen-efi enroll-mok
 # Reboot — MokManager appears automatically
@@ -350,27 +353,27 @@ sudo reboot</code></pre>
 <p>After confirming the new key is enrolled, clean up stale keys from previous installations:</p>
 <pre><code class="language-bash">sudo gen-efi cleanup-mok
 mokutil --list-enrolled | grep -i shani</code></pre>
-<h3>Recover from missing MOK keys</h3>
+<h3 id="recover-from-missing-mok-keys">Recover from missing MOK keys</h3>
 <pre><code class="language-bash"># gen-efi will generate new keys, rebuild the UKI, and re-sign everything
 sudo gen-efi configure blue
 
 # Then enroll the new key
 sudo gen-efi enroll-mok
 # Reboot and confirm in MokManager</code></pre>
-<h3>Fix a stale keymap in the UKI</h3>
+<h3 id="fix-a-stale-keymap-in-the-uki">Fix a stale keymap in the UKI</h3>
 <pre><code class="language-bash"># Set the correct keymap
 sudo localectl set-keymap us
 
 # Rebuild the UKI — gen-efi reads /etc/vconsole.conf
 sudo gen-efi configure blue</code></pre>
-<h3>Rebuild after recovery</h3>
+<h3 id="rebuild-after-recovery">Rebuild after recovery</h3>
 <p>If a UKI is missing or corrupted:</p>
 <pre><code class="language-bash">sudo gen-efi configure blue</code></pre>
-<h3>Re-enrolling TPM2 after firmware or Secure Boot changes</h3>
+<h3 id="re-enrolling-tpm2-after-firmware-or-secure-boot-changes">Re-enrolling TPM2 after firmware or Secure Boot changes</h3>
 <pre><code class="language-bash">sudo gen-efi cleanup-tpm2
 sudo gen-efi enroll-tpm2</code></pre>
-<p>---</p>
-<h2>Verifying a UKI</h2>
+<hr>
+<h2 id="verifying-a-uki">Verifying a UKI</h2>
 <pre><code class="language-bash"># Verify signature against the local MOK cert
 sbverify --cert /etc/secureboot/keys/MOK.crt /boot/efi/EFI/shanios/shanios-blue.efi
 sbverify --cert /etc/secureboot/keys/MOK.crt /boot/efi/EFI/shanios/shanios-green.efi
@@ -381,14 +384,14 @@ sudo ukify inspect /boot/efi/EFI/shanios/shanios-blue.efi
 # Extract the embedded kernel command line
 sudo objcopy -O binary --only-section=.cmdline \
     /boot/efi/EFI/shanios/shanios-blue.efi /dev/stdout | strings</code></pre>
-<p>---</p>
-<h2>See Also</h2>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="secure-boot">Secure Boot</a> — enrolling keys and enabling Secure Boot</li>
 <li><a href="tpm2">TPM2 Enrollment</a> — detailed TPM2 setup guide</li>
-<li><a href="../arch/boot">Boot Process</a> — how UKIs fit into the boot chain</li>
-<li><a href="../updates/system">System Updates</a> — how <code>shani-deploy</code> uses <code>gen-efi</code></li>
-<li><a href="../updates/shani-health">shani-health Reference</a> — <code>shani-health --security</code> reports Secure Boot state, MOK enrollment/pending status, MOK key file permissions, and TPM2 PCR-policy consistency</li>
+<li><a href="../arch/boot.md">Boot Process</a> — how UKIs fit into the boot chain</li>
+<li><a href="../updates/system.md">System Updates</a> — how <code>shani-deploy</code> uses <code>gen-efi</code></li>
+<li><a href="../updates/shani-health.md">shani-health Reference</a> — <code>shani-health --security</code> reports Secure Boot state, MOK enrollment/pending status, MOK key file permissions, and TPM2 PCR-policy consistency</li>
 </ul></div>
     </div>
 

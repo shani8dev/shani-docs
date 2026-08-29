@@ -1,7 +1,7 @@
 ---
 title: Homebrew
 section: Software & Apps
-updated: 2026-04-01
+updated: 2026-08-28
 ---
 
 # Homebrew
@@ -71,3 +71,10 @@ Homebrew installs everything under `/home/linuxbrew/`, which lives on the `@home
 | Recommended for | macOS familiarity | General CLI use |
 
 For most cases on Shanios, **Nix is preferred** — it is pre-installed, supports multiple package versions simultaneously, and has built-in rollback. Use Homebrew only when a specific tool is not available in Nix or when cross-platform `brew` scripts are a requirement.
+
+## See Also
+
+- [Nix Package Manager](nix) — pre-installed, preferred for CLI tools
+- [Flatpak](flatpak) — GUI app store
+- [Distrobox](distrobox) — full mutable environments
+- [Migrating from Traditional Linux](../intro/migrating.md) — Homebrew workflow changes

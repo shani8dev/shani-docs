@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>System Requirements — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="System Requirements  Hardware Requirements  | Component | Minimum | Recommended | |-----------|---------|-------------| | Processor | x8664 dual-core with …">
+  <meta name="description" id="meta-desc"     content="Hardware Requirements | Component | Minimum | Recommended | |-----------|---------|-------------| | Processor | x8664 dual-core with VT-x/AMD-V | x8664 qua…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="System Requirements">
-  <meta property="og:description" id="og-desc"    content="System Requirements  Hardware Requirements  | Component | Minimum | Recommended | |-----------|---------|-------------| | Processor | x8664 dual-core with …">
+  <meta property="og:description" id="og-desc"    content="Hardware Requirements | Component | Minimum | Recommended | |-----------|---------|-------------| | Processor | x8664 dual-core with VT-x/AMD-V | x8664 qua…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/install/requirements/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="System Requirements">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="System Requirements">
-  <meta name="twitter:description" id="tw-desc"  content="System Requirements  Hardware Requirements  | Component | Minimum | Recommended | |-----------|---------|-------------| | Processor | x8664 dual-core with …">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Hardware Requirements | Component | Minimum | Recommended | |-----------|---------|-------------| | Processor | x8664 dual-core with VT-x/AMD-V | x8664 qua…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"System Requirements","description":"System Requirements  Hardware Requirements  | Component | Minimum | Recommended | |-----------|---------|-------------| | Processor | x8664 dual-core with …","url":"https://docs.shani.dev/doc/install/requirements/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"System Requirements","description":"Hardware Requirements | Component | Minimum | Recommended | |-----------|---------|-------------| | Processor | x8664 dual-core with VT-x/AMD-V | x8664 qua…","url":"https://docs.shani.dev/doc/install/requirements/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"System Requirements","item":"https://docs.shani.dev/doc/install/requirements/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,27 +215,63 @@
         <h1 class="doc-title">System Requirements</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Installation</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><h2>Hardware Requirements</h2>
-<p>| Component | Minimum | Recommended | |-----------|---------|-------------| | Processor | x86_64 dual-core with VT-x/AMD-V | x86_64 quad-core or better | | Memory | 4 GB RAM | 8 GB RAM or more | | Storage | 32 GB (dual-image architecture) | 64 GB or more | | Firmware | UEFI (required) | UEFI with TPM 2.0 | | Installation Media | 8 GB USB drive | 16 GB USB 3.0 drive |</p>
-<blockquote><p><strong>Why 32GB minimum?</strong> Shanios maintains two complete system images (<code>@blue</code> and <code>@green</code>) for atomic updates. However, Btrfs Copy-on-Write shares unchanged data between them, resulting in only ~18% overhead compared to traditional systems. In practice the installer itself only refuses disks smaller than 28 GB — the lower enforced floor accounts for the real usable capacity of media nominally sold as "32 GB" (partition tables, wear-leveling, etc.), but 32 GB+ is still what we recommend for comfortable headroom.</p></blockquote>
-<h2>Disk Partition Layout</h2>
+      <div class="prose"><h2 id="hardware-requirements">Hardware Requirements</h2>
+<table><thead><tr><th>Component</th><th>Minimum</th><th>Recommended</th></tr></thead><tbody><tr><td>Processor</td><td>x86_64 dual-core with VT-x/AMD-V</td><td>x86_64 quad-core or better</td></tr><tr><td>Memory</td><td>4 GB RAM</td><td>8 GB RAM or more</td></tr><tr><td>Storage</td><td>32 GB (dual-image architecture)</td><td>64 GB or more</td></tr><tr><td>Firmware</td><td>UEFI (required)</td><td>UEFI with TPM 2.0</td></tr><tr><td>Installation Media</td><td>8 GB USB drive</td><td>16 GB USB 3.0 drive</td></tr></tbody></table>
+<blockquote><strong>Why 32GB minimum?</strong> Shanios maintains two complete system images (<code>@blue</code> and <code>@green</code>) for atomic updates. However, Btrfs Copy-on-Write shares unchanged data between them, resulting in only ~18% overhead compared to traditional systems. In practice the installer itself only refuses disks smaller than 28 GB — the lower enforced floor accounts for the real usable capacity of media nominally sold as "32 GB" (partition tables, wear-leveling, etc.), but 32 GB+ is still what we recommend for comfortable headroom.</blockquote>
+<h2 id="disk-partition-layout">Disk Partition Layout</h2>
 <p>Shanios uses a simple two-partition layout — there are no separate <code>/home</code>, <code>/var</code>, or swap partitions. All subvolumes live within the single Btrfs partition.</p>
-<p>| Partition | Filesystem | Size | Purpose | |-----------|-----------|------|---------| | EFI System Partition (ESP) | FAT32 | 1 GB | Bootloader, UKI images — mounted at <code>/boot/efi</code> | | Root partition | Btrfs (or LUKS2 → Btrfs) | Remainder of disk | All system subvolumes (<code>@blue</code>, <code>@green</code>, <code>@home</code>, <code>@data</code>, etc.) |</p>
+<table><thead><tr><th>Partition</th><th>Filesystem</th><th>Size</th><th>Purpose</th></tr></thead><tbody><tr><td>EFI System Partition (ESP)</td><td>FAT32</td><td>1 GB</td><td>Bootloader, UKI images — mounted at <code>/boot/efi</code></td></tr><tr><td>Root partition</td><td>Btrfs (or LUKS2 → Btrfs)</td><td>Remainder of disk</td><td>All system subvolumes (<code>@blue</code>, <code>@green</code>, <code>@home</code>, <code>@data</code>, etc.)</td></tr></tbody></table>
 <p>When full-disk encryption is chosen, the Btrfs partition is wrapped in a LUKS2 container (<code>/dev/mapper/shani_root</code>), formatted with the argon2id key-derivation function. The ESP is never encrypted — only the root partition is.</p>
-<h2>Firmware Requirements</h2>
+<h2 id="firmware-requirements">Firmware Requirements</h2>
 <ul>
 <li><strong>UEFI required</strong> — legacy BIOS is not supported</li>
 <li><strong>Secure Boot</strong> — optional but recommended; Shanios signs its bootloader and kernel with a MOK (Machine Owner Key) that is baked into the system image at build time — every machine installed from the same signed ISO shares the same key</li>
 <li><strong>TPM 2.0</strong> — optional; required for automatic LUKS2 unlock without passphrase</li>
 </ul>
-<h2>Not Supported</h2>
+<h2 id="not-supported">Not Supported</h2>
 <ul>
 <li>Legacy BIOS / CSM mode</li>
 <li>32-bit (x86) CPUs</li>
 <li>Dual-boot configurations (not recommended — other OSes may break the bootloader)</li>
+</ul>
+<h2 id="checking-your-hardware">Checking Your Hardware</h2>
+<p>Before installing, verify your hardware meets the requirements:</p>
+<pre><code class="language-bash"># Check CPU architecture (must be x86_64)
+uname -m
+# x86_64
+
+# Check virtualization support (must be present)
+grep -E 'vmx|svm' /proc/cpuinfo | head -1
+# vmx = Intel VT-x, svm = AMD-V
+
+# Check RAM (minimum 4 GB)
+free -h | grep Mem
+# Mem:    15Gi   ...
+
+# Check disk size (minimum 28 GB enforced, 32 GB+ recommended)
+lsblk -d -o NAME,SIZE | grep -v loop
+# NAME   SIZE
+# nvme0n1  476G
+
+# Check UEFI (not legacy BIOS)
+[ -d /sys/firmware/efi ] &amp;&amp; echo &quot;UEFI&quot; || echo &quot;Legacy BIOS&quot;
+# UEFI
+
+# Check TPM 2.0 (optional, needed for auto-unlock)
+ls /dev/tpm*
+# /dev/tpm0  /dev/tpmrm0</code></pre>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><td><code>uname -m</code> shows <code>i686</code></td><td>32-bit system</td><td>Shanios does not support 32-bit — install an Arch-based 32-bit distro instead</td></tr><tr><td><code>grep vmx</code> returns nothing</td><td>Virtualization disabled in BIOS</td><td>Enable VT-x (Intel) or AMD-V (AMD) in BIOS under CPU settings</td></tr><tr><td><code>/sys/firmware/efi</code> doesn't exist</td><td>System booted in Legacy BIOS/CSM mode</td><td>Reboot into BIOS and disable CSM / enable UEFI mode</td></tr><tr><td>TPM shows as not available</td><td>TPM disabled or set to Intel PTT</td><td>Enable TPM 2.0 in BIOS under Security settings</td></tr><tr><td><code>lsblk</code> shows disk < 28 GB</td><td>Actual usable space too low</td><td>Use a larger disk; 32 GB minimum is recommended</td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="./steps.md">Installation Steps</a> — step-by-step install guide</li>
+<li><a href="./first-boot.md">First Boot</a> — post-install configuration</li>
+<li><a href="./pre-install.md">Pre-Install Checklist</a> — what to prepare before starting</li>
+<li><a href="../security/secure-boot.md">Secure Boot</a> — MOK enrollment and firmware setup</li>
+<li><a href="../troubleshooting.md">Troubleshooting</a> — general troubleshooting guide</li>
 </ul></div>
     </div>
 

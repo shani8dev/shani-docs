@@ -1,7 +1,7 @@
 ---
 title: Hardware
 section: System
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Hardware
@@ -93,8 +93,8 @@ grep -i huge /proc/meminfo
 # ZRAM (compressed swap) usage
 zramctl
 
-# Memory bandwidth test (requires memtester — not pre-installed)
-# sudo pacman -S memtester && sudo memtester 1G 1
+# Memory bandwidth test (memtester is not pre-installed; install via Nix)
+nix-env -iA nixpkgs.memtester && sudo memtester 1G 1
 ```
 
 ---
@@ -311,7 +311,7 @@ sudo ethtool eth0 | grep Wake    # check current setting
 
 ## Firmware Updates
 
-Firmware updates for supported devices are managed by **fwupd**. See [Firmware Updates](../security/fwupd) for full documentation.
+Firmware updates for supported devices are managed by **fwupd**. See [Firmware Updates](../security/fwupd.md) for full documentation.
 
 ```bash
 # Quick reference
@@ -390,6 +390,6 @@ udevadm info --query=all --name=/dev/sdb | grep -E "ID_VENDOR|ID_MODEL|DRIVER"
 
 - [Kernel Modules](kernel-modules) — loading drivers, blacklisting, parameters
 - [Storage](storage) — SMART, NVMe, disk health
-- [Firmware Updates](../security/fwupd) — fwupd for device firmware
+- [Firmware Updates](../security/fwupd.md) — fwupd for device firmware
 - [Process Management](process-management) — CPU load, memory usage per process
 - [Systemd](systemd) — `CPUQuota=`, `MemoryMax=`, resource limits

@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Users &amp; Groups — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Users &amp; Groups  User accounts on Shani OS follow standard Linux conventions — accounts are stored in , , and , which live in the  overlay and persist acros…">
+  <meta name="description" id="meta-desc"     content="User accounts on Shani OS follow standard Linux conventions — accounts are stored in /etc/passwd, /etc/shadow, and /etc/group, which live in the /etc overl…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Users &amp; Groups">
-  <meta property="og:description" id="og-desc"    content="Users &amp; Groups  User accounts on Shani OS follow standard Linux conventions — accounts are stored in , , and , which live in the  overlay and persist acros…">
+  <meta property="og:description" id="og-desc"    content="User accounts on Shani OS follow standard Linux conventions — accounts are stored in /etc/passwd, /etc/shadow, and /etc/group, which live in the /etc overl…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/system/users-groups/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Users &amp; Groups">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Users &amp; Groups">
-  <meta name="twitter:description" id="tw-desc"  content="Users &amp; Groups  User accounts on Shani OS follow standard Linux conventions — accounts are stored in , , and , which live in the  overlay and persist acros…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="User accounts on Shani OS follow standard Linux conventions — accounts are stored in /etc/passwd, /etc/shadow, and /etc/group, which live in the /etc overl…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Users & Groups","description":"Users & Groups  User accounts on Shani OS follow standard Linux conventions — accounts are stored in , , and , which live in the  overlay and persist acros…","url":"https://docs.shani.dev/doc/system/users-groups/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Users & Groups","description":"User accounts on Shani OS follow standard Linux conventions — accounts are stored in /etc/passwd, /etc/shadow, and /etc/group, which live in the /etc overl…","url":"https://docs.shani.dev/doc/system/users-groups/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Users & Groups","item":"https://docs.shani.dev/doc/system/users-groups/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,26 +215,26 @@
         <h1 class="doc-title">Users &amp; Groups</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">System</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>User accounts on Shani OS follow standard Linux conventions — accounts are stored in <code>/etc/passwd</code>, <code>/etc/shadow</code>, and <code>/etc/group</code>, which live in the <code>/etc</code> overlay and persist across all OS updates and rollbacks.</p>
-<p>The key difference from a traditional distro is that <strong>you should use <code>adduser</code> (not <code>useradd</code>) for interactive accounts</strong>. The <code>adduser</code> wrapper on Shani OS reads <code>/etc/shani-extra-groups</code> and automatically adds new users to all the groups they need (wheel, video, input, kvm, etc.) in one step. See <a href="user-setup">User Provisioning</a> for the full group reference.</p>
-<p>---</p>
-<h2>On Shani OS: adduser vs useradd</h2>
-<p>| Command | Use when | |---------|----------| | <code>sudo adduser &lt;name&gt;</code> | Creating a human user — reads <code>/etc/shani-extra-groups</code>, sets Zsh shell, prompts for password | | <code>sudo useradd</code> | Scripted/service account creation where you need fine-grained control |</p>
+<p>The key difference from a traditional distro is that <strong>you should use <code>adduser</code> (not <code>useradd</code>) for interactive accounts</strong>. The <code>adduser</code> wrapper on Shani OS reads <code>/etc/shani-extra-groups</code> and automatically adds new users to all the groups they need (wheel, video, input, kvm, etc.) in one step. See <a href="../updates/user-setup.md">User Provisioning</a> for the full group reference.</p>
+<hr>
+<h2 id="on-shani-os-adduser-vs-useradd">On Shani OS: adduser vs useradd</h2>
+<table><thead><tr><th>Command</th><th>Use when</th></tr></thead><tbody><tr><td><code>sudo adduser &lt;name&gt;</code></td><td>Creating a human user — reads <code>/etc/shani-extra-groups</code>, sets Zsh shell, prompts for password</td></tr><tr><td><code>sudo useradd</code></td><td>Scripted/service account creation where you need fine-grained control</td></tr></tbody></table>
 <pre><code class="language-bash"># Preferred: creates account, sets groups, prompts for password interactively
 sudo adduser alice
 
 # After adding, trigger shani-user-setup to provision Flatpak/Nix/subuid ranges
 sudo touch /data/user-setup-needed</code></pre>
-<p>---</p>
-<h2>Creating Users</h2>
-<h3>Interactive user (preferred)</h3>
+<hr>
+<h2 id="creating-users">Creating Users</h2>
+<h3 id="interactive-user-preferred">Interactive user (preferred)</h3>
 <pre><code class="language-bash">sudo adduser alice
 # Prompts for password and GECOS info
 # Automatically adds to groups from /etc/shani-extra-groups</code></pre>
-<h3>Scripted user creation</h3>
+<h3 id="scripted-user-creation">Scripted user creation</h3>
 <pre><code class="language-bash"># Create account with home directory, set shell explicitly
 sudo useradd -m -s /bin/zsh -c &quot;Alice Smith&quot; alice
 
@@ -244,15 +246,15 @@ sudo usermod -aG wheel,video,input,audio,kvm,storage,network,realtime alice
 
 # Trigger shani-user-setup for Flatpak/Nix/subuid provisioning
 sudo touch /data/user-setup-needed</code></pre>
-<h3>Service/system account (no login)</h3>
+<h3 id="servicesystem-account-no-login">Service/system account (no login)</h3>
 <pre><code class="language-bash"># System account: UID &lt; 1000, no home, no shell, no password
 sudo useradd --system --no-create-home --shell /usr/sbin/nologin myservice
 
 # With a dedicated home directory (for service data)
 sudo useradd --system --create-home --home-dir /var/lib/myservice \
   --shell /usr/sbin/nologin myservice</code></pre>
-<p>---</p>
-<h2>Modifying Users</h2>
+<hr>
+<h2 id="modifying-users">Modifying Users</h2>
 <pre><code class="language-bash"># Change display name (GECOS)
 sudo usermod -c &quot;Alice Smith&quot; alice
 
@@ -280,8 +282,8 @@ sudo usermod -e 2026-12-31 alice
 
 # Remove expiry
 sudo usermod -e &quot;&quot; alice</code></pre>
-<p>---</p>
-<h2>Deleting Users</h2>
+<hr>
+<h2 id="deleting-users">Deleting Users</h2>
 <pre><code class="language-bash"># Remove account but keep home directory (recommended — avoids accidental data loss)
 sudo userdel alice
 
@@ -290,11 +292,9 @@ sudo userdel -r alice
 
 # Also remove the user's mail spool
 sudo userdel -r -f alice</code></pre>
-<blockquote><p>⚠️ On Shani OS, <code>/home</code> is a separate Btrfs subvolume (<code>@home</code>). Even <code>userdel -r</code> only removes the directory — the subvolume itself remains. If you want to fully remove a user's data, delete the subvolume manually:</p></blockquote>
-<blockquote><p><pre><code class="language-bash">&gt; sudo btrfs subvolume delete /home/alice
-&gt; </code></pre></p></blockquote>
-<p>---</p>
-<h2>Passwords</h2>
+<blockquote>⚠️ On Shani OS, <code>/home</code> is a separate Btrfs subvolume (<code>@home</code>). Even <code>userdel -r</code> only removes the directory — the subvolume itself remains. If you want to fully remove a user's data, delete the subvolume manually: ``<code>bash sudo btrfs subvolume delete /home/alice </code>``</blockquote>
+<hr>
+<h2 id="passwords">Passwords</h2>
 <pre><code class="language-bash"># Set or change your own password
 passwd
 
@@ -315,7 +315,7 @@ sudo passwd -S alice
 # Output: alice PS 2026-01-15 0 99999 7 -1
 # Fields: username  status  last-change  min-days  max-days  warn-days  inactive-days
 # status: PS=password set, LK=locked, NP=no password</code></pre>
-<h3>Password aging with chage</h3>
+<h3 id="password-aging-with-chage">Password aging with chage</h3>
 <pre><code class="language-bash"># View aging settings
 sudo chage -l alice
 
@@ -327,10 +327,10 @@ sudo chage -d 0 alice
 
 # Set account expiry
 sudo chage -E 2026-12-31 alice</code></pre>
-<p>See <a href="ch-commands">ch* Commands</a> for the full <code>chage</code> reference.</p>
-<p>---</p>
-<h2>Groups</h2>
-<h3>Creating and modifying groups</h3>
+<p>See <a href="../system/permissions.md">Permissions</a> for the full <code>chage</code> reference.</p>
+<hr>
+<h2 id="groups">Groups</h2>
+<h3 id="creating-and-modifying-groups">Creating and modifying groups</h3>
 <pre><code class="language-bash"># Create a new group
 sudo groupadd developers
 
@@ -342,7 +342,7 @@ sudo groupmod -n devs developers
 
 # Delete a group (does not affect users who were members)
 sudo groupdel developers</code></pre>
-<h3>Managing group membership</h3>
+<h3 id="managing-group-membership">Managing group membership</h3>
 <pre><code class="language-bash"># Add a user to one or more groups (append — does not remove from existing groups)
 sudo usermod -aG developers,docker alice
 
@@ -354,7 +354,7 @@ sudo usermod -G wheel,video,input alice
 
 # Make a user the group administrator
 sudo gpasswd -A alice developers</code></pre>
-<h3>Inspecting group membership</h3>
+<h3 id="inspecting-group-membership">Inspecting group membership</h3>
 <pre><code class="language-bash"># Show all groups the current user belongs to
 groups
 
@@ -370,18 +370,18 @@ getent group
 
 # Check if a user is in a specific group
 id alice | grep -w wheel</code></pre>
-<h3>The sambashare Group (Samba/SMB Sharing)</h3>
+<h3 id="the-sambashare-group-sambasmb-sharing">The sambashare Group (Samba/SMB Sharing)</h3>
 <p><code>shani-settings</code> maintains a <code>sambashare</code> group automatically on install/upgrade: it creates the group if missing, adds every account in the normal UID range with a real login shell to it, and <code>chgrp</code>s <code>/var/lib/samba/usershare</code> to the group. This is what lets an interactive user create SMB usershares (via <code>net usershare</code> or a file manager's "Share" option) without any manual <code>usermod</code>. A user created <em>after</em> that point still needs adding by hand:</p>
 <pre><code class="language-bash">sudo usermod -aG sambashare alice</code></pre>
-<p>---</p>
-<h2>sudo & Privileges</h2>
+<hr>
+<h2 id="sudo-privileges">sudo & Privileges</h2>
 <p>On Shani OS, <code>wheel</code> group members have full sudo access — granted not by <code>/etc/sudoers</code> itself but by a shipped drop-in at <code>/etc/sudoers.d/wheel</code> (<code>%wheel ALL=(ALL:ALL) ALL</code>). Both <code>/etc/sudoers</code> and <code>/etc/sudoers.d/</code> are captured by the <code>/etc</code> overlay, so edits (always via <code>visudo</code>) persist across updates.</p>
 <pre><code class="language-bash"># Edit sudoers safely (validates syntax before saving — never edit /etc/sudoers directly)
 sudo visudo
 
 # Add a drop-in rule (preferred — less risk of locking yourself out)
 sudo nano /etc/sudoers.d/my-rules</code></pre>
-<h3>Common sudoers patterns</h3>
+<h3 id="common-sudoers-patterns">Common sudoers patterns</h3>
 <pre><code class="language-text"># Full sudo without password (convenient for a personal machine)
 alice ALL=(ALL) NOPASSWD: ALL
 
@@ -396,8 +396,8 @@ alice ALL=(deploy) NOPASSWD: /usr/local/bin/deploy.sh
 
 # Restrict to specific hosts
 alice workstation=(ALL) ALL</code></pre>
-<blockquote><p>⚠️ Always use <code>sudo visudo</code> or <code>sudo visudo -f /etc/sudoers.d/myrule</code> — it validates syntax before writing. A syntax error in sudoers locks out all sudo access. If this happens, boot to the other slot and fix the file via the <code>/etc</code> overlay.</p></blockquote>
-<h3>Running commands as another user</h3>
+<blockquote>⚠️ Always use <code>sudo visudo</code> or <code>sudo visudo -f /etc/sudoers.d/myrule</code> — it validates syntax before writing. A syntax error in sudoers locks out all sudo access. If this happens, boot to the other slot and fix the file via the <code>/etc</code> overlay.</blockquote>
+<h3 id="running-commands-as-another-user">Running commands as another user</h3>
 <pre><code class="language-bash"># Run as root
 sudo command
 
@@ -412,8 +412,8 @@ sudo -u alice -s
 
 # Check what sudo permissions the current user has
 sudo -l</code></pre>
-<p>---</p>
-<h2>Inspecting Accounts</h2>
+<hr>
+<h2 id="inspecting-accounts">Inspecting Accounts</h2>
 <pre><code class="language-bash"># Current user and UID
 whoami
 id
@@ -443,8 +443,8 @@ getent passwd | awk -F: '$3 &gt;= 1000 {print $1, $3, $6, $7}'
 loginctl list-sessions
 loginctl show-session 1
 loginctl show-user alice</code></pre>
-<p>---</p>
-<h2>Linger (User Services Without Login)</h2>
+<hr>
+<h2 id="linger-user-services-without-login">Linger (User Services Without Login)</h2>
 <p>By default, user systemd services stop when the last session for that user ends. Enable linger to keep user services running at all times — required for user-level backup timers, containers, and any service that should run without an active login:</p>
 <pre><code class="language-bash"># Enable linger for a user
 sudo loginctl enable-linger alice
@@ -454,9 +454,9 @@ sudo loginctl disable-linger alice
 
 # Check linger status
 loginctl show-user alice | grep Linger</code></pre>
-<p>This is required for the <code>backup.timer</code> and any other <code>systemctl --user</code> timer that should fire even when the user is not logged in. See <a href="backup">Backup & Recovery</a> for the full example.</p>
-<p>---</p>
-<h2>/etc/passwd and /etc/shadow</h2>
+<p>This is required for the <code>backup.timer</code> and any other <code>systemctl --user</code> timer that should fire even when the user is not logged in. See <a href="../system/backup.md">Backup & Recovery</a> for the full example.</p>
+<hr>
+<h2 id="etcpasswd-and-etcshadow">/etc/passwd and /etc/shadow</h2>
 <p>These files live in the <code>/etc</code> overlay and are preserved across every OS update. You rarely need to edit them directly — use the commands above. For reference:</p>
 <pre><code>/etc/passwd  — username:x:UID:GID:GECOS:home:shell
 /etc/shadow  — username:hashed-password:last-change:min:max:warn:inactive:expire
@@ -467,17 +467,17 @@ loginctl show-user alice | grep Linger</code></pre>
 getent passwd alice
 getent shadow alice    # requires root
 getent group developers</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | New user missing groups (kvm, video, etc.) | Run <code>sudo touch /data/user-setup-needed</code> to trigger <code>shani-user-setup</code>; or <code>sudo FORCE_SETUP=1 shani-user-setup</code> | | <code>sudo: alice is not in the sudoers file</code> | Add alice to the wheel group: <code>sudo usermod -aG wheel alice</code>; log out and back in | | Group membership not taking effect | Log out and back in — supplementary groups are read at login. To apply immediately: <code>newgrp developers</code> (opens a subshell in that group) | | <code>userdel: user alice is currently used by process</code> | Kill active sessions first: <code>sudo loginctl kill-user alice</code>; then retry | | User can't run rootless Podman | Check <code>cat /etc/subuid</code> — if alice has no entry, run <code>sudo touch /data/user-setup-needed</code> | | Locked out of sudo (syntax error in sudoers) | Boot into the other slot from systemd-boot; mount the <code>/etc</code> overlay and remove the broken file from <code>/data/overlay/etc/upper/sudoers.d/</code> | | Account exists but home directory is missing | <code>sudo mkhomedir_helper alice</code> or <code>sudo cp -a /etc/skel /home/alice &amp;&amp; sudo chown -R alice:alice /home/alice</code> |</p>
-<p>---</p>
-<h2>See Also</h2>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>New user missing groups (kvm, video, etc.)</td><td>Run <code>sudo touch /data/user-setup-needed</code> to trigger <code>shani-user-setup</code>; or <code>sudo FORCE_SETUP=1 shani-user-setup</code></td></tr><tr><td><code>sudo: alice is not in the sudoers file</code></td><td>Add alice to the wheel group: <code>sudo usermod -aG wheel alice</code>; log out and back in</td></tr><tr><td>Group membership not taking effect</td><td>Log out and back in — supplementary groups are read at login. To apply immediately: <code>newgrp developers</code> (opens a subshell in that group)</td></tr><tr><td><code>userdel: user alice is currently used by process</code></td><td>Kill active sessions first: <code>sudo loginctl kill-user alice</code>; then retry</td></tr><tr><td>User can't run rootless Podman</td><td>Check <code>cat /etc/subuid</code> — if alice has no entry, run <code>sudo touch /data/user-setup-needed</code></td></tr><tr><td>Locked out of sudo (syntax error in sudoers)</td><td>Boot into the other slot from systemd-boot; mount the <code>/etc</code> overlay and remove the broken file from <code>/data/overlay/etc/upper/sudoers.d/</code></td></tr><tr><td>Account exists but home directory is missing</td><td><code>sudo mkhomedir_helper alice</code> or <code>sudo cp -a /etc/skel /home/alice &amp;&amp; sudo chown -R alice:alice /home/alice</code></td></tr></tbody></table>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="user-setup">User Provisioning</a> — <code>shani-user-setup</code>, <code>/etc/shani-extra-groups</code>, subuid allocation</li>
-<li><a href="ch-commands">ch* Commands</a> — <code>chmod</code>, <code>chown</code>, <code>chage</code>, <code>chsh</code>, <code>chpasswd</code></li>
-<li><a href="config">System Config</a> — how <code>/etc</code> overlay preserves account changes across updates</li>
-<li><a href="shani-reset">Factory Reset</a> — what happens to user accounts after a reset</li>
-<li><a href="shell">Shell & Environment</a> — Zsh, Starship, and per-user shell config</li>
+<li><a href="../updates/user-setup.md">User Provisioning</a> — <code>shani-user-setup</code>, <code>/etc/shani-extra-groups</code>, subuid allocation</li>
+<li><a href="../system/permissions.md">Permissions</a> — <code>chmod</code>, <code>chown</code>, <code>chage</code>, <code>chsh</code>, <code>chpasswd</code></li>
+<li><a href="../updates/config.md">System Config</a> — how <code>/etc</code> overlay preserves account changes across updates</li>
+<li><a href="../updates/shani-reset.md">Factory Reset</a> — what happens to user accounts after a reset</li>
+<li><a href="../updates/shell.md">Shell & Environment</a> — Zsh, Starship, and per-user shell config</li>
 </ul></div>
     </div>
 

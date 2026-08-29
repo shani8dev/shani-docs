@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Audio (PipeWire) — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Audio (PipeWire)  Shanios uses PipeWire as the entire audio (and video) server on every edition — it replaces PulseAudio and JACK with a single unified dae…">
+  <meta name="description" id="meta-desc"     content="Shanios uses PipeWire as the entire audio (and video) server on every edition — it replaces PulseAudio and JACK with a single unified daemon that's compati…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Audio (PipeWire)">
-  <meta property="og:description" id="og-desc"    content="Audio (PipeWire)  Shanios uses PipeWire as the entire audio (and video) server on every edition — it replaces PulseAudio and JACK with a single unified dae…">
+  <meta property="og:description" id="og-desc"    content="Shanios uses PipeWire as the entire audio (and video) server on every edition — it replaces PulseAudio and JACK with a single unified daemon that's compati…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/system/audio/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Audio (PipeWire)">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Audio (PipeWire)">
-  <meta name="twitter:description" id="tw-desc"  content="Audio (PipeWire)  Shanios uses PipeWire as the entire audio (and video) server on every edition — it replaces PulseAudio and JACK with a single unified dae…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios uses PipeWire as the entire audio (and video) server on every edition — it replaces PulseAudio and JACK with a single unified daemon that's compati…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Audio (PipeWire)","description":"Audio (PipeWire)  Shanios uses PipeWire as the entire audio (and video) server on every edition — it replaces PulseAudio and JACK with a single unified dae…","url":"https://docs.shani.dev/doc/system/audio/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Audio (PipeWire)","description":"Shanios uses PipeWire as the entire audio (and video) server on every edition — it replaces PulseAudio and JACK with a single unified daemon that's compati…","url":"https://docs.shani.dev/doc/system/audio/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Audio (PipeWire)","item":"https://docs.shani.dev/doc/system/audio/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,11 +215,11 @@
         <h1 class="doc-title">Audio (PipeWire)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">System</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Shanios uses <strong>PipeWire</strong> as the entire audio (and video) server on every edition — it replaces PulseAudio and JACK with a single unified daemon that's compatible with both APIs. <code>shani-multimedia</code> installs the full stack; <strong>WirePlumber</strong> is the session manager that handles routing and device policy.</p>
-<h2>The Stack</h2>
+<h2 id="the-stack">The Stack</h2>
 <ul>
 <li><strong>pipewire</strong> — the core media server</li>
 <li><strong>pipewire-pulse</strong> — PulseAudio compatibility layer (any app expecting PulseAudio just works)</li>
@@ -229,7 +231,7 @@
 </ul>
 <pre><code class="language-bash"># Confirm the stack is running
 systemctl --user status pipewire pipewire-pulse wireplumber</code></pre>
-<h2>Basic Control — pactl / wpctl</h2>
+<h2 id="basic-control-pactl-wpctl">Basic Control — pactl / wpctl</h2>
 <p>Both the PulseAudio-compatible <code>pactl</code> and PipeWire-native <code>wpctl</code> work; <code>wpctl</code> is generally preferred for PipeWire-specific tasks.</p>
 <pre><code class="language-bash"># List playback devices (sinks) and input devices (sources)
 wpctl status
@@ -252,9 +254,9 @@ pactl set-default-sink &lt;sink-name&gt;
 # Per-application volume
 pactl list sink-inputs
 pactl set-sink-input-volume &lt;input-id&gt; 50%</code></pre>
-<h2>GUI Volume Mixers</h2>
+<h2 id="gui-volume-mixers">GUI Volume Mixers</h2>
 <p><strong>GNOME:</strong> Settings → Sound covers basic device/volume control. For per-app mixing and advanced routing, install <strong>Pavucontrol</strong> (Flatpak) — it works against PipeWire's PulseAudio compatibility layer with no configuration needed. <strong>KDE Plasma:</strong> The Plasma audio applet in the system tray covers the same basics natively.</p>
-<h2>Switching Default Devices</h2>
+<h2 id="switching-default-devices">Switching Default Devices</h2>
 <pre><code class="language-bash"># List all available sinks with their IDs
 wpctl status
 # Output includes a tree like:
@@ -264,8 +266,8 @@ wpctl status
 
 # Switch default output
 wpctl set-default 52</code></pre>
-<p>Bluetooth audio devices appear in this same list once paired — see <a href="../networking/bluetooth">Bluetooth</a> for pairing and codec details.</p>
-<h2>Recording / Screen Capture Audio</h2>
+<p>Bluetooth audio devices appear in this same list once paired — see <a href="../networking/bluetooth.md">Bluetooth</a> for pairing and codec details.</p>
+<h2 id="recording-screen-capture-audio">Recording / Screen Capture Audio</h2>
 <pre><code class="language-bash"># Record from the default microphone
 pw-record ~/recording.wav
 
@@ -275,7 +277,7 @@ pw-record --target=@DEFAULT_AUDIO_SINK@ ~/system-audio.wav
 # List all PipeWire nodes (low-level view, useful for routing/debugging)
 pw-cli list-objects | grep -A2 node.name
 pw-top   # live view of active streams and their CPU/latency load</code></pre>
-<h2>Configuration</h2>
+<h2 id="configuration">Configuration</h2>
 <p>PipeWire and WirePlumber read config from <code>/usr/share/pipewire</code>/<code>/usr/share/wireplumber</code> (defaults) and <code>~/.config/pipewire</code>/<code>~/.config/wireplumber</code> (user overrides — created only if you add a file there).</p>
 <pre><code class="language-bash"># Example: override the default sample rate
 mkdir -p ~/.config/pipewire/pipewire.conf.d
@@ -286,13 +288,13 @@ context.properties = {
 EOF
 
 systemctl --user restart pipewire wireplumber</code></pre>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | No sound at all | <code>systemctl --user restart pipewire pipewire-pulse wireplumber</code>; check <code>wpctl status</code> shows a sink | | Sound distorted/crackling | Usually a sample-rate mismatch — check <code>pactl list sinks \| grep &quot;Sample Spec&quot;</code>; reset config: remove <code>~/.config/pipewire/pipewire.conf.d/*</code> and restart | | No audio on a new Intel laptop | SOF firmware may not have loaded — <code>dmesg \| grep -i sof</code>; confirm <code>sof-firmware</code> is present (it's pre-installed) and try a kernel update | | Bluetooth headphones connected but silent | Confirm the device shows as a sink: <code>pactl list sinks short \| grep bluez</code>; set it as default: <code>wpctl set-default &lt;id&gt;</code> | | App doesn't appear in the volume mixer | Some apps need <code>pipewire-pulse</code> specifically — confirm it's running; Flatpak apps need <code>--socket=pulseaudio</code> permission (usually granted by default via the portal) | | Mic not detected | <code>wpctl status</code> should list it under Sources; check it's not muted at the hardware level (some laptops have a physical mic-mute key) | | High audio latency (pro-audio use) | Use <code>pw-top</code> to inspect quantum/latency; JACK apps can request lower latency directly since <code>pipewire-jack</code> provides full JACK API compatibility |</p>
-<h2>See Also</h2>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>No sound at all</td><td><code>systemctl --user restart pipewire pipewire-pulse wireplumber</code>; check <code>wpctl status</code> shows a sink</td></tr><tr><td>Sound distorted/crackling</td><td>Usually a sample-rate mismatch — check `pactl list sinks \</td><td>grep "Sample Spec"<code>; reset config: remove </code>~/.config/pipewire/pipewire.conf.d/*` and restart</td></tr><tr><td>No audio on a new Intel laptop</td><td>SOF firmware may not have loaded — `dmesg \</td><td>grep -i sof<code>; confirm </code>sof-firmware` is present (it's pre-installed) and try a kernel update</td></tr><tr><td>Bluetooth headphones connected but silent</td><td>Confirm the device shows as a sink: `pactl list sinks short \</td><td>grep bluez<code>; set it as default: </code>wpctl set-default <id>`</td></tr><tr><td>App doesn't appear in the volume mixer</td><td>Some apps need <code>pipewire-pulse</code> specifically — confirm it's running; Flatpak apps need <code>--socket=pulseaudio</code> permission (usually granted by default via the portal)</td></tr><tr><td>Mic not detected</td><td><code>wpctl status</code> should list it under Sources; check it's not muted at the hardware level (some laptops have a physical mic-mute key)</td></tr><tr><td>High audio latency (pro-audio use)</td><td>Use <code>pw-top</code> to inspect quantum/latency; JACK apps can request lower latency directly since <code>pipewire-jack</code> provides full JACK API compatibility</td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../networking/bluetooth">Bluetooth</a> — pairing audio devices, codec support</li>
+<li><a href="../networking/bluetooth.md">Bluetooth</a> — pairing audio devices, codec support</li>
 <li><a href="hardware">Hardware</a> — general audio hardware detection</li>
-<li><a href="../intro/whats-included">What's Included</a> — full audio codec support list</li>
+<li><a href="../intro/whats-included.md">What's Included</a> — full audio codec support list</li>
 </ul></div>
     </div>
 

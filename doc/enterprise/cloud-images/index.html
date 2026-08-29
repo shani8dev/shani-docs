@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>Cloud Images Beyond AWS — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="What exists today for non-AWS targets, what you can build yourself, and how far official support extends. Current Reality There are two distribution paths:…">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/enterprise/cloud-images/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="Cloud Images Beyond AWS">
+  <meta property="og:description" id="og-desc"    content="What exists today for non-AWS targets, what you can build yourself, and how far official support extends. Current Reality There are two distribution paths:…">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/enterprise/cloud-images/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="Cloud Images Beyond AWS">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="Cloud Images Beyond AWS">
+  <meta name="twitter:description" id="tw-desc"  content="What exists today for non-AWS targets, what you can build yourself, and how far official support extends. Current Reality There are two distribution paths:…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Cloud Images Beyond AWS","description":"What exists today for non-AWS targets, what you can build yourself, and how far official support extends. Current Reality There are two distribution paths:…","url":"https://docs.shani.dev/doc/enterprise/cloud-images/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Cloud Images Beyond AWS","item":"https://docs.shani.dev/doc/enterprise/cloud-images/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Cloud Images Beyond AWS</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Enterprise</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><p>What exists today for non-AWS targets, what you can build yourself, and how far official support extends.</p>
+<h2 id="current-reality">Current Reality</h2>
+<p>There are two distribution paths:</p>
+<ol>
+<li><strong>Official automated pipeline: AWS AMI.</strong> <code>shani-install-media/packer/</code> contains a working Packer template (<code>amazon-ebssurrogate</code> builder) that turns a <code>.zst</code> base image into a bootable AMI — profiles, variables, and the GitHub Actions OIDC workflow are documented in <a href="fleet">OEM & Fleet Deployment</a>. This is the only cloud target with an end-to-end maintained path.</li>
+</ol>
+<ol>
+<li><strong>Raw artifacts for every profile and release.</strong> The image build publishes each profile's artifacts publicly to Cloudflare R2 and SourceForge mirrors:</li>
+</ol>
+<table><thead><tr><th>Artifact</th><th>Contents</th></tr></thead><tbody><tr><td><code>shanios-&lt;profile&gt;-&lt;version&gt;.zst</code></td><td>Compressed Btrfs send-stream of the full OS image</td></tr><tr><td><code>shanios-&lt;profile&gt;-&lt;version&gt;.zst.sha256</code></td><td>Checksum</td></tr><tr><td><code>shanios-&lt;profile&gt;-&lt;version&gt;.zst.asc</code></td><td>Detached GPG signature</td></tr></tbody></table>
+<p>The <code>.zst</code> send-stream is the same artifact the AWS Packer build consumes — anything it can do with it, you can replicate on another platform.</p>
+<h2 id="verify-artifacts-before-use">Verify Artifacts Before Use</h2>
+<pre><code class="language-bash">sha256sum -c shanios-server-2026.08.zst.sha256
+
+# One-time: import and trust the signing key
+gpg --keyserver keys.openpgp.org --recv-keys 7B927BFFD4A9EAAA8B666B77DE217F3DA8014792
+gpg --fingerprint 7B927BFFD4A9EAAA8B666B77DE217F3DA8014792   # confirm before trusting
+
+gpg --verify shanios-server-2026.08.zst.asc shanios-server-2026.08.zst</code></pre>
+<p>A failed checksum or signature means do not use the artifact — fetch again from another mirror (R2 primary, SourceForge fallback) and re-verify.</p>
+<hr>
+<h2 id="generic-kvm-qcow2-advanced-unofficial">Generic KVM / qcow2 (Advanced, Unofficial)</h2>
+<blockquote><strong>This is not a supported or documented product surface.</strong> The steps below describe the concept using standard tools; they assume familiarity with Btrfs, UEFI booting, and cloud-init. Read upstream's <code>build.sh test bootstrap</code> first — that local test loop performs exactly this class of operation (loop-mount, receive stream, chroot configure) and is the best available prior art.</blockquote>
+<p>Conceptual flow:</p>
+<pre><code class="language-bash"># 1. Create a blank disk sized for the profile (server needs ~28 GB minimum)
+truncate -s 30G shanios-server.raw
+
+# 2. Format Btrfs and receive the verified send-stream into it,
+#    following the subvolume layout the images expect (@blue/@green/@data)
+mkfs.btrfs shanios-server.raw
+mount -o loop shanios-server.raw /mnt
+zstd -dc shanios-server-2026.08.zst | btrfs receive /mnt
+
+# 3. Bootloader setup follows the image conventions: UKIs generated by
+#    gen-efi and systemd-boot entries on an ESP, exactly as physical
+#    installs produce them. Replicating this outside the Packer pipeline
+#    means reproducing what the pipeline's configuration stage does.
+#    Consult the upstream build scripts and the Arch Wiki pages on
+#    systemd-boot and unified kernel images — this is the step that
+#    requires real experience to get right.
+
+# 4. Swap the cloud-init datasource: the shipped config targets AWS
+#    (IMDSv2 strict, EC2 metadata). Replace it inside the received rootfs.
+rm /mnt/etc/cloud/cloud.cfg.d/10-shanios-aws.cfg
+cat &gt; /mnt/etc/cloud/cloud.cfg.d/10-myorg-generic.cfg &lt;&lt;'EOF'
+datasource_list: [ NoCloud ]
+EOF
+
+umount /mnt</code></pre>
+<p>Then convert and attach as a VM disk:</p>
+<pre><code class="language-bash">qemu-img convert -f raw -O qcow2 shanios-server.raw shanios-server.qcow2
+virt-install --name shanios-01 --memory 4096 --vcpus 2 \
+  --disk path=shanios-server.qcow2 \
+  --boot uefi --os-variant archlinux --import --no-console</code></pre>
+<p>UEFI firmware (OVMF) is required — Secure Boot with MOK-enrolled UKIs is part of the boot chain. If your hypervisor cannot enforce Secure Boot, the machine still boots via the MOK-signed UKI path but report boot state accordingly in your own compliance evidence (see <a href="compliance">Compliance & Benchmarks</a>).</p>
+<hr>
+<h2 id="azure-gcp">Azure / GCP</h2>
+<p>No official templates exist. The practical approach: copy <code>packer/shanios-ami.pkr.hcl</code>, swap the <code>amazon-ebssurrogate</code> builder block for <a href="https://developer.hashicorp.com/packer/plugins/builders/azure/arm"><code>azure-arm</code></a> or <a href="https://developer.hashicorp.com/packer/plugins/builders/googlecompute"><code>googlecompute</code></a>, and keep the three provisioner scripts (<code>00-bootstrap-shanios.sh</code>, <code>01-configure-aws.sh</code> → rename/adjust its cloud-init bits, <code>02-verify.sh</code>) operating on the attached volume unchanged where possible.</p>
+<p>Variable differences from the AWS template:</p>
+<table><thead><tr><th>Variable</th><th>AWS template</th><th>Azure/GCP adaptation</th></tr></thead><tbody><tr><td><code>r2_base_url</code> / <code>s3_base_url</code></td><td>Base <code>.zst</code> source for the build</td><td><strong>Unchanged</strong> — still pulled from R2/SourceForge</td></tr><tr><td><code>gpg_public_key</code></td><td>Optional org signing key baked at build time</td><td>Unchanged</td></tr><tr><td><code>shanios_profile</code></td><td><code>gnome</code>/<code>plasma</code>/<code>cosmic</code> (server default)</td><td>Unchanged</td></tr><tr><td>Credentials</td><td>AWS OIDC role, no long-lived keys</td><td>Azure: OIDC/service principal; GCP: service account impersonation</td></tr><tr><td>Added</td><td>—</td><td><code>azure_subscription_id</code> + resource group / <code>gcp_project_id</code> + zone</td></tr></tbody></table>
+<p>Budget time for the platform-specific parts of <code>01-configure-aws.sh</code> (fstab device naming differs; serial console targets differ).</p>
+<hr>
+<h2 id="proxmox-openstack">Proxmox / OpenStack</h2>
+<p>Both consume the output of either path above directly:</p>
+<table><thead><tr><th>Platform</th><th>Import</th><th>cloud-init datasource</th></tr></thead><tbody><tr><td>Proxmox VE</td><td><code>qm importdisk</code> with the qcow2/raw; attach as SCSI disk</td><td>NoCloud (Proxmox cloud-init drive)</td></tr><tr><td>OpenStack</td><td>Upload to Glance, boot from image</td><td>OpenStack datasource (metadata service)</td></tr><tr><td>Plain libvirt/KVM</td><td>Attach qcow2</td><td>NoCloud seed ISO</td></tr></tbody></table>
+<p>The server profile is built for exactly this usage: headless, <code>systemd-networkd</code> + cloud-init networking, serial console on <code>ttyS0</code>, sshd/firewalld/fail2ban/auditd enabled by default. After swapping the AWS datasource config (step 4 above) for the platform's datasource, first boot picks up hostname, SSH keys, and network from the metadata provider as usual.</p>
+<hr>
+<h2 id="support-posture">Support Posture</h2>
+<ul>
+<li><strong>Officially supported: AWS only.</strong> The AMI pipeline is tested end-to-end, including the CI build workflow.</li>
+<li><strong>Everything else: community/DIY.</strong> The raw artifacts are public and verifiable precisely so this remains possible, but nobody has validated Azure, GCP, Proxmox, or bare-KVM builds against release QA.</li>
+<li>Issues and improvements for other platforms are welcome upstream at the <a href="https://github.com/shani8dev/shani-install-media">shani-install-media</a> repository. For organisation-scale needs, <a href="https://shani.dev#enterprise">contact the project</a>.</li>
+</ul>
+<hr>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="fleet">OEM & Fleet Deployment</a> — Packer AMI pipeline, profiles, signing</li>
+<li><a href="../servers/kubernetes/overview.md">Kubernetes</a> — server-profile workloads</li>
+<li><a href="../networking/virtual-networking.md">Virtual Networking</a> — bridges, libvirt, VM networking</li>
+<li>Blog: <a href="https://shani.dev/blog/kubernetes-on-shani-os">Kubernetes on Shani OS</a></li>
+</ul></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

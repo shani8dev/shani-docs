@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>Switching from Windows &amp; macOS — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="This guide is for anyone leaving Windows or macOS for Shanios — whether you are migrating one laptop, setting up a family machine, or moving because your c…">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/intro/switching-from-windows/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="Switching from Windows &amp; macOS">
+  <meta property="og:description" id="og-desc"    content="This guide is for anyone leaving Windows or macOS for Shanios — whether you are migrating one laptop, setting up a family machine, or moving because your c…">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/intro/switching-from-windows/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="Switching from Windows &amp; macOS">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="Switching from Windows &amp; macOS">
+  <meta name="twitter:description" id="tw-desc"  content="This guide is for anyone leaving Windows or macOS for Shanios — whether you are migrating one laptop, setting up a family machine, or moving because your c…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Switching from Windows & macOS","description":"This guide is for anyone leaving Windows or macOS for Shanios — whether you are migrating one laptop, setting up a family machine, or moving because your c…","url":"https://docs.shani.dev/doc/intro/switching-from-windows/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Switching from Windows & macOS","item":"https://docs.shani.dev/doc/intro/switching-from-windows/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Switching from Windows &amp; macOS</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Introduction</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><p>This guide is for anyone leaving Windows or macOS for Shanios — whether you are migrating one laptop, setting up a family machine, or moving because your current OS no longer respects you. No Linux experience is assumed and none is required.</p>
+<p>The single biggest difference: Shanios is immutable. The operating system is a verified, read-only image. Nothing you do day to day — installing apps, changing settings, clicking the wrong thing — can break it. Updates apply atomically and roll back with one command (<code>sudo shani-deploy -r</code>). If a truly fresh start is ever needed, <code>shani-reset</code> returns the system to factory state while leaving your personal files untouched.</p>
+<p>Everything below applies to every edition — <strong>GNOME</strong> and <strong>KDE Plasma</strong> today, with the announced <strong>COSMIC</strong> edition to follow. Where an app differs by edition (the file manager, mainly), the difference is noted.</p>
+<table><thead><tr><th>Edition</th><th>File manager</th><th>Bundled apps</th><th>Pre-installed everywhere</th></tr></thead><tbody><tr><td>GNOME</td><td>Files (Nautilus)</td><td>GNOME apps, Deja Dup</td><td>Vivaldi browser</td></tr><tr><td>KDE Plasma</td><td>Dolphin</td><td>KDE apps</td><td>OnlyOffice</td></tr><tr><td>COSMIC <em>(announced)</em></td><td>COSMIC Files</td><td>COSMIC apps</td><td>Warehouse</td></tr></tbody></table>
+<p>Pick an edition based on desktop taste — all include the same core: Vivaldi, OnlyOffice, Warehouse, Mission Center, IBus input, Nix, and the <code>shani-deploy</code> update system.</p>
+<h2 id="before-you-leave-windows-or-macos">Before You Leave Windows or macOS</h2>
+<p>Do these on your old machine first. Ten minutes here saves days later.</p>
+<ul>
+<li><strong>Copy your personal data</strong> — Documents, Pictures, Videos, Desktop, Downloads — to a USB drive formatted as <strong>exFAT or NTFS</strong>. Both are fully readable and writable on Shanios. Cloud storage works equally well.</li>
+<li><strong>BitLocker (Windows):</strong> turn it off or decrypt the drive before wiping. An encrypted old drive is unreadable afterwards without the recovery key, which most people have never saved.</li>
+<li><strong>FileVault (macOS):</strong> disable it beforehand, or make certain you have the password. Time Machine backups cannot be restored directly on Linux either way — bring your <em>files</em>, not your backup container.</li>
+<li><strong>Export browser data:</strong> sign in to browser sync (Firefox, Chrome, Vivaldi) so bookmarks, history, and passwords follow you automatically.</li>
+<li><strong>Note your email settings:</strong> IMAP server, port, username, and password if they are stored only in your old mail client.</li>
+<li><strong>Deauthorise activations:</strong> iTunes and Adobe products limit activations per licence. Deauthorize before wiping, not after.</li>
+</ul>
+<h2 id="what-carries-over-and-what-does-not">What Carries Over — and What Does Not</h2>
+<table><thead><tr><th>Item</th><th>Carries over</th><th>How</th></tr></thead><tbody><tr><td>Documents, media, photos</td><td>Yes</td><td>Any USB drive (exFAT/NTFS) or cloud sync</td></tr><tr><td>Installed programs</td><td>No</td><td>Reinstall the equivalents — nearly all are free</td></tr><tr><td>Browser profile</td><td>Yes</td><td>Browser sync (Vivaldi is pre-installed)</td></tr><tr><td>Fonts</td><td>Yes</td><td>Copy <code>.ttf</code>/<code>.otf</code> files into <code>~/.local/share/fonts</code></td></tr><tr><td>Outlook PST archives</td><td>Yes</td><td>Importable into Thunderbird (Flathub)</td></tr><tr><td>Time Machine backups</td><td>Not directly</td><td>restic/borg cannot open them — copy the data out first</td></tr><tr><td>iPhone photos</td><td>Via iCloud or Mac</td><td>Download from iCloud.com, or copy to a drive on the Mac first</td></tr></tbody></table>
+<p>The last two rows matter for macOS switchers in particular. Bring your <em>files</em>, not your backup formats: restic and borg are excellent backup tools on Shanios, but they cannot open Apple's Time Machine sparse bundles. Copy what you need onto an exFAT drive or cloud storage before you wipe the Mac.</p>
+<p>Fonts are the small detail people forget: Windows and macOS ship different default fonts, so documents may look slightly different until you copy your font collection into <code>~/.local/share/fonts</code>. Nothing else is needed — fontconfig picks them up immediately.</p>
+<h2 id="habit-translation">Habit Translation</h2>
+<p>Every daily habit has an equivalent. The names differ; the workflows do not.</p>
+<h3 id="everyday-tools">Everyday Tools</h3>
+<table><thead><tr><th>Windows / macOS</th><th>Shanios</th></tr></thead><tbody><tr><td>File Explorer / Finder</td><td>Files app — Nautilus (GNOME), Dolphin (KDE Plasma), COSMIC Files (COSMIC)</td></tr><tr><td>Microsoft Store / Mac App Store</td><td>Flathub via <strong>Warehouse</strong> (pre-installed)</td></tr><tr><td>Control Panel / System Settings</td><td>Settings app of your edition</td></tr><tr><td>Task Manager / Activity Monitor</td><td>Mission Center (pre-installed), or <code>htop</code> in a terminal</td></tr><tr><td>cmd / PowerShell / Terminal.app</td><td>zsh with Starship prompt (pre-configured)</td></tr><tr><td>Action Centre / Notification Centre</td><td>Desktop notification centre; update prompts arrive via <code>shani-update</code> notifications</td></tr></tbody></table>
+<h3 id="applications">Applications</h3>
+<table><thead><tr><th>Windows / macOS</th><th>Shanios</th></tr></thead><tbody><tr><td><code>.exe</code> installers / <code>.dmg</code> images</td><td>Flatpak first (Warehouse), then AppImage; Bottles runs Windows <code>.exe</code> apps</td></tr><tr><td>MS Office</td><td>OnlyOffice (pre-installed) or LibreOffice (Flathub)</td></tr><tr><td>Photoshop</td><td>GIMP or Krita (Flathub)</td></tr><tr><td>Illustrator</td><td>Inkscape (Flathub)</td></tr><tr><td>Time Machine</td><td>restic or borg (documented), Deja Dup (GNOME edition)</td></tr><tr><td>iCloud Drive</td><td>Nextcloud/self-hosted, or any cloud provider in the browser</td></tr><tr><td>Keychain</td><td>KeePassXC (Flathub); GNOME Keys with Seahorse/Secrets (GNOME edition)</td></tr></tbody></table>
+<h3 id="finding-software">Finding Software</h3>
+<p>Software discovery is the easiest part of switching. Open <strong>Warehouse</strong>, search, install — no download-and-run installers, no bundled toolbars, no "check this box to decline".</p>
+<ul>
+<li>Thunderbird, LibreOffice, GIMP, Inkscape, Krita, KeePassXC, Discord, Spotify, and thousands more are on Flathub, which is pre-configured out of the box.</li>
+<li>For CLI tools, Nix is pre-installed; Homebrew is supported for those arriving from macOS.</li>
+<li>Bottles handles Windows applications that have no Linux equivalent.</li>
+<li>Gaming has its own documented stack — see <a href="../software/gaming.md">Gaming</a>.</li>
+</ul>
+<p>Office work needs no setup at all: <strong>OnlyOffice and the Vivaldi browser ship on every edition</strong>, so documents, spreadsheets, presentations, and web browsing work from first boot.</p>
+<h3 id="email-photos-and-media">Email, Photos, and Media</h3>
+<table><thead><tr><th>Task</th><th>On Shanios</th></tr></thead><tbody><tr><td>Email</td><td>Thunderbird (Flathub) — IMAP settings from your checklist go here</td></tr><tr><td>Importing Outlook PST</td><td>Thunderbird: Tools → Import</td></tr><tr><td>Photos from a camera or drive</td><td>Open with any image app; drives mount read/write (NTFS/exFAT included)</td></tr><tr><td>Music and video</td><td>Player of choice from Flathub</td></tr><tr><td>Cloud files</td><td>Any cloud provider works in Vivaldi; Nextcloud for self-hosted sync</td></tr></tbody></table>
+<h3 id="windows-applications">Windows Applications</h3>
+<p>For the occasional Windows program with no Linux equivalent — a tax tool, a legacy utility — <strong>Bottles</strong> (Flathub) creates isolated Wine environments per application. Install it from Warehouse, create a bottle, run the <code>.exe</code> inside it. No Windows licence is required.</p>
+<p>Applications that need a real Windows kernel (hardware drivers, kernel-level anti-cheat) are the exception; use a virtual machine for those, or keep them on a remaining Windows install.</p>
+<h2 id="installing">Installing</h2>
+<ol>
+<li>Download the ISO for your edition from <a href="https://shani.dev">shani.dev</a>.</li>
+<li>Verify SHA256 checksum and GPG signature:</li>
+</ol>
+<p>``<code>bash sha256sum -c shanios-x86_64.iso.SHA256 gpg --keyserver keys.openpgp.org --recv-keys 7B927BFFD4A9EAAA8B666B77DE217F3DA8014792 gpg --verify shanios-x86_64.iso.sig shanios-x86_64.iso </code>``</p>
+<ol>
+<li>Write to USB. On Linux/macOS use <code>dd</code>; on Windows use Rufus in <strong>DD image mode</strong>:</li>
+</ol>
+<p>``<code>bash sudo dd if=shanios-x86_64.iso of=/dev/sdX bs=4M status=progress oflag=sync </code>``</p>
+<blockquote><strong>Do not use Ventoy.</strong> Its ISO mounting method conflicts with the Shanios bootloader.</blockquote>
+<ol>
+<li>Boot from the USB and follow the guided installer (<code>os-installer</code>). Partitioning is guided by default; full-disk <strong>LUKS2 encryption</strong> is offered as a checkbox — recommended, especially on laptops.</li>
+<li>Reboot, remove the USB, done.</li>
+</ol>
+<p>Full details including troubleshooting bad USB writes: <a href="../install/steps.md">Install Steps</a>.</p>
+<h3 id="post-install-checklist">Post-Install Checklist</h3>
+<ol>
+<li>Run your first update: <code>sudo shani-deploy</code>, reboot when it finishes.</li>
+<li>Sign in to browser sync in Vivaldi — bookmarks and passwords return.</li>
+<li>Add your keyboard layouts, including any Indian languages (already configured via IBus).</li>
+<li>Set up Thunderbird with your IMAP details; import your Outlook PST if you have one.</li>
+<li>Install your usual apps from Warehouse.</li>
+<li>Configure a backup: restic or borg for encrypted versioned backups, Deja Dup on GNOME.</li>
+<li>If you enabled LUKS2, enrol TPM2 auto-unlock per <a href="getting-started">Getting Started</a>.</li>
+</ol>
+<h2 id="dual-boot-or-full-replacement">Dual-Boot or Full Replacement</h2>
+<p>Both work. Choose based on honesty about how you will actually use it:</p>
+<ul>
+<li><strong>Dual-boot</strong> keeps Windows around via the installer's manual partition step. Fine as a safety net — but be aware that major Windows updates have a habit of rewriting the boot order and putting themselves first. It is fixable, but annoying at 9am on a workday.</li>
+<li><strong>Full replacement</strong> is cleaner and is what most people end up preferring once they realise everything they need exists on Shanios.</li>
+</ul>
+<p>Secure Boot stays enabled either way — Shanio's bootloader is signed, so there is no BIOS fiddling before installation.</p>
+<p>Whichever you choose, the exFAT/NTFS backup drive stays your safety net for the first month. Delete it only after a full week of real work on Shanios.</p>
+<h2 id="first-week-adjustments">First Week Adjustments</h2>
+<ul>
+<li><strong>Expect different-but-equivalent.</strong> The file manager opens files, the settings app changes settings, OnlyOffice opens your <code>.docx</code>. Muscle memory rebuilds in days, not weeks.</li>
+<li><strong>Find software in Warehouse</strong>, not by searching the web for installers. If something is not on Flathub, check Nix, Homebrew, or Bottles for Windows apps.</li>
+<li><strong>Indian-language input is already configured.</strong> IBus ships enabled with support for Devanagari, Bengali, Gujarati, Gurmukhi, Kannada, Malayalam, Oriya, Tamil, and Telugu scripts — add your keyboard layout in Settings and start typing. Switchers from multilingual setups do not need to hunt for input-method packages.</li>
+<li><strong>Backups work differently — better.</strong> restic and borg give encrypted, versioned backups; Deja Dup offers a simple GUI on the GNOME edition. Set one up in week one.</li>
+<li><strong>When something breaks: it does not.</strong> The OS cannot drift, half-update, or be corrupted by a bad install. If behaviour ever seems wrong, <code>shani-health</code> diagnoses the system, and <code>sudo shani-deploy -r</code> rolls back the last update in minutes.</li>
+</ul>
+<h2 id="getting-help">Getting Help</h2>
+<ul>
+<li><a href="../faq.md">FAQ</a> — common questions from new users</li>
+<li><a href="../troubleshooting.md">Troubleshooting Guide</a> — systematic diagnosis when behaviour seems off</li>
+<li><a href="getting-started">Getting Started</a> — post-install walkthrough</li>
+</ul>
+<p>Switcher-specific questions (dual-boot, data migration, app equivalents) are covered in the FAQ. For anything else, the troubleshooting guide is the fastest path to an answer.</p>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="getting-started">Getting Started</a> — first steps after installation</li>
+<li><a href="what-is-shanios">What is Shanios?</a> — immutability, atomic updates, rollback</li>
+<li><a href="whats-included">What's Included</a> — the full pre-installed software stack</li>
+<li><a href="https://blog.shani.dev/post/migrating-to-shani-os">Migrating to Shani OS</a> — switching from another Linux distro instead</li>
+<li><a href="https://blog.shani.dev/post/shani-os-getting-started">Shani OS Getting Started</a></li>
+<li><a href="https://blog.shani.dev/post/shani-os-software-ecosystem">Shani OS Software Ecosystem</a> — what to use when</li>
+</ul></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

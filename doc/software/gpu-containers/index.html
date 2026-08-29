@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>GPU Acceleration &amp; HPC Containers — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="GPU Acceleration &amp; HPC Containers  Shanios is an immutable OS built for reproducibility. GPU drivers are pre-installed and OS-managed, while heavy user-spa…">
+  <meta name="description" id="meta-desc"     content="Shanios is an immutable OS built for reproducibility. GPU drivers are pre-installed and OS-managed, while heavy user-space stacks (CUDA, ROCm, OpenMPI, NCC…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="GPU Acceleration &amp; HPC Containers">
-  <meta property="og:description" id="og-desc"    content="GPU Acceleration &amp; HPC Containers  Shanios is an immutable OS built for reproducibility. GPU drivers are pre-installed and OS-managed, while heavy user-spa…">
+  <meta property="og:description" id="og-desc"    content="Shanios is an immutable OS built for reproducibility. GPU drivers are pre-installed and OS-managed, while heavy user-space stacks (CUDA, ROCm, OpenMPI, NCC…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/software/gpu-containers/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="GPU Acceleration &amp; HPC Containers">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="GPU Acceleration &amp; HPC Containers">
-  <meta name="twitter:description" id="tw-desc"  content="GPU Acceleration &amp; HPC Containers  Shanios is an immutable OS built for reproducibility. GPU drivers are pre-installed and OS-managed, while heavy user-spa…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios is an immutable OS built for reproducibility. GPU drivers are pre-installed and OS-managed, while heavy user-space stacks (CUDA, ROCm, OpenMPI, NCC…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"GPU Acceleration & HPC Containers","description":"GPU Acceleration & HPC Containers  Shanios is an immutable OS built for reproducibility. GPU drivers are pre-installed and OS-managed, while heavy user-spa…","url":"https://docs.shani.dev/doc/software/gpu-containers/","datePublished":"2026-04-17T00:00:00.000Z","dateModified":"2026-04-17T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"GPU Acceleration & HPC Containers","description":"Shanios is an immutable OS built for reproducibility. GPU drivers are pre-installed and OS-managed, while heavy user-space stacks (CUDA, ROCm, OpenMPI, NCC…","url":"https://docs.shani.dev/doc/software/gpu-containers/","datePublished":"2026-08-28T18:30:00.000Z","dateModified":"2026-08-28T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"GPU Acceleration & HPC Containers","item":"https://docs.shani.dev/doc/software/gpu-containers/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,42 +215,44 @@
         <h1 class="doc-title">GPU Acceleration &amp; HPC Containers</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Software &amp; Apps</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-17</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-29</span>
         </div>
       </div>
       <div class="prose"><p>Shanios is an immutable OS built for reproducibility. GPU drivers are pre-installed and OS-managed, while heavy user-space stacks (CUDA, ROCm, OpenMPI, NCCL) run <strong>exclusively in containers or Apptainer images</strong>. This keeps the host lean and makes research environments fully portable.</p>
-<p>---</p>
-<h2>🟢 NVIDIA CUDA + OpenCL</h2>
-<h3>1. Verify Host Driver</h3>
+<h2 id="quick-start-decision-framework">📋 Quick-Start Decision Framework</h2>
+<table><thead><tr><th>Goal</th><th>Recommended Runtime</th><th>Why</th></tr></thead><tbody><tr><td><strong>Interactive IDE / Jupyter / debugging</strong></td><td><strong>Distrobox</strong></td><td>Shares home dir, inherits host <code>/dev</code> nodes, no CDI config needed</td></tr><tr><td><strong>One-off test / benchmark / CI</strong></td><td><strong>Podman</strong></td><td>Rootless by default, CDI spec auto-propagates via <code>shani-deploy</code>, no persistent fs</td></tr><tr><td><strong>HPC cluster / SLURM / distributed</strong></td><td><strong>Apptainer</strong></td><td><code>.sif</code> standard, rootless by cluster requirement, <code>--nv</code> auto-injects host driver</td></tr><tr><td><strong>AI inference serving (vLLM / Ollama)</strong></td><td><strong>Podman</strong></td><td><code>--device nvidia.com/gpu=all</code> + <code>--security-opt=label=disable</code>; persists in <code>@containers</code> Btrfs</td></tr><tr><td><strong>Max compatibility (mixed CUDA/ROCm apps)</strong></td><td><strong>Distrobox</strong></td><td>Shares host GPU stack; use <code>--device=/dev/kfd --device=/dev/dri</code> inside for ROCm</td></tr></tbody></table>
+<hr>
+<h2 id="nvidia-cuda-opencl">🟢 NVIDIA CUDA + OpenCL</h2>
+<h3 id="1-verify-host-driver">1. Verify Host Driver</h3>
 <pre><code class="language-bash">nvidia-smi
 clinfo | grep -i nvidia   # Verify OpenCL platform</code></pre>
-<h3>2. Install Container Toolkit and Generate CDI Spec</h3>
-<pre><code class="language-bash">sudo pacman -S nvidia-container-toolkit
-
-# Generate the CDI specification — required for Podman (especially rootless)
+<h3 id="2-container-toolkit-and-cdi-spec">2. Container Toolkit and CDI Spec</h3>
+<p><code>nvidia-container-toolkit</code> <strong>ships pre-installed</strong> in Shanios images — no package install is needed (and the immutable root cannot accept one). Generate the CDI spec:</p>
+<pre><code class="language-bash"># Generate the CDI specification — required for Podman (especially rootless)
 sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
 
 # Verify devices were detected
 nvidia-ctk cdi list
 # Expected output: nvidia.com/gpu=0, nvidia.com/gpu=all, etc.</code></pre>
 <p>The CDI spec must be regenerated after driver updates or GPU configuration changes.</p>
-<h3>3. Run a CUDA Container</h3>
+<h3 id="3-run-a-cuda-container">3. Run a CUDA Container</h3>
 <p>CDI mode requires <code>--security-opt=label=disable</code> with Podman.</p>
 <pre><code class="language-bash">podman run --rm \
   --device nvidia.com/gpu=all \
   --security-opt=label=disable \
   docker.io/nvidia/cuda:12.6.0-devel-ubuntu24.04 \
   python3 -c &quot;import torch; print(torch.cuda.is_available())&quot;</code></pre>
-<h3>4. Install PyTorch (CUDA 12.1)</h3>
+<h3 id="4-install-pytorch-cuda-121">4. Install PyTorch (CUDA 12.1)</h3>
 <pre><code class="language-bash">pip install torch torchvision torchaudio \
   --index-url https://download.pytorch.org/whl/cu121</code></pre>
-<p>---</p>
-<h2>🔴 AMD ROCm + OpenCL</h2>
-<h3>1. Verify Host Driver</h3>
+<blockquote>💡 <strong>Tip:</strong> On Shanios, <code>shani-deploy</code> updates host NVIDIA drivers and the CDI spec automatically. No image rebuild is required — the change propagates to all existing containers on next <code>podman restart</code>.</blockquote>
+<hr>
+<h2 id="amd-rocm-opencl">🔴 AMD ROCm + OpenCL</h2>
+<h3 id="1-verify-host-driver-2">1. Verify Host Driver</h3>
 <pre><code class="language-bash">clinfo | grep -i amd</code></pre>
-<h3>2. Add User to Device Groups</h3>
+<h3 id="2-add-user-to-device-groups">2. Add User to Device Groups</h3>
 <pre><code class="language-bash">sudo usermod -aG render,video $USER &amp;&amp; newgrp render</code></pre>
-<h3>3. Run a ROCm Container</h3>
+<h3 id="3-run-a-rocm-container">3. Run a ROCm Container</h3>
 <p>No ROCm installation on the host is required — map devices via Podman flags.</p>
 <pre><code class="language-bash">podman run --rm \
   --device /dev/kfd \
@@ -258,30 +262,23 @@ nvidia-ctk cdi list
   -e HSA_OVERRIDE_GFX_VERSION=10.3.0 \
   docker.io/rocm/dev-ubuntu-22.04:latest \
   python3 -c &quot;import torch; print(torch.cuda.is_available())&quot;</code></pre>
-<blockquote><p>⚠️ <strong>GFX Version Override</strong>: Most consumer AMD GPUs require <code>HSA_OVERRIDE_GFX_VERSION</code>. Set it based on your GPU generation:</p></blockquote>
-<blockquote><p></p></blockquote>
-<blockquote><p>| GPU Generation | Value |</p></blockquote>
-<blockquote><p>|----------------|-------|</p></blockquote>
-<blockquote><p>| RDNA 2 (RX 6000 series) | <code>10.3.0</code> |</p></blockquote>
-<blockquote><p>| RDNA 3 (RX 7000 series) | <code>11.0.0</code> |</p></blockquote>
-<blockquote><p></p></blockquote>
-<blockquote><p>To find your exact version: <code>rocminfo | grep gfx</code></p></blockquote>
-<p>---</p>
-<h2>🔵 Intel oneAPI / SYCL</h2>
-<h3>1. Verify Host Driver</h3>
+<blockquote>⚠️ <strong>GFX Version Override</strong>: Most consumer AMD GPUs require <code>HSA_OVERRIDE_GFX_VERSION</code>. Set it based on your GPU generation:  | GPU Generation | Value | |----------------|-------| | RDNA 2 (RX 6000 series) | <code>10.3.0</code> | | RDNA 3 (RX 7000 series) | <code>11.0.0</code> |  To find your exact version: <code>rocminfo | grep gfx</code></blockquote>
+<hr>
+<h2 id="intel-oneapi-sycl">🔵 Intel oneAPI / SYCL</h2>
+<h3 id="1-verify-host-driver-3">1. Verify Host Driver</h3>
 <pre><code class="language-bash">clinfo | grep -i intel</code></pre>
-<h3>2. Add User to Device Groups</h3>
+<h3 id="2-add-user-to-device-groups-2">2. Add User to Device Groups</h3>
 <pre><code class="language-bash">sudo usermod -aG render,video $USER &amp;&amp; newgrp render</code></pre>
-<h3>3. Run a oneAPI Container</h3>
+<h3 id="3-run-a-oneapi-container">3. Run a oneAPI Container</h3>
 <pre><code class="language-bash">podman run --rm \
   --device /dev/dri \
   --group-add render \
   ghcr.io/intel/oneapi-basekit:latest \
   bash -c &quot;apt-get update -q &amp;&amp; apt-get install -y -q clinfo &amp;&amp; clinfo&quot;</code></pre>
-<p>---</p>
-<h2>📦 Distrobox: Interactive Development (Recommended)</h2>
+<hr>
+<h2 id="distrobox-interactive-development-recommended">📦 Distrobox: Interactive Development (Recommended)</h2>
 <p>Distrobox containers inherit host GPU drivers and <code>/dev</code> nodes automatically. This is the <strong>recommended path</strong> for interactive GPU development — IDEs, Jupyter notebooks, debugging, and persistent environments. Unlike raw Podman containers, Distrobox shares your home directory and does not require CDI configuration.</p>
-<h3>NVIDIA</h3>
+<h3 id="nvidia">NVIDIA</h3>
 <pre><code class="language-bash">distrobox create --name cuda-dev \
   --image nvidia/cuda:12.3.0-devel-ubuntu22.04
 
@@ -289,7 +286,7 @@ distrobox enter cuda-dev
 
 # Inside the container:
 pip install torch --index-url https://download.pytorch.org/whl/cu121</code></pre>
-<h3>AMD ROCm</h3>
+<h3 id="amd-rocm">AMD ROCm</h3>
 <pre><code class="language-bash">distrobox create --name rocm-dev \
   --image rocm/dev-ubuntu-22.04:latest \
   --additional-flags &quot;--device=/dev/kfd --device=/dev/dri --group-add=video --group-add=render&quot;
@@ -298,7 +295,7 @@ distrobox enter rocm-dev
 
 # Inside the container:
 pip install torch --index-url https://download.pytorch.org/whl/rocm6.0</code></pre>
-<h3>Intel oneAPI</h3>
+<h3 id="intel-oneapi">Intel oneAPI</h3>
 <pre><code class="language-bash">distrobox create --name intel-dev \
   --image intel/oneapi-basekit:latest \
   --additional-flags &quot;--device=/dev/dri --group-add=render&quot;
@@ -307,10 +304,10 @@ distrobox enter intel-dev
 
 # Inside the container:
 clinfo | grep -i intel</code></pre>
-<p>---</p>
-<h2>🧬 Apptainer (HPC & Cluster Ready)</h2>
+<hr>
+<h2 id="apptainer-hpc-cluster-ready">🧬 Apptainer (HPC & Cluster Ready)</h2>
 <p>Apptainer is pre-installed on Shanios and produces <code>.sif</code> files — the standard portable image format for HPC clusters. Unlike Docker or Podman, Apptainer runs rootless by default, which is required on most clusters.</p>
-<h3>Basic Usage</h3>
+<h3 id="basic-usage">Basic Usage</h3>
 <pre><code class="language-bash"># Pull an image from Docker Hub
 apptainer pull docker://nvidia/cuda:12.6.0-base-ubuntu24.04
 
@@ -320,7 +317,7 @@ apptainer build --fakeroot research.sif research.def
 # Run with GPU acceleration (host driver injected automatically)
 apptainer exec --nv   research.sif nvidia-smi   # NVIDIA
 apptainer exec --rocm research.sif rocm-smi     # AMD</code></pre>
-<h3>SLURM Job Submission</h3>
+<h3 id="slurm-job-submission">SLURM Job Submission</h3>
 <pre><code class="language-bash">#!/bin/bash
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks=8
@@ -330,9 +327,9 @@ apptainer exec --nv /scratch/$USER/research.sif python3 train.py
 
 # AMD workload
 apptainer exec --rocm /scratch/$USER/research.sif python3 train.py</code></pre>
-<p>---</p>
-<h2>🌐 OpenMPI & Distributed Workflows</h2>
-<h3>HPC Standard (Host MPI + Container)</h3>
+<hr>
+<h2 id="openmpi-distributed-workflows">🌐 OpenMPI & Distributed Workflows</h2>
+<h3 id="hpc-standard-host-mpi-container">HPC Standard (Host MPI + Container)</h3>
 <p>Most clusters run <code>mpirun</code> on the host and bind-mount the MPI libraries into the container. Your container's MPI version should match the host's.</p>
 <pre><code class="language-bash">module load openmpi
 
@@ -340,7 +337,7 @@ mpirun -np 32 \
   apptainer exec --nv \
   --bind /usr/lib/openmpi:/usr/lib/openmpi \
   myimage.sif python3 mpi_script.py</code></pre>
-<h3>Local Multi-Node Testing (Podman Pod)</h3>
+<h3 id="local-multi-node-testing-podman-pod">Local Multi-Node Testing (Podman Pod)</h3>
 <p>Test distributed workloads on a single workstation without installing MPI on the host.</p>
 <pre><code class="language-bash"># Create a pod with a shared network namespace
 podman pod create --name mpi-cluster
@@ -351,16 +348,31 @@ podman run -d --pod mpi-cluster --name node2 nvidia/openmpi:4.1 sleep infinity
 
 # Run the distributed job
 podman exec node1 mpirun --host node1,node2 -np 8 python3 /workspace/benchmark.py</code></pre>
-<p>---</p>
-<h2>🤖 AI Inference & Serving</h2>
-<p>| Workload | Runtime | Command | |----------|---------|---------| | <strong>vLLM</strong> | NVIDIA | <code>podman run -d -p 127.0.0.1:8000:8000 --device nvidia.com/gpu=all -v models:/models vllm/vllm-openai:latest --model meta-llama/Meta-Llama-3-8B-Instruct --tensor-parallel-size 1</code> | | <strong>LLaMA.cpp</strong> | AMD ROCm | <code>podman run --rm --device /dev/kfd --device /dev/dri --group-add video,render ghcr.io/ggerganov/llama.cpp:full-rocm -m /model.gguf -ngl 80 -p &quot;Hello&quot;</code> | | <strong>Ollama</strong> | NVIDIA | <code>podman run -d -p 127.0.0.1:11434:11434 --device nvidia.com/gpu=all -e NVIDIA_VISIBLE_DEVICES=all -v ollama:/root/.ollama ollama/ollama</code> |</p>
-<blockquote><p><strong>Tip:</strong> All server endpoints above bind to <code>127.0.0.1</code> by default for security. Change to <code>0.0.0.0</code> only if you need LAN access and understand the exposure.</p></blockquote>
-<p>---</p>
-<h2>📝 Notes</h2>
+<hr>
+<h2 id="ai-inference-serving">🤖 AI Inference & Serving</h2>
+<table><thead><tr><th>Workload</th><th>Runtime</th><th>Command</th></tr></thead><tbody><tr><td><strong>vLLM</strong></td><td>NVIDIA</td><td><code>podman run -d -p 127.0.0.1:8000:8000 --device nvidia.com/gpu=all -v models:/models vllm/vllm-openai:latest --model Qwen/Qwen3-32B --tensor-parallel-size 1</code></td></tr><tr><td><strong>LLaMA.cpp</strong></td><td>AMD ROCm</td><td><code>podman run --rm --device /dev/kfd --device /dev/dri --group-add video,render ghcr.io/ggerganov/llama.cpp:full-rocm -m /model.gguf -ngl 80 -p &quot;Hello&quot;</code></td></tr><tr><td><strong>Ollama</strong></td><td>NVIDIA</td><td><code>podman run -d -p 127.0.0.1:11434:11434 --device nvidia.com/gpu=all -e NVIDIA_VISIBLE_DEVICES=all -v ollama:/root/.ollama ollama/ollama</code></td></tr></tbody></table>
+<blockquote><strong>Tip:</strong> All server endpoints above bind to <code>127.0.0.1</code> by default for security. Change to <code>0.0.0.0</code> only if you need LAN access and understand the exposure.</blockquote>
+<hr>
+<h2 id="notes">📝 Notes</h2>
 <ul>
 <li><strong>Persistence:</strong> All container data persists in the <code>@containers</code> Btrfs subvolume.</li>
 <li><strong>Driver updates:</strong> Running <code>shani-deploy</code> updates host drivers and changes propagate to containers automatically — no image rebuilds required.</li>
 <li><strong>Rootless containers:</strong> Podman runs rootless by default on Shanios. If a container requires privileged device access (e.g., <code>/dev/kfd</code>), ensure your user is in the correct groups rather than using <code>--privileged</code>.</li>
+<li><strong>Common pitfalls:</strong></li>
+<li><strong><code>podman run</code> hangs on GPU device mount:</strong> Ensure <code>nvidia-container-toolkit</code> is installed (pre-installed on Shanios) and the CDI spec exists at <code>/etc/cdi/nvidia.yaml</code>. Regenerate with <code>sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml</code> if missing.</li>
+<li><strong><code>torch.cuda.is_available()</code> returns False after driver update:</strong> Regenerate the CDI spec (<code>shani-deploy</code> handles this) and restart the container — NVIDIA container images bind to the driver version at build time.</li>
+<li><strong>AMD ROCm <code>HSA_OVERRIDE_GFX_VERSION</code> not set:</strong> Always set it based on your GPU generation (see the GPU Containers table). Defaulting to <code>10.3.0</code> on RDNA 3 cards will cause runtime errors.</li>
+<li><strong>Distrobox GPU not visible:</strong> Distrobox shares host <code>/dev</code> nodes by default, but if using <code>--additional-flags</code>, ensure the flags include both <code>--device=/dev/dri</code> and <code>--device=/dev/kfd</code> (for ROCm) or just <code>--device=/dev/dri</code> (for CUDA).</li>
+<li><strong>Apptainer <code>--nv</code> flag has no effect:</strong> On Shanios, Apptainer injects the host driver automatically when running rootless. The <code>--nv</code> flag is informational only; verify with <code>apptainer exec myimage.nv nvidia-smi</code>.</li>
+</ul>
+<hr>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="containers">Containers</a> — overview of all container runtimes</li>
+<li><a href="distrobox">Distrobox</a> — mutable dev environments with host integration</li>
+<li><a href="lxc-lxd">Linux Containers (LXC/LXD)</a> — system containers</li>
+<li><a href="../system/hardware.md">Hardware & Graphics</a> — GPU driver stack</li>
+<li><a href="../servers/ai-llms.md">AI & Machine Learning</a> — model serving with GPU access</li>
 </ul></div>
     </div>
 

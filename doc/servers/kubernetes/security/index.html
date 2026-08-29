@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>Kubernetes — Security &amp; Policy — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Security &amp; Policy Kubernetes RBAC Pod Security Admission (PSA) Purpose: Kubernetes 1.25+ enforces security standards at the namespace level via labels. | P…">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/servers/kubernetes/security/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="Kubernetes — Security &amp; Policy">
+  <meta property="og:description" id="og-desc"    content="Security &amp; Policy Kubernetes RBAC Pod Security Admission (PSA) Purpose: Kubernetes 1.25+ enforces security standards at the namespace level via labels. | P…">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/kubernetes/security/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="Kubernetes — Security &amp; Policy">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="Kubernetes — Security &amp; Policy">
+  <meta name="twitter:description" id="tw-desc"  content="Security &amp; Policy Kubernetes RBAC Pod Security Admission (PSA) Purpose: Kubernetes 1.25+ enforces security standards at the namespace level via labels. | P…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Kubernetes — Security & Policy","description":"Security & Policy Kubernetes RBAC Pod Security Admission (PSA) Purpose: Kubernetes 1.25+ enforces security standards at the namespace level via labels. | P…","url":"https://docs.shani.dev/doc/servers/kubernetes/security/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Kubernetes — Security & Policy","item":"https://docs.shani.dev/doc/servers/kubernetes/security/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Kubernetes — Security &amp; Policy</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><h2 id="security-policy">Security & Policy</h2>
+<h3 id="kubernetes-rbac">Kubernetes RBAC</h3>
+<pre><code class="language-yaml"># Namespace-scoped read-only Role
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-reader
+  namespace: myapp
+rules:
+  - apiGroups: [&quot;&quot;]
+    resources: [&quot;pods&quot;, &quot;pods/log&quot;]
+    verbs: [&quot;get&quot;, &quot;list&quot;, &quot;watch&quot;]
+  - apiGroups: [&quot;apps&quot;]
+    resources: [&quot;deployments&quot;, &quot;replicasets&quot;]
+    verbs: [&quot;get&quot;, &quot;list&quot;, &quot;watch&quot;]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pod-reader-binding
+  namespace: myapp
+subjects:
+  - kind: User
+    name: developer@example.com
+    apiGroup: rbac.authorization.k8s.io
+  - kind: Group
+    name: dev-team
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io</code></pre>
+<pre><code class="language-yaml"># CI/CD ServiceAccount — minimal deploy permissions
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cicd-deployer
+  namespace: myapp
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: deployer
+  namespace: myapp
+rules:
+  - apiGroups: [&quot;apps&quot;]
+    resources: [&quot;deployments&quot;, &quot;statefulsets&quot;]
+    verbs: [&quot;get&quot;, &quot;list&quot;, &quot;update&quot;, &quot;patch&quot;]
+  - apiGroups: [&quot;&quot;]
+    resources: [&quot;configmaps&quot;, &quot;services&quot;]
+    verbs: [&quot;get&quot;, &quot;list&quot;, &quot;update&quot;, &quot;patch&quot;, &quot;create&quot;]
+  - apiGroups: [&quot;&quot;]
+    resources: [&quot;pods&quot;]
+    verbs: [&quot;get&quot;, &quot;list&quot;, &quot;watch&quot;, &quot;delete&quot;]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cicd-deployer-binding
+  namespace: myapp
+subjects:
+  - kind: ServiceAccount
+    name: cicd-deployer
+    namespace: myapp
+roleRef:
+  kind: Role
+  name: deployer
+  apiGroup: rbac.authorization.k8s.io</code></pre>
+<pre><code class="language-bash">kubectl auth can-i create deployments --as=system:serviceaccount:myapp:cicd-deployer -n myapp
+kubectl auth can-i --list --as=system:serviceaccount:myapp:cicd-deployer -n myapp
+kubectl create token cicd-deployer -n myapp --duration=8760h
+
+# Built-in ClusterRoles — use before creating custom ones
+kubectl create rolebinding myuser-edit \
+  --clusterrole=edit --user=developer@example.com --namespace=myapp
+# view (read-only), edit (read/write), admin (full namespace), cluster-admin (superuser — avoid for CI)</code></pre>
+<hr>
+<h3 id="pod-security-admission-psa">Pod Security Admission (PSA)</h3>
+<p><strong>Purpose:</strong> Kubernetes 1.25+ enforces security standards at the namespace level via labels.</p>
+<table><thead><tr><th>Profile</th><th>Description</th><th>Use Case</th></tr></thead><tbody><tr><td><code>privileged</code></td><td>No restrictions</td><td>kube-system, CNI pods</td></tr><tr><td><code>baseline</code></td><td>Prevents known privilege escalations</td><td>Most workloads</td></tr><tr><td><code>restricted</code></td><td>Hardened; requires non-root, read-only root FS</td><td>Production apps</td></tr></tbody></table>
+<pre><code class="language-bash">kubectl label namespace myapp \
+  pod-security.kubernetes.io/enforce=restricted \
+  pod-security.kubernetes.io/enforce-version=latest \
+  pod-security.kubernetes.io/warn=restricted \
+  pod-security.kubernetes.io/audit=restricted
+
+# Dry-run — preview what would fail before enforcing
+kubectl label namespace myapp pod-security.kubernetes.io/enforce=restricted --dry-run=server</code></pre>
+<h3 id="resource-quotas-limitranges">Resource Quotas & LimitRanges</h3>
+<pre><code class="language-yaml">apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-quota
+  namespace: production
+spec:
+  hard:
+    requests.cpu: &quot;4&quot;
+    requests.memory: 8Gi
+    limits.cpu: &quot;8&quot;
+    limits.memory: 16Gi
+    pods: &quot;20&quot;
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-limits
+  namespace: production
+spec:
+  limits:
+    - default:
+        memory: 512Mi
+        cpu: 500m
+      defaultRequest:
+        memory: 128Mi
+        cpu: 100m
+      type: Container</code></pre>
+<hr>
+<h3 id="securitycontext-production-hardening">SecurityContext — production hardening</h3>
+<pre><code class="language-yaml">spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 3000
+    fsGroup: 2000
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: myapp
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop: [ALL]
+          add: [NET_BIND_SERVICE]    # only what is needed
+      volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: cache
+          mountPath: /app/cache
+  volumes:
+    - name: tmp
+      emptyDir: {}
+    - name: cache
+      emptyDir: {}</code></pre>
+<hr>
+<h3 id="kyverno-kubernetes-native-policy-engine">Kyverno (Kubernetes-Native Policy Engine)</h3>
+<p><strong>Purpose:</strong> Write policies as YAML CRDs — no Rego. Validates, mutates, and generates resources. Simpler than OPA/Gatekeeper for most teams.</p>
+<pre><code class="language-bash">helm repo add kyverno https://kyverno.github.io/kyverno/
+helm install kyverno kyverno/kyverno --namespace kyverno --create-namespace</code></pre>
+<pre><code class="language-yaml"># Require resource limits on all pods
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-resource-limits
+spec:
+  validationFailureAction: Enforce
+  rules:
+    - name: check-limits
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+      validate:
+        message: &quot;Resource limits are required.&quot;
+        pattern:
+          spec:
+            containers:
+              - resources:
+                  limits:
+                    memory: &quot;?*&quot;
+                    cpu: &quot;?*&quot;
+---
+# Disallow privileged containers
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-privileged
+spec:
+  validationFailureAction: Enforce
+  rules:
+    - name: no-privileged
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+      validate:
+        message: &quot;Privileged containers are not allowed.&quot;
+        pattern:
+          spec:
+            containers:
+              - =(securityContext):
+                  =(privileged): false
+---
+# Auto-generate NetworkPolicy + PSS labels for every new managed namespace
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: namespace-bootstrap
+spec:
+  rules:
+    - name: add-default-deny
+      match:
+        any:
+          - resources:
+              kinds: [Namespace]
+              selector:
+                matchLabels:
+                  managed: &quot;true&quot;
+      generate:
+        apiVersion: networking.k8s.io/v1
+        kind: NetworkPolicy
+        name: default-deny-ingress
+        namespace: &quot;{{request.object.metadata.name}}&quot;
+        synchronize: true
+        data:
+          spec:
+            podSelector: {}
+            policyTypes: [Ingress]
+    - name: add-pss-labels
+      match:
+        any:
+          - resources:
+              kinds: [Namespace]
+              selector:
+                matchLabels:
+                  managed: &quot;true&quot;
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            labels:
+              pod-security.kubernetes.io/enforce: restricted
+              pod-security.kubernetes.io/enforce-version: latest</code></pre>
+<pre><code class="language-bash"># Creating a new namespace now auto-generates NetworkPolicy + PSS labels
+kubectl create namespace myapp &amp;&amp; kubectl label namespace myapp managed=true
+
+kubectl get policyreport -A
+kubectl describe clusterpolicyreport
+kubectl apply -f policy.yaml --dry-run=server</code></pre>
+<hr>
+<h3 id="opagatekeeper-rego-based-policy-engine">OPA/Gatekeeper (Rego-Based Policy Engine)</h3>
+<p><strong>Purpose:</strong> More expressive than Kyverno for complex cross-resource validation and external data. Steeper learning curve (Rego language).</p>
+<pre><code class="language-bash">helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts
+helm install gatekeeper gatekeeper/gatekeeper --namespace gatekeeper-system --create-namespace</code></pre>
+<pre><code class="language-yaml">apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequiredlabels
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequiredLabels
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            labels:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequiredlabels
+        violation[{&quot;msg&quot;: msg}] {
+          provided := {label | input.review.object.metadata.labels[label]}
+          required := {label | label := input.parameters.labels[_]}
+          missing := required - provided
+          count(missing) &gt; 0
+          msg := sprintf(&quot;Missing required labels: %v&quot;, [missing])
+        }
+---
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequiredLabels
+metadata:
+  name: require-team-label
+spec:
+  match:
+    kinds:
+      - apiGroups: [&quot;apps&quot;]
+        kinds: [&quot;Deployment&quot;]
+    namespaces: [myapp, staging, production]
+  parameters:
+    labels: [&quot;team&quot;, &quot;environment&quot;]</code></pre>
+<hr>
+<h3 id="falco-runtime-threat-detection">Falco (Runtime Threat Detection)</h3>
+<p><strong>Purpose:</strong> CNCF-graduated runtime security. Uses eBPF to inspect every syscall — detecting shell executions inside containers, unexpected file writes, privilege escalation, and unexpected outbound connections in real time.</p>
+<pre><code class="language-bash">helm repo add falcosecurity https://falcosecurity.github.io/charts
+helm install falco falcosecurity/falco \
+  --namespace falco --create-namespace \
+  --set driver.kind=ebpf \
+  --set falcosidekick.enabled=true \
+  --set falcosidekick.config.slack.webhookurl=&quot;https://hooks.slack.com/...&quot; \
+  --set falcosidekick.config.ntfy.hostport=&quot;http://ntfy.home.local&quot; \
+  --set falcosidekick.config.ntfy.topic=&quot;falco-alerts&quot;</code></pre>
+<pre><code class="language-yaml"># /etc/falco/rules.d/custom.yaml
+- rule: Shell in Container
+  desc: A shell was spawned in a container
+  condition: &gt;
+    spawned_process and container and
+    proc.name in (bash, sh, zsh, dash) and
+    not proc.pname in (bash, sh, zsh)
+  output: &gt;
+    Shell in container (user=%user.name container=%container.name
+    image=%container.image.repository:%container.image.tag cmd=%proc.cmdline)
+  priority: WARNING
+
+- rule: Unexpected Outbound Connection
+  desc: Container made an outbound connection to an unexpected IP
+  condition: &gt;
+    outbound and container and
+    not fd.sip in (192.168.0.0/16, 10.0.0.0/8) and
+    not proc.name in (curl, wget, apt-get)
+  output: &gt;
+    Unexpected outbound (container=%container.name ip=%fd.sip cmd=%proc.cmdline)
+  priority: WARNING</code></pre>
+<pre><code class="language-bash">kubectl logs -n falco -l app.kubernetes.io/name=falco -f
+kubectl port-forward -n falco svc/falco-falcosidekick-ui 2802:2802</code></pre>
+<hr>
+<h3 id="kube-bench-cis-kubernetes-benchmark">kube-bench (CIS Kubernetes Benchmark)</h3>
+<p><strong>Purpose:</strong> Runs the CIS Kubernetes Benchmark checks against your cluster nodes — checking API server flags, etcd permissions, kubelet config, RBAC, and more. Run after initial cluster setup and before production hardening sign-off.</p>
+<pre><code class="language-bash"># Run as a one-shot Job on the control plane node
+kubectl apply -f https://raw.githubusercontent.com/aquasecurity/kube-bench/main/job.yaml
+kubectl logs job/kube-bench
+
+# Or run directly on a node (requires root)
+nix-env -iA nixpkgs.kube-bench
+sudo kube-bench run --targets master    # control plane checks
+sudo kube-bench run --targets node      # worker node checks
+sudo kube-bench run --targets etcd      # etcd checks
+
+# Output formats
+sudo kube-bench run --json | jq '.Controls[].tests[].results[] | select(.status == &quot;FAIL&quot;)'
+sudo kube-bench run --targets master --benchmark cis-1.9</code></pre>
+<pre><code class="language-bash"># Quick summary of failures
+sudo kube-bench 2&gt;/dev/null | grep -E &quot;^\[FAIL\]&quot;</code></pre>
+<blockquote>Run <code>kube-bench</code> after every major cluster upgrade. For RKE2, use <code>--benchmark cis-1.23</code> — RKE2 is designed to pass out-of-the-box with minimal additional hardening.</blockquote>
+<hr>
+<h2 id="secrets-management">Secrets Management</h2>
+<h3 id="sealed-secrets">Sealed Secrets</h3>
+<p><strong>Purpose:</strong> Encrypt Kubernetes Secrets for safe Git storage. The in-cluster controller holds the private key and decrypts at apply time.</p>
+<pre><code class="language-bash">helm repo add sealed-secrets https://bitnami-labs.github.io/sealed-secrets
+helm install sealed-secrets sealed-secrets/sealed-secrets -n kube-system
+
+nix-env -iA nixpkgs.kubeseal
+
+kubectl create secret generic mysecret \
+  --from-literal=password=changeme \
+  --dry-run=client -o yaml | \
+  kubeseal --format yaml &gt; ~/k8s/mysecret-sealed.yaml
+
+kubectl apply -f ~/k8s/mysecret-sealed.yaml</code></pre>
+<blockquote>Back up the sealing key: <code>kubectl get secret -n kube-system sealed-secrets-key -o yaml</code>. Losing it makes all sealed secrets unrecoverable.</blockquote>
+<hr>
+<h3 id="sops-age-file-level-encryption-for-gitops">SOPS + age (File-Level Encryption for GitOps)</h3>
+<p><strong>Purpose:</strong> Mozilla SOPS encrypts entire YAML files (or specific values) using <code>age</code> keys or cloud KMS. Unlike Sealed Secrets (Kubernetes-specific) or ESO (needs a running secrets backend), SOPS works at the file level — any tool that reads the file sees plaintext; Git sees ciphertext. Flux has native SOPS integration.</p>
+<pre><code class="language-bash"># Install
+nix-env -iA nixpkgs.sops nixpkgs.age
+
+# Generate an age key pair
+age-keygen -o ~/.config/sops/age/keys.txt   # save the public key from stdout
+
+# Configure SOPS — which keys to use for which files
+cat &gt; ~/.sops.yaml &lt;&lt; 'EOF'
+creation_rules:
+  - path_regex: k8s/.*\.yaml$
+    age: age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  # your public key
+  - path_regex: clusters/.*/secrets/.*\.yaml$
+    age: &gt;-
+      age1xxxxxxxx,   # team member 1
+      age1yyyyyyyy    # team member 2 (multi-recipient)
+EOF</code></pre>
+<pre><code class="language-bash"># Encrypt a Kubernetes Secret manifest
+sops --encrypt k8s/secrets/myapp-secrets.yaml &gt; k8s/secrets/myapp-secrets.enc.yaml
+git add k8s/secrets/myapp-secrets.enc.yaml  # safe to commit
+
+# Decrypt for local editing
+sops k8s/secrets/myapp-secrets.enc.yaml     # opens in $EDITOR, re-encrypts on save
+
+# Encrypt specific values only (leave structure readable in Git)
+sops --encrypt --encrypted-regex '^(data|stringData)
+<h4 id="flux-sops-integration">Flux SOPS Integration</h4>
+<p>Flux has native SOPS decryption — no sidecar, no webhook.</p>
+<pre><code class="language-bash"># Create the age key as a cluster secret (done once — not committed to Git)
+kubectl create secret generic sops-age \
+  --namespace flux-system \
+  --from-file=age.agekey=$HOME/.config/sops/age/keys.txt</code></pre>
+<pre><code class="language-yaml"># ~/k8s-gitops/clusters/homelab/flux-system/kustomization.yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: flux-system
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./clusters/homelab
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age   # the secret created above</code></pre>
+<pre><code class="language-bash"># Verify Flux is decrypting — check the Kustomization status
+flux get kustomizations
+kubectl describe kustomization flux-system -n flux-system</code></pre>
+<blockquote><strong>SOPS vs Sealed Secrets vs ESO:</strong> - <strong>SOPS</strong>: file-level encryption; works with any GitOps tool; no cluster dependency for decryption setup (key is a static secret); best for Flux + age - <strong>Sealed Secrets</strong>: asymmetric encryption tied to the cluster controller; simple for <code>kubectl apply</code> workflows; controller must exist to decrypt - <strong>ESO</strong>: pulls live secrets from an external store; best when secrets rotate frequently or must be audited</blockquote>
+<hr>
+<h3 id="helm-secrets-sops-for-helm-values">helm-secrets (SOPS for Helm values)</h3>
+<p><strong>Purpose:</strong> Helm plugin that decrypts SOPS-encrypted values files on the fly — so you can store sensitive <code>values-prod.yaml</code> encrypted in Git and pass them directly to <code>helm upgrade</code>.</p>
+<pre><code class="language-bash">helm plugin install https://github.com/jkroepke/helm-secrets
+nix-env -iA nixpkgs.sops nixpkgs.age   # if not already installed</code></pre>
+<pre><code class="language-bash"># Encrypt your sensitive values file
+sops --encrypt values-prod-secrets.yaml &gt; values-prod-secrets.enc.yaml
+
+# Use encrypted values with helm (decrypts transparently)
+helm secrets upgrade myapp ./charts/myapp \
+  -f values-prod.yaml \
+  -f values-prod-secrets.enc.yaml
+
+# Or with helmfile
+# helmfile.yaml:
+# releases:
+#   - name: myapp
+#     values:
+#       - values-prod.yaml
+#       - secrets://values-prod-secrets.enc.yaml
+helmfile apply</code></pre>
+<blockquote><code>helm-secrets</code> uses the <code>secrets://</code> URI prefix so helmfile knows to decrypt before passing to Helm.</blockquote>
+<hr>
+<h3 id="external-secrets-operator-eso">External Secrets Operator (ESO)</h3>
+<p><strong>Purpose:</strong> Sync secrets from OpenBao, Infisical, HashiCorp Vault, AWS Secrets Manager, GCP Secret Manager, or Azure Key Vault into native Kubernetes <code>Secret</code> objects.</p>
+<pre><code class="language-bash">helm repo add external-secrets https://charts.external-secrets.io
+helm install external-secrets external-secrets/external-secrets \
+  --namespace external-secrets --create-namespace \
+  --set installCRDs=true</code></pre>
+<h4 id="connect-to-openbao">Connect to OpenBao</h4>
+<pre><code class="language-yaml">apiVersion: external-secrets.io/v1beta1
+kind: ClusterSecretStore
+metadata:
+  name: openbao
+spec:
+  provider:
+    vault:
+      server: &quot;http://openbao.home.local:8200&quot;
+      path: &quot;secret&quot;
+      version: &quot;v2&quot;
+      auth:
+        tokenSecretRef:
+          name: openbao-token
+          namespace: external-secrets
+          key: token</code></pre>
+<pre><code class="language-bash">kubectl create secret generic openbao-token \
+  --namespace external-secrets \
+  --from-literal=token=&lt;your-openbao-token&gt;</code></pre>
+<h4 id="connect-to-infisical">Connect to Infisical</h4>
+<pre><code class="language-yaml">apiVersion: external-secrets.io/v1beta1
+kind: ClusterSecretStore
+metadata:
+  name: infisical
+spec:
+  provider:
+    infisical:
+      auth:
+        universalAuthCredentials:
+          clientId:
+            name: infisical-creds
+            namespace: external-secrets
+            key: clientId
+          clientSecret:
+            name: infisical-creds
+            namespace: external-secrets
+            key: clientSecret
+      secretsScope:
+        projectSlug: myproject
+        environmentSlug: prod</code></pre>
+<h4 id="pull-a-secret-from-openbao">Pull a secret from OpenBao</h4>
+<pre><code class="language-yaml">apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: myapp-db-secret
+  namespace: myapp
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: openbao
+    kind: ClusterSecretStore
+  target:
+    name: myapp-db-credentials
+    creationPolicy: Owner
+  data:
+    - secretKey: DB_PASSWORD
+      remoteRef:
+        key: myapp/database
+        property: password
+    - secretKey: DB_USERNAME
+      remoteRef:
+        key: myapp/database
+        property: username</code></pre>
+<pre><code class="language-bash">kubectl get externalsecret -n myapp
+kubectl describe externalsecret myapp-db-secret -n myapp</code></pre>
+<blockquote><strong>Pattern:</strong> Store all secrets in OpenBao or Infisical. Reference via <code>ExternalSecret</code> CRDs. Never put plaintext values in Kubernetes YAML — even in private Git repos.</blockquote>
+<hr>
+<h2 id="image-supply-chain-security">Image Supply Chain Security</h2>
+<h3 id="harbor-self-hosted-oci-registry">Harbor (Self-Hosted OCI Registry)</h3>
+<p><strong>Purpose:</strong> CNCF-graduated container registry with built-in Trivy scanning, image signing, RBAC, robot accounts, and replication. Preferred over plain Gitea/Forgejo package registry for production.</p>
+<pre><code class="language-bash">helm repo add harbor https://helm.goharbor.io
+helm upgrade --install harbor harbor/harbor \
+  --namespace harbor --create-namespace \
+  --set expose.type=clusterIP \
+  --set expose.tls.enabled=false \
+  --set externalURL=https://harbor.home.local \
+  --set harborAdminPassword=changeme \
+  --set persistence.persistentVolumeClaim.registry.size=50Gi
+
+kubectl -n harbor get pods -w</code></pre>
+<p>Enable Trivy scanning in Harbor UI: <strong>Administration → Interrogation Services → Enable</strong>. Harbor scans every image on push automatically.</p>
+<pre><code class="language-bash"># Create a robot account for CI
+curl -X POST &quot;https://harbor.home.local/api/v2.0/projects/myorg/robots&quot; \
+  -H &quot;Content-Type: application/json&quot; -u &quot;admin:changeme&quot; \
+  -d '{&quot;name&quot;:&quot;ci-push&quot;,&quot;duration&quot;:365,&quot;permissions&quot;:[{&quot;kind&quot;:&quot;project&quot;,&quot;namespace&quot;:&quot;myorg&quot;,&quot;access&quot;:[{&quot;resource&quot;:&quot;repository&quot;,&quot;action&quot;:&quot;push&quot;},{&quot;resource&quot;:&quot;repository&quot;,&quot;action&quot;:&quot;pull&quot;}]}]}'</code></pre>
+<p><strong>Caddy:</strong> <code>harbor.home.local { tls internal; reverse_proxy harbor-core.harbor.svc.cluster.local:80 { header_up Host {host} } }</code></p>
+<hr>
+<h3 id="cosign-container-image-signing">Cosign (Container Image Signing)</h3>
+<p><strong>Purpose:</strong> Cryptographically sign container images. Signatures stored in the OCI registry alongside the image. Pair with Kyverno to enforce only signed images run in production.</p>
+<pre><code class="language-bash">nix-env -iA nixpkgs.cosign
+
+cosign generate-key-pair k8s://cosign-system/cosign
+
+cosign sign --key cosign.key \
+  --annotations &quot;git-sha=$(git rev-parse HEAD)&quot; \
+  --annotations &quot;build-date=$(date -u +%Y-%m-%dT%H:%M:%SZ)&quot; \
+  harbor.home.local/myorg/myapp:v1.4.2
+
+cosign verify --key cosign.pub harbor.home.local/myorg/myapp:v1.4.2</code></pre>
+<pre><code class="language-yaml"># .woodpecker.yml — sign after Kaniko push
+steps:
+  - name: sign-image
+    image: gcr.io/projectsigstore/cosign:latest
+    environment:
+      COSIGN_KEY:
+        from_secret: cosign_private_key
+    commands:
+      - cosign sign --key env://COSIGN_KEY
+          --annotations &quot;git-sha=${CI_COMMIT_SHA}&quot;
+          harbor.home.local/myorg/myapp:${CI_COMMIT_SHA}</code></pre>
+<h4 id="enforce-signed-images-with-kyverno">Enforce signed images with Kyverno</h4>
+<pre><code class="language-yaml">apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-signed-images
+spec:
+  validationFailureAction: Enforce
+  background: false
+  rules:
+    - name: check-image-signature
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaces: [production, staging]
+      verifyImages:
+        - imageReferences:
+            - &quot;harbor.home.local/myorg/*&quot;
+          attestors:
+            - entries:
+                - keys:
+                    publicKeys: |-
+                      -----BEGIN PUBLIC KEY-----
+                      &lt;your-cosign-public-key&gt;
+                      -----END PUBLIC KEY-----</code></pre>
+<hr>
+<h3 id="trivy-vulnerability-iac-scanning">Trivy (Vulnerability & IaC Scanning)</h3>
+<p><strong>Purpose:</strong> CNCF-graduated all-in-one scanner for container images, Helm charts, Kubernetes manifests, Terraform/OpenTofu, and running clusters. Also generates SBOMs.</p>
+<pre><code class="language-bash">nix-env -iA nixpkgs.trivy
+
+trivy image --severity HIGH,CRITICAL harbor.home.local/myorg/myapp:latest
+trivy config ~/k8s/charts/myapp/
+trivy k8s --report=summary cluster
+trivy image --format cyclonedx --output myapp-sbom.json harbor.home.local/myorg/myapp:latest
+trivy sbom myapp-sbom.json</code></pre>
+<h4 id="trivy-operator-continuous-in-cluster-scanning">Trivy Operator (continuous in-cluster scanning)</h4>
+<pre><code class="language-bash">helm repo add aqua https://aquasecurity.github.io/helm-charts/
+helm install trivy-operator aqua/trivy-operator \
+  --namespace trivy-system --create-namespace \
+  --set trivy.ignoreUnfixed=true
+
+kubectl get vulnerabilityreports -A
+kubectl get configauditreports -A
+kubectl describe vulnerabilityreport &lt;pod-name&gt; -n myapp</code></pre>
+<hr>
+<h2 id="spiffespire-workload-identity">SPIFFE/SPIRE — Workload Identity</h2>
+<p><strong>Purpose:</strong> SPIFFE (Secure Production Identity Framework for Everyone) is the CNCF standard for workload identity. SPIRE is the reference implementation. Every pod gets a cryptographically verifiable X.509 SVID (SPIFFE Verifiable Identity Document) — even across clusters and clouds. This is the foundation for zero-trust between services.</p>
+<blockquote><strong>Why SPIFFE over Kubernetes ServiceAccounts?</strong> ServiceAccount tokens are Kubernetes-scoped and rotate on a fixed schedule. SPIFFE SVIDs are short-lived (minutes), automatically rotated, and can federate across clusters, VMs, and clouds — enabling mTLS between services that don't share a Kubernetes cluster.</blockquote>
+<pre><code class="language-bash"># Install SPIRE on Kubernetes
+kubectl apply -f https://spiffe.io/downloads/spire-crds.yaml
+
+helm repo add spiffe https://spiffe.github.io/helm-charts/
+helm upgrade --install spire spiffe/spire \
+  --namespace spire-system --create-namespace \
+  --set spire-server.trustDomain=homelab.local \
+  --set spire-agent.trustDomain=homelab.local</code></pre>
+<pre><code class="language-bash"># Register a workload (automatic via k8s attestor)
+kubectl exec -n spire-system spire-server-0 -- \
+  /opt/spire/bin/spire-server entry create \
+  -spiffeID spiffe://homelab.local/ns/myapp/sa/myapp \
+  -parentID spiffe://homelab.local/k8s-workload-registrar/myapp/node \
+  -selector k8s:ns:myapp \
+  -selector k8s:sa:myapp
+
+# Check registered entries
+kubectl exec -n spire-system spire-server-0 -- \
+  /opt/spire/bin/spire-server entry show
+
+# Verify a pod has received its SVID
+kubectl exec -n myapp deploy/myapp -- \
+  /opt/spire/bin/spire-agent api fetch x509 -socketPath /run/spire/sockets/agent.sock</code></pre>
+<pre><code class="language-yaml"># Mount the SPIFFE workload API socket in your pod
+spec:
+  volumes:
+    - name: spiffe-workload-api
+      csi:
+        driver: &quot;csi.spiffe.io&quot;
+        readOnly: true
+  containers:
+    - name: myapp
+      volumeMounts:
+        - name: spiffe-workload-api
+          mountPath: /run/spire/sockets
+          readOnly: true
+      env:
+        - name: SPIFFE_ENDPOINT_SOCKET
+          value: unix:///run/spire/sockets/agent.sock</code></pre>
+<blockquote><strong>Cilium + SPIFFE:</strong> Cilium's mTLS uses WireGuard at the node level. SPIFFE/SPIRE adds per-workload identity for zero-trust that survives pod migration and multi-cluster federation.</blockquote>
+<hr>
+<h2 id="cluster-hardening">Cluster Hardening</h2>
+<h3 id="descheduler">Descheduler</h3>
+<p><strong>Purpose:</strong> The Kubernetes scheduler places pods at creation time but never moves them. The Descheduler runs periodically and evicts pods that violate scheduling policies — pods on overloaded nodes, topology spread violations, expired affinities — triggering the scheduler to re-place them more optimally.</p>
+<pre><code class="language-bash">helm repo add descheduler https://kubernetes-sigs.github.io/descheduler/
+helm install descheduler descheduler/descheduler \
+  --namespace kube-system \
+  --set schedule=&quot;*/10 * * * *&quot;</code></pre>
+<pre><code class="language-yaml"># ~/k8s/descheduler-policy.yaml
+apiVersion: &quot;descheduler/v1alpha2&quot;
+kind: &quot;DeschedulerPolicy&quot;
+profiles:
+  - name: default
+    pluginConfig:
+      - name: DefaultEvictor
+        args:
+          ignorePvcPods: true
+          evictSystemCriticalPods: false
+          nodeFit: true
+    plugins:
+      balance:
+        enabled:
+          - LowNodeUtilization
+          - RemoveDuplicates
+          - RemovePodsViolatingTopologySpreadConstraint
+      deschedule:
+        enabled:
+          - RemovePodsViolatingNodeAffinity
+          - RemovePodsViolatingInterPodAntiAffinity
+          - RemovePodsHavingTooManyRestarts</code></pre>
+<hr>
+<h3 id="cis-kubernetes-benchmark-kube-bench">CIS Kubernetes Benchmark — kube-bench</h3>
+<p><strong>Purpose:</strong> Run the CIS Kubernetes Benchmark against your cluster to find misconfigurations: insecure API server flags, missing audit logging, overly permissive RBAC, unencrypted etcd, and more. Essential before declaring a cluster "production-ready".</p>
+<pre><code class="language-bash"># Run against a k3s node
+kubectl apply -f https://raw.githubusercontent.com/aquasecurity/kube-bench/main/job.yaml
+kubectl logs job/kube-bench
+
+# Or run directly (finds binaries automatically)
+docker run --pid=host -v /etc:/etc:ro -v /var:/var:ro \
+  -v $(which kubectl):/usr/local/mount-from-host/bin/kubectl \
+  -e KUBECONFIG=$KUBECONFIG \
+  --rm aquasec/kube-bench:latest \
+  run --targets=master,node,etcd,policies</code></pre>
+<pre><code class="language-bash"># Target specific section
+kube-bench run --check 1.2.6    # check a specific CIS item
+kube-bench run --targets=master --json | jq '.[] | select(.status==&quot;FAIL&quot;)'</code></pre>
+<hr>
+<h3 id="production-cluster-hardening-checklist">Production Cluster Hardening Checklist</h3>
+<table><thead><tr><th>Area</th><th>Check</th><th>Tool</th></tr></thead><tbody><tr><td><strong>API Server</strong></td><td>Audit logging enabled</td><td>k3s config / kubeadm</td></tr><tr><td><strong>API Server</strong></td><td>Anonymous auth disabled</td><td><code>--anonymous-auth=false</code></td></tr><tr><td><strong>RBAC</strong></td><td>No <code>cluster-admin</code> granted to workloads</td><td><code>kubectl auth can-i --list</code></td></tr><tr><td><strong>RBAC</strong></td><td>CI/CD uses minimal ServiceAccount</td><td>Dedicated Role per namespace</td></tr><tr><td><strong>Pods</strong></td><td><code>restricted</code> PSA on all namespaces</td><td><code>pod-security.kubernetes.io/enforce=restricted</code></td></tr><tr><td><strong>Pods</strong></td><td><code>runAsNonRoot: true</code> on all containers</td><td>Kyverno policy</td></tr><tr><td><strong>Pods</strong></td><td><code>readOnlyRootFilesystem: true</code></td><td>SecurityContext</td></tr><tr><td><strong>Pods</strong></td><td>Resource limits set on all containers</td><td>Kyverno policy</td></tr><tr><td><strong>Pods</strong></td><td>No <code>hostNetwork</code>, <code>hostPID</code>, <code>hostIPC</code></td><td>Kyverno policy</td></tr><tr><td><strong>Images</strong></td><td>No <code>:latest</code> tags in production</td><td>conftest / Kyverno</td></tr><tr><td><strong>Images</strong></td><td>All images signed (Cosign)</td><td>Kyverno <code>verifyImages</code></td></tr><tr><td><strong>Images</strong></td><td>Continuous vulnerability scanning</td><td>Trivy Operator</td></tr><tr><td><strong>Network</strong></td><td>Default-deny NetworkPolicy in every namespace</td><td>Kyverno generate</td></tr><tr><td><strong>Network</strong></td><td>mTLS between services</td><td>Linkerd / Cilium WireGuard</td></tr><tr><td><strong>Secrets</strong></td><td>No plaintext secrets in Git</td><td>Sealed Secrets / ESO</td></tr><tr><td><strong>Secrets</strong></td><td>Secrets mounted as volumes, not env vars</td><td>Kyverno policy</td></tr><tr><td><strong>Runtime</strong></td><td>Falco detecting shell exec / file writes</td><td>Falco DaemonSet</td></tr><tr><td><strong>etcd</strong></td><td>Encrypted at rest</td><td><code>--encryption-provider-config</code></td></tr><tr><td><strong>Nodes</strong></td><td>CIS benchmark passing</td><td>kube-bench</td></tr><tr><td><strong>Nodes</strong></td><td>Node Problem Detector deployed</td><td>DaemonSet</td></tr><tr><td><strong>Backups</strong></td><td>Velero scheduled daily</td><td>Velero Schedule CRD</td></tr><tr><td><strong>Backups</strong></td><td>etcd snapshots to off-cluster storage</td><td>k3s etcd-snapshot + restic</td></tr></tbody></table>
+<hr>
+<h3 id="kubelet-eviction-thresholds">Kubelet Eviction Thresholds</h3>
+<p>The kubelet monitors node resources and evicts pods when thresholds are crossed. <strong>Soft</strong> eviction gives pods a grace period; <strong>hard</strong> eviction is immediate.</p>
+<pre><code class="language-yaml"># /etc/rancher/k3s/config.yaml (k3s) or kubelet config file (kubeadm)
+# For k3s, add under kubelet-arg:
+kubelet-arg:
+  # Hard eviction — immediate, no grace period
+  - &quot;eviction-hard=memory.available&lt;200Mi&quot;
+  - &quot;eviction-hard=nodefs.available&lt;5%&quot;
+  - &quot;eviction-hard=nodefs.inodesFree&lt;5%&quot;
+  - &quot;eviction-hard=imagefs.available&lt;10%&quot;
+  # Soft eviction — gives pods eviction-max-pod-grace-period to terminate cleanly
+  - &quot;eviction-soft=memory.available&lt;500Mi&quot;
+  - &quot;eviction-soft=nodefs.available&lt;10%&quot;
+  - &quot;eviction-soft-grace-period=memory.available=90s&quot;
+  - &quot;eviction-soft-grace-period=nodefs.available=2m&quot;
+  # Minimum reclaim — how much to free above threshold to avoid thrashing
+  - &quot;eviction-minimum-reclaim=memory.available=0Mi&quot;
+  - &quot;eviction-minimum-reclaim=nodefs.available=500Mi&quot;
+  # Prevent new pods from being scheduled when node is under pressure
+  - &quot;eviction-pressure-transition-period=5m&quot;</code></pre>
+<pre><code class="language-bash"># Check current node conditions (MemoryPressure, DiskPressure, PIDPressure)
+kubectl describe node &lt;node&gt; | grep -A5 &quot;Conditions:&quot;
+kubectl get node &lt;node&gt; -o jsonpath='{.status.conditions[*].type}'
+
+# Check eviction stats
+kubectl get events -A --field-selector=reason=Evicted | tail -20</code></pre>
+<blockquote><strong>Rule of thumb for homelab:</strong> Set hard <code>memory.available&lt;200Mi</code> and <code>nodefs.available&lt;5%</code>. Without eviction thresholds, nodes can OOM-kill the kubelet itself, making the node permanently unresponsive.</blockquote>
+<hr>
+<h3 id="kubeconfig-management">kubeconfig Management</h3>
+<p>Manage multiple clusters — merge configs, switch contexts, and set up OIDC authentication.</p>
+<pre><code class="language-bash"># View all contexts
+kubectl config get-contexts
+kubectl config current-context
+
+# Switch context
+kubectl config use-context k3s-homelab
+kubectl ctx k3s-homelab   # krew ctx plugin — faster
+
+# Merge two kubeconfigs (e.g., adding a new cluster)
+KUBECONFIG=~/.kube/config:~/.kube/new-cluster.yaml \
+  kubectl config view --flatten &gt; ~/.kube/merged-config &amp;&amp; \
+  mv ~/.kube/merged-config ~/.kube/config
+
+# Add a cluster, user, and context manually
+kubectl config set-cluster homelab \
+  --server=https://192.168.1.10:6443 \
+  --certificate-authority=/etc/rancher/k3s/server/tls/server-ca.crt
+
+kubectl config set-credentials homelab-admin \
+  --client-certificate=~/.kube/admin.crt \
+  --client-key=~/.kube/admin.key
+
+kubectl config set-context homelab \
+  --cluster=homelab \
+  --user=homelab-admin \
+  --namespace=default
+
+# Rename a context
+kubectl config rename-context old-name new-name
+
+# Delete a context/cluster/user
+kubectl config delete-context old-cluster
+kubectl config delete-cluster old-cluster
+kubectl config delete-user old-user</code></pre>
+<h4 id="oidc-authentication-sso-for-kubectl">OIDC Authentication (SSO for kubectl)</h4>
+<p>Integrate with Dex, Keycloak, or any OIDC provider so team members authenticate with their SSO credentials instead of shared kubeconfig certs.</p>
+<pre><code class="language-bash"># Install kubelogin (kubectl-oidc_login plugin)
+kubectl krew install oidc-login
+
+# Test OIDC flow
+kubectl oidc-login setup \
+  --oidc-issuer-url=https://dex.home.local \
+  --oidc-client-id=kubectl \
+  --oidc-client-secret=&lt;secret&gt;</code></pre>
+<pre><code class="language-yaml"># ~/.kube/config — OIDC user entry
+users:
+  - name: alice@home.local
+    user:
+      exec:
+        apiVersion: client.authentication.k8s.io/v1beta1
+        command: kubectl
+        args:
+          - oidc-login
+          - get-token
+          - --oidc-issuer-url=https://dex.home.local
+          - --oidc-client-id=kubectl
+          - --oidc-client-secret=&lt;secret&gt;
+          - --oidc-extra-scope=groups</code></pre>
+<pre><code class="language-yaml"># kube-apiserver flags (add to k3s config.yaml under kube-apiserver-arg:)
+kube-apiserver-arg:
+  - &quot;oidc-issuer-url=https://dex.home.local&quot;
+  - &quot;oidc-client-id=kubectl&quot;
+  - &quot;oidc-username-claim=email&quot;
+  - &quot;oidc-groups-claim=groups&quot;</code></pre>
+<pre><code class="language-bash"># Bind a ClusterRole to an OIDC group
+kubectl create clusterrolebinding dev-team-view \
+  --clusterrole=view \
+  --group=dev-team   # must match the 'groups' claim from OIDC provider</code></pre>
+<hr> k8s/secrets/myapp-secrets.yaml</code></pre>
+<h4 id="flux-sops-integration">Flux SOPS Integration</h4>
+<p>Flux has native SOPS decryption — no sidecar, no webhook.</p>
+ BLOCK19 
+ BLOCK20 
+ BLOCK21 
+<blockquote><strong>SOPS vs Sealed Secrets vs ESO:</strong> - <strong>SOPS</strong>: file-level encryption; works with any GitOps tool; no cluster dependency for decryption setup (key is a static secret); best for Flux + age - <strong>Sealed Secrets</strong>: asymmetric encryption tied to the cluster controller; simple for <code>kubectl apply</code> workflows; controller must exist to decrypt - <strong>ESO</strong>: pulls live secrets from an external store; best when secrets rotate frequently or must be audited</blockquote>
+<hr>
+<h3 id="helm-secrets-sops-for-helm-values">helm-secrets (SOPS for Helm values)</h3>
+<p><strong>Purpose:</strong> Helm plugin that decrypts SOPS-encrypted values files on the fly — so you can store sensitive <code>values-prod.yaml</code> encrypted in Git and pass them directly to <code>helm upgrade</code>.</p>
+ BLOCK22 
+ BLOCK23 
+<blockquote><code>helm-secrets</code> uses the <code>secrets://</code> URI prefix so helmfile knows to decrypt before passing to Helm.</blockquote>
+<hr>
+<h3 id="external-secrets-operator-eso">External Secrets Operator (ESO)</h3>
+<p><strong>Purpose:</strong> Sync secrets from OpenBao, Infisical, HashiCorp Vault, AWS Secrets Manager, GCP Secret Manager, or Azure Key Vault into native Kubernetes <code>Secret</code> objects.</p>
+ BLOCK24 
+<h4 id="connect-to-openbao">Connect to OpenBao</h4>
+ BLOCK25 
+ BLOCK26 
+<h4 id="connect-to-infisical">Connect to Infisical</h4>
+ BLOCK27 
+<h4 id="pull-a-secret-from-openbao">Pull a secret from OpenBao</h4>
+ BLOCK28 
+ BLOCK29 
+<blockquote><strong>Pattern:</strong> Store all secrets in OpenBao or Infisical. Reference via <code>ExternalSecret</code> CRDs. Never put plaintext values in Kubernetes YAML — even in private Git repos.</blockquote>
+<hr>
+<h2 id="image-supply-chain-security">Image Supply Chain Security</h2>
+<h3 id="harbor-self-hosted-oci-registry">Harbor (Self-Hosted OCI Registry)</h3>
+<p><strong>Purpose:</strong> CNCF-graduated container registry with built-in Trivy scanning, image signing, RBAC, robot accounts, and replication. Preferred over plain Gitea/Forgejo package registry for production.</p>
+ BLOCK30 
+<p>Enable Trivy scanning in Harbor UI: <strong>Administration → Interrogation Services → Enable</strong>. Harbor scans every image on push automatically.</p>
+ BLOCK31 
+<p><strong>Caddy:</strong> <code>harbor.home.local { tls internal; reverse_proxy harbor-core.harbor.svc.cluster.local:80 { header_up Host {host} } }</code></p>
+<hr>
+<h3 id="cosign-container-image-signing">Cosign (Container Image Signing)</h3>
+<p><strong>Purpose:</strong> Cryptographically sign container images. Signatures stored in the OCI registry alongside the image. Pair with Kyverno to enforce only signed images run in production.</p>
+ BLOCK32 
+ BLOCK33 
+<h4 id="enforce-signed-images-with-kyverno">Enforce signed images with Kyverno</h4>
+ BLOCK34 
+<hr>
+<h3 id="trivy-vulnerability-iac-scanning">Trivy (Vulnerability & IaC Scanning)</h3>
+<p><strong>Purpose:</strong> CNCF-graduated all-in-one scanner for container images, Helm charts, Kubernetes manifests, Terraform/OpenTofu, and running clusters. Also generates SBOMs.</p>
+ BLOCK35 
+<h4 id="trivy-operator-continuous-in-cluster-scanning">Trivy Operator (continuous in-cluster scanning)</h4>
+ BLOCK36 
+<hr>
+<h2 id="spiffespire-workload-identity">SPIFFE/SPIRE — Workload Identity</h2>
+<p><strong>Purpose:</strong> SPIFFE (Secure Production Identity Framework for Everyone) is the CNCF standard for workload identity. SPIRE is the reference implementation. Every pod gets a cryptographically verifiable X.509 SVID (SPIFFE Verifiable Identity Document) — even across clusters and clouds. This is the foundation for zero-trust between services.</p>
+<blockquote><strong>Why SPIFFE over Kubernetes ServiceAccounts?</strong> ServiceAccount tokens are Kubernetes-scoped and rotate on a fixed schedule. SPIFFE SVIDs are short-lived (minutes), automatically rotated, and can federate across clusters, VMs, and clouds — enabling mTLS between services that don't share a Kubernetes cluster.</blockquote>
+ BLOCK37 
+ BLOCK38 
+ BLOCK39 
+<blockquote><strong>Cilium + SPIFFE:</strong> Cilium's mTLS uses WireGuard at the node level. SPIFFE/SPIRE adds per-workload identity for zero-trust that survives pod migration and multi-cluster federation.</blockquote>
+<hr>
+<h2 id="cluster-hardening">Cluster Hardening</h2>
+<h3 id="descheduler">Descheduler</h3>
+<p><strong>Purpose:</strong> The Kubernetes scheduler places pods at creation time but never moves them. The Descheduler runs periodically and evicts pods that violate scheduling policies — pods on overloaded nodes, topology spread violations, expired affinities — triggering the scheduler to re-place them more optimally.</p>
+ BLOCK40 
+ BLOCK41 
+<hr>
+<h3 id="cis-kubernetes-benchmark-kube-bench">CIS Kubernetes Benchmark — kube-bench</h3>
+<p><strong>Purpose:</strong> Run the CIS Kubernetes Benchmark against your cluster to find misconfigurations: insecure API server flags, missing audit logging, overly permissive RBAC, unencrypted etcd, and more. Essential before declaring a cluster "production-ready".</p>
+ BLOCK42 
+ BLOCK43 
+<hr>
+<h3 id="production-cluster-hardening-checklist">Production Cluster Hardening Checklist</h3>
+<table><thead><tr><th>Area</th><th>Check</th><th>Tool</th></tr></thead><tbody><tr><td><strong>API Server</strong></td><td>Audit logging enabled</td><td>k3s config / kubeadm</td></tr><tr><td><strong>API Server</strong></td><td>Anonymous auth disabled</td><td><code>--anonymous-auth=false</code></td></tr><tr><td><strong>RBAC</strong></td><td>No <code>cluster-admin</code> granted to workloads</td><td><code>kubectl auth can-i --list</code></td></tr><tr><td><strong>RBAC</strong></td><td>CI/CD uses minimal ServiceAccount</td><td>Dedicated Role per namespace</td></tr><tr><td><strong>Pods</strong></td><td><code>restricted</code> PSA on all namespaces</td><td><code>pod-security.kubernetes.io/enforce=restricted</code></td></tr><tr><td><strong>Pods</strong></td><td><code>runAsNonRoot: true</code> on all containers</td><td>Kyverno policy</td></tr><tr><td><strong>Pods</strong></td><td><code>readOnlyRootFilesystem: true</code></td><td>SecurityContext</td></tr><tr><td><strong>Pods</strong></td><td>Resource limits set on all containers</td><td>Kyverno policy</td></tr><tr><td><strong>Pods</strong></td><td>No <code>hostNetwork</code>, <code>hostPID</code>, <code>hostIPC</code></td><td>Kyverno policy</td></tr><tr><td><strong>Images</strong></td><td>No <code>:latest</code> tags in production</td><td>conftest / Kyverno</td></tr><tr><td><strong>Images</strong></td><td>All images signed (Cosign)</td><td>Kyverno <code>verifyImages</code></td></tr><tr><td><strong>Images</strong></td><td>Continuous vulnerability scanning</td><td>Trivy Operator</td></tr><tr><td><strong>Network</strong></td><td>Default-deny NetworkPolicy in every namespace</td><td>Kyverno generate</td></tr><tr><td><strong>Network</strong></td><td>mTLS between services</td><td>Linkerd / Cilium WireGuard</td></tr><tr><td><strong>Secrets</strong></td><td>No plaintext secrets in Git</td><td>Sealed Secrets / ESO</td></tr><tr><td><strong>Secrets</strong></td><td>Secrets mounted as volumes, not env vars</td><td>Kyverno policy</td></tr><tr><td><strong>Runtime</strong></td><td>Falco detecting shell exec / file writes</td><td>Falco DaemonSet</td></tr><tr><td><strong>etcd</strong></td><td>Encrypted at rest</td><td><code>--encryption-provider-config</code></td></tr><tr><td><strong>Nodes</strong></td><td>CIS benchmark passing</td><td>kube-bench</td></tr><tr><td><strong>Nodes</strong></td><td>Node Problem Detector deployed</td><td>DaemonSet</td></tr><tr><td><strong>Backups</strong></td><td>Velero scheduled daily</td><td>Velero Schedule CRD</td></tr><tr><td><strong>Backups</strong></td><td>etcd snapshots to off-cluster storage</td><td>k3s etcd-snapshot + restic</td></tr></tbody></table>
+<hr>
+<h3 id="kubelet-eviction-thresholds">Kubelet Eviction Thresholds</h3>
+<p>The kubelet monitors node resources and evicts pods when thresholds are crossed. <strong>Soft</strong> eviction gives pods a grace period; <strong>hard</strong> eviction is immediate.</p>
+ BLOCK44 
+ BLOCK45 
+<blockquote><strong>Rule of thumb for homelab:</strong> Set hard <code>memory.available&lt;200Mi</code> and <code>nodefs.available&lt;5%</code>. Without eviction thresholds, nodes can OOM-kill the kubelet itself, making the node permanently unresponsive.</blockquote>
+<hr>
+<h3 id="kubeconfig-management">kubeconfig Management</h3>
+<p>Manage multiple clusters — merge configs, switch contexts, and set up OIDC authentication.</p>
+ BLOCK46 
+<h4 id="oidc-authentication-sso-for-kubectl">OIDC Authentication (SSO for kubectl)</h4>
+<p>Integrate with Dex, Keycloak, or any OIDC provider so team members authenticate with their SSO credentials instead of shared kubeconfig certs.</p>
+ BLOCK47 
+ BLOCK48 
+ BLOCK49 
+ BLOCK50 
+<hr></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

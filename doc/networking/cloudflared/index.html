@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Cloudflared Tunnels — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Cloudflared — Zero-Trust Tunnels  Cloudflared creates an encrypted, outbound-only tunnel from your Shani OS machine to Cloudflare's global edge network. Th…">
+  <meta name="description" id="meta-desc"     content="Cloudflared creates an encrypted, outbound-only tunnel from your Shani OS machine to Cloudflare's global edge network. This lets you expose local services …">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Cloudflared Tunnels">
-  <meta property="og:description" id="og-desc"    content="Cloudflared — Zero-Trust Tunnels  Cloudflared creates an encrypted, outbound-only tunnel from your Shani OS machine to Cloudflare's global edge network. Th…">
+  <meta property="og:description" id="og-desc"    content="Cloudflared creates an encrypted, outbound-only tunnel from your Shani OS machine to Cloudflare's global edge network. This lets you expose local services …">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/networking/cloudflared/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Cloudflared Tunnels">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Cloudflared Tunnels">
-  <meta name="twitter:description" id="tw-desc"  content="Cloudflared — Zero-Trust Tunnels  Cloudflared creates an encrypted, outbound-only tunnel from your Shani OS machine to Cloudflare's global edge network. Th…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Cloudflared creates an encrypted, outbound-only tunnel from your Shani OS machine to Cloudflare's global edge network. This lets you expose local services …">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Cloudflared Tunnels","description":"Cloudflared — Zero-Trust Tunnels  Cloudflared creates an encrypted, outbound-only tunnel from your Shani OS machine to Cloudflare's global edge network. Th…","url":"https://docs.shani.dev/doc/networking/cloudflared/","datePublished":"2026-04-22T00:00:00.000Z","dateModified":"2026-04-22T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Cloudflared Tunnels","description":"Cloudflared creates an encrypted, outbound-only tunnel from your Shani OS machine to Cloudflare's global edge network. This lets you expose local services …","url":"https://docs.shani.dev/doc/networking/cloudflared/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Cloudflared Tunnels","item":"https://docs.shani.dev/doc/networking/cloudflared/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,32 +215,31 @@
         <h1 class="doc-title">Cloudflared Tunnels</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Networking</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><h1>Cloudflared — Zero-Trust Tunnels</h1>
-<p>Cloudflared creates an encrypted, outbound-only tunnel from your Shani OS machine to Cloudflare's global edge network. This lets you expose local services at a real public HTTPS URL — with no static IP, no port forwarding, and no inbound firewall ports. The tunnel connects outward from your server; all traffic flows back through that established connection.</p>
+      <div class="prose"><p>Cloudflared creates an encrypted, outbound-only tunnel from your Shani OS machine to Cloudflare's global edge network. This lets you expose local services at a real public HTTPS URL — with no static IP, no port forwarding, and no inbound firewall ports. The tunnel connects outward from your server; all traffic flows back through that established connection.</p>
 <p>Cloudflared is pre-installed on Shani OS. Tunnel credentials are stored at <code>/data/varlib/cloudflared</code> and survive all OS updates and rollbacks. <strong>Inactive until you authenticate.</strong></p>
-<p>---</p>
-<h2>When to Use Cloudflared vs Tailscale</h2>
-<p>| Scenario | Use | |----------|-----| | Private access between your own devices | <strong>Tailscale</strong> — zero-config, no public URL | | Share a service with others via a real internet URL | <strong>Cloudflared</strong> — public HTTPS, no IP needed | | Full data sovereignty (no third-party cloud) | <strong>Pangolin</strong> — self-hosted tunnel via your own VPS |</p>
+<hr>
+<h2 id="when-to-use-cloudflared-vs-tailscale">When to Use Cloudflared vs Tailscale</h2>
+<table><thead><tr><th>Scenario</th><th>Use</th></tr></thead><tbody><tr><td>Private access between your own devices</td><td><strong>Tailscale</strong> — zero-config, no public URL</td></tr><tr><td>Share a service with others via a real internet URL</td><td><strong>Cloudflared</strong> — public HTTPS, no IP needed</td></tr><tr><td>Full data sovereignty (no third-party cloud)</td><td><strong>Pangolin</strong> — self-hosted tunnel via your own VPS</td></tr></tbody></table>
 <p>You can run both simultaneously: Caddy + Tailscale for internal <code>.home.local</code> access; Cloudflared for selectively public services.</p>
-<p>---</p>
-<h2>1. Authenticate</h2>
+<hr>
+<h2 id="1-authenticate">1. Authenticate</h2>
 <pre><code class="language-bash"># Opens a browser to log in to your Cloudflare account
 cloudflared tunnel login
 # Saves credentials to ~/.cloudflared/cert.pem</code></pre>
 <p>Your Cloudflare account must own at least one domain with DNS managed by Cloudflare (not just registered there — the nameservers must point to Cloudflare).</p>
-<p>---</p>
-<h2>2. Create a Tunnel</h2>
+<hr>
+<h2 id="2-create-a-tunnel">2. Create a Tunnel</h2>
 <pre><code class="language-bash"># Create a named tunnel — assigns a stable UUID that never changes
 cloudflared tunnel create my-home-server
 
 # List your tunnels and their UUIDs
 cloudflared tunnel list</code></pre>
 <p>The tunnel UUID and a JSON credentials file are created at <code>~/.cloudflared/&lt;UUID&gt;.json</code>. These are what authenticate your server to the tunnel — back them up.</p>
-<p>---</p>
-<h2>3. Configure Ingress</h2>
+<hr>
+<h2 id="3-configure-ingress">3. Configure Ingress</h2>
 <p>Create <code>~/.cloudflared/config.yml</code>. Each <code>hostname</code> entry maps a public subdomain to a local service. The order matters — Cloudflared matches rules top to bottom:</p>
 <pre><code class="language-yaml">tunnel: &lt;YOUR-TUNNEL-UUID&gt;
 credentials-file: /home/user/.cloudflared/&lt;UUID&gt;.json
@@ -266,37 +267,37 @@ ingress:
 
   # Catch-all — required, must be last
   - service: http_status:404</code></pre>
-<blockquote><p><strong>Note:</strong> You do not need a Caddyfile entry for services exposed via Cloudflared — Cloudflare handles TLS termination at the edge. Caddy is still useful for internal <code>.home.local</code> access on Tailscale or the LAN.</p></blockquote>
-<h3>HTTPS Backend</h3>
+<blockquote><strong>Note:</strong> You do not need a Caddyfile entry for services exposed via Cloudflared — Cloudflare handles TLS termination at the edge. Caddy is still useful for internal <code>.home.local</code> access on Tailscale or the LAN.</blockquote>
+<h3 id="https-backend">HTTPS Backend</h3>
 <p>If your local service runs HTTPS (e.g., you've configured Caddy with <code>tls internal</code>):</p>
 <pre><code class="language-yaml">ingress:
   - hostname: app.example.com
     service: https://localhost:443
     originRequest:
       noTLSVerify: true   # needed for self-signed / internal CA certs</code></pre>
-<p>---</p>
-<h2>4. Route DNS</h2>
+<hr>
+<h2 id="4-route-dns">4. Route DNS</h2>
 <p>Tell Cloudflare to point your subdomains at the tunnel. This creates CNAME records automatically in your Cloudflare DNS zone — no manual DNS editing required:</p>
 <pre><code class="language-bash">cloudflared tunnel route dns my-home-server media.example.com
 cloudflared tunnel route dns my-home-server files.example.com
 cloudflared tunnel route dns my-home-server vault.example.com
 cloudflared tunnel route dns my-home-server ha.example.com</code></pre>
 <p>DNS propagation is usually near-instant since Cloudflare controls both sides.</p>
-<p>---</p>
-<h2>5. Test Locally</h2>
+<hr>
+<h2 id="5-test-locally">5. Test Locally</h2>
 <p>Run the tunnel in the foreground to verify it works before committing to a persistent service:</p>
 <pre><code class="language-bash">cloudflared tunnel run my-home-server
 # Open media.example.com in a browser — you should reach Jellyfin
 # Ctrl-C to stop</code></pre>
-<p>---</p>
-<h2>6. Install as a Persistent Service</h2>
+<hr>
+<h2 id="6-install-as-a-persistent-service">6. Install as a Persistent Service</h2>
 <pre><code class="language-bash"># Install the systemd service (runs as root, starts at boot)
 sudo cloudflared service install
 
 sudo systemctl enable --now cloudflared</code></pre>
 <p>The service uses the config at <code>~/.cloudflared/config.yml</code> (for the user who ran <code>cloudflared tunnel login</code>) or <code>/etc/cloudflared/config.yml</code> if you move it there for a system-wide install.</p>
-<p>---</p>
-<h2>Status & Logs</h2>
+<hr>
+<h2 id="status-logs">Status & Logs</h2>
 <pre><code class="language-bash"># List all tunnels and their current status
 cloudflared tunnel list
 
@@ -308,8 +309,8 @@ sudo journalctl -u cloudflared -f
 
 # Active connections and which Cloudflare edge PoPs they're using
 cloudflared tunnel connections my-home-server</code></pre>
-<p>---</p>
-<h2>Access Policies (Zero Trust)</h2>
+<hr>
+<h2 id="access-policies-zero-trust">Access Policies (Zero Trust)</h2>
 <p>Protect exposed services with Cloudflare Access — require users to log in with email OTP, GitHub, Google, or any OIDC provider before reaching your service. This is particularly useful for services like Grafana or code-server that don't have their own authentication.</p>
 <p>Configure in the <a href="https://one.dash.cloudflare.com/">Cloudflare Zero Trust dashboard</a> under <strong>Access → Applications → Add an application → Self-hosted</strong>. No code changes on your side — Cloudflare handles the auth wall.</p>
 <pre><code class="language-yaml"># In config.yml — mark a service as requiring Access authentication
@@ -318,8 +319,8 @@ ingress:
     service: http://localhost:3000
     # Access policy is applied at the Cloudflare edge — no config changes here needed
     # Just create the Access Application in the Zero Trust dashboard</code></pre>
-<p>---</p>
-<h2>Running via Token (Dashboard-Managed)</h2>
+<hr>
+<h2 id="running-via-token-dashboard-managed">Running via Token (Dashboard-Managed)</h2>
 <p>If you prefer to manage tunnels entirely from the Cloudflare dashboard without a local config file:</p>
 <pre><code class="language-bash"># Get the token from: Zero Trust Dashboard → Networks → Tunnels → your tunnel → Configure → Run command
 sudo cloudflared service install --token &lt;YOUR-TUNNEL-TOKEN&gt;
@@ -330,8 +331,8 @@ sudo systemctl enable --now cloudflared</code></pre>
   --restart unless-stopped \
   cloudflare/cloudflared:latest tunnel --no-autoupdate run \
     --token &lt;YOUR-TUNNEL-TOKEN&gt;</code></pre>
-<p>---</p>
-<h2>Multiple Tunnels</h2>
+<hr>
+<h2 id="multiple-tunnels">Multiple Tunnels</h2>
 <p>You can run multiple tunnels from the same machine — useful for separating concerns or using different Cloudflare accounts:</p>
 <pre><code class="language-bash"># Create a second tunnel
 cloudflared tunnel create work-server
@@ -339,17 +340,22 @@ cloudflared tunnel create work-server
 # Run with explicit config
 cloudflared tunnel --config ~/.cloudflared/work-config.yml run work-server</code></pre>
 <p>For multiple persistent tunnels via systemd, create separate service files under <code>/etc/systemd/system/</code> pointing to different config files.</p>
-<p>---</p>
-<h2>Removing a Service from the Tunnel</h2>
+<hr>
+<h2 id="removing-a-service-from-the-tunnel">Removing a Service from the Tunnel</h2>
 <pre><code class="language-bash"># 1. Remove the hostname block from config.yml
 # 2. Reload the running tunnel
 sudo systemctl reload cloudflared
 
 # 3. Delete the CNAME record in the Cloudflare DNS dashboard
 #    (cloudflared doesn't auto-delete DNS records when you remove an ingress rule)</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | <code>ERR Failed to dial edge</code> | Check outbound HTTPS connectivity; corporate or ISP firewalls may block Cloudflare edge IPs on port 7844 (the QUIC port) — try <code>cloudflared tunnel run --protocol http2</code> | | Tunnel connects but subdomain returns error 1033 | DNS CNAME hasn't propagated, or <code>cloudflared tunnel route dns</code> wasn't run for that hostname — check the Cloudflare DNS dashboard | | Service returns 502 via tunnel | The local service isn't running or is bound to the wrong port; verify with <code>curl http://localhost:PORT</code> on the server | | WebSocket disconnects | Add <code>originRequest: { connectTimeout: 30s }</code> to the ingress rule; some apps (Vaultwarden, Home Assistant, Open WebUI) require WebSocket keep-alives | | Tunnel not starting after reboot | <code>sudo systemctl status cloudflared</code>; verify the credentials file path in config.yml points to the actual file and hasn't moved | | High latency to the tunnel | Cloudflare connects to the nearest edge PoP — check <code>cloudflared tunnel connections</code> to see which regions are being used; opening UDP 7844 enables QUIC (faster than HTTP/2) | | Access policy not triggering | Ensure the Cloudflare Access application is configured for the exact hostname (no wildcards unless explicitly set); check that the application type is "Self-hosted" | | <code>credentials file not found</code> error | The JSON credentials file path in config.yml must be absolute and match the actual file location; run <code>cloudflared tunnel list</code> to confirm the UUID |</p></div>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>ERR Failed to dial edge</code></td><td>Check outbound HTTPS connectivity; corporate or ISP firewalls may block Cloudflare edge IPs on port 7844 (the QUIC port) — try <code>cloudflared tunnel run --protocol http2</code></td></tr><tr><td>Tunnel connects but subdomain returns error 1033</td><td>DNS CNAME hasn't propagated, or <code>cloudflared tunnel route dns</code> wasn't run for that hostname — check the Cloudflare DNS dashboard</td></tr><tr><td>Service returns 502 via tunnel</td><td>The local service isn't running or is bound to the wrong port; verify with <code>curl http://localhost:PORT</code> on the server</td></tr><tr><td>WebSocket disconnects</td><td>Add <code>originRequest: { connectTimeout: 30s }</code> to the ingress rule; some apps (Vaultwarden, Home Assistant, Open WebUI) require WebSocket keep-alives</td></tr><tr><td>Tunnel not starting after reboot</td><td><code>sudo systemctl status cloudflared</code>; verify the credentials file path in config.yml points to the actual file and hasn't moved</td></tr><tr><td>High latency to the tunnel</td><td>Cloudflare connects to the nearest edge PoP — check <code>cloudflared tunnel connections</code> to see which regions are being used; opening UDP 7844 enables QUIC (faster than HTTP/2)</td></tr><tr><td>Access policy not triggering</td><td>Ensure the Cloudflare Access application is configured for the exact hostname (no wildcards unless explicitly set); check that the application type is "Self-hosted"</td></tr><tr><td><code>credentials file not found</code> error</td><td>The JSON credentials file path in config.yml must be absolute and match the actual file location; run <code>cloudflared tunnel list</code> to confirm the UUID</td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="caddy">Caddy reverse proxy</a></li>
+<li><a href="tailscale">Tailscale mesh VPN</a></li>
+</ul></div>
     </div>
 
   </main>

@@ -1,7 +1,7 @@
 ---
 title: Samba (SMB/CIFS)
 section: Networking
-updated: 2026-04-18
+updated: 2026-08-28
 ---
 
 # Samba — SMB/CIFS (Windows / macOS / Linux)
@@ -123,11 +123,28 @@ sudo firewall-cmd --add-service=samba --permanent
 sudo firewall-cmd --reload
 ```
 
+### 6. SELinux Contexts
+
+Shani OS enforces SELinux. Custom shares need the `samba_share_t` context:
+
+```bash
+sudo semanage fcontext -a -t samba_share_t "/srv/share(/.*)?"
+sudo restorecon -Rv /srv/share
+```
+
+For the `[homes]` share, enable the boolean instead:
+
+```bash
+sudo setsebool -P samba_enable_home_dirs on
+```
+
 ---
 
 ## Client Usage
 
 ### Linux
+
+The `mount.cifs` helper used below comes from `cifs-utils` (pre-installed).
 
 Temporary mount:
 
@@ -169,3 +186,8 @@ Finder → Go → Connect to Server: `smb://192.168.1.100/SharedFiles`
 | `mount error(13): Permission denied` on Linux | Add `sec=ntlmssp` to mount options; verify credentials in `.smbcredentials` |
 | Config changes not taking effect | Run `testparm` to validate, then `sudo systemctl restart smb nmb` |
 | View logs | `journalctl -u smb` or `/var/log/samba/log.smbd` |
+
+## See Also
+
+- [NFS exports](nfs)
+- [Firewall rules for SMB](firewalld)

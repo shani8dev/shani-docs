@@ -1,7 +1,7 @@
 ---
 title: arpwatch (ARP Monitor)
 section: Networking
-updated: 2026-04-20
+updated: 2026-08-28
 ---
 
 # arpwatch — ARP Activity Monitor
@@ -32,7 +32,7 @@ journalctl -u arpwatch@eth0 -f
 
 ## Configuration
 
-Default behaviour is to send email reports to `root`. Forward root's mail to a real address via `/etc/aliases` (see the [Exim page](https://docs.shani.dev/doc/networking/exim)).
+Default behaviour is to send email reports to `root`. Forward root's mail to a real address via `/etc/aliases` (see the [Exim](exim) page).
 
 The ARP database for each interface is stored at `/var/lib/arpwatch/<interface>.dat`.
 
@@ -104,6 +104,12 @@ journalctl -u arpwatch@eth0 --no-pager | grep -E "new|changed|flip"
 | Issue | Solution |
 |-------|----------|
 | No events appearing | Confirm the correct interface name — run `ip link` to list interfaces; arpwatch only processes traffic it can see |
-| Email alerts not arriving | Ensure Exim (or another MTA) is running and root's mail is forwarded — see the [Exim page](https://docs.shani.dev/doc/networking/exim) |
+| Email alerts not arriving | Ensure Exim (or another MTA) is running and root's mail is forwarded — see the [Exim](exim) page |
 | Too many "new activity" alerts on first run | Normal — arpwatch builds its database from scratch; alerts settle after all known devices have been seen once |
 | `changed ethernet address` for a trusted device | Mobile devices use MAC randomisation by default — disable randomisation for that device on your router/AP, or accept the alerts |
+
+## See Also
+
+- [Exim (Mail Transfer Agent)](exim) — email delivery for alerts
+- [Firewall](firewalld) — network security rules
+- [Network Tools](network-tools) — monitoring and diagnostics

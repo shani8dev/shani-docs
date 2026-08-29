@@ -1,7 +1,7 @@
 ---
 title: Mail Servers
 section: Self-Hosting & Servers
-updated: 2026-04-22
+updated: 2026-08-28
 ---
 
 # Mail Servers
@@ -61,10 +61,18 @@ Transactional email (password resets, order confirmations, account notifications
 
 ## Mailcow (Full-Featured)
 **Purpose:** Complete mail suite: Postfix, Dovecot, SOGo, Rspamd, ClamAV, admin UI, and ActiveSync.
-```yaml
-# Clone: git clone https://github.com/mailcow/mailcow-dockerized
-# Edit mailcow.conf, then run: podman-compose up -d
+
+##### Quickstart
+
+```bash
+git clone https://github.com/mailcow/mailcow-dockerized ~/mailcow-dockerized
+cd ~/mailcow-dockerized
+./generate_config.sh   # writes mailcow.conf — set your mail FQDN and timezone when prompted
+podman-compose up -d
 ```
+
+Access the admin UI and SOGo webmail at `https://<your-mail-fqdn>` (port `443`). Retrieve the DKIM public key from the UI (**Configuration → Configuration & Details → ARC/DKIM key**) or read it from `data/conf/dkim/dkim.key`, then publish it as the `dkim._domainkey` TXT record.
+
 Ports: `25`, `465/587`, `143/993`, `80/443`.
 
 **Firewall:**
@@ -113,6 +121,24 @@ services:
 volumes:
   pg_data:
 ```
+
+##### Generate the environment and start
+
+```bash
+cd ~/mailu
+# Preferred: generate .env (and a matching compose file) via the wizard at setup.mailu.io
+# Manual alternative:
+cat > .env << 'EOF'
+DOMAIN=example.com
+HOSTNAMES=mail.example.com
+POSTMASTER=admin
+SECRET_KEY=changeme-run-openssl-rand-hex-32
+SUBNET=10.22.33.0/24
+EOF
+podman-compose up -d
+```
+
+Admin interface: `https://mail.example.com/admin`. Webmail (Roundcube/SnappyMail): `https://mail.example.com/webmail`.
 
 ## Stalwart Mail Server
 **Purpose:** Next-gen, single-binary Rust mail server. JMAP, IMAP, SMTP, Sieve, webmail built-in. Extremely low resource usage.
@@ -258,7 +284,7 @@ For Stalwart specifically, `/home/user/stalwart` contains the embedded RocksDB s
 
 ---
 
-# Mailing Lists, Newsletters & Aliases
+## Mailing Lists, Newsletters & Aliases
 
 ## listmonk (Newsletter & Mailing Lists)
 
@@ -519,7 +545,7 @@ Access the web UI at `http://localhost:5000`. Create a mail server, configure DK
 
 ---
 
-# Mail Clients
+## Mail Clients
 
 Web, desktop, mobile, and terminal clients for secure IMAP/SMTP access.
 
@@ -602,3 +628,8 @@ cd ~/sogo && podman-compose up -d
 - Train server-side spam filters via "Mark as Spam/Not Spam". Rspamd and SpamAssassin use Bayesian learning; your feedback improves accuracy over time.
 - Never store plain-text passwords in config files. Use GPG or client-native secret managers.
 - Thunderbird has native OpenPGP support since v78 — no Enigmail plugin needed. Use it for sensitive mail end-to-end.
+
+## See Also
+
+- [DNS (SPF/DKIM records)](../networking/bind.md)
+- [Communication platforms](communication)

@@ -1,7 +1,7 @@
 ---
 title: Audit (auditd)
 section: Security
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # Audit — auditd
@@ -193,4 +193,4 @@ sudo grep "apparmor.*DENIED" /var/log/audit/audit.log
 
 - [AppArmor](apparmor) — LSM whose denials appear in the audit log
 - [Security Features](features) — IMA/EVM also uses kernel audit infrastructure
-- [shani-health Reference](../updates/shani-health) — `shani-health --security` reports whether auditd is running and how many rule files are loaded
+- [shani-health Reference](../updates/shani-health.md) — `shani-health --security` reports whether auditd is running and how many rule files are loaded

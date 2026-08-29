@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Overview — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Shanios Technical Documentation  Comprehensive guide to the immutable Linux OS with atomic updates.  Welcome to the Shanios technical documentation. This w…">
+  <meta name="description" id="meta-desc"     content="Comprehensive guide to the immutable Linux OS with atomic updates. Welcome to the Shanios technical documentation. This wiki provides comprehensive informa…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Overview">
-  <meta property="og:description" id="og-desc"    content="Shanios Technical Documentation  Comprehensive guide to the immutable Linux OS with atomic updates.  Welcome to the Shanios technical documentation. This w…">
+  <meta property="og:description" id="og-desc"    content="Comprehensive guide to the immutable Linux OS with atomic updates. Welcome to the Shanios technical documentation. This wiki provides comprehensive informa…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/overview/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Overview">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Overview">
-  <meta name="twitter:description" id="tw-desc"  content="Shanios Technical Documentation  Comprehensive guide to the immutable Linux OS with atomic updates.  Welcome to the Shanios technical documentation. This w…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Comprehensive guide to the immutable Linux OS with atomic updates. Welcome to the Shanios technical documentation. This wiki provides comprehensive informa…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Overview","description":"Shanios Technical Documentation  Comprehensive guide to the immutable Linux OS with atomic updates.  Welcome to the Shanios technical documentation. This w…","url":"https://docs.shani.dev/doc/overview/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Overview","description":"Comprehensive guide to the immutable Linux OS with atomic updates. Welcome to the Shanios technical documentation. This wiki provides comprehensive informa…","url":"https://docs.shani.dev/doc/overview/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Overview","item":"https://docs.shani.dev/doc/overview/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,15 +215,14 @@
         <h1 class="doc-title">Overview</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Overview</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><h1>Shanios Technical Documentation</h1>
-<p>Comprehensive guide to the immutable Linux OS with atomic updates.</p>
+      <div class="prose"><p>Comprehensive guide to the immutable Linux OS with atomic updates.</p>
 <p>Welcome to the Shanios technical documentation. This wiki provides comprehensive information about Shanios's architecture, installation, configuration, and daily use.</p>
-<p>Shanios is an <strong>immutable Linux desktop</strong> built on Arch Linux. The OS core is permanently read-only — nothing running on your machine can modify it, not even root. It always keeps two complete, bootable copies of the OS on disk. You run on one; updates are prepared on the other. When you're ready, reboot into the new one. If anything goes wrong, reboot back. It ships in two editions — <strong>GNOME</strong> and <strong>KDE Plasma</strong> — and works out of the box with no post-install tweaking required.</p>
-<p>Current stable release: <strong>2026.05.18</strong> · GNOME edition ~5.4 GB · KDE Plasma edition ~7.6 GB · Both SHA256 + GPG signed.</p>
-<h2>Five Core Ideas</h2>
+<p>Shanios is an <strong>immutable Linux desktop</strong> built on Arch Linux. The OS core is permanently read-only — nothing running on your machine can modify it, not even root. It always keeps two complete, bootable copies of the OS on disk. You run on one; updates are prepared on the other. When you're ready, reboot into the new one. If anything goes wrong, reboot back. It ships in three desktop editions today — <strong>GNOME</strong>, <strong>KDE Plasma</strong>, and <strong>COSMIC</strong> — plus a <strong>Kiosk</strong> profile for single-purpose deployments and a headless <strong>Server</strong> profile. It works out of the box with no post-install tweaking required.</p>
+<p>At the time of writing, the current stable release is <strong>2026.05.18</strong>: GNOME edition ~5.4 GB · KDE Plasma edition ~7.6 GB · COSMIC edition ~5.2 GB · Kiosk edition ~4.8 GB · Server edition ~3.5 GB · all SHA256 + GPG signed</p>
+<h2 id="five-core-ideas">Five Core Ideas</h2>
 <ul>
 <li><strong>Immutability:</strong> The root filesystem is read-only at runtime. Neither accidental commands nor malware can corrupt the OS — it always boots to a known-good state. Even a process running as root cannot modify core system files during a live session.</li>
 <li><strong>Atomic updates via blue-green deployment:</strong> Two complete system images (<code>@blue</code> and <code>@green</code>) are maintained at all times. Updates are written to the inactive image; you boot into it only when it's ready. The previous image remains as an instant rollback target. If the new copy can't boot at all, systemd-boot detects the failure and reverts automatically.</li>
@@ -231,10 +232,9 @@
 </ul>
 <p>Built in India 🇮🇳 by <a href="https://github.com/Shrinivasvkumbhar">Shrinivas Vishnu Kumbhar</a>. Indian-language support (Devanagari, Tamil, Telugu, and more) is a first-class feature.</p>
 <p><strong>New to Shanios?</strong> Visit <a href="https://shani.dev">shani.dev</a> for a general introduction, download links, and feature overview. This wiki focuses on technical implementation and usage details.</p>
-<h2>Editions</h2>
-<p>| Edition | Size | Best For | |---------|------|----------| | <strong>GNOME</strong> | ~5.4 GB | Most users — Windows/macOS switchers, office work, students, OEM deployments | | <strong>KDE Plasma</strong> | ~7.6 GB | Gamers and power users — full gaming stack pre-installed, virt-manager, full KDE suite |</p>
-<p>Both editions include the same underlying architecture, security stack, and immutable OS core.</p>
-<h2>Quick Links</h2>
+<h2 id="editions">Editions</h2>
+<table><thead><tr><th>Edition</th><th>Size</th><th>Best For</th></tr></thead><tbody><tr><td><strong>GNOME</strong></td><td>~5.4 GB</td><td>Most users — Windows/macOS switchers, office work, students, OEM deployments</td></tr><tr><td><strong>KDE Plasma</strong></td><td>~7.6 GB</td><td>Gamers and power users — full gaming stack pre-installed, virt-manager, full KDE suite</td></tr><tr><td><strong>COSMIC</strong></td><td>~5.2 GB</td><td>Modern desktop — tiling, keyboard-driven, System76's Cosmic DE</td></tr><tr><td><strong>Kiosk</strong></td><td>~4.8 GB</td><td>Single-purpose deployments — digital signage, kiosks, locked-down environments</td></tr><tr><td><strong>Server</strong></td><td>~3.5 GB</td><td>Headless servers — minimal footprint, no desktop environment</td></tr></tbody></table>
+<h2 id="quick-links">Quick Links</h2>
 <ul>
 <li><a href="intro/what-is-shanios">What is Shanios?</a> — core concepts explained</li>
 <li><a href="intro/getting-started">Getting Started</a> — download, verify, install, first boot</li>
@@ -242,6 +242,21 @@
 <li><a href="intro/whats-included">What's Included</a> — full software stack</li>
 <li><a href="updates/system">System Updates</a> — update and rollback</li>
 <li><a href="security/features">Security Features</a> — full security model</li>
+<li><a href="troubleshooting">Troubleshooting</a> — common issues and solutions</li>
+<li><a href="faq">FAQ</a> — frequently asked questions</li>
+</ul>
+<h2 id="current-release">Current Release</h2>
+<p><strong>Stable:</strong> 2026.05.18 · <strong>Channels:</strong> latest, stable</p>
+<p>All images are SHA256 checksummed and GPG-signed. Verify downloads using the signatures at <a href="https://downloads.shani.dev">downloads.shani.dev</a>.</p>
+<h2 id="project-repositories">Project Repositories</h2>
+<table><thead><tr><th>Repo</th><th>Purpose</th></tr></thead><tbody><tr><td><a href="https://github.com/shani8dev/shani-platform">shani-platform</a></td><td>Fleet management server (FastAPI)</td></tr><tr><td><a href="https://github.com/shani8dev/shani-fleet">shani-fleet</a></td><td>Fleet agent (heartbeat, commands)</td></tr><tr><td><a href="https://github.com/shani8dev/shani-insights">shani-insights</a></td><td>Workforce analytics server</td></tr><tr><td><a href="https://github.com/shani8dev/shani-deploy">shani-deploy</a></td><td>Transactional deployment scripts</td></tr><tr><td><a href="https://github.com/shani8dev/shani-builder">shani-builder</a></td><td>Build environment + package publisher</td></tr><tr><td><a href="https://github.com/shani8dev/shani-install-media">shani-install-media</a></td><td>ISO/image build pipeline</td></tr><tr><td><a href="https://github.com/shani8dev/shani-pkgbuilds">shani-pkgbuilds</a></td><td>Package build scripts</td></tr><tr><td><a href="https://github.com/shani8dev/shani-keyring">shani-keyring</a></td><td>Pacman trust root</td></tr><tr><td><a href="https://github.com/shani8dev/shani-repo">shani-repo</a></td><td>Published package repository</td></tr><tr><td><a href="https://github.com/shani8dev/shani-settings">shani-settings</a></td><td>Filesystem overlay</td></tr><tr><td><a href="https://github.com/shani8dev/os-installer-config">os-installer-config</a></td><td>Installer scripts</td></tr><tr><td><a href="https://github.com/shani8dev/shani-website">shani-website</a></td><td>Marketing site</td></tr><tr><td><a href="https://github.com/shani8dev/shani-docs">shani-docs</a></td><td>Documentation (this site)</td></tr><tr><td><a href="https://github.com/shani8dev/shani-wiki">shani-wiki</a></td><td>Technical wiki</td></tr><tr><td><a href="https://github.com/shani8dev/shani-blog">shani-blog</a></td><td>Engineering blog</td></tr></tbody></table>
+<h2 id="how-to-use-this-wiki">How to Use This Wiki</h2>
+<table><thead><tr><th>Section</th><th>What you'll find</th></tr></thead><tbody><tr><td><strong><a href="intro/what-is-shanios">Introduction</a></strong></td><td>What Shanios is, how it works, and getting started</td></tr><tr><td><strong><a href="concepts/immutability">Concepts</a></strong></td><td>Architecture deep-dives: immutability, blue-green, persistence, atomic updates</td></tr><tr><td><strong><a href="install/steps">Installation</a></strong></td><td>Requirements, pre-install checklist, installation steps, first boot</td></tr><tr><td><strong><a href="software/flatpak">Software & Apps</a></strong></td><td>App stores (Flatpak, Nix, Snap, Homebrew), containers, gaming, VMs</td></tr><tr><td><strong><a href="networking/bluetooth">Networking</a></strong></td><td>Bluetooth, SSH, VPN, DNS, firewall, and every networking daemon</td></tr><tr><td><strong><a href="security/features">Security</a></strong></td><td>Polkit tiers, LUKS, TPM, AppArmor, Secure Boot, audit, hardening</td></tr><tr><td><strong><a href="system/audio">System</a></strong></td><td>Audio, display, storage, backup, kernel modules, users & groups</td></tr><tr><td><strong><a href="updates/system">Updates</a></strong></td><td>How updates work, rollback, configuration management, health checks</td></tr><tr><td><strong><a href="arch/boot">Architecture</a></strong></td><td>Boot process, Btrfs layout, dracut, build pipeline, fleet deployment</td></tr><tr><td><strong><a href="troubleshooting">Troubleshooting</a></strong></td><td>Diagnosing and fixing common issues</td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="https://shani.dev">shani.dev</a> — public-facing site with download links and feature overview</li>
+<li><a href="https://github.com/shani8dev/shani-platform">GitHub</a> — source code, issue tracker, releases</li>
+<li><a href="https://github.com/shani8dev/shani-settings"><code>shani-settings</code> repo</a> — Polkit rules, system overlays, configuration</li>
 </ul></div>
     </div>
 

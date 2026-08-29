@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>slapd (OpenLDAP) — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="OpenLDAP Server (slapd)  OpenLDAP is an open-source implementation of the Lightweight Directory Access Protocol (LDAP), used for centralised authentication…">
+  <meta name="description" id="meta-desc"     content="OpenLDAP is an open-source implementation of the Lightweight Directory Access Protocol (LDAP), used for centralised authentication and directory services. …">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="slapd (OpenLDAP)">
-  <meta property="og:description" id="og-desc"    content="OpenLDAP Server (slapd)  OpenLDAP is an open-source implementation of the Lightweight Directory Access Protocol (LDAP), used for centralised authentication…">
+  <meta property="og:description" id="og-desc"    content="OpenLDAP is an open-source implementation of the Lightweight Directory Access Protocol (LDAP), used for centralised authentication and directory services. …">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/networking/slapd/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="slapd (OpenLDAP)">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="slapd (OpenLDAP)">
-  <meta name="twitter:description" id="tw-desc"  content="OpenLDAP Server (slapd)  OpenLDAP is an open-source implementation of the Lightweight Directory Access Protocol (LDAP), used for centralised authentication…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="OpenLDAP is an open-source implementation of the Lightweight Directory Access Protocol (LDAP), used for centralised authentication and directory services. …">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"slapd (OpenLDAP)","description":"OpenLDAP Server (slapd)  OpenLDAP is an open-source implementation of the Lightweight Directory Access Protocol (LDAP), used for centralised authentication…","url":"https://docs.shani.dev/doc/networking/slapd/","datePublished":"2026-04-18T00:00:00.000Z","dateModified":"2026-04-18T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"slapd (OpenLDAP)","description":"OpenLDAP is an open-source implementation of the Lightweight Directory Access Protocol (LDAP), used for centralised authentication and directory services. …","url":"https://docs.shani.dev/doc/networking/slapd/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"slapd (OpenLDAP)","item":"https://docs.shani.dev/doc/networking/slapd/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,21 +215,20 @@
         <h1 class="doc-title">slapd (OpenLDAP)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Networking</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-18</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><h1>OpenLDAP Server (slapd)</h1>
-<p>OpenLDAP is an open-source implementation of the Lightweight Directory Access Protocol (LDAP), used for centralised authentication and directory services. It is pre-installed on Shani OS.</p>
+      <div class="prose"><p>OpenLDAP is an open-source implementation of the Lightweight Directory Access Protocol (LDAP), used for centralised authentication and directory services. It is pre-installed on Shani OS.</p>
 <p>Database files persist in <code>/var/lib/openldap/openldap-data</code>, bind-mounted from <code>/data/varlib/openldap</code>, and survive OS updates.</p>
-<p>---</p>
-<h2>Setup</h2>
-<h3>Enable the Service</h3>
+<hr>
+<h2 id="setup">Setup</h2>
+<h3 id="enable-the-service">Enable the Service</h3>
 <pre><code class="language-bash">sudo systemctl enable --now slapd</code></pre>
-<h3>Generate a Password Hash</h3>
+<h3 id="generate-a-password-hash">Generate a Password Hash</h3>
 <pre><code class="language-bash"># Generates a hashed password for use in LDIF files
 slappasswd
 # Enter your chosen password — copy the {SSHA}... output</code></pre>
-<h3>Configure the Root DN</h3>
+<h3 id="configure-the-root-dn">Configure the Root DN</h3>
 <p>OpenLDAP starts empty. Create <code>setup.ldif</code> to set the base DN and admin user:</p>
 <pre><code class="language-ldif">dn: cn=config
 changetype: modify
@@ -241,14 +242,14 @@ replace: olcRootPW
 olcRootPW: {SSHA}hashedpasswordhere</code></pre>
 <p>Apply using the local UNIX socket (no password needed):</p>
 <pre><code class="language-bash">sudo ldapadd -Y EXTERNAL -H ldapi:/// -f setup.ldif</code></pre>
-<h3>Load Core Schema</h3>
+<h3 id="load-core-schema">Load Core Schema</h3>
 <pre><code class="language-bash"># Load standard schemas (required for most LDAP deployments)
 sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/core.ldif
 sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
 sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif</code></pre>
-<p>---</p>
-<h2>Adding Entries</h2>
-<h3>Base Structure</h3>
+<hr>
+<h2 id="adding-entries">Adding Entries</h2>
+<h3 id="base-structure">Base Structure</h3>
 <p>Create <code>base.ldif</code>:</p>
 <pre><code class="language-ldif">dn: dc=shanios,dc=local
 objectClass: dcObject
@@ -266,7 +267,7 @@ ou: groups</code></pre>
 <pre><code class="language-bash">ldapadd -x -H ldap://localhost \
   -D &quot;cn=Manager,dc=shanios,dc=local&quot; \
   -W -f base.ldif</code></pre>
-<h3>Add a User</h3>
+<h3 id="add-a-user">Add a User</h3>
 <pre><code class="language-ldif">dn: uid=alice,ou=users,dc=shanios,dc=local
 objectClass: inetOrgPerson
 objectClass: posixAccount
@@ -283,8 +284,8 @@ userPassword: {SSHA}hashedpasswordhere</code></pre>
 <pre><code class="language-bash">ldapadd -x -H ldap://localhost \
   -D &quot;cn=Manager,dc=shanios,dc=local&quot; \
   -W -f user-alice.ldif</code></pre>
-<p>---</p>
-<h2>Querying</h2>
+<hr>
+<h2 id="querying">Querying</h2>
 <pre><code class="language-bash"># List all entries under the base DN
 ldapsearch -x -H ldap://localhost -b dc=shanios,dc=local
 
@@ -297,14 +298,57 @@ ldapsearch -x -H ldap://localhost \
 ldapsearch -x -H ldap://localhost \
   -D &quot;cn=Manager,dc=shanios,dc=local&quot; \
   -W -b dc=shanios,dc=local</code></pre>
-<p>---</p>
-<h2>Firewall</h2>
+<hr>
+<h2 id="firewall">Firewall</h2>
 <pre><code class="language-bash">sudo firewall-cmd --add-service=ldap --permanent    # port 389 (plain/STARTTLS)
 sudo firewall-cmd --add-service=ldaps --permanent   # port 636 (TLS)
 sudo firewall-cmd --reload</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | <code>ldapadd</code> returns <code>No such object</code> | The parent DN doesn't exist yet — add base structure entries before adding users/groups | | <code>Invalid credentials</code> | Wrong bind DN or password; the bind DN must match <code>olcRootDN</code> exactly | | <code>Can't contact LDAP server</code> | Check <code>systemctl status slapd</code>; confirm the service is listening: <code>ss -tlnp | grep 389</code> | | Schema error on <code>ldapadd</code> | Load the required schema LDIFs first (<code>core.ldif</code>, <code>cosine.ldif</code>, <code>inetorgperson.ldif</code>) | | View slapd logs | <code>journalctl -u slapd -f</code> |</p></div>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>ldapadd</code> returns <code>No such object</code></td><td>The parent DN doesn't exist yet — add base structure entries before adding users/groups</td></tr><tr><td><code>Invalid credentials</code></td><td>Wrong bind DN or password; the bind DN must match <code>olcRootDN</code> exactly</td></tr><tr><td><code>Can't contact LDAP server</code></td><td>Check <code>systemctl status slapd</code>; confirm the service is listening: `ss -tlnp</td><td>grep 389`</td></tr><tr><td>Schema error on <code>ldapadd</code></td><td>Load the required schema LDIFs first (<code>core.ldif</code>, <code>cosine.ldif</code>, <code>inetorgperson.ldif</code>)</td></tr><tr><td>View slapd logs</td><td><code>journalctl -u slapd -f</code></td></tr></tbody></table>
+<hr>
+<h2 id="tls-configuration">TLS Configuration</h2>
+<p>Generate a self-signed certificate for internal use (or request one from your CA / Let's Encrypt):</p>
+<pre><code class="language-bash">sudo mkdir -p /etc/openldap/tls
+sudo openssl req -new -x509 -nodes -days 3650 \
+  -keyout /etc/openldap/tls/slapd.key \
+  -out /etc/openldap/tls/slapd.crt \
+  -subj &quot;/CN=ldap.shanios.local&quot;
+sudo chown ldap:ldap /etc/openldap/tls/slapd.key /etc/openldap/tls/slapd.crt
+sudo chmod 600 /etc/openldap/tls/slapd.key</code></pre>
+<p>Set <code>olcTLSCertificateFile</code> and <code>olcTLSCertificateKeyFile</code> via <code>cn=config</code>:</p>
+<pre><code class="language-ldif">dn: cn=config
+changetype: modify
+replace: olcTLSCertificateFile
+olcTLSCertificateFile: /etc/openldap/tls/slapd.crt
+-
+replace: olcTLSCertificateKeyFile
+olcTLSCertificateKeyFile: /etc/openldap/tls/slapd.key</code></pre>
+<pre><code class="language-bash">sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f tls.ldif
+sudo systemctl restart slapd</code></pre>
+<p>Verify with an LDAPS connection (<code>ldaps://</code>, port 636).</p>
+<h3 id="access-control">Access Control</h3>
+<p>Replace the default permissive ACLs on the database entry (<code>olcDatabase={1}mdb</code>). Sample policy: anonymous binds may authenticate only, authenticated users may read their own entry, and the Manager has write access:</p>
+<pre><code class="language-ldif">dn: olcDatabase={1}mdb
+changetype: modify
+replace: olcAccess
+olcAccess: {0}to attrs=userPassword
+    by dn.exact=&quot;cn=Manager,dc=shanios,dc=local&quot; write
+    by self write
+    by anonymous auth
+    by * none
+olcAccess: {1}to dn.subtree=&quot;dc=shanios,dc=local&quot;
+    by dn.exact=&quot;cn=Manager,dc=shanios,dc=local&quot; write
+    by self read
+    by users read
+    by * none</code></pre>
+<pre><code class="language-bash">sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f acl.ldif</code></pre>
+<p>ACL changes take effect immediately — no restart required.</p>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="kerberos">Kerberos</a></li>
+<li><a href="../system/users-groups.md">Users & groups</a></li>
+</ul></div>
     </div>
 
   </main>

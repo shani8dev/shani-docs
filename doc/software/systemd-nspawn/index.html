@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>systemd-nspawn — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="systemd-nspawn   is a lightweight container mechanism built directly into systemd. It runs a full Linux distribution — complete with an init system and its…">
+  <meta name="description" id="meta-desc"     content="systemd-nspawn is a lightweight container mechanism built directly into systemd. It runs a full Linux distribution — complete with an init system and its o…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="systemd-nspawn">
-  <meta property="og:description" id="og-desc"    content="systemd-nspawn   is a lightweight container mechanism built directly into systemd. It runs a full Linux distribution — complete with an init system and its…">
+  <meta property="og:description" id="og-desc"    content="systemd-nspawn is a lightweight container mechanism built directly into systemd. It runs a full Linux distribution — complete with an init system and its o…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/software/systemd-nspawn/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="systemd-nspawn">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="systemd-nspawn">
-  <meta name="twitter:description" id="tw-desc"  content="systemd-nspawn   is a lightweight container mechanism built directly into systemd. It runs a full Linux distribution — complete with an init system and its…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="systemd-nspawn is a lightweight container mechanism built directly into systemd. It runs a full Linux distribution — complete with an init system and its o…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"systemd-nspawn","description":"systemd-nspawn   is a lightweight container mechanism built directly into systemd. It runs a full Linux distribution — complete with an init system and its…","url":"https://docs.shani.dev/doc/software/systemd-nspawn/","datePublished":"2026-05-07T00:00:00.000Z","dateModified":"2026-05-07T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"systemd-nspawn","description":"systemd-nspawn is a lightweight container mechanism built directly into systemd. It runs a full Linux distribution — complete with an init system and its o…","url":"https://docs.shani.dev/doc/software/systemd-nspawn/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"systemd-nspawn","item":"https://docs.shani.dev/doc/software/systemd-nspawn/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,16 +215,16 @@
         <h1 class="doc-title">systemd-nspawn</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Software &amp; Apps</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-05-07</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p><code>systemd-nspawn</code> is a lightweight container mechanism built directly into systemd. It runs a full Linux distribution — complete with an init system and its own namespace — without any daemon, image format, or external tooling. You point it at a directory containing a Linux root filesystem and it boots it.</p>
 <p>On Shanios, <code>systemd-nspawn</code> is pre-installed with no configuration needed. Container root filesystems live in the <code>@machines</code> Btrfs subvolume at <code>/var/lib/machines</code>, completely independent of the OS slots. They survive every OS update and rollback untouched.</p>
 <p><code>machinectl</code> is the management tool — it handles pulling images, starting and stopping containers, logging in, and lifecycle management.</p>
-<h2>When to Use nspawn</h2>
-<p>| | systemd-nspawn | LXD | Distrobox | Podman | QEMU/KVM | |---|---|---|---|---|---| | Purpose | Lightweight system containers | Full system containers | Dev/app containers | OCI app containers | Full VMs | | Daemon required | No | Yes (lxd.socket) | No | No (socket-activated) | Yes | | Full init system | Yes | Yes | No | No | Yes | | Startup time | ~1s | ~3s | ~1s | ~0.1s | ~30s | | Isolation | High | High | Low–medium | Medium | Full |</p>
+<h2 id="when-to-use-nspawn">When to Use nspawn</h2>
+<table><thead><tr><th></th><th>systemd-nspawn</th><th>LXD</th><th>Distrobox</th><th>Podman</th><th>QEMU/KVM</th></tr></thead><tbody><tr><td>Purpose</td><td>Lightweight system containers</td><td>Full system containers</td><td>Dev/app containers</td><td>OCI app containers</td><td>Full VMs</td></tr><tr><td>Daemon required</td><td>No</td><td>Yes (lxd.socket)</td><td>No</td><td>No (socket-activated)</td><td>Yes</td></tr><tr><td>Full init system</td><td>Yes</td><td>Yes</td><td>No</td><td>No</td><td>Yes</td></tr><tr><td>Startup time</td><td>~1s</td><td>~3s</td><td>~1s</td><td>~0.1s</td><td>~30s</td></tr><tr><td>Isolation</td><td>High</td><td>High</td><td>Low–medium</td><td>Medium</td><td>Full</td></tr></tbody></table>
 <p><strong>Use systemd-nspawn when</strong> you want a full Linux system container with zero setup — no daemon, no image format, no wizard. Pull a tarball, boot it. Best for isolated builds, service sandboxing, and quick system environment tests. For a richer operational layer (image catalog, port forwarding devices, resource limits), use <a href="lxc-lxd.md">LXC/LXD</a>.</p>
-<h2>Quick Start: Arch Linux Container</h2>
+<h2 id="quick-start-arch-linux-container">Quick Start: Arch Linux Container</h2>
 <pre><code class="language-bash"># Pull an Arch Linux base image
 sudo machinectl pull-tar --verify=no \
   https://geo.mirror.pkgbuild.com/images/latest/Arch-Linux-x86_64-basic.tar.zst \
@@ -240,7 +242,7 @@ machinectl list
 # Stop the container
 sudo machinectl stop archlinux</code></pre>
 <p>The container root lives at <code>/var/lib/machines/archlinux</code> — a plain directory in the <code>@machines</code> subvolume.</p>
-<h2>Pulling and Creating Container Images</h2>
+<h2 id="pulling-and-creating-container-images">Pulling and Creating Container Images</h2>
 <p><code>machinectl</code> can pull tar archives and raw disk images:</p>
 <pre><code class="language-bash"># Pull a tar archive (most common)
 sudo machinectl pull-tar --verify=no \
@@ -260,7 +262,7 @@ sudo systemd-nspawn -D /var/lib/machines/debian-stable
 # Arch container via pacstrap (on Shanios, pacman is available)
 sudo mkdir /var/lib/machines/arch-custom
 sudo pacstrap -c /var/lib/machines/arch-custom base</code></pre>
-<h2>Managing Containers</h2>
+<h2 id="managing-containers">Managing Containers</h2>
 <pre><code class="language-bash"># Start a container (runs as a background systemd service)
 sudo machinectl start archlinux
 
@@ -279,7 +281,7 @@ machinectl status archlinux
 sudo machinectl stop archlinux
 sudo machinectl reboot archlinux
 sudo machinectl kill archlinux</code></pre>
-<h2>Auto-Start at Boot</h2>
+<h2 id="auto-start-at-boot">Auto-Start at Boot</h2>
 <pre><code class="language-bash"># Enable auto-start
 sudo machinectl enable archlinux
 
@@ -289,7 +291,7 @@ sudo machinectl disable archlinux
 # Manage the underlying unit directly
 sudo systemctl status systemd-nspawn@archlinux.service
 journalctl -u systemd-nspawn@archlinux.service</code></pre>
-<h2>Networking</h2>
+<h2 id="networking">Networking</h2>
 <p>By default, nspawn containers share the host network namespace — the container uses the host IP and can access the internet directly. This is the simplest setup for builds and tests.</p>
 <p>For isolated networking with its own IP:</p>
 <pre><code class="language-bash"># Start with private networking (one-off)
@@ -303,7 +305,7 @@ Private=yes
 VirtualEthernet=yes
 EOF
 sudo machinectl start archlinux</code></pre>
-<h2>Bind Mounts</h2>
+<h2 id="bind-mounts">Bind Mounts</h2>
 <pre><code class="language-bash"># Bind a host directory at startup (one-off)
 sudo systemd-nspawn \
   --bind=/home/$USER/projects:/projects \
@@ -315,7 +317,7 @@ cat &lt;&lt; 'EOF' | sudo tee /etc/systemd/nspawn/archlinux.nspawn
 Bind=/home/username/projects:/projects
 Bind=/home/username/data:/data
 EOF</code></pre>
-<h2>Btrfs Snapshots</h2>
+<h2 id="btrfs-snapshots">Btrfs Snapshots</h2>
 <p>Container roots live in <code>@machines</code> and participate in Btrfs snapshotting:</p>
 <pre><code class="language-bash"># Snapshot before making changes
 sudo btrfs subvolume snapshot \
@@ -333,8 +335,8 @@ sudo machinectl clone archlinux archlinux-test
 
 # Remove a container image
 sudo machinectl remove archlinux-test</code></pre>
-<h2>Practical Patterns</h2>
-<h3>Isolated Build Environment</h3>
+<h2 id="practical-patterns">Practical Patterns</h2>
+<h3 id="isolated-build-environment">Isolated Build Environment</h3>
 <pre><code class="language-bash">sudo machinectl start archlinux
 sudo machinectl shell archlinux /bin/bash -c &quot;
   pacman -Sy --noconfirm base-devel git
@@ -344,23 +346,30 @@ sudo systemd-nspawn \
   --bind=/home/$USER/myproject:/build \
   -D /var/lib/machines/archlinux \
   su - builder -c &quot;cd /build &amp;&amp; makepkg -s&quot;</code></pre>
-<h3>Testing a System Service</h3>
+<h3 id="testing-a-system-service">Testing a System Service</h3>
 <pre><code class="language-bash">sudo machinectl start archlinux
 sudo machinectl shell archlinux /bin/bash -c &quot;
   pacman -Sy --noconfirm nginx
   systemctl enable --now nginx
 &quot;
 # nginx runs under systemd inside the container, isolated from host</code></pre>
-<h3>Disposable Test Container</h3>
+<h3 id="disposable-test-container">Disposable Test Container</h3>
 <pre><code class="language-bash">sudo machinectl clone archlinux arch-test
 sudo machinectl start arch-test
 sudo machinectl shell arch-test /bin/bash
 # ... test things ...
 sudo machinectl stop arch-test
 sudo machinectl remove arch-test</code></pre>
-<h2>Storage</h2>
-<p>| Location | Subvolume | |---|---| | <code>/var/lib/machines/</code> | <code>@machines</code> |</p>
-<p>The <code>@machines</code> subvolume is independent of both OS slots and survives all updates and rollbacks.</p></div>
+<h2 id="storage">Storage</h2>
+<table><thead><tr><th>Location</th><th>Subvolume</th></tr></thead><tbody><tr><td><code>/var/lib/machines/</code></td><td><code>@machines</code></td></tr></tbody></table>
+<p>The <code>@machines</code> subvolume is independent of both OS slots and survives all updates and rollbacks.</p>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="containers">Containers</a> — overview of all container runtimes</li>
+<li><a href="lxc-lxd">Linux Containers (LXC/LXD)</a> — system containers with networking</li>
+<li><a href="distrobox">Distrobox</a> — mutable dev environments with host integration</li>
+<li><a href="apptainer">Apptainer</a> — HPC/research container runtime</li>
+</ul></div>
     </div>
 
   </main>

@@ -3,31 +3,33 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
-<title>Developer Tools — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …">
+<title>Dev Tools — Version Control, CI/CD &amp; Registries — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Key Concepts Git internals that come up in interviews Every commit is a snapshot (not a diff), identified by a SHA-1 hash of its content, author, timestamp…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/servers/devtools/">
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
-  <meta property="og:title"     id="og-title"     content="Developer Tools">
-  <meta property="og:description" id="og-desc"    content="Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …">
+  <meta property="og:title"     id="og-title"     content="Dev Tools — Version Control, CI/CD &amp; Registries">
+  <meta property="og:description" id="og-desc"    content="Key Concepts Git internals that come up in interviews Every commit is a snapshot (not a diff), identified by a SHA-1 hash of its content, author, timestamp…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/devtools/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
-  <meta property="og:image:alt" id="og-image-alt" content="Developer Tools">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="Dev Tools — Version Control, CI/CD &amp; Registries">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
-  <meta name="twitter:title"       id="tw-title" content="Developer Tools">
-  <meta name="twitter:description" id="tw-desc"  content="Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:title"       id="tw-title" content="Dev Tools — Version Control, CI/CD &amp; Registries">
+  <meta name="twitter:description" id="tw-desc"  content="Key Concepts Git internals that come up in interviews Every commit is a snapshot (not a diff), identified by a SHA-1 hash of its content, author, timestamp…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Developer Tools","description":"Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …","url":"https://docs.shani.dev/doc/servers/devtools/","datePublished":"2026-04-22T00:00:00.000Z","dateModified":"2026-04-22T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Dev Tools — Version Control, CI/CD & Registries","description":"Key Concepts Git internals that come up in interviews Every commit is a snapshot (not a diff), identified by a SHA-1 hash of its content, author, timestamp…","url":"https://docs.shani.dev/doc/servers/devtools/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Dev Tools — Version Control, CI/CD & Registries","item":"https://docs.shani.dev/doc/servers/devtools/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -210,58 +212,54 @@
         semantically correct, not byte-identical to the client render.
       -->
       <div class="doc-header">
-        <h1 class="doc-title">Developer Tools</h1>
+        <h1 class="doc-title">Dev Tools — Version Control, CI/CD &amp; Registries</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><blockquote><p><strong>Portability note:</strong> Compose examples use rootless <strong>Podman</strong> and <code>host.containers.internal</code> (the host gateway from a container). When using Docker, replace <code>podman-compose</code> with <code>docker compose</code> and <code>host.containers.internal</code> with <code>host-gateway</code> (add <code>extra_hosts: [host-gateway:host-gateway]</code> to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.</p></blockquote>
-<h1>Developer Tools</h1>
-<p>Code hosting, CI runners, container registries, developer environments, project management, and web analytics.</p>
-<p>---</p>
-<h2>Key Concepts</h2>
-<h4>Git internals that come up in interviews</h4>
+      <div class="prose"><h2 id="key-concepts">Key Concepts</h2>
+<h4 id="git-internals-that-come-up-in-interviews">Git internals that come up in interviews</h4>
 <ul>
 <li>Every commit is a snapshot (not a diff), identified by a SHA-1 hash of its content, author, timestamp, and parent commit hash. This is why commits are immutable and content-addressable.</li>
 <li><code>git rebase</code> replays commits on top of a new base, creating new SHAs. <code>git merge</code> creates a merge commit. Neither is universally better — rebase gives a linear history, merge preserves branch topology.</li>
 <li><code>git cherry-pick</code> applies a single commit's changes to the current branch. Useful for backporting fixes.</li>
 <li><code>git bisect</code> does a binary search through commit history to find which commit introduced a bug. Requires a <code>git bisect good</code> / <code>git bisect bad</code> signal — often a test script.</li>
 </ul>
-<h4>Code review best practices</h4>
+<h4 id="code-review-best-practices">Code review best practices</h4>
 <p>Reviews should be < 400 lines of changed code per PR — larger PRs have significantly lower defect detection rates. The author's job is to make the reviewer's job easy: meaningful PR description, small atomic commits, tests included. The reviewer's job is to focus on correctness, not style (automated formatters handle style). LGTM without reading = the most common code review failure mode.</p>
-<h4>Testing pyramid</h4>
+<h4 id="testing-pyramid">Testing pyramid</h4>
 <p>Unit tests (many, fast, no I/O) → Integration tests (fewer, slower, hit real dependencies) → End-to-end / UI tests (fewest, slowest, full stack). Inverting the pyramid (many E2E, few unit tests) makes CI slow and brittle. A common interview question: "where do you add coverage?" — start with units for logic, integration for DB queries, E2E only for critical happy paths.</p>
-<h4>Static analysis vs dynamic analysis</h4>
+<h4 id="static-analysis-vs-dynamic-analysis">Static analysis vs dynamic analysis</h4>
 <ul>
 <li>Static analysis (Semgrep, ESLint, <code>mypy</code>) inspects code without running it. Fast, catches bugs early, zero runtime cost. Can have false positives.</li>
 <li>Dynamic analysis (ZAP, Valgrind, sanitizers) runs the code and observes behaviour. Catches runtime bugs that static analysis misses (memory corruption, race conditions) but requires execution.</li>
 </ul>
-<h4>Container build performance</h4>
+<h4 id="container-build-performance">Container build performance</h4>
 <p>Layer caching is the key lever. Layers that change rarely (OS packages, language runtime) go first; layers that change often (application code) go last. Using <code>--mount=type=cache</code> in BuildKit (or <code>podman build --layers</code>) caches package manager download directories (pip cache, npm cache) across builds, dramatically reducing build times for dependency-heavy projects.</p>
-<h4>Inner loop vs outer loop development</h4>
+<h4 id="inner-loop-vs-outer-loop-development">Inner loop vs outer loop development</h4>
 <p>Inner loop = the tight cycle of edit-build-run on your laptop (code-server, hot reload, <code>tilt up</code>). Outer loop = the CI pipeline (Woodpecker, Forgejo Actions, GitHub Actions). Fast inner loops require good local tooling (kind, minikube, Tilt, Skaffold) so you're not waiting for CI. The goal: < 1 second feedback for syntax errors, < 10 seconds for unit tests, < 5 minutes for the full CI pipeline.</p>
-<h4>Service discovery patterns (Consul)</h4>
+<h4 id="service-discovery-patterns-consul">Service discovery patterns (Consul)</h4>
 <p>Services register with Consul on startup (name, address, port, health check endpoint). Clients query Consul's DNS (<code>service-name.service.consul</code>) or HTTP API to find a live instance — no hardcoded IPs. When a service fails its health check, Consul removes it from the registry automatically. This is how Nomad jobs find each other without environment variables or static config files. At work, you'll see this pattern in bare-metal microservice deployments, or as a sidecar in container environments that aren't on Kubernetes.</p>
-<h4>Nomad vs Kubernetes — when Nomad wins</h4>
+<h4 id="nomad-vs-kubernetes-when-nomad-wins">Nomad vs Kubernetes — when Nomad wins</h4>
 <p>Kubernetes is the dominant orchestrator, but Nomad handles workloads K8s can't: raw binaries, Java JAR files, Batch jobs with complex scheduling, and VM workloads. Nomad's job spec is simpler and more flexible than K8s manifests — a single binary, no etcd dependency. Teams already using the HashiCorp stack (Vault, Consul, Terraform) choose Nomad for its tight integration. Know both; most large shops run Kubernetes but may have legacy Nomad clusters.</p>
-<h4>Artifact management — why it matters</h4>
+<h4 id="artifact-management-why-it-matters">Artifact management — why it matters</h4>
 <p>A container registry (Harbor, Nexus, Artifactory) isn't just storage — it's a security boundary. Pull-through proxy caches upstream images locally (faster builds, no DockerHub rate limits). Vulnerability scanning at push time (Trivy in Harbor) blocks vulnerable images from entering the pipeline. Image signing (cosign, Notary) provides provenance — the cluster can verify an image was built by your CI and not tampered with. In a regulated environment, pulling directly from DockerHub is a compliance finding.</p>
-<h4>SonarQube quality gates</h4>
+<h4 id="sonarqube-quality-gates">SonarQube quality gates</h4>
 <p>A quality gate is a pass/fail threshold on code quality metrics — if new code introduces a coverage drop below 80%, a critical bug, or a security hotspot, the gate fails and the CI pipeline stops. This enforces quality as a pipeline concern rather than a post-merge review. The key metrics: Reliability (bugs), Security (vulnerabilities + hotspots), Maintainability (code smells, duplications), and Coverage. In interviews, distinguish SonarQube (code quality) from Semgrep (security patterns) — they complement each other.</p>
-<h4>Renovate vs Dependabot</h4>
+<h4 id="renovate-vs-dependabot">Renovate vs Dependabot</h4>
 <p>Both auto-generate PRs to update dependencies. Renovate is more configurable: custom update schedules, grouping multiple dependencies into a single PR, auto-merging patch updates that pass CI, and monorepo support. Dependabot is simpler and built into GitHub. At scale, unmanaged dependencies become the largest source of CVEs — automated dependency updates with CI checks are the lowest-effort high-impact security practice.</p>
-<h4>Static analysis vs dynamic analysis — complementary, not interchangeable</h4>
+<h4 id="static-analysis-vs-dynamic-analysis-complementary-not-interchangeable">Static analysis vs dynamic analysis — complementary, not interchangeable</h4>
 <p><strong>SAST</strong> (Static Application Security Testing — Semgrep, Bandit, CodeQL) analyses source code without running it. Fast, runs in CI pre-merge, catches: SQL injection patterns, hardcoded secrets, insecure function calls, type errors. Cannot find: business logic flaws, runtime configuration issues, or vulnerabilities that only manifest under specific data conditions. <strong>DAST</strong> (Dynamic Analysis — OWASP ZAP, Nuclei) tests a running application from the outside, simulating an attacker. Catches: authentication bypasses, injection in live endpoints, misconfigured headers, rate limiting gaps. Cannot see: server-side code. <strong>SCA</strong> (Software Composition Analysis — Trivy, Grype) scans dependency manifests for known CVEs. All three are needed for a complete security posture — they find different classes of issues.</p>
-<h4>Git internals — what a commit actually is</h4>
+<h4 id="git-internals-what-a-commit-actually-is">Git internals — what a commit actually is</h4>
 <p>A Git commit is a SHA-1 hash of: the tree object (a snapshot of all file contents at that point), the parent commit hash(es), author, committer, and the commit message. The tree recursively contains blob objects (file contents) and subtree objects (directories) — all content-addressed by hash. This means: (1) commits are immutable — changing any byte changes the hash and all descendant hashes; (2) identical file contents across branches are stored once (deduplication); (3) <code>git checkout</code> is just setting HEAD to point at a different commit object. Understanding this explains why rebasing "rewrites history" (creates new commit objects with new hashes) and why force-pushing after a rebase is destructive for collaborators.</p>
-<h4>Code review effectiveness — what to actually look for</h4>
+<h4 id="code-review-effectiveness-what-to-actually-look-for">Code review effectiveness — what to actually look for</h4>
 <p>Automated tools (linters, SAST, tests) should catch style, security patterns, and regressions before human review. Human review should focus on: (1) correctness of business logic — does the code actually do what the ticket says? (2) edge cases — what happens with empty input, concurrent access, or network failure? (3) API design — will this interface age well or require breaking changes in 6 months? (4) observability — are there enough logs and metrics to debug this in production? Avoid bikeshedding on style (automated formatters) or subjective naming (agree on a convention once, then stop discussing it).</p>
-<h4>Dependency management — why Renovate matters</h4>
+<h4 id="dependency-management-why-renovate-matters">Dependency management — why Renovate matters</h4>
 <p>Unpatched dependencies are the most common source of CVEs in production systems (OWASP A06). Renovate creates automated PRs to update <code>package.json</code>, <code>requirements.txt</code>, <code>go.mod</code>, Helm chart versions, and Docker base image tags on a schedule. Unlike Dependabot (GitHub-only, no grouping), Renovate works with Gitea/Forgejo, supports grouping multiple updates into one PR (reducing PR noise), and supports auto-merge for patch versions that pass CI. A Renovate PR with passing tests and a green Trivy scan can be merged with minimal review — this is how teams keep dependencies current without manual effort.</p>
-<p>---</p>
-<p>---</p>
-<h2>Gitea & Forgejo</h2>
+<hr>
+<hr>
+<h2 id="gitea-forgejo">Gitea & Forgejo</h2>
 <p><strong>Purpose:</strong> Lightweight, self-hosted Git servers with web UI, issue tracking, wikis, pull requests, and CI integration. Forgejo is a community-driven fork with identical CLI/API. Use Gitea/Forgejo as your private GitHub — complete with Actions-compatible CI.</p>
 <pre><code class="language-yaml"># ~/gitea/compose.yaml
 services:
@@ -277,7 +275,7 @@ services:
       USER_GID: &quot;1000&quot;
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/gitea &amp;&amp; podman-compose up -d</code></pre>
-<h4>Common operations</h4>
+<h4 id="common-operations">Common operations</h4>
 <pre><code class="language-bash"># Create an admin user via CLI
 podman exec -it gitea gitea admin user create   --username admin --password changeme --email admin@example.com --admin
 
@@ -302,8 +300,8 @@ podman logs -f gitea
 # Generate admin access token for API use
 podman exec gitea gitea admin user generate-access-token   --username admin --token-name mytoken</code></pre>
 <p>Configure SSH clients to use <code>Port 2222</code> for <code>git.home.local</code>. After first login, configure your instance under the Site Administration panel (admin → Site Administration).</p>
-<p>---</p>
-<h2>Woodpecker CI</h2>
+<hr>
+<h2 id="woodpecker-ci">Woodpecker CI</h2>
 <p><strong>Purpose:</strong> Simple, Gitea/Forgejo-native CI/CD engine. YAML pipeline configs live in the repo (<code>.woodpecker.yml</code>). Lightweight, fast, and compatible with the Drone CI pipeline format.</p>
 <pre><code class="language-yaml"># ~/woodpecker/compose.yml
 services:
@@ -334,8 +332,8 @@ services:
 
 volumes: {woodpecker_data: {}, woodpecker_agent: {}}</code></pre>
 <pre><code class="language-bash">cd ~/woodpecker &amp;&amp; podman-compose up -d</code></pre>
-<p>---</p>
-<h2>code-server</h2>
+<hr>
+<h2 id="code-server">code-server</h2>
 <p><strong>Purpose:</strong> VS Code running in the browser with full terminal, extensions, and language support. Accessible from any device on your tailnet — develop on your server from a tablet, Chromebook, or low-powered laptop.</p>
 <pre><code class="language-yaml"># ~/code-server/compose.yaml
 services:
@@ -352,10 +350,9 @@ services:
 <pre><code class="language-bash">cd ~/code-server &amp;&amp; podman-compose up -d</code></pre>
 <p><strong>Caddy:</strong></p>
 <pre><code class="language-caddyfile">code.home.local { tls internal; reverse_proxy localhost:8443 }</code></pre>
-<p>---</p>
-<h2>Gitpod / Coder (Cloud Development Environments)</h2>
+<hr>
+<h2 id="gitpod-coder-cloud-development-environments">Gitpod / Coder (Cloud Development Environments)</h2>
 <p><strong>Purpose:</strong> Self-hosted cloud development environments. Each developer gets an isolated, pre-configured container workspace with their tooling, extensions, and dotfiles — reproducible from a Git repo. Coder is lighter and better for self-hosting; Gitpod requires more resources.</p>
-<h1>Coder</h1>
 <pre><code class="language-yaml"># ~/coder/compose.yaml
 services:
   coder:
@@ -370,29 +367,9 @@ services:
       CODER_WILDCARD_ACCESS_URL: *.coder.home.local
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/coder &amp;&amp; podman-compose up -d</code></pre>
-<p>---</p>
-<h2>Nginx & Apache HTTPD</h2>
-<p><strong>Purpose:</strong> High-performance web servers and reverse proxies. Nginx excels at static content and proxying; Apache provides <code>.htaccess</code> support. Use these when you need full server-level config, not just a reverse proxy.</p>
-<pre><code class="language-yaml"># ~/nginx/compose.yaml
-services:
-  nginx:
-    image: nginx:alpine
-    ports:
-      - 127.0.0.1:8081:80
-    volumes:
-      - /home/user/www:/usr/share/nginx/html:ro,Z
-      - /home/user/nginx.conf:/etc/nginx/nginx.conf:ro,Z
-    restart: unless-stopped
-  apache:
-    image: httpd:alpine
-    ports:
-      - 127.0.0.1:8082:80
-    volumes:
-      - /home/user/www:/usr/local/apache2/htdocs:ro,Z
-    restart: unless-stopped</code></pre>
-<pre><code class="language-bash">cd ~/nginx &amp;&amp; podman-compose up -d</code></pre>
-<p>---</p>
-<h2>Private Container Registry</h2>
+<hr>
+<hr>
+<h2 id="private-container-registry">Private Container Registry</h2>
 <p><strong>Purpose:</strong> Store and serve your own container images. Useful for CI/CD pipelines that push images built by Woodpecker and pull them on deploy.</p>
 <pre><code class="language-yaml"># ~/registry/compose.yaml
 services:
@@ -406,12 +383,12 @@ services:
       REGISTRY_STORAGE_DELETE_ENABLED: true
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/registry &amp;&amp; podman-compose up -d</code></pre>
-<h4>Push an image to your registry</h4>
+<h4 id="push-an-image-to-your-registry">Push an image to your registry</h4>
 <pre><code class="language-bash">podman tag myimage localhost:5000/myimage:latest
 podman push localhost:5000/myimage:latest</code></pre>
 <p>Add <code>{ &quot;insecure-registries&quot;: [&quot;localhost:5000&quot;] }</code> to <code>/etc/containers/registries.conf</code> to allow unverified pushes in development.</p>
-<p>---</p>
-<h2>Mailpit (Email Testing)</h2>
+<hr>
+<h2 id="mailpit-email-testing">Mailpit (Email Testing)</h2>
 <p><strong>Purpose:</strong> SMTP catch-all for development. All outgoing emails from your apps land in Mailpit's web UI — nothing is actually delivered. Perfect for testing Nextcloud, Gitea, or any app that sends email.</p>
 <pre><code class="language-yaml"># ~/mailpit/compose.yaml
 services:
@@ -423,161 +400,8 @@ services:
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/mailpit &amp;&amp; podman-compose up -d</code></pre>
 <p>Configure apps to use SMTP host <code>localhost</code>, port <code>1025</code>. View emails at <code>http://localhost:8025</code>.</p>
-<p>---</p>
-<h2>Matomo (Web Analytics)</h2>
-<p><strong>Purpose:</strong> The leading open-source web analytics platform — a complete, self-hosted Google Analytics replacement. Tracks pageviews, sessions, bounce rate, goal conversions, funnels, heatmaps (with plugin), and e-commerce. GDPR-compliant by default when configured correctly. Unlike Plausible or Umami, Matomo tracks individual visitor sessions for deep funnel analysis.</p>
-<pre><code class="language-yaml"># ~/matomo/compose.yml
-services:
-  matomo:
-    image: matomo:latest
-    ports: [&quot;127.0.0.1:8500:80&quot;]
-    environment:
-      MATOMO_DATABASE_HOST: db
-      MATOMO_DATABASE_ADAPTER: mysql
-      MATOMO_DATABASE_DBNAME: matomo
-      MATOMO_DATABASE_USERNAME: matomo
-      MATOMO_DATABASE_PASSWORD: changeme
-    volumes:
-      - /home/user/matomo/data:/var/www/html:Z
-    depends_on: [db]
-    restart: unless-stopped
-
-  db:
-    image: mariadb:11
-    environment:
-      MYSQL_ROOT_PASSWORD: rootchangeme
-      MYSQL_DATABASE: matomo
-      MYSQL_USER: matomo
-      MYSQL_PASSWORD: changeme
-    volumes: [db_data:/var/lib/mysql]
-    restart: unless-stopped
-
-volumes:
-  db_data:</code></pre>
-<pre><code class="language-bash">cd ~/matomo &amp;&amp; podman-compose up -d</code></pre>
-<p>Access at <code>http://localhost:8500</code> to complete the setup wizard. Add the tracking snippet to your sites.</p>
-<blockquote><p><strong>Choosing between Matomo, Plausible, and Umami:</strong> Matomo is the choice when you need session-level tracking, funnel analysis, and A/B testing. Use Plausible or Umami for privacy-first aggregate-only analytics with no cookies.</p></blockquote>
-<p>---</p>
-<h2>Leantime (Project Management)</h2>
-<p><strong>Purpose:</strong> Open-source project management for non-project-managers. Covers the full project lifecycle: ideation → strategic goals → milestones → tasks → retros. Combines Kanban boards, Gantt charts, time tracking, and a built-in lean canvas — without the complexity of Jira. Good Basecamp or Linear alternative.</p>
-<pre><code class="language-yaml"># ~/leantime/compose.yml
-services:
-  leantime:
-    image: leantime/leantime:latest
-    ports: [&quot;127.0.0.1:8600:80&quot;]
-    environment:
-      LEAN_DB_HOST: db
-      LEAN_DB_USER: leantime
-      LEAN_DB_PASSWORD: changeme
-      LEAN_DB_DATABASE: leantime
-      LEAN_SESSION_PASSWORD: changeme-run-openssl-rand-hex-32
-      LEAN_APP_URL: https://pm.home.local
-    volumes:
-      - /home/user/leantime/public/userfiles:/var/www/html/public/userfiles:Z
-      - /home/user/leantime/userfiles:/var/www/html/userfiles:Z
-    depends_on: [db]
-    restart: unless-stopped
-
-  db:
-    image: mariadb:11
-    environment:
-      MYSQL_ROOT_PASSWORD: rootchangeme
-      MYSQL_DATABASE: leantime
-      MYSQL_USER: leantime
-      MYSQL_PASSWORD: changeme
-    volumes: [db_data:/var/lib/mysql]
-    restart: unless-stopped
-
-volumes:
-  db_data:</code></pre>
-<pre><code class="language-bash">cd ~/leantime &amp;&amp; podman-compose up -d</code></pre>
-<p>---</p>
-<h2>Twenty CRM (Modern Sales CRM)</h2>
-<p><strong>Purpose:</strong> Open-source CRM with a clean, Notion-inspired UI. Manage contacts, companies, deals, and tasks. Supports custom fields, relationships between records, a Kanban pipeline view, and a REST + GraphQL API. The self-hosted alternative to Salesforce Essentials or HubSpot CRM.</p>
-<pre><code class="language-yaml"># ~/twenty/compose.yml
-services:
-  server:
-    image: twentycrm/twenty:latest
-    ports: [&quot;127.0.0.1:3700:3000&quot;]
-    environment:
-      SERVER_URL: https://crm.example.com
-      FRONT_BASE_URL: https://crm.example.com
-      PG_DATABASE_URL: postgresql://twenty:changeme@db:5432/twenty
-      REDIS_URL: redis://redis:6379
-      APP_SECRET: changeme-run-openssl-rand-base64-32
-    depends_on: [db, redis]
-    restart: unless-stopped
-
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: twenty
-      POSTGRES_PASSWORD: changeme
-      POSTGRES_DB: twenty
-    volumes: [pg_data:/var/lib/postgresql/data]
-    restart: unless-stopped
-
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-
-volumes:
-  pg_data:</code></pre>
-<pre><code class="language-bash">cd ~/twenty &amp;&amp; podman-compose up -d</code></pre>
-<h5>First run — run DB migrations</h5>
-<pre><code class="language-bash">podman exec twenty yarn database:migrate:prod</code></pre>
-<p>---</p>
-<h2>Huly (All-in-One Project Hub)</h2>
-<p><strong>Purpose:</strong> Open-source alternative to Linear, Jira, and Notion combined. Issues, projects, team planning, HR (time off, members), chat, and documentation — all in one platform. Real-time collaborative editing, relations between issues, and a GraphQL API.</p>
-<pre><code class="language-yaml"># ~/huly/compose.yml — use the official template
-# git clone https://github.com/hcengineering/huly-selfhost
-# cd huly-selfhost &amp;&amp; cp .env.template .env
-# Edit .env (set HOST to your domain), then:
-# podman-compose up -d</code></pre>
-<pre><code class="language-bash">cd ~/huly &amp;&amp; podman-compose up -d</code></pre>
-<p>For a quick local start:</p>
-<pre><code class="language-yaml"># ~/huly/compose.yaml
-services:
-  huly:
-    image: hardcoreeng/huly:latest
-    ports:
-      - 127.0.0.1:8087:8083
-    environment:
-      SERVER_SECRET: changeme
-    restart: unless-stopped</code></pre>
-<pre><code class="language-bash">cd ~/huly &amp;&amp; podman-compose up -d</code></pre>
-<blockquote><p>Huly's full stack includes separate services for the backend, front-end, collaboration engine, and MinIO storage. Use the official <code>huly-selfhost</code> compose stack for production.</p></blockquote>
-<p>---</p>
-<h2>DocuSeal (Document Signing)</h2>
-<p><strong>Purpose:</strong> Open-source document signing and e-signature platform. Upload PDFs, add signature fields, send signing links via email, and collect legally binding e-signatures — all self-hosted. The self-hosted DocuSign alternative.</p>
-<pre><code class="language-yaml"># ~/docuseal/compose.yml
-services:
-  docuseal:
-    image: docuseal/docuseal:latest
-    ports: [&quot;127.0.0.1:3800:3000&quot;]
-    volumes:
-      - /home/user/docuseal/data:/data:Z
-    environment:
-      DATABASE_URL: postgresql://docuseal:changeme@db:5432/docuseal
-      SECRET_KEY_BASE: changeme-run-openssl-rand-hex-64
-    depends_on: [db]
-    restart: unless-stopped
-
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: docuseal
-      POSTGRES_PASSWORD: changeme
-      POSTGRES_DB: docuseal
-    volumes: [pg_data:/var/lib/postgresql/data]
-    restart: unless-stopped
-
-volumes:
-  pg_data:</code></pre>
-<pre><code class="language-bash">cd ~/docuseal &amp;&amp; podman-compose up -d</code></pre>
-<p>Access at <code>http://localhost:3800</code>. Create a signing template, upload a PDF, add signature fields, and send via a one-time link or email.</p>
-<p>---</p>
-<h2>GitLab CE</h2>
+<hr>
+<h2 id="gitlab-ce">GitLab CE</h2>
 <p><strong>Purpose:</strong> Full DevSecOps platform in a single container — Git hosting, CI/CD pipelines, container registry, merge requests, issue tracking, a package registry, Kubernetes integration, and secrets management. Heavier than Gitea/Forgejo (~4 GB RAM) but includes everything in one place, including built-in CI with GitLab Runners. The right choice when you want GitHub's full feature set self-hosted.</p>
 <pre><code class="language-yaml"># ~/gitlab/compose.yml
 services:
@@ -602,8 +426,8 @@ services:
     restart: unless-stopped
     shm_size: &quot;256m&quot;</code></pre>
 <pre><code class="language-bash">cd ~/gitlab &amp;&amp; podman-compose up -d</code></pre>
-<blockquote><p>GitLab requires at minimum 4 GB RAM — 8 GB recommended. First-start initialisation takes 3–5 minutes. Retrieve the initial root password with <code>podman exec gitlab cat /etc/gitlab/initial_root_password</code>.</p></blockquote>
-<h5>Register a GitLab Runner</h5>
+<blockquote>GitLab requires at minimum 4 GB RAM — 8 GB recommended. First-start initialisation takes 3–5 minutes. Retrieve the initial root password with <code>podman exec gitlab cat /etc/gitlab/initial_root_password</code>.</blockquote>
+<h5 id="register-a-gitlab-runner">Register a GitLab Runner</h5>
 <pre><code class="language-yaml"># ~/gitlab-runner/compose.yaml
 services:
   gitlab-runner:
@@ -613,8 +437,8 @@ services:
       - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/gitlab-runner &amp;&amp; podman-compose up -d</code></pre>
-<p>---</p>
-<h2>SonarQube (Code Quality & Security)</h2>
+<hr>
+<h2 id="sonarqube-code-quality-security">SonarQube (Code Quality & Security)</h2>
 <p><strong>Purpose:</strong> Static analysis platform for code quality and security scanning. Detects bugs, code smells, and security vulnerabilities (OWASP Top 10, CWEs) across 30+ languages. Integrates with Gitea, Forgejo, and GitLab CI as a pull request gate — failing builds when quality thresholds aren't met.</p>
 <pre><code class="language-yaml"># ~/sonarqube/compose.yml
 services:
@@ -644,10 +468,10 @@ services:
 volumes:
   pg_data:</code></pre>
 <pre><code class="language-bash">cd ~/sonarqube &amp;&amp; podman-compose up -d</code></pre>
-<blockquote><p>SonarQube requires <code>vm.max_map_count=524288</code> and <code>fs.file-max=131072</code> on the host. Set them persistently: <code>echo 'vm.max_map_count=524288' | sudo tee -a /etc/sysctl.d/sonar.conf &amp;&amp; sudo sysctl -p /etc/sysctl.d/sonar.conf</code>.</p></blockquote>
+<blockquote>SonarQube requires <code>vm.max_map_count=524288</code> and <code>fs.file-max=131072</code> on the host. Set them persistently: <code>echo 'vm.max_map_count=524288' | sudo tee -a /etc/sysctl.d/sonar.conf &amp;&amp; sudo sysctl -p /etc/sysctl.d/sonar.conf</code>.</blockquote>
 <p>Access at <code>http://localhost:9000</code>. Default credentials: <code>admin</code> / <code>admin</code> (change on first login). Install the SonarScanner in your CI pipeline to push analysis results.</p>
-<p>---</p>
-<h2>Harbor (Enterprise Container Registry)</h2>
+<hr>
+<h2 id="harbor-enterprise-container-registry">Harbor (Enterprise Container Registry)</h2>
 <p><strong>Purpose:</strong> Cloud-native container registry with role-based access control, image vulnerability scanning (Trivy), image signing, replication between registries, and a web UI. A significant upgrade over the basic Docker Registry — Harbor gives you a proper private registry with security scanning built in. Ideal for CI/CD pipelines that push images built by Woodpecker or GitLab CI.</p>
 <pre><code class="language-yaml"># ~/harbor/compose.yml — use the official installer (recommended)
 # Download from: https://github.com/goharbor/harbor/releases
@@ -666,7 +490,7 @@ volumes:
 # database.password: changeme</code></pre>
 <pre><code class="language-bash">cd ~/harbor &amp;&amp; podman-compose up -d</code></pre>
 <p>Access at <code>http://localhost:8180</code> after install. Default login: <code>admin</code> / your configured password.</p>
-<h4>Push images to Harbor</h4>
+<h4 id="push-images-to-harbor">Push images to Harbor</h4>
 <pre><code class="language-bash"># Login
 podman login registry.home.local
 
@@ -676,7 +500,7 @@ podman push registry.home.local/myproject/myapp:latest
 
 # Pull
 podman pull registry.home.local/myproject/myapp:latest</code></pre>
-<h5>Set up Woodpecker CI to push to Harbor</h5>
+<h5 id="set-up-woodpecker-ci-to-push-to-harbor">Set up Woodpecker CI to push to Harbor</h5>
 <pre><code class="language-yaml"># .woodpecker.yml
 steps:
   build-and-push:
@@ -691,72 +515,8 @@ steps:
       tags: [latest, &quot;${CI_COMMIT_SHA}&quot;]</code></pre>
 <p><strong>Caddy:</strong></p>
 <pre><code class="language-caddyfile">registry.home.local { tls internal; reverse_proxy localhost:8180 }</code></pre>
-<p>---</p>
-<h2>Plane (Open-Source Project Management)</h2>
-<p><strong>Purpose:</strong> Open-source project management platform — issues, cycles (sprints), modules (epics), pages (docs), and analytics. A clean, fast alternative to Jira and Linear with a familiar kanban/list/spreadsheet view switcher, custom properties, sub-issues, and a REST + GraphQL API. Self-host your entire engineering issue tracker with no per-seat fees.</p>
-<pre><code class="language-yaml"># ~/plane/compose.yml
-services:
-  web:
-    image: makeplane/plane-frontend:latest
-    ports: [&quot;127.0.0.1:3009:3000&quot;]
-    environment:
-      NEXT_PUBLIC_API_BASE_URL: https://plane.home.local
-    depends_on: [api]
-    restart: unless-stopped
-
-  api:
-    image: makeplane/plane-backend:latest
-    command: ./bin/beat-with-celery
-    ports: [&quot;127.0.0.1:8080:8000&quot;]
-    environment:
-      SECRET_KEY: changeme-run-openssl-rand-hex-32
-      POSTGRES_URL: postgresql://plane:changeme@db/plane
-      REDIS_URL: redis://redis:6379/
-      CORS_ALLOWED_ORIGINS: https://plane.home.local
-      WEB_URL: https://plane.home.local
-      EMAIL_HOST: localhost
-      EMAIL_PORT: 25
-      DEFAULT_FROM_EMAIL: plane@home.local
-      STORAGE_CLASS: storages.backends.s3boto3.S3Boto3Storage
-      AWS_S3_ENDPOINT_URL: http://host.containers.internal:9000
-      AWS_ACCESS_KEY_ID: plane
-      AWS_SECRET_ACCESS_KEY: changeme
-      AWS_STORAGE_BUCKET_NAME: plane
-    depends_on: [db, redis]
-    restart: unless-stopped
-
-  worker:
-    image: makeplane/plane-backend:latest
-    command: ./bin/worker
-    environment:
-      SECRET_KEY: changeme-run-openssl-rand-hex-32
-      POSTGRES_URL: postgresql://plane:changeme@db/plane
-      REDIS_URL: redis://redis:6379/
-    depends_on: [db, redis]
-    restart: unless-stopped
-
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: plane
-      POSTGRES_PASSWORD: changeme
-      POSTGRES_DB: plane
-    volumes: [pg_data:/var/lib/postgresql/data]
-    restart: unless-stopped
-
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-
-volumes:
-  pg_data:</code></pre>
-<pre><code class="language-bash">cd ~/plane &amp;&amp; podman-compose up -d</code></pre>
-<blockquote><p>Plane requires S3-compatible object storage for file attachments. Use the MinIO instance from the <a href="https://docs.shani.dev/doc/servers/backups-sync#minio-self-hosted-s3-backup-target">Backups wiki</a> — create a <code>plane</code> bucket and access key.</p></blockquote>
-<p>Access at <code>http://localhost:3009</code>. Create a workspace, invite members, and start creating projects.</p>
-<p><strong>Caddy:</strong></p>
-<pre><code class="language-caddyfile">plane.home.local { tls internal; reverse_proxy localhost:3009 }</code></pre>
-<p>---</p>
-<h2>Forgejo Actions Runner</h2>
+<hr>
+<h2 id="forgejo-actions-runner">Forgejo Actions Runner</h2>
 <p><strong>Purpose:</strong> Native CI/CD runner for Forgejo (and Gitea) using the built-in Actions system. If you're already using Forgejo, this is the first runner to reach for — no separate Woodpecker server needed. Workflows live in <code>.forgejo/workflows/*.yml</code> (GitHub Actions-compatible syntax).</p>
 <pre><code class="language-yaml"># ~/forgejo-runner/compose.yaml
 services:
@@ -770,13 +530,13 @@ services:
       FORGEJO_RUNNER_SECRET: changeme-from-forgejo-admin-panel
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/forgejo-runner &amp;&amp; podman-compose up -d</code></pre>
-<h5>Register the runner in Forgejo</h5>
+<h5 id="register-the-runner-in-forgejo">Register the runner in Forgejo</h5>
 <ol>
 <li>Go to <strong>Site Administration → Actions → Runners → Create new runner</strong> in the Forgejo UI.</li>
 <li>Copy the registration token and set it as <code>FORGEJO_RUNNER_SECRET</code>.</li>
 <li>The runner registers itself on first start — refresh the Runners page to verify.</li>
 </ol>
-<h5>Example workflow</h5>
+<h5 id="example-workflow">Example workflow</h5>
 <p>(<code>.forgejo/workflows/ci.yml</code>):</p>
 <pre><code class="language-yaml">on: [push]
 jobs:
@@ -785,9 +545,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: echo &quot;Hello from Forgejo Actions&quot;</code></pre>
-<blockquote><p>💡 Forgejo Actions runner uses the same <code>act</code> engine under the hood — most GitHub Actions marketplace actions work without modification.</p></blockquote>
-<p>---</p>
-<h2>Renovate Bot</h2>
+<blockquote>💡 Forgejo Actions runner uses the same <code>act</code> engine under the hood — most GitHub Actions marketplace actions work without modification.</blockquote>
+<hr>
+<h2 id="renovate-bot">Renovate Bot</h2>
 <p><strong>Purpose:</strong> Automated dependency update pull requests for any repository. Renovate scans your repos for outdated container image tags, npm/pip/cargo packages, and GitHub Actions versions, then opens PRs with the exact diff. Self-hostable and works natively with Gitea and Forgejo. The self-hosted alternative to Dependabot.</p>
 <pre><code class="language-yaml"># ~/renovate/compose.yaml
 services:
@@ -800,7 +560,7 @@ services:
       RENOVATE_AUTODISCOVER: &quot;true&quot;         # scan all repos the token can access
       LOG_LEVEL: info
     restart: &quot;no&quot;   # run once per invocation; use a timer for scheduling</code></pre>
-<h5>Run on demand or schedule with a systemd timer</h5>
+<h5 id="run-on-demand-or-schedule-with-a-systemd-timer">Run on demand or schedule with a systemd timer</h5>
 <pre><code class="language-bash"># One-shot run
 cd ~/renovate &amp;&amp; podman-compose run --rm renovate
 
@@ -828,15 +588,15 @@ WantedBy=timers.target
 EOF
 
 systemctl --user enable --now renovate.timer</code></pre>
-<h5>Minimal <code>renovate.json</code> to add to each repo root</h5>
+<h5 id="minimal-renovatejson-to-add-to-each-repo-root">Minimal <code>renovate.json</code> to add to each repo root</h5>
 <pre><code class="language-json">{
   &quot;$schema&quot;: &quot;https://docs.renovatebot.com/renovate-schema.json&quot;,
   &quot;extends&quot;: [&quot;config:base&quot;],
   &quot;automerge&quot;: false
 }</code></pre>
-<blockquote><p>💡 Set <code>&quot;automerge&quot;: true</code> for low-risk updates (patch versions) to have Renovate merge them automatically without your review.</p></blockquote>
-<p>---</p>
-<h2>Windmill (Workflow & Script Automation)</h2>
+<blockquote>💡 Set <code>&quot;automerge&quot;: true</code> for low-risk updates (patch versions) to have Renovate merge them automatically without your review.</blockquote>
+<hr>
+<h2 id="windmill-workflow-script-automation">Windmill (Workflow & Script Automation)</h2>
 <p><strong>Purpose:</strong> Self-hosted alternative to n8n and Retool for code-heavy automations. Write scripts in Python, TypeScript, Bash, or Go; compose them into DAG workflows; build internal apps with a drag-and-drop UI; and schedule or trigger everything via webhook or cron — all version-controlled in Git. Significantly faster than n8n for automation tasks that are primarily code, not drag-and-drop.</p>
 <pre><code class="language-yaml"># ~/windmill/compose.yaml
 services:
@@ -875,8 +635,8 @@ volumes:
 <p>Access at <code>http://localhost:8300</code>. Default credentials: <code>admin@windmill.dev</code> / <code>changeme</code> (change immediately). Create scripts, build flows, and deploy internal apps from the UI.</p>
 <p><strong>Caddy:</strong></p>
 <pre><code class="language-caddyfile">windmill.home.local { tls internal; reverse_proxy localhost:8300 }</code></pre>
-<p>---</p>
-<h2>Jenkins (Enterprise CI/CD)</h2>
+<hr>
+<h2 id="jenkins-enterprise-cicd">Jenkins (Enterprise CI/CD)</h2>
 <p><strong>Purpose:</strong> The most widely deployed open-source CI/CD server. Thousands of plugins covering every build tool, cloud provider, test framework, and deployment target. Common in enterprise environments where GitLab CI, Woodpecker, or Forgejo Actions aren't an option. Use Jenkins when you need to integrate with an existing org-wide pipeline or when the job description explicitly requires it.</p>
 <pre><code class="language-yaml"># ~/jenkins/compose.yaml
 services:
@@ -891,9 +651,9 @@ services:
       JAVA_OPTS: &quot;-Djenkins.install.runSetupWizard=false&quot;
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/jenkins &amp;&amp; podman-compose up -d</code></pre>
-<h4>Get the initial admin password</h4>
+<h4 id="get-the-initial-admin-password">Get the initial admin password</h4>
 <pre><code class="language-bash">podman exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword</code></pre>
-<h4>Common operations</h4>
+<h4 id="common-operations-2">Common operations</h4>
 <pre><code class="language-bash"># Install plugins via CLI (Jenkins CLI jar)
 podman exec jenkins java -jar /var/jenkins_home/war/WEB-INF/jenkins-cli.jar \
   -s http://localhost:8080 install-plugin git workflow-aggregator blueocean
@@ -910,9 +670,9 @@ podman exec jenkins java -jar /var/jenkins_home/war/WEB-INF/jenkins-cli.jar \
   -s http://localhost:8080 reload-configuration</code></pre>
 <p><strong>Caddy:</strong></p>
 <pre><code class="language-caddyfile">jenkins.home.local { tls internal; reverse_proxy localhost:8090 }</code></pre>
-<blockquote><p>💡 For greenfield projects prefer Woodpecker or Forgejo Actions — they're lighter and Podman-native. Use Jenkins when integrating with existing enterprise pipelines or when a job requires it specifically.</p></blockquote>
-<p>---</p>
-<h2>JFrog Artifactory OSS (Universal Artifact Repository)</h2>
+<blockquote>💡 For greenfield projects prefer Woodpecker or Forgejo Actions — they're lighter and Podman-native. Use Jenkins when integrating with existing enterprise pipelines or when a job requires it specifically.</blockquote>
+<hr>
+<h2 id="jfrog-artifactory-oss-universal-artifact-repository">JFrog Artifactory OSS (Universal Artifact Repository)</h2>
 <p><strong>Purpose:</strong> Universal artifact repository manager — store, proxy, and manage Maven, npm, PyPI, Docker, Helm, Go, Gradle, and generic binary artifacts from a single server. The self-hosted alternative to a paid Artifactory Cloud or GitHub Packages. Common in enterprise DevOps job descriptions alongside Jenkins or GitLab CI. OSS edition covers all common repository types.</p>
 <pre><code class="language-yaml"># ~/artifactory/compose.yaml
 services:
@@ -928,7 +688,7 @@ services:
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/artifactory &amp;&amp; podman-compose up -d</code></pre>
 <p>Default login: <code>admin</code> / <code>password</code>. <strong>Change immediately on first login.</strong></p>
-<h4>Common operations</h4>
+<h4 id="common-operations-3">Common operations</h4>
 <pre><code class="language-bash"># Create a local repository via REST API
 curl -u admin:password -X PUT \
   &quot;http://localhost:8181/artifactory/api/repositories/my-docker-local&quot; \
@@ -946,7 +706,7 @@ curl -u admin:password -T ./myapp.tar.gz \
 # Search for artifacts
 curl -u admin:password \
   &quot;http://localhost:8181/artifactory/api/search/quick?name=myapp&quot;</code></pre>
-<h4>With PostgreSQL (production)</h4>
+<h4 id="with-postgresql-production">With PostgreSQL (production)</h4>
 <pre><code class="language-yaml">services:
   artifactory:
     image: releases-docker.jfrog.io/jfrog/artifactory-oss:latest
@@ -975,8 +735,8 @@ volumes:
   pg_data:</code></pre>
 <p><strong>Caddy:</strong></p>
 <pre><code class="language-caddyfile">artifactory.home.local { tls internal; reverse_proxy localhost:8181 }</code></pre>
-<p>---</p>
-<h2>Nexus Repository OSS (Maven, npm, PyPI, Docker Proxy)</h2>
+<hr>
+<h2 id="nexus-repository-oss-maven-npm-pypi-docker-proxy">Nexus Repository OSS (Maven, npm, PyPI, Docker Proxy)</h2>
 <p><strong>Purpose:</strong> Self-hosted artifact repository for Java/Maven, npm, PyPI, Docker, Helm, Go, NuGet, and RubyGems. Commonly used as a <strong>proxy/cache</strong> — pull from Maven Central or npm Registry through Nexus, reducing external bandwidth and enabling offline builds. The most common artifact manager in Java-heavy enterprise shops.</p>
 <pre><code class="language-yaml"># ~/nexus/compose.yaml
 services:
@@ -992,7 +752,7 @@ services:
 
 # Get the initial admin password
 podman exec nexus cat /nexus-data/admin.password</code></pre>
-<h4>Common operations</h4>
+<h4 id="common-operations-4">Common operations</h4>
 <pre><code class="language-bash"># Configure Maven to use Nexus proxy — add to ~/.m2/settings.xml:
 # &lt;mirrors&gt;&lt;mirror&gt;&lt;id&gt;nexus&lt;/id&gt;&lt;url&gt;http://localhost:8091/repository/maven-public/&lt;/url&gt;
 #          &lt;mirrorOf&gt;*&lt;/mirrorOf&gt;&lt;/mirror&gt;&lt;/mirrors&gt;
@@ -1011,9 +771,9 @@ mvn deploy -DaltDeploymentRepository=nexus::default::http://localhost:8091/repos
 # Nexus UI → Administration → Tasks → Create: &quot;Delete unused components and assets&quot;</code></pre>
 <p><strong>Caddy:</strong></p>
 <pre><code class="language-caddyfile">nexus.home.local { tls internal; reverse_proxy localhost:8091 }</code></pre>
-<blockquote><p>⚠️ Nexus requires at least 4 GB RAM for comfortable operation. Set <code>-Xms2703m -Xmx2703m</code> in the JVM options via the <code>INSTALL4J_ADD_VM_PARAMS</code> environment variable if you need to cap memory usage.</p></blockquote>
-<p>---</p>
-<h2>Consul (Service Discovery & Service Mesh)</h2>
+<blockquote>⚠️ Nexus requires at least 4 GB RAM for comfortable operation. Set <code>-Xms2703m -Xmx2703m</code> in the JVM options via the <code>INSTALL4J_ADD_VM_PARAMS</code> environment variable if you need to cap memory usage.</blockquote>
+<hr>
+<h2 id="consul-service-discovery-service-mesh">Consul (Service Discovery & Service Mesh)</h2>
 <p><strong>Purpose:</strong> HashiCorp's service discovery, health checking, key-value store, and service mesh. Services register themselves with Consul; others look them up by name rather than IP. Used in job descriptions for teams running Nomad, bare-metal microservices, or multi-cloud infrastructure. Pairs naturally with OpenBao (Vault) for dynamic secrets.</p>
 <pre><code class="language-yaml"># ~/consul/compose.yaml
 services:
@@ -1027,7 +787,7 @@ services:
     command: &quot;agent -server -bootstrap-expect=1 -ui -client=0.0.0.0 -bind=0.0.0.0&quot;
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/consul &amp;&amp; podman-compose up -d</code></pre>
-<h4>Common operations</h4>
+<h4 id="common-operations-5">Common operations</h4>
 <pre><code class="language-bash"># Install Consul CLI via Nix
 nix-env -iA nixpkgs.consul
 
@@ -1051,8 +811,8 @@ consul health service myapp
 dig @127.0.0.1 -p 8600 myapp.service.consul</code></pre>
 <p><strong>Caddy:</strong></p>
 <pre><code class="language-caddyfile">consul.home.local { tls internal; reverse_proxy localhost:8500 }</code></pre>
-<p>---</p>
-<h2>Nomad (Workload Orchestrator)</h2>
+<hr>
+<h2 id="nomad-workload-orchestrator">Nomad (Workload Orchestrator)</h2>
 <p><strong>Purpose:</strong> HashiCorp's flexible workload orchestrator — runs containers (Podman/Docker), VMs, Java JARs, raw binaries, and batch jobs. Simpler than Kubernetes for teams that don't need the full K8s ecosystem. Common in job descriptions at shops using the HashiCorp stack (Consul + Vault + Nomad). Pairs with Consul for service discovery and OpenBao for secrets.</p>
 <pre><code class="language-yaml"># ~/nomad/compose.yaml
 services:
@@ -1071,7 +831,7 @@ services:
     command: &quot;agent -dev -bind=0.0.0.0 -log-level=INFO&quot;
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/nomad &amp;&amp; podman-compose up -d</code></pre>
-<h4>Common operations</h4>
+<h4 id="common-operations-6">Common operations</h4>
 <pre><code class="language-bash"># Install Nomad CLI via Nix
 nix-env -iA nixpkgs.nomad
 
@@ -1092,7 +852,7 @@ nomad job scale nginx web 3
 
 # Stop a job
 nomad job stop nginx</code></pre>
-<h5>Example job file (<code>~/nomad/jobs/nginx.nomad</code>)</h5>
+<h5 id="example-job-file-nomadjobsnginxnomad">Example job file (<code>~/nomad/jobs/nginx.nomad</code>)</h5>
 <pre><code class="language-hcl">job &quot;nginx&quot; {
   datacenters = [&quot;dc1&quot;]
   type        = &quot;service&quot;
@@ -1121,8 +881,8 @@ nomad job stop nginx</code></pre>
 }</code></pre>
 <p><strong>Caddy:</strong></p>
 <pre><code class="language-caddyfile">nomad.home.local { tls internal; reverse_proxy localhost:4646 }</code></pre>
-<p>---</p>
-<h2>Backstage (Internal Developer Portal)</h2>
+<hr>
+<h2 id="backstage-internal-developer-portal">Backstage (Internal Developer Portal)</h2>
 <p><strong>Purpose:</strong> Spotify's open-source Internal Developer Platform. A single portal where developers discover services, APIs, documentation, pipelines, infrastructure, and runbooks — reducing cognitive load and onboarding time. Common in Platform Engineer and DevEx job descriptions. Integrates with Gitea/Forgejo, Kubernetes, ArgoCD, PagerDuty, Grafana, and hundreds of plugins.</p>
 <pre><code class="language-yaml"># ~/backstage/compose.yaml
 services:
@@ -1150,7 +910,7 @@ services:
 
 volumes:
   pg_data:</code></pre>
-<h5>Minimal <code>app-config.yaml</code></h5>
+<h5 id="minimal-app-configyaml">Minimal <code>app-config.yaml</code></h5>
 <pre><code class="language-yaml">app:
   title: Homelab Developer Portal
   baseUrl: https://backstage.home.local
@@ -1177,114 +937,9 @@ catalog:
 <pre><code class="language-bash">cd ~/backstage &amp;&amp; podman-compose up -d</code></pre>
 <p><strong>Caddy:</strong></p>
 <pre><code class="language-caddyfile">backstage.home.local { tls internal; reverse_proxy localhost:7007 }</code></pre>
-<blockquote><p>💡 Backstage is most valuable once you have 5+ services. Start small — register a few services with <code>catalog-info.yaml</code> files in their repos, then add plugins incrementally (ArgoCD, Kubernetes, TechDocs).</p></blockquote>
-<p>---</p>
-<h2>Web Analytics</h2>
-<h3>Plausible Analytics</h3>
-<p><strong>Purpose:</strong> Lightweight, privacy-first Google Analytics alternative. Cookie-free, GDPR-compliant out of the box, and embeds as a single 1 KB script. Far simpler to operate than Matomo — no session-replay or heatmaps, but pageviews, bounce rate, referrers, top pages, and UTM campaigns in a clean UI. Good fit for sites that need basic analytics without GDPR cookie banners.</p>
-<pre><code class="language-yaml"># ~/plausible/compose.yaml
-services:
-  plausible_db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: plausible_db
-      POSTGRES_USER: plausible
-      POSTGRES_PASSWORD: changeme
-    volumes: [db_data:/var/lib/postgresql/data]
-    restart: unless-stopped
-
-  plausible_events_db:
-    image: clickhouse/clickhouse-server:24-alpine
-    volumes:
-      - events_data:/var/lib/clickhouse
-      - /home/user/plausible/clickhouse/logs.xml:/etc/clickhouse-server/config.d/logs.xml:ro,Z
-    ulimits:
-      nofile:
-        soft: 262144
-        hard: 262144
-    restart: unless-stopped
-
-  plausible:
-    image: ghcr.io/plausible/community-edition:v2
-    ports: [&quot;127.0.0.1:8033:8000&quot;]
-    environment:
-      BASE_URL: https://analytics.home.local
-      SECRET_KEY_BASE: &quot;run: openssl rand -hex 64&quot;
-      DATABASE_URL: postgres://plausible:changeme@plausible_db/plausible_db
-      CLICKHOUSE_DATABASE_URL: http://plausible_events_db:8123/plausible_events_db
-    depends_on: [plausible_db, plausible_events_db]
-    restart: unless-stopped
-
-volumes:
-  db_data:
-  events_data:</code></pre>
-<pre><code class="language-bash">cd ~/plausible &amp;&amp; podman-compose up -d
-# Create admin account on first visit at https://analytics.home.local/register</code></pre>
-<p><strong>Caddy:</strong></p>
-<pre><code class="language-caddyfile">analytics.home.local { tls internal; reverse_proxy localhost:8033 }</code></pre>
-<h5>Embed tracking snippet</h5>
-<p>(add to your site's <code>&lt;head&gt;</code>):</p>
-<pre><code class="language-html">&lt;script defer data-domain=&quot;mysite.home.local&quot;
-  src=&quot;https://analytics.home.local/js/script.js&quot;&gt;&lt;/script&gt;</code></pre>
-<p>---</p>
-<h3>Umami (Minimal Cookie-Free Analytics)</h3>
-<p><strong>Purpose:</strong> The simplest self-hosted analytics option — even lighter than Plausible. Single container (plus a Postgres or MySQL DB), sub-second dashboard loads, and a clean event tracking API for custom button/form events. No cookies, no GDPR consent required. Best for personal sites, blogs, and internal tools where Matomo is overkill.</p>
-<pre><code class="language-yaml"># ~/umami/compose.yaml
-services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: umami
-      POSTGRES_USER: umami
-      POSTGRES_PASSWORD: changeme
-    volumes: [db_data:/var/lib/postgresql/data]
-    restart: unless-stopped
-
-  umami:
-    image: ghcr.io/umami-software/umami:postgresql-latest
-    ports: [&quot;127.0.0.1:3005:3000&quot;]
-    environment:
-      DATABASE_URL: postgresql://umami:changeme@db:5432/umami
-      APP_SECRET: &quot;run: openssl rand -hex 32&quot;
-    depends_on: [db]
-    restart: unless-stopped
-
-volumes:
-  db_data:</code></pre>
-<pre><code class="language-bash">cd ~/umami &amp;&amp; podman-compose up -d
-# Default login: admin / umami — change immediately</code></pre>
-<p><strong>Caddy:</strong></p>
-<pre><code class="language-caddyfile">umami.home.local { tls internal; reverse_proxy localhost:3005 }</code></pre>
-<h4>Custom event tracking</h4>
-<pre><code class="language-html">&lt;!-- Track a button click --&gt;
-&lt;button data-umami-event=&quot;signup-click&quot;&gt;Sign Up&lt;/button&gt;
-
-&lt;!-- Track with extra properties --&gt;
-&lt;button data-umami-event=&quot;purchase&quot; data-umami-event-plan=&quot;pro&quot;&gt;Buy Pro&lt;/button&gt;</code></pre>
-<p>---</p>
-<h2>Education & Training</h2>
-<h2>Open edX (Tutor)</h2>
-<p><strong>Purpose:</strong> The platform powering edX.org and hundreds of MOOCs. Full MOOC toolkit: video courses, peer-graded assignments, timed exams, discussion forums, certificates, and XBlocks for custom content types. <strong>Tutor</strong> is the recommended way to deploy it — a Docker-based wrapper that makes the famously complex edX deployment manageable.</p>
-<pre><code class="language-bash"># Install Tutor
-pip install &quot;tutor[full]&quot; --break-system-packages
-
-# Initialise (interactive — sets domain, admin account, etc.)
-tutor config save --interactive
-
-# Launch the full stack
-tutor local launch
-
-# Create a superuser
-tutor local run lms manage.py createsuperuser
-
-# Import a demo course
-tutor local do importdemocourse</code></pre>
-<blockquote><p>Tutor manages all containers, volumes, and configuration. Run <code>tutor local status</code> to see all services.</p></blockquote>
-<p><strong>Caddy:</strong></p>
-<pre><code class="language-caddyfile">lms.example.com { reverse_proxy localhost:80 }
-studio.example.com { reverse_proxy localhost:80 }</code></pre>
-<p>---</p>
-<h2>Caddy Configuration</h2>
+<blockquote>💡 Backstage is most valuable once you have 5+ services. Start small — register a few services with <code>catalog-info.yaml</code> files in their repos, then add plugins incrementally (ArgoCD, Kubernetes, TechDocs).</blockquote>
+<hr>
+<h2 id="caddy-configuration">Caddy Configuration</h2>
 <pre><code class="language-caddyfile">git.home.local       { tls internal; reverse_proxy localhost:3000 }
 ci.home.local        { tls internal; reverse_proxy localhost:8000 }
 code.home.local      { tls internal; reverse_proxy localhost:8443 }
@@ -1301,10 +956,10 @@ sonar.home.local     { tls internal; reverse_proxy localhost:9000 }
 harbor.home.local    { tls internal; reverse_proxy localhost:8180 }
 plane.home.local     { tls internal; reverse_proxy localhost:3009 }
 windmill.home.local  { tls internal; reverse_proxy localhost:8300 }</code></pre>
-<p>---</p>
-<h2>Gitea / Forgejo Webhooks</h2>
+<hr>
+<h2 id="gitea-forgejo-webhooks">Gitea / Forgejo Webhooks</h2>
 <p>Webhooks let Gitea/Forgejo notify external services when events happen in a repository — a push, a pull request, a tag. This is how CI/CD pipelines get triggered without polling.</p>
-<h4>Configuring a webhook in Gitea</h4>
+<h4 id="configuring-a-webhook-in-gitea">Configuring a webhook in Gitea</h4>
 <ol>
 <li>Go to <strong>Repository → Settings → Webhooks → Add Webhook</strong></li>
 <li>Choose <strong>Gitea</strong> (for native events) or <strong>HTTP</strong> (for generic JSON)</li>
@@ -1312,7 +967,7 @@ windmill.home.local  { tls internal; reverse_proxy localhost:8300 }</code></pre>
 <li>Select which events trigger the hook (push, pull request, release)</li>
 <li>Gitea sends a signed HMAC-SHA256 payload — verify the <code>X-Gitea-Signature</code> header in your receiver</li>
 </ol>
-<h4>Trigger a Woodpecker pipeline on push</h4>
+<h4 id="trigger-a-woodpecker-pipeline-on-push">Trigger a Woodpecker pipeline on push</h4>
 <pre><code class="language-bash"># Woodpecker registers its webhook automatically when you enable a repo in the UI
 # Verify the webhook appeared under Repository → Settings → Webhooks
 
@@ -1321,8 +976,8 @@ curl -X POST https://ci.home.local/api/webhooks \
   -H &quot;X-Gitea-Event: push&quot; \
   -H &quot;Content-Type: application/json&quot; \
   -d '{&quot;ref&quot;: &quot;refs/heads/main&quot;, &quot;repository&quot;: {&quot;full_name&quot;: &quot;user/myrepo&quot;}}'</code></pre>
-<p>---</p>
-<h2>Branch Protection and Merge Strategies</h2>
+<hr>
+<h2 id="branch-protection-and-merge-strategies">Branch Protection and Merge Strategies</h2>
 <p><strong>Branch protection:</strong> (Repository → Settings → Branches → Add Protected Branch) enforces quality gates before changes can land on important branches like <code>main</code>:</p>
 <ul>
 <li><strong>Require status checks</strong> — CI must pass before merging</li>
@@ -1331,12 +986,12 @@ curl -X POST https://ci.home.local/api/webhooks \
 <li><strong>Require signed commits</strong> — all commits must be GPG-signed</li>
 </ul>
 <p><strong>Merge strategies:</strong> affect what the git history looks like after a PR is merged:</p>
-<p>| Strategy | What happens | Best for | |----------|-------------|----------| | <strong>Merge commit</strong> | Preserves all commits + adds a merge commit | Full history traceability | | <strong>Squash and merge</strong> | All PR commits become a single commit on <code>main</code> | Clean history, easier <code>git bisect</code> | | <strong>Rebase and merge</strong> | Replays PR commits on top of <code>main</code>, no merge commit | Linear history, no merge commits |</p>
+<table><thead><tr><th>Strategy</th><th>What happens</th><th>Best for</th></tr></thead><tbody><tr><td><strong>Merge commit</strong></td><td>Preserves all commits + adds a merge commit</td><td>Full history traceability</td></tr><tr><td><strong>Squash and merge</strong></td><td>All PR commits become a single commit on <code>main</code></td><td>Clean history, easier <code>git bisect</code></td></tr><tr><td><strong>Rebase and merge</strong></td><td>Replays PR commits on top of <code>main</code>, no merge commit</td><td>Linear history, no merge commits</td></tr></tbody></table>
 <p><strong>Linear history enforcement:</strong> (Squash or Rebase only) makes <code>git log</code> readable and <code>git bisect</code> reliable. Choose one strategy per repository and enforce it via branch protection — mixing strategies produces a chaotic history.</p>
-<p>---</p>
-<h2>Secret Scanning</h2>
+<hr>
+<h2 id="secret-scanning">Secret Scanning</h2>
 <p>Accidentally committed secrets (API keys, passwords, tokens) are one of the most common security incidents. Add secret scanning as a CI step to catch them before they land on <code>main</code>.</p>
-<h5>gitleaks</h5>
+<h5 id="gitleaks">gitleaks</h5>
 <p>scans for known secret patterns (AWS keys, GitHub tokens, generic high-entropy strings):</p>
 <pre><code class="language-yaml"># .forgejo/workflows/secret-scan.yml
 name: Secret Scan
@@ -1365,12 +1020,12 @@ repos:
       - id: gitleaks</code></pre>
 <pre><code class="language-bash">pre-commit install   # installs the hook into .git/hooks/pre-commit</code></pre>
 <p>If gitleaks fires on a legitimate secret that's already been rotated and removed, add it to <code>.gitleaksignore</code> with a hash so future scans skip that specific finding.</p>
-<p>---</p>
-<h2>Container Image Build Patterns</h2>
+<hr>
+<h2 id="container-image-build-patterns">Container Image Build Patterns</h2>
 <p><strong>Minimal base images:</strong> reduce attack surface by shipping fewer packages. Less software = fewer CVEs = smaller Trivy scan results.</p>
-<p>| Base image | Size | Use when | |-----------|------|----------| | <code>debian:bookworm-slim</code> | ~75 MB | Need a shell, standard tooling, apt packages | | <code>alpine:3</code> | ~7 MB | Shell + musl libc; some binaries need recompilation | | <code>gcr.io/distroless/static</code> | ~2 MB | Statically compiled binaries (Go, Rust) — no shell at all | | <code>scratch</code> | 0 bytes | Fully static binaries, maximum minimalism |</p>
+<table><thead><tr><th>Base image</th><th>Size</th><th>Use when</th></tr></thead><tbody><tr><td><code>debian:bookworm-slim</code></td><td>~75 MB</td><td>Need a shell, standard tooling, apt packages</td></tr><tr><td><code>alpine:3</code></td><td>~7 MB</td><td>Shell + musl libc; some binaries need recompilation</td></tr><tr><td><code>gcr.io/distroless/static</code></td><td>~2 MB</td><td>Statically compiled binaries (Go, Rust) — no shell at all</td></tr><tr><td><code>scratch</code></td><td>0 bytes</td><td>Fully static binaries, maximum minimalism</td></tr></tbody></table>
 <p><strong>Distroless:</strong> images have no shell, no package manager, no <code>ls</code>, no <code>cat</code>. You can't <code>exec</code> into them for debugging — use <code>kubectl debug</code> with a sidecar image instead. The tradeoff is worth it for production: no shell means no shell exploitation.</p>
-<h4>Layer caching in multi-stage builds</h4>
+<h4 id="layer-caching-in-multi-stage-builds">Layer caching in multi-stage builds</h4>
 <p>order your Dockerfile so the steps that change least frequently come first. Dependencies (which change rarely) before application code (which changes every commit):</p>
 <pre><code class="language-dockerfile">FROM golang:1.23 AS builder
 WORKDIR /src
@@ -1387,7 +1042,7 @@ FROM gcr.io/distroless/static:nonroot
 COPY --from=builder /app /app
 USER nonroot:nonroot
 ENTRYPOINT [&quot;/app&quot;]</code></pre>
-<h5>Using <code>--cache-from</code> in CI</h5>
+<h5 id="using---cache-from-in-ci">Using <code>--cache-from</code> in CI</h5>
 <p>pulls the previously built image to warm the layer cache across pipeline runs:</p>
 <pre><code class="language-yaml">- name: Build
   run: |
@@ -1395,44 +1050,11 @@ ENTRYPOINT [&quot;/app&quot;]</code></pre>
       --cache-from ghcr.io/myuser/myapp:cache \
       --cache-to ghcr.io/myuser/myapp:cache \
       -t ghcr.io/myuser/myapp:${{ github.sha }} .</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | Gitea SSH push fails | Confirm client is using <code>Port 2222</code> in <code>~/.ssh/config</code>; check <code>gitea</code> user has write access to the data volume | | Woodpecker agent not picking up jobs | Verify <code>WOODPECKER_AGENT_SECRET</code> matches on server and agent; check the agent has access to the Docker/Podman socket | | code-server blank after login | Verify <code>PASSWORD</code> env var is set; check the port is not in use by another service | | Private registry push rejected | Add <code>{ &quot;insecure-registries&quot;: [&quot;localhost:5000&quot;] }</code> to <code>/etc/containers/registries.conf</code>; restart Podman | | Coder workspace fails to start | Confirm the Podman socket is mounted and accessible; check <code>CODER_ACCESS_URL</code> matches the URL you use to access it | | n8n webhook not triggering | Ensure <code>WEBHOOK_URL</code> is the publicly accessible URL; check that Caddy is proxying correctly | | code-server extension install fails | The container needs outbound internet access; verify network is not blocked by firewalld | | Matomo setup wizard loops | Ensure MariaDB is fully started before Matomo; check <code>MATOMO_DATABASE_HOST</code> is <code>db</code> not <code>localhost</code> | | Matomo <code>No data</code> in reports | Verify the tracking snippet is correctly deployed on your site; check the Matomo real-time visitors page to confirm pings are arriving | | Leantime blank after install | Run <code>podman exec leantime php bin/leantime db:migrate</code> to apply DB migrations; check <code>podman logs leantime</code> | | Twenty CRM blank page | Ensure <code>yarn database:migrate:prod</code> ran successfully; check <code>SERVER_URL</code> matches the URL you access it from | | Huly services not connecting | Use the official <code>huly-selfhost</code> compose stack which wires all services correctly; single-container mode is for testing only | | DocuSeal PDF fields not saving | Ensure the <code>/data</code> volume has write permissions; check <code>podman logs docuseal</code> for storage errors | | GitLab 502 on first load | Wait 3–5 min for full initialisation; check <code>podman logs gitlab</code>; ensure <code>shm_size</code> is set to at least 256m | | GitLab Runner not picking up jobs | Verify the runner token matches; check runner tags match the job's <code>tags:</code> definition in <code>.gitlab-ci.yml</code> | | SonarQube exits immediately | Set <code>vm.max_map_count=524288</code> on the host with <code>sudo sysctl -w vm.max_map_count=524288</code>; add to <code>/etc/sysctl.d/</code> to persist across reboots | | Forgejo Actions runner not picking up jobs | Verify the registration token matches what's shown in <strong>Site Administration → Actions → Runners</strong>; confirm the Podman socket is mounted and accessible | | Renovate PR not created | Ensure the token has write access to the repos; check <code>podman logs</code> on the renovate container for API errors; verify <code>RENOVATE_PLATFORM=gitea</code> is set | | Windmill worker not executing jobs | Check <code>DATABASE_URL</code> is identical on server and worker; run <code>podman logs windmill_worker</code> for connection errors; ensure <code>MODE=worker</code> is set on the worker container |</p>
-<p>---</p>
-<h2>Drawio / draw.io (Self-Hosted Diagram Editor)</h2>
-<p><strong>Purpose:</strong> Self-hosted version of diagrams.net — the most widely used open-source diagramming tool. Create architecture diagrams, flowcharts, ERDs, network maps, and UML without sending data to any cloud service. Integrates with Nextcloud, Confluence, and can export to SVG, PNG, and PDF.</p>
-<pre><code class="language-yaml"># ~/drawio/compose.yaml
-services:
-  drawio:
-    image: jgraph/drawio:latest
-    ports:
-      - 127.0.0.1:8710:8080
-    restart: unless-stopped</code></pre>
-<pre><code class="language-bash">cd ~/drawio &amp;&amp; podman-compose up -d</code></pre>
-<p><strong>Caddy:</strong></p>
-<pre><code class="language-caddyfile">draw.home.local { tls internal; reverse_proxy localhost:8710 }</code></pre>
-<p>---</p>
-<h2>Gitea Classroom (Teaching & Learning)</h2>
-<p><strong>Purpose:</strong> Gitea's built-in Classroom feature (modelled after GitHub Classroom) lets instructors create assignment repositories, fork them per student, set deadlines, and review submissions. Pairs with Woodpecker CI for automatic grading pipelines.</p>
-<pre><code class="language-bash"># Enable in Site Administration → Gitea Configuration
-# Navigate to: /admin/self-check → enable classroom features
-
-# Create a classroom organisation
-# Users → Organisations → Create Organisation → enable &quot;Classroom&quot;
-
-# Assign a template repo to a classroom — students get a personal fork
-# Classroom → Create Assignment → select template repo</code></pre>
-<h5>Automated grading with Woodpecker</h5>
-<pre><code class="language-yaml"># .woodpecker.yml — in the template repo
-steps:
-  grade:
-    image: python:3.12-slim
-    commands:
-      - pip install pytest --quiet
-      - pytest tests/ --tb=short --json-report --json-report-file=grade-report.json
-      - python grader.py grade-report.json   # posts score to Gitea issue</code></pre>
-<p>---</p>
-<h2>Forgejo / Gitea Migration Patterns</h2>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Gitea SSH push fails</td><td>Confirm client is using <code>Port 2222</code> in <code>~/.ssh/config</code>; check <code>gitea</code> user has write access to the data volume</td></tr><tr><td>Woodpecker agent not picking up jobs</td><td>Verify <code>WOODPECKER_AGENT_SECRET</code> matches on server and agent; check the agent has access to the Docker/Podman socket</td></tr><tr><td>code-server blank after login</td><td>Verify <code>PASSWORD</code> env var is set; check the port is not in use by another service</td></tr><tr><td>Private registry push rejected</td><td>Add <code>{ &quot;insecure-registries&quot;: [&quot;localhost:5000&quot;] }</code> to <code>/etc/containers/registries.conf</code>; restart Podman</td></tr><tr><td>Coder workspace fails to start</td><td>Confirm the Podman socket is mounted and accessible; check <code>CODER_ACCESS_URL</code> matches the URL you use to access it</td></tr><tr><td>n8n webhook not triggering</td><td>Ensure <code>WEBHOOK_URL</code> is the publicly accessible URL; check that Caddy is proxying correctly</td></tr><tr><td>code-server extension install fails</td><td>The container needs outbound internet access; verify network is not blocked by firewalld</td></tr><tr><td>Matomo setup wizard loops</td><td>Ensure MariaDB is fully started before Matomo; check <code>MATOMO_DATABASE_HOST</code> is <code>db</code> not <code>localhost</code></td></tr><tr><td>Matomo <code>No data</code> in reports</td><td>Verify the tracking snippet is correctly deployed on your site; check the Matomo real-time visitors page to confirm pings are arriving</td></tr><tr><td>Leantime blank after install</td><td>Run <code>podman exec leantime php bin/leantime db:migrate</code> to apply DB migrations; check <code>podman logs leantime</code></td></tr><tr><td>Twenty CRM blank page</td><td>Ensure <code>yarn database:migrate:prod</code> ran successfully; check <code>SERVER_URL</code> matches the URL you access it from</td></tr><tr><td>Huly services not connecting</td><td>Use the official <code>huly-selfhost</code> compose stack which wires all services correctly; single-container mode is for testing only</td></tr><tr><td>DocuSeal PDF fields not saving</td><td>Ensure the <code>/data</code> volume has write permissions; check <code>podman logs docuseal</code> for storage errors</td></tr><tr><td>GitLab 502 on first load</td><td>Wait 3–5 min for full initialisation; check <code>podman logs gitlab</code>; ensure <code>shm_size</code> is set to at least 256m</td></tr><tr><td>GitLab Runner not picking up jobs</td><td>Verify the runner token matches; check runner tags match the job's <code>tags:</code> definition in <code>.gitlab-ci.yml</code></td></tr><tr><td>SonarQube exits immediately</td><td>Set <code>vm.max_map_count=524288</code> on the host with <code>sudo sysctl -w vm.max_map_count=524288</code>; add to <code>/etc/sysctl.d/</code> to persist across reboots</td></tr><tr><td>Forgejo Actions runner not picking up jobs</td><td>Verify the registration token matches what's shown in <strong>Site Administration → Actions → Runners</strong>; confirm the Podman socket is mounted and accessible</td></tr><tr><td>Renovate PR not created</td><td>Ensure the token has write access to the repos; check <code>podman logs</code> on the renovate container for API errors; verify <code>RENOVATE_PLATFORM=gitea</code> is set</td></tr><tr><td>Windmill worker not executing jobs</td><td>Check <code>DATABASE_URL</code> is identical on server and worker; run <code>podman logs windmill_worker</code> for connection errors; ensure <code>MODE=worker</code> is set on the worker container</td></tr></tbody></table>
+<hr>
+<h2 id="forgejo-gitea-migration-patterns">Forgejo / Gitea Migration Patterns</h2>
 <p>When migrating repositories between instances or from GitHub/GitLab, use the built-in migration tool or the API:</p>
 <pre><code class="language-bash"># Migrate a GitHub repo into Gitea via API
 curl -X POST https://git.home.local/api/v1/repos/migrate \
@@ -1467,12 +1089,12 @@ curl -s &quot;https://api.github.com/orgs/$ORG/repos?per_page=100&quot; \
       -H &quot;Content-Type: application/json&quot; \
       -d &quot;{\&quot;clone_addr\&quot;:\&quot;$url\&quot;,\&quot;repo_name\&quot;:\&quot;$repo\&quot;,\&quot;repo_owner\&quot;:\&quot;$ORG\&quot;,\&quot;mirror\&quot;:false,\&quot;private\&quot;:true}&quot;
   done</code></pre>
-<p>---</p>
-<h2>Additional Caddy Routes</h2>
+<hr>
+<h2 id="additional-caddy-routes">Additional Caddy Routes</h2>
 <pre><code class="language-caddyfile">draw.home.local       { tls internal; reverse_proxy localhost:8710 }</code></pre>
-<p>---</p>
-<h2>Troubleshooting (additional)</h2>
-<p>| Issue | Solution | |-------|----------| | Gitea migration stuck | Check the Gitea admin logs; large repos may time out — increase <code>timeout</code> in <code>app.ini</code> under <code>[migrations]</code> | | Woodpecker CI pipeline doesn't trigger | Verify the webhook is registered in Gitea (Repo → Settings → Webhooks) and that <code>WOODPECKER_HOST</code> is reachable from Gitea's network | | Forgejo Actions runner shows as offline | Re-register with a fresh token from Site Administration → Actions → Runners; tokens expire after first use |</p></div>
+<hr>
+<h2 id="troubleshooting-additional">Troubleshooting (additional)</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Gitea migration stuck</td><td>Check the Gitea admin logs; large repos may time out — increase <code>timeout</code> in <code>app.ini</code> under <code>[migrations]</code></td></tr><tr><td>Woodpecker CI pipeline doesn't trigger</td><td>Verify the webhook is registered in Gitea (Repo → Settings → Webhooks) and that <code>WOODPECKER_HOST</code> is reachable from Gitea's network</td></tr><tr><td>Forgejo Actions runner shows as offline</td><td>Re-register with a fresh token from Site Administration → Actions → Runners; tokens expire after first use</td></tr></tbody></table></div>
     </div>
 
   </main>

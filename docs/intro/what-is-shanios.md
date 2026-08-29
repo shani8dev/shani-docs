@@ -1,12 +1,12 @@
 ---
 title: What is Shanios?
 section: Introduction
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # What is Shanios?
 
-Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs filesystem, it provides atomic updates, instant rollback, and system integrity by design. It ships as two editions — **GNOME** and **KDE Plasma** — and works out of the box with no post-install tweaking required.
+Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs filesystem, it provides atomic updates, instant rollback, and system integrity by design. It ships in two desktop editions today — **GNOME** and **KDE Plasma** — with a third, **COSMIC**, announced and in development, a **Kiosk** profile for single-purpose deployments, plus a headless **Server** profile. It works out of the box with no post-install tweaking required.
 
 ## Core Pillars
 
@@ -45,6 +45,20 @@ Shanios is an immutable Linux distribution that brings enterprise DevOps practic
 - ✅ IMA/EVM runtime integrity measurement active
 - ✅ Six LSMs active simultaneously (AppArmor, Landlock…)
 
+## Project Structure
+
+Shanios is built across 15 repositories, each with a specific responsibility:
+
+- **OS Build:** `shani-install-media` (images/ISOs), `shani-builder` (build env), `shani-pkgbuilds` (packages)
+- **Deployment:** `shani-deploy` (transactional updates), `shani-settings` (filesystem overlay), `shani-keyring` (trust root)
+- **Management:** `shani-platform` (server), `shani-fleet` (agent), `shani-insights` (analytics)
+- **Distribution:** `shani-repo` (package repository), `os-installer-config` (installer)
+- **Web:** `shani-website` (marketing), `shani-docs` (documentation), `shani-wiki` (wiki), `shani-blog` (blog)
+
+## License
+
+The Shanios OS and all build/tooling repos are GPL v3. Server products (`shani-platform`, `shani-insights`) have their own licensing.
+
 ## How This Feels in Practice
 
 The immutable root is transparent in daily use. You edit `/etc` files normally, install Flatpaks and Nix packages freely, run containers, and manage VMs — all exactly as you would on any Linux system. The difference is that updates never break a running system, rollback is always available, and an attacker who gains root access during a session cannot plant a persistent backdoor into system paths.
@@ -56,3 +70,12 @@ The OS that passed build-time verification is the OS that runs, byte for byte, u
 Shanios is built in India 🇮🇳 by [Shrinivas Vishnu Kumbhar](https://github.com/Shrinivasvkumbhar). Indian-language support — Devanagari, Bengali, Gujarati, Gurmukhi (Punjabi), Kannada, Malayalam, Oriya, Tamil, and Telugu scripts — is a first-class feature, pre-configured from first boot with IBus multi-language input.
 
 The entire codebase is public at [github.com/shani8dev](https://github.com/shani8dev). Every claim in this documentation is independently verifiable.
+
+## See Also
+
+- [What's Included](whats-included) — the full software stack
+- [System Optimizations](optimizations) — performance tuning that ships enabled
+- [Immutability](../concepts/immutability.md) — how the read-only root works
+- [Blue-Green Deployment](../concepts/blue-green.md) — the two-slot update model
+- [Atomic Updates](../concepts/atomic-updates.md) — the all-or-nothing guarantee
+- [Getting Started](getting-started) — first steps after install

@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>Monitoring — Grafana, Loki &amp; Tracing — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Grafana Purpose: The standard visualisation layer for Prometheus, Loki, InfluxDB, and 50+ other data sources. Drag-and-drop dashboards, alerting, and team …">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/servers/monitoring/grafana/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="Monitoring — Grafana, Loki &amp; Tracing">
+  <meta property="og:description" id="og-desc"    content="Grafana Purpose: The standard visualisation layer for Prometheus, Loki, InfluxDB, and 50+ other data sources. Drag-and-drop dashboards, alerting, and team …">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/monitoring/grafana/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="Monitoring — Grafana, Loki &amp; Tracing">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="Monitoring — Grafana, Loki &amp; Tracing">
+  <meta name="twitter:description" id="tw-desc"  content="Grafana Purpose: The standard visualisation layer for Prometheus, Loki, InfluxDB, and 50+ other data sources. Drag-and-drop dashboards, alerting, and team …">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Monitoring — Grafana, Loki & Tracing","description":"Grafana Purpose: The standard visualisation layer for Prometheus, Loki, InfluxDB, and 50+ other data sources. Drag-and-drop dashboards, alerting, and team …","url":"https://docs.shani.dev/doc/servers/monitoring/grafana/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Monitoring — Grafana, Loki & Tracing","item":"https://docs.shani.dev/doc/servers/monitoring/grafana/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Monitoring — Grafana, Loki &amp; Tracing</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><h2 id="grafana">Grafana</h2>
+<p><strong>Purpose:</strong> The standard visualisation layer for Prometheus, Loki, InfluxDB, and 50+ other data sources. Drag-and-drop dashboards, alerting, and team sharing.</p>
+<pre><code class="language-yaml"># ~/grafana/compose.yaml
+services:
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - 127.0.0.1:3001:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: changeme
+      GF_SERVER_ROOT_URL: https://grafana.home.local
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-piechart-panel,grafana-worldmap-panel
+    restart: unless-stopped
+
+volumes:
+  grafana_data:</code></pre>
+<pre><code class="language-bash">cd ~/grafana &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="common-operations">Common operations</h4>
+<pre><code class="language-bash"># Install a plugin
+podman exec grafana grafana-cli plugins install grafana-clock-panel
+podman restart grafana
+
+# Reset admin password
+podman exec grafana grafana-cli admin reset-admin-password newpassword
+
+# Check Grafana health
+curl http://localhost:3001/api/health
+
+# Export a dashboard as JSON
+curl -u admin:changeme http://localhost:3001/api/dashboards/uid/YOUR_UID | python3 -m json.tool</code></pre>
+<h5 id="useful-dashboard-imports">Useful dashboard imports</h5>
+<p>(Dashboard → Import → paste ID):</p>
+<ul>
+<li><code>1860</code> — Node Exporter Full (complete server metrics)</li>
+<li><code>14282</code> — PostgreSQL overview</li>
+<li><code>11835</code> — Redis dashboard</li>
+<li><code>15141</code> — Kafka overview</li>
+<li><code>10991</code> — RabbitMQ overview</li>
+<li><code>12378</code> — InfluxDB 2.x system metrics</li>
+</ul>
+<h3 id="grafana-provisioning-dashboards-and-datasources-as-code">Grafana Provisioning (Dashboards and Datasources as Code)</h3>
+<p>Rather than configuring Grafana through the UI (which is lost if you recreate the container), provision datasources and dashboards from config files. Grafana reads these at startup and applies them automatically:</p>
+<pre><code class="language-yaml"># ~/grafana/compose.yaml — add provisioning volume mounts
+volumes:
+  - grafana_data:/var/lib/grafana
+  - /home/user/grafana/provisioning:/etc/grafana/provisioning:ro,Z
+  - /home/user/grafana/dashboards:/etc/grafana/dashboards:ro,Z</code></pre>
+<pre><code class="language-yaml"># ~/grafana/provisioning/datasources/prometheus.yaml
+apiVersion: 1
+datasources:
+  - name: Prometheus
+    type: prometheus
+    url: http://host.containers.internal:9090
+    isDefault: true
+    editable: false
+
+  - name: Loki
+    type: loki
+    url: http://host.containers.internal:3100
+    editable: false</code></pre>
+<pre><code class="language-yaml"># ~/grafana/provisioning/dashboards/main.yaml
+apiVersion: 1
+providers:
+  - name: default
+    type: file
+    disableDeletion: true      # prevent accidental deletion via UI
+    updateIntervalSeconds: 30  # hot-reload when dashboard JSON files change
+    options:
+      path: /etc/grafana/dashboards</code></pre>
+<p>Place exported dashboard JSON files in <code>~/grafana/dashboards/</code>. Grafana picks them up automatically — no browser interaction required. Export a dashboard via:</p>
+<pre><code class="language-bash"># Export dashboard JSON by UID
+curl -u admin:changeme http://localhost:3001/api/dashboards/uid/YOUR_UID \
+  | python3 -c &quot;import sys,json; d=json.load(sys.stdin); print(json.dumps(d['dashboard'], indent=2))&quot; \
+  &gt; ~/grafana/dashboards/my-dashboard.json</code></pre>
+<blockquote>For BI-focused Grafana usage (connecting to databases, building analytical dashboards), see the <a href="https://docs.shani.dev/doc/servers/business-intelligence">Business Intelligence wiki</a>.</blockquote>
+<hr>
+<hr>
+<h2 id="grafana-alloy-unified-telemetry-collector">Grafana Alloy (Unified Telemetry Collector)</h2>
+<p><strong>Purpose:</strong> Replaces Promtail, Grafana Agent, and OpenTelemetry Collector in a single binary. Scrapes metrics, ships logs to Loki, and forwards traces to Tempo. The recommended replacement for running separate collection agents.</p>
+<pre><code class="language-yaml"># ~/alloy/compose.yaml
+services:
+  alloy:
+    image: grafana/alloy:latest
+    ports:
+      - 127.0.0.1:12345:12345
+    volumes:
+      - /home/user/alloy/config.alloy:/etc/alloy/config.alloy:ro,Z
+      - /var/log:/var/log:ro
+    command: run /etc/alloy/config.alloy
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/alloy &amp;&amp; podman-compose up -d</code></pre>
+<hr>
+<h2 id="loki-log-aggregation">Loki (Log Aggregation)</h2>
+<p><strong>Purpose:</strong> Log aggregation system from Grafana Labs. Stores logs indexed by labels — cheap, fast, and queryable in Grafana alongside your metrics. Use Alloy (or the older Promtail) to ship container and system logs into Loki.</p>
+<pre><code class="language-yaml"># ~/loki/compose.yaml
+services:
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - 127.0.0.1:3100:3100
+    volumes:
+      - /home/user/loki:/loki:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/loki &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="common-operations-2">Common operations</h4>
+<pre><code class="language-bash"># Check Loki is ready
+curl http://localhost:3100/ready
+
+# Query logs via the API (LogQL)
+curl &quot;http://localhost:3100/loki/api/v1/query_range&quot; \
+  --data-urlencode 'query={job=&quot;containerlogs&quot;}' \
+  --data-urlencode 'start=1h ago' | python3 -m json.tool | head -30
+
+# List all label names
+curl http://localhost:3100/loki/api/v1/labels | python3 -m json.tool
+
+# Flush in-memory chunks to storage
+curl -X POST http://localhost:3100/flush</code></pre>
+<h5 id="ship-container-logs-with-alloy">Ship container logs with Alloy</h5>
+<p>— add to your <code>config.alloy</code>:</p>
+<pre><code class="language-hcl">local.file_match &quot;containers&quot; {
+  path_targets = [{
+    __path__ = &quot;/var/log/containers/*.log&quot;,
+    job      = &quot;containerlogs&quot;,
+  }]
+}
+
+loki.source.file &quot;containers&quot; {
+  targets    = local.file_match.containers.targets
+  forward_to = [loki.write.default.receiver]
+}
+
+loki.write &quot;default&quot; {
+  endpoint {
+    url = &quot;http://localhost:3100/loki/api/v1/push&quot;
+  }
+}</code></pre>
+<hr>
+<hr>
+<h2 id="grafana-tempo-distributed-tracing">Grafana Tempo (Distributed Tracing)</h2>
+<p><strong>Purpose:</strong> Distributed tracing backend from Grafana Labs. Stores traces from OpenTelemetry, Jaeger, Zipkin, and other instrumented services, then lets you correlate them with Prometheus metrics and Loki logs in the same Grafana dashboard.</p>
+<pre><code class="language-yaml"># ~/tempo/compose.yaml
+services:
+  tempo:
+    image: grafana/tempo:latest
+    ports:
+      - 127.0.0.1:3200:3200
+      - 127.0.0.1:4317:4317
+      - 127.0.0.1:4318:4318
+    volumes:
+      - /home/user/tempo/config.yaml:/etc/tempo.yaml:ro,Z
+      - /home/user/tempo/data:/var/tempo:Z
+    command: -config.file=/etc/tempo.yaml
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/tempo &amp;&amp; podman-compose up -d</code></pre>
+<h5 id="minimal-configyaml">Minimal <code>config.yaml</code></h5>
+<pre><code class="language-yaml">server:
+  http_listen_port: 3200
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+storage:
+  trace:
+    backend: local
+    local:
+      path: /var/tempo/blocks
+    wal:
+      path: /var/tempo/wal</code></pre>
+<p>Connect Grafana to Tempo: Configuration → Data Sources → Tempo → URL: <code>http://host.containers.internal:3200</code>. Enable the Trace to Logs correlation with your Loki datasource for one-click trace-to-log navigation.</p>
+<hr>
+<hr>
+<h2 id="grafana-oncall-on-call-scheduling">Grafana OnCall (On-Call Scheduling)</h2>
+<p><strong>Purpose:</strong> Self-hosted on-call scheduling and escalation platform — a PagerDuty/OpsGenie alternative. Define on-call schedules (weekly rotations, override shifts), escalation chains (page the primary → wait 5 min → page the secondary → alert the manager), and route Alertmanager or Grafana alerts through it. Integrates natively with Grafana and has mobile apps for iOS and Android.</p>
+<pre><code class="language-yaml"># ~/grafana-oncall/compose.yaml
+services:
+  engine:
+    image: grafana/oncall:latest
+    ports:
+      - 127.0.0.1:8080:8080
+    environment:
+      SECRET_KEY: changeme-run-openssl-rand-hex-32
+      DATABASE_TYPE: sqlite3
+      BROKER_TYPE: redis
+      BASE_URL: https://oncall.home.local
+      REDIS_URI: redis://redis:6379/0
+      DJANGO_SETTINGS_MODULE: settings.hobby
+    volumes:
+      - /home/user/oncall/data:/var/lib/oncall:Z
+    depends_on: [redis]
+    restart: unless-stopped
+
+  celery:
+    image: grafana/oncall:latest
+    command: ./celery_with_beat.sh
+    environment:
+      SECRET_KEY: changeme-run-openssl-rand-hex-32
+      DATABASE_TYPE: sqlite3
+      BROKER_TYPE: redis
+      BASE_URL: https://oncall.home.local
+      REDIS_URI: redis://redis:6379/0
+      DJANGO_SETTINGS_MODULE: settings.hobby
+    volumes:
+      - /home/user/oncall/data:/var/lib/oncall:Z
+    depends_on: [redis]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/grafana-oncall &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:8080</code>. Connect to Grafana under Settings → Plugins → Grafana OnCall, then configure integrations under Integrations → Alertmanager to receive alerts.</p>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">oncall.home.local { tls internal; reverse_proxy localhost:8080 }</code></pre>
+<hr>
+<h2 id="loki-alert-rules-log-based-alerting">Loki Alert Rules (Log-Based Alerting)</h2>
+<p><strong>Purpose:</strong> LogQL-based alerting fires Prometheus-compatible alerts based on log patterns — distinct from metric alerts. Use log alerts to fire when error rates in logs exceed a threshold, when a specific log pattern appears (like <code>FATAL</code> or <code>panic:</code>), or when a log stream goes silent (indicating a dead service). Loki alert rules are configured using the Loki Ruler and work alongside Alertmanager exactly like Prometheus rules.</p>
+<h5 id="enable-the-ruler-in-loki-config">Enable the ruler in Loki config</h5>
+<pre><code class="language-yaml"># Add to your Loki config (if using the single-binary image)
+ruler:
+  storage:
+    type: local
+    local:
+      directory: /loki/rules
+  rule_path: /loki/rules-temp
+  alertmanager_url: http://host.containers.internal:9093
+  ring:
+    kvstore:
+      store: inmemory
+  enable_api: true</code></pre>
+<h5 id="example-rule-files-homeuserlokiruleshomelabrulesyaml">Example rule files (<code>/home/user/loki/rules/homelab/rules.yaml</code>)</h5>
+<pre><code class="language-yaml">groups:
+  - name: log-alerts
+    rules:
+      # Fire when error rate in app logs exceeds 10/min for 5 minutes
+      - alert: HighErrorRate
+        expr: |
+          sum(rate({job=&quot;containerlogs&quot;, container=&quot;myapp&quot;} |= &quot;ERROR&quot; [1m])) &gt; 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: &quot;High error rate in myapp logs&quot;
+          description: &quot;More than 10 errors/min for 5 minutes&quot;
+
+      # Fire when a specific fatal error appears
+      - alert: PanicDetected
+        expr: |
+          count_over_time({job=&quot;containerlogs&quot;} |= &quot;panic:&quot; [5m]) &gt; 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: &quot;Panic detected in container logs&quot;
+
+      # Fire when a service produces no logs (dead service detection)
+      - alert: ServiceSilent
+        expr: |
+          absent(rate({job=&quot;containerlogs&quot;, container=&quot;myapp&quot;}[10m]))
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: &quot;myapp has produced no logs for 10 minutes&quot;</code></pre>
+<h5 id="create-the-rules-directory-and-restart-loki">Create the rules directory and restart Loki</h5>
+<pre><code class="language-bash">mkdir -p /home/user/loki/rules/homelab
+# Place rule files there
+podman restart loki</code></pre>
+<h4 id="query-via-api-to-verify-rules-are-loaded">Query via API to verify rules are loaded</h4>
+<pre><code class="language-bash">curl http://localhost:3100/loki/api/v1/rules | python3 -m json.tool</code></pre>
+<blockquote>Log-based and metric-based alerts both route through the same Alertmanager — you get a unified alert feed from both systems, deduplicated and routed to ntfy/Slack/email by the same <code>alertmanager.yml</code>.</blockquote>
+<hr>
+<h2 id="parca-continuous-profiling">Parca (Continuous Profiling)</h2>
+<p><strong>Purpose:</strong> Always-on CPU and memory profiling for your running services — captures flamegraphs in production without manual sampling. Stores profiles over time so you can compare CPU usage before and after a code change or pinpoint a memory leak by diffing two time windows. Adds the fourth pillar of observability alongside metrics, logs, and traces.</p>
+<pre><code class="language-yaml"># ~/parca/compose.yaml
+services:
+  parca:
+    image: ghcr.io/parca-dev/parca:latest
+    ports:
+      - 127.0.0.1:7070:7070
+    volumes:
+      - /home/user/parca/parca.yaml:/etc/parca/parca.yaml:ro,Z
+    command: /parca --config-path=/etc/parca/parca.yaml
+    restart: unless-stopped
+
+  parca-agent:
+    image: ghcr.io/parca-dev/parca-agent:latest
+    privileged: true
+    pid: host
+    network_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /sys/fs/bpf:/sys/fs/bpf
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    command: &gt;
+      --node=homeserver
+      --remote-store-address=localhost:7070
+      --remote-store-insecure
+    restart: unless-stopped</code></pre>
+<pre><code class="language-yaml"># ~/parca/parca.yaml
+object_storage:
+  bucket:
+    type: FILESYSTEM
+    config:
+      directory: /var/lib/parca
+
+scrape_configs:
+  - job_name: parca-server
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:7070']</code></pre>
+<pre><code class="language-bash">cd ~/parca &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:7070</code>. Select a profile type (CPU, memory allocations), choose a time range, and Parca renders an interactive flamegraph. Use the <strong>Compare</strong> view to diff two time windows.</p>
+<blockquote>The Parca Agent uses eBPF to profile any process on the host without code changes. Requires kernel ≥ 5.3 with BTF support — verify with <code>ls /sys/kernel/btf/vmlinux</code>.</blockquote>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">parca.home.local { tls internal; reverse_proxy localhost:7070 }</code></pre>
+<hr>
+<h2 id="netdata-grafana-datasource-integration">Netdata → Grafana Datasource Integration</h2>
+<p><strong>Purpose:</strong> Netdata (already documented above) exposes a Prometheus-compatible metrics endpoint — you can query it directly from Grafana as a datasource alongside your regular Prometheus instance. This gives you Netdata's per-second system metrics (CPU, RAM, disk I/O, network, containers) in the same Grafana dashboards as your application metrics, without running a separate Prometheus scrape job.</p>
+<h4 id="step-1-enable-prometheus-exporter-in-netdata">Step 1 — Enable Prometheus exporter in Netdata</h4>
+<p>Netdata exposes Prometheus metrics at <code>/api/v1/allmetrics?format=prometheus</code> by default on port 19999. No configuration required — it's always on.</p>
+<pre><code class="language-bash"># Test the endpoint
+curl http://localhost:19999/api/v1/allmetrics?format=prometheus | head -30</code></pre>
+<h4 id="step-2-add-netdata-as-a-prometheus-datasource-in-grafana">Step 2 — Add Netdata as a Prometheus datasource in Grafana</h4>
+<p>In Grafana → Connections → Data Sources → Add → Prometheus:</p>
+<ul>
+<li><strong>Name:</strong> <code>Netdata</code></li>
+<li><strong>URL:</strong> <code>http://netdata.home.local:19999/api/v1/allmetrics?format=prometheus</code></li>
+<li><strong>Scrape interval:</strong> <code>1s</code> (Netdata collects at 1s resolution)</li>
+<li><strong>Query timeout:</strong> <code>30s</code></li>
+</ul>
+<p>Or configure via provisioning YAML:</p>
+<pre><code class="language-yaml"># /home/user/grafana/provisioning/datasources/netdata.yaml
+apiVersion: 1
+datasources:
+  - name: Netdata
+    type: prometheus
+    access: proxy
+    url: http://host.containers.internal:19999/api/v1/allmetrics?format=prometheus
+    isDefault: false
+    jsonData:
+      timeInterval: &quot;1s&quot;</code></pre>
+<h4 id="step-3-query-netdata-metrics-in-grafana-panels">Step 3 — Query Netdata metrics in Grafana panels</h4>
+<pre><code class="language-promql"># CPU usage per core
+netdata_cpu_cpu_percentage_average{dimension=&quot;user&quot;}
+
+# System RAM usage
+netdata_system_ram_MiB_average{dimension=&quot;used&quot;}
+
+# Disk I/O
+rate(netdata_disk_io_kilobytes_persec_average[1m])
+
+# Network traffic per interface
+netdata_net_kilobits_persec_average{dimension=&quot;received&quot;}
+
+# Container CPU (Netdata monitors all Podman containers)
+netdata_cgroups_cpu_percentage_average{chart=~&quot;cgroup_.*&quot;}</code></pre>
+<h4 id="step-4-import-a-netdata-grafana-dashboard">Step 4 — Import a Netdata Grafana dashboard</h4>
+<p>Go to Grafana → Dashboards → Import → Dashboard ID <strong>7107</strong> (Netdata System Overview). This gives you a full system health dashboard powered by Netdata's Prometheus endpoint.</p>
+<blockquote><strong>When to use which:</strong> Keep Prometheus as your primary datasource for application metrics, SLO calculations, and alert evaluation. Use the Netdata datasource for host-level dashboards where 1-second resolution matters (disk spike analysis, container burst profiling). Both can be combined in a single Grafana dashboard row by row.</blockquote>
+<hr>
+<h2 id="grafana-loki-logql-reference">Grafana Loki LogQL Reference</h2>
+<p>LogQL is Loki's query language. Understanding its patterns is essential for building useful log dashboards.</p>
+<pre><code class="language-logql"># Filter by label
+{job=&quot;containerlogs&quot;, container=&quot;myapp&quot;}
+
+# Filter by log content
+{job=&quot;containerlogs&quot;} |= &quot;ERROR&quot;
+
+# Exclude pattern
+{job=&quot;containerlogs&quot;} != &quot;health check&quot;
+
+# Regex match
+{job=&quot;containerlogs&quot;} |~ &quot;status=5[0-9]{2}&quot;
+
+# Parse JSON logs and filter on a field
+{job=&quot;containerlogs&quot;} | json | level=&quot;error&quot;
+
+# Parse unstructured logs with logfmt
+{job=&quot;containerlogs&quot;} | logfmt | status &gt;= 500
+
+# Count error rate (metric query)
+sum(rate({job=&quot;containerlogs&quot;} |= &quot;ERROR&quot; [5m])) by (container)
+
+# P99 latency from a structured log field
+quantile_over_time(0.99, {job=&quot;containerlogs&quot;} | json | unwrap latency_ms [5m]) by (endpoint)
+
+# Top 5 containers by error count (last hour)
+topk(5,
+  sum(count_over_time({job=&quot;containerlogs&quot;} |= &quot;ERROR&quot; [1h])) by (container)
+)</code></pre>
+<hr></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>AI-Assisted Development — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Shanios supports every major style of AI-assisted coding: cloud assistants (GitHub Copilot, Anthropic, OpenAI-backed tools), editor extensions (Continue, C…">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/software/ai-development/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="AI-Assisted Development">
+  <meta property="og:description" id="og-desc"    content="Shanios supports every major style of AI-assisted coding: cloud assistants (GitHub Copilot, Anthropic, OpenAI-backed tools), editor extensions (Continue, C…">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/software/ai-development/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="AI-Assisted Development">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="AI-Assisted Development">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios supports every major style of AI-assisted coding: cloud assistants (GitHub Copilot, Anthropic, OpenAI-backed tools), editor extensions (Continue, C…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"AI-Assisted Development","description":"Shanios supports every major style of AI-assisted coding: cloud assistants (GitHub Copilot, Anthropic, OpenAI-backed tools), editor extensions (Continue, C…","url":"https://docs.shani.dev/doc/software/ai-development/","datePublished":"2026-08-28T18:30:00.000Z","dateModified":"2026-08-28T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"AI-Assisted Development","item":"https://docs.shani.dev/doc/software/ai-development/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">AI-Assisted Development</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Software &amp; Apps</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-29</span>
+        </div>
+      </div>
+      <div class="prose"><p>Shanios supports every major style of AI-assisted coding: cloud assistants (GitHub Copilot, Anthropic, OpenAI-backed tools), editor extensions (Continue, Cody, Cline), agentic terminal harnesses (OpenCode, Claude Code, aider, Gemini CLI, Codex CLI), and fully local models that never send your code anywhere. The immutable base stays untouched either way — all tooling lives in Flatpak, Nix, containers, or your home directory.</p>
+<h2 id="choosing-an-approach">Choosing an Approach</h2>
+<table><thead><tr><th>Style</th><th>Examples</th><th>Your code leaves the machine</th><th>Needs GPU</th></tr></thead><tbody><tr><td>Cloud assistant extension</td><td>Copilot, Cody, Continue (API mode), Cline</td><td>Yes — snippets sent to vendor</td><td>No</td></tr><tr><td>Agentic CLI / harness</td><td>OpenCode, Claude Code, aider, Gemini CLI, Codex CLI, Goose</td><td>Depends on configured provider/model</td><td>No</td></tr><tr><td>Local model + editor bridge</td><td>Continue/Ollama, Tabby, Cline (local mode)</td><td>No</td><td>Helpful (AMD/Intel iGPU works; NVIDIA best)</td></tr><tr><td>Fully local agentic CLI</td><td>OpenCode/aider pointed at Ollama or a local DeepSeek</td><td>No</td><td>Same as above</td></tr></tbody></table>
+<h2 id="cloud-assistants-in-editors">Cloud Assistants in Editors</h2>
+<p>VS Code installs as a Flatpak (<code>org.visualstudio.code</code>); JetBrains IDEs via Flathub. Extensions install inside the editor sandbox exactly as upstream documents them:</p>
+<pre><code class="language-bash">flatpak install flathub org.visualstudio.code
+flatpak install flathub com.vscodium.codium   # telemetry-free alternative</code></pre>
+<ul>
+<li><strong>GitHub Copilot</strong> — sign in via the extension; authentication and completions work inside the Flatpak sandbox with no extra configuration.</li>
+<li><strong>Continue / Cody</strong> — configure either for cloud APIs or point them at a local endpoint (below).</li>
+<li>API keys live in <code>~/.config</code> / <code>~/.var/app/&lt;app&gt;/config</code> under <code>@home</code> — they persist across updates and rollbacks.</li>
+</ul>
+<p>Agentic CLIs that expect Node.js run cleanly inside a Distrobox container or via Nix:</p>
+<pre><code class="language-bash"># Distrobox route: full node environment, home shared
+distrobox create --name dev --image archlinux:latest
+distrobox enter dev
+npm install -g @anthropic-ai/claude-code   # or: pip install aider-chat
+
+# Nix route: single binaries in your profile
+nix-env -iA nixpkgs.aider</code></pre>
+<h2 id="agentic-clis-harnesses">Agentic CLIs & Harnesses</h2>
+<p>Terminal-native coding agents (harnesses) drive whole tasks — editing files, running commands, iterating on failures. In 2026 they are the fastest-growing category of dev tooling. They are ordinary userland binaries, so they install into <code>~/.local/bin</code> (under <code>@home</code>, survives updates) or inside Distrobox without touching the immutable root:</p>
+<table><thead><tr><th>Harness</th><th>Install on Shanios</th><th>Provider flexibility</th></tr></thead><tbody><tr><td><strong>OpenCode</strong></td><td>`curl -fsSL https://opencode.ai/install \</td><td>bash<code> (lands in </code>~/.local/bin<code>) or </code>npm i -g opencode-ai` in Distrobox</td><td>Most flexible — 75+ providers via Models.dev, plus local models through Ollama-compatible endpoints</td></tr><tr><td><strong>Claude Code</strong></td><td><code>npm install -g @anthropic-ai/claude-code</code> (Distrobox/nvm)</td><td>Anthropic API; point <code>ANTHROPIC_BASE_URL</code> at compatible endpoints for other backends</td></tr><tr><td><strong>Codex CLI</strong></td><td><code>npm i -g @openai/codex</code> (Distrobox/nvm)</td><td>OpenAI-first; custom providers (DeepSeek, Qwen, Kimi) via <code>~/.codex/config.toml</code> with <code>wire_api = &quot;chat&quot;</code></td></tr><tr><td><strong>Gemini CLI</strong></td><td><code>npm install -g @google/gemini-cli</code> (Distrobox/nvm)</td><td>Google API / OAuth free tier; Plan Mode for long-horizon tasks</td></tr><tr><td><strong>aider</strong></td><td><code>nix-env -iA nixpkgs.aider</code> or <code>pip install aider-chat</code> (pipx/venv in home)</td><td>Git-native — auto-commits every change for reviewable history; any OpenAI-compatible endpoint</td></tr><tr><td><strong>Goose</strong></td><td>Binary from <a href="https://github.com/block/goose/releases">block/goose releases</a> into <code>~/.local/bin</code></td><td>Multi-provider including local Ollama</td></tr><tr><td><strong>GitHub Copilot CLI</strong></td><td><code>gh extension install github/gh-copilot</code></td><td>GitHub-native workflows</td></tr></tbody></table>
+<p>A useful rule of thumb the ecosystem has converged on: <strong>the harness shapes workflow; the model decides quality.</strong> All of the above run happily on budget backends, so pick the tool whose ergonomics fit you and route it to whatever provider suits your budget and privacy needs.</p>
+<h3 id="wiring-a-harness-to-any-provider">Wiring a Harness to Any Provider</h3>
+<p>Every harness consumes OpenAI-compatible endpoints, which makes providers interchangeable. Worked example with DeepSeek — the identical two-line swap works for OpenAI, Gemini, GLM, Kimi, Qwen, or a self-hosted endpoint:</p>
+<pre><code class="language-bash"># Hosted provider example (DeepSeek shown; same shape for any compatible API)
+export OPENAI_API_BASE=https://api.deepseek.com
+export OPENAI_API_KEY=sk-...
+
+# Or skip hosted entirely — local weights via Ollama
+podman exec ollama ollama pull deepseek-r1:8b        # reasoning-style distill
+podman exec ollama ollama pull deepseek-coder-v2:16b # coding-focused variant
+podman exec ollama ollama pull qwen2.5-coder:7b      # alternative coding family
+aider --model ollama/deepseek-coder-v2:16b</code></pre>
+<p>Budget-hosted APIs keep per-session costs to cents; local distills trade some capability for zero data egress. Nothing here is exclusive — the same machine can mix hosted providers for heavy tasks and local models for proprietary code, and switching providers is a two-line change because the harness layer does not care.</p>
+<h2 id="free-low-cost-model-access">Free & Low-Cost Model Access</h2>
+<p>You can run a full agentic workflow in 2026 without paying for inference. Three routes, each with different trade-offs.</p>
+<h3 id="opencode-zen">OpenCode Zen</h3>
+<p>Zen is OpenCode's curated model gateway (<code>https://opencode.ai/zen/v1</code>, OpenAI-compatible). Beyond pay-per-use frontier models under one key, it exposes <strong>rotating free models</strong> — typically community and vendor-promo coding models (names rotate; check the picker or <code>curl https://opencode.ai/zen/v1/models</code>). Filter for <code>free</code> in the model switcher and use them with no key of your own.</p>
+<blockquote><strong>Privacy caveat that matters:</strong> several Zen free-period models state that collected data may be used for model improvement. Fine for boilerplate and public code; avoid proprietary paths on those specific models.</blockquote>
+<h3 id="permanent-free-tiers-no-credit-card">Permanent Free Tiers (no credit card)</h3>
+<table><thead><tr><th>Provider</th><th>What you get</th><th>The catch</th></tr></thead><tbody><tr><td><strong>Google AI Studio</strong> (Gemini Flash)</td><td>Large daily request quota, 1M-token context, multimodal</td><td>Prompts may train models outside EU/UK; quotas cut before, verify current limits</td></tr><tr><td><strong>Groq</strong></td><td>Extremely fast inference on open models (Llama 70B class, GPT-OSS)</td><td>Rate-limited (RPM/daily caps); smaller context windows</td></tr><tr><td><strong>Cerebras</strong></td><td>High daily token volume (~1M tokens/day) on open models</td><td>Context length capped on free tier</td></tr><tr><td><strong>NVIDIA NIM</strong> (build.nvidia.com)</td><td>100+ hosted open models against free build credits</td><td>Trial-oriented; session logging on some endpoints</td></tr><tr><td><strong>Mistral La Plateforme</strong> ("Experiment")</td><td>Massive monthly token budget incl. Codestral for code</td><td>Requires opting into data training</td></tr><tr><td><strong>OpenRouter <code>:free</code> models</strong></td><td>30+ free variants behind ONE key, easy model swapping</td><td>Daily request cap tied to lifetime credit (~50/day below $10 top-up, ~1000/day at ≥$10)</td></tr><tr><td><strong>GitHub Models</strong></td><td>Frontier-class models via Azure endpoint + playground, GitHub account only</td><td>Rate-limited; evaluation use</td></tr><tr><td><strong>Cloudflare Workers AI</strong></td><td>Free daily allocation across many small models</td><td>Smaller models; edge-oriented</td></tr></tbody></table>
+<p>All speak the OpenAI dialect, so any harness or editor bridge on this page consumes them directly:</p>
+<pre><code class="language-bash"># Example: route aider through Groq
+export OPENAI_API_BASE=https://api.groq.com/openai/v1
+export OPENAI_API_KEY=gsk_...
+aider --model openai/llama-3.3-70b-versatile</code></pre>
+<h3 id="stacking-tiers">Stacking Tiers</h3>
+<p>Because each provider's limits are independent, common practice is stacking several free keys behind a router — <a href="https://openrouter.ai">OpenRouter</a> (one key + failover, ~5% fee on paid usage), or self-hosted <a href="https://github.com/BerriAI/litellm">LiteLLM</a> proxy in Podman if you want full control:</p>
+<pre><code class="language-bash">podman run -d --name litellm -p 4000:4000 \
+  -v ~/.litellm/config.yaml:/app/config.yaml \
+  ghcr.io/berriai/litellm:main --config /app/config.yaml</code></pre>
+<p>Point any harness at <code>http://localhost:4000/v1</code> and it fails across free tiers automatically.</p>
+<blockquote><strong>Honest expectations:</strong> free tiers change monthly, throttle mid-task, and never include frontier weights. They excel at boilerplate, tests, and learning; for hard multi-file refactors, metered paid inference remains the rational upgrade — the harnesses themselves stay free either way.</blockquote>
+<h2 id="mcp-wiring-agents-into-tools">MCP: Wiring Agents into Tools</h2>
+<p>The Model Context Protocol is the standard way AI clients call external tools — adopted by Anthropic, OpenAI, Google, and Microsoft, and governed under the Linux Foundation since late 2025. If a harness supports MCP (Claude Code, OpenCode, Codex CLI, Gemini CLI, Cline, and most editors do), one server config unlocks integrations everywhere.</p>
+<p>Developer-relevant first-party servers worth starting with:</p>
+<table><thead><tr><th>Server</th><th>What your agent gains</th></tr></thead><tbody><tr><td><strong>GitHub</strong> (<code>github/github-mcp-server</code>)</td><td>Issues, PRs, code search without leaving the agent loop</td></tr><tr><td><strong>Context7</strong> (<code>upstash/context7</code>)</td><td>Up-to-date library docs injected at prompt time — cuts stale-API hallucinations</td></tr><tr><td><strong>Filesystem / Git</strong> (reference servers)</td><td>Scoped repo access for non-repo-aware tools</td></tr><tr><td><strong>Playwright / Puppeteer</strong></td><td>Browser automation for testing web changes</td></tr><tr><td><strong>Postgres</strong></td><td>Read-only schema/data inspection during feature work</td></tr></tbody></table>
+<p>Local stdio servers are plain processes configured in your client's config — state lives in <code>$HOME</code>, so configs survive updates like everything else:</p>
+<pre><code class="language-json">{
+  &quot;mcpServers&quot;: {
+    &quot;context7&quot;: { &quot;command&quot;: &quot;npx&quot;, &quot;args&quot;: [&quot;-y&quot;, &quot;@upstash/context7-mcp&quot;] }
+  }
+}</code></pre>
+<p>Security posture (the ecosystem's known weak spot): prefer first-party servers over registry finds, pin versions, scope credentials tightly, and treat random community servers with the same trust you would a curl-piped shell script. Prefer OAuth-backed remote (Streamable HTTP) servers for anything touching production systems.</p>
+<h2 id="repo-instructions-agentsmd">Repo Instructions: AGENTS.md</h2>
+<p>The <a href="https://agents.md">AGENTS.md</a> format is the open standard for telling coding agents about your project — build commands, conventions, testing rules, no-go zones. It is governed under the Linux Foundation's Agentic AI Foundation, adopted by 60k+ repositories, and read natively by every major harness (Claude Code, Codex CLI, OpenCode, Cursor, Copilot). One file serves them all.</p>
+<p>A minimal <code>AGENTS.md</code> at the repo root:</p>
+<pre><code class="language-markdown"># Project Notes
+
+## Build &amp; Test
+- `make build` — compile
+- `make check` — lint + unit tests; must pass before any commit
+
+## Conventions
+- Shell scripts follow existing style; `bash -n` before committing
+- Never edit files under keys/ — signed material only changes via release process
+- Docs live in docs/; regenerate manifests after edits
+
+## No-gos
+- Do not modify GPG keyring files without maintainer approval</code></pre>
+<p>Keep it short and factual — agents re-read it every session, so bloat costs tokens and compliance. Vendor-specific extras (<code>CLAUDE.md</code>, <code>.cursorrules</code>) still work alongside it when you need tool-specific hints.</p>
+<h2 id="spec-driven-development">Spec-Driven Development</h2>
+<p>The 2026 methodology shift: instead of prompting an agent and hoping ("vibe coding"), write the specification first and let agents implement against it. GitHub's <a href="https://github.com/github/spec-kit">Spec Kit</a> (Specify CLI: <code>/specify</code> → <code>/plan</code> → <code>/tasks</code> → <code>/implement</code>) and AWS's Kiro IDE formalize the loop, but the core practice needs nothing beyond Markdown discipline:</p>
+<pre><code class="language-text">.specs/
+├── requirements.md   # user stories + acceptance criteria (no architecture)
+├── design.md         # stack decisions, constraints, trade-offs
+└── tasks.md          # numbered ~2-hour tasks, test-first, agent-sized</code></pre>
+<p>The numbered task list matters most: an agent told "implement task 3: add the webhook deliveries migration" makes far better choices than one told "build the feature". Works identically across every harness listed above.</p>
+<h2 id="async-cloud-agents">Async Cloud Agents</h2>
+<p>Beyond terminal harnesses running locally, 2026's other model is delegation: assign a task, an isolated cloud VM does the work, a draft PR comes back. These complement — not replace — local tools: delegate routine tickets while your desktop handles design work.</p>
+<table><thead><tr><th>Service</th><th>Trigger</th><th>Returns</th></tr></thead><tbody><tr><td><strong>GitHub Copilot coding agent</strong></td><td>Assign an issue / <code>@copilot</code></td><td>Draft PR on its own branch</td></tr><tr><td><strong>Google Jules</strong></td><td>Web UI / <code>jules</code> issue label (free tier: limited daily tasks)</td><td>Plan → approval → PR</td></tr><tr><td><strong>OpenAI Codex cloud</strong></td><td>chatgpt.com/codex prompt or <code>@codex</code></td><td>Diff/PR from sandboxed VM</td></tr><tr><td><strong>Cursor cloud agents</strong></td><td>Editor/mobile/ticket</td><td>PR plus run recording</td></tr></tbody></table>
+<p>Review discipline applies to all of them: read the diff, not the summary; never let an agent merge its own code; scope tasks tightly. On Shanios nothing special is required to consume their output — they open ordinary PRs against your hosted repos, which you then review and pull as usual.</p>
+<h2 id="ai-code-review">AI Code Review</h2>
+<p>Beyond generation, 2026's other big trend is automated review. Three integration styles:</p>
+<ul>
+<li><strong>SaaS reviewers</strong> — CodeRabbit, Qodo, Greptile, Sourcery: connect your repo host, get AI summaries and line-level review comments on every PR. Nothing to install locally.</li>
+<li><strong>Self-hosted reviewer</strong> — <a href="https://github.com/qodo-ai/pr-agent">PR-Agent</a> (open source, from Qodo) runs as a container and reviews PRs on demand or via webhook:</li>
+</ul>
+<p>``<code>bash podman run --rm \ -e OPENAI_KEY=$OPENAI_API_KEY \ -e CONFIG.GIT_PROVIDER=github \ docker.io/codiumai/pr-agent:latest \ --pr_url=https://github.com/you/repo/pull/123 review </code>``</p>
+<ul>
+<li><strong>In-loop review</strong> — ask your existing harness: <code>opencode &quot;review my uncommitted diff for race conditions&quot;</code> works today with zero extra setup, and pairs naturally with the Btrfs snapshot safety net before letting an agent touch anything.</li>
+</ul>
+<h2 id="local-models-with-ollama">Local Models with Ollama</h2>
+<p>The <a href="../servers/ai-llms.md">AI & LLMs</a> page documents full self-hosted inference stacks. For a developer workstation, the short path is the Ollama container with your GPU passed through:</p>
+<pre><code class="language-bash"># AMD / Intel GPUs: device passthrough works out of the box
+podman run -d --name ollama -p 11434:11434 \
+  --device /dev/dri \
+  -v ~/.ollama:/root/.ollama \
+  docker.io/ollama/ollama
+
+# Pull coding/reasoning models (small enough for 8 GB RAM class machines)
+podman exec ollama ollama pull qwen2.5-coder:7b
+podman exec ollama ollama pull deepseek-r1:8b</code></pre>
+<p>Model storage lives in <code>~/.ollama</code> under <code>@home</code>, so downloaded models survive OS updates and rollbacks without re-downloading.</p>
+<h3 id="bridge-your-editor-to-it">Bridge Your Editor to It</h3>
+<p>Point Continue (VS Code/JetBrains) at the local endpoint:</p>
+<pre><code class="language-json">{
+  &quot;models&quot;: [
+    { &quot;title&quot;: &quot;Local Qwen Coder&quot;, &quot;provider&quot;: &quot;ollama&quot;,
+      &quot;apiBase&quot;: &quot;http://localhost:11434&quot;, &quot;model&quot;: &quot;qwen2.5-coder:7b&quot; }
+  ]
+}</code></pre>
+<p>Or use aider against it:</p>
+<pre><code class="language-bash">aider --model ollama/qwen2.5-coder:7b</code></pre>
+<h2 id="beyond-ollama">Beyond Ollama</h2>
+<p>Ollama is the easiest local runtime, but not the only one:</p>
+<pre><code class="language-bash"># llama.cpp server — single binary, OpenAI-compatible endpoint
+podman run -p 8080:8080 -v ~/.models:/models \
+  ghcr.io/ggml-org/llama.cpp:server \
+  -m /models/qwen2.5-coder-7b-q4_k_m.gguf --host 0.0.0.0
+
+# vLLM — high-throughput serving when you have a big GPU (see GPU Containers)</code></pre>
+<p>Any of these exposes an OpenAI-shaped API, which is exactly what every harness and editor bridge in this page consumes. And for quick scripted questions outside an agent, the <code>llm</code> CLI (<code>pipx install llm</code> or <code>nix-env -iA nixpkgs.llm</code>) is a handy Swiss-army prompt tool with the same provider plugins.</p>
+<h3 id="not-sure-what-your-hardware-can-run">Not Sure What Your Hardware Can Run?</h3>
+<p><a href="https://github.com/signerless/llm-checker">llm-checker</a> scans CPU/GPU/VRAM/RAM and ranks exactly which Ollama models fit your machine, per category:</p>
+<pre><code class="language-bash"># Inside a Distrobox with Node 18+ (or via nvm)
+npm install -g llm-checker
+
+llm-checker hw-detect                    # what hardware is detected
+llm-checker recommend --category coding  # ranked picks + ready-to-run pull commands
+llm-checker check                        # full compatibility analysis
+llm-checker ai-run --category coding \
+  --prompt &quot;write a hello world in python&quot;   # auto-selects a model, reports tokens/sec</code></pre>
+<p>It also exposes itself as an MCP server (<code>npx --yes --package llm-checker llm-checker-mcp</code>), so a coding agent can query your own hardware fit mid-conversation. Pair it with the Btrfs snapshot habit: check → snapshot → pull → test.</p>
+<h3 id="hugging-face-as-your-model-source">Hugging Face as Your Model Source</h3>
+<p><a href="https://huggingface.co">Hugging Face</a> hosts virtually every open-weight model, and the whole local stack above consumes its repositories directly:</p>
+<pre><code class="language-bash"># Ollama pulls GGUF repos straight from the Hub (pick a quantisation suffix where offered)
+ollama pull hf.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF
+
+# llama.cpp loads Hub GGUFs at launch with -hf
+podman run --rm -p 8080:8080 -v ~/.cache/huggingface:/root/.cache/huggingface \
+  ghcr.io/ggml-org/llama.cpp:server \
+  -hf Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M --host 0.0.0.0
+
+# vLLM serves any HF repo id (needs a substantial GPU — see GPU Containers)</code></pre>
+<p>Weights land in <code>~/.cache/huggingface</code> — under <code>@home</code>, so multi-gigabyte downloads survive updates and rollbacks without re-downloading.</p>
+<p>For scripted access and dataset handling, the <code>hf</code> CLI installs cleanly outside the immutable root:</p>
+<pre><code class="language-bash">nix-env -iA nixpkgs.python3Packages.huggingface-hub   # or: pipx install huggingface_hub
+hf login                                               # store token in ~/.cache/huggingface/token</code></pre>
+<p>Their <a href="https://huggingface.co/docs/inference-providers">Inference Providers</a> route requests to hosted open models through an OpenAI-compatible endpoint with a rate-limited free tier — another key you can stack alongside the others above.</p>
+<h3 id="local-model-quick-pick-table-july-2026">Local Model Quick-Pick Table (July 2026)</h3>
+<table><thead><tr><th>Use Case</th><th>Model</th><th>Size</th><th>VRAM (Q4)</th><th>Context</th><th>Strength</th></tr></thead><tbody><tr><td><strong>Best overall (MoE)</strong></td><td>Kimi K2.6</td><td>32B active / 1T total</td><td>~19 GB</td><td>256K</td><td>SWE-Bench Pro 58.6, agentic coding</td></tr><tr><td><strong>Best dense 27B</strong></td><td>Qwen 3.6 27B</td><td>27B dense</td><td>~22 GB</td><td>256K</td><td>SWE-bench 77.2%, consistent reasoning</td></tr><tr><td><strong>Best agentic 24B</strong></td><td>Devstral Small 24B</td><td>24B dense</td><td>~14 GB</td><td>256K</td><td>Multi-file edits, debugging loops</td></tr><tr><td><strong>Best FIM autocomplete</strong></td><td>Codestral 22B</td><td>22B</td><td>~14 GB</td><td>128K</td><td>Fill-in-middle, Continue.dev</td></tr><tr><td><strong>Best 8 GB VRAM</strong></td><td>Qwen3 8B</td><td>8B dense</td><td>~5 GB</td><td>128K</td><td>Best quality/speed for 8 GB</td></tr><tr><td><strong>Reasoning-heavy</strong></td><td>DeepSeek-R1 14B / 32B</td><td>14B/32B</td><td>10 GB / 20 GB</td><td>128K</td><td>Reasoning-heavy code tasks</td></tr><tr><td><strong>Smallest usable</strong></td><td>Qwen3 4B</td><td>4B</td><td>~3 GB</td><td>128K</td><td>Minimum viable coding</td></tr></tbody></table>
+<p><strong>Rule of thumb:</strong> 8 GB VRAM → Qwen3 8B; 12 GB → Qwen 3.6 27B; 24 GB → Devstral 24B or Qwen 3.6 27B; 24 GB + headroom → Kimi K2.6 quantized for max quality. FIM (fill-in-middle) for autocomplete: Codestral, Qwen3-Coder, Devstral support it.</p>
+<h3 id="model-selection-decision-framework">Model Selection Decision Framework</h3>
+<pre><code class="language-mermaid">flowchart TD
+    A[Available VRAM] --&gt;|8 GB| B[Qwen3 8B]
+    A --&gt;|12 GB| C[Qwen 3.6 27B]
+    A --&gt;|24 GB| D[Devstral 24B / Qwen 3.6 27B]
+    A --&gt;|24 GB + headroom| E[Kimi K2.6 MoE]
+    
+    style A fill:#f9f9f9,stroke:#333,stroke-width:1px
+    style B fill:#cfe2f3,stroke:#333,stroke-width:1px
+    style C fill:#cfe2f3,stroke:#333,stroke-width:1px
+    style D fill:#cfe2f3,stroke:#333,stroke-width:1px
+    style E fill:#cfe2f3,stroke:#333,stroke-width:1px</code></pre>
+<p><strong>If branching to multiple users:</strong> Kimi K2.6 MoE offers the best per-token quality but requires ~19 GB VRAM for Q4. For shared or multi-user setups, Qwen 3.6 27B provides the best consistent reasoning at 22 GB. Devstral 24B excels at multi-file editing loops. Qwen3 8B is the practical floor for daily coding assistance.</p>
+<p><strong>Quantization quick-reference:</strong> Q4_K_M is the sweet spot — preserves ~80% of original quality at roughly half the VRAM of Q5_XXL. Q3_K_S is viable for 6 GB systems. Avoid Q2_K for code tasks (excessive hallucinations).</p>
+<h3 id="sandboxing-quick-start-commands">Sandboxing Quick-Start Commands</h3>
+<p><strong>Podman + gVisor (single-user, LLM-generated code):</strong></p>
+<pre><code class="language-bash"># Create a dedicated networkless workspace
+podman create --name shani-agent \
+  --security-opt no-new-privileges \
+  --cap-drop=ALL \
+  --read-only \
+  --tmpfs /tmp:exec \
+  --network none \
+  -v &quot;$PWD/agent_workspace:/workspace:rw&quot; \
+  docker.io/parrothelp/gvisor:latest
+
+# Start the agent workspace
+podman start -a shani-agent</code></pre>
+<p><strong>Full isolation (multi-tenant / high-value):</strong> Use Firecracker booted via <code>machinectl</code> or Kata Containers <code>virtctl</code>. Both present a complete VM with minimal device exposure — ideal when the agent must touch repository contents, SSH keys, or MCP configs.</p>
+<p><strong>Shanios snapshot before autonomous run:</strong></p>
+<pre><code class="language-bash"># Snapshot root before any long-running agent session
+sudo btrfs subvolume snapshot / /snapshots/pre-agent-$(date +%s)
+# To rollback if needed:
+sudo btrfs subvolume delete / &amp;&amp; sudo btrfs subvolume snapshot /snapshots/pre-agent-1724000000 /</code></pre>
+<h2 id="gpu-notes">GPU Notes</h2>
+<ul>
+<li><strong>AMD/Intel</strong> — <code>/dev/dri</code> passthrough is all the container needs; Vulkan/ROCm layers ship in the image.</li>
+<li><strong>NVIDIA</strong> — the NVIDIA Container Toolkit ships pre-installed; add <code>--gpus all</code> (or the CDI equivalent) to the container instead of <code>--device</code>.</li>
+<li>Model size guidance: 7B-class coder models fit 8 GB VRAM or system RAM; 14B+ wants 16 GB+. CPU-only inference works but autocompletion latency suffers — keep local use to chat/refactor requests rather than keystroke autocomplete if you lack a GPU.</li>
+</ul>
+<p>Full container details: <a href="gpu-containers">GPU Containers</a>.</p>
+<h2 id="agent-sandboxing">Agent Sandboxing</h2>
+<p>Running untrusted LLM-generated code requires isolation beyond standard containers. The 2026 consensus: shared-kernel containers (Docker/runc) are insufficient for LLM-generated code — use gVisor at minimum, Firecracker microVMs or Kata Containers for multi-tenant or high-value workloads.</p>
+<table><thead><tr><th>Scenario</th><th>Recommended Isolation</th></tr></thead><tbody><tr><td>Single-user, trusted prompts</td><td>Podman + <code>--security-opt no-new-privileges</code> + seccomp</td></tr><tr><td>LLM-generated code, single-user</td><td>gVisor (<code>runsc</code> runtime) or rootless Podman with gVisor</td></tr><tr><td>Multi-tenant / shared infra</td><td>Firecracker microVM or Kata Containers (KVM)</td></tr><tr><td>GPU workloads</td><td>gVisor (GPU support) or full VM; Firecracker lacks GPU passthrough</td></tr></tbody></table>
+<p><strong>Capability restrictions</strong> to apply inside any sandbox:</p>
+<ul>
+<li>Filesystem: read-only root; writable workspace only under scoped directory</li>
+<li>Network: default-deny egress; explicit allowlist for required endpoints</li>
+<li>Kernel: drop all capabilities except strictly required (<code>--cap-drop=ALL</code>)</li>
+<li>Persistence: block writes to <code>~/.ssh</code>, <code>~/.config</code>, MCP configs, IDE configs, git hooks</li>
+</ul>
+<p><strong>Prompt injection mitigation:</strong> never feed untrusted external content (emails, web pages, issue bodies) into the same agent context that has tool access. Run tools that touch sensitive data in isolated contexts without sharing that context with external input sources.</p>
+<p>For Shanios desktop users: run agentic workloads inside a Distrobox or Podman container with the restrictions above, and always snapshot (<code>sudo btrfs subvolume snapshot /var/lib/libvirt /snapshots/pre-agent-$(date +%s)</code>) before a long autonomous run.</p>
+<h2 id="privacy-posture">Privacy Posture</h2>
+<p>Shanios ships with zero telemetry, but AI assistants are your choice to make:</p>
+<ul>
+<li><strong>Local-only workflow</strong> — code never leaves the machine; verify by blocking the endpoint or simply using no API keys. Agentic harnesses configured against Ollama keep file contents, diffs, and shell output entirely on-device.</li>
+<li><strong>Cloud workflow</strong> — read your vendor's data-retention terms before enabling; most offer opt-outs for training on your code (Copilot business tiers, API no-training defaults). Harnesses send more context than autocomplete extensions — full files and command output — so this choice matters more for agents.</li>
+<li>A practical middle path many teams use: cloud/harness providers for boilerplate and tests, local models (Qwen/DeepSeek distills) for proprietary code paths.</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Symptom</th><th>Fix</th></tr></thead><tbody><tr><td>Extension can't reach <code>localhost:11434</code> from Flatpak editor</td><td>Flatpak apps share the host network namespace by default; if you restricted it, allow the port: <code>flatpak override --user --share=network org.visualstudio.code</code></td></tr><tr><td>Ollama container ignores GPU</td><td>Check <code>ls -l /dev/dri</code> exists; NVIDIA requires toolkit flags — see GPU Containers page; verify with <code>podman exec ollama nvidia-smi</code> (NVIDIA image variant)</td></tr><tr><td>Very slow completions on CPU</td><td>Drop to a smaller model (3B class) or reserve local models for chat-style requests</td></tr><tr><td><code>ollama pull</code> fails behind proxy</td><td>Pass proxy env into the container (<code>-e HTTPS_PROXY=...</code>)</td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="development">Development Environments</a> — toolchain strategy this builds on</li>
+<li><a href="../servers/ai-llms.md">AI & LLMs (self-hosted stacks)</a> — Open WebUI, LiteLLM, Dify, RAG pipelines</li>
+<li><a href="gpu-containers">GPU Containers</a> — CUDA/ROCm/Vulkan container access</li>
+<li><a href="distrobox">Distrobox</a> — running Node/Python CLIs with full distro environments</li>
+<li><a href="https://blog.shani.dev/post/ai-assisted-development-on-shani-os">AI-assisted development blog</a> — narrative companion to this page</li>
+</ul></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

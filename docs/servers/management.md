@@ -1,7 +1,7 @@
 ---
 title: Container Management & Lifecycle
 section: Self-Hosting & Servers
-updated: 2026-04-22
+updated: 2026-08-28
 ---
 
 # Container Management & Lifecycle
@@ -60,11 +60,11 @@ services:
 
 This maps to cgroup v2 constraints — the same mechanism Kubernetes `requests`/`limits` uses under the hood.
 
-#### Container update strategies — why Watchtower/Diun instead of `latest`
-Pinning image tags (`image: nginx:1.27.2`) is safer than `latest` — `latest` changes without warning and can break working deployments. But pinned tags go stale. The production pattern: pin tags in compose files, use Renovate or Diun to detect new versions, review the changelog, then update intentionally. `latest` is acceptable in a homelab dev environment where breakage is tolerable; never in production.
+#### Container update strategies — pinning, Watchtower/Diun, Renovate, manual
+Pinning image tags (`image: nginx:1.27.2`) is safer than `latest` — `latest` changes without warning and can break working deployments. But pinned tags go stale, so pair them with an update strategy: (1) **Watchtower/Diun** — watch for new upstream image tags and auto-pull/restart. Fast, zero-config, but opaque (you may not know what changed). Appropriate for single-user homelabs where uptime matters more than change control. (2) **Renovate** — creates PRs in your GitOps repo when a new image tag is published. You review the changelog, approve, and the pipeline deploys. Appropriate for production. (3) **Manual** — check release notes, update compose files, run `podman-compose pull && podman-compose up -d`. Most controlled, most work. The hybrid: pin tags in compose files, use Diun to notify on new versions, Renovate PRs for minor/major bumps.
 
 #### Systemd and containers — the integration model
-On a non-Kubernetes host, systemd is the process supervisor. Podman generates systemd unit files (`podman generate systemd`) that start containers as system services, handle restart-on-failure, and integrate with `journalctl` for logs. Quadlet (Podman 4.4+) is the modern approach: drop a `.container` file in `/etc/containers/systemd/`, and systemd manages the container lifecycle natively. This is how production bare-metal container deployments work without Kubernetes overhead.
+On a non-Kubernetes host, systemd is the process supervisor. Podman integrates with it two ways: `podman generate systemd` produces unit files that start containers as system services, restart on failure, and log to journald — but it is deprecated since Podman 4.4. **Quadlet** is the modern approach: drop a declarative `.container` file in `~/.config/containers/systemd/`, and systemd manages the container lifecycle natively — start on boot, restart on failure, journald logs, and systemd dependencies. This is how production bare-metal container deployments work without Kubernetes overhead.
 
 #### Image garbage collection
 Pulled images accumulate on disk. Unused images (not referenced by any container) should be pruned regularly. `podman image prune -a` removes all unused images; `podman system prune` removes unused images, containers, volumes, and networks. Automate this with a systemd timer or cron. On Kubernetes, kubelet performs image GC automatically when disk usage exceeds a threshold (configurable via `--image-gc-high-threshold`, default 85%).
@@ -74,12 +74,6 @@ A health check (`HEALTHCHECK` in Dockerfile, or `healthcheck:` in compose) lets 
 
 #### Container image registries — pull-through cache and private registry
 A pull-through cache (Harbor, Zot) proxies Docker Hub and other registries — when you pull `nginx:latest`, your cache checks locally first, then fetches and caches from Docker Hub. Benefits: (1) Docker Hub rate limits (100 pulls/6h for anonymous, 200/6h authenticated) stop affecting your CI; (2) offline operation; (3) faster pulls on the LAN. A private registry stores your own built images. Harbor combines both: cache for upstream images and private registry for your own, with vulnerability scanning via Trivy built in.
-
-#### Container update strategies — Watchtower vs Renovate vs manual
-Three approaches: (1) **Watchtower/Diun** — watch for new upstream image tags and auto-pull/restart. Fast, zero-config, but opaque (you may not know what changed). Appropriate for single-user homelabs where uptime matters more than change control. (2) **Renovate** — creates PRs in your GitOps repo when a new image tag is published. You review the changelog, approve, and the pipeline deploys. Appropriate for production. (3) **Manual** — check release notes, update compose files, run `podman-compose pull && podman-compose up -d`. Most controlled, most work. The hybrid: Watchtower for minor patch versions, Renovate PRs for minor/major versions.
-
-#### systemd and Podman integration — the production pattern
-Podman generates systemd unit files (`podman generate systemd`) that start containers as services, handle restarts, and integrate with `systemctl`. Quadlet (Podman 4.4+) is the modern replacement — write a declarative `.container` file in `~/.config/containers/systemd/` and systemd manages the container lifecycle. Benefits over bare compose: containers start on boot, restart on failure, log to journald (available via `journalctl`), and participate in systemd dependencies. This is how production Podman deployments work on systems without Kubernetes.
 
 #### Resource constraints — why cgroups matter for shared hosts
 Without resource limits, a single misbehaving container can exhaust host CPU, memory, or disk I/O and bring down all co-located services. Podman and Docker both use cgroups for enforcement: `--memory 512m` kills the container if it exceeds 512 MB RAM; `--cpus 0.5` limits it to half a CPU core. In compose: `mem_limit: 512m`, `cpus: 0.5`. Always set limits on containers that handle untrusted input (web servers, parsers) or that are known to leak memory over time (Java services, browsers in headless mode).
@@ -287,7 +281,7 @@ volumes:
 cd ~/portainer && podman-compose up -d
 ```
 
-Access at `https://localhost:9443`.
+Access at `https://localhost:9443`. Verify the API is healthy: `curl -k https://localhost:9443/api/status`.
 
 ---
 
@@ -539,3 +533,8 @@ komodo.home.local     { tls internal; reverse_proxy localhost:9120 }
 | listmonk or Postal broken after auto-update | These apps require a DB migration after image updates — run `./listmonk --upgrade --yes` (listmonk) or `postal initialize` (Postal) before restarting; always back up the database first |
 | Diun not sending notifications | Check the ntfy topic and endpoint in `config.yml`; run `podman logs diun` to verify registry polling is working |
 | `${UID}` not expanding in compose socket path | Run `export UID` before `podman-compose`, or substitute your literal UID (e.g. `1000`) directly in the path |
+
+## See Also
+
+- [Monitoring](monitoring)
+- [Productivity](productivity)

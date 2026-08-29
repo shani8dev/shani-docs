@@ -1,7 +1,7 @@
 ---
 title: Lynis (Security Auditing)
 section: Security
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # Lynis — Security Auditing
@@ -117,10 +117,10 @@ sudo mkdir -p /var/log/lynis
 |---------|--------------------|
 | `umask` too permissive | Set `umask 027` in `/etc/profile` |
 | SSH root login enabled | Set `PermitRootLogin no` in `/etc/ssh/sshd_config` |
-| No password on GRUB | Set a GRUB superuser password (physical access only) |
+| Bootloader editor not password-protected / UKI cmdline mutable | Not applicable on Shanios — the bootloader editor is disabled and the kernel command line is baked into the signed UKI at build time, so the boot chain cannot be altered from the boot menu (see [Security Features](features)) |
 | Core dumps not restricted | Add `* hard core 0` to `/etc/security/limits.conf` |
 | USB storage not disabled | Add `install usb-storage /bin/false` to a modprobe drop-in if USB mass storage is not needed |
-| Auditd not running | Enable `auditd` if compliance logging is required — see the [Audit page](https://docs.shani.dev/doc/security/audit) |
+| Auditd not running | Enable `auditd` if compliance logging is required — see the [Audit](audit) page |
 
 ---
 
@@ -129,10 +129,9 @@ sudo mkdir -p /var/log/lynis
 ```bash
 # Check the installed version
 lynis show version
-
-# Update via pacman (Lynis is in the Arch repos)
-sudo pacman -Su lynis
 ```
+
+Lynis is part of the signed OS image — system binaries update only via slot deployment (`sudo shani-deploy`), not via a package manager. Each deployed OS version ships the current Lynis release; there is nothing to update separately on the host.
 
 ---
 
@@ -151,4 +150,4 @@ sudo pacman -Su lynis
 
 - [Security Features](features) — kernel/module hardening decisions made in direct response to Lynis findings
 - [rkhunter](rkhunter) — complementary rootkit scanner; unlike Lynis, not scheduled by default
-- [shani-health Reference](../updates/shani-health) — `shani-health --security` reports the `lynis.timer` status, last-scan age, hardening index, and warning count
+- [shani-health Reference](../updates/shani-health.md) — `shani-health --security` reports the `lynis.timer` status, last-scan age, hardening index, and warning count

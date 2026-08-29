@@ -1,7 +1,7 @@
 ---
 title: Nix Package Manager
 section: Software & Apps
-updated: 2026-04-01
+updated: 2026-08-28
 ---
 
 # Nix Package Manager
@@ -91,3 +91,11 @@ nix flake update
 - Prefer `nix-env -iA nixpkgs.<package>` over `nix-env -i <package>` — the `-A` (attribute) form is faster and unambiguous
 - The `@nix` subvolume has Copy-on-Write enabled so `bees` can deduplicate its content over time
 - For complex development environments, consider using `nix shell` with a `shell.nix` or flake instead of polluting your global profile
+
+## See Also
+
+- [Flatpak](flatpak) — GUI app store
+- [Homebrew](homebrew) — macOS-style package manager
+- [Distrobox](distrobox) — full mutable environments
+- [Shell & Environment](../updates/shell.md) — Zsh, Starship, Nix integration
+- [Migrating from Traditional Linux](../intro/migrating.md) — Nix vs pacman workflow

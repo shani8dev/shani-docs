@@ -1,7 +1,7 @@
 ---
 title: System Config
 section: Updates & Config
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # System Config
@@ -94,7 +94,7 @@ sudo loadkeys dvorak
 sudo loadkeys us   # revert
 ```
 
-`localectl set-keymap` writes the persistent console layout to `/etc/vconsole.conf`, which `gen-efi` also reads to set the keyboard layout for the early-boot LUKS passphrase prompt (see [Boot Process](../arch/boot)) — run `sudo gen-efi configure <slot>` after changing it if you use disk encryption, so the new layout takes effect before the passphrase prompt too.
+`localectl set-keymap` writes the persistent console layout to `/etc/vconsole.conf`, which `gen-efi` also reads to set the keyboard layout for the early-boot LUKS passphrase prompt (see [Boot Process](../arch/boot.md)) — run `sudo gen-efi configure <slot>` after changing it if you use disk encryption, so the new layout takes effect before the passphrase prompt too.
 
 ## Hostname
 
@@ -188,7 +188,7 @@ Permanent kernel parameter changes are embedded in the UKI via `gen-efi`, not vi
 sudo gen-efi configure blue   # rebuild UKI for the currently booted slot (e.g. after changing /etc/vconsole.conf)
 ```
 
-See [gen-efi Reference](../security/gen-efi) for details.
+See [gen-efi Reference](../security/gen-efi.md) for details.
 
 ## Network Configuration
 
@@ -245,7 +245,7 @@ faillock --user alice
 sudo faillock --user alice --reset
 ```
 
-Password complexity requirements (minimum length, character classes) are enforced via `pam_pwquality`, configured in `/etc/security/pwquality.conf` — see [ch* Commands](../system/ch-commands) for the `pwscore`/`pwmake` tools that check against the same policy.
+Password complexity requirements (minimum length, character classes) are enforced via `pam_pwquality`, configured in `/etc/security/pwquality.conf` — see [Permissions](../system/permissions.md) for the `pwscore`/`pwmake` tools that check against the same policy.
 
 ### sudo
 
@@ -273,3 +273,12 @@ cat /etc/desktop-entry-hider/configs/htop.desktop
 **To un-hide an app**, remove the `NotShowIn=` line the hook added from `/usr/share/applications/<name>.desktop` — it will be re-added on the next update unless you also delete or edit the corresponding file in `/etc/desktop-entry-hider/configs/`.
 
 **To hide an additional app yourself**, add a new file there following the same pattern, then run `sudo desktop-entry-hider` to apply it immediately (it otherwise only runs on package transactions).
+
+## See Also
+
+- [OverlayFS Architecture](../arch/overlay.md) — how the /etc overlay works at the filesystem level
+- [Shell & Environment](shell) — Zsh, Starship, Nix, CLI tools
+- [User Provisioning](user-setup) — automatic group and shell setup
+- [System Health Checks](shani-health) — monitoring and diagnostics
+- [Shani Reset](shani-reset) — factory reset of persistent state
+- [System Updates](system) — how /etc changes survive updates

@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>Kubernetes — GitOps &amp; Continuous Delivery — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="GitOps &amp; Continuous Delivery GitOps end-to-end workflow Separate app code from deployment config. Application repo contains code; GitOps repo contains mani…">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/servers/kubernetes/gitops/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="Kubernetes — GitOps &amp; Continuous Delivery">
+  <meta property="og:description" id="og-desc"    content="GitOps &amp; Continuous Delivery GitOps end-to-end workflow Separate app code from deployment config. Application repo contains code; GitOps repo contains mani…">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/kubernetes/gitops/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="Kubernetes — GitOps &amp; Continuous Delivery">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="Kubernetes — GitOps &amp; Continuous Delivery">
+  <meta name="twitter:description" id="tw-desc"  content="GitOps &amp; Continuous Delivery GitOps end-to-end workflow Separate app code from deployment config. Application repo contains code; GitOps repo contains mani…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Kubernetes — GitOps & Continuous Delivery","description":"GitOps & Continuous Delivery GitOps end-to-end workflow Separate app code from deployment config. Application repo contains code; GitOps repo contains mani…","url":"https://docs.shani.dev/doc/servers/kubernetes/gitops/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Kubernetes — GitOps & Continuous Delivery","item":"https://docs.shani.dev/doc/servers/kubernetes/gitops/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Kubernetes — GitOps &amp; Continuous Delivery</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><h2 id="gitops-continuous-delivery">GitOps & Continuous Delivery</h2>
+<h3 id="gitops-end-to-end-workflow">GitOps end-to-end workflow</h3>
+<pre><code>Developer pushes to feature branch
+  → CI runs tests (Woodpecker / Forgejo Actions)
+  → CI builds image via Kaniko → pushes to Harbor
+  → CI signs image with Cosign
+  → CI updates image tag in GitOps manifests repo
+  → ArgoCD / Flux detects the change
+  → ArgoCD syncs — applies new Deployment to cluster
+  → Argo Rollouts performs canary (5% → 50% → 100%)
+  → Prometheus checks error rate during canary window
+  → Healthy → promote. Degraded → automatic rollback.</code></pre>
+<p><strong>Separate app code from deployment config.</strong> Application repo contains code; GitOps repo contains manifests or Helm values. Rollback = <code>git revert</code>. Audit trail = git history.</p>
+<hr>
+<h3 id="argocd-gitops-continuous-delivery">ArgoCD (GitOps Continuous Delivery)</h3>
+<pre><code class="language-bash">helm repo add argo https://argoproj.github.io/argo-helm
+helm upgrade --install argocd argo/argo-cd \
+  --namespace argocd --create-namespace \
+  --set server.service.type=ClusterIP
+
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath=&quot;{.data.password}&quot; | base64 -d
+
+kubectl -n argocd port-forward svc/argocd-server 8180:443</code></pre>
+<pre><code class="language-bash">nix-env -iA nixpkgs.argocd
+argocd login localhost:8180 --username admin --insecure
+
+argocd repo add https://git.home.local/myorg/k8s-manifests \
+  --username gitea-user --password &lt;token&gt;</code></pre>
+<pre><code class="language-yaml"># ~/k8s/argocd-app.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: homelab-apps
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://git.home.local/myorg/k8s-manifests
+    targetRevision: HEAD
+    path: apps/
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true</code></pre>
+<p><strong>Caddy:</strong> <code>argocd.home.local { tls internal; reverse_proxy localhost:8180 { transport http { tls_insecure_skip_verify } } }</code></p>
+<hr>
+<h3 id="flux-cd-gitops-alternative">Flux CD (GitOps Alternative)</h3>
+<pre><code class="language-bash">nix-env -iA nixpkgs.fluxcd
+
+flux bootstrap gitea \
+  --hostname=git.home.local \
+  --owner=myorg \
+  --repository=k8s-gitops \
+  --branch=main \
+  --path=clusters/homelab \
+  --token-auth
+
+kubectl -n flux-system get pods
+flux get all -A
+flux reconcile source git flux-system
+flux reconcile kustomization flux-system</code></pre>
+<hr>
+<h3 id="kargo-multi-stage-promotion">Kargo (Multi-Stage Promotion)</h3>
+<p><strong>Purpose:</strong> Kubernetes-native promotion engine. Bridges CI (building images) and ArgoCD/Flux (deploying) with ordered promotion pipelines — dev → staging → prod — with approval gates, verification steps, and rollback.</p>
+<pre><code class="language-bash">helm repo add kargo https://charts.kargo.akuity.io
+helm install kargo kargo/kargo \
+  --namespace kargo --create-namespace \
+  --set api.adminAccount.passwordHash=&quot;$(htpasswd -bnBC 10 '' changeme | tr -d ':\n')&quot;
+
+nix-env -iA nixpkgs.kargo
+kargo login https://localhost:31444 --admin --password changeme</code></pre>
+<table><thead><tr><th>Resource</th><th>Role</th></tr></thead><tbody><tr><td><code>Warehouse</code></td><td>Subscribes to image/chart/Git sources, produces <code>Freight</code></td></tr><tr><td><code>Freight</code></td><td>Immutable versioned bundle of artifact versions</td></tr><tr><td><code>Stage</code></td><td>Named environment (dev, staging, prod) consuming Freight</td></tr><tr><td><code>Promotion</code></td><td>The act of moving Freight from one Stage to the next</td></tr></tbody></table>
+<pre><code class="language-yaml"># ~/k8s/kargo-project.yaml
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Project
+metadata:
+  name: myapp
+---
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Warehouse
+metadata:
+  name: myapp-warehouse
+  namespace: myapp
+spec:
+  subscriptions:
+    - image:
+        repoURL: harbor.home.local/myorg/myapp
+        semverConstraint: &quot;&gt;=1.0.0&quot;
+        discoveryLimit: 5
+---
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Stage
+metadata:
+  name: dev
+  namespace: myapp
+spec:
+  requestedFreight:
+    - origin:
+        kind: Warehouse
+        name: myapp-warehouse
+      sources:
+        direct: true
+  promotionTemplate:
+    spec:
+      steps:
+        - uses: git-clone
+          config:
+            repoURL: https://git.home.local/myorg/k8s-manifests
+            checkout: [{ branch: main, path: ./src }]
+        - uses: kustomize-set-image
+          config:
+            path: src/overlays/dev
+            images: [{ image: harbor.home.local/myorg/myapp }]
+        - uses: git-commit
+          config: { path: ./src }
+        - uses: git-push
+          config: { path: ./src }
+        - uses: argocd-update
+          config:
+            apps: [{ name: myapp-dev, sources: [{ repoURL: https://git.home.local/myorg/k8s-manifests }] }]
+---
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Stage
+metadata:
+  name: staging
+  namespace: myapp
+spec:
+  requestedFreight:
+    - origin:
+        kind: Warehouse
+        name: myapp-warehouse
+      sources:
+        stages: [dev]    # only promotes after dev succeeds
+  promotionTemplate:
+    spec:
+      steps:
+        - uses: git-clone
+          config: { repoURL: https://git.home.local/myorg/k8s-manifests, checkout: [{ branch: main, path: ./src }] }
+        - uses: kustomize-set-image
+          config: { path: src/overlays/staging, images: [{ image: harbor.home.local/myorg/myapp }] }
+        - uses: git-commit
+          config: { path: ./src }
+        - uses: git-push
+          config: { path: ./src }
+        - uses: argocd-update
+          config: { apps: [{ name: myapp-staging }] }
+---
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Stage
+metadata:
+  name: prod
+  namespace: myapp
+spec:
+  requestedFreight:
+    - origin:
+        kind: Warehouse
+        name: myapp-warehouse
+      sources:
+        stages: [staging]   # approval gate before prod
+  promotionTemplate:
+    spec:
+      steps:
+        - uses: git-clone
+          config: { repoURL: https://git.home.local/myorg/k8s-manifests, checkout: [{ branch: main, path: ./src }] }
+        - uses: kustomize-set-image
+          config: { path: src/overlays/prod, images: [{ image: harbor.home.local/myorg/myapp }] }
+        - uses: git-commit
+          config: { path: ./src }
+        - uses: git-push
+          config: { path: ./src }
+        - uses: argocd-update
+          config: { apps: [{ name: myapp-prod }] }</code></pre>
+<pre><code class="language-bash">kubectl apply -f ~/k8s/kargo-project.yaml
+kargo get freight --project myapp
+kargo promote --project myapp --freight &lt;freight-id&gt; --stage staging
+kargo get promotions --project myapp --stage prod</code></pre>
+<blockquote><strong>Kargo vs ArgoCD Image Updater:</strong> Kargo adds ordered promotion gates, freight verification, approval workflows, and multi-source tracking. Use Kargo when you have multiple environments and need guardrails between them.</blockquote>
+<hr>
+<h3 id="kustomize-config-management">Kustomize (Config Management)</h3>
+<pre><code class="language-bash">kubectl apply -k ~/k8s/overlays/production/
+kubectl kustomize ~/k8s/overlays/production/</code></pre>
+<pre><code>~/k8s/
+├── base/
+│   ├── deployment.yaml
+│   ├── service.yaml
+│   └── kustomization.yaml
+└── overlays/
+    ├── dev/        # replicas=1, reduced resources
+    ├── staging/    # replicas=2
+    └── prod/       # replicas=5, HPA enabled</code></pre>
+<pre><code class="language-yaml"># k8s/overlays/prod/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+images:
+  - name: myapp
+    newTag: &quot;v1.4.2&quot;   # CI updates this via `kustomize edit set image`
+patches:
+  - path: patch.yaml</code></pre>
+<hr>
+<h3 id="flux-image-automation">Flux Image Automation</h3>
+<pre><code class="language-bash">flux install --components-extra=image-reflector-controller,image-automation-controller</code></pre>
+<pre><code class="language-yaml">apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: myapp
+  namespace: flux-system
+spec:
+  image: harbor.home.local/myorg/myapp
+  interval: 1m
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: myapp
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: myapp
+  policy:
+    semver:
+      range: &quot;&gt;=1.0.0&quot;
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta1
+kind: ImageUpdateAutomation
+metadata:
+  name: myapp
+  namespace: flux-system
+spec:
+  interval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  git:
+    checkout:
+      ref:
+        branch: main
+    commit:
+      author:
+        email: fluxcdbot@home.local
+        name: fluxcdbot
+      messageTemplate: &quot;chore: update {{range .Updated.Images}}{{println .}}{{end}}&quot;
+    push:
+      branch: main
+  update:
+    path: ./clusters/homelab
+    strategy: Setters</code></pre>
+<hr>
+<h3 id="flux-notifications">Flux Notifications</h3>
+<p><strong>Purpose:</strong> Flux's notification-controller sends alerts to Slack, Teams, Discord, ntfy, or any webhook when reconciliations fail, succeed, or when image updates are committed. Essential for knowing when GitOps diverges or deployments break.</p>
+<pre><code class="language-bash"># Ensure notification-controller is installed (included by default)
+flux check
+kubectl get pods -n flux-system | grep notification</code></pre>
+<pre><code class="language-yaml"># ~/k8s-gitops/clusters/homelab/flux-system/notifications.yaml
+
+# 1. Provider — where to send alerts
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+  name: slack-ops
+  namespace: flux-system
+spec:
+  type: slack
+  channel: &quot;#k8s-gitops&quot;
+  secretRef:
+    name: slack-webhook-url    # kubectl create secret generic slack-webhook-url --from-literal=address=https://hooks.slack.com/...
+---
+# ntfy alternative (self-hosted push notifications)
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+  name: ntfy-flux
+  namespace: flux-system
+spec:
+  type: ntfy
+  address: http://ntfy.home.local/flux-alerts
+---
+# 2. Alert — which events to watch and where to send them
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: flux-system-alert
+  namespace: flux-system
+spec:
+  providerRef:
+    name: slack-ops
+  eventSeverity: error       # info | warning | error
+  eventSources:
+    - kind: GitRepository
+      name: &quot;*&quot;              # all GitRepositories
+    - kind: Kustomization
+      name: &quot;*&quot;              # all Kustomizations
+    - kind: HelmRelease
+      name: &quot;*&quot;
+  summary: &quot;Flux reconciliation failure&quot;
+---
+# Alert on image updates (so you know when a new image tag was auto-committed)
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: image-update-alert
+  namespace: flux-system
+spec:
+  providerRef:
+    name: slack-ops
+  eventSeverity: info
+  eventSources:
+    - kind: ImageUpdateAutomation
+      name: &quot;*&quot;</code></pre>
+<pre><code class="language-bash">kubectl apply -f ~/k8s-gitops/clusters/homelab/flux-system/notifications.yaml
+
+# Check alert status
+flux get alerts -n flux-system
+kubectl describe alert flux-system-alert -n flux-system
+
+# Manually trigger a test event
+flux reconcile source git flux-system</code></pre>
+<blockquote><strong>Tip:</strong> Use <code>eventSeverity: info</code> for image updates (informational) and <code>eventSeverity: error</code> for failures. Mixing them into one alert floods Slack — separate providers are cleaner.</blockquote>
+<hr>
+<h2 id="advanced-gitops-patterns">Advanced GitOps Patterns</h2>
+<h3 id="argocd-app-of-apps">ArgoCD App of Apps</h3>
+<p><strong>Purpose:</strong> A single ArgoCD <code>Application</code> (the "parent") manages a directory of other <code>Application</code> manifests (the "children"). This is the standard pattern for managing many apps across many clusters from a single GitOps repo.</p>
+<pre><code>~/k8s-gitops/
+├── apps/
+│   ├── kustomization.yaml          ← parent Application points here
+│   ├── myapp.yaml                  ← child Application
+│   ├── monitoring.yaml             ← child Application
+│   └── ingress.yaml                ← child Application
+└── clusters/
+    └── homelab/
+        └── parent-app.yaml         ← the App of Apps</code></pre>
+<pre><code class="language-yaml"># ~/k8s-gitops/clusters/homelab/parent-app.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: homelab-root
+  namespace: argocd
+  finalizers: [resources-finalizer.argocd.argoproj.io]
+spec:
+  project: default
+  source:
+    repoURL: https://git.home.local/myorg/k8s-gitops
+    targetRevision: HEAD
+    path: apps/
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true</code></pre>
+<pre><code class="language-yaml"># ~/k8s-gitops/apps/myapp.yaml — a child Application
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: myapp
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://git.home.local/myorg/k8s-gitops
+    targetRevision: HEAD
+    path: releases/myapp
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: myapp
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true</code></pre>
+<pre><code class="language-bash">kubectl apply -f ~/k8s-gitops/clusters/homelab/parent-app.yaml
+argocd app list
+argocd app sync homelab-root</code></pre>
+<hr>
+<h3 id="argocd-applicationset-dynamic-app-generation">ArgoCD ApplicationSet (Dynamic App Generation)</h3>
+<p><strong>Purpose:</strong> Generate many <code>Application</code> resources from a single <code>ApplicationSet</code> — one per environment, one per Git directory, or one per cluster. Eliminates copy-paste when you have many apps or many clusters.</p>
+<pre><code class="language-yaml"># Generate an Application for every directory in apps/
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cluster-apps
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://git.home.local/myorg/k8s-gitops
+        revision: HEAD
+        directories:
+          - path: &quot;apps/*&quot;          # one Application per subdirectory
+  template:
+    metadata:
+      name: &quot;{{path.basename}}&quot;
+    spec:
+      project: default
+      source:
+        repoURL: https://git.home.local/myorg/k8s-gitops
+        targetRevision: HEAD
+        path: &quot;{{path}}&quot;
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: &quot;{{path.basename}}&quot;
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+---
+# Generate one Application per cluster (multi-cluster pattern)
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: multi-cluster-myapp
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - cluster: homelab
+            url: https://kubernetes.default.svc
+            env: production
+          - cluster: staging
+            url: https://staging.k8s.home.local:6443
+            env: staging
+  template:
+    metadata:
+      name: &quot;myapp-{{cluster}}&quot;
+    spec:
+      project: default
+      source:
+        repoURL: https://git.home.local/myorg/k8s-gitops
+        targetRevision: HEAD
+        path: &quot;apps/myapp/overlays/{{env}}&quot;
+      destination:
+        server: &quot;{{url}}&quot;
+        namespace: myapp
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true</code></pre>
+<hr>
+<h3 id="flux-helmrelease-kustomization">Flux HelmRelease & Kustomization</h3>
+<p><strong>Purpose:</strong> Flux's native CRDs for managing Helm releases and Kustomize overlays declaratively in Git — the Flux equivalent of ArgoCD Applications.</p>
+<pre><code class="language-yaml"># ~/k8s-gitops/clusters/homelab/monitoring/kustomization.yaml (Flux Kustomization)
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: monitoring
+  namespace: flux-system
+spec:
+  interval: 10m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./releases/monitoring
+  prune: true
+  wait: true
+  timeout: 5m
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: kube-prometheus-stack-grafana
+      namespace: monitoring
+---
+# HelmRelease — Flux manages a Helm release declaratively
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      version: &quot;&gt;=58.0.0&quot;
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+        namespace: flux-system
+  values:
+    grafana:
+      adminPassword: changeme
+    prometheus:
+      prometheusSpec:
+        retention: 15d
+  upgrade:
+    remediation:
+      retries: 3
+  rollback:
+    timeout: 5m
+    cleanupOnFail: true
+---
+# HelmRepository — the chart source
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: prometheus-community
+  namespace: flux-system
+spec:
+  interval: 30m
+  url: https://prometheus-community.github.io/helm-charts</code></pre>
+<pre><code class="language-bash">flux get helmreleases -A
+flux reconcile helmrelease kube-prometheus-stack -n monitoring
+flux suspend helmrelease kube-prometheus-stack -n monitoring    # pause updates
+flux resume helmrelease kube-prometheus-stack -n monitoring</code></pre>
+<hr>
+<h2 id="progressive-delivery">Progressive Delivery</h2>
+<p>Progressive delivery is the practice of releasing to a subset of traffic before rolling out fully.</p>
+<table><thead><tr><th>Strategy</th><th>Traffic Split</th><th>Rollback Speed</th><th>Cost</th><th>Best For</th></tr></thead><tbody><tr><td><strong>Rolling Update</strong></td><td>Gradual pod replacement</td><td>Medium</td><td>1×</td><td>Default; simple apps</td></tr><tr><td><strong>Blue/Green</strong></td><td>100% flip</td><td>Instant</td><td>2×</td><td>Zero-downtime; easy rollback</td></tr><tr><td><strong>Canary</strong></td><td>Percentage-based</td><td>Automatic on SLO breach</td><td>~1.1×</td><td>Risk reduction; metric-gated</td></tr><tr><td><strong>Feature Flags</strong></td><td>Per-user in-app</td><td>Instant flag toggle</td><td>1×</td><td>A/B testing; dark launches</td></tr></tbody></table>
+<h3 id="argo-rollouts">Argo Rollouts</h3>
+<p><strong>Purpose:</strong> Advanced deployment strategies for Kubernetes — canary, blue/green, and analysis-gated rollouts. Replaces standard <code>Deployment</code> with a <code>Rollout</code> CRD. Pairs naturally with ArgoCD.</p>
+<pre><code class="language-bash">kubectl create namespace argo-rollouts
+kubectl apply -n argo-rollouts \
+  -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+
+nix-env -iA nixpkgs.argo-rollouts</code></pre>
+<pre><code class="language-yaml"># Canary rollout
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: myapp
+  namespace: default
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+        - name: myapp
+          image: myapp:v2
+          ports:
+            - containerPort: 8080
+  strategy:
+    canary:
+      steps:
+        - setWeight: 20
+        - pause: { duration: 5m }
+        - setWeight: 50
+        - pause: {}               # manual gate — promote with kubectl argo rollouts promote
+        - setWeight: 100
+      canaryService: myapp-canary
+      stableService: myapp-stable</code></pre>
+<pre><code class="language-yaml"># Blue/Green
+strategy:
+  blueGreen:
+    activeService: myapp-active
+    previewService: myapp-preview
+    autoPromotionEnabled: false
+    scaleDownDelaySeconds: 30</code></pre>
+<pre><code class="language-bash">kubectl argo rollouts get rollout myapp --watch
+kubectl argo rollouts promote myapp
+kubectl argo rollouts abort myapp
+kubectl argo rollouts undo myapp</code></pre>
+<hr>
+<h2 id="in-cluster-cicd-build">In-Cluster CI/CD & Build</h2>
+<h3 id="forgejo-self-hosted-git">Forgejo (Self-Hosted Git)</h3>
+<p><strong>Purpose:</strong> Lightweight, self-hosted Git service — the forge this entire GitOps stack pushes to and pulls from. Forgejo is a community fork of Gitea. Stores repositories, issues, wikis, and CI configuration.</p>
+<pre><code class="language-bash">helm repo add forgejo https://codeberg.org/forgejo-contrib/forgejo-helm
+helm upgrade --install forgejo forgejo/forgejo \
+  --namespace forgejo --create-namespace \
+  -f ~/k8s/forgejo-values.yaml</code></pre>
+<pre><code class="language-yaml"># ~/k8s/forgejo-values.yaml
+gitea:
+  admin:
+    username: admin
+    email: admin@home.local
+    # password set via env var GITEA__security__INSTALL_LOCK=true at first start
+  config:
+    server:
+      DOMAIN: git.home.local
+      ROOT_URL: https://git.home.local
+      SSH_DOMAIN: git.home.local
+    database:
+      DB_TYPE: postgres
+      HOST: postgres.data.svc.cluster.local:5432
+      NAME: forgejo
+      USER: forgejo
+    cache:
+      ADAPTER: redis
+      HOST: redis://redis.data.svc.cluster.local:6379
+
+persistence:
+  enabled: true
+  size: 20Gi
+  storageClass: longhorn
+
+postgresql-ha:
+  enabled: false   # use external Postgres (CloudNativePG recommended)
+
+redis-cluster:
+  enabled: false   # use external Redis</code></pre>
+<pre><code class="language-bash"># Create a repository via API
+curl -X POST &quot;https://git.home.local/api/v1/user/repos&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Authorization: token $FORGEJO_TOKEN&quot; \
+  -d '{&quot;name&quot;:&quot;k8s-manifests&quot;,&quot;private&quot;:true,&quot;auto_init&quot;:true}'
+
+# Create a deploy key for ArgoCD / Flux
+curl -X POST &quot;https://git.home.local/api/v1/repos/myorg/k8s-manifests/keys&quot; \
+  -H &quot;Authorization: token $FORGEJO_TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;title&quot;:&quot;argocd&quot;,&quot;key&quot;:&quot;ssh-ed25519 AAAA...&quot;,&quot;read_only&quot;:true}'</code></pre>
+<p><strong>Caddy:</strong> <code>git.home.local { tls internal; reverse_proxy forgejo.forgejo.svc.cluster.local:3000 { header_up Host {host} } }</code></p>
+<hr>
+<h3 id="woodpecker-ci-lightweight-in-cluster-ci">Woodpecker CI (Lightweight In-Cluster CI)</h3>
+<p><strong>Purpose:</strong> Lightweight, container-native CI system that integrates directly with Forgejo. Pipelines are <code>.woodpecker.yml</code> files in the repository root. Each step runs in a container — no agent to maintain.</p>
+<pre><code class="language-bash">helm repo add woodpecker https://woodpecker-ci.org/helm-charts
+helm upgrade --install woodpecker woodpecker/woodpecker \
+  --namespace woodpecker --create-namespace \
+  -f ~/k8s/woodpecker-values.yaml</code></pre>
+<pre><code class="language-yaml"># ~/k8s/woodpecker-values.yaml
+# Forgejo OAuth app: Settings → Applications → OAuth2 Applications
+# Redirect URI: https://ci.home.local/authorize
+server:
+  env:
+    WOODPECKER_FORGEJO: &quot;true&quot;
+    WOODPECKER_FORGEJO_URL: https://git.home.local
+    WOODPECKER_FORGEJO_CLIENT: &lt;oauth-client-id&gt;
+    WOODPECKER_FORGEJO_SECRET: &lt;oauth-client-secret&gt;
+    WOODPECKER_ADMIN: admin
+    WOODPECKER_HOST: https://ci.home.local
+    WOODPECKER_AGENT_SECRET: &lt;random-32-char-string&gt;
+    WOODPECKER_DATABASE_DRIVER: postgres
+    WOODPECKER_DATABASE_DATASOURCE: &quot;postgres://woodpecker:pass@postgres.data.svc:5432/woodpecker?sslmode=disable&quot;
+
+agent:
+  env:
+    WOODPECKER_SERVER: woodpecker-server.woodpecker.svc.cluster.local:9000
+    WOODPECKER_AGENT_SECRET: &lt;same-secret-as-server&gt;
+    WOODPECKER_MAX_WORKFLOWS: 4
+    WOODPECKER_BACKEND: kubernetes   # run pipeline steps as Kubernetes Jobs
+    WOODPECKER_BACKEND_K8S_NAMESPACE: woodpecker
+    WOODPECKER_BACKEND_K8S_STORAGE_CLASS: longhorn
+    WOODPECKER_BACKEND_K8S_VOLUME_SIZE: 10G</code></pre>
+<h4 id="pipeline-examples">Pipeline examples</h4>
+<pre><code class="language-yaml"># .woodpecker.yml — full build, scan, sign, push pipeline
+when:
+  branch: main
+  event: push
+
+steps:
+  - name: test
+    image: golang:1.23-alpine
+    commands:
+      - go test ./...
+      - go vet ./...
+
+  - name: build-image
+    image: gcr.io/kaniko-project/executor:latest
+    settings:
+      registry: harbor.home.local
+      repo: myorg/myapp
+      tags:
+        - latest
+        - ${CI_COMMIT_SHA:0:8}
+    secrets: [docker_config]   # registry credentials from Woodpecker secrets
+
+  - name: scan
+    image: aquasec/trivy:latest
+    commands:
+      - trivy image --exit-code 1 --severity HIGH,CRITICAL
+          harbor.home.local/myorg/myapp:${CI_COMMIT_SHA:0:8}
+
+  - name: sign
+    image: gcr.io/projectsigstore/cosign:latest
+    commands:
+      - cosign sign --key env://COSIGN_KEY
+          harbor.home.local/myorg/myapp:${CI_COMMIT_SHA:0:8}
+    secrets: [cosign_key]
+
+  - name: update-manifests
+    image: alpine/git:latest
+    commands:
+      - git clone https://git.home.local/myorg/k8s-manifests /tmp/manifests
+      - cd /tmp/manifests
+      - sed -i &quot;s|myapp:.*|myapp:${CI_COMMIT_SHA:0:8}|&quot; overlays/prod/kustomization.yaml
+      - git config user.email &quot;ci@home.local&quot;
+      - git config user.name &quot;Woodpecker CI&quot;
+      - git commit -am &quot;chore: update myapp to ${CI_COMMIT_SHA:0:8}&quot;
+      - git push
+    secrets: [gitea_token]</code></pre>
+<pre><code class="language-yaml"># Parallel matrix build (multi-arch)
+steps:
+  - name: build-${PLATFORM}
+    image: gcr.io/kaniko-project/executor:latest
+    matrix:
+      PLATFORM: [linux/amd64, linux/arm64]
+    settings:
+      platforms: ${PLATFORM}
+      destination: harbor.home.local/myorg/myapp:${CI_COMMIT_SHA:0:8}-${PLATFORM##*/}</code></pre>
+<pre><code class="language-bash"># Woodpecker CLI
+nix-env -iA nixpkgs.woodpecker-cli
+
+woodpecker-cli pipeline ls --repo myorg/myapp
+woodpecker-cli pipeline start --repo myorg/myapp
+woodpecker-cli log --repo myorg/myapp --pipeline &lt;id&gt; --step build-image</code></pre>
+<p><strong>Caddy:</strong> <code>ci.home.local { tls internal; reverse_proxy woodpecker-server.woodpecker.svc.cluster.local:8000 { header_up Host {host} } }</code></p>
+<blockquote><strong>Woodpecker vs Tekton:</strong> Woodpecker is much simpler to operate — pipelines are YAML in the repo, no PipelineRun CRDs required. Use Tekton when you need event-driven triggers via TriggerBinding/EventListener or supply chain attestation via Tekton Chains. Use Woodpecker for everything else.</blockquote>
+<hr>
+<h3 id="tekton-pipelines">Tekton Pipelines</h3>
+<pre><code class="language-bash">kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
+kubectl apply -f https://storage.googleapis.com/tekton-releases/dashboard/latest/release.yaml
+kubectl apply -f https://storage.googleapis.com/tekton-releases/triggers/latest/release.yaml
+
+nix-env -iA nixpkgs.tekton-client
+kubectl -n tekton-pipelines port-forward svc/tekton-dashboard 9097:9097</code></pre>
+<pre><code class="language-yaml">apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: hello
+spec:
+  steps:
+    - name: echo
+      image: alpine
+      script: echo &quot;Hello from Tekton&quot;
+---
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  generateName: hello-run-
+spec:
+  pipelineRef:
+    name: hello-pipeline</code></pre>
+<pre><code class="language-bash">tkn pipelinerun logs -f --last</code></pre>
+<hr>
+<h3 id="tekton-chains-supply-chain-security">Tekton Chains (Supply Chain Security)</h3>
+<p><strong>Purpose:</strong> Adds SLSA provenance generation on top of Tekton. After a TaskRun completes, Chains captures attestations, signs them with Cosign/KMS, and stores them in an OCI registry or Rekor transparency log.</p>
+<pre><code class="language-bash">kubectl apply -f https://storage.googleapis.com/tekton-releases/chains/latest/release.yaml
+cosign generate-key-pair k8s://tekton-chains/signing-secrets
+cosign verify-attestation --key cosign.pub myregistry/myimage:latest</code></pre>
+<hr>
+<h3 id="kaniko-in-cluster-image-building">Kaniko (In-Cluster Image Building)</h3>
+<p><strong>Purpose:</strong> Build OCI images inside Kubernetes pods — no Docker daemon, no root privileges.</p>
+<pre><code class="language-yaml">apiVersion: batch/v1
+kind: Job
+metadata:
+  name: build-myapp
+spec:
+  template:
+    spec:
+      containers:
+        - name: kaniko
+          image: gcr.io/kaniko-project/executor:latest
+          args:
+            - --context=git://git.home.local/myorg/myapp
+            - --dockerfile=Containerfile
+            - --destination=harbor.home.local/myorg/myapp:latest
+            - --cache=true
+            - --cache-repo=harbor.home.local/myorg/myapp-cache
+          volumeMounts:
+            - name: regcred
+              mountPath: /kaniko/.docker
+      volumes:
+        - name: regcred
+          secret:
+            secretName: registry-credentials
+            items:
+              - key: .dockerconfigjson
+                path: config.json
+      restartPolicy: Never</code></pre>
+<hr>
+<h3 id="argo-workflows-data-ml-pipelines">Argo Workflows (Data & ML Pipelines)</h3>
+<pre><code class="language-bash">kubectl create namespace argo
+kubectl apply -n argo \
+  -f https://github.com/argoproj/argo-workflows/releases/latest/download/install.yaml
+
+nix-env -iA nixpkgs.argo
+argo submit -n argo --watch ~/k8s/workflow.yaml
+argo list -n argo
+argo logs -n argo my-workflow</code></pre>
+<pre><code class="language-yaml">apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: data-pipeline-
+spec:
+  entrypoint: main
+  templates:
+    - name: main
+      dag:
+        tasks:
+          - name: ingest
+            template: python-step
+            arguments:
+              parameters: [{ name: cmd, value: &quot;python ingest.py&quot; }]
+          - name: transform
+            template: python-step
+            dependencies: [ingest]
+            arguments:
+              parameters: [{ name: cmd, value: &quot;python transform.py&quot; }]
+    - name: python-step
+      inputs:
+        parameters:
+          - name: cmd
+      container:
+        image: python:3.12-slim
+        command: [sh, -c]
+        args: [&quot;{{inputs.parameters.cmd}}&quot;]</code></pre>
+<hr>
+<h2 id="local-development-cluster-intercept">Local Development & Cluster Intercept</h2>
+<p>A major pain point in microservices development: "how do I test my local code against real cluster services?" These tools solve it differently — each has trade-offs.</p>
+<table><thead><tr><th>Tool</th><th>Approach</th><th>Best For</th></tr></thead><tbody><tr><td><strong>mirrord</strong></td><td>Intercepts traffic at the kernel level; your local process runs as if it's inside the cluster</td><td>Single service dev with full cluster context</td></tr><tr><td><strong>Telepresence</strong></td><td>Replaces a cluster pod with a local proxy; routes traffic bidirectionally</td><td>Replacing a specific deployment during dev</td></tr><tr><td><strong>Tilt</strong></td><td>Watches files, rebuilds/redeploys on save; dev cluster orchestration</td><td>Full inner loop automation</td></tr><tr><td><strong>Skaffold</strong></td><td>Build → push → deploy pipeline on file change</td><td>CI-like local flow; GKE-native</td></tr><tr><td><strong>ko</strong></td><td>Build Go container images without Dockerfiles; OCI-native</td><td>Go services with minimal build friction</td></tr></tbody></table>
+<hr>
+<h3 id="minikube-local-dev-podman-driver">minikube (Local Dev — Podman Driver)</h3>
+<pre><code class="language-bash">nix-env -iA nixpkgs.minikube  # or: snap install minikube
+minikube start --driver=podman --container-runtime=containerd
+minikube dashboard
+minikube service myapp --url
+minikube image load myapp:latest
+minikube addons enable ingress metrics-server
+minikube pause / minikube unpause
+minikube stop &amp;&amp; minikube delete</code></pre>
+<blockquote>Use <strong>kind</strong> for multi-node CI clusters. Use <strong>minikube</strong> for a richer local dev experience with addons and a dashboard.</blockquote>
+<hr>
+<h3 id="kind-kubernetes-in-podman-devci">kind (Kubernetes in Podman — Dev/CI)</h3>
+<pre><code class="language-bash">nix-env -iA nixpkgs.kind
+export KIND_EXPERIMENTAL_PROVIDER=podman
+kind create cluster --name homelab
+
+cat &gt; ~/kind-multinode.yaml &lt;&lt; 'EOF'
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+  - role: worker
+  - role: worker
+EOF
+kind create cluster --name homelab --config ~/kind-multinode.yaml
+
+kind load docker-image myapp:latest --name homelab
+kind delete cluster --name homelab</code></pre>
+<hr>
+<h3 id="mirrord-run-local-code-in-cluster-context">mirrord (Run Local Code in Cluster Context)</h3>
+<p><strong>Purpose:</strong> mirrord intercepts the local process at the OS level — your local service reads from the cluster's file system, environment variables, and DNS, and receives a mirror of real cluster traffic. Zero code changes. Zero cluster modifications. The most transparent intercept tool.</p>
+<pre><code class="language-bash"># Install
+nix-env -iA nixpkgs.mirrord
+# or:
+curl -fsSL https://raw.githubusercontent.com/metalbear-co/mirrord/main/scripts/install.sh | bash
+
+# Run your local process in the context of a cluster pod
+# mirrord intercepts at the syscall level — your process thinks it's running in the pod
+mirrord exec --target pod/myapp-xyz-abc -n myapp -- python app.py
+
+# Target a deployment (picks a random pod)
+mirrord exec --target deployment/myapp -n myapp -- node server.js
+
+# Mirror traffic (copy) without stealing it from the real pod
+mirrord exec --target deployment/myapp -n myapp \
+  --mirror-mode -- ./myapp-binary
+
+# Use a mirrord config file (recommended for teams)
+mirrord exec --config-file .mirrord/mirrord.json -- python app.py</code></pre>
+<pre><code class="language-json">// .mirrord/mirrord.json — checked into the repo
+{
+  &quot;target&quot;: {
+    &quot;path&quot;: &quot;deployment/myapp&quot;,
+    &quot;namespace&quot;: &quot;myapp&quot;
+  },
+  &quot;feature&quot;: {
+    &quot;network&quot;: {
+      &quot;incoming&quot;: &quot;mirror&quot;,
+      &quot;outgoing&quot;: { &quot;unix_streams&quot;: true }
+    },
+    &quot;fs&quot;: &quot;read&quot;,
+    &quot;env&quot;: true
+  }
+}</code></pre>
+<pre><code class="language-bash"># IDE integration — run from VS Code launch config
+# .vscode/launch.json:
+# &quot;type&quot;: &quot;mirrord&quot;,
+# &quot;target&quot;: &quot;deployment/myapp&quot;
+
+# Check what mirrord is intercepting
+mirrord ls --target deployment/myapp -n myapp</code></pre>
+<blockquote><strong>mirrord vs Telepresence:</strong> mirrord operates at the OS syscall layer — no cluster-side agent or privileged DaemonSet required. Telepresence requires a <code>traffic-agent</code> sidecar injected into the target pod. For most homelab/self-hosted setups, mirrord is simpler to install and works without cluster-admin for the agent.</blockquote>
+<hr>
+<h3 id="telepresence-bidirectional-cluster-local-bridge">Telepresence (Bidirectional Cluster-Local Bridge)</h3>
+<p><strong>Purpose:</strong> Replaces a running pod with a local proxy. All traffic destined for the cluster service gets routed to your local machine. Your local process can reach all cluster services by name.</p>
+<pre><code class="language-bash"># Install
+curl -fL https://app.getambassador.io/download/tel2/linux/amd64/latest/telepresence -o /usr/local/bin/telepresence
+chmod +x /usr/local/bin/telepresence
+
+# Connect (installs Traffic Manager in cluster once)
+telepresence connect
+
+# After connect — your laptop can reach cluster services directly
+curl http://myapp.myapp.svc.cluster.local:8080/health
+
+# Intercept a deployment — route cluster traffic to your local port 8080
+telepresence intercept myapp --namespace myapp --port 8080:8080
+
+# Run your local code (receives real cluster traffic)
+python app.py
+
+# List active intercepts
+telepresence list -n myapp
+
+# Leave intercept
+telepresence leave myapp-myapp
+
+# Disconnect
+telepresence quit</code></pre>
+<hr>
+<h3 id="tilt-inner-development-loop-orchestration">Tilt (Inner Development Loop Orchestration)</h3>
+<p><strong>Purpose:</strong> Watches your source files, rebuilds container images incrementally, applies Kubernetes manifests, and streams logs — all in one terminal. The fastest inner loop for Kubernetes-native development.</p>
+<pre><code class="language-bash">nix-env -iA nixpkgs.tilt
+# or: curl -fsSL https://raw.githubusercontent.com/tilt-dev/tilt/master/scripts/install.sh | bash</code></pre>
+<pre><code class="language-python"># Tiltfile (Python-like DSL)
+# Build the image when source changes
+docker_build(
+    'harbor.home.local/myorg/myapp',
+    '.',
+    dockerfile='Containerfile',
+    live_update=[
+        # Sync Python files without a full rebuild
+        sync('./src', '/app/src'),
+        run('pip install -r requirements.txt', trigger=['requirements.txt']),
+    ]
+)
+
+# Apply Kubernetes manifests
+k8s_yaml(['k8s/deployment.yaml', 'k8s/service.yaml'])
+
+# Define the resource for port-forwarding and log grouping
+k8s_resource(
+    'myapp',
+    port_forwards='8080:8080',
+    labels=['backend']
+)
+
+# Depend on a Helm chart
+helm_resource('nginx-gateway-fabric',
+    chart='oci://ghcr.io/nginx/charts/nginx-gateway-fabric',
+    namespace='nginx-gateway',
+    labels=['infra']
+)</code></pre>
+<pre><code class="language-bash">tilt up          # starts the dev loop
+tilt down        # tears down
+tilt ci          # run in CI mode (exit after all resources healthy)</code></pre>
+<hr>
+<h3 id="skaffold-build-deploy-inner-loop">Skaffold (Build-Deploy Inner Loop)</h3>
+<p><strong>Purpose:</strong> Google's build-test-deploy loop tool. Watches sources, builds images with Kaniko/Docker/Buildpacks, pushes to registry, and deploys via Helm or kubectl. Strong GKE integration but works everywhere.</p>
+<pre><code class="language-bash">nix-env -iA nixpkgs.skaffold</code></pre>
+<pre><code class="language-yaml"># skaffold.yaml
+apiVersion: skaffold/v4beta9
+kind: Config
+metadata:
+  name: myapp
+build:
+  artifacts:
+    - image: harbor.home.local/myorg/myapp
+      docker:
+        dockerfile: Containerfile
+      sync:
+        infer: [&quot;**/*.py&quot;]    # hot-reload Python without rebuild
+  local:
+    push: true
+    useBuildkit: true
+deploy:
+  helm:
+    releases:
+      - name: myapp
+        chartPath: charts/myapp
+        valuesFiles:
+          - charts/myapp/values-dev.yaml
+        setValues:
+          image.tag: &quot;{{.IMAGE_TAG}}&quot;
+profiles:
+  - name: ci
+    build:
+      artifacts:
+        - image: harbor.home.local/myorg/myapp
+          kaniko:
+            cache: { repo: harbor.home.local/myorg/myapp-cache }</code></pre>
+<pre><code class="language-bash">skaffold dev          # watch mode — rebuild/redeploy on change
+skaffold run          # one-shot build and deploy
+skaffold build        # build only (use in CI)
+skaffold delete       # clean up</code></pre>
+<hr>
+<h3 id="ko-build-go-images-without-dockerfiles">ko (Build Go Images Without Dockerfiles)</h3>
+<p><strong>Purpose:</strong> Build Go binaries directly into OCI container images — no Dockerfile, no Docker daemon. Produces minimal images with the Go binary and its dependencies only. Ideal for Go-based controllers and operators.</p>
+<pre><code class="language-bash">nix-env -iA nixpkgs.ko
+export KO_DOCKER_REPO=harbor.home.local/myorg
+
+# Build and push a Go binary as an OCI image
+ko build ./cmd/myapp
+
+# Build and apply Kubernetes manifests (replaces image references automatically)
+ko apply -f k8s/
+
+# Use a specific base image
+KO_DEFAULTBASEIMAGE=gcr.io/distroless/static:nonroot ko build ./cmd/myapp
+
+# Multi-arch build
+GOARCH=arm64 ko build ./cmd/myapp</code></pre>
+<hr>
+<h2 id="policy-as-code-ci-gates">Policy as Code — CI Gates</h2>
+<h3 id="conftest-policy-testing-in-ci">Conftest (Policy Testing in CI)</h3>
+<p><strong>Purpose:</strong> Test Kubernetes manifests against OPA/Rego policies <strong>before</strong> they reach the cluster — in CI, as a pre-commit hook, or in your IDE. Fails the pipeline if a manifest would violate a policy.</p>
+<pre><code class="language-bash">nix-env -iA nixpkgs.conftest
+
+# Test a manifest against policies
+conftest test ~/k8s/deployment.yaml --policy ~/policies/
+
+# Test a rendered Helm chart
+helm template myapp ./myapp-chart -f values.yaml | conftest test -</code></pre>
+<pre><code class="language-rego"># ~/policies/no-latest-tag.rego
+package main
+
+deny[msg] {
+  input.kind == &quot;Deployment&quot;
+  container := input.spec.template.spec.containers[_]
+  endswith(container.image, &quot;:latest&quot;)
+  msg := sprintf(&quot;Container '%s' uses ':latest' tag — pin to a specific version&quot;, [container.name])
+}
+
+deny[msg] {
+  input.kind == &quot;Deployment&quot;
+  not input.spec.template.spec.securityContext.runAsNonRoot
+  msg := sprintf(&quot;Deployment '%s' must set runAsNonRoot: true&quot;, [input.metadata.name])
+}
+
+warn[msg] {
+  input.kind == &quot;Deployment&quot;
+  not input.spec.template.spec.containers[_].resources.limits
+  msg := sprintf(&quot;Deployment '%s' has no resource limits&quot;, [input.metadata.name])
+}</code></pre>
+<pre><code class="language-yaml"># .woodpecker.yml — conftest gate in CI
+steps:
+  - name: policy-check
+    image: openpolicyagent/conftest:latest
+    commands:
+      - conftest test k8s/ --policy policies/ --all-namespaces
+      - helm template myapp ./chart -f values.yaml | conftest test -</code></pre>
+<hr>
+<h3 id="kubeconform-manifest-schema-validation">kubeconform (Manifest Schema Validation)</h3>
+<p><strong>Purpose:</strong> Fast Kubernetes manifest validation against the upstream API schema — catches wrong field names, missing required fields, and version mismatches before applying to a cluster. Much faster than kubeval (which is unmaintained).</p>
+<pre><code class="language-bash">nix-env -iA nixpkgs.kubeconform
+
+# Validate all manifests in a directory
+kubeconform -strict -summary ~/k8s/
+
+# Validate a Helm render
+helm template myapp ./myapp-chart -f values.yaml | kubeconform -strict -
+
+# Validate with CRD schemas (Flux, ArgoCD, etc.)
+kubeconform \
+  -schema-location default \
+  -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+  -strict -summary ~/k8s/</code></pre>
+<pre><code class="language-yaml"># .woodpecker.yml — schema validation in CI
+steps:
+  - name: kubeconform
+    image: ghcr.io/yannh/kubeconform:latest
+    commands:
+      - kubeconform -strict -summary k8s/
+      - helm template myapp ./chart -f values.yaml | kubeconform -strict -</code></pre>
+<hr>
+<h2 id="buildpacks-image-build-strategies">Buildpacks & Image Build Strategies</h2>
+<p>A comparison of in-cluster and local image build strategies:</p>
+<table><thead><tr><th>Tool</th><th>Approach</th><th>Image size</th><th>Requires Docker</th><th>SBOM</th><th>Best for</th></tr></thead><tbody><tr><td><strong>Docker/Podman</strong></td><td>Dockerfile</td><td>Varies</td><td>Yes/No</td><td>Manual</td><td>General purpose</td></tr><tr><td><strong>Kaniko</strong></td><td>Dockerfile, no daemon</td><td>Varies</td><td>No</td><td>Manual</td><td>In-cluster CI</td></tr><tr><td><strong>ko</strong></td><td>Go source → OCI</td><td>Minimal</td><td>No</td><td>Auto</td><td>Go controllers/operators</td></tr><tr><td><strong>Buildpacks (pack)</strong></td><td>Source → image, no Dockerfile</td><td>Optimized</td><td>Yes (or buildpackd)</td><td>Auto</td><td>App developers; PaaS-style</td></tr><tr><td><strong>Buildah</strong></td><td>Dockerfile, rootless</td><td>Varies</td><td>No</td><td>Manual</td><td>Rootless environments</td></tr><tr><td><strong>Buildkit</strong></td><td>Dockerfile, cache mounts</td><td>Varies</td><td>No (standalone)</td><td>Manual</td><td>Advanced Dockerfile features</td></tr></tbody></table>
+<h3 id="cloud-native-buildpacks-pack-cli">Cloud Native Buildpacks (pack CLI)</h3>
+<p><strong>Purpose:</strong> Build production OCI images from source code without a Dockerfile. Detects language/runtime automatically. Generates SBOMs. Produces reproducible, optimized images.</p>
+<pre><code class="language-bash">nix-env -iA nixpkgs.pack
+
+# Auto-detect and build
+pack build harbor.home.local/myorg/myapp:latest \
+  --path ./myapp-source \
+  --builder paketobuildpacks/builder-jammy-base
+
+# Build with a specific buildpack
+pack build harbor.home.local/myorg/myapp:latest \
+  --buildpack gcr.io/paketo-buildpacks/python \
+  --path .
+
+# Generate SBOM during build
+pack build myapp:latest --sbom-output-dir ./sbom/
+
+# Inspect what buildpack was used
+pack inspect-image harbor.home.local/myorg/myapp:latest</code></pre>
+<hr>
+<h2 id="multi-architecture-builds">Multi-Architecture Builds</h2>
+<h3 id="building-multi-platform-images-amd64-arm64">Building Multi-Platform Images (amd64 + arm64)</h3>
+<p><strong>Purpose:</strong> Build images that run on both x86 servers and ARM nodes (Raspberry Pi, AWS Graviton, Apple Silicon) from a single manifest. Stored as an OCI index in the registry.</p>
+<pre><code class="language-bash"># Using Podman (buildx equivalent)
+podman manifest create myapp-manifest
+
+podman build --platform linux/amd64 -t myapp:amd64 .
+podman build --platform linux/arm64 -t myapp:arm64 .
+
+podman manifest add myapp-manifest myapp:amd64
+podman manifest add myapp-manifest myapp:arm64
+
+podman manifest push myapp-manifest harbor.home.local/myorg/myapp:latest
+
+# Using Docker buildx (for CI on Docker hosts)
+docker buildx create --use --name multiarch
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  --push \
+  -t harbor.home.local/myorg/myapp:latest .</code></pre>
+<pre><code class="language-yaml"># Kaniko in CI — multi-arch via parallel jobs
+# .woodpecker.yml
+steps:
+  - name: build-amd64
+    image: gcr.io/kaniko-project/executor:latest
+    args:
+      - --context=git://git.home.local/myorg/myapp
+      - --platform=linux/amd64
+      - --destination=harbor.home.local/myorg/myapp:${CI_COMMIT_SHA}-amd64
+
+  - name: build-arm64
+    image: gcr.io/kaniko-project/executor:latest-arm64
+    args:
+      - --context=git://git.home.local/myorg/myapp
+      - --platform=linux/arm64
+      - --destination=harbor.home.local/myorg/myapp:${CI_COMMIT_SHA}-arm64
+
+  - name: create-manifest
+    image: mplatform/manifest-tool:latest
+    commands:
+      - manifest-tool push from-args \
+          --platforms linux/amd64,linux/arm64 \
+          --template harbor.home.local/myorg/myapp:${CI_COMMIT_SHA}-ARCH \
+          --target harbor.home.local/myorg/myapp:${CI_COMMIT_SHA}</code></pre>
+<pre><code class="language-bash"># Verify a manifest image is multi-arch
+podman manifest inspect harbor.home.local/myorg/myapp:latest | jq '.manifests[].platform'
+
+# Node labels for architecture-based scheduling
+kubectl get nodes -o custom-columns='NODE:.metadata.name,ARCH:.status.nodeInfo.architecture'
+
+# Schedule only on arm64 nodes
+spec:
+  nodeSelector:
+    kubernetes.io/arch: arm64</code></pre>
+<hr></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

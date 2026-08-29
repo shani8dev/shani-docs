@@ -1,7 +1,7 @@
 ---
 title: snmpd (SNMP)
 section: Networking
-updated: 2026-04-18
+updated: 2026-08-28
 ---
 
 # SNMP Daemon (snmpd)
@@ -113,3 +113,8 @@ snmpwalk -v2c -c mycommstring localhost .1
 | Remote monitoring host can't reach snmpd | Check the firewall rule allows the monitoring host's IP; verify with `sudo firewall-cmd --list-all` |
 | `authorizationError` with SNMPv3 | Auth or privacy password mismatch — recreate the user with `net-snmp-create-v3-user` after stopping snmpd |
 | View snmpd logs | `journalctl -u snmpd -f` |
+
+## See Also
+
+- [Monitoring stack](../servers/monitoring/prometheus)
+- [Network tools](network-tools)

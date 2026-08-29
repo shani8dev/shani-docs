@@ -1,7 +1,7 @@
 ---
-title: IoT & Monitoring
+title: IoT & Sensor Data
 section: Self-Hosting & Servers
-updated: 2026-04-22
+updated: 2026-08-28
 ---
 
 # IoT & Monitoring
@@ -82,6 +82,41 @@ A well-designed topic hierarchy makes routing, filtering, and ACLs straightforwa
 
 #### Edge vs cloud processing — when to compute locally
 Processing at the edge (ESPHome doing threshold detection, Node-RED doing aggregation) reduces bandwidth, adds resilience (automation works during internet outage), and improves latency (local decisions in <10ms vs 100ms+ cloud roundtrip). Rule of thumb: decisions that affect physical actuators (lights, locks, HVAC) should run locally. Archival, analytics, and ML inference can run in the cloud or on a home server. The hybrid model — local for control, server for analytics — is the production pattern for serious home automation setups.
+
+---
+
+## Mosquitto (Message Bus)
+
+**Purpose:** Lightweight MQTT broker — the message bus every pipeline on this page depends on. Telegraf's `mqtt_consumer`, the Prometheus MQTT exporter, OwnTracks, and the Modbus bridge all publish and subscribe through it. Deploy it first; EMQX above is the high-scale alternative when you outgrow it.
+
+```yaml
+# ~/mosquitto/compose.yaml
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      - 127.0.0.1:1883:1883
+    volumes:
+      - /home/user/mosquitto/config:/mosquitto/config:Z
+      - /home/user/mosquitto/data:/mosquitto/data:Z
+    restart: unless-stopped
+```
+
+##### Minimal `mosquitto.conf`
+
+```conf
+listener 1883 0.0.0.0
+allow_anonymous false
+password_file /mosquitto/config/passwd
+```
+
+```bash
+# Create the password file once (prompts for a password)
+podman run --rm -v /home/user/mosquitto/config:/mosquitto/config:Z \
+  eclipse-mosquitto mosquitto_passwd -c /mosquitto/config/passwd iot_user
+
+cd ~/mosquitto && podman-compose up -d
+```
 
 ---
 
@@ -512,3 +547,26 @@ owntracks.home.local  { tls internal; reverse_proxy localhost:8086 }
 | OwnTracks app not reporting location | Verify the HTTP endpoint URL is correct in the app; check `podman logs owntracks-recorder` for connection errors; ensure Caddy is forwarding to port `8086` |
 
 > 💡 **Tip:** For sensor devices with unreliable Wi-Fi, set MQTT QoS to 1 (at least once) and enable `persistence true` in Mosquitto. Messages published when the broker is temporarily unreachable will be delivered when reconnected.
+
+---
+
+## OpenDataBay / Grafana SCADA Dashboard
+
+**Purpose:** Build SCADA-style dashboards in Grafana using the SCADA panel plugin — P&ID diagrams, process flow animations, valve states, and setpoint controls visualised with industrial symbols.
+
+```bash
+# Install the SCADA plugin in Grafana
+podman exec grafana grafana-cli plugins install volkovlabs-form-panel
+podman exec grafana grafana-cli plugins install marcusolsson-dynamictext-panel
+podman exec grafana grafana-cli plugins install volkovlabs-echarts-panel
+
+# Restart Grafana to load plugins
+podman restart grafana
+```
+
+---
+
+## See Also
+
+- [Home Automation](home-automation)
+- [Databases (time-series)](databases)

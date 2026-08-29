@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>Fleet Monitoring Runbook — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Shanios ships no fleet dashboard by design — no central console, no MDM server, no agent phoning home. Observability is composed from standard pieces you a…">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/enterprise/fleet-monitoring/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="Fleet Monitoring Runbook">
+  <meta property="og:description" id="og-desc"    content="Shanios ships no fleet dashboard by design — no central console, no MDM server, no agent phoning home. Observability is composed from standard pieces you a…">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/enterprise/fleet-monitoring/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="Fleet Monitoring Runbook">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="Fleet Monitoring Runbook">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios ships no fleet dashboard by design — no central console, no MDM server, no agent phoning home. Observability is composed from standard pieces you a…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Fleet Monitoring Runbook","description":"Shanios ships no fleet dashboard by design — no central console, no MDM server, no agent phoning home. Observability is composed from standard pieces you a…","url":"https://docs.shani.dev/doc/enterprise/fleet-monitoring/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Fleet Monitoring Runbook","item":"https://docs.shani.dev/doc/enterprise/fleet-monitoring/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Fleet Monitoring Runbook</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Enterprise</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><p>Shanios ships no fleet dashboard by design — no central console, no MDM server, no agent phoning home. Observability is composed from standard pieces you already run: Prometheus for metrics, Grafana for views, your log store of choice for journals. The only Shanios-specific inputs are a handful of on-host signals (<code>shani-health</code>, slot markers) exposed through standard mechanisms, and nothing Shanios-specific runs centrally.</p>
+<hr>
+<h2 id="per-host-metrics">Per-Host Metrics</h2>
+<p>Run <code>node_exporter</code> as a rootless Podman container via quadlet, with the standard read-only host binds:</p>
+<pre><code class="language-ini"># ~/.config/containers/systemd/node_exporter.container
+[Container]
+Image=docker.io/prom/node-exporter:v1.9.1
+Exec=--path.procfs=/host/proc --path.sysfs=/host/sys --path.rootfs=/host/root \
+     --collector.textfile.directory=/textfile
+Volume=/proc:/host/proc:ro,rprivate,rbind
+Volume=/sys:/host/sys:ro,rprivate,rbind
+Volume=/:/host/root:ro,rprivate,rbind
+Volume=%h/exporters/textfile:/textfile:ro,Z
+PublishPort=9100:9100
+[Service]
+Restart=on-failure</code></pre>
+<p>Enable with <code>mkdir -p ~/exporters/textfile &amp;&amp; systemctl --user daemon-reload &amp;&amp; systemctl --user start node_exporter.service</code>. firewalld is default-deny inbound, so open 9100 to the scraper subnet only:</p>
+<pre><code class="language-bash">sudo firewall-cmd --permanent --add-rich-rule='rule family=ipv4 source address=10.10.0.0/24 port port=9100 protocol=tcp accept' &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<p>Scrape from a self-hosted Prometheus (deployment patterns in <a href="../servers/monitoring/prometheus.md">Monitoring & Observability</a>):</p>
+<pre><code class="language-yaml">scrape_configs:
+  - job_name: shanios-fleet
+    static_configs:
+      - targets: ['host-a.tailnet.ts.net:9100', 'host-b.tailnet.ts.net:9100']</code></pre>
+<hr>
+<h2 id="deploy-state-signals">Deploy-State Signals</h2>
+<p>Two cron jobs (cronie is enabled by default on the server profile) turn Shanios state into textfile-collector metrics:</p>
+<pre><code class="language-crontab">*/5 * * * * root /usr/local/sbin/shani-textfile-metrics
+0 4 * * *  root shani-health --verify --json &gt; /var/local/shani-health.json</code></pre>
+<p><code>--verify</code> includes a full Btrfs scrub so it runs nightly; cheap state refreshes every five minutes. <code>/var/local/shani-health.json</code> is persistent local state, fine to keep per host and worth shipping off-box as compliance evidence (see <a href="compliance">Compliance & Benchmarks</a>). The metrics script writes atomically (<code>mv</code>), so node_exporter only ever reads complete files:</p>
+<pre><code class="language-bash">#!/bin/bash
+# /usr/local/sbin/shani-textfile-metrics — feed the node_exporter textfile collector
+set -euo pipefail
+OUT=/var/local/node_exporter; mkdir -p &quot;$OUT&quot;
+TMP=$(mktemp &quot;$OUT/.shani.XXXXXX&quot;)
+
+# Integrity result from last night's verify (missing file counts as fail)
+if jq -e 'any(.checks[]?; .status == &quot;fail&quot;)' /var/local/shani-health.json &gt;/dev/null 2&gt;&amp;1; then V=0; else V=1; fi
+echo &quot;shani_verify_success $V&quot; &gt;&gt; &quot;$TMP&quot;
+
+# Age of last verify, so a silently dead job also alarms
+echo &quot;shani_verify_last_run_seconds $(stat -c %Y /var/local/shani-health.json 2&gt;/dev/null || echo 0)&quot; &gt;&gt; &quot;$TMP&quot;
+
+# Pending-reboot marker (tmpfs; cleared at boot). mtime = when update was staged
+P=$([ -f /run/shanios/reboot-needed ] &amp;&amp; echo 1 || echo 0)
+echo &quot;shani_reboot_pending $P&quot; &gt;&gt; &quot;$TMP&quot;
+[ &quot;$P&quot; = 1 ] &amp;&amp; echo &quot;shani_reboot_pending_mtime $(stat -c %Y /run/shanios/reboot-needed)&quot; &gt;&gt; &quot;$TMP&quot;
+
+echo &quot;shani_failed_units $(systemctl --failed --no-legend | wc -l)&quot; &gt;&gt; &quot;$TMP&quot;
+
+chmod 644 &quot;$TMP&quot;; mv &quot;$TMP&quot; &quot;$OUT/shani_state.prom&quot;</code></pre>
+<h3 id="alert-worthy-conditions">Alert-worthy conditions</h3>
+<table><thead><tr><th>Condition</th><th>Signal</th></tr></thead><tbody><tr><td>Nightly verify failed or silently dead</td><td><code>shani_verify_success == 0</code>; staleness via <code>time() - shani_verify_last_run_seconds &gt; 2 days</code></td></tr><tr><td>Host drifted from its channel</td><td>installed version differs from the channel manifest (<code>latest.txt</code>/<code>stable.txt</code> under the CDN base URL) beyond N days</td></tr><tr><td>Update staged but never rebooted</td><td><code>/run/shanios/reboot-needed</code> present longer than your maintenance-window SLA</td></tr><tr><td>Failed units accumulating</td><td><code>shani_failed_units &gt; 0</code> sustained</td></tr><tr><td>Boot failure markers</td><td><code>/data/boot_failure</code> or <code>/data/boot_hard_failure</code> present</td></tr></tbody></table>
+<p>Channel-drift and boot-marker checks are small additions to the script following the identical pattern (fetch the manifest with <code>curl</code>, compare against <code>.VERSION_ID</code> in <code>/usr/lib/os-release</code>; test marker files with <code>[ -f ]</code>).</p>
+<hr>
+<h2 id="log-shipping">Log Shipping</h2>
+<p>Local journal retention is deliberately small (128 MB x 2 files), so ship promptly if you need history.</p>
+<p><strong>Pattern A — stream JSON journal into a log shipper:</strong></p>
+<pre><code class="language-bash">journalctl -f -o json | podman run --rm -i \
+  -v ~/exporters/vector.toml:/etc/vector/vector.toml:ro,Z \
+  docker.io/timberio/vector:latest-alpine --config /etc/vector/vector.toml</code></pre>
+<p>The Vector config is a <code>stdin</code> source plus whatever sink you run (Loki, Elasticsearch, S3 archive); wrap the pipeline in a user systemd unit so it restarts and starts at boot.</p>
+<p><strong>Pattern B — rsyslog-in-container:</strong> bind-mount <code>/run/systemd/journal/syslog</code> into an rsyslog container, set <code>ForwardToSyslog=yes</code> via a journald drop-in, and forward centrally from there. Journald persistence and drop-in mechanics are covered in <a href="../system/logging.md">System Logging</a>.</p>
+<hr>
+<h2 id="grafana-dashboard-sketch">Grafana Dashboard Sketch</h2>
+<p>Suggested panels for a per-fleet view:</p>
+<table><thead><tr><th>Panel</th><th>Source</th></tr></thead><tbody><tr><td>Active-slot age (days)</td><td><code>time() - shani_slot_booted_since</code> (textfile extension of the script above)</td></tr><tr><td>Verify result gauge</td><td><code>sum(shani_verify_success)</code> vs <code>count(shani_verify_success)</code></td></tr><tr><td>Updates pending / channel drift</td><td><code>max by (instance) (shani_channel_drift)</code> (custom metric, pattern above)</td></tr><tr><td>Pending reboots and age</td><td><code>sum(shani_reboot_pending)</code> ; <code>time() - shani_reboot_pending_mtime</code></td></tr><tr><td>Bees dedup ratio</td><td><code>shani_bees_dedup_ratio</code> (textfile extension)</td></tr><tr><td>ZRAM/swap usage</td><td><code>node_memory_SwapTotal_bytes - node_memory_SwapFree_bytes</code> (zram is the swap device)</td></tr><tr><td>Scrub last run</td><td><code>time() - shani_scrub_last_run</code> (textfile extension)</td></tr></tbody></table>
+<hr>
+<h2 id="alert-rules">Alert Rules</h2>
+<pre><code class="language-yaml">groups:
+  - name: shanios-integrity
+    rules:
+      - alert: ShaniVerifyFailed
+        expr: shani_verify_success == 0
+        for: 15m
+        labels: { severity: critical }
+        annotations: { summary: &quot;Integrity verify failed on {{ $labels.instance }}&quot; }
+      - alert: ShaniRebootPendingTooLong
+        expr: shani_reboot_pending == 1 and (time() - shani_reboot_pending_mtime) &gt; 604800
+        for: 12h
+        labels: { severity: warning }
+        annotations: { summary: &quot;Update staged over a week ago, never rebooted: {{ $labels.instance }}&quot; }
+      - alert: ShaniRootFilesystemLow
+        expr: node_filesystem_avail_bytes{mountpoint=&quot;/&quot;} / node_filesystem_size_bytes{mountpoint=&quot;/&quot;} &lt; 0.15
+        for: 30m
+        labels: { severity: warning }
+        annotations: { summary: &quot;Root pool below 15% free: {{ $labels.instance }}&quot; }</code></pre>
+<hr>
+<h2 id="rollout-checklist">Rollout Checklist</h2>
+<ol>
+<li>Start with <strong>2–3 canary hosts</strong> running the full stack (node_exporter + cron + textfile + log shipper), kept on <code>latest</code> while the rest of the fleet stays on <code>stable</code>.</li>
+<li>Watch one full weekly update cycle before widening; stagger any <code>shani-deploy --set-channel</code> changes across days rather than flipping groups simultaneously.</li>
+<li>Drive reboots from your maintenance window off the <code>/run/shanios/reboot-needed</code> marker (see <a href="fleet">OEM & Fleet Deployment</a>).</li>
+<li>Validate alert paths deliberately — stage an update on one VM and let the pending-reboot alert fire; force a channel mismatch and confirm drift detection — then roll out fleet-wide in batches.</li>
+</ol>
+<hr>
+<h2 id="fleet-agent-enrollment">Fleet Agent Enrollment</h2>
+<p>The <code>shani-fleet</code> agent enrolls machines with <code>shani-platform</code> using a pull-based model:</p>
+<ol>
+<li><strong>Enrollment token</strong> — IT generates a token from the platform UI</li>
+<li><strong>Agent enrollment</strong> — Agent calls <code>POST /fleet/enroll</code> with the token</li>
+<li><strong>Heartbeat</strong> — Agent sends facts every 60 seconds via <code>POST /fleet/heartbeat</code></li>
+<li><strong>Command delivery</strong> — Platform piggybacks commands on heartbeat responses</li>
+<li><strong>Command execution</strong> — Agent verifies GPG signature, executes, posts result</li>
+</ol>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant Agent
+    participant Platform
+    Agent-&gt;&gt;Platform: POST /fleet/enroll (token)
+    Platform-&gt;&gt;Agent: API key
+    loop Every 5min
+        Agent-&gt;&gt;Platform: POST /fleet/heartbeat (facts)
+        Platform-&gt;&gt;Agent: Signed commands (if any)
+    end
+    Agent-&gt;&gt;Agent: Verify GPG signature
+    Agent-&gt;&gt;Agent: Execute command
+    Agent-&gt;&gt;Platform: POST /fleet/commands/{id}/result</code></pre>
+<h2 id="signed-command-trust-chain">Signed Command Trust Chain</h2>
+<p>Every command delivered to fleet agents is GPG-signed by the platform. The agent verifies the signature before execution — this is the security boundary of the entire fleet (arbitrary remote exec is gated entirely on this check).</p>
+<pre><code>Platform signs command → Agent verifies signature → Agent executes</code></pre>
+<p>If signature verification fails, the agent refuses to execute and reports the failure.</p>
+<h2 id="monitoring-fleet-health">Monitoring Fleet Health</h2>
+<p>The platform derives alerts from heartbeat data:</p>
+<table><thead><tr><th>Alert</th><th>Condition</th><th>Severity</th></tr></thead><tbody><tr><td>Offline</td><td>No heartbeat > 5 minutes</td><td>Warning</td></tr><tr><td>Verify failed</td><td>OS integrity check failed</td><td>Critical</td></tr><tr><td>Clock skew</td><td>Clock drift > 5 minutes</td><td>Warning</td></tr><tr><td>Reboot stuck</td><td>Reboot pending > 7 days</td><td>Warning</td></tr><tr><td>Channel drift</td><td>Machine on unexpected channel</td><td>Info</td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="fleet">OEM & Fleet Deployment</a> — channels, update flow, reboot markers</li>
+<li><a href="../updates/shani-health.md">shani-health Reference</a> — <code>--verify --json</code>, exit codes</li>
+<li><a href="../servers/monitoring/prometheus.md">Monitoring & Observability</a> — self-hosted Prometheus/Grafana/Loki stacks</li>
+<li><a href="../system/cronie.md">cronie</a> — scheduler syntax and system crontabs</li>
+</ul></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

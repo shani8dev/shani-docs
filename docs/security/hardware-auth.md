@@ -1,12 +1,12 @@
 ---
 title: Hardware Authentication
 section: Security
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # Hardware Authentication
 
-Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work without a driver download, via packages pulled in by the `shani-peripherals` package. The CLI utilities for YubiKey management and TOTP/HOTP codes are not part of the default image and need a separate install — see the callout in each section below.
+Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work without a driver download, via packages pulled in by the `shani-peripherals` package. The CLI utilities for YubiKey management, PC/SC diagnostics, and TOTP/HOTP codes are not part of the default image — because Shanios is immutable, they cannot be installed with `pacman` at runtime. Install them via Nix (`nix-env -iA nixpkgs.<pkg>`) or run them inside a Distrobox container — see the callout in each section below.
 
 ---
 
@@ -46,9 +46,17 @@ fprintd-enroll   # will fail with a clear error if the device is unsupported
 
 ## YubiKey and FIDO2/U2F
 
-**Packages:** `libfido2`, `pam-u2f` — pre-installed via `shani-peripherals`. `yubikey-manager` (the `ykman` CLI used below) is **not** part of the default image — install it first: `sudo pacman -S yubikey-manager`.
+**Packages:** `libfido2`, `pam-u2f` — pre-installed via `shani-peripherals`. `yubikey-manager` (the `ykman` CLI used below) is **not** part of the default image and cannot be installed on the immutable host with `pacman`. Install it via Nix instead:
+
+```bash
+nix-env -iA nixpkgs.yubikey-manager
+```
+
+These CLI tools can also run inside a Distrobox container if you prefer not to install them on the host.
 
 ### Setting Up PAM U2F (sudo / login)
+
+> ⚠️ **Before editing PAM:** keep an existing root shell open when editing PAM files, and test `sudo` in a second terminal before logging out. A broken PAM stack can lock you out of `sudo` and login entirely.
 
 ```bash
 # 1. Create the U2F key mapping directory
@@ -103,7 +111,13 @@ ssh-keygen -t ed25519-sk
 
 ## Smart Card / PIV
 
-**Packages:** `opensc`, `ccid`, `acsccid` — pre-installed via `shani-peripherals`; `pcscd`/`pcsc-lite` come along transitively as a dependency of `opensc`/`ccid`. The `pcsc-tools` diagnostic package (used for `pcsc_scan` below) is **not** part of the default image — install it first: `sudo pacman -S pcsc-tools`.
+**Packages:** `opensc`, `ccid`, `acsccid` — pre-installed via `shani-peripherals`; `pcscd`/`pcsc-lite` come along transitively as a dependency of `opensc`/`ccid`. The `pcsc-tools` diagnostic package (used for `pcsc_scan` below) is **not** part of the default image and cannot be installed on the immutable host with `pacman` — install it via Nix:
+
+```bash
+nix-env -iA nixpkgs.pcsc-tools
+```
+
+Or run it inside a Distrobox container.
 
 ```bash
 # Start the PC/SC daemon
@@ -147,7 +161,13 @@ pcsc_scan   # shows NFC card when tapped
 
 ## TOTP / HOTP (Two-Factor)
 
-**Package:** `oath-toolkit` — **not** part of the default image; install it first: `sudo pacman -S oath-toolkit`.
+**Package:** `oath-toolkit` — **not** part of the default image and cannot be installed on the immutable host with `pacman`. Install it via Nix:
+
+```bash
+nix-env -iA nixpkgs.oath-toolkit
+```
+
+Or run it inside a Distrobox container.
 
 `oathtool` generates TOTP and HOTP codes from a shared secret, compatible with Google Authenticator, Authy, and any RFC 6238/4226 implementation.
 
@@ -181,4 +201,4 @@ oathtool --totp --base32 -w 1 JBSWY3DPEHPK3PXP 123456
 - [Security Features](features) — full list of supported authentication methods
 - [LUKS Management](luks) — using a keyfile for disk unlock
 - [TPM2 Enrollment](tpm2) — TPM-based disk unlock
-- [shani-health Reference](../updates/shani-health) — `shani-health --security` reports fprintd enrollment, pam-u2f configuration, and pcscd status per user
+- [shani-health Reference](../updates/shani-health.md) — `shani-health --security` reports fprintd enrollment, pam-u2f configuration, and pcscd status per user

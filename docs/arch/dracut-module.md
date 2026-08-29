@@ -1,7 +1,7 @@
 ---
 title: Dracut Initramfs Module
 section: Architecture
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # Dracut Initramfs Module
@@ -167,4 +167,4 @@ shani-health --boot   # shows "Dracut mod: OK 99shanios module installed (N hook
 
 - [Boot Process](boot) — how the full boot chain works
 - [Overlay Filesystem](overlay) — how the `/etc` overlay works at runtime
-- [gen-efi Reference](../security/gen-efi) — building and signing UKIs
+- [gen-efi Reference](../security/gen-efi.md) — building and signing UKIs

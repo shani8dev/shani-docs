@@ -1,7 +1,7 @@
 ---
 title: SSHFS
 section: Networking
-updated: 2026-04-18
+updated: 2026-08-28
 ---
 
 # SSHFS — Mount Remote Directories over SSH
@@ -106,3 +106,10 @@ systemctl --user enable --now mnt-remote.mount
 | Very slow file listing | Disable host key DNS lookups in `~/.ssh/config` with `UseDNS no`; enable attribute caching with `-o cache=yes` |
 | `Permission denied` | Confirm SSH key auth works first: `ssh user@hostname`; check that the remote path exists and is readable by that user |
 | Mount disappears after suspend/resume | Use `reconnect,ServerAliveInterval=15` options; alternatively, use a systemd mount unit with `Restart=on-failure` |
+
+## See Also
+
+- [SSH Server](openssh) — remote access and configuration
+- [NFS](nfs) — network filesystem sharing
+- [Samba](samba) — SMB/CIFS file sharing
+- [Backup & Restore](../system/backup.md) — offsite backup with restic

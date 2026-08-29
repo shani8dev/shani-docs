@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>gpsd (GPS Daemon) — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="gpsd — GPS Daemon  gpsd is a service daemon that reads data from GPS/GNSS receivers and makes it available to multiple clients over a local socket. Applica…">
+  <meta name="description" id="meta-desc"     content="gpsd is a service daemon that reads data from GPS/GNSS receivers and makes it available to multiple clients over a local socket. Applications such as Chron…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="gpsd (GPS Daemon)">
-  <meta property="og:description" id="og-desc"    content="gpsd — GPS Daemon  gpsd is a service daemon that reads data from GPS/GNSS receivers and makes it available to multiple clients over a local socket. Applica…">
+  <meta property="og:description" id="og-desc"    content="gpsd is a service daemon that reads data from GPS/GNSS receivers and makes it available to multiple clients over a local socket. Applications such as Chron…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/networking/gpsd/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="gpsd (GPS Daemon)">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="gpsd (GPS Daemon)">
-  <meta name="twitter:description" id="tw-desc"  content="gpsd — GPS Daemon  gpsd is a service daemon that reads data from GPS/GNSS receivers and makes it available to multiple clients over a local socket. Applica…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="gpsd is a service daemon that reads data from GPS/GNSS receivers and makes it available to multiple clients over a local socket. Applications such as Chron…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"gpsd (GPS Daemon)","description":"gpsd — GPS Daemon  gpsd is a service daemon that reads data from GPS/GNSS receivers and makes it available to multiple clients over a local socket. Applica…","url":"https://docs.shani.dev/doc/networking/gpsd/","datePublished":"2026-04-20T00:00:00.000Z","dateModified":"2026-04-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"gpsd (GPS Daemon)","description":"gpsd is a service daemon that reads data from GPS/GNSS receivers and makes it available to multiple clients over a local socket. Applications such as Chron…","url":"https://docs.shani.dev/doc/networking/gpsd/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"gpsd (GPS Daemon)","item":"https://docs.shani.dev/doc/networking/gpsd/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,13 +215,13 @@
         <h1 class="doc-title">gpsd (GPS Daemon)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Networking</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>gpsd is a service daemon that reads data from GPS/GNSS receivers and makes it available to multiple clients over a local socket. Applications such as Chrony (NTP), navigation software, and location-aware tools query gpsd rather than the device directly, allowing multiple programs to share a single GPS receiver simultaneously.</p>
 <p>gpsd is pre-installed on Shani OS. <strong>Not active by default</strong> — enable it when a GPS receiver is connected.</p>
-<p>---</p>
-<h2>Supported Hardware</h2>
+<hr>
+<h2 id="supported-hardware">Supported Hardware</h2>
 <p>gpsd works with virtually any GPS receiver that presents as a serial device:</p>
 <ul>
 <li><strong>USB GPS dongles</strong> — appear as <code>/dev/ttyUSB0</code> or <code>/dev/ttyACM0</code></li>
@@ -235,9 +237,9 @@ ls /dev/tty{USB,ACM}*
 
 # Check kernel messages for the assigned device node
 dmesg | tail -20</code></pre>
-<p>---</p>
-<h2>Enable & Configure</h2>
-<h3>Specify the Device</h3>
+<hr>
+<h2 id="enable-configure">Enable & Configure</h2>
+<h3 id="specify-the-device">Specify the Device</h3>
 <p>Edit <code>/etc/default/gpsd</code> (or <code>/etc/gpsd</code> depending on packaging):</p>
 <pre><code class="language-bash"># Device the GPS receiver is connected to
 DEVICES=&quot;/dev/ttyUSB0&quot;
@@ -249,11 +251,11 @@ GPSD_OPTIONS=&quot;-n&quot;    # -n: don't wait for a client to poll — start r
 START_DAEMON=&quot;true&quot;</code></pre>
 <pre><code class="language-bash">sudo systemctl enable --now gpsd
 systemctl status gpsd</code></pre>
-<h3>Socket Activation (Default)</h3>
+<h3 id="socket-activation-default">Socket Activation (Default)</h3>
 <p>gpsd on Arch uses socket activation — it starts on demand when a client connects. Enable the socket unit instead:</p>
 <pre><code class="language-bash">sudo systemctl enable --now gpsd.socket</code></pre>
-<p>---</p>
-<h2>Status & Testing</h2>
+<hr>
+<h2 id="status-testing">Status & Testing</h2>
 <pre><code class="language-bash"># Interactive GPS monitor — shows satellite view, fix status, lat/lon/alt
 gpsd -N -D 2 /dev/ttyUSB0   # run in foreground for testing
 
@@ -266,28 +268,33 @@ gpsmon
 # Raw NMEA sentences from the device
 cat /dev/ttyUSB0</code></pre>
 <p><code>cgps</code> output key fields:</p>
-<p>| Field | Meaning | |-------|---------| | <code>Status</code> | <code>NO FIX</code> / <code>2D FIX</code> / <code>3D FIX</code> | | <code>Latitude / Longitude</code> | Position in decimal degrees | | <code>Altitude</code> | Height above sea level | | <code>Speed</code> | Ground speed | | <code>Satellites Used</code> | Number of satellites contributing to the fix |</p>
+<table><thead><tr><th>Field</th><th>Meaning</th></tr></thead><tbody><tr><td><code>Status</code></td><td><code>NO FIX</code> / <code>2D FIX</code> / <code>3D FIX</code></td></tr><tr><td><code>Latitude / Longitude</code></td><td>Position in decimal degrees</td></tr><tr><td><code>Altitude</code></td><td>Height above sea level</td></tr><tr><td><code>Speed</code></td><td>Ground speed</td></tr><tr><td><code>Satellites Used</code></td><td>Number of satellites contributing to the fix</td></tr></tbody></table>
 <p>A 3D fix requires at least 4 satellites. Getting a first fix (TTFF) outdoors typically takes 30–90 seconds on a cold start.</p>
-<p>---</p>
-<h2>Using GPS as a Time Source (Chrony)</h2>
+<hr>
+<h2 id="using-gps-as-a-time-source-chrony">Using GPS as a Time Source (Chrony)</h2>
 <p>A GPS receiver provides highly accurate time via the PPS (Pulse Per Second) signal. Pair gpsd with Chrony to use GPS as an NTP reference:</p>
 <pre><code class="language-bash"># /etc/chrony.conf — add these lines
 refclock SHM 0 offset 0.5 delay 0.2 refid GPS
 refclock SOCK /var/run/chrony.ttyUSB0.sock refid PPS</code></pre>
 <pre><code class="language-bash">sudo systemctl restart chronyd
 chronyc sources -v   # GPS should appear as a source</code></pre>
-<blockquote><p>PPS requires hardware support from the GPS module. Most consumer USB GPS dongles do not expose PPS — check your hardware specs.</p></blockquote>
-<p>---</p>
-<h2>Firewall</h2>
+<blockquote>PPS requires hardware support from the GPS module. Most consumer USB GPS dongles do not expose PPS — check your hardware specs.</blockquote>
+<hr>
+<h2 id="firewall">Firewall</h2>
 <p>gpsd listens on <code>localhost:2947</code> by default. If you need LAN access (e.g., to share one GPS across multiple machines):</p>
 <pre><code class="language-bash"># Edit /etc/default/gpsd and add -G to listen on all interfaces:
 GPSD_OPTIONS=&quot;-n -G&quot;
 
 sudo firewall-cmd --add-port=2947/tcp --permanent
 sudo firewall-cmd --reload</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | <code>cgps</code> shows <code>NO FIX</code> | Move outdoors — GPS requires clear sky view; cold start takes up to 90 seconds | | Device not found | Check <code>ls /dev/ttyUSB*</code>; add your user to the <code>uucp</code> group for non-root access: <code>sudo usermod -aG uucp $USER</code> | | gpsd not reading device | Try running in foreground: <code>sudo gpsd -N -D 5 /dev/ttyUSB0</code> — look for permission or baud rate errors | | ModemManager interfering | ModemManager probes serial devices and can disrupt GPS. Add a udev rule to ignore it: <code>sudo tee /etc/udev/rules.d/99-gpsd.rules &lt;&lt;&lt; 'ATTRS{idVendor}==&quot;XXXX&quot;, ATTRS{idProduct}==&quot;YYYY&quot;, ENV{ID_MM_DEVICE_IGNORE}=&quot;1&quot;'</code> (replace with your device's IDs from <code>lsusb</code>) | | Multiple clients can't connect | gpsd handles multiple clients natively — no configuration needed; verify gpsd is running with <code>systemctl status gpsd</code> |</p></div>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>cgps</code> shows <code>NO FIX</code></td><td>Move outdoors — GPS requires clear sky view; cold start takes up to 90 seconds</td></tr><tr><td>Device not found</td><td>Check <code>ls /dev/ttyUSB*</code>; add your user to the <code>uucp</code> group for non-root access: <code>sudo usermod -aG uucp $USER</code></td></tr><tr><td>gpsd not reading device</td><td>Try running in foreground: <code>sudo gpsd -N -D 5 /dev/ttyUSB0</code> — look for permission or baud rate errors</td></tr><tr><td>ModemManager interfering</td><td>ModemManager probes serial devices and can disrupt GPS. Add a udev rule to ignore it: <code>sudo tee /etc/udev/rules.d/99-gpsd.rules &lt;&lt;&lt; 'ATTRS{idVendor}==&quot;XXXX&quot;, ATTRS{idProduct}==&quot;YYYY&quot;, ENV{ID_MM_DEVICE_IGNORE}=&quot;1&quot;'</code> (replace with your device's IDs from <code>lsusb</code>)</td></tr><tr><td>Multiple clients can't connect</td><td>gpsd handles multiple clients natively — no configuration needed; verify gpsd is running with <code>systemctl status gpsd</code></td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="../intro/optimizations.md">Socket-activated services</a></li>
+<li><a href="../system/hardware.md">Hardware info</a></li>
+</ul></div>
     </div>
 
   </main>

@@ -1,7 +1,7 @@
 ---
 title: FAQ
 section: FAQ
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Frequently Asked Questions
@@ -22,7 +22,11 @@ Shanios runs on any 64-bit x86 CPU (Intel or AMD) with UEFI firmware. 4 GB RAM a
 
 **Do I need to disable Secure Boot to install?**
 
-Yes, temporarily. Disable Secure Boot before installing, then re-enable it after installation and enroll your MOK key. See [Secure Boot](security/secure-boot).
+No. Shanios boots signed UKIs, so Secure Boot stays enabled — the installer media is pre-signed with the project MOK key and MOK enrollment is handled automatically by the installer/`gen-efi` (MokManager appears on first boot to confirm it). See [Secure Boot](security/secure-boot).
+
+**Which desktop editions are available?**
+
+Two desktop editions ship today: **GNOME** and **KDE Plasma** — plus a **Kiosk** profile for single-purpose deployments and a headless **Server** profile for cloud/server deployments. A third edition, **COSMIC**, is announced and in development (built as a cloud image rather than desktop install media). GNOME suits most users; KDE Plasma targets gamers and power users with the full gaming stack pre-installed; COSMIC offers System76's Rust-based desktop experience.
 
 **Can I dual boot with Windows?**
 
@@ -102,7 +106,7 @@ Yes. Bottles (pre-installed on KDE Plasma; available on Flathub for GNOME) provi
 
 **What about Android apps?**
 
-Waydroid runs a full hardware-accelerated Android 11 stack, pre-installed on both editions. Set up with `sudo waydroid-helper init`. See the [Android (Waydroid)](software/waydroid) guide.
+Waydroid runs a full hardware-accelerated Android 11 stack, pre-installed on every edition. Set up with `sudo waydroid-helper init`. See the [Android (Waydroid)](software/waydroid) guide.
 
 ---
 
@@ -111,10 +115,10 @@ Waydroid runs a full hardware-accelerated Android 11 stack, pre-installed on bot
 **How does updating work?**
 
 ```bash
-sudo shani-deploy update
+sudo shani-deploy
 ```
 
-This downloads a new OS image, verifies SHA256 + GPG signature, snapshots the inactive slot, extracts the new image, generates a signed UKI, and updates the bootloader. Your running system is never touched. Reboot when ready.
+Running plain `shani-deploy` deploys the latest available OS image. It downloads a new OS image, verifies SHA256 + GPG signature, snapshots the inactive slot, extracts the new image, generates a signed UKI, and updates the bootloader. Your running system is never touched. Reboot when ready.
 
 **How often do updates come out?**
 
@@ -239,7 +243,7 @@ Most have direct replacements on Flatpak: Firefox or Vivaldi (browser, both pre-
 
 **What about `.docx` and `.xlsx` files?**
 
-OnlyOffice Desktop Editors is pre-installed on both editions and has excellent compatibility with Microsoft Office formats.
+OnlyOffice Desktop Editors is pre-installed on every edition and has excellent compatibility with Microsoft Office formats.
 
 **I use Homebrew on macOS. Do I need to learn something new?**
 
@@ -296,3 +300,46 @@ Enterprise and OEM enquiries: [shani.dev — Enterprise & Vendors](https://shani
 **Can I contribute?**
 
 Yes. Source code, build scripts, and documentation are all public at [github.com/shani8dev](https://github.com/shani8dev). Pull requests and issue reports are welcome.
+
+## See Also
+
+- [Getting Started](intro/getting-started) — download, verify, install walkthrough
+- [Troubleshooting](troubleshooting) — diagnosing and fixing issues
+- [Security Features](security/features) — full security model overview
+- [System Updates](updates/system) — how updates and rollback work
+- [Migrating from Traditional Linux](intro/migrating) — workflow changes and tips
+- [What's Included](intro/whats-included) — complete software stack
+
+## Profiles & Editions
+
+**What is the Kiosk profile?**
+
+The Kiosk profile is a single-purpose deployment designed for digital signage, kiosks, and locked-down environments. It runs a full-screen Firefox instance inside a Cage/LabWC Wayland session with no desktop environment. The kiosk user's home directory is a tmpfs mount, so nothing survives reboot.
+
+**What is the Server profile?**
+
+The Server profile is a headless deployment with no desktop environment. It is designed for cloud and server workloads. Boot splash services are masked since there is no display.
+
+**How do release channels work?**
+
+Shanios publishes two channels: `latest` (every build) and `stable` (verified releases). See [Release Channels](../updates/channels.md) for details.
+
+## Troubleshooting
+
+**How do I check which slot I'm running?**
+
+```bash
+cat /data/current-slot   # prints: blue  or  green
+```
+
+**How do I check for updates manually?**
+
+```bash
+shani-update --check
+```
+
+**How do I view deployment logs?**
+
+```bash
+journalctl -u shani-deploy --no-pager
+```

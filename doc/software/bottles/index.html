@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Bottles (Windows Compatibility) — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Bottles (Windows Compatibility)  Bottles is the recommended tool for running non-gaming Windows software on Shanios. It manages Wine environments (&quot;bottles…">
+  <meta name="description" id="meta-desc"     content="Bottles is the recommended tool for running non-gaming Windows software on Shanios. It manages Wine environments (&quot;bottles&quot;), handles runtime dependencies,…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Bottles (Windows Compatibility)">
-  <meta property="og:description" id="og-desc"    content="Bottles (Windows Compatibility)  Bottles is the recommended tool for running non-gaming Windows software on Shanios. It manages Wine environments (&quot;bottles…">
+  <meta property="og:description" id="og-desc"    content="Bottles is the recommended tool for running non-gaming Windows software on Shanios. It manages Wine environments (&quot;bottles&quot;), handles runtime dependencies,…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/software/bottles/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Bottles (Windows Compatibility)">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Bottles (Windows Compatibility)">
-  <meta name="twitter:description" id="tw-desc"  content="Bottles (Windows Compatibility)  Bottles is the recommended tool for running non-gaming Windows software on Shanios. It manages Wine environments (&quot;bottles…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Bottles is the recommended tool for running non-gaming Windows software on Shanios. It manages Wine environments (&quot;bottles&quot;), handles runtime dependencies,…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Bottles (Windows Compatibility)","description":"Bottles (Windows Compatibility)  Bottles is the recommended tool for running non-gaming Windows software on Shanios. It manages Wine environments (\"bottles…","url":"https://docs.shani.dev/doc/software/bottles/","datePublished":"2026-05-08T00:00:00.000Z","dateModified":"2026-05-08T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Bottles (Windows Compatibility)","description":"Bottles is the recommended tool for running non-gaming Windows software on Shanios. It manages Wine environments (\"bottles\"), handles runtime dependencies,…","url":"https://docs.shani.dev/doc/software/bottles/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Bottles (Windows Compatibility)","item":"https://docs.shani.dev/doc/software/bottles/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,25 +215,23 @@
         <h1 class="doc-title">Bottles (Windows Compatibility)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Software &amp; Apps</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-05-08</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p><strong>Bottles</strong> is the recommended tool for running non-gaming Windows software on Shanios. It manages Wine environments ("bottles"), handles runtime dependencies, and keeps each application's Windows registry and files isolated in its own prefix.</p>
-<blockquote><p><strong>Installation</strong>: Pre-installed on the KDE Plasma edition. On the GNOME edition:</p></blockquote>
-<blockquote><p><pre><code class="language-bash">&gt; flatpak install flathub com.usebottles.bottles
-&gt; </code></pre></p></blockquote>
+<blockquote><strong>Installation</strong>: Pre-installed on the KDE Plasma edition. On the GNOME and COSMIC editions: ``<code>bash flatpak install flathub com.usebottles.bottles </code>``</blockquote>
 <p>For gaming, use Steam + Proton or Heroic Games Launcher instead — Bottles is for productivity tools, creative software, business applications, utilities, and legacy apps.</p>
-<h2>How Wine Works</h2>
+<h2 id="how-wine-works">How Wine Works</h2>
 <p>Wine reimplements the Windows API as native Linux calls — it is not an emulator. DXVK (DirectX 9/10/11) and VKD3D (DirectX 12) translate DirectX calls to Vulkan. Most Windows applications run at near-native speed.</p>
 <p>Wine cannot run applications that rely on Windows kernel drivers, hardware dongles tied to Windows, or kernel-level anti-cheat. Use a Windows VM for those cases.</p>
-<h2>Creating a Bottle</h2>
+<h2 id="creating-a-bottle">Creating a Bottle</h2>
 <p>Open Bottles from your application launcher → <strong>Create a new bottle</strong>:</p>
 <ul>
 <li><strong>Application</strong> — for productivity tools, utilities, and most Windows software.</li>
 <li><strong>Gaming</strong> — pre-configured with DXVK and VKD3D for DirectX games.</li>
 <li><strong>Custom</strong> — full manual control.</li>
 </ul>
-<h2>Installing Windows Software</h2>
+<h2 id="installing-windows-software">Installing Windows Software</h2>
 <ol>
 <li>Open your bottle → <strong>Run Executable</strong> → select the <code>.exe</code> installer</li>
 <li>Follow the installer as you would on Windows</li>
@@ -239,13 +239,13 @@
 <li>Click <strong>Add Desktop Entry</strong> (three-dot menu) to add it to your Linux launcher</li>
 </ol>
 <p>Your Linux home directory is accessible from inside Wine at <code>Z:\home\username</code>.</p>
-<h2>Runtime Dependencies</h2>
+<h2 id="runtime-dependencies">Runtime Dependencies</h2>
 <p>Go to your bottle → <strong>Dependencies</strong> → search and install as needed:</p>
-<p>| Dependency | Required by | |---|---| | <code>vcredist2019</code> | Most modern Windows apps (Visual C++ 2019) | | <code>vcredist2015</code> | Older apps (Visual C++ 2015) | | <code>dotnet48</code> | .NET Framework 4.8 — business software, installers | | <code>dotnet6</code> | .NET 6 — newer cross-platform apps | | <code>d3dx9</code> | DirectX 9 components | | <code>d3dcompiler_47</code> | DirectX shader compiler | | <code>corefonts</code> | Microsoft Core Fonts — improves text rendering | | <code>liberation</code> | Liberation fonts — metrically compatible with Arial/Times |</p>
-<h2>Wine Runners</h2>
+<table><thead><tr><th>Dependency</th><th>Required by</th></tr></thead><tbody><tr><td><code>vcredist2019</code></td><td>Most modern Windows apps (Visual C++ 2019)</td></tr><tr><td><code>vcredist2015</code></td><td>Older apps (Visual C++ 2015)</td></tr><tr><td><code>dotnet48</code></td><td>.NET Framework 4.8 — business software, installers</td></tr><tr><td><code>dotnet6</code></td><td>.NET 6 — newer cross-platform apps</td></tr><tr><td><code>d3dx9</code></td><td>DirectX 9 components</td></tr><tr><td><code>d3dcompiler_47</code></td><td>DirectX shader compiler</td></tr><tr><td><code>corefonts</code></td><td>Microsoft Core Fonts — improves text rendering</td></tr><tr><td><code>liberation</code></td><td>Liberation fonts — metrically compatible with Arial/Times</td></tr></tbody></table>
+<h2 id="wine-runners">Wine Runners</h2>
 <p>Change the runner in <strong>Settings → Runner</strong>:</p>
-<p>| Runner | Best for | |---|---| | <strong>Caffe</strong> | Default — stable, good general-purpose choice | | <strong>Vaniglia</strong> | Upstream Wine, minimal patches — use when patched runners misbehave | | <strong>Wine Staging</strong> | Wine + Staging patchset — good for productivity apps | | <strong>Wine-GE</strong> | Valve's Wine backported for non-Steam use — best for DirectX games and media software |</p>
-<h2>Advanced Configuration</h2>
+<table><thead><tr><th>Runner</th><th>Best for</th></tr></thead><tbody><tr><td><strong>Caffe</strong></td><td>Default — stable, good general-purpose choice</td></tr><tr><td><strong>Soda</strong></td><td>Caffe's successor lineage — patched runner tuned for compatibility with newer games and apps</td></tr><tr><td><strong>Vaniglia</strong></td><td>Upstream Wine, minimal patches — use when patched runners misbehave</td></tr><tr><td><strong>GE-Proton</strong></td><td>GloriousEggroll's actively maintained Proton-based build (the discontinued Wine-GE's replacement) — best for DirectX games and media software</td></tr></tbody></table>
+<h2 id="advanced-configuration">Advanced Configuration</h2>
 <p><strong>DXVK and VKD3D</strong>: In bottle <strong>Settings</strong>, enable DXVK (DirectX 9/10/11 → Vulkan) and VKD3D (DirectX 12 → Vulkan). Both are enabled by default in the Gaming template. Some creative and 3D tools also benefit.</p>
 <p><strong>Virtual Desktop Mode</strong>: Enable in bottle Settings if an app has window management or full-screen rendering issues. Wine creates a fake Windows desktop at a fixed resolution inside a single Linux window.</p>
 <p><strong>DLL Overrides</strong>: In bottle <strong>Settings → DLL Overrides</strong>, set <code>native,builtin</code> to prefer a winetricks-installed DLL, or <code>builtin,native</code> to prefer Wine's built-in. Common fix: install <code>d3dx9</code> via Dependencies, then set <code>d3d9</code> override to <code>native</code>.</p>
@@ -254,14 +254,14 @@
 <li><code>WINE_LARGE_ADDRESS_AWARE=1</code> — allows 32-bit apps to use more than 2 GB RAM</li>
 <li><code>WINEDEBUG=-all</code> — suppress debug output (speeds up some apps)</li>
 </ul>
-<h2>Storage</h2>
+<h2 id="storage">Storage</h2>
 <p>Bottles runs as a Flatpak. Data lives in <code>~/.var/app/com.usebottles.bottles/data/bottles/bottles/</code> — inside the <code>@home</code> subvolume, surviving all OS updates and rollbacks.</p>
-<h2>Checking Compatibility</h2>
+<h2 id="checking-compatibility">Checking Compatibility</h2>
 <ul>
 <li><strong><a href="https://appdb.winehq.org">WineHQ AppDB</a></strong> — compatibility database. Platinum/Gold = works well; Bronze = workarounds needed; Garbage = consider a Windows VM.</li>
 <li><strong><a href="https://www.protondb.com">ProtonDB</a></strong> — for Windows games under Proton/Steam.</li>
 </ul>
-<h2>When to Use a Windows VM Instead</h2>
+<h2 id="when-to-use-a-windows-vm-instead">When to Use a Windows VM Instead</h2>
 <p>Wine cannot handle:</p>
 <ul>
 <li>Applications requiring a <strong>kernel driver</strong> (hardware dongles, some DRM, security software)</li>
@@ -270,12 +270,19 @@
 <li><strong>Enterprise software</strong> with hardware-locked licensing</li>
 </ul>
 <p>For these, use a Windows VM via virt-manager (pre-installed on the KDE Plasma edition). See <a href="vms.md">Virtual Machines</a>.</p>
-<h2>Troubleshooting</h2>
+<h2 id="troubleshooting">Troubleshooting</h2>
 <ul>
 <li><strong>App won't start</strong>: Check the <strong>Logs</strong> tab. Install <code>vcredist2019</code> or <code>dotnet48</code> first.</li>
-<li><strong>Graphics glitches</strong>: Switch runner (e.g. Caffe → Wine-GE). Toggle DXVK on or off.</li>
+<li><strong>Graphics glitches</strong>: Switch runner (e.g. Caffe → GE-Proton). Toggle DXVK on or off.</li>
 <li><strong>App needs other drives</strong>: <strong>Settings → Sandbox</strong> — add paths or disable sandboxing.</li>
 <li><strong>Crashes on startup</strong>: Check WineHQ AppDB for known workarounds.</li>
+</ul>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="vms">Virtual Machines</a> — full Windows VMs for apps that need kernel drivers</li>
+<li><a href="gaming">Gaming</a> — Steam, Proton, game controllers</li>
+<li><a href="appimage">AppImages</a> — portable app format</li>
+<li><a href="distrobox">Distrobox</a> — full mutable environments for complex apps</li>
 </ul></div>
     </div>
 

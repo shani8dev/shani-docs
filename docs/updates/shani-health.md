@@ -1,7 +1,7 @@
 ---
 title: shani-health Reference
 section: Updates & Config
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # shani-health Reference
@@ -38,10 +38,16 @@ shani-health --export-logs ~/           # Bundle diagnostics for bug reports
 shani-health --history 100              # Last 100 deploy/rollback events
 shani-health --verify                   # Deep integrity check (runs Btrfs scrub)
 shani-health --clear-boot-failure       # Clear a stale boot failure marker
+shani-health --fix                      # Apply safe automatic fixes where offered
 
 # Output options
 shani-health -v                         # Verbose/debug output
+shani-health --json                     # Machine-readable JSON (scripting/CI)
+shani-health --nagios                   # Nagios plugin output (single-line + exit code)
+shani-health -h, --help                 # Usage summary
 ```
+
+Only one of `--json`, `--nagios`, or `--prometheus` may be used per run — combining them exits with an error. All three imply root is required (`_require_root` runs before any report).
 
 ---
 
@@ -262,5 +268,5 @@ For Nagios/Zabbix-style monitoring, the non-zero exit code on any issue makes `s
 ## See Also
 
 - [System Updates](system) — how `shani-deploy` works
-- [Boot Process](../arch/boot) — boot chain and health services
-- [gen-efi Reference](../security/gen-efi) — UKI generation and signing
+- [Boot Process](../arch/boot.md) — boot chain and health services
+- [gen-efi Reference](../security/gen-efi.md) — UKI generation and signing

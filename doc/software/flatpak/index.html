@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Flatpak — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Flatpak  Flatpak is the primary method for installing GUI applications on Shanios. Flathub is pre-configured and ready to use from first boot — no setup re…">
+  <meta name="description" id="meta-desc"     content="Flatpak is the primary method for installing GUI applications on Shanios. Flathub is pre-configured and ready to use from first boot — no setup required. F…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Flatpak">
-  <meta property="og:description" id="og-desc"    content="Flatpak  Flatpak is the primary method for installing GUI applications on Shanios. Flathub is pre-configured and ready to use from first boot — no setup re…">
+  <meta property="og:description" id="og-desc"    content="Flatpak is the primary method for installing GUI applications on Shanios. Flathub is pre-configured and ready to use from first boot — no setup required. F…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/software/flatpak/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Flatpak">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Flatpak">
-  <meta name="twitter:description" id="tw-desc"  content="Flatpak  Flatpak is the primary method for installing GUI applications on Shanios. Flathub is pre-configured and ready to use from first boot — no setup re…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Flatpak is the primary method for installing GUI applications on Shanios. Flathub is pre-configured and ready to use from first boot — no setup required. F…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Flatpak","description":"Flatpak  Flatpak is the primary method for installing GUI applications on Shanios. Flathub is pre-configured and ready to use from first boot — no setup re…","url":"https://docs.shani.dev/doc/software/flatpak/","datePublished":"2026-04-01T00:00:00.000Z","dateModified":"2026-04-01T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Flatpak","description":"Flatpak is the primary method for installing GUI applications on Shanios. Flathub is pre-configured and ready to use from first boot — no setup required. F…","url":"https://docs.shani.dev/doc/software/flatpak/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Flatpak","item":"https://docs.shani.dev/doc/software/flatpak/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,14 +215,14 @@
         <h1 class="doc-title">Flatpak</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Software &amp; Apps</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-01</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Flatpak is the primary method for installing GUI applications on Shanios. Flathub is pre-configured and ready to use from first boot — no setup required. Flatpak app data lives in the <code>@flatpak</code> Btrfs subvolume, which is shared between both <code>@blue</code> and <code>@green</code> OS slots — your installed apps are available regardless of which slot you have booted, and survive every OS update and rollback untouched.</p>
-<h2>Pre-Installed Apps</h2>
+<h2 id="pre-installed-apps">Pre-Installed Apps</h2>
 <p>Both editions ship with these apps pre-installed: <strong>Vivaldi Browser</strong>, <strong>OnlyOffice Desktop Editors</strong>, <strong>Warehouse</strong> (graphical Flatpak manager), <strong>Flatseal</strong> (sandbox permissions), <strong>Pods</strong> (Podman GUI), <strong>BoxBuddy</strong> (Distrobox GUI), and <strong>Gear Lever</strong> (AppImage manager).</p>
 <p>The GNOME edition additionally includes GNOME's core productivity and utility apps. The KDE Plasma edition additionally includes the full gaming stack (Steam, Heroic, Lutris, RetroArch, Bottles, and more), KDE productivity apps, and virt-manager with QEMU extension.</p>
-<h2>Installing Apps</h2>
+<h2 id="installing-apps">Installing Apps</h2>
 <pre><code class="language-bash"># Install from Flathub
 flatpak install flathub org.videolan.VLC
 flatpak install flathub com.spotify.Client
@@ -231,7 +233,7 @@ flatpak search gimp
 
 # Install from GUI
 # Open GNOME Software or KDE Discover — Flathub apps appear automatically</code></pre>
-<h2>Managing Installed Apps</h2>
+<h2 id="managing-installed-apps">Managing Installed Apps</h2>
 <pre><code class="language-bash"># List installed apps
 flatpak list --app
 
@@ -246,7 +248,7 @@ flatpak uninstall --delete-data org.videolan.VLC
 
 # Remove unused runtimes (free space)
 flatpak uninstall --unused</code></pre>
-<h2>Auto-Updates</h2>
+<h2 id="auto-updates">Auto-Updates</h2>
 <p>Flatpak apps update automatically via a systemd timer running every 12 hours — one for system-wide installs, one for per-user:</p>
 <pre><code class="language-bash"># Check timer status
 systemctl status flatpak-update-system.timer
@@ -254,7 +256,7 @@ systemctl --user status flatpak-update-user.timer
 
 # Disable auto-updates (not recommended)
 sudo systemctl disable flatpak-update-system.timer</code></pre>
-<h2>Permissions & Sandboxing</h2>
+<h2 id="permissions-sandboxing">Permissions & Sandboxing</h2>
 <p>Flatpak apps run in a sandbox. Use <strong>Flatseal</strong> (pre-installed) to manage permissions via GUI — it shows every permission for every installed app and lets you grant or revoke filesystem, network, device, and portal access per-app. Use the CLI for scripted overrides:</p>
 <pre><code class="language-bash"># View permissions for an app
 flatpak info --show-permissions org.gimp.GIMP
@@ -264,10 +266,10 @@ flatpak override --user --filesystem=home org.gimp.GIMP
 
 # Reset permissions to defaults
 flatpak override --user --reset org.gimp.GIMP</code></pre>
-<h2>App Data Location</h2>
-<p>| Type | Path | |------|------| | App data | <code>~/.var/app/&lt;app-id&gt;/</code> | | System runtime | <code>/var/lib/flatpak/</code> (<code>@flatpak</code> subvolume — shared between <code>@blue</code> and <code>@green</code>) | | User runtime | <code>~/.local/share/flatpak/</code> |</p>
+<h2 id="app-data-location">App Data Location</h2>
+<table><thead><tr><th>Type</th><th>Path</th></tr></thead><tbody><tr><td>App data</td><td><code>~/.var/app/&lt;app-id&gt;/</code></td></tr><tr><td>System runtime</td><td><code>/var/lib/flatpak/</code> (<code>@flatpak</code> subvolume — shared between <code>@blue</code> and <code>@green</code>)</td></tr><tr><td>User runtime</td><td><code>~/.local/share/flatpak/</code></td></tr></tbody></table>
 <p>The <code>@flatpak</code> subvolume is shared by both <code>@blue</code> and <code>@green</code> slots, so installed apps are available regardless of which slot you booted.</p>
-<h2>Running Apps from Terminal</h2>
+<h2 id="running-apps-from-terminal">Running Apps from Terminal</h2>
 <pre><code class="language-bash"># Run a Flatpak app
 flatpak run org.videolan.VLC
 
@@ -276,7 +278,7 @@ flatpak run --filesystem=home org.videolan.VLC
 
 # Open a shell inside the Flatpak sandbox
 flatpak run --command=sh org.videolan.VLC</code></pre>
-<h2>Adding Other Remotes</h2>
+<h2 id="adding-other-remotes">Adding Other Remotes</h2>
 <pre><code class="language-bash"># Add a remote (e.g., GNOME nightly)
 flatpak remote-add --if-not-exists gnome-nightly \
   https://nightly.gnome.org/gnome-nightly.flatpakrepo
@@ -285,7 +287,17 @@ flatpak remote-add --if-not-exists gnome-nightly \
 flatpak remotes
 
 # Remove a remote
-flatpak remote-delete gnome-nightly</code></pre></div>
+flatpak remote-delete gnome-nightly</code></pre>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="nix">Nix Package Manager</a> — CLI tools and development runtimes</li>
+<li><a href="snaps">Snap Packages</a> — containerised app store alternative</li>
+<li><a href="homebrew">Homebrew</a> — macOS-style package manager</li>
+<li><a href="distrobox">Distrobox</a> — full mutable environments for complex apps</li>
+<li><a href="appimage">AppImages</a> — portable app format</li>
+<li><a href="../concepts/immutability.md">Immutability</a> — how Flatpak apps persist on an immutable OS</li>
+<li><a href="../updates/system.md">System Updates</a> — how Flatpak updates work independently</li>
+</ul></div>
     </div>
 
   </main>

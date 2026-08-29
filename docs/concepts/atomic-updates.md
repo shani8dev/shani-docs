@@ -1,7 +1,7 @@
 ---
 title: Atomic Updates
 section: Concepts
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # Atomic Updates
@@ -95,7 +95,7 @@ Rollback actually happens in two stages — one automatic at the bootloader leve
 
 **Stage 1 — systemd-boot falls back on its own.** Every boot of the newly updated slot counts against its `+3-0` tries. `bless-boot` only calls `bootctl set-good` (clearing the counter) after `mark-boot-success` has confirmed `multi-user.target` was reached and written `/data/boot-ok`. So any boot that crashes, hangs, or never reaches a working session — including a hard failure where the Btrfs root itself fails to mount, caught by a dracut hook that writes `/data/boot_hard_failure` before the mount is even attempted — leaves the counter un-cleared. After three such attempts, systemd-boot automatically boots the fallback slot's `.conf` entry instead. This part requires no user interaction and no login: you land on the previous, working system.
 
-**Stage 2 — the actual data rollback is offered, not silent.** systemd-boot switching slots only changes which UKI boots next; it does not touch Btrfs subvolume contents, so the failed candidate slot is still sitting there broken. On next login, `shani-update` detects the mismatch between the booted slot and `/data/current-slot` (or the `boot_hard_failure` marker) and shows a "Roll Back Now / Ignore" dialog. Choosing to roll back runs `shani-deploy --rollback`, which restores the failed slot from its pre-deploy safety snapshot (see step 2 above) and rewrites both boot entries with no tries needed, since both slots are now known-good. No data on `@home`, `@data`, or any other persistent subvolume is touched by any of this — see [Persistence Strategy](./persistence).
+**Stage 2 — the actual data rollback is offered, not silent.** systemd-boot switching slots only changes which UKI boots next; it does not touch Btrfs subvolume contents, so the failed candidate slot is still sitting there broken. On next login, `shani-update` detects the mismatch between the booted slot and `/data/current-slot` (or the `boot_hard_failure` marker) and shows a "Roll Back Now / Ignore" dialog. Choosing to roll back runs `shani-deploy --rollback`, which restores the failed slot from its pre-deploy safety snapshot (see step 2 above) and rewrites both boot entries with no tries needed, since both slots are now known-good. No data on `@home`, `@data`, or any other persistent subvolume is touched by any of this — see [Persistence Strategy](./persistence.md).
 
 The boot health pipeline behind stage 1:
 
@@ -114,7 +114,7 @@ The boot health pipeline behind stage 1:
 | `stable` | Monthly | Default — recommended for all users |
 | `latest` | More frequent | Early access, testing |
 
-For channel switching commands, manual update commands, rollback, and storage management, see [System Updates](../updates/system).
+For channel switching commands, manual update commands, rollback, and storage management, see [System Updates](../updates/system.md).
 
 ## Storage Efficiency
 
@@ -125,3 +125,9 @@ The dual-slot architecture is not as expensive on disk as it sounds, for three c
 - `bees` runs continuously in the background (`beesd@<uuid>.service`) deduplicating shared content across all subvolumes, on top of whatever CoW sharing already gives you for free.
 
 There's no fixed "X% overhead" figure to quote here — actual savings depend on how much changes between updates and how compressible your data is — but the combination means a second slot rarely costs anywhere near a second full copy of the OS.
+
+## See Also
+
+- [Blue-Green Deployment](blue-green)
+- [System Updates](../updates/system.md)
+- [Why OS updates should never break](https://blog.shani.dev/post/why-os-updates-should-never-break)

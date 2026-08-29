@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Bluetooth — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Bluetooth  Shanios pre-installs the full BlueZ stack () and enables the Bluetooth daemon by default on every edition — pairing works out of the box with no…">
+  <meta name="description" id="meta-desc"     content="Shanios pre-installs the full BlueZ stack (shani-bluetooth) and enables the Bluetooth daemon by default on every edition — pairing works out of the box wit…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Bluetooth">
-  <meta property="og:description" id="og-desc"    content="Bluetooth  Shanios pre-installs the full BlueZ stack () and enables the Bluetooth daemon by default on every edition — pairing works out of the box with no…">
+  <meta property="og:description" id="og-desc"    content="Shanios pre-installs the full BlueZ stack (shani-bluetooth) and enables the Bluetooth daemon by default on every edition — pairing works out of the box wit…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/networking/bluetooth/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Bluetooth">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Bluetooth">
-  <meta name="twitter:description" id="tw-desc"  content="Bluetooth  Shanios pre-installs the full BlueZ stack () and enables the Bluetooth daemon by default on every edition — pairing works out of the box with no…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios pre-installs the full BlueZ stack (shani-bluetooth) and enables the Bluetooth daemon by default on every edition — pairing works out of the box wit…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Bluetooth","description":"Bluetooth  Shanios pre-installs the full BlueZ stack () and enables the Bluetooth daemon by default on every edition — pairing works out of the box with no…","url":"https://docs.shani.dev/doc/networking/bluetooth/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Bluetooth","description":"Shanios pre-installs the full BlueZ stack (shani-bluetooth) and enables the Bluetooth daemon by default on every edition — pairing works out of the box wit…","url":"https://docs.shani.dev/doc/networking/bluetooth/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Bluetooth","item":"https://docs.shani.dev/doc/networking/bluetooth/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,23 +215,23 @@
         <h1 class="doc-title">Bluetooth</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Networking</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Shanios pre-installs the full BlueZ stack (<code>shani-bluetooth</code>) and enables the Bluetooth daemon by default on every edition — pairing works out of the box with no setup.</p>
-<h2>What's Pre-Installed</h2>
+<h2 id="whats-pre-installed">What's Pre-Installed</h2>
 <ul>
 <li><strong>bluez</strong> / <strong>bluez-utils</strong> — the core Bluetooth protocol stack and CLI tools (<code>bluetoothctl</code>)</li>
 <li><strong>bluez-obex</strong> — OBEX file transfer support (sending/receiving files over Bluetooth)</li>
 <li><strong>bluez-mesh</strong> — Bluetooth Mesh networking support</li>
 <li><strong>bluez-hid2hci</strong> — HID-to-HCI mode switching for some older Bluetooth mice/keyboards that boot in a legacy USB-HID compatibility mode</li>
-<li><strong>bluez-cups</strong> — lets Bluetooth-connected printers register with CUPS (see <a href="../system/printing">Printing & Scanning</a>)</li>
+<li><strong>bluez-cups</strong> — lets Bluetooth-connected printers register with CUPS (see <a href="../system/printing.md">Printing & Scanning</a>)</li>
 <li><strong>bluez-tools</strong> — additional CLI utilities (<code>bt-adapter</code>, <code>bt-agent</code>, <code>bt-obex</code>)</li>
 </ul>
 <p><code>bluetooth.service</code> is enabled and running from first boot.</p>
-<h2>Pairing a Device — GUI</h2>
+<h2 id="pairing-a-device-gui">Pairing a Device — GUI</h2>
 <p><strong>GNOME:</strong> Settings → Bluetooth → toggle on, select the device, click <strong>Pair</strong>. <strong>KDE Plasma:</strong> System Settings → Bluetooth → select the device → <strong>Pair</strong>. Plasma's Bluetooth applet (<code>bluedevil</code>) also shows a pairing notification automatically when a device is discoverable nearby.</p>
-<h2>Pairing a Device — CLI</h2>
+<h2 id="pairing-a-device-cli">Pairing a Device — CLI</h2>
 <pre><code class="language-bash"># Enter the interactive bluetoothctl shell
 bluetoothctl
 
@@ -250,7 +252,7 @@ bluetoothctl scan on &amp;
 bluetoothctl pair XX:XX:XX:XX:XX:XX
 bluetoothctl trust XX:XX:XX:XX:XX:XX
 bluetoothctl connect XX:XX:XX:XX:XX:XX</code></pre>
-<h2>Managing Devices</h2>
+<h2 id="managing-devices">Managing Devices</h2>
 <pre><code class="language-bash"># List paired devices
 bluetoothctl devices
 
@@ -270,25 +272,25 @@ bluetoothctl remove XX:XX:XX:XX:XX:XX
 # Enable/disable the adapter
 bluetoothctl power off
 bluetoothctl power on</code></pre>
-<h2>Audio Devices</h2>
-<p>Bluetooth headphones/speakers route through PipeWire once paired — see <a href="../system/audio">Audio (PipeWire)</a> for switching the default output device and troubleshooting sound quality. Most modern Bluetooth audio codecs (aptX, LDAC, LC3) are supported out of the box via the pre-installed <code>libldac</code>/<code>liblc3</code>/<code>libfreeaptx</code> libraries.</p>
+<h2 id="audio-devices">Audio Devices</h2>
+<p>Bluetooth headphones/speakers route through PipeWire once paired — see <a href="../system/audio.md">Audio (PipeWire)</a> for switching the default output device and troubleshooting sound quality. Most modern Bluetooth audio codecs (aptX, LDAC, LC3) are supported out of the box via the pre-installed <code>libldac</code>/<code>liblc3</code>/<code>libfreeaptx</code> libraries.</p>
 <pre><code class="language-bash"># Confirm the Bluetooth device appears as an audio sink
 pactl list sinks short | grep -i bluez
 
 # Set it as the default output
 pactl set-default-sink bluez_output.XX_XX_XX_XX_XX_XX.1</code></pre>
-<h2>File Transfer (OBEX)</h2>
+<h2 id="file-transfer-obex">File Transfer (OBEX)</h2>
 <pre><code class="language-bash"># Send a file to a paired phone
 bluetoothctl connect XX:XX:XX:XX:XX:XX
 obexftp -b XX:XX:XX:XX:XX:XX -B 10 -p file.jpg   # requires obexftp, not pre-installed</code></pre>
 <p>Most desktop environments also support drag-and-drop file sending directly from the Bluetooth settings panel once a device is paired and marked as trusted.</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | Adapter not found | <code>rfkill list</code> — check Bluetooth isn't blocked; <code>rfkill unblock bluetooth</code> if it is | | Device won't pair | Remove any stale pairing first: <code>bluetoothctl remove XX:XX:XX:XX:XX:XX</code>, then retry; make sure the device is in pairing/discoverable mode | | Paired but won't connect | <code>sudo systemctl restart bluetooth</code>; check <code>journalctl -u bluetooth -n 30</code> for the actual error | | Headphones connected but no audio | See <a href="../system/audio">Audio (PipeWire)</a>'s Bluetooth section — usually a default-sink or codec negotiation issue | | Mouse/keyboard connects but doesn't work | Some older HID devices need <code>bluez-hid2hci</code> mode switching — confirmed pre-installed; try re-pairing after a fresh boot | | Bluetooth works then disappears after suspend | <code>sudo systemctl restart bluetooth</code> after resume; check for a known adapter-specific suspend bug via <code>dmesg \| grep -i bluetooth</code> |</p>
-<h2>See Also</h2>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Adapter not found</td><td><code>rfkill list</code> — check Bluetooth isn't blocked; <code>rfkill unblock bluetooth</code> if it is</td></tr><tr><td>Device won't pair</td><td>Remove any stale pairing first: <code>bluetoothctl remove XX:XX:XX:XX:XX:XX</code>, then retry; make sure the device is in pairing/discoverable mode</td></tr><tr><td>Paired but won't connect</td><td><code>sudo systemctl restart bluetooth</code>; check <code>journalctl -u bluetooth -n 30</code> for the actual error</td></tr><tr><td>Headphones connected but no audio</td><td>See <a href="../system/audio.md">Audio (PipeWire)</a>'s Bluetooth section — usually a default-sink or codec negotiation issue</td></tr><tr><td>Mouse/keyboard connects but doesn't work</td><td>Some older HID devices need <code>bluez-hid2hci</code> mode switching — confirmed pre-installed; try re-pairing after a fresh boot</td></tr><tr><td>Bluetooth works then disappears after suspend</td><td><code>sudo systemctl restart bluetooth</code> after resume; check for a known adapter-specific suspend bug via `dmesg \</td><td>grep -i bluetooth`</td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../system/audio">Audio (PipeWire)</a> — Bluetooth audio device switching and codec issues</li>
-<li><a href="../system/hardware">Hardware</a> — general USB/wireless device detection</li>
-<li><a href="../system/printing">Printing & Scanning</a> — Bluetooth-connected printers via <code>bluez-cups</code></li>
+<li><a href="../system/audio.md">Audio (PipeWire)</a> — Bluetooth audio device switching and codec issues</li>
+<li><a href="../system/hardware.md">Hardware</a> — general USB/wireless device detection</li>
+<li><a href="../system/printing.md">Printing & Scanning</a> — Bluetooth-connected printers via <code>bluez-cups</code></li>
 </ul></div>
     </div>
 

@@ -1,7 +1,7 @@
 ---
 title: Avahi (mDNS)
 section: Networking
-updated: 2026-04-18
+updated: 2026-08-28
 ---
 
 # Avahi — Zero-Config mDNS/DNS-SD (Bonjour)
@@ -78,3 +78,8 @@ sudo systemctl disable --now avahi-daemon
 | Services not appearing in `avahi-browse -a` | Confirm the remote service publishes via mDNS; some services require explicit Avahi service files |
 | Name collision (`hostname-2.local`) | Two devices share the same hostname — rename one via `hostnamectl set-hostname newname` |
 | Avahi flooding logs with errors | Check `/etc/nsswitch.conf` — `mdns4_minimal` should appear before `dns` in the `hosts:` line |
+
+## See Also
+
+- [mDNS printing](../system/printing.md)
+- [Network tools overview](network-tools)

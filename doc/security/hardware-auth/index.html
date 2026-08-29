@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Hardware Authentication — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Hardware Authentication  Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), an…">
+  <meta name="description" id="meta-desc"     content="Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work wit…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Hardware Authentication">
-  <meta property="og:description" id="og-desc"    content="Hardware Authentication  Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), an…">
+  <meta property="og:description" id="og-desc"    content="Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work wit…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/security/hardware-auth/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Hardware Authentication">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Hardware Authentication">
-  <meta name="twitter:description" id="tw-desc"  content="Hardware Authentication  Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), an…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work wit…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Hardware Authentication","description":"Hardware Authentication  Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), an…","url":"https://docs.shani.dev/doc/security/hardware-auth/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Hardware Authentication","description":"Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work wit…","url":"https://docs.shani.dev/doc/security/hardware-auth/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Hardware Authentication","item":"https://docs.shani.dev/doc/security/hardware-auth/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,12 +215,12 @@
         <h1 class="doc-title">Hardware Authentication</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Security</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><p>Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work without a driver download, via packages pulled in by the <code>shani-peripherals</code> package. The CLI utilities for YubiKey management and TOTP/HOTP codes are not part of the default image and need a separate install — see the callout in each section below.</p>
-<p>---</p>
-<h2>Fingerprint Authentication</h2>
+      <div class="prose"><p>Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work without a driver download, via packages pulled in by the <code>shani-peripherals</code> package. The CLI utilities for YubiKey management, PC/SC diagnostics, and TOTP/HOTP codes are not part of the default image — because Shanios is immutable, they cannot be installed with <code>pacman</code> at runtime. Install them via Nix (<code>nix-env -iA nixpkgs.&lt;pkg&gt;</code>) or run them inside a Distrobox container — see the callout in each section below.</p>
+<hr>
+<h2 id="fingerprint-authentication">Fingerprint Authentication</h2>
 <p><strong>Package:</strong> <code>fprintd</code> (pulls in <code>libfprint</code> as a dependency) — pre-installed via <code>shani-peripherals</code></p>
 <p>Fingerprints can be used to unlock the login screen, sudo prompts, and the lock screen.</p>
 <pre><code class="language-bash"># Enroll a finger (replace 'right-index-finger' with the finger you want)
@@ -233,15 +235,18 @@ fprintd-verify
 # Delete enrolled fingers
 fprintd-delete &quot;$USER&quot;</code></pre>
 <p>Enrollment via GUI: <strong>System Settings → Users → Fingerprint Login</strong> (KDE) or <strong>Settings → Users</strong> (GNOME).</p>
-<h3>Supported Hardware</h3>
+<h3 id="supported-hardware">Supported Hardware</h3>
 <p>Any fingerprint reader with a libfprint driver is supported. Check compatibility:</p>
 <pre><code class="language-bash"># Is your device recognised?
 lsusb | grep -i finger
 fprintd-enroll   # will fail with a clear error if the device is unsupported</code></pre>
-<p>---</p>
-<h2>YubiKey and FIDO2/U2F</h2>
-<p><strong>Packages:</strong> <code>libfido2</code>, <code>pam-u2f</code> — pre-installed via <code>shani-peripherals</code>. <code>yubikey-manager</code> (the <code>ykman</code> CLI used below) is <strong>not</strong> part of the default image — install it first: <code>sudo pacman -S yubikey-manager</code>.</p>
-<h3>Setting Up PAM U2F (sudo / login)</h3>
+<hr>
+<h2 id="yubikey-and-fido2u2f">YubiKey and FIDO2/U2F</h2>
+<p><strong>Packages:</strong> <code>libfido2</code>, <code>pam-u2f</code> — pre-installed via <code>shani-peripherals</code>. <code>yubikey-manager</code> (the <code>ykman</code> CLI used below) is <strong>not</strong> part of the default image and cannot be installed on the immutable host with <code>pacman</code>. Install it via Nix instead:</p>
+<pre><code class="language-bash">nix-env -iA nixpkgs.yubikey-manager</code></pre>
+<p>These CLI tools can also run inside a Distrobox container if you prefer not to install them on the host.</p>
+<h3 id="setting-up-pam-u2f-sudo-login">Setting Up PAM U2F (sudo / login)</h3>
+<blockquote>⚠️ <strong>Before editing PAM:</strong> keep an existing root shell open when editing PAM files, and test <code>sudo</code> in a second terminal before logging out. A broken PAM stack can lock you out of <code>sudo</code> and login entirely.</blockquote>
 <pre><code class="language-bash"># 1. Create the U2F key mapping directory
 mkdir -p ~/.config/Yubico
 
@@ -254,7 +259,7 @@ pamu2fcfg -n &gt;&gt; ~/.config/Yubico/u2f_keys</code></pre>
 <pre><code>auth required pam_u2f.so</code></pre>
 <p>Or to allow either password or YubiKey:</p>
 <pre><code>auth sufficient pam_u2f.so</code></pre>
-<h3>YubiKey Manager</h3>
+<h3 id="yubikey-manager">YubiKey Manager</h3>
 <pre><code class="language-bash"># Show YubiKey info
 ykman info
 
@@ -266,15 +271,17 @@ ykman fido access change-pin
 
 # Reset FIDO2 application (clears all credentials)
 ykman fido reset</code></pre>
-<h3>FIDO2 for SSH</h3>
+<h3 id="fido2-for-ssh">FIDO2 for SSH</h3>
 <pre><code class="language-bash"># Generate a FIDO2-backed SSH key (resident key stored on the YubiKey)
 ssh-keygen -t ed25519-sk -O resident -O application=ssh:myserver
 
 # Non-resident (key file required alongside the token)
 ssh-keygen -t ed25519-sk</code></pre>
-<p>---</p>
-<h2>Smart Card / PIV</h2>
-<p><strong>Packages:</strong> <code>opensc</code>, <code>ccid</code>, <code>acsccid</code> — pre-installed via <code>shani-peripherals</code>; <code>pcscd</code>/<code>pcsc-lite</code> come along transitively as a dependency of <code>opensc</code>/<code>ccid</code>. The <code>pcsc-tools</code> diagnostic package (used for <code>pcsc_scan</code> below) is <strong>not</strong> part of the default image — install it first: <code>sudo pacman -S pcsc-tools</code>.</p>
+<hr>
+<h2 id="smart-card-piv">Smart Card / PIV</h2>
+<p><strong>Packages:</strong> <code>opensc</code>, <code>ccid</code>, <code>acsccid</code> — pre-installed via <code>shani-peripherals</code>; <code>pcscd</code>/<code>pcsc-lite</code> come along transitively as a dependency of <code>opensc</code>/<code>ccid</code>. The <code>pcsc-tools</code> diagnostic package (used for <code>pcsc_scan</code> below) is <strong>not</strong> part of the default image and cannot be installed on the immutable host with <code>pacman</code> — install it via Nix:</p>
+<pre><code class="language-bash">nix-env -iA nixpkgs.pcsc-tools</code></pre>
+<p>Or run it inside a Distrobox container.</p>
 <pre><code class="language-bash"># Start the PC/SC daemon
 sudo systemctl enable --now pcscd
 
@@ -287,21 +294,23 @@ opensc-tool --list-algorithms
 
 # List certificates on a PIV card
 pkcs11-tool --module /usr/lib/opensc-pkcs11.so --list-certificates</code></pre>
-<h3>SSH with Smart Card</h3>
+<h3 id="ssh-with-smart-card">SSH with Smart Card</h3>
 <pre><code class="language-bash"># List keys visible via PKCS#11
 ssh-keygen -D /usr/lib/opensc-pkcs11.so -e
 
 # Use the card for SSH authentication
 ssh -I /usr/lib/opensc-pkcs11.so user@host</code></pre>
-<p>---</p>
-<h2>NFC Authentication</h2>
+<hr>
+<h2 id="nfc-authentication">NFC Authentication</h2>
 <p><strong>Packages:</strong> <code>libnfc</code>, pre-installed via <code>shani-peripherals</code>; NFC access rides on the same <code>pcscd</code>/<code>pcsc-lite</code> stack pulled in for smart cards above</p>
 <p>NFC tokens are accessed via the PC/SC stack. Once <code>pcscd</code> is running, NFC cards compatible with pcsc-lite are accessible in the same way as contact smart cards:</p>
 <pre><code class="language-bash">sudo systemctl enable --now pcscd
 pcsc_scan   # shows NFC card when tapped</code></pre>
-<p>---</p>
-<h2>TOTP / HOTP (Two-Factor)</h2>
-<p><strong>Package:</strong> <code>oath-toolkit</code> — <strong>not</strong> part of the default image; install it first: <code>sudo pacman -S oath-toolkit</code>.</p>
+<hr>
+<h2 id="totp-hotp-two-factor">TOTP / HOTP (Two-Factor)</h2>
+<p><strong>Package:</strong> <code>oath-toolkit</code> — <strong>not</strong> part of the default image and cannot be installed on the immutable host with <code>pacman</code>. Install it via Nix:</p>
+<pre><code class="language-bash">nix-env -iA nixpkgs.oath-toolkit</code></pre>
+<p>Or run it inside a Distrobox container.</p>
 <p><code>oathtool</code> generates TOTP and HOTP codes from a shared secret, compatible with Google Authenticator, Authy, and any RFC 6238/4226 implementation.</p>
 <pre><code class="language-bash"># Generate a TOTP code from a base32 secret
 oathtool --totp --base32 JBSWY3DPEHPK3PXP
@@ -311,16 +320,16 @@ oathtool --hotp --base32 JBSWY3DPEHPK3PXP 0
 
 # Verify a TOTP code
 oathtool --totp --base32 -w 1 JBSWY3DPEHPK3PXP 123456</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | <code>fprintd-enroll</code> says no device found | Check <code>lsusb</code> for the reader; the sensor may not have a libfprint driver | | YubiKey not detected | Check <code>lsusb</code>; <code>ykman list</code>; ensure <code>pcscd</code> is running for PIV/OTP modes | | Smart card not detected | <code>sudo systemctl status pcscd</code>; run <code>pcsc_scan</code> with card inserted | | PAM U2F not prompting for key | Check <code>/etc/pam.d/</code> config; verify <code>~/.config/Yubico/u2f_keys</code> exists and is correct | | SSH FIDO2 key says "unsupported" | Ensure the server has <code>PubkeyAuthOptions verify-required</code> removed or set correctly for sk keys |</p>
-<p>---</p>
-<h2>See Also</h2>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>fprintd-enroll</code> says no device found</td><td>Check <code>lsusb</code> for the reader; the sensor may not have a libfprint driver</td></tr><tr><td>YubiKey not detected</td><td>Check <code>lsusb</code>; <code>ykman list</code>; ensure <code>pcscd</code> is running for PIV/OTP modes</td></tr><tr><td>Smart card not detected</td><td><code>sudo systemctl status pcscd</code>; run <code>pcsc_scan</code> with card inserted</td></tr><tr><td>PAM U2F not prompting for key</td><td>Check <code>/etc/pam.d/</code> config; verify <code>~/.config/Yubico/u2f_keys</code> exists and is correct</td></tr><tr><td>SSH FIDO2 key says "unsupported"</td><td>Ensure the server has <code>PubkeyAuthOptions verify-required</code> removed or set correctly for sk keys</td></tr></tbody></table>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="features">Security Features</a> — full list of supported authentication methods</li>
 <li><a href="luks">LUKS Management</a> — using a keyfile for disk unlock</li>
 <li><a href="tpm2">TPM2 Enrollment</a> — TPM-based disk unlock</li>
-<li><a href="../updates/shani-health">shani-health Reference</a> — <code>shani-health --security</code> reports fprintd enrollment, pam-u2f configuration, and pcscd status per user</li>
+<li><a href="../updates/shani-health.md">shani-health Reference</a> — <code>shani-health --security</code> reports fprintd enrollment, pam-u2f configuration, and pcscd status per user</li>
 </ul></div>
     </div>
 

@@ -1,7 +1,7 @@
 ---
 title: Process Management
 section: System
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Process Management
@@ -404,5 +404,5 @@ cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq
 ## See Also
 
 - [Systemd](systemd) — service management, unit files, resource limits with `MemoryMax=` and `CPUQuota=`
-- [Shell & Environment](../updates/shell) — `htop`, `ncdu`, and other pre-installed monitoring tools
-- [shani-health](../updates/shani-health) — default report includes CPU load, memory, OOM events, and zombie processes
+- [Shell & Environment](../updates/shell.md) — `htop`, `ncdu`, and other pre-installed monitoring tools
+- [shani-health](../updates/shani-health.md) — default report includes CPU load, memory, OOM events, and zombie processes

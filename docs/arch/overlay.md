@@ -1,7 +1,7 @@
 ---
 title: Overlay Filesystem
 section: Architecture
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # Overlay Filesystem
@@ -83,7 +83,7 @@ sudo rm -rf /data/overlay/etc/upper/*
 sudo systemctl reboot
 ```
 
-For a full factory reset that also clears service state, use [`shani-reset`](../updates/shani-reset) instead.
+For a full factory reset that also clears service state, use [`shani-reset`](../updates/shani-reset.md) instead.
 
 ## Checking Overlay Health
 
@@ -115,5 +115,5 @@ The two mechanisms are explicitly mutually exclusive: if you enable the `/var` o
 ## See Also
 
 - [Dracut Module](dracut-module) — how the overlay is mounted at early boot
-- [System Config](../updates/config) — editing `/etc` files and managing the overlay
-- [Factory Reset](../updates/shani-reset) — clearing the entire overlay
+- [System Config](../updates/config.md) — editing `/etc` files and managing the overlay
+- [Factory Reset](../updates/shani-reset.md) — clearing the entire overlay

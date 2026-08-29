@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>Databases — PostgreSQL &amp; MariaDB — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="CAP Theorem Quick Reference The CAP theorem states that a distributed system can guarantee at most two of three properties: Consistency (all nodes see the …">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/servers/databases/postgresql/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="Databases — PostgreSQL &amp; MariaDB">
+  <meta property="og:description" id="og-desc"    content="CAP Theorem Quick Reference The CAP theorem states that a distributed system can guarantee at most two of three properties: Consistency (all nodes see the …">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/databases/postgresql/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="Databases — PostgreSQL &amp; MariaDB">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="Databases — PostgreSQL &amp; MariaDB">
+  <meta name="twitter:description" id="tw-desc"  content="CAP Theorem Quick Reference The CAP theorem states that a distributed system can guarantee at most two of three properties: Consistency (all nodes see the …">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Databases — PostgreSQL & MariaDB","description":"CAP Theorem Quick Reference The CAP theorem states that a distributed system can guarantee at most two of three properties: Consistency (all nodes see the …","url":"https://docs.shani.dev/doc/servers/databases/postgresql/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Databases — PostgreSQL & MariaDB","item":"https://docs.shani.dev/doc/servers/databases/postgresql/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Databases — PostgreSQL &amp; MariaDB</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><h2 id="cap-theorem-quick-reference">CAP Theorem Quick Reference</h2>
+<p>The CAP theorem states that a distributed system can guarantee at most two of three properties: <strong>Consistency</strong> (all nodes see the same data at the same time), <strong>Availability</strong> (every request gets a response), and <strong>Partition tolerance</strong> (the system continues operating when network partitions occur). Since real networks always partition eventually, the real choice is between CP and AP.</p>
+<table><thead><tr><th>Database</th><th>CAP Classification</th><th>What this means in practice</th></tr></thead><tbody><tr><td>PostgreSQL (single node)</td><td>CA</td><td>No partition tolerance — not distributed. ACID guarantees fully.</td></tr><tr><td>PostgreSQL + Patroni</td><td>CP</td><td>During failover election, the primary is unavailable. Consistency is never compromised.</td></tr><tr><td>Redis (single)</td><td>CA</td><td>No partition tolerance. Synchronous but not distributed.</td></tr><tr><td>Redis Sentinel</td><td>CP</td><td>Primary unavailable during failover election (~5s).</td></tr><tr><td>Cassandra / ScyllaDB</td><td>AP</td><td>Always available. Eventual consistency — reads may return stale data. Tune with <code>QUORUM</code> consistency level to move toward CP.</td></tr><tr><td>MongoDB Replica Set</td><td>CP</td><td>Primary unavailable during re-election. Strongly consistent by default.</td></tr><tr><td>Kafka</td><td>AP</td><td>Brokers stay available; consumers may see stale offsets during partition.</td></tr><tr><td>CockroachDB</td><td>CP</td><td>Strong consistency (serializable isolation) with partition tolerance. May be temporarily unavailable in split-brain.</td></tr><tr><td>etcd</td><td>CP</td><td>Refuses requests if quorum is lost. Never returns stale data.</td></tr></tbody></table>
+<h4 id="acid-vs-base-the-reliability-spectrum">ACID vs BASE — the reliability spectrum</h4>
+<p>ACID (Atomicity, Consistency, Isolation, Durability) is the contract of traditional relational databases: every transaction either fully commits or fully rolls back, leaving the database in a consistent state, isolated from concurrent transactions, and durable on disk. BASE (Basically Available, Soft state, Eventually consistent) is the contract of distributed systems like Cassandra and early DynamoDB: the system is always available, but data may be temporarily inconsistent across nodes and will converge eventually. Most modern systems let you tune where on this spectrum you operate — Cassandra's <code>CONSISTENCY QUORUM</code> leans toward ACID; <code>CONSISTENCY ONE</code> leans toward BASE.</p>
+<h4 id="indexing-the-single-most-impactful-performance-lever">Indexing — the single most impactful performance lever</h4>
+<p>An index is a separate data structure (B-tree by default in PostgreSQL/MariaDB) that maps column values to row locations, turning a sequential table scan O(n) into a lookup O(log n). A query on an un-indexed column on a 10M-row table reads every row; the same query with an index reads ~23 rows. Trade-offs: indexes speed up reads but slow down writes (every INSERT/UPDATE must update the index). Partial indexes (PostgreSQL: <code>WHERE deleted_at IS NULL</code>) index only a subset of rows. Composite indexes are ordered — <code>(a, b)</code> helps queries on <code>a</code> or <code>(a, b)</code> but not <code>b</code> alone. <code>EXPLAIN ANALYZE</code> shows whether an index is used.</p>
+<h4 id="connection-pooling-why-pgbouncer-exists">Connection pooling — why PgBouncer exists</h4>
+<p>PostgreSQL spawns a new OS process for every connection (unlike MySQL/MariaDB which use threads). Each process consumes ~5–10 MB of RAM. A web app with 100 concurrent workers each holding an idle connection wastes 500–1000 MB and creates scheduler pressure. PgBouncer sits between the app and PostgreSQL, multiplexing hundreds of app connections onto a small pool of actual database connections (transaction pooling: a connection is only held during a transaction, then returned to the pool). Dragonfly and Redis don't have this problem — they're single-threaded and handle connections via event loops.</p>
+<h4 id="message-queues-vs-event-streaming-when-to-use-each">Message queues vs event streaming — when to use each</h4>
+<p>A message queue (RabbitMQ, NATS) delivers each message to exactly one consumer, then deletes it. It's a task distribution system — ideal for job queues, email sending, and RPC. An event stream (Kafka, Redpanda) retains messages for a configurable period (days/weeks) and lets multiple independent consumers read them at their own pace. It's a shared, replayable log — ideal for audit trails, event sourcing, feeding multiple downstream systems (analytics, search indexing, ML pipelines) from one producer. The key question: do you want messages consumed and forgotten (queue) or permanently recorded and replayable (stream)?</p>
+<h4 id="vector-databases-and-embeddings-the-ai-infrastructure-layer">Vector databases and embeddings — the AI infrastructure layer</h4>
+<p>A vector database (Qdrant, Weaviate, Chroma, pgvector) stores high-dimensional float vectors (embeddings) and answers "find the N most similar vectors to this query vector" using approximate nearest-neighbour (ANN) algorithms (HNSW, IVF). Embeddings are produced by ML models — a 1536-dimension float array that encodes semantic meaning. Two semantically similar sentences produce nearby vectors. This enables RAG (Retrieval-Augmented Generation): embed your documents, store in Qdrant, embed a user query, find the most similar document chunks, pass them as context to an LLM. pgvector adds this capability to PostgreSQL; Qdrant/Weaviate are purpose-built for scale.</p>
+<h4 id="time-series-data-model-why-specialised-databases-exist">Time-series data model — why specialised databases exist</h4>
+<p>Time-series data (metrics, IoT sensor readings, financial ticks) has properties regular databases handle poorly: extremely high write throughput (millions of inserts/second), data is always appended (rarely updated), queries are almost always range-based (last 24h, 7-day average), and old data is downsampled or expired. TimescaleDB adds automatic partitioning by time (hypertables) and continuous aggregates to PostgreSQL. InfluxDB uses a custom storage engine (TSM) optimised for these access patterns. The key concept: <em>retention policies</em> automatically delete data older than N days, preventing unbounded disk growth.</p>
+<h4 id="oltp-vs-olap-two-different-access-patterns">OLTP vs OLAP — two different access patterns</h4>
+<p>OLTP (Online Transaction Processing) databases (PostgreSQL, MariaDB, MongoDB) are optimised for high-frequency, low-latency reads and writes of individual rows — your app's operational database. OLAP (Online Analytical Processing) databases (ClickHouse, DuckDB, Redshift) are optimised for aggregate queries over millions of rows — your analytics and reporting layer. OLAP databases use columnar storage: data for one column is stored contiguously on disk, so <code>SELECT AVG(revenue) FROM orders</code> reads only the revenue column, not every field. Row-oriented databases read every column for every matching row. DuckDB runs OLAP queries directly on Parquet files; ClickHouse handles billions of rows per second on a single node.</p>
+<h4 id="graph-databases-when-the-relationships-are-the-data">Graph databases — when the relationships are the data</h4>
+<p>In a relational database, joining two tables is a set operation that scans rows. In a graph database (Neo4j), relationships are first-class objects stored with direct pointers — traversing "friends of friends" follows pointers in memory without scanning tables. Graph databases excel at: social networks (mutual connections, influence paths), recommendation engines (people who bought X also bought Y), access control graphs (who can access what via which roles), and network topology (how many hops between two nodes). Cypher (Neo4j's query language) expresses graph patterns naturally: <code>MATCH (a:User)-[:FOLLOWS]-&gt;(b:User)-[:FOLLOWS]-&gt;(c:User) WHERE a.name = 'Alice' RETURN c</code>.</p>
+<h4 id="full-text-search-relevance-why-meilisearchtypesense-arent-just-sql-like">Full-text search relevance — why MeiliSearch/Typesense aren't just SQL LIKE</h4>
+<p>SQL <code>LIKE '%query%'</code> does a sequential scan, can't rank by relevance, and doesn't handle typos. A search engine (MeiliSearch, Typesense, Elasticsearch) builds an inverted index — a map from each word to the documents containing it. Relevance ranking uses TF-IDF (term frequency × inverse document frequency) or BM25: rare words that appear often in a specific document are strong signals. Typo tolerance uses Levenshtein distance. Faceted search filters by structured attributes (category, price range) while ranking by full-text relevance. Use a dedicated search engine when you need: typo tolerance, relevance ranking, instant-search UX, or faceting.</p>
+<h4 id="sharding-vs-partitioning">Sharding vs partitioning</h4>
+<p>Partitioning splits a single table into multiple storage segments on one node — PostgreSQL table partitioning by date, MySQL partitioning by range. This improves query performance (only scan the relevant partition) and maintenance (drop old partitions instead of DELETE). Sharding distributes data across multiple nodes — each shard is a separate database server handling a subset of data. Sharding is for horizontal scale beyond what one node can handle. The challenge: cross-shard queries (join data on shard 1 with data on shard 2) require application-level handling or a distributed query layer (Citus, CockroachDB). The rule: partition first (cheap, always useful), shard only when necessary (expensive operationally).</p>
+<hr>
+<h2 id="key-concepts">Key Concepts</h2>
+<h4 id="sql-vs-nosql-the-real-distinction">SQL vs NoSQL — the real distinction</h4>
+<p>The choice isn't binary. The real question is: what access patterns does your application need? Relational databases (PostgreSQL, MariaDB) excel at complex joins, ad-hoc queries, and strong consistency. Document stores (MongoDB) excel when records are self-contained and schema flexibility matters. Wide-column stores (Cassandra, ScyllaDB) excel at write-heavy time-series workloads where queries always include a partition key. Use the wrong tool and you're fighting the data model on every query.</p>
+<h4 id="acid-vs-base-what-these-actually-mean">ACID vs BASE — what these actually mean</h4>
+<ul>
+<li><strong>ACID</strong> (Atomic, Consistent, Isolated, Durable) — every transaction either fully succeeds or fully rolls back; concurrent transactions don't see each other's partial state; committed data survives crashes. PostgreSQL, MySQL (InnoDB). The default expectation in any financial or transactional system.</li>
+<li><strong>BASE</strong> (Basically Available, Soft state, Eventually consistent) — the system stays available even during failures; different nodes may temporarily disagree on state; they will converge eventually. Cassandra, DynamoDB. The default model for high-write, geographically distributed systems.</li>
+</ul>
+<h4 id="indexes-how-they-work-and-when-they-hurt">Indexes — how they work and when they hurt</h4>
+<p>An index is a separate data structure (usually a B-tree) that the database maintains alongside a table. Reads using the index skip full table scans — fast. Writes (INSERT, UPDATE, DELETE) are slower because every index must be updated. The pathological case: a table with 15 indexes on a write-heavy workload — each write touches 15 B-trees. Rule of thumb: index columns used in WHERE, JOIN, and ORDER BY clauses on tables with > 10,000 rows. Use <code>EXPLAIN ANALYZE</code> (Postgres) or <code>EXPLAIN</code> (MySQL) to verify an index is actually being used.</p>
+<h4 id="connection-pooling-why-it-matters-at-scale">Connection pooling — why it matters at scale</h4>
+<p>PostgreSQL creates a backend process per connection. At 500 connections, you have 500 processes. PgBouncer sits in front and multiplexes thousands of app-side connections onto a small real pool. The app sees a normal database on port 5432 — pooling is transparent. Standard in any production PostgreSQL deployment handling more than a few dozen concurrent users.</p>
+<h4 id="n1-query-problem">N+1 query problem</h4>
+<p>Fetching a list of N items then making N additional queries for related data. Example: fetch 100 users, then loop to fetch each user's profile — 101 queries instead of 1 JOIN. ORM frameworks (ActiveRecord, SQLAlchemy) are the most common source. Fix: eager loading (<code>.includes()</code>, <code>.joinedload()</code>) or an explicit JOIN. A standard interview question for any backend role.</p>
+<h4 id="read-replicas-vs-sharding">Read replicas vs sharding</h4>
+<p>A read replica receives all writes from the primary and serves read queries. Scales reads but not writes — all writes still go to one primary. Sharding splits data across multiple primaries (each handles a subset by user ID or hash). Scales both, but cross-shard joins are expensive or impossible. Default path: add a read replica first; shard only when write throughput is the proven bottleneck.</p>
+<h4 id="database-migrations-forward-compatible-patterns">Database migrations — forward-compatible patterns</h4>
+<p>Schema changes that break running app code during deployment cause downtime. Safe pattern for adding a required column: (1) add as nullable — app ignores it, (2) backfill existing rows, (3) make non-null in a later migration after all app instances are updated. For dropping a column: stop reading/writing it in app code first, then drop in a separate migration. Never couple a breaking schema change and the app change in the same deployment.</p>
+<h4 id="portability-note">Portability note</h4>
+<p>Compose examples use rootless <strong>Podman</strong> and <code>host.containers.internal</code>. When using Docker, replace <code>podman-compose</code> with <code>docker compose</code> and <code>host.containers.internal</code> with <code>host-gateway</code> (add <code>extra_hosts: [host-gateway:host-gateway]</code> to the service).</p>
+<h4 id="wal-write-ahead-log-the-foundation-of-database-durability">WAL (Write-Ahead Log) — the foundation of database durability</h4>
+<p>Before any change is written to the actual data files, it's appended to the WAL (also called redo log in MySQL, binlog in some contexts). On crash, the database replays the WAL to recover uncommitted transactions. This is what makes PostgreSQL and MySQL ACID-compliant. The WAL also powers streaming replication (standbys replay the primary's WAL) and point-in-time recovery (replay WAL from a base backup to any point in time). Understanding WAL is essential for explaining how replication, backup, and crash recovery work in interviews.</p>
+<h4 id="vacuum-and-autovacuum-in-postgresql">VACUUM and autovacuum in PostgreSQL</h4>
+<p>PostgreSQL uses MVCC (Multi-Version Concurrency Control) — old row versions are kept visible to concurrent transactions rather than being immediately overwritten. Dead tuples (old versions no longer needed) accumulate over time and must be reclaimed by VACUUM. autovacuum runs in the background and handles this automatically, but it can fall behind on high-churn tables. Symptoms of autovacuum lag: table bloat (physical size >> logical data size), slow sequential scans, and eventually transaction ID wraparound (a hard limit at 2 billion transactions that can cause database shutdown). Monitor <code>pg_stat_user_tables.n_dead_tup</code> and <code>autovacuum_count</code>.</p>
+<h4 id="database-connection-limits-and-pooling-tiers">Database connection limits and pooling tiers</h4>
+<p>PostgreSQL has a <code>max_connections</code> setting (default 100). Each connection is a backend process using ~5–10 MB RAM. At 200 connections you're using 1–2 GB just for connection overhead. The pooling stack: application → PgBouncer (transaction-mode pooling, 1000s of app connections → 20–50 real connections) → PostgreSQL. Transaction-mode pooling means a connection is only held for the duration of a single transaction — prepared statements and <code>SET</code> session variables don't work across transactions in this mode. Session-mode pooling is safer but provides less multiplexing benefit. For Kubernetes workloads, PgBouncer as a sidecar or as a shared service both work.</p>
+<h4 id="schema-migration-tools-flyway-vs-liquibase-vs-alembic">Schema migration tools — Flyway vs Liquibase vs Alembic</h4>
+<p>Schema migrations must be versioned, reproducible, and trackable. <strong>Flyway</strong>: SQL-first, simple, versioned files (<code>V1__create_users.sql</code>), Java or CLI. <strong>Liquibase</strong>: XML/YAML/JSON changesets with rollback support; more complex but supports diff-based migration generation. <strong>Alembic</strong> (Python): generates migration files from SQLAlchemy model diffs — developer-friendly but requires careful review since auto-generated migrations can miss edge cases. All three maintain a migration history table in the database. The rule: every schema change goes through a migration file committed to Git, never run directly against production.</p>
+<hr>
+<h2 id="mariadb">MariaDB</h2>
+<p><strong>Purpose:</strong> Open-source relational database for web apps, CMS platforms, and legacy software stacks.</p>
+<pre><code class="language-yaml"># ~/mariadb/compose.yaml
+services:
+  mariadb:
+    image: mariadb:11
+    ports:
+      - 127.0.0.1:3306:3306
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: strongpassword
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: myuserpass
+    restart: unless-stopped
+
+volumes:
+  mariadb_data:</code></pre>
+<pre><code class="language-bash">cd ~/mariadb &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="common-operations">Common operations</h4>
+<pre><code class="language-bash"># Connect interactively
+podman exec -it mariadb mariadb -u myuser -pmyuserpass mydb
+
+# Run a query non-interactively
+podman exec mariadb mariadb -u myuser -pmyuserpass mydb -e &quot;SHOW TABLES;&quot;
+
+# Dump a database
+podman exec mariadb mariadb-dump -u root -pstrongpassword mydb &gt; backup.sql
+
+# Restore from dump
+cat backup.sql | podman exec -i mariadb mariadb -u root -pstrongpassword mydb
+
+# List all databases
+podman exec mariadb mariadb -u root -pstrongpassword -e &quot;SHOW DATABASES;&quot;
+
+# Check running processes
+podman exec mariadb mariadb -u root -pstrongpassword -e &quot;SHOW PROCESSLIST;&quot;
+
+# Show table sizes
+podman exec mariadb mariadb -u root -pstrongpassword -e \
+  &quot;SELECT table_name, ROUND((data_length+index_length)/1024/1024,2) AS 'Size (MB)'
+   FROM information_schema.tables WHERE table_schema='mydb' ORDER BY 2 DESC;&quot;</code></pre>
+<blockquote><strong>Connect</strong>: <code>podman exec -it mariadb mariadb -u myuser -p mydb</code> <strong>Backup</strong>: <code>podman exec mariadb mariadb-dump -u root -p mydb &gt; backup.sql</code></blockquote>
+<hr>
+<h2 id="postgresql">PostgreSQL</h2>
+<p><strong>Purpose:</strong> Advanced, standards-compliant relational database known for complex queries, JSONB support, full-text search, and extensibility. Preferred database for most modern self-hosted apps.</p>
+<pre><code class="language-yaml"># ~/postgres/compose.yaml
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - 127.0.0.1:5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: strongpassword
+      POSTGRES_DB: mydb
+    restart: unless-stopped
+
+volumes:
+  postgres_data:</code></pre>
+<pre><code class="language-bash">cd ~/postgres &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><strong>Connect</strong>: <code>podman exec -it postgres psql -U myuser -d mydb</code> <strong>Backup</strong>: <code>podman exec postgres pg_dump -U myuser mydb &gt; backup.sql</code> <strong>GUI</strong>: pgAdmin (see below)</blockquote>
+<h3 id="json-vs-jsonb">JSON vs JSONB</h3>
+<p>PostgreSQL has two JSON types with an important difference:</p>
+<ul>
+<li><strong><code>json</code></strong> stores the raw text of the JSON document, preserving whitespace and key order. Every query re-parses the text. Fast to write, slow to query.</li>
+<li><strong><code>jsonb</code></strong> stores a parsed binary representation, normalises key order, and supports GIN indexing. Slightly slower to write, much faster to query. Use <code>jsonb</code> for almost everything.</li>
+</ul>
+<pre><code class="language-sql">-- GIN index on jsonb — makes @&gt;, ?, ?| operators fast
+CREATE INDEX ON documents USING GIN (metadata);
+
+-- Query: find all documents where metadata contains a specific key
+SELECT id FROM documents WHERE metadata ? 'author';
+
+-- Query: containment — metadata must contain this subset
+SELECT id FROM documents WHERE metadata @&gt; '{&quot;status&quot;: &quot;published&quot;}';</code></pre>
+<h3 id="postgresql-index-types">PostgreSQL Index Types</h3>
+<table><thead><tr><th>Index Type</th><th>Best For</th><th>Notes</th></tr></thead><tbody><tr><td><strong>B-tree</strong> (default)</td><td>Equality and range queries (<code>=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>BETWEEN</code>)</td><td>Works for most cases</td></tr><tr><td><strong>Hash</strong></td><td>Equality only (<code>=</code>)</td><td>Faster than B-tree for pure equality, no range support</td></tr><tr><td><strong>GIN</strong></td><td><code>jsonb</code>, arrays, full-text search, <code>LIKE '%pattern%'</code></td><td>Handles multiple values per row</td></tr><tr><td><strong>BRIN</strong></td><td>Very large tables with naturally ordered data (timestamps, sequential IDs)</td><td>Tiny index, useful for append-only logs</td></tr><tr><td><strong>GiST</strong></td><td>Geometric data, full-text search with ranking, range types</td><td>More flexible than GIN for some workloads</td></tr></tbody></table>
+<p>Use <code>EXPLAIN ANALYZE</code> to verify an index is being used:</p>
+<pre><code class="language-sql">EXPLAIN ANALYZE SELECT * FROM orders WHERE created_at &gt; NOW() - INTERVAL '7 days';
+-- Look for &quot;Index Scan&quot; vs &quot;Seq Scan&quot; — a Seq Scan on a large table indicates a missing index</code></pre>
+<p><strong>Partial indexes:</strong> index only a subset of rows — useful for filtering on a common condition:</p>
+<pre><code class="language-sql">-- Only index active users — much smaller, faster for this specific query
+CREATE INDEX ON users (email) WHERE active = true;</code></pre>
+<p><strong>Covering indexes:</strong> include extra columns so the query can be satisfied from the index alone without touching the table:</p>
+<pre><code class="language-sql">-- Include username so queries that fetch both email+username don't need a table lookup
+CREATE INDEX ON users (email) INCLUDE (username);</code></pre>
+<h4 id="pgadmin-postgresql-gui">pgAdmin (PostgreSQL GUI)</h4>
+<pre><code class="language-yaml"># ~/pgadmin/compose.yaml
+services:
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - 127.0.0.1:5050:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/pgadmin &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="common-operations-2">Common operations</h4>
+<pre><code class="language-bash"># Connect interactively
+podman exec -it postgres psql -U myuser -d mydb
+
+# Run a query non-interactively
+podman exec postgres psql -U myuser -d mydb -c &quot;SELECT count(*) FROM users;&quot;
+
+# Dump a database
+podman exec postgres pg_dump -U myuser mydb &gt; backup.sql
+
+# Restore from dump
+cat backup.sql | podman exec -i postgres psql -U myuser -d mydb
+
+# List databases
+podman exec postgres psql -U myuser -c &quot;\l&quot;
+
+# List tables in current DB
+podman exec postgres psql -U myuser -d mydb -c &quot;\dt&quot;
+
+# Check active connections
+podman exec postgres psql -U myuser -c &quot;SELECT count(*) FROM pg_stat_activity;&quot;
+
+# Show database sizes
+podman exec postgres psql -U myuser -c \
+  &quot;SELECT pg_database.datname, pg_size_pretty(pg_database_size(pg_database.datname))
+   FROM pg_database ORDER BY pg_database_size(pg_database.datname) DESC;&quot;</code></pre>
+<hr>
+<h2 id="pgvector-vector-search-in-postgresql">pgvector (Vector Search in PostgreSQL)</h2>
+<p><strong>Purpose:</strong> PostgreSQL extension that adds a native vector column type and similarity search operators — enabling semantic search, RAG (Retrieval-Augmented Generation) pipelines, and embedding storage without a separate vector database. If you're already using PostgreSQL, this is the lowest-friction path to vector search: one <code>CREATE EXTENSION</code>, one extra column type, and you're done. Use Qdrant or Weaviate when you need billion-scale vector search or advanced ANN indexing; use pgvector when your dataset is under ~10M vectors and you'd rather keep your stack simple.</p>
+<pre><code class="language-yaml"># ~/pgvector/compose.yaml
+services:
+  pgvector:
+    image: pgvector/pgvector:pg16
+    ports:
+      - 127.0.0.1:5432:5432
+    volumes:
+      - pgvector_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: strongpassword
+      POSTGRES_DB: mydb
+    restart: unless-stopped
+
+volumes:
+  pgvector_data:</code></pre>
+<pre><code class="language-bash">cd ~/pgvector &amp;&amp; podman-compose up -d</code></pre>
+<blockquote>The <code>pgvector/pgvector:pg16</code> image is official PostgreSQL 16 with the extension pre-installed. You can also install the extension into an existing PostgreSQL instance: ``<code>bash podman exec postgres psql -U myuser -d mydb -c &quot;CREATE EXTENSION vector;&quot; </code>``</blockquote>
+<h5 id="set-up-a-vector-table-and-index">Set up a vector table and index</h5>
+<pre><code class="language-sql">-- Enable the extension (once per database)
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- Create a table with a vector column (1536 dims for OpenAI, 768 for nomic-embed-text)
+CREATE TABLE documents (
+  id       BIGSERIAL PRIMARY KEY,
+  content  TEXT,
+  metadata JSONB,
+  embedding vector(768)
+);
+
+-- Create an HNSW index for fast approximate nearest-neighbour search
+CREATE INDEX ON documents USING hnsw (embedding vector_cosine_ops)
+  WITH (m = 16, ef_construction = 64);
+
+-- Insert a document with its embedding
+INSERT INTO documents (content, embedding)
+VALUES ('Self-hosting is great', '[0.01, 0.23, ...]'::vector);
+
+-- Semantic similarity search — find the 5 nearest neighbours
+SELECT id, content, 1 - (embedding &lt;=&gt; '[0.02, 0.21, ...]'::vector) AS similarity
+FROM documents
+ORDER BY embedding &lt;=&gt; '[0.02, 0.21, ...]'::vector
+LIMIT 5;</code></pre>
+<h4 id="operators">Operators</h4>
+<ul>
+<li><code>&lt;=&gt;</code> — cosine distance (most common for text embeddings)</li>
+<li><code>&lt;-&gt;</code> — L2 (Euclidean) distance</li>
+<li><code>&lt;#&gt;</code> — negative inner product (for dot-product similarity)</li>
+</ul>
+<h5 id="generate-embeddings-with-ollama-and-store-them-python-example">Generate embeddings with Ollama and store them (Python example)</h5>
+<pre><code class="language-python">import psycopg2, requests
+
+def embed(text):
+    r = requests.post(&quot;http://localhost:11434/api/embeddings&quot;,
+                      json={&quot;model&quot;: &quot;nomic-embed-text&quot;, &quot;prompt&quot;: text})
+    return r.json()[&quot;embedding&quot;]
+
+conn = psycopg2.connect(&quot;postgresql://myuser:strongpassword@localhost:5432/mydb&quot;)
+cur = conn.cursor()
+text = &quot;Self-hosting gives you full data ownership&quot;
+vector = embed(text)
+cur.execute(&quot;INSERT INTO documents (content, embedding) VALUES (%s, %s)&quot;, (text, vector))
+conn.commit()</code></pre>
+<blockquote>See the <a href="https://docs.shani.dev/doc/servers/ai-llms">AI & LLMs wiki</a> for the full Ollama setup. The <code>nomic-embed-text</code> model produces 768-dimensional vectors — adjust <code>vector(768)</code> to match your chosen model's output dimensions.</blockquote>
+<hr>
+<h2 id="pgbouncer-postgresql-connection-pooler">PgBouncer (PostgreSQL Connection Pooler)</h2>
+<p><strong>Purpose:</strong> PostgreSQL is process-based — every client connection spawns a separate backend process. Under high load (hundreds of concurrent connections from an application server), this becomes the bottleneck. PgBouncer sits between your app and PostgreSQL, maintaining a small pool of real database connections and multiplexing many application connections onto them.</p>
+<h4 id="pool-modes">Pool modes</h4>
+<ul>
+<li><strong>Transaction mode</strong> (recommended) — a database connection is held only for the duration of a single transaction. Most efficient, but prepared statements and session-level features (<code>SET</code>, advisory locks) don't work across transactions.</li>
+<li><strong>Session mode</strong> — a database connection is held for the entire application session. Fully transparent to the app but uses more connections.</li>
+<li><strong>Statement mode</strong> — one database connection per SQL statement. Very aggressive; breaks multi-statement transactions.</li>
+</ul>
+<pre><code class="language-yaml"># ~/pgbouncer/compose.yaml
+services:
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    ports:
+      - 127.0.0.1:5432:5432    # apps connect here instead of directly to postgres
+    environment:
+      DB_HOST: host.containers.internal
+      DB_PORT: 5432
+      DB_USER: myuser
+      DB_PASSWORD: strongpassword
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 1000     # max app-side connections
+      DEFAULT_POOL_SIZE: 25     # actual connections to PostgreSQL
+      AUTH_TYPE: scram-sha-256
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/pgbouncer &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="check-pool-status">Check pool status</h4>
+<pre><code class="language-bash"># Connect to the PgBouncer admin interface
+psql -h localhost -p 5432 -U myuser pgbouncer -c &quot;SHOW POOLS;&quot;
+psql -h localhost -p 5432 -U myuser pgbouncer -c &quot;SHOW STATS;&quot;
+psql -h localhost -p 5432 -U myuser pgbouncer -c &quot;SHOW CLIENTS;&quot;</code></pre>
+<blockquote>Applications connect to PgBouncer on port 5432 exactly as they would connect directly to PostgreSQL — the pooling is completely transparent. Change only the host/port in your connection string.</blockquote></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

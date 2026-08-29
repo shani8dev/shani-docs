@@ -1,7 +1,7 @@
 ---
 title: Directory Encryption (gocryptfs)
 section: Security
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Directory Encryption — gocryptfs

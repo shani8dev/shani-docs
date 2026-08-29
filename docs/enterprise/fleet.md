@@ -1,7 +1,7 @@
 ---
 title: OEM & Fleet Deployment
 section: Enterprise
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # OEM & Fleet Deployment
@@ -159,7 +159,34 @@ A GitHub Actions workflow (`.github/workflows/build-ami.yml`) builds the AMI via
 - **`docker/`** — the privileged Arch-based container (`shrinivasvkumbhar/shani-builder`) that `shani-install-media` uses to assemble images/ISOs; it pre-imports the Shanios signing key and adds the `[shani]` pacman repo
 - **`pkg/pkg-builder.sh`** — a fully automated pipeline that builds, GPG-signs, and publishes custom Arch packages to a `repo-add`-managed package repository, driven entirely by environment variables (`SSH_PRIVATE_KEY`, `GPG_PRIVATE_KEY`, `GPG_PASSPHRASE`) rather than positional CLI args, so credentials never show up in `ps aux`
 
+The Docker image is based on `archlinux:base-devel` and pre-installs everything needed to build Shanios images: `pacman`, `btrfs-progs`, `zstd`, `squashfs-tools`, `archiso`, `dracut`, `systemd-ukify`, `sbsigntools`, and the Shanios signing keyring. It runs as a privileged container because image assembly requires `btrfs receive`, loop mounts, and chroot operations that need full host access.
+
+Two GitHub Actions workflows orchestrate CI:
+
+- **`build-image.yml`** — triggered on push to `main` or manual dispatch, builds the OS image via Docker, uploads artifacts to Cloudflare R2 and SourceForge
+- **`promote-stable.yml`** — promotes the current `latest` build to `stable` after verification, updating both the image and ISO channel manifests
+
 Building a fully custom OEM/AMI image is therefore a real, documented pipeline (profile → `pacstrap` package list → overlay → customisation script → sign → publish), not a manual respin process.
+
+### Using the Shani OS Package Repo on Other Systems
+
+The `[shani]` pacman repository at `repo.shani.dev` is not locked to Shani OS installs. Any Arch-based distribution (Arch Linux, Manjaro, EndeavourOS, CachyOS, etc.) can add the repo to pull individual Shanios tools:
+
+```ini
+# /etc/pacman.conf
+[shani]
+Server = https://repo.shani.dev/$arch
+```
+
+Then trust the signing key and install packages:
+
+```bash
+sudo pacman-key --recv-key 7B927BFFD4A9EAAA8B666B77DE217F3DA8014792 --keyserver keys.openpgp.org
+sudo pacman-key --lsign-key 7B927BFFD4A9EAAA8B666B77DE217F3DA8014792
+sudo pacman -S shani-keyring
+```
+
+Available packages include `gen-efi` (Secure Boot UKI generation), `shani-health` (system diagnostics), `shani-deploy` (atomic updates), and `shani-tools` (maintenance utilities) — useful for borrowing Shanios tooling without running the full OS.
 
 ---
 
@@ -242,7 +269,7 @@ shani-deploy ships a ready-made, opt-in timer for this instead of a hand-rolled 
 sudo systemctl enable --now shani-download-only.timer
 ```
 
-It runs 30 minutes after boot and once a day thereafter (randomized by up to 2 hours, to avoid every machine hitting the CDN at once), and is idempotent — if the current image is already cached and verified, it's a no-op. If `zsync2` is installed and a previous image is still cached, the fetch it triggers is differential (see [System Updates → Differential Downloads](../updates/system#differential-downloads-zsync2)).
+It runs 30 minutes after boot and once a day thereafter (randomized by up to 2 hours, to avoid every machine hitting the CDN at once), and is idempotent — if the current image is already cached and verified, it's a no-op. If `zsync2` is installed and a previous image is still cached, the fetch it triggers is differential (see [System Updates → Differential Downloads](../updates/system.md#differential-downloads-zsync2)).
 
 For managed fleets, disable the `shani-update` interactive prompt so it does not surface to users:
 
@@ -431,7 +458,7 @@ If your organisation needs one of these, [contact the project](https://shani.dev
 
 ## See Also
 
-- [Security Features](../security/features) — full security model
-- [Atomic Updates](../concepts/atomic-updates) — update and rollback pipeline
-- [Overlay Filesystem](../arch/overlay) — `/etc` customisation persistence
-- [TPM2 Enrollment](../security/tpm2) — passwordless disk unlock
+- [Security Features](../security/features.md) — full security model
+- [Atomic Updates](../concepts/atomic-updates.md) — update and rollback pipeline
+- [Overlay Filesystem](../arch/overlay.md) — `/etc` customisation persistence
+- [TPM2 Enrollment](../security/tpm2.md) — passwordless disk unlock

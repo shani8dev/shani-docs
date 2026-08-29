@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>AppArmor (Mandatory Access Control) — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="AppArmor — Mandatory Access Control  AppArmor is a Linux Security Module that confines programs to a defined set of resources using per-application profile…">
+  <meta name="description" id="meta-desc"     content="AppArmor is a Linux Security Module that confines programs to a defined set of resources using per-application profiles. A profile specifies which files, c…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="AppArmor (Mandatory Access Control)">
-  <meta property="og:description" id="og-desc"    content="AppArmor — Mandatory Access Control  AppArmor is a Linux Security Module that confines programs to a defined set of resources using per-application profile…">
+  <meta property="og:description" id="og-desc"    content="AppArmor is a Linux Security Module that confines programs to a defined set of resources using per-application profiles. A profile specifies which files, c…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/security/apparmor/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="AppArmor (Mandatory Access Control)">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="AppArmor (Mandatory Access Control)">
-  <meta name="twitter:description" id="tw-desc"  content="AppArmor — Mandatory Access Control  AppArmor is a Linux Security Module that confines programs to a defined set of resources using per-application profile…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="AppArmor is a Linux Security Module that confines programs to a defined set of resources using per-application profiles. A profile specifies which files, c…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"AppArmor (Mandatory Access Control)","description":"AppArmor — Mandatory Access Control  AppArmor is a Linux Security Module that confines programs to a defined set of resources using per-application profile…","url":"https://docs.shani.dev/doc/security/apparmor/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"AppArmor (Mandatory Access Control)","description":"AppArmor is a Linux Security Module that confines programs to a defined set of resources using per-application profiles. A profile specifies which files, c…","url":"https://docs.shani.dev/doc/security/apparmor/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"AppArmor (Mandatory Access Control)","item":"https://docs.shani.dev/doc/security/apparmor/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,13 +215,13 @@
         <h1 class="doc-title">AppArmor (Mandatory Access Control)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Security</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>AppArmor is a Linux Security Module that confines programs to a defined set of resources using per-application profiles. A profile specifies which files, capabilities, network operations, and system calls a program is allowed — anything not explicitly permitted is denied. This limits the damage a compromised or misbehaving process can cause, even if it runs as root.</p>
 <p>AppArmor is pre-installed and active by default on Shani OS: it's part of the kernel LSM stack (<code>lsm=landlock,lockdown,yama,integrity,apparmor,bpf</code>, embedded in every UKI by <code>gen-efi</code>), and the <code>shani-core</code> package's post-install hook explicitly enables both <code>apparmor.service</code> and <code>snapd.apparmor.service</code> (so Snap confinement is enforced too) on every install. Profiles ship with applications and are loaded at boot — Shani OS does not currently ship any of its own custom <code>/etc/apparmor.d/</code> profiles beyond what upstream packages provide.</p>
-<p>---</p>
-<h2>Status</h2>
+<hr>
+<h2 id="status">Status</h2>
 <pre><code class="language-bash"># Check AppArmor is active in the kernel
 sudo aa-status
 
@@ -228,9 +230,9 @@ sudo aa-status
 #   - Number of profiles in enforce vs complain mode
 #   - List of confined processes</code></pre>
 <p>AppArmor profiles operate in two modes:</p>
-<p>| Mode | Effect | |------|--------| | <code>enforce</code> | Policy violations are <strong>blocked</strong> and logged | | <code>complain</code> | Policy violations are <strong>logged only</strong> — nothing is blocked. Used for testing new profiles. |</p>
-<p>---</p>
-<h2>Managing Profiles</h2>
+<table><thead><tr><th>Mode</th><th>Effect</th></tr></thead><tbody><tr><td><code>enforce</code></td><td>Policy violations are <strong>blocked</strong> and logged</td></tr><tr><td><code>complain</code></td><td>Policy violations are <strong>logged only</strong> — nothing is blocked. Used for testing new profiles.</td></tr></tbody></table>
+<hr>
+<h2 id="managing-profiles">Managing Profiles</h2>
 <pre><code class="language-bash"># List all loaded profiles and their mode
 sudo aa-status | grep -E &quot;enforce|complain&quot;
 
@@ -251,10 +253,10 @@ sudo aa-disable /usr/bin/firefox
 
 # Re-enable a disabled profile
 sudo aa-enable /usr/bin/firefox</code></pre>
-<p>---</p>
-<h2>Profile Files</h2>
+<hr>
+<h2 id="profile-files">Profile Files</h2>
 <p>Profiles are stored in <code>/etc/apparmor.d/</code>. Each file corresponds to a confined binary.</p>
-<h3>Viewing a Profile</h3>
+<h3 id="viewing-a-profile">Viewing a Profile</h3>
 <pre><code class="language-bash"># View the Firefox profile
 cat /etc/apparmor.d/usr.bin.firefox
 
@@ -266,7 +268,7 @@ cat /etc/apparmor.d/usr.bin.firefox
 #   network inet stream,          # outbound TCP
 #   deny /etc/shadow r,           # explicitly deny reading shadow file
 # }</code></pre>
-<h3>Writing a Profile for a New Application</h3>
+<h3 id="writing-a-profile-for-a-new-application">Writing a Profile for a New Application</h3>
 <p>Use <code>aa-genprof</code> to generate a profile interactively — it runs the application in complain mode, watches what it does, and offers to build rules from observed behaviour:</p>
 <pre><code class="language-bash"># Start profile generation
 sudo aa-genprof /path/to/application
@@ -275,8 +277,8 @@ sudo aa-genprof /path/to/application
 # Back in aa-genprof, press S to scan events and F to finish</code></pre>
 <p>Use <code>aa-logprof</code> to update an existing profile based on new denials in the log:</p>
 <pre><code class="language-bash">sudo aa-logprof</code></pre>
-<p>---</p>
-<h2>Checking Denials</h2>
+<hr>
+<h2 id="checking-denials">Checking Denials</h2>
 <p>AppArmor logs denied operations to the audit log and journal:</p>
 <pre><code class="language-bash"># View AppArmor denials via journald
 sudo journalctl -k | grep -i &quot;apparmor.*denied&quot;
@@ -290,15 +292,15 @@ sudo journalctl -k --since &quot;1 hour ago&quot; | grep &quot;apparmor.*denied&
 <pre><code>apparmor=&quot;DENIED&quot; operation=&quot;open&quot; profile=&quot;/usr/bin/myapp&quot;
 name=&quot;/etc/passwd&quot; pid=1234 comm=&quot;myapp&quot; requested_mask=&quot;r&quot; denied_mask=&quot;r&quot;</code></pre>
 <p>This tells you: <code>myapp</code> tried to read <code>/etc/passwd</code> and was denied. To allow it, add <code>/etc/passwd r,</code> to the profile.</p>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | Application crashes or behaves oddly | Check for AppArmor denials: <code>journalctl -k | grep &quot;apparmor.*denied&quot;</code>; put the profile in complain mode temporarily: <code>sudo aa-complain /path/to/binary</code> | | Profile reload fails | Check syntax: <code>sudo apparmor_parser -p /etc/apparmor.d/profile-name</code>; fix errors and reload | | <code>aa-status</code> shows no profiles | AppArmor is loaded but no profiles are installed — install application packages that ship profiles, or write your own | | Denial for a path that should be allowed | Edit the profile to add the required rule, then reload: <code>sudo apparmor_parser -r /etc/apparmor.d/profile</code> | | Want to test a profile change safely | Switch to complain mode first (<code>aa-complain</code>), test, check logs, then enforce (<code>aa-enforce</code>) once the profile is working correctly |</p>
-<p>---</p>
-<h2>See Also</h2>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Application crashes or behaves oddly</td><td>Check for AppArmor denials: `journalctl -k</td><td>grep "apparmor.*denied"<code>; put the profile in complain mode temporarily: </code>sudo aa-complain /path/to/binary`</td></tr><tr><td>Profile reload fails</td><td>Check syntax: <code>sudo apparmor_parser -p /etc/apparmor.d/profile-name</code>; fix errors and reload</td></tr><tr><td><code>aa-status</code> shows no profiles</td><td>AppArmor is loaded but no profiles are installed — install application packages that ship profiles, or write your own</td></tr><tr><td>Denial for a path that should be allowed</td><td>Edit the profile to add the required rule, then reload: <code>sudo apparmor_parser -r /etc/apparmor.d/profile</code></td></tr><tr><td>Want to test a profile change safely</td><td>Switch to complain mode first (<code>aa-complain</code>), test, check logs, then enforce (<code>aa-enforce</code>) once the profile is working correctly</td></tr></tbody></table>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="audit">Audit (auditd)</a> — AppArmor denials are logged to the audit trail when <code>auditd</code> is running</li>
 <li><a href="features">Security Features</a> — AppArmor's place in the six-LSM stack</li>
-<li><a href="../updates/shani-health">shani-health Reference</a> — <code>shani-health --security</code> reports the enforcing-profile count and counts this boot's AppArmor denials from the kernel log</li>
+<li><a href="../updates/shani-health.md">shani-health Reference</a> — <code>shani-health --security</code> reports the enforcing-profile count and counts this boot's AppArmor denials from the kernel log</li>
 </ul></div>
     </div>
 

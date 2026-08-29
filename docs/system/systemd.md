@@ -1,7 +1,7 @@
 ---
 title: Systemd
 section: System
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Systemd
@@ -495,7 +495,7 @@ sudo systemctl enable --now myapp.socket
 # myapp.service starts automatically when a connection arrives
 ```
 
-`sshd.socket` is available as an opt-in alternative on Shani OS for machines that rarely accept SSH connections — the default is the persistent `sshd.service`. See [OpenSSH](../networking/openssh).
+`sshd.socket` is available as an opt-in alternative on Shani OS for machines that rarely accept SSH connections — the default is the persistent `sshd.service`. See [OpenSSH](../networking/openssh.md).
 
 ---
 
@@ -566,8 +566,8 @@ ExecStopPost=/bin/rm -rf /var/run/myapp
 
 ## See Also
 
-- [System Config](../updates/config) — overlay persistence, `systemctl edit`, sysctl via systemd
+- [System Config](../updates/config.md) — overlay persistence, `systemctl edit`, sysctl via systemd
 - [Backup & Recovery](backup) — full example of a user timer with `loginctl enable-linger`
 - [cronie](cronie) — cron as an alternative for simple per-user schedules
 - [Process Management](process-management) — `systemd-cgls`, `systemd-cgtop`, cgroup resource usage
-- [shani-health](../updates/shani-health) — reports on failed units, journal errors, and boot time
+- [shani-health](../updates/shani-health.md) — reports on failed units, journal errors, and boot time

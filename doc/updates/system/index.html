@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>System Updates — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="System Updates  Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the…">
+  <meta name="description" id="meta-desc"     content="Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the next reboot. Th…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="System Updates">
-  <meta property="og:description" id="og-desc"    content="System Updates  Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the…">
+  <meta property="og:description" id="og-desc"    content="Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the next reboot. Th…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/updates/system/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="System Updates">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="System Updates">
-  <meta name="twitter:description" id="tw-desc"  content="System Updates  Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the next reboot. Th…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"System Updates","description":"System Updates  Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the…","url":"https://docs.shani.dev/doc/updates/system/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"System Updates","description":"Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the next reboot. Th…","url":"https://docs.shani.dev/doc/updates/system/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"System Updates","item":"https://docs.shani.dev/doc/updates/system/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,11 +215,11 @@
         <h1 class="doc-title">System Updates</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Updates &amp; Config</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the next reboot. The previous slot is preserved as an instant rollback target.</p>
-<h2>Automatic Updates</h2>
+<h2 id="automatic-updates">Automatic Updates</h2>
 <p><code>shani-update</code> is the user-facing update manager. It runs automatically via a desktop autostart entry at login (after a 15-second delay) and via a systemd user timer that fires 15 minutes after boot and then every 2 hours.</p>
 <p>On each run, <code>shani-update</code> works through a fixed priority sequence:</p>
 <ol>
@@ -228,7 +230,7 @@
 <li><strong>Update check</strong> — fetches release metadata and, if a newer version is available, shows an install dialog.</li>
 </ol>
 <p>When the user confirms an update, <code>shani-update</code> detects the available terminal emulator and launches <code>shani-deploy</code> inside it.</p>
-<blockquote><p><strong>Auto-reboot is opt-in here too.</strong> Once <code>shani-deploy</code> finishes successfully — whether launched unattended by the timer or manually — the new slot is ready to boot into whenever convenient; it does not reboot on its own unless <code>AUTO_REBOOT=yes</code> was set. See <a href="#automatic-reboot-after-deployment">Automatic Reboot After Deployment</a> below.</p></blockquote>
+<blockquote><strong>Auto-reboot is opt-in here too.</strong> Once <code>shani-deploy</code> finishes successfully — whether launched unattended by the timer or manually — the new slot is ready to boot into whenever convenient; it does not reboot on its own unless <code>AUTO_REBOOT=yes</code> was set. See <a href="#automatic-reboot-after-deployment">Automatic Reboot After Deployment</a> below.</blockquote>
 <pre><code class="language-bash"># Check timer status
 systemctl --user status shani-update.timer
 
@@ -238,11 +240,11 @@ journalctl -t shani-update -n 50
 
 # Run an immediate interactive check
 shani-update</code></pre>
-<h3>shani-update Flags</h3>
+<h3 id="shani-update-flags">shani-update Flags</h3>
 <p><code>shani-update</code> is mostly a GUI-driven wrapper, but it also accepts CLI flags that mirror (and, for install/deploy actions, pass through to) <code>shani-deploy</code>:</p>
-<p>| Flag | Effect | |------|--------| | <code>--startup</code> | Run the login flow: fallback check → reboot-needed check → candidate check → update check | | <code>-r</code>, <code>--rollback</code> | Roll back the inactive slot immediately | | <code>-f</code>, <code>--force</code> | Force deploy even if the version matches or there's a slot mismatch | | <code>-t</code>, <code>--channel &lt;chan&gt;</code> | Update channel for this run: <code>stable</code> or <code>latest</code> | | <code>-v</code>, <code>--verbose</code> | Verbose output from <code>shani-deploy</code> | | <code>-d</code>, <code>--dry-run</code> | Simulate the deployment without changes | | <code>-c</code>, <code>--cleanup</code> | Passthrough: <code>shani-deploy --cleanup</code> | | <code>-o</code>, <code>--optimize</code> | Passthrough: <code>shani-deploy --optimize</code> | | <code>--download-only</code> | Passthrough: <code>shani-deploy --download-only</code> | | <code>--set-channel &lt;chan&gt;</code> | Passthrough: <code>shani-deploy --set-channel</code> (persists to <code>/etc/shani-channel</code>) | | <code>--skip-self-update</code> | Passthrough on install: <code>shani-deploy --skip-self-update</code> | | <code>--update-genefi</code> | Passthrough on install: <code>shani-deploy --update-genefi</code> | | <code>--health [ARGS...]</code> | Forwards remaining arguments to <code>shani-health</code> (e.g. <code>shani-update --health --security</code>) — must be last on the command line | | <code>-h</code>, <code>--help</code> | Show usage |</p>
+<table><thead><tr><th>Flag</th><th>Effect</th></tr></thead><tbody><tr><td><code>--startup</code></td><td>Run the login flow: fallback check → reboot-needed check → candidate check → update check</td></tr><tr><td><code>-r</code>, <code>--rollback</code></td><td>Roll back the inactive slot immediately</td></tr><tr><td><code>-f</code>, <code>--force</code></td><td>Force deploy even if the version matches or there's a slot mismatch</td></tr><tr><td><code>-t</code>, <code>--channel &lt;chan&gt;</code></td><td>Update channel for this run: <code>stable</code> or <code>latest</code></td></tr><tr><td><code>-v</code>, <code>--verbose</code></td><td>Verbose output from <code>shani-deploy</code></td></tr><tr><td><code>-d</code>, <code>--dry-run</code></td><td>Simulate the deployment without changes</td></tr><tr><td><code>-c</code>, <code>--cleanup</code></td><td>Passthrough: <code>shani-deploy --cleanup</code></td></tr><tr><td><code>-o</code>, <code>--optimize</code></td><td>Passthrough: <code>shani-deploy --optimize</code></td></tr><tr><td><code>--download-only</code></td><td>Passthrough: <code>shani-deploy --download-only</code></td></tr><tr><td><code>--set-channel &lt;chan&gt;</code></td><td>Passthrough: <code>shani-deploy --set-channel</code> (persists to <code>/etc/shani-channel</code>)</td></tr><tr><td><code>--skip-self-update</code></td><td>Passthrough on install: <code>shani-deploy --skip-self-update</code></td></tr><tr><td><code>--update-genefi</code></td><td>Passthrough on install: <code>shani-deploy --update-genefi</code></td></tr><tr><td><code>--health [ARGS...]</code></td><td>Forwards remaining arguments to <code>shani-health</code> (e.g. <code>shani-update --health --security</code>) — must be last on the command line</td></tr><tr><td><code>-h</code>, <code>--help</code></td><td>Show usage</td></tr></tbody></table>
 <p>Running <code>shani-update</code> with no flags does the interactive flow: fallback check → reboot-needed check → candidate-boot check → update check, showing a GUI dialog (yad/zenity/kdialog) at whichever step applies, falling back to a desktop notification or console prompt if no GUI toolkit is available.</p>
-<h2>Manual Update</h2>
+<h2 id="manual-update">Manual Update</h2>
 <pre><code class="language-bash"># Download, verify, and stage the update
 sudo shani-deploy
 
@@ -261,10 +263,10 @@ sudo shani-deploy -t latest
 
 # Fetch and verify the update image only — exits before deploying
 sudo shani-deploy --download-only</code></pre>
-<h3>Full Flag Reference</h3>
-<p>| Flag | Effect | |------|--------| | <code>-h</code>, <code>--help</code> | Show usage | | <code>-r</code>, <code>--rollback</code> | Roll back the non-booted slot (run from the slot you want to keep) | | <code>-c</code>, <code>--cleanup</code> | Manual cleanup of old backups and cached downloads | | <code>-o</code>, <code>--optimize</code> | Manual Btrfs deduplication (bees handles continuous dedup in the background) | | <code>-t</code>, <code>--channel &lt;chan&gt;</code> | Update channel for this run only: <code>stable</code> or <code>latest</code> | | <code>-f</code>, <code>--force</code> | Deploy even if the version matches or there's a boot mismatch | | <code>--download-only</code> | Fetch and verify the update image, then exit without deploying | | <code>-d</code>, <code>--dry-run</code> | Simulate without making changes | | <code>-v</code>, <code>--verbose</code> | Verbose output | | <code>--set-channel &lt;chan&gt;</code> | Permanently persist the channel to <code>/etc/shani-channel</code> | | <code>--skip-self-update</code> | Skip <code>shani-deploy</code>'s own auto-update-and-re-exec step | | <code>--update-genefi</code> | Download the latest <code>gen-efi</code> from upstream and use it inside the deploy chroot only (does not install it to the host) |</p>
+<h3 id="full-flag-reference">Full Flag Reference</h3>
+<table><thead><tr><th>Flag</th><th>Effect</th></tr></thead><tbody><tr><td><code>-h</code>, <code>--help</code></td><td>Show usage</td></tr><tr><td><code>-r</code>, <code>--rollback</code></td><td>Roll back the non-booted slot (run from the slot you want to keep)</td></tr><tr><td><code>-c</code>, <code>--cleanup</code></td><td>Manual cleanup of old backups and cached downloads</td></tr><tr><td><code>-o</code>, <code>--optimize</code></td><td>Manual Btrfs deduplication (bees handles continuous dedup in the background)</td></tr><tr><td><code>-t</code>, <code>--channel &lt;chan&gt;</code></td><td>Update channel for this run only: <code>stable</code> or <code>latest</code></td></tr><tr><td><code>-f</code>, <code>--force</code></td><td>Deploy even if the version matches or there's a boot mismatch</td></tr><tr><td><code>--download-only</code></td><td>Fetch and verify the update image, then exit without deploying</td></tr><tr><td><code>-d</code>, <code>--dry-run</code></td><td>Simulate without making changes</td></tr><tr><td><code>-v</code>, <code>--verbose</code></td><td>Verbose output</td></tr><tr><td><code>--set-channel &lt;chan&gt;</code></td><td>Permanently persist the channel to <code>/etc/shani-channel</code></td></tr><tr><td><code>--skip-self-update</code></td><td>Skip <code>shani-deploy</code>'s own auto-update-and-re-exec step</td></tr><tr><td><code>--update-genefi</code></td><td>Download the latest <code>gen-efi</code> from upstream and use it inside the deploy chroot only (does not install it to the host)</td></tr></tbody></table>
 <p><code>--download-only</code> cannot be combined with <code>--rollback</code>, <code>--cleanup</code>, <code>--optimize</code>, or <code>--set-channel</code>.</p>
-<h2>Automatic Reboot After Deployment</h2>
+<h2 id="automatic-reboot-after-deployment">Automatic Reboot After Deployment</h2>
 <p><strong>The new slot is fully deployed and bootable as soon as <code>shani-deploy</code> finishes — rebooting promptly is not required.</strong> By default, <code>shani-deploy</code> does <strong>not</strong> reboot automatically; reboot whenever it's convenient to switch into the new slot. This applies every time, not just to interactive runs.</p>
 <pre><code class="language-bash"># Opt into an automatic reboot 60 seconds after a successful deployment
 sudo AUTO_REBOOT=yes shani-deploy
@@ -275,7 +277,7 @@ sudo AUTO_REBOOT=yes AUTO_REBOOT_DELAY=300 shani-deploy
 # Cancel a pending automatic reboot (if AUTO_REBOOT=yes armed one)
 systemctl stop shanios-auto-reboot.timer</code></pre>
 <p>When enabled, auto-reboot is still skipped entirely in <code>--dry-run</code> mode, and is armed via a transient systemd timer unit (<code>shanios-auto-reboot.timer</code>) so it survives even if the terminal running <code>shani-deploy</code> is closed — cancel it with the command above if you need more time before rebooting.</p>
-<h2>Update Process in Detail</h2>
+<h2 id="update-process-in-detail">Update Process in Detail</h2>
 <ol>
 <li><strong>Self-update check</strong> — downloads a newer version of <code>shani-deploy</code> itself if available and re-execs</li>
 <li><strong>Slot detection</strong> — determines the active and candidate slots</li>
@@ -292,17 +294,17 @@ systemctl stop shanios-auto-reboot.timer</code></pre>
 <li><strong>Auto-reboot</strong> — opt-in only (<code>AUTO_REBOOT=yes</code>); the new slot is ready immediately and reboot is left to your convenience by default (see <a href="#automatic-reboot-after-deployment">Automatic Reboot After Deployment</a> below)</li>
 </ol>
 <p>Nothing in your running OS is touched at any point.</p>
-<h2>Differential Downloads (zsync2)</h2>
+<h2 id="differential-downloads-zsync2">Differential Downloads (zsync2)</h2>
 <p>Each release image gets a <code>.zsync</code> control file alongside it, generated at build time. When <code>zsync2</code> is installed and a previous image is still cached in <code>/data/downloads/</code> (normally left there from your last update), <code>shani-deploy</code> tries a differential fetch first — pulling only the blocks that changed since that cached image — before falling back to a full download.</p>
 <p>This is an optimization, not a trust boundary: <code>zsync2</code> is an actively developing, upstream-experimental tool, so any problem with it (not installed, no cached image to diff against, timeout, failure) silently falls through to the ordinary full download via <code>aria2c</code>/<code>wget</code>/<code>curl</code>. Whichever path produced the file, it still goes through the same SHA256 and GPG verification afterward — a differential download is never trusted on its own, only the verified result is.</p>
 <p>There's nothing to configure: this only ever runs against R2 (where the control file's embedded URL always points), and only when a local seed image is actually available.</p>
-<h2>Rolling Back</h2>
+<h2 id="rolling-back">Rolling Back</h2>
 <pre><code class="language-bash"># Roll back from the currently booted slot (restores the inactive slot from its last snapshot)
 sudo shani-deploy -r
 sudo reboot</code></pre>
 <p>Or select the <strong>(Candidate)</strong> entry from the systemd-boot menu at startup (press Space to show the menu).</p>
 <p><strong>Important:</strong> Run rollback from the OS copy you want to keep. If you are on <code>@blue</code> and want to revert <code>@green</code>, run rollback from <code>@blue</code>.</p>
-<h2>Update Channels</h2>
+<h2 id="update-channels">Update Channels</h2>
 <pre><code class="language-bash"># Check current channel
 cat /etc/shani-channel
 
@@ -312,12 +314,26 @@ sudo shani-deploy --set-channel latest   # more frequent, pre-QA releases
 
 # Use a channel for one run only
 sudo shani-deploy -t latest</code></pre>
-<h2>Boot Counting and Automatic Fallback</h2>
+<h3 id="channel-mechanics">Channel Mechanics</h3>
+<p>The two channels differ in how builds reach them, not in what they contain:</p>
+<ul>
+<li><strong><code>latest</code></strong> receives every build that passes automated checks, continuously — as soon as a build is published, it's available on this channel.</li>
+<li><strong><code>stable</code></strong> is promoted from <code>latest</code>, never built separately. A build only reaches <code>stable</code> after soaking there through a QA window and passing validation.</li>
+</ul>
+<p>Promotion is done via <code>build.sh promote-stable</code> upstream. Because the QA soak is qualitative rather than time-boxed, there's no fixed lag between <code>latest</code> and <code>stable</code> — expect days, not hours, but don't treat any specific number as an SLA.</p>
+<p>Switching channels persists to <code>/etc/shani-channel</code> and applies to all future runs:</p>
+<pre><code class="language-bash">sudo shani-deploy --set-channel latest
+
+# Check what each remote currently offers before switching
+sudo shani-deploy --channel-status stable
+sudo shani-deploy --channel-status latest</code></pre>
+<p>Recommendation: for personal machines, <code>latest</code> is fine — rollback exists either way. For fleets or mission-critical systems, stay on <code>stable</code> and stagger deployments across machines so one bad build can't hit everything at once.</p>
+<h2 id="boot-counting-and-automatic-fallback">Boot Counting and Automatic Fallback</h2>
 <p>After an update, the new slot is registered in systemd-boot with <code>+3-0</code> boot count tries. If the new slot fails to boot three times, systemd-boot automatically falls back to the previous slot — no user action required.</p>
 <p>Shanios uses two tiers of boot failure detection:</p>
-<p>| Tier | Marker | Trigger | Action | |------|--------|---------|--------| | Hard failure | <code>/data/boot_hard_failure</code> | Root filesystem mount failed (dracut pre-mount hook) | Manual: <code>shani-deploy --rollback</code> | | Soft failure | <code>/data/boot_failure</code> | System booted but never reached <code>multi-user.target</code> within 15 minutes | Automated rollback offered by <code>shani-update</code> |</p>
+<table><thead><tr><th>Tier</th><th>Marker</th><th>Trigger</th><th>Action</th></tr></thead><tbody><tr><td>Hard failure</td><td><code>/data/boot_hard_failure</code></td><td>Root filesystem mount failed (dracut pre-mount hook)</td><td>Manual: <code>shani-deploy --rollback</code></td></tr><tr><td>Soft failure</td><td><code>/data/boot_failure</code></td><td>System booted but never reached <code>multi-user.target</code> within 15 minutes</td><td>Automated rollback offered by <code>shani-update</code></td></tr></tbody></table>
 <p>On first login after a fallback, <code>shani-update</code> detects the mismatch and shows a dialog offering to roll back the failed slot.</p>
-<h2>Storage Management</h2>
+<h2 id="storage-management">Storage Management</h2>
 <pre><code class="language-bash"># Remove old backup snapshots and cached downloads
 sudo shani-deploy -c
 
@@ -331,7 +347,7 @@ shani-health --storage-info
 sudo btrfs filesystem du -s --human-readable /
 sudo btrfs filesystem du -s --human-readable /home
 sudo btrfs filesystem du -s --human-readable /var/lib/flatpak</code></pre>
-<h2>Flatpak Auto-Updates</h2>
+<h2 id="flatpak-auto-updates">Flatpak Auto-Updates</h2>
 <p>Flatpak apps update separately from the OS. Two timers handle this — one system-wide, one per-user:</p>
 <pre><code class="language-bash"># Manual Flatpak update
 flatpak update
@@ -343,15 +359,21 @@ flatpak list --app
 systemctl status flatpak-update-system.timer
 systemctl --user status flatpak-update-user.timer</code></pre>
 <p>The system timer fires 15 minutes after boot and every 12 hours; the user timer fires 20 minutes after boot and every 12 hours, for per-user Flatpak remotes. Both automatically uninstall unused runtimes after updating.</p>
-<h2>Firmware Updates (fwupd)</h2>
+<h2 id="firmware-updates-fwupd">Firmware Updates (fwupd)</h2>
 <pre><code class="language-bash">sudo fwupdmgr refresh
 sudo fwupdmgr get-updates
 sudo fwupdmgr update</code></pre>
-<blockquote><p>After a firmware update, PCR 0 changes. Re-enroll TPM2 if you are using automatic LUKS unlock:</p></blockquote>
-<blockquote><p><pre><code class="language-bash">&gt; sudo gen-efi cleanup-tpm2
-&gt; sudo gen-efi enroll-tpm2
-&gt; </code></pre></p></blockquote>
-<blockquote><p>See <a href="../security/tpm2">TPM2 Enrollment</a>.</p></blockquote></div>
+<blockquote>After a firmware update, PCR 0 changes. Re-enroll TPM2 if you are using automatic LUKS unlock: ``<code>bash sudo gen-efi cleanup-tpm2 sudo gen-efi enroll-tpm2 </code>`` See <a href="../security/tpm2.md">TPM2 Enrollment</a>.</blockquote>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="shani-health">System Health Checks</a> — automated monitoring and diagnostics</li>
+<li><a href="config">System Config</a> — /etc overlay, locale, hostname, services</li>
+<li><a href="shell">Shell & Environment</a> — Zsh, Starship, Nix, CLI tools</li>
+<li><a href="user-setup">User Provisioning</a> — automatic group and shell setup</li>
+<li><a href="shani-reset">Shani Reset</a> — factory reset of persistent state</li>
+<li><a href="../concepts/blue-green.md">Blue-Green Deployment</a> — the two-slot architecture</li>
+<li><a href="../troubleshooting.md">Troubleshooting</a> — diagnosing update and boot issues</li>
+</ul></div>
     </div>
 
   </main>

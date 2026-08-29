@@ -1,12 +1,12 @@
 ---
 title: KDE Connect
 section: Networking
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # KDE Connect — Link Desktop and Mobile Devices
 
-KDE Connect integrates your phone (Android/iOS) with your Shani OS desktop over the local network. It's pre-installed on **both** desktop editions — natively on KDE Plasma, and as **GSConnect** (a GNOME Shell extension implementing the same KDE Connect protocol) on GNOME. Firewall rules are pre-configured in the `public` zone on both editions — no manual firewall setup is needed after a fresh install.
+KDE Connect integrates your phone (Android/iOS) with your Shani OS desktop over the local network. It's pre-installed on the **KDE Plasma** edition natively (`kdeconnect`) and on the **GNOME** edition via **GSConnect** (a GNOME Shell extension implementing the same KDE Connect protocol). COSMIC users can run KDE Connect inside Distrobox or via `nix-env -iA nixpkgs.kdeconnect`. Firewall rules are pre-configured in the `public` zone on all desktop editions — no manual firewall setup is needed after a fresh install.
 
 Features include: shared clipboard, file transfer, remote input (use your phone as a touchpad/keyboard), notification mirroring, media controls, and running pre-defined remote commands. GSConnect's feature set closely mirrors native KDE Connect, though a few advanced features (custom remote commands, some plugin settings) are more limited in its GNOME Extensions preferences UI than in KDE's System Settings module.
 
@@ -134,3 +134,8 @@ journalctl --user -f | grep -i gsconnect
 | File transfer failing | Ensure both devices are paired (not just discovered); check available storage on the phone |
 | Clipboard sync not working | The plugin must be enabled on both the desktop (KDE Connect settings, or GSConnect's device preferences) and in the phone app |
 | GSConnect icon missing from top bar (GNOME) | Open the **Extensions** app and confirm GSConnect is toggled on |
+
+## See Also
+
+- [Bluetooth](bluetooth)
+- [KDE Connect blog guide](https://blog.shani.dev/post/shani-os-kde-connect)

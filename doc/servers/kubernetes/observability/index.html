@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>Kubernetes — Observability (Metrics, Dashboards &amp; SLOs) — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Observability Prometheus + Grafana (kube-prometheus-stack) Grafana dashboard IDs | Tool | Dashboard ID | |------|-------------| | Longhorn | 13032 | | Ingr…">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/servers/kubernetes/observability/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="Kubernetes — Observability (Metrics, Dashboards &amp; SLOs)">
+  <meta property="og:description" id="og-desc"    content="Observability Prometheus + Grafana (kube-prometheus-stack) Grafana dashboard IDs | Tool | Dashboard ID | |------|-------------| | Longhorn | 13032 | | Ingr…">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/kubernetes/observability/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="Kubernetes — Observability (Metrics, Dashboards &amp; SLOs)">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="Kubernetes — Observability (Metrics, Dashboards &amp; SLOs)">
+  <meta name="twitter:description" id="tw-desc"  content="Observability Prometheus + Grafana (kube-prometheus-stack) Grafana dashboard IDs | Tool | Dashboard ID | |------|-------------| | Longhorn | 13032 | | Ingr…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Kubernetes — Observability (Metrics, Dashboards & SLOs)","description":"Observability Prometheus + Grafana (kube-prometheus-stack) Grafana dashboard IDs | Tool | Dashboard ID | |------|-------------| | Longhorn | 13032 | | Ingr…","url":"https://docs.shani.dev/doc/servers/kubernetes/observability/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Kubernetes — Observability (Metrics, Dashboards & SLOs)","item":"https://docs.shani.dev/doc/servers/kubernetes/observability/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Kubernetes — Observability (Metrics, Dashboards &amp; SLOs)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><h2 id="observability">Observability</h2>
+<h3 id="prometheus-grafana-kube-prometheus-stack">Prometheus + Grafana (kube-prometheus-stack)</h3>
+<pre><code class="language-bash">helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
+helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+  --namespace monitoring --create-namespace \
+  --set grafana.adminPassword=changeme \
+  --set prometheus.prometheusSpec.retention=15d
+
+kubectl -n monitoring port-forward svc/kube-prometheus-stack-grafana 3000:80</code></pre>
+<h4 id="grafana-dashboard-ids">Grafana dashboard IDs</h4>
+<table><thead><tr><th>Tool</th><th>Dashboard ID</th></tr></thead><tbody><tr><td>Longhorn</td><td>13032</td></tr><tr><td>Ingress NGINX</td><td>9614</td></tr><tr><td>ArgoCD</td><td>14584</td></tr><tr><td>KEDA</td><td>16406</td></tr><tr><td>Cilium Overview</td><td>18814</td></tr><tr><td>Cilium / Hubble L4 Flows</td><td>18815</td></tr><tr><td>Cilium / Hubble DNS</td><td>18816</td></tr><tr><td>Loki Logs</td><td>13639</td></tr><tr><td>Tempo Traces</td><td>16459</td></tr><tr><td>OpenCost</td><td>15714</td></tr></tbody></table>
+<blockquote>Import via Grafana UI: <strong>Dashboards → New → Import → enter ID</strong>.</blockquote>
+<hr>
+<h3 id="prometheus-alertmanager">Prometheus AlertManager</h3>
+<p><strong>Purpose:</strong> Routes Prometheus alerts to Slack, PagerDuty, email, or ntfy. AlertManager handles deduplication, grouping, silencing, and inhibition — so 50 alerts from one failing node appear as one grouped notification.</p>
+<h4 id="alertmanager-config-bundled-with-kube-prometheus-stack">AlertManager config (bundled with kube-prometheus-stack)</h4>
+<pre><code class="language-yaml"># ~/k8s/values/prometheus.yaml — add to your kube-prometheus-stack values
+alertmanager:
+  config:
+    global:
+      resolve_timeout: 5m
+
+    route:
+      group_by: [alertname, namespace, severity]
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+      receiver: default
+      routes:
+        - match:
+            severity: critical
+          receiver: critical-alerts
+          continue: true
+        - match:
+            severity: warning
+          receiver: warning-alerts
+
+    receivers:
+      - name: default
+        slack_configs:
+          - api_url: https://hooks.slack.com/services/XXXX
+            channel: &quot;#k8s-alerts&quot;
+            title: '{{ template &quot;slack.default.title&quot; . }}'
+            text: '{{ template &quot;slack.default.text&quot; . }}'
+
+      - name: critical-alerts
+        slack_configs:
+          - api_url: https://hooks.slack.com/services/XXXX
+            channel: &quot;#incidents&quot;
+            send_resolved: true
+        pagerduty_configs:
+          - service_key: &lt;pagerduty-service-key&gt;
+
+      - name: warning-alerts
+        webhook_configs:
+          - url: http://ntfy.home.local/k8s-warnings    # ntfy push notification
+
+    inhibit_rules:
+      - source_match:
+          severity: critical
+        target_match:
+          severity: warning
+        equal: [alertname, namespace]    # critical silences matching warning</code></pre>
+<h4 id="useful-prometheusrule-examples">Useful PrometheusRule examples</h4>
+<pre><code class="language-yaml">apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: myapp-alerts
+  namespace: myapp
+  labels:
+    release: kube-prometheus-stack    # must match kube-prometheus-stack label selector
+spec:
+  groups:
+    - name: myapp.rules
+      interval: 30s
+      rules:
+        # Alert if error rate &gt; 1% for 5 minutes
+        - alert: HighErrorRate
+          expr: |
+            sum(rate(http_requests_total{namespace=&quot;myapp&quot;, status=~&quot;5..&quot;}[5m]))
+            / sum(rate(http_requests_total{namespace=&quot;myapp&quot;}[5m])) &gt; 0.01
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: &quot;High error rate in {{ $labels.namespace }}&quot;
+            description: &quot;Error rate is {{ $value | humanizePercentage }}&quot;
+
+        # Alert if pod is not running for 10 minutes
+        - alert: PodNotRunning
+          expr: |
+            kube_pod_status_phase{namespace=&quot;myapp&quot;, phase!~&quot;Running|Succeeded&quot;} &gt; 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: &quot;Pod {{ $labels.pod }} is not running&quot;
+
+        # Alert if PVC is more than 80% full
+        - alert: PVCAlmostFull
+          expr: |
+            kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes &gt; 0.8
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: &quot;PVC {{ $labels.persistentvolumeclaim }} is {{ $value | humanizePercentage }} full&quot;
+
+        # Alert if HPA is at maximum replicas
+        - alert: HPAAtMaxReplicas
+          expr: |
+            kube_horizontalpodautoscaler_status_current_replicas
+            == kube_horizontalpodautoscaler_spec_max_replicas
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: &quot;HPA {{ $labels.horizontalpodautoscaler }} is at max replicas&quot;
+
+        # Alert if deployment has no available replicas
+        - alert: DeploymentUnavailable
+          expr: |
+            kube_deployment_status_replicas_available{namespace=&quot;myapp&quot;} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: &quot;Deployment {{ $labels.deployment }} has no available replicas&quot;</code></pre>
+<pre><code class="language-bash"># Test alertmanager config locally
+docker run --rm -v $(pwd)/alertmanager.yaml:/config.yaml \
+  prom/alertmanager:latest --config.file=/config.yaml --check-config
+
+kubectl -n monitoring port-forward svc/kube-prometheus-stack-alertmanager 9093:9093
+# Check at http://localhost:9093</code></pre>
+<h4 id="servicemonitor-podmonitor-scrape-custom-apps">ServiceMonitor / PodMonitor — Scrape Custom Apps</h4>
+<pre><code class="language-yaml"># Tell Prometheus to scrape your app's /metrics endpoint
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: myapp
+  namespace: myapp
+  labels:
+    release: kube-prometheus-stack    # must match prometheus.serviceMonitorSelector
+spec:
+  selector:
+    matchLabels:
+      app: myapp
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+---
+# PodMonitor — when pods don't have a Service
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: myapp-workers
+  namespace: myapp
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: myapp-worker
+  podMetricsEndpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s</code></pre>
+<hr>
+<h3 id="loki-promtail-grafana-alloy-log-aggregation">Loki + Promtail / Grafana Alloy (Log Aggregation)</h3>
+<p><strong>Purpose:</strong> Loki indexes only labels (not full log content), keeping storage costs low. Promtail or the newer Alloy agent ships pod logs from every node to Loki. Query via LogQL in Grafana alongside Prometheus metrics.</p>
+<pre><code class="language-bash">helm repo add grafana https://grafana.github.io/helm-charts
+
+# Loki (single-binary — homelab mode)
+helm upgrade --install loki grafana/loki \
+  --namespace monitoring --create-namespace \
+  --set loki.auth_enabled=false \
+  --set loki.commonConfig.replication_factor=1 \
+  --set loki.storage.type=filesystem
+
+# Promtail DaemonSet
+helm upgrade --install promtail grafana/promtail \
+  --namespace monitoring \
+  --set config.lokiAddress=http://loki:3100/loki/api/v1/push</code></pre>
+<h4 id="grafana-alloy-replaces-promtail-grafana-agent">Grafana Alloy (replaces Promtail + Grafana Agent)</h4>
+<pre><code class="language-bash">helm upgrade --install alloy grafana/alloy \
+  --namespace monitoring -f ~/k8s/alloy-values.yaml</code></pre>
+<pre><code class="language-yaml"># ~/k8s/alloy-values.yaml
+alloy:
+  configMap:
+    content: |
+      discovery.kubernetes &quot;pods&quot; { role = &quot;pod&quot; }
+
+      discovery.relabel &quot;pod_logs&quot; {
+        targets = discovery.kubernetes.pods.targets
+        rule { source_labels = [&quot;__meta_kubernetes_namespace&quot;]; target_label = &quot;namespace&quot; }
+        rule { source_labels = [&quot;__meta_kubernetes_pod_label_app&quot;]; target_label = &quot;app&quot; }
+      }
+
+      loki.source.kubernetes &quot;pod_logs&quot; {
+        targets    = discovery.relabel.pod_logs.output
+        forward_to = [loki.write.default.receiver]
+      }
+
+      loki.write &quot;default&quot; {
+        endpoint { url = &quot;http://loki.monitoring.svc:3100/loki/api/v1/push&quot; }
+      }</code></pre>
+<h4 id="add-loki-as-grafana-data-source">Add Loki as Grafana data source</h4>
+<pre><code class="language-bash">helm upgrade kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+  --namespace monitoring --reuse-values \
+  --set grafana.additionalDataSources[0].name=Loki \
+  --set grafana.additionalDataSources[0].type=loki \
+  --set grafana.additionalDataSources[0].url=http://loki.monitoring.svc:3100</code></pre>
+<h4 id="logql-quick-reference">LogQL quick reference</h4>
+<pre><code class="language-logql">{namespace=&quot;myapp&quot;}                              # all logs from namespace
+{app=&quot;myapp&quot;} |= &quot;error&quot;                         # filter by string
+{app=&quot;myapp&quot;} | json | level=&quot;error&quot;             # JSON parsing
+rate({namespace=&quot;myapp&quot;} |= &quot;error&quot; [5m])        # error rate (for alerting)
+sum by (app) (rate({namespace=&quot;myapp&quot;}[5m]))     # log volume by app</code></pre>
+<pre><code class="language-bash">kubectl -n monitoring port-forward svc/loki 3100:3100
+curl -G &quot;http://localhost:3100/loki/api/v1/query_range&quot; \
+  --data-urlencode 'query={namespace=&quot;myapp&quot;} |= &quot;error&quot;' \
+  --data-urlencode 'start=1h' --data-urlencode 'limit=100'</code></pre>
+<p><strong>Caddy:</strong> <code>loki.home.local { tls internal; reverse_proxy localhost:3100 }</code></p>
+<hr>
+<h3 id="opentelemetry-grafana-tempo-distributed-tracing">OpenTelemetry + Grafana Tempo (Distributed Tracing)</h3>
+<p><strong>Purpose:</strong> Follow a single request across microservices — finding which service was slow or where an error occurred. OTel is the vendor-neutral instrumentation standard; Tempo is the trace backend.</p>
+<h4 id="install-the-otel-operator">Install the OTel Operator</h4>
+<pre><code class="language-bash">helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+helm install opentelemetry-operator open-telemetry/opentelemetry-operator \
+  --namespace opentelemetry-operator-system --create-namespace \
+  --set admissionWebhooks.certManager.enabled=true</code></pre>
+<h4 id="deploy-an-otel-collector">Deploy an OTel Collector</h4>
+<pre><code class="language-yaml"># ~/k8s/otel-collector.yaml
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel-collector
+  namespace: monitoring
+spec:
+  mode: Deployment
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc: { endpoint: 0.0.0.0:4317 }
+          http: { endpoint: 0.0.0.0:4318 }
+    processors:
+      batch: { timeout: 1s, send_batch_size: 1024 }
+      memory_limiter: { check_interval: 1s, limit_mib: 512 }
+    exporters:
+      otlp/tempo:
+        endpoint: http://tempo.monitoring.svc:4317
+        tls: { insecure: true }
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [otlp/tempo]</code></pre>
+<pre><code class="language-bash">kubectl apply -f ~/k8s/otel-collector.yaml</code></pre>
+<h4 id="install-grafana-tempo">Install Grafana Tempo</h4>
+<pre><code class="language-bash">helm upgrade --install tempo grafana/tempo \
+  --namespace monitoring \
+  --set tempo.storage.trace.backend=local \
+  --set tempo.retention=24h</code></pre>
+<h4 id="auto-instrumentation-zero-code-injection">Auto-instrumentation (zero-code injection)</h4>
+<pre><code class="language-yaml"># ~/k8s/otel-autoinstrumentation.yaml
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: auto-instrumentation
+  namespace: myapp
+spec:
+  exporter:
+    endpoint: http://otel-collector.monitoring.svc:4317
+  sampler:
+    type: parentbased_traceidratio
+    argument: &quot;0.1&quot;   # sample 10% of traces
+  python:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:latest
+  java:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
+  nodejs:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:latest</code></pre>
+<pre><code class="language-bash">kubectl apply -f ~/k8s/otel-autoinstrumentation.yaml
+
+# Opt a Deployment in — no code changes required
+kubectl annotate deployment myapp \
+  instrumentation.opentelemetry.io/inject-python=&quot;auto-instrumentation&quot; -n myapp</code></pre>
+<h4 id="add-tempo-as-grafana-data-source">Add Tempo as Grafana data source</h4>
+<pre><code class="language-bash">helm upgrade kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+  --namespace monitoring --reuse-values \
+  --set grafana.additionalDataSources[0].name=Tempo \
+  --set grafana.additionalDataSources[0].type=tempo \
+  --set grafana.additionalDataSources[0].url=http://tempo.monitoring.svc:3100 \
+  --set &quot;grafana.additionalDataSources[0].jsonData.tracesToLogsV2.datasourceUid=loki&quot; \
+  --set &quot;grafana.additionalDataSources[0].jsonData.serviceMap.datasourceUid=prometheus&quot;</code></pre>
+<blockquote><strong>Full observability triangle:</strong> With Loki + Tempo + Prometheus connected, Grafana can jump from a trace → that span's logs → service metrics at that timestamp.</blockquote>
+<hr>
+<blockquote><strong>Cost Monitoring</strong> (OpenCost, Kubecost) is covered in <a href="#cost-management--resource-efficiency">Cost Management & Resource Efficiency</a> — it integrates directly with the Prometheus stack already running here.</blockquote>
+<hr>
+<h3 id="thanos-long-term-metrics-storage">Thanos (Long-Term Metrics Storage)</h3>
+<p><strong>Purpose:</strong> Extends Prometheus with unlimited retention, global query view across multiple clusters, and object storage (MinIO/S3) as the backend. The sidecar model means your existing Prometheus doesn't need modification.</p>
+<blockquote><strong>Thanos vs Grafana Mimir:</strong> Thanos is sidecar-based (attaches to existing Prometheus); simpler to adopt. Mimir is a fully separate write path with better write scalability. For a homelab or single-cluster setup, Thanos is the right choice.</blockquote>
+<pre><code class="language-bash">helm repo add bitnami https://charts.bitnami.com/bitnami
+helm upgrade --install thanos bitnami/thanos \
+  --namespace monitoring \
+  -f ~/k8s/values/thanos.yaml</code></pre>
+<pre><code class="language-yaml"># ~/k8s/values/thanos.yaml
+query:
+  enabled: true
+  replicaCount: 1
+  stores:
+    - thanos-storegateway.monitoring.svc:10901
+
+queryFrontend:
+  enabled: true
+
+storegateway:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 10Gi
+
+compactor:
+  enabled: true
+  retentionResolutionRaw: 30d    # keep raw samples for 30 days
+  retentionResolution5m: 90d     # 5m downsampled for 90 days
+  retentionResolution1h: 1y      # 1h downsampled for 1 year
+  persistence:
+    enabled: true
+    size: 20Gi
+
+objstoreConfig: |-
+  type: s3
+  config:
+    bucket: thanos
+    endpoint: minio.minio.svc:9000
+    access_key: thanos-user
+    secret_key: thanos-secret
+    insecure: true    # MinIO without TLS inside cluster</code></pre>
+<pre><code class="language-yaml"># Add Thanos sidecar to your kube-prometheus-stack Prometheus
+# ~/k8s/values/prometheus.yaml — add to existing values
+prometheus:
+  prometheusSpec:
+    thanos:
+      image: quay.io/thanos/thanos:v0.37.2
+      objectStorageConfig:
+        secret:
+          type: s3
+          config:
+            bucket: thanos
+            endpoint: minio.minio.svc:9000
+            access_key: thanos-user
+            secret_key: thanos-secret
+            insecure: true
+    retention: 2h          # Prometheus only keeps 2h; Thanos keeps the rest
+    retentionSize: 10GB</code></pre>
+<pre><code class="language-bash"># Add Thanos Querier as a datasource in Grafana
+# URL: http://thanos-query-frontend.monitoring.svc:9090
+# Check Thanos is receiving blocks
+kubectl -n monitoring logs -l app.kubernetes.io/name=thanos-compactor -f
+
+# Query via Thanos (same PromQL as Prometheus)
+kubectl -n monitoring port-forward svc/thanos-query-frontend 9090:9090</code></pre>
+<hr>
+<h3 id="dora-metrics">DORA Metrics</h3>
+<table><thead><tr><th>Metric</th><th>What it measures</th><th>Elite benchmark</th></tr></thead><tbody><tr><td><strong>Deployment Frequency</strong></td><td>How often code ships to production</td><td>Multiple per day</td></tr><tr><td><strong>Lead Time for Changes</strong></td><td>Commit to production</td><td>< 1 hour</td></tr><tr><td><strong>Change Failure Rate</strong></td><td>% of deployments causing incidents</td><td>0–5%</td></tr><tr><td><strong>Time to Restore (MTTR)</strong></td><td>Recovery time from failure</td><td>< 1 hour</td></tr></tbody></table>
+<h4 id="prometheus-recording-rules">Prometheus recording rules</h4>
+<pre><code class="language-yaml">groups:
+  - name: dora_metrics
+    interval: 5m
+    rules:
+      - record: dora:deployment_frequency:rate24h
+        expr: increase(ci_pipeline_runs_total{status=&quot;success&quot;, branch=&quot;main&quot;}[24h])
+
+      - record: dora:change_failure_rate
+        expr: |
+          sum(increase(ci_pipeline_runs_total{status=&quot;success&quot;, trigger=&quot;rollback&quot;}[7d]))
+          / sum(increase(ci_pipeline_runs_total{status=&quot;success&quot;}[7d]))
+
+      - record: dora:mttr_hours_p50
+        expr: |
+          histogram_quantile(0.50, sum(rate(incident_duration_seconds_bucket[30d])) by (le)) / 3600</code></pre>
+<h4 id="tracking-dora-without-a-dedicated-tool">Tracking DORA without a dedicated tool</h4>
+<pre><code class="language-bash"># Deployment Frequency — releases in Forgejo in last 24h
+curl -s &quot;http://git.home.local/api/v1/repos/myorg/myapp/releases?limit=50&quot; \
+  -H &quot;Authorization: token $GITEA_TOKEN&quot; \
+  | jq '[.[] | select(.created_at &gt; (now - 86400 | todate))] | length'
+
+# Change Failure Rate — hotfix/rollback merges in last 30 days
+git log --merges --first-parent main --format=&quot;%s&quot; --since=&quot;30 days ago&quot; \
+  | grep -c -i &quot;hotfix\|rollback\|revert&quot;
+
+# MTTR from Grafana OnCall API
+curl -s &quot;https://oncall.home.local/api/v1/incidents/?limit=100&quot; \
+  -H &quot;Authorization: $GRAFANA_ONCALL_TOKEN&quot; \
+  | jq '[.results[] | .duration_seconds] | add / length / 3600'</code></pre>
+<hr>
+<h2 id="grafana-dashboards-as-code">Grafana Dashboards as Code</h2>
+<h3 id="grafana-dashboard-provisioning-gitops">Grafana Dashboard Provisioning (GitOps)</h3>
+<p><strong>Purpose:</strong> Store Grafana dashboards as JSON in Git and have them auto-provisioned — no manual UI imports, no dashboard drift.</p>
+<pre><code class="language-yaml"># ~/k8s/values/prometheus.yaml (kube-prometheus-stack)
+grafana:
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: default
+          orgId: 1
+          folder: Homelab
+          type: file
+          options:
+            path: /var/lib/grafana/dashboards/default
+
+  # Auto-load dashboards from ConfigMaps with this label
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: &quot;1&quot;
+      searchNamespace: ALL    # scan all namespaces for dashboard ConfigMaps
+
+  # Import community dashboards by ID
+  dashboards:
+    default:
+      cilium-overview:
+        gnetId: 18814
+        revision: 1
+        datasource: Prometheus
+      loki-logs:
+        gnetId: 13639
+        revision: 1
+        datasource: Loki
+      opencost:
+        gnetId: 15714
+        revision: 1
+        datasource: Prometheus</code></pre>
+<pre><code class="language-yaml"># Store a custom dashboard as a ConfigMap — auto-imported by Grafana sidecar
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myapp-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: &quot;1&quot;     # must match sidecar.dashboards.label
+data:
+  myapp.json: |
+    {
+      &quot;title&quot;: &quot;MyApp Overview&quot;,
+      &quot;uid&quot;: &quot;myapp-overview&quot;,
+      &quot;panels&quot;: [
+        {
+          &quot;title&quot;: &quot;Request Rate&quot;,
+          &quot;type&quot;: &quot;timeseries&quot;,
+          &quot;targets&quot;: [{
+            &quot;expr&quot;: &quot;sum(rate(http_requests_total{namespace=\&quot;myapp\&quot;}[5m])) by (status)&quot;
+          }]
+        },
+        {
+          &quot;title&quot;: &quot;Error Rate&quot;,
+          &quot;type&quot;: &quot;stat&quot;,
+          &quot;targets&quot;: [{
+            &quot;expr&quot;: &quot;sum(rate(http_requests_total{namespace=\&quot;myapp\&quot;,status=~\&quot;5..\&quot;}[5m])) / sum(rate(http_requests_total{namespace=\&quot;myapp\&quot;}[5m]))&quot;
+          }]
+        },
+        {
+          &quot;title&quot;: &quot;p99 Latency&quot;,
+          &quot;type&quot;: &quot;timeseries&quot;,
+          &quot;targets&quot;: [{
+            &quot;expr&quot;: &quot;histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{namespace=\&quot;myapp\&quot;}[5m])) by (le))&quot;
+          }]
+        }
+      ]
+    }</code></pre>
+<hr>
+<h2 id="slo-management">SLO Management</h2>
+<p>Service Level Objectives define the reliability targets your service must meet. Alerting on SLO burn rate (not raw error rate) dramatically reduces alert noise — you only page when a failure is consuming your error budget fast enough to miss the SLO.</p>
+<h3 id="openslo-declarative-slo-specification">OpenSLO (Declarative SLO Specification)</h3>
+<p><strong>Purpose:</strong> CNCF standard for defining SLOs as code — vendor-neutral YAML spec that generates Prometheus rules, Datadog monitors, or whatever backend you use.</p>
+<pre><code class="language-yaml"># slo.yaml — OpenSLO spec
+apiVersion: openslo/v1
+kind: SLO
+metadata:
+  name: myapp-availability
+  namespace: myapp
+spec:
+  service: myapp
+  indicator:
+    metadata:
+      name: http-availability
+    spec:
+      ratioMetric:
+        counter: true
+        good:
+          metricSource:
+            type: Prometheus
+            spec:
+              query: |
+                sum(rate(http_requests_total{namespace=&quot;myapp&quot;, status!~&quot;5..&quot;}[5m]))
+        total:
+          metricSource:
+            type: Prometheus
+            spec:
+              query: |
+                sum(rate(http_requests_total{namespace=&quot;myapp&quot;}[5m]))
+  objectives:
+    - displayName: Availability 99.9%
+      target: 0.999
+      timeWindow:
+        - duration: 30d
+          isRolling: true</code></pre>
+<hr>
+<h3 id="pyrra-slo-dashboards-alerting">Pyrra (SLO Dashboards & Alerting)</h3>
+<p><strong>Purpose:</strong> Takes SLO definitions (as CRDs or Prometheus recording rules) and generates multi-burn-rate alerts and Grafana dashboards automatically. The fastest way to get SLO-based alerting running.</p>
+<pre><code class="language-bash">helm repo add pyrra https://pyrra-dev.github.io/pyrra/helm-charts
+helm upgrade --install pyrra pyrra/pyrra \
+  --namespace monitoring \
+  --set apiServer.genericRules=true
+
+kubectl -n monitoring port-forward svc/pyrra-kubernetes 9099:9099</code></pre>
+<pre><code class="language-yaml"># ~/k8s/slo-myapp.yaml — Pyrra SLO CRD
+apiVersion: pyrra.dev/v1alpha1
+kind: ServiceLevelObjective
+metadata:
+  name: myapp-availability
+  namespace: monitoring
+  labels:
+    pyrra.dev/team: backend
+spec:
+  target: &quot;99.9&quot;
+  window: 4w
+  indicator:
+    ratio:
+      errors:
+        metric: http_requests_total{namespace=&quot;myapp&quot;,status=~&quot;5..&quot;}
+      total:
+        metric: http_requests_total{namespace=&quot;myapp&quot;}
+---
+apiVersion: pyrra.dev/v1alpha1
+kind: ServiceLevelObjective
+metadata:
+  name: myapp-latency
+  namespace: monitoring
+spec:
+  target: &quot;99&quot;
+  window: 4w
+  indicator:
+    latency:
+      success:
+        metric: http_request_duration_seconds_bucket{namespace=&quot;myapp&quot;,le=&quot;0.5&quot;}
+      total:
+        metric: http_request_duration_seconds_count{namespace=&quot;myapp&quot;}</code></pre>
+<pre><code class="language-bash">kubectl apply -f ~/k8s/slo-myapp.yaml
+# Pyrra auto-generates:
+# - Prometheus PrometheusRule with multi-window burn rate alerts
+# - Grafana dashboard with error budget burn-down chart
+kubectl get prometheusrule -n monitoring | grep pyrra</code></pre>
+<h4 id="multi-burn-rate-alerting-why-it-beats-raw-thresholds">Multi-burn-rate alerting (why it beats raw thresholds)</h4>
+<p>Pyrra generates alerts at multiple time windows automatically:</p>
+<table><thead><tr><th>Window</th><th>Burn Rate</th><th>Meaning</th></tr></thead><tbody><tr><td>5m / 1h</td><td>14.4× budget</td><td>Page immediately — fast incident</td></tr><tr><td>30m / 6h</td><td>6× budget</td><td>Page — moderate incident draining budget</td></tr><tr><td>2h / 24h</td><td>3× budget</td><td>Ticket — slow burn, needs investigation</td></tr><tr><td>6h / 3d</td><td>1× budget</td><td>Track — budget consumption at exactly SLO rate</td></tr></tbody></table>
+<hr>
+<h2 id="beyla-ebpf-auto-instrumentation-no-code-changes">Beyla (eBPF Auto-Instrumentation — No Code Changes)</h2>
+<p><strong>Purpose:</strong> Grafana Beyla uses eBPF to automatically instrument applications at the kernel level — capturing HTTP/gRPC latency, error rates, and traces without any SDK or code instrumentation. Works for any language: Go, Python, Node.js, Java, Rust. Exports to Prometheus and OpenTelemetry. The ultimate zero-code observability.</p>
+<blockquote><strong>Beyla vs OTel auto-instrumentation:</strong> The OTel Operator injects language-specific agents as init containers — requires Kubernetes API access and works per-language. Beyla is a DaemonSet that instruments everything on the node via eBPF — language-agnostic, no sidecars, lower overhead.</blockquote>
+<pre><code class="language-bash">helm repo add grafana https://grafana.github.io/helm-charts
+helm upgrade --install beyla grafana/beyla \
+  --namespace beyla --create-namespace \
+  -f ~/k8s/beyla-values.yaml</code></pre>
+<pre><code class="language-yaml"># ~/k8s/beyla-values.yaml
+config:
+  data: |
+    otel_metrics_export:
+      endpoint: http://otel-collector.monitoring.svc:4317
+    otel_traces_export:
+      endpoint: http://otel-collector.monitoring.svc:4317
+    prometheus_export:
+      port: 9090
+      path: /metrics
+    attributes:
+      kubernetes:
+        enable: true      # attach pod/namespace/deployment labels to metrics
+
+preset: network           # instrument all pods on the node (vs 'application' for specific)
+
+tolerations:
+  - operator: Exists      # run on all nodes including control plane
+
+podAnnotations:
+  instrumentation.opentelemetry.io/inject-sdk: &quot;false&quot;   # Beyla replaces OTel injection</code></pre>
+<pre><code class="language-bash"># Verify Beyla is capturing spans
+kubectl -n beyla logs -l app.kubernetes.io/name=beyla -f
+
+# Metrics are available in Prometheus automatically
+# Traces appear in Grafana Tempo
+# No annotations needed on workloads</code></pre>
+<pre><code class="language-bash"># Beyla Grafana dashboard IDs
+# RED Metrics (HTTP):    19419
+# RED Metrics (gRPC):    19420
+# Network Map:           19421</code></pre>
+<h3 id="grafana-oncall-on-call-scheduling-escalation">Grafana OnCall (On-Call Scheduling & Escalation)</h3>
+<p><strong>Purpose:</strong> Integrates with Grafana alerts to provide on-call schedules, escalation chains, and incident management. Self-hosted option available; SaaS tier is free for small teams.</p>
+<pre><code class="language-bash">helm repo add grafana https://grafana.github.io/helm-charts
+helm upgrade --install oncall grafana/oncall \
+  --namespace oncall --create-namespace \
+  --set base_url=https://oncall.home.local \
+  --set grafana.enabled=false \     # connect to existing Grafana
+  --set mariadb.enabled=true \
+  --set rabbitmq.enabled=true</code></pre>
+<pre><code class="language-bash">kubectl -n oncall port-forward svc/oncall-engine 8080:8080</code></pre>
+<p><strong>Caddy:</strong> <code>oncall.home.local { tls internal; reverse_proxy localhost:8080 }</code></p>
+<p>Configure in Grafana UI: <strong>Alerts & IRM → OnCall → Connect</strong>.</p>
+<hr></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

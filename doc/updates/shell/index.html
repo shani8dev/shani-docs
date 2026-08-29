@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Shell &amp; Environment — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Shell &amp; Environment  Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your…">
+  <meta name="description" id="meta-desc"     content="Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your home directory and p…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Shell &amp; Environment">
-  <meta property="og:description" id="og-desc"    content="Shell &amp; Environment  Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your…">
+  <meta property="og:description" id="og-desc"    content="Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your home directory and p…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/updates/shell/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Shell &amp; Environment">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Shell &amp; Environment">
-  <meta name="twitter:description" id="tw-desc"  content="Shell &amp; Environment  Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your home directory and p…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Shell & Environment","description":"Shell & Environment  Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your…","url":"https://docs.shani.dev/doc/updates/shell/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Shell & Environment","description":"Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your home directory and p…","url":"https://docs.shani.dev/doc/updates/shell/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Shell & Environment","item":"https://docs.shani.dev/doc/updates/shell/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,33 +215,34 @@
         <h1 class="doc-title">Shell &amp; Environment</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Updates &amp; Config</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your home directory and persists across every OS update and rollback.</p>
-<h2>Default Shell Stack</h2>
-<p>| Tool | Role | |------|------| | <strong>Zsh</strong> | Default shell for all users | | <strong>Starship</strong> | Cross-shell prompt with git, language runtime, exit-code, and timing info | | <strong>McFly</strong> | Neural-network command history search (replaces Ctrl+R) | | <strong>FZF</strong> | Fuzzy finder — integrated for Ctrl+T (files) and Alt+C (cd) | | <strong>zsh-syntax-highlighting</strong> | Fish-style inline syntax colouring (green = valid, red = invalid) | | <strong>zsh-autosuggestions</strong> | Ghost-text suggestions from history; press → or End to accept | | <strong>zsh-history-substring-search</strong> | Up/Down arrow searches history by substring, not just prefix |</p>
+<h2 id="default-shell-stack">Default Shell Stack</h2>
+<table><thead><tr><th>Tool</th><th>Role</th></tr></thead><tbody><tr><td><strong>Zsh</strong></td><td>Default shell for all users</td></tr><tr><td><strong>Starship</strong></td><td>Cross-shell prompt with git, language runtime, exit-code, and timing info</td></tr><tr><td><strong>McFly</strong></td><td>Neural-network command history search (replaces Ctrl+R)</td></tr><tr><td><strong>FZF</strong></td><td>Fuzzy finder — integrated for Ctrl+T (files) and Alt+C (cd)</td></tr><tr><td><strong>zsh-syntax-highlighting</strong></td><td>Fish-style inline syntax colouring (green = valid, red = invalid)</td></tr><tr><td><strong>zsh-autosuggestions</strong></td><td>Ghost-text suggestions from history; press → or End to accept</td></tr><tr><td><strong>zsh-history-substring-search</strong></td><td>Up/Down arrow searches history by substring, not just prefix</td></tr></tbody></table>
 <p>Bash and Fish are also installed if you prefer them — both ship with a Starship-enabled prompt and McFly history search in their skeleton config (<code>~/.bashrc_shani</code>, <code>~/.config/fish/config.fish</code>), though the Zsh-only plugins above (syntax highlighting, autosuggestions, history-substring-search) are not mirrored there.</p>
-<h2>Terminal Emulator</h2>
+<h2 id="terminal-emulator">Terminal Emulator</h2>
 <p>The default terminal app differs by edition — both run the same shell stack above.</p>
 <ul>
 <li><strong>KDE Plasma:</strong> <strong>Konsole</strong>, pre-installed. <strong>Yakuake</strong> (a drop-down/quake-style variant of Konsole) is also pre-installed — press <code>F12</code> to toggle it from anywhere.</li>
 <li><strong>GNOME:</strong> <strong>GNOME Console</strong>, pre-installed.</li>
+<li><strong>COSMIC:</strong> <strong>COSMIC Terminal</strong>, pre-installed.</li>
 </ul>
 <p>Any terminal emulator you install separately (via Flatpak, Nix, etc.) uses the same Zsh config and prompt — the shell environment isn't tied to a specific terminal app.</p>
-<h2>Changing Your Shell</h2>
+<h2 id="changing-your-shell">Changing Your Shell</h2>
 <pre><code class="language-bash">chsh -s /bin/bash    # switch to Bash
 chsh -s /bin/fish    # switch to Fish
 chsh -s /bin/zsh     # switch back to Zsh (default)</code></pre>
 <p>Log out and back in for the change to take effect.</p>
-<h2>Customising Zsh</h2>
+<h2 id="customising-zsh">Customising Zsh</h2>
 <pre><code class="language-bash">nano ~/.zshrc
 source ~/.zshrc   # reload without restarting the shell</code></pre>
-<h2>Starship Prompt</h2>
+<h2 id="starship-prompt">Starship Prompt</h2>
 <p>Starship shows by default: current directory (truncated to the repo root), git branch/status, active Python virtualenv, Node.js version (in Node projects), Rust toolchain version (when <code>Cargo.toml</code> is present), exit code of last command (when non-zero), and command duration — the shipped config sets <code>min_time = 1</code> (millisecond), so the duration shows for almost every command, not just long-running ones.</p>
 <pre><code class="language-bash">nano ~/.config/starship.toml
 starship help</code></pre>
-<h2>McFly History Search</h2>
+<h2 id="mcfly-history-search">McFly History Search</h2>
 <p>McFly replaces <code>Ctrl+R</code> with a context-aware, exit-code-aware history search that learns from your usage patterns. Everything runs on-device — no data leaves your system.</p>
 <pre><code class="language-bash"># Press Ctrl+R to open McFly
 # Type to filter; Enter to select; Ctrl+C to cancel
@@ -252,38 +255,38 @@ MCFLY_RESULTS=20              # number of results shown
 MCFLY_INTERFACE_VIEW=BOTTOM   # results list anchored to the bottom of the screen
 MCFLY_RESULTS_SORT=LAST_RUN   # most-recently-run commands surface first</code></pre>
 <p>Override any of these in your shell's rc file before the <code>mcfly init</code> line.</p>
-<h2>FZF Integration</h2>
+<h2 id="fzf-integration">FZF Integration</h2>
 <p>FZF is integrated into Zsh for three keybindings:</p>
-<p>| Keybinding | Action | |-----------|--------| | <code>Ctrl+R</code> | History search (McFly takes precedence; FZF is fallback) | | <code>Ctrl+T</code> | Fuzzy file finder — inserts selected path at cursor | | <code>Alt+C</code> | Fuzzy <code>cd</code> — jump to any subdirectory |</p>
+<table><thead><tr><th>Keybinding</th><th>Action</th></tr></thead><tbody><tr><td><code>Ctrl+R</code></td><td>History search (McFly takes precedence; FZF is fallback)</td></tr><tr><td><code>Ctrl+T</code></td><td>Fuzzy file finder — inserts selected path at cursor</td></tr><tr><td><code>Alt+C</code></td><td>Fuzzy <code>cd</code> — jump to any subdirectory</td></tr></tbody></table>
 <pre><code class="language-bash"># Use fzf in scripts
 ls | fzf
 fzf --preview 'cat {}'
 
 # Select a git branch to checkout
 git branch | fzf | xargs git checkout</code></pre>
-<h2>Pre-Installed CLI Tools</h2>
-<h3>File Search and Navigation</h3>
+<h2 id="pre-installed-cli-tools">Pre-Installed CLI Tools</h2>
+<h3 id="file-search-and-navigation">File Search and Navigation</h3>
 <p><code>ripgrep</code> (<code>rg</code>) is present on <strong>KDE Plasma only</strong>, pulled in transitively by KTextEditor's search-in-files feature (<code>ripgrep-all</code> depends on it) — not deliberately curated, and absent on GNOME. <code>fd</code> is <strong>not pre-installed on either edition</strong>. The standard POSIX tools always work:</p>
 <pre><code class="language-bash">grep -r &quot;search term&quot; .    # recursive text search
 find . -name &quot;filename&quot;    # find by name
 plocate filename           # indexed filename search — see Storage</code></pre>
 <p>For a consistent experience across editions, install both via Nix: <code>nix-env -iA nixpkgs.ripgrep nixpkgs.fd</code>.</p>
-<h3>File Viewing</h3>
+<h3 id="file-viewing">File Viewing</h3>
 <p><code>bat</code> and <code>eza</code> (modern <code>cat</code>/<code>ls</code> alternatives) are also <strong>not pre-installed</strong> — only standard <code>cat</code>/<code>less</code>/<code>ls</code> are. Install via Nix if wanted: <code>nix-env -iA nixpkgs.bat nixpkgs.eza</code>.</p>
-<h3>System Monitoring</h3>
+<h3 id="system-monitoring">System Monitoring</h3>
 <pre><code class="language-bash">htop                       # interactive process viewer
 fastfetch                  # system information summary
 ncdu                       # interactive disk usage analyser</code></pre>
-<h3>Text Processing</h3>
+<h3 id="text-processing">Text Processing</h3>
 <pre><code class="language-bash">echo '{&quot;key&quot;: &quot;value&quot;}' | jq .    # jq — JSON processor</code></pre>
-<h3>Compression</h3>
+<h3 id="compression">Compression</h3>
 <pre><code class="language-bash">7z a archive.7z file.txt
 tar xzf archive.tar.gz
 unzip archive.zip
 unrar x archive.rar          # extract a RAR archive (extraction only — RAR is proprietary)
 lrzip -o archive.lrz file    # long-range compression, best ratio on large/redundant files
 lzop -o file.lzo file        # fast, low-ratio compression — optimised for speed over size</code></pre>
-<h2>Shell Configuration Files</h2>
+<h2 id="shell-configuration-files">Shell Configuration Files</h2>
 <pre><code>~/.zshrc                     — Zsh configuration (plugins, aliases, env vars)
 ~/.bashrc                    — Bash configuration
 ~/.profile                   — login shell config (shared between shells)
@@ -291,7 +294,7 @@ lzop -o file.lzo file        # fast, low-ratio compression — optimised for spe
 ~/.local/share/mcfly/        — McFly history database
 ~/.config/environment.d/     — session environment variables (Wayland/X)</code></pre>
 <p>All of these are in <code>@home</code> — never touched by OS updates or rollbacks. The one exception is <code>/etc/environment.d/90-shani.conf</code> (sets the system-wide <code>EDITOR=micro</code> default) — it lives on the read-only root, so overriding it means setting the same variable in <code>~/.config/environment.d/</code> or your shell rc, not editing it in place.</p>
-<h2>Environment Variables</h2>
+<h2 id="environment-variables">Environment Variables</h2>
 <p>Shanios sets one system-wide default out of the box: <code>EDITOR=micro</code>, via a drop-in at <code>/etc/environment.d/90-shani.conf</code>. This is read by systemd user sessions (not just login shells), so it applies to <code>sudoedit</code>, <code>visudo</code>, <code>crontab -e</code>, and any tool that shells out with <code>$EDITOR</code> set — override it per-user rather than editing the drop-in directly, since it lives on the read-only root and any local edit would be lost on the next OS update.</p>
 <pre><code class="language-bash"># Shell-specific (Zsh)
 nano ~/.zshrc
@@ -305,7 +308,7 @@ MOZ_ENABLE_WAYLAND=1
 
 # System-wide (traditional PAM-read file, separate mechanism from environment.d)
 sudo nano /etc/environment</code></pre>
-<h2>Nix Package Manager</h2>
+<h2 id="nix-package-manager">Nix Package Manager</h2>
 <p>Nix is pre-installed on the dedicated <code>@nix</code> subvolume. Install CLI tools without root — they survive all OS updates and rollbacks:</p>
 <pre><code class="language-bash"># Add channel (required before first install)
 nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
@@ -322,15 +325,23 @@ nix-env -q
 
 # Upgrade all
 nix-env -u '*'</code></pre>
-<h2>Tmux</h2>
+<h2 id="tmux">Tmux</h2>
 <p>Tmux is pre-installed:</p>
 <pre><code class="language-bash">tmux new -s work          # start named session
-Ctrl+B then %             # split horizontally
-Ctrl+B then &quot;             # split vertically
+Ctrl+B then %             # split vertically (panes side-by-side)
+Ctrl+B then &quot;             # split horizontally (panes stacked)
 Ctrl+B then D             # detach (session keeps running)
 tmux ls                   # list sessions
 tmux attach -t work       # reattach</code></pre>
-<p>Configuration lives in <code>~/.tmux.conf</code>.</p></div>
+<p>Configuration lives in <code>~/.tmux.conf</code>.</p>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="config">System Config</a> — /etc overlay, locale, hostname, kernel parameters</li>
+<li><a href="../software/nix.md">Nix Package Manager</a> — Nix details and channel setup</li>
+<li><a href="../intro/migrating.md">Migrating from Traditional Linux</a> — shell workflow changes</li>
+<li><a href="../intro/whats-included.md">What's Included</a> — complete software stack</li>
+<li><a href="system">System Updates</a> — how updates affect your shell config</li>
+</ul></div>
     </div>
 
   </main>

@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Virtual Machines — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Virtual Machines  Shanios ships a full virtualisation stack pre-installed and ready to use. VM disk images live in dedicated Btrfs subvolumes ( and ) with …">
+  <meta name="description" id="meta-desc"     content="Shanios ships a full virtualisation stack pre-installed and ready to use. VM disk images live in dedicated Btrfs subvolumes (@libvirt and @qemu) with nodat…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Virtual Machines">
-  <meta property="og:description" id="og-desc"    content="Virtual Machines  Shanios ships a full virtualisation stack pre-installed and ready to use. VM disk images live in dedicated Btrfs subvolumes ( and ) with …">
+  <meta property="og:description" id="og-desc"    content="Shanios ships a full virtualisation stack pre-installed and ready to use. VM disk images live in dedicated Btrfs subvolumes (@libvirt and @qemu) with nodat…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/software/vms/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Virtual Machines">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Virtual Machines">
-  <meta name="twitter:description" id="tw-desc"  content="Virtual Machines  Shanios ships a full virtualisation stack pre-installed and ready to use. VM disk images live in dedicated Btrfs subvolumes ( and ) with …">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios ships a full virtualisation stack pre-installed and ready to use. VM disk images live in dedicated Btrfs subvolumes (@libvirt and @qemu) with nodat…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Virtual Machines","description":"Virtual Machines  Shanios ships a full virtualisation stack pre-installed and ready to use. VM disk images live in dedicated Btrfs subvolumes ( and ) with …","url":"https://docs.shani.dev/doc/software/vms/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Virtual Machines","description":"Shanios ships a full virtualisation stack pre-installed and ready to use. VM disk images live in dedicated Btrfs subvolumes (@libvirt and @qemu) with nodat…","url":"https://docs.shani.dev/doc/software/vms/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Virtual Machines","item":"https://docs.shani.dev/doc/software/vms/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,35 +215,53 @@
         <h1 class="doc-title">Virtual Machines</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Software &amp; Apps</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Shanios ships a full virtualisation stack pre-installed and ready to use. VM disk images live in dedicated Btrfs subvolumes (<code>@libvirt</code> and <code>@qemu</code>) with <code>nodatacow</code> enabled for optimal disk I/O performance. These subvolumes persist across all system updates and rollbacks.</p>
-<h2>Pre-installed Stack</h2>
+<h2 id="pre-installed-stack">Pre-installed Stack</h2>
 <ul>
 <li><strong>libvirt</strong> — VM management daemon (<code>libvirtd</code>), accessible via <code>virsh</code> and virt-manager</li>
-<li><strong>QEMU/KVM</strong> — hardware-accelerated virtualisation; <code>qemu-base</code> and <code>libvirt</code> are installed as system packages on every edition (<code>shani-core</code>), with <code>libvirtd</code>/<code>virtlogd</code> sockets enabled from first boot</li>
+<li><strong>QEMU/KVM</strong> — hardware-accelerated virtualisation; <code>qemu-base</code> and <code>libvirt</code> are installed as system packages on every edition (<code>shani-core</code>), with <code>libvirtd</code>/<code>virtlogd</code> sockets enabled from first boot. Includes <code>qemu-img</code> for disk image creation/conversion</li>
 <li><strong>systemd-nspawn</strong> — lightweight OS containers managed as systemd units (stored in <code>@machines</code>)</li>
 <li><strong>LXC/LXD</strong> — full system containers with near-VM isolation (stored in <code>@lxc</code> / <code>@lxd</code>, <code>lxd.socket</code> enabled at boot)</li>
 <li><strong>GNOME Boxes</strong> — simple VM manager, pre-installed on the GNOME edition as a Flatpak (<code>org.gnome.Boxes</code>)</li>
-<li><strong>Virt-manager</strong> — pre-installed on the KDE Plasma edition as a Flatpak (<code>org.virt_manager.virt-manager</code> + <code>org.virt_manager.virt_manager.Extension.Qemu</code>); install on GNOME edition via Flatpak</li>
+<li><strong>Virt-manager</strong> — pre-installed on the KDE Plasma edition as a Flatpak (<code>org.virt_manager.virt-manager</code> + <code>org.virt_manager.virt_manager.Extension.Qemu</code>); install via Flatpak on GNOME or COSMIC editions (COSMIC ships neither manager by default)</li>
 </ul>
-<h2>GNOME Boxes</h2>
+<h2 id="verify-the-stack">Verify the Stack</h2>
+<p>Everything below should already be true on a fresh install:</p>
+<pre><code class="language-bash"># KVM present (if not: enable VT-x/AMD-V in firmware settings)
+ls -l /dev/kvm
+
+# Daemon sockets active (socket-activated — they start on first use)
+systemctl status libvirtd.socket virtlogd.socket
+
+# Group membership (kvm + libvirt). If just provisioned, log out and back in:
+groups | grep -E 'kvm|libvirt'
+
+# Connect and confirm the hypervisor
+virsh uri                 # qemu:///system
+virsh list --all
+virsh net-list --all      # 'default' NAT network should be listed/active</code></pre>
+<h2 id="gnome-boxes">GNOME Boxes</h2>
 <p>The simplest way to run VMs on Shanios. Pre-installed on the GNOME edition as a Flatpak. For advanced configuration (CPU pinning, GPU passthrough, custom XML), use virt-manager instead.</p>
 <pre><code class="language-bash"># Open from the app launcher, or:
 flatpak run org.gnome.Boxes</code></pre>
 <p>Boxes handles downloading ISOs, creating VMs, and managing snapshots — no manual QEMU or libvirt configuration needed.</p>
-<h2>Virt-Manager (Full libvirt GUI)</h2>
-<pre><code class="language-bash"># Pre-installed on KDE Plasma edition. Install on GNOME edition:
+<h2 id="virt-manager-full-libvirt-gui">Virt-Manager (Full libvirt GUI)</h2>
+<pre><code class="language-bash"># Pre-installed on KDE Plasma edition. Install on GNOME/COSMIC editions:
 flatpak install flathub org.virt_manager.virt-manager
 flatpak install flathub org.virt_manager.virt_manager.Extension.Qemu
 
-# Or use virsh from the terminal
+# Or drive the system daemon directly from the terminal
 virsh list --all
 virsh start myvm
 virsh shutdown myvm
-virsh snapshot-create-as myvm snap1</code></pre>
-<h2>QEMU/KVM — Command Line</h2>
+virsh snapshot-create-as myvm snap1
+
+# Create a disk volume inside the dedicated @libvirt pool
+virsh vol-create-as default myvm.qcow2 40G --format qcow2</code></pre>
+<h2 id="qemukvm-command-line">QEMU/KVM — Command Line</h2>
 <pre><code class="language-bash"># Check KVM is available
 ls /dev/kvm
 kvm-ok   # or: grep -c vmx /proc/cpuinfo  (Intel) / grep -c svm /proc/cpuinfo  (AMD)
@@ -261,7 +281,7 @@ qemu-img create -f qcow2 ~/vms/myvm.qcow2 40G
 
 # Check image info
 qemu-img info ~/vms/myvm.qcow2</code></pre>
-<h2>systemd-nspawn (Lightweight OS Containers)</h2>
+<h2 id="systemd-nspawn-lightweight-os-containers">systemd-nspawn (Lightweight OS Containers)</h2>
 <pre><code class="language-bash"># Pull an Arch Linux base and boot it as a container
 sudo machinectl pull-tar https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/x86_64/alpine-minirootfs-3.20.0-x86_64.tar.gz alpine
 
@@ -278,7 +298,7 @@ sudo machinectl login alpine
 
 # Enable a machine to start at boot
 sudo machinectl enable alpine</code></pre>
-<h2>LXC / LXD</h2>
+<h2 id="lxc-lxd">LXC / LXD</h2>
 <p><code>lxd.socket</code> is enabled at boot. Your user is automatically added to the <code>lxc</code> and <code>lxd</code> groups during installation.</p>
 <pre><code class="language-bash"># Initialize LXD (first-time setup)
 sudo lxd init --auto
@@ -301,10 +321,10 @@ lxc snapshot mycontainer snap1
 
 # Launch a VM (not a container) with LXD
 lxc launch ubuntu:24.04 myvm --vm</code></pre>
-<h2>Storage Layout</h2>
-<p>| Subvolume | Mount Point | Notes | |---|---|---| | <code>@libvirt</code> | <code>/var/lib/libvirt</code> | libvirt VM disk images — <code>nodatacow</code> | | <code>@qemu</code> | <code>/var/lib/qemu</code> | Bare QEMU disk images — <code>nodatacow</code> | | <code>@machines</code> | <code>/var/lib/machines</code> | systemd-nspawn containers | | <code>@lxc</code> | <code>/var/lib/lxc</code> | LXC containers | | <code>@lxd</code> | <code>/var/lib/lxd</code> | LXD container and VM storage |</p>
+<h2 id="storage-layout">Storage Layout</h2>
+<table><thead><tr><th>Subvolume</th><th>Mount Point</th><th>Notes</th></tr></thead><tbody><tr><td><code>@libvirt</code></td><td><code>/var/lib/libvirt</code></td><td>libvirt VM disk images — <code>nodatacow</code></td></tr><tr><td><code>@qemu</code></td><td><code>/var/lib/qemu</code></td><td>Bare QEMU disk images — <code>nodatacow</code></td></tr><tr><td><code>@machines</code></td><td><code>/var/lib/machines</code></td><td>systemd-nspawn containers</td></tr><tr><td><code>@lxc</code></td><td><code>/var/lib/lxc</code></td><td>LXC containers</td></tr><tr><td><code>@lxd</code></td><td><code>/var/lib/lxd</code></td><td>LXD container and VM storage</td></tr></tbody></table>
 <p><code>nodatacow</code> is set on <code>@libvirt</code> and <code>@qemu</code> because Copy-on-Write causes fragmentation and performance degradation for large, frequently-written VM disk files.</p>
-<h2>VM Guest Tools (Running Shanios as a Guest)</h2>
+<h2 id="vm-guest-tools-running-shanios-as-a-guest">VM Guest Tools (Running Shanios as a Guest)</h2>
 <p>If Shanios is running inside a VM (VMware, VirtualBox, QEMU/SPICE), guest tools are pre-installed:</p>
 <ul>
 <li><code>spice-vdagent</code> — clipboard sharing, dynamic resolution for SPICE/QEMU</li>
@@ -313,12 +333,22 @@ lxc launch ubuntu:24.04 myvm --vm</code></pre>
 <li><code>open-vm-tools</code> — VMware tools</li>
 </ul>
 <p>These are grouped under <code>shani-video-guest.target</code> and activate automatically when the relevant package detects the VM environment.</p>
-<h2>Tips</h2>
+<h2 id="tips">Tips</h2>
 <ul>
 <li>Keep VM disk images in <code>/home</code> or the dedicated <code>@libvirt</code>/<code>@qemu</code> subvolumes — not in <code>/var</code> (volatile tmpfs)</li>
 <li>For Windows VMs, use VirtIO drivers for best disk and network performance</li>
 <li>For development environments that need a full OS, prefer <strong>Distrobox</strong> (lighter, shares your home directory) over a full VM</li>
 <li>LXD VMs offer a middle ground — hardware-level isolation with faster boot than QEMU</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Symptom</th><th>Cause & Fix</th></tr></thead><tbody><tr><td><code>/dev/kvm</code> does not exist</td><td>Virtualisation disabled in firmware — enable Intel VT-x / AMD-V (SVM) in BIOS/UEFI, then reboot</td></tr><tr><td><code>virsh</code> fails with <em>Permission denied</em> or asks for root</td><td>User not in <code>kvm</code>/<code>libvirt</code> groups yet — log out and back in after install, or run <code>sudo usermod -aG kvm,libvirt $USER</code> first (groups ship provisioned on Shanios accounts)</td></tr><tr><td><code>error: failed to connect to the hypervisor</code></td><td>Socket not yet started — <code>systemctl start libvirtd.socket</code>, or check <code>systemctl status libvirtd.socket</code> for errors</td></tr><tr><td>VM has no network after creation</td><td>Default NAT network not active — <code>sudo virsh net-start default &amp;&amp; sudo virsh net-autostart default</code></td></tr><tr><td>Flatpak virt-manager shows no system VMs</td><td>The sandboxed GUI may connect to a session instance instead of the system daemon; manage system-defined VMs with <code>virsh</code> from the terminal, or create new VMs inside the Flatpak GUI</td></tr><tr><td>Disk I/O slow inside guests</td><td>Image stored on CoW storage — move it under <code>/var/lib/libvirt/images/</code> (<code>@libvirt</code>, nodatacow) with <code>virsh vol-*</code> or virt-manager's storage settings</td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="distrobox">Distrobox</a> — lightweight container-based environments</li>
+<li><a href="lxc-lxd">Linux Containers (LXC/LXD)</a> — system containers</li>
+<li><a href="systemd-nspawn">systemd-nspawn</a> — lightweight container runtime</li>
+<li><a href="gpu-containers">GPU Containers</a> — NVIDIA access in containers</li>
+<li><a href="bottles">Bottles</a> — Wine-based Windows app compatibility</li>
 </ul></div>
     </div>
 

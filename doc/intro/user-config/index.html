@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>User Configuration — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="User Configuration  The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created u…">
+  <meta name="description" id="meta-desc"     content="The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created users: the shani-user…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="User Configuration">
-  <meta property="og:description" id="og-desc"    content="User Configuration  The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created u…">
+  <meta property="og:description" id="og-desc"    content="The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created users: the shani-user…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/intro/user-config/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="User Configuration">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="User Configuration">
-  <meta name="twitter:description" id="tw-desc"  content="User Configuration  The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created u…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created users: the shani-user…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"User Configuration","description":"User Configuration  The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created u…","url":"https://docs.shani.dev/doc/intro/user-config/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"User Configuration","description":"The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created users: the shani-user…","url":"https://docs.shani.dev/doc/intro/user-config/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"User Configuration","item":"https://docs.shani.dev/doc/intro/user-config/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,15 +215,51 @@
         <h1 class="doc-title">User Configuration</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Introduction</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created users: the <code>shani-user-setup.path</code> unit watches the <code>/etc</code> overlay's upper-layer <code>passwd</code> file and the <code>/data/user-setup-needed</code> marker (written by <code>shani-deploy</code> after every OS update and by the first-run wizard on a fresh install), and triggers <code>shani-user-setup.service</code> whenever either changes. That service processes every regular user (UID 1000–59999) on the system, adding any missing required groups and setting the default shell to Zsh (falling back to Bash if Zsh isn't installed) — it is idempotent, so re-running it is always safe.</p>
 <p>This means any user created post-installation — via the desktop first-run wizard, or with <code>useradd</code>/<code>adduser</code> on the command line — gets the same setup automatically, and the same run also re-syncs existing users after an OS update.</p>
-<p>For the full list of groups provisioned to each user, the mechanism that controls them, and how to customise group membership, see <a href="../updates/user-setup">User Provisioning</a>.</p>
-<p>For pre-configured firewall rules (KDE Connect, Waydroid, and other system-level rules applied at installation), see <a href="../security/features">Security Features</a>.</p>
-<h2>Parental Controls (GNOME)</h2>
-<p><strong>Malcontent</strong> is pre-installed on the GNOME edition, providing per-user app restrictions, content filtering, and screen-time limits. Configure it from Settings → Parental Controls, or the standalone <strong>Parental Controls</strong> app — it must be set up from an administrator account for a standard (non-admin) user account.</p></div>
+<p>For the full list of groups provisioned to each user, the mechanism that controls them, and how to customise group membership, see <a href="../updates/user-setup.md">User Provisioning</a>.</p>
+<p>For pre-configured firewall rules (KDE Connect, Waydroid, and other system-level rules applied at installation), see <a href="../security/features.md">Security Features</a>.</p>
+<h2 id="creating-users-manually">Creating Users Manually</h2>
+<p>You can create additional users from the command line — they'll automatically receive the correct groups and shell:</p>
+<pre><code class="language-bash"># Add a new user (with home directory and default shell)
+sudo useradd -m -G wheel -s /usr/bin/zsh newuser
+
+# Set a password for the new user
+sudo passwd newuser
+
+# Verify groups were assigned
+id newuser
+# uid=1001(newuser) gid=1001(newuser) groups=1001(newuser),10(wheel)</code></pre>
+<p>Or use the <code>adduser</code> interactive wrapper:</p>
+<pre><code class="language-bash">sudo adduser newuser
+sudo usermod -aG wheel newuser   # add to wheel if needed</code></pre>
+<p>After creating the user, the provisioning service (<code>shani-user-setup.service</code>) runs automatically on next login, or you can trigger it immediately:</p>
+<pre><code class="language-bash">sudo systemctl start shani-user-setup.service</code></pre>
+<h2 id="checking-user-configuration">Checking User Configuration</h2>
+<pre><code class="language-bash"># List all groups for the current user
+groups
+
+# Check which shell is configured
+getent passwd $(whoami) | cut -d: -f7
+# /usr/bin/zsh
+
+# Verify the provisioning marker exists (after first boot)
+ls /data/user-setup-needed
+# File absent = provisioning already ran successfully</code></pre>
+<h2 id="parental-controls-gnome">Parental Controls (GNOME)</h2>
+<p><strong>Malcontent</strong> is pre-installed on the GNOME edition, providing per-user app restrictions, content filtering, and screen-time limits. Configure it from Settings → Parental Controls, or the standalone <strong>Parental Controls</strong> app — it must be set up from an administrator account for a standard (non-admin) user account.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><td><code>id newuser</code> shows no extra groups</td><td>Provisioning service hasn't run yet</td><td>Run <code>sudo systemctl start shani-user-setup.service</code></td></tr><tr><td>User's shell is <code>/bin/bash</code> instead of Zsh</td><td>Provisioning ran without Zsh available (should not happen — Zsh is pre-installed)</td><td>Re-run <code>sudo systemctl start shani-user-setup.service</code>; if a fresh account somehow lacks provisioning, re-run <code>shani-user-setup</code> or install via Nix: <code>nix-env -iA nixpkgs.zsh</code></td></tr><tr><td><code>groups</code> shows <code>wheel</code> is missing</td><td>User wasn't added to wheel during creation</td><td>Run <code>sudo usermod -aG wheel username</code></td></tr><tr><td>First-run wizard didn't appear</td><td>User already exists or was created outside the wizard</td><td>Re-run with <code>gnome-initial-setup</code> (GNOME) or System Settings → Welcome (KDE)</td></tr><tr><td>Can't sudo despite being in wheel</td><td>Polkit tier may require password; check <code>99-shani.rules</code></td><td>See <a href="../security/permissions.md">Permissions & Authorization</a></td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="../updates/user-setup.md">User Provisioning</a> — full list of groups, mechanism, customisation</li>
+<li><a href="../security/features.md">Security Features</a> — firewall rules, Polkit tiers, default hardening</li>
+<li><a href="../intro/whats-included.md">What's Included</a> — pre-installed software stack</li>
+<li><a href="../intro/migrating.md">Migrating from Traditional Linux</a> — workflow changes and user management differences</li>
+</ul></div>
     </div>
 
   </main>

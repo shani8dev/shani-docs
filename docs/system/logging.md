@@ -1,7 +1,7 @@
 ---
 title: Logging
 section: System
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Logging
@@ -218,15 +218,13 @@ If you need traditional text-file logging (e.g. for log shippers like Filebeat, 
 
 ### rsyslog
 
-```bash
-# Install rsyslog (not pre-installed)
-# It is available but not part of the default image — install via the system overlay
-sudo pacman -S rsyslog
+rsyslog is **not pre-installed and cannot be installed on the immutable host** — the read-only root does not accept `pacman` installs. Your options:
 
-sudo systemctl enable --now rsyslog
-```
+1. **Stick with journald** — persistent journald logs (shown above) cover most text-file needs; `journalctl -o short` exports plain text on demand.
+2. **Run rsyslog centrally** — point Shanios at a rsyslog server elsewhere on your network that receives remote syslog.
+3. **Run rsyslog in a container** — e.g. inside a Distrobox container, receiving forwarded syslog from the host.
 
-Enable forwarding in journald:
+For option 3, enable forwarding from journald to the syslog socket first:
 
 ```ini
 # /etc/systemd/journald.conf
@@ -234,7 +232,7 @@ Enable forwarding in journald:
 ForwardToSyslog=yes
 ```
 
-Then configure rsyslog normally in `/etc/rsyslog.conf`.
+Then configure rsyslog normally in `/etc/rsyslog.conf` inside the container.
 
 ### Remote log forwarding (journald native)
 
@@ -335,5 +333,5 @@ journalctl -p err --no-pager
 
 - [Systemd](systemd) — service logs, `journalctl -u`, unit file logging options
 - [Process Management](process-management) — OOM killer events, `journalctl -k | grep oom`
-- [shani-health Reference](../updates/shani-health) — automated journal error reporting
+- [shani-health Reference](../updates/shani-health.md) — automated journal error reporting
 - [Backup & Recovery](backup) — backing up `/var/log/journal/` if persistent logs are enabled

@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Samba (SMB/CIFS) — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Samba — SMB/CIFS (Windows / macOS / Linux)  Samba provides file and print sharing using the SMB/CIFS protocol, making your Shani OS machine appear as a Win…">
+  <meta name="description" id="meta-desc"     content="Samba provides file and print sharing using the SMB/CIFS protocol, making your Shani OS machine appear as a Windows-compatible network share. It is pre-ins…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Samba (SMB/CIFS)">
-  <meta property="og:description" id="og-desc"    content="Samba — SMB/CIFS (Windows / macOS / Linux)  Samba provides file and print sharing using the SMB/CIFS protocol, making your Shani OS machine appear as a Win…">
+  <meta property="og:description" id="og-desc"    content="Samba provides file and print sharing using the SMB/CIFS protocol, making your Shani OS machine appear as a Windows-compatible network share. It is pre-ins…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/networking/samba/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Samba (SMB/CIFS)">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Samba (SMB/CIFS)">
-  <meta name="twitter:description" id="tw-desc"  content="Samba — SMB/CIFS (Windows / macOS / Linux)  Samba provides file and print sharing using the SMB/CIFS protocol, making your Shani OS machine appear as a Win…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Samba provides file and print sharing using the SMB/CIFS protocol, making your Shani OS machine appear as a Windows-compatible network share. It is pre-ins…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Samba (SMB/CIFS)","description":"Samba — SMB/CIFS (Windows / macOS / Linux)  Samba provides file and print sharing using the SMB/CIFS protocol, making your Shani OS machine appear as a Win…","url":"https://docs.shani.dev/doc/networking/samba/","datePublished":"2026-04-18T00:00:00.000Z","dateModified":"2026-04-18T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Samba (SMB/CIFS)","description":"Samba provides file and print sharing using the SMB/CIFS protocol, making your Shani OS machine appear as a Windows-compatible network share. It is pre-ins…","url":"https://docs.shani.dev/doc/networking/samba/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Samba (SMB/CIFS)","item":"https://docs.shani.dev/doc/networking/samba/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,18 +215,17 @@
         <h1 class="doc-title">Samba (SMB/CIFS)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Networking</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-18</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><h1>Samba — SMB/CIFS (Windows / macOS / Linux)</h1>
-<p>Samba provides file and print sharing using the SMB/CIFS protocol, making your Shani OS machine appear as a Windows-compatible network share. It is pre-installed, and its runtime state (locks, caches, <code>tdbsam</code> database) is bind-mounted from <code>/data/varlib/samba</code>, ensuring it persists across OS updates.</p>
-<blockquote><p><strong>Prefer NFS</strong> for Linux-to-Linux sharing. Use Samba when you need Windows or macOS compatibility.</p></blockquote>
-<p>---</p>
-<h2>Server Setup</h2>
-<h3>1. Enable Services</h3>
+      <div class="prose"><p>Samba provides file and print sharing using the SMB/CIFS protocol, making your Shani OS machine appear as a Windows-compatible network share. It is pre-installed, and its runtime state (locks, caches, <code>tdbsam</code> database) is bind-mounted from <code>/data/varlib/samba</code>, ensuring it persists across OS updates.</p>
+<blockquote><strong>Prefer NFS</strong> for Linux-to-Linux sharing. Use Samba when you need Windows or macOS compatibility.</blockquote>
+<hr>
+<h2 id="server-setup">Server Setup</h2>
+<h3 id="1-enable-services">1. Enable Services</h3>
 <p>Samba consists of <code>smbd</code> (file sharing) and <code>nmbd</code> (NetBIOS name resolution for Windows discovery):</p>
 <pre><code class="language-bash">sudo systemctl enable --now smb nmb</code></pre>
-<h3>2. Configuration</h3>
+<h3 id="2-configuration">2. Configuration</h3>
 <p><strong>File:</strong> <code>/etc/samba/smb.conf</code></p>
 <pre><code class="language-ini">[global]
     workgroup = WORKGROUP
@@ -276,8 +277,8 @@
     browseable = yes
     read only = yes
     guest ok = no</code></pre>
-<blockquote><p>💡 <strong>Validate your config:</strong> Run <code>testparm</code> after editing to catch syntax errors before restarting.</p></blockquote>
-<h3>3. User Authentication</h3>
+<blockquote>💡 <strong>Validate your config:</strong> Run <code>testparm</code> after editing to catch syntax errors before restarting.</blockquote>
+<h3 id="3-user-authentication">3. User Authentication</h3>
 <p>Samba maintains its own password database. Even with <code>unix password sync = yes</code>, you must create the Samba password entry initially:</p>
 <pre><code class="language-bash"># Add a Samba password for an existing Linux user
 sudo smbpasswd -a youruser
@@ -285,7 +286,7 @@ sudo smbpasswd -a youruser
 # Enable an existing Samba user (if previously disabled)
 sudo smbpasswd -e youruser</code></pre>
 <p>This grants access to the automatic <code>[homes]</code> share at <code>\\server-ip\youruser</code>.</p>
-<h3>4. Adding a Custom Share</h3>
+<h3 id="4-adding-a-custom-share">4. Adding a Custom Share</h3>
 <p>Append to the bottom of <code>/etc/samba/smb.conf</code>:</p>
 <pre><code class="language-ini">[SharedFiles]
     comment = Shared Files
@@ -297,12 +298,19 @@ sudo smbpasswd -e youruser</code></pre>
     directory mask = 0755</code></pre>
 <p>Then restart Samba to apply:</p>
 <pre><code class="language-bash">sudo systemctl restart smb nmb</code></pre>
-<h3>5. Firewall</h3>
+<h3 id="5-firewall">5. Firewall</h3>
 <pre><code class="language-bash">sudo firewall-cmd --add-service=samba --permanent
 sudo firewall-cmd --reload</code></pre>
-<p>---</p>
-<h2>Client Usage</h2>
-<h3>Linux</h3>
+<h3 id="6-selinux-contexts">6. SELinux Contexts</h3>
+<p>Shani OS enforces SELinux. Custom shares need the <code>samba_share_t</code> context:</p>
+<pre><code class="language-bash">sudo semanage fcontext -a -t samba_share_t &quot;/srv/share(/.*)?&quot;
+sudo restorecon -Rv /srv/share</code></pre>
+<p>For the <code>[homes]</code> share, enable the boolean instead:</p>
+<pre><code class="language-bash">sudo setsebool -P samba_enable_home_dirs on</code></pre>
+<hr>
+<h2 id="client-usage">Client Usage</h2>
+<h3 id="linux">Linux</h3>
+<p>The <code>mount.cifs</code> helper used below comes from <code>cifs-utils</code> (pre-installed).</p>
 <p>Temporary mount:</p>
 <pre><code class="language-bash">sudo mount -t cifs //192.168.1.100/SharedFiles /mnt/samba \
   -o username=youruser,uid=$(id -u),gid=$(id -g),vers=3.0</code></pre>
@@ -311,13 +319,18 @@ sudo firewall-cmd --reload</code></pre>
 password=yourpass</code></pre>
 <p>Then add to <code>/etc/fstab</code>:</p>
 <pre><code class="language-text">//192.168.1.100/SharedFiles  /mnt/samba  cifs  credentials=/home/user/.smbcredentials,uid=1000,gid=1000,_netdev,vers=3.0  0 0</code></pre>
-<h3>Windows</h3>
+<h3 id="windows">Windows</h3>
 <p>In File Explorer address bar or Run dialog: <code>\\192.168.1.100\SharedFiles</code> or <code>\\192.168.1.100\youruser</code></p>
-<h3>macOS</h3>
+<h3 id="macos">macOS</h3>
 <p>Finder → Go → Connect to Server: <code>smb://192.168.1.100/SharedFiles</code></p>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | Share not appearing in Windows network browser | Ensure <code>nmb</code> is running; Windows uses NetBIOS/WSD for discovery — connecting directly by IP (<code>\\192.168.1.100</code>) always works | | <code>Permission denied</code> when accessing share | Check Linux filesystem permissions on the shared path — Samba permissions are layered on top; both must allow access | | <code>NT_STATUS_LOGON_FAILURE</code> | Wrong Samba password — reset with <code>sudo smbpasswd youruser</code> | | <code>mount error(13): Permission denied</code> on Linux | Add <code>sec=ntlmssp</code> to mount options; verify credentials in <code>.smbcredentials</code> | | Config changes not taking effect | Run <code>testparm</code> to validate, then <code>sudo systemctl restart smb nmb</code> | | View logs | <code>journalctl -u smb</code> or <code>/var/log/samba/log.smbd</code> |</p></div>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Share not appearing in Windows network browser</td><td>Ensure <code>nmb</code> is running; Windows uses NetBIOS/WSD for discovery — connecting directly by IP (<code>\\192.168.1.100</code>) always works</td></tr><tr><td><code>Permission denied</code> when accessing share</td><td>Check Linux filesystem permissions on the shared path — Samba permissions are layered on top; both must allow access</td></tr><tr><td><code>NT_STATUS_LOGON_FAILURE</code></td><td>Wrong Samba password — reset with <code>sudo smbpasswd youruser</code></td></tr><tr><td><code>mount error(13): Permission denied</code> on Linux</td><td>Add <code>sec=ntlmssp</code> to mount options; verify credentials in <code>.smbcredentials</code></td></tr><tr><td>Config changes not taking effect</td><td>Run <code>testparm</code> to validate, then <code>sudo systemctl restart smb nmb</code></td></tr><tr><td>View logs</td><td><code>journalctl -u smb</code> or <code>/var/log/samba/log.smbd</code></td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="nfs">NFS exports</a></li>
+<li><a href="firewalld">Firewall rules for SMB</a></li>
+</ul></div>
     </div>
 
   </main>

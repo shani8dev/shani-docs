@@ -1,7 +1,7 @@
 ---
 title: rsyncd (rsync Daemon)
 section: Networking
-updated: 2026-04-18
+updated: 2026-08-28
 ---
 
 # rsync Daemon (rsyncd)
@@ -9,6 +9,8 @@ updated: 2026-04-18
 The rsync daemon exposes file modules over the `rsync://` protocol for fast, efficient network file synchronisation and backups. Unlike SSH-based rsync, rsyncd runs as a standalone service — useful for automated, password-protected transfers without requiring SSH access.
 
 rsyncd is pre-installed on Shani OS. Lock and state files persist in `/data/varlib/rsync` across OS updates.
+
+> ⚠️ **Unencrypted:** `rsync://` daemon mode sends the data *and* the auth secret unencrypted on port 873. Restrict it to trusted LANs only — off-LAN, tunnel over WireGuard or use rsync-over-SSH instead.
 
 ---
 
@@ -97,3 +99,10 @@ rsync -avz -e "ssh -p 2222" ~/myproject youruser@192.168.1.100:~/
 | `Auth failed` | Verify `/etc/rsyncd.secrets` has mode `600` (`sudo chmod 600 /etc/rsyncd.secrets`) and the username in the client command matches `auth users` in the config |
 | `hosts allow` blocking your client | Check the client IP is within the `hosts allow` range; temporarily remove the restriction for testing |
 | Files not syncing (no errors) | Add `-v` for verbose output; check that the source path ends with `/` if you want directory *contents* (not the directory itself) |
+
+## See Also
+
+- [SSH Server](openssh) — rsync over SSH for secure transfers
+- [Samba](samba) — SMB/CIFS file sharing
+- [NFS](nfs) — network filesystem sharing
+- [Backup & Restore](../system/backup.md) — restic-based backup

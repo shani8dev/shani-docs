@@ -1,7 +1,7 @@
 ---
 title: Audio (PipeWire)
 section: System
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Audio (PipeWire)
@@ -70,7 +70,7 @@ wpctl status
 wpctl set-default 52
 ```
 
-Bluetooth audio devices appear in this same list once paired — see [Bluetooth](../networking/bluetooth) for pairing and codec details.
+Bluetooth audio devices appear in this same list once paired — see [Bluetooth](../networking/bluetooth.md) for pairing and codec details.
 
 ## Recording / Screen Capture Audio
 
@@ -116,6 +116,6 @@ systemctl --user restart pipewire wireplumber
 
 ## See Also
 
-- [Bluetooth](../networking/bluetooth) — pairing audio devices, codec support
+- [Bluetooth](../networking/bluetooth.md) — pairing audio devices, codec support
 - [Hardware](hardware) — general audio hardware detection
-- [What's Included](../intro/whats-included) — full audio codec support list
+- [What's Included](../intro/whats-included.md) — full audio codec support list

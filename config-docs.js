@@ -34,7 +34,7 @@ const CONFIG = {
   DATE_LOCALE: 'en-IN',
   // ── Social ───────────────────────────────────────────────────
   TWITTER_HANDLE: '@shani8dev',
-  OG_IMAGE: 'https://shani.dev/assets/images/logo.svg',
+  OG_IMAGE: 'https://shani.dev/assets/images/gnome-screenshot.jpg',
   SOCIAL_LINKS: [
     { label: 'GitHub',   icon: 'fa-brands fa-github',   url: 'https://github.com/shani8dev' },
     { label: 'LinkedIn', icon: 'fa-brands fa-linkedin',  url: 'https://www.linkedin.com/in/Shrinivasvkumbhar/' },

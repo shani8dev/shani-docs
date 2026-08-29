@@ -1,7 +1,7 @@
 ---
 title: Containers
 section: Software & Apps
-updated: 2026-05-07
+updated: 2026-08-28
 ---
 
 # Containers on Shanios
@@ -36,7 +36,7 @@ All subvolumes survive every OS update and atomic rollback untouched.
 
 Podman is the default daemonless, rootless container runtime. Its CLI is identical to Docker's. `podman.socket` is socket-activated at boot. The `podman-docker` drop-in is pre-installed — existing `docker` commands work without modification.
 
-**Pods** (pre-installed on both editions) provides a graphical interface for managing containers, images, volumes, and networks.
+**Pods** (pre-installed on every edition) provides a graphical interface for managing containers, images, volumes, and networks.
 
 ### Basic Commands
 
@@ -166,3 +166,12 @@ sudo compsize /var/lib/containers
 # Prune unused images, containers, volumes
 podman system prune -af --volumes
 ```
+
+## See Also
+
+- [Distrobox](distrobox) — mutable dev environments with host integration
+- [Linux Containers (LXC/LXD)](lxc-lxd) — system containers
+- [systemd-nspawn](systemd-nspawn) — lightweight container runtime
+- [Apptainer](apptainer) — HPC/research container runtime
+- [GPU Containers](gpu-containers) — NVIDIA/AMD access in containers
+- [Immutability](../concepts/immutability.md) — how containers persist on an immutable OS

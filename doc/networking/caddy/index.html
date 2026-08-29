@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Caddy — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Caddy Web Server   is a modern web server with automatic HTTPS. It provisions and renews TLS certificates entirely automatically — via Let's Encrypt for pu…">
+  <meta name="description" id="meta-desc"     content="Caddy is a modern web server with automatic HTTPS. It provisions and renews TLS certificates entirely automatically — via Let's Encrypt for public domains …">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Caddy">
-  <meta property="og:description" id="og-desc"    content="Caddy Web Server   is a modern web server with automatic HTTPS. It provisions and renews TLS certificates entirely automatically — via Let's Encrypt for pu…">
+  <meta property="og:description" id="og-desc"    content="Caddy is a modern web server with automatic HTTPS. It provisions and renews TLS certificates entirely automatically — via Let's Encrypt for public domains …">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/networking/caddy/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Caddy">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Caddy">
-  <meta name="twitter:description" id="tw-desc"  content="Caddy Web Server   is a modern web server with automatic HTTPS. It provisions and renews TLS certificates entirely automatically — via Let's Encrypt for pu…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Caddy is a modern web server with automatic HTTPS. It provisions and renews TLS certificates entirely automatically — via Let's Encrypt for public domains …">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Caddy","description":"Caddy Web Server   is a modern web server with automatic HTTPS. It provisions and renews TLS certificates entirely automatically — via Let's Encrypt for pu…","url":"https://docs.shani.dev/doc/networking/caddy/","datePublished":"2026-04-22T00:00:00.000Z","dateModified":"2026-04-22T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Caddy","description":"Caddy is a modern web server with automatic HTTPS. It provisions and renews TLS certificates entirely automatically — via Let's Encrypt for public domains …","url":"https://docs.shani.dev/doc/networking/caddy/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Caddy","item":"https://docs.shani.dev/doc/networking/caddy/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,16 +215,15 @@
         <h1 class="doc-title">Caddy</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Networking</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><h1>Caddy Web Server</h1>
-<p><a href="https://caddyserver.com/">Caddy</a> is a modern web server with automatic HTTPS. It provisions and renews TLS certificates entirely automatically — via Let's Encrypt for public domains and via its own internal CA for private <code>.home.local</code> addresses — with no manual certificate management, no OpenSSL commands, and no browser warnings.</p>
+      <div class="prose"><p><a href="https://caddyserver.com/">Caddy</a> is a modern web server with automatic HTTPS. It provisions and renews TLS certificates entirely automatically — via Let's Encrypt for public domains and via its own internal CA for private <code>.home.local</code> addresses — with no manual certificate management, no OpenSSL commands, and no browser warnings.</p>
 <p>On Shani OS, Caddy is pre-installed and is the recommended reverse proxy for all self-hosted services. Always bind container ports to <code>127.0.0.1</code> and proxy through Caddy — this ensures every service is accessible only via HTTPS and never directly exposed to the network.</p>
-<p>---</p>
-<h2>Configuration Context</h2>
+<hr>
+<h2 id="configuration-context">Configuration Context</h2>
 <p>Caddy's behaviour depends on how it is launched.</p>
-<h3>System Service (Recommended)</h3>
+<h3 id="system-service-recommended">System Service (Recommended)</h3>
 <p>When managed via systemd, Caddy runs as the <code>caddy</code> system user and loads a system-wide config:</p>
 <ul>
 <li><strong>Config file:</strong> <code>/etc/caddy/Caddyfile</code></li>
@@ -230,13 +231,13 @@
 </ul>
 <p>On Shani OS, <code>/etc</code> is managed atomically — your Caddyfile persists across OS updates and rollbacks.</p>
 <pre><code class="language-bash">sudo systemctl enable --now caddy</code></pre>
-<h3>Manual / Development</h3>
+<h3 id="manual-development">Manual / Development</h3>
 <p>Running <code>caddy run</code> from a terminal loads the <code>Caddyfile</code> from the <strong>current working directory</strong>, or from an explicit path:</p>
 <pre><code class="language-bash">cd ~/projects/my-app/
 caddy run                              # loads ./Caddyfile
 caddy run --config /path/to/Caddyfile  # explicit path</code></pre>
-<p>---</p>
-<h2>Service Management</h2>
+<hr>
+<h2 id="service-management">Service Management</h2>
 <pre><code class="language-bash"># Enable and start on boot
 sudo systemctl enable --now caddy
 
@@ -257,9 +258,9 @@ caddy validate --config /etc/caddy/Caddyfile
 
 # Auto-format and fix indentation in place
 sudo caddy fmt --overwrite /etc/caddy/Caddyfile</code></pre>
-<p>---</p>
-<h2>Caddyfile Reference</h2>
-<h3>Reverse Proxy</h3>
+<hr>
+<h2 id="caddyfile-reference">Caddyfile Reference</h2>
+<h3 id="reverse-proxy">Reverse Proxy</h3>
 <p>The most common use case — route external traffic to local services running on Podman, Distrobox, or bare ports.</p>
 <pre><code class="language-caddyfile"># /etc/caddy/Caddyfile
 
@@ -279,13 +280,13 @@ myapp.home.local {
 api.example.com       { reverse_proxy localhost:8000 }
 dashboard.example.com { reverse_proxy localhost:9090 }
 grafana.home.local    { tls internal; reverse_proxy localhost:3001 }</code></pre>
-<h3>Static File Server</h3>
+<h3 id="static-file-server">Static File Server</h3>
 <pre><code class="language-caddyfile">docs.example.com {
     root * /srv/http/docs
     file_server
     encode zstd gzip
 }</code></pre>
-<h3>Load Balancing</h3>
+<h3 id="load-balancing">Load Balancing</h3>
 <pre><code class="language-caddyfile">app.example.com {
     reverse_proxy localhost:3001 localhost:3002 localhost:3003 {
         lb_policy round_robin
@@ -293,7 +294,7 @@ grafana.home.local    { tls internal; reverse_proxy localhost:3001 }</code></pre
         health_interval 10s
     }
 }</code></pre>
-<h3>Basic Auth & Security Headers</h3>
+<h3 id="basic-auth-security-headers">Basic Auth & Security Headers</h3>
 <pre><code class="language-caddyfile"># Generate the bcrypt hash first:
 #   caddy hash-password --plaintext &quot;yourpassword&quot;
 
@@ -310,7 +311,7 @@ secure.example.com {
     }
     reverse_proxy localhost:8080
 }</code></pre>
-<h3>Forward Auth (Authelia / Authentik)</h3>
+<h3 id="forward-auth-authelia-authentik">Forward Auth (Authelia / Authentik)</h3>
 <p>Protect any service behind your SSO provider — one login page guards your entire self-hosted stack:</p>
 <pre><code class="language-caddyfile"># Authelia forward auth
 service.example.com {
@@ -330,12 +331,12 @@ service.example.com {
     }
     reverse_proxy localhost:SERVICE_PORT
 }</code></pre>
-<h3>Redirect HTTP → HTTPS (Explicit)</h3>
+<h3 id="redirect-http-https-explicit">Redirect HTTP → HTTPS (Explicit)</h3>
 <p>Caddy handles this automatically for public domains. For internal hosts where you want an explicit redirect:</p>
 <pre><code class="language-caddyfile">http://myapp.home.local {
     redir https://{host}{uri} permanent
 }</code></pre>
-<h3>Global Options</h3>
+<h3 id="global-options">Global Options</h3>
 <pre><code class="language-caddyfile">{
     email admin@example.com     # Used for Let's Encrypt notifications
     default_bind 0.0.0.0        # Prefer IPv4; remove if IPv6 works correctly
@@ -345,16 +346,16 @@ service.example.com {
 example.com {
     reverse_proxy 192.168.1.50:80
 }</code></pre>
-<p>---</p>
-<h2>TLS & Certificates</h2>
-<p>| Domain type | Configuration | How it works | |-------------|---------------|--------------| | Public (<code>example.com</code>) | No <code>tls</code> directive needed | Caddy auto-provisions via Let's Encrypt ACME (HTTP-01 or TLS-ALPN-01) | | Private (<code>.home.local</code>, <code>.lan</code>, <code>.internal</code>) | <code>tls internal</code> | Caddy issues certificates from its own local CA | | Custom cert | <code>tls /path/cert.pem /path/key.pem</code> | Your own certificate | | Let's Encrypt staging (testing) | <code>acme_ca https://acme-staging-v02.api.letsencrypt.org/directory</code> | Avoids rate limits while testing |</p>
-<h3>Trust the Internal CA</h3>
+<hr>
+<h2 id="tls-certificates">TLS & Certificates</h2>
+<table><thead><tr><th>Domain type</th><th>Configuration</th><th>How it works</th></tr></thead><tbody><tr><td>Public (<code>example.com</code>)</td><td>No <code>tls</code> directive needed</td><td>Caddy auto-provisions via Let's Encrypt ACME (HTTP-01 or TLS-ALPN-01)</td></tr><tr><td>Private (<code>.home.local</code>, <code>.lan</code>, <code>.internal</code>)</td><td><code>tls internal</code></td><td>Caddy issues certificates from its own local CA</td></tr><tr><td>Custom cert</td><td><code>tls /path/cert.pem /path/key.pem</code></td><td>Your own certificate</td></tr><tr><td>Let's Encrypt staging (testing)</td><td><code>acme_ca https://acme-staging-v02.api.letsencrypt.org/directory</code></td><td>Avoids rate limits while testing</td></tr></tbody></table>
+<h3 id="trust-the-internal-ca">Trust the Internal CA</h3>
 <p>Run this once on the Shani OS machine so that browsers and command-line tools trust the local CA for all <code>*.home.local</code> domains:</p>
 <pre><code class="language-bash">sudo trust anchor \
   /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt
 sudo update-ca-trust</code></pre>
 <p>To trust it on other devices (phones, other laptops), export the certificate and install it in each device's trust store. On Android: Settings → Security → Install from storage. On iOS: Settings → General → VPN & Device Management.</p>
-<h3>Wildcard Certificates (DNS-01 Challenge)</h3>
+<h3 id="wildcard-certificates-dns-01-challenge">Wildcard Certificates (DNS-01 Challenge)</h3>
 <p>For a wildcard cert (<code>*.home.local</code>) that works across all subdomains, use the DNS-01 challenge with your DNS provider's plugin. This avoids needing port 80 open:</p>
 <pre><code class="language-caddyfile">{
     acme_dns cloudflare {env.CF_API_TOKEN}
@@ -373,8 +374,8 @@ sudo update-ca-trust</code></pre>
         reverse_proxy localhost:8080
     }
 }</code></pre>
-<p>---</p>
-<h2>Caddy + Tailscale</h2>
+<hr>
+<h2 id="caddy-tailscale">Caddy + Tailscale</h2>
 <p>Use Caddy with <code>tls internal</code> to serve HTTPS on your Tailscale interface. Services become available as <code>https://hostname.tailnet-name.ts.net</code> with valid certificates on every tailnet device (after trusting the local CA):</p>
 <pre><code class="language-caddyfile"># Accessible only on your tailnet — not exposed to the internet
 jellyfin.home.local {
@@ -387,12 +388,12 @@ vaultwarden.home.local {
     reverse_proxy localhost:8180
 }</code></pre>
 <p>Services exposed via Tailscale do not need firewall rules — Tailscale handles access control. See the <a href="https://docs.shani.dev/doc/networking/tailscale">Tailscale wiki page</a> for setup.</p>
-<p>---</p>
-<h2>Caddy + Cloudflared</h2>
+<hr>
+<h2 id="caddy-cloudflared">Caddy + Cloudflared</h2>
 <p>When exposing services via Cloudflare Tunnel, you do <strong>not</strong> need a Caddyfile entry — Cloudflare handles TLS termination at the edge. Caddy is still the right choice for internal <code>.home.local</code> access on Tailscale, and for any services accessed directly on the LAN.</p>
 <p>Use both together: Caddy serves internal traffic; Cloudflared exposes selected services publicly. See the <a href="https://docs.shani.dev/doc/networking/cloudflared">Cloudflared wiki page</a>.</p>
-<p>---</p>
-<h2>Permissions & File Serving</h2>
+<hr>
+<h2 id="permissions-file-serving">Permissions & File Serving</h2>
 <p>Caddy runs as the <code>caddy</code> system user with restricted privileges. If it needs to read files from your home directory, grant access with ACLs rather than changing ownership:</p>
 <pre><code class="language-bash"># Grant recursive read + execute to the caddy user
 sudo setfacl -R -m u:caddy:rx /home/user/www
@@ -405,15 +406,21 @@ ls -Z /home/user/www
 
 # Relabel if needed
 sudo restorecon -Rv /home/user/www</code></pre>
-<p>---</p>
-<h2>Firewall</h2>
+<hr>
+<h2 id="firewall">Firewall</h2>
 <p>Open ports 80 and 443 if Caddy is serving public traffic. Let's Encrypt requires port 80 to be reachable for HTTP-01 challenges:</p>
 <pre><code class="language-bash">sudo firewall-cmd --add-service=http --add-service=https --permanent
 sudo firewall-cmd --reload</code></pre>
 <p>For internal-only Caddy serving <code>.home.local</code> addresses over Tailscale or the LAN, no firewall changes are needed — ports 80 and 443 do not need to be open to the internet.</p>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | <code>permission denied</code> serving files | <code>sudo setfacl -R -m u:caddy:rx /your/path</code>; check SELinux context with <code>ls -Z</code> | | Browser shows untrusted cert for <code>.home.local</code> | Trust the Caddy local CA: <code>sudo trust anchor /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt &amp;&amp; sudo update-ca-trust</code> | | <code>bind: address already in use</code> | Another process owns port 80 or 443 — <code>sudo ss -tlnp | grep ':80\|:443'</code> to identify it | | Service won't start | Validate syntax first: <code>caddy validate --config /etc/caddy/Caddyfile</code>; then check logs: <code>journalctl -u caddy -f</code> | | Let's Encrypt rate limit hit | Switch to staging CA: <code>acme_ca https://acme-staging-v02.api.letsencrypt.org/directory</code> while testing | | Reverse proxy returns 502 Bad Gateway | Confirm the backend is running and bound to the right port: <code>curl -v http://localhost:PORT</code>; for containers use <code>host.containers.internal</code> instead of <code>localhost</code> | | Config change not taking effect | Run <code>sudo systemctl reload caddy</code> — Caddy must be explicitly reloaded to pick up Caddyfile changes | | HTTPS certificate not renewing | Check <code>journalctl -u caddy</code> for ACME errors; confirm port 80 is reachable from the internet for HTTP-01 challenges | | WebSocket connections dropping | Add <code>@ws { header Connection <em>Upgrade</em> }</code> matcher and <code>handle @ws { reverse_proxy ... }</code> with explicit WebSocket header passthrough |</p></div>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>permission denied</code> serving files</td><td><code>sudo setfacl -R -m u:caddy:rx /your/path</code>; check SELinux context with <code>ls -Z</code></td></tr><tr><td>Browser shows untrusted cert for <code>.home.local</code></td><td>Trust the Caddy local CA: <code>sudo trust anchor /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt &amp;&amp; sudo update-ca-trust</code></td></tr><tr><td><code>bind: address already in use</code></td><td>Another process owns port 80 or 443 — `sudo ss -tlnp</td><td>grep ':80\</td><td>:443'` to identify it</td></tr><tr><td>Service won't start</td><td>Validate syntax first: <code>caddy validate --config /etc/caddy/Caddyfile</code>; then check logs: <code>journalctl -u caddy -f</code></td></tr><tr><td>Let's Encrypt rate limit hit</td><td>Switch to staging CA: <code>acme_ca https://acme-staging-v02.api.letsencrypt.org/directory</code> while testing</td></tr><tr><td>Reverse proxy returns 502 Bad Gateway</td><td>Confirm the backend is running and bound to the right port: <code>curl -v http://localhost:PORT</code>; for containers use <code>host.containers.internal</code> instead of <code>localhost</code></td></tr><tr><td>Config change not taking effect</td><td>Run <code>sudo systemctl reload caddy</code> — Caddy must be explicitly reloaded to pick up Caddyfile changes</td></tr><tr><td>HTTPS certificate not renewing</td><td>Check <code>journalctl -u caddy</code> for ACME errors; confirm port 80 is reachable from the internet for HTTP-01 challenges</td></tr><tr><td>WebSocket connections dropping</td><td>Add <code>@ws { header Connection <em>Upgrade</em> }</code> matcher and <code>handle @ws { reverse_proxy ... }</code> with explicit WebSocket header passthrough</td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="cloudflared">Cloudflared Tunnels</a></li>
+<li><a href="apache">Apache HTTP Server</a></li>
+<li><a href="https://blog.shani.dev/post/shani-os-home-server">Home server blog</a></li>
+</ul></div>
     </div>
 
   </main>

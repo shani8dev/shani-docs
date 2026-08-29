@@ -1,7 +1,7 @@
 ---
 title: systemd-nspawn
 section: Software & Apps
-updated: 2026-05-07
+updated: 2026-08-28
 ---
 
 # systemd-nspawn
@@ -217,3 +217,10 @@ sudo machinectl remove arch-test
 | `/var/lib/machines/` | `@machines` |
 
 The `@machines` subvolume is independent of both OS slots and survives all updates and rollbacks.
+
+## See Also
+
+- [Containers](containers) — overview of all container runtimes
+- [Linux Containers (LXC/LXD)](lxc-lxd) — system containers with networking
+- [Distrobox](distrobox) — mutable dev environments with host integration
+- [Apptainer](apptainer) — HPC/research container runtime

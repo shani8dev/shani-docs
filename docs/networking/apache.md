@@ -1,7 +1,7 @@
 ---
 title: Apache HTTP Server
 section: Networking
-updated: 2026-04-20
+updated: 2026-08-28
 ---
 
 # Apache HTTP Server
@@ -74,12 +74,42 @@ app.example.com {
 </VirtualHost>
 ```
 
+### Direct HTTPS (Port 443)
+
+When Apache serves traffic directly (no Caddy in front), terminate TLS itself. Requires `mod_ssl` — uncomment `LoadModule ssl_module modules/mod_ssl.so` and restart:
+
+```apache
+# /etc/httpd/conf.d/mysite-ssl.conf
+
+<VirtualHost *:443>
+    ServerName mysite.example.com
+    DocumentRoot /srv/http/mysite
+
+    SSLEngine on
+    # Let's Encrypt:
+    SSLCertificateFile    /etc/letsencrypt/live/mysite.example.com/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/mysite.example.com/privkey.pem
+    # Or self-signed for internal use:
+    #   sudo openssl req -x509 -nodes -days 3650 -newkey rsa:4096 \
+    #     -keyout /etc/httpd/conf/server.key -out /etc/httpd/conf/server.crt \
+    #     -subj "/CN=mysite.example.com"
+
+    <Directory /srv/http/mysite>
+        Options -Indexes +FollowSymLinks
+        Require all granted
+    </Directory>
+
+    ErrorLog  /var/log/httpd/mysite-ssl-error.log
+    CustomLog /var/log/httpd/mysite-ssl-access.log combined
+</VirtualHost>
+```
+
 ### Basic Authentication
 
 ```bash
-# Create a password file (-c creates the file; omit -c when adding further users)
-sudo htpasswd -c /etc/httpd/conf/.htpasswd alice
-sudo htpasswd /etc/httpd/conf/.htpasswd bob
+# Create a password file (-B selects bcrypt; -c creates the file, omit it when adding further users)
+sudo htpasswd -B -c /etc/httpd/conf/.htpasswd alice
+sudo htpasswd -B /etc/httpd/conf/.htpasswd bob
 ```
 
 ```apache
@@ -181,3 +211,9 @@ sudo setsebool -P httpd_can_network_connect 1
 | `Permission denied` in error log | Apache (`http` user) cannot read the file — fix permissions or apply the correct SELinux context |
 | Reverse proxy returns 503 | Enable the SELinux boolean: `sudo setsebool -P httpd_can_network_connect 1` |
 | Config changes not taking effect | Run `sudo apachectl configtest` to validate, then `sudo systemctl reload httpd` |
+
+## See Also
+
+- [Caddy (modern alternative)](caddy)
+- [Firewall rules](firewalld)
+- [Home server blog](https://blog.shani.dev/post/shani-os-home-server)

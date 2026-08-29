@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Boot Process — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Boot Process  Shanios uses a fully measured, signed boot chain built on systemd-boot, dracut-generated Unified Kernel Images (UKIs), and optionally TPM2 + …">
+  <meta name="description" id="meta-desc"     content="Shanios uses a fully measured, signed boot chain built on systemd-boot, dracut-generated Unified Kernel Images (UKIs), and optionally TPM2 + Secure Boot ve…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Boot Process">
-  <meta property="og:description" id="og-desc"    content="Boot Process  Shanios uses a fully measured, signed boot chain built on systemd-boot, dracut-generated Unified Kernel Images (UKIs), and optionally TPM2 + …">
+  <meta property="og:description" id="og-desc"    content="Shanios uses a fully measured, signed boot chain built on systemd-boot, dracut-generated Unified Kernel Images (UKIs), and optionally TPM2 + Secure Boot ve…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/arch/boot/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Boot Process">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Boot Process">
-  <meta name="twitter:description" id="tw-desc"  content="Boot Process  Shanios uses a fully measured, signed boot chain built on systemd-boot, dracut-generated Unified Kernel Images (UKIs), and optionally TPM2 + …">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios uses a fully measured, signed boot chain built on systemd-boot, dracut-generated Unified Kernel Images (UKIs), and optionally TPM2 + Secure Boot ve…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Boot Process","description":"Boot Process  Shanios uses a fully measured, signed boot chain built on systemd-boot, dracut-generated Unified Kernel Images (UKIs), and optionally TPM2 + …","url":"https://docs.shani.dev/doc/arch/boot/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Boot Process","description":"Shanios uses a fully measured, signed boot chain built on systemd-boot, dracut-generated Unified Kernel Images (UKIs), and optionally TPM2 + Secure Boot ve…","url":"https://docs.shani.dev/doc/arch/boot/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Boot Process","item":"https://docs.shani.dev/doc/arch/boot/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,11 +215,11 @@
         <h1 class="doc-title">Boot Process</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Architecture</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Shanios uses a fully measured, signed boot chain built on systemd-boot, dracut-generated Unified Kernel Images (UKIs), and optionally TPM2 + Secure Boot verification.</p>
-<h2>Boot Chain Overview</h2>
+<h2 id="boot-chain-overview">Boot Chain Overview</h2>
 <pre><code>UEFI Firmware
   └─ systemd-boot (EFI binary at /boot/efi/EFI/BOOT/BOOTX64.EFI via shim)
        └─ UKI: shanios-blue.efi  or  shanios-green.efi
@@ -233,9 +235,9 @@
                        ├─ OverlayFS /etc mount (pre-pivot hook)
                        ├─ boot_hard_failure cleared on success (pre-pivot hook)
                        └─ Switch root → systemd PID 1</code></pre>
-<h2>Unified Kernel Images (UKIs)</h2>
+<h2 id="unified-kernel-images-ukis">Unified Kernel Images (UKIs)</h2>
 <p>Each slot has its own UKI — a single EFI PE binary that bundles the kernel, initramfs, and kernel cmdline together:</p>
-<p>| File | Slot | |------|------| | <code>/boot/efi/EFI/shanios/shanios-blue.efi</code> | <code>@blue</code> | | <code>/boot/efi/EFI/shanios/shanios-green.efi</code> | <code>@green</code> |</p>
+<table><thead><tr><th>File</th><th>Slot</th></tr></thead><tbody><tr><td><code>/boot/efi/EFI/shanios/shanios-blue.efi</code></td><td><code>@blue</code></td></tr><tr><td><code>/boot/efi/EFI/shanios/shanios-green.efi</code></td><td><code>@green</code></td></tr></tbody></table>
 <p>UKIs are generated by <code>gen-efi configure &lt;slot&gt;</code> — it builds the image with <code>dracut --force --uefi --kver &lt;kver&gt; --kernel-cmdline &lt;cmdline&gt; &lt;path&gt;.tmp</code>, signs it with the MOK key via <code>sbsign</code>, verifies the signature with <code>sbverify</code>, then renames it into place. Because the cmdline is embedded and signed, it cannot be tampered with from the boot menu.</p>
 <p><code>gen-efi</code> also keeps the rest of the ESP current: on every <code>configure</code> run it copies <code>shimx64.efi</code>, <code>systemd-bootx64.efi</code>, and <code>mmx64.efi</code> from <code>/usr/share/shim-signed/</code> and <code>/usr/lib/systemd/boot/efi/</code> onto the ESP whenever the source is newer than what's installed, and re-signs <code>grubx64.efi</code> (systemd-boot) with the MOK key. This is necessary because <code>bootctl update</code> would otherwise deploy an unsigned binary on a Secure Boot system — <code>gen-efi</code> is the only path that keeps signatures valid across kernel/systemd updates.</p>
 <p>The ESP also holds:</p>
@@ -245,12 +247,12 @@
 <li><code>EFI/BOOT/mmx64.efi</code> — MokManager (for key enrollment at UEFI prompt)</li>
 <li><code>EFI/BOOT/MOK.der</code> — local MOK public certificate (for MokManager fallback)</li>
 </ul>
-<h2>Boot Entries</h2>
+<h2 id="boot-entries">Boot Entries</h2>
 <p>systemd-boot displays two entries:</p>
 <pre><code>shanios-blue  (Active)      ← currently running slot
 shanios-green (Candidate)   ← standby / previous slot</code></pre>
 <p>The <code>(Active)</code> entry is written as <code>shanios-&lt;slot&gt;+3-0.conf</code> (3 tries left, 0 done) and set as the <code>loader.conf</code> default; systemd-boot matches the default against the entry <em>ID</em> (<code>shanios-&lt;slot&gt;.conf</code>, tries suffix stripped), so the tries-suffixed filename still resolves correctly no matter how many boots have elapsed. The <code>(Candidate)</code> entry is written as a plain <code>shanios-&lt;slot&gt;.conf</code> with no tries suffix — it is the unconditional fallback if the active slot's tries run out.</p>
-<h3>UEFI Firmware Boot Entries (efibootmgr)</h3>
+<h3 id="uefi-firmware-boot-entries-efibootmgr">UEFI Firmware Boot Entries (efibootmgr)</h3>
 <p>The entries above are systemd-boot's own internal menu. Separately, the UEFI firmware itself keeps a boot menu (visible via your firmware setup or a one-time boot-device key like F12) that decides which bootloader to launch at all — this is managed by <code>efibootmgr</code> (pre-installed), and is what the installer registers automatically during setup.</p>
 <pre><code class="language-bash"># List current UEFI firmware boot entries and boot order
 sudo efibootmgr -v
@@ -263,7 +265,7 @@ sudo efibootmgr --bootorder 0000,0001,0002
 
 # Remove a stale/duplicate entry
 sudo efibootmgr --bootnum 0003 --delete-bootnum</code></pre>
-<h2>Kernel Command Line</h2>
+<h2 id="kernel-command-line">Kernel Command Line</h2>
 <p>Key parameters embedded in each UKI:</p>
 <pre><code>quiet splash                         # suppress kernel messages; show Plymouth
 systemd.volatile=state               # /var is tmpfs; bind-mounts restore service state
@@ -279,13 +281,13 @@ rd.vconsole.keymap=us                # keyboard layout for LUKS passphrase promp
 resume=UUID=&lt;uuid&gt;                   # hibernation resume device (when /swap/swapfile exists)
 resume_offset=&lt;offset&gt;               # from `btrfs inspect-internal map-swapfile -r /swap/swapfile` (when swap configured)</code></pre>
 <p>The cmdline is generated by <code>gen-efi configure &lt;slot&gt;</code>'s <code>generate_cmdline()</code> and written to <code>/etc/kernel/install_cmdline_&lt;slot&gt;</code> before being embedded in the UKI via <code>dracut --kernel-cmdline</code>. This file is regenerated on every deploy and <strong>cannot be manually pre-edited</strong> — it is always overwritten. If UUID/LUKS detection fails transiently (e.g. inside a chroot), <code>gen-efi</code> falls back to keeping the existing cmdline file rather than writing a broken one.</p>
-<h2>The 99shanios Dracut Module</h2>
+<h2 id="the-99shanios-dracut-module">The 99shanios Dracut Module</h2>
 <p>Shanios ships a custom dracut module at <code>/usr/lib/dracut/modules.d/99shanios/</code> that adds three hooks to the initramfs:</p>
-<p>| Hook | Phase | Priority | Purpose | |------|-------|----------|---------| | <code>shanios-boot-failure-hook.sh</code> | pre-mount | 90 | Writes <code>/data/boot_hard_failure</code> before root is mounted — persists if root mount fails | | <code>shanios-overlay-etc.sh</code> | pre-pivot | 50 | Mounts the <code>/etc</code> OverlayFS before <code>pivot_root</code> so systemd PID 1 sees user config from its first read | | <code>shanios-boot-success-clear.sh</code> | pre-pivot | 90 | Clears <code>boot_hard_failure</code> after root mounts successfully |</p>
+<table><thead><tr><th>Hook</th><th>Phase</th><th>Priority</th><th>Purpose</th></tr></thead><tbody><tr><td><code>shanios-boot-failure-hook.sh</code></td><td>pre-mount</td><td>90</td><td>Writes <code>/data/boot_hard_failure</code> before root is mounted — persists if root mount fails</td></tr><tr><td><code>shanios-overlay-etc.sh</code></td><td>pre-pivot</td><td>50</td><td>Mounts the <code>/etc</code> OverlayFS before <code>pivot_root</code> so systemd PID 1 sees user config from its first read</td></tr><tr><td><code>shanios-boot-success-clear.sh</code></td><td>pre-pivot</td><td>90</td><td>Clears <code>boot_hard_failure</code> after root mounts successfully</td></tr></tbody></table>
 <p>See <a href="dracut-module">Dracut Initramfs Module</a> for full hook implementation details, mount options, and interaction with boot health services.</p>
-<h2>How gen-efi Runs Against the Candidate Slot</h2>
+<h2 id="how-gen-efi-runs-against-the-candidate-slot">How gen-efi Runs Against the Candidate Slot</h2>
 <p><code>shani-deploy</code> never runs <code>gen-efi</code> directly against the live root — the candidate slot's UKI is built inside a chroot of the <em>inactive</em> subvolume so the new kernel/initramfs come from the new slot, not the booted one. <code>prepare_chroot()</code> sets this up with two groups of bind mounts (<code>shani-deploy.sh</code>):</p>
-<p>| Group | Dirs | Mount | Purpose | |---|---|---|---| | <code>CHROOT_BIND_DIRS</code> | <code>/dev /proc /sys /run /tmp</code> | <code>mount --rbind</code> | Standard chroot plumbing so <code>dracut</code>, <code>sbsign</code>, <code>mokutil</code>, etc. work normally | | <code>CHROOT_STATIC_DIRS</code> | <code>data etc var swap</code> | <code>mount --bind</code> | Live host state the candidate's <code>gen-efi</code> needs but that shouldn't come from the new slot |</p>
+<table><thead><tr><th>Group</th><th>Dirs</th><th>Mount</th><th>Purpose</th></tr></thead><tbody><tr><td><code>CHROOT_BIND_DIRS</code></td><td><code>/dev /proc /sys /run /tmp</code></td><td><code>mount --rbind</code></td><td>Standard chroot plumbing so <code>dracut</code>, <code>sbsign</code>, <code>mokutil</code>, etc. work normally</td></tr><tr><td><code>CHROOT_STATIC_DIRS</code></td><td><code>data etc var swap</code></td><td><code>mount --bind</code></td><td>Live host state the candidate's <code>gen-efi</code> needs but that shouldn't come from the new slot</td></tr></tbody></table>
 <p><code>CHROOT_STATIC_DIRS</code> is bound from the <strong>live, booted system</strong>, not the candidate slot, deliberately:</p>
 <ul>
 <li><code>data</code> — <code>/data/downloads</code> and the slot markers gen-efi may need</li>
@@ -294,21 +296,21 @@ resume_offset=&lt;offset&gt;               # from `btrfs inspect-internal map-sw
 <li><code>swap</code> — the shared <code>@swap</code> subvolume, so <code>gen-efi</code> can read the real swapfile's <code>resume_offset</code></li>
 </ul>
 <p>Consequence: <code>gen-efi</code> inside the chroot always sees the <strong>live</strong> <code>/etc</code>, not the new slot's <code>/etc</code>. This is intentional for keys and keymap (they're shared state), but it means if the new slot ships a different <code>fstab</code> or <code>vconsole.conf</code>, those changes don't affect the UKI cmdline until the <em>next</em> deploy after already booting into the new slot. <code>/sys/firmware/efi/efivars</code> is also rbind-mounted in (when present) so <code>mokutil</code> can reach the real EFI variable store from inside the chroot. <code>/boot/efi</code> is bind-mounted (or freshly mounted by label if not already mounted on the host) so <code>gen-efi</code> writes UKIs to the real ESP.</p>
-<h2>Boot Health & Automatic Rollback</h2>
+<h2 id="boot-health-automatic-rollback">Boot Health & Automatic Rollback</h2>
 <p>Shanios uses systemd-boot's boot-counting mechanism plus its own two-tier failure detection:</p>
-<h3>Tier 1: Boot Counter (systemd-boot)</h3>
+<h3 id="tier-1-boot-counter-systemd-boot">Tier 1: Boot Counter (systemd-boot)</h3>
 <ol>
 <li><strong><code>+3-0</code></strong> — set on the new slot's EFI entry at deploy time (3 tries left, 0 done)</li>
 <li>On each failed boot, the firmware decrements the tries-left counter</li>
 <li>At <code>0</code>, systemd-boot falls back to the <code>(Candidate)</code> entry — before the OS even starts</li>
 <li>Once <code>bless-boot.service</code> runs successfully, the entry file is renamed <code>+3-0</code> → <code>+3-3</code> (tries-left == tries-done), which stops the countdown for good</li>
 </ol>
-<h3>Tier 2: Application-level Health (systemd services)</h3>
-<p>| Service | When | What | |---------|------|------| | <code>mark-boot-in-progress.service</code> | <code>local-fs.target</code> (requires <code>data.mount</code>) | <code>rm -f boot-ok boot_failure.acked boot_in_progress</code>, then <code>touch boot_in_progress</code> — hard-fails (blocking the boot) if <code>/data</code> isn't mounted | | <code>mark-boot-success.service</code> | <code>multi-user.target</code>, requires <code>boot_in_progress</code> to exist | Writes <code>/data/boot-ok</code>, removes <code>boot_in_progress</code>, and — if the slot that just booted matches the slot recorded in <code>boot_failure</code> — clears <code>boot_failure</code>/<code>boot_failure.acked</code> as stale (the slot clearly recovered) | | <code>bless-boot.service</code> | <code>multi-user.target</code>, <code>ConditionPathExists=/data/boot-ok</code> | Runs <code>bootctl set-good</code> — stops the boot counter countdown | | <code>check-boot-failure.timer</code> / <code>.service</code> | <code>OnBootSec=15m</code>, fires once | If <code>boot_in_progress</code> still exists and <code>boot-ok</code> is absent, writes the <em>previously active</em> slot name into <code>/data/boot_failure</code> (skipped if <code>/data/boot_hard_failure</code> is already present) |</p>
+<h3 id="tier-2-application-level-health-systemd-services">Tier 2: Application-level Health (systemd services)</h3>
+<table><thead><tr><th>Service</th><th>When</th><th>What</th></tr></thead><tbody><tr><td><code>mark-boot-in-progress.service</code></td><td><code>local-fs.target</code> (requires <code>data.mount</code>)</td><td><code>rm -f boot-ok boot_failure.acked boot_in_progress</code>, then <code>touch boot_in_progress</code> — hard-fails (blocking the boot) if <code>/data</code> isn't mounted</td></tr><tr><td><code>mark-boot-success.service</code></td><td><code>multi-user.target</code>, requires <code>boot_in_progress</code> to exist</td><td>Writes <code>/data/boot-ok</code>, removes <code>boot_in_progress</code>, and — if the slot that just booted matches the slot recorded in <code>boot_failure</code> — clears <code>boot_failure</code>/<code>boot_failure.acked</code> as stale (the slot clearly recovered)</td></tr><tr><td><code>bless-boot.service</code></td><td><code>multi-user.target</code>, <code>ConditionPathExists=/data/boot-ok</code></td><td>Runs <code>bootctl set-good</code> — stops the boot counter countdown</td></tr><tr><td><code>check-boot-failure.timer</code> / <code>.service</code></td><td><code>OnBootSec=15m</code>, fires once</td><td>If <code>boot_in_progress</code> still exists and <code>boot-ok</code> is absent, writes the <em>previously active</em> slot name into <code>/data/boot_failure</code> (skipped if <code>/data/boot_hard_failure</code> is already present)</td></tr></tbody></table>
 <p>On first login after a fallback, <code>shani-update</code> detects the mismatch between the booted slot and <code>/data/current-slot</code>, then offers rollback.</p>
-<h3>Boot Marker Files</h3>
-<p>| File | Location | Meaning | |------|----------|---------| | <code>boot_in_progress</code> | <code>/data/</code> | Boot started but not yet confirmed successful | | <code>boot-ok</code> | <code>/data/</code> | System reached <code>multi-user.target</code> successfully | | <code>boot_failure</code> | <code>/data/</code> | Soft failure: contains the name of the slot that failed to reach <code>multi-user.target</code> and was fallen back from | | <code>boot_failure.acked</code> | <code>/data/</code> | User acknowledged the failure; rollback was offered | | <code>boot_hard_failure</code> | <code>/data/</code> | Hard failure: contains the attempted slot name (or <code>unknown</code>); written by the pre-mount dracut hook before root mount is even attempted, cleared by the pre-pivot hook only on success |</p>
-<h2>LUKS2 Unlock</h2>
+<h3 id="boot-marker-files">Boot Marker Files</h3>
+<table><thead><tr><th>File</th><th>Location</th><th>Meaning</th></tr></thead><tbody><tr><td><code>boot_in_progress</code></td><td><code>/data/</code></td><td>Boot started but not yet confirmed successful</td></tr><tr><td><code>boot-ok</code></td><td><code>/data/</code></td><td>System reached <code>multi-user.target</code> successfully</td></tr><tr><td><code>boot_failure</code></td><td><code>/data/</code></td><td>Soft failure: contains the name of the slot that failed to reach <code>multi-user.target</code> and was fallen back from</td></tr><tr><td><code>boot_failure.acked</code></td><td><code>/data/</code></td><td>User acknowledged the failure; rollback was offered</td></tr><tr><td><code>boot_hard_failure</code></td><td><code>/data/</code></td><td>Hard failure: contains the attempted slot name (or <code>unknown</code>); written by the pre-mount dracut hook before root mount is even attempted, cleared by the pre-pivot hook only on success</td></tr></tbody></table>
+<h2 id="luks2-unlock">LUKS2 Unlock</h2>
 <p>If full-disk encryption is enabled, the initramfs unlocks the LUKS2 container before mounting the Btrfs partition:</p>
 <ul>
 <li><strong>Manual:</strong> Plymouth passphrase prompt (keyboard layout from <code>rd.vconsole.keymap</code>)</li>
@@ -316,7 +318,7 @@ resume_offset=&lt;offset&gt;               # from `btrfs inspect-internal map-sw
 <li><strong>Recovery:</strong> Boot from USB → <code>cryptsetup open /dev/sdXY shani_root</code> → mount and repair</li>
 </ul>
 <p>The initramfs includes <code>/etc/crypttab</code> (via <code>dracut.conf.d/99-crypt-key.conf</code>) so the LUKS device is known at early-boot time.</p>
-<h2>Checking Boot State</h2>
+<h2 id="checking-boot-state">Checking Boot State</h2>
 <pre><code class="language-bash"># Which slot am I running?
 cat /data/current-slot
 
@@ -340,7 +342,13 @@ journalctl -b -1 --no-pager | head -60
 systemctl status mark-boot-success.service bless-boot.service check-boot-failure.timer
 
 # Comprehensive boot diagnostics
-shani-health --boot</code></pre></div>
+shani-health --boot</code></pre>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="../security/secure-boot.md">Secure Boot</a></li>
+<li><a href="dracut-module">Dracut Initramfs Module</a></li>
+<li><a href="https://blog.shani.dev/post/shani-os-architecture-deep-dive">Boot Process blog deep dive</a></li>
+</ul></div>
     </div>
 
   </main>

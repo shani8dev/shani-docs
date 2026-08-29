@@ -1,7 +1,7 @@
 ---
 title: Communication
 section: Self-Hosting & Servers
-updated: 2026-04-22
+updated: 2026-08-28
 ---
 
 > **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
@@ -142,7 +142,7 @@ services:
 cd ~/mattermost && podman-compose up -d
 ```
 
-> Mattermost requires PostgreSQL. Run it from the [Databases wiki](https://docs.shani.dev/doc/servers/databases) first.
+> Mattermost requires PostgreSQL. Run it from the [Databases wiki](https://docs.shani.dev/doc/servers/databases/postgresql) first.
 
 ---
 
@@ -272,10 +272,23 @@ curl "http://localhost:8070/message?token=YOUR_APP_TOKEN" \
 
 **Purpose:** Self-hosted, open-source video conferencing. No accounts required, no time limits, end-to-end encryption. Drop-in replacement for Zoom or Google Meet for personal or small-team use. For education-specific virtual classrooms with whiteboards, breakout rooms, polling, and LMS integration, see [BigBlueButton in the Education wiki](https://docs.shani.dev/doc/servers/education#bigbluebutton-virtual-classroom).
 
-```yaml
-# ~/jitsi/compose.yaml — use the official quick-install from github.com/jitsi/docker-jitsi-meet
-# Run: wget $(curl -s https://api.github.com/repos/jitsi/docker-jitsi-meet/releases/latest | grep 'tarball' | cut -d'"' -f4) -O jitsi.tar.gz
-# Extract and run: cp env.example .env && ./gen-passwords.sh && podman-compose up -d
+##### Quickstart (docker-jitsi-meet)
+
+```bash
+git clone https://github.com/jitsi/docker-jitsi-meet ~/jitsi
+cd ~/jitsi
+./gen-passwords.sh        # generates strong passwords for every component
+cp env.example .env       # then edit .env — set CONFIG, HTTP_PORT, HTTPS_PORT, and TZ
+mkdir -p ~/.jitsi-meet-cfg/{web,transcripts,jicofo,jvb}
+podman-compose up -d
+```
+
+Access at `https://localhost` — a self-signed certificate is generated on first boot; create a room by entering any name.
+
+Verify the web server is up before opening ports:
+
+```bash
+curl -k https://localhost
 ```
 
 Ports required: `80/tcp`, `443/tcp`, `10000/udp` (media). Caddy should proxy 80/443 and pass through the media port.
@@ -356,7 +369,7 @@ services:
 cd ~/discourse && podman-compose up -d
 ```
 
-> Discourse requires PostgreSQL and Redis. Run both from the [Databases wiki](https://docs.shani.dev/doc/servers/databases) first. It also requires outbound email (SMTP) for account activation — use Mailpit in development.
+> Discourse requires PostgreSQL and Redis. Run both from the [Databases wiki](https://docs.shani.dev/doc/servers/databases/postgresql) first. It also requires outbound email (SMTP) for account activation — use Mailpit in development.
 
 #### First-time setup
 Visit `http://localhost:3100/finish-installation` to create the admin account.
@@ -435,6 +448,16 @@ volumes:
 ```bash
 cd ~/mastodon && podman-compose up -d
 ```
+
+##### Generate the required secrets
+
+`SECRET_KEY_BASE` and `OTP_SECRET` must be two distinct random values, identical between the `web` and `sidekiq` services. Generate each with:
+
+```bash
+podman run --rm ghcr.io/mastodon/mastodon bundle exec rake secret
+```
+
+Run the command twice and paste the output into both services before first start — Mastodon refuses to boot without them.
 
 #### Initial setup
 ```bash
@@ -998,3 +1021,8 @@ support.example.com   { reverse_proxy localhost:3300 }
 | SimpleX server not reachable | Ensure port `5223/tcp` is publicly reachable; verify the fingerprint in your server address matches what `smp-server` printed during init |
 | Chatwoot widget not loading | Verify `FRONTEND_URL` matches the domain the widget is loaded from; check CSP headers aren't blocking the script |
 | Chatwoot Sidekiq not processing | Check Redis is running and `REDIS_URL` is correct; view Sidekiq logs with `podman logs chatwoot-sidekiq-1` |
+
+## See Also
+
+- [Databases (PostgreSQL/Redis)](databases)
+- [Mail server](mail)

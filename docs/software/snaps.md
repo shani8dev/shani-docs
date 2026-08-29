@@ -1,7 +1,7 @@
 ---
 title: Snaps
 section: Software & Apps
-updated: 2026-04-01
+updated: 2026-08-28
 ---
 
 # Snaps
@@ -128,3 +128,10 @@ snap refresh --hold=48h app-name
 # Resume auto-updates for a snap
 snap refresh --unhold app-name
 ```
+
+## See Also
+
+- [Flatpak](flatpak) — sandboxed app store alternative
+- [Nix Package Manager](nix) — CLI tools and development runtimes
+- [Distrobox](distrobox) — full mutable environments
+- [Immutability](../concepts/immutability.md) — how snaps persist on an immutable OS

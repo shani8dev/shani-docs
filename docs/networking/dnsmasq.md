@@ -1,7 +1,7 @@
 ---
 title: dnsmasq (Local DNS)
 section: Networking
-updated: 2026-04-18
+updated: 2026-08-28
 ---
 
 # dnsmasq — Local DNS, DHCP & Split DNS
@@ -113,3 +113,11 @@ sudo journalctl -u dnsmasq -f
 | Custom hostnames not resolving | Confirm dnsmasq is the active resolver (`cat /etc/resolv.conf` should show `127.0.0.1`); run `dig @127.0.0.1 myhost.home` to test directly |
 | VPN DNS stops working after enabling dnsmasq | Ensure openresolv integration is set up (`name_servers=127.0.0.1` in `/etc/resolvconf.conf`) — dnsmasq receives upstream servers from openresolv and handles split DNS automatically |
 | DHCP leases not assigned | Check that no other DHCP server is active on the same subnet (usually your router); verify `dhcp-range` is uncommented and the interface is correct |
+
+## See Also
+
+- [openresolv](openresolv) — DNS configuration manager
+- [DNS over HTTPS (dnscrypt-proxy)](dnscrypt-proxy) — encrypted DNS resolver
+- [Firewall](firewalld) — network security rules
+- [SSH Server](openssh) — remote access
+- [DNS Server Applications](../servers/networking.md) — Pi-hole, AdGuard Home, Unbound, Technitium

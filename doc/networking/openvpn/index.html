@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>OpenVPN — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="OpenVPN  OpenVPN and its NetworkManager plugin are pre-installed on Shani OS. Use it to connect to corporate or university VPNs, self-hosted VPN servers, o…">
+  <meta name="description" id="meta-desc"     content="OpenVPN Purpose: Legacy, highly configurable VPN standard. Use when you need specific cipher suites, client certificate management, or compatibility with o…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="OpenVPN">
-  <meta property="og:description" id="og-desc"    content="OpenVPN  OpenVPN and its NetworkManager plugin are pre-installed on Shani OS. Use it to connect to corporate or university VPNs, self-hosted VPN servers, o…">
+  <meta property="og:description" id="og-desc"    content="OpenVPN Purpose: Legacy, highly configurable VPN standard. Use when you need specific cipher suites, client certificate management, or compatibility with o…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/networking/openvpn/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="OpenVPN">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="OpenVPN">
-  <meta name="twitter:description" id="tw-desc"  content="OpenVPN  OpenVPN and its NetworkManager plugin are pre-installed on Shani OS. Use it to connect to corporate or university VPNs, self-hosted VPN servers, o…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="OpenVPN Purpose: Legacy, highly configurable VPN standard. Use when you need specific cipher suites, client certificate management, or compatibility with o…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"OpenVPN","description":"OpenVPN  OpenVPN and its NetworkManager plugin are pre-installed on Shani OS. Use it to connect to corporate or university VPNs, self-hosted VPN servers, o…","url":"https://docs.shani.dev/doc/networking/openvpn/","datePublished":"2026-04-20T00:00:00.000Z","dateModified":"2026-04-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"OpenVPN","description":"OpenVPN Purpose: Legacy, highly configurable VPN standard. Use when you need specific cipher suites, client certificate management, or compatibility with o…","url":"https://docs.shani.dev/doc/networking/openvpn/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"OpenVPN","item":"https://docs.shani.dev/doc/networking/openvpn/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -212,153 +214,33 @@
       <div class="doc-header">
         <h1 class="doc-title">OpenVPN</h1>
         <div class="doc-meta">
-          <span class="doc-meta__badge">Networking</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+          <span class="doc-meta__badge">Self-Hosted Networking</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><p>OpenVPN and its NetworkManager plugin are pre-installed on Shani OS. Use it to connect to corporate or university VPNs, self-hosted VPN servers, or any provider that issues <code>.ovpn</code> profile files.</p>
-<blockquote><p><strong>OpenVPN vs WireGuard:</strong> Use <strong>WireGuard</strong> for new self-hosted setups — it is faster, simpler, and has a smaller attack surface. Use <strong>OpenVPN</strong> when you need to connect to an existing OpenVPN server or a provider/employer that issues <code>.ovpn</code> files.</p></blockquote>
-<p>---</p>
-<h2>Connecting with a .ovpn Profile</h2>
-<p>Most VPN providers and corporate IT departments issue a single <code>.ovpn</code> file that contains all configuration and certificates.</p>
-<h3>Via NetworkManager (recommended)</h3>
-<pre><code class="language-bash"># Import the profile
-sudo nmcli connection import type openvpn file /path/to/client.ovpn
-
-# Connect
-nmcli connection up &lt;profile-name&gt;
-
-# Disconnect
-nmcli connection down &lt;profile-name&gt;
-
-# List VPN connections
-nmcli connection show | grep vpn
-
-# Delete a profile
-nmcli connection delete &lt;profile-name&gt;</code></pre>
-<p>Or use the GUI: <strong>System Settings → Connections → Import</strong> (KDE) / <strong>Settings → Network → VPN → +</strong> (GNOME).</p>
-<h3>Via openvpn Directly</h3>
-<pre><code class="language-bash"># Connect (foreground — Ctrl-C to disconnect)
-sudo openvpn --config /path/to/client.ovpn
-
-# Connect in background
-sudo openvpn --config /path/to/client.ovpn --daemon --log /var/log/openvpn.log
-
-# Watch the log
-sudo tail -f /var/log/openvpn.log</code></pre>
-<p>---</p>
-<h2>Manual Configuration</h2>
-<p>When you need to build a config from separate certificate files rather than an all-in-one <code>.ovpn</code>:</p>
-<pre><code class="language-ini"># /etc/openvpn/client/myvpn.conf
-
-client
-dev tun
-proto udp
-remote vpn.example.com 1194
-
-# Certificates — inline or as file paths
-ca   /etc/openvpn/client/ca.crt
-cert /etc/openvpn/client/client.crt
-key  /etc/openvpn/client/client.key
-
-# TLS authentication (if server uses --tls-auth or --tls-crypt)
-tls-crypt /etc/openvpn/client/ta.key
-
-# Route all traffic through the VPN
-redirect-gateway def1
-dhcp-option DNS 1.1.1.1
-
-# Reconnect on failure
-resolv-retry infinite
-nobind
-persist-key
-persist-tun
-
-# Compression (match server setting)
-# comp-lzo   # legacy — only enable if server requires it
-
-verb 3</code></pre>
-<p>Start the manually configured connection:</p>
-<pre><code class="language-bash">sudo systemctl enable --now openvpn-client@myvpn
-# Reads: /etc/openvpn/client/myvpn.conf
-
-sudo systemctl status openvpn-client@myvpn
-sudo journalctl -u openvpn-client@myvpn -f</code></pre>
-<p>---</p>
-<h2>Inline Certificates (.ovpn Format)</h2>
-<p>Many providers embed certificates directly in the <code>.ovpn</code> file using XML-style tags. This is the standard format and works with both <code>nmcli</code> import and <code>openvpn --config</code>:</p>
-<pre><code class="language-ini">&lt;ca&gt;
------BEGIN CERTIFICATE-----
-...
------END CERTIFICATE-----
-&lt;/ca&gt;
-
-&lt;cert&gt;
------BEGIN CERTIFICATE-----
-...
------END CERTIFICATE-----
-&lt;/cert&gt;
-
-&lt;key&gt;
------BEGIN PRIVATE KEY-----
-...
------END PRIVATE KEY-----
-&lt;/key&gt;
-
-&lt;tls-crypt&gt;
------BEGIN OpenVPN Static key V1-----
-...
------END OpenVPN Static key V1-----
-&lt;/tls-crypt&gt;</code></pre>
-<p>---</p>
-<h2>Username/Password Authentication</h2>
-<p>Some servers require credentials in addition to certificates:</p>
-<pre><code class="language-bash"># Connect interactively (prompts for username/password)
-sudo openvpn --config client.ovpn --auth-user-pass
-
-# Or store credentials in a file (one line each)
-echo -e &quot;myusername\nmypassword&quot; | sudo tee /etc/openvpn/client/credentials
-sudo chmod 600 /etc/openvpn/client/credentials</code></pre>
-<p>Add to the config:</p>
-<pre><code class="language-ini">auth-user-pass /etc/openvpn/client/credentials</code></pre>
-<p>---</p>
-<h2>Firewall</h2>
-<p>OpenVPN creates a <code>tun0</code> interface. Add it to the trusted zone so VPN traffic is not blocked:</p>
-<pre><code class="language-bash">sudo firewall-cmd --zone=trusted --add-interface=tun0 --permanent
-sudo firewall-cmd --reload</code></pre>
-<p>If running an OpenVPN <strong>server</strong> on this machine:</p>
-<pre><code class="language-bash"># Open the listen port
-sudo firewall-cmd --add-port=1194/udp --permanent
-
-# Enable masquerade so VPN clients can reach the internet
-sudo firewall-cmd --zone=public --add-masquerade --permanent
-
-sudo firewall-cmd --reload</code></pre>
-<p>---</p>
-<h2>Status & Diagnostics</h2>
-<pre><code class="language-bash"># Check if the tunnel interface is up
-ip addr show tun0
-
-# Check routes going through the VPN
-ip route show | grep tun0
-
-# Verify your external IP has changed (confirms traffic is tunnelled)
-curl https://ifconfig.me
-
-# View connection log (systemd unit)
-sudo journalctl -u openvpn-client@myvpn -n 50
-
-# View connection log (daemon mode)
-sudo tail -f /var/log/openvpn.log</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | TLS handshake failed | Server may require a minimum TLS version — add <code>tls-version-min 1.2</code> to the config; verify <code>ca</code>, <code>cert</code>, <code>key</code> paths are correct | | <code>AUTH_FAILED</code> | Wrong username/password, or certificate CN mismatch; check server logs | | <code>tun0</code> not created | Check <code>dmesg</code> for TUN/TAP module errors; ensure <code>tun</code> module is loaded: <code>sudo modprobe tun</code> | | Connected but no internet | <code>redirect-gateway def1</code> pushes a default route — ensure the server has masquerade enabled; add <code>dhcp-option DNS</code> to avoid DNS leaks | | DNS leaks while connected | Set <code>dhcp-option DNS</code> in the config; or use <a href="dnscrypt">dnscrypt-proxy</a> which is not affected by VPN DNS push | | Connection drops on network change | Add <code>persist-tun</code> and <code>persist-key</code> to the config; NetworkManager handles reconnection automatically | | <code>comp-lzo</code> deprecation warning | Remove <code>comp-lzo</code> from the config unless the server explicitly requires it; use <code>compress</code> instead if needed |</p>
-<p>---</p>
-<h2>See Also</h2>
+      <div class="prose"><blockquote><strong>Part of the VPN & Tunnels series:</strong> See <a href="../networking">all networking docs</a></blockquote>
+<h2 id="openvpn">OpenVPN</h2>
+<p><strong>Purpose:</strong> Legacy, highly configurable VPN standard. Use when you need specific cipher suites, client certificate management, or compatibility with older devices.</p>
+<pre><code class="language-yaml"># ~/openvpn/compose.yaml
+services:
+  openvpn:
+    image: kylemanna/openvpn
+    ports:
+      - 0.0.0.0:1194:1194/udp
+    volumes:
+      - /home/user/openvpn:/etc/openvpn:Z
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      net.ipv4.ip_forward: 1
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/openvpn &amp;&amp; podman-compose up -d</code></pre>
+<hr>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="wireguard">WireGuard</a> — preferred for new self-hosted VPN setups</li>
-<li><a href="firewalld">Firewall</a> — opening ports and masquerade for VPN servers</li>
-<li><a href="dnscrypt">dnscrypt-proxy</a> — encrypted DNS alongside VPN</li>
+<li><a href="../networking">Networking</a> — all networking docs</li>
 </ul></div>
     </div>
 

@@ -1,7 +1,7 @@
 ---
 title: Btrfs Deep Dive
 section: Architecture
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # Btrfs Deep Dive
@@ -89,7 +89,7 @@ sudo btrfs send -p /data/snapshots/home-20250101 /data/snapshots/home-20250201 \
   | sudo btrfs receive /mnt/backup/
 ```
 
-> **Snapshots are not backups** if they live on the same disk — a disk failure loses both. Use `btrfs send` to an external drive, or `restic`/`rclone` for cloud storage. See [Backup & Recovery](../system/backup) for a complete backup strategy.
+> **Snapshots are not backups** if they live on the same disk — a disk failure loses both. Use `btrfs send` to an external drive, or `restic`/`rclone` for cloud storage. See [Backup & Recovery](../system/backup.md) for a complete backup strategy.
 
 ## Btrfs Manual Maintenance
 
@@ -182,3 +182,9 @@ Shanios runs Btrfs maintenance automatically via systemd timers — no manual in
 systemctl status btrfs-scrub.timer btrfs-balance.timer btrfs-defrag.timer
 systemctl list-timers btrfs-*
 ```
+
+## See Also
+
+- [Filesystem Structure](filesystem)
+- [Snapshots & Backup guide](https://blog.shani.dev/post/shani-os-btrfs-snapshots-and-backup)
+- [Storage Management](../system/storage.md)

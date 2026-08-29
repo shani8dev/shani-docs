@@ -1,7 +1,7 @@
 ---
 title: apcupsd (UPS Daemon)
 section: Networking
-updated: 2026-04-20
+updated: 2026-08-28
 ---
 
 # apcupsd — APC UPS Daemon
@@ -114,6 +114,8 @@ Make scripts executable:
 sudo chmod +x /etc/apcupsd/onbattery
 ```
 
+> The `mail` example above requires `mailx` to be installed and configured. To log events to the journal instead: `logger -t apcupsd "on battery"`
+
 ---
 
 ## Network Status Server
@@ -146,3 +148,8 @@ sudo firewall-cmd --reload
 | UPS not detected | Run `lsusb` to confirm the UPS appears; APC USB devices use the standard HID UPS class — no extra driver needed |
 | Shutdown not triggering on low battery | Check `BATTERYLEVEL` and `MINUTES` thresholds in the config; test with `apctest` → option 7 (simulate power failure) |
 | `STATFLAG` shows `0x060000` (communication lost) | Cable issue or wrong port — unplug/replug USB; check `DEVICE` is blank for USB |
+
+## See Also
+
+- [UPS monitoring in practice](https://blog.shani.dev/post/shani-os-home-server)
+- [systemd timers](../system/cronie.md)

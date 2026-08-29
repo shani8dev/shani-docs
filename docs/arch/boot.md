@@ -1,7 +1,7 @@
 ---
 title: Boot Process
 section: Architecture
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Boot Process
@@ -197,3 +197,9 @@ systemctl status mark-boot-success.service bless-boot.service check-boot-failure
 # Comprehensive boot diagnostics
 shani-health --boot
 ```
+
+## See Also
+
+- [Secure Boot](../security/secure-boot.md)
+- [Dracut Initramfs Module](dracut-module)
+- [Boot Process blog deep dive](https://blog.shani.dev/post/shani-os-architecture-deep-dive)

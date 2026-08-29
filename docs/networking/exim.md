@@ -1,7 +1,7 @@
 ---
 title: Exim (Mail Transfer Agent)
 section: Networking
-updated: 2026-04-20
+updated: 2026-08-28
 ---
 
 # Exim — Mail Transfer Agent
@@ -66,6 +66,8 @@ begin authenticators
 ```
 
 > **Gmail:** Use an [App Password](https://myaccount.google.com/apppasswords) (not your main password) — requires 2FA to be enabled on the account. Set `smtp.gmail.com`, port `587`.
+
+> **Plain-text credentials:** `client_send` contains the app password — restrict the file: `sudo chmod 600 /etc/mail/exim.conf`
 
 After editing:
 
@@ -132,3 +134,8 @@ sudo tail -f /var/log/exim/mainlog
 | `TLS negotiation failed` | Confirm `hosts_require_tls = *` is set and the upstream SMTP port supports STARTTLS (587) or TLS (465) |
 | Cron output not being mailed | Ensure `MAILTO` is set in the crontab (`MAILTO=root` or `MAILTO=youruser`) and Exim is running |
 | Exim not starting | Run `sudo exim -bV` to check config syntax; check `journalctl -u exim` for errors |
+
+## See Also
+
+- [arpwatch mail alerts](arpwatch)
+- [Logging](../system/logging.md)

@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>Productivity — File Sync (Nextcloud, Syncthing &amp; More) — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Key Concepts Internal Developer Platforms (IDPs) — what they solve Without an IDP, every developer needs to know: how to provision infrastructure (Terrafor…">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/servers/productivity/file-sync/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="Productivity — File Sync (Nextcloud, Syncthing &amp; More)">
+  <meta property="og:description" id="og-desc"    content="Key Concepts Internal Developer Platforms (IDPs) — what they solve Without an IDP, every developer needs to know: how to provision infrastructure (Terrafor…">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/productivity/file-sync/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="Productivity — File Sync (Nextcloud, Syncthing &amp; More)">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="Productivity — File Sync (Nextcloud, Syncthing &amp; More)">
+  <meta name="twitter:description" id="tw-desc"  content="Key Concepts Internal Developer Platforms (IDPs) — what they solve Without an IDP, every developer needs to know: how to provision infrastructure (Terrafor…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Productivity — File Sync (Nextcloud, Syncthing & More)","description":"Key Concepts Internal Developer Platforms (IDPs) — what they solve Without an IDP, every developer needs to know: how to provision infrastructure (Terrafor…","url":"https://docs.shani.dev/doc/servers/productivity/file-sync/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Productivity — File Sync (Nextcloud, Syncthing & More)","item":"https://docs.shani.dev/doc/servers/productivity/file-sync/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Productivity — File Sync (Nextcloud, Syncthing &amp; More)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><h2 id="key-concepts">Key Concepts</h2>
+<h4 id="internal-developer-platforms-idps-what-they-solve">Internal Developer Platforms (IDPs) — what they solve</h4>
+<p>Without an IDP, every developer needs to know: how to provision infrastructure (Terraform), how to set up CI/CD (Woodpecker/GitHub Actions), how to configure observability (Prometheus + Grafana), how to manage secrets (OpenBao), and how to deploy (Helm + ArgoCD). An IDP (Backstage, Port) wraps all of this in a self-service UI with golden path templates. A developer fills in a form and gets a GitHub repo, CI pipeline, Kubernetes namespace, database, and Grafana dashboard — all wired together. This is what "platform engineering" means in practice.</p>
+<h4 id="document-as-code-vs-knowledge-wiki">Document-as-code vs knowledge wiki</h4>
+<p>"Docs-as-code" treats documentation like source code — Markdown files in Git, reviewed via PRs, versioned alongside the code they describe, rendered by a static site generator (Docusaurus). This contrasts with wikis (Confluence, BookStack) where docs live in a database, aren't version-controlled with code, and aren't part of the review process. Best practice: API docs and runbooks live in the code repo; architectural decision records (ADRs) also live in Git; long-form internal knowledge in a wiki.</p>
+<h4 id="architecture-decision-records-adrs">Architecture Decision Records (ADRs)</h4>
+<p>Lightweight documents that capture the context, decision, and consequences of a significant technical decision. Stored in <code>docs/adr/</code> in the repo. Format: (1) Status (proposed/accepted/deprecated/superseded), (2) Context (what problem, what constraints), (3) Decision (what was chosen), (4) Consequences (trade-offs). ADRs let future engineers understand <em>why</em> a decision was made, not just <em>what</em> was decided. Essential for remote teams and long-lived systems.</p>
+<h4 id="webhook-driven-automation-patterns">Webhook-driven automation patterns</h4>
+<p>A webhook is an HTTP POST that an event source sends to a configured URL when something happens. Gitea sends a webhook on push → Woodpecker CI starts a pipeline. GitHub sends a webhook on PR merge → n8n workflow updates a Jira ticket. Webhooks are stateless and fire-and-forget — the source doesn't wait for the receiver. For reliability, the receiver should acknowledge immediately (HTTP 200) and process asynchronously. Webhook security: always verify the HMAC-SHA256 signature in the <code>X-Gitea-Signature</code> or <code>X-Hub-Signature-256</code> header.</p>
+<h4 id="s3-compatible-storage-in-the-modern-stack">S3-compatible storage in the modern stack</h4>
+<p>Understanding the S3 API is a core DevOps skill because it's used by: Velero (Kubernetes backups), Restic/Kopia (file backups), Thanos (Prometheus long-term storage), Loki (log storage), MLflow (model artifacts), and dozens of other tools. The key operations: PutObject, GetObject, DeleteObject, ListObjectsV2. Presigned URLs (time-limited, signature-authenticated URLs for direct client access) come up in interview questions about secure file sharing.</p>
+<h4 id="self-hosted-vs-saas-trade-offs-the-honest-framing">Self-hosted vs SaaS trade-offs — the honest framing</h4>
+<p>Self-hosting gives you data sovereignty, no per-seat pricing, and customisation. The real costs: operational overhead (updates, backups, uptime), security responsibility (you patch the CVEs, not the vendor), and feature gaps (SaaS products have larger engineering teams). The right answer depends on data sensitivity (medical/legal → self-host), team size (one person managing 20 self-hosted apps is a maintenance burden), and internet reliability (self-hosted services go down when your home internet does).</p>
+<h4 id="nextcloud-as-a-platform-not-just-file-sync">Nextcloud as a platform, not just file sync</h4>
+<p>Nextcloud's app ecosystem makes it more than Dropbox. Talk (video calls + chat), Calendar (CalDAV), Contacts (CardDAV), Notes, Deck (Kanban), and Forms extend it toward a self-hosted Google Workspace. The key architecture decision: high-performance backend (Redis for caching, PostgreSQL over SQLite, preview generation workers) makes the difference between a slow clunky app and one that feels like a real SaaS product. External storage mounts (S3, SFTP, SMB) let you use Nextcloud as a unified frontend for data that lives elsewhere.</p>
+<h4 id="workflow-automation-n8n-vs-zapier-mental-model">Workflow automation — n8n vs Zapier mental model</h4>
+<p>n8n is a self-hosted Zapier/Make alternative: visual, node-based automation flows triggered by webhooks, schedules, or events. Each node is an action (HTTP request, database query, email send, Slack message). The key concept is the data flow between nodes — each node receives the previous node's output as JSON. Useful patterns: nightly report from Prometheus data → formatted Markdown → sent to Telegram; new row in Nextcloud spreadsheet → create task in Vikunja; RSS item with keyword → saved to Wallabag. For DevOps automation (CI/CD, Kubernetes), prefer purpose-built tools; n8n is best for glue code between productivity apps.</p>
+<p><strong>CalDAV and CardDAV — the open calendar/contacts standard:</strong> These protocols (extensions of WebDAV) are how Nextcloud, Radicale, and Baikal expose calendars and contacts to any client (iOS, Android, Thunderbird, GNOME Calendar). Understanding them matters because: (1) any self-hosted calendar server can replace Google Calendar if your clients support CalDAV, (2) when debugging sync issues, the protocol is the same regardless of server, (3) event data lives in iCalendar format (.ics) — human-readable, version-controllable.</p>
+<h4 id="documentation-as-institutional-memory">Documentation as institutional memory</h4>
+<p>The half-life of tribal knowledge is the tenure of the person who holds it. A wiki (BookStack, Outline, Wiki.js) only provides value if it's kept current and actually consulted. Two practices that work: (1) runbooks linked from Grafana alerts — the person paged opens the alert and sees the runbook URL immediately, so runbooks get used and therefore get maintained; (2) ADRs committed alongside code — the PR that adds a service also adds a doc/adr explaining why.</p>
+<h4 id="internal-developer-portals-what-backstage-actually-solves">Internal developer portals — what Backstage actually solves</h4>
+<p>Software catalog sprawl: in a company with 50+ microservices, no one knows who owns what, what's deployed where, what APIs exist, or where the runbooks are. Backstage solves this with a software catalog (every service has a <code>catalog-info.yaml</code> with owner, links, dependencies) and a TechDocs site (markdown documentation auto-published from the service repo). Plugins add live data: which Kubernetes pods are running for this service, the latest CI build status, Datadog SLOs, PagerDuty on-call. The business value: onboarding time drops from weeks to days when every new engineer can discover services, owners, and documentation from one place.</p>
+<h4 id="knowledge-management-why-wikis-fail-and-how-to-fix-them">Knowledge management — why wikis fail and how to fix them</h4>
+<p>Wikis fail because they rot: content goes stale, nobody maintains it, and eventually nobody trusts it. Practices that work: (1) link runbooks directly from Grafana alerts — the person paged opens the alert and sees the runbook URL immediately, so runbooks get used and therefore maintained; (2) ADRs (Architecture Decision Records) committed alongside code — the PR that adds a service also adds <code>docs/decisions/001-why-postgres.md</code>; (3) treat documentation as code — PRs required for doc changes, linting for broken links, last-modified dates visible on every page. The failure mode to avoid: a wiki that's separate from the workflow is a wiki nobody reads.</p>
+<h4 id="webhook-driven-automation-the-integration-pattern">Webhook-driven automation — the integration pattern</h4>
+<p>Webhooks are HTTP POST requests sent by a system when an event occurs. Gitea sends a webhook on every push; Grafana sends one when an alert fires; Stripe sends one when a payment succeeds. n8n, Huginn, and custom endpoints receive these webhooks and trigger workflows. The pattern: system event → webhook POST → automation platform → actions (send Slack message, create Jira ticket, trigger deployment, update spreadsheet). This is the foundation of event-driven integration — cheaper and simpler than polling APIs on a schedule. Webhook security: always validate the HMAC signature in the payload header before processing.</p>
+<h4 id="s3-compatible-storage-as-a-universal-integration-layer">S3-compatible storage as a universal integration layer</h4>
+<p>MinIO's S3-compatible API means any tool that supports S3 works with your self-hosted storage: backup tools (Restic, Kopia), analytics platforms (Trino, DuckDB, Spark), ML frameworks (MLflow artifact store), logging pipelines (Loki, Thanos), and CI artifact storage (Woodpecker). The S3 API has become the universal object storage interface — knowing how to configure IAM-style bucket policies, lifecycle rules, and versioning in MinIO transfers directly to AWS S3 skills, and vice versa.</p>
+<hr>
+<hr>
+<h2 id="nextcloud">Nextcloud</h2>
+<p><strong>Purpose:</strong> Comprehensive self-hosted cloud suite — file sync across all your devices, calendar, contacts, collaborative document editing (via Collabora or OnlyOffice), and a mobile app that feels like Google Drive. Replaces Dropbox, Google Drive, Google Calendar, and Google Contacts simultaneously.</p>
+<h3 id="how-webdav-and-caldav-work">How WebDAV and CalDAV Work</h3>
+<p>Nextcloud (and several other tools in this section) expose their file and calendar data via two HTTP-based protocols that are worth understanding:</p>
+<p><strong>WebDAV (Web Distributed Authoring and Versioning):</strong> extends HTTP with additional methods (<code>PROPFIND</code>, <code>MKCOL</code>, <code>COPY</code>, <code>MOVE</code>, <code>LOCK</code>) that let clients browse, upload, download, and manage files over HTTPS — without a proprietary sync agent. Any WebDAV client (Nautilus, Finder, Cyberduck, rclone, Windows Explorer) can mount a WebDAV share as a filesystem. Nextcloud exposes WebDAV at:</p>
+<pre><code>https://files.home.local/remote.php/dav/files/&lt;username&gt;/</code></pre>
+<p><strong>CalDAV:</strong> is a similar extension for calendar data — it adds iCalendar (<code>.ics</code>) create/read/update/delete operations over HTTP. Any CalDAV-compatible calendar app (GNOME Calendar, Apple Calendar, Thunderbird, Android via DAVx⁵) syncs directly with your Nextcloud calendar. Nextcloud's CalDAV endpoint:</p>
+<pre><code>https://files.home.local/remote.php/dav/calendars/&lt;username&gt;/</code></pre>
+<p><strong>CardDAV:</strong> is the same concept for contacts (<code>.vcf</code> / vCard format). These three protocols together are why Nextcloud can replace an entire Google Workspace for file, calendar, and contacts sync — they're open standards, not proprietary APIs.</p>
+<h5 id="mounting-nextcloud-via-rclone-webdav">Mounting Nextcloud via rclone (WebDAV)</h5>
+<pre><code class="language-bash"># Configure in rclone config (type: webdav, vendor: nextcloud)
+rclone copy nextcloud:/Documents ~/local-backup/
+
+# Or mount as a local filesystem
+rclone mount nextcloud:/ ~/mnt/nextcloud/ --daemon</code></pre>
+<pre><code class="language-yaml"># ~/nextcloud/compose.yaml
+services:
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nc
+      MYSQL_PASSWORD: ncpass
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  nextcloud:
+    image: nextcloud:30
+    ports: [&quot;127.0.0.1:8888:80&quot;]
+    environment:
+      MYSQL_HOST: db
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nc
+      MYSQL_PASSWORD: ncpass
+      REDIS_HOST: redis
+      NEXTCLOUD_ADMIN_USER: admin
+      NEXTCLOUD_ADMIN_PASSWORD: changeme
+      NEXTCLOUD_TRUSTED_DOMAINS: files.home.local
+    volumes: [nc_data:/var/www/html]
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+volumes:
+  db_data:
+  nc_data:</code></pre>
+<pre><code class="language-bash">cd ~/nextcloud &amp;&amp; podman-compose up -d</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">files.home.local { tls internal; reverse_proxy localhost:8888 }</code></pre>
+<h5 id="run-background-jobs-required-for-performance">Run background jobs (required for performance)</h5>
+<pre><code class="language-bash"># Add to a systemd timer — every 5 minutes
+podman exec -u www-data nextcloud php /var/www/html/cron.php</code></pre>
+<h4 id="common-operations">Common operations</h4>
+<pre><code class="language-bash"># Run Nextcloud cron (add to systemd timer — every 5 minutes)
+podman exec -u www-data nextcloud php /var/www/html/cron.php
+
+# Run OCC commands (Nextcloud's admin CLI)
+podman exec -u www-data nextcloud php occ status
+podman exec -u www-data nextcloud php occ user:list
+podman exec -u www-data nextcloud php occ files:scan --all
+podman exec -u www-data nextcloud php occ maintenance:mode --on
+podman exec -u www-data nextcloud php occ maintenance:mode --off
+podman exec -u www-data nextcloud php occ upgrade
+podman exec -u www-data nextcloud php occ app:install photos
+podman exec -u www-data nextcloud php occ app:list
+podman exec -u www-data nextcloud php occ db:add-missing-indices
+
+# Add a trusted domain
+podman exec -u www-data nextcloud php occ config:system:set trusted_domains 2 --value=files.home.local
+
+# View Nextcloud logs
+podman exec -u www-data nextcloud php occ log:tail
+
+# Check background jobs are running
+podman exec -u www-data nextcloud php occ background:cron</code></pre>
+<h4 id="recommended-apps-to-install">Recommended apps to install</h4>
+<p>Nextcloud Office (Collabora), Contacts, Calendar, Notes, Passwords, Talk (video calls).</p>
+<hr>
+<h2 id="syncthing">Syncthing</h2>
+<p><strong>Purpose:</strong> Decentralised, peer-to-peer file sync with no central server. Devices sync directly with each other — encrypted, open-source, and completely private. Ideal for syncing folders across your laptop, phone, and server without a cloud account.</p>
+<pre><code class="language-yaml"># ~/syncthing/compose.yaml
+services:
+  syncthing:
+    image: syncthing/syncthing:latest
+    ports:
+      - 127.0.0.1:8384:8384
+      - 22000:22000/tcp
+      - 22000:22000/udp
+      - 21027:21027/udp
+    volumes:
+      - /home/user/syncthing/config:/var/syncthing/config:Z
+      - /home/user/sync:/var/syncthing/Sync:Z
+    environment:
+      PUID: &quot;1000&quot;
+      PGID: &quot;1000&quot;
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/syncthing &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="common-operations-2">Common operations</h4>
+<pre><code class="language-bash"># View logs
+podman logs -f syncthing
+
+# Get device ID (needed to pair with other devices)
+podman exec syncthing syncthing --device-id
+
+# List paired devices and their status via API
+curl -s -H &quot;X-API-Key: $(grep apikey /home/user/syncthing/config/config.xml | grep -oP '(?&lt;=&gt;)[^&lt;]+')&quot;   http://localhost:8384/rest/system/connections | python3 -m json.tool
+
+# Check folder sync status
+curl -s -H &quot;X-API-Key: YOUR_API_KEY&quot;   http://localhost:8384/rest/db/status?folder=default | python3 -m json.tool
+
+# Force a full rescan
+curl -X POST -H &quot;X-API-Key: YOUR_API_KEY&quot;   &quot;http://localhost:8384/rest/db/scan?folder=default&quot;
+
+# Get server version and stats
+curl -s http://localhost:8384/rest/system/version</code></pre>
+<p><strong>Firewall:</strong> (for syncing with external devices):</p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=22000/tcp --add-port=22000/udp --add-port=21027/udp --permanent
+sudo firewall-cmd --reload</code></pre>
+<p>Access the web UI at <code>http://localhost:8384</code>. Add remote devices using their Device ID (found in the UI).</p>
+<hr>
+<h2 id="filebrowser">Filebrowser</h2>
+<p><strong>Purpose:</strong> Lightweight web-based file manager. Browse, upload, download, rename, and edit files on your server from any browser. Useful for quick file access without needing an SSH client or a full Nextcloud setup.</p>
+<pre><code class="language-yaml"># ~/filebrowser/compose.yaml
+services:
+  filebrowser:
+    image: filebrowser/filebrowser:s6
+    ports:
+      - 127.0.0.1:8085:80
+    volumes:
+      - /home/user:/srv:Z
+      - /home/user/filebrowser.db:/database.db:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/filebrowser &amp;&amp; podman-compose up -d</code></pre>
+<p>Default login: admin / admin. Change the password immediately after first login.</p>
+<hr>
+<h2 id="paperless-ngx">Paperless-ngx</h2>
+<p><strong>Purpose:</strong> Document management system with OCR. Scan paper documents, automatically index and tag their contents, and make everything full-text searchable. Drop a PDF into the consume folder and it is automatically processed and filed.</p>
+<pre><code class="language-yaml"># ~/paperless/compose.yaml
+services:
+  broker:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: paperless
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  webserver:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    ports: [&quot;127.0.0.1:8000:8000&quot;]
+    environment:
+      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_DBHOST: db
+      PAPERLESS_OCR_LANGUAGE: eng
+      PAPERLESS_TIME_ZONE: Asia/Kolkata
+      PAPERLESS_ADMIN_USER: admin
+      PAPERLESS_ADMIN_PASSWORD: changeme
+    volumes:
+      - /home/user/paperless/data:/usr/src/paperless/data:Z
+      - /home/user/paperless/media:/usr/src/paperless/media:Z
+      - /home/user/Documents/inbox:/usr/src/paperless/consume:Z
+      - /home/user/paperless/export:/usr/src/paperless/export:Z
+    depends_on: [broker, db]
+    restart: unless-stopped
+
+volumes:
+  pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/paperless &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="common-operations-3">Common operations</h4>
+<pre><code class="language-bash"># Trigger a manual document consumption scan
+curl -X POST http://localhost:8000/api/documents/post_document/   -H &quot;Authorization: Token YOUR_API_TOKEN&quot;   -F &quot;document=@/path/to/file.pdf&quot;
+
+# List recent documents
+curl http://localhost:8000/api/documents/?ordering=-created   -H &quot;Authorization: Token YOUR_API_TOKEN&quot; | python3 -m json.tool | head -50
+
+# Run management commands
+podman exec webserver python manage.py document_index reindex
+podman exec webserver python manage.py document_thumbnails
+podman exec webserver python manage.py check
+
+# Search documents from CLI
+curl &quot;http://localhost:8000/api/documents/?query=invoice&amp;format=json&quot;   -H &quot;Authorization: Token YOUR_API_TOKEN&quot;
+
+# Create a superuser
+podman exec webserver python manage.py createsuperuser
+
+# Export all documents
+podman exec webserver python manage.py document_exporter /usr/src/paperless/export
+
+# View logs
+podman logs -f webserver</code></pre>
+<blockquote>Drop documents into <code>~/Documents/inbox</code> — Paperless will automatically OCR, index, and file them within minutes.</blockquote>
+<h3 id="share-documents-via-email">Share Documents via Email</h3>
+<p>Paperless-ngx can send documents as email attachments directly from the UI or via automation. This requires configuring SMTP settings in the environment.</p>
+<h4 id="1-add-smtp-settings-to-the-compose-environment">1. Add SMTP settings to the compose environment</h4>
+<pre><code class="language-yaml">environment:
+  # ... existing vars ...
+  PAPERLESS_EMAIL_HOST: host.containers.internal   # or your SMTP relay / Mailrise
+  PAPERLESS_EMAIL_PORT: &quot;25&quot;
+  PAPERLESS_EMAIL_HOST_USER: &quot;&quot;            # blank for unauthenticated local relay
+  PAPERLESS_EMAIL_HOST_PASSWORD: &quot;&quot;
+  PAPERLESS_EMAIL_USE_TLS: &quot;false&quot;
+  PAPERLESS_EMAIL_USE_SSL: &quot;false&quot;
+  PAPERLESS_FROM_EMAIL: paperless@home.local</code></pre>
+<p>For an authenticated SMTP provider (e.g., Brevo, Mailgun, Gmail SMTP):</p>
+<pre><code class="language-yaml">  PAPERLESS_EMAIL_HOST: smtp.brevo.com
+  PAPERLESS_EMAIL_PORT: &quot;587&quot;
+  PAPERLESS_EMAIL_HOST_USER: your@email.com
+  PAPERLESS_EMAIL_HOST_PASSWORD: your-smtp-password
+  PAPERLESS_EMAIL_USE_TLS: &quot;true&quot;</code></pre>
+<h4 id="2-configure-a-mail-rule-to-send-on-consume-optional-automation">2. Configure a mail rule to send on consume (optional automation)</h4>
+<p>In the Paperless UI → <strong>Settings → Mail Rules → Add Rule</strong>:</p>
+<ul>
+<li>Action: <strong>Assign tags / correspondent</strong> (or trigger a workflow)</li>
+</ul>
+<blockquote>Full email-out automation is available via the <strong>Workflows</strong> feature (Paperless-ngx 2.x+). Go to <strong>Settings → Workflows → Add Workflow</strong> → Trigger: <em>Document Added</em> → Action: <em>Send Email</em>.</blockquote>
+<h4 id="3-send-a-document-manually-from-the-ui">3. Send a document manually from the UI</h4>
+<p>Open any document → click the <strong>⋮ menu → Share / Send</strong> → enter a recipient address. Paperless attaches the original PDF and sends via the configured SMTP relay.</p>
+<h4 id="4-send-via-api">4. Send via API</h4>
+<pre><code class="language-bash"># Share document ID 42 by email
+curl -X POST http://localhost:8000/api/documents/42/share_link/ \
+  -H &quot;Authorization: Token YOUR_API_TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;expiration&quot;: null}'
+# Returns a share link — paste into an email manually</code></pre>
+<blockquote>For a simple local SMTP relay without an external account, pair Paperless with <strong>Mailrise</strong> or <strong>Maddy</strong> (both documented in the Mail section) — configure Paperless to use <code>host.containers.internal:25</code> as the relay.</blockquote>
+<hr></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

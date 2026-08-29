@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Apache HTTP Server — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Apache HTTP Server  Apache is a full-featured, battle-tested web server. On Shani OS, Caddy is the recommended reverse proxy for self-hosted services due t…">
+  <meta name="description" id="meta-desc"     content="Apache is a full-featured, battle-tested web server. On Shani OS, Caddy is the recommended reverse proxy for self-hosted services due to its automatic HTTP…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Apache HTTP Server">
-  <meta property="og:description" id="og-desc"    content="Apache HTTP Server  Apache is a full-featured, battle-tested web server. On Shani OS, Caddy is the recommended reverse proxy for self-hosted services due t…">
+  <meta property="og:description" id="og-desc"    content="Apache is a full-featured, battle-tested web server. On Shani OS, Caddy is the recommended reverse proxy for self-hosted services due to its automatic HTTP…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/networking/apache/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Apache HTTP Server">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Apache HTTP Server">
-  <meta name="twitter:description" id="tw-desc"  content="Apache HTTP Server  Apache is a full-featured, battle-tested web server. On Shani OS, Caddy is the recommended reverse proxy for self-hosted services due t…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Apache is a full-featured, battle-tested web server. On Shani OS, Caddy is the recommended reverse proxy for self-hosted services due to its automatic HTTP…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Apache HTTP Server","description":"Apache HTTP Server  Apache is a full-featured, battle-tested web server. On Shani OS, Caddy is the recommended reverse proxy for self-hosted services due t…","url":"https://docs.shani.dev/doc/networking/apache/","datePublished":"2026-04-20T00:00:00.000Z","dateModified":"2026-04-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Apache HTTP Server","description":"Apache is a full-featured, battle-tested web server. On Shani OS, Caddy is the recommended reverse proxy for self-hosted services due to its automatic HTTP…","url":"https://docs.shani.dev/doc/networking/apache/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Apache HTTP Server","item":"https://docs.shani.dev/doc/networking/apache/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,13 +215,13 @@
         <h1 class="doc-title">Apache HTTP Server</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Networking</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Apache is a full-featured, battle-tested web server. On Shani OS, Caddy is the recommended reverse proxy for self-hosted services due to its automatic HTTPS and simpler configuration — but Apache is pre-installed for workloads that specifically need it: <code>.htaccess</code>-based access control, <code>mod_rewrite</code> rules inherited from existing deployments, PHP via <code>mod_php</code>, or applications that ship Apache-specific configuration.</p>
 <p>Both can coexist by binding Apache to a non-standard port and proxying through Caddy.</p>
-<p>---</p>
-<h2>Service Management</h2>
+<hr>
+<h2 id="service-management">Service Management</h2>
 <pre><code class="language-bash"># Enable and start at boot
 sudo systemctl enable --now httpd
 
@@ -234,10 +236,10 @@ sudo apachectl configtest
 
 # Watch live logs
 journalctl -u httpd -f</code></pre>
-<p>---</p>
-<h2>Configuration</h2>
+<hr>
+<h2 id="configuration">Configuration</h2>
 <p>The main config file is <code>/etc/httpd/conf/httpd.conf</code>. Site-specific configs belong in <code>/etc/httpd/conf.d/</code> — any <code>.conf</code> file placed there is automatically included.</p>
-<h3>Listen on a Non-Standard Port (Caddy Proxy Mode)</h3>
+<h3 id="listen-on-a-non-standard-port-caddy-proxy-mode">Listen on a Non-Standard Port (Caddy Proxy Mode)</h3>
 <p>If Caddy handles ports 80/443, bind Apache to a local port and proxy through Caddy:</p>
 <pre><code class="language-apache"># /etc/httpd/conf/httpd.conf
 Listen 127.0.0.1:8080</code></pre>
@@ -245,7 +247,7 @@ Listen 127.0.0.1:8080</code></pre>
 <pre><code class="language-caddyfile">app.example.com {
     reverse_proxy localhost:8080
 }</code></pre>
-<h3>Virtual Hosts</h3>
+<h3 id="virtual-hosts">Virtual Hosts</h3>
 <pre><code class="language-apache"># /etc/httpd/conf.d/mysite.conf
 
 &lt;VirtualHost *:8080&gt;
@@ -261,17 +263,42 @@ Listen 127.0.0.1:8080</code></pre>
     ErrorLog  /var/log/httpd/mysite-error.log
     CustomLog /var/log/httpd/mysite-access.log combined
 &lt;/VirtualHost&gt;</code></pre>
-<h3>Basic Authentication</h3>
-<pre><code class="language-bash"># Create a password file (-c creates the file; omit -c when adding further users)
-sudo htpasswd -c /etc/httpd/conf/.htpasswd alice
-sudo htpasswd /etc/httpd/conf/.htpasswd bob</code></pre>
+<h3 id="direct-https-port-443">Direct HTTPS (Port 443)</h3>
+<p>When Apache serves traffic directly (no Caddy in front), terminate TLS itself. Requires <code>mod_ssl</code> — uncomment <code>LoadModule ssl_module modules/mod_ssl.so</code> and restart:</p>
+<pre><code class="language-apache"># /etc/httpd/conf.d/mysite-ssl.conf
+
+&lt;VirtualHost *:443&gt;
+    ServerName mysite.example.com
+    DocumentRoot /srv/http/mysite
+
+    SSLEngine on
+    # Let's Encrypt:
+    SSLCertificateFile    /etc/letsencrypt/live/mysite.example.com/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/mysite.example.com/privkey.pem
+    # Or self-signed for internal use:
+    #   sudo openssl req -x509 -nodes -days 3650 -newkey rsa:4096 \
+    #     -keyout /etc/httpd/conf/server.key -out /etc/httpd/conf/server.crt \
+    #     -subj &quot;/CN=mysite.example.com&quot;
+
+    &lt;Directory /srv/http/mysite&gt;
+        Options -Indexes +FollowSymLinks
+        Require all granted
+    &lt;/Directory&gt;
+
+    ErrorLog  /var/log/httpd/mysite-ssl-error.log
+    CustomLog /var/log/httpd/mysite-ssl-access.log combined
+&lt;/VirtualHost&gt;</code></pre>
+<h3 id="basic-authentication">Basic Authentication</h3>
+<pre><code class="language-bash"># Create a password file (-B selects bcrypt; -c creates the file, omit it when adding further users)
+sudo htpasswd -B -c /etc/httpd/conf/.htpasswd alice
+sudo htpasswd -B /etc/httpd/conf/.htpasswd bob</code></pre>
 <pre><code class="language-apache">&lt;Directory /srv/http/protected&gt;
     AuthType Basic
     AuthName &quot;Restricted&quot;
     AuthUserFile /etc/httpd/conf/.htpasswd
     Require valid-user
 &lt;/Directory&gt;</code></pre>
-<h3>URL Rewriting</h3>
+<h3 id="url-rewriting">URL Rewriting</h3>
 <pre><code class="language-apache">&lt;VirtualHost *:8080&gt;
     ServerName app.example.com
     DocumentRoot /srv/http/app
@@ -283,8 +310,8 @@ sudo htpasswd /etc/httpd/conf/.htpasswd bob</code></pre>
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^ /index.html [L]
 &lt;/VirtualHost&gt;</code></pre>
-<p>---</p>
-<h2>Modules</h2>
+<hr>
+<h2 id="modules">Modules</h2>
 <pre><code class="language-bash"># List all loaded modules
 httpd -M
 
@@ -296,17 +323,17 @@ httpd -M
 # LoadModule headers_module     modules/mod_headers.so</code></pre>
 <p>After enabling or disabling a module, a full restart is required:</p>
 <pre><code class="language-bash">sudo systemctl restart httpd</code></pre>
-<p>---</p>
-<h2>Logs</h2>
+<hr>
+<h2 id="logs">Logs</h2>
 <pre><code class="language-bash">sudo tail -f /var/log/httpd/error_log
 sudo tail -f /var/log/httpd/access_log</code></pre>
-<p>---</p>
-<h2>Firewall</h2>
+<hr>
+<h2 id="firewall">Firewall</h2>
 <p>Only needed if Apache is serving traffic directly (not behind Caddy):</p>
 <pre><code class="language-bash">sudo firewall-cmd --add-service=http --add-service=https --permanent
 sudo firewall-cmd --reload</code></pre>
-<p>---</p>
-<h2>Permissions & SELinux</h2>
+<hr>
+<h2 id="permissions-selinux">Permissions & SELinux</h2>
 <p>Apache runs as the <code>http</code> user. Shani OS uses SELinux by default — files served by Apache must carry the correct context:</p>
 <pre><code class="language-bash"># Apply the correct context to a new document root
 sudo chcon -Rt httpd_sys_content_t /srv/http/mysite
@@ -315,9 +342,15 @@ sudo chcon -Rt httpd_sys_content_t /srv/http/mysite
 sudo restorecon -Rv /srv/http/mysite</code></pre>
 <p>If Apache needs to connect to a backend (reverse proxy mode), enable the relevant boolean:</p>
 <pre><code class="language-bash">sudo setsebool -P httpd_can_network_connect 1</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | <code>AH00558: Could not reliably determine server's FQDN</code> | Add <code>ServerName localhost</code> to <code>httpd.conf</code> — cosmetic, does not affect operation | | Port 80/443 already in use | Caddy or another service owns the port — bind Apache to <code>127.0.0.1:8080</code> and proxy through Caddy | | <code>403 Forbidden</code> on directory | Check filesystem permissions and the <code>&lt;Directory&gt;</code> block's <code>Require</code> directive; check SELinux context with <code>ls -Z</code> | | <code>Permission denied</code> in error log | Apache (<code>http</code> user) cannot read the file — fix permissions or apply the correct SELinux context | | Reverse proxy returns 503 | Enable the SELinux boolean: <code>sudo setsebool -P httpd_can_network_connect 1</code> | | Config changes not taking effect | Run <code>sudo apachectl configtest</code> to validate, then <code>sudo systemctl reload httpd</code> |</p></div>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>AH00558: Could not reliably determine server's FQDN</code></td><td>Add <code>ServerName localhost</code> to <code>httpd.conf</code> — cosmetic, does not affect operation</td></tr><tr><td>Port 80/443 already in use</td><td>Caddy or another service owns the port — bind Apache to <code>127.0.0.1:8080</code> and proxy through Caddy</td></tr><tr><td><code>403 Forbidden</code> on directory</td><td>Check filesystem permissions and the <code>&lt;Directory&gt;</code> block's <code>Require</code> directive; check SELinux context with <code>ls -Z</code></td></tr><tr><td><code>Permission denied</code> in error log</td><td>Apache (<code>http</code> user) cannot read the file — fix permissions or apply the correct SELinux context</td></tr><tr><td>Reverse proxy returns 503</td><td>Enable the SELinux boolean: <code>sudo setsebool -P httpd_can_network_connect 1</code></td></tr><tr><td>Config changes not taking effect</td><td>Run <code>sudo apachectl configtest</code> to validate, then <code>sudo systemctl reload httpd</code></td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="caddy">Caddy (modern alternative)</a></li>
+<li><a href="firewalld">Firewall rules</a></li>
+<li><a href="https://blog.shani.dev/post/shani-os-home-server">Home server blog</a></li>
+</ul></div>
     </div>
 
   </main>

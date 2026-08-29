@@ -1,7 +1,7 @@
 ---
 title: slapd (OpenLDAP)
 section: Networking
-updated: 2026-04-18
+updated: 2026-08-28
 ---
 
 # OpenLDAP Server (slapd)
@@ -154,3 +154,69 @@ sudo firewall-cmd --reload
 | `Can't contact LDAP server` | Check `systemctl status slapd`; confirm the service is listening: `ss -tlnp | grep 389` |
 | Schema error on `ldapadd` | Load the required schema LDIFs first (`core.ldif`, `cosine.ldif`, `inetorgperson.ldif`) |
 | View slapd logs | `journalctl -u slapd -f` |
+
+---
+
+## TLS Configuration
+
+Generate a self-signed certificate for internal use (or request one from your CA / Let's Encrypt):
+
+```bash
+sudo mkdir -p /etc/openldap/tls
+sudo openssl req -new -x509 -nodes -days 3650 \
+  -keyout /etc/openldap/tls/slapd.key \
+  -out /etc/openldap/tls/slapd.crt \
+  -subj "/CN=ldap.shanios.local"
+sudo chown ldap:ldap /etc/openldap/tls/slapd.key /etc/openldap/tls/slapd.crt
+sudo chmod 600 /etc/openldap/tls/slapd.key
+```
+
+Set `olcTLSCertificateFile` and `olcTLSCertificateKeyFile` via `cn=config`:
+
+```ldif
+dn: cn=config
+changetype: modify
+replace: olcTLSCertificateFile
+olcTLSCertificateFile: /etc/openldap/tls/slapd.crt
+-
+replace: olcTLSCertificateKeyFile
+olcTLSCertificateKeyFile: /etc/openldap/tls/slapd.key
+```
+
+```bash
+sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f tls.ldif
+sudo systemctl restart slapd
+```
+
+Verify with an LDAPS connection (`ldaps://`, port 636).
+
+### Access Control
+
+Replace the default permissive ACLs on the database entry (`olcDatabase={1}mdb`). Sample policy: anonymous binds may authenticate only, authenticated users may read their own entry, and the Manager has write access:
+
+```ldif
+dn: olcDatabase={1}mdb
+changetype: modify
+replace: olcAccess
+olcAccess: {0}to attrs=userPassword
+    by dn.exact="cn=Manager,dc=shanios,dc=local" write
+    by self write
+    by anonymous auth
+    by * none
+olcAccess: {1}to dn.subtree="dc=shanios,dc=local"
+    by dn.exact="cn=Manager,dc=shanios,dc=local" write
+    by self read
+    by users read
+    by * none
+```
+
+```bash
+sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f acl.ldif
+```
+
+ACL changes take effect immediately — no restart required.
+
+## See Also
+
+- [Kerberos](kerberos)
+- [Users & groups](../system/users-groups.md)

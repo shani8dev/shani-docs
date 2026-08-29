@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Kernel Modules — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Kernel Modules  Kernel modules are loadable drivers and extensions that the Linux kernel can load and unload at runtime without rebooting. On Shani OS, mod…">
+  <meta name="description" id="meta-desc"     content="Kernel modules are loadable drivers and extensions that the Linux kernel can load and unload at runtime without rebooting. On Shani OS, module configuratio…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Kernel Modules">
-  <meta property="og:description" id="og-desc"    content="Kernel Modules  Kernel modules are loadable drivers and extensions that the Linux kernel can load and unload at runtime without rebooting. On Shani OS, mod…">
+  <meta property="og:description" id="og-desc"    content="Kernel modules are loadable drivers and extensions that the Linux kernel can load and unload at runtime without rebooting. On Shani OS, module configuratio…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/system/kernel-modules/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Kernel Modules">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Kernel Modules">
-  <meta name="twitter:description" id="tw-desc"  content="Kernel Modules  Kernel modules are loadable drivers and extensions that the Linux kernel can load and unload at runtime without rebooting. On Shani OS, mod…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Kernel modules are loadable drivers and extensions that the Linux kernel can load and unload at runtime without rebooting. On Shani OS, module configuratio…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Kernel Modules","description":"Kernel Modules  Kernel modules are loadable drivers and extensions that the Linux kernel can load and unload at runtime without rebooting. On Shani OS, mod…","url":"https://docs.shani.dev/doc/system/kernel-modules/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Kernel Modules","description":"Kernel modules are loadable drivers and extensions that the Linux kernel can load and unload at runtime without rebooting. On Shani OS, module configuratio…","url":"https://docs.shani.dev/doc/system/kernel-modules/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Kernel Modules","item":"https://docs.shani.dev/doc/system/kernel-modules/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,12 +215,12 @@
         <h1 class="doc-title">Kernel Modules</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">System</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Kernel modules are loadable drivers and extensions that the Linux kernel can load and unload at runtime without rebooting. On Shani OS, module configuration files placed in <code>/etc/modules-load.d/</code> and <code>/etc/modprobe.d/</code> live in the <code>/etc</code> overlay and persist across all OS updates and rollbacks.</p>
-<p>---</p>
-<h2>Listing and Inspecting Modules</h2>
+<hr>
+<h2 id="listing-and-inspecting-modules">Listing and Inspecting Modules</h2>
 <pre><code class="language-bash"># List all currently loaded modules
 lsmod
 
@@ -234,8 +236,8 @@ modinfo -F depends kvm         # dependencies
 
 # Check if a module is loaded
 lsmod | grep kvm</code></pre>
-<p>---</p>
-<h2>Loading and Unloading Modules</h2>
+<hr>
+<h2 id="loading-and-unloading-modules">Loading and Unloading Modules</h2>
 <pre><code class="language-bash"># Load a module (for the current session only)
 sudo modprobe kvm
 sudo modprobe kvm_intel          # or kvm_amd depending on CPU
@@ -253,9 +255,9 @@ sudo modprobe -r --remove-dependencies kvm_intel
 
 # Dry run — show what would be loaded/unloaded
 sudo modprobe --dry-run kvm</code></pre>
-<blockquote><p>⚠️ <code>rmmod</code> fails if the module is in use. Use <code>modprobe -r</code> which handles the dependency chain, or check what is using it with <code>lsmod | grep &lt;module&gt;</code> and look at the "Used by" column.</p></blockquote>
-<p>---</p>
-<h2>Persistent Module Loading</h2>
+<blockquote>⚠️ <code>rmmod</code> fails if the module is in use. Use <code>modprobe -r</code> which handles the dependency chain, or check what is using it with <code>lsmod | grep &lt;module&gt;</code> and look at the "Used by" column.</blockquote>
+<hr>
+<h2 id="persistent-module-loading">Persistent Module Loading</h2>
 <p>To load a module automatically at boot, create a file in <code>/etc/modules-load.d/</code>. Files here are processed by <code>systemd-modules-load.service</code> early in the boot sequence.</p>
 <pre><code class="language-bash"># Load a single module at boot
 echo &quot;kvm_intel&quot; | sudo tee /etc/modules-load.d/kvm.conf
@@ -270,8 +272,8 @@ EOF</code></pre>
 <pre><code class="language-bash"># Verify the service loaded all modules correctly
 systemctl status systemd-modules-load.service
 journalctl -u systemd-modules-load.service</code></pre>
-<p>---</p>
-<h2>Module Parameters</h2>
+<hr>
+<h2 id="module-parameters">Module Parameters</h2>
 <p>Module parameters can be set persistently in <code>/etc/modprobe.d/</code>.</p>
 <pre><code class="language-bash"># Disable 802.11n (workaround for some Wi-Fi issues)
 echo &quot;options iwlwifi 11n_disable=1&quot; | sudo tee /etc/modprobe.d/iwlwifi.conf
@@ -287,8 +289,8 @@ echo &quot;options usbcore autosuspend=5&quot; | sudo tee /etc/modprobe.d/usb.co
 cat /sys/module/kvm_intel/parameters/nested
 cat /sys/module/iwlwifi/parameters/11n_disable</code></pre>
 <p>Changes to <code>/etc/modprobe.d/</code> take effect on the next module load. To apply immediately: unload and reload the module with <code>modprobe -r</code> then <code>modprobe</code>.</p>
-<p>---</p>
-<h2>Blacklisting Modules</h2>
+<hr>
+<h2 id="blacklisting-modules">Blacklisting Modules</h2>
 <p>Blacklisting prevents a module from loading automatically. Useful for disabling a buggy driver, forcing a different driver, or preventing a conflicting module from loading alongside another.</p>
 <pre><code class="language-bash"># Blacklist a module
 echo &quot;blacklist nouveau&quot; | sudo tee /etc/modprobe.d/blacklist-nouveau.conf
@@ -301,9 +303,9 @@ EOF</code></pre>
 <p>The <code>install &lt;module&gt; /bin/false</code> directive is stronger — it replaces the module's install command with <code>/bin/false</code>, preventing it from loading even as a dependency of another module.</p>
 <pre><code class="language-bash"># Verify a module is blacklisted
 cat /etc/modprobe.d/*.conf | grep blacklist</code></pre>
-<blockquote><p>💡 Shani OS ships several blacklists by default in <code>/usr/lib/modprobe.d/</code>: <code>blacklist-firewire.conf</code> blocks <code>firewire-core</code>/<code>firewire-ohci</code>/<code>firewire-sbp2</code>/<code>firewire-net</code> (no firewire hardware is expected, and it closes off a DMA attack vector), <code>nobeep.conf</code> blacklists <code>pcspkr</code> to silence the PC speaker, <code>noime.conf</code> blacklists <code>mei</code>/<code>mei_me</code> (Intel vPro/AMT remote management), and <code>disable-unused-protocols.conf</code> disables the <code>dccp</code>, <code>sctp</code>, <code>rds</code>, and <code>tipc</code> network protocols via <code>install &lt;module&gt; /bin/false</code> to shrink the network attack surface. Run <code>cat /usr/lib/modprobe.d/*.conf</code> to see them; if you need to re-enable one on your own install, add the corresponding override in <code>/etc/modprobe.d/</code> (part of the persistent overlay described above).</p></blockquote>
-<p>---</p>
-<h2>Module Aliases</h2>
+<blockquote>💡 Shani OS ships several blacklists by default in <code>/usr/lib/modprobe.d/</code>: <code>blacklist-firewire.conf</code> blocks <code>firewire-core</code>/<code>firewire-ohci</code>/<code>firewire-sbp2</code>/<code>firewire-net</code> (no firewire hardware is expected, and it closes off a DMA attack vector), <code>nobeep.conf</code> blacklists <code>pcspkr</code> to silence the PC speaker, <code>noime.conf</code> blacklists <code>mei</code>/<code>mei_me</code> (Intel vPro/AMT remote management), and <code>disable-unused-protocols.conf</code> disables the <code>dccp</code>, <code>sctp</code>, <code>rds</code>, and <code>tipc</code> network protocols via <code>install &lt;module&gt; /bin/false</code> to shrink the network attack surface. Run <code>cat /usr/lib/modprobe.d/*.conf</code> to see them; if you need to re-enable one on your own install, add the corresponding override in <code>/etc/modprobe.d/</code> (part of the persistent overlay described above).</blockquote>
+<hr>
+<h2 id="module-aliases">Module Aliases</h2>
 <p>Aliases let you refer to a module by a friendly name or map a hardware ID to a driver.</p>
 <pre><code class="language-bash"># Show all aliases for a module
 modinfo -F alias kvm_intel
@@ -313,22 +315,18 @@ modprobe --show-depends pci:v00008086d00001234sv...
 
 # List all alias mappings (from modules.alias in the kernel)
 cat /lib/modules/$(uname -r)/modules.alias | grep iwlwifi</code></pre>
-<p>---</p>
-<h2>Dracut and the Initramfs</h2>
-<p>On Shani OS, the initramfs is built with <strong>dracut</strong>. Modules that must be available before the root filesystem is mounted (e.g. storage controllers, crypto drivers) need to be included in the initramfs.</p>
+<hr>
+<h2 id="dracut-and-the-initramfs">Dracut and the Initramfs</h2>
+<p>On Shani OS, the initramfs is built with <strong>dracut</strong>, but it is never built standalone — Shanios boots via signed Unified Kernel Images (UKIs), and regeneration happens through <code>gen-efi</code> during an OS deploy. Users do not rebuild the initramfs manually.</p>
 <pre><code class="language-bash"># Force-include a module in the initramfs
 echo &quot;add_drivers+=\&quot; virtio_blk virtio_scsi \&quot;&quot; | sudo tee /etc/dracut.conf.d/virtio.conf
 
-# Regenerate the initramfs after changes
-sudo dracut --force
-
-# Verify a module is present in the initramfs
-lsinitrd | grep virtio
-lsinitrd /boot/initramfs-linux.img | grep &lt;module&gt;</code></pre>
-<blockquote><p>⚠️ After adding or changing module configuration that affects early boot (storage, crypto, firmware), always regenerate the initramfs with <code>sudo dracut --force</code> and reboot to verify the new initramfs works before removing the previous boot slot.</p></blockquote>
-<p>---</p>
-<h2>Firmware</h2>
-<p>Many modules require firmware blobs that are loaded from <code>/lib/firmware/</code>. Shani OS ships a comprehensive <code>linux-firmware</code> package split by vendor. If a module reports a missing firmware file:</p>
+# Verify a module is present in the current UKI's initramfs
+lsinitrd | grep virtio</code></pre>
+<blockquote>⚠️ Do not run bare <code>dracut --force</code> on Shani OS: there is no plain <code>/boot/initramfs-linux.img</code> to regenerate, only signed UKIs (<code>shanios-blue.efi</code> / <code>shanios-green.efi</code>). Initramfs/UKI regeneration happens via <code>gen-efi</code> as part of an OS deploy (<code>sudo shani-deploy</code>), which rebuilds and re-signs both UKIs with your <code>dracut.conf.d/</code> settings applied. After changing early-boot module configuration, deploy (or run <code>sudo gen-efi configure &lt;slot&gt;</code> for the active slot) and reboot to verify before removing the previous boot slot.</blockquote>
+<hr>
+<h2 id="firmware">Firmware</h2>
+<p>Many modules require firmware blobs that are loaded from <code>/lib/firmware/</code>. Shani OS ships a comprehensive <code>linux-firmware</code> package split by vendor — firmware is baked into the OS image at build time, and kernel + firmware updates arrive via OS deploy (<code>sudo shani-deploy</code>), not via a package manager. If a module reports a missing firmware file:</p>
 <pre><code class="language-bash"># Check dmesg for firmware load failures
 dmesg | grep -i firmware
 dmesg | grep &quot;Direct firmware load&quot;
@@ -337,11 +335,11 @@ dmesg | grep &quot;Direct firmware load&quot;
 ls /lib/firmware/iwlwifi*         # Intel Wi-Fi firmware
 ls /lib/firmware/amdgpu/          # AMD GPU firmware
 
-# Check which firmware package provides a file
+# Check which firmware package provides a file (read-only file-database query)
 pacman -F /lib/firmware/iwlwifi-8265-36.ucode</code></pre>
-<p>If a firmware file is genuinely missing, the relevant <code>linux-firmware-&lt;vendor&gt;</code> package may not be installed. On Shani OS these are split packages (e.g. <code>linux-firmware-intel</code>, <code>linux-firmware-amdgpu</code>).</p>
-<p>---</p>
-<h2>Useful Diagnostics</h2>
+<p>If the firmware your device needs is genuinely absent from the image, you cannot add it to the read-only host yourself: request it upstream / file an issue against Shanios so it's included in the next image build. As an interim workaround, load the device from inside a Distrobox container or via Nix-packaged userspace tooling that bundles its own firmware handling.</p>
+<hr>
+<h2 id="useful-diagnostics">Useful Diagnostics</h2>
 <pre><code class="language-bash"># Show kernel messages related to module loading since boot
 dmesg | grep -E &quot;module|driver|firmware&quot; | head -40
 
@@ -359,16 +357,16 @@ journalctl -b | grep -i &quot;module\|modprobe\|failed to load&quot;
 
 # Show all loaded modules with their sysfs paths
 ls /sys/module/</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | <code>modprobe: FATAL: Module not found</code> | Module name may differ — check <code>modinfo</code> or search: <code>find /lib/modules/$(uname -r) -name &quot;<em>name</em>&quot;</code> | | Module loads but device doesn't work | Check <code>dmesg</code> for firmware errors; verify firmware package is installed | | <code>rmmod: ERROR: Module is in use</code> | Check the "Used by" column in <code>lsmod</code>; unload dependent modules first, or use <code>modprobe -r</code> | | Module loads but wrong driver is used | Blacklist the competing module in <code>/etc/modprobe.d/</code> | | Changes to <code>/etc/modprobe.d/</code> not taking effect | Unload and reload the module; or reboot; if it's an initramfs module, run <code>sudo dracut --force</code> | | Missing firmware after OS update | Run <code>sudo pacman -S linux-firmware</code> or the specific vendor firmware package | | Module not loading at boot despite <code>/etc/modules-load.d/</code> entry | Check <code>systemctl status systemd-modules-load</code>; verify the module name is correct with <code>modinfo</code> |</p>
-<p>---</p>
-<h2>See Also</h2>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>modprobe: FATAL: Module not found</code></td><td>Module name may differ — check <code>modinfo</code> or search: <code>find /lib/modules/$(uname -r) -name &quot;<em>name</em>&quot;</code></td></tr><tr><td>Module loads but device doesn't work</td><td>Check <code>dmesg</code> for firmware errors; verify firmware package is installed</td></tr><tr><td><code>rmmod: ERROR: Module is in use</code></td><td>Check the "Used by" column in <code>lsmod</code>; unload dependent modules first, or use <code>modprobe -r</code></td></tr><tr><td>Module loads but wrong driver is used</td><td>Blacklist the competing module in <code>/etc/modprobe.d/</code></td></tr><tr><td>Changes to <code>/etc/modprobe.d/</code> not taking effect</td><td>Unload and reload the module; or reboot; if it's an initramfs module, regenerate the UKIs via <code>sudo gen-efi configure &lt;slot&gt;</code> (or deploy a new OS version)</td></tr><tr><td>Missing firmware after OS update</td><td>Firmware ships inside the image — kernel + firmware arrive together via <code>sudo shani-deploy</code>; if your device's firmware is absent from the image, request it upstream / file an issue</td></tr><tr><td>Module not loading at boot despite <code>/etc/modules-load.d/</code> entry</td><td>Check <code>systemctl status systemd-modules-load</code>; verify the module name is correct with <code>modinfo</code></td></tr></tbody></table>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="systemd">Systemd</a> — <code>systemd-modules-load.service</code>, unit dependencies</li>
 <li><a href="hardware">Hardware</a> — <code>lspci</code>, <code>lsusb</code>, device identification</li>
 <li><a href="storage">Storage</a> — storage controller modules, NVMe</li>
-<li><a href="../arch/dracut-module">Architecture: Dracut Initramfs Module</a> — Shani OS initramfs build</li>
+<li><a href="../arch/dracut-module.md">Architecture: Dracut Initramfs Module</a> — Shani OS initramfs build</li>
 </ul></div>
     </div>
 

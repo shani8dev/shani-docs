@@ -1,14 +1,14 @@
 ---
 title: Users & Groups
 section: System
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # Users & Groups
 
 User accounts on Shani OS follow standard Linux conventions — accounts are stored in `/etc/passwd`, `/etc/shadow`, and `/etc/group`, which live in the `/etc` overlay and persist across all OS updates and rollbacks.
 
-The key difference from a traditional distro is that **you should use `adduser` (not `useradd`) for interactive accounts**. The `adduser` wrapper on Shani OS reads `/etc/shani-extra-groups` and automatically adds new users to all the groups they need (wheel, video, input, kvm, etc.) in one step. See [User Provisioning](user-setup) for the full group reference.
+The key difference from a traditional distro is that **you should use `adduser` (not `useradd`) for interactive accounts**. The `adduser` wrapper on Shani OS reads `/etc/shani-extra-groups` and automatically adds new users to all the groups they need (wheel, video, input, kvm, etc.) in one step. See [User Provisioning](../updates/user-setup.md) for the full group reference.
 
 ---
 
@@ -163,7 +163,7 @@ sudo chage -d 0 alice
 sudo chage -E 2026-12-31 alice
 ```
 
-See [ch* Commands](ch-commands) for the full `chage` reference.
+See [Permissions](../system/permissions.md) for the full `chage` reference.
 
 ---
 
@@ -336,7 +336,7 @@ sudo loginctl disable-linger alice
 loginctl show-user alice | grep Linger
 ```
 
-This is required for the `backup.timer` and any other `systemctl --user` timer that should fire even when the user is not logged in. See [Backup & Recovery](backup) for the full example.
+This is required for the `backup.timer` and any other `systemctl --user` timer that should fire even when the user is not logged in. See [Backup & Recovery](../system/backup.md) for the full example.
 
 ---
 
@@ -377,8 +377,8 @@ getent group developers
 
 ## See Also
 
-- [User Provisioning](user-setup) — `shani-user-setup`, `/etc/shani-extra-groups`, subuid allocation
-- [ch* Commands](ch-commands) — `chmod`, `chown`, `chage`, `chsh`, `chpasswd`
-- [System Config](config) — how `/etc` overlay preserves account changes across updates
-- [Factory Reset](shani-reset) — what happens to user accounts after a reset
-- [Shell & Environment](shell) — Zsh, Starship, and per-user shell config
+- [User Provisioning](../updates/user-setup.md) — `shani-user-setup`, `/etc/shani-extra-groups`, subuid allocation
+- [Permissions](../system/permissions.md) — `chmod`, `chown`, `chage`, `chsh`, `chpasswd`
+- [System Config](../updates/config.md) — how `/etc` overlay preserves account changes across updates
+- [Factory Reset](../updates/shani-reset.md) — what happens to user accounts after a reset
+- [Shell & Environment](../updates/shell.md) — Zsh, Starship, and per-user shell config

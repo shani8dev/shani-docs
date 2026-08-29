@@ -1,14 +1,14 @@
 ---
 title: Bottles (Windows Compatibility)
 section: Software & Apps
-updated: 2026-05-08
+updated: 2026-08-28
 ---
 
 # Bottles (Windows Compatibility)
 
 **Bottles** is the recommended tool for running non-gaming Windows software on Shanios. It manages Wine environments ("bottles"), handles runtime dependencies, and keeps each application's Windows registry and files isolated in its own prefix.
 
-> **Installation**: Pre-installed on the KDE Plasma edition. On the GNOME edition:
+> **Installation**: Pre-installed on the KDE Plasma edition. On the GNOME and COSMIC editions:
 > ```bash
 > flatpak install flathub com.usebottles.bottles
 > ```
@@ -60,9 +60,9 @@ Change the runner in **Settings → Runner**:
 | Runner | Best for |
 |---|---|
 | **Caffe** | Default — stable, good general-purpose choice |
+| **Soda** | Caffe's successor lineage — patched runner tuned for compatibility with newer games and apps |
 | **Vaniglia** | Upstream Wine, minimal patches — use when patched runners misbehave |
-| **Wine Staging** | Wine + Staging patchset — good for productivity apps |
-| **Wine-GE** | Valve's Wine backported for non-Steam use — best for DirectX games and media software |
+| **GE-Proton** | GloriousEggroll's actively maintained Proton-based build (the discontinued Wine-GE's replacement) — best for DirectX games and media software |
 
 ## Advanced Configuration
 
@@ -98,6 +98,13 @@ For these, use a Windows VM via virt-manager (pre-installed on the KDE Plasma ed
 ## Troubleshooting
 
 - **App won't start**: Check the **Logs** tab. Install `vcredist2019` or `dotnet48` first.
-- **Graphics glitches**: Switch runner (e.g. Caffe → Wine-GE). Toggle DXVK on or off.
+- **Graphics glitches**: Switch runner (e.g. Caffe → GE-Proton). Toggle DXVK on or off.
 - **App needs other drives**: **Settings → Sandbox** — add paths or disable sandboxing.
 - **Crashes on startup**: Check WineHQ AppDB for known workarounds.
+
+## See Also
+
+- [Virtual Machines](vms) — full Windows VMs for apps that need kernel drivers
+- [Gaming](gaming) — Steam, Proton, game controllers
+- [AppImages](appimage) — portable app format
+- [Distrobox](distrobox) — full mutable environments for complex apps

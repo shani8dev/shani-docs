@@ -1,7 +1,7 @@
 ---
 title: dnscrypt-proxy (Encrypted DNS)
 section: Networking
-updated: 2026-04-20
+updated: 2026-08-28
 ---
 
 # dnscrypt-proxy — Encrypted DNS
@@ -159,4 +159,4 @@ sudo dnscrypt-proxy -resolve example.com
 
 - [Firewall](firewalld) — DNS port rules
 - [WireGuard](wireguard) — VPN DNS interaction with openresolv
-- [Security Features](features) — network security overview
+- [Security Features](../security/features.md) — network security overview

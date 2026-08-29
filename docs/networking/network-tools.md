@@ -1,7 +1,7 @@
 ---
 title: Network Tools
 section: Networking
-updated: 2026-04-01
+updated: 2026-08-28
 ---
 
 # Network Tools
@@ -307,3 +307,9 @@ sudo journalctl -u sshd -f      # Follow SSH logs
 sudo journalctl -u NetworkManager -k # Kernel logs related to networking
 ```
 
+
+## See Also
+
+- [IP addressing & routing](ip-addressing)
+- [Virtual networking](virtual-networking)
+- [Networking guide blog](https://blog.shani.dev/post/shani-os-networking-guide)

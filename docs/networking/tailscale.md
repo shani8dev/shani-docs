@@ -1,7 +1,7 @@
 ---
 title: Tailscale VPN
 section: Networking
-updated: 2026-04-22
+updated: 2026-08-28
 ---
 
 # Tailscale — Private WireGuard Mesh
@@ -196,7 +196,7 @@ Because Tailscale state is persisted in `/data/varlib/tailscale`, the machine st
 
 Tailscale's default ACL allows all devices to reach all other devices on the tailnet. Lock this down in the [admin console ACL editor](https://login.tailscale.com/admin/acls) to control exactly who can reach what:
 
-```json
+```jsonc
 {
   "acls": [
     // Allow your personal devices to reach everything
@@ -257,3 +257,9 @@ sudo tailscale logout
 | Tailscale SSH: permission denied | Check ACL rules in the admin console — the default policy allows all, but a custom ACL may be blocking SSH; add an `ssh` rule for your user/tag |
 | Re-authentication required after update | Disable key expiry in the admin console for server machines; Shani OS persists Tailscale state across updates, but an expired key still requires re-auth |
 | `tailscale netcheck` shows only DERP, no direct | UDP 41641 may be blocked at your router; add a firewall rule and check router port forwarding settings |
+
+## See Also
+
+- [Cloudflared Tunnels](cloudflared)
+- [OpenSSH hardening](openssh)
+- [Home server blog](https://blog.shani.dev/post/shani-os-home-server)

@@ -1,7 +1,7 @@
 ---
 title: AI & LLMs
 section: Self-Hosting & Servers
-updated: 2026-04-22
+updated: 2026-08-29
 ---
 
 # AI & LLMs
@@ -20,7 +20,7 @@ Run large language models, vision pipelines, image generation, speech-to-text, a
 Large language models are transformer networks. The key operational facts: inference is memory-bandwidth-bound, not compute-bound — the GPU spends most of its time moving weights from VRAM to compute units. This is why quantisation (reducing weight precision from float16 to int4) gives a 4× memory reduction with minimal quality loss. VRAM capacity determines the maximum model size; VRAM bandwidth determines tokens-per-second. A 7B model at float16 needs ~14 GB VRAM; at Q4_K_M quantisation, ~4 GB. Knowing this lets you choose the right model-hardware combination and explain why a 3090 (24 GB) outperforms a 4090 (24 GB) for inference at saturated VRAM.
 
 #### Context window, tokens, and why they matter
-A context window is the maximum number of tokens (roughly ¾ of a word each) a model can process in one request — both the input prompt and the output combined. Llama 3.2's context is 128k tokens (~96k words). A longer context costs quadratically more memory (KV cache grows with sequence length). For RAG, the context window determines how many retrieved document chunks fit alongside the query. For coding assistants, it determines how much of the codebase can be in-context at once. Context exhaustion is the most common failure mode in production LLM applications.
+A context window is the maximum number of tokens (roughly ¾ of a word each) a model can process in one request — both the input prompt and the output combined. Qwen3 8B's context is 128k tokens (~96k words); some 2026-era models (Kimi K2.6, Qwen 3.6 27B) go up to 256k. A longer context costs quadratically more memory (KV cache grows with sequence length). For RAG, the context window determines how many retrieved document chunks fit alongside the query. For coding assistants, it determines how much of the codebase can be in-context at once. Context exhaustion is the most common failure mode in production LLM applications.
 
 #### RAG (Retrieval-Augmented Generation) architecture
 RAG solves the "my LLM doesn't know my data" problem without fine-tuning. The pipeline: (1) embed each document chunk using an embedding model (Ollama's `nomic-embed-text`) into a vector; (2) store vectors in a vector database (Qdrant, ChromaDB, pgvector); (3) at query time, embed the user's question and find the N most similar document vectors; (4) inject those chunks into the LLM's context alongside the question. The LLM answers from the retrieved context, not from its training data. Key metrics: chunk size (too small = no context; too large = noise), top-K (how many chunks), and embedding model quality. RAG is the dominant pattern for enterprise AI applications.
@@ -65,7 +65,7 @@ cd ~/ollama && podman-compose up -d
 
 ```bash
 curl http://localhost:11434/api/generate \
-  -d '{"model":"llama3.2","prompt":"What is immutable Linux?","stream":false}'
+  -d '{"model":"qwen3:8b","prompt":"What is immutable Linux?","stream":false}'
 ```
 
 ##### OpenAI-compatible API
@@ -74,40 +74,40 @@ curl http://localhost:11434/api/generate \
 ```bash
 curl http://localhost:11434/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -d '{"model":"llama3.2","messages":[{"role":"user","content":"Hello"}]}'
+  -d '{"model":"qwen3:8b","messages":[{"role":"user","content":"Hello"}]}'
 ```
 
 #### Common operations
 ```bash
 # Pull a model
-podman exec ollama ollama pull llama3.2
+podman exec ollama ollama pull qwen3:8b
 
 # Pull a smaller/faster model
-podman exec ollama ollama pull phi4-mini
+podman exec ollama ollama pull qwen3:4b
 
 # Pull a specific quantisation
-podman exec ollama ollama pull llama3.2:3b-instruct-q4_K_M
+podman exec ollama ollama pull qwen3:8b-q4_K_M
 
 # Run a model interactively in the terminal
-podman exec -it ollama ollama run llama3.2
+podman exec -it ollama ollama run qwen3:8b
 
 # Run a one-shot prompt
-podman exec ollama ollama run llama3.2 "Summarise the theory of relativity in 2 sentences"
+podman exec ollama ollama run qwen3:8b "Summarise the theory of relativity in 2 sentences"
 
 # List downloaded models
 podman exec ollama ollama list
 
 # Show model info, parameters and template
-podman exec ollama ollama show llama3.2
+podman exec ollama ollama show qwen3:8b
 
 # Show currently loaded models and their VRAM usage
 podman exec ollama ollama ps
 
 # Remove a model
-podman exec ollama ollama rm llama3.2:latest
+podman exec ollama ollama rm qwen3:8b
 
 # Copy a model (create an alias)
-podman exec ollama ollama cp llama3.2 my-custom-model
+podman exec ollama ollama cp qwen3:8b my-custom-model
 
 # Check Ollama version
 podman exec ollama ollama version
@@ -115,6 +115,30 @@ podman exec ollama ollama version
 # List models via API
 curl http://localhost:11434/api/tags
 ```
+
+##### Not sure which model fits your hardware?
+
+[llm-checker](https://github.com/signerless/llm-checker) scans your RAM/VRAM/CPU and ranks Ollama models by fit, with ready-to-paste `ollama pull` commands:
+
+```bash
+# Inside a Distrobox with Node 18+ (or via nvm)
+npm install -g llm-checker
+
+llm-checker hw-detect                    # what hardware is detected
+llm-checker recommend --category coding  # ranked picks + ready-to-run pull commands
+```
+
+It also exposes itself as an MCP server (`npx --yes --package llm-checker llm-checker-mcp`), so a coding agent can query your own hardware fit mid-conversation.
+
+##### Pulling models directly from Hugging Face
+
+Virtually every open-weight model lives on [Hugging Face](https://huggingface.co) — Ollama pulls GGUF repos straight from the Hub instead of the Ollama library:
+
+```bash
+ollama pull hf.co/Qwen/Qwen3-8B-GGUF
+```
+
+Weights land in the same `~/.ollama` volume as library pulls, so they survive updates and rollbacks the same way.
 
 ---
 
@@ -142,7 +166,7 @@ cd ~/open-webui && podman-compose up -d
 
 > Use `host.containers.internal` (not `localhost`) when Open WebUI needs to reach Ollama running in another container.
 
-> **RAG & vector search:** Open WebUI's RAG pipeline uses its built-in ChromaDB by default. For production RAG workloads, connect an external vector database — see [Qdrant and Weaviate in the Databases wiki](https://docs.shani.dev/doc/servers/databases#qdrant-vector-database).
+> **RAG & vector search:** Open WebUI's RAG pipeline uses its built-in ChromaDB by default. For production RAG workloads, connect an external vector database — see [Qdrant and Weaviate in the Databases wiki](https://docs.shani.dev/doc/servers/databases/other#qdrant-vector-database).
 
 Access at `http://localhost:3000`. Proxy through Caddy for HTTPS: `webui.home.local { tls internal; reverse_proxy localhost:3000 }`.
 
@@ -181,7 +205,7 @@ cd ~/localai && podman-compose up -d
 ```bash
 curl http://localhost:8080/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -d '{"model":"llama3.2","messages":[{"role":"user","content":"Hello"}]}'
+  -d '{"model":"qwen3:8b","messages":[{"role":"user","content":"Hello"}]}'
 ```
 
 > LocalAI supports embeddings, function calling, audio transcription, and image generation — all via the standard OpenAI API surface.
@@ -354,7 +378,7 @@ services:
       STORAGE_DIR: /app/server/storage
       LLM_PROVIDER: ollama
       OLLAMA_BASE_PATH: http://host.containers.internal:11434
-      OLLAMA_MODEL_PREF: llama3.2
+      OLLAMA_MODEL_PREF: qwen3:8b
       EMBEDDING_ENGINE: ollama
       OLLAMA_EMBEDDING_MODEL_PREF: nomic-embed-text
       VECTOR_DB: lancedb
@@ -384,6 +408,9 @@ services:
     ports: ["127.0.0.1:4000:4000"]
     volumes:
       - /home/user/litellm/config.yaml:/app/config.yaml:ro,Z
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
     command: --config /app/config.yaml --port 4000 --num_workers 8
     restart: unless-stopped
 
@@ -404,6 +431,8 @@ volumes:
 cd ~/litellm && podman-compose up -d
 ```
 
+Export `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` in your shell (or a `.env` next to the compose file) before starting — the `api_key: os.environ/...` entries in `config.yaml` resolve from these.
+
 ##### First run — apply database migrations
 
 ```bash
@@ -414,14 +443,14 @@ podman exec litellm-litellm-1 litellm --database_url "postgresql://litellm:chang
 
 ```yaml
 model_list:
-  - model_name: llama3.2
+  - model_name: qwen3:8b
     litellm_params:
-      model: ollama/llama3.2
+      model: ollama/qwen3:8b
       api_base: http://host.containers.internal:11434
 
-  - model_name: phi4-mini
+  - model_name: qwen3:4b
     litellm_params:
-      model: ollama/phi4-mini
+      model: ollama/qwen3:4b
       api_base: http://host.containers.internal:11434
 
   - model_name: claude-sonnet
@@ -449,7 +478,7 @@ general_settings:
 curl http://localhost:4000/v1/chat/completions \
   -H "Authorization: Bearer sk-changeme" \
   -H "Content-Type: application/json" \
-  -d '{"model": "llama3.2", "messages": [{"role": "user", "content": "Hello"}]}'
+  -d '{"model": "qwen3:8b", "messages": [{"role": "user", "content": "Hello"}]}'
 ```
 
 ---
@@ -473,11 +502,11 @@ services:
 cd ~/vane && podman-compose up -d
 ```
 
-Access at `http://localhost:3009`. On first load, configure your AI provider (Ollama URL: `http://host.containers.internal:11434`, model: `llama3.2`) through the setup screen.
+Access at `http://localhost:3009`. On first load, configure your AI provider (Ollama URL: `http://host.containers.internal:11434`, model: `qwen3:8b`) through the setup screen.
 
 > If you already run a separate SearXNG instance, use the slim image instead: `itzcrazykns1337/vane:slim-latest` and set `SEARXNG_API_URL: http://host.containers.internal:8090`.
 
-> Vane needs at least a 7B model for coherent answers. `llama3.2` or `mistral` work well. Pull the model first with `podman exec ollama ollama pull llama3.2`.
+> Vane needs at least a 7B model for coherent answers. `qwen3:8b` or `deepseek-r1:8b` work well. Pull the model first with `podman exec ollama ollama pull qwen3:8b`.
 
 ---
 
@@ -648,6 +677,19 @@ In Open WebUI: Settings → Connections → add OpenAI-compatible endpoint `http
 
 **Purpose:** Full-stack LLM application development platform — build chatbots, agents, RAG pipelines, and AI workflows with a visual editor, then deploy them as API endpoints or embeddable widgets. Dify combines what Flowise and AnythingLLM do separately: a powerful workflow canvas *and* a complete RAG document pipeline *and* a deployment platform, all in one. Supports Ollama, OpenAI, Anthropic, Azure, Groq, and 30+ other providers.
 
+##### Recommended: deploy from the official repo
+
+Dify is designed to be deployed from its own repository — the bundled `docker/` directory ships the working compose file, `.env` template, and nginx config that the standalone example below omits:
+
+```bash
+git clone https://github.com/langgenius/dify ~/dify
+cd ~/dify/docker
+cp .env.example .env        # then set SECRET_KEY and your provider keys
+podman-compose up -d
+```
+
+The service layout below shows what that stack contains:
+
 ```yaml
 # ~/dify/compose.yml
 services:
@@ -699,8 +741,6 @@ services:
   nginx:
     image: nginx:alpine
     ports: ["127.0.0.1:5002:80"]
-    volumes:
-      - /home/user/dify/nginx/nginx.conf:/etc/nginx/nginx.conf:ro,Z
     depends_on: [api, web]
     restart: unless-stopped
 
@@ -770,7 +810,7 @@ services:
       - /home/user/open-interpreter/files:/files:Z
     environment:
       OLLAMA_HOST: http://host.containers.internal:11434
-      DEFAULT_MODEL: ollama/llama3.2
+      DEFAULT_MODEL: ollama/qwen3:8b
     command: server
     restart: unless-stopped
 ```
@@ -785,11 +825,11 @@ podman run -it --rm \
   -v /home/user/open-interpreter/files:/files:Z \
   -e OLLAMA_HOST=http://host.containers.internal:11434 \
   openinterpreter/open-interpreter:latest \
-  --model ollama/llama3.2 \
+  --model ollama/qwen3:8b \
   --local
 ```
 
-> For best results with code execution tasks, use a larger model — `llama3.1:70b` or `qwen2.5-coder:32b` produce significantly better code than 7B models.
+> For best results with code execution tasks, use a larger model — `qwen3:32b` or `deepseek-r1:32b` produce significantly better code than 7B models.
 
 ---
 
@@ -844,3 +884,12 @@ dify.home.local      { tls internal; reverse_proxy localhost:5002 }
 | Open Interpreter refuses to execute code | By default the agent confirms before running code — pass `--auto_run` to skip confirmation; ensure the files volume has write permissions |
 
 > 🔒 **Security tip:** Always bind AI service ports to `127.0.0.1` and proxy through Caddy. These services have no built-in authentication — do not expose them directly to the internet.
+
+## See Also
+
+- [AI-Assisted Development](../software/ai-development.md) — coding agents/harnesses (Claude Code, OpenCode, aider) instead of self-hosted inference servers
+- [Databases (vector stores)](databases)
+- [GPU compute blog](https://blog.shani.dev/post/gpu-compute-on-shani-os)
+- [AI-assisted development blog](https://blog.shani.dev/post/ai-assisted-development-on-shani-os) — narrative walkthrough of the harness/MCP/local-model landscape
+- [GPU Containers](../software/gpu-containers.md)
+- [Containers](../software/containers.md)

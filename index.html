@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
   <title>Shanios Docs</title>
@@ -23,20 +24,20 @@
 
   <!-- ═══ OPEN GRAPH ══════════════════════════════════════════════════ -->
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
-  <meta property="og:title"     id="og-title"     content="">
-  <meta property="og:description" id="og-desc"    content="">
+  <meta property="og:title"     id="og-title"     content="Shanios Docs">
+  <meta property="og:description" id="og-desc"    content="Comprehensive technical documentation for Shanios — the immutable Linux OS.">
   <meta property="og:type"      id="og-type"      content="website">
-  <meta property="og:url"       id="og-url"       content="">
-  <meta property="og:image"     id="og-image"     content="">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Shanios Docs logo">
   <meta property="og:locale"    content="en_IN">
 
   <!-- ═══ TWITTER ═════════════════════════════════════════════════════ -->
   <meta name="twitter:card"        content="summary_large_image">
-  <meta name="twitter:site"        id="tw-site"  content="">
-  <meta name="twitter:title"       id="tw-title" content="">
-  <meta name="twitter:description" id="tw-desc"  content="">
-  <meta name="twitter:image"       id="tw-image" content="">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="Shanios Docs">
+  <meta name="twitter:description" id="tw-desc"  content="Comprehensive technical documentation for Shanios — the immutable Linux OS.">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
   <!-- ═══ STRUCTURED DATA — FIX D: proper WebSite object for homepage ═══ -->
   <script type="application/ld+json" id="ld-doc">
@@ -50,6 +51,14 @@
       "@type": "Organization",
       "name": "Shanios",
       "logo": { "@type": "ImageObject", "url": "https://shani.dev/assets/images/logo.svg" }
+    },
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://docs.shani.dev/?q={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
     }
   }
   </script>
@@ -93,38 +102,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -227,7 +236,271 @@
   <main class="content" id="main-content" tabindex="-1">
 
     <!-- Doc content is injected here by the router -->
-    <div class="content__inner" id="doc-content" role="article"></div>
+    <!--PRERENDERED-DOCS-START-->
+<h1>Shanios Docs</h1>
+<p>Comprehensive technical documentation for Shanios — the immutable Linux OS.</p>
+
+<h2>Architecture</h2>
+<ul>
+  <li><a href="/doc/arch/boot/">Boot Process</a> — Shanios uses a fully measured, signed boot chain built on systemd-boot, dracut-generated Unified Kernel Images (UKIs), and optionally TPM2 +</li>
+  <li><a href="/doc/arch/btrfs/">Btrfs Deep Dive</a> — Shanios leverages advanced Btrfs features for immutability, efficiency, and data integrity. Copy-on-Write (CoW) Btrfs CoW minimises storage </li>
+  <li><a href="/doc/arch/build-pipeline/">Build Pipeline</a> — Shanios images are produced by a multi-stage build pipeline that takes a package list, an overlay filesystem, and a profile-specific customi</li>
+  <li><a href="/doc/arch/dracut-module/">Dracut Initramfs Module</a> — Shanios ships a custom dracut module (99shanios) that adds three hooks to the initramfs. These hooks implement the two features that require</li>
+  <li><a href="/doc/arch/filesystem/">Filesystem Structure</a> — Shanios uses Btrfs with a sophisticated subvolume layout housed in a single Btrfs partition (plus a 1 GB FAT32 ESP). The design separates th</li>
+  <li><a href="/doc/arch/overlay/">Overlay Filesystem</a> — Shanios uses Linux OverlayFS to present a fully writable /etc on top of a read-only root filesystem. This is what makes the immutable OS fee</li>
+</ul>
+
+<h2>Concepts</h2>
+<ul>
+  <li><a href="/doc/concepts/atomic-updates/">Atomic Updates</a> — Shanios uses an intelligent multi-layered update system with automatic checking, user notifications, and the shani-deploy tool for atomic sy</li>
+  <li><a href="/doc/concepts/blue-green/">Blue-Green Deployment</a> — Shanios implements blue-green deployment using Btrfs subvolumes — a strategy adapted from DevOps for desktop Linux. How It Works 1. System m</li>
+  <li><a href="/doc/concepts/immutability/">Immutability</a> — Shanios's immutability fundamentally changes how you interact with the system. Understanding this concept is key to using Shanios effectivel</li>
+  <li><a href="/doc/concepts/persistence/">Persistence Strategy</a> — Shanios selectively persists data across immutable system updates through bind mounts and dedicated Btrfs subvolumes. Three Categories ❌ Rep</li>
+</ul>
+
+<h2>Enterprise</h2>
+<ul>
+  <li><a href="/doc/enterprise/cloud-images/">Cloud Images Beyond AWS</a> — What exists today for non-AWS targets, what you can build yourself, and how far official support extends. Current Reality There are two dist</li>
+  <li><a href="/doc/enterprise/compliance/">Compliance &amp; Benchmarks</a> — How Shanios maps to common audit frameworks, what is satisfied by construction versus what remains an administrative action, and how to gene</li>
+  <li><a href="/doc/enterprise/fleet-monitoring/">Fleet Monitoring Runbook</a> — Shanios ships no fleet dashboard by design — no central console, no MDM server, no agent phoning home. Observability is composed from standa</li>
+  <li><a href="/doc/enterprise/fleet/">OEM &amp; Fleet Deployment</a> — Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or-nothing.</li>
+</ul>
+
+<h2>FAQ</h2>
+<ul>
+  <li><a href="/doc/faq/">FAQ</a> — Answers to the most common questions about Shanios — software installation, updates, hardware, security, and the immutable architecture in p</li>
+</ul>
+
+<h2>Installation</h2>
+<ul>
+  <li><a href="/doc/install/first-boot/">First Boot</a> — Plymouth BGRT Boot Theme Shanios uses the Plymouth BGRT boot theme. Plymouth provides a smooth graphical boot experience, suppressing kernel</li>
+  <li><a href="/doc/install/pre-install/">Pre-Installation Setup</a> — BIOS/UEFI Configuration Configure your firmware before installation (typically accessed via F2, F10, Del, or Esc during startup): 1. Enable </li>
+  <li><a href="/doc/install/requirements/">System Requirements</a> — Hardware Requirements | Component | Minimum | Recommended | |-----------|---------|-------------| | Processor | x8664 dual-core with VT-x/AM</li>
+  <li><a href="/doc/install/steps/">Installation Steps</a> — Installation takes approximately 10–15 minutes. Step-by-Step 1. Boot from USB — Press F12, F2, or Del during startup. Select your USB drive </li>
+</ul>
+
+<h2>Introduction</h2>
+<ul>
+  <li><a href="/doc/intro/comparison/">How Shanios Compares</a> — Immutable, atomic-update Linux distributions share one idea: the running system is never modified in place. Updates land as a complete, veri</li>
+  <li><a href="/doc/intro/getting-started/">Getting Started</a> — A complete walkthrough: choose your edition, download and verify the ISO, install, and configure Shanios for daily use. Choosing Your Editio</li>
+  <li><a href="/doc/intro/migrating/">Migrating from Traditional Linux</a> — If you're coming from Ubuntu, Fedora, Arch, or any mutable Linux distro, the main adjustment is how you install software and make system-lev</li>
+  <li><a href="/doc/intro/optimizations/">System Optimizations</a> — Shanios includes extensive performance, gaming, and reliability optimizations out of the box, eliminating the need for manual tweaking. Thes</li>
+  <li><a href="/doc/intro/switching-from-windows/">Switching from Windows &amp; macOS</a> — This guide is for anyone leaving Windows or macOS for Shanios — whether you are migrating one laptop, setting up a family machine, or moving</li>
+  <li><a href="/doc/intro/user-config/">User Configuration</a> — The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created users:</li>
+  <li><a href="/doc/intro/what-is-shanios/">What is Shanios?</a> — Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs file</li>
+  <li><a href="/doc/intro/whats-included/">What's Included</a> — Shanios comes fully equipped with a comprehensive software stack, carefully curated for desktop computing, development, gaming, and professi</li>
+</ul>
+
+<h2>Self-Hosted Networking</h2>
+<ul>
+  <li><a href="/doc/networking/adguard-home/">AdGuard Home</a> — AdGuard Home Purpose: Pi-hole alternative with native DNS-over-HTTPS (DoH) and DNS-over-TLS (DoT) support, a cleaner UI, per-client rules, a</li>
+  <li><a href="/doc/networking/blocky/">Blocky</a> — Blocky (Fast DNS Ad Blocker) Purpose: High-performance DNS proxy written in Go. Blocks ads and trackers via deny-lists (same blocklists as P</li>
+  <li><a href="/doc/networking/ddns-updater-dynamic-dns/">ddns-updater (Dynamic DNS)</a> — ddns-updater (Dynamic DNS) Purpose: Keeps your DNS records updated when your home/server IP changes. Polls your current public IP on a sched</li>
+  <li><a href="/doc/networking/firezone/">Firezone</a> — Purpose: Zero-trust network access (ZTNA) built on WireGuard. Features SSO (OIDC/SAML), granular access policies, device posture checks, and</li>
+  <li><a href="/doc/networking/frp-fast-reverse-proxy/">frp (Fast Reverse Proxy)</a> — frp (Fast Reverse Proxy) Purpose: Expose services running behind NAT or a firewall to the internet via a VPS relay — without needing to open</li>
+  <li><a href="/doc/networking/frrouting-bgp-ospf-dynamic-routing/">FRRouting — BGP, OSPF &amp; Dynamic Routing</a> — FRRouting (BGP / OSPF / Dynamic Routing) Purpose: Full-featured open-source routing suite implementing BGP, OSPF, IS-IS, RIP, PIM, and BFD —</li>
+  <li><a href="/doc/networking/gluetun-vpn-client-container/">Gluetun (VPN Client Container)</a> — Gluetun (VPN Client Container) Purpose: Route any container's traffic through a commercial VPN provider — without installing a VPN client on</li>
+  <li><a href="/doc/networking/haproxy/">HAProxy</a> — HAProxy (High-Performance Load Balancer) Purpose: The gold-standard TCP and HTTP load balancer. HAProxy has been the backbone of GitHub, Red</li>
+  <li><a href="/doc/networking/headscale/">Headscale (Self-Hosted Tailscale Alternative)</a> — Purpose: Zero-config mesh VPN built on WireGuard. Tailscale uses managed coordination; Headscale is the fully open-source self-hosted contro</li>
+  <li><a href="/doc/networking/hysteria-2-high-loss-networks/">Hysteria 2 (High-Loss Networks)</a> — Hysteria 2 (High-Loss Networks) Purpose: A QUIC-based proxy and tunnel that performs well in high-latency, high-loss, or censored network en</li>
+  <li><a href="/doc/networking/kea-dhcp/">Kea DHCP</a> — Kea DHCP (Modern DHCP Server) Purpose: ISC Kea is the modern replacement for ISC DHCP (dhcpd). Provides DHCPv4 and DHCPv6 with a REST API, a</li>
+  <li><a href="/doc/networking/librenms/">LibreNMS</a> — LibreNMS (Network Monitoring) Purpose: Full-featured auto-discovering network monitoring system. Discovers routers, switches, servers, APs, </li>
+  <li><a href="/doc/networking/nebula-overlay-mesh-network/">Nebula (Overlay Mesh Network)</a> — Nebula (Overlay Mesh Network) Purpose: A scalable, decentralised overlay network developed by Slack. Nodes communicate directly using certif</li>
+  <li><a href="/doc/networking/netbird/">NetBird</a> — NetBird Purpose: Open-source, peer-to-peer WireGuard mesh VPN platform. The most complete self-hosted alternative to Tailscale — management </li>
+  <li><a href="/doc/networking/netbox/">NetBox</a> — NetBox (Network Documentation &amp; IPAM) Purpose: Source of truth for your network infrastructure. Document IP address assignments (IPAM), VLAN</li>
+  <li><a href="/doc/networking/nginx-proxy-manager/">Nginx Proxy Manager</a> — Nginx Proxy Manager Purpose: GUI-based reverse proxy with Let's Encrypt integration. If you find Caddy's Caddyfile syntax unfamiliar, NPM of</li>
+  <li><a href="/doc/networking/ntopng/">Ntopng</a> — Ntopng (Network Traffic Analysis) Purpose: Real-time network traffic monitoring and analysis. Shows active flows, top talkers, protocol brea</li>
+  <li><a href="/doc/networking/openvpn/">OpenVPN</a> — OpenVPN Purpose: Legacy, highly configurable VPN standard. Use when you need specific cipher suites, client certificate management, or compa</li>
+  <li><a href="/doc/networking/outline-vpn/">Outline VPN</a> — Outline VPN Purpose: Shadowsocks-based proxy server by Jigsaw (Google). Designed for ease of deployment and resistance to traffic fingerprin</li>
+  <li><a href="/doc/networking/pangolin/">Pangolin</a> — Purpose: A fully open-source alternative to Cloudflare Tunnel. Expose local services via a public HTTPS URL through an encrypted WireGuard t</li>
+  <li><a href="/doc/networking/phpipam/">phpIPAM — IP Address Management</a> — phpIPAM (Lightweight IP Address Management) Purpose: Web-based IP address management tool. Track which IPs are assigned, to what device, who</li>
+  <li><a href="/doc/networking/pi-hole/">Pi-hole</a> — Pi-hole Purpose: Network-wide DNS ad and tracker blocker. Runs as your LAN's DNS server and blocks ads, telemetry, and malware domains for e</li>
+  <li><a href="/doc/networking/pritunl/">Pritunl</a> — Purpose: Enterprise-grade VPN with a modern web UI. Supports WireGuard and OpenVPN, SSO, multi-site routing, and audit logging. Requires Mon</li>
+  <li><a href="/doc/networking/searxng/">SearXNG</a> — SearXNG Purpose: Privacy-respecting meta-search engine. Aggregates results from Google, Bing, DuckDuckGo, and 70+ other sources without trac</li>
+  <li><a href="/doc/networking/squid-caching-proxy/">Squid (Caching Proxy)</a> — Squid (Caching Proxy) Purpose: High-performance HTTP/HTTPS caching proxy. Squid caches web content so repeated requests are served from disk</li>
+  <li><a href="/doc/networking/technitium/">Technitium DNS Server</a> — Technitium DNS Server Purpose: Full-featured authoritative and recursive DNS server with a clean web UI. Goes further than Pi-hole and AdGua</li>
+  <li><a href="/doc/networking/traefik/">Traefik</a> — Traefik Purpose: Container-native reverse proxy and load balancer. Auto-discovers services by watching Docker/Podman labels — no config file</li>
+  <li><a href="/doc/networking/unbound/">Unbound</a> — Unbound (Recursive DNS Resolver) Purpose: Validating, caching, recursive DNS resolver. Use it upstream of Pi-hole or AdGuard Home for DNSSEC</li>
+  <li><a href="/doc/networking/wireguard-easy/">WireGuard / WG-Easy</a> — All VPN and tunnel solutions on this system can run fully containerised. Rootless containers handle traffic routing but require specific cap</li>
+  <li><a href="/doc/networking/xray-v2ray-protocol-obfuscating-proxy/">Xray / V2Ray — Protocol-Obfuscating Proxy</a> — Xray / V2Ray (Protocol-Obfuscating Proxy) Purpose: A suite of network proxy tools that wrap traffic in protocols designed to evade deep pack</li>
+  <li><a href="/doc/networking/zerotier-self-hosted-controller/">ZeroTier (Self-Hosted Controller)</a> — ZeroTier (Self-Hosted Controller) Purpose: Run a private ZeroTier network controller without using ZeroTier's central cloud servers. Manage </li>
+</ul>
+
+<h2>Networking</h2>
+<ul>
+  <li><a href="/doc/networking/apache/">Apache HTTP Server</a> — Apache is a full-featured, battle-tested web server. On Shani OS, Caddy is the recommended reverse proxy for self-hosted services due to its</li>
+  <li><a href="/doc/networking/apcupsd/">apcupsd (UPS Daemon)</a> — apcupsd monitors APC Uninterruptible Power Supplies and triggers a graceful system shutdown when battery runs low. It is pre-installed on Sh</li>
+  <li><a href="/doc/networking/arpwatch/">arpwatch (ARP Monitor)</a> — arpwatch monitors Ethernet ARP traffic and maintains a database of IP-to-MAC address mappings. It sends an email alert (via the local MTA) w</li>
+  <li><a href="/doc/networking/avahi/">Avahi (mDNS)</a> — Avahi is active by default — your machine is immediately reachable as hostname.local on the LAN. It is used by CUPS (printers), KDE Connect,</li>
+  <li><a href="/doc/networking/bind/">BIND (Authoritative DNS)</a> — BIND (named) is the most widely deployed DNS server. On Shani OS it is pre-installed and provides two distinct functions that are often comb</li>
+  <li><a href="/doc/networking/bluetooth/">Bluetooth</a> — Shanios pre-installs the full BlueZ stack (shani-bluetooth) and enables the Bluetooth daemon by default on every edition — pairing works out</li>
+  <li><a href="/doc/networking/caddy/">Caddy</a> — Caddy is a modern web server with automatic HTTPS. It provisions and renews TLS certificates entirely automatically — via Let's Encrypt for </li>
+  <li><a href="/doc/networking/cloudflared/">Cloudflared Tunnels</a> — Cloudflared creates an encrypted, outbound-only tunnel from your Shani OS machine to Cloudflare's global edge network. This lets you expose </li>
+  <li><a href="/doc/networking/dnscrypt-proxy/">dnscrypt-proxy (Encrypted DNS)</a> — dnscrypt-proxy encrypts DNS queries between your machine and upstream resolvers using DNSCrypt or DNS-over-HTTPS (DoH). Without it, DNS quer</li>
+  <li><a href="/doc/networking/dnsmasq/">dnsmasq (Local DNS)</a> — dnsmasq is a lightweight DNS forwarder, local caching resolver, and DHCP server — ideal for homelab setups. Use it for custom .home domains,</li>
+  <li><a href="/doc/networking/exim/">Exim (Mail Transfer Agent)</a> — Exim is a pre-installed Mail Transfer Agent (MTA). On a desktop or homelab machine, its primary purpose is local mail delivery — routing sys</li>
+  <li><a href="/doc/networking/fail2ban/">Fail2ban (Brute-Force Protection)</a> — fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs via firewalld. It integrates with firewa</li>
+  <li><a href="/doc/networking/firewalld/">Firewall (firewalld)</a> — firewalld is active by default on Shani OS with a restrictive inbound policy. It manages nftables under the hood using a zone-based model — </li>
+  <li><a href="/doc/networking/gpsd/">gpsd (GPS Daemon)</a> — gpsd is a service daemon that reads data from GPS/GNSS receivers and makes it available to multiple clients over a local socket. Application</li>
+  <li><a href="/doc/networking/how-container-networking-works/">How Container Networking Works</a> — How Container Networking Works Understanding what Podman does under the hood helps debug connectivity issues between containers and the host</li>
+  <li><a href="/doc/networking/ip-addressing/">IP Addressing &amp; Routing</a> — This page covers IP addressing fundamentals — CIDR notation, subnetting, IPv4 and IPv6 — and practical ip command usage for managing address</li>
+  <li><a href="/doc/networking/iptables-and-nftables-basics/">iptables and nftables Basics</a> — iptables and nftables Basics Firewalld (used throughout this wiki) is a high-level interface over nftables on modern Linux. Understanding th</li>
+  <li><a href="/doc/networking/kdeconnect/">KDE Connect</a> — KDE Connect integrates your phone (Android/iOS) with your Shani OS desktop over the local network. It's pre-installed on the KDE Plasma edit</li>
+  <li><a href="/doc/networking/kerberos/">Kerberos</a> — Kerberos provides strong mutual authentication for client/server applications using secret-key cryptography. It is the standard for enterpri</li>
+  <li><a href="/doc/networking/modemmanager/">ModemManager (Mobile Broadband)</a> — ModemManager is pre-installed on Shani OS and integrates with NetworkManager to provide first-class support for USB and PCIe mobile broadban</li>
+  <li><a href="/doc/networking/nbd/">nbd-server (Network Block Device)</a> — NBD exports a block device (disk, partition, or image file) over the network. The client side presents it as a local block device (e.g., /de</li>
+  <li><a href="/doc/networking/network-debugging-quick-reference/">Network Debugging Quick Reference</a> — Network Debugging Quick Reference These commands are the foundation of diagnosing connectivity, DNS, and firewall problems on any Linux host</li>
+  <li><a href="/doc/networking/network-tools/">Network Tools</a> — Shanios includes a comprehensive suite of networking utilities for diagnostics, monitoring, security, and file transfer. All tools listed he</li>
+  <li><a href="/doc/networking/networkmanager-vpn/">NetworkManager &amp; VPN</a> — NetworkManager is pre-installed and active by default on Shani OS. It manages all network connections — wired, Wi-Fi, mobile broadband, and </li>
+  <li><a href="/doc/networking/nfs/">NFS File Sharing</a> — Native Linux file sharing at near-local disk speeds. Best for Linux-to-Linux sharing on a trusted LAN. NFS state is bind-mounted from /data/</li>
+  <li><a href="/doc/networking/openresolv/">openresolv (DNS)</a> — Shani OS uses openresolv to manage /etc/resolv.conf. Rather than any single program owning DNS, openresolv acts as a central broker: Network</li>
+  <li><a href="/doc/networking/openssh/">OpenSSH</a> — OpenSSH provides encrypted remote access, file transfer, and port forwarding. On Shani OS, the SSH daemon (sshd) is not enabled by default. </li>
+  <li><a href="/doc/networking/powerdns/">PowerDNS + PowerDNS Admin</a> — PowerDNS + PowerDNS Admin (Authoritative DNS) Purpose: Authoritative DNS server for your own domains. While Pi-hole, AdGuard, and Technitium</li>
+  <li><a href="/doc/networking/remote-desktop/">Remote Desktop</a> — Shani OS includes both client and server tools for graphical remote desktop access. All tools are pre-installed. Client — Connect to a Remot</li>
+  <li><a href="/doc/networking/rsyncd/">rsyncd (rsync Daemon)</a> — The rsync daemon exposes file modules over the rsync:// protocol for fast, efficient network file synchronisation and backups. Unlike SSH-ba</li>
+  <li><a href="/doc/networking/samba/">Samba (SMB/CIFS)</a> — Samba provides file and print sharing using the SMB/CIFS protocol, making your Shani OS machine appear as a Windows-compatible network share</li>
+  <li><a href="/doc/networking/slapd/">slapd (OpenLDAP)</a> — OpenLDAP is an open-source implementation of the Lightweight Directory Access Protocol (LDAP), used for centralised authentication and direc</li>
+  <li><a href="/doc/networking/snmpd/">snmpd (SNMP)</a> — The Simple Network Management Protocol daemon allows your Shani OS machine to be monitored by external systems such as Zabbix, Nagios, Libre</li>
+  <li><a href="/doc/networking/sshfs/">SSHFS</a> — SSHFS mounts any directory from an SSH-accessible machine as a local folder using FUSE. It requires only an SSH server on the remote — no sp</li>
+  <li><a href="/doc/networking/tailscale/">Tailscale VPN</a> — Tailscale builds a private, peer-to-peer encrypted network (a &quot;tailnet&quot;) between all your devices using WireGuard under the hood. Every devi</li>
+  <li><a href="/doc/networking/tcp-ip-fundamentals/">TCP/IP Fundamentals</a> — TCP/IP Fundamentals The TCP Three-Way Handshake Every TCP connection opens with a three-message exchange: 1. SYN — client sends a segment wi</li>
+  <li><a href="/doc/networking/troubleshooting/">Troubleshooting</a> — Troubleshooting | Issue | Solution | |-------|----------| | TUN/TAP device not found | Run sudo modprobe tun on the host | | Clients can't r</li>
+  <li><a href="/doc/networking/virtual-networking/">Virtual Networking</a> — Linux exposes a rich set of virtual network devices and primitives for building software-defined networks, container networking, VMs, VPN tu</li>
+  <li><a href="/doc/networking/wireguard-road-warrior/">WireGuard Road Warrior — Split-Tunnel</a> — WireGuard Road Warrior (Manual Split-Tunnel Config) Purpose: A &quot;road warrior&quot; setup lets mobile or laptop clients connect to your home serve</li>
+  <li><a href="/doc/networking/wireguard/">WireGuard (Manual)</a> — WireGuard kernel support and wireguard-tools are pre-installed on Shani OS. Tailscale uses WireGuard under the hood, but you can configure r</li>
+  <li><a href="/doc/networking/wireless/">Wi-Fi &amp; Wireless Firmware</a> — Wi-Fi works on first boot. NetworkManager is preinstalled and enabled, and the wireless firmware for common chip families ships inside the i</li>
+</ul>
+
+<h2>Overview</h2>
+<ul>
+  <li><a href="/doc/overview/">Overview</a> — Comprehensive guide to the immutable Linux OS with atomic updates. Welcome to the Shanios technical documentation. This wiki provides compre</li>
+</ul>
+
+<h2>Security</h2>
+<ul>
+  <li><a href="/doc/security/apparmor/">AppArmor (Mandatory Access Control)</a> — AppArmor is a Linux Security Module that confines programs to a defined set of resources using per-application profiles. A profile specifies</li>
+  <li><a href="/doc/security/audit/">Audit (auditd)</a> — auditd is the Linux kernel audit framework daemon. It captures security-relevant kernel events — file access, system calls, authentication, </li>
+  <li><a href="/doc/security/features/">Security Features</a> — Shanios implements defence-in-depth security across every layer — from firmware to userspace. All features are active from first boot with n</li>
+  <li><a href="/doc/security/fwupd/">Firmware Updates (fwupd)</a> — fwupd is the Linux Vendor Firmware Service client. It downloads firmware updates for BIOS/UEFI, drives, controllers, and other hardware comp</li>
+  <li><a href="/doc/security/gen-efi/">gen-efi Reference</a> — gen-efi is the Shanios UKI (Unified Kernel Image) builder and Secure Boot key manager. It wraps dracut --uefi and sbsign/sbverify to produce</li>
+  <li><a href="/doc/security/gocryptfs/">Directory Encryption (gocryptfs)</a> — gocryptfs encrypts individual directories using FUSE. Each file is stored as a separate encrypted blob, so cloud sync tools (Nextcloud, Sync</li>
+  <li><a href="/doc/security/hardware-auth/">Hardware Authentication</a> — Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC toke</li>
+  <li><a href="/doc/security/keyring/">Pacman Keyring &amp; Trust Root</a> — Shanios uses a custom pacman keyring to verify every package installed from the [shani] repository. This page explains how the trust root wo</li>
+  <li><a href="/doc/security/luks/">LUKS Management</a> — Full-disk encryption with LUKS2 must be enabled during the Shanios installer — it is a single checkbox on the disk setup screen. There is no</li>
+  <li><a href="/doc/security/lynis/">Lynis (Security Auditing)</a> — Lynis is a security auditing tool that scans a running Linux system and produces a hardening report. It checks hundreds of items: file permi</li>
+  <li><a href="/doc/security/permissions/">Permissions &amp; Authorization</a> — Shanios controls what a logged-in user can do — install software, format a disk, change the hostname — through a deliberate two-tier Polkit </li>
+  <li><a href="/doc/security/rkhunter/">rkhunter (Rootkit Hunter)</a> — rkhunter scans a system for known rootkits, backdoors, and local exploits. It checks system binaries against stored hashes, looks for suspic</li>
+  <li><a href="/doc/security/secure-boot/">Secure Boot</a> — Shanios ships with its own MOK (Machine Owner Key) and signs all UKI images at install time. Secure Boot can be enabled after installation t</li>
+  <li><a href="/doc/security/tpm2/">TPM2 Enrollment</a> — TPM2 enrollment seals your LUKS2 disk encryption key into your machine's Trusted Platform Module. Once enrolled, the disk unlocks automatica</li>
+</ul>
+
+<h2>Self-Hosting &amp; Servers</h2>
+<ul>
+  <li><a href="/doc/servers/ai-llms/">AI &amp; LLMs</a> — Run large language models, vision pipelines, image generation, speech-to-text, and AI coding assistants entirely on your own hardware. No AP</li>
+  <li><a href="/doc/servers/backups-sync/">Backups &amp; Storage</a> — Backups &amp; Sync Reliable, encrypted backup solutions and cloud synchronisation tools. Follow the 3-2-1 rule: Three copies of your data, on tw</li>
+  <li><a href="/doc/servers/business-intelligence/">Business Intelligence &amp; Analytics</a> — Self-hosted BI platforms, data visualisation tools, SQL explorers, and analytical dashboards. Query your databases, build charts, and share </li>
+  <li><a href="/doc/servers/clusters/">Clusters &amp; High Availability</a> — Multi-node, replicated, and highly available deployments. All compose files use rootless Podman with :Z volume labels on bind mounts. Named </li>
+  <li><a href="/doc/servers/communication/">Communication</a> — Communication Self-hosted chat, push notifications, VoIP, and team collaboration platforms. Key Concepts Federation and the fediverse — Acti</li>
+  <li><a href="/doc/servers/databases/mongodb/">Databases — MongoDB &amp; FerretDB</a> — MongoDB Purpose: Flexible document database optimised for JSON-like storage, rapid development cycles, and unstructured data models. Common </li>
+  <li><a href="/doc/servers/databases/other/">Databases — Messaging, Analytics &amp; Specialty Stores</a> — Apache Kafka Purpose: Distributed event streaming platform. Producers publish events to topics; consumers read them with durable, replayable</li>
+  <li><a href="/doc/servers/databases/postgresql/">Databases — PostgreSQL &amp; MariaDB</a> — CAP Theorem Quick Reference The CAP theorem states that a distributed system can guarantee at most two of three properties: Consistency (all</li>
+  <li><a href="/doc/servers/databases/redis/">Databases — Redis &amp; Compatible Alternatives</a> — Redis Purpose: High-performance in-memory data store used for caching, session management, message brokering, and real-time analytics. Used </li>
+  <li><a href="/doc/servers/devops/ci-cd/">DevOps — Code Hosting &amp; CI/CD</a> — Table of Contents Code Hosting CI/CD Container &amp; Image Tools Kubernetes &amp; Orchestration HA Clusters Infrastructure as Code Artifact &amp; Depend</li>
+  <li><a href="/doc/servers/devops/other/">DevOps — Infrastructure as Code, Containers &amp; Utilities</a> — Infrastructure as Code OpenTofu / Terraform Purpose: Declarative cloud and on-premise infrastructure provisioning. OpenTofu is the open-sour</li>
+  <li><a href="/doc/servers/devtools/">Dev Tools — Version Control, CI/CD &amp; Registries</a> — Key Concepts Git internals that come up in interviews Every commit is a snapshot (not a diff), identified by a SHA-1 hash of its content, au</li>
+  <li><a href="/doc/servers/education/">Education &amp; E-Learning</a> — Self-hosted learning management systems, school administration platforms, collaborative tools, and knowledge-sharing apps. Run your own camp</li>
+  <li><a href="/doc/servers/finance/">Finance &amp; Accounting</a> — Self-hosted personal finance, double-entry bookkeeping, invoicing, budgeting, stock portfolio tracking, and cryptocurrency nodes. Keep your </li>
+  <li><a href="/doc/servers/game-servers/">Game Servers</a> — Dedicated game servers for multiplayer gaming — hosted on your own hardware, on your own terms. No monthly fees, no player limits imposed by</li>
+  <li><a href="/doc/servers/home-automation/">Home Automation</a> — Smart home hubs, IoT bridges, camera NVRs, and automation pipelines — all running locally with no cloud dependency. Why local? Cloud-depende</li>
+  <li><a href="/doc/servers/iot/">IoT &amp; Sensor Data</a> — Sensor data pipelines, MQTT brokers, time-series ingestion, industrial protocols, dashboards, alerting, and network monitoring. Everything f</li>
+  <li><a href="/doc/servers/kubernetes/gitops/">Kubernetes — GitOps &amp; Continuous Delivery</a> — GitOps &amp; Continuous Delivery GitOps end-to-end workflow Separate app code from deployment config. Application repo contains code; GitOps rep</li>
+  <li><a href="/doc/servers/kubernetes/networking/">Kubernetes — Networking &amp; Ingress</a> — Networking &amp; Ingress Cilium (eBPF CNI — Primary) Purpose: High-performance CNI built on eBPF. Replaces Flannel, Calico, and kube-proxy in on</li>
+  <li><a href="/doc/servers/kubernetes/observability/">Kubernetes — Observability (Metrics, Dashboards &amp; SLOs)</a> — Observability Prometheus + Grafana (kube-prometheus-stack) Grafana dashboard IDs | Tool | Dashboard ID | |------|-------------| | Longhorn |</li>
+  <li><a href="/doc/servers/kubernetes/operations/">Kubernetes — Cluster Operations &amp; Platform Engineering</a> — Backup &amp; Disaster Recovery Velero (Cluster Backup &amp; Restore) Scheduled backups Restore etcd Snapshots (k3s) Restic (Off-Cluster File Backup)</li>
+  <li><a href="/doc/servers/kubernetes/overview/">Kubernetes Overview — Key Concepts &amp; Distributions</a> — Table of Contents Core Concepts &amp; Distributions 1. Key Concepts (Control Plane, Networking, RBAC, Storage, eBPF, GitOps, Namespaces, Labels,</li>
+  <li><a href="/doc/servers/kubernetes/security/">Kubernetes — Security &amp; Policy</a> — Security &amp; Policy Kubernetes RBAC Pod Security Admission (PSA) Purpose: Kubernetes 1.25+ enforces security standards at the namespace level </li>
+  <li><a href="/doc/servers/kubernetes/storage/">Kubernetes — Storage</a> — Storage Longhorn (Distributed Block Storage) Purpose: Cloud-native distributed block storage for multi-node clusters. Provides replicated Re</li>
+  <li><a href="/doc/servers/kubernetes/troubleshooting/">Kubernetes — Troubleshooting</a> — Troubleshooting General cluster issues | Issue | Solution | |-------|----------| | kubectl: connection refused | sudo systemctl status k3s; </li>
+  <li><a href="/doc/servers/kubernetes/workloads/">Kubernetes — Workload Patterns</a> — Workload Patterns StatefulSets Use for databases, Kafka, Elasticsearch, Redis Cluster — anything needing stable identity or per-pod PVCs. Jo</li>
+  <li><a href="/doc/servers/mail/">Mail Servers</a> — Production-ready email solutions for full data control and privacy. ⚠️ Prerequisite: Requires static public IP, reverse DNS (PTR), and corre</li>
+  <li><a href="/doc/servers/management/">Container Management &amp; Lifecycle</a> — Best practices for running, updating, and maintaining self-hosted containers on Shani OS. Key Concepts These concepts apply identically whet</li>
+  <li><a href="/doc/servers/media/">Media &amp; Entertainment</a> — Self-hosted streaming servers, personal photo libraries, music servers, and download automation. All containers bind to 127.0.0.1 by default</li>
+  <li><a href="/doc/servers/medical/">Medical &amp; Health</a> — Self-hosted electronic health records, hospital information systems, FHIR servers, health data aggregation, telemedicine, and personal welln</li>
+  <li><a href="/doc/servers/monitoring/grafana/">Monitoring — Grafana, Loki &amp; Tracing</a> — Grafana Purpose: The standard visualisation layer for Prometheus, Loki, InfluxDB, and 50+ other data sources. Drag-and-drop dashboards, aler</li>
+  <li><a href="/doc/servers/monitoring/logs/">Monitoring — Log Aggregation (ELK, OpenSearch &amp; Vector)</a> — Elasticsearch + ELK Stack (Single-Node) Purpose: Distributed search and analytics engine — the E in the ELK stack (Elasticsearch + Logstash </li>
+  <li><a href="/doc/servers/monitoring/prometheus/">Monitoring — Prometheus, Alerting &amp; Long-Term Storage</a> — Key Concepts The three pillars (now four) of observability Metrics — numeric time-series data (CPU %, request rate, error count). Cheap to s</li>
+  <li><a href="/doc/servers/monitoring/uptime/">Monitoring — Uptime, Lightweight Dashboards &amp; All-in-One Platforms</a> — Netdata Purpose: Real-time system and container metrics with zero configuration. Auto-discovers running containers, processes, databases, an</li>
+  <li><a href="/doc/servers/openstack/">OpenStack &amp; Private Cloud</a> — OpenStack &amp; Private Cloud Deploy a full OpenStack cloud on this system — from a minimal all-in-one development setup to a multi-node private</li>
+  <li><a href="/doc/servers/productivity/file-sync/">Productivity — File Sync (Nextcloud, Syncthing &amp; More)</a> — Key Concepts Internal Developer Platforms (IDPs) — what they solve Without an IDP, every developer needs to know: how to provision infrastru</li>
+  <li><a href="/doc/servers/productivity/knowledge-base/">Productivity — Wikis &amp; Knowledge Bases</a> — Outline (Team Knowledge Base) Purpose: Modern wiki and knowledge base with real-time collaborative editing, a clean Notion-like interface, a</li>
+  <li><a href="/doc/servers/productivity/notes-bookmarks/">Productivity — Notes, Bookmarks &amp; RSS</a> — HedgeDoc (Collaborative Markdown) Purpose: Real-time collaborative Markdown editor. Multiple people edit simultaneously — useful for meeting</li>
+  <li><a href="/doc/servers/productivity/project-management/">Productivity — Project Management &amp; CRM</a> — Planka (Kanban Board) Purpose: Open-source Trello alternative. Real-time collaborative Kanban boards with cards, labels, checklists, due dat</li>
+  <li><a href="/doc/servers/productivity/publishing-design/">Productivity — Publishing &amp; Design Tools</a> — Ghost (Publishing &amp; Blogging) Purpose: Modern, open-source publishing platform. Ghost is a focused writing and newsletter tool — clean edito</li>
+  <li><a href="/doc/servers/productivity/utilities/">Productivity — Household &amp; Personal Utilities</a> — Mealie (Recipe Manager) Purpose: Self-hosted recipe manager with web scraping (import recipes from any URL), meal planning, shopping list ge</li>
+  <li><a href="/doc/servers/security/authelia/">Security &amp; Identity — SSO, Directory &amp; Passwordless (Authelia, Authentik, Keycloak, Zitadel, LLDAP, Kanidm)</a> — Key Concepts Zero Trust principles &quot;Never trust, always verify.&quot; Traditional perimeter security trusts anything inside the network. Zero tru</li>
+  <li><a href="/doc/servers/security/pki-secrets-siem/">Security — CrowdSec, PKI, Secrets &amp; SIEM</a> — CrowdSec Purpose: Collaborative intrusion prevention system. Analyses your logs for attack patterns, blocks malicious IPs via a firewall bou</li>
+  <li><a href="/doc/servers/security/policies/">Security &amp; Identity — Scanning, SBOM &amp; Policy Enforcement</a> — Syft + Grype (SBOM &amp; Vulnerability Scanning) Purpose: Syft generates a Software Bill of Materials (SBOM) — a complete inventory of every pac</li>
+</ul>
+
+<h2>Software &amp; Apps</h2>
+<ul>
+  <li><a href="/doc/software/ai-development/">AI-Assisted Development</a> — Shanios supports every major style of AI-assisted coding: cloud assistants (GitHub Copilot, Anthropic, OpenAI-backed tools), editor extensio</li>
+  <li><a href="/doc/software/appimage/">AppImage</a> — AppImages are self-contained executable bundles that run on any Linux system without installation. Gear Lever (pre-installed) provides a GUI</li>
+  <li><a href="/doc/software/apptainer/">Apptainer (HPC Containers)</a> — Apptainer (formerly Singularity) is the container runtime built for HPC. It packages your entire software environment into a single .sif (Si</li>
+  <li><a href="/doc/software/bottles/">Bottles (Windows Compatibility)</a> — Bottles is the recommended tool for running non-gaming Windows software on Shanios. It manages Wine environments (&quot;bottles&quot;), handles runtim</li>
+  <li><a href="/doc/software/containers/">Containers</a> — Shanios is a first-class container platform. The following runtimes are pre-installed and ready to use: | Runtime | Best for | Wiki | |---|-</li>
+  <li><a href="/doc/software/development/">Development Environments</a> — Shanios works as a daily development machine, but the workflow differs from a traditional distro: /usr is read-only and there is no package </li>
+  <li><a href="/doc/software/distrobox/">Distrobox</a> — Distrobox is the recommended way to run software that requires traditional package managers on Shanios. It creates a full mutable Linux cont</li>
+  <li><a href="/doc/software/flatpak/">Flatpak</a> — Flatpak is the primary method for installing GUI applications on Shanios. Flathub is pre-configured and ready to use from first boot — no se</li>
+  <li><a href="/doc/software/gaming/">Gaming</a> — Shanios pre-installs GameMode and broad controller/RGB hardware support on every edition. The full gaming app stack (Steam, Lutris, Heroic, </li>
+  <li><a href="/doc/software/gpu-containers/">GPU Acceleration &amp; HPC Containers</a> — Shanios is an immutable OS built for reproducibility. GPU drivers are pre-installed and OS-managed, while heavy user-space stacks (CUDA, ROC</li>
+  <li><a href="/doc/software/homebrew/">Homebrew</a> — Homebrew is an optional, user-space package manager that installs software under /home/linuxbrew/. It is useful if you are familiar with mac</li>
+  <li><a href="/doc/software/lxc-lxd/">LXC and LXD</a> — LXC and LXD provide full Linux system containers — a complete operating system (init system, services, network stack) inside an isolated env</li>
+  <li><a href="/doc/software/nix/">Nix Package Manager</a> — Nix is pre-installed on Shanios and is the recommended way to install CLI tools, language runtimes, and developer libraries. All Nix data li</li>
+  <li><a href="/doc/software/shani-pkgbuilds/">Building &amp; Adding Packages</a> — Shanios uses a reproducible Docker-based build pipeline to compile Arch Linux packages for the [shani] repository. This page explains how to</li>
+  <li><a href="/doc/software/shani-repo/">Shani Package Repository</a> — The [shani] repository contains custom packages built for Shanios. It is served at repo.shani.dev and is configured on every Shanios install</li>
+  <li><a href="/doc/software/snaps/">Snaps</a> — Snap packages are sandboxed, self-contained applications published to the Snap Store by Canonical and third-party developers. Shanios ships </li>
+  <li><a href="/doc/software/systemd-nspawn/">systemd-nspawn</a> — systemd-nspawn is a lightweight container mechanism built directly into systemd. It runs a full Linux distribution — complete with an init s</li>
+  <li><a href="/doc/software/vms/">Virtual Machines</a> — Shanios ships a full virtualisation stack pre-installed and ready to use. VM disk images live in dedicated Btrfs subvolumes (@libvirt and @q</li>
+  <li><a href="/doc/software/waydroid/">Android (Waydroid)</a> — Waydroid runs a full Android system in a container on Shanios. It integrates with the Wayland compositor so Android apps appear as native wi</li>
+</ul>
+
+<h2>System</h2>
+<ul>
+  <li><a href="/doc/system/accessibility/">Accessibility</a> — Shanios pre-installs a full accessibility stack on every desktop edition (GNOME, KDE Plasma, and COSMIC) — a screen reader, speech synthesis</li>
+  <li><a href="/doc/system/audio/">Audio (PipeWire)</a> — Shanios uses PipeWire as the entire audio (and video) server on every edition — it replaces PulseAudio and JACK with a single unified daemon</li>
+  <li><a href="/doc/system/backup/">Backup &amp; Recovery</a> — Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User data and container state must be backed up independently to </li>
+  <li><a href="/doc/system/cheatsheet/">Command Cheatsheet</a> — One-line-per-task reference for daily Shanios operation. Printable. Full detail lives in the pages linked at the bottom. | Task | Go-to comm</li>
+  <li><a href="/doc/system/cronie/">cronie (Cron Scheduler)</a> — cronie is the standard cron daemon — it runs commands on a schedule defined in crontab files. It is pre-installed and active by default on S</li>
+  <li><a href="/doc/system/gpu/">GPU &amp; Graphics Drivers</a> — Every graphics driver on Shanios ships inside the signed OS image. There is no DKMS, no post-install driver script, and nothing to download </li>
+  <li><a href="/doc/system/hardware/">Hardware</a> — This page covers inspecting and diagnosing hardware on Shani OS: CPUs, memory, GPUs, storage controllers, USB devices, sensors, and firmware</li>
+  <li><a href="/doc/system/kernel-modules/">Kernel Modules</a> — Kernel modules are loadable drivers and extensions that the Linux kernel can load and unload at runtime without rebooting. On Shani OS, modu</li>
+  <li><a href="/doc/system/logging/">Logging</a> — Shani OS uses systemd-journald as its primary logging system. All kernel messages, service output, and system events flow into a single stru</li>
+  <li><a href="/doc/system/permissions/">ch* Commands (chmod, chown, chattr, ACLs)</a> — The ch* family covers the core &quot;change&quot; utilities — tools that modify permissions, ownership, file attributes, and user account properties. </li>
+  <li><a href="/doc/system/power/">Power Management</a> — Shanios ships sane power defaults that are active from first boot — no post-install tuning required. This page focuses on laptops: sleep sta</li>
+  <li><a href="/doc/system/printing/">Printing &amp; Scanning</a> — Shanios ships a complete printing and scanning stack out of the box — CUPS, a wide range of vendor drivers, and driverless IPP/network scann</li>
+  <li><a href="/doc/system/process-management/">Process Management</a> — Standard Linux process management tools are all available on Shani OS. This page covers inspecting, controlling, and debugging running proce</li>
+  <li><a href="/doc/system/storage/">Storage</a> — This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health moni</li>
+  <li><a href="/doc/system/systemd/">Systemd</a> — Systemd is the init system and service manager on Shani OS. It starts every process at boot, manages all daemons, handles logging via the jo</li>
+  <li><a href="/doc/system/users-groups/">Users &amp; Groups</a> — User accounts on Shani OS follow standard Linux conventions — accounts are stored in /etc/passwd, /etc/shadow, and /etc/group, which live in</li>
+</ul>
+
+<h2>Troubleshooting</h2>
+<ul>
+  <li><a href="/doc/troubleshooting/">Troubleshooting</a> — The most important thing to know about troubleshooting Shanios is that the worst case is almost always &quot;rollback and reboot.&quot; The architectu</li>
+</ul>
+
+<h2>Updates &amp; Config</h2>
+<ul>
+  <li><a href="/doc/updates/channels/">Release Channels</a> — Shanios publishes releases through two channels: latest and stable. This page explains the difference and how promotion works. Channel Overv</li>
+  <li><a href="/doc/updates/config/">System Config</a> — All system configuration in Shanios follows standard Linux conventions — edit files in /etc, manage services with systemctl. Your changes ar</li>
+  <li><a href="/doc/updates/shani-health/">shani-health Reference</a> — shani-health is the system health and diagnostics CLI for Shanios. It provides a comprehensive single-command view of your system's state: b</li>
+  <li><a href="/doc/updates/shani-reset/">Factory Reset (shani-reset)</a> — shani-reset wipes all persistent system state stored in /data and reboots the machine. On the next boot, systemd-tmpfiles recreates the /dat</li>
+  <li><a href="/doc/updates/shell/">Shell &amp; Environment</a> — Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your home </li>
+  <li><a href="/doc/updates/system/">System Updates</a> — Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the </li>
+  <li><a href="/doc/updates/user-setup/">User Provisioning (shani-user-setup)</a> — shani-user-setup automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix c</li>
+</ul>
+<!--PRERENDERED-DOCS-END-->
 
   </main>
 

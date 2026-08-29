@@ -1,7 +1,7 @@
 ---
 title: Factory Reset (shani-reset)
 section: Updates & Config
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # Factory Reset
@@ -143,5 +143,5 @@ sudo shani-reset --yes --keep-downloads
 ## See Also
 
 - [System Config](config) — editing `/etc` files and managing the overlay
-- [Overlay Filesystem](../arch/overlay) — how the `/etc` overlay works
+- [Overlay Filesystem](../arch/overlay.md) — how the `/etc` overlay works
 - [System Updates](system) — rolling back an update without a full reset

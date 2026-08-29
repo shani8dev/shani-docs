@@ -1,7 +1,7 @@
 ---
 title: Distrobox
 section: Software & Apps
-updated: 2026-04-01
+updated: 2026-08-28
 ---
 
 # Distrobox
@@ -118,3 +118,11 @@ host-spawn systemctl --user restart pipewire
 - Install heavy build dependencies in Distrobox rather than Nix to keep the Nix store clean
 - For AUR packages, use the `arch` container — `yay` and `paru` work inside it
 - Container data (installed packages) lives in Podman storage (`@containers`), not your home directory — reinstalling a container resets its installed packages, but not your home files
+
+## See Also
+
+- [Containers](containers) — overview of all container runtimes
+- [Nix Package Manager](nix) — CLI tools without containers
+- [Flatpak](flatpak) — sandboxed GUI apps
+- [Linux Containers (LXC/LXD)](lxc-lxd) — system containers
+- [GPU Containers](gpu-containers) — NVIDIA access in containers

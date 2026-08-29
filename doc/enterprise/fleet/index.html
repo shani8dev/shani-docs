@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>OEM &amp; Fleet Deployment — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="OEM &amp; Fleet Deployment  Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or…">
+  <meta name="description" id="meta-desc"     content="Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or-nothing. Rollback requi…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="OEM &amp; Fleet Deployment">
-  <meta property="og:description" id="og-desc"    content="OEM &amp; Fleet Deployment  Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or…">
+  <meta property="og:description" id="og-desc"    content="Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or-nothing. Rollback requi…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/enterprise/fleet/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="OEM &amp; Fleet Deployment">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="OEM &amp; Fleet Deployment">
-  <meta name="twitter:description" id="tw-desc"  content="OEM &amp; Fleet Deployment  Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or-nothing. Rollback requi…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"OEM & Fleet Deployment","description":"OEM & Fleet Deployment  Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or…","url":"https://docs.shani.dev/doc/enterprise/fleet/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"OEM & Fleet Deployment","description":"Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or-nothing. Rollback requi…","url":"https://docs.shani.dev/doc/enterprise/fleet/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"OEM & Fleet Deployment","item":"https://docs.shani.dev/doc/enterprise/fleet/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,19 +215,19 @@
         <h1 class="doc-title">OEM &amp; Fleet Deployment</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Enterprise</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Shanios is designed for fleet-scale management. Every machine pulls from the same GPG-verified image. Updates are atomic and all-or-nothing. Rollback requires no reimaging. The fleet stays uniform because the OS is replaced wholesale on each update — never patched in place.</p>
 <p>Enterprise contact and OEM enquiries: <a href="https://shani.dev#enterprise">shani.dev — Enterprise & Vendors</a>.</p>
-<h2>Why Immutability Solves Fleet Management</h2>
+<h2 id="why-immutability-solves-fleet-management">Why Immutability Solves Fleet Management</h2>
 <p>Traditional fleet management tooling (Ansible, Puppet, Chef, Salt) solves a problem Shanios makes unnecessary: reconciling the actual state of a mutable system with the desired state. You write playbooks to install packages, configure files, enable services, and fix drift. You run them on a schedule.</p>
 <p>On Shanios, the root filesystem is physically read-only. A machine cannot drift from the OS image it booted. The only way the OS changes is through <code>shani-deploy</code>, which replaces it atomically. Configuration lives in the <code>/etc</code> OverlayFS overlay (in <code>@data</code>) — tracked separately from the OS image and surviving every update.</p>
 <p>The result is a fleet model that looks more like container orchestration than traditional desktop management: the OS is an image, deployments are image swaps, and per-machine state is limited and explicit.</p>
-<p>| Concern | Traditional Mutable Linux | Shanios | |---|---|---| | Fleet uniformity | Drifts over time; requires reconciliation tools | Every machine on same channel runs identical verified image | | Bad update recovery | Reimage or manual rollback; often on-site | One SSH command (<code>shani-deploy -r</code>); automatic if unattended | | Security audit | Hardening guide + config management | Secure by default; auditable public codebase | | Software inventory | <code>dpkg -l</code>, <code>rpm -qa</code> varies per machine | OS image version + Flatpak list — identical across fleet | | Remote management | MDM + SSH + config management stack | SSH or Tailscale; no drift to manage | | Encryption | Configure LUKS separately | LUKS2 + TPM2 at install; no foreign key escrow |</p>
-<p>---</p>
-<h2>OEM Deployment</h2>
-<h3>Unattended and Low-Interaction Installs</h3>
+<table><thead><tr><th>Concern</th><th>Traditional Mutable Linux</th><th>Shanios</th></tr></thead><tbody><tr><td>Fleet uniformity</td><td>Drifts over time; requires reconciliation tools</td><td>Every machine on same channel runs identical verified image</td></tr><tr><td>Bad update recovery</td><td>Reimage or manual rollback; often on-site</td><td>One SSH command (<code>shani-deploy -r</code>); automatic if unattended</td></tr><tr><td>Security audit</td><td>Hardening guide + config management</td><td>Secure by default; auditable public codebase</td></tr><tr><td>Software inventory</td><td><code>dpkg -l</code>, <code>rpm -qa</code> varies per machine</td><td>OS image version + Flatpak list — identical across fleet</td></tr><tr><td>Remote management</td><td>MDM + SSH + config management stack</td><td>SSH or Tailscale; no drift to manage</td></tr><tr><td>Encryption</td><td>Configure LUKS separately</td><td>LUKS2 + TPM2 at install; no foreign key escrow</td></tr></tbody></table>
+<hr>
+<h2 id="oem-deployment">OEM Deployment</h2>
+<h3 id="unattended-and-low-interaction-installs">Unattended and Low-Interaction Installs</h3>
 <p>The graphical installer (<code>os-installer</code>) is driven entirely by <code>/etc/os-installer/config.yaml</code>, plus a set of shell scripts (<code>scripts/prepare.sh</code>, <code>scripts/install.sh</code>, <code>scripts/configure.sh</code>) that <code>os-installer</code> invokes with the user's choices exported as <code>OSI_*</code> environment variables (<code>OSI_DEVICE_PATH</code>, <code>OSI_USE_ENCRYPTION</code>, <code>OSI_ENCRYPTION_PIN</code>, <code>OSI_USER_AUTOLOGIN</code>, etc.). <code>config.yaml</code> is the only config file in play — it's a real, working config, not a template — so an OEM builds a custom image profile with its own <code>config.yaml</code> to control the install flow:</p>
 <pre><code class="language-yaml"># os-installer-config/config.yaml — keys relevant to a low-touch OEM install
 
@@ -263,7 +265,7 @@ skip_user: yes</code></pre>
 <p><code>configure.sh</code> reads <code>OSI_USER_AUTOLOGIN</code> and configures autologin for whichever display manager is present on the image — GDM, SDDM, greetd, LightDM, LXDM, or plain <code>agetty</code> on a TTY (<code>os-installer-config/scripts/configure.sh:505</code>, <code>setup_autologin_target</code>). Combined with <code>skip_region</code>/<code>skip_user</code>, an OEM image can go from first boot to a logged-in desktop with no first-run wizard at all.</p>
 <p>Because the install/configure scripts only read <code>OSI_*</code> environment variables — they have no hard dependency on the GTK front-end — an OEM building a factory-imaging pipeline can call <code>install.sh</code>/<code>configure.sh</code> directly with those variables pre-set, skipping the interactive UI entirely for mass provisioning. This is scripting the same code path the GUI installer uses, not a separate "headless mode" — there is no bundled kickstart/autoyast-style single-answer-file format.</p>
 <p><code>failure_help_url</code> can point at an internal support desk instead of the public one, and <code>commands.reboot</code>/<code>commands.browser</code> can be repointed at OEM-specific tooling.</p>
-<h3>Pre-installation Customisation</h3>
+<h3 id="pre-installation-customisation">Pre-installation Customisation</h3>
 <p><strong>Plymouth branding:</strong> The Plymouth boot theme uses BGRT — it reads the OEM logo directly from UEFI firmware. A machine whose logo is in the UEFI BGRT table automatically displays it during boot without any image customisation. For custom logos beyond BGRT, the Plymouth theme configuration lives in <code>/usr/share/plymouth/themes/</code>.</p>
 <p><strong>Pre-installed Flatpaks:</strong> To ship machines with specific applications pre-installed, add Flatpak refs to the OEM configuration layer. Flatpaks install to <code>@flatpak</code> and are fully independent of the OS image.</p>
 <p><strong>Custom Flatpak remotes:</strong> Organisations can run private Flatpak repositories for internal applications:</p>
@@ -272,14 +274,14 @@ flatpak remote-add --if-not-exists myorg https://flatpak.myorg.com/repo
 
 # Install an internal app
 flatpak install myorg com.myorg.InternalApp</code></pre>
-<h3>Image Signing</h3>
+<h3 id="image-signing">Image Signing</h3>
 <p>Every Shanios release is signed with key <code>7B927BFFD4A9EAAA8B666B77DE217F3DA8014792</code>, and <code>shani-deploy</code> hardcodes that fingerprint (<code>GPG_KEY_ID</code>) plus the CDN endpoint (<code>R2_BASE_URL=&quot;https://downloads.shani.dev&quot;</code>) as <code>readonly</code> constants — there is no runtime flag or config file that repoints a stock <code>shani-deploy</code> binary at a different signing key or a private mirror. Machines running the stock tool always verify against, and download from, the public Shanios infrastructure (R2, with SourceForge-mirror auto-discovery as fallback).</p>
 <p>An OEM that needs its own signing key does so at the <strong>image-build layer</strong>, not at runtime on deployed machines — see <a href="#custom--cloud-image-building">Custom & Cloud Image Building</a> below, where the Packer AMI pipeline accepts <code>PKR_VAR_gpg_public_key</code> to bake in an organisation's own key at build time. Redirecting the <em>ongoing</em> update pipeline (the <code>shani-deploy</code> running on already-deployed machines) to a private CDN or a different signing key requires forking <code>shani-deploy</code> (GPLv3, source available) and rebuilding the image with the patched constants — this is not a supported runtime configuration surface today.</p>
-<p>---</p>
-<h2>Custom & Cloud Image Building</h2>
+<hr>
+<h2 id="custom-cloud-image-building">Custom & Cloud Image Building</h2>
 <p><a href="https://github.com/shani8dev/shani-install-media">shani-install-media</a> builds the actual OS images and ISOs from four profiles, each with its own <code>package-list.txt</code> under <code>image_profiles/&lt;profile&gt;/</code>:</p>
-<p>| Profile | Desktop | Notes | |---|---|---| | <code>gnome</code> | GNOME | Default desktop image | | <code>plasma</code> | KDE Plasma | Adds Kvantum Flatpak filesystem override | | <code>cosmic</code> | COSMIC | Desktop image | | <code>server</code> | None (headless) | Cloud/AMI-oriented, no GUI stack |</p>
-<h3>The Server Profile</h3>
+<table><thead><tr><th>Profile</th><th>Desktop</th><th>Notes</th></tr></thead><tbody><tr><td><code>gnome</code></td><td>GNOME</td><td>Default desktop image</td></tr><tr><td><code>plasma</code></td><td>KDE Plasma</td><td>Adds Kvantum Flatpak filesystem override</td></tr><tr><td><code>cosmic</code></td><td>COSMIC</td><td>Desktop image</td></tr><tr><td><code>server</code></td><td>None (headless)</td><td>Cloud/AMI-oriented, no GUI stack</td></tr></tbody></table>
+<h3 id="the-server-profile">The Server Profile</h3>
 <p><code>image_profiles/server/package-list.txt</code> is explicitly built for headless/cloud deployment — its header states the meta-package policy: it deliberately excludes <code>shani-core</code>, <code>shani-network</code>, and <code>shani-desktop-*</code> (which would pull in NetworkManager, Waydroid, snapd-for-desktop, and GUI stacks) and instead installs <code>shani-tools-network</code> plus an explicit package list. Concretely, the server profile differs from the desktop profiles in:</p>
 <ul>
 <li><strong>Networking:</strong> <code>systemd-networkd</code>/<code>systemd-resolved</code> instead of NetworkManager (<code>etc/systemd/network/20-cloud-dhcp.network</code>)</li>
@@ -291,7 +293,7 @@ flatpak install myorg com.myorg.InternalApp</code></pre>
 <li><strong>Optional-until-configured services disabled:</strong> <code>tailscaled</code>, <code>cloudflared</code>, and <code>caddy</code> are installed but disabled until an admin configures them</li>
 </ul>
 <p>The bundled cloud-init datasource config (<code>etc/cloud/cloud.cfg.d/10-shanios-aws.cfg</code>) targets AWS EC2 specifically: IMDSv2 is enforced (<code>strict_id: true</code>), SSH host keys are regenerated per-instance (<code>ssh_deletekeys</code>/<code>ssh_genkeytypes</code>) so cloned AMI instances don't share host keys, root SSH login is disabled, and the default <code>shanios</code> user is created with passwordless sudo and cloud-init-managed key injection — comparable to what AL2023/RHEL9/Ubuntu cloud images do.</p>
-<h3>Building an AWS AMI Directly</h3>
+<h3 id="building-an-aws-ami-directly">Building an AWS AMI Directly</h3>
 <p><code>shani-install-media/packer/</code> contains a working Packer template (<code>shanios-ami.pkr.hcl</code>, using the <code>amazon-ebssurrogate</code> builder) that turns a pre-built <code>.zst</code> base image into a bootable AWS AMI with the same blue/green Btrfs layout as physical installs:</p>
 <pre><code class="language-bash">cd packer/
 cp templates/variables.pkrvars.hcl local.pkrvars.hcl
@@ -302,18 +304,34 @@ make validate
 make build                       # default profile: server
 make build PROFILE=gnome         # or gnome / plasma / cosmic</code></pre>
 <p>The build runs a three-stage provisioner (<code>00-bootstrap-shanios.sh</code> partitions the target volume and receives the Btrfs send-stream; <code>01-configure-aws.sh</code> writes fstab, cloud-init, and the bootloader; <code>02-verify.sh</code> fails the build if anything critical is missing) and takes roughly 15–25 minutes. Key variables an OEM/cloud team would set:</p>
-<p>| Variable | Purpose | |---|---| | <code>r2_base_url</code> / <code>s3_base_url</code> | Where the base <code>.zst</code> image is pulled from during the <em>build</em> | | <code>gpg_public_key</code> | Pass your own signing key via <code>PKR_VAR_gpg_public_key</code> — never stored in the vars file | | <code>shanios_profile</code> | <code>gnome</code> \| <code>plasma</code> \| <code>cosmic</code> (server is the default) | | <code>root_volume_size_gb</code> / <code>efi_volume_size_mb</code> | AMI volume sizing |</p>
+<table><thead><tr><th>Variable</th><th>Purpose</th></tr></thead><tbody><tr><td><code>r2_base_url</code> / <code>s3_base_url</code></td><td>Where the base <code>.zst</code> image is pulled from during the <em>build</em></td></tr><tr><td><code>gpg_public_key</code></td><td>Pass your own signing key via <code>PKR_VAR_gpg_public_key</code> — never stored in the vars file</td></tr><tr><td><code>shanios_profile</code></td><td><code>gnome</code> \</td><td><code>plasma</code> \</td><td><code>cosmic</code> (server is the default)</td></tr><tr><td><code>root_volume_size_gb</code> / <code>efi_volume_size_mb</code></td><td>AMI volume sizing</td></tr></tbody></table>
 <p>A GitHub Actions workflow (<code>.github/workflows/build-ami.yml</code>) builds the AMI via AWS OIDC (no long-lived keys) on every relevant push.</p>
-<h3>The Underlying Package Build Pipeline</h3>
+<h3 id="the-underlying-package-build-pipeline">The Underlying Package Build Pipeline</h3>
 <p><a href="https://github.com/shani8dev/shani-builder">shani-builder</a> is the shared build infrastructure an OEM would need if customising further:</p>
 <ul>
 <li><strong><code>docker/</code></strong> — the privileged Arch-based container (<code>shrinivasvkumbhar/shani-builder</code>) that <code>shani-install-media</code> uses to assemble images/ISOs; it pre-imports the Shanios signing key and adds the <code>[shani]</code> pacman repo</li>
 <li><strong><code>pkg/pkg-builder.sh</code></strong> — a fully automated pipeline that builds, GPG-signs, and publishes custom Arch packages to a <code>repo-add</code>-managed package repository, driven entirely by environment variables (<code>SSH_PRIVATE_KEY</code>, <code>GPG_PRIVATE_KEY</code>, <code>GPG_PASSPHRASE</code>) rather than positional CLI args, so credentials never show up in <code>ps aux</code></li>
 </ul>
+<p>The Docker image is based on <code>archlinux:base-devel</code> and pre-installs everything needed to build Shanios images: <code>pacman</code>, <code>btrfs-progs</code>, <code>zstd</code>, <code>squashfs-tools</code>, <code>archiso</code>, <code>dracut</code>, <code>systemd-ukify</code>, <code>sbsigntools</code>, and the Shanios signing keyring. It runs as a privileged container because image assembly requires <code>btrfs receive</code>, loop mounts, and chroot operations that need full host access.</p>
+<p>Two GitHub Actions workflows orchestrate CI:</p>
+<ul>
+<li><strong><code>build-image.yml</code></strong> — triggered on push to <code>main</code> or manual dispatch, builds the OS image via Docker, uploads artifacts to Cloudflare R2 and SourceForge</li>
+<li><strong><code>promote-stable.yml</code></strong> — promotes the current <code>latest</code> build to <code>stable</code> after verification, updating both the image and ISO channel manifests</li>
+</ul>
 <p>Building a fully custom OEM/AMI image is therefore a real, documented pipeline (profile → <code>pacstrap</code> package list → overlay → customisation script → sign → publish), not a manual respin process.</p>
-<p>---</p>
-<h2>Fleet Update Management</h2>
-<h3>Release Channels and Staged Rollouts</h3>
+<h3 id="using-the-shani-os-package-repo-on-other-systems">Using the Shani OS Package Repo on Other Systems</h3>
+<p>The <code>[shani]</code> pacman repository at <code>repo.shani.dev</code> is not locked to Shani OS installs. Any Arch-based distribution (Arch Linux, Manjaro, EndeavourOS, CachyOS, etc.) can add the repo to pull individual Shanios tools:</p>
+<pre><code class="language-ini"># /etc/pacman.conf
+[shani]
+Server = https://repo.shani.dev/$arch</code></pre>
+<p>Then trust the signing key and install packages:</p>
+<pre><code class="language-bash">sudo pacman-key --recv-key 7B927BFFD4A9EAAA8B666B77DE217F3DA8014792 --keyserver keys.openpgp.org
+sudo pacman-key --lsign-key 7B927BFFD4A9EAAA8B666B77DE217F3DA8014792
+sudo pacman -S shani-keyring</code></pre>
+<p>Available packages include <code>gen-efi</code> (Secure Boot UKI generation), <code>shani-health</code> (system diagnostics), <code>shani-deploy</code> (atomic updates), and <code>shani-tools</code> (maintenance utilities) — useful for borrowing Shanios tooling without running the full OS.</p>
+<hr>
+<h2 id="fleet-update-management">Fleet Update Management</h2>
+<h3 id="release-channels-and-staged-rollouts">Release Channels and Staged Rollouts</h3>
 <p><code>shani-deploy</code> supports two release channels: <code>stable</code> (default, monthly) and <code>latest</code> (more frequent). For staged rollouts, run a canary group on <code>latest</code> before pushing the full fleet on <code>stable</code>:</p>
 <pre><code class="language-bash"># Check current channel
 cat /etc/shani-channel
@@ -324,7 +342,7 @@ sudo shani-deploy --set-channel latest
 
 # Use a channel for a single run without changing the default
 sudo shani-deploy -t latest</code></pre>
-<h3>Automated Unattended Updates</h3>
+<h3 id="automated-unattended-updates">Automated Unattended Updates</h3>
 <p>For unattended fleet updates, a systemd timer can trigger <code>shani-deploy</code> on a schedule:</p>
 <pre><code class="language-ini"># /etc/systemd/system/shani-autoupdate.timer
 [Unit]
@@ -360,25 +378,25 @@ fi</code></pre>
 sudo shani-deploy                     # deploys the already-verified image</code></pre>
 <p>shani-deploy ships a ready-made, opt-in timer for this instead of a hand-rolled unit — disabled by default, enable it explicitly on machines/fleets that want updates pre-staged automatically:</p>
 <pre><code class="language-bash">sudo systemctl enable --now shani-download-only.timer</code></pre>
-<p>It runs 30 minutes after boot and once a day thereafter (randomized by up to 2 hours, to avoid every machine hitting the CDN at once), and is idempotent — if the current image is already cached and verified, it's a no-op. If <code>zsync2</code> is installed and a previous image is still cached, the fetch it triggers is differential (see <a href="../updates/system#differential-downloads-zsync2">System Updates → Differential Downloads</a>).</p>
+<p>It runs 30 minutes after boot and once a day thereafter (randomized by up to 2 hours, to avoid every machine hitting the CDN at once), and is idempotent — if the current image is already cached and verified, it's a no-op. If <code>zsync2</code> is installed and a previous image is still cached, the fetch it triggers is differential (see <a href="../updates/system.md#differential-downloads-zsync2">System Updates → Differential Downloads</a>).</p>
 <p>For managed fleets, disable the <code>shani-update</code> interactive prompt so it does not surface to users:</p>
 <pre><code class="language-bash">sudo rm /etc/xdg/autostart/shani-update.desktop</code></pre>
-<h3>Centralised Update Delivery — What Is (and Isn't) Configurable</h3>
+<h3 id="centralised-update-delivery-what-is-and-isnt-configurable">Centralised Update Delivery — What Is (and Isn't) Configurable</h3>
 <p>Update images are served from Cloudflare R2 (<code>https://downloads.shani.dev</code>) with automatic SourceForge-mirror discovery as fallback, and every image is GPG-verified against the fixed key above. Both the CDN base URL and the signing key are <code>readonly</code> constants baked into <code>shani-deploy.sh</code> and <code>shani-update.sh</code> — <strong>there is currently no config file or flag that points a stock installation at an internal mirror or a private signing key for its ongoing updates.</strong> For air-gapped or bandwidth-controlled fleets, the practical options today are:</p>
 <ul>
 <li><code>--download-only</code> on a machine with network access, then distributing the verified image tarball for offline deployment (manual, not automated by the tool)</li>
 <li>Forking <code>shani-deploy</code> to change <code>R2_BASE_URL</code>/<code>GPG_KEY_ID</code> and shipping that build to the fleet instead of the stock tool</li>
 </ul>
 <p>A fully self-hosted "private update CDN" pointed to by an unmodified <code>shani-deploy</code> is not an existing feature — see <a href="#gaps-and-roadmap">Gaps and Roadmap</a>.</p>
-<p>---</p>
-<h2>Remote Rollback Without Reimaging</h2>
+<hr>
+<h2 id="remote-rollback-without-reimaging">Remote Rollback Without Reimaging</h2>
 <p><strong>Automatic rollback (no intervention):</strong> systemd-boot's boot-counting mechanism detects a slot that fails to reach <code>multi-user.target</code> within three boot attempts and automatically falls back to the previous slot.</p>
 <p><strong>Manual rollback (one command, remotely):</strong></p>
 <pre><code class="language-bash">sudo shani-deploy -r
 # Then reboot — via SSH, MDM, or remote management console</code></pre>
 <p>No reimaging cycle. No USB drive. No on-site visit. The previous OS slot is always kept on disk until the next update cycle.</p>
-<p>---</p>
-<h2>Configuration Management</h2>
+<hr>
+<h2 id="configuration-management">Configuration Management</h2>
 <p>For configuration that must be consistent across a fleet — SSH hardening, service enablement, custom <code>/etc</code> settings — use the OverlayFS upper layer in <code>@data</code>:</p>
 <pre><code class="language-bash"># Deploy a managed configuration to the persistent overlay
 sudo cp /path/to/managed/sshd_config /data/overlay/etc/upper/ssh/sshd_config
@@ -386,14 +404,14 @@ sudo cp /path/to/managed/sshd_config /data/overlay/etc/upper/ssh/sshd_config
 # Enable a managed service (symlink persists in the overlay)
 sudo systemctl enable --now myservice</code></pre>
 <p>Changes to <code>/etc</code> via OverlayFS survive every OS update and rollback. When the OS updates, new defaults in the lower layer are visible to files you have not customised; files you have customised retain your version.</p>
-<h3>Auditing Customisations</h3>
+<h3 id="auditing-customisations">Auditing Customisations</h3>
 <pre><code class="language-bash"># See all machine-specific /etc customisations
 find /data/overlay/etc/upper -type f | sort
 
 # Compare a customised file to the OS default
 diff /data/overlay/etc/upper/ssh/sshd_config /etc/ssh/sshd_config</code></pre>
-<p>---</p>
-<h2>School Labs and Shared Computing</h2>
+<hr>
+<h2 id="school-labs-and-shared-computing">School Labs and Shared Computing</h2>
 <p>Shanios is particularly well-suited to environments where users cannot be trusted to preserve the OS — school labs, library terminals, shared workstations, kiosks.</p>
 <p>A user cannot persistently corrupt the immutable root. Changes to system files are impossible. Changes to <code>/etc</code> via OverlayFS are per-machine and auditable.</p>
 <p><strong>Reset between sessions:</strong> For kiosk or lab scenarios where each session should start fresh:</p>
@@ -411,9 +429,9 @@ sudo shani-reset
 sudo shani-reset --home</code></pre>
 <p>No reimaging cycle needed between semesters.</p>
 <p><strong>Indian language support:</strong> Devanagari, Tamil, Telugu, and other Indian scripts are configured from first boot. IBus multi-language input is pre-configured. The software is free, the codebase is auditable, and there is no subscription, licence fee, or vendor lock-in.</p>
-<p>---</p>
-<h2>Monitoring and Observability</h2>
-<h3>shani-health</h3>
+<hr>
+<h2 id="monitoring-and-observability">Monitoring and Observability</h2>
+<h3 id="shani-health">shani-health</h3>
 <p><code>shani-health</code> is the diagnostic tool for fleet monitoring. It covers boot state, security configuration, storage, hardware, and package status:</p>
 <pre><code class="language-bash"># Full system status report
 shani-health
@@ -448,15 +466,15 @@ fi
 # Machine-readable summary for a monitoring dashboard
 shani-health --verify --json | jq '.checks[] | select(.status == &quot;fail&quot;)'</code></pre>
 <p><code>--export-logs</code> bundles diagnostics into a directory for centralized collection (e.g. rsync'd back to a fleet-management box) when a deeper look is needed than the exit code alone provides.</p>
-<h3>Remote Monitoring via Tailscale or SSH</h3>
+<h3 id="remote-monitoring-via-tailscale-or-ssh">Remote Monitoring via Tailscale or SSH</h3>
 <p>Each machine is accessible via SSH over Tailscale without requiring a VPN server or port forwarding. Tailscale state persists across OS updates at <code>/data/varlib/tailscale</code>:</p>
 <pre><code class="language-bash"># Check a remote machine's active slot and boot state
 ssh admin@machine-name.tailnet.ts.net 'cat /data/current-slot &amp;&amp; shani-health --boot'
 
 # Remote rollback
 ssh admin@machine-name.tailnet.ts.net 'sudo shani-deploy -r &amp;&amp; sudo reboot'</code></pre>
-<p>---</p>
-<h2>Security Posture for Enterprise Compliance</h2>
+<hr>
+<h2 id="security-posture-for-enterprise-compliance">Security Posture for Enterprise Compliance</h2>
 <p>Shanios's default security configuration is designed to pass enterprise security audits without additional hardening steps:</p>
 <ul>
 <li>Six simultaneous Linux Security Modules (AppArmor, Landlock, Lockdown, Yama, IMA/EVM, BPF LSM)</li>
@@ -471,8 +489,8 @@ ssh admin@machine-name.tailnet.ts.net 'sudo shani-deploy -r &amp;&amp; sudo rebo
 <li>Zero telemetry — no usage data, crash reports, or analytics</li>
 </ul>
 <p>LUKS2 keys never leave the device. TPM2 sealing binds to PCRs 0 and 7 — the firmware state and the Secure Boot policy. For government and institutional deployments requiring no foreign key escrow: the encryption key is on the device, sealed in the TPM2 chip, verifiable via the public <code>gen-efi</code> source code.</p>
-<p>---</p>
-<h2>Gaps and Roadmap</h2>
+<hr>
+<h2 id="gaps-and-roadmap">Gaps and Roadmap</h2>
 <p>To keep this page honest about what exists versus what a larger enterprise deployment might expect, the following are <strong>not</strong> currently implemented anywhere in the Shanios codebase, and should not be assumed:</p>
 <ul>
 <li><strong>No centralised fleet dashboard.</strong> There is no web console or MDM-style server for viewing fleet-wide status, pushing configuration, or triggering updates across machines. Fleet coordination today means SSH/Tailscale plus your own scripting (cron + <code>shani-deploy</code> + <code>shani-health --verify</code>), as described above.</li>
@@ -481,13 +499,13 @@ ssh admin@machine-name.tailnet.ts.net 'sudo shani-deploy -r &amp;&amp; sudo rebo
 <li><strong>No remote push/enrollment mechanism.</strong> Machines pull updates on their own schedule (timer or user-triggered); there's no server-initiated "deploy to these 200 machines now" push.</li>
 </ul>
 <p>If your organisation needs one of these, <a href="https://shani.dev#enterprise">contact the project</a> — enterprise/OEM engagement is exactly the context in which contributing this kind of tooling upstream is on the table.</p>
-<p>---</p>
-<h2>See Also</h2>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../security/features">Security Features</a> — full security model</li>
-<li><a href="../concepts/atomic-updates">Atomic Updates</a> — update and rollback pipeline</li>
-<li><a href="../arch/overlay">Overlay Filesystem</a> — <code>/etc</code> customisation persistence</li>
-<li><a href="../security/tpm2">TPM2 Enrollment</a> — passwordless disk unlock</li>
+<li><a href="../security/features.md">Security Features</a> — full security model</li>
+<li><a href="../concepts/atomic-updates.md">Atomic Updates</a> — update and rollback pipeline</li>
+<li><a href="../arch/overlay.md">Overlay Filesystem</a> — <code>/etc</code> customisation persistence</li>
+<li><a href="../security/tpm2.md">TPM2 Enrollment</a> — passwordless disk unlock</li>
 </ul></div>
     </div>
 

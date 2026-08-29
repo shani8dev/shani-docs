@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Blue-Green Deployment — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Blue-Green Deployment  Shanios implements blue-green deployment using Btrfs subvolumes — a strategy adapted from DevOps for desktop Linux.  How It Works  1…">
+  <meta name="description" id="meta-desc"     content="Shanios implements blue-green deployment using Btrfs subvolumes — a strategy adapted from DevOps for desktop Linux. How It Works 1. System maintains @blue …">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Blue-Green Deployment">
-  <meta property="og:description" id="og-desc"    content="Blue-Green Deployment  Shanios implements blue-green deployment using Btrfs subvolumes — a strategy adapted from DevOps for desktop Linux.  How It Works  1…">
+  <meta property="og:description" id="og-desc"    content="Shanios implements blue-green deployment using Btrfs subvolumes — a strategy adapted from DevOps for desktop Linux. How It Works 1. System maintains @blue …">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/concepts/blue-green/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Blue-Green Deployment">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Blue-Green Deployment">
-  <meta name="twitter:description" id="tw-desc"  content="Blue-Green Deployment  Shanios implements blue-green deployment using Btrfs subvolumes — a strategy adapted from DevOps for desktop Linux.  How It Works  1…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios implements blue-green deployment using Btrfs subvolumes — a strategy adapted from DevOps for desktop Linux. How It Works 1. System maintains @blue …">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Blue-Green Deployment","description":"Blue-Green Deployment  Shanios implements blue-green deployment using Btrfs subvolumes — a strategy adapted from DevOps for desktop Linux.  How It Works  1…","url":"https://docs.shani.dev/doc/concepts/blue-green/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Blue-Green Deployment","description":"Shanios implements blue-green deployment using Btrfs subvolumes — a strategy adapted from DevOps for desktop Linux. How It Works 1. System maintains @blue …","url":"https://docs.shani.dev/doc/concepts/blue-green/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Blue-Green Deployment","item":"https://docs.shani.dev/doc/concepts/blue-green/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,11 +215,11 @@
         <h1 class="doc-title">Blue-Green Deployment</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Concepts</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Shanios implements blue-green deployment using Btrfs subvolumes — a strategy adapted from DevOps for desktop Linux.</p>
-<h2>How It Works</h2>
+<h2 id="how-it-works">How It Works</h2>
 <ol>
 <li>System maintains <code>@blue</code> and <code>@green</code> subvolumes, both created as read-only Btrfs snapshots of the same base image at install time</li>
 <li>One subvolume is active (mounted read-only as <code>/</code>, tracked in <code>/data/current-slot</code>), the other inactive</li>
@@ -226,11 +228,11 @@
 <li>Reboot switches to the updated system</li>
 <li>Previous version remains available for instant rollback</li>
 </ol>
-<p>The active slot is identified at runtime by parsing <code>subvol=@blue</code> or <code>subvol=@green</code> out of <code>rootflags=</code> on <code>/proc/cmdline</code> (falling back to <code>btrfs subvolume get-default</code>) — the same detection logic is shared by <code>shani-deploy</code>, <code>shani-update</code>, and <code>check-boot-failure</code> so all three always agree on which slot is running. See <a href="./atomic-updates">Atomic Updates</a> for the full deploy pipeline and <a href="./persistence">Persistence Strategy</a> for what survives a slot swap.</p>
-<h2>Slot Layout</h2>
-<p>| Slot | State | Description | |------|-------|-------------| | <code>@blue</code> | Active or Standby | One complete, bootable root filesystem | | <code>@green</code> | Active or Standby | The other complete, bootable root filesystem |</p>
+<p>The active slot is identified at runtime by parsing <code>subvol=@blue</code> or <code>subvol=@green</code> out of <code>rootflags=</code> on <code>/proc/cmdline</code> (falling back to <code>btrfs subvolume get-default</code>) — the same detection logic is shared by <code>shani-deploy</code>, <code>shani-update</code>, and <code>check-boot-failure</code> so all three always agree on which slot is running. See <a href="./atomic-updates.md">Atomic Updates</a> for the full deploy pipeline and <a href="./persistence.md">Persistence Strategy</a> for what survives a slot swap.</p>
+<h2 id="slot-layout">Slot Layout</h2>
+<table><thead><tr><th>Slot</th><th>State</th><th>Description</th></tr></thead><tbody><tr><td><code>@blue</code></td><td>Active or Standby</td><td>One complete, bootable root filesystem</td></tr><tr><td><code>@green</code></td><td>Active or Standby</td><td>The other complete, bootable root filesystem</td></tr></tbody></table>
 <p>Only one slot is active at a time. <code>shani-deploy</code> writes updates to the inactive slot, then switches the bootloader default. On the next reboot, the updated slot becomes active. The previous slot stays intact as an instant rollback target.</p>
-<h2>Shared Subvolumes</h2>
+<h2 id="shared-subvolumes">Shared Subvolumes</h2>
 <p>These subvolumes are shared between both slots and persist across all updates and rollbacks:</p>
 <ul>
 <li><code>@home</code> — user data</li>
@@ -243,26 +245,32 @@
 <li><code>@libvirt</code>, <code>@lxc</code>, etc. — virtualisation data</li>
 </ul>
 <p>Switching slots or rolling back <strong>never</strong> touches these subvolumes.</p>
-<h2>The Cycle</h2>
+<h2 id="the-cycle">The Cycle</h2>
 <pre><code>@blue active
 ↓ update @green
 reboot → @green active
 ↓ update @blue
 reboot → @blue active…</code></pre>
-<h2>Advantages</h2>
+<h2 id="advantages">Advantages</h2>
 <ul>
 <li><strong>Atomic Updates:</strong> All-or-nothing — the running system is never in a partially-updated state</li>
 <li><strong>Zero Downtime:</strong> The active system is never modified during an update</li>
 <li><strong>Instant Rollback:</strong> Boot into the previous version at any time from the boot menu</li>
 <li><strong>Safe Testing:</strong> The old system validates while the new one is prepared</li>
 </ul>
-<h2>Boot Menu Labels</h2>
+<h2 id="boot-menu-labels">Boot Menu Labels</h2>
 <ul>
 <li><strong>shanios-blue (Active):</strong> Currently running system</li>
 <li><strong>shanios-green (Candidate):</strong> Standby system, will be booted after next update</li>
 </ul>
 <p>After each deployment, <code>shani-deploy</code> rewrites both boot entries. The newly updated slot is labelled <strong>(Active)</strong> with <code>+3-0</code> boot-count tries and set as the <code>loader.conf</code> default; the currently running slot is relabelled <strong>(Candidate)</strong> as the stable fallback.</p>
-<p>Note the two rollback mechanisms operate at different levels: systemd-boot's boot counting only decides <em>which slot boots next</em> — it never touches subvolume contents. Actually restoring a failed candidate slot's data (from the pre-deploy safety snapshot) is a separate step performed by <code>shani-deploy --rollback</code>, which <code>shani-update</code> offers automatically the next time you log in after a fallback boot. See <a href="./atomic-updates#automatic-rollback">Atomic Updates</a> for the full sequence.</p></div>
+<p>Note the two rollback mechanisms operate at different levels: systemd-boot's boot counting only decides <em>which slot boots next</em> — it never touches subvolume contents. Actually restoring a failed candidate slot's data (from the pre-deploy safety snapshot) is a separate step performed by <code>shani-deploy --rollback</code>, which <code>shani-update</code> offers automatically the next time you log in after a fallback boot. See <a href="./atomic-updates.md#automatic-rollback">Atomic Updates</a> for the full sequence.</p>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="atomic-updates">Atomic Updates</a></li>
+<li><a href="immutability">Immutability</a></li>
+<li><a href="https://blog.shani.dev/post/shani-os-architecture-deep-dive">Architecture deep dive blog</a></li>
+</ul></div>
     </div>
 
   </main>

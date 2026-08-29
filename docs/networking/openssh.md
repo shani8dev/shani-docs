@@ -1,7 +1,7 @@
 ---
 title: OpenSSH
 section: Networking
-updated: 2026-04-18
+updated: 2026-08-28
 ---
 
 # OpenSSH — Remote Shell & File Transfer
@@ -243,3 +243,9 @@ On Shani OS, SSH host keys are stored in `/etc/ssh/` and persisted across OS upd
 | Cannot connect after changing port | Ensure the new port is open in the firewall and you verified connectivity before closing the existing session |
 | View server-side logs | `journalctl -u sshd -f` |
 | View client-side debug output | Add `-v` (or `-vvv` for maximum verbosity) to the `ssh` command |
+
+## See Also
+
+- [SSHFS](sshfs)
+- [Fail2ban](fail2ban)
+- [Tailscale (avoid exposure)](tailscale)

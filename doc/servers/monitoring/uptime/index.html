@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>Monitoring — Uptime, Lightweight Dashboards &amp; All-in-One Platforms — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Netdata Purpose: Real-time system and container metrics with zero configuration. Auto-discovers running containers, processes, databases, and services. Pro…">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/servers/monitoring/uptime/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="Monitoring — Uptime, Lightweight Dashboards &amp; All-in-One Platforms">
+  <meta property="og:description" id="og-desc"    content="Netdata Purpose: Real-time system and container metrics with zero configuration. Auto-discovers running containers, processes, databases, and services. Pro…">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/monitoring/uptime/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="Monitoring — Uptime, Lightweight Dashboards &amp; All-in-One Platforms">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="Monitoring — Uptime, Lightweight Dashboards &amp; All-in-One Platforms">
+  <meta name="twitter:description" id="tw-desc"  content="Netdata Purpose: Real-time system and container metrics with zero configuration. Auto-discovers running containers, processes, databases, and services. Pro…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Monitoring — Uptime, Lightweight Dashboards & All-in-One Platforms","description":"Netdata Purpose: Real-time system and container metrics with zero configuration. Auto-discovers running containers, processes, databases, and services. Pro…","url":"https://docs.shani.dev/doc/servers/monitoring/uptime/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Monitoring — Uptime, Lightweight Dashboards & All-in-One Platforms","item":"https://docs.shani.dev/doc/servers/monitoring/uptime/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Monitoring — Uptime, Lightweight Dashboards &amp; All-in-One Platforms</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><h2 id="netdata">Netdata</h2>
+<p><strong>Purpose:</strong> Real-time system and container metrics with zero configuration. Auto-discovers running containers, processes, databases, and services. Provides built-in anomaly detection, and exports to Prometheus for Grafana dashboards.</p>
+<pre><code class="language-yaml"># ~/netdata/compose.yaml
+services:
+  netdata:
+    image: netdata/netdata:latest
+    ports:
+      - 127.0.0.1:19999:19999
+    volumes:
+      - netdata_config:/etc/netdata
+      - netdata_lib:/var/lib/netdata
+      - netdata_cache:/var/cache/netdata
+      - /etc/passwd:/host/etc/passwd:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor=unconfined
+    restart: unless-stopped
+
+volumes:
+  netdata_cache:
+  netdata_config:
+  netdata_lib:</code></pre>
+<pre><code class="language-bash">cd ~/netdata &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:19999</code>. Good first option when you want metrics immediately without writing any configuration.</p>
+<hr>
+<h2 id="netdata-parent-multi-host-hub">Netdata Parent (Multi-Host Hub)</h2>
+<p><strong>Purpose:</strong> A Netdata "parent" node acts as a streaming hub for child agents. Children stream metrics to the parent; the parent's UI shows all hosts in a unified multi-host dashboard — without sending data to netdata.cloud.</p>
+<pre><code class="language-yaml"># ~/netdata-parent/compose.yaml
+services:
+  netdata-parent:
+    image: netdata/netdata:latest
+    ports:
+      - 127.0.0.1:19998:19999
+    volumes:
+      - /home/user/netdata-parent/config:/etc/netdata:Z
+      - /home/user/netdata-parent/lib:/var/lib/netdata:Z
+      - /home/user/netdata-parent/cache:/var/cache/netdata:Z
+    environment:
+      NETDATA_CLAIM_TOKEN: &quot;&quot;   # leave blank for fully local hub
+    cap_add: [SYS_PTRACE, SYS_ADMIN]
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/netdata-parent &amp;&amp; podman-compose up -d</code></pre>
+<h5 id="configure-child-agents-to-stream-to-the-parent">Configure child agents to stream to the parent</h5>
+<p>(<code>/etc/netdata/stream.conf</code> on each child):</p>
+<pre><code class="language-ini">[stream]
+  enabled = yes
+  destination = parent.home.local:19999
+  api key = xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx   # generate with: uuidgen</code></pre>
+<h5 id="allow-incoming-streams-on-the-parent">Allow incoming streams on the parent</h5>
+<p>(<code>/etc/netdata/stream.conf</code>):</p>
+<pre><code class="language-ini">[xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx]   # same UUID as child's api key
+  enabled = yes
+  default memory mode = dbengine</code></pre>
+<p>Restart both instances. The parent's dashboard at <code>http://localhost:19998</code> will show all streaming child nodes under the <strong>Nodes</strong> tab.</p>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">netdata-hub.home.local { tls internal; reverse_proxy localhost:19998 }</code></pre>
+<hr>
+<h2 id="uptime-kuma">Uptime Kuma</h2>
+<p><strong>Purpose:</strong> Self-hosted uptime monitoring with beautiful status pages. Monitors HTTP/HTTPS endpoints, TCP ports, DNS resolution, MQTT topics, and Docker container health. Sends alerts via ntfy, Telegram, Slack, email, and 50+ integrations.</p>
+<pre><code class="language-yaml"># ~/uptime-kuma/compose.yaml
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:latest
+    ports:
+      - 127.0.0.1:3002:3001
+    volumes:
+      - /home/user/uptime-kuma:/app/data:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/uptime-kuma &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="common-operations">Common operations</h4>
+<pre><code class="language-bash"># Backup Uptime Kuma data
+cp -r /home/user/uptime-kuma /home/user/uptime-kuma.bak
+
+# View logs
+podman logs -f uptime-kuma
+
+# Check all monitors via API (requires API key from Settings → API Keys)
+curl -H &quot;Authorization: Bearer YOUR_API_KEY&quot; http://localhost:3002/api/v1/monitor</code></pre>
+<p>Access at <code>http://localhost:3002</code>. The built-in status page can be shared with users to communicate outages.</p>
+<hr>
+<h2 id="beszel-multi-host-monitoring">Beszel (Multi-Host Monitoring)</h2>
+<p><strong>Purpose:</strong> Minimal, lightweight server monitoring with a central dashboard. Each server runs a tiny agent that reports CPU, RAM, disk, and network to the hub. Better than Netdata for monitoring multiple remote servers from one screen.</p>
+<pre><code class="language-yaml"># ~/beszel/compose.yaml — hub (central server)
+services:
+  beszel:
+    image: henrygd/beszel:latest
+    ports:
+      - 127.0.0.1:8090:8090
+    volumes:
+      - /home/user/beszel/data:/beszel_data:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/beszel &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="agent-on-each-monitored-server">Agent on each monitored server</h4>
+<pre><code class="language-yaml"># ~/beszel-agent/compose.yaml
+services:
+  beszel-agent:
+    image: henrygd/beszel-agent:latest
+    network_mode: host
+    volumes:
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    environment:
+      PORT: 45876
+      KEY: your-public-key-from-hub
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/beszel-agent &amp;&amp; podman-compose up -d</code></pre>
+<hr>
+<h2 id="dozzle-container-log-viewer">Dozzle (Container Log Viewer)</h2>
+<p><strong>Purpose:</strong> Live container log viewer in the browser. Zero setup — mount the Podman socket and browse logs for any running container in real time. Supports log search, filtering, and multi-host aggregation.</p>
+<pre><code class="language-yaml"># ~/dozzle/compose.yaml
+services:
+  dozzle:
+    image: amir20/dozzle:latest
+    ports:
+      - 127.0.0.1:8888:8080
+    volumes:
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/dozzle &amp;&amp; podman-compose up -d</code></pre>
+<hr>
+<h2 id="healthchecksio-cron-monitoring">Healthchecks.io (Cron Monitoring)</h2>
+<p><strong>Purpose:</strong> Dead man's switch for cron jobs and scheduled tasks. Your scripts ping a URL when they finish — Healthchecks alerts you if the ping doesn't arrive on schedule. Essential for monitoring backup jobs, data sync tasks, and other scheduled work.</p>
+<pre><code class="language-yaml"># ~/healthchecks/compose.yaml
+services:
+  healthchecks:
+    image: healthchecks/healthchecks:latest
+    ports:
+      - 127.0.0.1:8000:8000
+    environment:
+      SECRET_KEY: changeme-run-openssl-rand-base64-32
+      SITE_ROOT: https://hc.home.local
+      ALLOWED_HOSTS: hc.home.local,localhost
+      DEBUG: &quot;False&quot;
+    volumes:
+      - /home/user/healthchecks/data:/data:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/healthchecks &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="use-in-a-backup-script">Use in a backup script</h4>
+<pre><code class="language-bash">podman exec restic restic backup /data &amp;&amp; \
+  curl -fsS --retry 3 https://hc.home.local/ping/your-uuid</code></pre>
+<hr>
+<h2 id="speedtest-tracker">Speedtest Tracker</h2>
+<p><strong>Purpose:</strong> Runs automated Ookla/LibreSpeed tests on a schedule and stores results with charts. Useful for documenting ISP performance over time and catching degradation before it becomes a problem.</p>
+<pre><code class="language-yaml"># ~/speedtest/compose.yaml
+services:
+  speedtest:
+    image: lscr.io/linuxserver/speedtest-tracker:latest
+    ports:
+      - 127.0.0.1:8092:80
+    environment:
+      APP_KEY: base64:changeme-run-openssl-rand-base64-32
+      DB_CONNECTION: sqlite
+      PUID: &quot;1000&quot;
+      PGID: &quot;1000&quot;
+    volumes:
+      - /home/user/speedtest/config:/config:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/speedtest &amp;&amp; podman-compose up -d</code></pre>
+<hr>
+<h2 id="smokeping-latency-packet-loss">SmokePing (Latency & Packet Loss)</h2>
+<p><strong>Purpose:</strong> Network latency and packet loss monitor. Sends probes to configurable targets (your ISP gateway, 1.1.1.1, a VPS) and plots RTT over time — excellent for diagnosing intermittent network issues.</p>
+<pre><code class="language-yaml"># ~/smokeping/compose.yaml
+services:
+  smokeping:
+    image: lscr.io/linuxserver/smokeping:latest
+    ports:
+      - 127.0.0.1:8081:80
+    volumes:
+      - /home/user/smokeping/config:/config:Z
+      - /home/user/smokeping/data:/data:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/smokeping &amp;&amp; podman-compose up -d</code></pre>
+<hr>
+<h2 id="gatus-endpoint-monitoring">Gatus (Endpoint Monitoring)</h2>
+<p><strong>Purpose:</strong> Declarative, Git-friendly uptime and health monitoring. Define endpoints in YAML — HTTP, TCP, DNS, ICMP — with configurable conditions. Lighter than Uptime Kuma and easy to version-control. Ships a built-in status page.</p>
+<pre><code class="language-yaml"># ~/gatus/compose.yaml
+services:
+  gatus:
+    image: twinproduction/gatus:latest
+    ports:
+      - 127.0.0.1:8088:8080
+    volumes:
+      - /home/user/gatus/config:/config:ro,Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/gatus &amp;&amp; podman-compose up -d</code></pre>
+<h5 id="example-configyaml">Example <code>config.yaml</code></h5>
+<pre><code class="language-yaml">endpoints:
+  - name: Jellyfin
+    url: http://host.containers.internal:8096/health
+    interval: 60s
+    conditions:
+      - &quot;[STATUS] == 200&quot;
+    alerts:
+      - type: ntfy
+        failure-threshold: 2
+        description: &quot;Jellyfin is down&quot;
+
+  - name: Nextcloud
+    url: https://files.home.local
+    interval: 5m
+    conditions:
+      - &quot;[STATUS] == 200&quot;
+      - &quot;[RESPONSE_TIME] &lt; 2000&quot;</code></pre>
+<blockquote>Gatus integrates with ntfy, Slack, email, Telegram, and more. Its config file is easy to keep in Git alongside your other service configs.</blockquote>
+<hr>
+<hr>
+<h2 id="changedetectionio-website-change-monitor">Changedetection.io (Website Change Monitor)</h2>
+<p><strong>Purpose:</strong> Monitor any webpage for changes and get notified when content updates. Watches price drops, government notices, stock availability, documentation changes, and more. Supports CSS selectors, visual diffing, and notifications via ntfy, email, Telegram, Slack, Discord, and 80+ other services.</p>
+<pre><code class="language-yaml"># ~/changedetection/compose.yaml
+services:
+  changedetection:
+    image: ghcr.io/dgtlmoon/changedetection.io:latest
+    ports:
+      - 127.0.0.1:5000:5000
+    volumes:
+      - /home/user/changedetection/data:/datastore:Z
+    environment:
+      PUID: &quot;1000&quot;
+      PGID: &quot;1000&quot;
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/changedetection &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:5000</code>. Add URLs to watch, optionally set a CSS/XPath selector, configure the check interval, and connect a notification service.</p>
+<h5 id="send-notifications-via-ntfy">Send notifications via ntfy</h5>
+<p>(Settings → Notifications → Add notification URL):</p>
+<pre><code>ntfy://host.containers.internal:8090/your-topic</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">changes.home.local { tls internal; reverse_proxy localhost:5000 }</code></pre>
+<hr>
+<h2 id="diun-docker-image-update-notifier">DIUN (Docker Image Update Notifier)</h2>
+<p>Watches running container images and notifies when a newer version is available upstream, without auto-updating. Full setup and compose file: <a href="https://docs.shani.dev/doc/servers/management#diun-image-update-notifier">Management wiki → Diun</a>.</p>
+<hr>
+<h2 id="zabbix-agent-based-monitoring">Zabbix (Agent-Based Monitoring)</h2>
+<p><strong>Purpose:</strong> Enterprise-grade infrastructure monitoring with active and passive agent support. Zabbix agents run on monitored hosts and push detailed metrics — process lists, file monitoring, log parsing, custom scripts, and SNMP traps. Strong choice for monitoring Windows servers, network equipment, and bare-metal machines that don't expose Prometheus <code>/metrics</code> endpoints.</p>
+<pre><code class="language-yaml"># ~/zabbix/compose.yaml
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: zabbix
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: zabbix
+    volumes:
+      - zabbix_pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  zabbix-server:
+    image: zabbix/zabbix-server-pgsql:alpine-latest
+    ports:
+      - 0.0.0.0:10051:10051
+    environment:
+      DB_SERVER_HOST: postgres
+      POSTGRES_USER: zabbix
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: zabbix
+    depends_on: [postgres]
+    restart: unless-stopped
+
+  zabbix-web:
+    image: zabbix/zabbix-web-nginx-pgsql:alpine-latest
+    ports:
+      - 127.0.0.1:8400:8080
+    environment:
+      ZBX_SERVER_HOST: zabbix-server
+      DB_SERVER_HOST: postgres
+      POSTGRES_USER: zabbix
+      POSTGRES_PASSWORD: changeme
+      PHP_TZ: Asia/Kolkata
+    depends_on: [zabbix-server]
+    restart: unless-stopped
+
+volumes:
+  zabbix_pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/zabbix &amp;&amp; podman-compose up -d</code></pre>
+<p>Default login: <code>Admin</code> / <code>zabbix</code>. Change immediately. Add hosts under Configuration → Hosts.</p>
+<h5 id="install-zabbix-agent-on-monitored-hosts">Install Zabbix agent on monitored hosts</h5>
+<pre><code class="language-bash"># Option A: Install inside a Distrobox container (recommended on this system)
+distrobox create --name zabbix-agent --image fedora:latest
+distrobox enter zabbix-agent -- bash -c &quot;
+  sudo dnf install -y zabbix-agent2
+  sudo sed -i 's/Server=127.0.0.1/Server=zabbix.home.local/' /etc/zabbix/zabbix_agent2.conf
+  sudo systemctl enable --now zabbix-agent2
+&quot;
+sudo firewall-cmd --add-port=10050/tcp --permanent &amp;&amp; sudo firewall-cmd --reload
+
+# Option B: On a conventional Linux host (not Shani OS)
+sudo dnf install zabbix-agent2
+sudo sed -i 's/Server=127.0.0.1/Server=zabbix.home.local/' /etc/zabbix/zabbix_agent2.conf
+sudo systemctl enable --now zabbix-agent2
+sudo firewall-cmd --add-port=10050/tcp --permanent &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<p><strong>Firewall (server side — for active agents):</strong></p>
+<pre><code class="language-bash">sudo firewall-cmd --add-port=10051/tcp --permanent &amp;&amp; sudo firewall-cmd --reload</code></pre>
+<hr>
+<hr>
+<h2 id="zabbix-proxy">Zabbix Proxy</h2>
+<p><strong>Purpose:</strong> Collects monitoring data on behalf of the Zabbix server and forwards it in batches. Essential for monitoring remote networks where direct agent-to-server connections are impractical, and for reducing load on the main Zabbix server. The proxy runs locally in the remote network — only a single outbound connection is needed from that network to the Zabbix server.</p>
+<pre><code class="language-yaml"># ~/zabbix-proxy/compose.yaml
+services:
+  proxy-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: zabbix
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: zabbix_proxy
+    volumes:
+      - zabbix_proxy_pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  zabbix-proxy:
+    image: zabbix/zabbix-proxy-pgsql:alpine-latest
+    ports:
+      - 0.0.0.0:10051:10051
+    environment:
+      ZBX_SERVER_HOST: zabbix.home.local
+      ZBX_SERVER_PORT: &quot;10051&quot;
+      ZBX_PROXYMODE: &quot;0&quot;              # 0 = active (proxy pushes to server)
+      ZBX_HOSTNAME: remote-proxy-01   # must match the proxy name in the server UI
+      DB_SERVER_HOST: proxy-db
+      POSTGRES_USER: zabbix
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: zabbix_proxy
+    depends_on: [proxy-db]
+    restart: unless-stopped
+
+volumes:
+  zabbix_proxy_pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/zabbix-proxy &amp;&amp; podman-compose up -d</code></pre>
+<h5 id="register-the-proxy-in-the-zabbix-server-ui">Register the proxy in the Zabbix server UI</h5>
+<ol>
+<li>Go to <strong>Administration → Proxies → Create proxy</strong>.</li>
+<li>Set the <strong>Proxy name</strong> to match <code>ZBX_HOSTNAME</code> above (<code>remote-proxy-01</code>).</li>
+<li>Set <strong>Proxy mode</strong> to <strong>Active</strong>. Save.</li>
+</ol>
+<blockquote>In <strong>active mode</strong> (recommended), the proxy initiates the connection to the Zabbix server — no inbound firewall rules are needed on the proxy host.</blockquote>
+<hr>
+<h2 id="signoz-opentelemetry-native-observability">SigNoz (OpenTelemetry-Native Observability)</h2>
+<p><strong>Purpose:</strong> All-in-one observability platform built natively on OpenTelemetry. Combines metrics, traces, and logs in a single UI — without needing to run separate Prometheus + Tempo + Loki stacks. Best for teams already using OpenTelemetry instrumentation.</p>
+<pre><code class="language-yaml"># ~/signoz/compose.yaml
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:24-alpine
+    volumes:
+      - signoz_clickhouse_data:/var/lib/clickhouse
+    restart: unless-stopped
+
+  query-service:
+    image: signoz/query-service:latest
+    ports:
+      - 127.0.0.1:8085:8085
+    environment:
+      ClickHouseUrl: tcp://clickhouse:9000
+    depends_on: [clickhouse]
+    restart: unless-stopped
+
+  frontend:
+    image: signoz/frontend:latest
+    ports:
+      - 127.0.0.1:3301:3301
+    depends_on: [query-service]
+    restart: unless-stopped
+
+  otel-collector:
+    image: signoz/signoz-otel-collector:latest
+    ports:
+      - 127.0.0.1:4317:4317   # OTLP gRPC
+      - 127.0.0.1:4318:4318   # OTLP HTTP
+    depends_on: [clickhouse]
+    restart: unless-stopped
+
+volumes:
+  signoz_clickhouse_data:</code></pre>
+<pre><code class="language-bash">cd ~/signoz &amp;&amp; podman-compose up -d</code></pre>
+<blockquote>Use the official <code>install.sh</code> script from the <a href="https://github.com/SigNoz/signoz">SigNoz repo</a> for production — it sets up all dependencies and volume mounts correctly.</blockquote>
+<p>Access at <code>http://localhost:3301</code>. Instrument your apps with the OpenTelemetry SDK and point them at <code>http://localhost:4317</code> (gRPC) or <code>http://localhost:4318</code> (HTTP).</p>
+<hr>
+<h2 id="opentelemetry-collector">OpenTelemetry Collector</h2>
+<p><strong>Purpose:</strong> Vendor-neutral telemetry pipeline for traces, metrics, and logs. Receives telemetry from your applications via OTLP, Jaeger, Zipkin, or Prometheus scrape; processes and enriches it; then fans it out to multiple backends simultaneously. Removes per-backend SDK lock-in from your application code.</p>
+<pre><code class="language-yaml"># ~/otel-collector/compose.yaml
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    ports:
+      - 127.0.0.1:4317:4317
+      - 127.0.0.1:4318:4318
+      - 127.0.0.1:8889:8889
+    volumes:
+      - /home/user/otel/otel-collector.yaml:/etc/otelcol-contrib/config.yaml:ro,Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/otel-collector &amp;&amp; podman-compose up -d</code></pre>
+<h5 id="example-otel-collectoryaml">Example <code>otel-collector.yaml</code></h5>
+<pre><code class="language-yaml">receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: otel-collector
+          static_configs:
+            - targets: [localhost:8888]
+
+processors:
+  batch:
+    timeout: 5s
+  memory_limiter:
+    limit_mib: 512
+
+exporters:
+  otlp/tempo:
+    endpoint: host.containers.internal:4317
+    tls:
+      insecure: true
+  loki:
+    endpoint: http://host.containers.internal:3100/loki/api/v1/push
+  prometheus:
+    endpoint: 0.0.0.0:8889
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch, memory_limiter]
+      exporters: [otlp/tempo]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [loki]
+    metrics:
+      receivers: [otlp, prometheus]
+      processors: [batch]
+      exporters: [prometheus]</code></pre>
+<blockquote>Point your applications' OTLP SDK at <code>http://localhost:4317</code> (gRPC) or <code>http://localhost:4318</code> (HTTP). They send telemetry to the Collector, which routes to Tempo, Loki, and Prometheus — zero application changes needed when you swap backends.</blockquote>
+<hr>
+<h2 id="checkmk-free-agent-based-infrastructure-monitoring">Checkmk Free (Agent-Based Infrastructure Monitoring)</h2>
+<p><strong>Purpose:</strong> Full-stack IT infrastructure monitoring with auto-discovery, agent-based checks, SNMP, hardware health (IPMI/iDRAC), service states, inventory, and a powerful notification engine. More approachable than Zabbix for users who want a polished setup wizard. The free edition supports unlimited hosts with a full feature set for home lab and small-business use.</p>
+<pre><code class="language-yaml"># ~/checkmk/compose.yaml
+services:
+  checkmk:
+    image: checkmk/check-mk-free:latest
+    ports:
+      - 127.0.0.1:8095:5000
+    volumes:
+      - /home/user/checkmk/data:/omd/sites:Z
+    tmpfs:
+      - /omd/sites/cmk/tmp:uid=1000,gid=1000
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/checkmk &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:8095/cmk</code>. The admin password is shown in the container startup logs (<code>podman logs checkmk</code>).</p>
+<h5 id="install-the-agent-on-hosts-to-monitor">Install the agent on hosts to monitor</h5>
+<pre><code class="language-bash">curl -o check-mk-agent.rpm \
+  http://checkmk.home.local/cmk/check_mk/agents/check-mk-agent-2.3.0-1.noarch.rpm
+sudo rpm -i check-mk-agent.rpm
+sudo systemctl enable --now check-mk-agent.socket</code></pre>
+<blockquote>Checkmk auto-discovers all running services (systemd units, listening ports, running processes) on registered agents — far less manual configuration than Prometheus exporters.</blockquote>
+<hr>
+<h2 id="karma-alertmanager-dashboard">Karma (Alertmanager Dashboard)</h2>
+<p><strong>Purpose:</strong> Read-only, real-time web dashboard for Alertmanager. Shows all firing alerts across multiple Alertmanager instances in a clear, filterable card layout — grouped by labels, silenced alerts visible, and instant search across alert names, labels, and annotations. Indispensable when you have many alert rules and need to quickly triage what's firing.</p>
+<pre><code class="language-yaml"># ~/karma/compose.yaml
+services:
+  karma:
+    image: ghcr.io/prymitive/karma:latest
+    ports:
+      - 127.0.0.1:8094:8080
+    environment:
+      ALERTMANAGER_URI: http://host.containers.internal:9093
+      ALERTMANAGER_NAME: home
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/karma &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:8094</code>. Karma auto-refreshes every 30 seconds.</p>
+<h4 id="multiple-alertmanager-instances">Multiple Alertmanager instances</h4>
+<pre><code class="language-bash">-e ALERTMANAGER_0_URI=http://host.containers.internal:9093 \
+-e ALERTMANAGER_0_NAME=homelab \
+-e ALERTMANAGER_1_URI=http://192.168.1.50:9093 \
+-e ALERTMANAGER_1_NAME=nas</code></pre>
+<hr>
+<h2 id="openobserve-all-in-one-observability">OpenObserve (All-in-One Observability)</h2>
+<p><strong>Purpose:</strong> Rust-based unified observability platform — metrics, logs, and traces in a single binary with a built-in web UI. Claims ~140× lower storage cost than Elasticsearch for log ingestion. A compelling alternative to running the full Grafana + Loki + Tempo stack when you want one service instead of three. Accepts OpenTelemetry, Prometheus remote-write, and Loki-compatible log APIs.</p>
+<pre><code class="language-yaml"># ~/openobserve/compose.yaml
+services:
+  openobserve:
+    image: public.ecr.aws/zinclabs/openobserve:latest
+    ports:
+      - 127.0.0.1:5080:5080
+    volumes:
+      - /home/user/openobserve/data:/data:Z
+    environment:
+      ZO_ROOT_USER_EMAIL: admin@example.com
+      ZO_ROOT_USER_PASSWORD: changeme
+      ZO_DATA_DIR: /data
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/openobserve &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:5080</code>. Ingest logs via the Loki-compatible endpoint (<code>/api/{org}/loki/api/v1/push</code>), send metrics via Prometheus remote-write, and send traces via OTLP.</p>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">openobserve.home.local { tls internal; reverse_proxy localhost:5080 }</code></pre>
+<hr>
+<h2 id="caddy-configuration">Caddy Configuration</h2>
+<pre><code class="language-caddyfile">grafana.home.local         { tls internal; reverse_proxy localhost:3001 }
+prometheus.home.local      { tls internal; reverse_proxy localhost:9090 }
+alerts.home.local          { tls internal; reverse_proxy localhost:9093 }
+karma.home.local           { tls internal; reverse_proxy localhost:8094 }
+pushgateway.home.local     { tls internal; reverse_proxy localhost:9091 }
+pyrra.home.local           { tls internal; reverse_proxy localhost:9099 }
+oncall.home.local          { tls internal; reverse_proxy localhost:8080 }
+netdata.home.local         { tls internal; reverse_proxy localhost:19999 }
+netdata-hub.home.local     { tls internal; reverse_proxy localhost:19998 }
+uptime.home.local          { tls internal; reverse_proxy localhost:3002 }
+beszel.home.local          { tls internal; reverse_proxy localhost:8090 }
+dozzle.home.local          { tls internal; reverse_proxy localhost:8888 }
+hc.home.local              { tls internal; reverse_proxy localhost:8000 }
+speedtest.home.local       { tls internal; reverse_proxy localhost:8092 }
+smokeping.home.local       { tls internal; reverse_proxy localhost:8081 }
+gatus.home.local           { tls internal; reverse_proxy localhost:8088 }
+victoriametrics.home.local { tls internal; reverse_proxy localhost:8428 }
+tempo.home.local           { tls internal; reverse_proxy localhost:3200 }
+zabbix.home.local          { tls internal; reverse_proxy localhost:8400 }
+signoz.home.local          { tls internal; reverse_proxy localhost:3301 }
+checkmk.home.local         { tls internal; reverse_proxy localhost:8095 }
+graylog.home.local         { tls internal; reverse_proxy localhost:9000 }
+changes.home.local         { tls internal; reverse_proxy localhost:5000 }
+openobserve.home.local     { tls internal; reverse_proxy localhost:5080 }
+parca.home.local           { tls internal; reverse_proxy localhost:7070 }
+toxiproxy.home.local       { tls internal; reverse_proxy localhost:8474 }</code></pre>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Grafana shows "No data"</td><td>Ensure Prometheus scrape targets are reachable; verify the datasource URL uses <code>host.containers.internal</code> not <code>localhost</code></td></tr><tr><td>Loki not receiving logs</td><td>Check that Alloy/Promtail is running and the Loki push URL is correct; check <code>podman logs loki</code></td></tr><tr><td>Prometheus scrape failing</td><td>Confirm the target endpoint responds at <code>/metrics</code> with a 200; check the port is bound and reachable</td></tr><tr><td>Alertmanager not sending alerts</td><td>Verify receiver config syntax; test with <code>amtool alert add</code>; check <code>podman logs alertmanager</code></td></tr><tr><td>Node Exporter shows wrong metrics</td><td>Ensure <code>--path.procfs</code> and <code>--path.sysfs</code> flags are set correctly when running in a container</td></tr><tr><td>Netdata container metrics missing</td><td>Mount the Podman socket: <code>-v /run/user/$(id -u)/podman/podman.sock:/var/run/docker.sock:ro</code></td></tr><tr><td>Uptime Kuma push monitors not firing</td><td>Verify the monitor URL is accessible from the container; check that ntfy topic/webhook URL is correct</td></tr><tr><td>Dozzle shows no containers</td><td>Rootless Podman uses <code>/run/user/$(id -u)/podman/podman.sock</code> — not <code>/var/run/docker.sock</code></td></tr><tr><td>Beszel agent not reporting</td><td>Verify the public key from the hub is correctly pasted; check that port <code>45876</code> is reachable from the hub</td></tr><tr><td>Gatus not sending alerts</td><td>Verify the alert integration config syntax; check <code>podman logs gatus</code> for connection errors</td></tr><tr><td>Healthchecks ping not received</td><td>Verify <code>SITE_ROOT</code> is the URL the script calls; check that the UUID matches the check in the UI</td></tr><tr><td>VictoriaMetrics not receiving data</td><td>Verify the remote-write URL is <code>http://host.containers.internal:8428/api/v1/write</code>; check <code>podman logs victoriametrics</code></td></tr><tr><td>Tempo traces not appearing</td><td>Ensure the OTel SDK targets the correct endpoint (<code>4317</code> for gRPC, <code>4318</code> for HTTP); check <code>podman logs tempo</code></td></tr><tr><td>OTel Collector dropping spans</td><td>Check <code>memory_limiter</code> isn't too aggressive; increase <code>limit_mib</code>; view pipeline stats at <code>http://localhost:8888/metrics</code></td></tr><tr><td>Checkmk agent not connecting</td><td>Ensure <code>check-mk-agent.socket</code> is active on the monitored host; verify TCP port <code>6556</code> is reachable</td></tr><tr><td>Zabbix agent not connecting</td><td>Verify <code>Server=</code> in <code>zabbix_agent2.conf</code> matches the Zabbix server IP; check port <code>10051/tcp</code> is open</td></tr><tr><td>Zabbix Proxy not registering</td><td>Confirm <code>ZBX_HOSTNAME</code> in the proxy compose matches exactly the name in the server UI under Administration → Proxies</td></tr><tr><td>SigNoz no data after deployment</td><td>Ensure the OTel collector is running and your app is sending to the correct port; check ClickHouse is healthy</td></tr><tr><td>Karma shows no alerts</td><td>Verify <code>ALERTMANAGER_URI</code> is reachable from the container using <code>host.containers.internal</code></td></tr><tr><td>Graylog web UI unreachable</td><td>Ensure <code>GRAYLOG_HTTP_EXTERNAL_URI</code> matches the URL you're accessing; check OpenSearch and MongoDB are healthy first</td></tr><tr><td>Graylog GELF input not receiving logs</td><td>Verify the log driver uses <code>gelf</code> with <code>gelf-address: udp://</code>; check firewall isn't blocking <code>12201/udp</code></td></tr><tr><td>Graylog OpenSearch connection refused</td><td>The <code>plugins.security.disabled: &quot;true&quot;</code> env var is required for OpenSearch 2.x without TLS</td></tr><tr><td>Changedetection not detecting changes</td><td>Try adding a CSS selector to target the specific element; some sites require the Playwright-based browser fetcher for JavaScript-rendered content</td></tr><tr><td>alertmanager-ntfy bridge not delivering</td><td>Verify the bridge container is running and the <code>url</code> in <code>alertmanager.yml</code> uses <code>host.containers.internal</code>; check <code>podman logs alertmanager-ntfy</code></td></tr><tr><td>Netdata parent shows no child nodes</td><td>Confirm the <code>api key</code> UUID in both child and parent <code>stream.conf</code> match exactly; restart the child agent after editing</td></tr><tr><td>Parca Agent missing profiles</td><td>eBPF requires kernel ≥ 5.3 with BTF — verify with <code>ls /sys/kernel/btf/vmlinux</code>; the agent must run <code>privileged: true</code> with <code>pid: host</code></td></tr><tr><td>Elasticsearch OOM-killed</td><td>Limit JVM heap with <code>ES_JAVA_OPTS=&quot;-Xms512m -Xmx1g&quot;</code>; default is 50% of host RAM</td></tr><tr><td>Elasticsearch <code>vm.max_map_count too low</code></td><td>Run <code>sudo sysctl -w vm.max_map_count=262144</code> on the host and persist in <code>/etc/sysctl.d/99-elasticsearch.conf</code></td></tr><tr><td>Kibana <code>Kibana server is not ready yet</code></td><td>Wait for Elasticsearch to fully start first; check <code>podman logs kibana</code></td></tr><tr><td>Logstash <code>Pipeline aborted due to error</code></td><td>Check <code>podman logs logstash</code>; most common causes are Grok pattern mismatch or Elasticsearch unreachable</td></tr><tr><td>Filebeat <code>connection refused</code> to Logstash</td><td>Verify Logstash Beats input is on port <code>5044</code>; use <code>host.containers.internal:5044</code> not <code>localhost:5044</code></td></tr><tr><td>OpenSearch <code>cluster_manager not discovered</code></td><td><code>cluster.initial_cluster_manager_nodes</code> must list all manager-eligible nodes on first boot only</td></tr><tr><td>Fluent Bit losing events on container restart</td><td>Enable <code>storage.type filesystem</code> on a persistent volume; without this, in-flight events are lost on restart</td></tr><tr><td>Vector pipeline component showing errors</td><td>Run <code>curl localhost:8686/components</code> to see component health; run <code>vector validate /etc/vector/vector.yaml</code> before deploying</td></tr><tr><td>Vector disk buffer filling up</td><td>Increase <code>max_size</code> in the sink buffer config, or fix the downstream sink connectivity; Vector applies backpressure rather than dropping events</td></tr><tr><td>k6 <code>experimental-prometheus-rw: connection refused</code></td><td>Ensure Prometheus has <code>--web.enable-remote-write-receiver</code> flag or use VictoriaMetrics which accepts remote-write by default</td></tr><tr><td>k6 thresholds not appearing in Grafana</td><td>Import dashboard ID <strong>18030</strong> and set the datasource to the Prometheus instance receiving k6 remote-write; confirm <code>K6_PROMETHEUS_RW_SERVER_URL</code> is reachable from where k6 runs</td></tr><tr><td>Toxiproxy proxy not affecting traffic</td><td>Ensure your app connects to the Toxiproxy port (e.g., <code>15432</code>) rather than directly to Postgres (<code>5432</code>); use <code>toxiproxy-cli list</code> to verify the proxy is enabled</td></tr><tr><td>Toxiproxy toxic added but latency not observed</td><td>Some toxics are directional — add the toxic to both <code>upstream</code> and <code>downstream</code> if needed; verify with <code>toxiproxy-cli inspect &lt;proxy&gt;</code></td></tr><tr><td>Netdata Grafana datasource returns no data</td><td>The Prometheus query format differs from native Prometheus — use <code>netdata_</code> prefixed metric names; verify with `curl http://netdata:19999/api/v1/allmetrics?format=prometheus</td><td>grep netdata_`</td></tr><tr><td>Netdata metrics disappear after host restart</td><td>Netdata stores metrics in <code>/var/cache/netdata</code> — mount this as a volume (<code>/home/user/netdata/cache:/var/cache/netdata:Z</code>) to persist across container restarts</td></tr></tbody></table>
+<hr>
+<h2 id="caddy-additional-routes">Caddy (additional routes)</h2>
+<pre><code class="language-caddyfile">blackbox.home.local { tls internal; reverse_proxy localhost:9115 }</code></pre>
+<hr>
+<h2 id="troubleshooting-additional">Troubleshooting (additional)</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Prometheus <code>scrape timeout</code> errors</td><td>Increase <code>scrape_timeout</code> in <code>prometheus.yml</code> (default 10s); check the target is not overloaded</td></tr><tr><td>High cardinality causing Prometheus OOM</td><td>Run <code>topk(10, count by (__name__)({__name__=~&quot;.+&quot;}))</code> to find high-cardinality metrics; drop labels at scrape time with <code>metric_relabel_configs</code></td></tr><tr><td>Loki <code>out of order</code> errors</td><td>Ensure log timestamps are monotonically increasing; use <code>allow_structured_metadata: true</code> in Loki config if timestamps are close together</td></tr><tr><td>Grafana dashboard loads slowly</td><td>Enable query caching in Grafana data source settings; use recording rules in Prometheus to pre-compute expensive queries</td></tr><tr><td>Alertmanager duplicate alerts</td><td>Add <code>group_by</code> labels that are common across duplicates; use <code>equal</code> in inhibition rules to match root cause and symptom alerts</td></tr><tr><td>DIUN not detecting updated images</td><td>Verify the Podman socket is mounted and readable; check <code>DIUN_PROVIDERS_DOCKER</code> is <code>&quot;true&quot;</code>; inspect logs with <code>podman logs diun</code></td></tr></tbody></table></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

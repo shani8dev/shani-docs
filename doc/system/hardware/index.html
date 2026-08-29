@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Hardware — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Hardware  This page covers inspecting and diagnosing hardware on Shani OS: CPUs, memory, GPUs, storage controllers, USB devices, sensors, and firmware. All…">
+  <meta name="description" id="meta-desc"     content="This page covers inspecting and diagnosing hardware on Shani OS: CPUs, memory, GPUs, storage controllers, USB devices, sensors, and firmware. All tools lis…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Hardware">
-  <meta property="og:description" id="og-desc"    content="Hardware  This page covers inspecting and diagnosing hardware on Shani OS: CPUs, memory, GPUs, storage controllers, USB devices, sensors, and firmware. All…">
+  <meta property="og:description" id="og-desc"    content="This page covers inspecting and diagnosing hardware on Shani OS: CPUs, memory, GPUs, storage controllers, USB devices, sensors, and firmware. All tools lis…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/system/hardware/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Hardware">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Hardware">
-  <meta name="twitter:description" id="tw-desc"  content="Hardware  This page covers inspecting and diagnosing hardware on Shani OS: CPUs, memory, GPUs, storage controllers, USB devices, sensors, and firmware. All…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="This page covers inspecting and diagnosing hardware on Shani OS: CPUs, memory, GPUs, storage controllers, USB devices, sensors, and firmware. All tools lis…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Hardware","description":"Hardware  This page covers inspecting and diagnosing hardware on Shani OS: CPUs, memory, GPUs, storage controllers, USB devices, sensors, and firmware. All…","url":"https://docs.shani.dev/doc/system/hardware/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Hardware","description":"This page covers inspecting and diagnosing hardware on Shani OS: CPUs, memory, GPUs, storage controllers, USB devices, sensors, and firmware. All tools lis…","url":"https://docs.shani.dev/doc/system/hardware/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Hardware","item":"https://docs.shani.dev/doc/system/hardware/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,12 +215,12 @@
         <h1 class="doc-title">Hardware</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">System</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>This page covers inspecting and diagnosing hardware on Shani OS: CPUs, memory, GPUs, storage controllers, USB devices, sensors, and firmware. All tools listed here are pre-installed unless noted.</p>
-<p>---</p>
-<h2>System Overview</h2>
+<hr>
+<h2 id="system-overview">System Overview</h2>
 <pre><code class="language-bash"># Quick full system summary (CPU, RAM, GPU, storage, network, OS)
 inxi -Fz
 
@@ -240,8 +242,8 @@ hostnamectl
 # Distro identification (useful for scripts that branch on distro)
 lsb_release -a
 cat /etc/os-release</code></pre>
-<p>---</p>
-<h2>CPU</h2>
+<hr>
+<h2 id="cpu">CPU</h2>
 <pre><code class="language-bash"># CPU model, cores, threads, cache
 lscpu
 
@@ -268,8 +270,8 @@ grep -r . /sys/devices/system/cpu/vulnerabilities/
 
 # CPU topology (sockets, dies, cores, threads)
 lscpu -e</code></pre>
-<p>---</p>
-<h2>Memory</h2>
+<hr>
+<h2 id="memory">Memory</h2>
 <pre><code class="language-bash"># Overview: total, used, free, buffers, swap
 free -h
 
@@ -289,10 +291,10 @@ grep -i huge /proc/meminfo
 # ZRAM (compressed swap) usage
 zramctl
 
-# Memory bandwidth test (requires memtester — not pre-installed)
-# sudo pacman -S memtester &amp;&amp; sudo memtester 1G 1</code></pre>
-<p>---</p>
-<h2>PCI Devices</h2>
+# Memory bandwidth test (memtester is not pre-installed; install via Nix)
+nix-env -iA nixpkgs.memtester &amp;&amp; sudo memtester 1G 1</code></pre>
+<hr>
+<h2 id="pci-devices">PCI Devices</h2>
 <pre><code class="language-bash"># List all PCI devices
 lspci
 
@@ -315,8 +317,8 @@ lspci -tv
 
 # Detailed info for a specific device
 lspci -v -s 00:02.0</code></pre>
-<p>---</p>
-<h2>USB Devices</h2>
+<hr>
+<h2 id="usb-devices">USB Devices</h2>
 <pre><code class="language-bash"># List all USB devices
 lsusb
 
@@ -335,8 +337,8 @@ udevadm info -a /dev/sdb        # full attribute chain
 
 # USB device power management
 cat /sys/bus/usb/devices/*/power/control</code></pre>
-<p>---</p>
-<h2>GPU</h2>
+<hr>
+<h2 id="gpu">GPU</h2>
 <pre><code class="language-bash"># GPU model and driver
 lspci -k | grep -A3 -i &quot;vga\|3d\|display&quot;
 
@@ -366,8 +368,8 @@ intel_gpu_top                   # requires intel-gpu-tools (not pre-installed)
 # Switcheroo (multi-GPU / hybrid graphics)
 switcherooctl list
 switcherooctl switch             # switch active GPU</code></pre>
-<p>---</p>
-<h2>Temperature and Sensors</h2>
+<hr>
+<h2 id="temperature-and-sensors">Temperature and Sensors</h2>
 <p><code>lm_sensors</code> is pre-installed. Run <code>sudo sensors-detect</code> once to configure it, then use <code>sensors</code> for readings.</p>
 <pre><code class="language-bash"># Initial sensor detection (run once, answer yes to auto-load modules)
 sudo sensors-detect --auto
@@ -391,8 +393,8 @@ cat /sys/class/nvme/nvme0/hwmon*/temp1_input   # in millidegrees
 
 # Thermal zones (kernel thermal framework)
 paste /sys/class/thermal/thermal_zone*/type /sys/class/thermal/thermal_zone*/temp</code></pre>
-<p>---</p>
-<h2>Fan Control</h2>
+<hr>
+<h2 id="fan-control">Fan Control</h2>
 <pre><code class="language-bash"># View fan speeds (from sensors)
 sensors | grep -i fan
 
@@ -419,8 +421,8 @@ sudo liquidctl set fan speed 50
 # Set RGB lighting
 sudo liquidctl set led color fixed ff0000</code></pre>
 <p>Full device support list: <a href="https://liquidctl.github.io/liquidctl/">liquidctl.github.io/liquidctl</a>.</p>
-<p>---</p>
-<h2>Monitor Control</h2>
+<hr>
+<h2 id="monitor-control">Monitor Control</h2>
 <p><strong>ddcutil</strong> (pre-installed) controls monitor settings over DDC/CI — brightness, contrast, and input source — without needing physical buttons on the monitor. Useful for monitors without OSD controls, or scripting brightness changes.</p>
 <pre><code class="language-bash"># List detected displays
 sudo ddcutil detect
@@ -434,8 +436,8 @@ sudo ddcutil setvcp 10 75
 # Switch input source (VCP code 60; values are monitor-specific — check with detect)
 sudo ddcutil setvcp 60 0x0f</code></pre>
 <p>Not all monitors support DDC/CI, and some require enabling it in the monitor's OSD menu first. Run <code>ddcutil</code> with <code>sudo</code> — Shanios doesn't grant any user group direct access to <code>/dev/i2c-*</code> by default. If <code>sudo ddcutil detect</code> still finds nothing, check <code>sudo ddcutil detect --verbose</code> for I2C bus errors. <code>i2c-tools</code> (<code>i2cdetect</code>, <code>i2cget</code>, <code>i2cset</code>) is also pre-installed for lower-level I2C bus inspection.</p>
-<p>---</p>
-<h2>Power Management</h2>
+<hr>
+<h2 id="power-management">Power Management</h2>
 <pre><code class="language-bash"># Current power profile
 powerprofilesctl get
 
@@ -458,16 +460,16 @@ systemctl reboot
 # Wake-on-LAN
 sudo ethtool -s eth0 wol g       # enable WoL (magic packet)
 sudo ethtool eth0 | grep Wake    # check current setting</code></pre>
-<p>---</p>
-<h2>Firmware Updates</h2>
-<p>Firmware updates for supported devices are managed by <strong>fwupd</strong>. See <a href="../security/fwupd">Firmware Updates</a> for full documentation.</p>
+<hr>
+<h2 id="firmware-updates">Firmware Updates</h2>
+<p>Firmware updates for supported devices are managed by <strong>fwupd</strong>. See <a href="../security/fwupd.md">Firmware Updates</a> for full documentation.</p>
 <pre><code class="language-bash"># Quick reference
 sudo fwupdmgr get-devices
 sudo fwupdmgr refresh
 sudo fwupdmgr get-updates
 sudo fwupdmgr update</code></pre>
-<p>---</p>
-<h2>Hardware Errors and Events</h2>
+<hr>
+<h2 id="hardware-errors-and-events">Hardware Errors and Events</h2>
 <pre><code class="language-bash"># Kernel hardware messages since boot
 dmesg | grep -iE &quot;error|fail|warn|hardware&quot; | head -40
 
@@ -489,8 +491,8 @@ sudo nvme error-log /dev/nvme0
 
 # Hardware event log via IPMI (servers)
 sudo ipmitool sel list           # requires ipmitool</code></pre>
-<p>---</p>
-<h2>Identifying Unknown Hardware</h2>
+<hr>
+<h2 id="identifying-unknown-hardware">Identifying Unknown Hardware</h2>
 <pre><code class="language-bash"># Look up a PCI vendor:device ID on the internet
 lspci -n | awk '{print $3}'      # list raw IDs
 # Then search: https://pci-ids.ucw.cz/
@@ -505,15 +507,15 @@ pacman -F /lib/modules/$(uname -r)/kernel/drivers/**/drivername.ko.zst
 
 # udev rule for a device
 udevadm info --query=all --name=/dev/sdb | grep -E &quot;ID_VENDOR|ID_MODEL|DRIVER&quot;</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | Device not detected | Check <code>dmesg | tail -30</code> after plugging in; verify with <code>lspci -k</code> or <code>lsusb</code>; try a different port | | Wrong driver loaded | Blacklist the competing module — see <a href="kernel-modules">Kernel Modules</a> | | <code>sensors</code> shows no data | Run <code>sudo sensors-detect --auto</code> to detect and load the correct modules | | GPU not accelerating | Check <code>lspci -k</code> to confirm the right driver is in use; check for firmware errors in <code>dmesg</code> | | High CPU temperature | Check <code>sensors</code>; verify thermal paste is applied; check fan speed; check <code>powerprofilesctl</code> | | Battery draining fast | Install and check <code>powertop</code> (not pre-installed); verify <code>power-saver</code> profile is active | | <code>dmidecode</code> returns empty | System firmware may not populate DMI tables — try <code>inxi -Fz</code> for alternative sources |</p>
-<p>---</p>
-<h2>See Also</h2>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Device not detected</td><td>Check `dmesg</td><td>tail -30<code> after plugging in; verify with </code>lspci -k<code> or </code>lsusb`; try a different port</td></tr><tr><td>Wrong driver loaded</td><td>Blacklist the competing module — see <a href="kernel-modules">Kernel Modules</a></td></tr><tr><td><code>sensors</code> shows no data</td><td>Run <code>sudo sensors-detect --auto</code> to detect and load the correct modules</td></tr><tr><td>GPU not accelerating</td><td>Check <code>lspci -k</code> to confirm the right driver is in use; check for firmware errors in <code>dmesg</code></td></tr><tr><td>High CPU temperature</td><td>Check <code>sensors</code>; verify thermal paste is applied; check fan speed; check <code>powerprofilesctl</code></td></tr><tr><td>Battery draining fast</td><td>Install and check <code>powertop</code> (not pre-installed); verify <code>power-saver</code> profile is active</td></tr><tr><td><code>dmidecode</code> returns empty</td><td>System firmware may not populate DMI tables — try <code>inxi -Fz</code> for alternative sources</td></tr></tbody></table>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="kernel-modules">Kernel Modules</a> — loading drivers, blacklisting, parameters</li>
 <li><a href="storage">Storage</a> — SMART, NVMe, disk health</li>
-<li><a href="../security/fwupd">Firmware Updates</a> — fwupd for device firmware</li>
+<li><a href="../security/fwupd.md">Firmware Updates</a> — fwupd for device firmware</li>
 <li><a href="process-management">Process Management</a> — CPU load, memory usage per process</li>
 <li><a href="systemd">Systemd</a> — <code>CPUQuota=</code>, <code>MemoryMax=</code>, resource limits</li>
 </ul></div>

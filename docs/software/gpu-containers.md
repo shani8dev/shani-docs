@@ -1,12 +1,22 @@
 ---
 title: GPU Acceleration & HPC Containers
 section: Software & Apps
-updated: 2026-04-17
+updated: 2026-08-29
 ---
 
 # GPU Acceleration & HPC Containers
 
 Shanios is an immutable OS built for reproducibility. GPU drivers are pre-installed and OS-managed, while heavy user-space stacks (CUDA, ROCm, OpenMPI, NCCL) run **exclusively in containers or Apptainer images**. This keeps the host lean and makes research environments fully portable.
+
+## 📋 Quick-Start Decision Framework
+
+| Goal | Recommended Runtime | Why |
+|---|---|---|
+| **Interactive IDE / Jupyter / debugging** | **Distrobox** | Shares home dir, inherits host `/dev` nodes, no CDI config needed |
+| **One-off test / benchmark / CI** | **Podman** | Rootless by default, CDI spec auto-propagates via `shani-deploy`, no persistent fs |
+| **HPC cluster / SLURM / distributed** | **Apptainer** | `.sif` standard, rootless by cluster requirement, `--nv` auto-injects host driver |
+| **AI inference serving (vLLM / Ollama)** | **Podman** | `--device nvidia.com/gpu=all` + `--security-opt=label=disable`; persists in `@containers` Btrfs |
+| **Max compatibility (mixed CUDA/ROCm apps)** | **Distrobox** | Shares host GPU stack; use `--device=/dev/kfd --device=/dev/dri` inside for ROCm |
 
 ---
 
@@ -19,11 +29,11 @@ nvidia-smi
 clinfo | grep -i nvidia   # Verify OpenCL platform
 ```
 
-### 2. Install Container Toolkit and Generate CDI Spec
+### 2. Container Toolkit and CDI Spec
+
+`nvidia-container-toolkit` **ships pre-installed** in Shanios images — no package install is needed (and the immutable root cannot accept one). Generate the CDI spec:
 
 ```bash
-sudo pacman -S nvidia-container-toolkit
-
 # Generate the CDI specification — required for Podman (especially rootless)
 sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
 
@@ -52,6 +62,8 @@ podman run --rm \
 pip install torch torchvision torchaudio \
   --index-url https://download.pytorch.org/whl/cu121
 ```
+
+> 💡 **Tip:** On Shanios, `shani-deploy` updates host NVIDIA drivers and the CDI spec automatically. No image rebuild is required — the change propagates to all existing containers on next `podman restart`.
 
 ---
 
@@ -236,7 +248,7 @@ podman exec node1 mpirun --host node1,node2 -np 8 python3 /workspace/benchmark.p
 
 | Workload | Runtime | Command |
 |----------|---------|---------|
-| **vLLM** | NVIDIA | `podman run -d -p 127.0.0.1:8000:8000 --device nvidia.com/gpu=all -v models:/models vllm/vllm-openai:latest --model meta-llama/Meta-Llama-3-8B-Instruct --tensor-parallel-size 1` |
+| **vLLM** | NVIDIA | `podman run -d -p 127.0.0.1:8000:8000 --device nvidia.com/gpu=all -v models:/models vllm/vllm-openai:latest --model Qwen/Qwen3-32B --tensor-parallel-size 1` |
 | **LLaMA.cpp** | AMD ROCm | `podman run --rm --device /dev/kfd --device /dev/dri --group-add video,render ghcr.io/ggerganov/llama.cpp:full-rocm -m /model.gguf -ngl 80 -p "Hello"` |
 | **Ollama** | NVIDIA | `podman run -d -p 127.0.0.1:11434:11434 --device nvidia.com/gpu=all -e NVIDIA_VISIBLE_DEVICES=all -v ollama:/root/.ollama ollama/ollama` |
 
@@ -249,3 +261,19 @@ podman exec node1 mpirun --host node1,node2 -np 8 python3 /workspace/benchmark.p
 - **Persistence:** All container data persists in the `@containers` Btrfs subvolume.
 - **Driver updates:** Running `shani-deploy` updates host drivers and changes propagate to containers automatically — no image rebuilds required.
 - **Rootless containers:** Podman runs rootless by default on Shanios. If a container requires privileged device access (e.g., `/dev/kfd`), ensure your user is in the correct groups rather than using `--privileged`.
+- **Common pitfalls:**
+  - **`podman run` hangs on GPU device mount:** Ensure `nvidia-container-toolkit` is installed (pre-installed on Shanios) and the CDI spec exists at `/etc/cdi/nvidia.yaml`. Regenerate with `sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml` if missing.
+  - **`torch.cuda.is_available()` returns False after driver update:** Regenerate the CDI spec (`shani-deploy` handles this) and restart the container — NVIDIA container images bind to the driver version at build time.
+  - **AMD ROCm `HSA_OVERRIDE_GFX_VERSION` not set:** Always set it based on your GPU generation (see the GPU Containers table). Defaulting to `10.3.0` on RDNA 3 cards will cause runtime errors.
+  - **Distrobox GPU not visible:** Distrobox shares host `/dev` nodes by default, but if using `--additional-flags`, ensure the flags include both `--device=/dev/dri` and `--device=/dev/kfd` (for ROCm) or just `--device=/dev/dri` (for CUDA).
+  - **Apptainer `--nv` flag has no effect:** On Shanios, Apptainer injects the host driver automatically when running rootless. The `--nv` flag is informational only; verify with `apptainer exec myimage.nv nvidia-smi`.
+
+---
+
+## See Also
+
+- [Containers](containers) — overview of all container runtimes
+- [Distrobox](distrobox) — mutable dev environments with host integration
+- [Linux Containers (LXC/LXD)](lxc-lxd) — system containers
+- [Hardware & Graphics](../system/hardware.md) — GPU driver stack
+- [AI & Machine Learning](../servers/ai-llms.md) — model serving with GPU access

@@ -1,7 +1,7 @@
 ---
 title: NetworkManager & VPN
 section: Networking
-updated: 2026-04-18
+updated: 2026-08-28
 ---
 
 # NetworkManager & VPN
@@ -118,7 +118,7 @@ nmcli connection import type wireguard file /etc/wireguard/wg0.conf
 nmcli connection up "wg0"
 ```
 
-WireGuard connections can also be created manually in the GUI with no config file. See the [WireGuard wiki page](https://docs.shani.dev/doc/networking/wireguard) for raw peer-to-peer setup without NetworkManager.
+WireGuard connections can also be created manually in the GUI with no config file. See the [WireGuard](wireguard) page for raw peer-to-peer setup without NetworkManager.
 
 ### IKEv2 / IPsec (strongSwan)
 
@@ -170,7 +170,7 @@ Available via GUI: **Settings → Network → VPN → +** → Point-to-Point Tun
 
 ## DNS & Split DNS with VPNs
 
-Shani OS uses openresolv to broker DNS across multiple simultaneous connections. When a VPN connects, its DNS servers are automatically registered — split DNS (sending only `.corp` queries to the VPN) works without any manual `/etc/resolv.conf` editing. See the [openresolv wiki page](https://docs.shani.dev/doc/networking/openresolv) for details.
+Shani OS uses openresolv to broker DNS across multiple simultaneous connections. When a VPN connects, its DNS servers are automatically registered — split DNS (sending only `.corp` queries to the VPN) works without any manual `/etc/resolv.conf` editing. See the [openresolv](openresolv) page for details.
 
 ---
 
@@ -184,3 +184,9 @@ Shani OS uses openresolv to broker DNS across multiple simultaneous connections.
 | OpenVPN import fails | Ensure the `.ovpn` file doesn't reference external certificate files — all certs must be inline |
 | WireGuard connection times out | Confirm endpoint IP and port are correct; check that your ISP doesn't block UDP on that port |
 | GUI not showing all VPN protocols | Some protocols only appear in `nmtui` or `nmcli` — all are installed regardless |
+
+## See Also
+
+- [WireGuard](wireguard)
+- [openresolv split DNS](openresolv)
+- [Networking guide blog](https://blog.shani.dev/post/shani-os-networking-guide)

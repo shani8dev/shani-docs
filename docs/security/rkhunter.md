@@ -1,7 +1,7 @@
 ---
 title: rkhunter (Rootkit Hunter)
 section: Security
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # rkhunter — Rootkit Hunter
@@ -12,7 +12,7 @@ Unlike Lynis, Shani OS does **not** enable a scheduling timer for rkhunter — t
 
 rkhunter does not change anything — it only scans and reports.
 
-> **Important workflow:** rkhunter must build a baseline of known-good file hashes **before** the system is potentially compromised — ideally immediately after installation, and again after every system update. Running it for the first time on an already-compromised system provides little value.
+> **Important workflow:** rkhunter must build a baseline of known-good file hashes **before** the system is potentially compromised — ideally immediately after installation, and again after every deployed OS version bump (`sudo shani-deploy`). Running it for the first time on an already-compromised system provides little value.
 
 ---
 
@@ -66,20 +66,22 @@ Checking system commands...
 [09:15:32]          Current inode: 123456   Stored inode: 123400
 ```
 
-A `WARNING` for a file that changed after a package update is **expected** — this is why you run `--propupd` after every update. An unexpected warning (file changed with no package update) warrants investigation.
+A `WARNING` for a file that changed after an OS deployment is **expected** — this is why you run `--propupd` after every deployed version bump. An unexpected warning (file changed with no deployment) warrants investigation.
 
 ---
 
-## After a System Update
+## After an OS Deployment
 
-Every time you update system packages, file hashes legitimately change. Update the baseline immediately after upgrading:
+On Shanios there is no rolling package update path: the host binaries change wholesale each time you deploy a new OS version (`sudo shani-deploy`). Every deployed version bump replaces the entire root filesystem, so all stored hashes legitimately change at once — update the baseline immediately after each deployed OS version bump:
 
 ```bash
-sudo pacman -Syu
-sudo rkhunter --propupd   # update baseline to reflect new package versions
+sudo shani-deploy
+sudo rkhunter --propupd   # update baseline to reflect the newly deployed image
 ```
 
-If you scan before running `--propupd` after an update, you will see a flood of hash-change warnings for every updated binary — these are false positives.
+If you scan before running `--propupd` after a deployment, you will see a flood of hash-change warnings for every system binary — these are false positives.
+
+Changes in the mutable layers do **not** trip host hash checks: Flatpak apps, Nix packages, and container contents live outside the read-only root and are not part of rkhunter's host-binary baseline, so adding or updating them never produces file-property warnings.
 
 ---
 
@@ -142,7 +144,7 @@ sudo grep -i "warning\|infected\|found" /var/log/rkhunter.log
 
 | Issue | Solution |
 |-------|----------|
-| Many `WARNING` after a system update | Expected — run `sudo rkhunter --propupd` to update the baseline, then re-scan |
+| Many `WARNING` after an OS deployment | Expected — run `sudo rkhunter --propupd` to update the baseline, then re-scan |
 | `Unhappy about OS` / `Unknown OS` warning | Cosmetic on Arch-based systems; does not indicate a problem |
 | False positive for a known-safe binary | Add it to `SCRIPTWHITELIST` in `/etc/rkhunter.conf` |
 | `rkhunter --update` fails | Check network connectivity; the signature database is downloaded from the rkhunter project servers |
@@ -153,4 +155,4 @@ sudo grep -i "warning\|infected\|found" /var/log/rkhunter.log
 ## See Also
 
 - [Lynis](lynis) — broader hardening audit; Shani OS enables `lynis.timer` by default, unlike rkhunter
-- [shani-health Reference](../updates/shani-health) — `shani-health --security` reports the age of your last rkhunter scan and its warning count, read from `/var/log/rkhunter.log`
+- [shani-health Reference](../updates/shani-health.md) — `shani-health --security` reports the age of your last rkhunter scan and its warning count, read from `/var/log/rkhunter.log`

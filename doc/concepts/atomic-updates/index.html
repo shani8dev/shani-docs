@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Atomic Updates — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Atomic Updates  Shanios uses an intelligent multi-layered update system with automatic checking, user notifications, and the  tool for atomic system update…">
+  <meta name="description" id="meta-desc"     content="Shanios uses an intelligent multi-layered update system with automatic checking, user notifications, and the shani-deploy tool for atomic system updates. U…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Atomic Updates">
-  <meta property="og:description" id="og-desc"    content="Atomic Updates  Shanios uses an intelligent multi-layered update system with automatic checking, user notifications, and the  tool for atomic system update…">
+  <meta property="og:description" id="og-desc"    content="Shanios uses an intelligent multi-layered update system with automatic checking, user notifications, and the shani-deploy tool for atomic system updates. U…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/concepts/atomic-updates/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Atomic Updates">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Atomic Updates">
-  <meta name="twitter:description" id="tw-desc"  content="Atomic Updates  Shanios uses an intelligent multi-layered update system with automatic checking, user notifications, and the  tool for atomic system update…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios uses an intelligent multi-layered update system with automatic checking, user notifications, and the shani-deploy tool for atomic system updates. U…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Atomic Updates","description":"Atomic Updates  Shanios uses an intelligent multi-layered update system with automatic checking, user notifications, and the  tool for atomic system update…","url":"https://docs.shani.dev/doc/concepts/atomic-updates/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Atomic Updates","description":"Shanios uses an intelligent multi-layered update system with automatic checking, user notifications, and the shani-deploy tool for atomic system updates. U…","url":"https://docs.shani.dev/doc/concepts/atomic-updates/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Atomic Updates","item":"https://docs.shani.dev/doc/concepts/atomic-updates/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,11 +215,11 @@
         <h1 class="doc-title">Atomic Updates</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Concepts</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Shanios uses an intelligent multi-layered update system with automatic checking, user notifications, and the <code>shani-deploy</code> tool for atomic system updates. Updates are all-or-nothing — the running system is never touched while an update is being prepared.</p>
-<h2>Update Process Flow</h2>
+<h2 id="update-process-flow">Update Process Flow</h2>
 <ol>
 <li><strong>Check</strong> — <code>shani-update</code> timer runs automatically (15 min after boot, then every 2 hours) and finds a new release</li>
 <li><strong>Notify</strong> — GUI dialog (yad/zenity/kdialog) prompts for user approval</li>
@@ -228,18 +230,18 @@
 <li><strong>Confirm</strong> — <code>mark-boot-success</code> writes <code>/data/boot-ok</code> once <code>multi-user.target</code> is reached; <code>bless-boot</code> then stops the boot counter</li>
 </ol>
 <p>If boot fails, the system automatically falls back to the previous slot.</p>
-<h2>The Full Update Pipeline</h2>
+<h2 id="the-full-update-pipeline">The Full Update Pipeline</h2>
 <p>Here is every step <code>shani-deploy</code> runs internally, in order.</p>
-<h3>1. Fetch and Verify</h3>
+<h3 id="1-fetch-and-verify">1. Fetch and Verify</h3>
 <pre><code class="language-bash"># Download version manifest from R2 CDN (with SourceForge fallback)
 # Download image — streamed with resume support
 # SHA256 verified after download
 # GPG signature verified against known public key (7B927BFFD4A9EAAA8B666B77DE217F3DA8014792)</code></pre>
 <p>Nothing is written to the OS subvolumes until both the checksum and signature verify. A corrupted or tampered image never touches your system. If the download is interrupted, it resumes from where it stopped.</p>
-<h3>2. Snapshot the Inactive Slot</h3>
+<h3 id="2-snapshot-the-inactive-slot">2. Snapshot the Inactive Slot</h3>
 <pre><code class="language-bash">btrfs subvolume snapshot @green @green_backup_20260820153000</code></pre>
 <p>This safety snapshot (named <code>&lt;slot&gt;_backup_&lt;timestamp&gt;</code>) is created before any changes to the inactive slot, and only if that slot already holds a previous system (a first-ever deploy has nothing to back up). If extraction or the swap below fails partway, <code>shani-deploy</code>'s error trap (<code>restore_candidate</code>) uses this snapshot to put <code>@green</code> back exactly as it was — the running <code>@blue</code> slot is never at risk either way.</p>
-<h3>3. Extract the New Image</h3>
+<h3 id="3-extract-the-new-image">3. Extract the New Image</h3>
 <pre><code class="language-bash"># Decompress and receive the btrfs send stream into a scratch workspace
 zstd -d --long=31 -T0 shanios-&lt;version&gt;-&lt;profile&gt;.zst -c | btrfs receive /mnt/temp_update
 
@@ -249,14 +251,14 @@ btrfs subvolume delete @green
 btrfs subvolume snapshot /mnt/temp_update/shanios_base @green
 btrfs property set -f -ts @green ro true</code></pre>
 <p><code>btrfs receive</code> reconstructs the subvolume from the send stream into a scratch workspace first — <code>@green</code> itself is only deleted and replaced after the receive has fully succeeded, so a failed or interrupted extraction leaves the old <code>@green</code> (and the safety snapshot from step 2) untouched. The result is byte-for-byte identical to the subvolume that was snapshotted, signed, and shipped — not a package application or diff, but a complete verified reconstitution of exactly what passed build QA.</p>
-<h3>4. Generate the UKI</h3>
+<h3 id="4-generate-the-uki">4. Generate the UKI</h3>
 <p><code>gen-efi</code> generates and signs a new Unified Kernel Image for the updated slot, run inside a chroot of the candidate slot:</p>
 <pre><code class="language-bash">gen-efi configure green</code></pre>
 <p>The kernel cmdline embedded in the UKI is regenerated from the live disk state — current LUKS UUID, swap offset — and signed with the MOK keypair. The signed UKI is placed in the ESP and the bootloader is updated to set it as the next-boot default.</p>
-<h3>5. Boot Counting</h3>
+<h3 id="5-boot-counting">5. Boot Counting</h3>
 <p>The new entry gets a <code>+3-0</code> suffix: 3 tries allowed, 0 done. Each failed boot attempt decrements the tries-left counter. If it reaches zero, systemd-boot automatically falls back to the previous slot's UKI.</p>
 <p>If the new slot boots successfully, <code>bless-boot</code> calls <code>bootctl set-good</code>, stopping the countdown. The slot becomes the permanent default.</p>
-<h2>Before / After</h2>
+<h2 id="before-after">Before / After</h2>
 <p><strong>Before update — running <code>@blue</code>:</strong></p>
 <ul>
 <li><code>@blue</code> ✅ Active (Booted) — current system</li>
@@ -270,10 +272,10 @@ btrfs property set -f -ts @green ro true</code></pre>
 <li><code>@green</code> ✅ Active (Updated!) — new system running</li>
 <li><code>shani-update --startup</code> (run at login) checks for a fallback or candidate boot and confirms success</li>
 </ul>
-<h2>Automatic Rollback</h2>
+<h2 id="automatic-rollback">Automatic Rollback</h2>
 <p>Rollback actually happens in two stages — one automatic at the bootloader level, one confirmed by you at the login screen.</p>
 <p><strong>Stage 1 — systemd-boot falls back on its own.</strong> Every boot of the newly updated slot counts against its <code>+3-0</code> tries. <code>bless-boot</code> only calls <code>bootctl set-good</code> (clearing the counter) after <code>mark-boot-success</code> has confirmed <code>multi-user.target</code> was reached and written <code>/data/boot-ok</code>. So any boot that crashes, hangs, or never reaches a working session — including a hard failure where the Btrfs root itself fails to mount, caught by a dracut hook that writes <code>/data/boot_hard_failure</code> before the mount is even attempted — leaves the counter un-cleared. After three such attempts, systemd-boot automatically boots the fallback slot's <code>.conf</code> entry instead. This part requires no user interaction and no login: you land on the previous, working system.</p>
-<p><strong>Stage 2 — the actual data rollback is offered, not silent.</strong> systemd-boot switching slots only changes which UKI boots next; it does not touch Btrfs subvolume contents, so the failed candidate slot is still sitting there broken. On next login, <code>shani-update</code> detects the mismatch between the booted slot and <code>/data/current-slot</code> (or the <code>boot_hard_failure</code> marker) and shows a "Roll Back Now / Ignore" dialog. Choosing to roll back runs <code>shani-deploy --rollback</code>, which restores the failed slot from its pre-deploy safety snapshot (see step 2 above) and rewrites both boot entries with no tries needed, since both slots are now known-good. No data on <code>@home</code>, <code>@data</code>, or any other persistent subvolume is touched by any of this — see <a href="./persistence">Persistence Strategy</a>.</p>
+<p><strong>Stage 2 — the actual data rollback is offered, not silent.</strong> systemd-boot switching slots only changes which UKI boots next; it does not touch Btrfs subvolume contents, so the failed candidate slot is still sitting there broken. On next login, <code>shani-update</code> detects the mismatch between the booted slot and <code>/data/current-slot</code> (or the <code>boot_hard_failure</code> marker) and shows a "Roll Back Now / Ignore" dialog. Choosing to roll back runs <code>shani-deploy --rollback</code>, which restores the failed slot from its pre-deploy safety snapshot (see step 2 above) and rewrites both boot entries with no tries needed, since both slots are now known-good. No data on <code>@home</code>, <code>@data</code>, or any other persistent subvolume is touched by any of this — see <a href="./persistence.md">Persistence Strategy</a>.</p>
 <p>The boot health pipeline behind stage 1:</p>
 <ul>
 <li><code>mark-boot-in-progress</code> — clears prior markers and plants <code>/data/boot_in_progress</code> at boot start</li>
@@ -282,18 +284,24 @@ btrfs property set -f -ts @green ro true</code></pre>
 <li><code>check-boot-failure</code> (15-minute timer) — if <code>/data/boot_in_progress</code> is still present and <code>/data/boot-ok</code> never appeared, records the slot in <code>/data/boot_failure</code></li>
 <li>a dracut pre-mount hook writes <code>/data/boot_hard_failure</code> unconditionally before the root Btrfs mount is attempted, and a pre-pivot hook clears it on success — this catches failures too early for the above systemd units to ever run</li>
 </ul>
-<h2>Release Channels</h2>
+<h2 id="release-channels">Release Channels</h2>
 <p><code>shani-deploy</code> supports two release channels:</p>
-<p>| Channel | Cadence | Use Case | |---------|---------|----------| | <code>stable</code> | Monthly | Default — recommended for all users | | <code>latest</code> | More frequent | Early access, testing |</p>
-<p>For channel switching commands, manual update commands, rollback, and storage management, see <a href="../updates/system">System Updates</a>.</p>
-<h2>Storage Efficiency</h2>
+<table><thead><tr><th>Channel</th><th>Cadence</th><th>Use Case</th></tr></thead><tbody><tr><td><code>stable</code></td><td>Monthly</td><td>Default — recommended for all users</td></tr><tr><td><code>latest</code></td><td>More frequent</td><td>Early access, testing</td></tr></tbody></table>
+<p>For channel switching commands, manual update commands, rollback, and storage management, see <a href="../updates/system.md">System Updates</a>.</p>
+<h2 id="storage-efficiency">Storage Efficiency</h2>
 <p>The dual-slot architecture is not as expensive on disk as it sounds, for three concrete reasons rather than one fixed number:</p>
 <ul>
 <li>Every subvolume in <code>fstab</code> (<code>@root</code>, <code>@home</code>, <code>@data</code>, and the <code>@data/varlib/*</code> bind-mount sources) mounts with <code>compress=zstd</code>, so file content is transparently compressed on write.</li>
 <li><code>@blue</code>/<code>@green</code> are seeded as Btrfs snapshots of each other, not independent copies — Copy-on-Write means only blocks that actually differ between the two slots consume extra space; identical blocks are shared on disk.</li>
 <li><code>bees</code> runs continuously in the background (<code>beesd@&lt;uuid&gt;.service</code>) deduplicating shared content across all subvolumes, on top of whatever CoW sharing already gives you for free.</li>
 </ul>
-<p>There's no fixed "X% overhead" figure to quote here — actual savings depend on how much changes between updates and how compressible your data is — but the combination means a second slot rarely costs anywhere near a second full copy of the OS.</p></div>
+<p>There's no fixed "X% overhead" figure to quote here — actual savings depend on how much changes between updates and how compressible your data is — but the combination means a second slot rarely costs anywhere near a second full copy of the OS.</p>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="blue-green">Blue-Green Deployment</a></li>
+<li><a href="../updates/system.md">System Updates</a></li>
+<li><a href="https://blog.shani.dev/post/why-os-updates-should-never-break">Why OS updates should never break</a></li>
+</ul></div>
     </div>
 
   </main>

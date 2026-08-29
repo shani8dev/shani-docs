@@ -1,7 +1,7 @@
 ---
 title: Persistence Strategy
 section: Concepts
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # Persistence Strategy
@@ -78,7 +78,7 @@ View overlay modifications:
 ls -la /data/overlay/etc/upper
 ```
 
-The same `99shanios` dracut module also carries the two hooks that make boot-failure detection possible before systemd ever starts — a pre-mount hook writes `/data/boot_hard_failure` before the root Btrfs subvolume is mounted, and a pre-pivot hook clears it once mount succeeds. See [Atomic Updates](./atomic-updates#automatic-rollback) for how that feeds into rollback.
+The same `99shanios` dracut module also carries the two hooks that make boot-failure detection possible before systemd ever starts — a pre-mount hook writes `/data/boot_hard_failure` before the root Btrfs subvolume is mounted, and a pre-pivot hook clears it once mount succeeds. See [Atomic Updates](./atomic-updates.md#automatic-rollback) for how that feeds into rollback.
 
 ## Bind-Mounted Service State
 
@@ -99,6 +99,12 @@ Key bind mounts from `@data/varlib/` → `/var/lib/`:
 
 All bind mounts use:
 ```
-bind,nofail,x-systemd.after=var.mount,x-systemd.after=data.mount
+bind,nofail,x-systemd.after=var.mount,x-systemd.requires-mounts-for=/data
 ```
 (confirmed against the real fstab template in `shani-install-media/image_profiles/shared/overlay/rootfs/etc/fstab`)
+
+## See Also
+
+- [Immutability](immutability)
+- [User Configuration](../intro/user-config.md)
+- [Shell & Environment](../updates/shell.md)

@@ -1,7 +1,7 @@
 ---
 title: Shell & Environment
 section: Updates & Config
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Shell & Environment
@@ -28,6 +28,7 @@ The default terminal app differs by edition — both run the same shell stack ab
 
 - **KDE Plasma:** **Konsole**, pre-installed. **Yakuake** (a drop-down/quake-style variant of Konsole) is also pre-installed — press `F12` to toggle it from anywhere.
 - **GNOME:** **GNOME Console**, pre-installed.
+- **COSMIC:** **COSMIC Terminal**, pre-installed.
 
 Any terminal emulator you install separately (via Flatpak, Nix, etc.) uses the same Zsh config and prompt — the shell environment isn't tied to a specific terminal app.
 
@@ -202,11 +203,19 @@ Tmux is pre-installed:
 
 ```bash
 tmux new -s work          # start named session
-Ctrl+B then %             # split horizontally
-Ctrl+B then "             # split vertically
+Ctrl+B then %             # split vertically (panes side-by-side)
+Ctrl+B then "             # split horizontally (panes stacked)
 Ctrl+B then D             # detach (session keeps running)
 tmux ls                   # list sessions
 tmux attach -t work       # reattach
 ```
 
 Configuration lives in `~/.tmux.conf`.
+
+## See Also
+
+- [System Config](config) — /etc overlay, locale, hostname, kernel parameters
+- [Nix Package Manager](../software/nix.md) — Nix details and channel setup
+- [Migrating from Traditional Linux](../intro/migrating.md) — shell workflow changes
+- [What's Included](../intro/whats-included.md) — complete software stack
+- [System Updates](system) — how updates affect your shell config

@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>User Provisioning (shani-user-setup) — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="User Provisioning   automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix channels, and…">
+  <meta name="description" id="meta-desc"     content="shani-user-setup automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix channels, and ro…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="User Provisioning (shani-user-setup)">
-  <meta property="og:description" id="og-desc"    content="User Provisioning   automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix channels, and…">
+  <meta property="og:description" id="og-desc"    content="shani-user-setup automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix channels, and ro…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/updates/user-setup/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="User Provisioning (shani-user-setup)">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="User Provisioning (shani-user-setup)">
-  <meta name="twitter:description" id="tw-desc"  content="User Provisioning   automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix channels, and…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="shani-user-setup automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix channels, and ro…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"User Provisioning (shani-user-setup)","description":"User Provisioning   automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix channels, and…","url":"https://docs.shani.dev/doc/updates/user-setup/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"User Provisioning (shani-user-setup)","description":"shani-user-setup automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix channels, and ro…","url":"https://docs.shani.dev/doc/updates/user-setup/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"User Provisioning (shani-user-setup)","item":"https://docs.shani.dev/doc/updates/user-setup/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,13 +215,12 @@
         <h1 class="doc-title">User Provisioning (shani-user-setup)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Updates &amp; Config</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><h1>User Provisioning</h1>
-<p><code>shani-user-setup</code> automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix channels, and rootless container namespaces. It runs as root via <code>shani-user-setup.service</code>, triggered by a systemd path unit (<code>shani-user-setup.path</code>) that watches for any of three conditions: a new/changed <code>/etc/passwd</code> in the <code>/etc</code> overlay's upper layer (i.e. a user was just added), a modified <code>/etc/skel</code>, or the <code>/data/user-setup-needed</code> marker file — the marker is written by <code>shani-deploy</code> after every slot switch and by <code>shani-reset</code> after a factory reset, so newly-applied group assignments and skel changes are picked up on the next boot even without a fresh user account.</p>
-<p>---</p>
-<h2>What It Does</h2>
+      <div class="prose"><p><code>shani-user-setup</code> automatically provisions every regular user (UID 1000–59999) with the correct groups, default shell, Flatpak remotes, Nix channels, and rootless container namespaces. It runs as root via <code>shani-user-setup.service</code>, triggered by a systemd path unit (<code>shani-user-setup.path</code>) that watches for any of three conditions: a new/changed <code>/etc/passwd</code> in the <code>/etc</code> overlay's upper layer (i.e. a user was just added), a modified <code>/etc/skel</code>, or the <code>/data/user-setup-needed</code> marker file — the marker is written by <code>shani-deploy</code> after every slot switch and by <code>shani-reset</code> after a factory reset, so newly-applied group assignments and skel changes are picked up on the next boot even without a fresh user account.</p>
+<hr>
+<h2 id="what-it-does">What It Does</h2>
 <p>For each interactive user account on the system, <code>shani-user-setup</code>:</p>
 <ol>
 <li><strong>Groups</strong> — adds the user to all groups listed in <code>/etc/shani-extra-groups</code>, skipping any that don't exist</li>
@@ -230,14 +231,14 @@
 <li><strong>Podman storage migration</strong> — runs <code>podman system migrate</code> to upgrade the storage graph if <code>/var/lib/containers</code> is mounted</li>
 </ol>
 <p>A stamp file at <code>~/.cache/shani/user-setup.stamp</code> records the script mtime and extra-groups list. If the stamp matches, the expensive steps are skipped on subsequent runs. Set <code>FORCE_SETUP=1</code> to bypass.</p>
-<p>---</p>
-<h2>Extra Groups</h2>
+<hr>
+<h2 id="extra-groups">Extra Groups</h2>
 <p>The list of groups added to every user is read from a single file:</p>
 <pre><code>/etc/shani-extra-groups</code></pre>
 <p>Format: one comma-separated line, no spaces.</p>
 <pre><code>wheel,video,input,audio,kvm,storage,network,realtime,scanner,lp,cups,libvirt,lxd</code></pre>
-<h3>Group Reference</h3>
-<p>| Group | Purpose | |-------|---------| | <code>wheel</code> | Sudo privileges for system administration | | <code>input</code> | Direct input device access (keyboards, mice, controllers) | | <code>realtime</code> | Real-time scheduling, HPET/RTC access for audio production and low-latency gaming | | <code>video</code> | GPU and video hardware access | | <code>sys</code> | Hardware monitoring and sensor access | | <code>cups</code>, <code>lp</code> | Printer management and job submission | | <code>scanner</code> | Scanner device access | | <code>nixbld</code> | Nix build users group — required for the Nix package manager daemon | | <code>lxc</code>, <code>lxd</code> | LXC/LXD container management without root | | <code>kvm</code> | Virtual machine management (KVM hardware access) | | <code>libvirt</code> | libvirt VM management via <code>virsh</code> and virt-manager |</p>
+<h3 id="group-reference">Group Reference</h3>
+<table><thead><tr><th>Group</th><th>Purpose</th></tr></thead><tbody><tr><td><code>wheel</code></td><td>Sudo privileges for system administration</td></tr><tr><td><code>input</code></td><td>Direct input device access (keyboards, mice, controllers)</td></tr><tr><td><code>realtime</code></td><td>Real-time scheduling, HPET/RTC access for audio production and low-latency gaming</td></tr><tr><td><code>video</code></td><td>GPU and video hardware access</td></tr><tr><td><code>sys</code></td><td>Hardware monitoring and sensor access</td></tr><tr><td><code>cups</code>, <code>lp</code></td><td>Printer management and job submission</td></tr><tr><td><code>scanner</code></td><td>Scanner device access</td></tr><tr><td><code>nixbld</code></td><td>Nix build users group — required for the Nix package manager daemon</td></tr><tr><td><code>lxc</code>, <code>lxd</code></td><td>LXC/LXD container management without root</td></tr><tr><td><code>kvm</code></td><td>Virtual machine management (KVM hardware access)</td></tr><tr><td><code>libvirt</code></td><td>libvirt VM management via <code>virsh</code> and virt-manager</td></tr></tbody></table>
 <p>This file is the <strong>single source of truth</strong> shared between <code>shani-user-setup</code> and the <code>adduser</code>/<code>useradd</code> wrappers. Editing it ensures that all future users (and any re-provisioning runs) get the same groups.</p>
 <p>If the file is missing or empty, <code>shani-user-setup</code> adds <strong>no</strong> extra groups at all — the group-membership step silently has nothing to do. It does not fall back to a built-in list. Shell, Flatpak remote, Nix channel, and subuid/subgid provisioning are unaffected and still run normally. In practice the file is written by the base image install, so this only matters if you delete it yourself.</p>
 <pre><code class="language-bash"># View current extra groups
@@ -248,8 +249,8 @@ sudo nano /etc/shani-extra-groups
 
 # Force re-provisioning all users with the new group list
 sudo FORCE_SETUP=1 shani-user-setup</code></pre>
-<p>---</p>
-<h2>Triggering</h2>
+<hr>
+<h2 id="triggering">Triggering</h2>
 <p><code>shani-user-setup.path</code> watches three things, and running the service is rate-limited to at most 3 triggers per 60 seconds:</p>
 <ol>
 <li><code>/data/overlay/etc/upper/passwd</code> created or changed — fires the moment a new user is added (via <code>useradd</code>/<code>adduser</code>, which copy-up <code>/etc/passwd</code> into the overlay), without needing any marker file</li>
@@ -262,8 +263,8 @@ systemctl status shani-user-setup.path
 # Trigger manually (e.g. after adding a new user or editing shani-extra-groups)
 sudo touch /data/user-setup-needed</code></pre>
 <p>Whichever trigger fires, the service itself re-provisions every interactive user (UID 1000–59999) on the system, not just the one that changed.</p>
-<p>---</p>
-<h2>Running Manually</h2>
+<hr>
+<h2 id="running-manually">Running Manually</h2>
 <pre><code class="language-bash"># Provision all users (normal run)
 sudo shani-user-setup
 
@@ -272,8 +273,8 @@ sudo DRY_RUN=1 shani-user-setup
 
 # Force full re-provisioning (ignore stamp file)
 sudo FORCE_SETUP=1 shani-user-setup</code></pre>
-<p>---</p>
-<h2>Checking Status</h2>
+<hr>
+<h2 id="checking-status">Checking Status</h2>
 <pre><code class="language-bash"># View provisioning logs
 journalctl -t shani-user-setup -n 50
 
@@ -286,8 +287,8 @@ id myuser
 
 # Check subuid/subgid assignment
 grep myuser /etc/subuid /etc/subgid</code></pre>
-<p>---</p>
-<h2>After a Factory Reset</h2>
+<hr>
+<h2 id="after-a-factory-reset">After a Factory Reset</h2>
 <p>After <code>shani-reset</code>, user accounts are gone (the <code>/etc</code> overlay is wiped). On the next boot:</p>
 <ol>
 <li>The first-run wizard creates a new user account</li>
@@ -295,8 +296,8 @@ grep myuser /etc/subuid /etc/subgid</code></pre>
 <li>The new user gets all groups, correct shell, and Flatpak/Nix setup automatically</li>
 </ol>
 <p>Files in <code>/home/&lt;username&gt;</code> survive the reset (the <code>@home</code> subvolume is not wiped). Once the account is re-created with the same username, all personal files are immediately accessible.</p>
-<p>---</p>
-<h2>Rootless Container Support</h2>
+<hr>
+<h2 id="rootless-container-support">Rootless Container Support</h2>
 <p><code>shani-user-setup</code> allocates subUID/subGID ranges automatically, which are required for rootless Podman, Distrobox, LXC, and LXD.</p>
 <p>The allocation algorithm finds the highest existing range end in <code>/etc/subuid</code> and allocates the next 65,536 IDs to avoid collisions. For example, with one existing user allocated at <code>100000–165535</code>, a second user gets <code>165536–231071</code>.</p>
 <pre><code class="language-bash"># Verify your subuid/subgid assignment
@@ -305,8 +306,8 @@ cat /etc/subgid
 
 # Verify Podman rootless works
 podman run --rm alpine echo hello</code></pre>
-<p>---</p>
-<h2>See Also</h2>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="shell">Shell & Environment</a> — Zsh configuration and shell tools</li>
 <li><a href="shani-reset">Factory Reset</a> — re-provisioning after a reset</li>

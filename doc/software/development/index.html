@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>Development Environments — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Shanios works as a daily development machine, but the workflow differs from a traditional distro: /usr is read-only and there is no package manager on the …">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/software/development/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="Development Environments">
+  <meta property="og:description" id="og-desc"    content="Shanios works as a daily development machine, but the workflow differs from a traditional distro: /usr is read-only and there is no package manager on the …">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/software/development/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="Development Environments">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="Development Environments">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios works as a daily development machine, but the workflow differs from a traditional distro: /usr is read-only and there is no package manager on the …">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Development Environments","description":"Shanios works as a daily development machine, but the workflow differs from a traditional distro: /usr is read-only and there is no package manager on the …","url":"https://docs.shani.dev/doc/software/development/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Development Environments","item":"https://docs.shani.dev/doc/software/development/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Development Environments</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Software &amp; Apps</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><p>Shanios works as a daily development machine, but the workflow differs from a traditional distro: <code>/usr</code> is read-only and there is no package manager on the host. Toolchains, IDEs, and services live in runtime layers outside the root — update with <code>sudo shani-deploy</code>, roll back with <code>sudo shani-deploy -r</code>, check health with <code>shani-health</code>, and nothing about your projects, toolchains, or editor config moves.</p>
+<h2 id="what-is-pre-installed">What Is Pre-Installed</h2>
+<p>Enough to be productive on first boot: git, python3, gcc toolchain basics, zsh/starship/fzf/mcfly, podman + buildah + skopeo, qemu-base/libvirt. Everything else installs into one of the four layers below — never into <code>/usr</code>.</p>
+<h2 id="choosing-a-toolchain-strategy">Choosing a Toolchain Strategy</h2>
+<table><thead><tr><th>Layer</th><th>Best for</th><th>Install pattern</th></tr></thead><tbody><tr><td><strong>Nix</strong></td><td>Reproducible CLI toolchains, per-project environments</td><td><code>nix-env -iA nixpkgs.&lt;pkg&gt;</code>, <code>shell.nix</code>, flakes</td></tr><tr><td><strong>Distrobox</strong></td><td>Full mutable distro environments — apt/dnf/pacman inside</td><td><code>distrobox create &amp;&amp; distrobox enter</code></td></tr><tr><td><strong>Flatpak</strong></td><td>GUI apps and IDEs</td><td><code>flatpak install flathub &lt;app&gt;</code> — auto-updates every 12h</td></tr><tr><td><strong>Podman</strong></td><td>Services, databases, stacks</td><td><code>podman run</code>, quadlets</td></tr></tbody></table>
+<p>Rules of thumb: compiler pinned per project → Nix shell; apt/AUR packages with real system deps → Distrobox; GUI app → Flatpak; something listening on a port → rootless Podman.</p>
+<h2 id="ides">IDEs</h2>
+<p>VS Code and JetBrains IDEs are not pre-installed — install them as Flatpaks from Flathub:</p>
+<pre><code class="language-bash">flatpak install flathub org.visualstudio.code
+flatpak search org.jetbrains
+flatpak install flathub org.jetbrains.IntelliJ-IDEA-Community</code></pre>
+<p>VS Code sandbox notes:</p>
+<ul>
+<li>Host binaries are reachable via <code>flatpak-spawn --talk</code> helpers, or configure the integrated terminal to open a host terminal</li>
+<li>Extensions and settings persist under <code>~/.var/app/org.visualstudio.code/</code> in <code>@home</code> — they survive updates and rollbacks</li>
+</ul>
+<p>Terminal editors ship pre-installed. When the sandbox does not fit, run the IDE outside it:</p>
+<pre><code class="language-bash">nix-env -iA nixpkgs.vscodium    # from the Nix profile
+
+distrobox enter ubuntu-dev      # or a full IDE inside a container
+distrobox-export --app code     # exported to GNOME Activities / KDE menu</code></pre>
+<h2 id="language-toolchains">Language Toolchains</h2>
+<h3 id="python">Python</h3>
+<p>System <code>python3</code> handles scripts. Project environments belong in venv/poetry/uv setups created inside a Nix shell or Distrobox so versions never collide:</p>
+<pre><code class="language-bash"># Nix route — pins the exact pip version and pulls from nixpkgs
+nix-shell -p python311 python311Packages.pip  
+
+# Traditional venv inside @home (survives rollbacks)
+python3 -m venv .venv &amp;&amp; source .venv/bin/activate
+pip install -r requirements.txt
+
+# Modern alternatives — uv is ~5x faster than pip
+pip install uv
+uv venv .venv &amp;&amp; source .venv/bin/activate
+uv pip install -r requirements.txt
+
+# Poetry for dependency management
+pip install poetry
+poetry install --no-root
+
+&gt; 💡 **Shanios tip:** Always create venvs inside `~/venvs/` or project directories under `@home`. Never install packages system-wide via `pip install` — the immutable root cannot accept writes and it breaks reproducibility.</code></pre>
+<h3 id="nodejs">Node.js</h3>
+<pre><code class="language-bash"># nvm inside Distrobox (recommended for per-project version control)
+distrobox enter ubuntu-dev
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+nvm install 22
+nvm use 22
+
+# Nix route — installs node directly to your Nix profile
+nix-env -iA nixpkgs.nodejs_22
+
+# fnm (fast Node version manager) — single binary, no shell profile pollution
+pip install fnm
+fnm install 22
+fnm use 22
+
+# pnpm — recommended package manager for modern Node projects
+curl -fsSL https://pnpm.io/install.sh | sh
+pnpm install
+
+&gt; 💡 **Shanios tip:** nvm and fnm both store their data under `~/.nvm` or `~/.fnm` in `@home`, so they survive OS updates and rollbacks. Avoid `sudo npm install -g` — global installs under the read-only `/usr` are unreliable; use Distrobox or Nix for globally available tools.</code></pre>
+<h3 id="rust">Rust</h3>
+<p>rustup lives entirely in your home directory and works unmodified — <code>~/.cargo</code> and <code>~/.rustup</code> are in <code>@home</code>:</p>
+<pre><code class="language-bash">curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh &amp;&amp; rustup toolchain install stable</code></pre>
+<blockquote>💡 <strong>Shanios tip:</strong> Rust toolchains are completely self-contained under <code>@home</code>. No host-package-manager steps needed. <code>rustup override set stable</code> in your shell profile makes it persist across Distrobox/Nix contexts.</blockquote>
+<h3 id="java">Java</h3>
+<p>The JDK is not pre-installed on Shanios — install it via one of these layers:</p>
+<table><thead><tr><th>Layer</th><th>Command</th><th>Shanios Pattern</th></tr></thead><tbody><tr><td><strong>Nix</strong></td><td><code>nix-env -iA nixpkgs.openjdk_17</code></td><td>Installs to Nix profile; <code>~/.java</code> in <code>@home</code>; survives rollbacks</td></tr><tr><td><strong>Distrobox</strong></td><td><code>distrobox create --name java-dev --image ubuntu:24.04</code> then <code>apt install openjdk-17-jdk</code></td><td>Full Ubuntu env with <code>apt</code>; <code>~/.java</code> in <code>@home</code>; good for AUR-prohibited setups</td></tr><tr><td><strong>SDKMAN</strong></td><td>`curl -s "https://get.sdkman.io"</td><td>bash && sdk install java 17`</td><td>Stores data under <code>~/.sdkman/candidates</code> in <code>@home</code>; single binary, no profile pollution</td></tr></tbody></table>
+<blockquote>💡 <strong>Shanios tip:</strong> Avoid <code>sudo apt install openjdk</code> on the host — <code>/usr</code> is read-only. Use Nix for reproducible CLI toolchains, Distrobox for full mutable environments, or SDKMAN for self-contained version management. All store user data under <code>@home</code> and survive OS updates.</blockquote>
+<h3 id="go-c-c">Go / C / C++</h3>
+<p>Use Nix shells so each project pins its own version — this avoids <code>PATH</code> conflicts between system and project toolchains:</p>
+<pre><code class="language-bash">nix-shell -p go gopkgcheck            # Go with go vet
+nix-shell -p gcc                        # C compiler
+nix-shell -p cmake                      # C/C++ build system</code></pre>
+<blockquote>💡 <strong>Shanios tip:</strong> Nix shells provide ephemeral environments that disappear when you <code>exit</code>. Your <code>~/.cargo</code> and <code>~/.rustup</code> persist, but project-specific toolchains (Go modules, CMake toolchains) live inside the shell and don't pollute your host path.</blockquote>
+<h3 id="per-project-environments-with-shellnix">Per-Project Environments with shell.nix</h3>
+<p>Commit this next to your project — anyone with Nix gets the identical environment:</p>
+<pre><code class="language-nix">{ pkgs ? import &lt;nixpkgs&gt; {} }:
+
+pkgs.mkShell {
+  buildInputs = with pkgs; [
+    nodejs_22
+    python311
+    postgresql_16
+  ];
+}</code></pre>
+<pre><code class="language-bash">cd ~/projects/myapp &amp;&amp; nix-shell   # drops you into the pinned environment</code></pre>
+<h2 id="language-toolchains-quick-reference-july-2026">Language Toolchains Quick-Reference (July 2026)</h2>
+<table><thead><tr><th>Language</th><th>Recommended Tool</th><th>Shanios Pattern</th></tr></thead><tbody><tr><td><strong>Python</strong></td><td><code>python3 -m venv .venv</code></td><td>Create inside <code>~/venvs/</code> under <code>@home</code>; use <code>uv</code> or <code>pip</code></td></tr><tr><td><strong>Python</strong></td><td><code>poetry install</code></td><td>Declarative <code>pyproject.toml</code>; locks reproduce exact env</td></tr><tr><td><strong>Node.js</strong></td><td><code>nvm install 22</code></td><td>Store <code>~/.nvm</code> in <code>@home</code>; works inside Distrobox</td></tr><tr><td><strong>Node.js</strong></td><td><code>fnm install 22</code></td><td>Single binary; no shell profile pollution</td></tr><tr><td><strong>Node.js</strong></td><td><code>pnpm install</code></td><td>Recommended PM; fast, disk-efficient</td></tr><tr><td><strong>Node.js</strong></td><td><code>nix-env -iA nixpkgs.nodejs_22</code></td><td>Installs to Nix profile; survives rollbacks</td></tr><tr><td><strong>Rust</strong></td><td><code>rustup toolchain install stable</code></td><td><code>~/.cargo</code> / <code>~/.rustup</code> in <code>@home</code>; self-contained</td></tr><tr><td><strong>Rust</strong></td><td><code>rustup override set stable</code></td><td>Persists across Distrobox/Nix contexts</td></tr><tr><td><strong>Go</strong></td><td><code>nix-shell -p go</code></td><td>Ephemeral env; no PATH pollution</td></tr><tr><td><strong>Go</strong></td><td><code>go mod init &amp;&amp; go mod tidy</code></td><td>Module-mode projects under <code>@home</code></td></tr><tr><td><strong>C/C++</strong></td><td><code>nix-shell -p cmake</code></td><td>Build system; toolchain from Nix profile</td></tr><tr><td><strong>C/C++</strong></td><td><code>gcc</code> / <code>cmake</code></td><td>Project-local; no system-wide installs needed</td></tr><tr><td><strong>Java</strong></td><td><code>nix-env -iA nixpkgs.openjdk_17</code></td><td>Installs to Nix profile; <code>~/.java</code> in <code>@home</code>; survives rollbacks</td></tr><tr><td><strong>Java</strong></td><td><code>sdk install java 17</code></td><td>SDKMAN; <code>~/.sdkman</code> in <code>@home</code>; single binary, no profile pollution</td></tr><tr><td><strong>Java</strong></td><td><code>distrobox create --name java-dev --image ubuntu:24.04</code> then <code>apt install openjdk-17-jdk</code></td><td>Full Ubuntu env; <code>~/.java</code> in <code>@home</code>; good for AUR-prohibited setups</td></tr></tbody></table>
+<hr>
+<h3 id="the-immutable-way">The Immutable Way</h3>
+<ul>
+<li><strong>Never</strong> <code>pip install</code> or <code>npm install -g</code> on the host — <code>/usr</code> is read-only</li>
+<li><strong>Always</strong> use one of: Nix (<code>nix-env</code>, <code>nix-shell</code>), Distrobox (<code>distrobox create</code>), Flatpak (<code>flatpak install</code>), or Podman (<code>podman run</code>) for any tool beyond <code>python3</code>/<code>node</code> basics</li>
+<li><strong>Keep data in <code>@home</code></strong> — venvs, <code>.rustup</code>, <code>.cargo</code>, <code>~/.nvm</code> all survive updates and rollbacks</li>
+<li><strong>Snapshot before major toolchain changes</strong>: <code>sudo btrfs subvolume snapshot / /snapshots/pre-toolchain-$(date +%s)</code></li>
+</ul>
+<hr>
+<h2 id="distrobox-deep-dive-for-development">Distrobox Deep-Dive for Development</h2>
+<p>A complete mutable distro with your home directory shared by default:</p>
+<pre><code class="language-bash"># Create a dev box (--additional-flags passes options straight to Podman)
+distrobox create --name ubuntu-dev --image ubuntu:24.04 \
+  --additional-flags &quot;--security-opt seccomp=unconfined&quot;
+
+distrobox enter ubuntu-dev
+sudo apt install build-essential libssl-dev pkg-config
+
+# Export GUI apps and binaries to the host
+distrobox-export --app code
+distrobox-export --bin /usr/bin/gcc</code></pre>
+<p>Inside the box: same <code>~</code> as the host, GPU/audio/Wayland forwarded, <code>host-spawn &lt;cmd&gt;</code> runs host commands. Container data lives in the <code>@containers</code> subvolume.</p>
+<h2 id="local-services-and-dev-databases">Local Services and Dev Databases</h2>
+<p>Rootless Podman one-liners with named volumes:</p>
+<pre><code class="language-bash"># PostgreSQL
+podman run -d --name dev-postgres -e POSTGRES_PASSWORD=dev \
+  -v dev-pgdata:/var/lib/postgresql/data -p 127.0.0.1:5432:5432 postgres:16
+
+# Redis
+podman run -d --name dev-redis \
+  -v dev-redis-data:/data -p 127.0.0.1:6379:6379 redis:7-alpine
+
+# MySQL
+podman run -d --name dev-mysql -e MYSQL_ROOT_PASSWORD=dev \
+  -v dev-mysql-data:/var/lib/mysql -p 127.0.0.1:3306:3306 mysql:8</code></pre>
+<p>Multi-service stacks use <code>podman-compose</code> against any <code>docker-compose.yml</code>:</p>
+<pre><code class="language-bash">podman-compose up -d
+podman-compose down</code></pre>
+<p>Auto-start a dev database at login with a quadlet — plain systemd, no daemon:</p>
+<pre><code class="language-ini"># ~/.config/containers/systemd/dev-postgres.container
+[Container]
+Image=docker.io/library/postgres:16
+ContainerName=dev-postgres
+Environment=POSTGRES_PASSWORD=dev
+Volume=dev-pgdata:/var/lib/postgresql/data
+PublishPort=127.0.0.1:5432:5432
+
+[Install]
+WantedBy=default.target</code></pre>
+<pre><code class="language-bash">systemctl --user daemon-reload
+systemctl --user start dev-postgres</code></pre>
+<h2 id="dev-containers-with-podman">Dev Containers with Podman</h2>
+<p>VS Code Dev Containers work on top of Podman instead of Docker:</p>
+<pre><code class="language-bash">systemctl --user enable --now podman.socket     # enable the user socket once
+echo $XDG_RUNTIME_DIR/podman/podman.sock        # /run/user/1000/podman/podman.sock</code></pre>
+<p>Point VS Code at Podman with <code>&quot;dev.containers.dockerPath&quot;: &quot;podman&quot;</code> in <code>settings.json</code>, or export the socket for any Docker-API client: <code>export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock</code>. Then open a folder with <code>.devcontainer/devcontainer.json</code> and run <strong>Dev Containers: Reopen in Container</strong> — builds and execution happen entirely rootless.</p>
+<h2 id="what-you-cannot-do">What You Cannot Do</h2>
+<p>Honest list:</p>
+<ul>
+<li><strong>No DKMS or out-of-tree kernel modules on the host.</strong> Modules must match the exact running kernel; on an image-based immutable OS the kernel only changes through signed deploys, so ad-hoc module builds would break signature verification and rollback guarantees. Workaround: test kernels and modules in a VM — qemu-base and libvirt are pre-installed.</li>
+<li><strong>No global pacman packages.</strong> There is no pacman on the host; package needs route through Nix, Flatpak, Distrobox, or Podman.</li>
+<li><strong>No installing system services directly.</strong> Anything needing a boot-time systemd unit goes into the OS image upstream, or runs as a user-level container/quadlet.</li>
+</ul>
+<pre><code class="language-bash">virt-install --name kernel-test --memory 4096 --vcpus 2 --disk size=20 --cdrom shani-os.iso</code></pre>
+<h2 id="persistence-model">Persistence Model</h2>
+<p>Where everything lives, and what it survives:</p>
+<table><thead><tr><th>Location</th><th>Subvolume / mechanism</th><th>Survives updates</th><th>Survives rollback</th></tr></thead><tbody><tr><td><code>~</code> (user data, dotfiles, IDE extensions)</td><td><code>@home</code></td><td>Yes</td><td>Yes</td></tr><tr><td><code>/etc</code> (writable overlay)</td><td>Overlay</td><td>Yes</td><td>Yes</td></tr><tr><td>Nix store</td><td><code>@nix</code></td><td>Yes</td><td>Yes</td></tr><tr><td>Podman/Distrobox storage</td><td><code>@containers</code></td><td>Yes</td><td>Yes</td></tr><tr><td><code>/usr</code> (root filesystem)</td><td>Image slot</td><td>Replaced</td><td>Replaced</td></tr></tbody></table>
+<p>Config in <code>@home</code> and <code>/etc</code> survives updates and rollbacks. Container storage persists across updates. Nothing under <code>/usr</code> survives anything — it is replaced wholesale by every <code>shani-deploy</code>, which is exactly why toolchains live outside it.</p>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="distrobox">Distrobox</a> — full mutable distro environments</li>
+<li><a href="nix">Nix Package Manager</a> — reproducible toolchains and shells</li>
+<li><a href="containers">Containers</a> — Podman, compose, quadlets</li>
+<li><a href="vms">Virtual Machines</a> — kernel and driver testing</li>
+<li><a href="gpu-containers">GPU Containers</a> — CUDA/ROCm compute workflows</li>
+<li><a href="https://blog.shani.dev/post/shani-os-software-ecosystem">The Shanios Software Ecosystem</a> — when to use which layer</li>
+</ul></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

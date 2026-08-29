@@ -1,7 +1,7 @@
 ---
 title: Flatpak
 section: Software & Apps
-updated: 2026-04-01
+updated: 2026-08-28
 ---
 
 # Flatpak
@@ -112,3 +112,13 @@ flatpak remotes
 # Remove a remote
 flatpak remote-delete gnome-nightly
 ```
+
+## See Also
+
+- [Nix Package Manager](nix) — CLI tools and development runtimes
+- [Snap Packages](snaps) — containerised app store alternative
+- [Homebrew](homebrew) — macOS-style package manager
+- [Distrobox](distrobox) — full mutable environments for complex apps
+- [AppImages](appimage) — portable app format
+- [Immutability](../concepts/immutability.md) — how Flatpak apps persist on an immutable OS
+- [System Updates](../updates/system.md) — how Flatpak updates work independently

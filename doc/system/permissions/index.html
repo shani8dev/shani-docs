@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>ch* Commands (chmod, chown, chattr, ACLs) — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="The ch* family covers the core &quot;change&quot; utilities — tools that modify permissions, ownership, file attributes, and user account properties. All are pre-ins…">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/system/permissions/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="ch* Commands (chmod, chown, chattr, ACLs)">
+  <meta property="og:description" id="og-desc"    content="The ch* family covers the core &quot;change&quot; utilities — tools that modify permissions, ownership, file attributes, and user account properties. All are pre-ins…">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/system/permissions/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="ch* Commands (chmod, chown, chattr, ACLs)">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="ch* Commands (chmod, chown, chattr, ACLs)">
+  <meta name="twitter:description" id="tw-desc"  content="The ch* family covers the core &quot;change&quot; utilities — tools that modify permissions, ownership, file attributes, and user account properties. All are pre-ins…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"ch* Commands (chmod, chown, chattr, ACLs)","description":"The ch* family covers the core \"change\" utilities — tools that modify permissions, ownership, file attributes, and user account properties. All are pre-ins…","url":"https://docs.shani.dev/doc/system/permissions/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"ch* Commands (chmod, chown, chattr, ACLs)","item":"https://docs.shani.dev/doc/system/permissions/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">ch* Commands (chmod, chown, chattr, ACLs)</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">System</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><p>The <code>ch*</code> family covers the core "change" utilities — tools that modify permissions, ownership, file attributes, and user account properties. All are pre-installed on Shani OS.</p>
+<hr>
+<h2 id="chmod-change-file-permissions">chmod — Change File Permissions</h2>
+<p><code>chmod</code> sets read, write, and execute permissions for the owner, group, and others.</p>
+<h3 id="symbolic-mode">Symbolic mode</h3>
+<pre><code class="language-bash">chmod u+x script.sh          # Add execute for owner
+chmod go-w file.txt           # Remove write for group and others
+chmod a+r file.txt            # Add read for everyone
+chmod u=rw,go=r file.txt      # Set exact permissions per class</code></pre>
+<table><thead><tr><th>Symbol</th><th>Meaning</th></tr></thead><tbody><tr><td><code>u</code></td><td>Owner (user)</td></tr><tr><td><code>g</code></td><td>Group</td></tr><tr><td><code>o</code></td><td>Others</td></tr><tr><td><code>a</code></td><td>All (u+g+o)</td></tr><tr><td><code>+</code></td><td>Add permission</td></tr><tr><td><code>-</code></td><td>Remove permission</td></tr><tr><td><code>=</code></td><td>Set exactly (overwrites)</td></tr></tbody></table>
+<h3 id="octal-mode">Octal mode</h3>
+<p>Each permission class is a 3-bit value: read=4, write=2, execute=1.</p>
+<pre><code class="language-bash">chmod 755 script.sh           # rwxr-xr-x  (owner: rwx, group: r-x, others: r-x)
+chmod 644 file.txt            # rw-r--r--  (owner: rw, group: r, others: r)
+chmod 600 ~/.ssh/id_ed25519   # rw-------  (private key — others must have no access)
+chmod 700 ~/.ssh              # rwx------  (SSH directory)
+chmod 000 locked.txt          # ---------- (no access for anyone)</code></pre>
+<p>Common permission patterns:</p>
+<table><thead><tr><th>Octal</th><th>Symbolic</th><th>Typical use</th></tr></thead><tbody><tr><td><code>755</code></td><td><code>rwxr-xr-x</code></td><td>Executable scripts, directories</td></tr><tr><td><code>644</code></td><td><code>rw-r--r--</code></td><td>Regular files</td></tr><tr><td><code>600</code></td><td><code>rw-------</code></td><td>Private keys, secrets</td></tr><tr><td><code>700</code></td><td><code>rwx------</code></td><td>Private directories</td></tr><tr><td><code>664</code></td><td><code>rw-rw-r--</code></td><td>Shared group files</td></tr><tr><td><code>775</code></td><td><code>rwxrwxr-x</code></td><td>Shared group directories</td></tr></tbody></table>
+<h3 id="recursive-and-special-bits">Recursive and special bits</h3>
+<pre><code class="language-bash">chmod -R 755 /var/www/html    # Recursive (applies to all files and subdirs)
+
+chmod u+s /usr/bin/myapp      # Setuid — runs as file owner, not caller
+chmod g+s /shared/dir         # Setgid — new files inherit group; useful for shared dirs
+chmod +t /tmp                 # Sticky bit — only owner can delete their own files</code></pre>
+<blockquote>⚠️ Avoid <code>chmod -R 777</code>. It grants world-write to everything, including config files and scripts.</blockquote>
+<hr>
+<h2 id="chown-change-ownership">chown — Change Ownership</h2>
+<p><code>chown</code> sets the owner and optionally the group of a file or directory.</p>
+<pre><code class="language-bash">chown alice file.txt              # Change owner to alice
+chown alice:developers file.txt   # Change owner and group
+chown :developers file.txt        # Change group only (note leading colon)
+chown -R alice:alice /home/alice  # Recursive ownership change
+chown --reference=ref.txt file.txt # Copy ownership from another file</code></pre>
+<blockquote>💡 <code>chgrp</code> is a shorthand for changing only the group: <code>chgrp developers file.txt</code> is equivalent to <code>chown :developers file.txt</code>.</blockquote>
+<hr>
+<h2 id="chattr-change-extended-file-attributes">chattr — Change Extended File Attributes</h2>
+<p><code>chattr</code> sets low-level filesystem attributes on ext2/ext4/Btrfs. These attributes are enforced by the kernel — even root cannot modify or delete a file with the immutable flag set without first removing the attribute.</p>
+<pre><code class="language-bash">sudo chattr +i important.conf     # Immutable — no writes, renames, or deletes
+sudo chattr -i important.conf     # Remove immutable flag
+sudo chattr +a logfile.log        # Append-only — can only append, not overwrite
+sudo chattr +u file.txt           # Undeletable (save data on deletion for recovery)
+sudo chattr +c archive.tar        # Enable transparent compression (ext4)
+sudo chattr -R +i /etc/           # Recursive — use with caution</code></pre>
+<p>Check attributes with <code>lsattr</code>:</p>
+<pre><code class="language-bash">lsattr important.conf
+# ----i--------e-- important.conf
+
+lsattr -R /etc/               # Recursive listing</code></pre>
+<p>Common attribute flags:</p>
+<table><thead><tr><th>Flag</th><th>Meaning</th></tr></thead><tbody><tr><td><code>i</code></td><td>Immutable — no modifications, no deletion, even by root</td></tr><tr><td><code>a</code></td><td>Append-only — data can be added but not overwritten</td></tr><tr><td><code>u</code></td><td>Undeletable — kernel keeps data recoverable after deletion</td></tr><tr><td><code>c</code></td><td>Transparent compression</td></tr><tr><td><code>e</code></td><td>Extents in use (set automatically, do not modify)</td></tr></tbody></table>
+<blockquote>⚠️ The <code>+i</code> flag is useful for protecting config files from accidental changes, but remember to remove it before package updates that modify the file.</blockquote>
+<hr>
+<h2 id="acls-beyond-ownergroupother">ACLs — Beyond Owner/Group/Other</h2>
+<p>Standard <code>chmod</code>/<code>chown</code> only give you one owner and one group per file. <code>acl</code> (pre-installed) adds Access Control Lists — extra permission entries for specific additional users or groups on the same file, without changing its actual owner or group.</p>
+<pre><code class="language-bash"># Grant a specific user read+write on a file, without changing its owner
+sudo setfacl -m u:bob:rw file.txt
+
+# Grant a specific group read-only access to a directory
+sudo setfacl -m g:developers:rx /shared/project
+
+# View the ACL entries on a file (also shown by ls -l as a trailing '+')
+getfacl file.txt
+
+# Apply recursively to a directory tree
+sudo setfacl -R -m u:bob:rwx /shared/project
+
+# Set a default ACL so new files created inside a directory inherit it
+sudo setfacl -d -m g:developers:rwx /shared/project
+
+# Remove one entry
+sudo setfacl -x u:bob file.txt
+
+# Remove all ACL entries (back to plain owner/group/other)
+sudo setfacl -b file.txt</code></pre>
+<p>Filesystems must be mounted with ACL support for this to work — ext4 and XFS enable it by default; Btrfs (Shanios's own root and <code>@home</code>) supports ACLs natively with no mount option needed.</p>
+<hr>
+<h2 id="chage-change-password-aging-policy">chage — Change Password Aging Policy</h2>
+<p><code>chage</code> manages password expiry and account aging for local users. Useful for enforcing security policies without a directory service.</p>
+<pre><code class="language-bash">sudo chage -l alice               # List current aging settings
+sudo chage -M 90 alice            # Password expires after 90 days
+sudo chage -m 7 alice             # Minimum 7 days between password changes
+sudo chage -W 14 alice            # Warn user 14 days before expiry
+sudo chage -I 30 alice            # Lock account 30 days after expiry
+sudo chage -E 2026-12-31 alice    # Account expires on a specific date
+sudo chage -E -1 alice            # Remove account expiry
+sudo chage -d 0 alice             # Force password change on next login</code></pre>
+<p>View aging info:</p>
+<pre><code class="language-bash">sudo chage -l alice
+# Last password change                        : Apr 01, 2026
+# Password expires                            : Jun 30, 2026
+# Password inactive                           : Jul 30, 2026
+# Account expires                             : never
+# Minimum number of days between changes      : 7
+# Maximum number of days between changes      : 90
+# Number of days of warning before expiry     : 14</code></pre>
+<h3 id="password-strength-pwscore-pwmake">Password Strength — pwscore / pwmake</h3>
+<p><code>libpwquality</code> (pre-installed) checks passwords against the same complexity policy PAM enforces at password-change time (<code>/etc/security/pwquality.conf</code>) — useful for testing a password before setting it, or generating a random one that already passes.</p>
+<pre><code class="language-bash"># Score a password against the configured policy (0-100, or an error if it fails)
+echo &quot;MyP@ssw0rd123&quot; | pwscore
+
+# Generate a random password that passes the policy (length in bits of entropy)
+pwmake 128</code></pre>
+<hr>
+<h2 id="chsh-change-login-shell">chsh — Change Login Shell</h2>
+<p><code>chsh</code> changes a user's default login shell.</p>
+<pre><code class="language-bash">chsh                              # Interactive prompt for current user
+chsh -s /bin/zsh                  # Set shell to zsh for current user
+chsh -s /bin/bash alice           # Set shell for another user (root only)
+chsh -l                           # List valid shells (reads /etc/shells)</code></pre>
+<p>Shells must be listed in <code>/etc/shells</code> to be accepted. To add a custom shell:</p>
+<pre><code class="language-bash">which fish                        # e.g. /usr/bin/fish
+echo /usr/bin/fish | sudo tee -a /etc/shells
+chsh -s /usr/bin/fish</code></pre>
+<p>The change takes effect on the next login. Running <code>echo $SHELL</code> in an existing session still shows the old shell.</p>
+<hr>
+<h2 id="chfn-change-finger-gecos-information">chfn — Change Finger (GECOS) Information</h2>
+<p><code>chfn</code> updates the GECOS field in <code>/etc/passwd</code> — the display name and contact info shown by <code>finger</code> and some system tools.</p>
+<pre><code class="language-bash">chfn                              # Interactive prompts for current user
+chfn -f &quot;Alice Smith&quot; alice       # Set full name (root only for other users)
+chfn -r &quot;Ops Team&quot; alice          # Set room/location
+chfn -w &quot;555-1234&quot; alice          # Set work phone
+chfn -h &quot;555-5678&quot; alice          # Set home phone</code></pre>
+<p>The GECOS string is cosmetic and not security-sensitive, but it is displayed in <code>finger</code>, <code>w</code>, <code>who</code>, and some email clients.</p>
+<hr>
+<h2 id="chpasswd-batch-password-changes">chpasswd — Batch Password Changes</h2>
+<p><code>chpasswd</code> reads <code>username:password</code> pairs from stdin and updates passwords in bulk. It is intended for provisioning scripts, not interactive use.</p>
+<pre><code class="language-bash">echo &quot;alice:NewP@ssw0rd&quot; | sudo chpasswd
+echo &quot;bob:AnotherSecure1&quot; | sudo chpasswd
+
+# Batch from a file (delete the file immediately after use)
+sudo chpasswd &lt; /tmp/passwords.txt
+sudo shred -u /tmp/passwords.txt</code></pre>
+<blockquote>⚠️ Avoid embedding plain-text passwords in scripts. Use <code>chpasswd</code> only in controlled provisioning environments, and always shred the input file after use.</blockquote>
+<hr>
+<h2 id="quick-reference">Quick Reference</h2>
+<table><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody><tr><td><code>chmod</code></td><td>File/directory permissions (rwx)</td></tr><tr><td><code>chown</code></td><td>File owner and group</td></tr><tr><td><code>chgrp</code></td><td>File group only</td></tr><tr><td><code>chattr</code></td><td>Kernel-level file attributes (immutable, append-only)</td></tr><tr><td><code>lsattr</code></td><td>List extended file attributes</td></tr><tr><td><code>setfacl</code></td><td>Grant permissions to specific extra users/groups (ACLs)</td></tr><tr><td><code>getfacl</code></td><td>View ACL entries on a file</td></tr><tr><td><code>pwscore</code> / <code>pwmake</code></td><td>Check or generate a password against the pwquality policy</td></tr><tr><td><code>chage</code></td><td>Password aging and account expiry</td></tr><tr><td><code>chsh</code></td><td>Login shell</td></tr><tr><td><code>chfn</code></td><td>GECOS / display name fields</td></tr><tr><td><code>chpasswd</code></td><td>Batch password updates</td></tr></tbody></table>
+<hr>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="users-groups">Users & Groups</a> — account management, <code>useradd</code>, <code>usermod</code></li>
+<li><a href="../arch/filesystem.md">Filesystem Structure</a> — subvolume layout and permissions</li>
+<li><a href="../networking/openssh.md">OpenSSH</a> — key permissions (<code>chmod 600</code>)</li>
+</ul></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

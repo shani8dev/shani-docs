@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>OpenStack &amp; Private Cloud — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …">
+  <meta name="description" id="meta-desc"     content="OpenStack &amp; Private Cloud Deploy a full OpenStack cloud on this system — from a minimal all-in-one development setup to a multi-node private cloud with com…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="OpenStack &amp; Private Cloud">
-  <meta property="og:description" id="og-desc"    content="Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …">
+  <meta property="og:description" id="og-desc"    content="OpenStack &amp; Private Cloud Deploy a full OpenStack cloud on this system — from a minimal all-in-one development setup to a multi-node private cloud with com…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/openstack/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="OpenStack &amp; Private Cloud">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="OpenStack &amp; Private Cloud">
-  <meta name="twitter:description" id="tw-desc"  content="Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="OpenStack &amp; Private Cloud Deploy a full OpenStack cloud on this system — from a minimal all-in-one development setup to a multi-node private cloud with com…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"OpenStack & Private Cloud","description":"Portability note: Compose examples use rootless Podman and  (the host gateway from a container). When using Docker, replace  with  and  with  (add  to the …","url":"https://docs.shani.dev/doc/servers/openstack/","datePublished":"2026-04-25T00:00:00.000Z","dateModified":"2026-04-25T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"OpenStack & Private Cloud","description":"OpenStack & Private Cloud Deploy a full OpenStack cloud on this system — from a minimal all-in-one development setup to a multi-node private cloud with com…","url":"https://docs.shani.dev/doc/servers/openstack/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"OpenStack & Private Cloud","item":"https://docs.shani.dev/doc/servers/openstack/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,56 +215,55 @@
         <h1 class="doc-title">OpenStack &amp; Private Cloud</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-25</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><blockquote><p><strong>Portability note:</strong> Compose examples use rootless <strong>Podman</strong> and <code>host.containers.internal</code> (the host gateway from a container). When using Docker, replace <code>podman-compose</code> with <code>docker compose</code> and <code>host.containers.internal</code> with <code>host-gateway</code> (add <code>extra_hosts: [host-gateway:host-gateway]</code> to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.</p></blockquote>
-<h1>OpenStack & Private Cloud</h1>
+      <div class="prose"><blockquote><strong>Portability note:</strong> Compose examples use rootless <strong>Podman</strong> and <code>host.containers.internal</code> (the host gateway from a container). When using Docker, replace <code>podman-compose</code> with <code>docker compose</code> and <code>host.containers.internal</code> with <code>host-gateway</code> (add <code>extra_hosts: [host-gateway:host-gateway]</code> to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.</blockquote>
 <p>Deploy a full OpenStack cloud on this system — from a minimal all-in-one development setup to a multi-node private cloud with compute, networking, storage, and identity services. All compose files use rootless Podman with <code>:Z</code> volume labels on bind mounts. Named volumes omit <code>:Z</code> — Podman manages their labels automatically.</p>
-<blockquote><p><strong>Install convention:</strong> CLI tools and dev runtimes install via <strong>Nix</strong> (primary) or <strong>Snap</strong> (fallback). GUI apps go via <strong>Flatpak</strong>. Services run as rootless <strong>Podman</strong> containers. On immutable OS distributions the root filesystem is read-only — use Nix, Snap, or Distrobox for user-space tooling.</p></blockquote>
-<blockquote><p>⚠️ <strong>Resource requirements:</strong> OpenStack is a full private cloud stack. Even an all-in-one Devstack node needs at least 8 GB RAM and 50 GB disk. A production multi-node setup needs 16 GB+ per controller node and 8 GB+ per compute node. For lightweight single-node use, <a href="#microstack-snap--all-in-one">MicroStack</a> is the fastest path.</p></blockquote>
-<p>---</p>
-<h2>Key Concepts</h2>
+<blockquote><strong>Install convention:</strong> CLI tools and dev runtimes install via <strong>Nix</strong> (primary) or <strong>Snap</strong> (fallback). GUI apps go via <strong>Flatpak</strong>. Services run as rootless <strong>Podman</strong> containers. On immutable OS distributions the root filesystem is read-only — use Nix, Snap, or Distrobox for user-space tooling.</blockquote>
+<blockquote>⚠️ <strong>Resource requirements:</strong> OpenStack is a full private cloud stack. Even an all-in-one Devstack node needs at least 8 GB RAM and 50 GB disk. A production multi-node setup needs 16 GB+ per controller node and 8 GB+ per compute node. For lightweight single-node use, <a href="#microstack-snap--all-in-one">MicroStack</a> is the fastest path.</blockquote>
+<hr>
+<h2 id="key-concepts">Key Concepts</h2>
 <p><strong>OpenStack vs Kubernetes — what's the difference?:</strong> OpenStack manages <em>virtual machines and infrastructure</em> (compute, networking, storage, identity). Kubernetes manages <em>containerised workloads</em>. They're complementary: many production environments run Kubernetes on top of OpenStack VMs (Magnum does this automatically). In cloud provider terms, OpenStack = the IaaS layer (like AWS EC2/VPC/EBS); Kubernetes = the PaaS layer (like EKS/GKE).</p>
-<h4>Nova vs Neutron vs Cinder — the three most commonly asked</h4>
+<h4 id="nova-vs-neutron-vs-cinder-the-three-most-commonly-asked">Nova vs Neutron vs Cinder — the three most commonly asked</h4>
 <ul>
 <li><strong>Nova</strong> (compute): manages VM lifecycle — boot, stop, resize, migrate, snapshot. The core of OpenStack.</li>
 <li><strong>Neutron</strong> (network): provides virtual networks, subnets, routers, security groups, floating IPs, and load balancers. More complex than Nova because networking is inherently stateful.</li>
 <li><strong>Cinder</strong> (block storage): persistent volumes for VMs, like EBS. Backends include LVM, Ceph RBD, NFS. A volume can be attached to one VM at a time (ReadWriteOnce).</li>
 </ul>
-<h4>Keystone's token model</h4>
+<h4 id="keystones-token-model">Keystone's token model</h4>
 <p>Keystone is the identity service. Every other OpenStack API requires a Keystone token in the <code>X-Auth-Token</code> header. Tokens are short-lived (default 1 hour) and contain the user's project, roles, and service endpoints. The service catalog (which endpoint to call for which service) is embedded in the token response — this is how clients discover Nova, Neutron, etc. without hard-coding URLs.</p>
-<h4>Tenant/project isolation</h4>
+<h4 id="tenantproject-isolation">Tenant/project isolation</h4>
 <p>OpenStack uses <em>projects</em> (formerly tenants) as the isolation boundary — quotas, networks, and volumes belong to a project. A user belongs to one or more projects with roles. <code>admin</code> role gives full control; <code>member</code> role is standard user access; <code>reader</code> role is read-only. This maps directly to AWS accounts or Kubernetes namespaces.</p>
-<h4>VM migration types</h4>
+<h4 id="vm-migration-types">VM migration types</h4>
 <ul>
 <li><strong>Live migration</strong>: move a running VM to another compute node with minimal downtime (seconds). Requires shared storage (Ceph RBD) or block-device live migration.</li>
 <li><strong>Cold migration</strong>: stop the VM, move the disk, restart on the new node. More reliable, more downtime.</li>
 <li><strong>Evacuation</strong>: force-migrate all VMs from a failed compute node (used when a node dies). Used in HA cluster maintenance.</li>
 </ul>
-<h4>Floating IP vs fixed IP</h4>
+<h4 id="floating-ip-vs-fixed-ip">Floating IP vs fixed IP</h4>
 <p>A fixed IP is the VM's internal address on the tenant network (e.g., <code>10.0.0.5</code>). A floating IP is a public IP that can be associated with a VM's port and provides external access. Floating IPs are drawn from an external network pool. This is analogous to AWS Elastic IPs. NAT is used to map floating IP → fixed IP on the router.</p>
-<h4>Heat templates vs Terraform</h4>
+<h4 id="heat-templates-vs-terraform">Heat templates vs Terraform</h4>
 <p>Heat is OpenStack's native orchestration — HOT (Heat Orchestration Template) format, YAML, declarative. Terraform/OpenTofu can also provision OpenStack resources via the OpenStack provider — and is more portable across clouds. For a pure OpenStack shop, Heat has the advantage of deep integration (auto-scaling groups, wait conditions, resource signals). For multi-cloud, Terraform is better.</p>
-<h4>Ceph as the OpenStack storage backbone</h4>
+<h4 id="ceph-as-the-openstack-storage-backbone">Ceph as the OpenStack storage backbone</h4>
 <p>Ceph RBD (RADOS Block Device) is the preferred backend for Cinder volumes, Glance images, and Nova ephemeral disks in production OpenStack. All three services share the same Ceph cluster with separate pools. Benefits: thin provisioning, snapshots, cloning (fast VM spawning from images), no shared storage requirement for live migration (each VM's disk is a Ceph RBD image stored in the cluster, not on the compute node).</p>
-<h4>OpenStack deployment model — services are just APIs</h4>
+<h4 id="openstack-deployment-model-services-are-just-apis">OpenStack deployment model — services are just APIs</h4>
 <p>Every OpenStack service is a REST API backed by a message queue (RabbitMQ). Nova receives a boot request → puts a message on the queue → nova-compute picks it up → calls the hypervisor. This async model is why OpenStack scales: you can have hundreds of compute nodes all consuming the same queue. The downside: debugging requires following a message through multiple service logs. <code>openstack server create</code> returning immediately doesn't mean the VM is running — poll <code>openstack server show</code> for status.</p>
-<h4>Quotas and capacity planning</h4>
+<h4 id="quotas-and-capacity-planning">Quotas and capacity planning</h4>
 <p>OpenStack enforces quotas per project: max VCPUs, RAM, floating IPs, volumes, and security groups. Quotas prevent one team from consuming all resources. For platform teams, quota management is a significant operational task — projects request increases, you verify capacity, you adjust. Nova's <code>nova-scheduler</code> places VMs based on actual resource availability filtered against quotas. Over-commitment ratios (defaulting to 16:1 for VCPUs, 1.5:1 for RAM) determine how many VMs fit on a compute node.</p>
-<h4>Security groups vs network ACLs</h4>
+<h4 id="security-groups-vs-network-acls">Security groups vs network ACLs</h4>
 <p>Security groups in OpenStack (Neutron) are stateful firewalls attached to VM ports — allow a rule for inbound port 443, and return traffic is automatically allowed. They're applied at the virtual switch level, not at the VM. Rules are additive: multiple security groups on one port merge their rules. This is identical to AWS security groups. Network ACLs (if configured) apply at the subnet level and are stateless (you must explicitly allow return traffic).</p>
-<h4>Glance images and image formats</h4>
+<h4 id="glance-images-and-image-formats">Glance images and image formats</h4>
 <p>Glance stores VM images (qcow2, raw, vmdk). qcow2 is the standard format — thin-provisioned, supports snapshots, compresses well. raw is faster at runtime (no format overhead) but larger. When an image is used to boot a VM, Nova (with Ceph backend) clones the Glance image in Ceph as a copy-on-write RBD volume — VM boots in seconds regardless of image size. Always upload images in qcow2 format; the backend handles conversion.</p>
-<h4>Ceph integration — the backbone of production OpenStack storage</h4>
+<h4 id="ceph-integration-the-backbone-of-production-openstack-storage">Ceph integration — the backbone of production OpenStack storage</h4>
 <p>Most production OpenStack deployments use Ceph as the unified storage backend: Cinder (block storage) uses RBD (RADOS Block Device), Glance (image service) stores images in Ceph object storage, and Nova (compute) boots instances directly from Ceph-backed volumes via copy-on-write clones — a VM boots in seconds regardless of image size because only modified blocks are written. The Ceph cluster is separate from OpenStack compute nodes; they communicate via the Ceph client library embedded in libvirt/QEMU. This architecture makes live migration trivial (no data to move — the new host just attaches to the same Ceph volume) and enables snapshotting at the storage layer.</p>
-<h4>Keystone token types and service discovery</h4>
+<h4 id="keystone-token-types-and-service-discovery">Keystone token types and service discovery</h4>
 <p>Keystone issues tokens (currently Fernet format — signed, non-persistent) that services use to authenticate API calls. The service catalog embedded in the token lists the endpoint URLs for every OpenStack service — compute, storage, networking, identity. When <code>nova list</code> runs, it first contacts Keystone to get a token and the catalog, then calls the Nova endpoint from the catalog. Every OpenStack service validates tokens against Keystone on every API call. This central identity model means a Keystone outage takes down the entire cloud's API layer — HA Keystone deployment is non-negotiable in production.</p>
-<h4>Neutron ML2 plugin architecture — why OpenStack networking is complex</h4>
+<h4 id="neutron-ml2-plugin-architecture-why-openstack-networking-is-complex">Neutron ML2 plugin architecture — why OpenStack networking is complex</h4>
 <p>Neutron's Modular Layer 2 (ML2) plugin separates the type driver (what kind of network: VLAN, VXLAN, flat) from the mechanism driver (how it's implemented: OVS, OVN, SR-IOV). OVN (Open Virtual Network) is the current recommended mechanism driver — it replaces the older OVS agent model with a centralised database (OVSDB) that distributes flow rules to all compute nodes without requiring a Neutron agent on each. The complexity comes from the abstraction layers: Neutron networks → Neutron subnets → Neutron ports → OVN logical switches → OVS flow rules on the hypervisor. When debugging, work down the stack: check the Neutron API first, then OVN database (<code>ovn-nbctl show</code>), then OVS flows (<code>ovs-ofctl dump-flows</code>).</p>
-<p>---</p>
-<p>---</p>
-<h2>Table of Contents</h2>
+<hr>
+<hr>
+<h2 id="table-of-contents">Table of Contents</h2>
 <ul>
 <li><a href="#choosing-your-openstack-path">Choosing Your OpenStack Path</a></li>
 <li><a href="#microstack-snap--all-in-one">MicroStack (All-in-One)</a></li>
@@ -275,12 +276,12 @@
 <li><a href="#caddy-configuration">Caddy Configuration</a></li>
 <li><a href="#troubleshooting">Troubleshooting</a></li>
 </ul>
-<p>---</p>
-<h2>Choosing Your OpenStack Path</h2>
-<p>| Option | Best For | RAM (min) | Complexity | Notes | |--------|----------|-----------|------------|-------| | <strong>MicroStack</strong> | Local dev, learning, homelabs | 8 GB | Low | Snap-based, all-in-one, Canonical-maintained | | <strong>DevStack</strong> | Development, contributing upstream | 8 GB | Medium | Git-based, single-node, not production-ready | | <strong>Kolla-Ansible</strong> | Production, multi-node | 16 GB | High | Container-based, production-grade, full control | | <strong>OpenStack-Helm</strong> | K8s-native OpenStack | 16 GB | Very High | Runs OpenStack services as Helm charts on Kubernetes | | <strong>TripleO / Director</strong> | Bare-metal, telco | 32 GB | Very High | Red Hat/CentOS heritage, being phased out upstream |</p>
+<hr>
+<h2 id="choosing-your-openstack-path">Choosing Your OpenStack Path</h2>
+<table><thead><tr><th>Option</th><th>Best For</th><th>RAM (min)</th><th>Complexity</th><th>Notes</th></tr></thead><tbody><tr><td><strong>MicroStack</strong></td><td>Local dev, learning, homelabs</td><td>8 GB</td><td>Low</td><td>Snap-based, all-in-one, Canonical-maintained</td></tr><tr><td><strong>DevStack</strong></td><td>Development, contributing upstream</td><td>8 GB</td><td>Medium</td><td>Git-based, single-node, not production-ready</td></tr><tr><td><strong>Kolla-Ansible</strong></td><td>Production, multi-node</td><td>16 GB</td><td>High</td><td>Container-based, production-grade, full control</td></tr><tr><td><strong>OpenStack-Helm</strong></td><td>K8s-native OpenStack</td><td>16 GB</td><td>Very High</td><td>Runs OpenStack services as Helm charts on Kubernetes</td></tr><tr><td><strong>TripleO / Director</strong></td><td>Bare-metal, telco</td><td>32 GB</td><td>Very High</td><td>Red Hat/CentOS heritage, being phased out upstream</td></tr></tbody></table>
 <p>For a Shani OS homelab, <strong>MicroStack</strong> (learn/experiment) or <strong>Kolla-Ansible</strong> (build something real) are the two practical paths.</p>
-<p>---</p>
-<h2>MicroStack (Snap — All-in-One)</h2>
+<hr>
+<h2 id="microstack-snap-all-in-one">MicroStack (Snap — All-in-One)</h2>
 <p><strong>Purpose:</strong> Canonical's single-Snap OpenStack distribution. Installs Nova (compute), Neutron (networking), Cinder (block storage), Glance (images), Keystone (identity), and Horizon (dashboard) in minutes. The fastest way to get a working OpenStack on this system for learning, development, and homelab use.</p>
 <pre><code class="language-bash"># Install MicroStack — Snap only, no Nix equivalent
 sudo snap install microstack --channel=2024/stable --classic
@@ -295,11 +296,11 @@ sudo microstack.openstack catalog list
 
 # Check the control plane
 sudo microstack status</code></pre>
-<h4>Access Horizon (web dashboard)</h4>
+<h4 id="access-horizon-web-dashboard">Access Horizon (web dashboard)</h4>
 <pre><code class="language-bash"># Get the Horizon URL and admin credentials
 sudo microstack.openstack user password set admin   # change default password
 # Horizon is at http://&lt;your-ip&gt;/</code></pre>
-<h4>Launch your first instance</h4>
+<h4 id="launch-your-first-instance">Launch your first instance</h4>
 <pre><code class="language-bash"># Download and upload a cloud image (CirrOS — tiny test image)
 curl -O https://download.cirros-cloud.net/0.6.2/cirros-0.6.2-x86_64-disk.img
 sudo microstack.openstack image create \
@@ -334,7 +335,7 @@ sudo microstack.openstack server add floating ip myvm &lt;floating-ip&gt;
 
 # SSH into the instance
 ssh -i ~/.ssh/id_ed25519 cirros@&lt;floating-ip&gt;</code></pre>
-<h4>Common MicroStack operations</h4>
+<h4 id="common-microstack-operations">Common MicroStack operations</h4>
 <pre><code class="language-bash"># List all instances
 sudo microstack.openstack server list
 
@@ -358,7 +359,7 @@ sudo microstack.openstack console log show myvm
 
 # Get a VNC console URL
 sudo microstack.openstack console url show --novnc myvm</code></pre>
-<h4>Upload Ubuntu or Debian images</h4>
+<h4 id="upload-ubuntu-or-debian-images">Upload Ubuntu or Debian images</h4>
 <pre><code class="language-bash"># Ubuntu 24.04 LTS cloud image
 curl -L -O https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
 sudo microstack.openstack image create \
@@ -372,11 +373,11 @@ sudo microstack.openstack image create \
   --file debian-12-genericcloud-amd64.qcow2 \
   --disk-format qcow2 --container-format bare \
   --public debian-12</code></pre>
-<blockquote><p>💡 MicroStack stores all cluster state inside <code>/var/snap/microstack/</code> which lives in <code>@snapd</code> and persists across Shani OS updates and rollbacks. It does not use the OS root.</p></blockquote>
-<p>---</p>
-<h2>DevStack (Development)</h2>
+<blockquote>💡 MicroStack stores all cluster state inside <code>/var/snap/microstack/</code> which lives in <code>@snapd</code> and persists across Shani OS updates and rollbacks. It does not use the OS root.</blockquote>
+<hr>
+<h2 id="devstack-development">DevStack (Development)</h2>
 <p><strong>Purpose:</strong> The reference OpenStack development environment. Installs directly from Git, making it easy to test patches, contribute upstream, or explore bleeding-edge features. <strong>Not for production</strong> — DevStack is a single-node setup designed to be torn down and rebuilt. Run it inside a Distrobox container to keep the host clean.</p>
-<h5>Run DevStack inside a Distrobox Ubuntu container</h5>
+<h5 id="run-devstack-inside-a-distrobox-ubuntu-container">Run DevStack inside a Distrobox Ubuntu container</h5>
 <pre><code class="language-bash"># Create an Ubuntu 24.04 Distrobox container for DevStack
 distrobox create --name devstack --image ubuntu:24.04
 distrobox enter devstack
@@ -406,7 +407,7 @@ EOF
 
 # Run the installer (takes 20–40 minutes)
 ./stack.sh</code></pre>
-<h4>After installation</h4>
+<h4 id="after-installation">After installation</h4>
 <pre><code class="language-bash"># Source credentials
 source ~/devstack/openrc admin admin
 
@@ -419,7 +420,7 @@ cd ~/devstack &amp;&amp; ./rejoin-stack.sh
 
 # Full teardown and rebuild
 ./unstack.sh &amp;&amp; ./clean.sh &amp;&amp; ./stack.sh</code></pre>
-<h4>Common DevStack workflows</h4>
+<h4 id="common-devstack-workflows">Common DevStack workflows</h4>
 <pre><code class="language-bash"># Source user credentials
 source openrc demo demo     # non-admin user
 source openrc admin admin   # admin
@@ -434,11 +435,11 @@ screen -x stack
 # View individual service log
 sudo journalctl -u devstack@n-api -f    # Nova API
 sudo journalctl -u devstack@q-svc -f   # Neutron</code></pre>
-<p>---</p>
-<h2>Kolla-Ansible (Production)</h2>
+<hr>
+<h2 id="kolla-ansible-production">Kolla-Ansible (Production)</h2>
 <p><strong>Purpose:</strong> Deploy OpenStack using containerised services managed by Ansible. Kolla packages every OpenStack service as an OCI image; Kolla-Ansible orchestrates deployment, configuration, and upgrades. This is the recommended path for a production-grade multi-node private cloud on this system.</p>
-<blockquote><p><strong>Architecture:</strong> A typical small deployment has 1–3 controller nodes (Keystone, Nova-API, Neutron-Server, Glance, Cinder, Horizon, RabbitMQ, MariaDB, HAProxy) and 1–N compute nodes (Nova-Compute, Neutron-Agent). All-in-one deployments run everything on a single node.</p></blockquote>
-<h3>Prerequisites</h3>
+<blockquote><strong>Architecture:</strong> A typical small deployment has 1–3 controller nodes (Keystone, Nova-API, Neutron-Server, Glance, Cinder, Horizon, RabbitMQ, MariaDB, HAProxy) and 1–N compute nodes (Nova-Compute, Neutron-Agent). All-in-one deployments run everything on a single node.</blockquote>
+<h3 id="prerequisites">Prerequisites</h3>
 <pre><code class="language-bash"># Install Python and Ansible via Nix
 nix-env -iA nixpkgs.python312 nixpkgs.python312Packages.pip nixpkgs.ansible
 
@@ -449,7 +450,7 @@ pip install kolla-ansible
 
 # Install Ansible Galaxy requirements
 kolla-ansible install-deps</code></pre>
-<h3>All-in-One Setup</h3>
+<h3 id="all-in-one-setup">All-in-One Setup</h3>
 <pre><code class="language-bash"># Create the kolla config directory
 sudo mkdir -p /etc/kolla
 sudo chown $USER:$USER /etc/kolla
@@ -462,7 +463,7 @@ kolla-genpwd
 
 # Copy the all-in-one inventory
 cp ~/kolla-venv/share/kolla-ansible/ansible/inventory/all-in-one ~/inventory-aio</code></pre>
-<h4>Edit <code>/etc/kolla/globals.yml</code></h4>
+<h4 id="edit-etckollaglobalsyml">Edit <code>/etc/kolla/globals.yml</code></h4>
 <pre><code class="language-yaml"># Minimal all-in-one globals.yml
 kolla_base_distro: &quot;ubuntu&quot;
 kolla_install_type: &quot;binary&quot;
@@ -491,7 +492,7 @@ enable_swift: &quot;no&quot;
 
 # Optional: Kubernetes integration via Magnum
 enable_magnum: &quot;no&quot;</code></pre>
-<h5>Bootstrap and deploy</h5>
+<h5 id="bootstrap-and-deploy">Bootstrap and deploy</h5>
 <pre><code class="language-bash">source ~/kolla-venv/bin/activate
 
 # Bootstrap servers (installs Docker/Podman, dependencies)
@@ -509,8 +510,8 @@ kolla-ansible -i ~/inventory-aio post-deploy
 # Source credentials
 source /etc/kolla/admin-openrc.sh
 openstack service list</code></pre>
-<h3>Multi-Node Setup</h3>
-<h4><code>~/inventory-multinode</code></h4>
+<h3 id="multi-node-setup">Multi-Node Setup</h3>
+<h4 id="inventory-multinode"><code>~/inventory-multinode</code></h4>
 <pre><code class="language-ini">[control]
 controller01 ansible_host=192.168.1.10 ansible_user=user
 controller02 ansible_host=192.168.1.11 ansible_user=user
@@ -537,7 +538,7 @@ localhost ansible_connection=local</code></pre>
 kolla-ansible -i ~/inventory-multinode prechecks
 kolla-ansible -i ~/inventory-multinode deploy
 kolla-ansible -i ~/inventory-multinode post-deploy</code></pre>
-<h3>Upgrades and Maintenance</h3>
+<h3 id="upgrades-and-maintenance">Upgrades and Maintenance</h3>
 <pre><code class="language-bash"># Upgrade OpenStack to a new release
 # 1. Update openstack_release in globals.yml
 # 2. Pull new images
@@ -554,9 +555,9 @@ kolla-ansible -i ~/inventory-aio check
 
 # Destroy and clean up (warning: deletes all data)
 kolla-ansible -i ~/inventory-aio destroy --yes-i-really-really-mean-it</code></pre>
-<p>---</p>
-<h2>OpenStack CLI Tools</h2>
-<h5>Install via Nix (primary)</h5>
+<hr>
+<h2 id="openstack-cli-tools">OpenStack CLI Tools</h2>
+<h5 id="install-via-nix-primary">Install via Nix (primary)</h5>
 <pre><code class="language-bash"># OpenStackClient — unified CLI for all services
 nix-env -iA nixpkgs.python312Packages.openstackclient
 
@@ -571,7 +572,7 @@ pip install python-openstackclient \
             python-neutronclient \
             python-novaclient \
             python-swiftclient</code></pre>
-<h4>Authentication — <code>clouds.yaml</code></h4>
+<h4 id="authentication-cloudsyaml">Authentication — <code>clouds.yaml</code></h4>
 <pre><code class="language-yaml"># ~/.config/openstack/clouds.yaml
 clouds:
   homelab:
@@ -602,7 +603,7 @@ export OS_CLOUD=homelab
 
 # Or source the openrc file
 source /etc/kolla/admin-openrc.sh</code></pre>
-<h4>Essential daily commands</h4>
+<h4 id="essential-daily-commands">Essential daily commands</h4>
 <pre><code class="language-bash"># Identity (Keystone)
 openstack user list
 openstack project list
@@ -691,14 +692,14 @@ openstack keypair list
 openstack flavor list
 openstack flavor create --vcpus 4 --ram 8192 --disk 50 m1.large
 openstack flavor delete m1.large</code></pre>
-<p>---</p>
-<h2>Core Services Reference</h2>
+<hr>
+<h2 id="core-services-reference">Core Services Reference</h2>
 <p>OpenStack is composed of many loosely coupled services. These are the ones you'll encounter most in a homelab or small private cloud.</p>
-<p>| Service | Code Name | Purpose | Port | |---------|-----------|---------|------| | Identity | Keystone | Auth, tokens, service catalog | 5000 | | Image | Glance | VM image storage and retrieval | 9292 | | Compute | Nova | VM lifecycle management | 8774 | | Placement | Placement | Resource inventory tracking | 8778 | | Network | Neutron | Virtual networks, routers, FIPs | 9696 | | Block Storage | Cinder | Persistent volumes for VMs | 8776 | | Object Storage | Swift | S3-like object store | 8080 | | Dashboard | Horizon | Web UI for all services | 80/443 | | Orchestration | Heat | Stack templates (like Terraform) | 8004 | | Telemetry | Ceilometer | Usage metering and events | 8041 | | Bare Metal | Ironic | Provision physical servers | 6385 | | Container Infra | Magnum | Kubernetes clusters via API | 9511 | | DNS | Designate | DNS as a service | 9001 | | Load Balancer | Octavia | LBaaS with Amphorae | 9876 | | Key Manager | Barbican | Secret and certificate storage | 9311 | | Shared File System | Manila | NFS/CIFS shares for VMs | 8786 |</p>
-<p>---</p>
-<h2>Containerised Supporting Services</h2>
+<table><thead><tr><th>Service</th><th>Code Name</th><th>Purpose</th><th>Port</th></tr></thead><tbody><tr><td>Identity</td><td>Keystone</td><td>Auth, tokens, service catalog</td><td>5000</td></tr><tr><td>Image</td><td>Glance</td><td>VM image storage and retrieval</td><td>9292</td></tr><tr><td>Compute</td><td>Nova</td><td>VM lifecycle management</td><td>8774</td></tr><tr><td>Placement</td><td>Placement</td><td>Resource inventory tracking</td><td>8778</td></tr><tr><td>Network</td><td>Neutron</td><td>Virtual networks, routers, FIPs</td><td>9696</td></tr><tr><td>Block Storage</td><td>Cinder</td><td>Persistent volumes for VMs</td><td>8776</td></tr><tr><td>Object Storage</td><td>Swift</td><td>S3-like object store</td><td>8080</td></tr><tr><td>Dashboard</td><td>Horizon</td><td>Web UI for all services</td><td>80/443</td></tr><tr><td>Orchestration</td><td>Heat</td><td>Stack templates (like Terraform)</td><td>8004</td></tr><tr><td>Telemetry</td><td>Ceilometer</td><td>Usage metering and events</td><td>8041</td></tr><tr><td>Bare Metal</td><td>Ironic</td><td>Provision physical servers</td><td>6385</td></tr><tr><td>Container Infra</td><td>Magnum</td><td>Kubernetes clusters via API</td><td>9511</td></tr><tr><td>DNS</td><td>Designate</td><td>DNS as a service</td><td>9001</td></tr><tr><td>Load Balancer</td><td>Octavia</td><td>LBaaS with Amphorae</td><td>9876</td></tr><tr><td>Key Manager</td><td>Barbican</td><td>Secret and certificate storage</td><td>9311</td></tr><tr><td>Shared File System</td><td>Manila</td><td>NFS/CIFS shares for VMs</td><td>8786</td></tr></tbody></table>
+<hr>
+<h2 id="containerised-supporting-services">Containerised Supporting Services</h2>
 <p>Several OpenStack services have popular self-hosted equivalents that integrate directly via standard APIs. Use these on this system alongside or instead of full OpenStack deployments.</p>
-<h3>MinIO (OpenStack Swift-compatible Object Storage)</h3>
+<h3 id="minio-openstack-swift-compatible-object-storage">MinIO (OpenStack Swift-compatible Object Storage)</h3>
 <p><strong>Purpose:</strong> S3 and Swift-compatible object storage. Use MinIO as a drop-in Swift replacement for image storage (Glance), volume backups (Cinder), or Heat templates. Lighter than running full Swift.</p>
 <pre><code class="language-yaml"># ~/minio/compose.yaml
 services:
@@ -739,8 +740,8 @@ mc mb homelab/heat-templates
 <p><strong>Caddy:</strong></p>
 <pre><code class="language-caddyfile">minio.home.local        { tls internal; reverse_proxy localhost:9000 }
 minio-console.home.local { tls internal; reverse_proxy localhost:9001 }</code></pre>
-<p>---</p>
-<h3>Ceph (Distributed Storage for OpenStack)</h3>
+<hr>
+<h3 id="ceph-distributed-storage-for-openstack">Ceph (Distributed Storage for OpenStack)</h3>
 <p><strong>Purpose:</strong> Ceph is the reference storage backend for production OpenStack deployments — it powers Cinder (RBD volumes), Glance (image storage), and Nova (ephemeral disks). A 3-node Ceph cluster provides redundancy and near-unlimited scale.</p>
 <pre><code class="language-yaml"># ~/ceph/compose.yaml — minimal Ceph cluster using ceph/daemon images
 services:
@@ -793,9 +794,9 @@ podman exec ceph-mon-1 ceph osd pool application enable vms rbd
 # Create keyring for OpenStack services
 podman exec ceph-mon-1 ceph auth get-or-create \
   client.cinder mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=volumes, allow rx pool=images'</code></pre>
-<blockquote><p>For a full production Ceph deployment on this system, use <strong>Ceph's own <code>cephadm</code> orchestrator</strong> or the <a href="https://rook.io">Rook operator</a> inside your k3s/RKE2 cluster.</p></blockquote>
-<p>---</p>
-<h3>Vault / OpenBao (Keystone Credential Backend)</h3>
+<blockquote>For a full production Ceph deployment on this system, use <strong>Ceph's own <code>cephadm</code> orchestrator</strong> or the <a href="https://rook.io">Rook operator</a> inside your k3s/RKE2 cluster. Directory-based OSDs (<code>CEPH_DAEMON: OSD_DIRECTORY</code>) also require prepared directories with correct ownership and a mounted filesystem before they will come up — <code>cephadm</code> handles this provisioning for you.</blockquote>
+<hr>
+<h3 id="vault-openbao-keystone-credential-backend">Vault / OpenBao (Keystone Credential Backend)</h3>
 <p><strong>Purpose:</strong> Use OpenBao (the open-source HashiCorp Vault fork) as Keystone's credential and secret backend — replacing the default Fernet keys stored on disk. Also useful as a Barbican backend.</p>
 <pre><code class="language-yaml"># ~/openbao/compose.yaml
 services:
@@ -835,8 +836,8 @@ bao secrets enable -path=openstack kv-v2
 
 # Store a Keystone secret
 bao kv put openstack/keystone fernet_key_0=&lt;base64-key&gt;</code></pre>
-<p>---</p>
-<h3>RabbitMQ (OpenStack Message Queue)</h3>
+<hr>
+<h3 id="rabbitmq-openstack-message-queue">RabbitMQ (OpenStack Message Queue)</h3>
 <p>OpenStack services communicate via AMQP. In Kolla deployments RabbitMQ is managed automatically. For custom or hybrid deployments:</p>
 <pre><code class="language-yaml"># ~/rabbitmq/compose.yaml
 services:
@@ -860,8 +861,8 @@ volumes:
 
 # Verify
 podman exec rabbitmq-rabbitmq-1 rabbitmqctl status</code></pre>
-<p>---</p>
-<h3>MariaDB + Galera (OpenStack Database)</h3>
+<hr>
+<h3 id="mariadb-galera-openstack-database">MariaDB + Galera (OpenStack Database)</h3>
 <p>OpenStack services share a MySQL-compatible database. For a production HA setup use Galera:</p>
 <pre><code class="language-yaml"># ~/mariadb-galera/compose.yaml
 services:
@@ -934,8 +935,8 @@ podman exec mariadb-galera-db1-1 mysql -u root -pchangeme -e &quot;
   GRANT ALL PRIVILEGES ON heat.* TO 'heat'@'%' IDENTIFIED BY 'changeme';
   FLUSH PRIVILEGES;
 &quot;</code></pre>
-<p>---</p>
-<h3>Memcached (Token Cache)</h3>
+<hr>
+<h3 id="memcached-token-cache">Memcached (Token Cache)</h3>
 <p>Keystone uses Memcached to cache tokens and reduce database load:</p>
 <pre><code class="language-yaml"># ~/memcached/compose.yaml
 services:
@@ -946,9 +947,9 @@ services:
     command: memcached -m 512 -c 1024
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/memcached &amp;&amp; podman-compose up -d</code></pre>
-<p>---</p>
-<h2>Integrating with Kubernetes</h2>
-<h3>Magnum (Kubernetes-as-a-Service)</h3>
+<hr>
+<h2 id="integrating-with-kubernetes">Integrating with Kubernetes</h2>
+<h3 id="magnum-kubernetes-as-a-service">Magnum (Kubernetes-as-a-Service)</h3>
 <p>Magnum is the OpenStack service that provisions Kubernetes clusters on demand — you call the OpenStack API and get a working k8s cluster running on Nova VMs. Requires a working OpenStack environment with at least Nova, Neutron, Glance, and Cinder.</p>
 <pre><code class="language-bash"># Enable Magnum in Kolla globals.yml
 # enable_magnum: &quot;yes&quot;
@@ -996,8 +997,8 @@ export KUBECONFIG=~/mycluster-config/config
 
 # Verify
 kubectl get nodes</code></pre>
-<p>---</p>
-<h3>OpenStack Helm (Kubernetes-Native OpenStack)</h3>
+<hr>
+<h3 id="openstack-helm-kubernetes-native-openstack">OpenStack Helm (Kubernetes-Native OpenStack)</h3>
 <p>Run OpenStack services themselves as Helm charts on your k3s/RKE2 cluster. This is the most cloud-native OpenStack deployment model.</p>
 <pre><code class="language-bash"># Prerequisites: k3s or RKE2 running, Helm installed
 # OpenStack-Helm repository
@@ -1031,10 +1032,16 @@ helm upgrade --install nova osh/nova \
 
 helm upgrade --install neutron osh/neutron \
   --namespace openstack</code></pre>
-<p>---</p>
-<h2>Heat Templates (Infrastructure as Code)</h2>
+<h5 id="verification-gate">Verification gate</h5>
+<pre><code class="language-bash"># Wait until every pod in the namespace is Running or Completed
+kubectl get pods -n openstack
+
+# Confirm the deployed service catalog from a utility pod (with cloud credentials)
+kubectl -n openstack exec -it openstack-client -- openstack service list</code></pre>
+<hr>
+<h2 id="heat-templates-infrastructure-as-code">Heat Templates (Infrastructure as Code)</h2>
 <p>Heat is OpenStack's native orchestration service — equivalent to Terraform or CloudFormation but for your private cloud. Templates are written in YAML (HOT format).</p>
-<h4>Example: Launch a web server stack</h4>
+<h4 id="example-launch-a-web-server-stack">Example: Launch a web server stack</h4>
 <pre><code class="language-yaml"># ~/heat/webserver.yaml
 heat_template_version: '2021-04-06'
 
@@ -1114,7 +1121,7 @@ openstack stack update -t ~/heat/webserver.yaml webserver-stack
 
 # Delete the stack (removes all resources)
 openstack stack delete webserver-stack</code></pre>
-<h2>Caddy Configuration</h2>
+<h2 id="caddy-configuration">Caddy Configuration</h2>
 <pre><code class="language-caddyfile"># OpenStack Horizon dashboard
 horizon.home.local       { tls internal; reverse_proxy localhost:80 }
 
@@ -1133,8 +1140,8 @@ minio.home.local         { tls internal; reverse_proxy localhost:9000 }
 minio-console.home.local { tls internal; reverse_proxy localhost:9001 }
 openbao.home.local       { tls internal; reverse_proxy localhost:8200 }
 rabbitmq.home.local      { tls internal; reverse_proxy localhost:15672 }</code></pre>
-<p>---</p>
-<h2>Useful Daily Commands</h2>
+<hr>
+<h2 id="useful-daily-commands">Useful Daily Commands</h2>
 <pre><code class="language-bash"># Quota management
 openstack quota show --project demo
 openstack quota set --instances 20 --cores 40 --ram 102400 demo
@@ -1181,9 +1188,14 @@ openstack console url show --novnc myserver
 openstack floating ip list
 openstack floating ip create external-net
 openstack floating ip delete &lt;id&gt;</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | MicroStack <code>microstack status</code> shows services down | Run <code>sudo snap restart microstack</code>; check <code>sudo snap logs microstack</code> for errors | | MicroStack <code>openstack</code> CLI returns <code>Connection refused</code> | Ensure you're using <code>sudo microstack.openstack</code> not bare <code>openstack</code>; or source <code>/var/snap/microstack/common/etc/microstack.rc</code> | | DevStack <code>stack.sh</code> fails mid-way | Check <code>~/devstack/logs/</code> for the failing service; common causes: insufficient RAM, missing <code>local.conf</code> parameters, network connectivity | | DevStack services down after reboot | Run <code>cd ~/devstack &amp;&amp; ./rejoin-stack.sh</code> — <code>./stack.sh</code> starts from scratch; <code>rejoin-stack.sh</code> re-attaches to existing services | | Kolla <code>prechecks</code> fails on <code>docker_sdk</code> | Kolla needs Docker SDK on the control node: <code>pip install docker</code> inside the kolla-venv; Kolla uses the Docker API even with Podman | | Kolla deploy fails with <code>UNREACHABLE</code> | Verify SSH key access from the deploy node to all inventory hosts; test with <code>ansible -i inventory-aio all -m ping</code> | | Horizon <code>CSRF verification failed</code> | Set <code>ALLOWED_HOSTS</code> in <code>/etc/kolla/config/horizon/local_settings</code> to match your domain | | Nova instances stuck in <code>SPAWNING</code> | Check <code>nova-compute</code> logs on the compute node: <code>sudo journalctl -u kolla-nova-compute</code>; common cause: missing Glance image or insufficient compute resources | | Nova live migration fails | Verify compute nodes can reach each other on ports 16509 (libvirt) and 49152+ (QEMU migration); check <code>nova.conf</code> migration settings | | Neutron DHCP not assigning IPs to instances | Check <code>neutron-dhcp-agent</code> is running; verify the network's <code>enable_dhcp</code> is <code>true</code>; check <code>neutron-metadata-agent</code> status | | Floating IP not reachable | Verify the external network gateway is correctly configured; check security group rules allow ICMP; confirm the router's external gateway matches the floating IP pool | | Keystone <code>401 Unauthorized</code> | Token may have expired — run <code>openstack token issue</code> again; check <code>OS_AUTH_URL</code> points to port 5000, not 35357 (deprecated admin port) | | Glance image stuck <code>queued</code> | Check Glance API logs; if using Swift/MinIO backend, verify the backend credentials and connectivity; for local backend check disk space | | Cinder volume stuck <code>creating</code> | Check <code>cinder-volume</code> service logs; if using LVM, verify the <code>cinder-volumes</code> VG exists and has free space: <code>sudo vgs</code> | | Ceph pool <code>HEALTH_WARN: too few PGs</code> | Increase PG count: <code>ceph osd pool set &lt;pool&gt; pg_num 256</code>; wait for rebalancing before increasing further | | Magnum cluster stuck <code>CREATE_IN_PROGRESS</code> | Check Heat stack events for the cluster: <code>openstack stack event list &lt;cluster-stack-name&gt; --follow</code>; common cause: Glance image wrong <code>os_distro</code> property | | OpenStack-Helm pod <code>CrashLoopBackOff</code> | Check <code>kubectl logs -n openstack &lt;pod&gt;</code>; most common cause is database not ready — check MariaDB pod status first | | <code>openstack</code> CLI <code>SSL: CERTIFICATE_VERIFY_FAILED</code> | Add <code>--insecure</code> flag or set <code>OS_CACERT=/path/to/ca.crt</code>; for Kolla, the CA is at <code>/etc/kolla/certificates/ca/root.crt</code> | | RabbitMQ queues accumulating | A service is not consuming messages — check the dead service's logs; use <code>rabbitmqctl list_queues</code> to identify the backlog | | MariaDB Galera cluster split-brain | Identify the most up-to-date node with <code>mysql -e &quot;SHOW STATUS LIKE 'wsrep_last_committed'&quot;</code>; bootstrap from that node |</p></div>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>MicroStack <code>microstack status</code> shows services down</td><td>Run <code>sudo snap restart microstack</code>; check <code>sudo snap logs microstack</code> for errors</td></tr><tr><td>MicroStack <code>openstack</code> CLI returns <code>Connection refused</code></td><td>Ensure you're using <code>sudo microstack.openstack</code> not bare <code>openstack</code>; or source <code>/var/snap/microstack/common/etc/microstack.rc</code></td></tr><tr><td>DevStack <code>stack.sh</code> fails mid-way</td><td>Check <code>~/devstack/logs/</code> for the failing service; common causes: insufficient RAM, missing <code>local.conf</code> parameters, network connectivity</td></tr><tr><td>DevStack services down after reboot</td><td>Run <code>cd ~/devstack &amp;&amp; ./rejoin-stack.sh</code> — <code>./stack.sh</code> starts from scratch; <code>rejoin-stack.sh</code> re-attaches to existing services</td></tr><tr><td>Kolla <code>prechecks</code> fails on <code>docker_sdk</code></td><td>Kolla needs Docker SDK on the control node: <code>pip install docker</code> inside the kolla-venv; Kolla uses the Docker API even with Podman</td></tr><tr><td>Kolla deploy fails with <code>UNREACHABLE</code></td><td>Verify SSH key access from the deploy node to all inventory hosts; test with <code>ansible -i inventory-aio all -m ping</code></td></tr><tr><td>Horizon <code>CSRF verification failed</code></td><td>Set <code>ALLOWED_HOSTS</code> in <code>/etc/kolla/config/horizon/local_settings</code> to match your domain</td></tr><tr><td>Nova instances stuck in <code>SPAWNING</code></td><td>Check <code>nova-compute</code> logs on the compute node: <code>sudo journalctl -u kolla-nova-compute</code>; common cause: missing Glance image or insufficient compute resources</td></tr><tr><td>Nova live migration fails</td><td>Verify compute nodes can reach each other on ports 16509 (libvirt) and 49152+ (QEMU migration); check <code>nova.conf</code> migration settings</td></tr><tr><td>Neutron DHCP not assigning IPs to instances</td><td>Check <code>neutron-dhcp-agent</code> is running; verify the network's <code>enable_dhcp</code> is <code>true</code>; check <code>neutron-metadata-agent</code> status</td></tr><tr><td>Floating IP not reachable</td><td>Verify the external network gateway is correctly configured; check security group rules allow ICMP; confirm the router's external gateway matches the floating IP pool</td></tr><tr><td>Keystone <code>401 Unauthorized</code></td><td>Token may have expired — run <code>openstack token issue</code> again; check <code>OS_AUTH_URL</code> points to port 5000, not 35357 (deprecated admin port)</td></tr><tr><td>Glance image stuck <code>queued</code></td><td>Check Glance API logs; if using Swift/MinIO backend, verify the backend credentials and connectivity; for local backend check disk space</td></tr><tr><td>Cinder volume stuck <code>creating</code></td><td>Check <code>cinder-volume</code> service logs; if using LVM, verify the <code>cinder-volumes</code> VG exists and has free space: <code>sudo vgs</code></td></tr><tr><td>Ceph pool <code>HEALTH_WARN: too few PGs</code></td><td>Increase PG count: <code>ceph osd pool set &lt;pool&gt; pg_num 256</code>; wait for rebalancing before increasing further</td></tr><tr><td>Magnum cluster stuck <code>CREATE_IN_PROGRESS</code></td><td>Check Heat stack events for the cluster: <code>openstack stack event list &lt;cluster-stack-name&gt; --follow</code>; common cause: Glance image wrong <code>os_distro</code> property</td></tr><tr><td>OpenStack-Helm pod <code>CrashLoopBackOff</code></td><td>Check <code>kubectl logs -n openstack &lt;pod&gt;</code>; most common cause is database not ready — check MariaDB pod status first</td></tr><tr><td><code>openstack</code> CLI <code>SSL: CERTIFICATE_VERIFY_FAILED</code></td><td>Add <code>--insecure</code> flag or set <code>OS_CACERT=/path/to/ca.crt</code>; for Kolla, the CA is at <code>/etc/kolla/certificates/ca/root.crt</code></td></tr><tr><td>RabbitMQ queues accumulating</td><td>A service is not consuming messages — check the dead service's logs; use <code>rabbitmqctl list_queues</code> to identify the backlog</td></tr><tr><td>MariaDB Galera cluster split-brain</td><td>Identify the most up-to-date node with <code>mysql -e &quot;SHOW STATUS LIKE 'wsrep_last_committed'&quot;</code>; bootstrap from that node</td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="kubernetes">Kubernetes</a></li>
+<li><a href="../networking/virtual-networking.md">Virtual networking</a></li>
+</ul></div>
     </div>
 
   </main>

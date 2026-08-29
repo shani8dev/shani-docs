@@ -1804,3 +1804,22 @@ HOME — very small screen fixes
   .wiki-home__cards { grid-template-columns: 1fr; }
   .wiki-home__actions { flex-direction: column; align-items: flex-start; }
 }
+
+
+/* ── Mobile hardening ────────────────────────────────────────────── */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+* { -webkit-tap-highlight-color: transparent; }
+img, video, iframe, svg { max-width: 100%; height: auto; }
+
+@media (max-width: 768px) {
+  .prose table {
+    display: block;
+    width: max-content;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .prose th { white-space: normal; }   /* was nowrap → forced h-scroll */
+  .prose td, .prose th { word-break: break-word; }
+  input[type="search"], .doc-search input { font-size: 16px; }
+}

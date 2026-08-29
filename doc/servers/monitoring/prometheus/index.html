@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>Monitoring — Prometheus, Alerting &amp; Long-Term Storage — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Key Concepts The three pillars (now four) of observability Metrics — numeric time-series data (CPU %, request rate, error count). Cheap to store, fast to q…">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/servers/monitoring/prometheus/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="Monitoring — Prometheus, Alerting &amp; Long-Term Storage">
+  <meta property="og:description" id="og-desc"    content="Key Concepts The three pillars (now four) of observability Metrics — numeric time-series data (CPU %, request rate, error count). Cheap to store, fast to q…">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/monitoring/prometheus/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="Monitoring — Prometheus, Alerting &amp; Long-Term Storage">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="Monitoring — Prometheus, Alerting &amp; Long-Term Storage">
+  <meta name="twitter:description" id="tw-desc"  content="Key Concepts The three pillars (now four) of observability Metrics — numeric time-series data (CPU %, request rate, error count). Cheap to store, fast to q…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Monitoring — Prometheus, Alerting & Long-Term Storage","description":"Key Concepts The three pillars (now four) of observability Metrics — numeric time-series data (CPU %, request rate, error count). Cheap to store, fast to q…","url":"https://docs.shani.dev/doc/servers/monitoring/prometheus/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Monitoring — Prometheus, Alerting & Long-Term Storage","item":"https://docs.shani.dev/doc/servers/monitoring/prometheus/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Monitoring — Prometheus, Alerting &amp; Long-Term Storage</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><h2 id="key-concepts">Key Concepts</h2>
+<h4 id="the-three-pillars-now-four-of-observability">The three pillars (now four) of observability</h4>
+<ul>
+<li><strong>Metrics</strong> — numeric time-series data (CPU %, request rate, error count). Cheap to store, fast to query. Prometheus + Grafana.</li>
+<li><strong>Logs</strong> — structured or unstructured event records. Expensive at scale. Loki (label-indexed streams) or Elasticsearch (fully indexed).</li>
+<li><strong>Traces</strong> — records of a request as it flows through multiple services. Shows where latency is introduced. Tempo + OpenTelemetry.</li>
+<li><strong>Profiles</strong> (emerging) — continuous CPU/memory profiling of running processes. Parca + eBPF. The "fourth pillar."</li>
+</ul>
+<h4 id="pull-vs-push-model-for-metrics">Pull vs push model for metrics</h4>
+<p>Prometheus uses a <em>pull</em> model — it scrapes <code>/metrics</code> endpoints on a schedule. This means you know what's being scraped and can see scrape errors in Prometheus itself. <em>Push</em> model (Pushgateway, InfluxDB's Telegraf) is used for short-lived jobs. Most interviewers will ask why Prometheus scrapes rather than having apps push to it: better target discovery, single place to detect unreachable targets, less firewall complexity.</p>
+<h4 id="cardinality-and-why-it-matters">Cardinality and why it matters</h4>
+<p>Cardinality is the number of unique label combinations for a metric. <code>http_requests_total{method=&quot;GET&quot;, path=&quot;/api/users/123&quot;}</code> where <code>path</code> contains user IDs creates millions of unique series. High cardinality is the number-one cause of Prometheus memory exhaustion. Always bound labels to a small, known set of values (<code>path=&quot;/api/users/:id&quot;</code> not the literal ID).</p>
+<h4 id="rate-vs-irate-vs-increase">Rate vs irate vs increase</h4>
+<ul>
+<li><code>rate(metric[5m])</code> — per-second average rate over the last 5 minutes. Smooth, good for dashboards.</li>
+<li><code>irate(metric[5m])</code> — instantaneous rate based on last two data points. Spiky, good for detecting brief bursts.</li>
+<li><code>increase(metric[5m])</code> — total increase over the window (rate × duration). Good for "how many errors in the last 5 min".</li>
+</ul>
+<h4 id="alert-fatigue">Alert fatigue</h4>
+<p>The condition where too many noisy/low-priority alerts cause on-call engineers to start ignoring pages. Symptoms: alerts that resolve themselves, alerts that require no action, duplicate alerts for the same underlying cause. Fix: alert only on symptoms (high error rate) not causes (CPU high), use inhibition rules, tune <code>for:</code> duration so brief spikes don't fire, use Karma dashboard for triage.</p>
+<h4 id="multiwindow-multi-burn-rate-alerts">Multiwindow, multi-burn-rate alerts</h4>
+<p>For SLO alerts, a single threshold alert (error rate > 1%) fires too often for minor blips and too slowly for catastrophic failures. The recommended pattern from the Google SRE book uses two windows: a fast window (e.g., 1h) catches rapid burns, a slow window (e.g., 6h) catches slow burns. Pyrra generates these automatically from SLO definitions.</p>
+<h4 id="opentelemetry-sdk-instrumentation">OpenTelemetry SDK instrumentation</h4>
+<p>Auto-instrumentation (via agents) adds traces and metrics to your app with zero code changes for common frameworks (Django, Express, Spring). Manual instrumentation wraps specific code sections in spans. The SDK exports to an OTel Collector, which fans out to Tempo (traces), Prometheus (metrics), and Loki (logs) — one SDK call, multiple backends.</p>
+<h4 id="log-levels-and-when-to-use-them">Log levels and when to use them</h4>
+<ul>
+<li><code>DEBUG</code> — verbose, only in dev; never leave on in production</li>
+<li><code>INFO</code> — normal operation events ("started", "processed 100 items")</li>
+<li><code>WARN</code> — recoverable unexpected condition that deserves attention</li>
+<li><code>ERROR</code> — operation failed; action required</li>
+<li><code>FATAL/CRITICAL</code> — service cannot continue; immediate page</li>
+</ul>
+<h4 id="structured-logging-json-vs-unstructured">Structured logging (JSON) vs unstructured</h4>
+<p>Structured logs (<code>{&quot;level&quot;:&quot;error&quot;,&quot;msg&quot;:&quot;DB timeout&quot;,&quot;user_id&quot;:42,&quot;latency_ms&quot;:5000}</code>) are parseable by Loki, Graylog, and other tools without Grok patterns. Unstructured logs (<code>ERROR: DB timeout for user 42 after 5000ms</code>) require regex extraction, which is brittle. Always use structured logging in production services.</p>
+<h4 id="understanding-grafana-variables-and-templating">Understanding Grafana variables and templating</h4>
+<p>Dashboard variables let one dashboard serve multiple services (<code>$service</code>), environments (<code>$environment</code>), or time ranges. They're backed by Prometheus label queries. A variable <code>$namespace</code> with query <code>label_values(kube_pod_info, namespace)</code> gives a dropdown of all Kubernetes namespaces. This is a core Grafana skill for platform teams building shared observability tooling.</p>
+<h4 id="distributed-tracing-spans-traces-and-why-they-matter">Distributed tracing — spans, traces, and why they matter</h4>
+<p>A trace represents a single request as it flows through multiple services. It's composed of spans — each span represents one operation (HTTP call, DB query, cache lookup) with a start time, duration, and attributes. Spans are linked by a trace ID propagated in headers (<code>traceparent</code> in W3C format, <code>X-B3-TraceId</code> in Zipkin format). Without tracing, diagnosing latency in a microservices architecture means correlating logs across 10 services by timestamp — error-prone and slow. With tracing (Tempo + OTel), you click on a slow request in Grafana and see exactly which service and which operation contributed the latency. The key metric: P99 latency per span, not just the total.</p>
+<h4 id="continuous-profiling-flamegraphs-and-ebpf">Continuous profiling — flamegraphs and eBPF</h4>
+<p>A profiler samples what the CPU is executing thousands of times per second, building a statistical picture of where time is spent. A flamegraph visualises this as a call stack — the width of each frame is proportional to the time spent in that function. Parca uses eBPF to profile running processes with no code changes and near-zero overhead. Continuous profiling (running 24/7, not just during incidents) lets you correlate CPU spikes with deployments — "this function got 3x slower after the commit that added field validation." This is the "fourth pillar" of observability because it answers "why is the CPU high" when metrics only tell you that it is.</p>
+<h4 id="thanos-architecture-sidecar-vs-receive-mode">Thanos architecture — sidecar vs receive mode</h4>
+<p>Thanos extends Prometheus with long-term storage and global query. Two deployment modes: (1) <strong>Sidecar</strong> — a Thanos sidecar runs next to each Prometheus instance, uploads TSDB blocks to object storage (S3/MinIO) after they're sealed (every 2h). The Store Gateway serves these blocks for long-range queries. Simple but adds 2h latency before data is queryable globally. (2) <strong>Receive</strong> — Prometheus remote-writes metrics to Thanos Receive in real-time. Global queryability immediately, but adds write path complexity and a potential bottleneck. For most setups: sidecar mode is simpler and sufficient. For multi-cluster global dashboards with sub-2h data: receive mode.</p>
+<h4 id="load-testing-methodology-k6-concepts">Load testing methodology — k6 concepts</h4>
+<p>Load testing has three phases: (1) <strong>Baseline</strong> — what's the latency and error rate at 1 concurrent user? (2) <strong>Load test</strong> — ramp to expected production traffic, verify latency SLOs hold. (3) <strong>Stress test</strong> — push beyond expected load until the system breaks, to find the failure mode and capacity ceiling. k6 models load as virtual users (VUs) running test scripts. Key metrics: <code>http_req_duration</code> (latency), <code>http_req_failed</code> (error rate), <code>iterations</code> (throughput). The output feeds into Grafana dashboards (k6 has a Prometheus remote write output). Run load tests before every major release in CI with a pass/fail threshold on P95 latency.</p>
+<h4 id="chaos-engineering-intentional-failure-injection">Chaos engineering — intentional failure injection</h4>
+<p>Chaos engineering tests whether a system actually survives the failures it's designed to handle. Toxiproxy injects network conditions (latency, packet loss, bandwidth limits, connection drops) between your services — you test that your circuit breaker trips when the database latency spikes to 2s, rather than discovering this in production. The practice: (1) define a steady state (normal error rate, latency), (2) hypothesise that the system survives failure X, (3) inject failure X, (4) verify steady state is maintained (or fix if not). Chaos engineering is not about breaking things randomly — it's a disciplined experiment that builds confidence in fault tolerance.</p>
+<h4 id="log-aggregation-architectures-push-vs-pull-and-the-pipeline">Log aggregation architectures — push vs pull, and the pipeline</h4>
+<p>Three approaches: (1) <strong>Agent-based push</strong> — Alloy/Fluent Bit runs on each host, tails log files, and pushes to Loki/Elasticsearch. Low latency, agent adds resource overhead. (2) <strong>Syslog forwarding</strong> — services write to syslog, rsyslog/syslog-ng forwards centrally. Works for systemd services without any agent. (3) <strong>Direct SDK</strong> — applications write structured logs directly to Loki's push API. Pipeline tools (Vector.dev) add buffering, transformation (parse, filter, enrich), and fan-out (logs go to both Loki and an S3 archive). The key design decision: parse logs at the source (less data transmitted, structured from the start) vs at the destination (simpler agents, parsing can be changed without redeployment).</p>
+<hr>
+<h2 id="observability-philosophy">Observability Philosophy</h2>
+<p>Before diving into tools, it helps to have a framework for what you're trying to observe. Two complementary models are widely used in practice.</p>
+<h3 id="the-four-golden-signals">The Four Golden Signals</h3>
+<p>Coined by Google's SRE team, these four metrics cover nearly everything that matters about a running service:</p>
+<ul>
+<li><strong>Latency</strong> — how long does a request take? Track both successful and failed requests separately. A failed request that returns instantly is fast but still broken.</li>
+<li><strong>Traffic</strong> — how many requests per second? This establishes your baseline and helps you notice unusual spikes or drops.</li>
+<li><strong>Errors</strong> — what fraction of requests fail? Include both explicit errors (HTTP 5xx) and implicit failures (HTTP 200 with a corrupted response).</li>
+<li><strong>Saturation</strong> — how full is the system? CPU usage, memory pressure, disk I/O queue depth. Saturation often predicts problems before latency or errors spike.</li>
+</ul>
+<h3 id="sli-slo-sla-and-error-budgets">SLI, SLO, SLA, and Error Budgets</h3>
+<p>These terms define how reliability is measured and negotiated:</p>
+<ul>
+<li><strong>SLI (Service Level Indicator)</strong> — a specific metric that measures reliability. Example: "the fraction of HTTP requests that complete successfully in under 500ms."</li>
+<li><strong>SLO (Service Level Objective)</strong> — a target value for an SLI over a time window. Example: "the SLI above must be ≥ 99.9% over any 30-day rolling window."</li>
+<li><strong>SLA (Service Level Agreement)</strong> — a contractual commitment to an SLO, with consequences for violation. SLOs are internal; SLAs are external.</li>
+<li><strong>Error Budget</strong> — the amount of unreliability an SLO allows. 99.9% SLO over 30 days = 0.1% budget = 43.2 minutes of downtime/slowness per month.</li>
+</ul>
+<p>The error budget is the most useful concept for day-to-day decisions: if you've used half your budget two weeks into the month, you slow down deployments. If you have plenty of budget left, you can move faster. This replaces "can we deploy on Fridays?" with a data-driven answer.</p>
+<pre><code class="language-yaml"># Concrete SLI: 99th percentile latency below 500ms
+# SLO: this must hold 99.9% of the time over 30 days
+
+# Prometheus query for the SLI:
+histogram_quantile(0.99,
+  sum(rate(http_request_duration_seconds_bucket{job=&quot;myapi&quot;}[5m])) by (le)
+) &lt; 0.5
+
+# Error budget consumed (last 30 days):
+1 - (
+  sum(rate(http_requests_total{job=&quot;myapi&quot;, status!~&quot;5..&quot;}[30d]))
+  /
+  sum(rate(http_requests_total{job=&quot;myapi&quot;}[30d]))
+)</code></pre>
+<p>Pyrra (below) provides a dashboard-based SLO management UI that calculates error budgets and burn rates automatically from Prometheus metrics.</p>
+<h3 id="the-use-method">The USE Method</h3>
+<p>Complementing the four golden signals for <strong>infrastructure</strong> monitoring: for every resource (CPU, memory, disk, network), measure:</p>
+<ul>
+<li><strong>Utilisation</strong> — what percentage of the resource is being used?</li>
+<li><strong>Saturation</strong> — how much additional demand is queued (run queue length, memory swap)?</li>
+<li><strong>Errors</strong> — are there hardware errors, dropped packets, disk errors?</li>
+</ul>
+<p>Apply USE to every physical resource: CPU cores, memory, storage, network interfaces. Combine with the four golden signals (which apply to services) for complete coverage.</p>
+<hr>
+<hr>
+<h2 id="prometheus">Prometheus</h2>
+<p><strong>Purpose:</strong> Scrapes <code>/metrics</code> endpoints on a schedule, evaluates alerting rules, and feeds dashboards in Grafana. The foundation of the standard self-hosted observability stack.</p>
+<pre><code class="language-yaml"># ~/prometheus/compose.yaml
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - 127.0.0.1:9090:9090
+    volumes:
+      - /home/user/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro,Z
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:</code></pre>
+<pre><code class="language-bash">cd ~/prometheus &amp;&amp; podman-compose up -d</code></pre>
+<h5 id="minimal-prometheusyml">Minimal <code>prometheus.yml</code></h5>
+<pre><code class="language-yaml">global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['host.containers.internal:9093']
+
+scrape_configs:
+  - job_name: node
+    static_configs:
+      - targets: ['host.containers.internal:9100']
+
+  - job_name: cadvisor
+    static_configs:
+      - targets: ['host.containers.internal:8080']</code></pre>
+<h4 id="node-exporter-system-metrics">Node Exporter — system metrics</h4>
+<pre><code class="language-yaml"># ~/node-exporter/compose.yaml
+services:
+  node-exporter:
+    image: prom/node-exporter
+    network_mode: host
+    volumes:
+      - /proc:/host/proc:ro,rslave
+      - /sys:/host/sys:ro,rslave
+      - /:/rootfs:ro,rslave
+    command: --path.procfs=/host/proc --path.sysfs=/host/sys
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/node-exporter &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="cadvisor-container-metrics">cAdvisor — container metrics</h4>
+<pre><code class="language-yaml"># ~/cadvisor/compose.yaml
+services:
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    ports:
+      - 127.0.0.1:8080:8080
+    volumes:
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/cadvisor &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="common-operations">Common operations</h4>
+<pre><code class="language-bash"># Check Prometheus targets status
+curl http://localhost:9090/api/v1/targets | python3 -m json.tool | grep -A3 health
+
+# Query a metric via API
+curl &quot;http://localhost:9090/api/v1/query?query=up&quot; | python3 -m json.tool
+
+# Reload config without restart
+curl -X POST http://localhost:9090/-/reload
+
+# Check config validity before reloading
+podman exec prometheus promtool check config /etc/prometheus/prometheus.yml
+
+# Check alert rules
+podman exec prometheus promtool check rules /etc/prometheus/alerts.yml
+
+# View current active alerts
+curl http://localhost:9090/api/v1/alerts | python3 -m json.tool</code></pre>
+<h5 id="example-alert-rules-alertsyml">Example alert rules (<code>alerts.yml</code>)</h5>
+<pre><code class="language-yaml">groups:
+  - name: host
+    rules:
+      - alert: HighCPU
+        expr: 100 - (avg by(instance)(rate(node_cpu_seconds_total{mode=&quot;idle&quot;}[5m])) * 100) &gt; 90
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: &quot;High CPU on {{ $labels.instance }}&quot;
+
+      - alert: DiskNearlyFull
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 &lt; 10
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: &quot;Disk nearly full on {{ $labels.instance }}&quot;
+
+      - alert: ServiceDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: &quot;Service {{ $labels.job }} is down&quot;</code></pre>
+<h5 id="recording-rules">Recording rules</h5>
+<p>pre-compute expensive or frequently used queries and store the result as a new metric. This makes dashboards and alert rules load faster, and lets you build higher-level metrics from raw ones:</p>
+<pre><code class="language-yaml"># prometheus/recording_rules.yml
+groups:
+  - name: recording
+    interval: 1m
+    rules:
+      # Pre-compute request rate per job — used by many dashboards
+      - record: job:http_requests_total:rate5m
+        expr: sum(rate(http_requests_total[5m])) by (job)
+
+      # Pre-compute error ratio per job — used by SLO alerts
+      - record: job:http_request_errors:ratio5m
+        expr: |
+          sum(rate(http_requests_total{status=~&quot;5..&quot;}[5m])) by (job)
+          /
+          sum(rate(http_requests_total[5m])) by (job)
+
+      # Node CPU utilisation — expensive query, compute once
+      - record: instance:node_cpu_utilisation:rate5m
+        expr: |
+          1 - avg(rate(node_cpu_seconds_total{mode=&quot;idle&quot;}[5m])) by (instance)</code></pre>
+<p>Add this file to your Prometheus config:</p>
+<pre><code class="language-yaml">rule_files:
+  - /etc/prometheus/alerts.yml
+  - /etc/prometheus/recording_rules.yml</code></pre>
+<p>Recording rule results are stored as time series with the <code>record:</code> name — query them just like any other metric: <code>job:http_requests_total:rate5m</code>. Naming convention: <code>level:metric:operations</code> (e.g., <code>job:http_requests_total:rate5m</code>).</p>
+<hr>
+<hr>
+<h2 id="alertmanager">Alertmanager</h2>
+<p><strong>Purpose:</strong> Routes firing Prometheus alerts to notification channels — ntfy, Slack, email, PagerDuty, and more. Handles deduplication, grouping, silencing, and inhibition.</p>
+<pre><code class="language-yaml"># ~/alertmanager/compose.yaml
+services:
+  alertmanager:
+    image: prom/alertmanager:latest
+    ports:
+      - 127.0.0.1:9093:9093
+    volumes:
+      - /home/user/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro,Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/alertmanager &amp;&amp; podman-compose up -d</code></pre>
+<h5 id="example-alertmanageryml-route-alerts-to-ntfy">Example <code>alertmanager.yml</code> — route alerts to ntfy</h5>
+<pre><code class="language-yaml">route:
+  group_by: ['alertname', 'severity']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  receiver: ntfy
+
+receivers:
+  - name: ntfy
+    webhook_configs:
+      - url: http://host.containers.internal:8090/alerts
+        send_resolved: true
+
+inhibit_rules:
+  - source_match:
+      severity: critical
+    target_match:
+      severity: warning
+    equal: [alertname, instance]</code></pre>
+<h4 id="alertmanager-ntfy-bridge-severity-aware-routing">Alertmanager → ntfy bridge (severity-aware routing)</h4>
+<p>Use <a href="https://github.com/alexbakker/alertmanager-ntfy">alertmanager-ntfy</a> as a thin webhook bridge to map Prometheus severity labels to ntfy priority levels:</p>
+<pre><code class="language-yaml"># ~/alertmanager-ntfy/compose.yaml
+services:
+  alertmanager-ntfy:
+    image: ghcr.io/alexbakker/alertmanager-ntfy:latest
+    ports:
+      - 127.0.0.1:9095:8080
+    volumes:
+      - /home/user/alertmanager-ntfy/config.yaml:/config.yaml:ro,Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-yaml"># ~/alertmanager-ntfy/config.yaml
+ntfy:
+  base_url: http://host.containers.internal:8090
+  topic: alerts
+  priority_map:
+    critical: urgent
+    warning: default
+    info: low
+
+labels:
+  - name: severity</code></pre>
+<pre><code class="language-bash">cd ~/alertmanager-ntfy &amp;&amp; podman-compose up -d</code></pre>
+<p>Update <code>alertmanager.yml</code> to route by severity to the bridge:</p>
+<pre><code class="language-yaml">route:
+  group_by: ['alertname', 'severity']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  receiver: ntfy-default
+  routes:
+    - match:
+        severity: critical
+      receiver: ntfy-critical
+    - match:
+        severity: warning
+      receiver: ntfy-warning
+
+receivers:
+  - name: ntfy-default
+    webhook_configs:
+      - url: http://host.containers.internal:9095/hook
+        send_resolved: true
+  - name: ntfy-critical
+    webhook_configs:
+      - url: http://host.containers.internal:9095/hook
+        send_resolved: true
+  - name: ntfy-warning
+    webhook_configs:
+      - url: http://host.containers.internal:9095/hook
+        send_resolved: true</code></pre>
+<blockquote>The bridge maps the <code>severity</code> label to ntfy priority levels automatically — <code>critical</code> → <code>urgent</code> (breaks through Do Not Disturb), <code>warning</code> → <code>default</code>, <code>info</code> → <code>low</code>.</blockquote>
+<hr>
+<hr>
+<h2 id="alerting-best-practices">Alerting Best Practices</h2>
+<h4 id="alert-on-symptoms-not-causes">Alert on symptoms, not causes</h4>
+<p>Alert on what the user experiences (high latency, error rate, service down) not on infrastructure metrics that may or may not be impacting users (CPU at 80% might be fine). A CPU alert that fires daily and never requires action is alert noise; an error-rate alert that fires rarely but always requires action is signal.</p>
+<h4 id="multi-window-multi-burn-rate-alerting-slo-based">Multi-window multi-burn-rate alerting (SLO-based)</h4>
+<p>Instead of a simple threshold alert, use two windows that catch both fast and slow error budget burns:</p>
+<pre><code class="language-yaml"># alerts.yml — SLO burn rate alert (99.9% availability SLO)
+groups:
+  - name: slo_alerts
+    rules:
+      # Fast burn: 14.4× rate over 1h → will exhaust budget in 5 days
+      - alert: ErrorBudgetFastBurn
+        expr: |
+          (
+            job:http_request_errors:ratio5m &gt; (14.4 * 0.001)
+            and
+            job:http_request_errors:ratio1h &gt; (14.4 * 0.001)
+          )
+        for: 2m
+        labels:
+          severity: critical
+          slo: availability
+        annotations:
+          summary: &quot;Fast error budget burn on {{ $labels.job }}&quot;
+
+      # Slow burn: 3× rate over 6h → will exhaust budget in 24 days
+      - alert: ErrorBudgetSlowBurn
+        expr: |
+          (
+            job:http_request_errors:ratio5m &gt; (3 * 0.001)
+            and
+            job:http_request_errors:ratio6h &gt; (3 * 0.001)
+          )
+        for: 15m
+        labels:
+          severity: warning
+          slo: availability
+        annotations:
+          summary: &quot;Slow error budget burn on {{ $labels.job }}&quot;</code></pre>
+<h4 id="inhibition-rules-reduce-alert-storms">Inhibition rules — reduce alert storms</h4>
+<p>When a <code>ServiceDown</code> fires, suppress all <code>SlowResponse</code> and <code>HighErrorRate</code> alerts for the same instance — the downstream symptoms are causally related to the root cause:</p>
+<pre><code class="language-yaml"># alertmanager.yml
+inhibit_rules:
+  - source_match:
+      alertname: ServiceDown
+    target_match_re:
+      alertname: (SlowResponse|HighErrorRate|DiskNearlyFull)
+    equal: [instance]</code></pre>
+<hr>
+<hr>
+<h2 id="thanos-prometheus-long-term-storage-ha-federation">Thanos (Prometheus Long-Term Storage, HA & Federation)</h2>
+<p><strong>Purpose:</strong> Thanos extends Prometheus to solve its three main production limitations: <strong>retention</strong> (Prometheus stores data locally; Thanos uploads blocks to object storage — MinIO, S3, GCS — for unlimited retention), <strong>high availability</strong> (Thanos Querier deduplicates data from multiple Prometheus replicas, so you can run 2+ Prometheus instances with identical configs), and <strong>federation</strong> (Thanos Query Frontend federates across multiple Prometheus clusters — query all environments from a single Grafana datasource). The standard choice for production Prometheus at scale.</p>
+<h4 id="architecture-overview">Architecture overview</h4>
+<pre><code>Prometheus ──► Thanos Sidecar ──► Object Store (MinIO)
+                    │
+                    ▼
+             Thanos Store Gateway ◄── Object Store (MinIO)
+                    │
+Thanos Ruler ──►    │
+                    ▼
+             Thanos Querier ◄── Grafana / PromQL clients
+                    │
+             Thanos Query Frontend (caching layer)
+                    │
+             Thanos Compactor (compaction + downsampling)</code></pre>
+<pre><code class="language-yaml"># ~/thanos/compose.yaml
+services:
+
+  # Sidecar: sits next to Prometheus, uploads TSDB blocks to object store
+  thanos-sidecar:
+    image: quay.io/thanos/thanos:latest
+    command:
+      - sidecar
+      - --tsdb.path=/prometheus
+      - --prometheus.url=http://host.containers.internal:9090
+      - --objstore.config-file=/etc/thanos/objstore.yaml
+      - --http-address=0.0.0.0:10902
+      - --grpc-address=0.0.0.0:10901
+    ports:
+      - &quot;127.0.0.1:10901:10901&quot;   # gRPC (Querier connects here)
+      - &quot;127.0.0.1:10902:10902&quot;   # HTTP status page
+    volumes:
+      - prometheus_data:/prometheus:ro
+      - /home/user/thanos/objstore.yaml:/etc/thanos/objstore.yaml:ro,Z
+    restart: unless-stopped
+
+  # Store Gateway: serves historical blocks from object storage to Querier
+  thanos-store:
+    image: quay.io/thanos/thanos:latest
+    command:
+      - store
+      - --objstore.config-file=/etc/thanos/objstore.yaml
+      - --http-address=0.0.0.0:10904
+      - --grpc-address=0.0.0.0:10903
+      - --data-dir=/var/thanos/store
+    ports:
+      - &quot;127.0.0.1:10903:10903&quot;   # gRPC
+      - &quot;127.0.0.1:10904:10904&quot;   # HTTP
+    volumes:
+      - thanos_store_data:/var/thanos/store
+      - /home/user/thanos/objstore.yaml:/etc/thanos/objstore.yaml:ro,Z
+    restart: unless-stopped
+
+  # Querier: deduplicates from Sidecar + Store Gateway, exposes PromQL endpoint
+  thanos-querier:
+    image: quay.io/thanos/thanos:latest
+    command:
+      - query
+      - --http-address=0.0.0.0:9091
+      - --grpc-address=0.0.0.0:10905
+      - --store=thanos-sidecar:10901           # real-time data from Prometheus
+      - --store=thanos-store:10903             # historical data from object store
+      - --query.replica-label=prometheus_replica
+    ports:
+      - &quot;127.0.0.1:9091:9091&quot;    # Querier UI + PromQL endpoint (point Grafana here)
+    depends_on: [thanos-sidecar, thanos-store]
+    restart: unless-stopped
+
+  # Query Frontend: caching + query splitting layer in front of Querier
+  thanos-query-frontend:
+    image: quay.io/thanos/thanos:latest
+    command:
+      - query-frontend
+      - --http-address=0.0.0.0:9092
+      - --query-frontend.downstream-url=http://thanos-querier:9091
+      - --query-range.split-interval=24h
+      - --query-range.max-retries-per-request=5
+      - --query-range.response-cache-config-file=/etc/thanos/cache.yaml
+    ports:
+      - &quot;127.0.0.1:9092:9092&quot;    # Use this as Grafana datasource URL for best performance
+    depends_on: [thanos-querier]
+    restart: unless-stopped
+
+  # Compactor: compacts and downsamples historical blocks (only one instance)
+  thanos-compactor:
+    image: quay.io/thanos/thanos:latest
+    command:
+      - compact
+      - --wait
+      - --objstore.config-file=/etc/thanos/objstore.yaml
+      - --data-dir=/var/thanos/compact
+      - --retention.resolution-raw=30d     # keep raw (15s) data for 30 days
+      - --retention.resolution-5m=180d     # keep 5m downsamples for 180 days
+      - --retention.resolution-1h=365d     # keep 1h downsamples for 1 year
+      - --http-address=0.0.0.0:10906
+    ports:
+      - &quot;127.0.0.1:10906:10906&quot;
+    volumes:
+      - thanos_compact_data:/var/thanos/compact
+      - /home/user/thanos/objstore.yaml:/etc/thanos/objstore.yaml:ro,Z
+    restart: unless-stopped
+
+  # Ruler: evaluates alerting and recording rules against Thanos query layer
+  thanos-ruler:
+    image: quay.io/thanos/thanos:latest
+    command:
+      - rule
+      - --data-dir=/var/thanos/ruler
+      - --eval-interval=30s
+      - --rule-file=/etc/thanos/rules/*.yaml
+      - --alertmanagers.url=http://host.containers.internal:9093
+      - --query=thanos-querier:9091
+      - --objstore.config-file=/etc/thanos/objstore.yaml
+      - --http-address=0.0.0.0:10908
+      - --grpc-address=0.0.0.0:10907
+      - --label=ruler_cluster=&quot;homelab&quot;
+    ports:
+      - &quot;127.0.0.1:10907:10907&quot;
+      - &quot;127.0.0.1:10908:10908&quot;
+    volumes:
+      - thanos_ruler_data:/var/thanos/ruler
+      - /home/user/thanos/rules:/etc/thanos/rules:ro,Z
+      - /home/user/thanos/objstore.yaml:/etc/thanos/objstore.yaml:ro,Z
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:
+    external: true    # shared with the Prometheus container
+  thanos_store_data:
+  thanos_compact_data:
+  thanos_ruler_data:</code></pre>
+<h4 id="object-store-config-homeuserthanosobjstoreyaml-minio-backend">Object store config (<code>/home/user/thanos/objstore.yaml</code>) — MinIO backend</h4>
+<pre><code class="language-yaml">type: S3
+config:
+  bucket: thanos-metrics
+  endpoint: minio.home.local:9000
+  access_key: minioadmin
+  secret_key: changeme
+  insecure: true             # use false + proper cert in production
+  signature_version2: false</code></pre>
+<pre><code class="language-bash"># Create the MinIO bucket first
+mc alias set local http://localhost:9000 minioadmin changeme
+mc mb local/thanos-metrics
+
+cd ~/thanos &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="wire-prometheus-to-upload-blocks-add-to-prometheusyml">Wire Prometheus to upload blocks (add to <code>prometheus.yml</code>)</h4>
+<pre><code class="language-yaml"># Enable TSDB block storage (required for Thanos Sidecar)
+# Thanos Sidecar reads from the same TSDB path Prometheus writes to.
+# Ensure prometheus_data volume is shared between prometheus and thanos-sidecar containers.
+
+# Remote-write to Thanos Receive (alternative architecture — push instead of sidecar):
+# remote_write:
+#   - url: http://thanos-receive:19291/api/v1/receive</code></pre>
+<h5 id="point-grafana-at-thanos-query-frontend">Point Grafana at Thanos Query Frontend</h5>
+<p>In Grafana → Data Sources → Prometheus:</p>
+<ul>
+<li><strong>URL:</strong> <code>http://localhost:9092</code> (Query Frontend — cached, split queries)</li>
+<li>Or <code>http://localhost:9091</code> (Querier — direct, no cache)</li>
+</ul>
+<h4 id="multi-cluster-federation">Multi-cluster federation</h4>
+<pre><code class="language-yaml"># On the global Thanos Querier, add store endpoints from remote clusters:
+thanos-querier:
+  command:
+    - query
+    - --store=thanos-sidecar-cluster1:10901     # cluster 1 Sidecar
+    - --store=thanos-sidecar-cluster2:10901     # cluster 2 Sidecar
+    - --store=thanos-store:10903                # shared object store (historical)
+    - --query.replica-label=prometheus_replica
+    # Add as many --store flags as needed (one per Prometheus/Sidecar endpoint)</code></pre>
+<h4 id="ha-setup-2-prometheus-deduplicated-by-thanos">HA setup (2× Prometheus, deduplicated by Thanos)</h4>
+<pre><code class="language-yaml"># Run two Prometheus instances with identical scrape configs but different replica labels:
+# prometheus-1: --storage.tsdb.path=/prometheus --web.listen-address=:9090
+# prometheus-2: --storage.tsdb.path=/prometheus --web.listen-address=:9090
+
+# In each Prometheus's external_labels:
+global:
+  external_labels:
+    cluster: homelab
+    prometheus_replica: prometheus-1   # change to prometheus-2 on second instance
+
+# Thanos Querier deduplicates using --query.replica-label=prometheus_replica
+# Result: you see one consistent time series even when one Prometheus restarts</code></pre>
+<h4 id="compaction-and-downsampling-explained">Compaction and downsampling explained</h4>
+<pre><code class="language-bash"># Compactor runs continuously (--wait flag) and:
+# 1. Merges small 2h TSDB blocks into larger ones (reduces object store files)
+# 2. Downsamples raw data (15s → 5m → 1h resolution) for fast long-range queries
+# 3. Applies retention policies to delete old blocks
+
+# Check compactor status
+curl http://localhost:10906/metrics | grep thanos_compact
+
+# View blocks in object store
+podman run --rm -e AWS_ACCESS_KEY_ID=minioadmin -e AWS_SECRET_ACCESS_KEY=changeme \
+  quay.io/thanos/thanos:latest \
+  tools bucket ls \
+  --objstore.config=&quot;type: S3
+config:
+  bucket: thanos-metrics
+  endpoint: minio.home.local:9000
+  insecure: true&quot;</code></pre>
+<h4 id="ruler-alerting-rules-that-evaluate-across-long-term-data">Ruler — alerting rules that evaluate across long-term data</h4>
+<pre><code class="language-yaml"># /home/user/thanos/rules/alerts.yaml
+groups:
+  - name: long-term-alerts
+    interval: 5m
+    rules:
+      # Alert if any host has had &gt;90% CPU for more than 1 hour total in the last day
+      - alert: HighCPULastDay
+        expr: |
+          sum_over_time(
+            (avg by(instance) (rate(node_cpu_seconds_total{mode!=&quot;idle&quot;}[5m])) &gt; 0.9)[24h:5m]
+          ) * 5 &gt; 60
+        labels:
+          severity: warning
+        annotations:
+          summary: &quot;{{ $labels.instance }} had high CPU for &gt;1h in last 24h&quot;</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">thanos.home.local         { tls internal; reverse_proxy localhost:9092 }
+thanos-query.home.local   { tls internal; reverse_proxy localhost:9091 }
+thanos-compact.home.local { tls internal; reverse_proxy localhost:10906 }</code></pre>
+<h4 id="troubleshooting-thanos">Troubleshooting Thanos</h4>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Sidecar <code>cannot read TSDB blocks</code></td><td>Ensure <code>prometheus_data</code> volume is shared between Prometheus and Thanos Sidecar containers; mount as <code>:ro</code> on the Sidecar</td></tr><tr><td>Querier shows gaps in data</td><td>Store Gateway may be lagging — check <code>thanos_objstore_*</code> metrics; compactor takes time to upload blocks (default 2h)</td></tr><tr><td>Compactor <code>halted — conflict</code></td><td>Only one Compactor can run at a time; check for a second running instance or a stale lock file in the MinIO bucket (<code>thanos/</code> prefix)</td></tr><tr><td><code>duplicate label set</code> error in Querier</td><td>Two store endpoints return the same series with the same labels — set <code>--query.replica-label</code> to the label that differentiates your Prometheus replicas</td></tr><tr><td>Query Frontend <code>cache miss</code> for all queries</td><td>Cache config file may not be mounted correctly; start without <code>--query-range.response-cache-config-file</code> to confirm frontend works, then add caching</td></tr><tr><td>Ruler alerts not firing</td><td>Verify Ruler's <code>--query</code> flag points to the Querier address; check Ruler logs for rule evaluation errors</td></tr><tr><td>Blocks not appearing in Store Gateway</td><td>Blocks take up to 2h to upload (Sidecar uploads completed blocks only); force immediate upload by restarting the Sidecar</td></tr></tbody></table>
+<hr>
+<h2 id="victoriametrics-prometheus-compatible-high-performance">VictoriaMetrics (Prometheus-Compatible, High Performance)</h2>
+<p><strong>Purpose:</strong> Drop-in Prometheus replacement with 10× lower memory usage, better compression, and faster queries. Fully compatible with the Prometheus remote-write protocol and PromQL — point any Prometheus-scraping agent (Grafana Alloy, Telegraf, node-exporter) at VictoriaMetrics without code changes. Ideal when Prometheus starts consuming too much RAM or when you need long-term metric retention.</p>
+<pre><code class="language-yaml"># ~/victoriametrics/compose.yaml
+services:
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:latest
+    ports:
+      - 127.0.0.1:8428:8428
+    volumes:
+      - /home/user/victoriametrics/data:/victoria-metrics-data:Z
+    command: --storageDataPath=/victoria-metrics-data --retentionPeriod=12 --selfScrapeInterval=10s
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/victoriametrics &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="common-operations-2">Common operations</h4>
+<pre><code class="language-bash"># Check server health
+curl http://localhost:8428/health
+
+# Query metrics (MetricsQL / PromQL)
+curl &quot;http://localhost:8428/api/v1/query?query=up&quot;
+
+# List all metric names
+curl http://localhost:8428/api/v1/label/__name__/values | python3 -m json.tool | head -20
+
+# Snapshot for backup
+curl -X POST http://localhost:8428/snapshot/create</code></pre>
+<h5 id="reconfigure-grafana-to-use-victoriametrics">Reconfigure Grafana to use VictoriaMetrics</h5>
+<p>instead of Prometheus:</p>
+<ul>
+<li>Data Sources → Prometheus → URL: <code>http://host.containers.internal:8428</code></li>
+</ul>
+<h5 id="remote-write-from-prometheus-to-victoriametrics">Remote-write from Prometheus to VictoriaMetrics</h5>
+<p>(dual-write for migration):</p>
+<pre><code class="language-yaml"># In prometheus.yml
+remote_write:
+  - url: http://host.containers.internal:8428/api/v1/write</code></pre>
+<p>For the horizontally scalable cluster variant (vminsert / vmselect / vmstorage), see the <a href="https://docs.shani.dev/doc/servers/clusters">Clusters wiki</a>.</p>
+<hr>
+<hr>
+<h2 id="prometheus-pushgateway">Prometheus Pushgateway</h2>
+<p><strong>Purpose:</strong> An intermediary for short-lived jobs that cannot be scraped by Prometheus — batch jobs, cron tasks, and scripts that run and exit before Prometheus's scrape interval. The job pushes metrics to the Pushgateway on completion; Prometheus then scrapes the Pushgateway at its normal interval. Essential for monitoring backup jobs, ETL pipelines, and any workload where the process is already gone by the time Prometheus would scrape it.</p>
+<pre><code class="language-yaml"># ~/pushgateway/compose.yaml
+services:
+  pushgateway:
+    image: prom/pushgateway:latest
+    ports:
+      - 127.0.0.1:9091:9091
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/pushgateway &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="add-to-prometheusyml">Add to <code>prometheus.yml</code></h4>
+<pre><code class="language-yaml">scrape_configs:
+  - job_name: pushgateway
+    honor_labels: true
+    static_configs:
+      - targets: ['host.containers.internal:9091']</code></pre>
+<h4 id="push-metrics-from-a-script">Push metrics from a script</h4>
+<pre><code class="language-bash"># Push a single metric (backup job duration)
+cat &lt;&lt;EOF | curl --data-binary @- http://localhost:9091/metrics/job/restic_backup/instance/homeserver
+# HELP restic_backup_duration_seconds Duration of the last backup run
+# TYPE restic_backup_duration_seconds gauge
+restic_backup_duration_seconds 142.3
+# HELP restic_backup_success Whether the last backup succeeded (1=yes, 0=no)
+# TYPE restic_backup_success gauge
+restic_backup_success 1
+EOF
+
+# Delete a metric group after the job
+curl -X DELETE http://localhost:9091/metrics/job/restic_backup/instance/homeserver</code></pre>
+<h4 id="in-a-backup-systemd-service">In a backup systemd service</h4>
+<pre><code class="language-bash"># Wrap your backup command and push success/failure
+START=$(date +%s)
+podman exec restic restic backup /data &amp;&amp; SUCCESS=1 || SUCCESS=0
+DURATION=$(($(date +%s) - START))
+cat &lt;&lt;EOF | curl --data-binary @- http://localhost:9091/metrics/job/restic_backup
+restic_backup_success $SUCCESS
+restic_backup_duration_seconds $DURATION
+EOF</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">pushgateway.home.local { tls internal; reverse_proxy localhost:9091 }</code></pre>
+<hr>
+<h2 id="pyrra-slo-management">Pyrra (SLO Management)</h2>
+<p><strong>Purpose:</strong> SLO (Service Level Objective) management for Prometheus. Define SLOs in YAML, and Pyrra generates the recording rules, alerting rules, and Grafana dashboards automatically. Calculates error budgets, burn rates, and multi-window alerts — the proper way to move from raw metric alerts to SLO-based alerting without writing complex PromQL by hand.</p>
+<pre><code class="language-yaml"># ~/pyrra/compose.yaml
+services:
+  pyrra-api:
+    image: ghcr.io/pyrra-dev/pyrra:latest
+    ports:
+      - 127.0.0.1:9099:9099
+    volumes:
+      - /home/user/pyrra/slos:/etc/pyrra:Z
+    command: filesystem --config-files=/etc/pyrra
+    restart: unless-stopped
+
+  pyrra-kubernetes:
+    image: ghcr.io/pyrra-dev/pyrra:latest
+    command: kubernetes
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/pyrra &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="add-to-prometheusyml-2">Add to <code>prometheus.yml</code></h4>
+<pre><code class="language-yaml">scrape_configs:
+  - job_name: pyrra
+    static_configs:
+      - targets: ['host.containers.internal:9099']
+
+rule_files:
+  - /etc/prometheus/pyrra/*.yaml</code></pre>
+<h5 id="example-slo-definition-homeuserpyrraslosapi-availabilityyaml">Example SLO definition (<code>/home/user/pyrra/slos/api-availability.yaml</code>)</h5>
+<pre><code class="language-yaml">apiVersion: pyrra.dev/v1alpha1
+kind: ServiceLevelObjective
+metadata:
+  name: api-availability
+  namespace: monitoring
+spec:
+  target: &quot;99.9&quot;
+  window: 4w
+  serviceLevel:
+    objectives:
+      - ratio:
+          errors:
+            metric: http_requests_total{job=&quot;myapi&quot;, code=~&quot;5..&quot;}
+          total:
+            metric: http_requests_total{job=&quot;myapi&quot;}</code></pre>
+<p>Access Pyrra's UI at <code>http://localhost:9099</code> to view current SLO status, error budget remaining, and burn rate over time.</p>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">pyrra.home.local { tls internal; reverse_proxy localhost:9099 }</code></pre>
+<hr>
+<h2 id="prometheus-exporters-reference">Prometheus Exporters Reference</h2>
+<p>Common exporters you'll configure beyond node-exporter and cAdvisor:</p>
+<table><thead><tr><th>Exporter</th><th>Port</th><th>What it exposes</th></tr></thead><tbody><tr><td><code>postgres_exporter</code></td><td>9187</td><td>PostgreSQL query times, connections, replication lag</td></tr><tr><td><code>redis_exporter</code></td><td>9121</td><td>Redis hits/misses, memory, commands/sec</td></tr><tr><td><code>mysql_exporter</code></td><td>9104</td><td>MySQL queries, connections, slow queries</td></tr><tr><td><code>rabbitmq_exporter</code></td><td>9419</td><td>Queue depth, message rates, consumer lag</td></tr><tr><td><code>kafka_exporter</code></td><td>9308</td><td>Topic offsets, consumer group lag</td></tr><tr><td><code>blackbox_exporter</code></td><td>9115</td><td>HTTP/TCP/ICMP probes from external perspective</td></tr><tr><td><code>snmp_exporter</code></td><td>9116</td><td>Network device metrics via SNMP</td></tr><tr><td><code>nginx_exporter</code></td><td>9113</td><td>Nginx request rates, active connections</td></tr><tr><td><code>cadvisor</code></td><td>8080</td><td>Container CPU/memory/network/disk</td></tr><tr><td><code>process_exporter</code></td><td>9256</td><td>Per-process CPU, memory, open files</td></tr></tbody></table>
+<h4 id="blackbox-exporter-external-probing">Blackbox Exporter (external probing)</h4>
+<pre><code class="language-yaml"># ~/blackbox/compose.yaml
+services:
+  blackbox:
+    image: prom/blackbox-exporter:latest
+    ports:
+      - 127.0.0.1:9115:9115
+    volumes:
+      - /home/user/blackbox/config.yml:/etc/blackbox_exporter/config.yml:ro,Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-yaml"># ~/blackbox/config.yml
+modules:
+  http_2xx:
+    prober: http
+    timeout: 5s
+    http:
+      valid_http_versions: [HTTP/1.1, HTTP/2.0]
+      valid_status_codes: []  # default: 2xx
+      follow_redirects: true
+  tcp_connect:
+    prober: tcp
+    timeout: 5s</code></pre>
+<pre><code class="language-yaml"># prometheus.yml — scrape blackbox for your services
+- job_name: blackbox
+  metrics_path: /probe
+  params:
+    module: [http_2xx]
+  static_configs:
+    - targets:
+        - https://nextcloud.home.local
+        - https://gitea.home.local
+        - https://grafana.home.local
+  relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: host.containers.internal:9115</code></pre>
+<hr></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

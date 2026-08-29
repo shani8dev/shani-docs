@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>rkhunter (Rootkit Hunter) — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="rkhunter — Rootkit Hunter  rkhunter scans a system for known rootkits, backdoors, and local exploits. It checks system binaries against stored hashes, look…">
+  <meta name="description" id="meta-desc"     content="rkhunter scans a system for known rootkits, backdoors, and local exploits. It checks system binaries against stored hashes, looks for suspicious file permi…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="rkhunter (Rootkit Hunter)">
-  <meta property="og:description" id="og-desc"    content="rkhunter — Rootkit Hunter  rkhunter scans a system for known rootkits, backdoors, and local exploits. It checks system binaries against stored hashes, look…">
+  <meta property="og:description" id="og-desc"    content="rkhunter scans a system for known rootkits, backdoors, and local exploits. It checks system binaries against stored hashes, looks for suspicious file permi…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/security/rkhunter/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="rkhunter (Rootkit Hunter)">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="rkhunter (Rootkit Hunter)">
-  <meta name="twitter:description" id="tw-desc"  content="rkhunter — Rootkit Hunter  rkhunter scans a system for known rootkits, backdoors, and local exploits. It checks system binaries against stored hashes, look…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="rkhunter scans a system for known rootkits, backdoors, and local exploits. It checks system binaries against stored hashes, looks for suspicious file permi…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"rkhunter (Rootkit Hunter)","description":"rkhunter — Rootkit Hunter  rkhunter scans a system for known rootkits, backdoors, and local exploits. It checks system binaries against stored hashes, look…","url":"https://docs.shani.dev/doc/security/rkhunter/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"rkhunter (Rootkit Hunter)","description":"rkhunter scans a system for known rootkits, backdoors, and local exploits. It checks system binaries against stored hashes, looks for suspicious file permi…","url":"https://docs.shani.dev/doc/security/rkhunter/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"rkhunter (Rootkit Hunter)","item":"https://docs.shani.dev/doc/security/rkhunter/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,23 +215,23 @@
         <h1 class="doc-title">rkhunter (Rootkit Hunter)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Security</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>rkhunter scans a system for known rootkits, backdoors, and local exploits. It checks system binaries against stored hashes, looks for suspicious file permissions, hidden files in sensitive directories, and known rootkit signatures. It is pre-installed on Shani OS as a direct dependency of the <code>shani-core</code> package (alongside <code>lynis</code>, <code>apparmor</code>, <code>audit</code>, and <code>fwupd</code>).</p>
 <p>Unlike Lynis, Shani OS does <strong>not</strong> enable a scheduling timer for rkhunter — there's no <code>rkhunter.timer</code> unit enabled by <code>shani-core</code>'s post-install hook. The scheduled-scan setup below (cron) is a genuine gap you need to fill yourself, not busywork duplicating something already running.</p>
 <p>rkhunter does not change anything — it only scans and reports.</p>
-<blockquote><p><strong>Important workflow:</strong> rkhunter must build a baseline of known-good file hashes <strong>before</strong> the system is potentially compromised — ideally immediately after installation, and again after every system update. Running it for the first time on an already-compromised system provides little value.</p></blockquote>
-<p>---</p>
-<h2>Initial Setup</h2>
+<blockquote><strong>Important workflow:</strong> rkhunter must build a baseline of known-good file hashes <strong>before</strong> the system is potentially compromised — ideally immediately after installation, and again after every deployed OS version bump (<code>sudo shani-deploy</code>). Running it for the first time on an already-compromised system provides little value.</blockquote>
+<hr>
+<h2 id="initial-setup">Initial Setup</h2>
 <pre><code class="language-bash"># 1. Update the rootkit signature database
 sudo rkhunter --update
 
 # 2. Build a baseline of current system file hashes
 #    Run this immediately after a clean install and after every system update
 sudo rkhunter --propupd</code></pre>
-<p>---</p>
-<h2>Running a Scan</h2>
+<hr>
+<h2 id="running-a-scan">Running a Scan</h2>
 <pre><code class="language-bash"># Full system scan (interactive — press Enter to continue between sections)
 sudo rkhunter --check
 
@@ -241,8 +243,8 @@ sudo rkhunter --check --skip-keypress --rwo
 
 # Log output to a file
 sudo rkhunter --check --skip-keypress --rwo 2&gt;/dev/null | tee ~/rkhunter-$(date +%Y%m%d).txt</code></pre>
-<p>---</p>
-<h2>Understanding the Output</h2>
+<hr>
+<h2 id="understanding-the-output">Understanding the Output</h2>
 <pre><code>[ Rootkit Hunter version 1.4.6 ]
 
 Checking system commands...
@@ -257,15 +259,16 @@ Checking system commands...
 [09:15:32] Warning: The file properties have changed:
 [09:15:32]          File: /usr/bin/basename
 [09:15:32]          Current inode: 123456   Stored inode: 123400</code></pre>
-<p>A <code>WARNING</code> for a file that changed after a package update is <strong>expected</strong> — this is why you run <code>--propupd</code> after every update. An unexpected warning (file changed with no package update) warrants investigation.</p>
-<p>---</p>
-<h2>After a System Update</h2>
-<p>Every time you update system packages, file hashes legitimately change. Update the baseline immediately after upgrading:</p>
-<pre><code class="language-bash">sudo pacman -Syu
-sudo rkhunter --propupd   # update baseline to reflect new package versions</code></pre>
-<p>If you scan before running <code>--propupd</code> after an update, you will see a flood of hash-change warnings for every updated binary — these are false positives.</p>
-<p>---</p>
-<h2>Scheduled Scans</h2>
+<p>A <code>WARNING</code> for a file that changed after an OS deployment is <strong>expected</strong> — this is why you run <code>--propupd</code> after every deployed version bump. An unexpected warning (file changed with no deployment) warrants investigation.</p>
+<hr>
+<h2 id="after-an-os-deployment">After an OS Deployment</h2>
+<p>On Shanios there is no rolling package update path: the host binaries change wholesale each time you deploy a new OS version (<code>sudo shani-deploy</code>). Every deployed version bump replaces the entire root filesystem, so all stored hashes legitimately change at once — update the baseline immediately after each deployed OS version bump:</p>
+<pre><code class="language-bash">sudo shani-deploy
+sudo rkhunter --propupd   # update baseline to reflect the newly deployed image</code></pre>
+<p>If you scan before running <code>--propupd</code> after a deployment, you will see a flood of hash-change warnings for every system binary — these are false positives.</p>
+<p>Changes in the mutable layers do <strong>not</strong> trip host hash checks: Flatpak apps, Nix packages, and container contents live outside the read-only root and are not part of rkhunter's host-binary baseline, so adding or updating them never produces file-property warnings.</p>
+<hr>
+<h2 id="scheduled-scans">Scheduled Scans</h2>
 <pre><code class="language-bash">sudo tee /etc/cron.weekly/rkhunter-scan &lt;&lt; 'EOF'
 #!/bin/sh
 rkhunter --update --skip-keypress --quiet
@@ -274,8 +277,8 @@ rkhunter --check --skip-keypress --rwo \
 EOF
 sudo chmod +x /etc/cron.weekly/rkhunter-scan
 sudo mkdir -p /var/log/rkhunter</code></pre>
-<p>---</p>
-<h2>Configuration</h2>
+<hr>
+<h2 id="configuration">Configuration</h2>
 <p><code>/etc/rkhunter.conf</code> controls which checks run and what is whitelisted:</p>
 <pre><code class="language-ini"># Email warnings to root (requires a working MTA — see Exim page)
 MAIL-ON-WARNING=root
@@ -292,21 +295,21 @@ ALLOWHIDDENDIR=/dev/.static
 DISABLE_TESTS=suspscan</code></pre>
 <p>After editing:</p>
 <pre><code class="language-bash">sudo rkhunter --config-check   # verify config syntax</code></pre>
-<p>---</p>
-<h2>Logs</h2>
+<hr>
+<h2 id="logs">Logs</h2>
 <pre><code class="language-bash"># View the full log from the last scan
 sudo cat /var/log/rkhunter.log
 
 # See only warnings from the last scan
 sudo grep -i &quot;warning\|infected\|found&quot; /var/log/rkhunter.log</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | Many <code>WARNING</code> after a system update | Expected — run <code>sudo rkhunter --propupd</code> to update the baseline, then re-scan | | <code>Unhappy about OS</code> / <code>Unknown OS</code> warning | Cosmetic on Arch-based systems; does not indicate a problem | | False positive for a known-safe binary | Add it to <code>SCRIPTWHITELIST</code> in <code>/etc/rkhunter.conf</code> | | <code>rkhunter --update</code> fails | Check network connectivity; the signature database is downloaded from the rkhunter project servers | | Scan not finding anything suspicious | That's the expected result on a healthy system — the value of rkhunter is the delta between scans, not finding problems on every run |</p>
-<p>---</p>
-<h2>See Also</h2>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Many <code>WARNING</code> after an OS deployment</td><td>Expected — run <code>sudo rkhunter --propupd</code> to update the baseline, then re-scan</td></tr><tr><td><code>Unhappy about OS</code> / <code>Unknown OS</code> warning</td><td>Cosmetic on Arch-based systems; does not indicate a problem</td></tr><tr><td>False positive for a known-safe binary</td><td>Add it to <code>SCRIPTWHITELIST</code> in <code>/etc/rkhunter.conf</code></td></tr><tr><td><code>rkhunter --update</code> fails</td><td>Check network connectivity; the signature database is downloaded from the rkhunter project servers</td></tr><tr><td>Scan not finding anything suspicious</td><td>That's the expected result on a healthy system — the value of rkhunter is the delta between scans, not finding problems on every run</td></tr></tbody></table>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="lynis">Lynis</a> — broader hardening audit; Shani OS enables <code>lynis.timer</code> by default, unlike rkhunter</li>
-<li><a href="../updates/shani-health">shani-health Reference</a> — <code>shani-health --security</code> reports the age of your last rkhunter scan and its warning count, read from <code>/var/log/rkhunter.log</code></li>
+<li><a href="../updates/shani-health.md">shani-health Reference</a> — <code>shani-health --security</code> reports the age of your last rkhunter scan and its warning count, read from <code>/var/log/rkhunter.log</code></li>
 </ul></div>
     </div>
 

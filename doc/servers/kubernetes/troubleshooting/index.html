@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>Kubernetes — Troubleshooting — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Troubleshooting General cluster issues | Issue | Solution | |-------|----------| | kubectl: connection refused | sudo systemctl status k3s; verify kubeconf…">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/servers/kubernetes/troubleshooting/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="Kubernetes — Troubleshooting">
+  <meta property="og:description" id="og-desc"    content="Troubleshooting General cluster issues | Issue | Solution | |-------|----------| | kubectl: connection refused | sudo systemctl status k3s; verify kubeconf…">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/kubernetes/troubleshooting/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="Kubernetes — Troubleshooting">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="Kubernetes — Troubleshooting">
+  <meta name="twitter:description" id="tw-desc"  content="Troubleshooting General cluster issues | Issue | Solution | |-------|----------| | kubectl: connection refused | sudo systemctl status k3s; verify kubeconf…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Kubernetes — Troubleshooting","description":"Troubleshooting General cluster issues | Issue | Solution | |-------|----------| | kubectl: connection refused | sudo systemctl status k3s; verify kubeconf…","url":"https://docs.shani.dev/doc/servers/kubernetes/troubleshooting/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Kubernetes — Troubleshooting","item":"https://docs.shani.dev/doc/servers/kubernetes/troubleshooting/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Kubernetes — Troubleshooting</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="general-cluster-issues">General cluster issues</h3>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>kubectl: connection refused</code></td><td><code>sudo systemctl status k3s</code>; verify kubeconfig <code>server:</code> IP</td></tr><tr><td>Node shows <code>NotReady</code></td><td><code>kubectl describe node &lt;n&gt;</code>; check CNI pods in <code>kube-system</code>; verify <code>br_netfilter</code> loaded</td></tr><tr><td>Pod stuck in <code>Pending</code></td><td>No nodes have enough resources, or PVC not bound — check StorageClass exists</td></tr><tr><td>Pod stuck in <code>CrashLoopBackOff</code></td><td><code>kubectl logs &lt;pod&gt; --previous</code>; check env vars and volume mounts</td></tr><tr><td>Pod stuck in <code>ImagePullBackOff</code></td><td>Image name/tag wrong; registry unreachable; missing <code>imagePullSecret</code></td></tr><tr><td>Pod <code>OOMKilled</code></td><td>Container exceeded memory limit — <code>kubectl describe pod &lt;pod&gt;</code> shows <code>Reason: OOMKilled</code>; increase <code>limits.memory</code> or reduce app memory usage; use Goldilocks to right-size</td></tr><tr><td>Pod <code>OOMKilled</code> on node startup</td><td>Node-level <code>vm.max_map_count</code> too low (Elasticsearch etc.) — set <code>vm.max_map_count=524288</code> in sysctl</td></tr><tr><td>Namespace stuck <code>Terminating</code></td><td>Finalizers blocking deletion — `kubectl get namespace <ns> -o json \</td><td>jq '.spec.finalizers = []' \</td><td>kubectl replace --raw "/api/v1/namespaces/<ns>/finalize" -f -`</td></tr><tr><td><code>etcdserver: mvcc: database space exceeded</code></td><td>etcd DB too large — run compaction and defragmentation (see etcd Operations section)</td></tr><tr><td>Node <code>DiskPressure</code></td><td>Clean up unused images: <code>crictl rmi --prune</code>; check Longhorn replica space</td></tr></tbody></table>
+<hr>
+<h3 id="distribution-specific">Distribution-specific</h3>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>MicroK8s <code>permission denied</code></td><td><code>sudo usermod -aG microk8s $USER</code> then log out/in</td></tr><tr><td>MicroK8s addon enable fails</td><td><code>microk8s status</code>; <code>sudo snap logs microk8s</code></td></tr><tr><td>minikube start fails with Podman driver</td><td><code>systemctl --user start podman.socket</code>; <code>minikube delete</code> then re-create</td></tr><tr><td>minikube <code>ImagePullBackOff</code> after image load</td><td>Confirm image name matches exactly; check with <code>minikube image ls</code></td></tr><tr><td>k3s agent not joining</td><td>Verify token matches <code>/var/lib/rancher/k3s/server/node-token</code>; check firewall allows 6443</td></tr><tr><td>kubeadm node stays <code>NotReady</code></td><td>CNI not installed — apply CNI manifest immediately after <code>kubeadm init</code></td></tr><tr><td>kubeadm <code>certificate has expired</code></td><td><code>sudo kubeadm certs renew all &amp;&amp; sudo systemctl restart kubelet</code></td></tr><tr><td>kubeadm init: container runtime not running</td><td><code>sudo systemctl status containerd</code>; verify <code>--cri-socket</code> flag</td></tr></tbody></table>
+<hr>
+<h3 id="cilium-networking">Cilium / Networking</h3>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Pods can't reach each other after Cilium install</td><td>Delete stale config: <code>sudo rm /etc/cni/net.d/10-flannel.conflist</code>; restart pods</td></tr><tr><td><code>hubble observe</code> returns no flows</td><td><code>kubectl -n kube-system get pods -l k8s-app=hubble-relay</code></td></tr><tr><td>L7 policy not enforced</td><td>Verify <code>envoy.enabled=true</code> (implied by Cilium 1.17+); check <code>cilium-envoy</code> DaemonSet</td></tr><tr><td>WireGuard broken after node reboot</td><td>`lsmod</td><td>grep wireguard<code>; </code>sudo modprobe wireguard`</td></tr><tr><td>kube-proxy still running</td><td>k3s not started with <code>--disable-kube-proxy</code>; reinstall with the flag</td></tr><tr><td><code>cilium status</code> shows errors</td><td><code>cilium connectivity test</code>; check <code>cilium</code> DaemonSet pods in <code>kube-system</code></td></tr></tbody></table>
+<hr>
+<h3 id="ingress-gateway">Ingress / Gateway</h3>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Ingress returns 404</td><td>Verify <code>ingressClassName: nginx</code> matches controller; check service name and port</td></tr><tr><td>NGF GatewayClass not Accepted</td><td>Check NGF logs; confirm Gateway API CRDs installed at correct version</td></tr><tr><td>NGF returns 404 for all requests</td><td>Add <code>header_up Host {host}</code> inside Caddy's <code>reverse_proxy</code> block</td></tr><tr><td>NGF HTTPRoute not Accepted</td><td>Check <code>sectionName</code> matches listener; verify <code>parentRef</code> namespace; check ReferenceGrant</td></tr><tr><td>Cross-namespace route returning 503</td><td>ReferenceGrant must be in the <strong>target</strong> namespace; <code>kubectl get referencegrant -A</code></td></tr><tr><td>NGF NodePort 30080 not reachable</td><td><code>kubectl -n nginx-gateway get svc nginx-gateway-nginx</code> — confirm <code>80:30080/TCP</code></td></tr><tr><td>NGF data plane OOMKilled</td><td>Increase <code>nginx.container.resources.limits.memory</code> to <code>1Gi</code> minimum</td></tr><tr><td>ObservabilityPolicy CRD conflict on upgrade</td><td>Re-apply <code>deploy/crds.yaml</code> from the new NGF version</td></tr></tbody></table>
+<hr>
+<h3 id="storage">Storage</h3>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Longhorn volume stuck <code>Attaching</code></td><td><code>sudo systemctl status iscsid</code>; check Longhorn manager logs</td></tr><tr><td>Longhorn volume degraded</td><td>Replica on unavailable node — Longhorn rebuilds once node returns</td></tr><tr><td>PDB blocks node drain</td><td><code>kubectl describe pdb</code>; temporarily patch <code>minAvailable: 0</code> if safe, then restore</td></tr></tbody></table>
+<hr>
+<h3 id="gitops-delivery">GitOps & Delivery</h3>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>ArgoCD app OutOfSync after apply</td><td>Add <code>ignoreDifferences</code> to Application spec for server-side mutated fields</td></tr><tr><td>ArgoCD unable to connect to Forgejo</td><td>Use HTTPS; add <code>--insecure-skip-server-verification</code> for self-signed cert</td></tr><tr><td>Helm upgrade fails mid-release</td><td><code>helm rollback &lt;release&gt; -n &lt;ns&gt;</code>; if stuck <code>pending-upgrade</code>, delete the stuck secret</td></tr><tr><td>Argo Rollouts stuck at canary weight</td><td>Verify <code>canaryService</code> and <code>stableService</code> exist; <code>kubectl argo rollouts get rollout myapp</code></td></tr><tr><td>Kargo Warehouse not discovering images</td><td>Check image registry credentials; verify <code>semverConstraint</code> matches published tags</td></tr><tr><td>Kargo promotion stuck</td><td><code>kubectl -n myapp describe promotion &lt;n&gt;</code>; verify ArgoCD app name matches stage config</td></tr></tbody></table>
+<hr>
+<h3 id="secrets">Secrets</h3>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Sealed secret not decrypting</td><td>Sealing key must match — never delete <code>sealed-secrets-key</code>; back it up</td></tr><tr><td>ExternalSecret stuck <code>SecretSyncedError</code></td><td><code>kubectl describe externalsecret &lt;n&gt;</code> — wrong <code>remoteRef.key</code>, bad permissions, or unreachable backend</td></tr><tr><td>ESO not refreshing secret</td><td>Decrease <code>refreshInterval</code> for testing; check ESO operator logs</td></tr></tbody></table>
+<hr>
+<h3 id="autoscaling">Autoscaling</h3>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>HPA shows <code>&lt;unknown&gt;</code> for CPU</td><td><code>resources.requests.cpu</code> must be set — HPA calculates <code>current / requested</code></td></tr><tr><td>VPA and HPA conflict</td><td>Never run both on same metric (CPU/memory); HPA on external metrics + VPA for sizing</td></tr><tr><td>KEDA ScaledObject shows 0 replicas but queue has messages</td><td>Check <code>kubectl describe scaledobject</code> for trigger errors; verify secret ref for queue credentials</td></tr><tr><td>KEDA scale-to-zero doesn't recover</td><td>Check <code>pollingInterval</code> and <code>cooldownPeriod</code>; confirm trigger metric is reachable from KEDA namespace</td></tr><tr><td>Cluster Autoscaler not scaling up</td><td>Check <code>cluster-autoscaler-status</code> ConfigMap; ensure node group max not hit; check for unschedulable pods vs pending pods</td></tr><tr><td>StatefulSet pod stuck <code>Terminating</code></td><td>Check finalizers: `kubectl get pod <pod> -o json \</td><td>jq .metadata.finalizers`</td></tr><tr><td>Init container stuck <code>Init:0/1</code></td><td><code>kubectl logs &lt;pod&gt; -c &lt;init-container-name&gt;</code></td></tr></tbody></table>
+<hr>
+<h3 id="certificates">Certificates</h3>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>cert-manager Certificate stuck <code>Pending</code></td><td><code>kubectl describe certificate &lt;n&gt;</code> → look at <code>CertificateRequest</code> and <code>Order</code> events</td></tr><tr><td>cert-manager HTTP-01 challenge failing</td><td>Domain must resolve publicly; check <code>kubectl get challenges -A</code></td></tr><tr><td>cert-manager DNS-01 challenge failing</td><td>Check Cloudflare/provider credentials; <code>kubectl describe challenge -A</code>; verify TXT record propagated</td></tr><tr><td>cert-manager <code>ACME account not found</code></td><td>Delete and recreate the <code>ClusterIssuer</code> privateKeySecretRef secret</td></tr><tr><td>Certificate in <code>Ready: False</code> loop</td><td><code>kubectl describe certificaterequest -A</code>; look for rate limit errors from Let's Encrypt (429)</td></tr><tr><td>cert-manager pods crashlooping after CRD install</td><td>CRD version mismatch — reinstall with <code>--set installCRDs=true</code> or apply CRDs manually first</td></tr><tr><td>trust-manager bundle not appearing in namespace</td><td>Namespace missing <code>trust: enabled</code> label; <code>kubectl label namespace myapp trust=enabled</code></td></tr><tr><td>Internal CA cert not trusted by pods</td><td>trust-manager Bundle not applied; check <code>kubectl get bundle -A</code> and namespace label</td></tr><tr><td>kubeadm cert expiry breaking cluster</td><td><code>sudo kubeadm certs check-expiration</code>; renew with <code>sudo kubeadm certs renew all &amp;&amp; sudo systemctl restart kubelet</code></td></tr></tbody></table>
+<hr>
+<h3 id="observability">Observability</h3>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>k9s shows no resources</td><td>Check active namespace <code>:ns</code>; switch context <code>:ctx</code></td></tr><tr><td>Dashboard <code>Unauthorized</code></td><td><code>kubectl -n kubernetes-dashboard create token admin-user</code></td></tr><tr><td>Headlamp shows no clusters</td><td>Ensure kubeconfig mounted read-only; <code>server:</code> URL reachable from container</td></tr><tr><td>Loki shows no logs</td><td>Check Promtail/Alloy pods; verify <code>lokiAddress</code> matches Loki service name</td></tr><tr><td>Loki ingestion rate limit errors</td><td>Increase <code>ingestionRate</code> and <code>ingestionBurstSize</code> in Loki values; or reduce log volume with Promtail pipeline stages</td></tr><tr><td>Tempo shows no traces</td><td>Check OTel Collector receiving spans; verify <code>endpoint</code> in Instrumentation CRD</td></tr><tr><td>Prometheus scraping fails (<code>connection refused</code>)</td><td>Target pod has no <code>metrics</code> port; ServiceMonitor label doesn't match <code>serviceMonitorSelector</code>; check <code>kubectl get servicemonitor -A</code></td></tr><tr><td>Grafana datasource "no data" for Prometheus</td><td>URL must be <code>http://kube-prometheus-stack-prometheus.monitoring.svc:9090</code>; test with <strong>Explore</strong> tab</td></tr><tr><td>AlertManager not sending</td><td>Config YAML invalid — run <code>amtool check-config alertmanager.yaml</code>; check inhibit rules aren't silencing everything</td></tr><tr><td>PrometheusRule alerts not showing in AlertManager</td><td>Labels must include <code>release: kube-prometheus-stack</code>; check <code>kubectl get prometheusrule -A</code></td></tr><tr><td>SonarQube / Elasticsearch OOM</td><td><code>vm.max_map_count=524288</code> on host; restart pod</td></tr></tbody></table>
+<hr>
+<h3 id="etcd">etcd</h3>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>etcdserver: mvcc: database space exceeded</code></td><td>Run compact + defrag (see etcd Operations section); increase <code>--quota-backend-bytes</code></td></tr><tr><td>etcd leader election constantly changing</td><td>Clock skew between nodes — ensure NTP is synced: <code>timedatectl status</code>; check <code>etcdctl endpoint status</code></td></tr><tr><td>etcd cluster has no quorum (2 of 3 nodes down)</td><td>Force new cluster from snapshot: <code>k3s server --cluster-reset</code>; restore latest etcd snapshot</td></tr><tr><td>etcd high latency (>100ms p99)</td><td>Disk I/O contention — move etcd data to a dedicated SSD; check <code>etcdctl endpoint status --write-out=table</code></td></tr><tr><td>k3s etcd snapshot restore fails</td><td>Ensure k3s is stopped (<code>systemctl stop k3s</code>); correct path in <code>--cluster-reset-restore-path</code>; restart k3s after reset</td></tr><tr><td>etcd <code>request timeout</code> in API server logs</td><td>etcd overloaded; check <code>etcd_disk_wal_fsync_duration_seconds_bucket</code> in Prometheus</td></tr></tbody></table>
+<hr>
+<h3 id="policy-hardening">Policy & Hardening</h3>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>conftest passes locally but fails in CI</td><td>Ensure <code>--policy</code> path and <code>--all-namespaces</code> flag match CI config</td></tr><tr><td>kubeconform fails on CRD resources</td><td>Add <code>-schema-location</code> for CRD catalog URL; use <code>--ignore-missing-schemas</code> during migration</td></tr><tr><td>kube-bench says API server flags missing</td><td>For k3s, set flags via <code>kube-apiserver-arg:</code> in <code>/etc/rancher/k3s/config.yaml</code></td></tr><tr><td>PSA blocks system namespace pods</td><td>Add <code>pod-security.kubernetes.io/enforce=privileged</code> to <code>kube-system</code> before enforcing elsewhere</td></tr><tr><td>Kyverno webhook times out</td><td><code>kubectl get pods -n kyverno</code>; scale replicas; check <code>--webhookTimeout</code></td></tr></tbody></table>
+<hr>
+<h3 id="multi-tenancy">Multi-Tenancy</h3>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>vCluster pods stuck Pending</td><td>Check host cluster has resources; verify <code>storageClass</code> exists in host namespace</td></tr><tr><td>vCluster kubeconfig connection refused</td><td>Ensure port-forward is running: <code>vcluster connect &lt;name&gt; -n &lt;ns&gt;</code></td></tr><tr><td>Kubernetes Audit logs not appearing in Loki</td><td>Verify Alloy <code>kubernetes_audit</code> config; check <code>--audit-log-path</code> in k3s config</td></tr></tbody></table>
+<hr>
+<h3 id="multi-cluster-registry">Multi-Cluster & Registry</h3>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Submariner tunnel not establishing</td><td>Check UDP 4500/4800 between nodes; verify broker token; <code>subctl diagnose all</code></td></tr><tr><td>Zot push rejected 401</td><td>Verify htpasswd credentials; check <code>auth.htpasswd.path</code> in config.json</td></tr><tr><td>Admiralty pods stuck Pending</td><td>Check <code>MultiClusterSchedulingProfile</code> on target cluster; verify Admiralty version compatibility</td></tr><tr><td>Harbor push fails: <code>unknown blob</code></td><td>Harbor storage PVC full — check <code>kubectl -n harbor get pvc</code></td></tr><tr><td>Harbor DB migration error on upgrade</td><td>Check <code>harbor-database</code> pod logs; run migration job manually if needed</td></tr></tbody></table>
+<hr>
+<h3 id="alerting">Alerting</h3>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>AlertManager not sending alerts</td><td>Check <code>kubectl -n monitoring get pods</code>; view config: <code>kubectl -n monitoring get secret alertmanager-main -o yaml</code></td></tr><tr><td>PrometheusRule not picked up</td><td>Labels must match <code>prometheus.prometheusSpec.ruleSelector</code>; add <code>release: kube-prometheus-stack</code> label</td></tr><tr><td>ServiceMonitor metrics missing</td><td>Labels must match <code>prometheus.serviceMonitorSelector</code>; check <code>kubectl get servicemonitor -A</code></td></tr><tr><td>Grafana OnCall not receiving alerts</td><td>Verify Grafana alert notification policy points to OnCall integration</td></tr><tr><td>Beyla shows no metrics</td><td>Check DaemonSet is running; verify kernel ≥5.8; check eBPF capabilities (<code>SYS_ADMIN</code> or CAP_BPF)</td></tr></tbody></table>
+<hr>
+<h2 id="troubleshooting-advanced-debug-flows">Troubleshooting — Advanced Debug Flows</h2>
+<h3 id="kubectl-quick-debug-flows">kubectl Quick Debug Flows</h3>
+<pre><code class="language-bash"># ---- Pod won't start ----
+kubectl describe pod &lt;pod&gt; -n myapp           # check Events section
+kubectl logs &lt;pod&gt; -n myapp --previous        # logs from last crash
+kubectl get events -n myapp --sort-by='.lastTimestamp' | tail -20
+
+# ---- Service not reachable ----
+# 1. Confirm endpoints exist
+kubectl get endpoints myapp -n myapp          # should show pod IPs
+# 2. Test from inside the cluster
+kubectl run curl --rm -it --restart=Never --image=curlimages/curl -- \
+  curl -v http://myapp.myapp.svc.cluster.local:8080/health
+# 3. Check NetworkPolicy isn't blocking
+hubble observe --to-pod myapp/&lt;pod&gt; --verdict DROPPED
+
+# ---- Node is NotReady ----
+kubectl describe node &lt;node&gt;                  # check Conditions section
+ssh &lt;node&gt; 'sudo journalctl -u kubelet -n 50'
+ssh &lt;node&gt; 'sudo systemctl status containerd'
+
+# ---- PVC stuck Pending ----
+kubectl describe pvc myapp-data -n myapp      # check Events
+kubectl get sc                                # confirm StorageClass exists
+kubectl get pods -n longhorn-system           # check CSI driver pods
+
+# ---- OOMKilled ----
+kubectl describe pod &lt;pod&gt; -n myapp | grep -A5 &quot;OOMKilled&quot;
+kubectl top pod &lt;pod&gt; -n myapp --containers
+# Fix: increase limits or fix memory leak
+
+# ---- CrashLoopBackOff ----
+kubectl logs &lt;pod&gt; -n myapp --previous
+kubectl exec -it &lt;pod&gt; -n myapp -- /bin/sh    # if shell available
+kubectl debug -it &lt;pod&gt; --image=busybox --target=myapp -n myapp  # if distroless
+
+# ---- Certificate not provisioning ----
+kubectl get certificate -n myapp
+kubectl get certificaterequest -n myapp
+kubectl get order -n myapp                    # ACME HTTP-01 / DNS-01 state
+kubectl get challenge -n myapp               # challenge in progress?
+kubectl describe challenge -n myapp          # detailed ACME error
+
+# ---- ArgoCD OutOfSync (ignoring normal fields) ----
+# ignoreDifferences for fields that Kubernetes/operators mutate:
+spec:
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas           # if HPA manages replicas
+    - group: &quot;&quot;
+      kind: Service
+      jsonPointers:
+        - /spec/clusterIP          # assigned by Kubernetes
+        - /spec/clusterIPs</code></pre>
+<h3 id="resource-debugging-checklist">Resource Debugging Checklist</h3>
+<pre><code class="language-bash"># Full resource dump for a namespace — useful for incident handoff
+kubectl get all,cm,secret,pvc,ingress,httproute,certificate,externalsecret \
+  -n myapp -o yaml &gt; /tmp/myapp-snapshot-$(date +%Y%m%d-%H%M).yaml
+
+# Compare two snapshots
+diff /tmp/myapp-snapshot-before.yaml /tmp/myapp-snapshot-after.yaml
+
+# Cluster-wide resource count (spot runaway resource creation)
+kubectl get pods -A --no-headers | wc -l
+kubectl get pvc -A --no-headers | wc -l
+
+# Top nodes and pods
+kubectl top nodes
+kubectl top pods -A --sort-by=memory | head -20
+kubectl top pods -A --sort-by=cpu | head -20
+
+# Find who owns a pod (trace back to Deployment/StatefulSet)
+kubectl tree pod myapp-xyz -n myapp    # requires krew tree plugin</code></pre>
+<hr></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

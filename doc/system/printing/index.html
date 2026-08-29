@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Printing &amp; Scanning — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Printing &amp; Scanning  Shanios ships a complete printing and scanning stack out of the box — CUPS, a wide range of vendor drivers, and driverless IPP/network…">
+  <meta name="description" id="meta-desc"     content="Shanios ships a complete printing and scanning stack out of the box — CUPS, a wide range of vendor drivers, and driverless IPP/network scanning support are…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Printing &amp; Scanning">
-  <meta property="og:description" id="og-desc"    content="Printing &amp; Scanning  Shanios ships a complete printing and scanning stack out of the box — CUPS, a wide range of vendor drivers, and driverless IPP/network…">
+  <meta property="og:description" id="og-desc"    content="Shanios ships a complete printing and scanning stack out of the box — CUPS, a wide range of vendor drivers, and driverless IPP/network scanning support are…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/system/printing/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Printing &amp; Scanning">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Printing &amp; Scanning">
-  <meta name="twitter:description" id="tw-desc"  content="Printing &amp; Scanning  Shanios ships a complete printing and scanning stack out of the box — CUPS, a wide range of vendor drivers, and driverless IPP/network…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios ships a complete printing and scanning stack out of the box — CUPS, a wide range of vendor drivers, and driverless IPP/network scanning support are…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Printing & Scanning","description":"Printing & Scanning  Shanios ships a complete printing and scanning stack out of the box — CUPS, a wide range of vendor drivers, and driverless IPP/network…","url":"https://docs.shani.dev/doc/system/printing/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Printing & Scanning","description":"Shanios ships a complete printing and scanning stack out of the box — CUPS, a wide range of vendor drivers, and driverless IPP/network scanning support are…","url":"https://docs.shani.dev/doc/system/printing/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Printing & Scanning","item":"https://docs.shani.dev/doc/system/printing/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,11 +215,11 @@
         <h1 class="doc-title">Printing &amp; Scanning</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">System</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Shanios ships a complete printing and scanning stack out of the box — CUPS, a wide range of vendor drivers, and driverless IPP/network scanning support are all pre-installed and active from first boot. No package installation is needed to add most printers or scanners.</p>
-<h2>What's Pre-Installed</h2>
+<h2 id="whats-pre-installed">What's Pre-Installed</h2>
 <ul>
 <li><strong>Print system:</strong> CUPS 2.4 with <code>cups-filters</code>, <code>cups-pdf</code> (print-to-PDF), <code>cups-browsed</code> (automatic network printer discovery), <code>cups-pk-helper</code> (Polkit integration for GUI printer management), <code>ipp-usb</code> (driverless IPP-over-USB for AirPrint-capable printers)</li>
 <li><strong>Drivers:</strong> <code>hplip-minimal</code> (HP), <code>cnijfilter2</code> (Canon), <code>brlaser</code> (Brother laser), <code>foo2zjs-nightly</code> (various ZjStream-based printers), <code>gutenprint</code> and <code>splix</code> (broad generic/open-source coverage), the full Foomatic database (<code>foomatic-db</code>, <code>foomatic-db-engine</code>, <code>foomatic-db-ppds</code>, <code>foomatic-db-gutenprint-ppds</code>) for wide legacy driver coverage, plus <code>ghostscript</code>, <code>gsfonts</code>, and <code>a2ps</code> for PostScript/text rendering</li>
@@ -225,20 +227,20 @@
 <li><strong>GUI apps:</strong> GNOME Simple Scan / KDE Skanlite for scanning; printer management is built into each desktop's Settings app (KDE Plasma's is provided by <code>print-manager</code>, integrated into System Settings and showing a print-queue icon in the system tray while jobs are active); <code>system-config-printer</code> is also available for advanced CUPS configuration</li>
 </ul>
 <p><code>cups.socket</code>, <code>cups-browsed.service</code>, <code>saned.socket</code>, and <code>ipp-usb.service</code> are all enabled by default — nothing to turn on manually.</p>
-<h2>Adding a Printer</h2>
+<h2 id="adding-a-printer">Adding a Printer</h2>
 <p><strong>GUI (recommended):</strong></p>
 <ul>
 <li>GNOME: Settings → Printers → Add Printer</li>
 <li>KDE Plasma: System Settings → Printers → Add a New Printer</li>
 </ul>
-<p>Both auto-discover printers on the local network via <code>cups-browsed</code> (mDNS/DNS-SD through <a href="avahi">Avahi</a>) and USB-connected printers via <code>ipp-usb</code>. For most modern printers, discovery and driver selection happen automatically.</p>
+<p>Both auto-discover printers on the local network via <code>cups-browsed</code> (mDNS/DNS-SD through <a href="../networking/avahi.md">Avahi</a>) and USB-connected printers via <code>ipp-usb</code>. For most modern printers, discovery and driver selection happen automatically.</p>
 <p><strong>CLI / advanced:</strong> CUPS also exposes a local web UI at <a href="http://localhost:631">http://localhost:631</a> for adding printers, managing queues, and tweaking driver options — useful when you need PPD-level control the GUI doesn't expose. <code>system-config-printer</code> provides a more traditional standalone GUI for the same tasks.</p>
 <pre><code class="language-bash"># List configured printers
 lpstat -p -d
 
 # Add a printer manually with a specific driver (rarely needed — GUI/auto-discovery covers most cases)
 sudo lpadmin -p MyPrinter -E -v ipp://192.168.1.50/ipp/print -m everywhere</code></pre>
-<h2>Managing Print Jobs</h2>
+<h2 id="managing-print-jobs">Managing Print Jobs</h2>
 <pre><code class="language-bash"># Print a file
 lp document.pdf
 lp -d MyPrinter -o sides=two-sided-long-edge document.pdf
@@ -254,7 +256,7 @@ cancel &lt;job-id&gt;
 # Pause / resume a printer
 cupsdisable MyPrinter
 cupsenable MyPrinter</code></pre>
-<h2>Scanning</h2>
+<h2 id="scanning">Scanning</h2>
 <p><strong>GUI:</strong> Simple Scan (GNOME) or Skanlite (KDE) — both detect USB and network scanners automatically via SANE and <code>sane-airscan</code>.</p>
 <pre><code class="language-bash"># List detected scanners
 scanimage -L
@@ -263,17 +265,17 @@ scanimage -L
 scanimage --format=png -o scan.png --resolution=300
 
 # Driverless network scanner discovery (eSCL/AirScan) is handled by sane-airscan automatically</code></pre>
-<p>If a network scanner doesn't appear, confirm it's on the same subnet and that Avahi/mDNS traffic isn't being blocked — see <a href="../networking/firewalld">Firewall (firewalld)</a> if you've added custom rules.</p>
-<h2>Groups & Permissions</h2>
-<p>New users are automatically added to the <code>cups</code>, <code>lp</code>, and <code>scanner</code> groups at creation time via <code>/etc/shani-extra-groups</code> — see <a href="../updates/user-setup">User Provisioning</a> for the full mechanism. No manual group changes are needed for printing or scanning to work for a normal user account.</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | Printer not discovered | Confirm it's on the same network/subnet; check <code>cups-browsed</code> is running (<code>systemctl status cups-browsed</code>); check the CUPS web UI at <code>localhost:631</code> | | USB printer not detected | Check <code>lsusb</code>; confirm <code>ipp-usb.service</code> is running for AirPrint-capable USB printers | | Wrong or missing driver | Check the CUPS web UI's driver search — the Foomatic/Gutenprint databases cover most non-vendor-specific printers; some vendor drivers (e.g. Epson) are not pre-installed and must be added manually | | Print jobs stuck in queue | <code>cupsenable &lt;printer&gt;</code> if paused; check <code>journalctl -u cups</code> for filter errors | | Scanner not detected | Run <code>scanimage -L</code>; for network scanners, confirm <code>sane-airscan</code> supports the device's protocol (eSCL/AirScan or WSD) | | Can't manage printers without a password prompt every time | This is expected — <code>cups-pk-helper</code> gates printer administration via Polkit; see <a href="../security/permissions">Permissions & Authorization</a> |</p>
-<h2>See Also</h2>
+<p>If a network scanner doesn't appear, confirm it's on the same subnet and that Avahi/mDNS traffic isn't being blocked — see <a href="../networking/firewalld.md">Firewall (firewalld)</a> if you've added custom rules.</p>
+<h2 id="groups-permissions">Groups & Permissions</h2>
+<p>New users are automatically added to the <code>cups</code>, <code>lp</code>, and <code>scanner</code> groups at creation time via <code>/etc/shani-extra-groups</code> — see <a href="../updates/user-setup.md">User Provisioning</a> for the full mechanism. No manual group changes are needed for printing or scanning to work for a normal user account.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Printer not discovered</td><td>Confirm it's on the same network/subnet; check <code>cups-browsed</code> is running (<code>systemctl status cups-browsed</code>); check the CUPS web UI at <code>localhost:631</code></td></tr><tr><td>USB printer not detected</td><td>Check <code>lsusb</code>; confirm <code>ipp-usb.service</code> is running for AirPrint-capable USB printers</td></tr><tr><td>Wrong or missing driver</td><td>Check the CUPS web UI's driver search — the Foomatic/Gutenprint databases cover most non-vendor-specific printers; some vendor drivers (e.g. Epson) are not pre-installed and must be added manually</td></tr><tr><td>Print jobs stuck in queue</td><td><code>cupsenable &lt;printer&gt;</code> if paused; check <code>journalctl -u cups</code> for filter errors</td></tr><tr><td>Scanner not detected</td><td>Run <code>scanimage -L</code>; for network scanners, confirm <code>sane-airscan</code> supports the device's protocol (eSCL/AirScan or WSD)</td></tr><tr><td>Can't manage printers without a password prompt every time</td><td>This is expected — <code>cups-pk-helper</code> gates printer administration via Polkit; see <a href="../security/permissions.md">Permissions & Authorization</a></td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="hardware">Hardware</a> — general device detection and troubleshooting</li>
-<li><a href="../networking/avahi">Avahi (mDNS)</a> — the discovery mechanism behind network printer/scanner auto-detection</li>
-<li><a href="../networking/firewalld">Firewall (firewalld)</a> — if custom firewall rules block discovery traffic</li>
-<li><a href="../updates/user-setup">User Provisioning</a> — how the <code>cups</code>/<code>lp</code>/<code>scanner</code> groups are assigned</li>
+<li><a href="../networking/avahi.md">Avahi (mDNS)</a> — the discovery mechanism behind network printer/scanner auto-detection</li>
+<li><a href="../networking/firewalld.md">Firewall (firewalld)</a> — if custom firewall rules block discovery traffic</li>
+<li><a href="../updates/user-setup.md">User Provisioning</a> — how the <code>cups</code>/<code>lp</code>/<code>scanner</code> groups are assigned</li>
 <li><a href="https://blog.shani.dev/post/shani-os-printing-and-scanning">Printing and Scanning on Shani OS</a> — extended walkthrough with per-manufacturer driver notes</li>
 </ul></div>
     </div>

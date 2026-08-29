@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Firewall (firewalld) — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Firewall (firewalld)  firewalld is active by default on Shani OS with a restrictive inbound policy. It manages nftables under the hood using a zone-based m…">
+  <meta name="description" id="meta-desc"     content="firewalld is active by default on Shani OS with a restrictive inbound policy. It manages nftables under the hood using a zone-based model — every interface…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Firewall (firewalld)">
-  <meta property="og:description" id="og-desc"    content="Firewall (firewalld)  firewalld is active by default on Shani OS with a restrictive inbound policy. It manages nftables under the hood using a zone-based m…">
+  <meta property="og:description" id="og-desc"    content="firewalld is active by default on Shani OS with a restrictive inbound policy. It manages nftables under the hood using a zone-based model — every interface…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/networking/firewalld/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Firewall (firewalld)">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Firewall (firewalld)">
-  <meta name="twitter:description" id="tw-desc"  content="Firewall (firewalld)  firewalld is active by default on Shani OS with a restrictive inbound policy. It manages nftables under the hood using a zone-based m…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="firewalld is active by default on Shani OS with a restrictive inbound policy. It manages nftables under the hood using a zone-based model — every interface…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Firewall (firewalld)","description":"Firewall (firewalld)  firewalld is active by default on Shani OS with a restrictive inbound policy. It manages nftables under the hood using a zone-based m…","url":"https://docs.shani.dev/doc/networking/firewalld/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Firewall (firewalld)","description":"firewalld is active by default on Shani OS with a restrictive inbound policy. It manages nftables under the hood using a zone-based model — every interface…","url":"https://docs.shani.dev/doc/networking/firewalld/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Firewall (firewalld)","item":"https://docs.shani.dev/doc/networking/firewalld/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,14 +215,14 @@
         <h1 class="doc-title">Firewall (firewalld)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Networking</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>firewalld is <strong>active by default</strong> on Shani OS with a restrictive inbound policy. It manages nftables under the hood using a zone-based model — every interface belongs to a zone, and each zone has its own allow/deny rules. Do not mix direct <code>nft</code> commands with firewalld rules as they will conflict.</p>
 <p>Pre-configured zones for KDE Connect, GSConnect, Waydroid, and Tailscale are included out of the box.</p>
-<p>| Zone | Default assignment | Policy | |------|--------------------|--------| | <code>public</code> | All physical NICs | Deny inbound, allow outbound | | <code>trusted</code> | <code>waydroid0</code> | Accept all |</p>
-<p>---</p>
-<h2>Status & Inspection</h2>
+<table><thead><tr><th>Zone</th><th>Default assignment</th><th>Policy</th></tr></thead><tbody><tr><td><code>public</code></td><td>All physical NICs</td><td>Deny inbound, allow outbound</td></tr><tr><td><code>trusted</code></td><td><code>waydroid0</code></td><td>Accept all</td></tr></tbody></table>
+<hr>
+<h2 id="status-inspection">Status & Inspection</h2>
 <pre><code class="language-bash"># Confirm firewall is running
 sudo firewall-cmd --state
 
@@ -238,8 +240,8 @@ sudo firewall-cmd --get-zone-of-interface=eth0
 
 # Show the default zone
 sudo firewall-cmd --get-default-zone</code></pre>
-<p>---</p>
-<h2>Opening Services & Ports</h2>
+<hr>
+<h2 id="opening-services-ports">Opening Services & Ports</h2>
 <p>The <code>--permanent</code> flag writes the rule to disk so it survives reboots. Always follow with <code>--reload</code> to apply immediately to the running firewall.</p>
 <pre><code class="language-bash"># Allow a named service (uses built-in service definitions)
 sudo firewall-cmd --add-service=http --permanent
@@ -260,8 +262,8 @@ sudo firewall-cmd --reload
 
 # List all available pre-defined service names
 sudo firewall-cmd --get-services</code></pre>
-<p>---</p>
-<h2>Zones</h2>
+<hr>
+<h2 id="zones">Zones</h2>
 <p>Zones let you apply different rules to different network interfaces or source IP ranges — useful when a LAN interface and a VPN interface should have different trust levels.</p>
 <pre><code class="language-bash"># Move an interface to a different zone
 sudo firewall-cmd --zone=trusted --change-interface=tailscale0 --permanent
@@ -276,8 +278,8 @@ sudo firewall-cmd --new-zone=homelab --permanent
 sudo firewall-cmd --reload
 sudo firewall-cmd --zone=homelab --add-service=http --permanent
 sudo firewall-cmd --reload</code></pre>
-<p>---</p>
-<h2>Rich Rules</h2>
+<hr>
+<h2 id="rich-rules">Rich Rules</h2>
 <p>Rich rules allow more granular conditions — source IP, destination port, logging, and rate limiting.</p>
 <pre><code class="language-bash"># Allow SSH only from your LAN
 sudo firewall-cmd --add-rich-rule='rule family=&quot;ipv4&quot; source address=&quot;192.168.1.0/24&quot; service name=&quot;ssh&quot; accept' --permanent
@@ -292,21 +294,21 @@ sudo firewall-cmd --add-rich-rule='rule service name=&quot;https&quot; limit val
 sudo firewall-cmd --add-rich-rule='rule family=&quot;ipv4&quot; source address=&quot;10.0.0.0/8&quot; log prefix=&quot;BLOCKED: &quot; level=&quot;warning&quot; drop' --permanent
 
 sudo firewall-cmd --reload</code></pre>
-<p>---</p>
-<h2>Port Forwarding</h2>
+<hr>
+<h2 id="port-forwarding">Port Forwarding</h2>
 <pre><code class="language-bash"># Forward incoming port 80 to localhost:8080
 sudo firewall-cmd --add-forward-port=port=80:proto=tcp:toport=8080:toaddr=127.0.0.1 --permanent
 sudo firewall-cmd --reload</code></pre>
-<p>---</p>
-<h2>Logging</h2>
+<hr>
+<h2 id="logging">Logging</h2>
 <pre><code class="language-bash"># Enable logging of dropped packets
 sudo firewall-cmd --set-log-denied=all --permanent
 sudo firewall-cmd --reload
 
 # View firewall-related kernel messages
 sudo journalctl -k | grep -i &quot;nft\|firewall\|REJECT\|DROP&quot;</code></pre>
-<p>---</p>
-<h2>Runtime vs Permanent</h2>
+<hr>
+<h2 id="runtime-vs-permanent">Runtime vs Permanent</h2>
 <pre><code class="language-bash"># Show rules currently active (runtime)
 sudo firewall-cmd --list-all
 
@@ -319,23 +321,23 @@ sudo firewall-cmd --reload
 # Make the current runtime config permanent without re-running each command
 sudo firewall-cmd --runtime-to-permanent</code></pre>
 <p>Omit <code>--permanent</code> to test a rule without committing it — it disappears on the next <code>--reload</code> or reboot.</p>
-<p>---</p>
-<h2>GUI</h2>
+<hr>
+<h2 id="gui">GUI</h2>
 <pre><code class="language-bash"># Launch the graphical firewall manager (pre-installed)
 sudo firewall-config</code></pre>
 <p><strong>KDE Plasma</strong> additionally has <strong>Plasma Firewall</strong> (pre-installed), a native module in System Settings that's a simpler front-end to the same firewalld backend — good for basic zone/service toggling; use <code>firewall-config</code> or the CLI above for rich rules and advanced zone configuration.</p>
-<p>---</p>
-<h2>Common Port Reference</h2>
-<p>| Service | Port | Protocol | |---------|------|----------| | SSH | 22 | TCP | | HTTP | 80 | TCP | | HTTPS | 443 | TCP | | DNS | 53 | TCP/UDP | | WireGuard | 51820 | UDP | | Tailscale | 41641 | UDP | | Syncthing | 22000 | TCP/UDP | | KDE Connect | 1714–1764 | TCP/UDP | | Minecraft | 25565 | TCP |</p>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | Service reachable locally but not from LAN | Check <code>--list-all</code> to confirm the port/service is open; verify the interface is in the correct zone | | Rule added but not working | Did you forget <code>--reload</code>? Runtime and permanent configs can diverge | | <code>ALREADY_ENABLED</code> error | The rule already exists permanently; inspect with <code>--list-all --permanent</code> | | Port open but connection refused | The service itself may not be running; check <code>systemctl status &lt;service&gt;</code> | | Rules disappear after reboot | Rule was added without <code>--permanent</code> | | fail2ban bans not appearing in firewall | Confirm fail2ban's backend is <code>firewalld</code>; check <code>sudo firewall-cmd --direct --get-all-rules</code> | | Waydroid has no network | Check <code>waydroid0</code> is in the trusted zone: <code>sudo firewall-cmd --get-zone-of-interface=waydroid0</code> | | Podman/container networking broken | Add the container bridge to trusted: <code>sudo firewall-cmd --zone=trusted --add-interface=podman0 --permanent</code> |</p>
-<p>---</p>
-<h2>See Also</h2>
+<hr>
+<h2 id="common-port-reference">Common Port Reference</h2>
+<table><thead><tr><th>Service</th><th>Port</th><th>Protocol</th></tr></thead><tbody><tr><td>SSH</td><td>22</td><td>TCP</td></tr><tr><td>HTTP</td><td>80</td><td>TCP</td></tr><tr><td>HTTPS</td><td>443</td><td>TCP</td></tr><tr><td>DNS</td><td>53</td><td>TCP/UDP</td></tr><tr><td>WireGuard</td><td>51820</td><td>UDP</td></tr><tr><td>Tailscale</td><td>41641</td><td>UDP</td></tr><tr><td>Syncthing</td><td>22000</td><td>TCP/UDP</td></tr><tr><td>KDE Connect</td><td>1714–1764</td><td>TCP/UDP</td></tr><tr><td>Minecraft</td><td>25565</td><td>TCP</td></tr></tbody></table>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Service reachable locally but not from LAN</td><td>Check <code>--list-all</code> to confirm the port/service is open; verify the interface is in the correct zone</td></tr><tr><td>Rule added but not working</td><td>Did you forget <code>--reload</code>? Runtime and permanent configs can diverge</td></tr><tr><td><code>ALREADY_ENABLED</code> error</td><td>The rule already exists permanently; inspect with <code>--list-all --permanent</code></td></tr><tr><td>Port open but connection refused</td><td>The service itself may not be running; check <code>systemctl status &lt;service&gt;</code></td></tr><tr><td>Rules disappear after reboot</td><td>Rule was added without <code>--permanent</code></td></tr><tr><td>fail2ban bans not appearing in firewall</td><td>Confirm fail2ban's backend is <code>firewalld</code>; check <code>sudo firewall-cmd --direct --get-all-rules</code></td></tr><tr><td>Waydroid has no network</td><td>Check <code>waydroid0</code> is in the trusted zone: <code>sudo firewall-cmd --get-zone-of-interface=waydroid0</code></td></tr><tr><td>Podman/container networking broken</td><td>Add the container bridge to trusted: <code>sudo firewall-cmd --zone=trusted --add-interface=podman0 --permanent</code></td></tr></tbody></table>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="fail2ban">fail2ban</a> — brute-force protection layered on top of the firewall</li>
 <li><a href="wireguard">WireGuard</a> — opening the WireGuard UDP port</li>
-<li><a href="features">Security Features</a> — overview of all security layers</li>
+<li><a href="../security/features.md">Security Features</a> — overview of all security layers</li>
 </ul></div>
     </div>
 

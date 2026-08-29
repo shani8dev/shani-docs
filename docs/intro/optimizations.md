@@ -1,7 +1,7 @@
 ---
 title: System Optimizations
 section: Introduction
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # System Optimizations
@@ -66,6 +66,42 @@ Shanios includes extensive performance, gaming, and reliability optimizations ou
 
 All maintenance operations are scheduled during low-usage periods and use minimal system resources.
 
+### Verifying the Optimizations
+
+Everything above is observable on a running system:
+
+```bash
+# ZRAM: compressed in-memory swap
+zramctl
+
+# Swappiness and page-lock tuning
+sysctl vm.swappiness vm.page_lock_unfairness
+
+# Maintenance timers: when they last ran and what's pending
+systemctl list-timers --all | grep -E 'btrfs|flatpak|shani'
+
+# bees deduplication status (unit is keyed by filesystem UUID)
+systemctl status 'beesd@*'
+
+# GameMode daemon
+systemctl status gamemoded
+
+# Raised limits
+ulimit -n && ulimit -u
+
+# MGLRU and hugepage settings
+cat /sys/kernel/mm/lru_gen/enabled
+cat /sys/kernel/mm/transparent_hugepage/enabled
+```
+
 > **Note:** All these optimizations are pre-configured and active from first boot. No manual configuration, tweaking, or performance tuning required.
 
-> For the full security configuration — AppArmor, firewalld, kernel module blacklist, LSM stack, and hardening parameters — see [Security Features](../security/features).
+> For the full security configuration — AppArmor, firewalld, kernel module blacklist, LSM stack, and hardening parameters — see [Security Features](../security/features.md).
+
+## See Also
+
+- [What is Shanios?](../intro/what-is-shanios.md) — the design philosophy behind these defaults
+- [Btrfs Deep Dive](../arch/btrfs.md) — scrub, balance, and deduplication internals
+- [Gaming](../software/gaming.md) — controllers, GameMode, and the full gaming stack
+- [Power Management](https://blog.shani.dev/post/shani-os-power-management) — battery and thermals blog guide
+- [Security Features](../security/features.md) — hardening that runs alongside these optimizations

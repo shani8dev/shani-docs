@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>DevOps — Code Hosting &amp; CI/CD — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Table of Contents Code Hosting CI/CD Container &amp; Image Tools Kubernetes &amp; Orchestration HA Clusters Infrastructure as Code Artifact &amp; Dependency Management…">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/servers/devops/ci-cd/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="DevOps — Code Hosting &amp; CI/CD">
+  <meta property="og:description" id="og-desc"    content="Table of Contents Code Hosting CI/CD Container &amp; Image Tools Kubernetes &amp; Orchestration HA Clusters Infrastructure as Code Artifact &amp; Dependency Management…">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/devops/ci-cd/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="DevOps — Code Hosting &amp; CI/CD">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="DevOps — Code Hosting &amp; CI/CD">
+  <meta name="twitter:description" id="tw-desc"  content="Table of Contents Code Hosting CI/CD Container &amp; Image Tools Kubernetes &amp; Orchestration HA Clusters Infrastructure as Code Artifact &amp; Dependency Management…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"DevOps — Code Hosting & CI/CD","description":"Table of Contents Code Hosting CI/CD Container & Image Tools Kubernetes & Orchestration HA Clusters Infrastructure as Code Artifact & Dependency Management…","url":"https://docs.shani.dev/doc/servers/devops/ci-cd/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"DevOps — Code Hosting & CI/CD","item":"https://docs.shani.dev/doc/servers/devops/ci-cd/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">DevOps — Code Hosting &amp; CI/CD</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><h2 id="table-of-contents">Table of Contents</h2>
+<ul>
+<li><a href="#code-hosting">Code Hosting</a></li>
+<li><a href="#cicd">CI/CD</a></li>
+<li><a href="#container--image-tools">Container & Image Tools</a></li>
+<li><a href="#kubernetes--orchestration">Kubernetes & Orchestration</a></li>
+<li><a href="#ha-clusters">HA Clusters</a></li>
+<li><a href="#infrastructure-as-code">Infrastructure as Code</a></li>
+<li><a href="#artifact--dependency-management">Artifact & Dependency Management</a></li>
+<li><a href="#service-discovery--orchestration">Service Discovery & Orchestration</a></li>
+<li><a href="#developer-environments--utilities">Developer Environments & Utilities</a></li>
+<li><a href="#internal-platforms">Internal Platforms</a></li>
+<li><a href="#hardware--embedded">Hardware & Embedded</a></li>
+<li><a href="#iot--scada-tools">IoT & SCADA Tools</a></li>
+<li><a href="#security-cli-tools">Security CLI Tools</a></li>
+<li><a href="#education--training-platforms">Education & Training Platforms</a></li>
+<li><a href="#key-concepts">Key Concepts</a></li>
+</ul>
+<hr>
+<h2 id="code-hosting">Code Hosting</h2>
+<blockquote>Full setup, compose files, and common operations for code hosting tools live in the <a href="https://docs.shani.dev/doc/servers/devtools">Developer Tools wiki</a>. This section covers DevOps integration patterns.</blockquote>
+<h3 id="gitea-forgejo">Gitea / Forgejo</h3>
+<p>For compose files, CLI operations, SSH setup, and Gitea Classroom patterns, see the <a href="https://docs.shani.dev/doc/servers/devtools#gitea--forgejo">Developer Tools wiki → Gitea & Forgejo</a>.</p>
+<p>Configure SSH clients to use <code>Port 2222</code> for <code>git.home.local</code>.</p>
+<h3 id="gitlab-ce">GitLab CE</h3>
+<p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#gitlab-ce">Developer Tools wiki → GitLab CE</a>.</p>
+<hr>
+<h2 id="cicd">CI/CD</h2>
+<blockquote>Compose files and basic setup for self-hosted CI runners live in the <a href="https://docs.shani.dev/doc/servers/devtools">Developer Tools wiki</a>. This section covers CI/CD pipeline patterns, GitHub Actions workflows, and cloud-CI integration.</blockquote>
+<h3 id="woodpecker-ci">Woodpecker CI</h3>
+<p>For compose file, server/agent setup, and Gitea OAuth integration, see the <a href="https://docs.shani.dev/doc/servers/devtools#woodpecker-ci">Developer Tools wiki → Woodpecker CI</a>.</p>
+<hr>
+<h3 id="forgejo-actions-runner">Forgejo Actions Runner</h3>
+<p>For compose file and registration steps, see the <a href="https://docs.shani.dev/doc/servers/devtools#forgejo-actions-runner">Developer Tools wiki → Forgejo Actions Runner</a>.</p>
+<h5 id="example-workflow">Example workflow</h5>
+<p>(<code>.forgejo/workflows/ci.yml</code>):</p>
+<pre><code class="language-yaml">on: [push]
+jobs:
+  test:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo &quot;Hello from Forgejo Actions&quot;</code></pre>
+<hr>
+<h3 id="jenkins">Jenkins</h3>
+<p>For compose file, initial setup, and common CLI operations, see the <a href="https://docs.shani.dev/doc/servers/devtools#jenkins-enterprise-cicd">Developer Tools wiki → Jenkins</a>.</p>
+<h3 id="openfeature-flagd-feature-flag-management">OpenFeature + Flagd (Feature Flag Management)</h3>
+<p><strong>Purpose:</strong> OpenFeature is a vendor-neutral FHIR-like standard for feature flags — your application code calls the OpenFeature SDK and any backend (Flagd, LaunchDarkly, Unleash, CloudBees) can be swapped without code changes. Flagd is the lightweight, self-hosted reference backend: it reads flag definitions from a config file or Kubernetes CRDs, evaluates them with targeting rules, and serves them over gRPC or HTTP. Increasingly standard in platform engineering stacks.</p>
+<pre><code class="language-yaml"># ~/flagd/compose.yaml
+services:
+  flagd:
+    image: ghcr.io/open-feature/flagd:latest
+    ports:
+      - 127.0.0.1:8013:8013   # gRPC
+      - 127.0.0.1:8014:8014   # HTTP
+    volumes:
+      - /home/user/flagd/flags.json:/flags.json:ro,Z
+    command: start --uri file:///flags.json
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/flagd &amp;&amp; podman-compose up -d</code></pre>
+<h5 id="example-flagsjson">Example <code>flags.json</code></h5>
+<pre><code class="language-json">{
+  &quot;$schema&quot;: &quot;https://flagd.dev/schema/v0/flags.json&quot;,
+  &quot;flags&quot;: {
+    &quot;new-checkout-flow&quot;: {
+      &quot;state&quot;: &quot;ENABLED&quot;,
+      &quot;variants&quot;: { &quot;on&quot;: true, &quot;off&quot;: false },
+      &quot;defaultVariant&quot;: &quot;off&quot;,
+      &quot;targeting&quot;: {
+        &quot;if&quot;: [
+          { &quot;in&quot;: [{ &quot;var&quot;: &quot;email&quot; }, [&quot;beta@example.com&quot;]] },
+          &quot;on&quot;, &quot;off&quot;
+        ]
+      }
+    }
+  }
+}</code></pre>
+<h5 id="use-from-python">Use from Python</h5>
+<pre><code class="language-python">from openfeature import api
+from openfeature.provider.flagd import FlagdProvider
+
+api.set_provider(FlagdProvider())
+client = api.get_client()
+enabled = client.get_boolean_value(&quot;new-checkout-flow&quot;, False, {&quot;email&quot;: &quot;user@example.com&quot;})</code></pre>
+<hr>
+<h3 id="score-platform-agnostic-workload-spec">Score (Platform-Agnostic Workload Spec)</h3>
+<p><strong>Purpose:</strong> Score is a developer-centric workload specification format — like <code>docker-compose.yaml</code> but platform-agnostic. Developers write a <code>score.yaml</code> describing their workload (containers, resources, environment) once, and <code>score-compose</code> or <code>score-k8s</code> translates it to a <code>compose.yaml</code> or Kubernetes manifests respectively. Eliminates the need for developers to know Kubernetes YAML while keeping platform teams in control of how workloads are deployed.</p>
+<pre><code class="language-bash"># Install via Nix
+nix-env -iA nixpkgs.score-compose nixpkgs.score-k8s
+
+# Initialise a Score project
+score-compose init
+score-k8s init
+
+# Generate a compose.yaml from score.yaml
+score-compose generate score.yaml --output compose.yaml
+
+# Generate Kubernetes manifests from score.yaml
+score-k8s generate score.yaml --output manifests/</code></pre>
+<h5 id="example-scoreyaml">Example <code>score.yaml</code></h5>
+<pre><code class="language-yaml">apiVersion: score.dev/v1b1
+metadata:
+  name: my-service
+containers:
+  web:
+    image: myapp:latest
+    variables:
+      DB_URL: ${resources.db.host}:${resources.db.port}/${resources.db.name}
+    ports:
+      - name: http
+        port: 8080
+resources:
+  db:
+    type: postgres</code></pre>
+<hr>
+<h3 id="dagger-portable-pipelines-as-code">Dagger (Portable Pipelines as Code)</h3>
+<p><strong>Purpose:</strong> Write CI/CD pipelines in Python, Go, TypeScript, or PHP — not YAML. Pipelines run identically on your workstation (via Podman) and in any CI system. Eliminates "works on CI but not locally" problems.</p>
+<pre><code class="language-bash"># Install Dagger CLI — Nix (primary)
+nix-env -iA nixpkgs.dagger
+
+# Or via Snap
+snap install dagger --classic
+
+# Point Dagger at the rootless Podman socket
+export _EXPERIMENTAL_DAGGER_RUNNER_HOST=unix:///run/user/$UID/podman/podman.sock
+
+# Initialise a Dagger module
+dagger init --sdk=python
+
+# Run a function locally
+dagger call build --source=.</code></pre>
+<h5 id="example-mainpy">Example <code>main.py</code></h5>
+<pre><code class="language-python">import dagger
+from dagger import dag, function, object_type
+
+@object_type
+class MyPipeline:
+    @function
+    async def build(self, source: dagger.Directory) -&gt; dagger.Container:
+        return (
+            dag.container()
+            .from_(&quot;python:3.12-slim&quot;)
+            .with_directory(&quot;/app&quot;, source)
+            .with_workdir(&quot;/app&quot;)
+            .with_exec([&quot;pip&quot;, &quot;install&quot;, &quot;-r&quot;, &quot;requirements.txt&quot;])
+            .with_exec([&quot;python&quot;, &quot;-m&quot;, &quot;pytest&quot;])
+        )</code></pre>
+<hr>
+<h3 id="github-actions-cloud-cicd-githubcom">GitHub Actions (Cloud CI/CD — github.com)</h3>
+<p><strong>Purpose:</strong> GitHub's native CI/CD system. Workflows are YAML files in <code>.github/workflows/</code> that trigger on push, pull request, schedule, or manual dispatch.</p>
+<blockquote><strong>Note:</strong> <code>act</code> (below) runs GitHub Actions workflows locally using Podman. For self-hosted runners, see the <a href="https://docs.shani.dev/doc/servers/devtools">Developer Tools wiki</a>.</blockquote>
+<h4 id="workflow-structure-and-triggers">Workflow structure and triggers</h4>
+<pre><code class="language-yaml"># .github/workflows/ci.yaml
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 2 * * 1'    # weekly at 2 AM Monday
+  workflow_dispatch:         # manual trigger from GitHub UI
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options: [staging, prod]</code></pre>
+<h4 id="complete-ci-workflow-build-test-push-image">Complete CI workflow (build, test, push image)</h4>
+<pre><code class="language-yaml"># .github/workflows/ci.yaml (continued)
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest tests/ --tb=short --junitxml=test-results.xml
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: test-results.xml
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=sha-
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max</code></pre>
+<h3 id="dependency-caching-in-ci">Dependency Caching in CI</h3>
+<p>The <code>cache-from: type=gha</code> above caches Docker image layers. For faster dependency installs (pip, npm, Go modules), use <code>actions/cache</code> keyed on the lockfile hash — so the cache is invalidated only when dependencies actually change:</p>
+<pre><code class="language-yaml"># Python
+- uses: actions/cache@v4
+  with:
+    path: ~/.cache/pip
+    key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+    restore-keys: ${{ runner.os }}-pip-
+
+# Node.js
+- uses: actions/cache@v4
+  with:
+    path: ~/.npm
+    key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+    restore-keys: ${{ runner.os }}-node-
+
+# Go modules
+- uses: actions/cache@v4
+  with:
+    path: ~/go/pkg/mod
+    key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
+    restore-keys: ${{ runner.os }}-go-</code></pre>
+<p>The <code>restore-keys</code> fallback uses a partial cache (the most recent cache for this OS, even with a different lockfile hash) — a partial cache hit is still much faster than downloading all dependencies from scratch.</p>
+<pre><code class="language-yaml"># .github/workflows/deploy.yaml
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [&quot;CI Pipeline&quot;]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  deploy-staging:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.example.com
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to staging
+        run: |
+          echo &quot;${{ secrets.KUBECONFIG }}&quot; | base64 -d &gt; kubeconfig
+          kubectl --kubeconfig kubeconfig set image deployment/myapp \
+            myapp=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }} \
+            -n staging
+
+  deploy-prod:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment:
+      name: production         # requires manual approval in GitHub Environments settings
+      url: https://example.com
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to production
+        run: |
+          echo &quot;${{ secrets.KUBECONFIG_PROD }}&quot; | base64 -d &gt; kubeconfig
+          kubectl --kubeconfig kubeconfig set image deployment/myapp \
+            myapp=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }} \
+            -n production</code></pre>
+<h4 id="reusable-workflows-dry-define-once-call-from-many-repos">Reusable workflows (DRY — define once, call from many repos)</h4>
+<pre><code class="language-yaml"># .github/workflows/reusable-test.yaml  (in a shared repo)
+name: Reusable Test
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        required: false
+        default: '3.12'
+        type: string
+    secrets:
+      TEST_DB_URL:
+        required: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+      - run: pytest
+        env:
+          DATABASE_URL: ${{ secrets.TEST_DB_URL }}</code></pre>
+<pre><code class="language-yaml"># .github/workflows/ci.yaml  (in a consumer repo)
+jobs:
+  test:
+    uses: myorg/shared-workflows/.github/workflows/reusable-test.yaml@main
+    with:
+      python-version: '3.11'
+    secrets:
+      TEST_DB_URL: ${{ secrets.TEST_DB_URL }}</code></pre>
+<h4 id="branching-strategy-github-flow-standard-for-cd-teams">Branching strategy — GitHub Flow (standard for CD teams)</h4>
+<pre><code>main ──────────────────────────────── (always deployable, protected)
+  ├── feature/add-login ─────────► PR ─► merge ─► auto-deploy staging
+  ├── fix/null-pointer ──────────► PR ─► merge ─► auto-deploy staging
+  └── release/v1.2 ─────────────► PR ─► merge ─► manual approve prod</code></pre>
+<h4 id="branch-protection-rules-configure-in-github-settings-branches">Branch protection rules (configure in GitHub Settings → Branches)</h4>
+<pre><code class="language-yaml"># Typical main branch protection:
+# - Require PR before merging (no direct push)
+# - Require status checks: ci/test, ci/lint, security/scan
+# - Require at least 1 approving review
+# - Dismiss stale reviews when new commits pushed
+# - Require branches to be up to date before merging
+# - Restrict who can push to matching branches: team:platform-engineers</code></pre>
+<h4 id="terraform-planapply-with-github-actions-infrastructure-pr-workflow">Terraform plan/apply with GitHub Actions (Infrastructure PR workflow)</h4>
+<pre><code class="language-yaml"># .github/workflows/terraform.yaml
+name: Terraform
+
+on:
+  pull_request:
+    paths: ['terraform/**']
+  push:
+    branches: [main]
+    paths: ['terraform/**']
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform/
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: &quot;~1.9&quot;
+
+      - name: Terraform Init
+        run: terraform init
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: tflint
+        uses: terraform-linters/setup-tflint@v4
+      - run: tflint --recursive
+
+      - name: Checkov security scan
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: terraform/
+          quiet: true
+          soft_fail: false
+
+      - name: Terraform Plan
+        if: github.event_name == 'pull_request'
+        run: terraform plan -no-color -out=tfplan
+        env:
+          TF_VAR_environment: ${{ github.base_ref }}
+
+      - name: Comment plan on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const plan = require('fs').readFileSync('tfplan.txt', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '```hcl\n' + plan + '\n```'
+            });
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' &amp;&amp; github.event_name == 'push'
+        run: terraform apply -auto-approve tfplan</code></pre>
+<h4 id="secrets-management-in-github-actions">Secrets management in GitHub Actions</h4>
+<pre><code class="language-bash"># Set repository secrets via CLI
+gh secret set KUBECONFIG --body &quot;$(cat ~/.kube/config | base64)&quot;
+gh secret set REGISTRY_PASSWORD &lt; ~/.docker-password
+
+# Set environment-scoped secrets (staging vs prod isolation)
+gh secret set DATABASE_URL --env staging --body &quot;postgres://...&quot;
+gh secret set DATABASE_URL --env production --body &quot;postgres://...&quot;
+
+# List secrets (names only — values never shown)
+gh secret list
+gh secret list --env production</code></pre>
+<h4 id="matrix-builds-test-across-multiple-versions">Matrix builds (test across multiple versions)</h4>
+<pre><code class="language-yaml">jobs:
+  test:
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+        os: [ubuntu-latest, ubuntu-22.04]
+      fail-fast: false      # don't cancel other matrix jobs on failure
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}</code></pre>
+<h4 id="self-hosted-runner-on-this-system-route-ci-jobs-to-your-own-machine">Self-hosted runner on this system (route CI jobs to your own machine)</h4>
+<pre><code class="language-yaml"># ~/github-runner/compose.yaml
+services:
+  github-runner:
+    image: myoung34/github-runner:latest
+    environment:
+      REPO_URL: https://github.com/myorg/myrepo
+      RUNNER_TOKEN: &lt;token-from-github-settings-actions-runners&gt;
+      RUNNER_NAME: shani-runner-01
+      RUNNER_WORKDIR: /tmp/github-runner
+      LABELS: self-hosted,linux,shani-os
+    volumes:
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/github-runner &amp;&amp; podman-compose up -d</code></pre>
+<p>In your workflows, use <code>runs-on: [self-hosted, shani-os]</code> to route jobs to this runner.</p>
+<hr>
+<h3 id="act-local-github-actions-runner">act (Local GitHub Actions Runner)</h3>
+<p><strong>Purpose:</strong> Run GitHub Actions workflows locally without pushing to GitHub. Reads <code>.github/workflows/*.yml</code> and runs them in containers. Use for local iteration before pushing.</p>
+<pre><code class="language-bash"># Install act — Nix
+nix-env -iA nixpkgs.act
+
+# Run the default push event
+act
+
+# Run a specific job
+act -j build
+
+# Pass secrets
+act --secret-file .secrets
+
+# Dry run
+act -n</code></pre>
+<hr>
+<h3 id="renovate-bot">Renovate Bot</h3>
+<p><strong>Purpose:</strong> Automated dependency update PRs — outdated container image tags, npm/pip/cargo packages, Actions versions. Works natively with Gitea and Forgejo.</p>
+<h4 id="schedule-with-a-systemd-timer">Schedule with a systemd timer</h4>
+<pre><code class="language-bash">cat &gt; ~/.config/systemd/user/renovate.service &lt;&lt; 'EOF'
+[Unit]
+Description=Renovate Dependency Updater
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/user/renovate
+ExecStart=podman-compose run --rm renovate
+EOF
+
+cat &gt; ~/.config/systemd/user/renovate.timer &lt;&lt; 'EOF'
+[Unit]
+Description=Weekly Renovate Run
+
+[Timer]
+OnCalendar=weekly
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
+systemctl --user enable --now renovate.timer</code></pre>
+<h5 id="minimal-renovatejson">Minimal <code>renovate.json</code></h5>
+<pre><code class="language-json">{
+  &quot;$schema&quot;: &quot;https://docs.renovatebot.com/renovate-schema.json&quot;,
+  &quot;extends&quot;: [&quot;config:base&quot;],
+  &quot;automerge&quot;: false
+}</code></pre>
+<hr>
+<h3 id="sonarqube-code-quality-security">SonarQube (Code Quality & Security)</h3>
+<p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#sonarqube-code-quality--security">Developer Tools wiki → SonarQube</a>.</p>
+<blockquote>Requires <code>vm.max_map_count=524288</code> and <code>fs.file-max=131072</code> on the host. Set persistently: ``<code>bash echo 'vm.max_map_count=524288' | sudo tee -a /etc/sysctl.d/sonar.conf sudo sysctl -p /etc/sysctl.d/sonar.conf </code>``</blockquote>
+<hr></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

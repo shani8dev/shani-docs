@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Installation Steps — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Installation Steps  Installation takes approximately 10–15 minutes.  Step-by-Step  1. Boot from USB — Press F12, F2, or Del during startup. Select your USB…">
+  <meta name="description" id="meta-desc"     content="Installation takes approximately 10–15 minutes. Step-by-Step 1. Boot from USB — Press F12, F2, or Del during startup. Select your USB drive from the boot m…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Installation Steps">
-  <meta property="og:description" id="og-desc"    content="Installation Steps  Installation takes approximately 10–15 minutes.  Step-by-Step  1. Boot from USB — Press F12, F2, or Del during startup. Select your USB…">
+  <meta property="og:description" id="og-desc"    content="Installation takes approximately 10–15 minutes. Step-by-Step 1. Boot from USB — Press F12, F2, or Del during startup. Select your USB drive from the boot m…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/install/steps/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Installation Steps">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Installation Steps">
-  <meta name="twitter:description" id="tw-desc"  content="Installation Steps  Installation takes approximately 10–15 minutes.  Step-by-Step  1. Boot from USB — Press F12, F2, or Del during startup. Select your USB…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Installation takes approximately 10–15 minutes. Step-by-Step 1. Boot from USB — Press F12, F2, or Del during startup. Select your USB drive from the boot m…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Installation Steps","description":"Installation Steps  Installation takes approximately 10–15 minutes.  Step-by-Step  1. Boot from USB — Press F12, F2, or Del during startup. Select your USB…","url":"https://docs.shani.dev/doc/install/steps/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Installation Steps","description":"Installation takes approximately 10–15 minutes. Step-by-Step 1. Boot from USB — Press F12, F2, or Del during startup. Select your USB drive from the boot m…","url":"https://docs.shani.dev/doc/install/steps/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Installation Steps","item":"https://docs.shani.dev/doc/install/steps/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,22 +215,22 @@
         <h1 class="doc-title">Installation Steps</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Installation</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Installation takes approximately 10–15 minutes.</p>
-<h2>Step-by-Step</h2>
+<h2 id="step-by-step">Step-by-Step</h2>
 <ol>
 <li><strong>Boot from USB</strong> — Press F12, F2, or Del during startup. Select your USB drive from the boot menu.</li>
 <li><strong>Select "Install Shanios"</strong> — Choose the installation option from the boot menu.</li>
 <li><strong>Keyboard Layout</strong> — Always asked, on every edition.</li>
-<li><strong>Language & Region</strong> — This page is skipped on both editions — locale and timezone are configured later by the first-boot Initial Setup wizard instead.</li>
+<li><strong>Language & Region</strong> — This page is skipped on all editions — locale and timezone are configured later by the first-boot Initial Setup wizard instead.</li>
 <li><strong>Disk Selection</strong> — Choose target disk and partitioning scheme (automatic recommended).</li>
 <li><strong>Encryption (Optional)</strong> — Enable LUKS2 full-disk encryption (argon2id key derivation). You'll be asked to enter the passphrase twice to confirm. Recommended for laptops and portable systems.</li>
 <li><strong>Install</strong> — The installer creates Btrfs subvolumes, installs the base system, and configures the bootloader.</li>
 <li><strong>Reboot</strong> — Remove USB drive when prompted and reboot into Shanios.</li>
 </ol>
-<h2>What the Installer Sets Up</h2>
+<h2 id="what-the-installer-sets-up">What the Installer Sets Up</h2>
 <p>All of the following is completed by the installer (<code>install.sh</code> + <code>configure.sh</code>) <strong>before</strong> first boot — nothing heavy runs in the background on your first session:</p>
 <ul>
 <li>All Btrfs subvolumes are created: <code>@root</code>, <code>@home</code>, <code>@data</code>, <code>@nix</code>, <code>@cache</code>, <code>@log</code>, <code>@flatpak</code>, <code>@snapd</code>, <code>@waydroid</code>, <code>@containers</code>, <code>@machines</code>, <code>@lxc</code>, <code>@lxd</code>, <code>@libvirt</code>, <code>@qemu</code>, <code>@swap</code></li>
@@ -236,11 +238,33 @@
 <li>The Flatpak store is extracted and snapshotted into <code>@flatpak</code>. If Snap seed was included on the ISO, it is extracted into <code>@snapd</code></li>
 <li>The swapfile is created in <code>@swap</code> using <code>btrfs filesystem mkswapfile</code> sized to match RAM. If there isn't enough free disk space for a full-RAM swapfile, this step is skipped entirely and the system falls back to zram for swap</li>
 <li>Keyboard layout is always configured via <code>chroot</code>; locale, timezone, user account, and autologin are configured the same way, unless deferred to the first-boot wizard (see step 4 above)</li>
-<li>Secure Boot: the MOK signing key is normally already baked into the system image at build time — the installer just verifies the keypair and re-signs the bootloader/kernel with it. Keys are only generated fresh on the spot if they're missing or invalid, which is a fallback path, not the common case. Either way, both UKIs (<code>shanios-blue.efi</code>, <code>shanios-green.efi</code>) are built using <code>dracut --force --uefi</code> and signed with the MOK key, and MOK enrollment is staged automatically so you just confirm it in MokManager on first boot (see <a href="./first-boot">First Boot</a>)</li>
+<li>Secure Boot: the MOK signing key is normally already baked into the system image at build time — the installer just verifies the keypair and re-signs the bootloader/kernel with it. Keys are only generated fresh on the spot if they're missing or invalid, which is a fallback path, not the common case. Either way, both UKIs (<code>shanios-blue.efi</code>, <code>shanios-green.efi</code>) are built using <code>dracut --force --uefi</code> and signed with the MOK key, and MOK enrollment is staged automatically so you just confirm it in MokManager on first boot (see <a href="./first-boot.md">First Boot</a>)</li>
 <li><code>/etc/crypttab</code> is generated with the LUKS UUID and <code>none</code> key field if encryption was chosen</li>
 <li>Firewall rules for KDE Connect and Waydroid are applied via <code>firewall-offline-cmd</code></li>
 </ul>
-<p>On first boot, <code>beesd-setup.service</code> configures the deduplication daemon for the Btrfs volume UUID, then the Initial Setup wizard runs for user-facing personalisation.</p></div>
+<p>On first boot, <code>beesd-setup.service</code> configures the deduplication daemon for the Btrfs volume UUID, then the Initial Setup wizard runs for user-facing personalisation.</p>
+<h2 id="verifying-the-installation">Verifying the Installation</h2>
+<p>After reboot, confirm the install succeeded:</p>
+<pre><code class="language-bash"># Check which slot is active
+cat /data/current-slot
+# @blue (first install always boots into blue)
+
+# Verify Btrfs subvolumes
+sudo btrfs subvolume list /
+# Should show: @root, @home, @data, @nix, @cache, @log, @flatpak, @snapd, @waydroid, @containers, @machines, @lxc, @lxd, @libvirt, @qemu, @swap
+
+# Check disk usage
+df -h /</code></pre>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><td>USB doesn't appear in boot menu</td><td>Secure Boot may block unsigned USB media</td><td>Try disabling Secure Boot temporarily, or use a different USB port</td></tr><tr><td>"Failed to mount" errors during install</td><td>Corrupted installation media</td><td>Re-download ISO, re-flash with <code>dd</code> (or Rufus in DD image mode), verify SHA256 checksum</td></tr><tr><td>Disk selection shows no disks</td><td>NVMe/RAID not detected; driver missing from initramfs</td><td>Check BIOS settings for NVMe/RAID mode; ensure AHCI is selected (not RAID for single disks)</td></tr><tr><td>Btrfs error during install</td><td>Corrupted filesystem or bad disk</td><td>Run <code>sudo btrfs check /dev/sdX</code> from live USB, or try a different disk</td></tr><tr><td>Secure Boot MokManager prompt doesn't appear on first boot</td><td>Firmware skipped MOK enrollment</td><td>Reboot and enter firmware settings; look for "Security" → "MOK" or "Secure Boot Key Management"</td></tr><tr><td>Installer fails with "insufficient disk space"</td><td>Disk nominally 32 GB but below 28 GB usable floor</td><td>Use a disk with ≥32 GB total; the 28 GB floor accounts for partition tables and wear-leveling overhead</td></tr><tr><td>Wi-Fi doesn't work during install</td><td>Wireless firmware not loaded</td><td>This is expected — the installer doesn't load Wi-Fi firmware; use wired connection or configure Wi-Fi after first boot</td></tr><tr><td>Swap not created</td><td>Not enough free space for full-RAM swapfile</td><td>System will fall back to zram automatically — this is expected behavior, not an error</td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="./requirements.md">System Requirements</a> — hardware and firmware requirements</li>
+<li><a href="./first-boot.md">First Boot</a> — what happens after installation completes</li>
+<li><a href="./pre-install.md">Pre-Install Checklist</a> — what to prepare before starting</li>
+<li><a href="../intro/getting-started.md">Getting Started</a> — download, verify, install walkthrough</li>
+<li><a href="../troubleshooting.md">Troubleshooting</a> — general troubleshooting guide</li>
+</ul></div>
     </div>
 
   </main>

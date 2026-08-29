@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Kerberos — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Kerberos 5 (KDC)  Kerberos provides strong mutual authentication for client/server applications using secret-key cryptography. It is the standard for enter…">
+  <meta name="description" id="meta-desc"     content="Kerberos provides strong mutual authentication for client/server applications using secret-key cryptography. It is the standard for enterprise network auth…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Kerberos">
-  <meta property="og:description" id="og-desc"    content="Kerberos 5 (KDC)  Kerberos provides strong mutual authentication for client/server applications using secret-key cryptography. It is the standard for enter…">
+  <meta property="og:description" id="og-desc"    content="Kerberos provides strong mutual authentication for client/server applications using secret-key cryptography. It is the standard for enterprise network auth…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/networking/kerberos/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Kerberos">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Kerberos">
-  <meta name="twitter:description" id="tw-desc"  content="Kerberos 5 (KDC)  Kerberos provides strong mutual authentication for client/server applications using secret-key cryptography. It is the standard for enter…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Kerberos provides strong mutual authentication for client/server applications using secret-key cryptography. It is the standard for enterprise network auth…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Kerberos","description":"Kerberos 5 (KDC)  Kerberos provides strong mutual authentication for client/server applications using secret-key cryptography. It is the standard for enter…","url":"https://docs.shani.dev/doc/networking/kerberos/","datePublished":"2026-04-18T00:00:00.000Z","dateModified":"2026-04-18T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Kerberos","description":"Kerberos provides strong mutual authentication for client/server applications using secret-key cryptography. It is the standard for enterprise network auth…","url":"https://docs.shani.dev/doc/networking/kerberos/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Kerberos","item":"https://docs.shani.dev/doc/networking/kerberos/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,14 +215,13 @@
         <h1 class="doc-title">Kerberos</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Networking</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-18</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><h1>Kerberos 5 (KDC)</h1>
-<p>Kerberos provides strong mutual authentication for client/server applications using secret-key cryptography. It is the standard for enterprise network authentication and is required by Active Directory environments.</p>
-<p>---</p>
-<h2>Server Setup (KDC)</h2>
-<h3>Configuration</h3>
+      <div class="prose"><p>Kerberos provides strong mutual authentication for client/server applications using secret-key cryptography. It is the standard for enterprise network authentication and is required by Active Directory environments.</p>
+<hr>
+<h2 id="server-setup-kdc">Server Setup (KDC)</h2>
+<h3 id="configuration">Configuration</h3>
 <p>Edit <code>/etc/krb5.conf</code>:</p>
 <pre><code class="language-ini">[libdefaults]
     default_realm = SHANIOS.LOCAL
@@ -237,14 +238,14 @@
 [domain_realm]
     .shanios.local = SHANIOS.LOCAL
     shanios.local = SHANIOS.LOCAL</code></pre>
-<h3>Initialize the Realm Database</h3>
+<h3 id="initialize-the-realm-database">Initialize the Realm Database</h3>
 <pre><code class="language-bash"># Create the realm database (prompts for a master password)
 sudo kdb5_util create -s -r SHANIOS.LOCAL
 
 # Start services
 sudo systemctl enable --now krb5kdc
 sudo systemctl enable --now kadmin</code></pre>
-<h3>Principal Administration</h3>
+<h3 id="principal-administration">Principal Administration</h3>
 <pre><code class="language-bash"># Open the admin shell (runs locally as root, bypasses network auth)
 sudo kadmin.local
 
@@ -256,16 +257,21 @@ ktadd host/kdc.shanios.local  # export to /etc/krb5.keytab
 listprincs                    # list all principals
 delprinc olduser              # delete a principal
 quit</code></pre>
-<h3>Firewall</h3>
+<h3 id="remote-admin-access-kadm5acl">Remote Admin Access (kadm5.acl)</h3>
+<p>Remote <code>kadmin</code> requires an ACL file. Create <code>/var/lib/kerberos/krb5kdc/kadm5.acl</code> granting admin principals full rights (match the realm to yours):</p>
+<pre><code class="language-text">*/admin@SHANIOS.LOCAL *</code></pre>
+<p>Then restart the KDC to pick it up:</p>
+<pre><code class="language-bash">sudo systemctl restart krb5kdc</code></pre>
+<h3 id="firewall">Firewall</h3>
 <pre><code class="language-bash">sudo firewall-cmd --add-port=88/tcp --add-port=88/udp --permanent   # KDC (authentication)
 sudo firewall-cmd --add-port=749/tcp --permanent                     # kadmin (admin)
 sudo firewall-cmd --add-port=464/tcp --add-port=464/udp --permanent  # kpasswd (password change)
 sudo firewall-cmd --reload</code></pre>
-<h3>Persistence</h3>
+<h3 id="persistence">Persistence</h3>
 <p>Kerberos database files are stored in <code>/var/lib/kerberos/krb5kdc</code> and bind-mounted from <code>/data/varlib/kerberos</code> — they persist across OS updates and rollbacks.</p>
-<p>---</p>
-<h2>Client Usage</h2>
-<h3>Obtain a Ticket</h3>
+<hr>
+<h2 id="client-usage">Client Usage</h2>
+<h3 id="obtain-a-ticket">Obtain a Ticket</h3>
 <pre><code class="language-bash"># Authenticate and obtain a Kerberos ticket
 kinit youruser@SHANIOS.LOCAL
 
@@ -277,15 +283,28 @@ kinit -R
 
 # Destroy all tickets (log out)
 kdestroy</code></pre>
-<h3>Test Authentication</h3>
+<h3 id="test-authentication">Test Authentication</h3>
 <pre><code class="language-bash"># Verify you can reach the KDC
 kinit admin/admin@SHANIOS.LOCAL
 
 # Check DNS resolves the KDC correctly
 host kdc.shanios.local</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | <code>Cannot contact any KDC for realm</code> | Check that <code>krb5kdc</code> is running (<code>systemctl status krb5kdc</code>) and that UDP/TCP 88 is open in the firewall | | <code>Clock skew too great</code> | Kerberos requires clocks within 5 minutes — sync with <code>sudo timedatectl set-ntp true</code> | | <code>Client not found in Kerberos database</code> | The principal does not exist — create it with <code>sudo kadmin.local</code> → <code>addprinc username</code> | | <code>Decrypt integrity check failed</code> | Wrong password, or the keytab is stale — regenerate with <code>ktadd</code> in <code>kadmin.local</code> |</p></div>
+<h3 id="ssh-with-kerberos-gssapi">SSH with Kerberos (GSSAPI)</h3>
+<p>On the SSH server, enable GSSAPI authentication in <code>/etc/ssh/sshd_config</code>:</p>
+<pre><code class="language-text">GSSAPIAuthentication yes</code></pre>
+<pre><code class="language-bash">sudo systemctl restart sshd</code></pre>
+<p>On the client, obtain a ticket first, then connect — no password prompt:</p>
+<pre><code class="language-bash">kinit youruser@SHANIOS.LOCAL
+ssh youruser@kdc.shanios.local</code></pre>
+<p>Confirm the ticket was accepted with <code>klist</code> on either machine.</p>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>Cannot contact any KDC for realm</code></td><td>Check that <code>krb5kdc</code> is running (<code>systemctl status krb5kdc</code>) and that UDP/TCP 88 is open in the firewall</td></tr><tr><td><code>Clock skew too great</code></td><td>Kerberos requires clocks within 5 minutes — sync with <code>sudo timedatectl set-ntp true</code></td></tr><tr><td><code>Client not found in Kerberos database</code></td><td>The principal does not exist — create it with <code>sudo kadmin.local</code> → <code>addprinc username</code></td></tr><tr><td><code>Decrypt integrity check failed</code></td><td>Wrong password, or the keytab is stale — regenerate with <code>ktadd</code> in <code>kadmin.local</code></td></tr></tbody></table>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="openssh">OpenSSH</a></li>
+<li><a href="../security/features.md">Security features</a></li>
+</ul></div>
     </div>
 
   </main>

@@ -1,7 +1,7 @@
 ---
 title: Kernel Modules
 section: System
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # Kernel Modules
@@ -153,27 +153,23 @@ cat /lib/modules/$(uname -r)/modules.alias | grep iwlwifi
 
 ## Dracut and the Initramfs
 
-On Shani OS, the initramfs is built with **dracut**. Modules that must be available before the root filesystem is mounted (e.g. storage controllers, crypto drivers) need to be included in the initramfs.
+On Shani OS, the initramfs is built with **dracut**, but it is never built standalone — Shanios boots via signed Unified Kernel Images (UKIs), and regeneration happens through `gen-efi` during an OS deploy. Users do not rebuild the initramfs manually.
 
 ```bash
 # Force-include a module in the initramfs
 echo "add_drivers+=\" virtio_blk virtio_scsi \"" | sudo tee /etc/dracut.conf.d/virtio.conf
 
-# Regenerate the initramfs after changes
-sudo dracut --force
-
-# Verify a module is present in the initramfs
+# Verify a module is present in the current UKI's initramfs
 lsinitrd | grep virtio
-lsinitrd /boot/initramfs-linux.img | grep <module>
 ```
 
-> ⚠️ After adding or changing module configuration that affects early boot (storage, crypto, firmware), always regenerate the initramfs with `sudo dracut --force` and reboot to verify the new initramfs works before removing the previous boot slot.
+> ⚠️ Do not run bare `dracut --force` on Shani OS: there is no plain `/boot/initramfs-linux.img` to regenerate, only signed UKIs (`shanios-blue.efi` / `shanios-green.efi`). Initramfs/UKI regeneration happens via `gen-efi` as part of an OS deploy (`sudo shani-deploy`), which rebuilds and re-signs both UKIs with your `dracut.conf.d/` settings applied. After changing early-boot module configuration, deploy (or run `sudo gen-efi configure <slot>` for the active slot) and reboot to verify before removing the previous boot slot.
 
 ---
 
 ## Firmware
 
-Many modules require firmware blobs that are loaded from `/lib/firmware/`. Shani OS ships a comprehensive `linux-firmware` package split by vendor. If a module reports a missing firmware file:
+Many modules require firmware blobs that are loaded from `/lib/firmware/`. Shani OS ships a comprehensive `linux-firmware` package split by vendor — firmware is baked into the OS image at build time, and kernel + firmware updates arrive via OS deploy (`sudo shani-deploy`), not via a package manager. If a module reports a missing firmware file:
 
 ```bash
 # Check dmesg for firmware load failures
@@ -184,11 +180,11 @@ dmesg | grep "Direct firmware load"
 ls /lib/firmware/iwlwifi*         # Intel Wi-Fi firmware
 ls /lib/firmware/amdgpu/          # AMD GPU firmware
 
-# Check which firmware package provides a file
+# Check which firmware package provides a file (read-only file-database query)
 pacman -F /lib/firmware/iwlwifi-8265-36.ucode
 ```
 
-If a firmware file is genuinely missing, the relevant `linux-firmware-<vendor>` package may not be installed. On Shani OS these are split packages (e.g. `linux-firmware-intel`, `linux-firmware-amdgpu`).
+If the firmware your device needs is genuinely absent from the image, you cannot add it to the read-only host yourself: request it upstream / file an issue against Shanios so it's included in the next image build. As an interim workaround, load the device from inside a Distrobox container or via Nix-packaged userspace tooling that bundles its own firmware handling.
 
 ---
 
@@ -224,8 +220,8 @@ ls /sys/module/
 | Module loads but device doesn't work | Check `dmesg` for firmware errors; verify firmware package is installed |
 | `rmmod: ERROR: Module is in use` | Check the "Used by" column in `lsmod`; unload dependent modules first, or use `modprobe -r` |
 | Module loads but wrong driver is used | Blacklist the competing module in `/etc/modprobe.d/` |
-| Changes to `/etc/modprobe.d/` not taking effect | Unload and reload the module; or reboot; if it's an initramfs module, run `sudo dracut --force` |
-| Missing firmware after OS update | Run `sudo pacman -S linux-firmware` or the specific vendor firmware package |
+| Changes to `/etc/modprobe.d/` not taking effect | Unload and reload the module; or reboot; if it's an initramfs module, regenerate the UKIs via `sudo gen-efi configure <slot>` (or deploy a new OS version) |
+| Missing firmware after OS update | Firmware ships inside the image — kernel + firmware arrive together via `sudo shani-deploy`; if your device's firmware is absent from the image, request it upstream / file an issue |
 | Module not loading at boot despite `/etc/modules-load.d/` entry | Check `systemctl status systemd-modules-load`; verify the module name is correct with `modinfo` |
 
 ---
@@ -235,4 +231,4 @@ ls /sys/module/
 - [Systemd](systemd) — `systemd-modules-load.service`, unit dependencies
 - [Hardware](hardware) — `lspci`, `lsusb`, device identification
 - [Storage](storage) — storage controller modules, NVMe
-- [Architecture: Dracut Initramfs Module](../arch/dracut-module) — Shani OS initramfs build
+- [Architecture: Dracut Initramfs Module](../arch/dracut-module.md) — Shani OS initramfs build

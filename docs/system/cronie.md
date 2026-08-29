@@ -1,7 +1,7 @@
 ---
 title: cronie (Cron Scheduler)
 section: System
-updated: 2026-04-20
+updated: 2026-08-28
 ---
 
 # cronie — Cron Job Scheduler
@@ -148,3 +148,9 @@ See the [Backup & Recovery page](https://docs.shani.dev/doc/system/backup) for a
 | Output being mailed to root | Add `MAILTO=""` to suppress, or `MAILTO=youruser` to redirect; ensure Exim is running if you want mail delivery |
 | Missed jobs after suspend/hibernate | cron does not catch up missed jobs after sleep — use a systemd timer with `Persistent=true` instead |
 | Editing crontab opens wrong editor | Set `VISUAL` or `EDITOR` env variable: `export EDITOR=nano` |
+
+## See Also
+
+- [Backup & Recovery](backup)
+- [Monitoring wiki](../servers/monitoring/prometheus.md)
+- [systemd reference](systemd)

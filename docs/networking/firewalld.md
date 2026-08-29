@@ -1,7 +1,7 @@
 ---
 title: Firewall (firewalld)
 section: Networking
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Firewall (firewalld)
@@ -202,4 +202,4 @@ sudo firewall-config
 
 - [fail2ban](fail2ban) — brute-force protection layered on top of the firewall
 - [WireGuard](wireguard) — opening the WireGuard UDP port
-- [Security Features](features) — overview of all security layers
+- [Security Features](../security/features.md) — overview of all security layers

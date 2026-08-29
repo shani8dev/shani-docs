@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>LXC and LXD — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="LXC and LXD  LXC and LXD provide full Linux system containers — a complete operating system (init system, services, network stack) inside an isolated envir…">
+  <meta name="description" id="meta-desc"     content="LXC and LXD provide full Linux system containers — a complete operating system (init system, services, network stack) inside an isolated environment that s…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="LXC and LXD">
-  <meta property="og:description" id="og-desc"    content="LXC and LXD  LXC and LXD provide full Linux system containers — a complete operating system (init system, services, network stack) inside an isolated envir…">
+  <meta property="og:description" id="og-desc"    content="LXC and LXD provide full Linux system containers — a complete operating system (init system, services, network stack) inside an isolated environment that s…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/software/lxc-lxd/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="LXC and LXD">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="LXC and LXD">
-  <meta name="twitter:description" id="tw-desc"  content="LXC and LXD  LXC and LXD provide full Linux system containers — a complete operating system (init system, services, network stack) inside an isolated envir…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="LXC and LXD provide full Linux system containers — a complete operating system (init system, services, network stack) inside an isolated environment that s…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"LXC and LXD","description":"LXC and LXD  LXC and LXD provide full Linux system containers — a complete operating system (init system, services, network stack) inside an isolated envir…","url":"https://docs.shani.dev/doc/software/lxc-lxd/","datePublished":"2026-05-07T00:00:00.000Z","dateModified":"2026-05-07T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"LXC and LXD","description":"LXC and LXD provide full Linux system containers — a complete operating system (init system, services, network stack) inside an isolated environment that s…","url":"https://docs.shani.dev/doc/software/lxc-lxd/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"LXC and LXD","item":"https://docs.shani.dev/doc/software/lxc-lxd/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,13 +215,13 @@
         <h1 class="doc-title">LXC and LXD</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Software &amp; Apps</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-05-07</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>LXC and LXD provide full Linux system containers — a complete operating system (init system, services, network stack) inside an isolated environment that shares the host kernel. This sits between application containers (Podman) and full virtual machines (QEMU/KVM) in terms of isolation and overhead.</p>
 <p>On Shanios, LXC and LXD are pre-installed with dedicated Btrfs subvolumes (<code>@lxc</code> and <code>@lxd</code>). <code>lxd.socket</code> is socket-activated. <code>lxcfs.service</code> is enabled — it virtualises <code>/proc/cpuinfo</code>, <code>/proc/meminfo</code>, and similar files so containers report per-container values rather than host totals. Containers survive every OS update and rollback untouched.</p>
-<h2>When to Use LXD</h2>
-<p>| | Distrobox | Podman | systemd-nspawn | LXD | QEMU/KVM | |---|---|---|---|---|---| | Purpose | Dev/app containers | OCI app containers | Lightweight system containers | Full system containers | Full VMs | | Shares home dir | Yes | No | No | No | No | | Full init system | No | No | Yes | Yes | Yes | | Startup time | ~1s | ~0.1s | ~1s | ~3s | ~30s | | Daemon required | No | No | No | Yes (socket) | Yes | | Isolation | Low–medium | Medium | High | High | Full |</p>
+<h2 id="when-to-use-lxd">When to Use LXD</h2>
+<table><thead><tr><th></th><th>Distrobox</th><th>Podman</th><th>systemd-nspawn</th><th>LXD</th><th>QEMU/KVM</th></tr></thead><tbody><tr><td>Purpose</td><td>Dev/app containers</td><td>OCI app containers</td><td>Lightweight system containers</td><td>Full system containers</td><td>Full VMs</td></tr><tr><td>Shares home dir</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td></tr><tr><td>Full init system</td><td>No</td><td>No</td><td>Yes</td><td>Yes</td><td>Yes</td></tr><tr><td>Startup time</td><td>~1s</td><td>~0.1s</td><td>~1s</td><td>~3s</td><td>~30s</td></tr><tr><td>Daemon required</td><td>No</td><td>No</td><td>No</td><td>Yes (socket)</td><td>Yes</td></tr><tr><td>Isolation</td><td>Low–medium</td><td>Medium</td><td>High</td><td>High</td><td>Full</td></tr></tbody></table>
 <p><strong>Use LXD when:</strong></p>
 <ul>
 <li>You need a complete isolated server environment (web server, database, multiple services with init)</li>
@@ -228,7 +230,7 @@
 <li>You want Btrfs-backed container snapshots managed via <code>lxc snapshot</code></li>
 </ul>
 <p><strong>Use systemd-nspawn</strong> when you want the same full-system isolation with less setup — no init wizard, no daemon, no image format. See <a href="systemd-nspawn.md">systemd-nspawn</a>.</p>
-<h2>Setup</h2>
+<h2 id="setup">Setup</h2>
 <p><code>lxd.socket</code> is socket-activated on Shanios. Your user is automatically added to the <code>lxd</code> group during installation. Initialize LXD on first use:</p>
 <pre><code class="language-bash"># Interactive wizard (choose btrfs as storage backend)
 sudo lxd init
@@ -243,7 +245,7 @@ groups | grep lxd
 sudo usermod -aG lxd $USER
 # Log out and back in</code></pre>
 <p>When the wizard asks about the storage backend, choose <strong>btrfs</strong> — it integrates with the host Btrfs filesystem and maps into the <code>@lxd</code> subvolume.</p>
-<h2>Creating and Managing Containers</h2>
+<h2 id="creating-and-managing-containers">Creating and Managing Containers</h2>
 <pre><code class="language-bash"># List available images
 lxc image list images: | grep -i ubuntu
 lxc image list images: | grep -i alpine
@@ -273,7 +275,7 @@ lxc restart myubuntu
 # Delete
 lxc delete myubuntu
 lxc delete myubuntu --force    # force-delete a running container</code></pre>
-<h2>Networking</h2>
+<h2 id="networking">Networking</h2>
 <p>LXD creates a <code>lxdbr0</code> bridge by default and gives each container a private IP with NAT to the internet.</p>
 <pre><code class="language-bash"># Get a container's IP
 lxc list
@@ -287,7 +289,7 @@ lxc config device add myubuntu webport proxy \
   listen=tcp:0.0.0.0:8080 \
   connect=tcp:127.0.0.1:8080
 # http://localhost:8080 on host now reaches port 8080 in the container</code></pre>
-<h2>Persistent Storage</h2>
+<h2 id="persistent-storage">Persistent Storage</h2>
 <pre><code class="language-bash"># Mount a host directory into a container
 lxc config device add myubuntu mydata disk \
   source=/home/$USER/projects \
@@ -297,7 +299,7 @@ lxc config device add myubuntu mydata disk \
 lxc config device add myubuntu sharedfolder disk \
   source=/home/$USER/shared \
   path=/shared</code></pre>
-<h2>Snapshots</h2>
+<h2 id="snapshots">Snapshots</h2>
 <p>LXD supports fast Btrfs-backed snapshots:</p>
 <pre><code class="language-bash"># Create a snapshot
 lxc snapshot myubuntu snap0
@@ -311,7 +313,7 @@ lxc restore myubuntu snap0
 
 # Delete a snapshot
 lxc delete myubuntu/snap0</code></pre>
-<h2>LXD VMs</h2>
+<h2 id="lxd-vms">LXD VMs</h2>
 <p>LXD can also launch full VMs (not just containers) using its <code>--vm</code> flag:</p>
 <pre><code class="language-bash"># Launch a VM (hardware-level isolation, own kernel)
 lxc launch ubuntu:24.04 myvm --vm
@@ -319,8 +321,8 @@ lxc launch ubuntu:24.04 myvm --vm
 # Manage identically to a container
 lxc exec myvm -- bash
 lxc stop myvm</code></pre>
-<h2>Practical Patterns</h2>
-<h3>Running a Web Server in Isolation</h3>
+<h2 id="practical-patterns">Practical Patterns</h2>
+<h3 id="running-a-web-server-in-isolation">Running a Web Server in Isolation</h3>
 <pre><code class="language-bash">lxc launch ubuntu:24.04 webserver
 lxc exec webserver -- apt update
 lxc exec webserver -- apt install -y nginx
@@ -332,14 +334,14 @@ lxc config device add webserver http proxy \
   connect=tcp:127.0.0.1:80
 
 curl http://localhost:8080</code></pre>
-<h3>Testing an Arch Configuration</h3>
+<h3 id="testing-an-arch-configuration">Testing an Arch Configuration</h3>
 <pre><code class="language-bash">lxc launch archlinux:current testarch
 lxc exec testarch -- bash
 # Inside: full Arch Linux with pacman
 pacman -Syu &amp;&amp; pacman -S some-package
 exit
 lxc delete testarch --force</code></pre>
-<h3>Running Multiple Database Versions Side by Side</h3>
+<h3 id="running-multiple-database-versions-side-by-side">Running Multiple Database Versions Side by Side</h3>
 <pre><code class="language-bash">lxc launch ubuntu:22.04 pg14
 lxc exec pg14 -- apt install -y postgresql-14
 
@@ -347,9 +349,17 @@ lxc launch ubuntu:24.04 pg16
 lxc exec pg16 -- apt install -y postgresql-16
 
 # Both run simultaneously, fully isolated</code></pre>
-<h2>Storage</h2>
-<p>| Location | Subvolume | |---|---| | <code>/var/lib/lxc/</code> | <code>@lxc</code> | | <code>/var/lib/lxd/</code> | <code>@lxd</code> |</p>
-<p>Both subvolumes are independent of the OS slots and survive all updates and rollbacks.</p></div>
+<h2 id="storage">Storage</h2>
+<table><thead><tr><th>Location</th><th>Subvolume</th></tr></thead><tbody><tr><td><code>/var/lib/lxc/</code></td><td><code>@lxc</code></td></tr><tr><td><code>/var/lib/lxd/</code></td><td><code>@lxd</code></td></tr></tbody></table>
+<p>Both subvolumes are independent of the OS slots and survive all updates and rollbacks.</p>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="containers">Containers</a> — overview of all container runtimes</li>
+<li><a href="systemd-nspawn">systemd-nspawn</a> — lightweight container runtime</li>
+<li><a href="distrobox">Distrobox</a> — mutable dev environments with host integration</li>
+<li><a href="vms">Virtual Machines</a> — QEMU/KVM, virt-manager</li>
+<li><a href="gpu-containers">GPU Containers</a> — NVIDIA/AMD access in containers</li>
+</ul></div>
     </div>
 
   </main>

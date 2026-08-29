@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Business Intelligence &amp; Analytics — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Business Intelligence &amp; Analytics  Self-hosted BI platforms, data visualisation tools, SQL explorers, and analytical dashboards. Query your databases, buil…">
+  <meta name="description" id="meta-desc"     content="Self-hosted BI platforms, data visualisation tools, SQL explorers, and analytical dashboards. Query your databases, build charts, and share insights — with…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Business Intelligence &amp; Analytics">
-  <meta property="og:description" id="og-desc"    content="Business Intelligence &amp; Analytics  Self-hosted BI platforms, data visualisation tools, SQL explorers, and analytical dashboards. Query your databases, buil…">
+  <meta property="og:description" id="og-desc"    content="Self-hosted BI platforms, data visualisation tools, SQL explorers, and analytical dashboards. Query your databases, build charts, and share insights — with…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/business-intelligence/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Business Intelligence &amp; Analytics">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Business Intelligence &amp; Analytics">
-  <meta name="twitter:description" id="tw-desc"  content="Business Intelligence &amp; Analytics  Self-hosted BI platforms, data visualisation tools, SQL explorers, and analytical dashboards. Query your databases, buil…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Self-hosted BI platforms, data visualisation tools, SQL explorers, and analytical dashboards. Query your databases, build charts, and share insights — with…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Business Intelligence & Analytics","description":"Business Intelligence & Analytics  Self-hosted BI platforms, data visualisation tools, SQL explorers, and analytical dashboards. Query your databases, buil…","url":"https://docs.shani.dev/doc/servers/business-intelligence/","datePublished":"2026-04-22T00:00:00.000Z","dateModified":"2026-04-22T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Business Intelligence & Analytics","description":"Self-hosted BI platforms, data visualisation tools, SQL explorers, and analytical dashboards. Query your databases, build charts, and share insights — with…","url":"https://docs.shani.dev/doc/servers/business-intelligence/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Business Intelligence & Analytics","item":"https://docs.shani.dev/doc/servers/business-intelligence/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,26 +215,26 @@
         <h1 class="doc-title">Business Intelligence &amp; Analytics</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-22</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Self-hosted BI platforms, data visualisation tools, SQL explorers, and analytical dashboards. Query your databases, build charts, and share insights — without sending your business data to a cloud analytics vendor.</p>
-<blockquote><p><strong>Why self-host BI?</strong> Your databases already live on your server. Running your analytics stack next to them eliminates egress costs, keeps sensitive data on-premises, and removes per-seat licensing that makes cloud BI prohibitively expensive for small teams.</p></blockquote>
-<p>---</p>
-<h2>Key Concepts</h2>
-<h4>OLAP vs OLTP — the fundamental access pattern split</h4>
+<blockquote><strong>Why self-host BI?</strong> Your databases already live on your server. Running your analytics stack next to them eliminates egress costs, keeps sensitive data on-premises, and removes per-seat licensing that makes cloud BI prohibitively expensive for small teams.</blockquote>
+<hr>
+<h2 id="key-concepts">Key Concepts</h2>
+<h4 id="olap-vs-oltp-the-fundamental-access-pattern-split">OLAP vs OLTP — the fundamental access pattern split</h4>
 <p>OLTP (Online Transaction Processing) databases (PostgreSQL, MySQL) are row-oriented — optimised for reading/writing single rows quickly. Each INSERT or SELECT retrieves entire rows. OLAP (Online Analytical Processing) databases (ClickHouse, DuckDB, Redshift) are column-oriented — data for one column is stored contiguously on disk. <code>SELECT AVG(revenue) FROM orders</code> reads only the revenue column, skipping all other fields. At 1 billion rows, this is a 10–100× query time difference. BI tools that query OLAP databases feel instant; the same queries against PostgreSQL time out. The architectural decision: use PostgreSQL for your app's operational data, replicate or ETL to ClickHouse/DuckDB for analytics.</p>
-<h4>Star schema and dimensional modelling</h4>
+<h4 id="star-schema-and-dimensional-modelling">Star schema and dimensional modelling</h4>
 <p>Dimensional modelling organises analytical data around a central fact table (transactions, events, measurements) surrounded by dimension tables (customers, products, dates). The fact table holds numeric measures (revenue, quantity, duration) and foreign keys to dimensions. Queries join the fact table to dimensions to slice and dice — "total revenue by country and product category this quarter" is one query. This schema is called a star because the fact table is at the centre with dimension tables radiating out. BI tools (Metabase, Superset, Looker) assume this structure and generate SQL against it. A data warehouse without dimensional modelling produces slow, complex, unmaintainable queries.</p>
-<h4>ETL vs ELT — the modern data pipeline shift</h4>
+<h4 id="etl-vs-elt-the-modern-data-pipeline-shift">ETL vs ELT — the modern data pipeline shift</h4>
 <p>ETL (Extract, Transform, Load) transforms data before loading it into the warehouse — useful when transformation is expensive or the destination schema is rigid. ELT (Extract, Load, Transform) loads raw data first, then transforms it inside the warehouse using SQL — the modern pattern enabled by cheap columnar storage. Tools: dbt (data build tool) is the standard ELT transformation layer — it defines transformations as SQL <code>SELECT</code> statements, manages dependencies, tests data quality, and generates documentation. Lightdash reads dbt models directly. This is the dominant data engineering stack in 2025: source → Airbyte/Fivetran (extract/load) → dbt (transform) → ClickHouse/Redshift (warehouse) → Metabase/Superset (BI).</p>
-<h4>Data freshness, materialisation, and query performance</h4>
+<h4 id="data-freshness-materialisation-and-query-performance">Data freshness, materialisation, and query performance</h4>
 <p>A dashboard that runs a 30-second query on every page load is unusable. Three solutions: (1) Materialised views — pre-computed query results stored as a table, refreshed on a schedule or trigger. ClickHouse continuous materialised views update in real time as data arrives. (2) Dashboard caching — Metabase and Superset cache query results for a configurable TTL; stale data trades off against query load. (3) Pre-aggregation — aggregate raw events into daily/hourly summaries at ingest time. Cube.js and dbt handle this. The rule: analytical queries should complete in under 2 seconds for interactive use. If they don't, materialise or aggregate.</p>
-<h4>Role-based access control in BI tools</h4>
+<h4 id="role-based-access-control-in-bi-tools">Role-based access control in BI tools</h4>
 <p>BI tools often have access to sensitive data. Row-level security (RLS) restricts which rows a user can see — a sales manager sees only their region's data even when running a global query. Superset implements RLS via SQL WHERE clause injection on the dataset level. Column-level permissions prevent certain roles from seeing PII fields. Data masking replaces sensitive values with asterisks or tokens for lower-trust roles. In interviews for data engineering or analytics engineering roles, RLS and data governance come up frequently — it's the difference between a BI tool that just works internally versus one that can be safely exposed to external users or regulated environments.</p>
-<h4>Metrics layers and semantic consistency</h4>
+<h4 id="metrics-layers-and-semantic-consistency">Metrics layers and semantic consistency</h4>
 <p>Without a metrics layer, the same business metric is defined differently in 20 different Metabase queries — "monthly active users" means different things to different dashboards. A metrics layer (dbt metrics, Cube.js, LookML) defines metrics once and exposes them to all BI tools. The metric definition (SQL logic, time grain, filters) lives in one place; BI tools query the layer rather than raw tables. This is a standard concept in mature data organisations — the distinction between a "data analyst who builds dashboards" and a "analytics engineer who builds the semantic layer the dashboards query."</p>
-<h2>Metabase</h2>
+<h2 id="metabase">Metabase</h2>
 <p><strong>Purpose:</strong> The most approachable self-hosted BI tool. Non-technical users can build charts and dashboards by clicking through a question builder — no SQL required. For power users, the native query editor supports full SQL with autocomplete, query versioning, and parameterised questions. Connects to PostgreSQL, MySQL, MariaDB, MongoDB, SQLite, ClickHouse, Redshift, BigQuery, Snowflake, and more.</p>
 <pre><code class="language-yaml"># ~/metabase/compose.yaml
 services:
@@ -252,7 +254,7 @@ services:
       MB_SITE_URL: https://metabase.home.local
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/metabase &amp;&amp; podman-compose up -d</code></pre>
-<h4>Common operations</h4>
+<h4 id="common-operations">Common operations</h4>
 <pre><code class="language-bash"># Check Metabase health
 curl http://localhost:3000/api/health
 
@@ -267,8 +269,8 @@ curl -X POST http://localhost:3000/api/dataset   -H &quot;X-Metabase-Session: YO
 
 # Get session token for API use
 curl -X POST http://localhost:3000/api/session   -H &quot;Content-Type: application/json&quot;   -d '{&quot;username&quot;:&quot;admin@example.com&quot;,&quot;password&quot;:&quot;changeme&quot;}'</code></pre>
-<blockquote><p>Metabase can use its built-in H2 database for evaluation, but PostgreSQL is strongly recommended for production — it handles concurrent users and stores question/dashboard history reliably.</p></blockquote>
-<h4>Key features to explore after setup</h4>
+<blockquote>Metabase can use its built-in H2 database for evaluation, but PostgreSQL is strongly recommended for production — it handles concurrent users and stores question/dashboard history reliably.</blockquote>
+<h4 id="key-features-to-explore-after-setup">Key features to explore after setup</h4>
 <ul>
 <li><strong>Questions</strong> — saved queries that auto-refresh on a schedule</li>
 <li><strong>Dashboards</strong> — drag-and-drop canvas combining multiple questions with filters</li>
@@ -279,8 +281,8 @@ curl -X POST http://localhost:3000/api/session   -H &quot;Content-Type: applicat
 </ul>
 <p><strong>Caddy:</strong></p>
 <pre><code class="language-caddyfile">metabase.home.local { tls internal; reverse_proxy localhost:3000 }</code></pre>
-<p>---</p>
-<h2>Apache Superset</h2>
+<hr>
+<h2 id="apache-superset">Apache Superset</h2>
 <p><strong>Purpose:</strong> Enterprise-grade BI and data exploration platform from Apache. More powerful and more configurable than Metabase — supports 40+ database connectors, a drag-and-drop chart builder, a full SQL IDE (SQL Lab), role-based access control, row-level security, and advanced chart types (Sankey, sunburst, heatmap, geospatial). Steeper learning curve but no feature ceilings.</p>
 <pre><code class="language-yaml"># ~/superset/compose.yaml
 services:
@@ -326,10 +328,10 @@ services:
 volumes:
   pg_data:</code></pre>
 <pre><code class="language-bash">cd ~/superset &amp;&amp; podman-compose up -d</code></pre>
-<p>Access at <code>http://localhost:8088</code>.</p>
+<p>Access at <code>http://localhost:8088</code>. Health check: <code>curl localhost:8088/health</code> returns <code>true</code> once the app is ready.</p>
 <p><strong>SQL Lab:</strong> — the built-in IDE supports multi-tab SQL editing, query history, schema explorer, result export to CSV/Excel, and saved queries shared across the team. It is a full replacement for tools like DBeaver for query work.</p>
-<p>---</p>
-<h2>Redash</h2>
+<hr>
+<h2 id="redash">Redash</h2>
 <p><strong>Purpose:</strong> Query-first BI tool. Write SQL (or use the query builder), visualise the results, and assemble dashboards. Strong focus on scheduled query refreshes and alerting — ideal for operational dashboards that need to stay current. Supports PostgreSQL, MySQL, MongoDB, Elasticsearch, InfluxDB, Google Sheets, and REST APIs as data sources.</p>
 <pre><code class="language-yaml"># ~/redash/compose.yaml
 x-redash-service: &amp;redash-service
@@ -374,12 +376,12 @@ services:
 volumes:
   pg_data:</code></pre>
 <pre><code class="language-bash">cd ~/redash &amp;&amp; podman-compose up -d</code></pre>
-<h5>Initialise the database (first run only)</h5>
+<h5 id="initialise-the-database-first-run-only">Initialise the database (first run only)</h5>
 <pre><code class="language-bash">podman-compose run --rm server create_db</code></pre>
-<blockquote><p><strong>Version note:</strong> Redash jumped from v10.1 to v25.1 in early 2025 (a 3-year release gap). The <code>:latest</code> tag will pull v25.x. If upgrading from v10.x, review the <a href="https://github.com/getredash/redash/releases">release notes</a> — the scheduler service structure changed in v10.</p></blockquote>
+<blockquote><strong>Version note:</strong> Redash jumped from v10.1 to v25.1 in early 2025 (a 3-year release gap). The <code>:latest</code> tag will pull v25.x. If upgrading from v10.x, review the <a href="https://github.com/getredash/redash/releases">release notes</a> — the scheduler service structure changed in v10.</blockquote>
 <p>Access at <code>http://localhost:5000</code>.</p>
-<p>---</p>
-<h2>Evidence.dev</h2>
+<hr>
+<h2 id="evidencedev">Evidence.dev</h2>
 <p><strong>Purpose:</strong> Code-first BI tool — write SQL queries and Markdown in <code>.md</code> files, and Evidence renders them as a polished interactive report site. Version-controlled in Git, deployed as a static site. Ideal for analysts who prefer code over drag-and-drop and want reports that live in the same repo as the data pipelines that produce them.</p>
 <pre><code class="language-yaml"># ~/evidence/compose.yaml
 services:
@@ -391,85 +393,38 @@ services:
       - /home/user/evidence/build:/usr/share/nginx/html:ro,Z
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/evidence &amp;&amp; podman-compose up -d</code></pre>
-<h5>Example report page (<code>pages/sales.md</code>)</h5>
-<p><pre><code class="language-markdown"># Sales Overview
-</code></pre>sql orders_by_month SELECT date_trunc('month', created_at) AS month, COUNT(*) AS orders, SUM(total) AS revenue FROM orders WHERE created_at >= NOW() - INTERVAL '12 months' GROUP BY 1 ORDER BY 1</p>
+<h5 id="build-the-site-first-required">Build the site first (required)</h5>
+<p>Evidence is a build tool first — the container only serves static output. Scaffold a project, preview it, then produce the production build:</p>
+<pre><code class="language-bash">npm init evidence@latest   # scaffold a new project (or clone github.com/evidence-dev/evidence starter)
+npx evidence dev           # live dev preview with hot reload at localhost:3000
+npx evidence build         # production build — outputs to build/</code></pre>
+<p>The nginx container above serves <code>/home/user/evidence/build</code> — an empty or missing <code>build/</code> directory means an empty site.</p>
+<h5 id="example-report-page-pagessalesmd">Example report page (<code>pages/sales.md</code>)</h5>
+<pre><code class="language-markdown"># Sales Overview
+
+```sql orders_by_month
+SELECT date_trunc('month', created_at) AS month,
+       COUNT(*) AS orders,
+       SUM(total) AS revenue
+FROM orders
+WHERE created_at &gt;= NOW() - INTERVAL '12 months'
+GROUP BY 1 ORDER BY 1</code></pre>
+<p><LineChart data={orders_by_month} x=month y=revenue title="Monthly Revenue" /></p>
+<p>Total orders last 12 months: <strong><Value data={orders_by_month} column=orders fmt=num0 agg=sum /></strong></p>
 <pre><code>
-&lt;LineChart data={orders_by_month} x=month y=revenue title=&quot;Monthly Revenue&quot; /&gt;
+---
 
-Total orders last 12 months: **&lt;Value data={orders_by_month} column=orders fmt=num0 agg=sum /&gt;**</code></pre>
-<p>---</p>
-<h2>ClickHouse (OLAP Database)</h2>
-<p><strong>Purpose:</strong> Columnar OLAP database that executes analytical queries orders of magnitude faster than row-oriented databases. If you are running Metabase or Superset against a PostgreSQL table with hundreds of millions of rows and queries are slow, ClickHouse is the answer. Used by Cloudflare, Uber, and Bytedance for petabyte-scale analytics.</p>
-<pre><code class="language-yaml"># ~/clickhouse/compose.yaml
-services:
-  clickhouse:
-    image: clickhouse/clickhouse-server:latest
-    ports:
-      - &quot;127.0.0.1:8123:8123&quot;
-      - &quot;127.0.0.1:9000:9000&quot;
-    volumes:
-      - /home/user/clickhouse/data:/var/lib/clickhouse:Z
-      - /home/user/clickhouse/logs:/var/log/clickhouse-server:Z
-    environment:
-      CLICKHOUSE_USER: admin
-      CLICKHOUSE_PASSWORD: changeme
-      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
-    ulimits:
-      nofile:
-        soft: 262144
-        hard: 262144
-    restart: unless-stopped</code></pre>
-<pre><code class="language-bash">cd ~/clickhouse &amp;&amp; podman-compose up -d</code></pre>
-<h5>Connect and run queries</h5>
-<pre><code class="language-bash">podman exec -it clickhouse clickhouse-client --user admin --password changeme
+## ClickHouse (OLAP Database)
 
--- Create a table and insert data
-CREATE TABLE events (
-  event_date Date,
-  event_type String,
-  user_id UInt64,
-  properties String
-) ENGINE = MergeTree()
-PARTITION BY toYYYYMM(event_date)
-ORDER BY (event_date, event_type, user_id);
+**Purpose:** Columnar OLAP database that executes analytical queries orders of magnitude faster than row-oriented databases — the storage backend of choice when Metabase or Superset queries against Postgres get slow at hundreds of millions of rows. Full setup and compose file: [Databases wiki → ClickHouse](https://docs.shani.dev/doc/servers/databases/other#clickhouse-columnar-olap-database).
 
--- ClickHouse can ingest from Kafka directly
-CREATE TABLE kafka_events (...)
-ENGINE = Kafka
-SETTINGS kafka_broker_list = 'localhost:9092',
-         kafka_topic_list = 'events',
-         kafka_group_name = 'clickhouse',
-         kafka_format = 'JSONEachRow';</code></pre>
-<h4>Common operations</h4>
-<pre><code class="language-bash"># Connect to ClickHouse SQL shell
-podman exec -it clickhouse clickhouse-client --user admin --password changeme
 
-# Run a query non-interactively
-podman exec clickhouse clickhouse-client --user admin --password changeme   --query &quot;SELECT count() FROM system.tables&quot;
+## Lightdash (dbt-Native BI)
 
-# Show all databases
-podman exec clickhouse clickhouse-client --user admin --password changeme   --query &quot;SHOW DATABASES&quot;
+**Purpose:** Open-source BI tool built on top of dbt (data build tool). If your team already uses dbt for data transformation, Lightdash reads your dbt models and metrics directly — no reimporting schemas, no duplicated definitions. Metrics defined in dbt YAML automatically appear in Lightdash dashboards.
 
-# Show tables in a database
-podman exec clickhouse clickhouse-client --user admin --password changeme   --query &quot;SHOW TABLES FROM default&quot;
-
-# Ingest CSV data
-cat data.csv | podman exec -i clickhouse clickhouse-client   --user admin --password changeme   --query &quot;INSERT INTO mydb.mytable FORMAT CSV&quot;
-
-# Check disk usage per table
-podman exec clickhouse clickhouse-client --user admin --password changeme   --query &quot;SELECT table, formatReadableSize(sum(bytes)) FROM system.parts GROUP BY table ORDER BY sum(bytes) DESC&quot;
-
-# View running queries
-podman exec clickhouse clickhouse-client --user admin --password changeme   --query &quot;SELECT query_id, elapsed, query FROM system.processes&quot;
-
-# Kill a long-running query
-podman exec clickhouse clickhouse-client --user admin --password changeme   --query &quot;KILL QUERY WHERE query_id='abc123'&quot;</code></pre>
-<blockquote><p>Connect Metabase or Superset to ClickHouse to get sub-second query times on datasets that would take minutes in PostgreSQL.</p></blockquote>
-<p>---</p>
-<h2>Lightdash (dbt-Native BI)</h2>
-<p><strong>Purpose:</strong> Open-source BI tool built on top of dbt (data build tool). If your team already uses dbt for data transformation, Lightdash reads your dbt models and metrics directly — no reimporting schemas, no duplicated definitions. Metrics defined in dbt YAML automatically appear in Lightdash dashboards.</p>
-<pre><code class="language-yaml"># ~/lightdash/compose.yaml
+```yaml
+# ~/lightdash/compose.yaml
 services:
   lightdash:
     image: lightdash/lightdash:latest
@@ -499,8 +454,9 @@ services:
 volumes:
   pg_data:</code></pre>
 <pre><code class="language-bash">cd ~/lightdash &amp;&amp; podman-compose up -d</code></pre>
-<p>---</p>
-<h2>Plausible Analytics (Web Analytics)</h2>
+<p>Access at <code>http://localhost:8080</code>. Health check: <code>curl localhost:8080/api/v1/health</code>.</p>
+<hr>
+<h2 id="plausible-analytics-web-analytics">Plausible Analytics (Web Analytics)</h2>
 <p><strong>Purpose:</strong> Lightweight, GDPR-compliant web analytics. No cookies, no cross-site tracking, no personal data stored. A one-line script tag replaces Google Analytics with a dashboard you own. See pageviews, referrers, top pages, devices, and conversion goals — without privacy violations.</p>
 <pre><code class="language-yaml"># ~/plausible/compose.yaml
 services:
@@ -533,8 +489,8 @@ volumes: {pg_data: {}, events_data: {}}</code></pre>
 <pre><code class="language-bash">cd ~/plausible &amp;&amp; podman-compose up -d</code></pre>
 <p>Add to any website:</p>
 <pre><code class="language-html">&lt;script defer data-domain=&quot;yoursite.com&quot; src=&quot;https://analytics.example.com/js/script.js&quot;&gt;&lt;/script&gt;</code></pre>
-<p>---</p>
-<h2>Umami (Simple Web Analytics)</h2>
+<hr>
+<h2 id="umami-simple-web-analytics">Umami (Simple Web Analytics)</h2>
 <p><strong>Purpose:</strong> Simpler Plausible alternative. Single-service analytics with event tracking, funnel analysis, and an OpenAPI. Backed by PostgreSQL or MySQL.</p>
 <pre><code class="language-yaml"># ~/umami/compose.yaml
 services:
@@ -558,20 +514,61 @@ services:
 
 volumes: {pg_data: {}}</code></pre>
 <pre><code class="language-bash">cd ~/umami &amp;&amp; podman-compose up -d</code></pre>
-<p>---</p>
-<h2>Choosing the Right Tool</h2>
-<p>| Use Case | Recommended Tool | |----------|-----------------| | Non-technical users, quick setup | Metabase | | Large teams, enterprise features, 40+ connectors | Apache Superset | | Operational dashboards, alerting on query results | Redash | | Time-series, infrastructure metrics | Grafana | | Code-first reports in Git | Evidence.dev | | dbt-native BI | Lightdash | | Fast analytics on 100M+ row tables | ClickHouse | | GDPR-compliant web analytics | Plausible | | Simple web analytics | Umami |</p>
-<p>---</p>
-<h2>Caddy Configuration</h2>
+<blockquote>Default login: <code>admin</code> / <code>umami</code> — change the password immediately under <strong>Settings → Profile</strong>.</blockquote>
+<hr>
+<h2 id="choosing-the-right-tool">Choosing the Right Tool</h2>
+<table><thead><tr><th>Use Case</th><th>Recommended Tool</th></tr></thead><tbody><tr><td>Non-technical users, quick setup</td><td>Metabase</td></tr><tr><td>Large teams, enterprise features, 40+ connectors</td><td>Apache Superset</td></tr><tr><td>Operational dashboards, alerting on query results</td><td>Redash</td></tr><tr><td>Time-series, infrastructure metrics</td><td>Grafana</td></tr><tr><td>Code-first reports in Git</td><td>Evidence.dev</td></tr><tr><td>dbt-native BI</td><td>Lightdash</td></tr><tr><td>Fast analytics on 100M+ row tables</td><td>ClickHouse</td></tr><tr><td>GDPR-compliant web analytics</td><td>Plausible</td></tr><tr><td>Simple web analytics</td><td>Umami</td></tr></tbody></table>
+<hr>
+<h2 id="caddy-configuration">Caddy Configuration</h2>
 <pre><code class="language-caddyfile">metabase.home.local    { tls internal; reverse_proxy localhost:3000 }
 superset.home.local    { tls internal; reverse_proxy localhost:8088 }
 redash.home.local      { tls internal; reverse_proxy localhost:5000 }
 analytics.example.com  { reverse_proxy localhost:8000 }
 lightdash.home.local   { tls internal; reverse_proxy localhost:8080 }</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | Metabase blank on first load | Wait 60–90 s for initialisation; check logs with <code>podman logs metabase</code>; ensure PostgreSQL is reachable on <code>host.containers.internal</code> | | Metabase <code>Cannot connect to database</code> | Use <code>host.containers.internal</code> not <code>localhost</code> for the DB host; verify credentials match the PostgreSQL container | | Superset <code>No module named psycopg2</code> | Add <code>psycopg2-binary</code> to the image or use <code>apache/superset:latest</code> which includes it | | Superset charts not loading | Check <code>SUPERSET_SECRET_KEY</code> is set and consistent; clear browser cache | | Redash worker not processing queries | Verify Redis is running; check <code>podman-compose logs worker</code> for connection errors | | ClickHouse OOM | Add <code>--memory 4g</code> to limit container memory; tune <code>max_memory_usage</code> in ClickHouse config | | Plausible no events received | Verify <code>BASE_URL</code> matches your site's script src; check CSP headers aren't blocking the script | | Evidence build fails | Ensure your database credentials in <code>sources/</code> are correct; run <code>npm run sources</code> to retest connections |</p>
-<blockquote><p>💡 <strong>Tip:</strong> For the best Metabase experience, connect it to a <strong>read replica</strong> of your production database rather than the primary — long-running analytical queries won't block application writes.</p></blockquote></div>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Metabase blank on first load</td><td>Wait 60–90 s for initialisation; check logs with <code>podman logs metabase</code>; ensure PostgreSQL is reachable on <code>host.containers.internal</code></td></tr><tr><td>Metabase <code>Cannot connect to database</code></td><td>Use <code>host.containers.internal</code> not <code>localhost</code> for the DB host; verify credentials match the PostgreSQL container</td></tr><tr><td>Superset <code>No module named psycopg2</code></td><td>Add <code>psycopg2-binary</code> to the image or use <code>apache/superset:latest</code> which includes it</td></tr><tr><td>Superset charts not loading</td><td>Check <code>SUPERSET_SECRET_KEY</code> is set and consistent; clear browser cache</td></tr><tr><td>Redash worker not processing queries</td><td>Verify Redis is running; check <code>podman-compose logs worker</code> for connection errors</td></tr><tr><td>ClickHouse OOM</td><td>Add <code>--memory 4g</code> to limit container memory; tune <code>max_memory_usage</code> in ClickHouse config</td></tr><tr><td>Plausible no events received</td><td>Verify <code>BASE_URL</code> matches your site's script src; check CSP headers aren't blocking the script</td></tr><tr><td>Evidence build fails</td><td>Ensure your database credentials in <code>sources/</code> are correct; run <code>npm run sources</code> to retest connections</td></tr></tbody></table>
+<blockquote>💡 <strong>Tip:</strong> For the best Metabase experience, connect it to a <strong>read replica</strong> of your production database rather than the primary — long-running analytical queries won't block application writes.</blockquote>
+<hr>
+<h2 id="matomo-web-analytics">Matomo (Web Analytics)</h2>
+<p><strong>Purpose:</strong> The leading open-source web analytics platform — a complete, self-hosted Google Analytics replacement. Tracks pageviews, sessions, bounce rate, goal conversions, funnels, heatmaps (with plugin), and e-commerce. GDPR-compliant by default when configured correctly. Unlike Plausible or Umami, Matomo tracks individual visitor sessions for deep funnel analysis.</p>
+<pre><code class="language-yaml"># ~/matomo/compose.yml
+services:
+  matomo:
+    image: matomo:latest
+    ports: [&quot;127.0.0.1:8500:80&quot;]
+    environment:
+      MATOMO_DATABASE_HOST: db
+      MATOMO_DATABASE_ADAPTER: mysql
+      MATOMO_DATABASE_DBNAME: matomo
+      MATOMO_DATABASE_USERNAME: matomo
+      MATOMO_DATABASE_PASSWORD: changeme
+    volumes:
+      - /home/user/matomo/data:/var/www/html:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: matomo
+      MYSQL_USER: matomo
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  db_data:</code></pre>
+<pre><code class="language-bash">cd ~/matomo &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:8500</code> to complete the setup wizard. Add the tracking snippet to your sites.</p>
+<blockquote><strong>Choosing between Matomo, Plausible, and Umami:</strong> Matomo is the choice when you need session-level tracking, funnel analysis, and A/B testing. Use Plausible or Umami for privacy-first aggregate-only analytics with no cookies.</blockquote>
+<hr>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="databases">Databases</a></li>
+<li><a href="monitoring">Monitoring (Grafana)</a></li>
+</ul></div>
     </div>
 
   </main>

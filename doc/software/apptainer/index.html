@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Apptainer (HPC Containers) — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Apptainer (HPC Containers)  Apptainer (formerly Singularity) is the container runtime built for HPC. It packages your entire software environment into a si…">
+  <meta name="description" id="meta-desc"     content="Apptainer (formerly Singularity) is the container runtime built for HPC. It packages your entire software environment into a single .sif (Singularity Image…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Apptainer (HPC Containers)">
-  <meta property="og:description" id="og-desc"    content="Apptainer (HPC Containers)  Apptainer (formerly Singularity) is the container runtime built for HPC. It packages your entire software environment into a si…">
+  <meta property="og:description" id="og-desc"    content="Apptainer (formerly Singularity) is the container runtime built for HPC. It packages your entire software environment into a single .sif (Singularity Image…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/software/apptainer/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Apptainer (HPC Containers)">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Apptainer (HPC Containers)">
-  <meta name="twitter:description" id="tw-desc"  content="Apptainer (HPC Containers)  Apptainer (formerly Singularity) is the container runtime built for HPC. It packages your entire software environment into a si…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Apptainer (formerly Singularity) is the container runtime built for HPC. It packages your entire software environment into a single .sif (Singularity Image…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Apptainer (HPC Containers)","description":"Apptainer (HPC Containers)  Apptainer (formerly Singularity) is the container runtime built for HPC. It packages your entire software environment into a si…","url":"https://docs.shani.dev/doc/software/apptainer/","datePublished":"2026-05-07T00:00:00.000Z","dateModified":"2026-05-07T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Apptainer (HPC Containers)","description":"Apptainer (formerly Singularity) is the container runtime built for HPC. It packages your entire software environment into a single .sif (Singularity Image…","url":"https://docs.shani.dev/doc/software/apptainer/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Apptainer (HPC Containers)","item":"https://docs.shani.dev/doc/software/apptainer/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,15 +215,15 @@
         <h1 class="doc-title">Apptainer (HPC Containers)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Software &amp; Apps</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-05-07</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Apptainer (formerly Singularity) is the container runtime built for HPC. It packages your entire software environment into a single <code>.sif</code> (Singularity Image Format) file that runs identically on your Shanios workstation and on any SLURM/PBS/LSF cluster that has Apptainer installed. No root daemon required — it runs as an unprivileged user out of the box.</p>
 <p>Apptainer is pre-installed on Shanios. No configuration required.</p>
-<h2>Apptainer vs Podman vs Distrobox</h2>
-<p>| | Apptainer | Podman | Distrobox | |---|---|---|---| | Primary use case | HPC / cluster portability | Services, dev containers | Mutable dev environments | | Image format | SIF (single file) | OCI layers | OCI layers | | Root required | No | No | No | | Home dir shared | Yes (by default) | No | Yes (by default) | | GPU passthrough | <code>--nv</code> / <code>--rocm</code> flags | Manual device flags | Manual device flags | | Cluster-compatible | Yes | No | No | | Mutable at runtime | No (read-only) | Yes | Yes |</p>
+<h2 id="apptainer-vs-podman-vs-distrobox">Apptainer vs Podman vs Distrobox</h2>
+<table><thead><tr><th></th><th>Apptainer</th><th>Podman</th><th>Distrobox</th></tr></thead><tbody><tr><td>Primary use case</td><td>HPC / cluster portability</td><td>Services, dev containers</td><td>Mutable dev environments</td></tr><tr><td>Image format</td><td>SIF (single file)</td><td>OCI layers</td><td>OCI layers</td></tr><tr><td>Root required</td><td>No</td><td>No</td><td>No</td></tr><tr><td>Home dir shared</td><td>Yes (by default)</td><td>No</td><td>Yes (by default)</td></tr><tr><td>GPU passthrough</td><td><code>--nv</code> / <code>--rocm</code> flags</td><td>Manual device flags</td><td>Manual device flags</td></tr><tr><td>Cluster-compatible</td><td>Yes</td><td>No</td><td>No</td></tr><tr><td>Mutable at runtime</td><td>No (read-only)</td><td>Yes</td><td>Yes</td></tr></tbody></table>
 <p><strong>Use Apptainer when</strong> you need to run the same environment on your workstation and a SLURM/PBS cluster, need long-term reproducibility, or want a single portable file archived alongside data and code.</p>
-<h2>Basic Usage</h2>
+<h2 id="basic-usage">Basic Usage</h2>
 <pre><code class="language-bash"># Pull an image from Docker Hub (converted to SIF automatically)
 apptainer pull docker://ubuntu:22.04
 apptainer pull docker://python:3.11-slim
@@ -244,7 +246,7 @@ apptainer exec --rocm rocm_pytorch.sif python3 -c &quot;import torch; print(torc
 # Bind mount a host directory
 apptainer exec --bind /home/$USER/data:/data myimage.sif python3 /data/analysis.py</code></pre>
 <p>By default, Apptainer binds your home directory into the container — your files are available at the same paths inside and outside.</p>
-<h2>Pulling Images</h2>
+<h2 id="pulling-images">Pulling Images</h2>
 <pre><code class="language-bash"># From Docker Hub
 apptainer pull docker://ubuntu:22.04
 apptainer pull docker://nvidia/cuda:12.3.0-devel-ubuntu22.04
@@ -263,9 +265,9 @@ apptainer pull --name my-pytorch.sif docker://pytorch/pytorch:2.2.0-cuda12.1-cud
 apptainer inspect ubuntu_22.04.sif
 apptainer inspect --runscript ubuntu_22.04.sif
 apptainer inspect --labels ubuntu_22.04.sif</code></pre>
-<h2>Building Reproducible Images</h2>
+<h2 id="building-reproducible-images">Building Reproducible Images</h2>
 <p>The <code>.def</code> definition file is a text-based, version-controllable description of your environment. Anyone with Apptainer can build the identical image from the same <code>.def</code>.</p>
-<h3>Basic Python Research Environment</h3>
+<h3 id="basic-python-research-environment">Basic Python Research Environment</h3>
 <pre><code># python-research.def
 Bootstrap: docker
 From: ubuntu:22.04
@@ -293,7 +295,7 @@ apptainer build --fakeroot python-research.sif python-research.def
 
 # Test
 apptainer exec python-research.sif python3 -c &quot;import numpy; print(numpy.__version__)&quot;</code></pre>
-<h3>PyTorch + CUDA Environment</h3>
+<h3 id="pytorch-cuda-environment">PyTorch + CUDA Environment</h3>
 <pre><code># pytorch-cuda.def
 Bootstrap: docker
 From: nvidia/cuda:12.3.0-devel-ubuntu22.04
@@ -314,7 +316,7 @@ From: nvidia/cuda:12.3.0-devel-ubuntu22.04
     exec python3 &quot;$@&quot;</code></pre>
 <pre><code class="language-bash">apptainer build --fakeroot pytorch-cuda.sif pytorch-cuda.def
 apptainer exec --nv pytorch-cuda.sif python3 train.py</code></pre>
-<h3>Bioinformatics Environment</h3>
+<h3 id="bioinformatics-environment">Bioinformatics Environment</h3>
 <pre><code># bioinformatics.def
 Bootstrap: docker
 From: ubuntu:22.04
@@ -329,9 +331,9 @@ From: ubuntu:22.04
 
 %environment
     export PATH=/usr/local/bin:$PATH</code></pre>
-<h2>Submitting to HPC Clusters</h2>
+<h2 id="submitting-to-hpc-clusters">Submitting to HPC Clusters</h2>
 <p>The <code>.sif</code> file you build and test locally is exactly what you submit to the cluster.</p>
-<h3>SLURM</h3>
+<h3 id="slurm">SLURM</h3>
 <pre><code class="language-bash">#!/bin/bash
 #SBATCH --job-name=my_analysis
 #SBATCH --nodes=1
@@ -350,7 +352,7 @@ apptainer exec --nv \
 
 # For AMD GPU clusters:
 # apptainer exec --rocm /scratch/$USER/rocm.sif python3 train.py</code></pre>
-<h3>PBS/Torque</h3>
+<h3 id="pbstorque">PBS/Torque</h3>
 <pre><code class="language-bash">#!/bin/bash
 #PBS -N my_analysis
 #PBS -l nodes=1:ppn=8:gpus=1
@@ -363,12 +365,12 @@ apptainer exec --nv \
   --bind /scratch/$USER/data:/data \
   /scratch/$USER/pytorch-cuda.sif \
   python3 analysis/train.py</code></pre>
-<h3>MPI (Multi-Node)</h3>
+<h3 id="mpi-multi-node">MPI (Multi-Node)</h3>
 <p>Host MPI version must match the MPI version inside the container:</p>
 <pre><code class="language-bash">mpirun -np 32 apptainer exec --nv \
   /scratch/$USER/mpi-app.sif \
   /app/my_mpi_program</code></pre>
-<h2>GPU Support</h2>
+<h2 id="gpu-support">GPU Support</h2>
 <p><code>--nv</code> and <code>--rocm</code> inject the host GPU runtime into the container at runtime. No driver bundling is needed in the SIF image — the same image works across cluster generations as long as CUDA/ROCm ABI compatibility is maintained.</p>
 <pre><code class="language-bash"># NVIDIA
 apptainer exec --nv myimage.sif nvidia-smi
@@ -380,7 +382,7 @@ apptainer exec --rocm myimage.sif python3 -c &quot;import torch; print(torch.cud
 
 # Debug: see what GPU libraries are injected
 apptainer exec --nv --debug myimage.sif true 2&gt;&amp;1 | grep -i nvidia</code></pre>
-<h2>Persistent Overlays</h2>
+<h2 id="persistent-overlays">Persistent Overlays</h2>
 <p>SIF images are read-only. To add packages without rebuilding:</p>
 <pre><code class="language-bash"># Create a writable overlay file
 apptainer overlay create --size 512 my-overlay.img
@@ -393,7 +395,7 @@ apptainer build --sandbox my-sandbox/ docker://ubuntu:22.04
 apptainer shell --writable my-sandbox/
 # Install packages, test your .def, then convert back
 apptainer build final.sif my-sandbox/</code></pre>
-<h2>Caching and Storage</h2>
+<h2 id="caching-and-storage">Caching and Storage</h2>
 <pre><code class="language-bash"># Cache location (persists in @home subvolume — survives OS updates)
 du -sh ~/.apptainer/cache
 
@@ -402,13 +404,20 @@ apptainer cache clean
 
 # Override cache location (e.g. to a scratch disk)
 export APPTAINER_CACHEDIR=/scratch/$USER/apptainer-cache</code></pre>
-<h2>Practical Tips</h2>
+<h2 id="practical-tips">Practical Tips</h2>
 <ul>
 <li><strong>Pin base image versions.</strong> Use <code>From: ubuntu:22.04</code> not <code>From: ubuntu:latest</code>.</li>
 <li><strong>Pin package versions.</strong> Use <code>pip install package==X.Y.Z</code>, not <code>pip install package</code>.</li>
 <li><strong>Keep the <code>.def</code> in version control.</strong> The <code>.sif</code> is a build artefact; the <code>.def</code> is the source.</li>
 <li><strong>Test locally before submitting to cluster.</strong> Run on a small dataset locally first.</li>
 <li><strong>Use <code>--bind</code> explicitly for data directories.</strong> Don't rely on automatic home binding for large datasets.</li>
+</ul>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="containers">Containers</a> — overview of all container runtimes</li>
+<li><a href="gpu-containers">GPU Containers</a> — NVIDIA/AMD access in containers</li>
+<li><a href="distrobox">Distrobox</a> — mutable dev environments with host integration</li>
+<li><a href="lxc-lxd">Linux Containers (LXC/LXD)</a> — system containers</li>
 </ul></div>
     </div>
 

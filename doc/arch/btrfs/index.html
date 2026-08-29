@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Btrfs Deep Dive — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Btrfs Deep Dive  Shanios leverages advanced Btrfs features for immutability, efficiency, and data integrity.  Copy-on-Write (CoW)  Btrfs CoW minimises stor…">
+  <meta name="description" id="meta-desc"     content="Shanios leverages advanced Btrfs features for immutability, efficiency, and data integrity. Copy-on-Write (CoW) Btrfs CoW minimises storage duplication: Sh…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Btrfs Deep Dive">
-  <meta property="og:description" id="og-desc"    content="Btrfs Deep Dive  Shanios leverages advanced Btrfs features for immutability, efficiency, and data integrity.  Copy-on-Write (CoW)  Btrfs CoW minimises stor…">
+  <meta property="og:description" id="og-desc"    content="Shanios leverages advanced Btrfs features for immutability, efficiency, and data integrity. Copy-on-Write (CoW) Btrfs CoW minimises storage duplication: Sh…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/arch/btrfs/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Btrfs Deep Dive">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Btrfs Deep Dive">
-  <meta name="twitter:description" id="tw-desc"  content="Btrfs Deep Dive  Shanios leverages advanced Btrfs features for immutability, efficiency, and data integrity.  Copy-on-Write (CoW)  Btrfs CoW minimises stor…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios leverages advanced Btrfs features for immutability, efficiency, and data integrity. Copy-on-Write (CoW) Btrfs CoW minimises storage duplication: Sh…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Btrfs Deep Dive","description":"Btrfs Deep Dive  Shanios leverages advanced Btrfs features for immutability, efficiency, and data integrity.  Copy-on-Write (CoW)  Btrfs CoW minimises stor…","url":"https://docs.shani.dev/doc/arch/btrfs/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Btrfs Deep Dive","description":"Shanios leverages advanced Btrfs features for immutability, efficiency, and data integrity. Copy-on-Write (CoW) Btrfs CoW minimises storage duplication: Sh…","url":"https://docs.shani.dev/doc/arch/btrfs/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Btrfs Deep Dive","item":"https://docs.shani.dev/doc/arch/btrfs/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,11 +215,11 @@
         <h1 class="doc-title">Btrfs Deep Dive</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Architecture</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Shanios leverages advanced Btrfs features for immutability, efficiency, and data integrity.</p>
-<h2>Copy-on-Write (CoW)</h2>
+<h2 id="copy-on-write-cow">Copy-on-Write (CoW)</h2>
 <p>Btrfs CoW minimises storage duplication:</p>
 <ul>
 <li>Shared data blocks between <code>@blue</code> and <code>@green</code> — only the delta is stored</li>
@@ -226,7 +228,7 @@
 <li>Cheap snapshots: snapshot creation is nearly instantaneous regardless of subvolume size</li>
 </ul>
 <p>At install time, <code>@blue</code> and <code>@green</code> are not created independently — the installer extracts the OS image into a subvolume, snapshots it read-only as <code>@blue</code>, then snapshots <code>@blue</code> again as <code>@green</code>. Both slots therefore start out as CoW clones of the exact same data. Every subsequent <code>shani-deploy</code> update repeats the pattern against whichever slot is currently inactive: snapshot the old candidate as a <code>@&lt;slot&gt;_backup_&lt;timestamp&gt;</code> safety copy, <code>btrfs receive</code> the new image, then snapshot it into place as the new <code>@&lt;slot&gt;</code> — so the CoW delta between slots only ever reflects one update's worth of changed blocks.</p>
-<h2>Transparent Compression</h2>
+<h2 id="transparent-compression">Transparent Compression</h2>
 <p>Default mount options for all data subvolumes:</p>
 <pre><code>compress=zstd,space_cache=v2,autodefrag</code></pre>
 <ul>
@@ -235,7 +237,7 @@
 <li>Improves SSD lifespan by reducing write amplification</li>
 <li><code>autodefrag</code> periodically defragments small random-write files in the background</li>
 </ul>
-<h2>Subvolumes with nodatacow</h2>
+<h2 id="subvolumes-with-nodatacow">Subvolumes with nodatacow</h2>
 <p>Specific subvolumes disable CoW for performance:</p>
 <ul>
 <li><strong><code>@swap</code>:</strong> CoW must be disabled for swap files — Btrfs requires it, and compression is also disabled</li>
@@ -243,9 +245,9 @@
 <li><strong><code>@qemu</code>:</strong> Bare QEMU VM disk images</li>
 </ul>
 <p>These subvolumes use <code>nodatacow,nospace_cache</code> and do not participate in bees deduplication.</p>
-<h2>Mount Options by Subvolume</h2>
-<p>| Subvolume(s) | Mount Options | Notes | |---|---|---| | <code>@blue</code> / <code>@green</code> | <code>ro,noatime,compress=zstd,space_cache=v2,autodefrag</code> | Mounted by dracut via kernel cmdline — <strong>not in fstab</strong> | | <code>@root</code>, <code>@home</code>, <code>@data</code> | <code>rw,noatime,compress=zstd,space_cache=v2,autodefrag</code> | Core persistent data — always mounted | | <code>@nix</code> | <code>nofail,noatime,compress=zstd,space_cache=v2,autodefrag</code> | CoW kept for bees deduplication | | <code>@log</code>, <code>@cache</code> | <code>nofail,noatime,compress=zstd,space_cache=v2,autodefrag,x-systemd.after=var.mount,x-systemd.requires=var.mount</code> | <code>nofail</code> plus requires <code>/var</code> to exist first | | <code>@flatpak</code>, <code>@snapd</code>, <code>@waydroid</code>, <code>@containers</code>, <code>@machines</code>, <code>@lxc</code>, <code>@lxd</code> | <code>nofail,noatime,compress=zstd,space_cache=v2,autodefrag,x-systemd.after=var.mount,x-systemd.requires=var.mount</code> | <code>nofail</code> — boots cleanly even if not yet created | | <code>@libvirt</code>, <code>@qemu</code> | <code>nofail,noatime,nodatacow,nospace_cache,x-systemd.after=var.mount,x-systemd.requires=var.mount</code> | nodatacow required for VM disk performance | | <code>@swap</code> | <code>nofail,noatime,nodatacow,nospace_cache</code> | Mandatory for swapfile correctness on Btrfs |</p>
-<h2>Why noatime?</h2>
+<h2 id="mount-options-by-subvolume">Mount Options by Subvolume</h2>
+<table><thead><tr><th>Subvolume(s)</th><th>Mount Options</th><th>Notes</th></tr></thead><tbody><tr><td><code>@blue</code> / <code>@green</code></td><td><code>ro,noatime,compress=zstd,space_cache=v2,autodefrag</code></td><td>Mounted by dracut via kernel cmdline — <strong>not in fstab</strong></td></tr><tr><td><code>@root</code>, <code>@home</code>, <code>@data</code></td><td><code>rw,noatime,compress=zstd,space_cache=v2,autodefrag</code></td><td>Core persistent data — always mounted</td></tr><tr><td><code>@nix</code></td><td><code>nofail,noatime,compress=zstd,space_cache=v2,autodefrag</code></td><td>CoW kept for bees deduplication</td></tr><tr><td><code>@log</code>, <code>@cache</code></td><td><code>nofail,noatime,compress=zstd,space_cache=v2,autodefrag,x-systemd.after=var.mount,x-systemd.requires=var.mount</code></td><td><code>nofail</code> plus requires <code>/var</code> to exist first</td></tr><tr><td><code>@flatpak</code>, <code>@snapd</code>, <code>@waydroid</code>, <code>@containers</code>, <code>@machines</code>, <code>@lxc</code>, <code>@lxd</code></td><td><code>nofail,noatime,compress=zstd,space_cache=v2,autodefrag,x-systemd.after=var.mount,x-systemd.requires=var.mount</code></td><td><code>nofail</code> — boots cleanly even if not yet created</td></tr><tr><td><code>@libvirt</code>, <code>@qemu</code></td><td><code>nofail,noatime,nodatacow,nospace_cache,x-systemd.after=var.mount,x-systemd.requires=var.mount</code></td><td>nodatacow required for VM disk performance</td></tr><tr><td><code>@swap</code></td><td><code>nofail,noatime,nodatacow,nospace_cache</code></td><td>Mandatory for swapfile correctness on Btrfs</td></tr></tbody></table>
+<h2 id="why-noatime">Why noatime?</h2>
 <p>All subvolumes use <code>noatime</code>:</p>
 <ul>
 <li>Prevents writing to disk every time a file is read</li>
@@ -253,7 +255,7 @@
 <li>Improves battery life on laptops</li>
 <li>No impact on most applications (relatime/noatime is a Debian/Ubuntu default too)</li>
 </ul>
-<h2>Manual Snapshots</h2>
+<h2 id="manual-snapshots">Manual Snapshots</h2>
 <pre><code class="language-bash"># Create a read-only snapshot of /home (best practice for backups)
 sudo btrfs subvolume snapshot -r /home /data/snapshots/home-$(date +%Y%m%d)
 
@@ -275,8 +277,8 @@ sudo btrfs send /data/snapshots/home-20250101 | sudo btrfs receive /mnt/backup/
 # Incremental send (only sends the diff)
 sudo btrfs send -p /data/snapshots/home-20250101 /data/snapshots/home-20250201 \
   | sudo btrfs receive /mnt/backup/</code></pre>
-<blockquote><p><strong>Snapshots are not backups</strong> if they live on the same disk — a disk failure loses both. Use <code>btrfs send</code> to an external drive, or <code>restic</code>/<code>rclone</code> for cloud storage. See <a href="../system/backup">Backup & Recovery</a> for a complete backup strategy.</p></blockquote>
-<h2>Btrfs Manual Maintenance</h2>
+<blockquote><strong>Snapshots are not backups</strong> if they live on the same disk — a disk failure loses both. Use <code>btrfs send</code> to an external drive, or <code>restic</code>/<code>rclone</code> for cloud storage. See <a href="../system/backup.md">Backup & Recovery</a> for a complete backup strategy.</blockquote>
+<h2 id="btrfs-manual-maintenance">Btrfs Manual Maintenance</h2>
 <pre><code class="language-bash"># Disk usage (more accurate than df for Btrfs)
 sudo btrfs filesystem usage /
 sudo btrfs filesystem df /
@@ -306,7 +308,7 @@ sudo btrfs qgroup show --sync /
 # Inspect swapfile offset (needed for hibernation resume=)
 # This is exactly what gen-efi runs to compute resume_offset= for the UKI cmdline.
 sudo btrfs inspect-internal map-swapfile -r /swap/swapfile</code></pre>
-<h2>Checking Deduplication Status</h2>
+<h2 id="checking-deduplication-status">Checking Deduplication Status</h2>
 <p>Shanios uses <code>bees</code> (Block-level Extent Enumeration and Sharing) for continuous background deduplication. <code>bees</code> is a block-level deduplicator — it finds identical 128 KB blocks across all subvolumes and shares them via Btrfs extent references.</p>
 <pre><code class="language-bash"># Check bees daemon status (UUID is your Btrfs filesystem UUID)
 sudo systemctl status &quot;beesd@*&quot;
@@ -323,7 +325,7 @@ sudo compsize /var/lib/flatpak
 # Full storage usage report
 shani-health --storage-info</code></pre>
 <p><code>bees</code> is configured by <code>beesd-setup</code> which writes <code>/etc/bees/&lt;uuid&gt;.conf</code> and enables the <code>beesd@&lt;uuid&gt;.service</code> unit. The hash table size is automatically tuned to 256 MB per TB of filesystem size (capped at 1 GB for 4+ TB filesystems).</p>
-<h2>Manual Deduplication (<code>shani-deploy --optimize</code>)</h2>
+<h2 id="manual-deduplication-shani-deploy---optimize">Manual Deduplication (<code>shani-deploy --optimize</code>)</h2>
 <p><code>bees</code> runs continuously in the background across every subvolume, but <code>shani-deploy</code> also ships a heavier, on-demand pass using <a href="https://github.com/markfasheh/duperemove"><code>duperemove</code></a> — a block-hashing deduplicator rather than a live crawler. Run it manually with:</p>
 <pre><code class="language-bash">sudo shani-deploy --optimize</code></pre>
 <p>This is a different tool with a narrower scope than <code>bees</code>:</p>
@@ -334,12 +336,18 @@ shani-health --storage-info</code></pre>
 <li>Reports before/after usage via <code>compsize</code> (or <code>btrfs filesystem du</code> as a fallback) and a final <code>btrfs filesystem df</code></li>
 </ul>
 <p>Use <code>--optimize</code> after a deploy or two if you want to reclaim the CoW delta between root slots immediately rather than waiting for <code>bees</code>' background crawl to catch up — it's a maintenance convenience, not a replacement for the continuous <code>beesd</code> daemon.</p>
-<h2>Automated Maintenance</h2>
+<h2 id="automated-maintenance">Automated Maintenance</h2>
 <p>Shanios runs Btrfs maintenance automatically via systemd timers — no manual intervention required:</p>
-<p>| Timer | Action | |-------|--------| | <code>btrfs-scrub.timer</code> | Monthly scrubbing to detect and repair data corruption | | <code>btrfs-balance.timer</code> | Periodic filesystem balancing for optimal performance | | <code>btrfs-defrag.timer</code> | Automatic defragmentation on fragmented files | | <code>btrfs-trim.timer</code> | Regular TRIM operations for SSD optimisation | | <code>beesd</code> daemon | Continuous background block-level deduplication across all Btrfs subvolumes |</p>
+<table><thead><tr><th>Timer</th><th>Action</th></tr></thead><tbody><tr><td><code>btrfs-scrub.timer</code></td><td>Monthly scrubbing to detect and repair data corruption</td></tr><tr><td><code>btrfs-balance.timer</code></td><td>Periodic filesystem balancing for optimal performance</td></tr><tr><td><code>btrfs-defrag.timer</code></td><td>Automatic defragmentation on fragmented files</td></tr><tr><td><code>btrfs-trim.timer</code></td><td>Regular TRIM operations for SSD optimisation</td></tr><tr><td><code>beesd</code> daemon</td><td>Continuous background block-level deduplication across all Btrfs subvolumes</td></tr></tbody></table>
 <pre><code class="language-bash"># Check timer status and next run times
 systemctl status btrfs-scrub.timer btrfs-balance.timer btrfs-defrag.timer
-systemctl list-timers btrfs-*</code></pre></div>
+systemctl list-timers btrfs-*</code></pre>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="filesystem">Filesystem Structure</a></li>
+<li><a href="https://blog.shani.dev/post/shani-os-btrfs-snapshots-and-backup">Snapshots & Backup guide</a></li>
+<li><a href="../system/storage.md">Storage Management</a></li>
+</ul></div>
     </div>
 
   </main>

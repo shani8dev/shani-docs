@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>IP Addressing &amp; Routing — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="IP Addressing &amp; Routing  This page covers IP addressing fundamentals — CIDR notation, subnetting, IPv4 and IPv6 — and practical  command usage for managing…">
+  <meta name="description" id="meta-desc"     content="This page covers IP addressing fundamentals — CIDR notation, subnetting, IPv4 and IPv6 — and practical ip command usage for managing addresses, gateways, a…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="IP Addressing &amp; Routing">
-  <meta property="og:description" id="og-desc"    content="IP Addressing &amp; Routing  This page covers IP addressing fundamentals — CIDR notation, subnetting, IPv4 and IPv6 — and practical  command usage for managing…">
+  <meta property="og:description" id="og-desc"    content="This page covers IP addressing fundamentals — CIDR notation, subnetting, IPv4 and IPv6 — and practical ip command usage for managing addresses, gateways, a…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/networking/ip-addressing/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="IP Addressing &amp; Routing">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="IP Addressing &amp; Routing">
-  <meta name="twitter:description" id="tw-desc"  content="IP Addressing &amp; Routing  This page covers IP addressing fundamentals — CIDR notation, subnetting, IPv4 and IPv6 — and practical  command usage for managing…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="This page covers IP addressing fundamentals — CIDR notation, subnetting, IPv4 and IPv6 — and practical ip command usage for managing addresses, gateways, a…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"IP Addressing & Routing","description":"IP Addressing & Routing  This page covers IP addressing fundamentals — CIDR notation, subnetting, IPv4 and IPv6 — and practical  command usage for managing…","url":"https://docs.shani.dev/doc/networking/ip-addressing/","datePublished":"2026-04-28T00:00:00.000Z","dateModified":"2026-04-28T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"IP Addressing & Routing","description":"This page covers IP addressing fundamentals — CIDR notation, subnetting, IPv4 and IPv6 — and practical ip command usage for managing addresses, gateways, a…","url":"https://docs.shani.dev/doc/networking/ip-addressing/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"IP Addressing & Routing","item":"https://docs.shani.dev/doc/networking/ip-addressing/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,22 +215,22 @@
         <h1 class="doc-title">IP Addressing &amp; Routing</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Networking</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-04-28</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>This page covers IP addressing fundamentals — CIDR notation, subnetting, IPv4 and IPv6 — and practical <code>ip</code> command usage for managing addresses, gateways, and routes on Shani OS. All operations use <code>iproute2</code> which is pre-installed.</p>
 <p>For virtual interfaces (bridges, VLANs, veth pairs) see <a href="virtual-networking">Virtual Networking</a>. For diagnostics and traffic inspection see <a href="network-tools">Network Tools</a>.</p>
-<p>---</p>
-<h2>CIDR Notation</h2>
+<hr>
+<h2 id="cidr-notation">CIDR Notation</h2>
 <p><strong>CIDR (Classless Inter-Domain Routing)</strong> notation expresses an IP address and its network mask together:</p>
 <pre><code>192.168.1.0/24
 │           │
 │           └─ prefix length: how many bits are the network part
 └─ network address</code></pre>
 <p>The prefix length determines how many host addresses the network contains:</p>
-<p>| CIDR | Subnet Mask | Hosts | Common Use | |------|------------|-------|------------| | <code>/8</code> | <code>255.0.0.0</code> | 16,777,214 | Class A private (10.0.0.0/8) | | <code>/16</code> | <code>255.255.0.0</code> | 65,534 | Class B private (172.16.0.0/16) | | <code>/24</code> | <code>255.255.255.0</code> | 254 | Typical home/office LAN | | <code>/25</code> | <code>255.255.255.128</code> | 126 | Split a /24 in half | | <code>/26</code> | <code>255.255.255.192</code> | 62 | Quarter of a /24 | | <code>/28</code> | <code>255.255.255.240</code> | 14 | Small VLAN or DMZ | | <code>/30</code> | <code>255.255.255.252</code> | 2 | Point-to-point link | | <code>/31</code> | <code>255.255.255.254</code> | 2 (no broadcast) | Point-to-point (RFC 3021) | | <code>/32</code> | <code>255.255.255.255</code> | 1 | Single host / loopback route |</p>
+<table><thead><tr><th>CIDR</th><th>Subnet Mask</th><th>Hosts</th><th>Common Use</th></tr></thead><tbody><tr><td><code>/8</code></td><td><code>255.0.0.0</code></td><td>16,777,214</td><td>Class A private (10.0.0.0/8)</td></tr><tr><td><code>/16</code></td><td><code>255.255.0.0</code></td><td>65,534</td><td>Class B private (172.16.0.0/16)</td></tr><tr><td><code>/24</code></td><td><code>255.255.255.0</code></td><td>254</td><td>Typical home/office LAN</td></tr><tr><td><code>/25</code></td><td><code>255.255.255.128</code></td><td>126</td><td>Split a /24 in half</td></tr><tr><td><code>/26</code></td><td><code>255.255.255.192</code></td><td>62</td><td>Quarter of a /24</td></tr><tr><td><code>/28</code></td><td><code>255.255.255.240</code></td><td>14</td><td>Small VLAN or DMZ</td></tr><tr><td><code>/30</code></td><td><code>255.255.255.252</code></td><td>2</td><td>Point-to-point link</td></tr><tr><td><code>/31</code></td><td><code>255.255.255.254</code></td><td>2 (no broadcast)</td><td>Point-to-point (RFC 3021)</td></tr><tr><td><code>/32</code></td><td><code>255.255.255.255</code></td><td>1</td><td>Single host / loopback route</td></tr></tbody></table>
 <p><strong>Formula:</strong> <code>2^(32 − prefix) − 2</code> usable hosts (subtract network and broadcast addresses). <code>/31</code> and <code>/32</code> are exceptions used for point-to-point links and host routes respectively.</p>
-<h3>Quick Mental Math</h3>
+<h3 id="quick-mental-math">Quick Mental Math</h3>
 <p>For any <code>/prefix</code>:</p>
 <ul>
 <li><strong>Network bits</strong>: the prefix number</li>
@@ -242,20 +244,20 @@
 <li>Range: <code>192.168.10.1</code> – <code>192.168.10.62</code></li>
 <li>Broadcast: <code>192.168.10.63</code></li>
 </ul>
-<p>---</p>
-<h2>Reserved and Special IPv4 Ranges</h2>
-<p>| Range | Purpose | |-------|---------| | <code>10.0.0.0/8</code> | Private (RFC 1918) | | <code>172.16.0.0/12</code> | Private (RFC 1918) — <code>172.16.x.x</code> to <code>172.31.x.x</code> | | <code>192.168.0.0/16</code> | Private (RFC 1918) | | <code>127.0.0.0/8</code> | Loopback | | <code>169.254.0.0/16</code> | Link-local / APIPA (no DHCP response) | | <code>100.64.0.0/10</code> | Carrier-grade NAT (CGNAT) — also used by Tailscale | | <code>0.0.0.0/0</code> | Default route (all destinations) | | <code>255.255.255.255/32</code> | Limited broadcast | | <code>224.0.0.0/4</code> | Multicast | | <code>240.0.0.0/4</code> | Reserved (experimental) |</p>
-<p>---</p>
-<h2>Subnetting a Network</h2>
-<h3>Splitting a /24 into Smaller Subnets</h3>
+<hr>
+<h2 id="reserved-and-special-ipv4-ranges">Reserved and Special IPv4 Ranges</h2>
+<table><thead><tr><th>Range</th><th>Purpose</th></tr></thead><tbody><tr><td><code>10.0.0.0/8</code></td><td>Private (RFC 1918)</td></tr><tr><td><code>172.16.0.0/12</code></td><td>Private (RFC 1918) — <code>172.16.x.x</code> to <code>172.31.x.x</code></td></tr><tr><td><code>192.168.0.0/16</code></td><td>Private (RFC 1918)</td></tr><tr><td><code>127.0.0.0/8</code></td><td>Loopback</td></tr><tr><td><code>169.254.0.0/16</code></td><td>Link-local / APIPA (no DHCP response)</td></tr><tr><td><code>100.64.0.0/10</code></td><td>Carrier-grade NAT (CGNAT) — also used by Tailscale</td></tr><tr><td><code>0.0.0.0/0</code></td><td>Default route (all destinations)</td></tr><tr><td><code>255.255.255.255/32</code></td><td>Limited broadcast</td></tr><tr><td><code>224.0.0.0/4</code></td><td>Multicast</td></tr><tr><td><code>240.0.0.0/4</code></td><td>Reserved (experimental)</td></tr></tbody></table>
+<hr>
+<h2 id="subnetting-a-network">Subnetting a Network</h2>
+<h3 id="splitting-a-24-into-smaller-subnets">Splitting a /24 into Smaller Subnets</h3>
 <p>A common task: take a <code>192.168.1.0/24</code> and divide it into smaller segments.</p>
-<p>| Subnet | Range | Broadcast | Hosts | |--------|-------|-----------|-------| | <code>192.168.1.0/25</code> | <code>.1</code> – <code>.126</code> | <code>.127</code> | 126 | | <code>192.168.1.128/25</code> | <code>.129</code> – <code>.254</code> | <code>.255</code> | 126 |</p>
+<table><thead><tr><th>Subnet</th><th>Range</th><th>Broadcast</th><th>Hosts</th></tr></thead><tbody><tr><td><code>192.168.1.0/25</code></td><td><code>.1</code> – <code>.126</code></td><td><code>.127</code></td><td>126</td></tr><tr><td><code>192.168.1.128/25</code></td><td><code>.129</code> – <code>.254</code></td><td><code>.255</code></td><td>126</td></tr></tbody></table>
 <p>Split again into <code>/26</code>:</p>
-<p>| Subnet | Range | Broadcast | Hosts | |--------|-------|-----------|-------| | <code>192.168.1.0/26</code> | <code>.1</code> – <code>.62</code> | <code>.63</code> | 62 | | <code>192.168.1.64/26</code> | <code>.65</code> – <code>.126</code> | <code>.127</code> | 62 | | <code>192.168.1.128/26</code> | <code>.129</code> – <code>.190</code> | <code>.191</code> | 62 | | <code>192.168.1.192/26</code> | <code>.193</code> – <code>.254</code> | <code>.255</code> | 62 |</p>
-<h3>Key Rule — Network Address Alignment</h3>
+<table><thead><tr><th>Subnet</th><th>Range</th><th>Broadcast</th><th>Hosts</th></tr></thead><tbody><tr><td><code>192.168.1.0/26</code></td><td><code>.1</code> – <code>.62</code></td><td><code>.63</code></td><td>62</td></tr><tr><td><code>192.168.1.64/26</code></td><td><code>.65</code> – <code>.126</code></td><td><code>.127</code></td><td>62</td></tr><tr><td><code>192.168.1.128/26</code></td><td><code>.129</code> – <code>.190</code></td><td><code>.191</code></td><td>62</td></tr><tr><td><code>192.168.1.192/26</code></td><td><code>.193</code> – <code>.254</code></td><td><code>.255</code></td><td>62</td></tr></tbody></table>
+<h3 id="key-rule-network-address-alignment">Key Rule — Network Address Alignment</h3>
 <p>A subnet's network address must be a multiple of its block size (<code>2^host_bits</code>). For <code>/26</code> the block size is 64, so valid network addresses are <code>.0</code>, <code>.64</code>, <code>.128</code>, <code>.192</code>. <code>192.168.1.100/26</code> is valid as a host address but <code>192.168.1.100/26</code> is <strong>not</strong> a valid network address.</p>
-<p>---</p>
-<h2>IPv6 Addressing</h2>
+<hr>
+<h2 id="ipv6-addressing">IPv6 Addressing</h2>
 <p>IPv6 uses 128-bit addresses written as eight 16-bit groups in hexadecimal:</p>
 <pre><code>2001:0db8:85a3:0000:0000:8a2e:0370:7334</code></pre>
 <p>Two simplification rules:</p>
@@ -264,19 +266,19 @@
 <li>One consecutive run of all-zero groups can be replaced with <code>::</code>: <code>::</code> can appear only once</li>
 </ol>
 <pre><code>2001:db8:85a3::8a2e:370:7334</code></pre>
-<h3>IPv6 Prefix Lengths</h3>
+<h3 id="ipv6-prefix-lengths">IPv6 Prefix Lengths</h3>
 <p>IPv6 uses CIDR notation the same way. Common prefix lengths:</p>
-<p>| Prefix | Use | |--------|-----| | <code>/128</code> | Single host (like IPv4 /32) | | <code>/64</code> | Standard LAN segment — required for SLAAC | | <code>/48</code> | Typical allocation to a site/organisation | | <code>/32</code> | Typical ISP customer allocation |</p>
+<table><thead><tr><th>Prefix</th><th>Use</th></tr></thead><tbody><tr><td><code>/128</code></td><td>Single host (like IPv4 /32)</td></tr><tr><td><code>/64</code></td><td>Standard LAN segment — required for SLAAC</td></tr><tr><td><code>/48</code></td><td>Typical allocation to a site/organisation</td></tr><tr><td><code>/32</code></td><td>Typical ISP customer allocation</td></tr></tbody></table>
 <p>A <code>/64</code> has <code>2^64</code> addresses — about 18 quintillion hosts per network segment.</p>
-<h3>Special IPv6 Addresses</h3>
-<p>| Address | Meaning | |---------|---------| | <code>::1/128</code> | Loopback (IPv6 equivalent of 127.0.0.1) | | <code>fe80::/10</code> | Link-local (auto-configured, non-routable) | | <code>fc00::/7</code> | Unique local (ULA — IPv6 private, like RFC 1918) | | <code>ff00::/8</code> | Multicast | | <code>2000::/3</code> | Global unicast (public internet) | | <code>64:ff9b::/96</code> | IPv4-mapped / NAT64 | | <code>::ffff:0:0/96</code> | IPv4-mapped IPv6 address | | <code>::/0</code> | Default route |</p>
-<h3>Link-Local Addresses</h3>
+<h3 id="special-ipv6-addresses">Special IPv6 Addresses</h3>
+<table><thead><tr><th>Address</th><th>Meaning</th></tr></thead><tbody><tr><td><code>::1/128</code></td><td>Loopback (IPv6 equivalent of 127.0.0.1)</td></tr><tr><td><code>fe80::/10</code></td><td>Link-local (auto-configured, non-routable)</td></tr><tr><td><code>fc00::/7</code></td><td>Unique local (ULA — IPv6 private, like RFC 1918)</td></tr><tr><td><code>ff00::/8</code></td><td>Multicast</td></tr><tr><td><code>2000::/3</code></td><td>Global unicast (public internet)</td></tr><tr><td><code>64:ff9b::/96</code></td><td>IPv4-mapped / NAT64</td></tr><tr><td><code>::ffff:0:0/96</code></td><td>IPv4-mapped IPv6 address</td></tr><tr><td><code>::/0</code></td><td>Default route</td></tr></tbody></table>
+<h3 id="link-local-addresses">Link-Local Addresses</h3>
 <p>Every IPv6-capable interface automatically generates a <strong>link-local address</strong> in the <code>fe80::/10</code> range derived from the MAC address (EUI-64) or a random value. Link-local addresses are only valid on their local segment and are never routed. They are always present even if no global IPv6 address is configured.</p>
 <pre><code class="language-bash">ip -6 addr show          # fe80::... addresses are link-local
 ping6 fe80::1%eth0       # must specify the interface with %iface for link-local</code></pre>
-<p>---</p>
-<h2>Managing Addresses with <code>ip</code></h2>
-<h3>Viewing Addresses</h3>
+<hr>
+<h2 id="managing-addresses-with-ip">Managing Addresses with <code>ip</code></h2>
+<h3 id="viewing-addresses">Viewing Addresses</h3>
 <pre><code class="language-bash"># All interfaces with addresses
 ip addr show
 ip a                          # shorthand
@@ -293,7 +295,7 @@ ip -4 addr show
 
 # IPv6 only
 ip -6 addr show</code></pre>
-<h3>Adding and Removing Addresses</h3>
+<h3 id="adding-and-removing-addresses">Adding and Removing Addresses</h3>
 <pre><code class="language-bash"># Add an IPv4 address to an interface
 sudo ip addr add 192.168.1.100/24 dev eth0
 
@@ -308,8 +310,8 @@ sudo ip addr del 192.168.1.100/24 dev eth0
 
 # Flush all addresses from an interface
 sudo ip addr flush dev eth0</code></pre>
-<blockquote><p>💡 Addresses added with <code>ip addr add</code> are ephemeral — they disappear on reboot. For persistence, configure them via NetworkManager or systemd-networkd. See <a href="#persistent-configuration">Persistent Configuration</a>.</p></blockquote>
-<h3>Bringing Interfaces Up and Down</h3>
+<blockquote>💡 Addresses added with <code>ip addr add</code> are ephemeral — they disappear on reboot. For persistence, configure them via NetworkManager or systemd-networkd. See <a href="#persistent-configuration">Persistent Configuration</a>.</blockquote>
+<h3 id="bringing-interfaces-up-and-down">Bringing Interfaces Up and Down</h3>
 <pre><code class="language-bash">sudo ip link set eth0 up
 sudo ip link set eth0 down
 
@@ -318,8 +320,8 @@ sudo ip link set eth0 mtu 9000    # jumbo frames
 
 # Set MAC address
 sudo ip link set eth0 address 02:00:00:00:00:01</code></pre>
-<p>---</p>
-<h2>Default Gateway</h2>
+<hr>
+<h2 id="default-gateway">Default Gateway</h2>
 <p>The default gateway is the router that handles traffic destined for addresses not in any local subnet. It corresponds to the route for <code>0.0.0.0/0</code> (IPv4) or <code>::/0</code> (IPv6).</p>
 <pre><code class="language-bash"># Show the default gateway
 ip route show default
@@ -339,8 +341,8 @@ sudo ip route del default via 192.168.1.1
 
 # Change the default gateway
 sudo ip route replace default via 192.168.1.254 dev eth0</code></pre>
-<p>---</p>
-<h2>Routing Table</h2>
+<hr>
+<h2 id="routing-table">Routing Table</h2>
 <p>The routing table is the kernel's lookup table: for each destination, which interface and next-hop to use.</p>
 <pre><code class="language-bash"># Show the full IPv4 routing table
 ip route show
@@ -357,7 +359,7 @@ ip -6 route get 2001:db8::1
 # Example output of ip route get:
 # 8.8.8.8 via 192.168.1.1 dev eth0 src 192.168.1.50 uid 1000
 #     cache</code></pre>
-<h3>Adding and Removing Routes</h3>
+<h3 id="adding-and-removing-routes">Adding and Removing Routes</h3>
 <pre><code class="language-bash"># Add a static route to a specific network
 sudo ip route add 10.10.0.0/16 via 192.168.1.254 dev eth0
 
@@ -375,7 +377,7 @@ sudo ip route add blackhole 192.0.2.0/24
 
 # Unreachable route (return ICMP unreachable)
 sudo ip route add unreachable 192.0.2.0/24</code></pre>
-<h3>Route Metrics</h3>
+<h3 id="route-metrics">Route Metrics</h3>
 <p>When multiple routes match a destination, the one with the <strong>lowest metric</strong> wins.</p>
 <pre><code class="language-bash"># Add a route with a specific metric
 sudo ip route add default via 192.168.1.1 metric 100
@@ -383,8 +385,8 @@ sudo ip route add default via 10.0.0.1 metric 200    # fallback
 
 # Show metrics
 ip route show | grep metric</code></pre>
-<p>---</p>
-<h2>Multiple Routing Tables (Policy Routing)</h2>
+<hr>
+<h2 id="multiple-routing-tables-policy-routing">Multiple Routing Tables (Policy Routing)</h2>
 <p>Linux supports up to 252 named routing tables. Policy routing lets you route traffic differently based on source address, mark, or interface — useful for VPNs, multi-homing, and VRFs.</p>
 <pre><code class="language-bash"># List named routing tables
 cat /etc/iproute2/rt_tables
@@ -403,8 +405,8 @@ ip route show table 100
 
 # Delete a rule
 sudo ip rule del from 192.168.2.0/24 table 100</code></pre>
-<p>---</p>
-<h2>ARP and Neighbour Table</h2>
+<hr>
+<h2 id="arp-and-neighbour-table">ARP and Neighbour Table</h2>
 <p>ARP (IPv4) and NDP (IPv6) map IP addresses to MAC addresses on the local segment. The kernel caches these in the neighbour table.</p>
 <pre><code class="language-bash"># Show the ARP/neighbour cache
 ip neigh show
@@ -421,9 +423,9 @@ sudo ip neigh flush dev eth0
 
 # Flush stale entries only
 sudo ip neigh flush nud stale dev eth0</code></pre>
-<p>---</p>
-<h2>Persistent Configuration</h2>
-<h3>NetworkManager (recommended for desktops)</h3>
+<hr>
+<h2 id="persistent-configuration">Persistent Configuration</h2>
+<h3 id="networkmanager-recommended-for-desktops">NetworkManager (recommended for desktops)</h3>
 <pre><code class="language-bash"># Show all connections
 nmcli connection show
 
@@ -453,7 +455,7 @@ nmcli connection up &quot;Wired connection 1&quot;
 # Add a persistent static route via NetworkManager
 nmcli connection modify &quot;Wired connection 1&quot; \
   +ipv4.routes &quot;10.10.0.0/16 192.168.1.254&quot;</code></pre>
-<h3>systemd-networkd (servers / headless)</h3>
+<h3 id="systemd-networkd-servers-headless">systemd-networkd (servers / headless)</h3>
 <p><strong><code>/etc/systemd/network/10-eth0.network</code></strong></p>
 <pre><code class="language-ini">[Match]
 Name=eth0
@@ -473,8 +475,8 @@ Destination=10.10.0.0/16
 Gateway=192.168.1.254</code></pre>
 <pre><code class="language-bash">sudo systemctl restart systemd-networkd
 networkctl status eth0</code></pre>
-<p>---</p>
-<h2>IPv4 vs IPv6 Dual Stack</h2>
+<hr>
+<h2 id="ipv4-vs-ipv6-dual-stack">IPv4 vs IPv6 Dual Stack</h2>
 <p>Most modern systems run <strong>dual stack</strong> — both IPv4 and IPv6 simultaneously. Applications try IPv6 first (RFC 6724 address selection).</p>
 <pre><code class="language-bash"># Check if IPv6 is enabled on an interface
 cat /proc/sys/net/ipv6/conf/eth0/disable_ipv6
@@ -493,8 +495,8 @@ echo &quot;net.ipv6.conf.all.disable_ipv6 = 1&quot; | sudo tee /etc/sysctl.d/40-
 ip route get 2001:4860:4860::8888    # Google's IPv6 DNS
 curl -6 https://ipv6.google.com      # force IPv6
 curl -4 https://google.com           # force IPv4</code></pre>
-<p>---</p>
-<h2>IP Forwarding</h2>
+<hr>
+<h2 id="ip-forwarding">IP Forwarding</h2>
 <p>IP forwarding must be enabled for a machine to route packets between interfaces (acting as a router, NAT gateway, or container host).</p>
 <pre><code class="language-bash"># Check current state
 cat /proc/sys/net/ipv4/ip_forward       # 1=enabled, 0=disabled
@@ -510,8 +512,8 @@ net.ipv4.ip_forward = 1
 net.ipv6.conf.all.forwarding = 1
 EOF
 sudo sysctl --system</code></pre>
-<p>---</p>
-<h2>Useful One-Liners</h2>
+<hr>
+<h2 id="useful-one-liners">Useful One-Liners</h2>
 <pre><code class="language-bash"># My public IPv4 address
 curl -4 -s ifconfig.me
 
@@ -536,11 +538,11 @@ ip route show | awk '{print $1, $3, $5}'
 
 # Watch the routing table for changes
 watch -n 1 ip route show</code></pre>
-<p>---</p>
-<h2>Troubleshooting</h2>
-<p>| Issue | Solution | |-------|----------| | No internet despite correct IP and gateway | Check DNS: <code>dig google.com @8.8.8.8</code>; check routing: <code>ip route get 8.8.8.8</code>; check firewall: <code>sudo nft list ruleset</code> | | <code>Network unreachable</code> | No route to destination — check <code>ip route show</code>; verify the gateway is reachable with <code>ping 192.168.1.1</code> | | <code>No route to host</code> | Route exists but the host is not responding — check firewall at the destination, check ARP: <code>ip neigh show</code> | | Wrong gateway used | Multiple default routes — check metrics with <code>ip route show</code>; remove lower-priority duplicates | | IPv6 link-local only, no global address | SLAAC or DHCPv6 failing — check <code>journalctl -u NetworkManager</code>; verify the router is sending RA (router advertisements) | | <code>169.254.x.x</code> address assigned | DHCP failed — APIPA fallback; check DHCP server and cable/connection | | Route disappears after reboot | Route was set with <code>ip route add</code> (ephemeral); persist via NetworkManager or systemd-networkd | | Packets sent but not returned | Asymmetric routing — check return path on the other end; intermediate firewall may be blocking | | VPN routes not taking effect | Check <code>ip rule show</code> for policy routing; VPN may need <code>table</code> configuration |</p>
-<p>---</p>
-<h2>See Also</h2>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>No internet despite correct IP and gateway</td><td>Check DNS: <code>dig google.com @8.8.8.8</code>; check routing: <code>ip route get 8.8.8.8</code>; check firewall: <code>sudo nft list ruleset</code></td></tr><tr><td><code>Network unreachable</code></td><td>No route to destination — check <code>ip route show</code>; verify the gateway is reachable with <code>ping 192.168.1.1</code></td></tr><tr><td><code>No route to host</code></td><td>Route exists but the host is not responding — check firewall at the destination, check ARP: <code>ip neigh show</code></td></tr><tr><td>Wrong gateway used</td><td>Multiple default routes — check metrics with <code>ip route show</code>; remove lower-priority duplicates</td></tr><tr><td>IPv6 link-local only, no global address</td><td>SLAAC or DHCPv6 failing — check <code>journalctl -u NetworkManager</code>; verify the router is sending RA (router advertisements)</td></tr><tr><td><code>169.254.x.x</code> address assigned</td><td>DHCP failed — APIPA fallback; check DHCP server and cable/connection</td></tr><tr><td>Route disappears after reboot</td><td>Route was set with <code>ip route add</code> (ephemeral); persist via NetworkManager or systemd-networkd</td></tr><tr><td>Packets sent but not returned</td><td>Asymmetric routing — check return path on the other end; intermediate firewall may be blocking</td></tr><tr><td>VPN routes not taking effect</td><td>Check <code>ip rule show</code> for policy routing; VPN may need <code>table</code> configuration</td></tr></tbody></table>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="network-tools">Network Tools</a> — <code>ping</code>, <code>traceroute</code>, <code>ss</code>, <code>tcpdump</code>, diagnostics</li>
 <li><a href="virtual-networking">Virtual Networking</a> — bridges, VLANs, veth pairs, namespaces</li>

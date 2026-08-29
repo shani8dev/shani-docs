@@ -1,7 +1,7 @@
 ---
 title: OpenStack & Private Cloud
 section: Self-Hosting & Servers
-updated: 2026-04-25
+updated: 2026-08-28
 ---
 
 > **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
@@ -732,7 +732,7 @@ podman exec ceph-mon-1 ceph auth get-or-create \
   client.cinder mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=volumes, allow rx pool=images'
 ```
 
-> For a full production Ceph deployment on this system, use **Ceph's own `cephadm` orchestrator** or the [Rook operator](https://rook.io) inside your k3s/RKE2 cluster.
+> For a full production Ceph deployment on this system, use **Ceph's own `cephadm` orchestrator** or the [Rook operator](https://rook.io) inside your k3s/RKE2 cluster. Directory-based OSDs (`CEPH_DAEMON: OSD_DIRECTORY`) also require prepared directories with correct ownership and a mounted filesystem before they will come up — `cephadm` handles this provisioning for you.
 
 ---
 
@@ -1020,6 +1020,16 @@ helm upgrade --install neutron osh/neutron \
   --namespace openstack
 ```
 
+##### Verification gate
+
+```bash
+# Wait until every pod in the namespace is Running or Completed
+kubectl get pods -n openstack
+
+# Confirm the deployed service catalog from a utility pod (with cloud credentials)
+kubectl -n openstack exec -it openstack-client -- openstack service list
+```
+
 ---
 
 ## Heat Templates (Infrastructure as Code)
@@ -1214,3 +1224,8 @@ openstack floating ip delete <id>
 | `openstack` CLI `SSL: CERTIFICATE_VERIFY_FAILED` | Add `--insecure` flag or set `OS_CACERT=/path/to/ca.crt`; for Kolla, the CA is at `/etc/kolla/certificates/ca/root.crt` |
 | RabbitMQ queues accumulating | A service is not consuming messages — check the dead service's logs; use `rabbitmqctl list_queues` to identify the backlog |
 | MariaDB Galera cluster split-brain | Identify the most up-to-date node with `mysql -e "SHOW STATUS LIKE 'wsrep_last_committed'"`; bootstrap from that node |
+
+## See Also
+
+- [Kubernetes](kubernetes)
+- [Virtual networking](../networking/virtual-networking.md)

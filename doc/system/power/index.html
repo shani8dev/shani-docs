@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>Power Management — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Shanios ships sane power defaults that are active from first boot — no post-install tuning required. This page focuses on laptops: sleep states, suspend, h…">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/system/power/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="Power Management">
+  <meta property="og:description" id="og-desc"    content="Shanios ships sane power defaults that are active from first boot — no post-install tuning required. This page focuses on laptops: sleep states, suspend, h…">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/system/power/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="Power Management">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="Power Management">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios ships sane power defaults that are active from first boot — no post-install tuning required. This page focuses on laptops: sleep states, suspend, h…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Power Management","description":"Shanios ships sane power defaults that are active from first boot — no post-install tuning required. This page focuses on laptops: sleep states, suspend, h…","url":"https://docs.shani.dev/doc/system/power/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Power Management","item":"https://docs.shani.dev/doc/system/power/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Power Management</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">System</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><p>Shanios ships sane power defaults that are active from first boot — no post-install tuning required. This page focuses on laptops: sleep states, suspend, hibernation, battery reporting, and the tunables worth knowing about. Desktop users can ignore most of it.</p>
+<p>What works out of the box:</p>
+<ul>
+<li>Lid-close suspend, handled by <code>systemd-logind</code></li>
+<li>Battery reporting via <code>upower</code>, surfaced by every desktop's power panel</li>
+<li>Airplane-mode radio toggles via <code>rfkill</code></li>
+<li>Correct clock across suspend/hibernate via <code>timedatectl</code> / <code>systemd-timesyncd</code> (enabled by default)</li>
+</ul>
+<h2 id="sleep-states">Sleep States</h2>
+<p>Modern Linux systems support two suspend-to-RAM variants:</p>
+<table><thead><tr><th>State</th><th>Name</th><th>Behavior</th></tr></thead><tbody><tr><td><code>s2idle</code></td><td>Suspend-to-idle (aka "modern standby")</td><td>CPU halted, devices put in low-power mode, RAM kept refreshed. Fastest wake, higher drain.</td></tr><tr><td><code>deep</code></td><td>S3</td><td>Traditional ACPI sleep — RAM self-refreshes, everything else powered off. Slowest wake, minimal drain.</td></tr></tbody></table>
+<p>Which states your hardware supports is firmware-dependent. Check what's available and what's currently selected:</p>
+<pre><code class="language-bash">cat /sys/power/mem_sleep
+# Example output: s2idle [deep]
+#                 ^^^^^^ the bracketed entry is the active default</code></pre>
+<p>If only <code>s2idle</code> appears, your firmware does not expose S3 — nothing to configure. Many recent laptops ship <code>s2idle</code>-only.</p>
+<h2 id="suspend">Suspend</h2>
+<pre><code class="language-bash"># Suspend immediately
+systemctl suspend
+
+# Inspect your current session (shows idle/lid-relevant state)
+loginctl session-status</code></pre>
+<p>By default, closing the lid suspends the machine — on battery <strong>and</strong> on AC (<code>HandleLidSwitch=suspend</code> is the logind default). Wake with the power button; most firmware also wakes on keyboard input if enabled in BIOS/UEFI setup.</p>
+<h2 id="hibernation">Hibernation</h2>
+<p>Hibernation writes RAM to swap and powers off completely — survives a dead battery, unlike suspend.</p>
+<p>Requirements:</p>
+<ul>
+<li>Swap at least as large as RAM. Shanios creates a swapfile sized to RAM in the dedicated <code>@swap</code> Btrfs subvolume (mounted at <code>/swap</code>) at install time.</li>
+<li><code>resume=</code> on the kernel command line. <strong>This is already baked into the image's UKI cmdline at build/deploy time</strong> — there is nothing to configure manually.</li>
+</ul>
+<p>Do <strong>not</strong> attempt to add or edit boot arguments yourself: the bootloader editor is disabled by design on Shanios, and any resume setup belongs in the image. If you resized or replaced the swapfile manually, see <a href="storage">Storage</a> for the correct procedure first.</p>
+<pre><code class="language-bash"># Hibernate
+systemctl hibernate</code></pre>
+<p>Verify a full hibernate/resume cycle works before relying on it — a failed resume falls back to a cold boot with an empty session.</p>
+<h2 id="battery-reporting">Battery & Reporting</h2>
+<pre><code class="language-bash"># Full battery report: capacity, health, vendor, cycle count where exposed
+upower -i $(upower -e | grep BAT)
+
+# Just charge state and percentage
+upower -i $(upower -e | grep BAT) | grep -E 'state|percentage|capacity'</code></pre>
+<p>The <code>capacity</code> field is firmware-reported health (design vs. full-charge capacity) — below ~80% usually means a worn battery. Every desktop surfaces this graphically:</p>
+<ul>
+<li><strong>GNOME:</strong> Settings → Power</li>
+<li><strong>KDE Plasma:</strong> System Settings → Energy Saving</li>
+<li><strong>COSMIC:</strong> Settings → Power</li>
+</ul>
+<h2 id="tunables">Tunables</h2>
+<h3 id="lid-actions">Lid Actions</h3>
+<p>Lid behavior is configured in <code>/etc/systemd/logind.conf</code>. The writable <code>/etc</code> overlay persists across updates, so edits survive redeploys.</p>
+<pre><code class="language-ini"># /etc/systemd/logind.conf
+HandleLidSwitch=suspend                    # lid close on battery
+HandleLidSwitchExternalMemory=ignore       # lid closed while docked/external monitor
+HandleLidSwitchDocked=ignore               # docked via dock itself</code></pre>
+<p>After editing:</p>
+<pre><code class="language-bash">sudo systemctl restart systemd-logind</code></pre>
+<blockquote>Restarting <code>systemd-logind</code> briefly resets login sessions — running graphical sessions generally survive, but expect a short hiccup and re-authentication prompts.</blockquote>
+<h3 id="wi-fi-power-save">Wi-Fi Power Save</h3>
+<p>NetworkManager manages Wi-Fi power saving per connection via the <code>wifi.powersave</code> property. See <a href="../networking/wireless.md">Wi-Fi & Wireless Firmware</a> for checking and changing it.</p>
+<h3 id="usb-autosuspend">USB Autosuspend</h3>
+<p>USB autosuspend saves power but can misbehave with some input devices (mice/keyboards stuttering or dropping after idle). If a wired input device acts up after a pause, that's autosuspend — check <code>/sys/bus/usb/devices/*/power/control</code> and consider whitelisting the device rather than disabling autosuspend globally.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Wakes immediately after suspend</td><td>Commonly a firmware ACPI issue with the active sleep state. Toggle between <code>deep</code> and <code>s2idle</code>: <code>echo deep &gt; /sys/power/mem_sleep</code> (as root), then retry. Persist the choice with a tmpfiles entry (below)</td></tr><tr><td>Suspends fine, black screen on wake</td><td>Usually a GPU driver pairing problem. Confirm you booted the slot matching your latest deployment: <code>cat /data/current-slot</code>; reboot once to settle. If it persists across slots, report the bug with GPU model</td></tr><tr><td>Hibernation writes swap but doesn't resume</td><td>Swap smaller than RAM, or the wrong swap target — see <a href="storage">Storage</a> for swap sizing and the baked-in <code>resume=</code> handling</td></tr><tr><td>Battery drains overnight while suspended</td><td>Check which state you're using: <code>s2idle</code> drains far faster than <code>deep</code> — prefer <code>deep</code> when supported. Also rule out Wake-on-LAN keeping the NIC alive (<code>ethtool</code> — see <a href="../networking/network-tools.md">Network Tools</a>)</td></tr><tr><td>Lid ignored on AC</td><td><code>HandleLidSwitchExternalMemory=ignore</code> is the logind default for external-monitor setups. Change it in <code>/etc/systemd/logind.conf</code> if you want suspend-on-AC</td></tr></tbody></table>
+<p>Persisting a <code>mem_sleep</code> choice across reboots (tmpfiles write it early each boot):</p>
+<pre><code class="language-ini"># /etc/tmpfiles.d/mem-sleep.conf
+w /sys/power/mem_sleep - - - - deep</code></pre>
+<p>Filtering the journal for sleep activity:</p>
+<pre><code class="language-bash">journalctl --grep 'suspend|sleep|resume' -b
+journalctl -u systemd-suspend.service -b -1   # previous suspend attempt</code></pre>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="hardware">Hardware</a> — sensors, <code>powertop</code>, thermals</li>
+<li><a href="storage">Storage</a> — swap, <code>@swap</code> subvolume, hibernation prerequisites</li>
+<li><a href="../intro/optimizations.md">Optimizations</a> — system-wide performance and power tuning</li>
+<li><a href="gpu">GPU</a> — driver slots and suspend/resume hangs</li>
+<li>Blog: <a href="https://blog.shani.dev/post/shani-os-power-management">Power Management on Shani OS</a></li>
+</ul></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

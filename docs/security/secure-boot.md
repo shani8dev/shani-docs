@@ -1,7 +1,7 @@
 ---
 title: Secure Boot
 section: Security
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Secure Boot
@@ -47,7 +47,7 @@ On the first boot from the Shani OS USB, MokManager launches automatically:
 sudo gen-efi enroll-mok
 
 # Reboot — MokManager appears automatically
-# Confirm with password: shanios
+# Confirm with the MOK password shown by the gen-efi configure flow
 sudo reboot
 ```
 
@@ -106,9 +106,20 @@ sudo gen-efi enroll-mok
 - The UKI was not signed with an enrolled key
 - Disable Secure Boot, run `sudo gen-efi configure blue`, re-enroll with `sudo gen-efi enroll-mok`, and retry
 
+**MokManager asks for a password:**
+- The enrollment password is not a fixed value — it is generated and displayed by the `gen-efi` configure/enroll flow when it stages enrollment. Use the password `shanios` printed at that point; if you no longer have it, re-run `sudo gen-efi enroll-mok` to stage a fresh enrollment.
+
 **TPM2 fails after Secure Boot change:**
 - When you change Secure Boot settings, PCR 7 changes — re-enroll TPM2:
   ```bash
   sudo gen-efi cleanup-tpm2
   sudo gen-efi enroll-tpm2
   ```
+
+## See Also
+
+- [TPM2 Enrollment](tpm2) — automatic LUKS unlock with PCR policy
+- [LUKS Management](luks) — encryption key management
+- [Security Features](features) — full security model overview
+- [gen-efi Reference](gen-efi) — UKI generation and signing
+- [Boot Process](../arch/boot.md) — systemd-boot and boot counting

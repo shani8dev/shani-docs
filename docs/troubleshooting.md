@@ -1,7 +1,7 @@
 ---
-title: Troubleshooting Guide
-section: System Management
-updated: 2026-08-21
+title: Troubleshooting
+section: Troubleshooting
+updated: 2026-08-28
 ---
 
 # Troubleshooting Guide
@@ -109,7 +109,7 @@ If TPM2 enrollment fails repeatedly after a firmware update, confirm Secure Boot
 
 ```bash
 mokutil --sb-state
-sbctl status
+bootctl status
 ```
 
 ### Drops to Emergency Shell at Boot
@@ -186,7 +186,7 @@ sudo shani-deploy
 ### Update Downloaded but Slot Won't Activate
 
 ```bash
-shani-deploy --status
+shani-deploy --verify-existing
 
 # Check if the UKI was generated
 ls /boot/efi/EFI/shanios/
@@ -550,9 +550,11 @@ sudo rm /data/overlay/etc/upper/path/to/file
 
 ### Revert All `/etc` Customisations
 
+Don't delete the overlay upper layer by hand — raw `rm -rf` can leave the overlay work directory in an inconsistent state. Use `shani-reset` (see [System Config](updates/config) and [Factory Reset](updates/shani-reset)):
+
 ```bash
-sudo rm -rf /data/overlay/etc/upper/*
-sudo reboot
+sudo shani-reset --dry-run   # preview first
+sudo shani-reset             # wipes persistent system state in /data and reboots
 ```
 
 ---
@@ -614,9 +616,18 @@ When reporting a bug, include:
 cat /etc/shani-version
 cat /data/current-slot
 shani-deploy --version
-shani-health --json
+shani-health --verify --json   # --json output requires --verify
 journalctl -b 0 -p err --no-pager | tail -30
 lspci | grep -E "VGA|Audio|Network"
 ```
 
 Report bugs at [github.com/shani8dev/shani-os/issues](https://github.com/shani8dev/shani-os/issues) or ask in the [Telegram community](https://t.me/shani8dev).
+
+## See Also
+
+- [System Health Checks](updates/shani-health) — automated health monitoring and diagnostics
+- [System Updates](updates/system) — how updates and rollback work
+- [System Config](updates/config) — managing /etc customisations
+- [Security Features](security/features) — security model and hardening
+- [Blue-Green Deployment](concepts/blue-green) — understanding the two-slot architecture
+- [Installation Steps](install/steps) — installer troubleshooting

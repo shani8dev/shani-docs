@@ -1,7 +1,7 @@
 ---
 title: Fail2ban (Brute-Force Protection)
 section: Networking
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Fail2ban — Brute-Force Protection
@@ -167,4 +167,4 @@ ignoreip = 127.0.0.1/8 ::1 192.168.1.0/24 100.64.0.0/10
 ## See Also
 
 - [Firewall](firewalld) — the firewall that fail2ban writes rules into
-- [Security Features](features) — overview of all security layers
+- [Security Features](../security/features.md) — overview of all security layers

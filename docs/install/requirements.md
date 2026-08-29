@@ -1,7 +1,7 @@
 ---
 title: System Requirements
 section: Installation
-updated: 2026-08-20
+updated: 2026-08-28
 ---
 
 # System Requirements
@@ -40,3 +40,52 @@ When full-disk encryption is chosen, the Btrfs partition is wrapped in a LUKS2 c
 - Legacy BIOS / CSM mode
 - 32-bit (x86) CPUs
 - Dual-boot configurations (not recommended — other OSes may break the bootloader)
+
+## Checking Your Hardware
+
+Before installing, verify your hardware meets the requirements:
+
+```bash
+# Check CPU architecture (must be x86_64)
+uname -m
+# x86_64
+
+# Check virtualization support (must be present)
+grep -E 'vmx|svm' /proc/cpuinfo | head -1
+# vmx = Intel VT-x, svm = AMD-V
+
+# Check RAM (minimum 4 GB)
+free -h | grep Mem
+# Mem:    15Gi   ...
+
+# Check disk size (minimum 28 GB enforced, 32 GB+ recommended)
+lsblk -d -o NAME,SIZE | grep -v loop
+# NAME   SIZE
+# nvme0n1  476G
+
+# Check UEFI (not legacy BIOS)
+[ -d /sys/firmware/efi ] && echo "UEFI" || echo "Legacy BIOS"
+# UEFI
+
+# Check TPM 2.0 (optional, needed for auto-unlock)
+ls /dev/tpm*
+# /dev/tpm0  /dev/tpmrm0
+```
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| `uname -m` shows `i686` | 32-bit system | Shanios does not support 32-bit — install an Arch-based 32-bit distro instead |
+| `grep vmx` returns nothing | Virtualization disabled in BIOS | Enable VT-x (Intel) or AMD-V (AMD) in BIOS under CPU settings |
+| `/sys/firmware/efi` doesn't exist | System booted in Legacy BIOS/CSM mode | Reboot into BIOS and disable CSM / enable UEFI mode |
+| TPM shows as not available | TPM disabled or set to Intel PTT | Enable TPM 2.0 in BIOS under Security settings |
+| `lsblk` shows disk < 28 GB | Actual usable space too low | Use a larger disk; 32 GB minimum is recommended |
+
+## See Also
+
+- [Installation Steps](./steps.md) — step-by-step install guide
+- [First Boot](./first-boot.md) — post-install configuration
+- [Pre-Install Checklist](./pre-install.md) — what to prepare before starting
+- [Secure Boot](../security/secure-boot.md) — MOK enrollment and firmware setup
+- [Troubleshooting](../troubleshooting.md) — general troubleshooting guide

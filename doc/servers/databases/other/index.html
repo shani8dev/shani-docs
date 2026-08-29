@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
+
+  <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
+<title>Databases — Messaging, Analytics &amp; Specialty Stores — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Apache Kafka Purpose: Distributed event streaming platform. Producers publish events to topics; consumers read them with durable, replayable, ordered deliv…">
+  <meta name="keywords"    id="meta-keywords" content="">
+  <meta name="author"      content="Shrinivas Kumbhar">
+  <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/servers/databases/other/">
+
+  <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
+  <meta property="og:title"     id="og-title"     content="Databases — Messaging, Analytics &amp; Specialty Stores">
+  <meta property="og:description" id="og-desc"    content="Apache Kafka Purpose: Distributed event streaming platform. Producers publish events to topics; consumers read them with durable, replayable, ordered deliv…">
+  <meta property="og:type"      id="og-type"      content="article">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/databases/other/">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+  <meta property="og:image:alt" id="og-image-alt" content="Databases — Messaging, Analytics &amp; Specialty Stores">
+  <meta property="og:locale"    content="en_IN">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
+  <meta name="twitter:title"       id="tw-title" content="Databases — Messaging, Analytics &amp; Specialty Stores">
+  <meta name="twitter:description" id="tw-desc"  content="Apache Kafka Purpose: Distributed event streaming platform. Producers publish events to topics; consumers read them with durable, replayable, ordered deliv…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
+
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Databases — Messaging, Analytics & Specialty Stores","description":"Apache Kafka Purpose: Distributed event streaming platform. Producers publish events to topics; consumers read them with durable, replayable, ordered deliv…","url":"https://docs.shani.dev/doc/servers/databases/other/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Databases — Messaging, Analytics & Specialty Stores","item":"https://docs.shani.dev/doc/servers/databases/other/"}]}</script>
+
+  <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
+
+  <!-- ═══ PERFORMANCE ════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- FIX E: preconnect to GitHub Raw for faster doc fetches -->
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+
+  <!-- ═══ FAVICON / PWA ══════════════════════════════════════════════ -->
+  <link rel="icon" id="favicon" type="image/svg+xml" href="https://shani.dev/assets/images/logo.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" id="pwa-theme-color" content="#161514">
+
+  <!-- ═══ Theme — applied before CSS to prevent flash ════════════════ -->
+  <script>
+    (function () {
+      try {
+        var pfx = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_PREFIX)
+                    ? CONFIG.STORAGE_PREFIX + '_'
+                    : 'shanidocs_';
+        var t = localStorage.getItem(pfx + 'theme') ||
+                (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="/brand-shani.css">
+  <link rel="stylesheet" href="/style-docs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" id="prism-theme"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
+
+  <!-- KaTeX math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
+
+  <!-- Prism language support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <noscript>
+    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is required to view this wiki.</strong>
+    </div>
+  </noscript>
+
+  <!-- ── Page loader ──────────────────────────────────────────────── -->
+  <div id="page-loader" aria-hidden="true">
+    <div class="loader__logo">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img id="loader-logo-img" src="https://shani.dev/assets/images/logo.svg" alt="Shanios Docs" width="48" height="48">
+    </div>
+    <div class="loader__track"><div class="loader__bar"></div></div>
+    <p class="loader__text">Loading wiki…</p>
+  </div>
+
+  <!-- ── Auspicious bar ───────────────────────────────────────────── -->
+  <div class="auspicious-bar" aria-label="Shanios">
+    <a href="https://shani.dev" id="auspicious-link" aria-label="Visit Shanios">॥ श्री ॥</a>
+  </div>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <!-- Mobile menu button -->
+    <button class="topbar__menu-btn btn-icon" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="wiki-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="topbar__logo" aria-label="Shanios Docs home">
+      <!-- FIX G: explicit width/height to reduce CLS -->
+      <img src="" alt="Shanios" id="logo-img" width="24" height="24">
+      <span class="topbar__logo-word logo__word">wiki</span>
+    </a>
+
+    <!-- Search -->
+    <div class="topbar__search-wrap" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="wiki-search"
+        class="topbar__search"
+        placeholder="Search docs… (/ or Ctrl+K)"
+        aria-label="Search documentation"
+        autocomplete="off"
+        spellcheck="false">
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="topbar__actions">
+
+      <!-- Font size decrease -->
+      <button class="btn-icon" id="font-decrease" aria-label="Decrease font size" title="Decrease font size (A−)">
+        <i class="fa-solid fa-text-height" style="font-size:0.7rem"></i>
+      </button>
+
+      <!-- Font size increase -->
+      <button class="btn-icon" id="font-increase" aria-label="Increase font size" title="Increase font size (A+)">
+        <i class="fa-solid fa-text-height"></i>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="theme-btn" aria-label="Toggle light/dark theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- GitHub link -->
+      <a class="btn-icon"
+         href="https://github.com/shani8dev"
+         target="_blank" rel="noopener"
+         aria-label="View on GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Sidebar navigation ────────────────────────────────────────── -->
+  <aside class="sidebar" id="wiki-sidebar" role="navigation" aria-label="Documentation navigation">
+    <div class="sidebar__header">
+      <div class="sidebar__section-label">Documentation</div>
+    </div>
+    <nav class="nav-tree" id="wiki-nav" aria-label="Pages"></nav>
+  </aside>
+
+  <!-- Reading progress bar -->
+  <div class="reading-progress" aria-hidden="true">
+    <div class="reading-progress__bar" id="reading-bar"></div>
+  </div>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <main class="content" id="main-content" tabindex="-1">
+
+    <!-- Doc content is injected here by the router -->
+    <div class="content__inner" id="doc-content" role="article">
+      <!--
+        Prerendered content below — real text for crawlers and no-JS
+        clients. script-docs.js overwrites this div with the fully
+        interactive render (TOC, copy buttons, Prism, KaTeX, view
+        counts, etc.) once it loads, so markup here only needs to be
+        semantically correct, not byte-identical to the client render.
+      -->
+      <div class="doc-header">
+        <h1 class="doc-title">Databases — Messaging, Analytics &amp; Specialty Stores</h1>
+        <div class="doc-meta">
+          <span class="doc-meta__badge">Self-Hosting &amp; Servers</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+        </div>
+      </div>
+      <div class="prose"><h2 id="apache-kafka">Apache Kafka</h2>
+<p><strong>Purpose:</strong> Distributed event streaming platform. Producers publish events to topics; consumers read them with durable, replayable, ordered delivery. Handles millions of events per second with configurable retention.</p>
+<blockquote><strong>KRaft mode only:</strong> ZooKeeper was removed entirely in Kafka 4.0 (released March 18, 2025). All new deployments must use KRaft.</blockquote>
+<pre><code class="language-yaml"># ~/kafka/compose.yaml
+services:
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    ports:
+      - 127.0.0.1:9092:9092
+      - 127.0.0.1:29092:29092
+    environment:
+      CLUSTER_ID: &quot;MkU3OEVBNTcwNTJENDM2Qk&quot;
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://kafka:29092,CONTROLLER://kafka:9093,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: &quot;true&quot;
+      KAFKA_LOG_RETENTION_HOURS: 168
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    restart: unless-stopped
+
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:latest
+    ports:
+      - 127.0.0.1:8080:8080
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+    depends_on: [kafka]
+    restart: unless-stopped
+
+volumes:
+  kafka_data:</code></pre>
+<pre><code class="language-bash">cd ~/kafka &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="common-operations">Common operations</h4>
+<pre><code class="language-bash"># Create a topic
+podman exec kafka kafka-topics \
+  --bootstrap-server localhost:29092 \
+  --create --topic my-topic --partitions 3 --replication-factor 1
+
+# List topics
+podman exec kafka kafka-topics --bootstrap-server localhost:29092 --list
+
+# Produce messages
+podman exec -it kafka kafka-console-producer \
+  --bootstrap-server localhost:29092 --topic my-topic
+
+# Consume messages from the beginning
+podman exec -it kafka kafka-console-consumer \
+  --bootstrap-server localhost:29092 --topic my-topic --from-beginning
+
+# Check consumer group lag
+podman exec kafka kafka-consumer-groups \
+  --bootstrap-server localhost:29092 --describe --group my-group</code></pre>
+<h5 id="access-kafka-ui">Access Kafka UI</h5>
+<p>at <code>http://localhost:8080</code> for a web-based view of topics, consumer groups, and message browsing.</p>
+<hr>
+<h2 id="redpanda-kafka-compatible-no-jvm">Redpanda (Kafka-Compatible, No JVM)</h2>
+<p><strong>Purpose:</strong> Kafka-compatible event streaming platform written in C++. Runs without ZooKeeper, uses a fraction of the memory and CPU of Kafka, and starts in seconds. Ideal for development, smaller deployments, and self-hosted setups where Kafka's JVM overhead is undesirable.</p>
+<pre><code class="language-yaml"># ~/redpanda/compose.yaml
+services:
+  redpanda:
+    image: redpandadata/redpanda:latest
+    ports:
+      - 127.0.0.1:9092:9092
+      - 127.0.0.1:9644:9644
+      - 127.0.0.1:8081:8081
+    volumes:
+      - /home/user/redpanda/data:/var/lib/redpanda/data:Z
+    command: &gt;
+      redpanda start
+      --node-id 0
+      --kafka-addr 0.0.0.0:9092
+      --advertise-kafka-addr localhost:9092
+      --schema-registry-addr 0.0.0.0:8081
+      --rpc-addr 0.0.0.0:33145
+      --advertise-rpc-addr redpanda:33145
+      --mode dev-container
+    restart: unless-stopped
+
+  redpanda-console:
+    image: docker.redpanda.com/redpandadata/console:latest
+    ports:
+      - 127.0.0.1:8080:8080
+    environment:
+      KAFKA_BROKERS: host.containers.internal:9092
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/redpanda &amp;&amp; podman-compose up -d</code></pre>
+<blockquote>Redpanda is fully compatible with the Kafka API — any Kafka client (Confluent SDK, librdkafka, kafka-python) connects without modification.</blockquote>
+<hr>
+<h2 id="rabbitmq-message-broker">RabbitMQ (Message Broker)</h2>
+<p><strong>Purpose:</strong> The most widely deployed open-source message broker. Implements AMQP, MQTT, and STOMP. Use RabbitMQ when you need reliable task queues, fanout messaging, dead-letter exchanges, message acknowledgement, and per-message TTL. Used by Celery, Sidekiq, and most web framework background job systems.</p>
+<pre><code class="language-yaml"># ~/rabbitmq/compose.yaml
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - 127.0.0.1:5672:5672
+      - 127.0.0.1:15672:15672
+    volumes:
+      - /home/user/rabbitmq/data:/var/lib/rabbitmq:Z
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: changeme
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/rabbitmq &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><strong>Management UI:</strong> <code>http://localhost:15672</code> — browse queues, exchanges, bindings, and message rates in real time.</blockquote>
+<h4 id="common-operations-2">Common operations</h4>
+<pre><code class="language-bash"># List queues
+podman exec rabbitmq rabbitmqctl list_queues name messages consumers
+
+# Declare a queue and publish a test message
+podman exec rabbitmq rabbitmqadmin \
+  -u admin -p changeme \
+  publish exchange=amq.default routing_key=test payload='{&quot;hello&quot;: &quot;world&quot;}'
+
+# Purge a queue
+podman exec rabbitmq rabbitmqctl purge_queue my-queue</code></pre>
+<blockquote><strong>Kafka vs RabbitMQ:</strong> Use Kafka for high-throughput event streaming where consumers need to replay history. Use RabbitMQ for task queues, RPC patterns, and workloads where each message is processed once and discarded.</blockquote>
+<hr>
+<h2 id="nats-lightweight-messaging">NATS (Lightweight Messaging)</h2>
+<p><strong>Purpose:</strong> High-performance, cloud-native messaging. Core NATS is publish/subscribe with at-most-once delivery. JetStream (built-in) adds persistent streams, at-least-once delivery, key-value store, and object store — all in a single ~20 MB binary with no external dependencies.</p>
+<pre><code class="language-yaml"># ~/nats/compose.yaml
+services:
+  nats:
+    image: nats:alpine
+    ports:
+      - 127.0.0.1:4222:4222
+      - 127.0.0.1:8222:8222
+    volumes:
+      - /home/user/nats/data:/data:Z
+      - /home/user/nats/nats.conf:/etc/nats/nats.conf:ro,Z
+    command: -c /etc/nats/nats.conf
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/nats &amp;&amp; podman-compose up -d</code></pre>
+<h5 id="minimal-natsconf-with-jetstream">Minimal <code>nats.conf</code> with JetStream</h5>
+<pre><code class="language-conf">port: 4222
+http_port: 8222
+
+jetstream {
+  store_dir: /data
+  max_memory_store: 1GB
+  max_file_store: 10GB
+}
+
+authorization {
+  user: nats
+  password: changeme
+}</code></pre>
+<h4 id="common-operations-3">Common operations</h4>
+<pre><code class="language-bash"># Check server info
+podman run --rm natsio/nats-box \
+  nats -s nats://nats:changeme@host.containers.internal:4222 server info
+
+# List JetStream streams
+podman run --rm natsio/nats-box \
+  nats -s nats://nats:changeme@host.containers.internal:4222 stream ls
+
+# View JetStream stats
+curl http://localhost:8222/jsz | python3 -m json.tool | head -20
+
+# Create a JetStream stream
+podman run --rm natsio/nats-box \
+  nats -s nats://nats:changeme@host.containers.internal:4222 \
+  stream add ORDERS --subjects &quot;orders.&gt;&quot; --storage file --replicas 1</code></pre>
+<hr>
+<h2 id="neo4j-graph-database">Neo4j (Graph Database)</h2>
+<p><strong>Purpose:</strong> The leading native graph database. Stores data as nodes and relationships — ideal for social networks, recommendation engines, fraud detection, knowledge graphs, and any domain where connections between data points matter as much as the data itself. Queried with the Cypher query language.</p>
+<pre><code class="language-yaml"># ~/neo4j/compose.yaml
+services:
+  neo4j:
+    image: neo4j:5
+    ports:
+      - 127.0.0.1:7474:7474
+      - 127.0.0.1:7687:7687
+    volumes:
+      - /home/user/neo4j/data:/data:Z
+      - /home/user/neo4j/logs:/logs:Z
+      - /home/user/neo4j/import:/var/lib/neo4j/import:Z
+    environment:
+      NEO4J_AUTH: neo4j/strongpassword
+      NEO4J_PLUGINS: '[&quot;apoc&quot;, &quot;graph-data-science&quot;]'
+      NEO4J_dbms_memory_heap_initial__size: 512m
+      NEO4J_dbms_memory_heap_max__size: 2g
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/neo4j &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><strong>Browser UI</strong>: <code>http://localhost:7474</code> — interactive graph explorer and Cypher query editor. <strong>Bolt driver</strong>: <code>bolt://localhost:7687</code></blockquote>
+<h5 id="example-cypher-queries">Example Cypher queries</h5>
+<pre><code class="language-cypher">-- Create nodes and a relationship
+CREATE (alice:Person {name: 'Alice', age: 30})-[:KNOWS]-&gt;(bob:Person {name: 'Bob', age: 25})
+
+-- Find shortest path between two people
+MATCH p=shortestPath((a:Person {name:'Alice'})-[*]-(b:Person {name:'Bob'})) RETURN p
+
+-- Recommendation: friends of friends not already known
+MATCH (me:Person {name: 'Alice'})-[:KNOWS]-(friend)-[:KNOWS]-(fof)
+WHERE NOT (me)-[:KNOWS]-(fof) AND fof &lt;&gt; me
+RETURN fof.name, count(*) AS mutual ORDER BY mutual DESC</code></pre>
+<p><strong>APOC:</strong> adds 450+ utility procedures for data import, refactoring, and graph algorithms — included via <code>NEO4J_PLUGINS</code> above.</p>
+<hr>
+<h2 id="apache-cassandra">Apache Cassandra</h2>
+<p><strong>Purpose:</strong> Wide-column NoSQL database designed for massive write throughput and linear horizontal scalability. No single point of failure. Ideal for IoT telemetry, event logs, and any workload where you need to write millions of rows per second across geographically distributed nodes.</p>
+<pre><code class="language-yaml"># ~/cassandra/compose.yaml
+services:
+  cassandra:
+    image: cassandra:5
+    ports:
+      - 127.0.0.1:9042:9042
+    volumes:
+      - /home/user/cassandra/data:/var/lib/cassandra:Z
+    environment:
+      CASSANDRA_CLUSTER_NAME: HomeCluster
+      CASSANDRA_DC: dc1
+      CASSANDRA_RACK: rack1
+      HEAP_NEWSIZE: 128m
+      MAX_HEAP_SIZE: 1g
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/cassandra &amp;&amp; podman-compose up -d</code></pre>
+<h5 id="connect-and-run-cql">Connect and run CQL</h5>
+<pre><code class="language-bash">podman exec -it cassandra cqlsh
+
+# Create keyspace and table
+CREATE KEYSPACE iot WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+USE iot;
+CREATE TABLE sensor_readings (
+  device_id UUID,
+  timestamp TIMESTAMP,
+  temperature FLOAT,
+  humidity    FLOAT,
+  PRIMARY KEY (device_id, timestamp)
+) WITH CLUSTERING ORDER BY (timestamp DESC);
+
+# Insert and query
+INSERT INTO sensor_readings (device_id, timestamp, temperature, humidity)
+  VALUES (uuid(), toTimestamp(now()), 22.5, 65.0);
+SELECT * FROM sensor_readings WHERE device_id = &lt;uuid&gt; LIMIT 100;</code></pre>
+<blockquote>Cassandra requires at least 2 GB RAM for a single node. Use <code>MAX_HEAP_SIZE=512m</code> on memory-constrained servers.</blockquote>
+<hr>
+<h2 id="scylladb-cassandra-compatible-c">ScyllaDB (Cassandra-Compatible, C++)</h2>
+<p><strong>Purpose:</strong> Drop-in Cassandra replacement written in C++. Uses a shard-per-core architecture that eliminates the JVM and garbage collection pauses — delivering 10× better latency and throughput on the same hardware. Fully compatible with the CQL wire protocol and Cassandra client drivers.</p>
+<pre><code class="language-yaml"># ~/scylladb/compose.yaml
+services:
+  scylladb:
+    image: scylladb/scylla:6
+    ports:
+      - 127.0.0.1:9042:9042
+      - 127.0.0.1:10000:10000
+    volumes:
+      - /home/user/scylladb/data:/var/lib/scylla:Z
+    cpuset: &quot;0-3&quot;
+    command: --developer-mode 1 --seeds scylladb
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/scylladb &amp;&amp; podman-compose up -d</code></pre>
+<blockquote>ScyllaDB is the recommended replacement for Cassandra in new deployments. Any code written against the Cassandra CQL API runs unmodified against ScyllaDB.</blockquote>
+<hr>
+<h2 id="cockroachdb-distributed-postgresql">CockroachDB (Distributed PostgreSQL)</h2>
+<p><strong>Purpose:</strong> Distributed SQL database with strong ACID guarantees, automatic sharding, and survivable multi-node operation. Wire-compatible with PostgreSQL — connect with <code>psql</code> or any Postgres driver. Ideal for applications that need horizontal write scaling or multi-region data residency while keeping SQL semantics.</p>
+<pre><code class="language-yaml"># ~/cockroachdb/compose.yaml
+services:
+  cockroachdb:
+    image: cockroachdb/cockroach:latest
+    ports:
+      - 127.0.0.1:26257:26257
+      - 127.0.0.1:8081:8080
+    volumes:
+      - /home/user/cockroachdb/data:/cockroach/cockroach-data:Z
+    command: start-single-node --insecure --http-addr=0.0.0.0:8080
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/cockroachdb &amp;&amp; podman-compose up -d</code></pre>
+<blockquote>The Admin UI is at <code>http://localhost:8081</code> — shows query plans, node health, slow queries, and schema inspector.</blockquote>
+<h5 id="create-a-database-and-user">Create a database and user</h5>
+<pre><code class="language-sql">CREATE DATABASE myapp;
+CREATE USER myuser WITH PASSWORD 'strongpassword';
+GRANT ALL ON DATABASE myapp TO myuser;</code></pre>
+<blockquote>For production, use TLS and the <code>--secure</code> flag. Insecure mode is suitable for local/internal-only deployments.</blockquote>
+<hr>
+<h2 id="timescaledb-time-series-postgresql">TimescaleDB (Time-Series PostgreSQL)</h2>
+<p><strong>Purpose:</strong> PostgreSQL extension that adds native time-series storage, hypertables, continuous aggregates, compression, and data retention policies. Query with standard SQL. Because it is just PostgreSQL, all your existing tools (pgAdmin, Grafana, ORMs) work without modification — you get 100× faster time-series queries.</p>
+<pre><code class="language-yaml"># ~/timescaledb/compose.yaml
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    ports:
+      - 127.0.0.1:5433:5432
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: strongpassword
+      POSTGRES_DB: metrics
+    restart: unless-stopped
+
+volumes:
+  timescale_data:</code></pre>
+<pre><code class="language-bash">cd ~/timescaledb &amp;&amp; podman-compose up -d</code></pre>
+<h5 id="set-up-a-hypertable">Set up a hypertable</h5>
+<pre><code class="language-sql">-- Connect: psql -h localhost -p 5433 -U myuser -d metrics
+
+CREATE EXTENSION IF NOT EXISTS timescaledb;
+
+CREATE TABLE sensor_data (
+  time        TIMESTAMPTZ NOT NULL,
+  device_id   TEXT NOT NULL,
+  temperature DOUBLE PRECISION,
+  humidity    DOUBLE PRECISION
+);
+
+-- Convert to hypertable (auto-partitioned by time)
+SELECT create_hypertable('sensor_data', 'time');
+
+-- Automatic compression after 7 days
+ALTER TABLE sensor_data SET (timescaledb.compress, timescaledb.compress_segmentby = 'device_id');
+SELECT add_compression_policy('sensor_data', INTERVAL '7 days');
+
+-- Data retention: drop data older than 1 year
+SELECT add_retention_policy('sensor_data', INTERVAL '1 year');
+
+-- Continuous aggregate (materialised 1-hour averages, auto-refreshed)
+CREATE MATERIALIZED VIEW sensor_hourly
+WITH (timescaledb.continuous) AS
+SELECT time_bucket('1 hour', time) AS bucket, device_id,
+       AVG(temperature) AS avg_temp, AVG(humidity) AS avg_humidity
+FROM sensor_data GROUP BY bucket, device_id;</code></pre>
+<blockquote>Connect Grafana's TimescaleDB datasource to this instance for instant time-series dashboards.</blockquote>
+<hr>
+<h2 id="influxdb">InfluxDB</h2>
+<p><strong>Purpose:</strong> High-performance time-series database. Optimised for metrics, IoT telemetry, and real-time analytics. Used with Home Assistant and Grafana dashboards.</p>
+<pre><code class="language-yaml"># ~/influxdb/compose.yaml
+services:
+  influxdb:
+    image: influxdb:2
+    ports:
+      - 127.0.0.1:8086:8086
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: strongpassword
+      DOCKER_INFLUXDB_INIT_ORG: home
+      DOCKER_INFLUXDB_INIT_BUCKET: metrics
+    restart: unless-stopped
+
+volumes:
+  influxdb_data:</code></pre>
+<pre><code class="language-bash">cd ~/influxdb &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="common-operations-4">Common operations</h4>
+<pre><code class="language-bash"># Open the InfluxDB CLI
+podman exec -it influxdb influx
+
+# List buckets
+podman exec influxdb influx bucket list
+
+# List organisations
+podman exec influxdb influx org list
+
+# Write a data point
+podman exec influxdb influx write \
+  --bucket metrics --org home \
+  --token &quot;$(podman exec influxdb influx auth list --json | python3 -c &quot;import sys,json;print(json.load(sys.stdin)[0]['token'])&quot;)&quot; \
+  'temperature,room=bedroom value=22.5'
+
+# Query data (Flux)
+podman exec influxdb influx query \
+  --org home \
+  'from(bucket:&quot;metrics&quot;) |&gt; range(start:-1h) |&gt; filter(fn:(r) =&gt; r._measurement == &quot;temperature&quot;)'
+
+# Create a backup
+podman exec influxdb influx backup /tmp/backup --org home
+podman cp influxdb:/tmp/backup ./influxdb-backup-$(date +%Y%m%d)</code></pre>
+<hr>
+<h2 id="qdrant-vector-database">Qdrant (Vector Database)</h2>
+<p><strong>Purpose:</strong> High-performance vector similarity search engine. Used with AI/LLM applications for semantic search, RAG pipelines, and recommendation systems. Connect to Ollama and Open WebUI for document-aware AI chat. See the <a href="https://docs.shani.dev/doc/servers/ai-llms">AI & LLMs wiki</a> for the Ollama and Open WebUI setup.</p>
+<pre><code class="language-yaml"># ~/qdrant/compose.yaml
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - 127.0.0.1:6333:6333
+      - 127.0.0.1:6334:6334
+    volumes:
+      - /home/user/qdrant/storage:/qdrant/storage:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/qdrant &amp;&amp; podman-compose up -d</code></pre>
+<blockquote><strong>REST API</strong>: <code>http://localhost:6333</code> <strong>gRPC</strong>: <code>localhost:6334</code> <strong>Web UI</strong>: <code>http://localhost:6333/dashboard</code></blockquote>
+<hr>
+<h2 id="weaviate-vector-database-with-built-in-ml">Weaviate (Vector Database with Built-In ML)</h2>
+<p><strong>Purpose:</strong> Vector database with native modules for text, image, and multi-modal embeddings — no separate embedding service required. Supports hybrid search (vector + BM25 keyword), GraphQL API, and REST. The <code>text2vec-ollama</code> module connects directly to a local Ollama instance. See the <a href="https://docs.shani.dev/doc/servers/ai-llms">AI & LLMs wiki</a>.</p>
+<pre><code class="language-yaml"># ~/weaviate/compose.yaml
+services:
+  weaviate:
+    image: cr.weaviate.io/semitechnologies/weaviate:latest
+    ports:
+      - 127.0.0.1:8080:8080
+      - 127.0.0.1:50051:50051
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: &quot;true&quot;
+      PERSISTENCE_DATA_PATH: /var/lib/weaviate
+      DEFAULT_VECTORIZER_MODULE: text2vec-ollama
+      ENABLE_MODULES: text2vec-ollama,generative-ollama
+      TEXT2VEC_OLLAMA_APIENDPOINT: http://host.containers.internal:11434
+      TEXT2VEC_OLLAMA_MODEL: nomic-embed-text
+      GENERATIVE_OLLAMA_APIENDPOINT: http://host.containers.internal:11434
+    restart: unless-stopped
+
+volumes:
+  weaviate_data:</code></pre>
+<pre><code class="language-bash">cd ~/weaviate &amp;&amp; podman-compose up -d</code></pre>
+<blockquote>Weaviate's <code>text2vec-ollama</code> module connects to your local Ollama for embeddings — no OpenAI API key needed.</blockquote>
+<hr>
+<h2 id="chroma-lightweight-vector-database">Chroma (Lightweight Vector Database)</h2>
+<p><strong>Purpose:</strong> Simple, developer-friendly vector database focused on getting an AI/RAG application running in minutes. Minimal Python and JavaScript SDK, persistent server mode, and an opinionated API designed for LLM use cases — just <code>add</code>, <code>query</code>, and <code>delete</code>. Scale up to Qdrant or Weaviate when you need production-grade indexing at tens of millions of vectors.</p>
+<pre><code class="language-yaml"># ~/chroma/compose.yaml
+services:
+  chroma:
+    image: chromadb/chroma:latest
+    ports:
+      - 127.0.0.1:8000:8000
+    volumes:
+      - /home/user/chroma/data:/chroma/chroma:Z
+    environment:
+      IS_PERSISTENT: &quot;TRUE&quot;
+      ANONYMIZED_TELEMETRY: &quot;FALSE&quot;
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/chroma &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="common-operations-via-rest-api">Common operations (via REST API)</h4>
+<pre><code class="language-bash">curl http://localhost:8000/api/v1/heartbeat
+curl http://localhost:8000/api/v1/collections
+curl http://localhost:8000/api/v1/version</code></pre>
+<h4 id="use-with-the-python-sdk">Use with the Python SDK</h4>
+<pre><code class="language-python">import chromadb
+
+client = chromadb.HttpClient(host=&quot;localhost&quot;, port=8000)
+collection = client.get_or_create_collection(
+    name=&quot;my_docs&quot;,
+    metadata={&quot;hnsw:space&quot;: &quot;cosine&quot;}
+)
+
+collection.add(
+    ids=[&quot;doc1&quot;, &quot;doc2&quot;, &quot;doc3&quot;],
+    documents=[
+        &quot;Self-hosting gives you full control&quot;,
+        &quot;Podman runs containers rootlessly&quot;,
+        &quot;Caddy is a modern reverse proxy&quot;,
+    ],
+    metadatas=[{&quot;source&quot;: &quot;wiki&quot;}, {&quot;source&quot;: &quot;wiki&quot;}, {&quot;source&quot;: &quot;wiki&quot;}]
+)
+
+results = collection.query(
+    query_texts=[&quot;how do I run containers without root?&quot;],
+    n_results=2
+)
+print(results[&quot;documents&quot;])</code></pre>
+<blockquote><strong>Chroma vs Qdrant vs pgvector:</strong> Chroma is the fastest to integrate in a Python LLM app. Qdrant offers more indexing control, filtering, and production throughput. pgvector is best if you're already using PostgreSQL and want zero extra infrastructure.</blockquote>
+<hr>
+<h2 id="meilisearch">MeiliSearch</h2>
+<p><strong>Purpose:</strong> Lightning-fast, typo-tolerant full-text search engine with a simple REST API. No query language to learn.</p>
+<pre><code class="language-yaml"># ~/meilisearch/compose.yaml
+services:
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    ports:
+      - 127.0.0.1:7700:7700
+    volumes:
+      - meilisearch_data:/meili_data
+    environment:
+      MEILI_MASTER_KEY: changeme
+    restart: unless-stopped
+
+volumes:
+  meilisearch_data:</code></pre>
+<pre><code class="language-bash">cd ~/meilisearch &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="common-operations-5">Common operations</h4>
+<pre><code class="language-bash"># Check server health
+curl http://localhost:7700/health -H &quot;Authorization: Bearer changeme&quot;
+
+# List all indexes
+curl http://localhost:7700/indexes -H &quot;Authorization: Bearer changeme&quot;
+
+# Index documents and search
+curl -X POST http://localhost:7700/indexes/movies/documents \
+  -H &quot;Authorization: Bearer changeme&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '[{&quot;id&quot;:1,&quot;title&quot;:&quot;Inception&quot;,&quot;genre&quot;:&quot;Sci-Fi&quot;},{&quot;id&quot;:2,&quot;title&quot;:&quot;The Matrix&quot;,&quot;genre&quot;:&quot;Sci-Fi&quot;}]'
+
+curl &quot;http://localhost:7700/indexes/movies/search?q=inceptoin&quot; \
+  -H &quot;Authorization: Bearer changeme&quot;</code></pre>
+<hr>
+<h2 id="typesense-fast-search-engine">Typesense (Fast Search Engine)</h2>
+<p><strong>Purpose:</strong> Open-source typo-tolerant search engine optimised for instant, as-you-type results. Zero configuration needed, sub-50ms queries on millions of documents, and a clean REST API. Ideal for e-commerce search, documentation search, and app-level search.</p>
+<pre><code class="language-yaml"># ~/typesense/compose.yaml
+services:
+  typesense:
+    image: typesense/typesense:latest
+    ports:
+      - 127.0.0.1:8108:8108
+    volumes:
+      - /home/user/typesense/data:/data:Z
+    environment:
+      TYPESENSE_DATA_DIR: /data
+      TYPESENSE_API_KEY: changeme
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/typesense &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="common-operations-6">Common operations</h4>
+<pre><code class="language-bash"># Check server health
+curl http://localhost:8108/health -H &quot;X-TYPESENSE-API-KEY: changeme&quot;
+
+# Create a collection and index documents
+curl http://localhost:8108/collections \
+  -H &quot;X-TYPESENSE-API-KEY: changeme&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;name&quot;:&quot;products&quot;,&quot;fields&quot;:[{&quot;name&quot;:&quot;name&quot;,&quot;type&quot;:&quot;string&quot;},{&quot;name&quot;:&quot;price&quot;,&quot;type&quot;:&quot;float&quot;},{&quot;name&quot;:&quot;rating&quot;,&quot;type&quot;:&quot;int32&quot;}],&quot;default_sorting_field&quot;:&quot;rating&quot;}'
+
+# Search (typo-tolerant)
+curl &quot;http://localhost:8108/collections/products/documents/search?q=latp&amp;query_by=name&quot; \
+  -H &quot;X-TYPESENSE-API-KEY: changeme&quot;</code></pre>
+<blockquote><strong>MeiliSearch vs Typesense:</strong> Both are fast and typo-tolerant. Typesense has a stricter schema, better multi-tenancy, and faster faceting. MeiliSearch has a more flexible schema-optional API and better out-of-box relevancy tuning.</blockquote>
+<hr>
+<h2 id="duckdb-embedded-olap">DuckDB (Embedded OLAP)</h2>
+<p><strong>Purpose:</strong> In-process analytical database — think SQLite for analytics. Runs inside your application process, needs no server, and executes columnar OLAP queries directly on Parquet, CSV, and JSON files. Ideal for data analysis scripts, Jupyter notebooks, and ETL pipelines where you don't want to spin up a full ClickHouse or Postgres instance.</p>
+<pre><code class="language-yaml"># ~/duckdb-api/compose.yaml
+services:
+  duckdb-api:
+    image: ghcr.io/tobilg/duckdb-api:latest
+    ports:
+      - 127.0.0.1:1294:1294
+    volumes:
+      - /home/user/duckdb:/duckdb:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/duckdb-api &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="common-operations-via-rest-api-2">Common operations (via REST API)</h4>
+<pre><code class="language-bash">curl -X POST http://localhost:1294/query \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;query&quot;: &quot;SELECT 42 AS answer&quot;}'
+
+curl -X POST http://localhost:1294/query \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;query&quot;: &quot;SELECT * FROM read_parquet('\''/duckdb/data.parquet'\'') LIMIT 10&quot;}'</code></pre>
+<blockquote>DuckDB can read directly from S3/MinIO, InfluxDB line protocol files, and PostgreSQL — making it a powerful ad-hoc query layer over your existing data stores without ETL.</blockquote>
+<hr>
+<h2 id="clickhouse-columnar-olap-database">ClickHouse (Columnar OLAP Database)</h2>
+<p><strong>Purpose:</strong> Open-source columnar database optimised for real-time analytical queries on large datasets — billions of rows, sub-second aggregations, and high-throughput ingestion. Used by SigNoz, Plausible Analytics, PostHog, and many other self-hosted analytics platforms as their storage backend. Unlike DuckDB (embedded/local files), ClickHouse is a persistent server that accepts concurrent writes and queries from multiple clients.</p>
+<pre><code class="language-yaml"># ~/clickhouse/compose.yaml
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    ports:
+      - 127.0.0.1:8123:8123    # HTTP interface
+      - 127.0.0.1:9000:9000    # Native TCP interface
+    volumes:
+      - /home/user/clickhouse/data:/var/lib/clickhouse:Z
+      - /home/user/clickhouse/logs:/var/log/clickhouse-server:Z
+      - /home/user/clickhouse/config.xml:/etc/clickhouse-server/config.d/custom.xml:ro,Z
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    restart: unless-stopped</code></pre>
+<pre><code class="language-xml">&lt;!-- ~/clickhouse/config.xml — minimal custom config --&gt;
+&lt;clickhouse&gt;
+  &lt;listen_host&gt;0.0.0.0&lt;/listen_host&gt;
+  &lt;max_connections&gt;100&lt;/max_connections&gt;
+  &lt;users&gt;
+    &lt;default&gt;
+      &lt;password&gt;changeme&lt;/password&gt;
+      &lt;networks&gt;&lt;ip&gt;::/0&lt;/ip&gt;&lt;/networks&gt;
+      &lt;profile&gt;default&lt;/profile&gt;
+      &lt;quota&gt;default&lt;/quota&gt;
+    &lt;/default&gt;
+  &lt;/users&gt;
+&lt;/clickhouse&gt;</code></pre>
+<pre><code class="language-bash">cd ~/clickhouse &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="common-operations-7">Common operations</h4>
+<pre><code class="language-bash"># Interactive SQL shell
+podman exec -it clickhouse clickhouse-client --password changeme
+
+# Query via HTTP interface
+curl &quot;http://localhost:8123/?query=SELECT+version()&amp;password=changeme&quot;
+
+# Show table sizes
+podman exec clickhouse clickhouse-client --password changeme --query &quot;
+  SELECT database, table,
+    formatReadableSize(sum(bytes_on_disk)) AS size,
+    sum(rows) AS rows
+  FROM system.parts WHERE active
+  GROUP BY database, table
+  ORDER BY sum(bytes_on_disk) DESC&quot;
+
+# Import CSV
+podman exec -i clickhouse clickhouse-client --password changeme \
+  --query &quot;INSERT INTO mydb.events FORMAT CSV&quot; &lt; /path/to/events.csv</code></pre>
+<h5 id="create-a-table-optimised-for-event-data">Create a table optimised for event data</h5>
+<pre><code class="language-sql">CREATE DATABASE IF NOT EXISTS analytics;
+
+CREATE TABLE analytics.events (
+  event_time   DateTime,
+  session_id   String,
+  user_id      UInt64,
+  event_name   LowCardinality(String),
+  properties   String
+)
+ENGINE = MergeTree()
+PARTITION BY toYYYYMM(event_time)
+ORDER BY (event_name, event_time)
+TTL event_time + INTERVAL 1 YEAR;</code></pre>
+<blockquote><strong>DuckDB vs ClickHouse:</strong> Use DuckDB for local, one-off analytics on files (CSV, Parquet, Postgres) — no server, no setup. Use ClickHouse when you need a persistent server that ingests data continuously from multiple sources and serves concurrent analytical queries at scale.</blockquote>
+<hr>
+<h2 id="surrealdb-multi-model-database">SurrealDB (Multi-Model Database)</h2>
+<p><strong>Purpose:</strong> A single database that acts as relational, document, graph, and time-series store simultaneously. One query language (SurrealQL — SQL-like) handles joins, graph traversals, computed fields, and live queries (WebSocket-based change streams).</p>
+<pre><code class="language-yaml"># ~/surrealdb/compose.yaml
+services:
+  surrealdb:
+    image: surrealdb/surrealdb:latest
+    ports:
+      - 127.0.0.1:8000:8000
+    volumes:
+      - /home/user/surrealdb/data:/data:Z
+    command: start --log debug --user root --pass changeme file:/data/database.db
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/surrealdb &amp;&amp; podman-compose up -d</code></pre>
+<h4 id="common-operations-8">Common operations</h4>
+<pre><code class="language-bash"># Connect interactively
+podman exec -it surrealdb surreal sql \
+  --conn http://localhost:8000 \
+  --user root --pass changeme \
+  --ns myns --db mydb
+
+# Export a database
+podman exec surrealdb surreal export \
+  --conn http://localhost:8000 \
+  --user root --pass changeme \
+  --ns myns --db mydb /tmp/export.surql
+podman cp surrealdb:/tmp/export.surql ./surrealdb-$(date +%Y%m%d).surql</code></pre>
+<hr>
+<h2 id="pocketbase-sqlite-backend-as-a-service">PocketBase (SQLite Backend-as-a-Service)</h2>
+<p><strong>Purpose:</strong> Single-binary Go backend with a built-in SQLite database, REST and realtime subscriptions API, file storage, authentication (email/password, OAuth), and a clean admin dashboard. No separate database server needed. Perfect for lightweight apps, prototypes, or small-team internal tools.</p>
+<pre><code class="language-yaml"># ~/pocketbase/compose.yaml
+services:
+  pocketbase:
+    image: ghcr.io/muchobien/pocketbase:latest
+    ports:
+      - 127.0.0.1:8090:8090
+    volumes:
+      - /home/user/pocketbase/pb_data:/pb_data:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/pocketbase &amp;&amp; podman-compose up -d</code></pre>
+<p>Access the admin UI at <code>http://localhost:8090/_/</code> to create your first admin account and define collections.</p>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">pb.home.local { tls internal; reverse_proxy localhost:8090 }</code></pre>
+<hr>
+<h2 id="supabase-self-hosted-firebase-alternative">Supabase (Self-Hosted Firebase Alternative)</h2>
+<p><strong>Purpose:</strong> Full open-source Firebase/Supabase stack — PostgreSQL + Auth + Storage + Realtime subscriptions + Edge Functions + Studio UI in one compose stack. Use when you need a complete BaaS for a production app with no per-seat or per-row fees.</p>
+<pre><code class="language-bash"># Clone the official self-hosted stack
+git clone --depth 1 https://github.com/supabase/supabase
+cd supabase/docker
+
+# Copy and edit the env file
+cp .env.example .env
+# Edit .env: set POSTGRES_PASSWORD, JWT_SECRET, ANON_KEY, SERVICE_ROLE_KEY
+# Generate JWT secrets with: openssl rand -base64 32
+
+podman-compose up -d</code></pre>
+<blockquote>The <code>.env.example</code> file contains detailed comments for every variable. At minimum set <code>POSTGRES_PASSWORD</code>, <code>JWT_SECRET</code>, <code>ANON_KEY</code>, and <code>SERVICE_ROLE_KEY</code>.</blockquote>
+<p>Access Supabase Studio at <code>http://localhost:3000</code>.</p>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">supabase.home.local { tls internal; reverse_proxy localhost:3000 }</code></pre>
+<hr>
+<h2 id="nocodb-airtable-on-postgresql">NocoDB (Airtable on PostgreSQL)</h2>
+<p><strong>Purpose:</strong> Turns any existing PostgreSQL, MySQL, or SQLite database into an Airtable-style spreadsheet UI with forms, views (grid, gallery, Kanban), and a REST API — without touching your schema. Essential for giving non-technical team members a usable frontend over raw database tables.</p>
+<pre><code class="language-yaml"># ~/nocodb/compose.yaml
+services:
+  nocodb:
+    image: nocodb/nocodb:latest
+    ports:
+      - 127.0.0.1:8180:8080
+    environment:
+      NC_DB: pg://db:5432?u=nocodb&amp;p=changeme&amp;d=nocodb
+      NC_AUTH_JWT_SECRET: changeme-run-openssl-rand-hex-32
+    depends_on: [db]
+    volumes:
+      - /home/user/nocodb/data:/usr/app/data:Z
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: nocodb
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: nocodb
+    volumes:
+      - nocodb_pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  nocodb_pg_data:</code></pre>
+<pre><code class="language-bash">cd ~/nocodb &amp;&amp; podman-compose up -d</code></pre>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">nocodb.home.local { tls internal; reverse_proxy localhost:8180 }</code></pre>
+<hr>
+<h2 id="adminer">Adminer</h2>
+<p><strong>Purpose:</strong> Lightweight, single-file database management interface supporting MySQL, PostgreSQL, SQLite, and Oracle. Useful for quick inspection without installing a full GUI.</p>
+<pre><code class="language-yaml"># ~/adminer/compose.yaml
+services:
+  adminer:
+    image: adminer
+    ports:
+      - 127.0.0.1:8089:8080
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/adminer &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:8089</code>. Enter <code>host.containers.internal</code> as the server address when connecting to a database in another container.</p>
+<hr>
+<h2 id="cloudbeaver-universal-database-gui">CloudBeaver (Universal Database GUI)</h2>
+<p><strong>Purpose:</strong> Web-based, multi-database IDE from the makers of DBeaver. Supports PostgreSQL, MySQL/MariaDB, SQLite, ClickHouse, MongoDB, Redis, and 40+ other databases — all from a single browser tab. Offers a full SQL editor with autocomplete, ERD diagrams, data export/import, and role-based access controls.</p>
+<pre><code class="language-yaml"># ~/cloudbeaver/compose.yaml
+services:
+  cloudbeaver:
+    image: dbeaver/cloudbeaver:latest
+    ports:
+      - 127.0.0.1:8978:8978
+    volumes:
+      - /home/user/cloudbeaver/workspace:/opt/cloudbeaver/workspace:Z
+    restart: unless-stopped</code></pre>
+<pre><code class="language-bash">cd ~/cloudbeaver &amp;&amp; podman-compose up -d</code></pre>
+<p>Access at <code>http://localhost:8978</code>. Complete the initial setup wizard, then add connections under <strong>Connection → New Connection</strong> — use <code>host.containers.internal</code> as the host for other containers.</p>
+<p><strong>Caddy:</strong></p>
+<pre><code class="language-caddyfile">db-gui.home.local { tls internal; reverse_proxy localhost:8978 }</code></pre>
+<blockquote><strong>Adminer vs CloudBeaver:</strong> Adminer is zero-config, instant-start, ideal for one-off inspection. CloudBeaver is a full web IDE with saved connections, shared team access, query history, and ERD diagrams — better for regular development work.</blockquote>
+<hr>
+<h2 id="choosing-the-right-database">Choosing the Right Database</h2>
+<table><thead><tr><th>Use Case</th><th>Recommended Database</th></tr></thead><tbody><tr><td>General-purpose relational, web apps</td><td>PostgreSQL</td></tr><tr><td>Legacy PHP apps, WordPress</td><td>MariaDB</td></tr><tr><td>Caching, sessions, pub/sub</td><td>Redis / Valkey</td></tr><tr><td>High-throughput caching (multi-core)</td><td>Dragonfly / KeyDB</td></tr><tr><td>Document storage, flexible schema</td><td>MongoDB</td></tr><tr><td>MongoDB API on PostgreSQL storage</td><td>FerretDB</td></tr><tr><td>Event streaming, data pipelines</td><td>Kafka / Redpanda</td></tr><tr><td>Task queues, worker jobs, RPC</td><td>RabbitMQ</td></tr><tr><td>Lightweight pub/sub + KV + streams</td><td>NATS JetStream</td></tr><tr><td>Graph data, social networks, recommendations</td><td>Neo4j</td></tr><tr><td>IoT telemetry, time-series at scale</td><td>Cassandra / ScyllaDB</td></tr><tr><td>Time-series with SQL & PostgreSQL tooling</td><td>TimescaleDB</td></tr><tr><td>Horizontal SQL scaling, multi-region</td><td>CockroachDB</td></tr><tr><td>Full-text search (simple, fast)</td><td>Typesense / MeiliSearch</td></tr><tr><td>Vector/semantic search (AI/RAG)</td><td>Qdrant / Weaviate</td></tr><tr><td>Vector search in existing PostgreSQL</td><td>pgvector</td></tr><tr><td>Vector search, LLM-app SDK simplicity</td><td>Chroma</td></tr><tr><td>SQLite with replication</td><td>Litestream</td></tr><tr><td>Metrics & IoT (line protocol)</td><td>InfluxDB</td></tr><tr><td>Local OLAP / data analysis on files</td><td>DuckDB</td></tr><tr><td>High-throughput server-side OLAP / analytics</td><td>ClickHouse</td></tr><tr><td>Multi-model (relational + graph + doc)</td><td>SurrealDB</td></tr><tr><td>Lightweight app backend (SQLite + Auth + API)</td><td>PocketBase</td></tr><tr><td>Full BaaS (PostgreSQL + Auth + Realtime + Storage)</td><td>Supabase</td></tr><tr><td>Visual spreadsheet UI over existing DB</td><td>NocoDB</td></tr><tr><td>Universal web-based DB GUI (multi-database)</td><td>CloudBeaver</td></tr></tbody></table>
+<hr>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>PostgreSQL <code>FATAL: password authentication failed</code></td><td>Verify <code>POSTGRES_USER</code> and <code>POSTGRES_PASSWORD</code> match; recreate the volume if the DB was initialised with different credentials</td></tr><tr><td>Redis <code>NOAUTH</code> error</td><td>Add <code>--requirepass changeme</code> to the command; update clients to pass the password</td></tr><tr><td>MongoDB <code>auth failed</code></td><td>Ensure client uses <code>admin</code> database for auth: add <code>?authSource=admin</code> to the connection string</td></tr><tr><td>Qdrant collection not found</td><td>Collections are created via API or the web UI dashboard; Qdrant does not auto-create on insert</td></tr><tr><td>InfluxDB can't accept writes</td><td>Verify the org name and bucket match <code>DOCKER_INFLUXDB_INIT_ORG</code> and <code>DOCKER_INFLUXDB_INIT_BUCKET</code> exactly</td></tr><tr><td>Adminer shows no database</td><td>Connect to <code>host.containers.internal</code> (not <code>localhost</code>) when the database is in another container</td></tr><tr><td>Kafka consumer lag growing</td><td>Check partition count vs consumer count; increase partitions or add consumer instances; verify no consumer is crashing</td></tr><tr><td>Kafka topic not created</td><td>Ensure <code>KAFKA_AUTO_CREATE_TOPICS_ENABLE=true</code> or create manually with <code>kafka-topics --create</code></td></tr><tr><td>Kafka KRaft broker not starting</td><td>Ensure <code>CLUSTER_ID</code> is set (generate with <code>kafka-storage random-uuid</code>); verify <code>KAFKA_PROCESS_ROLES</code>, <code>KAFKA_NODE_ID</code>, and <code>KAFKA_CONTROLLER_QUORUM_VOTERS</code> are all consistent</td></tr><tr><td>Neo4j heap OOM</td><td>Increase <code>NEO4J_dbms_memory_heap_max__size</code> — default is 512m; graph queries on large datasets need more</td></tr><tr><td>Cassandra connection refused</td><td>Cassandra takes 30–60 s to start; check <code>podman logs cassandra</code> for <code>Starting listening for CQL clients</code></td></tr><tr><td>CockroachDB <code>node is not ready</code></td><td>Single-node startup takes a few seconds; retry with <code>podman exec cockroachdb cockroach sql --insecure</code> after 10 s</td></tr><tr><td>TimescaleDB extension not found</td><td>Run <code>CREATE EXTENSION timescaledb;</code> in <code>psql</code> after first connection; must be enabled per database</td></tr><tr><td>Redpanda schema registry errors</td><td>Ensure schema registry port <code>8081</code> is not blocked; it is separate from the Kafka broker port <code>9092</code></td></tr><tr><td>Weaviate vectorisation fails</td><td>Verify Ollama is running and <code>TEXT2VEC_OLLAMA_APIENDPOINT</code> resolves; pull the embedding model: <code>podman exec ollama ollama pull nomic-embed-text</code></td></tr><tr><td>RabbitMQ management UI unreachable</td><td>Ensure port <code>15672</code> is exposed; management plugin is bundled in the <code>-management</code> image tag</td></tr><tr><td>RabbitMQ messages not consumed</td><td>Check consumer acknowledgement mode — unacked messages stay in queue; verify the consumer is running and connected</td></tr><tr><td>NATS JetStream not persisting</td><td>Ensure <code>store_dir</code> is set in config and the <code>/data</code> volume is mounted; <code>jetstream {}</code> block must be present</td></tr><tr><td>Typesense collection not found</td><td>Collections must be explicitly created before indexing; verify the API key matches <code>TYPESENSE_API_KEY</code></td></tr><tr><td>DuckDB Parquet read error</td><td>Ensure the file path inside the container matches the volume mount; DuckDB requires read permissions on the file</td></tr><tr><td>SurrealDB connection refused</td><td>Verify the <code>--conn</code> URL uses <code>http://</code> not <code>https://</code> for local connections; check the namespace and database exist</td></tr><tr><td>Dragonfly <code>ulimit</code> warning on startup</td><td>Set <code>ulimits: memlock: -1</code> in the compose service; Dragonfly requires unlimited locked memory</td></tr><tr><td>FerretDB command not supported</td><td>Check the <a href="https://docs.ferretdb.io/reference/supported-commands/">FerretDB compatibility list</a> — some advanced MongoDB aggregation stages are not yet implemented</td></tr><tr><td>PocketBase admin blank on first load</td><td>Visit <code>http://localhost:8090/_/</code> (note the trailing slash) to trigger admin setup</td></tr><tr><td>Supabase Studio not loading</td><td>Wait 60–90 s for all services to initialise; Kong and GoTrue must be healthy before Studio loads</td></tr><tr><td>NocoDB <code>Cannot read properties of undefined</code> on connect</td><td>Ensure <code>NC_DB</code> uses the <code>pg://</code> URI scheme with correct credentials; check the PostgreSQL container is fully started</td></tr><tr><td>pgvector <code>type &quot;vector&quot; does not exist</code></td><td>Run <code>CREATE EXTENSION IF NOT EXISTS vector;</code> in the target database; must be enabled per database</td></tr><tr><td>Chroma collection not persisting after restart</td><td>Ensure <code>IS_PERSISTENT: &quot;TRUE&quot;</code> is set and the <code>/chroma/chroma</code> volume is correctly mounted</td></tr><tr><td>Chroma <code>Connection refused</code> from Python</td><td>Verify <code>chromadb.HttpClient(host=&quot;localhost&quot;, port=8000)</code> — the default <code>chromadb.Client()</code> is in-memory only</td></tr><tr><td>ClickHouse <code>Connection refused</code> on port 8123</td><td>Ensure <code>&lt;listen_host&gt;0.0.0.0&lt;/listen_host&gt;</code> is in the custom config; by default ClickHouse only binds to localhost</td></tr><tr><td>CloudBeaver can't connect to container databases</td><td>Use <code>host.containers.internal</code> instead of <code>localhost</code>; set the port to the host-side mapped port</td></tr></tbody></table></div>
+    </div>
+
+  </main>
+
+  <!-- ── Back to top ───────────────────────────────────────────────── -->
+  <button class="to-top" id="back-top" aria-label="Back to top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- ── Toast notification ────────────────────────────────────────── -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <!-- Restore path forwarded by 404.html SPA redirect (/doc/<slug>) -->
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var p  = qs.get('p');
+      if (!p) return;
+      qs.delete('p');
+      var q = qs.get('q') || ''; qs.delete('q');
+      var h = qs.get('h') || ''; qs.delete('h');
+      var url = decodeURIComponent(p);
+      if (q) url += '?' + decodeURIComponent(q);
+      if (h) url += '#' + decodeURIComponent(h);
+      history.replaceState(null, '', url);
+    })();
+  </script>
+  <script src="/config-docs.js"></script>
+  <script src="/nav-docs.js"></script>
+  <script src="/script-docs.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(e) { console.error('SW failed:', e); });
+    }
+  </script>
+</body>
+</html>

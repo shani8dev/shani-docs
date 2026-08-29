@@ -1,14 +1,14 @@
 ---
 title: Storage
 section: System
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Storage
 
 This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring, and the udisks2 layer used by desktop tools.
 
-For encrypted volumes see [LUKS Management](../security/luks). For Btrfs-specific operations (snapshots, subvolumes, scrub) see [Btrfs Deep Dive](../arch/btrfs). For backup strategy see [Backup & Recovery](backup).
+For encrypted volumes see [LUKS Management](../security/luks.md). For Btrfs-specific operations (snapshots, subvolumes, scrub) see [Btrfs Deep Dive](../arch/btrfs.md). For backup strategy see [Backup & Recovery](backup).
 
 ---
 
@@ -257,7 +257,7 @@ sudo mdadm --stop /dev/md0
 
 ## Automatic Btrfs Maintenance (Shani OS Defaults)
 
-Shani OS's root and data volumes are Btrfs, laid out as `@blue`/`@green` root subvolumes for atomic updates (see [Btrfs Deep Dive](../arch/btrfs)). Routine maintenance already runs on its own — you rarely need to invoke `btrfs scrub`, `btrfs balance`, or `fstrim` manually:
+Shani OS's root and data volumes are Btrfs, laid out as `@blue`/`@green` root subvolumes for atomic updates (see [Btrfs Deep Dive](../arch/btrfs.md)). Routine maintenance already runs on its own — you rarely need to invoke `btrfs scrub`, `btrfs balance`, or `fstrim` manually:
 
 - **Balance, defrag, scrub, and trim** run via `btrfs-balance.timer`, `btrfs-defrag.timer`, `btrfs-scrub.timer`, and `btrfs-trim.timer` (from `btrfsmaintenance`), enabled by default and scheduled weekly at idle I/O priority. Check them with `systemctl list-timers 'btrfs-*'`.
 - **bees** runs continuously in the background (`beesd@<uuid>.service`), deduplicating extents across the `@blue`/`@green` root subvolumes and their backup snapshots as they diverge — this is what keeps two nearly-identical OS slots from doubling disk usage.
@@ -462,22 +462,35 @@ truncate -s 2G disk.img
 swapon --show
 free -h
 
-# Add a swap file
-sudo fallocate -l 4G /swapfile
-sudo chmod 600 /swapfile
-sudo mkswap /swapfile
-sudo swapon /swapfile
-
-# Make permanent (add to /etc/fstab)
-echo '/swapfile none swap defaults 0 0' | sudo tee -a /etc/fstab
-
-# Disable a swap file
-sudo swapoff /swapfile
-
 # ZRAM swap (Shani OS default)
 zramctl                          # show ZRAM devices and compression ratio
 cat /proc/swaps                  # all active swap sources
 ```
+
+Shanios sets up swap at install time: ZRAM plus a swapfile created in the dedicated `@swap` Btrfs subvolume, sized to RAM (skipped automatically if disk space is tight — the system then falls back to zram alone). The root filesystem is read-only, so a `/swapfile` on `/` via `fallocate` is not possible — any extra swapfile must live under `/swap`, which is mounted from `@swap` with `nodatacow` (NOCOW semantics are required for swapfiles on Btrfs).
+
+To add another swapfile under `/swap`:
+
+```bash
+# Create an 8 GiB swapfile in the @swap subvolume (handles NOCOW for you)
+sudo btrfs filesystem mkswapfile --size 8g /swap/swapfile
+
+# If your btrfs-progs lacks mkswapfile, fall back to dd + chattr +C under /swap:
+sudo dd if=/dev/zero of=/swap/swapfile bs=1M count=8192 status=progress
+sudo chmod 600 /swap/swapfile
+sudo chattr +C /swap/swapfile    # disable CoW (must be set before data is written)
+
+sudo mkswap /swap/swapfile
+sudo swapon /swap/swapfile
+
+# Make permanent
+echo '/swap/swapfile none swap defaults 0 0' | sudo tee -a /etc/fstab
+
+# Disable a swap file
+sudo swapoff /swap/swapfile
+```
+
+> Hibernation (`resume=`) setup is baked into the image's UKI kernel command line at build/deploy time — there is no manual dracut/resume configuration to apply.
 
 ---
 
@@ -491,13 +504,13 @@ cat /proc/swaps                  # all active swap sources
 | `e2fsck` finds errors but drive is mounted | Boot from the other slot and run `e2fsck` unmounted |
 | Btrfs reports errors after scrub | Check `dmesg | grep btrfs`; if uncorrectable, restore from backup — the drive may be failing |
 | `No space left` but `df` shows free space | Inode exhaustion: `df -i`; or Btrfs metadata full: `sudo btrfs balance start -m /` (balance also runs automatically via `btrfs-balance.timer`, weekly) |
-| UUID changed after mkfs | Update `/etc/fstab` with `blkid`; regenerate initramfs with `sudo dracut --force` |
+| UUID changed after mkfs | Update `/etc/fstab` with `blkid`; UKIs are rebuilt and re-signed by `gen-efi` on the next `sudo shani-deploy` (or run `sudo gen-efi configure <slot>`) |
 
 ---
 
 ## See Also
 
-- [Btrfs Deep Dive](../arch/btrfs) — subvolumes, snapshots, send/receive, balance
-- [LUKS Management](../security/luks) — encrypted volumes
+- [Btrfs Deep Dive](../arch/btrfs.md) — subvolumes, snapshots, send/receive, balance
+- [LUKS Management](../security/luks.md) — encrypted volumes
 - [Backup & Recovery](backup) — restic, rclone, snapshot strategy
-- [Filesystem Structure](../arch/filesystem) — Shani OS subvolume layout
+- [Filesystem Structure](../arch/filesystem.md) — Shani OS subvolume layout

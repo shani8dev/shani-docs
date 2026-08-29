@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Dracut Initramfs Module — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Dracut Initramfs Module  Shanios ships a custom dracut module () that adds three hooks to the initramfs. These hooks implement the two features that requir…">
+  <meta name="description" id="meta-desc"     content="Shanios ships a custom dracut module (99shanios) that adds three hooks to the initramfs. These hooks implement the two features that require early-boot acc…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Dracut Initramfs Module">
-  <meta property="og:description" id="og-desc"    content="Dracut Initramfs Module  Shanios ships a custom dracut module () that adds three hooks to the initramfs. These hooks implement the two features that requir…">
+  <meta property="og:description" id="og-desc"    content="Shanios ships a custom dracut module (99shanios) that adds three hooks to the initramfs. These hooks implement the two features that require early-boot acc…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/arch/dracut-module/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="Dracut Initramfs Module">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Dracut Initramfs Module">
-  <meta name="twitter:description" id="tw-desc"  content="Dracut Initramfs Module  Shanios ships a custom dracut module () that adds three hooks to the initramfs. These hooks implement the two features that requir…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios ships a custom dracut module (99shanios) that adds three hooks to the initramfs. These hooks implement the two features that require early-boot acc…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Dracut Initramfs Module","description":"Dracut Initramfs Module  Shanios ships a custom dracut module () that adds three hooks to the initramfs. These hooks implement the two features that requir…","url":"https://docs.shani.dev/doc/arch/dracut-module/","datePublished":"2026-08-20T00:00:00.000Z","dateModified":"2026-08-20T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Dracut Initramfs Module","description":"Shanios ships a custom dracut module (99shanios) that adds three hooks to the initramfs. These hooks implement the two features that require early-boot acc…","url":"https://docs.shani.dev/doc/arch/dracut-module/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Dracut Initramfs Module","item":"https://docs.shani.dev/doc/arch/dracut-module/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,12 +215,12 @@
         <h1 class="doc-title">Dracut Initramfs Module</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Architecture</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-20</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>Shanios ships a custom dracut module (<code>99shanios</code>) that adds three hooks to the initramfs. These hooks implement the two features that require early-boot access before the root filesystem is available to userspace: <strong>boot failure detection</strong> and <strong><code>/etc</code> OverlayFS mounting</strong>.</p>
-<p>---</p>
-<h2>Module Location</h2>
+<hr>
+<h2 id="module-location">Module Location</h2>
 <pre><code>/usr/lib/dracut/modules.d/99shanios/
 ├── module-setup.sh              ← declares hooks and binaries
 ├── shanios-boot-failure-hook.sh ← pre-mount (priority 90)
@@ -230,8 +232,8 @@
 <li>Binaries: <code>blkid mount umount mountpoint mkdir rmdir rm printf sed</code> (via <code>inst_multiple</code>)</li>
 <li>Kernel module: <code>overlay</code> (via <code>instmods overlay</code>), so <code>mount -t overlay</code> works before the real root's modules are reachable</li>
 </ul>
-<p>---</p>
-<h2>Hook: shanios-boot-failure-hook.sh (pre-mount 90)</h2>
+<hr>
+<h2 id="hook-shanios-boot-failure-hooksh-pre-mount-90">Hook: shanios-boot-failure-hook.sh (pre-mount 90)</h2>
 <p><strong>Runs:</strong> After LUKS unlock and device discovery, <strong>before</strong> the root Btrfs subvolume is mounted.</p>
 <p><strong>Purpose:</strong> Write a <code>boot_hard_failure</code> marker so that if root mount fails, the failure is recorded persistently and <code>shani-update</code> can detect it on the next boot.</p>
 <p><strong>Why dracut and not a systemd service:</strong> dracut has no "on mount failure" hook. The only reliable pattern is write-before-mount, clear-on-success. If root never mounts, the marker persists. If root mounts successfully, the <code>shanios-boot-success-clear.sh</code> hook at pre-pivot removes it.</p>
@@ -244,8 +246,8 @@
 <li>Unmounts <code>@data</code> immediately</li>
 </ol>
 <p><strong>Failure handling:</strong> If the <code>@data</code> subvolume cannot be mounted (e.g. disk not found), the hook exits silently with a warning in the boot log rather than halting the boot.</p>
-<p>---</p>
-<h2>Hook: shanios-overlay-etc.sh (pre-pivot 50)</h2>
+<hr>
+<h2 id="hook-shanios-overlay-etcsh-pre-pivot-50">Hook: shanios-overlay-etc.sh (pre-pivot 50)</h2>
 <p><strong>Runs:</strong> After root is successfully mounted, <strong>before</strong> <code>pivot_root</code> hands control to systemd.</p>
 <p><strong>Purpose:</strong> Mount the <code>/etc</code> OverlayFS so systemd PID 1 reads the correct (user-modified) <code>/etc</code> from its very first unit file access.</p>
 <p><strong>Why in dracut and not fstab:</strong> If the overlay is applied via fstab after <code>pivot_root</code>, systemd has already cached paths from the read-only root's <code>/etc</code>. The overlay must be in place before the switch to the new root.</p>
@@ -259,9 +261,9 @@
 </ol>
 <p>The <code>@data</code> mount at <code>/run/shanios-data-tmp</code> is carried into the new root by <code>switch_root</code> (which moves all <code>/run</code> mounts automatically). It is visible in the booted system at <code>/run/shanios-data-tmp</code> until the fstab <code>@data</code> mount at <code>/data</code> takes over.</p>
 <p><strong>Mount options:</strong></p>
-<p>| Option | Reason | |--------|--------| | <code>index=off</code> | Avoids inode index checks that break across subvolume mounts | | <code>metacopy=off</code> | Disables metadata-only copy-up; keeps behaviour simple and compatible with older kernels |</p>
-<p>---</p>
-<h2>Hook: shanios-boot-success-clear.sh (pre-pivot 90)</h2>
+<table><thead><tr><th>Option</th><th>Reason</th></tr></thead><tbody><tr><td><code>index=off</code></td><td>Avoids inode index checks that break across subvolume mounts</td></tr><tr><td><code>metacopy=off</code></td><td>Disables metadata-only copy-up; keeps behaviour simple and compatible with older kernels</td></tr></tbody></table>
+<hr>
+<h2 id="hook-shanios-boot-success-clearsh-pre-pivot-90">Hook: shanios-boot-success-clear.sh (pre-pivot 90)</h2>
 <p><strong>Runs:</strong> After root is successfully mounted and after the overlay hook (priority 50), before <code>pivot_root</code>.</p>
 <p><strong>Purpose:</strong> Clear the <code>boot_hard_failure</code> marker written by the pre-mount hook, confirming that root mount succeeded.</p>
 <p><strong>What it does:</strong></p>
@@ -271,8 +273,8 @@
 <li><strong>Does not unmount <code>@data</code></strong> — same reason as the overlay hook</li>
 </ol>
 <p><strong>Ordering:</strong> Running at priority 90 (after the overlay hook at 50) ensures the overlay is already live when success is declared.</p>
-<p>---</p>
-<h2>Interaction with Boot Health Services</h2>
+<hr>
+<h2 id="interaction-with-boot-health-services">Interaction with Boot Health Services</h2>
 <p>The dracut hooks work together with userspace systemd services to provide complete boot failure detection:</p>
 <pre><code>Boot attempt
   │
@@ -303,17 +305,17 @@
        │
        └─ check-boot-failure.timer (OnBootSec=15m)
             └─ if boot_in_progress &amp;&amp; ! boot-ok → writes /data/boot_failure</code></pre>
-<p>---</p>
-<h2>Rebuilding the Module</h2>
+<hr>
+<h2 id="rebuilding-the-module">Rebuilding the Module</h2>
 <p>The module is rebuilt automatically by every <code>shani-deploy</code> run and every <code>gen-efi configure</code> call. To rebuild manually:</p>
 <pre><code class="language-bash"># Rebuild initramfs (and re-sign UKI) for the currently booted slot
 sudo gen-efi configure blue
 
 # Or rebuild just the initramfs without re-signing
 sudo dracut --force --kver &quot;$(uname -r)&quot;</code></pre>
-<blockquote><p><strong>Note:</strong> A raw <code>dracut --force</code> without <code>--uefi</code> produces a separate initrd file, not a UKI. Always use <code>gen-efi configure</code> to ensure the result is signed and installed correctly.</p></blockquote>
-<p>---</p>
-<h2>Verifying the Module is Installed</h2>
+<blockquote><strong>Note:</strong> A raw <code>dracut --force</code> without <code>--uefi</code> produces a separate initrd file, not a UKI. Always use <code>gen-efi configure</code> to ensure the result is signed and installed correctly.</blockquote>
+<hr>
+<h2 id="verifying-the-module-is-installed">Verifying the Module is Installed</h2>
 <pre><code class="language-bash"># Check module files are present
 ls /usr/lib/dracut/modules.d/99shanios/
 
@@ -324,12 +326,12 @@ sudo /usr/lib/systemd/systemd-stub /boot/efi/EFI/shanios/shanios-blue.efi --dump
 
 # Or use shani-health
 shani-health --boot   # shows &quot;Dracut mod: OK 99shanios module installed (N hooks)&quot;</code></pre>
-<p>---</p>
-<h2>See Also</h2>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="boot">Boot Process</a> — how the full boot chain works</li>
 <li><a href="overlay">Overlay Filesystem</a> — how the <code>/etc</code> overlay works at runtime</li>
-<li><a href="../security/gen-efi">gen-efi Reference</a> — building and signing UKIs</li>
+<li><a href="../security/gen-efi.md">gen-efi Reference</a> — building and signing UKIs</li>
 </ul></div>
     </div>
 

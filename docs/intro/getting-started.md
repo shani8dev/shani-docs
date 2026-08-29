@@ -1,7 +1,7 @@
 ---
 title: Getting Started
 section: Introduction
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Getting Started
@@ -13,6 +13,8 @@ A complete walkthrough: choose your edition, download and verify the ISO, instal
 **GNOME Edition** (~5.4 GB) is the right choice for most people — Windows and macOS switchers, office work, students, and OEM deployments. Clean, focused interface. All essential apps pre-installed including Vivaldi Browser and OnlyOffice.
 
 **KDE Plasma Edition** (~7.6 GB) is the right choice for gamers and power users. The complete gaming stack (Steam, Proton, Heroic Games Launcher, Lutris, MangoHud) is pre-installed and configured. Fully customisable desktop. Full KDE productivity suite including Okular, Kate, and Gwenview. virt-manager for virtual machines.
+
+**COSMIC Edition** (announced, in development) brings System76's Rust-based COSMIC desktop — a tiling-first workflow with the COSMIC app suite — on the same immutable core. Watch [shani.dev](https://shani.dev) for its release.
 
 If you are unsure, start with GNOME. You can always install KDE apps on GNOME or switch editions later.
 
@@ -31,7 +33,7 @@ Access your BIOS/UEFI via F2, F10, Del, or Esc at startup, then:
 
 1. Disable legacy/CSM mode — enable UEFI boot
 2. Disable Fast Boot
-3. Disable Secure Boot temporarily (re-enable after install)
+3. Leave Secure Boot **enabled** — Shanios boots MOK-signed UKIs and the installer handles MOK enrollment automatically (MokManager appears on first USB boot to confirm). Only disable it as an exception, if your specific machine's firmware refuses third-party keys.
 4. Set SATA mode to AHCI
 5. Enable Intel VT-x or AMD-V
 
@@ -79,13 +81,12 @@ Boot from the USB (press F12, F2, or Del at startup and select the USB). Select 
 
 The installer walks you through:
 
-1. Language and keyboard layout
-2. Timezone
-3. Disk selection (use automatic partitioning unless you need a custom layout)
-4. **Encryption** — enable LUKS2 if this is a laptop (strongly recommended)
-5. User account creation
+1. Keyboard layout (always asked)
+2. Disk selection (use automatic partitioning unless you need a custom layout)
+3. **Encryption** — enable LUKS2 if this is a laptop (strongly recommended)
+4. Install
 
-Installation takes 10–15 minutes. The installer creates all Btrfs subvolumes, extracts the system image, builds both Unified Kernel Images, and registers the UEFI boot entry automatically. Remove the USB drive when prompted and reboot.
+Language/region, timezone, and user account creation are deferred to the first-boot Initial Setup wizard (see [Installation Steps](../install/steps.md) for the per-edition detail). Installation takes 10–15 minutes. The installer creates all Btrfs subvolumes, extracts the system image, builds both Unified Kernel Images, and registers the UEFI boot entry automatically. Remove the USB drive when prompted and reboot.
 
 ## First Boot
 
@@ -117,7 +118,7 @@ After this, `nix-env -i <package>` works for any Nixpkgs package. Installed pack
 sudo gen-efi enroll-tpm2
 ```
 
-See [TPM2 Enrollment](../security/tpm2) for full details.
+See [TPM2 Enrollment](../security/tpm2.md) for full details.
 
 ### 3. Update the system
 
@@ -205,5 +206,5 @@ Possible but not recommended — other OSes may overwrite the Shanios bootloader
 - [What is Shanios?](what-is-shanios) — core concepts
 - [Migrating from Traditional Linux](migrating) — workflow mapping table
 - [What's Included](whats-included) — full software stack
-- [Atomic Updates](../concepts/atomic-updates) — how `shani-deploy` works
-- [TPM2 Enrollment](../security/tpm2) — passwordless disk unlock
+- [Atomic Updates](../concepts/atomic-updates.md) — how `shani-deploy` works
+- [TPM2 Enrollment](../security/tpm2.md) — passwordless disk unlock

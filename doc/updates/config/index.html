@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>System Config — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="System Config  All system configuration in Shanios follows standard Linux conventions — edit files in , manage services with . Your changes are captured by…">
+  <meta name="description" id="meta-desc"     content="All system configuration in Shanios follows standard Linux conventions — edit files in /etc, manage services with systemctl. Your changes are captured by t…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -14,20 +15,21 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="System Config">
-  <meta property="og:description" id="og-desc"    content="System Config  All system configuration in Shanios follows standard Linux conventions — edit files in , manage services with . Your changes are captured by…">
+  <meta property="og:description" id="og-desc"    content="All system configuration in Shanios follows standard Linux conventions — edit files in /etc, manage services with systemctl. Your changes are captured by t…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/updates/config/">
-  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/logo.svg">
+  <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
   <meta property="og:image:alt" id="og-image-alt" content="System Config">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="System Config">
-  <meta name="twitter:description" id="tw-desc"  content="System Config  All system configuration in Shanios follows standard Linux conventions — edit files in , manage services with . Your changes are captured by…">
-  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/logo.svg">
+  <meta name="twitter:description" id="tw-desc"  content="All system configuration in Shanios follows standard Linux conventions — edit files in /etc, manage services with systemctl. Your changes are captured by t…">
+  <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"System Config","description":"System Config  All system configuration in Shanios follows standard Linux conventions — edit files in , manage services with . Your changes are captured by…","url":"https://docs.shani.dev/doc/updates/config/","datePublished":"2026-08-21T00:00:00.000Z","dateModified":"2026-08-21T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/logo.svg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"System Config","description":"All system configuration in Shanios follows standard Linux conventions — edit files in /etc, manage services with systemctl. Your changes are captured by t…","url":"https://docs.shani.dev/doc/updates/config/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"System Config","item":"https://docs.shani.dev/doc/updates/config/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -67,38 +69,38 @@
   <!-- ═══ STYLES ══════════════════════════════════════════════════════ -->
   <link rel="stylesheet" href="/brand-shani.css">
   <link rel="stylesheet" href="/style-docs.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-/o6I2CkkWC//PSjvWC/eYN7l3xM3tJm8ZzVkCOfp//W05QcE3mlGskpoHB6XqI+B" crossorigin="anonymous">
 
   <!-- Prism.js syntax highlighting -->
   <link rel="stylesheet" id="prism-theme"
-        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A" crossorigin="anonymous">
 
   <!-- KaTeX math -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous" defer></script>
 
   <!-- Markdown & sanitizer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" integrity="sha384-QsSpx6a0USazT7nK7w8qXDgpSAPhFsb2XtpoLFQ5+X2yFN6hvCKnwEzN8M5FWaJb" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js" integrity="sha384-cwS6YdhLI7XS60eoDiC+egV0qHp8zI+Cms46R0nbn8JrmoAzV9uFL60etMZhAnSu" crossorigin="anonymous" defer></script>
 
   <!-- Prism language support -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha384-06z5D//U/xpvxZHuUz92xBvq3DqBBFi7Up53HRrbV7Jlv7Yvh/MZ7oenfUe9iCEt" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js" integrity="sha384-AKAiycghK0jDCjD+aavMHzDkLzRR7Yzcwh3+xL/295cvyVMe+cxQfyQC8xxGGcI8" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" integrity="sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" integrity="sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js" integrity="sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" integrity="sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js" integrity="sha384-YxCco6ByOY5rJ3jD18514fa8w5so07zigIyV6tZa3CWSE5vYrbDSuFkZ5zOknnZ6" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" integrity="sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup-templating.min.js" integrity="sha384-LMCbF6eKAywctm2tlnguxYpyYDf0/Z3ecx60ugk8J/pydfawrC24sn2gumP8MWBN" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js" integrity="sha384-DioAMZB4yk91W6LuFit5wJDh8c5Ov09f/MBvja94y0PodMqTpTZeBeejqpRUru7D" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-properties.min.js" integrity="sha384-ERMA59XzNH+8QpVm1k3y1MH9gF5oU+zhioXiqJ9+PojFBbV0STwWy8H4x7e6Zexh" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-hcl.min.js" integrity="sha384-0y5/QqNYmb5MZoz6vFxQrt5eW0QK+bSYT7E62/nolopV1eoc1hjZtTFWShRJmme9" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js" integrity="sha384-44ggPevoK6FC5kDMdbbWoMCAFkSCwaRoXXtKMkslR2lf8Ra3OSzCRrFIyeK+TQBi" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js" integrity="sha384-OdjJsWuHX1UDLZwLom2vRDx/z4CJ3LJK1i9jqIT3OGyJ2y3n7bZ9XDW9jAjRu/W5" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js" integrity="sha384-/MKWdycCDliku23mP5sYXbZNuXrzgmQO/jsVxwPFn99dVOaXRyKsqDjarqpueGAp" crossorigin="anonymous" defer></script>
 </head>
 <body>
 
@@ -213,16 +215,16 @@
         <h1 class="doc-title">System Config</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Updates &amp; Config</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-21</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
       <div class="prose"><p>All system configuration in Shanios follows standard Linux conventions — edit files in <code>/etc</code>, manage services with <code>systemctl</code>. Your changes are captured by the OverlayFS upper layer and survive every OS update and rollback.</p>
-<h2>How the /etc Overlay Works</h2>
+<h2 id="how-the-etc-overlay-works">How the /etc Overlay Works</h2>
 <pre><code>Lower layer (read-only): /etc from the active @blue or @green slot
 Upper layer (writable):  /data/overlay/etc/upper/
 Merged view:             /etc (what you see and interact with)</code></pre>
 <p>When you write to any <code>/etc</code> file, the kernel copies it from the lower layer to the upper layer and applies your change. When the OS updates (new lower layer), your upper-layer files are untouched. Files you have never modified automatically reflect the new OS defaults.</p>
-<h2>Editing /etc Files</h2>
+<h2 id="editing-etc-files">Editing /etc Files</h2>
 <p>Nothing special is required — edit files in <code>/etc</code> exactly as on any Linux system:</p>
 <pre><code class="language-bash">sudo nano /etc/hostname
 sudo nano /etc/hosts
@@ -235,17 +237,17 @@ sudo nano /etc/fstab
 sudo systemctl edit sshd.service           # creates a drop-in override
 sudo systemctl edit --full sshd.service    # full copy you can modify freely</code></pre>
 <p>Changes take effect immediately (or after service restart for daemon config) and survive every OS update.</p>
-<h2>Viewing Your Customisations</h2>
+<h2 id="viewing-your-customisations">Viewing Your Customisations</h2>
 <pre><code class="language-bash"># Every /etc file you have modified
 find /data/overlay/etc/upper/ -type f | sort
 
 # Compare a modified file to the OS default
 diff /data/overlay/etc/upper/ssh/sshd_config \
      /etc/ssh/sshd_config</code></pre>
-<h2>Reverting a File to OS Default</h2>
+<h2 id="reverting-a-file-to-os-default">Reverting a File to OS Default</h2>
 <pre><code class="language-bash"># Remove the upper-layer version — the OS default becomes active again
 sudo rm /data/overlay/etc/upper/ssh/sshd_config</code></pre>
-<h2>Resetting All /etc Customisations</h2>
+<h2 id="resetting-all-etc-customisations">Resetting All /etc Customisations</h2>
 <p>Use <code>shani-reset</code> rather than raw <code>rm -rf</code> to avoid leaving the overlay work directory in an inconsistent state:</p>
 <pre><code class="language-bash"># Factory reset all persistent system state in /data (keeps /home and OS slots intact)
 sudo shani-reset
@@ -255,7 +257,7 @@ sudo shani-reset --dry-run
 
 # Keep previously downloaded OS images
 sudo shani-reset --keep-downloads</code></pre>
-<h2>Locale & Timezone</h2>
+<h2 id="locale-timezone">Locale & Timezone</h2>
 <p><code>glibc-locales</code> is pre-installed with every locale glibc supports already generated — unlike vanilla Arch, <code>localectl set-locale</code> works immediately with no <code>locale-gen</code> step first.</p>
 <pre><code class="language-bash">sudo localectl set-locale LANG=en_IN.UTF-8
 sudo localectl set-keymap us
@@ -274,8 +276,8 @@ timedatectl status
 # doesn't touch /etc/vconsole.conf) — useful for a one-off TTY session
 sudo loadkeys dvorak
 sudo loadkeys us   # revert</code></pre>
-<p><code>localectl set-keymap</code> writes the persistent console layout to <code>/etc/vconsole.conf</code>, which <code>gen-efi</code> also reads to set the keyboard layout for the early-boot LUKS passphrase prompt (see <a href="../arch/boot">Boot Process</a>) — run <code>sudo gen-efi configure &lt;slot&gt;</code> after changing it if you use disk encryption, so the new layout takes effect before the passphrase prompt too.</p>
-<h2>Hostname</h2>
+<p><code>localectl set-keymap</code> writes the persistent console layout to <code>/etc/vconsole.conf</code>, which <code>gen-efi</code> also reads to set the keyboard layout for the early-boot LUKS passphrase prompt (see <a href="../arch/boot.md">Boot Process</a>) — run <code>sudo gen-efi configure &lt;slot&gt;</code> after changing it if you use disk encryption, so the new layout takes effect before the passphrase prompt too.</p>
+<h2 id="hostname">Hostname</h2>
 <pre><code class="language-bash">sudo hostnamectl set-hostname my-machine
 hostnamectl
 
@@ -289,7 +291,7 @@ sudo hostnamectl set-hostname &quot;Alice's Laptop&quot; --pretty</code></pre>
 <p><code>hostnamectl set-hostname</code> without a scope flag sets the static, transient, and pretty hostnames together. To set only one (e.g. a temporary override that reverts on reboot):</p>
 <pre><code class="language-bash">sudo hostnamectl set-hostname temp-name --transient   # runtime only, not written to /etc/hostname
 sudo hostnamectl set-hostname my-machine --static     # persistent, written to /etc/hostname</code></pre>
-<h2>Managing Services</h2>
+<h2 id="managing-services">Managing Services</h2>
 <pre><code class="language-bash"># Enable/disable a service (persists across reboots via overlay)
 sudo systemctl enable --now sshd
 sudo systemctl disable sshd
@@ -306,17 +308,17 @@ journalctl -u sshd --since today
 
 systemctl list-unit-files --state=enabled
 systemctl --failed</code></pre>
-<h3>User Services</h3>
+<h3 id="user-services">User Services</h3>
 <pre><code class="language-bash">systemctl --user enable --now my-service.service
 systemctl --user status my-service.service
 journalctl --user -u my-service.service -f</code></pre>
 <p>User service unit files live in <code>~/.config/systemd/user/</code>.</p>
-<h2>Adding Custom systemd Units</h2>
+<h2 id="adding-custom-systemd-units">Adding Custom systemd Units</h2>
 <pre><code class="language-bash">sudo nano /etc/systemd/system/myapp.service
 sudo systemctl daemon-reload
 sudo systemctl enable --now myapp.service</code></pre>
 <p>Units placed in <code>/etc/systemd/system/</code> are captured by the overlay and persist across updates.</p>
-<h2>sysctl Tuning</h2>
+<h2 id="sysctl-tuning">sysctl Tuning</h2>
 <pre><code class="language-bash"># Temporary (lost on reboot)
 sudo sysctl vm.swappiness=10
 
@@ -328,16 +330,16 @@ sudo sysctl --system   # apply without reboot</code></pre>
 vm.swappiness=10
 fs.inotify.max_user_watches=524288
 fs.file-max=2097152</code></pre>
-<h2>Kernel Parameters</h2>
+<h2 id="kernel-parameters">Kernel Parameters</h2>
 <p>Permanent kernel parameter changes are embedded in the UKI via <code>gen-efi</code>, not via <code>/etc/default/grub</code>. The generated command line is written to <code>/etc/kernel/install_cmdline_&lt;slot&gt;</code> on each run and cannot be manually pre-edited (it is overwritten) — <code>gen-efi.sh</code> builds it entirely from its own hardcoded logic (<code>root=</code>, <code>rd.luks.*</code>, <code>rd.vconsole.keymap=</code>, <code>resume=</code>). There is currently no user-facing way to add a custom permanent kernel parameter; doing so would require a code change to <code>gen-efi</code> itself.</p>
 <pre><code class="language-bash">sudo gen-efi configure blue   # rebuild UKI for the currently booted slot (e.g. after changing /etc/vconsole.conf)</code></pre>
-<p>See <a href="../security/gen-efi">gen-efi Reference</a> for details.</p>
-<h2>Network Configuration</h2>
+<p>See <a href="../security/gen-efi.md">gen-efi Reference</a> for details.</p>
+<h2 id="network-configuration">Network Configuration</h2>
 <p>NetworkManager handles all network configuration. Wi-Fi passwords, VPN profiles, and static IP configurations persist in <code>/data/varlib/NetworkManager</code> across all updates and rollbacks.</p>
 <pre><code class="language-bash">nmcli connection show
 nmcli device wifi connect &quot;SSID&quot; password &quot;password&quot;
 nmcli device status</code></pre>
-<h2>Time Synchronisation</h2>
+<h2 id="time-synchronisation">Time Synchronisation</h2>
 <p><code>systemd-timesyncd</code> is enabled by default:</p>
 <pre><code class="language-bash">sudo nano /etc/systemd/timesyncd.conf
 # [Time]
@@ -353,7 +355,7 @@ sudo timedatectl set-ntp true
 
 # Manually set date/time (only takes effect while NTP sync is off)
 sudo timedatectl set-time '2026-08-21 14:30:00'</code></pre>
-<h2>PAM & sudo</h2>
+<h2 id="pam-sudo">PAM & sudo</h2>
 <p>PAM (Pluggable Authentication Modules) configuration lives in <code>/etc/pam.d/</code> — one file per service (<code>login</code>, <code>sudo</code>, <code>sshd</code>, <code>system-login</code>, etc.), all captured by the <code>/etc</code> overlay. Shanios ships stock Arch PAM defaults — account lockout after repeated failed logins is <strong>not</strong> enabled out of the box and must be configured manually if you want it:</p>
 <pre><code class="language-bash"># Add faillock to the login stack (edit both auth and account sections)
 sudo nano /etc/pam.d/system-login
@@ -372,14 +374,14 @@ faillock --user alice
 
 # Manually clear a lockout
 sudo faillock --user alice --reset</code></pre>
-<p>Password complexity requirements (minimum length, character classes) are enforced via <code>pam_pwquality</code>, configured in <code>/etc/security/pwquality.conf</code> — see <a href="../system/ch-commands">ch* Commands</a> for the <code>pwscore</code>/<code>pwmake</code> tools that check against the same policy.</p>
-<h3>sudo</h3>
+<p>Password complexity requirements (minimum length, character classes) are enforced via <code>pam_pwquality</code>, configured in <code>/etc/security/pwquality.conf</code> — see <a href="../system/permissions.md">Permissions</a> for the <code>pwscore</code>/<code>pwmake</code> tools that check against the same policy.</p>
+<h3 id="sudo">sudo</h3>
 <pre><code class="language-bash">sudo visudo
 
 # Add a sudoers drop-in (safer than editing /etc/sudoers directly)
 sudo nano /etc/sudoers.d/my-rules
 # username ALL=(ALL) NOPASSWD: /usr/bin/specific-command</code></pre>
-<h2>Hiding App-Launcher Entries</h2>
+<h2 id="hiding-app-launcher-entries">Hiding App-Launcher Entries</h2>
 <p>Some CLI-only tools ship a <code>.desktop</code> file upstream even though they have no real GUI (<code>htop</code>, <code>vim</code>, <code>nvim</code>, <code>cups</code>, and similar packages) — without intervention these would clutter your application launcher. Shanios ships a pacman hook, <code>desktop-entry-hider</code>, that runs automatically after every package install or upgrade touching <code>/usr/share/applications/*.desktop</code>. It applies a curated list of overrides from <code>/etc/desktop-entry-hider/configs/</code> — one file per app, each appending a <code>NotShowIn=</code> line to that app's <code>.desktop</code> file so it's suppressed from the launcher without removing the file itself.</p>
 <pre><code class="language-bash"># See what desktop-entry-hider has configured
 ls /etc/desktop-entry-hider/configs/
@@ -388,7 +390,16 @@ ls /etc/desktop-entry-hider/configs/
 cat /etc/desktop-entry-hider/configs/htop.desktop
 # contain='NotShowIn=GNOME;KDE;Pantheon;'</code></pre>
 <p><strong>To un-hide an app</strong>, remove the <code>NotShowIn=</code> line the hook added from <code>/usr/share/applications/&lt;name&gt;.desktop</code> — it will be re-added on the next update unless you also delete or edit the corresponding file in <code>/etc/desktop-entry-hider/configs/</code>.</p>
-<p><strong>To hide an additional app yourself</strong>, add a new file there following the same pattern, then run <code>sudo desktop-entry-hider</code> to apply it immediately (it otherwise only runs on package transactions).</p></div>
+<p><strong>To hide an additional app yourself</strong>, add a new file there following the same pattern, then run <code>sudo desktop-entry-hider</code> to apply it immediately (it otherwise only runs on package transactions).</p>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="../arch/overlay.md">OverlayFS Architecture</a> — how the /etc overlay works at the filesystem level</li>
+<li><a href="shell">Shell & Environment</a> — Zsh, Starship, Nix, CLI tools</li>
+<li><a href="user-setup">User Provisioning</a> — automatic group and shell setup</li>
+<li><a href="shani-health">System Health Checks</a> — monitoring and diagnostics</li>
+<li><a href="shani-reset">Shani Reset</a> — factory reset of persistent state</li>
+<li><a href="system">System Updates</a> — how /etc changes survive updates</li>
+</ul></div>
     </div>
 
   </main>

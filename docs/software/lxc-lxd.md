@@ -1,7 +1,7 @@
 ---
 title: LXC and LXD
 section: Software & Apps
-updated: 2026-05-07
+updated: 2026-08-28
 ---
 
 # LXC and LXD
@@ -198,3 +198,11 @@ lxc exec pg16 -- apt install -y postgresql-16
 | `/var/lib/lxd/` | `@lxd` |
 
 Both subvolumes are independent of the OS slots and survive all updates and rollbacks.
+
+## See Also
+
+- [Containers](containers) — overview of all container runtimes
+- [systemd-nspawn](systemd-nspawn) — lightweight container runtime
+- [Distrobox](distrobox) — mutable dev environments with host integration
+- [Virtual Machines](vms) — QEMU/KVM, virt-manager
+- [GPU Containers](gpu-containers) — NVIDIA/AMD access in containers

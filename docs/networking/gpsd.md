@@ -1,7 +1,7 @@
 ---
 title: gpsd (GPS Daemon)
 section: Networking
-updated: 2026-04-20
+updated: 2026-08-28
 ---
 
 # gpsd — GPS Daemon
@@ -139,3 +139,8 @@ sudo firewall-cmd --reload
 | gpsd not reading device | Try running in foreground: `sudo gpsd -N -D 5 /dev/ttyUSB0` — look for permission or baud rate errors |
 | ModemManager interfering | ModemManager probes serial devices and can disrupt GPS. Add a udev rule to ignore it: `sudo tee /etc/udev/rules.d/99-gpsd.rules <<< 'ATTRS{idVendor}=="XXXX", ATTRS{idProduct}=="YYYY", ENV{ID_MM_DEVICE_IGNORE}="1"'` (replace with your device's IDs from `lsusb`) |
 | Multiple clients can't connect | gpsd handles multiple clients natively — no configuration needed; verify gpsd is running with `systemctl status gpsd` |
+
+## See Also
+
+- [Socket-activated services](../intro/optimizations.md)
+- [Hardware info](../system/hardware.md)

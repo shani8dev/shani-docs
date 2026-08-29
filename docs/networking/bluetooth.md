@@ -1,7 +1,7 @@
 ---
 title: Bluetooth
 section: Networking
-updated: 2026-08-21
+updated: 2026-08-28
 ---
 
 # Bluetooth
@@ -14,7 +14,7 @@ Shanios pre-installs the full BlueZ stack (`shani-bluetooth`) and enables the Bl
 - **bluez-obex** — OBEX file transfer support (sending/receiving files over Bluetooth)
 - **bluez-mesh** — Bluetooth Mesh networking support
 - **bluez-hid2hci** — HID-to-HCI mode switching for some older Bluetooth mice/keyboards that boot in a legacy USB-HID compatibility mode
-- **bluez-cups** — lets Bluetooth-connected printers register with CUPS (see [Printing & Scanning](../system/printing))
+- **bluez-cups** — lets Bluetooth-connected printers register with CUPS (see [Printing & Scanning](../system/printing.md))
 - **bluez-tools** — additional CLI utilities (`bt-adapter`, `bt-agent`, `bt-obex`)
 
 `bluetooth.service` is enabled and running from first boot.
@@ -78,7 +78,7 @@ bluetoothctl power on
 
 ## Audio Devices
 
-Bluetooth headphones/speakers route through PipeWire once paired — see [Audio (PipeWire)](../system/audio) for switching the default output device and troubleshooting sound quality. Most modern Bluetooth audio codecs (aptX, LDAC, LC3) are supported out of the box via the pre-installed `libldac`/`liblc3`/`libfreeaptx` libraries.
+Bluetooth headphones/speakers route through PipeWire once paired — see [Audio (PipeWire)](../system/audio.md) for switching the default output device and troubleshooting sound quality. Most modern Bluetooth audio codecs (aptX, LDAC, LC3) are supported out of the box via the pre-installed `libldac`/`liblc3`/`libfreeaptx` libraries.
 
 ```bash
 # Confirm the Bluetooth device appears as an audio sink
@@ -105,12 +105,12 @@ Most desktop environments also support drag-and-drop file sending directly from 
 | Adapter not found | `rfkill list` — check Bluetooth isn't blocked; `rfkill unblock bluetooth` if it is |
 | Device won't pair | Remove any stale pairing first: `bluetoothctl remove XX:XX:XX:XX:XX:XX`, then retry; make sure the device is in pairing/discoverable mode |
 | Paired but won't connect | `sudo systemctl restart bluetooth`; check `journalctl -u bluetooth -n 30` for the actual error |
-| Headphones connected but no audio | See [Audio (PipeWire)](../system/audio)'s Bluetooth section — usually a default-sink or codec negotiation issue |
+| Headphones connected but no audio | See [Audio (PipeWire)](../system/audio.md)'s Bluetooth section — usually a default-sink or codec negotiation issue |
 | Mouse/keyboard connects but doesn't work | Some older HID devices need `bluez-hid2hci` mode switching — confirmed pre-installed; try re-pairing after a fresh boot |
 | Bluetooth works then disappears after suspend | `sudo systemctl restart bluetooth` after resume; check for a known adapter-specific suspend bug via `dmesg \| grep -i bluetooth` |
 
 ## See Also
 
-- [Audio (PipeWire)](../system/audio) — Bluetooth audio device switching and codec issues
-- [Hardware](../system/hardware) — general USB/wireless device detection
-- [Printing & Scanning](../system/printing) — Bluetooth-connected printers via `bluez-cups`
+- [Audio (PipeWire)](../system/audio.md) — Bluetooth audio device switching and codec issues
+- [Hardware](../system/hardware.md) — general USB/wireless device detection
+- [Printing & Scanning](../system/printing.md) — Bluetooth-connected printers via `bluez-cups`

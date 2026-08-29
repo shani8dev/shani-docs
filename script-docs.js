@@ -180,15 +180,13 @@ const GH = (() => {
   function getToken()  {
     return Storage.session.get(TOKEN_KEY) || Storage.get(TOKEN_KEY) || '';
   }
-  function setToken(t) {
+function setToken(t) {
     const v = t.trim();
     Storage.session.set(TOKEN_KEY, v);
-    Storage.set(TOKEN_KEY, v);
-  }
-  function clearToken(){
+}
+function clearToken(){
     Storage.session.remove(TOKEN_KEY);
-    Storage.remove(TOKEN_KEY);
-  }
+}
 
   async function request(path, opts = {}) {
     const token = getToken();
@@ -990,6 +988,19 @@ function initSearch() {
   document.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); input.focus(); input.select(); }
   });
+}
+
+// Backs the WebSite/SearchAction JSON-LD in index.html's <head>: Google's
+// sitelinks searchbox sends visitors to /?q=<term>, so that URL has to
+// actually run a real search, not just load the plain homepage.
+function initSearchFromQuery() {
+  const q = new URLSearchParams(location.search).get('q');
+  if (!q) return;
+  const input = $('#wiki-search');
+  if (!input) return;
+  input.value = q;
+  loadFuse();
+  doSearch(q);
 }
 
 function doSearch(q) {
@@ -2069,10 +2080,21 @@ const AdminEditor = (() => {
 
   function extractNavTree(src) {
     try {
-      // nav-docs.js format: CONFIG.NAV_TREE = [ ... ];
+      // nav-docs.js format: CONFIG.NAV_TREE = [ ... ]; — generate-manifest.js
+      // emits the array body as valid JSON (double-quoted keys/strings via
+      // JSON.stringify), with trailing commas kept for diff readability.
+      // Parsed with JSON.parse, not `new Function`/`eval` — src here can be
+      // content fetched live from GitHub, and a tampered/compromised
+      // nav-docs.js must never execute as code in this admin's browser, only
+      // ever fail to parse as data.
       const m = src.match(/CONFIG\.NAV_TREE\s*=\s*\[([\s\S]*?)\];/);
       if (!m) return [...CONFIG.NAV_TREE];
-      return (new Function('return [' + m[1] + ']'))();
+      // Strip trailing commas AFTER wrapping in brackets, not before — the
+      // generator's very last entry is followed by a trailing comma then
+      // only the outer `]` (added here), so a strip pass over the raw
+      // capture alone never sees a closing bracket to match against.
+      const wrapped = ('[' + m[1] + ']').replace(/,(\s*[\]}])/g, '$1');
+      return JSON.parse(wrapped);
     } catch(e) {
       return [...CONFIG.NAV_TREE];
     }
@@ -2952,6 +2974,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileSidebar();
   initMobileSwipe();
   initSearch();
+  initSearchFromQuery();
   initBackToTop();
 
   // Reading streak
@@ -2983,7 +3006,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // / key → focus search
   document.addEventListener('keydown', e => {
-    if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+    const ae = document.activeElement;
+    if (e.key === '/' && (ae.tagName !== 'INPUT' && ae.tagName !== 'TEXTAREA' && !ae.isContentEditable) && !e.ctrlKey && !e.metaKey && !e.altKey && !e.isComposing) {
       e.preventDefault(); $('#wiki-search')?.focus();
     }
     // ? → keyboard shortcuts modal
