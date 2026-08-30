@@ -51717,20 +51717,21 @@ rekor.home.local { tls internal; reverse_proxy localhost:3000 }
 # AI-Assisted Development
 
 URL: https://docs.shani.dev/doc/software/ai-development/
-Updated: 2026-08-29
+Updated: 2026-08-30
 
 Shanios supports every major style of AI-assisted coding: cloud assistants (GitHub Copilot, Anthropic, OpenAI-backed tools), editor extensions (Continue, C…
 
 # AI-Assisted Development
 
-Shanios supports every major style of AI-assisted coding: cloud assistants (GitHub Copilot, Anthropic, OpenAI-backed tools), editor extensions (Continue, Cody, Cline), agentic terminal harnesses (OpenCode, Claude Code, aider, Gemini CLI, Codex CLI), and fully local models that never send your code anywhere. The immutable base stays untouched either way — all tooling lives in Flatpak, Nix, containers, or your home directory.
+Shanios supports every major style of AI-assisted coding: cloud assistants (GitHub Copilot, Anthropic, OpenAI-backed tools), editor extensions (Continue, Cody, Cline, Kilo Code), AI-native editors (Cursor, Devin Desktop, Zed), agentic terminal harnesses (OpenCode, Claude Code, aider, Gemini CLI, Codex CLI, Kilo CLI, Pi), and fully local models that never send your code anywhere. The immutable base stays untouched either way — all tooling lives in Flatpak, Nix, containers, AppImages, or your home directory.
 
 ## Choosing an Approach
 
 | Style | Examples | Your code leaves the machine | Needs GPU |
 |---|---|---|---|
-| Cloud assistant extension | Copilot, Cody, Continue (API mode), Cline | Yes — snippets sent to vendor | No |
-| Agentic CLI / harness | OpenCode, Claude Code, aider, Gemini CLI, Codex CLI, Goose | Depends on configured provider/model | No |
+| Cloud assistant extension | Copilot, Cody, Continue (API mode), Cline, Kilo Code | Yes — snippets sent to vendor | No |
+| AI-native editor | Cursor, Devin Desktop, Zed | Depends on configured provider/model | No |
+| Agentic CLI / harness | OpenCode, Claude Code, aider, Gemini CLI, Codex CLI, Goose, Kilo CLI, Pi | Depends on configured provider/model | No |
 | Local model + editor bridge | Continue/Ollama, Tabby, Cline (local mode) | No | Helpful (AMD/Intel iGPU works; NVIDIA best) |
 | Fully local agentic CLI | OpenCode/aider pointed at Ollama or a local DeepSeek | No | Same as above |
 
@@ -51745,6 +51746,7 @@ flatpak install flathub com.vscodium.codium   # telemetry-free alternative
 
 - **GitHub Copilot** — sign in via the extension; authentication and completions work inside the Flatpak sandbox with no extra configuration.
 - **Continue / Cody** — configure either for cloud APIs or point them at a local endpoint (below).
+- **Kilo Code** — Apache-2.0, forked from the Cline→Roo Code lineage (Roo Code itself was archived in May 2026). Installs from the VS Code Marketplace, or from **Open VSX** for VSCodium and other non-Microsoft builds — the official docs specifically list VSCodium among its supported Open VSX targets. BYOK across 400+ models, plus an MCP server marketplace for one-click tool integrations.
 - API keys live in `~/.config` / `~/.var/app/<app>/config` under `@home` — they persist across updates and rollbacks.
 
 Agentic CLIs that expect Node.js run cleanly inside a Distrobox container or via Nix:
@@ -51759,6 +51761,18 @@ npm install -g @anthropic-ai/claude-code   # or: pip install aider-chat
 nix-env -iA nixpkgs.aider
 ```
 
+## AI-Native Editors
+
+A separate track from editor extensions: whole IDEs built agent-first rather than agent-added.
+
+| Editor | What it is | Linux install |
+|---|---|---|
+| **Cursor** | VS Code fork, deepest first-party agent integration; free tier up to a $200/mo Max tier | AppImage — needs `libfuse2` on a fresh Ubuntu-based base |
+| **Devin Desktop** (formerly Windsurf) | Cognition acquired and rebranded Windsurf in June 2026 after a prior OpenAI-acquisition deal collapsed; Pro moved to a flat $20/mo, replacing per-message token-credit billing | AppImage — prefer a distro `.deb`/`.rpm` where the vendor offers one, since the AppImage tarball doesn't self-update |
+| **Zed** | Rust-based, GPU-accelerated editor. Its Agent Panel speaks the open Agent Client Protocol (ACP) — model-agnostic, and can drive an *external* CLI harness (Claude Code, Codex CLI, OpenCode) from inside the same panel, including multiple agents running in parallel on different parts of a codebase | Native Linux binary; ships its own edit-prediction model (Zeta2) |
+
+Both Cursor and Devin Desktop distribute as AppImages rather than distro packages on Linux — which fits Shanios well: an AppImage runs from anywhere in `@home` without touching the immutable root, same as any other portable binary on this OS. Neither needs anything beyond a normal desktop session; no container or Distrobox required unless you specifically want one for isolation (see Agent Sandboxing below).
+
 ## Agentic CLIs & Harnesses
 
 Terminal-native coding agents (harnesses) drive whole tasks — editing files, running commands, iterating on failures. In 2026 they are the fastest-growing category of dev tooling. They are ordinary userland binaries, so they install into `~/.local/bin` (under `@home`, survives updates) or inside Distrobox without touching the immutable root:
@@ -51772,8 +51786,12 @@ Terminal-native coding agents (harnesses) drive whole tasks — editing files, r
 | **aider** | `nix-env -iA nixpkgs.aider` or `pip install aider-chat` (pipx/venv in home) | Git-native — auto-commits every change for reviewable history; any OpenAI-compatible endpoint |
 | **Goose** | Binary from [block/goose releases](https://github.com/block/goose/releases) into `~/.local/bin` | Multi-provider including local Ollama |
 | **GitHub Copilot CLI** | `gh extension install github/gh-copilot` | GitHub-native workflows |
+| **Kilo CLI** | Terminal counterpart to the Kilo Code extension above; itself forked from OpenCode | Same MCP marketplace and 400+-model BYOK routing as the extension, in a shell |
+| **Pi** | Build from [source](https://github.com/earendil-works/pi) (TypeScript) — check the repo for the current published-package name before assuming an npm one-liner | Deliberately minimal — only four tools (read/write/edit/bash) and a sub-1,000-token system prompt; MIT-licensed, also embeddable as a TypeScript SDK |
 
 A useful rule of thumb the ecosystem has converged on: **the harness shapes workflow; the model decides quality.** All of the above run happily on budget backends, so pick the tool whose ergonomics fit you and route it to whatever provider suits your budget and privacy needs.
+
+**Where the market actually stands (2026):** GitHub Copilot leads on raw share (~40%, driven by enterprise/Microsoft bundling), but Claude Code already out-adopts Cursor in the workplace despite being newer, and was rated the single most-loved tool in JetBrains' most recent developer survey. Cursor remains the fastest-growing at 5M+ active users. In practice the average professional developer now runs 2.3 of these tools side by side rather than standardizing on one — a data point worth keeping in mind before over-indexing on any single recommendation in this page.
 
 ### Wiring a Harness to Any Provider
 
@@ -51864,6 +51882,16 @@ Local stdio servers are plain processes configured in your client's config — s
 ```
 
 Security posture (the ecosystem's known weak spot): prefer first-party servers over registry finds, pin versions, scope credentials tightly, and treat random community servers with the same trust you would a curl-piped shell script. Prefer OAuth-backed remote (Streamable HTTP) servers for anything touching production systems.
+
+## Context Engineering
+
+2026's named successor discipline to "prompt engineering," specific to agentic coding: the unit of control isn't the prompt anymore, it's the entire information environment an agent operates in — which files it sees, which rules apply, which history it's given, which tools it can call. The practice has converged on a few concrete habits:
+
+- **Quality over quantity** — a small, clean, relevant context paired with a weaker model consistently outperforms a huge, cluttered one paired with a stronger model. Trim `AGENTS.md`/context files as aggressively as you'd trim a diff.
+- **Structured rules, not prose** — short bullet rules plus an explicit `## Preferred` / `## Avoid` block with real code samples reads more reliably to an agent than a paragraph of guidance.
+- **Freshness metadata** — stamping context files with `last_updated`, `owner`, and `scope` lets an agent (or a human) judge whether a rule still applies before trusting it, the same instinct that already applies to any other stale documentation.
+
+This is additive to, not a replacement for, the AGENTS.md and spec-driven practices below — it's the discipline of deciding *what* goes into those files in the first place.
 
 ## Repo Instructions: AGENTS.md
 
@@ -52144,6 +52172,7 @@ Shanios ships with zero telemetry, but AI assistants are your choice to make:
 - [AI & LLMs (self-hosted stacks)](../servers/ai-llms.md) — Open WebUI, LiteLLM, Dify, RAG pipelines
 - [GPU Containers](gpu-containers) — CUDA/ROCm/Vulkan container access
 - [Distrobox](distrobox) — running Node/Python CLIs with full distro environments
+- [Kilo Code](https://kilo.ai) · [Pi](https://github.com/earendil-works/pi) · [Cursor](https://cursor.com) · [Devin Desktop](https://devin.ai) · [Zed](https://zed.dev)
 - [AI-assisted development blog](https://blog.shani.dev/post/ai-assisted-development-on-shani-os) — narrative companion to this page
 
 ---

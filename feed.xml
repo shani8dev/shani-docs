@@ -5,8 +5,17 @@
     <link>https://docs.shani.dev/</link>
     <description>Comprehensive technical documentation for Shanios — the immutable Linux OS.</description>
     <language>en-IN</language>
-    <lastBuildDate>Sat, 29 Aug 2026 06:22:54 GMT</lastBuildDate>
+    <lastBuildDate>Sun, 30 Aug 2026 19:25:22 GMT</lastBuildDate>
     <atom:link href="https://docs.shani.dev/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>AI-Assisted Development</title>
+      <link>https://docs.shani.dev/doc/software/ai-development/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/software/ai-development/</guid>
+      <description>Shanios supports every major style of AI-assisted coding: cloud assistants (GitHub Copilot, Anthropic, OpenAI-backed tools), editor extensions (Continue, C…</description>
+      <pubDate>Sun, 30 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Software &amp; Apps</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
     <item>
       <title>AI &amp; LLMs</title>
       <link>https://docs.shani.dev/doc/servers/ai-llms/</link>
@@ -14,15 +23,6 @@
       <description>Run large language models, vision pipelines, image generation, speech-to-text, and AI coding assistants entirely on your own hardware. No API keys. No usag…</description>
       <pubDate>Sat, 29 Aug 2026 00:00:00 GMT</pubDate>
       <category>Self-Hosting &amp; Servers</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>AI-Assisted Development</title>
-      <link>https://docs.shani.dev/doc/software/ai-development/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/software/ai-development/</guid>
-      <description>Shanios supports every major style of AI-assisted coding: cloud assistants (GitHub Copilot, Anthropic, OpenAI-backed tools), editor extensions (Continue, C…</description>
-      <pubDate>Sat, 29 Aug 2026 00:00:00 GMT</pubDate>
-      <category>Software &amp; Apps</category>
       <author>Shrinivas Kumbhar</author>
     </item>
     <item>
