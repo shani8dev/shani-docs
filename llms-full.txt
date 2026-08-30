@@ -51723,15 +51723,15 @@ Shanios supports every major style of AI-assisted coding: cloud assistants (GitH
 
 # AI-Assisted Development
 
-Shanios supports every major style of AI-assisted coding: cloud assistants (GitHub Copilot, Anthropic, OpenAI-backed tools), editor extensions (Continue, Cody, Cline, Kilo Code), AI-native editors (Cursor, Devin Desktop, Zed), agentic terminal harnesses (OpenCode, Claude Code, aider, Gemini CLI, Codex CLI, Kilo CLI, Pi), and fully local models that never send your code anywhere. The immutable base stays untouched either way — all tooling lives in Flatpak, Nix, containers, AppImages, or your home directory.
+Shanios supports every major style of AI-assisted coding: cloud assistants (GitHub Copilot, Anthropic, OpenAI-backed tools), editor extensions (Continue, Cody, Cline, Kilo Code, JetBrains Junie), AI-native editors (Cursor, Devin Desktop, Zed), agentic terminal harnesses (OpenCode, Claude Code, aider, Gemini CLI, Codex CLI, Kilo CLI, Pi, OpenHands, Amp), and fully local models that never send your code anywhere. The immutable base stays untouched either way — all tooling lives in Flatpak, Nix, containers, AppImages, or your home directory.
 
 ## Choosing an Approach
 
 | Style | Examples | Your code leaves the machine | Needs GPU |
 |---|---|---|---|
-| Cloud assistant extension | Copilot, Cody, Continue (API mode), Cline, Kilo Code | Yes — snippets sent to vendor | No |
+| Cloud assistant extension | Copilot, Cody, Continue (API mode), Cline, Kilo Code, JetBrains Junie | Yes — snippets sent to vendor | No |
 | AI-native editor | Cursor, Devin Desktop, Zed | Depends on configured provider/model | No |
-| Agentic CLI / harness | OpenCode, Claude Code, aider, Gemini CLI, Codex CLI, Goose, Kilo CLI, Pi | Depends on configured provider/model | No |
+| Agentic CLI / harness | OpenCode, Claude Code, aider, Gemini CLI, Codex CLI, Goose, Kilo CLI, Pi, OpenHands, Amp | Depends on configured provider/model | No |
 | Local model + editor bridge | Continue/Ollama, Tabby, Cline (local mode) | No | Helpful (AMD/Intel iGPU works; NVIDIA best) |
 | Fully local agentic CLI | OpenCode/aider pointed at Ollama or a local DeepSeek | No | Same as above |
 
@@ -51747,6 +51747,7 @@ flatpak install flathub com.vscodium.codium   # telemetry-free alternative
 - **GitHub Copilot** — sign in via the extension; authentication and completions work inside the Flatpak sandbox with no extra configuration.
 - **Continue / Cody** — configure either for cloud APIs or point them at a local endpoint (below).
 - **Kilo Code** — Apache-2.0, forked from the Cline→Roo Code lineage (Roo Code itself was archived in May 2026). Installs from the VS Code Marketplace, or from **Open VSX** for VSCodium and other non-Microsoft builds — the official docs specifically list VSCodium among its supported Open VSX targets. BYOK across 400+ models, plus an MCP server marketplace for one-click tool integrations.
+- **JetBrains Junie** — JetBrains' own first-party agent (reached GA June 2026), distinct from Continue/Cody, distributed as a plugin across the whole JetBrains lineup (IntelliJ, PyCharm, WebStorm, GoLand, RubyMine, Rider, CLion, PhpStorm — all Flathub-installable on Shanios). Also ships a standalone CLI for terminal/CI use. Pricing is folded into JetBrains AI Pro/Ultimate, not sold separately.
 - API keys live in `~/.config` / `~/.var/app/<app>/config` under `@home` — they persist across updates and rollbacks.
 
 Agentic CLIs that expect Node.js run cleanly inside a Distrobox container or via Nix:
@@ -51788,10 +51789,14 @@ Terminal-native coding agents (harnesses) drive whole tasks — editing files, r
 | **GitHub Copilot CLI** | `gh extension install github/gh-copilot` | GitHub-native workflows |
 | **Kilo CLI** | Terminal counterpart to the Kilo Code extension above; itself forked from OpenCode | Same MCP marketplace and 400+-model BYOK routing as the extension, in a shell |
 | **Pi** | Build from [source](https://github.com/earendil-works/pi) (TypeScript) — check the repo for the current published-package name before assuming an npm one-liner | Deliberately minimal — only four tools (read/write/edit/bash) and a sub-1,000-token system prompt; MIT-licensed, also embeddable as a TypeScript SDK |
+| **OpenHands** (formerly OpenDevin) | Self-hosted, runs as a sandboxed container via Podman instead of Docker — follow the [current official run command](https://docs.all-hands.dev/usage/local-setup) exactly rather than an older tutorial's, since the image path has moved at least once (`ghcr.io/openhands/...`, previously `all-hands-ai/...`) | MIT, 80k+ GitHub stars — one of the most-starred agents by that measure. Note: the dedicated `OpenHands-CLI` is no longer actively maintained; the project now points users at its "Agent Canvas" for a local, customizable setup instead of the standalone CLI |
+| **Amp** | `npm i @ampcode/cli` (Distrobox/nvm) — the package was recently renamed from `@sourcegraph/amp`, check [current docs](https://ampcode.com/manual) if this drifts again | Sourcegraph's harness — pay-as-you-go, zero markup over provider pricing; free tier includes full agent access with no hard token cap |
 
 A useful rule of thumb the ecosystem has converged on: **the harness shapes workflow; the model decides quality.** All of the above run happily on budget backends, so pick the tool whose ergonomics fit you and route it to whatever provider suits your budget and privacy needs.
 
-**Where the market actually stands (2026):** GitHub Copilot leads on raw share (~40%, driven by enterprise/Microsoft bundling), but Claude Code already out-adopts Cursor in the workplace despite being newer, and was rated the single most-loved tool in JetBrains' most recent developer survey. Cursor remains the fastest-growing at 5M+ active users. In practice the average professional developer now runs 2.3 of these tools side by side rather than standardizing on one — a data point worth keeping in mind before over-indexing on any single recommendation in this page.
+**Where the market actually stands (2026):** GitHub Copilot leads on raw share (~40%, driven by enterprise/Microsoft bundling), but Claude Code already out-adopts Cursor in the workplace despite being newer, and was rated the single most-loved tool in JetBrains' most recent developer survey. Cursor remains the fastest-growing at 5M+ active users. By GitHub star count, OpenCode is the most-starred open-source agent (~199k) with OpenHands, Gemini CLI, and Codex CLI all in the same tier. In practice the average professional developer now runs 2.3 of these tools side by side rather than standardizing on one — a data point worth keeping in mind before over-indexing on any single recommendation in this page.
+
+**A different category worth knowing about: Warp**, an AI-native terminal (not a harness itself) with full native Linux support since 2024 and a client that went dual MIT/AGPLv3 open-source in 2026. Its "Oz" feature is a cloud background-agent orchestrator that can launch and drive Claude Code, Codex CLI, or Warp's own agent from inside the terminal — worth a look if you'd rather manage multiple harnesses from one place than run each standalone.
 
 ### Wiring a Harness to Any Provider
 
@@ -52173,6 +52178,7 @@ Shanios ships with zero telemetry, but AI assistants are your choice to make:
 - [GPU Containers](gpu-containers) — CUDA/ROCm/Vulkan container access
 - [Distrobox](distrobox) — running Node/Python CLIs with full distro environments
 - [Kilo Code](https://kilo.ai) · [Pi](https://github.com/earendil-works/pi) · [Cursor](https://cursor.com) · [Devin Desktop](https://devin.ai) · [Zed](https://zed.dev)
+- [OpenHands](https://docs.all-hands.dev) · [Amp](https://ampcode.com) · [JetBrains Junie](https://www.jetbrains.com/junie) · [Warp](https://warp.dev)
 - [AI-assisted development blog](https://blog.shani.dev/post/ai-assisted-development-on-shani-os) — narrative companion to this page
 
 ---
