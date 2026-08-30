@@ -434,7 +434,7 @@ podman create --name shani-agent \
 # Start the agent workspace
 podman start -a shani-agent</code></pre>
 <p><strong>Full isolation (multi-tenant / high-value):</strong> Use Firecracker booted via <code>machinectl</code> or Kata Containers <code>virtctl</code>. Both present a complete VM with minimal device exposure — ideal when the agent must touch repository contents, SSH keys, or MCP configs.</p>
-<p><strong>The root filesystem itself needs no manual snapshot at all.</strong> <code>/</code> is always one of the two read-only <code>@blue</code>/<code>@green</code> slots — an agent (or anything else) cannot write to it, and there's nothing to protect there because <a href="../concepts/atomic-updates.md"><code>shani-deploy</code></a> already keeps the inactive slot as an instant rollback target for OS-level changes. What an agent <em>can</em> actually modify is <code>@home</code> — and unlike the root slots, there's currently no automatic snapshot schedule for it, so a manual snapshot before a risky run is the real safety net, not a backstop on top of an existing one:</p>
+<p><strong>The root filesystem itself needs no manual snapshot at all.</strong> <code>/</code> is always one of the two read-only <code>@blue</code>/<code>@green</code> slots — an agent (or anything else) cannot write to it, and there's nothing to protect there because <a href="../concepts/atomic-updates.md"><code>shani-deploy</code></a> already keeps the inactive slot as an instant rollback target for OS-level changes. What an agent <em>can</em> actually modify is <code>@home</code> — and unlike the root slots, that has no automatic snapshot schedule out of the box. Set one up once via the systemd timer in <a href="../system/backup.md#1-btrfs-snapshots-local-instant-recovery">Backup & Recovery</a>, or take a one-off manual snapshot right before a specific risky run:</p>
 <pre><code class="language-bash"># Extra snapshot of @home right before a risky agent session (read-only, non-destructive)
 sudo btrfs subvolume snapshot -r /home /data/snapshots/home/pre-agent-$(date +%s)
 
@@ -459,7 +459,7 @@ cp -a /data/snapshots/home/pre-agent-&lt;timestamp&gt;/path/to/thing /home/path/
 <li>Persistence: block writes to <code>~/.ssh</code>, <code>~/.config</code>, MCP configs, IDE configs, git hooks</li>
 </ul>
 <p><strong>Prompt injection mitigation:</strong> never feed untrusted external content (emails, web pages, issue bodies) into the same agent context that has tool access. Run tools that touch sensitive data in isolated contexts without sharing that context with external input sources.</p>
-<p>For Shanios desktop users: run agentic workloads inside a Distrobox or Podman container with the restrictions above. The root filesystem needs no extra protection — it's already read-only regardless — but <code>@home</code> has no automatic snapshot schedule today, so take a manual one yourself (see the snapshot commands above) before a specific long autonomous run.</p>
+<p>For Shanios desktop users: run agentic workloads inside a Distrobox or Podman container with the restrictions above. The root filesystem needs no extra protection — it's already read-only regardless — but <code>@home</code> has no automatic snapshot schedule out of the box, so either set up the recurring timer in <a href="../system/backup.md">Backup & Recovery</a> or take a manual one (see above) before a specific long autonomous run.</p>
 <h2 id="privacy-posture">Privacy Posture</h2>
 <p>Shanios ships with zero telemetry, but AI assistants are your choice to make:</p>
 <ul>

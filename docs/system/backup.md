@@ -340,7 +340,7 @@ The self-hosted option is **Healthchecks** — see the [Monitoring wiki](https:/
 
 ## The Complete Strategy
 
-**Layer 1 — Daily Btrfs snapshots** of `@home` to `/data/snapshots/home/`. Fast local recovery from accidental deletion.
+**Layer 1 — Daily Btrfs snapshots** of `@home` to `/data/snapshots/home/`, via the systemd timer you set up above (not automatic out of the box — see "Automating Daily Snapshots"). Fast local recovery from accidental deletion once it's running.
 
 **Layer 2 — Daily/weekly restic backups** to an external drive or NAS. Off-disk, encrypted, versioned protection against hardware failure.
 

@@ -441,7 +441,7 @@ journalctl --user -u backup.service -f</code></pre>
 </ol>
 <hr>
 <h2 id="the-complete-strategy">The Complete Strategy</h2>
-<p><strong>Layer 1 — Daily Btrfs snapshots</strong> of <code>@home</code> to <code>/data/snapshots/home/</code>. Fast local recovery from accidental deletion.</p>
+<p><strong>Layer 1 — Daily Btrfs snapshots</strong> of <code>@home</code> to <code>/data/snapshots/home/</code>, via the systemd timer you set up above (not automatic out of the box — see "Automating Daily Snapshots"). Fast local recovery from accidental deletion once it's running.</p>
 <p><strong>Layer 2 — Daily/weekly restic backups</strong> to an external drive or NAS. Off-disk, encrypted, versioned protection against hardware failure.</p>
 <p><strong>Layer 3 — Cloud sync via rclone (or restic over rclone)</strong> to Google Drive, S3, Backblaze, etc. Off-site protection against fire, theft, or local disaster.</p>
 <hr>
