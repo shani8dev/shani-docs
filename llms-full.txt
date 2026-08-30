@@ -51723,7 +51723,7 @@ Shanios supports every major style of AI-assisted coding: cloud assistants (GitH
 
 # AI-Assisted Development
 
-Shanios supports every major style of AI-assisted coding: cloud assistants (GitHub Copilot, Anthropic, OpenAI-backed tools), editor extensions (Continue, Cody, Cline, Kilo Code, JetBrains Junie), AI-native editors (Cursor, Devin Desktop, Zed), agentic terminal harnesses (OpenCode, Claude Code, aider, Gemini CLI, Codex CLI, Kilo CLI, Pi, OpenHands, Amp), and fully local models that never send your code anywhere. The immutable base stays untouched either way — all tooling lives in Flatpak, Nix, containers, AppImages, or your home directory.
+Shanios supports every major style of AI-assisted coding: cloud assistants (GitHub Copilot, Anthropic, OpenAI-backed tools), editor extensions (Continue, Cody, Cline, Kilo Code, JetBrains Junie), AI-native editors (Cursor, Devin Desktop, Zed), agentic terminal harnesses (OpenCode, Claude Code, aider, Gemini CLI, Codex CLI, Kilo CLI, Pi, OpenHands, Amp, Open Interpreter), and fully local models that never send your code anywhere. The immutable base stays untouched either way — all tooling lives in Flatpak, Nix, containers, AppImages, or your home directory.
 
 ## Choosing an Approach
 
@@ -51731,7 +51731,7 @@ Shanios supports every major style of AI-assisted coding: cloud assistants (GitH
 |---|---|---|---|
 | Cloud assistant extension | Copilot, Cody, Continue (API mode), Cline, Kilo Code, JetBrains Junie | Yes — snippets sent to vendor | No |
 | AI-native editor | Cursor, Devin Desktop, Zed | Depends on configured provider/model | No |
-| Agentic CLI / harness | OpenCode, Claude Code, aider, Gemini CLI, Codex CLI, Goose, Kilo CLI, Pi, OpenHands, Amp | Depends on configured provider/model | No |
+| Agentic CLI / harness | OpenCode, Claude Code, aider, Gemini CLI, Codex CLI, Goose, Kilo CLI, Pi, OpenHands, Amp, Open Interpreter | Depends on configured provider/model | No |
 | Local model + editor bridge | Continue/Ollama, Tabby, Cline (local mode) | No | Helpful (AMD/Intel iGPU works; NVIDIA best) |
 | Fully local agentic CLI | OpenCode/aider pointed at Ollama or a local DeepSeek | No | Same as above |
 
@@ -51791,6 +51791,7 @@ Terminal-native coding agents (harnesses) drive whole tasks — editing files, r
 | **Pi** | Build from [source](https://github.com/earendil-works/pi) (TypeScript) — check the repo for the current published-package name before assuming an npm one-liner | Deliberately minimal — only four tools (read/write/edit/bash) and a sub-1,000-token system prompt; MIT-licensed, also embeddable as a TypeScript SDK |
 | **OpenHands** (formerly OpenDevin) | Self-hosted, runs as a sandboxed container via Podman instead of Docker — follow the [current official run command](https://docs.all-hands.dev/usage/local-setup) exactly rather than an older tutorial's, since the image path has moved at least once (`ghcr.io/openhands/...`, previously `all-hands-ai/...`) | MIT, 80k+ GitHub stars — one of the most-starred agents by that measure. Note: the dedicated `OpenHands-CLI` is no longer actively maintained; the project now points users at its "Agent Canvas" for a local, customizable setup instead of the standalone CLI |
 | **Amp** | `npm i @ampcode/cli` (Distrobox/nvm) — the package was recently renamed from `@sourcegraph/amp`, check [current docs](https://ampcode.com/manual) if this drifts again | Sourcegraph's harness — pay-as-you-go, zero markup over provider pricing; free tier includes full agent access with no hard token cap |
+| **Open Interpreter** | `pip install open-interpreter` (venv/pipx in home, or `uv pip install`), then run `interpreter` | 65k+ GitHub stars, MIT-licensed. Natural-language interface to Python/JS/shell execution rather than a file-editing harness per se — strong story for local models (Llama/Mistral/Ollama) and non-coding tasks (document/spreadsheet editing) alongside code |
 
 A useful rule of thumb the ecosystem has converged on: **the harness shapes workflow; the model decides quality.** All of the above run happily on budget backends, so pick the tool whose ergonomics fit you and route it to whatever provider suits your budget and privacy needs.
 
@@ -51818,13 +51819,39 @@ Budget-hosted APIs keep per-session costs to cents; local distills trade some ca
 
 ## Free & Low-Cost Model Access
 
-You can run a full agentic workflow in 2026 without paying for inference. Three routes, each with different trade-offs.
+You can run a full agentic workflow in 2026 without paying for inference. Several routes, each with different trade-offs.
 
 ### OpenCode Zen
 
 Zen is OpenCode's curated model gateway (`https://opencode.ai/zen/v1`, OpenAI-compatible). Beyond pay-per-use frontier models under one key, it exposes **rotating free models** — typically community and vendor-promo coding models (names rotate; check the picker or `curl https://opencode.ai/zen/v1/models`). Filter for `free` in the model switcher and use them with no key of your own.
 
 > **Privacy caveat that matters:** several Zen free-period models state that collected data may be used for model improvement. Fine for boilerplate and public code; avoid proprietary paths on those specific models.
+
+### Kilo Gateway
+
+Kilo Code's direct equivalent to Zen — a free-model gateway with zero configuration, no API key required, and no sign-in needed to start. As of late 2026 it exposes 40+ free coding models (ByteDance Seed, Grok Code Fast, NVIDIA Nemotron, Arcee Trinity, and others), with anonymous (unauthenticated) use rate-limited to 200 requests/hour per IP — signing in raises the limit. Same rotation caveat as Zen: the exact model roster changes without much notice, so check the live list in Kilo's model picker rather than assuming a specific name is still available.
+
+### Free Tiers Built Into the Tools Themselves
+
+Zen and Kilo Gateway are free *models*; this is a different thing — a free *quota on the tool itself*, independent of which model it's calling. Every harness and editor covered on this page has some story here, and they vary a lot in how genuinely usable and how permanent they are:
+
+| Tool | What's actually free | The catch |
+|---|---|---|
+| **GitHub Copilot** | 2,000 code completions + 50 chat requests/month — permanent, no card, no trial expiry | The most durable free tier here; everything else on this list is either time-limited, rate-limited harder, or newer/more likely to change |
+| **Google Jules** | 15 fully autonomous agent tasks/day, 3 concurrent, on Gemini 2.5 Pro | Google-account gated; daily quota resets, doesn't roll over |
+| **Zed** (Personal plan) | Free forever — unlimited local models and BYOK, no restriction | Only Zed's own *hosted* models require the $10/mo Pro plan (which bundles a $5 token credit) |
+| **Codex CLI** | 50 agentic coding messages/day + 1,000 terminal completions/month via a free ChatGPT account sign-in | Ties the CLI to a ChatGPT Free account, not a bare API key |
+| **Cursor** (Hobby) | Community-reported ~2,000 completions + 50 slow "premium" requests/month | Cursor doesn't officially publish exact numbers — the pricing page just says "Limited" |
+| **Devin Desktop** | Unlimited tab completions/inline edits, free, no card | Full agent sessions ("Devin Local") hit an undisclosed, tight daily cap fast |
+| **Gemini CLI** | 250 requests/day on Flash/Flash-Lite via an API key | The old free-OAuth tier (1,000 req/day, no key) was shut down in 2026 after third-party abuse — don't trust an older tutorial's numbers |
+| **Claude Code** | No permanent free tier; new signups get ~$5 in API credit (roughly 1.67M Sonnet input tokens) | **Notable exception:** Anthropic's "Claude for Open Source" program gives qualifying maintainers 6 months of the $200/mo Max 20x tier entirely free |
+| **JetBrains Junie** | 30-day AI Pro trial on signup, then ~3 AI credits/30 days ongoing after it ends | Meaningful use beyond light chat needs a paid Pro/Ultimate plan |
+| **Amp** | Free, ad-supported tier — no hard token cap, but rate-limited to roughly $10/day of usage value | Sponsored suggestions appear in non-code UI on the free tier |
+| **OpenHands** (Cloud) | Free Individual tier, capped at 10 conversations/day | Beyond that: BYOK, or OpenHands' own at-cost (zero-markup) provider option |
+| **Goose** | BYOK by default, no bundled credits | One exception: a one-time $10 credit if you authenticate via its Tetrate integration |
+| **aider** | Nothing tool-native — strictly BYOK | Pairs naturally with any free model-provider tier from the table below |
+
+**Worth featuring first if you're starting from zero budget:** Google Jules' 15 free autonomous tasks/day is the most generous *agentic* free tier on this list; GitHub Copilot Free is the only genuinely permanent one; Zed's Personal plan gives full BYOK/local-model access with no restriction at all; and Anthropic's Claude for Open Source program is worth knowing about if you maintain a real open-source project.
 
 ### Permanent Free Tiers (no credit card)
 
@@ -52178,7 +52205,7 @@ Shanios ships with zero telemetry, but AI assistants are your choice to make:
 - [GPU Containers](gpu-containers) — CUDA/ROCm/Vulkan container access
 - [Distrobox](distrobox) — running Node/Python CLIs with full distro environments
 - [Kilo Code](https://kilo.ai) · [Pi](https://github.com/earendil-works/pi) · [Cursor](https://cursor.com) · [Devin Desktop](https://devin.ai) · [Zed](https://zed.dev)
-- [OpenHands](https://docs.all-hands.dev) · [Amp](https://ampcode.com) · [JetBrains Junie](https://www.jetbrains.com/junie) · [Warp](https://warp.dev)
+- [OpenHands](https://docs.all-hands.dev) · [Amp](https://ampcode.com) · [JetBrains Junie](https://www.jetbrains.com/junie) · [Warp](https://warp.dev) · [Open Interpreter](https://github.com/KillianLucas/open-interpreter)
 - [AI-assisted development blog](https://blog.shani.dev/post/ai-assisted-development-on-shani-os) — narrative companion to this page
 
 ---
