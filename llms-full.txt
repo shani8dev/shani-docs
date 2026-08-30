@@ -51823,7 +51823,7 @@ You can run a full agentic workflow in 2026 without paying for inference. Severa
 
 ### OpenCode Zen
 
-Zen is OpenCode's curated model gateway (`https://opencode.ai/zen/v1`, OpenAI-compatible). Beyond pay-per-use frontier models under one key, it exposes **rotating free models** — typically community and vendor-promo coding models (names rotate; check the picker or `curl https://opencode.ai/zen/v1/models`). Filter for `free` in the model switcher and use them with no key of your own.
+Zen is OpenCode's curated model gateway (`https://opencode.ai/zen/v1`, OpenAI-compatible), with 90+ models total behind pay-per-use. Beyond that, it exposes a smaller **rotating free tier** — around 5 free models at any given time (community and vendor-promo coding models; names rotate — check the picker or `curl https://opencode.ai/zen/v1/models`), capped at 100 requests/day across all of them, no key of your own required.
 
 > **Privacy caveat that matters:** several Zen free-period models state that collected data may be used for model improvement. Fine for boilerplate and public code; avoid proprietary paths on those specific models.
 
