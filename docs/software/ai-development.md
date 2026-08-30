@@ -426,13 +426,15 @@ podman start -a shani-agent
 
 **Full isolation (multi-tenant / high-value):** Use Firecracker booted via `machinectl` or Kata Containers `virtctl`. Both present a complete VM with minimal device exposure — ideal when the agent must touch repository contents, SSH keys, or MCP configs.
 
-**Shanios snapshot before autonomous run:**
+**The root filesystem itself needs no manual snapshot at all.** `/` is always one of the two read-only `@blue`/`@green` slots — an agent (or anything else) cannot write to it, and there's nothing to protect there because [`shani-deploy`](../concepts/atomic-updates.md) already keeps the inactive slot as an instant rollback target for OS-level changes. What an agent *can* actually modify is `@home` — and unlike the root slots, there's currently no automatic snapshot schedule for it, so a manual snapshot before a risky run is the real safety net, not a backstop on top of an existing one:
 
 ```bash
-# Snapshot root before any long-running agent session
-sudo btrfs subvolume snapshot / /snapshots/pre-agent-$(date +%s)
-# To rollback if needed:
-sudo btrfs subvolume delete / && sudo btrfs subvolume snapshot /snapshots/pre-agent-1724000000 /
+# Extra snapshot of @home right before a risky agent session (read-only, non-destructive)
+sudo btrfs subvolume snapshot -r /home /data/snapshots/home/pre-agent-$(date +%s)
+
+# To restore a file or directory afterward, just copy it back out of the snapshot —
+# no subvolume deletion needed:
+cp -a /data/snapshots/home/pre-agent-<timestamp>/path/to/thing /home/path/to/thing
 ```
 
 ## GPU Notes
@@ -462,7 +464,7 @@ Running untrusted LLM-generated code requires isolation beyond standard containe
 
 **Prompt injection mitigation:** never feed untrusted external content (emails, web pages, issue bodies) into the same agent context that has tool access. Run tools that touch sensitive data in isolated contexts without sharing that context with external input sources.
 
-For Shanios desktop users: run agentic workloads inside a Distrobox or Podman container with the restrictions above, and always snapshot (`sudo btrfs subvolume snapshot /var/lib/libvirt /snapshots/pre-agent-$(date +%s)`) before a long autonomous run.
+For Shanios desktop users: run agentic workloads inside a Distrobox or Podman container with the restrictions above. The root filesystem needs no extra protection — it's already read-only regardless — but `@home` has no automatic snapshot schedule today, so take a manual one yourself (see the snapshot commands above) before a specific long autonomous run.
 
 ## Privacy Posture
 

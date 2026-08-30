@@ -434,11 +434,13 @@ podman create --name shani-agent \
 # Start the agent workspace
 podman start -a shani-agent</code></pre>
 <p><strong>Full isolation (multi-tenant / high-value):</strong> Use Firecracker booted via <code>machinectl</code> or Kata Containers <code>virtctl</code>. Both present a complete VM with minimal device exposure — ideal when the agent must touch repository contents, SSH keys, or MCP configs.</p>
-<p><strong>Shanios snapshot before autonomous run:</strong></p>
-<pre><code class="language-bash"># Snapshot root before any long-running agent session
-sudo btrfs subvolume snapshot / /snapshots/pre-agent-$(date +%s)
-# To rollback if needed:
-sudo btrfs subvolume delete / &amp;&amp; sudo btrfs subvolume snapshot /snapshots/pre-agent-1724000000 /</code></pre>
+<p><strong>The root filesystem itself needs no manual snapshot at all.</strong> <code>/</code> is always one of the two read-only <code>@blue</code>/<code>@green</code> slots — an agent (or anything else) cannot write to it, and there's nothing to protect there because <a href="../concepts/atomic-updates.md"><code>shani-deploy</code></a> already keeps the inactive slot as an instant rollback target for OS-level changes. What an agent <em>can</em> actually modify is <code>@home</code> — and unlike the root slots, there's currently no automatic snapshot schedule for it, so a manual snapshot before a risky run is the real safety net, not a backstop on top of an existing one:</p>
+<pre><code class="language-bash"># Extra snapshot of @home right before a risky agent session (read-only, non-destructive)
+sudo btrfs subvolume snapshot -r /home /data/snapshots/home/pre-agent-$(date +%s)
+
+# To restore a file or directory afterward, just copy it back out of the snapshot —
+# no subvolume deletion needed:
+cp -a /data/snapshots/home/pre-agent-&lt;timestamp&gt;/path/to/thing /home/path/to/thing</code></pre>
 <h2 id="gpu-notes">GPU Notes</h2>
 <ul>
 <li><strong>AMD/Intel</strong> — <code>/dev/dri</code> passthrough is all the container needs; Vulkan/ROCm layers ship in the image.</li>
@@ -457,7 +459,7 @@ sudo btrfs subvolume delete / &amp;&amp; sudo btrfs subvolume snapshot /snapshot
 <li>Persistence: block writes to <code>~/.ssh</code>, <code>~/.config</code>, MCP configs, IDE configs, git hooks</li>
 </ul>
 <p><strong>Prompt injection mitigation:</strong> never feed untrusted external content (emails, web pages, issue bodies) into the same agent context that has tool access. Run tools that touch sensitive data in isolated contexts without sharing that context with external input sources.</p>
-<p>For Shanios desktop users: run agentic workloads inside a Distrobox or Podman container with the restrictions above, and always snapshot (<code>sudo btrfs subvolume snapshot /var/lib/libvirt /snapshots/pre-agent-$(date +%s)</code>) before a long autonomous run.</p>
+<p>For Shanios desktop users: run agentic workloads inside a Distrobox or Podman container with the restrictions above. The root filesystem needs no extra protection — it's already read-only regardless — but <code>@home</code> has no automatic snapshot schedule today, so take a manual one yourself (see the snapshot commands above) before a specific long autonomous run.</p>
 <h2 id="privacy-posture">Privacy Posture</h2>
 <p>Shanios ships with zero telemetry, but AI assistants are your choice to make:</p>
 <ul>
