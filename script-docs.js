@@ -362,26 +362,38 @@ function renderNavTree(tree, activeSlug) {
 }
 
 // ── Router ────────────────────────────────────────────────────────
+function cleanSlug(raw) {
+  // Normalize a path/hash slug: strip trailing slashes AND a trailing
+  // "/index.html". When the site is served locally (python3 -m http.server)
+  // or hit directly at its literal file URL, location.pathname is
+  // "/doc/<slug>/index.html", not production's "/doc/<slug>/" — without
+  // stripping the filename the derived slug becomes "<slug>/index.html",
+  // so loadDoc() fetches "docs/<slug>/index.html.md" (404) and live-content
+  // hydration silently falls back to the prerendered stub with console
+  // errors every page. Both URL forms must resolve to the same clean slug.
+  if (!raw) return null;
+  return raw
+    .replace(/\/+$/, '')
+    .replace(/(^|\/)index\.html$/, '')
+    .replace(/\/+$/, '') || null;
+}
+
 function getSlugFromHash() {
   // Support path-style URLs: /doc/<slug>
   const p = location.pathname;
   if (p.startsWith('/doc/')) {
-    const raw = decodeURIComponent(p.slice(5));
-    return raw ? raw.replace(/\/+$/, '') : null;  // 🔧 Strip trailing slashes
+    return cleanSlug(decodeURIComponent(p.slice(5)));
   }
   
   // Legacy hash fallback: #doc/<slug> or #/<slug>
   const h = location.hash.slice(1);
   if (h.startsWith('doc/')) {
-    const raw = h.slice(4);
-    return raw ? raw.replace(/\/+$/, '') : null;  // 🔧 Strip trailing slashes
+    return cleanSlug(h.slice(4));
   }
   if (h.startsWith('/')) {
-    const raw = h.slice(1);
-    return raw ? raw.replace(/\/+$/, '') : null;  // 🔧 Strip trailing slashes
+    return cleanSlug(h.slice(1));
   }
-  const raw = h || null;
-  return raw ? raw.replace(/\/+$/, '') : null;    // 🔧 Strip trailing slashes
+  return cleanSlug(h);
 }
 
 function navigate(slug, pushState = true) {
@@ -884,7 +896,14 @@ function initTheme() {
     // Moon = shown in dark mode (click to go light); Sun = shown in light mode (click to go dark)
     if (icon) icon.className = t === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
     const prism = $('#prism-theme');
-    if (prism) prism.href = t === 'dark' ? PRISM_DARK : PRISM_LIGHT;
+    if (prism) {
+      // Intentionally no integrity: this <link> swaps between two different
+      // CDN theme files at runtime, and SRI validated against the parse-time
+      // attribute can never cover both — it blocks one theme's CSS. Matches
+      // shani-blog's #prism-theme. All other CDN resources keep SRI.
+      prism.href = t === 'dark' ? PRISM_DARK : PRISM_LIGHT;
+      prism.setAttribute('crossorigin', 'anonymous');
+    }
     // Keep browser chrome / PWA status bar color in sync with the active theme
     const themeColorMeta = $('#pwa-theme-color');
     if (themeColorMeta) themeColorMeta.content = t === 'dark' ? '#161514' : '#faf9f7';

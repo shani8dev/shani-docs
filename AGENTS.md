@@ -21,7 +21,11 @@ surface, not static content.
    `integrity=` (SRI) hash actually matches the pinned file version
    (`openssl dgst -sha384 -binary <file> | openssl base64 -A` against the
    real URL) — a wrong hash silently blocks script execution with no
-   visible error unless you check the console.
+   visible error unless you check the console. **Exception: `#prism-theme`
+   intentionally has NO `integrity=`** (its `href` swaps between two CDN
+   theme files at runtime and SRI can't cover both — see "Prism light-mode
+   rendering" in the known-issues section). Do not "fix" SRI back onto it,
+   or light mode's code blocks will silently lose their styling again.
 3. If you touch `script-docs.js`'s token handling (`getToken`/`setToken`),
    confirm the token only ever round-trips through `sessionStorage` —
    don't leave or reintroduce a `localStorage` fallback, even a
@@ -77,10 +81,32 @@ not how it got that way.
   existing client-side search, not decorative schema.
 - **Security — FIXED.** `new Function()` parsing of `nav-docs.js` (fetched
   live from GitHub) replaced with `JSON.parse` (was a stored-XSS-via-
-  compromised-nav-file risk). All 23 CDN resources now have verified SRI
-  hashes. CSP added to `index.html`, all 201 doc stubs, and `404.html`
-  (`default-src 'self'` + explicit CDN/API allowances) — verified live in
-  a real browser, zero console errors, full functional render.
+  compromised-nav-file risk). All CDN resources now have verified SRI
+  hashes — **with one deliberate exception**: `#prism-theme` carries no
+  `integrity=`. That single `<link>` is swapped between two different CDN
+  theme files (`prism-tomorrow.min.css` dark vs `prism.min.css` light) at
+  runtime, and SRI is validated against the parse-time attribute value, so
+  it can never validly cover both — a static hash silently blocks whichever
+  theme's stylesheet doesn't match (unstyled code blocks in light mode, a
+  bug just root-caused and fixed). This matches the sibling
+  `shani-blog`'s `#prism-theme`, which was already correct. All other CDN
+  `<script>`/`<link>` resources keep their byte-verified SRI hashes. CSP
+  added to `index.html`, all 201 doc stubs, and `404.html`
+  (`default-src 'self'` + explicit CDN/API allowances).
+- **Prism light-mode rendering — FIXED.** Prior to this the `#prism-theme`
+  `<link>` pinned `integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A"`
+  (the dark theme's hash) in static HTML, while `initTheme()` swapped only
+  `href` to the light stylesheet. Because SRI is bound at parse time, the
+  browser kept validating the swapped light URL against the dark hash and
+  rejected it — code blocks rendered unstyled (single monochrome text color)
+  in light mode, with a `Failed to find a valid digest...` console error.
+  Fixed by removing the `integrity` from the `#prism-theme` link in
+  `index.html` and all 201 generated stubs, and simplifying `initTheme()` in
+  `script-docs.js` to swap only `href` (plus `crossorigin="anonymous"`), the
+  same scheme the blog already used. `generate-manifest.js`'s `buildStub()`
+  inherits the head from root `index.html`, so regeneration keeps the fixed
+  pattern. Verified live in a browser: both themes now render distinct
+  multi-color Prism token highlighting and **zero console errors**.
 - **Root `index.html` OG/Twitter tags — FIXED.** Were shipping
   `content=""`, populated only by client JS; now have real static values,
   matching how every doc stub already worked.
@@ -89,6 +115,25 @@ not how it got that way.
   explicitly welcomed in `robots.txt`) — since `robots.txt` also disallows
   the redirect's `?p=` target, this trapped exactly the crawlers the site
   says it wants indexed. Both now recognized.
+- **Live-content hydration broken when a page is opened at its literal
+  `index.html` URL — FIXED.** `getSlugFromHash()` derived the slug straight
+  from `location.pathname`, so a page loaded at its actual file path
+  (`/doc/<slug>/index.html`, which is exactly what `python3 -m http.server`
+  local preview produces) yielded a slug of `<slug>/index.html`. `loadDoc()`
+  then fetched `docs/<slug>/index.html.md` → 404 (plus a
+  raw.githubusercontent fallback that also 404s), and silently fell back to
+  the prerendered stub with a console error on **every** doc page (201/201
+  under local preview). Production was unaffected because GitHub Pages
+  serves `/doc/<slug>/` (trailing slash, no `index.html`). Root cause and
+  fix are shared with the blog — see the matching entry in
+  `shani-blog/AGENTS.md` (their `Router.getSlug()` had the identical defect,
+  and the blog giscus comment thread term inherited it too). Fixed by
+  normalizing the slug in `getSlugFromHash()` to strip both trailing
+  slashes and a trailing `/index.html`, so `/doc/<slug>/` and
+  `/doc/<slug>/index.html` resolve identically. Verified live: full
+  203-page corpus sweep (201 docs + home + 404) reports **0 pages with
+  issues** after the fix (was 201). `cleanSlug()` is the shared normalizer;
+  do not revert the `index.html` strip when "simplifying" the function.
 - **AI docs — refreshed.** `ai-llms.md`, `ai-development.md`, and
   `gpu-containers.md` used 2024-era example models (`llama3.2`,
   `phi4-mini`, `mistral`, `Meta-Llama-3`) inconsistent with the
