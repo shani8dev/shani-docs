@@ -571,7 +571,7 @@ function renderDoc(slug, raw) {
     <div class="doc-header">
       <nav class="doc-breadcrumb" aria-label="Breadcrumb">
         <a href="#"><i class="fa-solid fa-house" style="font-size:0.7rem"></i></a>
-        ${breadcrumb.map(b => `<i class="fa-solid fa-chevron-right" style="font-size:0.55rem;color:var(--color-border)"></i><a href="#doc/${esc(b.slug)}">${esc(b.title)}</a>`).join('')}
+        ${breadcrumb.map(b => `<i class="fa-solid fa-chevron-right" style="font-size:0.55rem;color:var(--color-border)"></i><a href="/doc/${esc(b.slug)}/" onclick="event.preventDefault();navigate('${esc(b.slug)}')">${esc(b.title)}</a>`).join('')}
         <i class="fa-solid fa-chevron-right" style="font-size:0.55rem;color:var(--color-border)"></i>
         <span>${esc(title)}</span>
       </nav>
@@ -2505,7 +2505,7 @@ const AdminEditor = (() => {
         <div class="doc-header" style="border-bottom:1px solid var(--color-border);padding-bottom:.65rem;margin-bottom:0">
           <nav class="doc-breadcrumb" aria-label="Breadcrumb">
             <a href="#"><i class="fa-solid fa-house" style="font-size:0.7rem"></i></a>
-            ${breadcrumb.map(b => `<i class="fa-solid fa-chevron-right" style="font-size:0.55rem;color:var(--color-border)"></i><a href="#doc/${esc(b.slug)}">${esc(b.title)}</a>`).join('')}
+        ${breadcrumb.map(b => `<i class="fa-solid fa-chevron-right" style="font-size:0.55rem;color:var(--color-border)"></i><a href="/doc/${esc(b.slug)}/" onclick="event.preventDefault();navigate('${esc(b.slug)}')">${esc(b.title)}</a>`).join('')}
             <i class="fa-solid fa-chevron-right" style="font-size:0.55rem;color:var(--color-border)"></i>
             <span>${esc(title)}</span>
           </nav>
