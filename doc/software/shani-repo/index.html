@@ -28,7 +28,7 @@
   <meta name="twitter:description" id="tw-desc"  content="The [shani] repository contains custom packages built for Shanios. It is served at repo.shani.dev and is configured on every Shanios install. Repository St…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Shani Package Repository","description":"The [shani] repository contains custom packages built for Shanios. It is served at repo.shani.dev and is configured on every Shanios install. Repository St…","url":"https://docs.shani.dev/doc/software/shani-repo/","datePublished":"2026-08-28T00:00:00.000Z","dateModified":"2026-08-28T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Shani Package Repository","description":"The [shani] repository contains custom packages built for Shanios. It is served at repo.shani.dev and is configured on every Shanios install. Repository St…","url":"https://docs.shani.dev/doc/software/shani-repo/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
   <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Shani Package Repository","item":"https://docs.shani.dev/doc/software/shani-repo/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
@@ -232,15 +232,7 @@
 <pre><code class="language-ini">[shani]
 SigLevel = Required DatabaseOptional
 Server = https://repo.shani.dev/$arch</code></pre>
-<p>If you need to add it manually:</p>
-<pre><code class="language-bash"># Install the keyring first
-sudo pacman -S shani-keyring
-
-# Add the repository to /etc/pacman.conf
-echo -e '\n[shani]\nSigLevel = Required DatabaseOptional\nServer = https://repo.shani.dev/$arch' | sudo tee -a /etc/pacman.conf
-
-# Refresh the database
-sudo pacman -Sy</code></pre>
+<p><strong>No action needed on Shani OS:</strong> the <code>[shani]</code> repository is already configured on every install, and the OS root is immutable — host-level <code>pacman -S</code> or edits to <code>/etc/pacman.conf</code> cannot persist and are not supported. (The manual <code>pacman</code> instructions above apply only to <strong>non-ShaniOS</strong> Arch-based systems that want to pull individual Shanios tools — see <a href="../enterprise/fleet.md">Fleet Deployment</a> for that setup.)</p>
 <h2 id="building-packages">Building Packages</h2>
 <p>Packages are built by the <code>shani-pkgbuilds</code> repo inside a reproducible Docker container. See the <a href="https://github.com/shani8dev/shani-pkgbuilds">shani-pkgbuilds</a> repo for details.</p>
 <h2 id="known-issues">Known Issues</h2>

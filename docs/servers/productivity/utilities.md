@@ -335,7 +335,7 @@ cd ~/n8n && podman-compose up -d
 n8n.example.com { reverse_proxy localhost:5678 }
 ```
 
-> n8n webhooks require a publicly accessible URL. Use a Cloudflare Tunnel or Pangolin for internet-facing webhooks without opening firewall ports — see [Cloudflared](https://docs.shani.dev/doc/networking/cloudflared) or [Pangolin](https://docs.shani.dev/doc/networking/pangolin) in the Networking wiki.
+> n8n webhooks require a publicly accessible URL. Use a Cloudflare Tunnel or Pangolin for internet-facing webhooks without opening firewall ports — see [Cloudflared](https://docs.shani.dev/doc/networking/cloudflared) or [Pangolin](https://docs.shani.dev/doc/servers/networking/pangolin) in the Networking wiki.
 
 ---
 

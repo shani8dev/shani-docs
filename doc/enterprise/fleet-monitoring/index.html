@@ -28,7 +28,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Shanios ships no fleet dashboard by design — no central console, no MDM server, no agent phoning home. Observability is composed from standard pieces you a…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Fleet Monitoring Runbook","description":"Shanios ships no fleet dashboard by design — no central console, no MDM server, no agent phoning home. Observability is composed from standard pieces you a…","url":"https://docs.shani.dev/doc/enterprise/fleet-monitoring/","datePublished":"2026-08-28T00:00:00.000Z","dateModified":"2026-08-28T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Fleet Monitoring Runbook","description":"Shanios ships no fleet dashboard by design — no central console, no MDM server, no agent phoning home. Observability is composed from standard pieces you a…","url":"https://docs.shani.dev/doc/enterprise/fleet-monitoring/","datePublished":"2026-08-27T18:30:00.000Z","dateModified":"2026-08-27T18:30:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
   <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Fleet Monitoring Runbook","item":"https://docs.shani.dev/doc/enterprise/fleet-monitoring/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
@@ -318,7 +318,7 @@ chmod 644 &quot;$TMP&quot;; mv &quot;$TMP&quot; &quot;$OUT/shani_state.prom&quot
 <ol>
 <li><strong>Enrollment token</strong> — IT generates a token from the platform UI</li>
 <li><strong>Agent enrollment</strong> — Agent calls <code>POST /fleet/enroll</code> with the token</li>
-<li><strong>Heartbeat</strong> — Agent sends facts every 60 seconds via <code>POST /fleet/heartbeat</code></li>
+<li><strong>Heartbeat</strong> — Agent sends facts every 5 minutes via <code>POST /fleet/heartbeat</code> (default <code>HEARTBEAT_INTERVAL=300</code>; driven by the <code>shani-fleet-agent.timer</code> systemd timer)</li>
 <li><strong>Command delivery</strong> — Platform piggybacks commands on heartbeat responses</li>
 <li><strong>Command execution</strong> — Agent verifies GPG signature, executes, posts result</li>
 </ol>
@@ -340,7 +340,7 @@ chmod 644 &quot;$TMP&quot;; mv &quot;$TMP&quot; &quot;$OUT/shani_state.prom&quot
 <p>If signature verification fails, the agent refuses to execute and reports the failure.</p>
 <h2 id="monitoring-fleet-health">Monitoring Fleet Health</h2>
 <p>The platform derives alerts from heartbeat data:</p>
-<table><thead><tr><th>Alert</th><th>Condition</th><th>Severity</th></tr></thead><tbody><tr><td>Offline</td><td>No heartbeat > 5 minutes</td><td>Warning</td></tr><tr><td>Verify failed</td><td>OS integrity check failed</td><td>Critical</td></tr><tr><td>Clock skew</td><td>Clock drift > 5 minutes</td><td>Warning</td></tr><tr><td>Reboot stuck</td><td>Reboot pending > 7 days</td><td>Warning</td></tr><tr><td>Channel drift</td><td>Machine on unexpected channel</td><td>Info</td></tr></tbody></table>
+<table><thead><tr><th>Alert</th><th>Condition</th><th>Severity</th></tr></thead><tbody><tr><td>Offline</td><td>No heartbeat > 15 minutes (default <code>SHANI_FLEET_ONLINE_WINDOW=900</code>)</td><td>Warning</td></tr><tr><td>Verify failed</td><td>OS integrity check failed</td><td>Critical</td></tr><tr><td>Clock skew</td><td>Clock drift > 5 minutes</td><td>Warning</td></tr><tr><td>Reboot stuck</td><td>Reboot pending > 7 days</td><td>Warning</td></tr><tr><td>Channel drift</td><td>Machine on unexpected channel</td><td>Info</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="fleet">OEM & Fleet Deployment</a> — channels, update flow, reboot markers</li>

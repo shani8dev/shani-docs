@@ -5,7 +5,7 @@
     <link>https://docs.shani.dev/</link>
     <description>Comprehensive technical documentation for Shanios — the immutable Linux OS.</description>
     <language>en-IN</language>
-    <lastBuildDate>Mon, 31 Aug 2026 10:01:09 GMT</lastBuildDate>
+    <lastBuildDate>Tue, 01 Sep 2026 04:45:29 GMT</lastBuildDate>
     <atom:link href="https://docs.shani.dev/feed.xml" rel="self" type="application/rss+xml"/>
     <item>
       <title>AI-Assisted Development</title>
@@ -278,15 +278,6 @@
       <author>Shrinivas Kumbhar</author>
     </item>
     <item>
-      <title>AdGuard Home</title>
-      <link>https://docs.shani.dev/doc/networking/adguard-home/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/networking/adguard-home/</guid>
-      <description>AdGuard Home Purpose: Pi-hole alternative with native DNS-over-HTTPS (DoH) and DNS-over-TLS (DoT) support, a cleaner UI, per-client rules, and built-in par…</description>
-      <pubDate>Fri, 28 Aug 2026 00:00:00 GMT</pubDate>
-      <category>Self-Hosted Networking</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
       <title>Apache HTTP Server</title>
       <link>https://docs.shani.dev/doc/networking/apache/</link>
       <guid isPermaLink="true">https://docs.shani.dev/doc/networking/apache/</guid>
@@ -332,15 +323,6 @@
       <author>Shrinivas Kumbhar</author>
     </item>
     <item>
-      <title>Blocky</title>
-      <link>https://docs.shani.dev/doc/networking/blocky/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/networking/blocky/</guid>
-      <description>Blocky (Fast DNS Ad Blocker) Purpose: High-performance DNS proxy written in Go. Blocks ads and trackers via deny-lists (same blocklists as Pi-hole), suppor…</description>
-      <pubDate>Fri, 28 Aug 2026 00:00:00 GMT</pubDate>
-      <category>Self-Hosted Networking</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
       <title>Bluetooth</title>
       <link>https://docs.shani.dev/doc/networking/bluetooth/</link>
       <guid isPermaLink="true">https://docs.shani.dev/doc/networking/bluetooth/</guid>
@@ -363,6 +345,24 @@
       <link>https://docs.shani.dev/doc/networking/cloudflared/</link>
       <guid isPermaLink="true">https://docs.shani.dev/doc/networking/cloudflared/</guid>
       <description>Cloudflared creates an encrypted, outbound-only tunnel from your Shani OS machine to Cloudflare's global edge network. This lets you expose local services …</description>
+      <pubDate>Fri, 28 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Networking</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>dnscrypt-proxy (Encrypted DNS)</title>
+      <link>https://docs.shani.dev/doc/networking/dnscrypt-proxy/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/networking/dnscrypt-proxy/</guid>
+      <description>dnscrypt-proxy encrypts DNS queries between your machine and upstream resolvers using DNSCrypt or DNS-over-HTTPS (DoH). Without it, DNS queries travel in p…</description>
+      <pubDate>Fri, 28 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Networking</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>dnsmasq (Local DNS)</title>
+      <link>https://docs.shani.dev/doc/networking/dnsmasq/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/networking/dnsmasq/</guid>
+      <description>dnsmasq is a lightweight DNS forwarder, local caching resolver, and DHCP server — ideal for homelab setups. Use it for custom .home domains, split DNS (dif…</description>
       <pubDate>Fri, 28 Aug 2026 00:00:00 GMT</pubDate>
       <category>Networking</category>
       <author>Shrinivas Kumbhar</author>

@@ -1,6 +1,6 @@
 ---
 title: Gluetun (VPN Client Container)
-section: Self-Hosted Networking
+section: Self-Hosting & Servers
 updated: 2026-08-28
 ---
 

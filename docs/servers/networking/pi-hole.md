@@ -1,6 +1,6 @@
 ---
 title: Pi-hole
-section: Self-Hosted Networking
+section: Self-Hosting & Servers
 updated: 2026-08-28
 ---
 

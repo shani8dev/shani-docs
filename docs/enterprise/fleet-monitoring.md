@@ -169,7 +169,7 @@ The `shani-fleet` agent enrolls machines with `shani-platform` using a pull-base
 
 1. **Enrollment token** — IT generates a token from the platform UI
 2. **Agent enrollment** — Agent calls `POST /fleet/enroll` with the token
-3. **Heartbeat** — Agent sends facts every 60 seconds via `POST /fleet/heartbeat`
+3. **Heartbeat** — Agent sends facts every 5 minutes via `POST /fleet/heartbeat` (default `HEARTBEAT_INTERVAL=300`; driven by the `shani-fleet-agent.timer` systemd timer)
 4. **Command delivery** — Platform piggybacks commands on heartbeat responses
 5. **Command execution** — Agent verifies GPG signature, executes, posts result
 
@@ -204,7 +204,7 @@ The platform derives alerts from heartbeat data:
 
 | Alert | Condition | Severity |
 |-------|-----------|----------|
-| Offline | No heartbeat > 5 minutes | Warning |
+| Offline | No heartbeat > 15 minutes (default `SHANI_FLEET_ONLINE_WINDOW=900`) | Warning |
 | Verify failed | OS integrity check failed | Critical |
 | Clock skew | Clock drift > 5 minutes | Warning |
 | Reboot stuck | Reboot pending > 7 days | Warning |

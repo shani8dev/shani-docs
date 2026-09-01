@@ -1,6 +1,6 @@
 ---
 title: Pritunl
-section: Self-Hosted Networking
+section: Self-Hosting & Servers
 updated: 2026-08-28
 ---
 
@@ -53,5 +53,5 @@ cd ~/pritunl && podman-compose up -d
 ## See Also
 
 - [WireGuard / WG-Easy](./wireguard-easy.md)
-- [OpenVPN](../networking/openvpn.md)
+- [OpenVPN](openvpn.md)
 - [Firezone](./firezone.md)

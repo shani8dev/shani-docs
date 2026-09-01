@@ -1902,7 +1902,7 @@ The `shani-fleet` agent enrolls machines with `shani-platform` using a pull-base
 
 1. **Enrollment token** — IT generates a token from the platform UI
 2. **Agent enrollment** — Agent calls `POST /fleet/enroll` with the token
-3. **Heartbeat** — Agent sends facts every 60 seconds via `POST /fleet/heartbeat`
+3. **Heartbeat** — Agent sends facts every 5 minutes via `POST /fleet/heartbeat` (default `HEARTBEAT_INTERVAL=300`; driven by the `shani-fleet-agent.timer` systemd timer)
 4. **Command delivery** — Platform piggybacks commands on heartbeat responses
 5. **Command execution** — Agent verifies GPG signature, executes, posts result
 
@@ -1937,7 +1937,7 @@ The platform derives alerts from heartbeat data:
 
 | Alert | Condition | Severity |
 |-------|-----------|----------|
-| Offline | No heartbeat > 5 minutes | Warning |
+| Offline | No heartbeat > 15 minutes (default `SHANI_FLEET_ONLINE_WINDOW=900`) | Warning |
 | Verify failed | OS integrity check failed | Critical |
 | Clock skew | Clock drift > 5 minutes | Warning |
 | Reboot stuck | Reboot pending > 7 days | Warning |
@@ -2026,7 +2026,7 @@ skip_region: yes
 skip_user: yes
 ```
 
-`configure.sh` reads `OSI_USER_AUTOLOGIN` and configures autologin for whichever display manager is present on the image — GDM, SDDM, greetd, LightDM, LXDM, or plain `agetty` on a TTY (`os-installer-config/scripts/configure.sh:505`, `setup_autologin_target`). Combined with `skip_region`/`skip_user`, an OEM image can go from first boot to a logged-in desktop with no first-run wizard at all.
+`configure.sh` reads `OSI_USER_AUTOLOGIN` and configures autologin for whichever display manager is present on the image — GDM, SDDM, greetd, LightDM, LXDM, or plain `agetty` on a TTY (`os-installer-config/scripts/configure.sh:576`, `setup_autologin_target`). Combined with `skip_region`/`skip_user`, an OEM image can go from first boot to a logged-in desktop with no first-run wizard at all.
 
 Because the install/configure scripts only read `OSI_*` environment variables — they have no hard dependency on the GTK front-end — an OEM building a factory-imaging pipeline can call `install.sh`/`configure.sh` directly with those variables pre-set, skipping the interactive UI entirely for mass provisioning. This is scripting the same code path the GUI installer uses, not a separate "headless mode" — there is no bundled kickstart/autoyast-style single-answer-file format.
 
@@ -3967,7 +3967,7 @@ Every daily habit has an equivalent. The names differ; the workflows do not.
 | File Explorer / Finder | Files app — Nautilus (GNOME), Dolphin (KDE Plasma), COSMIC Files (COSMIC) |
 | Microsoft Store / Mac App Store | Flathub via **Warehouse** (pre-installed) |
 | Control Panel / System Settings | Settings app of your edition |
-| Task Manager / Activity Monitor | Mission Center (pre-installed), or `htop` in a terminal |
+| Task Manager / Activity Monitor | Mission Center (pre-installed on the COSMIC edition), or `htop` in a terminal |
 | cmd / PowerShell / Terminal.app | zsh with Starship prompt (pre-configured) |
 | Action Centre / Notification Centre | Desktop notification centre; update prompts arrive via `shani-update` notifications |
 
@@ -4368,2765 +4368,6 @@ Full guide: [Gaming](../software/gaming.md).
 - [COSMIC edition announcement](https://blog.shani.dev/post/shani-os-cosmic-edition)
 - [Release notes (full package tables)](https://blog.shani.dev/post/2026-04-15-release-notes)
 - [Fleet Deployment (image profiles)](../enterprise/fleet.md)
-
-
-# Section: Self-Hosted Networking
-
----
-
-# AdGuard Home
-
-URL: https://docs.shani.dev/doc/networking/adguard-home/
-Updated: 2026-08-28
-
-AdGuard Home Purpose: Pi-hole alternative with native DNS-over-HTTPS (DoH) and DNS-over-TLS (DoT) support, a cleaner UI, per-client rules, and built-in par…
-
-> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
-
-## AdGuard Home
-
-**Purpose:** Pi-hole alternative with native DNS-over-HTTPS (DoH) and DNS-over-TLS (DoT) support, a cleaner UI, per-client rules, and built-in parental controls.
-
-```yaml
-# ~/adguardhome/compose.yaml
-services:
-  adguardhome:
-    image: adguard/adguardhome
-    ports:
-      - 53:53/tcp
-      - 53:53/udp
-      - 127.0.0.1:3000:3000
-      - 853:853/tcp
-    volumes:
-      - /home/user/adguard/work:/opt/adguardhome/work:Z
-      - /home/user/adguard/conf:/opt/adguardhome/conf:Z
-    restart: unless-stopped
-```
-
-```bash
-cd ~/adguardhome && podman-compose up -d
-```
-
-Access the setup wizard at `http://localhost:3000` on first run. After setup, the UI moves to port `80` (or the port you configure).
-
-**Firewall:** (for DoT from external devices):
-```bash
-sudo firewall-cmd --add-port=853/tcp --permanent && sudo firewall-cmd --reload
-```
-
-#### Common operations
-```bash
-# View logs
-podman logs -f adguardhome
-
-# Test DNS resolution via AdGuard
-podman exec adguardhome nslookup google.com 127.0.0.1
-
-# Query statistics via API
-curl -u admin:changeme http://localhost:3000/control/stats
-
-# Update blocklists
-curl -X POST -u admin:changeme http://localhost:3000/control/filtering/refresh   -H "Content-Type: application/json" -d '{"whitelist":false}'
-
-# Add a custom DNS rewrite (internal domain)
-curl -X POST -u admin:changeme http://localhost:3000/control/rewrite/add   -H "Content-Type: application/json"   -d '{"domain":"myserver.home.local","answer":"192.168.1.10"}'
-```
-
----
-
-
-
----
-
-## See Also
-
-- [Networking & Infrastructure](networking) — overview
-
----
-
-# Blocky
-
-URL: https://docs.shani.dev/doc/networking/blocky/
-Updated: 2026-08-28
-
-Blocky (Fast DNS Ad Blocker) Purpose: High-performance DNS proxy written in Go. Blocks ads and trackers via deny-lists (same blocklists as Pi-hole), suppor…
-
-> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
-
-## Blocky (Fast DNS Ad Blocker)
-
-**Purpose:** High-performance DNS proxy written in Go. Blocks ads and trackers via deny-lists (same blocklists as Pi-hole), supports DNS-over-HTTPS and DNS-over-TLS upstream resolvers, per-client group rules, conditional forwarding, query logging to a database, and response caching with prefetching. Starts in under a second and uses a fraction of Pi-hole's RAM — good choice for low-power hardware or containers where resource efficiency matters.
-
-```yaml
-# ~/blocky/compose.yml
-services:
-  blocky:
-    image: spx01/blocky:latest
-    ports:
-      - "53:53/tcp"
-      - "53:53/udp"
-      - "127.0.0.1:4000:4000"
-    volumes:
-      - /home/user/blocky/config.yml:/app/config.yml:ro,Z
-    restart: unless-stopped
-```
-
-```bash
-cd ~/blocky && podman-compose up -d
-```
-
-##### Example `config.yml`
-
-```yaml
-upstreams:
-  groups:
-    default:
-      - https://one.one.one.one/dns-query    # Cloudflare DoH
-      - https://dns.quad9.net/dns-query      # Quad9 DoH
-
-blocking:
-  blackLists:
-    ads:
-      - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
-      - https://adaway.org/hosts.txt
-  clientGroupsBlock:
-    default:
-      - ads
-
-caching:
-  minTime: 5m
-  maxTime: 30m
-  prefetching: true
-
-queryLog:
-  type: console
-  logRetentionDays: 7
-
-ports:
-  dns: 53
-  http: 4000
-```
-
-> **Pi-hole vs Blocky:** Use Pi-hole or AdGuard Home for a dashboard-heavy, click-to-manage experience. Use Blocky when you want a lean, config-file-driven blocker with better performance and no web UI overhead.
-
-## See Also
-
-- [Pi-hole](pihole.md)
-- [AdGuard Home](adguard-home.md)
-- [Unbound](unbound.md)
-
----
-
-# ddns-updater (Dynamic DNS)
-
-URL: https://docs.shani.dev/doc/networking/ddns-updater-dynamic-dns/
-Updated: 2026-08-28
-
-ddns-updater (Dynamic DNS) Purpose: Keeps your DNS records updated when your home/server IP changes. Polls your current public IP on a schedule and updates…
-
-> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
-
-## ddns-updater (Dynamic DNS)
-
-**Purpose:** Keeps your DNS records updated when your home/server IP changes. Polls your current public IP on a schedule and updates records via the APIs of 30+ providers — Cloudflare, Namecheap, DuckDNS, Gandi, Porkbun, Hetzner, and more. Essential if you're self-hosting from a residential or dynamic-IP connection without a static IP.
-
-```yaml
-# ~/ddns-updater/compose.yaml
-services:
-  ddns-updater:
-    image: qmcgaw/ddns-updater:latest
-    ports:
-      - 127.0.0.1:8000:8000
-    volumes:
-      - /home/user/ddns-updater/data:/updater/data:Z
-    environment:
-      PERIOD: 5m
-      UPDATE_COOLDOWN_PERIOD: 5m
-      PUBLICIP_FETCHERS: all
-      LOG_LEVEL: info
-      TZ: Asia/Kolkata
-    restart: unless-stopped
-```
-
-```bash
-cd ~/ddns-updater && podman-compose up -d
-```
-
-##### Configure providers in `/home/user/ddns-updater/data/config.json`
-
-```json
-{
-  "settings": [
-    {
-      "provider": "cloudflare",
-      "zone_identifier": "your-zone-id",
-      "domain": "home.example.com",
-      "host": "@",
-      "ttl": 300,
-      "proxied": false,
-      "token": "your-cloudflare-api-token",
-      "ip_version": "ipv4"
-    },
-    {
-      "provider": "duckdns",
-      "domain": "myhome.duckdns.org",
-      "token": "your-duckdns-token",
-      "ip_version": "ipv4"
-    }
-  ]
-}
-```
-
-Access the status dashboard at `http://localhost:8000` — shows last update time, current IP, and success/failure per record.
-
-**Caddy:**
-```caddyfile
-ddns.home.local { tls internal; reverse_proxy localhost:8000 }
-```
-
-> **Tip:** Pair with a short TTL (300 seconds) on the DNS record so clients pick up the new IP quickly after a change.
-
----
-
-
-
----
-
-## See Also
-
-- [Networking & Infrastructure](networking) — overview
-
----
-
-# Firezone
-
-URL: https://docs.shani.dev/doc/networking/firezone/
-Updated: 2026-08-28
-
-Purpose: Zero-trust network access (ZTNA) built on WireGuard. Features SSO (OIDC/SAML), granular access policies, device posture checks, and a unified dash…
-
-**Purpose:** Zero-trust network access (ZTNA) built on WireGuard. Features SSO (OIDC/SAML), granular access policies, device posture checks, and a unified dashboard.
-
-```yaml
-# ~/firezone/compose.yaml
-services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: firezone
-      POSTGRES_PASSWORD: strongpassword
-      POSTGRES_DB: firezone
-    volumes: [db_data:/var/lib/postgresql/data]
-    restart: unless-stopped
-
-  firezone:
-    image: firezone/firezone:latest
-    ports:
-      - "0.0.0.0:4443:443"
-      - "0.0.0.0:51820:51820/udp"
-    environment:
-      DATABASE_URL: postgresql://firezone:strongpassword@db:5432/firezone
-      SECRET_KEY_BASE: changeme-generate-with-openssl-rand-base64-64
-      DEFAULT_ADMIN_EMAIL: admin@example.com
-    cap_add: [NET_ADMIN]
-    sysctls:
-      net.ipv4.ip_forward: "1"
-      net.ipv6.conf.all.disable_ipv6: "0"
-    depends_on: [db]
-    restart: unless-stopped
-
-volumes:
-  db_data:
-```
-
-```bash
-cd ~/firezone && podman-compose up -d
-```
-
-- **Access:** `https://localhost:4443`
-- **Firewall:** `sudo firewall-cmd --add-port=4443/tcp --add-port=51820/udp --permanent && sudo firewall-cmd --reload`
-
-## See Also
-
-- [WireGuard / WG-Easy](./wireguard-easy.md)
-- [Pritunl](./pritunl.md)
-- [NetBird](./netbird.md)
-
----
-
-# frp (Fast Reverse Proxy)
-
-URL: https://docs.shani.dev/doc/networking/frp-fast-reverse-proxy/
-Updated: 2026-08-28
-
-frp (Fast Reverse Proxy) Purpose: Expose services running behind NAT or a firewall to the internet via a VPS relay — without needing to open ports on your …
-
-> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
-
-## frp (Fast Reverse Proxy)
-
-**Purpose:** Expose services running behind NAT or a firewall to the internet via a VPS relay — without needing to open ports on your home router or ISP. You run `frps` (server) on a cheap VPS with a public IP, and `frpc` (client) on your home server. The client connects outbound to the VPS; all traffic to `vps-ip:port` is tunnelled back to your local service. A lightweight alternative to Cloudflare Tunnel or Pangolin when you need raw TCP/UDP forwarding or non-HTTP protocols.
-
-```yaml
-# On your VPS — ~/frps/compose.yaml
-services:
-  frps:
-    image: snowdreamtech/frps:latest
-    network_mode: host
-    volumes:
-      - /home/user/frps/frps.toml:/etc/frp/frps.toml:ro
-    restart: unless-stopped
-```
-
-#### `frps.toml` on the VPS
-```toml
-bindPort = 7000           # frpc connects here
-vhostHTTPPort = 8080      # HTTP vhost traffic (optional)
-vhostHTTPSPort = 8443     # HTTPS vhost traffic (optional)
-
-auth.method = "token"
-auth.token = "changeme-strong-secret"
-
-webServer.addr = "127.0.0.1"
-webServer.port = 7500
-webServer.user = "admin"
-webServer.password = "changeme"
-```
-
-```yaml
-# On your home server — ~/frpc/compose.yaml
-services:
-  frpc:
-    image: snowdreamtech/frpc:latest
-    network_mode: host
-    volumes:
-      - /home/user/frpc/frpc.toml:/etc/frp/frpc.toml:ro
-    restart: unless-stopped
-```
-
-#### `frpc.toml` on your home server
-```toml
-serverAddr = "your.vps.ip"
-serverPort = 7000
-
-auth.method = "token"
-auth.token = "changeme-strong-secret"
-
-# Expose a local HTTP service
-[[proxies]]
-name = "homelab-web"
-type = "http"
-localIP = "127.0.0.1"
-localPort = 80
-customDomains = ["home.example.com"]
-
-# Expose SSH
-[[proxies]]
-name = "homelab-ssh"
-type = "tcp"
-localIP = "127.0.0.1"
-localPort = 22
-remotePort = 2222          # ssh -p 2222 user@your.vps.ip
-
-# Expose a raw TCP service (e.g. MQTT)
-[[proxies]]
-name = "mqtt"
-type = "tcp"
-localIP = "127.0.0.1"
-localPort = 1883
-remotePort = 1883
-```
-
-```bash
-# Start on the VPS
-cd ~/frps && podman-compose up -d
-
-# Start on the home server
-cd ~/frpc && podman-compose up -d
-```
-
-**Firewall on the VPS:**
-```bash
-sudo firewall-cmd --add-port=7000/tcp --permanent   # frpc control
-sudo firewall-cmd --add-port=8080/tcp --permanent   # HTTP vhost
-sudo firewall-cmd --add-port=8443/tcp --permanent   # HTTPS vhost
-sudo firewall-cmd --add-port=2222/tcp --permanent   # SSH forwarding
-sudo firewall-cmd --reload
-```
-
-> **frp vs Cloudflare Tunnel:** Cloudflare Tunnel is zero-config and free, but traffic passes through Cloudflare's network and requires HTTP/HTTPS. frp works for any TCP/UDP protocol, traffic stays on your VPS, and you keep full control. Use frp when you need to forward MQTT, SSH, game server ports, or any non-HTTP service.
-
----
-
-
-
----
-
-## See Also
-
-- [Networking & Infrastructure](networking) — overview
-
----
-
-# FRRouting — BGP, OSPF & Dynamic Routing
-
-URL: https://docs.shani.dev/doc/networking/frrouting-bgp-ospf-dynamic-routing/
-Updated: 2026-08-28
-
-FRRouting (BGP / OSPF / Dynamic Routing) Purpose: Full-featured open-source routing suite implementing BGP, OSPF, IS-IS, RIP, PIM, and BFD — the same proto…
-
-> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
-
-## FRRouting (BGP / OSPF / Dynamic Routing)
-
-**Purpose:** Full-featured open-source routing suite implementing BGP, OSPF, IS-IS, RIP, PIM, and BFD — the same protocols running on enterprise and ISP routers. On a homelab or small datacenter, FRR is most useful for: advertising your Tailscale/WireGuard subnets into BGP, running BGP between your Shani OS host and a pfSense/OPNsense router, implementing ECMP load-balancing between uplinks, or learning BGP/OSPF for job preparation. FRR runs as a container alongside your network stack — it doesn't require a separate router appliance.
-
-> **Note:** FRR needs `--network host` and `--cap-add NET_ADMIN,NET_RAW,SYS_ADMIN` to manipulate kernel routing tables. These capabilities are available to rootless Podman containers on this system with `--privileged` or explicit `--cap-add`. The kernel routing changes FRR makes are real — they affect the host's routing table.
-
-```yaml
-# ~/frr/compose.yaml
-services:
-  frr:
-    image: frrouting/frr:latest
-    network_mode: host
-    cap_add: [NET_ADMIN, NET_RAW, SYS_ADMIN]
-    volumes:
-      - /home/user/frr/etc:/etc/frr:Z
-    restart: unless-stopped
-```
-
-```bash
-mkdir -p ~/frr/etc
-cd ~/frr && podman-compose up -d
-```
-
-#### Initial FRR config files
-```bash
-# ~/frr/etc/daemons — enable only what you need
-cat > ~/frr/etc/daemons << 'EOF'
-zebra=yes      # core routing daemon — always required
-bgpd=yes       # enable for BGP
-ospfd=yes      # enable for OSPFv2
-ospf6d=no
-ripd=no
-ripngd=no
-isisd=no
-pimd=no
-bfdd=yes       # Bidirectional Forwarding Detection — fast link failure detection
-EOF
-
-# ~/frr/etc/vtysh.conf
-cat > ~/frr/etc/vtysh.conf << 'EOF'
-service integrated-vtysh-config
-EOF
-```
-
-##### Connect to the FRR CLI (vtysh)
-
-```bash
-podman exec -it frr vtysh
-```
-
-#### Example: iBGP between Shani OS host and a pfSense/OPNsense router
-```
-# Inside vtysh:
-
-# Set the router ID (use host's LAN IP)
-configure terminal
- router bgp 65001
-  bgp router-id 192.168.1.10
-  neighbor 192.168.1.1 remote-as 65001          ! pfSense/OPNsense LAN IP, same AS = iBGP
-  neighbor 192.168.1.1 description pfsense-router
-  !
-  address-family ipv4 unicast
-   network 10.8.0.0/24                           ! advertise WireGuard VPN subnet into BGP
-   network 100.64.0.0/10                         ! advertise Tailscale CGNAT range
-   neighbor 192.168.1.1 activate
-   neighbor 192.168.1.1 soft-reconfiguration inbound
-  exit-address-family
- !
- ip route 10.8.0.0/24 wg0                        ! static route so zebra knows the next-hop
-exit
-```
-
-#### Example: BGP with a Hetzner cloud server (eBGP over WireGuard)
-```
-configure terminal
- router bgp 65001
-  bgp router-id 192.168.1.10
-  neighbor 10.8.0.2 remote-as 65002             ! Hetzner VM, different AS = eBGP
-  neighbor 10.8.0.2 ebgp-multihop 2             ! required when peering over a tunnel
-  neighbor 10.8.0.2 update-source wg0
-  !
-  address-family ipv4 unicast
-   network 192.168.1.0/24                        ! advertise homelab LAN to the cloud
-   neighbor 10.8.0.2 activate
-   neighbor 10.8.0.2 route-map EXPORT out
-  exit-address-family
- !
- route-map EXPORT permit 10
-  match ip address prefix-list HOMELAB
- !
- ip prefix-list HOMELAB seq 5 permit 192.168.1.0/24
-exit
-```
-
-#### Example: OSPF for automatic route redistribution (all routers learn all subnets)
-```
-configure terminal
- router ospf
-  ospf router-id 192.168.1.10
-  network 192.168.1.0/24 area 0.0.0.0
-  network 10.8.0.0/24 area 0.0.0.0
-  passive-interface default           ! don't send OSPF hellos on all interfaces
-  no passive-interface eth0           ! only peer on the LAN interface
-  redistribute connected              ! inject directly connected routes
-exit
-```
-
-#### Useful show commands (inside vtysh)
-```
-show ip bgp summary          # peer status, uptime, prefixes received
-show ip bgp                  # full BGP table
-show ip route                # kernel routing table (zebra view)
-show ip route bgp            # only BGP-learned routes
-show ip ospf neighbor        # OSPF adjacency table
-show bfd peers               # BFD session status (sub-second failure detection)
-show running-config          # full current config
-write memory                 # save config to /etc/frr/frr.conf
-```
-
-#### BFD (fast failover in under 1 second)
-```
-configure terminal
- bfd
-  peer 192.168.1.1
-   detect-multiplier 3
-   receive-interval 300
-   transmit-interval 300
-  !
- exit
- !
- router bgp 65001
-  neighbor 192.168.1.1 bfd       ! attach BFD to the BGP peer
-exit
-```
-
-> **FRR vs a dedicated router VM:** FRR in a container is appropriate for BGP peering, route redistribution, and learning. For a full home router (DHCP, NAT, firewall, PPPoE), use OPNsense or pfSense on a dedicated machine or VM. FRR and OPNsense complement each other — OPNsense handles the internet edge, FRR handles internal routing between segments.
-
-
-
----
-
-## See Also
-
-- [Networking & Infrastructure](networking) — overview
-
----
-
-# Gluetun (VPN Client Container)
-
-URL: https://docs.shani.dev/doc/networking/gluetun-vpn-client-container/
-Updated: 2026-08-28
-
-Gluetun (VPN Client Container) Purpose: Route any container's traffic through a commercial VPN provider — without installing a VPN client on the host. Glue…
-
-> **Part of the VPN & Tunnels series:** See [all networking docs](../networking)
-
-## Gluetun (VPN Client Container)
-
-**Purpose:** Route any container's traffic through a commercial VPN provider — without installing a VPN client on the host. Gluetun supports 50+ providers (Mullvad, ProtonVPN, NordVPN, Private Internet Access, ExpressVPN, etc.) and acts as a network gateway container. Other containers join its network namespace via `network_mode: service:gluetun` — their traffic exits through the VPN tunnel transparently.
-
-#### Common use case
-Route qBittorrent through Mullvad so torrent traffic never uses your home IP.
-
-```yaml
-# ~/gluetun/compose.yaml
-services:
-  gluetun:
-    image: qmcgaw/gluetun:latest
-    cap_add: [NET_ADMIN]
-    devices:
-      - /dev/net/tun
-    ports:
-      - "127.0.0.1:8080:8080"   # qBittorrent WebUI exposed via gluetun
-    environment:
-      VPN_SERVICE_PROVIDER: mullvad
-      VPN_TYPE: wireguard
-      WIREGUARD_PRIVATE_KEY: your-mullvad-wireguard-private-key
-      WIREGUARD_ADDRESSES: 10.64.222.21/32
-      SERVER_COUNTRIES: Netherlands
-    volumes:
-      - /home/user/gluetun:/gluetun:Z
-    restart: unless-stopped
-
-  qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:latest
-    network_mode: "service:gluetun"   # all qbittorrent traffic goes through gluetun
-    environment:
-      PUID: "1000"
-      PGID: "1000"
-      WEBUI_PORT: 8080
-    volumes:
-      - /home/user/qbittorrent:/config:Z
-      - /home/user/downloads:/downloads:Z
-    depends_on: [gluetun]
-    restart: unless-stopped
-```
-
-```bash
-cd ~/gluetun && podman-compose up -d
-```
-
-> When `network_mode: service:gluetun` is set, the dependent container shares gluetun's network — all ports are exposed on the gluetun container, not the app container. The qBittorrent WebUI is reached at `http://localhost:8080` via gluetun's port mapping.
-
-#### Check that traffic is routed through the VPN
-```bash
-podman exec qbittorrent curl -s https://api.ipify.org
-# Should return the VPN exit IP, not your home IP
-```
-
-#### Common operations
-```bash
-# Verify traffic is routed through VPN (should show VPN exit IP)
-podman exec qbittorrent curl -s https://api.ipify.org
-
-# Check Gluetun control server status
-curl http://localhost:8000/v1/openvpn/status 2>/dev/null ||   curl http://localhost:8000/v1/publicip/ip
-
-# View logs to debug connection issues
-podman logs -f gluetun
-
-# Force reconnect (pick a different VPN server)
-podman restart gluetun
-
-# List available servers for your provider (Mullvad example)
-podman exec gluetun cat /gluetun/servers.json | python3 -m json.tool | grep '"city"' | head -20
-```
-
-#### Supported providers include
-Mullvad, ProtonVPN, NordVPN, ExpressVPN, Private Internet Access, Surfshark, Windscribe, IVPN, AzireVPN, and any custom WireGuard/OpenVPN config.
-
----
-
-
-
----
-
-## See Also
-
-- [Networking](../networking) — all networking docs
-
----
-
-# HAProxy
-
-URL: https://docs.shani.dev/doc/networking/haproxy/
-Updated: 2026-08-28
-
-HAProxy (High-Performance Load Balancer) Purpose: The gold-standard TCP and HTTP load balancer. HAProxy has been the backbone of GitHub, Reddit, and Stack …
-
-> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
-
-## HAProxy (High-Performance Load Balancer)
-
-**Purpose:** The gold-standard TCP and HTTP load balancer. HAProxy has been the backbone of GitHub, Reddit, and Stack Overflow for years. Unlike Traefik (label-driven, auto-discovery) or Caddy (config-file, developer-friendly), HAProxy is purpose-built for raw throughput, advanced health checking, and TCP-layer load balancing — useful for load balancing PostgreSQL replicas, MQTT brokers, Redis, or any non-HTTP protocol alongside web traffic.
-
-```yaml
-# ~/haproxy/compose.yaml
-services:
-  haproxy:
-    image: haproxy:3-alpine
-    ports:
-      - 0.0.0.0:80:80
-      - 0.0.0.0:443:443
-      - 127.0.0.1:9000:9000
-    volumes:
-      - /home/user/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro,Z
-      - /home/user/haproxy/certs:/etc/haproxy/certs:ro,Z
-    restart: unless-stopped
-```
-
-```bash
-cd ~/haproxy && podman-compose up -d
-```
-
-##### Example `haproxy.cfg` — HTTP load balancing with health checks
-
-```
-global
-  log stdout format raw local0
-  maxconn 50000
-
-defaults
-  mode http
-  log global
-  option httplog
-  option dontlognull
-  option forwardfor
-  option http-server-close
-  timeout connect 5s
-  timeout client  30s
-  timeout server  30s
-  retries 3
-
-# Stats dashboard
-frontend stats
-  bind *:9000
-  stats enable
-  stats uri /
-  stats refresh 10s
-  stats auth admin:changeme
-  stats hide-version
-
-# HTTPS frontend
-frontend https_in
-  bind *:443 ssl crt /etc/haproxy/certs/combined.pem
-  http-request set-header X-Forwarded-Proto https
-  default_backend app_servers
-
-# Backend with health checks
-backend app_servers
-  balance roundrobin
-  option httpchk GET /health HTTP/1.1\r\nHost:\ app.example.com
-  http-check expect status 200
-  server app1 192.168.1.10:8080 check inter 10s fall 3 rise 2
-  server app2 192.168.1.11:8080 check inter 10s fall 3 rise 2
-  server app3 192.168.1.12:8080 check inter 10s fall 3 rise 2 backup
-```
-
-#### Load balancing algorithms
-```
-balance roundrobin   # Equal distribution (default)
-balance leastconn    # Route to server with fewest active connections
-balance source       # Sticky sessions by client IP hash
-balance uri          # Sticky by URI hash (useful for caches)
-```
-
-#### TCP load balancing for databases and MQTT
-```
-frontend postgres_in
-  mode tcp
-  bind *:5432
-  default_backend postgres_servers
-
-backend postgres_servers
-  mode tcp
-  balance leastconn
-  option tcp-check
-  server pg-primary 192.168.1.20:5432 check
-  server pg-replica 192.168.1.21:5432 check backup
-
-frontend mqtt_in
-  mode tcp
-  bind *:1883
-  default_backend mqtt_brokers
-
-backend mqtt_brokers
-  mode tcp
-  balance leastconn
-  server mqtt1 192.168.1.30:1883 check
-  server mqtt2 192.168.1.31:1883 check
-```
-
-Access the live stats page at `http://localhost:9000` to see connection counts, request rates, error rates, and per-backend health in real time.
-
-## See Also
-
-- [Traefik](traefik.md)
-- [Nginx Proxy Manager](nginx-proxy-manager.md)
-- [Caddy](../networking/caddy.md)
-
----
-
-# Headscale (Self-Hosted Tailscale Alternative)
-
-URL: https://docs.shani.dev/doc/networking/headscale/
-Updated: 2026-08-28
-
-Purpose: Zero-config mesh VPN built on WireGuard. Tailscale uses managed coordination; Headscale is the fully open-source self-hosted control server — givi…
-
-**Purpose:** Zero-config mesh VPN built on WireGuard. Tailscale uses managed coordination; Headscale is the fully open-source self-hosted control server — giving you the same experience with no third-party dependency.
-
-### Tailscale (Managed)
-
-```bash
-# Tailscale is pre-installed on this system — just run:
-sudo tailscale up
-
-# Enable SSH over Tailscale
-sudo tailscale up --ssh
-
-# Advertise as an exit node
-sudo tailscale up --advertise-exit-node
-
-# Advertise local subnets (share your LAN with other tailnet devices)
-sudo tailscale up --advertise-routes=192.168.1.0/24
-```
-
-Or run as a container:
-```yaml
-# ~/tailscale/compose.yaml
-services:
-  tailscale:
-    image: tailscale/tailscale
-    command: tailscaled --tun=userspace-networking --socks5-server=:1080
-    volumes:
-      - /home/user/tailscale:/var/lib:Z
-    devices:
-      - /dev/net/tun
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-    restart: unless-stopped
-```
-
-```bash
-cd ~/tailscale && podman-compose up -d
-```
-
-### Tailscale ACL Policies
-
-By default, all devices in a Tailscale network can reach all other devices. ACL policies (in HuJSON format) let you control exactly which devices can talk to which — essential for separating personal devices from servers, or restricting access to sensitive ports.
-
-Configure ACLs in the Tailscale admin console under **Access Controls**, or for Headscale via the `policy.hujson` config:
-
-```jsonc
-{
-  // Tags are assigned to devices — servers get "tag:server", laptops get "tag:laptop"
-  "tagOwners": {
-    "tag:server": ["autogroup:admin"],
-    "tag:laptop": ["autogroup:admin"]
-  },
-
-  "acls": [
-    // Laptops can SSH to servers
-    {"action": "accept", "src": ["tag:laptop"], "dst": ["tag:server:22"]},
-    // Servers can reach each other on any port (internal service mesh)
-    {"action": "accept", "src": ["tag:server"], "dst": ["tag:server:*"]},
-    // Laptops can reach Grafana dashboard on servers
-    {"action": "accept", "src": ["tag:laptop"], "dst": ["tag:server:3001"]},
-    // All other traffic denied (implicit deny at end of list)
-  ],
-
-  // Tailscale SSH — which users can SSH to which tags
-  "ssh": [
-    {
-      "action": "accept",
-      "src": ["autogroup:admin"],
-      "dst": ["tag:server"],
-      "users": ["autogroup:nonroot"]
-    }
-  ]
-}
-```
-
-```bash
-# Apply policy to Headscale
-headscale policy set -f policy.hujson
-
-# Verify policy was applied
-headscale policy get
-```
-
-### Headscale (Self-Hosted Control Server)
-
-Headscale reimplements Tailscale's coordination server, so any Tailscale-compatible client can connect to it instead of Tailscale's managed service — no third-party dependency, full control over ACLs and DNS.
-
-#### 1. Create config directory and config file
-```bash
-mkdir -p /home/user/headscale/{config,data}
-```
-
-`/home/user/headscale/config/config.yaml`:
-```yaml
-server_url: https://headscale.example.com
-listen_addr: 0.0.0.0:8080
-grpc_listen_addr: 0.0.0.0:9090
-database:
-  type: sqlite3
-  sqlite:
-    path: /var/lib/headscale/db.sqlite
-dns:
-  base_domain: headscale.lan
-  magic_dns: true
-  nameservers:
-    - 1.1.1.1
-    - 8.8.8.8
-```
-
-#### 2. Run the container
-```yaml
-# ~/headscale/compose.yaml
-services:
-  headscale:
-    image: headscale/headscale:latest
-    ports:
-      - 127.0.0.1:8080:8080
-      - 127.0.0.1:9090:9090
-    volumes:
-      - /home/user/headscale/config:/etc/headscale:Z
-      - /home/user/headscale/data:/var/lib/headscale:Z
-    restart: unless-stopped
-```
-
-```bash
-cd ~/headscale && podman-compose up -d
-```
-
-#### 3. Create a user and connect devices
-```bash
-# Create a namespace
-podman exec headscale headscale users create home
-
-# Generate a reusable pre-auth key (valid 30 days)
-podman exec headscale headscale preauthkeys create --user home --reusable --expiration 30d
-
-# Connect any Tailscale-compatible device to your Headscale server
-tailscale up --login-server https://headscale.example.com --authkey <key>
-
-# List connected nodes
-podman exec headscale headscale nodes list
-```
-
-### Headplane (Web UI for Headscale)
-
-```yaml
-# ~/headplane/compose.yaml
-services:
-  headplane:
-    image: ghcr.io/tale/headplane:latest
-    ports:
-      - 127.0.0.1:3001:3000
-    volumes:
-      - /home/user/headscale/config:/etc/headscale:ro,Z
-    restart: unless-stopped
-```
-
-```bash
-cd ~/headplane && podman-compose up -d
-```
-
-#### Common operations
-```bash
-# Create a user (namespace)
-podman exec headscale headscale users create myuser
-
-# List users
-podman exec headscale headscale users list
-
-# Generate a reusable pre-auth key (30 days)
-podman exec headscale headscale preauthkeys create --user myuser --reusable --expiration 30d
-
-# List pre-auth keys
-podman exec headscale headscale preauthkeys list --user myuser
-
-# List all connected nodes
-podman exec headscale headscale nodes list
-
-# Expire (force-disconnect) a node
-podman exec headscale headscale nodes expire --identifier NODE_ID
-
-# Delete a node
-podman exec headscale headscale nodes delete --identifier NODE_ID
-
-# Get debug info for a node
-podman exec headscale headscale nodes --output json list | python3 -m json.tool
-
-# Generate an API key for Headplane
-podman exec headscale headscale apikeys create
-
-# Check server version
-podman exec headscale headscale version
-```
-
-## See Also
-
-- [WireGuard / WG-Easy](./wireguard-easy.md)
-- [NetBird](./netbird.md)
-- [Tailscale](../networking/tailscale.md)
-
----
-
-# Hysteria 2 (High-Loss Networks)
-
-URL: https://docs.shani.dev/doc/networking/hysteria-2-high-loss-networks/
-Updated: 2026-08-28
-
-Hysteria 2 (High-Loss Networks) Purpose: A QUIC-based proxy and tunnel that performs well in high-latency, high-loss, or censored network environments wher…
-
-> **Part of the VPN & Tunnels series:** See [all networking docs](../networking)
-
-## Hysteria 2 (High-Loss Networks)
-
-**Purpose:** A QUIC-based proxy and tunnel that performs well in high-latency, high-loss, or censored network environments where WireGuard/TCP struggle. Traffic looks like normal HTTP/3 to firewalls.
-
-`/home/user/hysteria/config.yaml`:
-```yaml
-listen: :443
-tls:
-  cert: /etc/hysteria/fullchain.pem
-  key: /etc/hysteria/privkey.pem
-auth:
-  type: password
-  password: "your-strong-password"
-```
-
-```yaml
-# ~/hysteria/compose.yaml
-services:
-  hysteria:
-    image: ghcr.io/apernet/hysteria:latest
-    ports:
-      - 0.0.0.0:443:443/udp
-    volumes:
-      - /home/user/hysteria/config.yaml:/etc/hysteria/config.yaml:ro,Z
-      - /home/user/hysteria/certs:/etc/hysteria:ro,Z
-    command: server -c /etc/hysteria/config.yaml
-    restart: unless-stopped
-```
-
-```bash
-cd ~/hysteria && podman-compose up -d
-```
-
----
-
-
-
----
-
-## See Also
-
-- [Networking](../networking) — all networking docs
-
----
-
-# Kea DHCP
-
-URL: https://docs.shani.dev/doc/networking/kea-dhcp/
-Updated: 2026-08-28
-
-Kea DHCP (Modern DHCP Server) Purpose: ISC Kea is the modern replacement for ISC DHCP (dhcpd). Provides DHCPv4 and DHCPv6 with a REST API, a lease database…
-
-> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
-
-## Kea DHCP (Modern DHCP Server)
-
-**Purpose:** ISC Kea is the modern replacement for ISC DHCP (`dhcpd`). Provides DHCPv4 and DHCPv6 with a REST API, a lease database (PostgreSQL or MySQL), high-availability failover, host reservations, and a web UI via Stork. Run it alongside Technitium or PowerDNS to control both DHCP and DNS from your server, giving you reliable `hostname → IP` mappings for every device on your LAN.
-
-```yaml
-# ~/kea/compose.yaml
-services:
-  kea-dhcp4:
-    image: jonasal/kea-dhcp4:latest
-    network_mode: host          # Must see your LAN broadcast domain
-    volumes:
-      - /home/user/kea/kea-dhcp4.conf:/etc/kea/kea-dhcp4.conf:ro,Z
-      - /home/user/kea/leases:/var/lib/kea:Z
-    restart: unless-stopped
-```
-
-##### Minimal `kea-dhcp4.conf`
-
-```json
-{
-  "Dhcp4": {
-    "interfaces-config": {
-      "interfaces": ["eth0"]
-    },
-    "lease-database": {
-      "type": "memfile",
-      "persist": true,
-      "name": "/var/lib/kea/dhcp4.leases"
-    },
-    "subnet4": [{
-      "id": 1,
-      "subnet": "192.168.1.0/24",
-      "pools": [{ "pool": "192.168.1.100 - 192.168.1.200" }],
-      "option-data": [
-        { "name": "routers",              "data": "192.168.1.1" },
-        { "name": "domain-name-servers",  "data": "192.168.1.10" },
-        { "name": "domain-search",        "data": "home.local" }
-      ],
-      "reservations": [
-        {
-          "hw-address": "aa:bb:cc:dd:ee:ff",
-          "ip-address":  "192.168.1.50",
-          "hostname":    "myserver"
-        }
-      ]
-    }],
-    "loggers": [{
-      "name": "kea-dhcp4",
-      "output_options": [{ "output": "stdout" }],
-      "severity": "INFO"
-    }]
-  }
-}
-```
-
-```bash
-cd ~/kea && podman-compose up -d
-
-# View current leases
-cat /home/user/kea/leases/dhcp4.leases
-
-# Firewall — allow DHCP
-sudo firewall-cmd --add-service=dhcp --permanent && sudo firewall-cmd --reload
-```
-
-> **Kea vs dnsmasq:** dnsmasq (bundled with Pi-hole) is excellent for simple setups. Kea is the right choice when you need HA failover, a REST API, PostgreSQL lease storage, or want to manage DHCP independently of your DNS blocker.
-
-## See Also
-
-- [Technitium DNS Server](technitium.md)
-- [PowerDNS](powerdns.md)
-- [Pi-hole](pihole.md)
-
----
-
-# LibreNMS
-
-URL: https://docs.shani.dev/doc/networking/librenms/
-Updated: 2026-08-28
-
-LibreNMS (Network Monitoring) Purpose: Full-featured auto-discovering network monitoring system. Discovers routers, switches, servers, APs, and printers vi…
-
-> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
-
-## LibreNMS (Network Monitoring)
-
-**Purpose:** Full-featured auto-discovering network monitoring system. Discovers routers, switches, servers, APs, and printers via SNMP, then monitors CPU, memory, interface traffic, BGP, environmental sensors, and more. Generates alerts, bandwidth graphs, and SLA reports. The self-hosted PRTG/SolarWinds alternative.
-
-```yaml
-# ~/librenms/compose.yml
-services:
-  db:
-    image: mariadb:11
-    environment:
-      MYSQL_ROOT_PASSWORD: rootchangeme
-      MYSQL_DATABASE: librenms
-      MYSQL_USER: librenms
-      MYSQL_PASSWORD: changeme
-    volumes: [db_data:/var/lib/mysql]
-    command: --innodb-file-per-table=1 --lower-case-table-names=0
-    restart: unless-stopped
-
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-
-  librenms:
-    image: librenms/librenms:latest
-    ports: ["127.0.0.1:8100:8000"]
-    environment:
-      DB_HOST: db
-      DB_NAME: librenms
-      DB_USER: librenms
-      DB_PASSWORD: changeme
-      REDIS_HOST: redis
-      TZ: Asia/Kolkata
-      MEMORY_LIMIT: 256M
-      UPLOAD_MAX_SIZE: 16M
-    volumes:
-      - /home/user/librenms/data:/data:Z
-    depends_on: [db, redis]
-    restart: unless-stopped
-
-  dispatcher:
-    image: librenms/librenms:latest
-    environment:
-      DB_HOST: db
-      DB_NAME: librenms
-      DB_USER: librenms
-      DB_PASSWORD: changeme
-      REDIS_HOST: redis
-      DISPATCHER_NODE_ID: dispatcher1
-      SIDECAR_DISPATCHER: "1"
-    volumes:
-      - /home/user/librenms/data:/data:Z
-    depends_on: [librenms]
-    restart: unless-stopped
-
-volumes:
-  db_data:
-```
-
-```bash
-cd ~/librenms && podman-compose up -d
-```
-
-#### Common operations
-```bash
-# Add a device via CLI
-podman exec librenms lnms device:add 192.168.1.1 --v2c --community public
-
-# Run discovery and polling manually
-podman exec librenms lnms device:poll 192.168.1.1
-
-# Validate the install
-podman exec librenms lnms validate
-
-# View logs
-podman logs -f librenms
-
-# Generate an API token for integrations
-podman exec librenms lnms api-token:add mytoken --user admin
-```
-
-Access at `http://localhost:8100`. Add devices via Devices → Add Device, specifying SNMP community string and version.
-
-**Caddy:**
-```caddyfile
-librenms.home.local { tls internal; reverse_proxy localhost:8100 }
-```
-
-## See Also
-
-- [NetBox](netbox.md)
-- [Ntopng](ntopng.md)
-- [Caddy](../networking/caddy.md)
-
----
-
-# Nebula (Overlay Mesh Network)
-
-URL: https://docs.shani.dev/doc/networking/nebula-overlay-mesh-network/
-Updated: 2026-08-28
-
-Nebula (Overlay Mesh Network) Purpose: A scalable, decentralised overlay network developed by Slack. Nodes communicate directly using certificate-based PKI…
-
-> **Part of the VPN & Tunnels series:** See [all networking docs](../networking)
-
-## Nebula (Overlay Mesh Network)
-
-**Purpose:** A scalable, decentralised overlay network developed by Slack. Nodes communicate directly using certificate-based PKI. Designed for GitOps-style config management — no web UI.
-
-### 1. Generate Certificates
-
-```bash
-# Generate CA
-nebula-cert ca -name "Home Network CA"
-
-# Generate lighthouse (coordination node) certificate
-nebula-cert sign -name "lighthouse" -ip "192.168.100.1/24"
-
-# Generate client certificate
-nebula-cert sign -name "shani-server" -ip "192.168.100.2/24"
-```
-
-### 2. Lighthouse Config (`config.yml`)
-
-```yaml
-pki:
-  ca: /etc/nebula/ca.crt
-  cert: /etc/nebula/lighthouse.crt
-  key: /etc/nebula/lighthouse.key
-
-static_host_map:
-  "192.168.100.1": ["your-vps-public-ip:4242"]
-
-lighthouse:
-  am_lighthouse: true
-
-listen:
-  host: 0.0.0.0
-  port: 4242
-
-firewall:
-  outbound: [{ port: any, proto: any, host: any }]
-  inbound: [{ port: any, proto: any, host: any }]
-```
-
-### 3. Run Container
-
-```yaml
-# ~/nebula/compose.yaml
-services:
-  nebula:
-    image: slacktechnologiesllc/nebula:latest
-    ports:
-      - 0.0.0.0:4242:4242/udp
-    volumes:
-      - /home/user/nebula:/etc/nebula:Z
-    devices:
-      - /dev/net/tun
-    cap_add:
-      - NET_ADMIN
-    restart: unless-stopped
-```
-
-```bash
-cd ~/nebula && podman-compose up -d
-```
-
-**Firewall:** `sudo firewall-cmd --add-port=4242/udp --permanent && sudo firewall-cmd --reload`
-
-> Nebula has no official web UI. Manage configs via Git and distribute with `scp` or Ansible.
-
----
-
-
-
----
-
-## See Also
-
-- [Networking](../networking) — all networking docs
-
----
-
-# NetBird
-
-URL: https://docs.shani.dev/doc/networking/netbird/
-Updated: 2026-08-28
-
-NetBird Purpose: Open-source, peer-to-peer WireGuard mesh VPN platform. The most complete self-hosted alternative to Tailscale — management dashboard, STUN…
-
-> **Part of the VPN & Tunnels series:** See [all networking docs](../networking)
-
-## NetBird
-
-**Purpose:** Open-source, peer-to-peer WireGuard mesh VPN platform. The most complete self-hosted alternative to Tailscale — management dashboard, STUN/TURN relay, and kernel-level WireGuard all run on hardware you control. Supports SSO (OIDC), ACL policies, DNS routing, and split tunnelling. Clients are available for Linux, macOS, Windows, iOS, and Android.
-
-### Architecture
-
-NetBird has three server components:
-- **Management** — API, ACL policy store, device registry
-- **Signal** — WebRTC signalling for peer hole-punching
-- **Relay (Coturn)** — TURN relay for peers behind strict NAT
-
-### Full Self-Hosted Deployment
-
-```bash
-# 1. Get the official compose stack
-curl -sSL https://raw.githubusercontent.com/netbirdio/netbird/main/infrastructure_files/docker-compose.yml \
-  -o ~/netbird/compose.yaml
-curl -sSL https://raw.githubusercontent.com/netbirdio/netbird/main/infrastructure_files/.env.example \
-  -o ~/netbird/.env
-
-# 2. Edit .env — set your domain, OIDC provider, and TURN credentials
-nano ~/netbird/.env
-```
-
-#### Key `.env` variables
-```bash
-NETBIRD_DOMAIN=netbird.example.com
-
-# OIDC provider (e.g., Authentik, Keycloak, Zitadel, or Dex)
-NETBIRD_AUTH_OIDC_CONFIGURATION_ENDPOINT=https://auth.example.com/application/o/netbird/.well-known/openid-configuration
-NETBIRD_AUTH_CLIENT_ID=netbird
-NETBIRD_AUTH_CLIENT_SECRET=changeme
-
-# TURN relay credentials
-NETBIRD_TURN_USER=coturn
-NETBIRD_TURN_PASSWORD=changeme
-```
-
-#### 3. Start all services
-```bash
-cd ~/netbird && podman-compose up -d
-```
-
-#### Services started
-- `management` on port `443` (HTTPS/gRPC)
-- `signal` on port `10000`
-- `coturn` (TURN relay) on port `3478/udp` and `5349/tcp`
-- `dashboard` (React SPA served by Nginx)
-
-**Firewall:**
-```bash
-sudo firewall-cmd --add-port=443/tcp \
-  --add-port=10000/tcp \
-  --add-port=3478/udp \
-  --add-port=5349/tcp \
-  --permanent && sudo firewall-cmd --reload
-```
-
-### Connect a Client
-
-```bash
-# Install the NetBird client
-curl -fsSL https://pkgs.netbird.io/install.sh | sh
-
-# Connect to your self-hosted management server
-netbird up --management-url https://netbird.example.com:443
-
-# Check status
-netbird status
-
-# Show peers
-netbird peers
-
-# Disconnect
-netbird down
-```
-
-### ACL Policies
-
-NetBird lets you define granular access policies per group in the dashboard:
-- Create groups (e.g., `servers`, `laptops`, `phones`)
-- Assign devices to groups
-- Create policies that allow specific traffic (e.g., `laptops` → `servers` on port 22)
-- Block all other inter-peer traffic by default
-
-### DNS Routes
-
-Route private DNS to your server's Pi-hole or AdGuard instance:
-- In the dashboard: DNS → Nameservers → Add
-- Domain: `home.local`, Nameserver: IP of your Pi-hole peer
-- Enable: all peers in the `laptops` group use this nameserver for `.home.local`
-
-### Caddy Configuration
-
-```caddyfile
-netbird.example.com {
-  reverse_proxy localhost:80
-  # gRPC for management API
-  @grpc protocol grpc
-  reverse_proxy @grpc localhost:443 {
-    transport http { versions h2c }
-  }
-}
-```
-
----
-
-
-
----
-
-## See Also
-
-- [Networking](../networking) — all networking docs
-
----
-
-# NetBox
-
-URL: https://docs.shani.dev/doc/networking/netbox/
-Updated: 2026-08-28
-
-NetBox (Network Documentation & IPAM) Purpose: Source of truth for your network infrastructure. Document IP address assignments (IPAM), VLAN configurations…
-
-> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
-
-## NetBox (Network Documentation & IPAM)
-
-**Purpose:** Source of truth for your network infrastructure. Document IP address assignments (IPAM), VLAN configurations, rack layouts, cable connections, device inventory, and circuit topology. NetBox is not a monitoring tool — it's the authoritative record of what you have and how it's connected. Integrates with Ansible, Terraform, and LibreNMS.
-
-```yaml
-# ~/netbox/compose.yml
-services:
-  netbox:
-    image: netboxcommunity/netbox:latest
-    ports: ["127.0.0.1:8101:8080"]
-    environment:
-      DB_HOST: postgres
-      DB_NAME: netbox
-      DB_USER: netbox
-      DB_PASSWORD: changeme
-      REDIS_HOST: redis
-      REDIS_PASSWORD: ""
-      SECRET_KEY: changeme-run-openssl-rand-base64-50
-      ALLOWED_HOSTS: netbox.home.local localhost
-      SUPERUSER_EMAIL: admin@home.local
-      SUPERUSER_PASSWORD: changeme
-    volumes:
-      - /home/user/netbox/media:/opt/netbox/netbox/media:Z
-    depends_on: [postgres, redis]
-    restart: unless-stopped
-
-  netbox-worker:
-    image: netboxcommunity/netbox:latest
-    command: /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py rqworker
-    environment:
-      DB_HOST: postgres
-      DB_NAME: netbox
-      DB_USER: netbox
-      DB_PASSWORD: changeme
-      REDIS_HOST: redis
-      SECRET_KEY: changeme-run-openssl-rand-base64-50
-    depends_on: [postgres, redis]
-    restart: unless-stopped
-
-  postgres:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: netbox
-      POSTGRES_PASSWORD: changeme
-      POSTGRES_DB: netbox
-    volumes: [pg_data:/var/lib/postgresql/data]
-    restart: unless-stopped
-
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-
-volumes:
-  pg_data:
-```
-
-```bash
-cd ~/netbox && podman-compose up -d
-```
-
-Access at `http://localhost:8101`. Start by defining your IP prefixes and VLANs, then populate devices and rack positions.
-
-## See Also
-
-- [LibreNMS](librenms.md)
-- [Caddy](../networking/caddy.md)
-
----
-
-# Nginx Proxy Manager
-
-URL: https://docs.shani.dev/doc/networking/nginx-proxy-manager/
-Updated: 2026-08-28
-
-Nginx Proxy Manager Purpose: GUI-based reverse proxy with Let's Encrypt integration. If you find Caddy's Caddyfile syntax unfamiliar, NPM offers a click-th…
-
-> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
-
-## Nginx Proxy Manager
-
-**Purpose:** GUI-based reverse proxy with Let's Encrypt integration. If you find Caddy's Caddyfile syntax unfamiliar, NPM offers a click-through interface for creating proxy hosts, redirects, and SSL termination.
-
-```yaml
-# ~/npm/compose.yml
-services:
-  npm:
-    image: jc21/nginx-proxy-manager:latest
-    ports:
-      - "80:80"
-      - "443:443"
-      - "127.0.0.1:81:81"
-    environment:
-      DB_MYSQL_HOST: db
-      DB_MYSQL_PORT: 3306
-      DB_MYSQL_USER: npm
-      DB_MYSQL_PASSWORD: changeme
-      DB_MYSQL_NAME: npm
-    volumes:
-      - /home/user/npm/data:/data:Z
-      - /home/user/npm/letsencrypt:/etc/letsencrypt:Z
-    depends_on: [db]
-    restart: unless-stopped
-
-  db:
-    image: mariadb:11
-    environment:
-      MYSQL_ROOT_PASSWORD: rootchangeme
-      MYSQL_DATABASE: npm
-      MYSQL_USER: npm
-      MYSQL_PASSWORD: changeme
-    volumes: [db_data:/var/lib/mysql]
-    restart: unless-stopped
-
-volumes:
-  db_data:
-```
-
-```bash
-cd ~/npm && podman-compose up -d
-```
-
-Access the admin UI at `http://localhost:81`. Default credentials: `admin@example.com` / `changeme` — change immediately after first login. Add proxy hosts via Dashboard → Proxy Hosts → Add Proxy Host; enable Let's Encrypt in the SSL tab.
-
----
-
-
-
----
-
-## See Also
-
-- [Networking & Infrastructure](networking) — overview
-
----
-
-# Ntopng
-
-URL: https://docs.shani.dev/doc/networking/ntopng/
-Updated: 2026-08-28
-
-Ntopng (Network Traffic Analysis) Purpose: Real-time network traffic monitoring and analysis. Shows active flows, top talkers, protocol breakdown, geo-IP m…
-
-> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
-
-## Ntopng (Network Traffic Analysis)
-
-**Purpose:** Real-time network traffic monitoring and analysis. Shows active flows, top talkers, protocol breakdown, geo-IP mapping, and historical traffic trends. Can integrate with nProbe for deep packet inspection and with pfSense/OPNsense via NetFlow/sFlow export.
-
-```yaml
-# ~/ntopng/compose.yaml
-services:
-  ntopng:
-    image: ntop/ntopng:stable
-    network_mode: host
-    volumes:
-      - /home/user/ntopng/data:/var/lib/ntopng:Z
-    environment:
-      NTOPNG_COMMUNITY: true
-    command: --interface=eth0 --http-port=3000 --data-dir=/var/lib/ntopng --community
-    restart: unless-stopped
-```
-
-```bash
-cd ~/ntopng && podman-compose up -d
-```
-
-> Replace `eth0` with your primary network interface name (`ip link show`). `--network host` is required for ntopng to see actual traffic.
-
-## See Also
-
-- [LibreNMS](librenms.md)
-- [Caddy](../networking/caddy.md)
-
----
-
-# OpenVPN
-
-URL: https://docs.shani.dev/doc/networking/openvpn/
-Updated: 2026-08-28
-
-OpenVPN Purpose: Legacy, highly configurable VPN standard. Use when you need specific cipher suites, client certificate management, or compatibility with o…
-
-> **Part of the VPN & Tunnels series:** See [all networking docs](../networking)
-
-## OpenVPN
-
-**Purpose:** Legacy, highly configurable VPN standard. Use when you need specific cipher suites, client certificate management, or compatibility with older devices.
-
-```yaml
-# ~/openvpn/compose.yaml
-services:
-  openvpn:
-    image: kylemanna/openvpn
-    ports:
-      - 0.0.0.0:1194:1194/udp
-    volumes:
-      - /home/user/openvpn:/etc/openvpn:Z
-    cap_add:
-      - NET_ADMIN
-      - SYS_MODULE
-    sysctls:
-      net.ipv4.ip_forward: 1
-    restart: unless-stopped
-```
-
-```bash
-cd ~/openvpn && podman-compose up -d
-```
-
----
-
-
-
----
-
-## See Also
-
-- [Networking](../networking) — all networking docs
-
----
-
-# Outline VPN
-
-URL: https://docs.shani.dev/doc/networking/outline-vpn/
-Updated: 2026-08-28
-
-Outline VPN Purpose: Shadowsocks-based proxy server by Jigsaw (Google). Designed for ease of deployment and resistance to traffic fingerprinting — traffic …
-
-> **Part of the VPN & Tunnels series:** See [all networking docs](../networking)
-
-## Outline VPN
-
-**Purpose:** Shadowsocks-based proxy server by Jigsaw (Google). Designed for ease of deployment and resistance to traffic fingerprinting — traffic is indistinguishable from regular HTTPS to deep packet inspection. Unlike WireGuard, Outline is proxy-based rather than a full network tunnel, making it suitable for censorship circumvention where WireGuard is blocked. Management is via the Outline Manager desktop app (Linux/macOS/Windows) which generates a one-line `docker run` command and per-user access keys.
-
-```yaml
-# ~/outline/compose.yaml
-# Note: Outline Manager generates an exact run command including ports and secrets.
-# Use its output directly. The compose below is a representative template.
-services:
-  outline:
-    image: quay.io/outline/shadowbox:stable
-    ports:
-      - "0.0.0.0:8080:8080/tcp"
-      - "0.0.0.0:8080:8080/udp"
-      - "0.0.0.0:9090:9090/tcp"    # management API (bind to 127.0.0.1 if behind a proxy)
-    volumes:
-      - /home/user/outline/persisted-state:/root/shadowbox/persisted-state:Z
-    environment:
-      SB_API_PORT: "9090"
-      SB_API_PREFIX: "your-random-prefix"   # generated by Outline Manager
-      SB_CERTIFICATE_FILE: /root/shadowbox/persisted-state/shadowbox-selfsigned.crt
-      SB_PRIVATE_KEY_FILE: /root/shadowbox/persisted-state/shadowbox-selfsigned.key
-    restart: unless-stopped
-```
-
-> **Recommended:** Use the **Outline Manager** desktop app to generate the exact command, copy the `docker run` output and convert it to compose. The Manager handles certificate generation, port selection, and API key management automatically.
-
-**Firewall:** Open the data port (default `8080/tcp` and `8080/udp`) and the management API port on your server.
-
-```bash
-sudo firewall-cmd --add-port=8080/tcp --add-port=8080/udp --permanent
-sudo firewall-cmd --reload
-```
-
-#### Clients
-Distribute per-user access keys (ss:// URIs) generated by the Manager. Users install the Outline Client app on Android, iOS, Windows, macOS, or Linux.
-
-> Outline and Hysteria 2 solve different problems. Outline is optimised for **censorship circumvention** (traffic obfuscation). Hysteria 2 is optimised for **high-loss / high-latency networks** (QUIC transport). Use Outline where WireGuard is fingerprinted and blocked; use Hysteria 2 where packet loss degrades TCP-based protocols.
-
----
-
-
-
----
-
-## See Also
-
-- [Networking](../networking) — all networking docs
-
----
-
-# Pangolin
-
-URL: https://docs.shani.dev/doc/networking/pangolin/
-Updated: 2026-08-28
-
-Purpose: A fully open-source alternative to Cloudflare Tunnel. Expose local services via a public HTTPS URL through an encrypted WireGuard tunnel to a VPS …
-
-**Purpose:** A fully open-source alternative to Cloudflare Tunnel. Expose local services via a public HTTPS URL through an encrypted WireGuard tunnel to a VPS you control. No third-party cloud — you own the entire path. Supports identity-aware access control per resource.
-
-Pangolin has two components:
-- **Pangolin** — the server, runs on a VPS, receives tunnelled traffic and routes it to your services
-- **Newt** — the agent, runs on your Shani OS machine, creates the outbound WireGuard tunnel
-
-### 1. Server Setup (on a VPS)
-
-`/home/user/pangolin/config/config.yml`:
-```yaml
-app:
-  dashboard_url: https://pangolin.yourdomain.com
-  base_domain: yourdomain.com
-  admin_email: admin@yourdomain.com
-  admin_password: changeme
-  log_level: info
-server:
-  external_port: 443
-  internal_port: 8080
-db:
-  encryption_key: "your-32-char-hex-key"
-```
-
-```yaml
-# ~/pangolin/compose.yaml
-services:
-  pangolin:
-    image: fosrl/pangolin:latest
-    ports:
-      - 0.0.0.0:443:443
-      - 0.0.0.0:51820:51820/udp
-    volumes:
-      - /home/user/pangolin/config:/app/config:Z
-      - /home/user/pangolin/data:/app/data:Z
-    restart: unless-stopped
-```
-
-```bash
-cd ~/pangolin && podman-compose up -d
-```
-
-Access the dashboard at `https://pangolin.yourdomain.com`, create a site, and copy the Newt credentials.
-
-#### VPS firewall
-open `443/tcp` and `51820/udp`
-
-### 2. Newt Agent (on this system)
-
-```yaml
-# ~/newt/compose.yaml
-services:
-  newt:
-    image: fosrl/newt:latest
-    environment:
-      PANGOLIN_URL: https://pangolin.yourdomain.com
-      NEWT_ID: <your-newt-id>
-      NEWT_SECRET: <your-newt-secret>
-    restart: unless-stopped
-```
-
-```bash
-cd ~/newt && podman-compose up -d
-```
-
-## See Also
-
-- [WireGuard / WG-Easy](./wireguard-easy.md)
-- [Cloudflared](../networking/cloudflared.md)
-- [NetBird](./netbird.md)
-
----
-
-# phpIPAM — IP Address Management
-
-URL: https://docs.shani.dev/doc/networking/phpipam/
-Updated: 2026-08-28
-
-phpIPAM (Lightweight IP Address Management) Purpose: Web-based IP address management tool. Track which IPs are assigned, to what device, who requested the …
-
-> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
-
-## phpIPAM (Lightweight IP Address Management)
-
-**Purpose:** Web-based IP address management tool. Track which IPs are assigned, to what device, who requested the allocation, and which subnets are full. phpIPAM is lighter than NetBox for teams who just need clean IPAM without the full network topology and asset management features. Integrates with PowerDNS for automatic PTR record updates when IPs are assigned.
-
-```yaml
-# ~/phpipam/compose.yaml
-services:
-  phpipam-web:
-    image: phpipam/phpipam-www:latest
-    ports:
-      - 127.0.0.1:8200:80
-    environment:
-      TZ: Asia/Kolkata
-      IPAM_DATABASE_HOST: db
-      IPAM_DATABASE_USER: phpipam
-      IPAM_DATABASE_PASS: changeme
-      IPAM_DATABASE_NAME: phpipam
-    volumes:
-      - /home/user/phpipam/logo:/phpipam/css/images/logo:Z
-    depends_on: [db]
-    restart: unless-stopped
-
-  phpipam-cron:
-    image: phpipam/phpipam-cron:latest
-    environment:
-      TZ: Asia/Kolkata
-      IPAM_DATABASE_HOST: db
-      IPAM_DATABASE_USER: phpipam
-      IPAM_DATABASE_PASS: changeme
-      IPAM_DATABASE_NAME: phpipam
-      SCAN_INTERVAL: 1h
-    depends_on: [db]
-    restart: unless-stopped
-
-  db:
-    image: mariadb:11
-    environment:
-      MYSQL_ROOT_PASSWORD: rootchangeme
-      MYSQL_DATABASE: phpipam
-      MYSQL_USER: phpipam
-      MYSQL_PASSWORD: changeme
-    volumes: [db_data:/var/lib/mysql]
-    restart: unless-stopped
-
-volumes:
-  db_data:
-```
-
-```bash
-cd ~/phpipam && podman-compose up -d
-```
-
-Access at `http://localhost:8200`. On first run, select **Automatic database installation** and create the admin account. Then define your subnets and start allocating IPs.
-
-**Caddy:**
-```caddyfile
-ipam.home.local { tls internal; reverse_proxy localhost:8200 }
-```
-
-> **NetBox vs phpIPAM:** Use phpIPAM for pure IPAM (subnets, IPs, reservations). Use NetBox when you also need rack diagrams, cable management, VLAN documentation, and device inventory.
-
----
-
-
-
----
-
-## See Also
-
-- [Networking & Infrastructure](networking) — overview
-
----
-
-# Pi-hole
-
-URL: https://docs.shani.dev/doc/networking/pi-hole/
-Updated: 2026-08-28
-
-Pi-hole Purpose: Network-wide DNS ad and tracker blocker. Runs as your LAN's DNS server and blocks ads, telemetry, and malware domains for every device — p…
-
-## Pi-hole
-
-**Purpose:** Network-wide DNS ad and tracker blocker. Runs as your LAN's DNS server and blocks ads, telemetry, and malware domains for every device — phones, smart TVs, IoT — without installing anything on them.
-
-```yaml
-# ~/pihole/compose.yaml
-services:
-  pihole:
-    image: pihole/pihole:latest
-    ports:
-      - 127.0.0.1:8083:80
-      - 53:53/tcp
-      - 53:53/udp
-    volumes:
-      - /home/user/pihole/etc-pihole:/etc/pihole:Z
-      - /home/user/pihole/etc-dnsmasq.d:/etc/dnsmasq.d:Z
-    environment:
-      TZ: Asia/Kolkata
-      WEBPASSWORD: changeme
-    restart: unless-stopped
-```
-
-```bash
-cd ~/pihole && podman-compose up -d
-```
-
-**Firewall:** (allow DNS from LAN):
-```bash
-sudo firewall-cmd --add-service=dns --permanent && sudo firewall-cmd --reload
-```
-```bash
-# Update gravity (blocklists) manually
-podman exec pihole pihole -g
-
-# View real-time query log
-podman exec pihole pihole -t
-
-# Enable/disable Pi-hole blocking
-podman exec pihole pihole enable
-podman exec pihole pihole disable 300  # disable for 300 seconds
-
-# Add a domain to whitelist
-podman exec pihole pihole -w example.com
-
-# Add a domain to blacklist
-podman exec pihole pihole -b ads.example.com
-
-# Remove from whitelist
-podman exec pihole pihole -w -d example.com
-
-# View stats summary
-podman exec pihole pihole -c
-
-# Flush logs
-podman exec pihole pihole flush
-
-# Restart DNS resolver
-podman exec pihole pihole restartdns
-
-# Show version info
-podman exec pihole pihole version
-```
-
-> Set your router's DHCP DNS option to your server's LAN IP. All devices will automatically use Pi-hole.
-
-**Caddy:**
-```caddyfile
-pihole.home.local { tls internal; reverse_proxy localhost:8083 }
-```
-
-## See Also
-
-- [AdGuard Home](adguard-home.md)
-- [Unbound](unbound.md)
-- [Blocky](blocky.md)
-- [Technitium DNS Server](technitium.md)
-
----
-
-# Pritunl
-
-URL: https://docs.shani.dev/doc/networking/pritunl/
-Updated: 2026-08-28
-
-Purpose: Enterprise-grade VPN with a modern web UI. Supports WireGuard and OpenVPN, SSO, multi-site routing, and audit logging. Requires MongoDB. 1. MongoD…
-
-**Purpose:** Enterprise-grade VPN with a modern web UI. Supports WireGuard and OpenVPN, SSO, multi-site routing, and audit logging. Requires MongoDB.
-
-### 1. MongoDB Backend
-```yaml
-# ~/pritunl-mongo/compose.yaml
-services:
-  pritunl-mongo:
-    image: mongo:6
-    ports:
-      - 127.0.0.1:27017:27017
-    volumes:
-      - /home/user/pritunl/mongo:/data/db:Z
-    restart: unless-stopped
-```
-
-```bash
-cd ~/pritunl-mongo && podman-compose up -d
-```
-
-### 2. Pritunl Server
-```yaml
-# ~/pritunl/compose.yaml
-services:
-  pritunl:
-    image: linuxserver/pritunl:latest
-    network_mode: host
-    volumes:
-      - /home/user/pritunl/config:/etc/pritunl:Z
-    cap_add:
-      - NET_ADMIN
-      - SYS_ADMIN
-    restart: unless-stopped
-```
-
-```bash
-cd ~/pritunl && podman-compose up -d
-```
-
-#### Initial setup
-1. Generate setup key: `podman exec pritunl pritunl setup-key`
-2. Access UI: `https://<server-ip>:443`
-3. Set MongoDB URI: `mongodb://127.0.0.1:27017/pritunl`
-4. Create Org → Add Users → Create Server → Attach → Start
-
-**Firewall:** `sudo firewall-cmd --add-port=443/tcp --add-port=51820/udp --add-port=1194/udp --permanent && sudo firewall-cmd --reload`
-
-## See Also
-
-- [WireGuard / WG-Easy](./wireguard-easy.md)
-- [OpenVPN](../networking/openvpn.md)
-- [Firezone](./firezone.md)
-
----
-
-# SearXNG
-
-URL: https://docs.shani.dev/doc/networking/searxng/
-Updated: 2026-08-28
-
-SearXNG Purpose: Privacy-respecting meta-search engine. Aggregates results from Google, Bing, DuckDuckGo, and 70+ other sources without tracking, logging, …
-
-> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
-
-## SearXNG
-
-**Purpose:** Privacy-respecting meta-search engine. Aggregates results from Google, Bing, DuckDuckGo, and 70+ other sources without tracking, logging, or profiling users. Run it on your server and use it as your default browser search engine.
-
-```yaml
-# ~/searxng/compose.yaml
-services:
-  searxng:
-    image: searxng/searxng:latest
-    ports:
-      - 127.0.0.1:8091:8080
-    volumes:
-      - /home/user/searxng/settings:/etc/searxng:Z
-    environment:
-      SEARXNG_BASE_URL: https://search.home.local
-    restart: unless-stopped
-```
-
-```bash
-cd ~/searxng && podman-compose up -d
-```
-
----
-
-
-
----
-
-## See Also
-
-- [Networking & Infrastructure](networking) — overview
-
----
-
-# Squid (Caching Proxy)
-
-URL: https://docs.shani.dev/doc/networking/squid-caching-proxy/
-Updated: 2026-08-28
-
-Squid (Caching Proxy) Purpose: High-performance HTTP/HTTPS caching proxy. Squid caches web content so repeated requests are served from disk rather than th…
-
-> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
-
-## Squid (Caching Proxy)
-
-**Purpose:** High-performance HTTP/HTTPS caching proxy. Squid caches web content so repeated requests are served from disk rather than the internet — saving bandwidth, reducing latency, and enabling content filtering by URL, domain, or MIME type. Useful in homelabs with metered internet connections, for caching container image pulls, or as a transparent proxy for auditing outbound HTTP traffic from containers.
-
-```yaml
-# ~/squid/compose.yaml
-services:
-  squid:
-    image: ubuntu/squid:latest
-    ports:
-      - 127.0.0.1:3128:3128
-    volumes:
-      - /home/user/squid/squid.conf:/etc/squid/squid.conf:ro,Z
-      - /home/user/squid/cache:/var/spool/squid:Z
-      - /home/user/squid/logs:/var/log/squid:Z
-    restart: unless-stopped
-```
-
-##### Minimal `squid.conf`
-
-```
-# Allow LAN clients
-acl localnet src 192.168.0.0/16
-acl localnet src 10.0.0.0/8
-
-# Standard safe ports
-acl SSL_ports port 443
-acl Safe_ports port 80 443 21 70 210 280 488 591 777 1025-65535
-acl CONNECT method CONNECT
-
-http_access deny !Safe_ports
-http_access deny CONNECT !SSL_ports
-http_access allow localnet
-http_access allow localhost
-http_access deny all
-
-http_port 3128
-
-# Cache configuration
-cache_dir ufs /var/spool/squid 10000 16 256   # 10 GB cache
-maximum_object_size 512 MB
-cache_mem 512 MB
-maximum_object_size_in_memory 10 MB
-
-# Access log
-access_log /var/log/squid/access.log squid
-```
-
-```bash
-cd ~/squid && podman-compose up -d
-
-# Initialise the cache directory (first run)
-podman exec squid squid -z
-
-# View access log
-podman exec squid tail -f /var/log/squid/access.log
-
-# Force cache refresh for a URL
-podman exec squid squidclient -m PURGE http://example.com/
-
-# Check cache statistics
-podman exec squid squidclient mgr:info
-```
-
-#### Use Squid as a proxy for container pulls
-```bash
-# Set Podman to pull via Squid
-export https_proxy=http://localhost:3128
-export http_proxy=http://localhost:3128
-podman pull nginx:alpine
-```
-
-**Caddy:**
-```caddyfile
-squid.home.local { tls internal; reverse_proxy localhost:3128 }
-```
-
----
-
-
-
----
-
-## See Also
-
-- [Networking & Infrastructure](networking) — overview
-
----
-
-# Technitium DNS Server
-
-URL: https://docs.shani.dev/doc/networking/technitium/
-Updated: 2026-08-28
-
-Technitium DNS Server Purpose: Full-featured authoritative and recursive DNS server with a clean web UI. Goes further than Pi-hole and AdGuard Home — Techn…
-
-> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
-
-## Technitium DNS Server
-
-**Purpose:** Full-featured authoritative and recursive DNS server with a clean web UI. Goes further than Pi-hole and AdGuard Home — Technitium can host your own DNS zones (split-horizon DNS for `home.local`), act as a DHCP server, supports DNS-over-HTTPS/TLS/QUIC, has advanced conditional forwarding, and includes built-in ad-blocking. The right choice when you need proper DNS zone management alongside ad-blocking.
-
-```yaml
-# ~/technitium-dns/compose.yaml
-services:
-  technitium-dns:
-    image: technitium/dns-server:latest
-    ports:
-      - 53:53/udp
-      - 53:53/tcp
-      - 127.0.0.1:5380:5380
-      - 853:853/tcp
-      - 443:443/tcp
-    volumes:
-      - /home/user/technitium/config:/etc/dns:Z
-    environment:
-      DNS_SERVER_DOMAIN: dns.home.local
-      DNS_SERVER_ADMIN_PASSWORD: changeme
-    restart: unless-stopped
-```
-
-```bash
-cd ~/technitium-dns && podman-compose up -d
-```
-
-Access the web UI at `http://localhost:5380`. Configure zones, forwarders, and blocklists in the admin panel.
-
-> **Pi-hole vs AdGuard vs Technitium:** Use Pi-hole or AdGuard for simple network-wide ad-blocking. Use Technitium when you also need to manage DNS zones for internal services or run DHCP from the same interface.
-
-## See Also
-
-- [Pi-hole](pihole.md)
-- [AdGuard Home](adguard-home.md)
-- [Unbound](unbound.md)
-- [PowerDNS](powerdns.md)
-- [Kea DHCP](kea-dhcp.md)
-
----
-
-# Traefik
-
-URL: https://docs.shani.dev/doc/networking/traefik/
-Updated: 2026-08-28
-
-Traefik Purpose: Container-native reverse proxy and load balancer. Auto-discovers services by watching Docker/Podman labels — no config file reload needed …
-
-> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
-
-## Traefik
-
-**Purpose:** Container-native reverse proxy and load balancer. Auto-discovers services by watching Docker/Podman labels — no config file reload needed when you start a new container. Supports automatic HTTPS via Let's Encrypt, weighted load balancing, sticky sessions, rate limiting, circuit breakers, and middleware chains. Best for setups where containers come and go frequently and you want routing to update automatically.
-
-```yaml
-# ~/traefik/compose.yml
-services:
-  traefik:
-    image: traefik:v3
-    ports:
-      - "0.0.0.0:80:80"
-      - "0.0.0.0:443:443"
-      - "127.0.0.1:8080:8080"   # Dashboard
-    command:
-      - --api.dashboard=true
-      - --api.insecure=false
-      - --providers.docker=true
-      - --providers.docker.exposedbydefault=false
-      - --providers.file.directory=/config
-      - --entrypoints.web.address=:80
-      - --entrypoints.web.http.redirections.entrypoint.to=websecure
-      - --entrypoints.websecure.address=:443
-      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
-      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
-      - --certificatesresolvers.letsencrypt.acme.email=you@example.com
-      - --certificatesresolvers.letsencrypt.acme.storage=/certs/acme.json
-      - --log.level=INFO
-      - --accesslog=true
-    volumes:
-      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
-      - /home/user/traefik/config:/config:Z
-      - /home/user/traefik/certs:/certs:Z
-    restart: unless-stopped
-```
-
-```bash
-cd ~/traefik && podman-compose up -d
-```
-
-#### Expose a service via labels (no Caddyfile edit required)
-```yaml
-services:
-  myapp:
-    image: myapp:latest
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.myapp.rule=Host(`app.example.com`)"
-      - "traefik.http.routers.myapp.entrypoints=websecure"
-      - "traefik.http.routers.myapp.tls.certresolver=letsencrypt"
-      - "traefik.http.services.myapp.loadbalancer.server.port=3000"
-```
-
-#### Load balancing and middleware via dynamic config (`/home/user/traefik/config/dynamic.yml`)
-```yaml
-http:
-  middlewares:
-    rate-limit:
-      rateLimit:
-        average: 100
-        burst: 50
-
-    internal-only:
-      ipAllowList:
-        sourceRange:
-          - "192.168.1.0/24"
-          - "100.64.0.0/10"     # Tailscale
-
-  services:
-    myapp-weighted:
-      weighted:
-        services:
-          - name: myapp-v1
-            weight: 90
-          - name: myapp-v2
-            weight: 10           # Canary: 10% to new version
-
-  routers:
-    myapp:
-      rule: Host(`app.example.com`)
-      service: myapp-weighted
-      entryPoints: [websecure]
-      middlewares: [rate-limit]
-      tls:
-        certResolver: letsencrypt
-```
-
-#### Secure the dashboard behind Caddy
-```caddyfile
-traefik.home.local { tls internal; reverse_proxy localhost:8080 }
-```
-
----
-
-
-
----
-
-## See Also
-
-- [Networking & Infrastructure](networking) — overview
-
----
-
-# Unbound
-
-URL: https://docs.shani.dev/doc/networking/unbound/
-Updated: 2026-08-28
-
-Unbound (Recursive DNS Resolver) Purpose: Validating, caching, recursive DNS resolver. Use it upstream of Pi-hole or AdGuard Home for DNSSEC validation and…
-
-> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
-
-## Unbound (Recursive DNS Resolver)
-
-**Purpose:** Validating, caching, recursive DNS resolver. Use it upstream of Pi-hole or AdGuard Home for DNSSEC validation and to eliminate your ISP's DNS from the picture entirely. Queries go directly to root nameservers.
-
-##### Minimal `unbound.conf`
-
-```yaml
-# /home/user/unbound/unbound.conf
-server:
-  interface: 0.0.0.0
-  port: 53
-  do-ip6: no
-  prefetch: yes
-  cache-min-ttl: 60
-  cache-max-ttl: 86400
-  msg-cache-size: 64m
-  rrset-cache-size: 128m
-  access-control: 127.0.0.0/8 allow
-  access-control: 192.168.0.0/16 allow
-
-forward-zone:
-  name: "."
-  forward-addr: 1.1.1.1
-  forward-addr: 9.9.9.9
-```
-
-```yaml
-# ~/unbound/compose.yaml
-services:
-  unbound:
-    image: mvance/unbound
-    ports:
-      - 127.0.0.1:5335:53/tcp
-      - 127.0.0.1:5335:53/udp
-    volumes:
-      - /home/user/unbound/unbound.conf:/opt/unbound/etc/unbound/unbound.conf:ro,Z
-    restart: unless-stopped
-```
-
-```bash
-cd ~/unbound && podman-compose up -d
-```
-
-Verify resolution through the resolver:
-
-```bash
-dig @localhost -p 5335 example.com +short
-```
-
-In Pi-hole: Settings → DNS → Custom upstream DNS → `127.0.0.1#5335`. Disable all other upstream DNS entries.
-
-## See Also
-
-- [Pi-hole](pihole.md)
-- [AdGuard Home](adguard-home.md)
-- [Technitium DNS Server](technitium.md)
-
----
-
-# WireGuard / WG-Easy
-
-URL: https://docs.shani.dev/doc/networking/wireguard-easy/
-Updated: 2026-08-28
-
-All VPN and tunnel solutions on this system can run fully containerised. Rootless containers handle traffic routing but require specific capabilities (NETA…
-
-> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
-
-All VPN and tunnel solutions on this system can run fully containerised. Rootless containers handle traffic routing but require specific capabilities (`NET_ADMIN`, `NET_RAW`), kernel modules (`tun`), and IP forwarding enabled on the host.
-
----
-
-## Key Concepts
-
-#### WireGuard vs OpenVPN vs IPSec — when interviewers ask
-WireGuard: modern (2015), small codebase (~4000 lines), fast, kernel-level, uses fixed modern crypto (ChaCha20, Curve25519). No backward compatibility negotiation — a feature, not a limitation. OpenVPN: mature (2001), large ecosystem, configurable cipher suites, userspace TLS so slower, supports TCP mode (useful when UDP is blocked). IPSec: the enterprise/router standard, complex to configure, built into most OSes natively.
-
-#### Mesh VPN topology vs hub-and-spoke
-Traditional VPNs are hub-and-spoke — all client traffic flows through a central VPN server. Mesh VPNs (Tailscale, NetBird, Nebula, ZeroTier) connect every peer directly to every other peer using STUN/TURN for NAT traversal. Advantages: lower latency (direct peer-to-peer), no single point of failure, no bandwidth bottleneck at the hub. Tailscale's control plane manages the key exchange; the data plane is direct WireGuard.
-
-#### STUN vs TURN vs ICE
-- **STUN** (Session Traversal Utilities for NAT) — tells a client its public IP and port as seen from the internet. Used for hole-punching.
-- **TURN** (Traversal Using Relays around NAT) — a relay that proxies traffic when direct hole-punching fails (symmetric NAT). More expensive (all traffic flows through the relay).
-- **ICE** (Interactive Connectivity Establishment) — the negotiation protocol that tries STUN first, falls back to TURN. Used by WebRTC and mesh VPNs.
-
-#### Zero-trust network access (ZTNA) vs VPN
-A traditional VPN grants access to the network — once connected, the user can typically reach everything on the network. ZTNA grants access to specific applications or resources, not the network itself. Firezone and Teleport implement ZTNA: you get access to `postgres.internal:5432` not to the entire `10.0.0.0/8` network. Better for the principle of least privilege.
-
-#### Tunnel overhead and MTU
-Every VPN tunnel adds overhead to each packet (headers, encryption padding). WireGuard adds ~60 bytes. This reduces the effective inner MTU below the standard 1500 bytes — if you send a full-size 1500-byte packet through a WireGuard tunnel, the outer packet exceeds the link MTU and gets fragmented or dropped. Solutions: (1) set the WireGuard client MTU to 1420 (`MTU = 1420` in wg0.conf), (2) enable MSS clamping on the server's PostUp iptables rule to automatically tell TCP connections about the reduced MTU.
-
-#### Split tunnel security implications
-With a split tunnel (`AllowedIPs = 192.168.1.0/24`), only traffic to the home LAN goes through the VPN — all other internet traffic goes directly from the client's ISP. This means: (1) DNS queries for non-`.home.local` domains don't use your Pi-hole, (2) your ISP can still see your general browsing, (3) a malicious website can't be blocked by your home DNS. A full tunnel (`AllowedIPs = 0.0.0.0/0`) routes everything through home, but adds latency and uses your home bandwidth. Choose based on the use case.
-
-#### Cloudflare Tunnel vs self-hosted reverse proxy — the trade-off
-Cloudflare Tunnel (cloudflared) exposes a local service to the internet without opening firewall ports or having a public IP. The tunnel connects outbound to Cloudflare's network, which terminates HTTPS for your domain. Trade-offs: you must trust Cloudflare to terminate your TLS (they see plaintext), your availability depends on Cloudflare's uptime, and all traffic passes through their network (latency + bandwidth cost for large transfers). For services that don't need to bypass Cloudflare, Pangolin (self-hosted) or a VPS-based reverse proxy (frp) gives you the same capability without the dependency.
-
-#### NAT traversal and hole-punching
-When two peers are both behind NAT (typical home routers), neither can initiate a direct connection to the other because there's no public IP:port mapping. Hole-punching works by having both peers send UDP packets to each other simultaneously — each packet causes the NAT to create a mapping for the return direction, opening a bidirectional path. STUN servers facilitate this by telling each peer their external address. This fails with symmetric NAT (different external port for each destination), which requires a TURN relay. WireGuard-based mesh VPNs (Tailscale, NetBird) handle all of this automatically.
-
-#### Access control at the VPN layer vs application layer
-A VPN (WireGuard, OpenVPN) controls who can reach the network; the application still controls what authenticated users can do. Zero-Trust tools (Firezone, Teleport) add a third layer: per-application access policies enforced at the gateway — user Alice can SSH to server A but not server B, even though both are on the same VPN subnet. This maps access control to identity (user + device) rather than just network position. Audit logs at the gateway layer (Teleport's session recording) are also available here, not possible with a plain VPN.
-
-#### Protocol obfuscation — when and why
-Standard WireGuard and OpenVPN traffic patterns are fingerprint-able by deep packet inspection (DPI). ISPs and national firewalls (GFW) identify and block them. Obfuscation tools (Xray/V2Ray with VLESS+XTLS-Reality, Hysteria2) make VPN traffic look like normal HTTPS, video streaming, or QUIC traffic. This is relevant for: (1) countries with internet censorship, (2) corporate networks that block non-HTTP outbound, (3) ISPs that throttle VPN traffic. Hysteria2 additionally uses QUIC's congestion control to improve performance on high-latency, high-loss links (satellite, mobile).
-
-#### WireGuard cryptography — what you're actually running
-WireGuard uses Curve25519 for key exchange (ECDH), ChaCha20-Poly1305 for symmetric encryption (authenticated, AEAD), and BLAKE2s for hashing. This is a modern, audited cryptographic stack — significantly simpler than OpenVPN's TLS negotiation (which can be misconfigured to use weak ciphers). Each peer has a 32-byte public key derived from its private key. Handshakes are silent — WireGuard never responds to unauthenticated packets, making it invisible to port scanners.
-
-#### Tailscale vs Headscale — what the control plane actually does
-WireGuard handles data-plane encryption; the control plane distributes public keys, allocates IP addresses, and implements NAT traversal. Tailscale's control plane is managed (tailscale.com servers). Headscale self-hosts the control plane — same WireGuard data plane, but your server handles key distribution and NAT traversal coordination. The trade-off: Headscale means no Tailscale SaaS dependency, but you run the coordination server, and some Tailscale features (MagicDNS via their resolvers, some client apps) may have reduced functionality.
-
-#### Key rotation and peer management at scale
-WireGuard has no built-in PKI — each peer is a static public key. At small scale (10 peers) this is manageable. At medium scale (50+ peers), use Headscale's API or Netbird's management plane to automate key distribution and rotation. Key compromise in WireGuard requires removing the peer's public key from all other peers' `AllowedPeers` lists — in a mesh of 50 nodes, this means 49 config updates. This is why a management plane (Headscale, Netbird, Innernet) is not optional at scale.
-
-#### VPN split tunneling — security implications
-Full tunnel routes all traffic through the VPN — protects DNS queries, prevents local network leakage, but adds latency and routes your ISP's traffic through your home server. Split tunnel routes only specific CIDRs through the VPN — your home LAN is accessible, but public traffic goes direct. Security risk: split tunnel exposes your traffic on the exit network (corporate WiFi, coffee shop) for non-VPN-routed traffic. DNS leak: even with split tunnel, ensure DNS queries for home resources go through the VPN resolver, not the local network's DNS.
-
----
-
-## Prerequisites
-
-Before running any VPN container, enable IP forwarding and load the TUN module:
-
-```bash
-# Enable IPv4 and IPv6 forwarding
-sudo sysctl -w net.ipv4.ip_forward=1
-sudo sysctl -w net.ipv6.conf.all.forwarding=1
-
-# Make it persistent across reboots
-echo "net.ipv4.ip_forward=1" | sudo tee /etc/sysctl.d/99-ipforward.conf
-echo "net.ipv6.conf.all.forwarding=1" | sudo tee -a /etc/sysctl.d/99-ipforward.conf
-
-# Load the TUN/TAP module (usually auto-loaded on first use)
-sudo modprobe tun
-```
-
----
-
-## Quick Selection Guide
-
-| Tool | Best For | Complexity | Web UI | Protocol |
-|------|----------|------------|--------|----------|
-| **WG-Easy** | Home/SOHO WireGuard with a clean UI | Low | ✅ | WireGuard |
-| **Tailscale** | Zero-config mesh for personal/team use | Low | ✅ App | WireGuard (managed) |
-| **Headscale + Headplane** | Self-hosted Tailscale control server | Medium | ✅ | WireGuard |
-| **Cloudflared** | Expose services publicly, no port forwarding | Low | ✅ Dashboard | HTTPS/TLS |
-| **Pangolin + Newt** | Self-hosted tunnel server, full data ownership | Medium | ✅ | WireGuard |
-| **NetBird** | Open-source self-hosted Tailscale alternative | Medium | ✅ | WireGuard |
-| **Pritunl** | Enterprise VPN — SSO, multi-site, audit logs | Medium | ✅ | WireGuard / OpenVPN |
-| **Firezone** | Zero-trust access (ZTNA), granular policies | High | ✅ | WireGuard |
-| **Nebula** | Decentralised mesh, cert-based auth, GitOps | Medium | ❌ CLI | Nebula (UDP) |
-| **ZeroTier** | ZeroTier network with self-hosted controller | Medium | ✅ | ZeroTier (UDP) |
-| **Hysteria 2** | High-loss / censored networks (QUIC) | Medium | ⚠️ Experimental | QUIC (HTTP/3) |
-| **OpenVPN** | Legacy compatibility, cert-based auth | Medium | ⚠️ Community | UDP/TCP |
-| **WireGuard Road Warrior** | Manual split-tunnel config for mobile clients | Medium | ❌ CLI | WireGuard |
-| **Outline VPN** | Simple Shadowsocks proxy for censorship resistance | Low | ✅ App | Shadowsocks |
-| **Xray / V2Ray** | Protocol-obfuscating proxy for censored networks | Medium | ❌ CLI | VLESS/VMESS/XTLS |
-
----
-
-## WireGuard / WG-Easy
-
-**Purpose:** Modern, high-performance VPN with state-of-the-art cryptography. WG-Easy adds a lightweight web UI for managing peers, generating QR codes, and controlling routes — no CLI required.
-
-```yaml
-# ~/wg-easy/compose.yaml
-services:
-  wg-easy:
-    image: ghcr.io/wg-easy/wg-easy
-    ports:
-      - "127.0.0.1:51821:51821"
-      - "0.0.0.0:51820:51820/udp"
-    volumes:
-      - /home/user/wgeasy:/etc/wireguard:Z
-    environment:
-      WG_HOST: vpn.example.com
-      PASSWORD: changeme
-      WG_DEFAULT_ADDRESS: 10.8.0.x
-      WG_DEFAULT_DNS: 1.1.1.1
-    cap_add:
-      - NET_ADMIN
-      - SYS_MODULE
-    sysctls:
-      net.ipv4.ip_forward: "1"
-    restart: unless-stopped
-```
-
-```bash
-cd ~/wg-easy && podman-compose up -d
-```
-
-#### Common operations
-```bash
-# View connected peers and their traffic stats
-# Get session cookie first
-SESSION=$(curl -s -c - -X POST http://localhost:51821/api/session \
-  -H 'Content-Type: application/json' \
-  -d '{"password":"changeme"}' | grep -o 'connect.sid=[^;]*')
-# Then use it
-curl http://localhost:51821/api/wireguard/client -H "Cookie: $SESSION"
-
-# View WireGuard interface status on the host
-sudo wg show
-
-# View logs
-podman logs -f wg-easy
-
-# Restart to apply config changes
-podman restart wg-easy
-```
-
-- **Management UI:** `http://localhost:51821` (proxy through Caddy for HTTPS)
-- **Client data:** persisted in `/home/user/wgeasy/`
-- **Firewall:** `sudo firewall-cmd --add-port=51820/udp --permanent && sudo firewall-cmd --reload`
-
-### How WireGuard Works
-
-WireGuard is fundamentally different from older VPN protocols (OpenVPN, IPSec) in both design and implementation.
-
-**Cryptography:** WireGuard uses a fixed, modern cryptographic suite — no negotiation, no cipher selection, no version mismatches:
-- **ChaCha20-Poly1305** — authenticated symmetric encryption (fast on CPUs without AES hardware acceleration)
-- **Curve25519** — elliptic-curve Diffie-Hellman key exchange
-- **BLAKE2s** — fast cryptographic hashing
-- **SipHash** — for routing table lookups
-
-**No handshake at connection time:** WireGuard peers are configured with each other's public keys in advance. The "tunnel" is stateless — there is no session establishment phase. Packets are just encrypted and sent. This makes WireGuard silent when idle (nothing to detect) and extremely fast to reconnect after a network change (roaming between WiFi and mobile data works seamlessly).
-
-**Kernel-space implementation:** WireGuard runs as a kernel module (or via a wireguard-go userspace implementation on unsupported platforms). This means packet processing happens without crossing the user/kernel boundary, giving it significantly better throughput than OpenVPN's userspace TLS stack.
-
-**Compared to OpenVPN:** OpenVPN is a PKI-based TLS VPN running in userspace. It supports dynamic certificate revocation, many cipher suites, and protocol obfuscation — useful in enterprise environments. WireGuard trades that flexibility for simplicity, speed, and a drastically smaller codebase (~4000 lines vs ~100,000+ for OpenVPN).
-
-### Kill Switch
-
-A kill switch ensures that if the VPN tunnel drops, traffic stops rather than falling back to your clearnet IP. Without it, a brief VPN disconnect leaks your real IP.
-
-```bash
-# Add to your WireGuard client config (wg0.conf)
-[Interface]
-PrivateKey = <your-private-key>
-Address = 10.8.0.2/32
-DNS = 10.8.0.1
-
-# Kill switch: block all traffic except through wg0
-PostUp = iptables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT
-PreDown = iptables -D OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT
-
-[Peer]
-...
-```
-
-This iptables rule allows only traffic marked by the WireGuard interface plus local traffic (LAN). All other outbound traffic is rejected at the kernel level. If WireGuard goes down, `PreDown` removes the rule and normal routing resumes.
-
-### Split DNS for VPN Clients
-
-When routing LAN traffic through WireGuard, DNS for `.home.local` domains must resolve to LAN IPs even from a remote client. Configure the WireGuard client to use your home DNS server for `.home.local` queries only:
-
-```ini
-# wg0.conf client config — split DNS
-[Interface]
-DNS = 192.168.1.10          # your home AdGuard Home / Pi-hole IP
-
-[Peer]
-AllowedIPs = 10.8.0.0/24, 192.168.1.0/24   # route LAN traffic through VPN
-# DNS queries for .home.local go to 192.168.1.10, which resolves them correctly
-```
-
-On Linux clients, `systemd-resolved` handles split DNS when `DNS=` is set in the WireGuard interface config. On macOS/Windows, the WireGuard GUI app respects the DNS setting from the config file.
-
-## See Also
-
-- [Tailscale & Headscale](./headscale.md)
-- [Pangolin](./pangolin.md)
-- [NetBird](./netbird.md)
-- [Pritunl](./pritunl.md)
-- [Firezone](./firezone.md)
-- [WireGuard](../networking/wireguard.md)
-- [Cloudflared](../networking/cloudflared.md)
-
----
-
-# Xray / V2Ray — Protocol-Obfuscating Proxy
-
-URL: https://docs.shani.dev/doc/networking/xray-v2ray-protocol-obfuscating-proxy/
-Updated: 2026-08-28
-
-Xray / V2Ray (Protocol-Obfuscating Proxy) Purpose: A suite of network proxy tools that wrap traffic in protocols designed to evade deep packet inspection —…
-
-> **Part of the VPN & Tunnels series:** See [all networking docs](../networking)
-
-## Xray / V2Ray (Protocol-Obfuscating Proxy)
-
-**Purpose:** A suite of network proxy tools that wrap traffic in protocols designed to evade deep packet inspection — VLESS, VMESS, and XTLS over WebSocket or gRPC, disguised as ordinary HTTPS. Widely used alongside Hysteria 2 for censorship circumvention. Xray is the actively maintained fork of V2Ray with additional protocols (XTLS, VLESS, XHTTP) and better performance.
-
-#### Use case vs WireGuard
-Xray is a proxy, not a VPN — it forwards traffic through an HTTPS tunnel that looks like web traffic. WireGuard is a full network tunnel with a distinct UDP fingerprint. In environments where WireGuard and Shadowsocks are actively blocked, Xray VLESS+XTLS over port 443 is significantly harder to detect.
-
-`/home/user/xray/config.json` (VLESS + XTLS-Reality — the modern recommended config):
-```json
-{
-  "inbounds": [{
-    "port": 443,
-    "protocol": "vless",
-    "settings": {
-      "clients": [{
-        "id": "your-uuid-here",
-        "flow": "xtls-rprx-vision"
-      }],
-      "decryption": "none"
-    },
-    "streamSettings": {
-      "network": "tcp",
-      "security": "reality",
-      "realitySettings": {
-        "dest": "www.google.com:443",
-        "serverNames": ["www.google.com"],
-        "privateKey": "your-reality-private-key",
-        "shortIds": ["your-short-id"]
-      }
-    }
-  }],
-  "outbounds": [{"protocol": "freedom"}]
-}
-```
-
-```yaml
-# ~/xray/compose.yaml
-services:
-  xray:
-    image: ghcr.io/xtls/xray-core:latest
-    ports:
-      - "0.0.0.0:443:443/tcp"
-    volumes:
-      - /home/user/xray/config.json:/etc/xray/config.json:ro,Z
-    command: run -config /etc/xray/config.json
-    restart: unless-stopped
-```
-
-```bash
-cd ~/xray && podman-compose up -d
-```
-
-##### Generate a UUID and Reality keys
-
-```bash
-# Generate a UUID for the client ID
-podman run --rm ghcr.io/xtls/xray-core:latest uuid
-
-# Generate a Reality key pair
-podman run --rm ghcr.io/xtls/xray-core:latest x25519
-```
-
-#### Clients
-[v2rayN](https://github.com/2dust/v2rayN) (Windows), [v2rayNG](https://github.com/2dust/v2rayNG) (Android), [Shadowrocket](https://apps.apple.com/app/shadowrocket/id932747118) (iOS), [Nekoray](https://github.com/MatsuriDayo/nekoray) (Linux/Windows). Share the connection config as a `vless://` URI or QR code.
-
-> **XTLS-Reality** (shown above) is the recommended modern config — it borrows a real TLS certificate fingerprint from a public site (`www.google.com`), making the server indistinguishable from that site even to active probers. Older VMESS+WS configs are simpler but more detectable.
-
-**Firewall:**
-```bash
-sudo firewall-cmd --add-port=443/tcp --permanent && sudo firewall-cmd --reload
-```
-
-
-
----
-
-## See Also
-
-- [Networking](../networking) — all networking docs
-
----
-
-# ZeroTier (Self-Hosted Controller)
-
-URL: https://docs.shani.dev/doc/networking/zerotier-self-hosted-controller/
-Updated: 2026-08-28
-
-ZeroTier (Self-Hosted Controller) Purpose: Run a private ZeroTier network controller without using ZeroTier's central cloud servers. Manage virtual network…
-
-> **Part of the VPN & Tunnels series:** See [all networking docs](../networking)
-
-## ZeroTier (Self-Hosted Controller)
-
-**Purpose:** Run a private ZeroTier network controller without using ZeroTier's central cloud servers. Manage virtual networks and peers on your own hardware.
-
-```yaml
-# ~/zerotier-controller/compose.yaml
-services:
-  zerotier-controller:
-    image: mgk/zerotier-controller:latest
-    ports:
-      - 127.0.0.1:9993:9993/udp
-      - 127.0.0.1:3180:3180/tcp
-    volumes:
-      - /home/user/zerotier-controller:/var/lib/ztnetwork:Z
-    restart: unless-stopped
-```
-
-```bash
-cd ~/zerotier-controller && podman-compose up -d
-```
-
-- **Dashboard:** `http://localhost:3180`
-- **Client setup:** `zerotier-cli join <network-id> --controller <your-server-ip>:3180`
-
----
-
-
-
----
-
-## See Also
-
-- [Networking](../networking) — all networking docs
 
 
 # Section: Networking
@@ -40137,7 +37378,7 @@ cd ~/sogo && podman-compose up -d
 ## Thunderbird / KMail / Evolution
 **Purpose:** Feature-rich desktop clients with PGP, CalDAV, and Exchange/ActiveSync support. Install via Flatpak.
 - **Thunderbird**: `flatpak install flathub org.mozilla.Thunderbird`
-- **KMail**: `flatpak install flathub org.kde.kmail2` (KDE — or pre-installed on Shani OS KDE edition)
+- **KMail**: `flatpak install flathub org.kde.kmail2` (KDE — best paired with the KDE Plasma edition, installed via Flatpak)
 - **Evolution**: `flatpak install flathub org.gnome.Evolution` (GNOME)
 
 ## FairEmail / K-9 Mail
@@ -45078,6 +42319,2762 @@ blackbox.home.local { tls internal; reverse_proxy localhost:9115 }
 
 ---
 
+# AdGuard Home
+
+URL: https://docs.shani.dev/doc/servers/networking/adguard-home/
+Updated: 2026-08-28
+
+AdGuard Home Purpose: Pi-hole alternative with native DNS-over-HTTPS (DoH) and DNS-over-TLS (DoT) support, a cleaner UI, per-client rules, and built-in par…
+
+> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
+
+## AdGuard Home
+
+**Purpose:** Pi-hole alternative with native DNS-over-HTTPS (DoH) and DNS-over-TLS (DoT) support, a cleaner UI, per-client rules, and built-in parental controls.
+
+```yaml
+# ~/adguardhome/compose.yaml
+services:
+  adguardhome:
+    image: adguard/adguardhome
+    ports:
+      - 53:53/tcp
+      - 53:53/udp
+      - 127.0.0.1:3000:3000
+      - 853:853/tcp
+    volumes:
+      - /home/user/adguard/work:/opt/adguardhome/work:Z
+      - /home/user/adguard/conf:/opt/adguardhome/conf:Z
+    restart: unless-stopped
+```
+
+```bash
+cd ~/adguardhome && podman-compose up -d
+```
+
+Access the setup wizard at `http://localhost:3000` on first run. After setup, the UI moves to port `80` (or the port you configure).
+
+**Firewall:** (for DoT from external devices):
+```bash
+sudo firewall-cmd --add-port=853/tcp --permanent && sudo firewall-cmd --reload
+```
+
+#### Common operations
+```bash
+# View logs
+podman logs -f adguardhome
+
+# Test DNS resolution via AdGuard
+podman exec adguardhome nslookup google.com 127.0.0.1
+
+# Query statistics via API
+curl -u admin:changeme http://localhost:3000/control/stats
+
+# Update blocklists
+curl -X POST -u admin:changeme http://localhost:3000/control/filtering/refresh   -H "Content-Type: application/json" -d '{"whitelist":false}'
+
+# Add a custom DNS rewrite (internal domain)
+curl -X POST -u admin:changeme http://localhost:3000/control/rewrite/add   -H "Content-Type: application/json"   -d '{"domain":"myserver.home.local","answer":"192.168.1.10"}'
+```
+
+---
+
+
+
+---
+
+## See Also
+
+- [Networking & Infrastructure](networking) — overview
+
+---
+
+# Blocky
+
+URL: https://docs.shani.dev/doc/servers/networking/blocky/
+Updated: 2026-08-28
+
+Blocky (Fast DNS Ad Blocker) Purpose: High-performance DNS proxy written in Go. Blocks ads and trackers via deny-lists (same blocklists as Pi-hole), suppor…
+
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+
+## Blocky (Fast DNS Ad Blocker)
+
+**Purpose:** High-performance DNS proxy written in Go. Blocks ads and trackers via deny-lists (same blocklists as Pi-hole), supports DNS-over-HTTPS and DNS-over-TLS upstream resolvers, per-client group rules, conditional forwarding, query logging to a database, and response caching with prefetching. Starts in under a second and uses a fraction of Pi-hole's RAM — good choice for low-power hardware or containers where resource efficiency matters.
+
+```yaml
+# ~/blocky/compose.yml
+services:
+  blocky:
+    image: spx01/blocky:latest
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "127.0.0.1:4000:4000"
+    volumes:
+      - /home/user/blocky/config.yml:/app/config.yml:ro,Z
+    restart: unless-stopped
+```
+
+```bash
+cd ~/blocky && podman-compose up -d
+```
+
+##### Example `config.yml`
+
+```yaml
+upstreams:
+  groups:
+    default:
+      - https://one.one.one.one/dns-query    # Cloudflare DoH
+      - https://dns.quad9.net/dns-query      # Quad9 DoH
+
+blocking:
+  blackLists:
+    ads:
+      - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+      - https://adaway.org/hosts.txt
+  clientGroupsBlock:
+    default:
+      - ads
+
+caching:
+  minTime: 5m
+  maxTime: 30m
+  prefetching: true
+
+queryLog:
+  type: console
+  logRetentionDays: 7
+
+ports:
+  dns: 53
+  http: 4000
+```
+
+> **Pi-hole vs Blocky:** Use Pi-hole or AdGuard Home for a dashboard-heavy, click-to-manage experience. Use Blocky when you want a lean, config-file-driven blocker with better performance and no web UI overhead.
+
+## See Also
+
+- [Pi-hole](pihole.md)
+- [AdGuard Home](adguard-home.md)
+- [Unbound](unbound.md)
+
+---
+
+# ddns-updater (Dynamic DNS)
+
+URL: https://docs.shani.dev/doc/servers/networking/ddns-updater-dynamic-dns/
+Updated: 2026-08-28
+
+ddns-updater (Dynamic DNS) Purpose: Keeps your DNS records updated when your home/server IP changes. Polls your current public IP on a schedule and updates…
+
+> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
+
+## ddns-updater (Dynamic DNS)
+
+**Purpose:** Keeps your DNS records updated when your home/server IP changes. Polls your current public IP on a schedule and updates records via the APIs of 30+ providers — Cloudflare, Namecheap, DuckDNS, Gandi, Porkbun, Hetzner, and more. Essential if you're self-hosting from a residential or dynamic-IP connection without a static IP.
+
+```yaml
+# ~/ddns-updater/compose.yaml
+services:
+  ddns-updater:
+    image: qmcgaw/ddns-updater:latest
+    ports:
+      - 127.0.0.1:8000:8000
+    volumes:
+      - /home/user/ddns-updater/data:/updater/data:Z
+    environment:
+      PERIOD: 5m
+      UPDATE_COOLDOWN_PERIOD: 5m
+      PUBLICIP_FETCHERS: all
+      LOG_LEVEL: info
+      TZ: Asia/Kolkata
+    restart: unless-stopped
+```
+
+```bash
+cd ~/ddns-updater && podman-compose up -d
+```
+
+##### Configure providers in `/home/user/ddns-updater/data/config.json`
+
+```json
+{
+  "settings": [
+    {
+      "provider": "cloudflare",
+      "zone_identifier": "your-zone-id",
+      "domain": "home.example.com",
+      "host": "@",
+      "ttl": 300,
+      "proxied": false,
+      "token": "your-cloudflare-api-token",
+      "ip_version": "ipv4"
+    },
+    {
+      "provider": "duckdns",
+      "domain": "myhome.duckdns.org",
+      "token": "your-duckdns-token",
+      "ip_version": "ipv4"
+    }
+  ]
+}
+```
+
+Access the status dashboard at `http://localhost:8000` — shows last update time, current IP, and success/failure per record.
+
+**Caddy:**
+```caddyfile
+ddns.home.local { tls internal; reverse_proxy localhost:8000 }
+```
+
+> **Tip:** Pair with a short TTL (300 seconds) on the DNS record so clients pick up the new IP quickly after a change.
+
+---
+
+
+
+---
+
+## See Also
+
+- [Networking & Infrastructure](networking) — overview
+
+---
+
+# Firezone
+
+URL: https://docs.shani.dev/doc/servers/networking/firezone/
+Updated: 2026-08-28
+
+Purpose: Zero-trust network access (ZTNA) built on WireGuard. Features SSO (OIDC/SAML), granular access policies, device posture checks, and a unified dash…
+
+**Purpose:** Zero-trust network access (ZTNA) built on WireGuard. Features SSO (OIDC/SAML), granular access policies, device posture checks, and a unified dashboard.
+
+```yaml
+# ~/firezone/compose.yaml
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: firezone
+      POSTGRES_PASSWORD: strongpassword
+      POSTGRES_DB: firezone
+    volumes: [db_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  firezone:
+    image: firezone/firezone:latest
+    ports:
+      - "0.0.0.0:4443:443"
+      - "0.0.0.0:51820:51820/udp"
+    environment:
+      DATABASE_URL: postgresql://firezone:strongpassword@db:5432/firezone
+      SECRET_KEY_BASE: changeme-generate-with-openssl-rand-base64-64
+      DEFAULT_ADMIN_EMAIL: admin@example.com
+    cap_add: [NET_ADMIN]
+    sysctls:
+      net.ipv4.ip_forward: "1"
+      net.ipv6.conf.all.disable_ipv6: "0"
+    depends_on: [db]
+    restart: unless-stopped
+
+volumes:
+  db_data:
+```
+
+```bash
+cd ~/firezone && podman-compose up -d
+```
+
+- **Access:** `https://localhost:4443`
+- **Firewall:** `sudo firewall-cmd --add-port=4443/tcp --add-port=51820/udp --permanent && sudo firewall-cmd --reload`
+
+## See Also
+
+- [WireGuard / WG-Easy](./wireguard-easy.md)
+- [Pritunl](./pritunl.md)
+- [NetBird](./netbird.md)
+
+---
+
+# frp (Fast Reverse Proxy)
+
+URL: https://docs.shani.dev/doc/servers/networking/frp-fast-reverse-proxy/
+Updated: 2026-08-28
+
+frp (Fast Reverse Proxy) Purpose: Expose services running behind NAT or a firewall to the internet via a VPS relay — without needing to open ports on your …
+
+> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
+
+## frp (Fast Reverse Proxy)
+
+**Purpose:** Expose services running behind NAT or a firewall to the internet via a VPS relay — without needing to open ports on your home router or ISP. You run `frps` (server) on a cheap VPS with a public IP, and `frpc` (client) on your home server. The client connects outbound to the VPS; all traffic to `vps-ip:port` is tunnelled back to your local service. A lightweight alternative to Cloudflare Tunnel or Pangolin when you need raw TCP/UDP forwarding or non-HTTP protocols.
+
+```yaml
+# On your VPS — ~/frps/compose.yaml
+services:
+  frps:
+    image: snowdreamtech/frps:latest
+    network_mode: host
+    volumes:
+      - /home/user/frps/frps.toml:/etc/frp/frps.toml:ro
+    restart: unless-stopped
+```
+
+#### `frps.toml` on the VPS
+```toml
+bindPort = 7000           # frpc connects here
+vhostHTTPPort = 8080      # HTTP vhost traffic (optional)
+vhostHTTPSPort = 8443     # HTTPS vhost traffic (optional)
+
+auth.method = "token"
+auth.token = "changeme-strong-secret"
+
+webServer.addr = "127.0.0.1"
+webServer.port = 7500
+webServer.user = "admin"
+webServer.password = "changeme"
+```
+
+```yaml
+# On your home server — ~/frpc/compose.yaml
+services:
+  frpc:
+    image: snowdreamtech/frpc:latest
+    network_mode: host
+    volumes:
+      - /home/user/frpc/frpc.toml:/etc/frp/frpc.toml:ro
+    restart: unless-stopped
+```
+
+#### `frpc.toml` on your home server
+```toml
+serverAddr = "your.vps.ip"
+serverPort = 7000
+
+auth.method = "token"
+auth.token = "changeme-strong-secret"
+
+# Expose a local HTTP service
+[[proxies]]
+name = "homelab-web"
+type = "http"
+localIP = "127.0.0.1"
+localPort = 80
+customDomains = ["home.example.com"]
+
+# Expose SSH
+[[proxies]]
+name = "homelab-ssh"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 22
+remotePort = 2222          # ssh -p 2222 user@your.vps.ip
+
+# Expose a raw TCP service (e.g. MQTT)
+[[proxies]]
+name = "mqtt"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 1883
+remotePort = 1883
+```
+
+```bash
+# Start on the VPS
+cd ~/frps && podman-compose up -d
+
+# Start on the home server
+cd ~/frpc && podman-compose up -d
+```
+
+**Firewall on the VPS:**
+```bash
+sudo firewall-cmd --add-port=7000/tcp --permanent   # frpc control
+sudo firewall-cmd --add-port=8080/tcp --permanent   # HTTP vhost
+sudo firewall-cmd --add-port=8443/tcp --permanent   # HTTPS vhost
+sudo firewall-cmd --add-port=2222/tcp --permanent   # SSH forwarding
+sudo firewall-cmd --reload
+```
+
+> **frp vs Cloudflare Tunnel:** Cloudflare Tunnel is zero-config and free, but traffic passes through Cloudflare's network and requires HTTP/HTTPS. frp works for any TCP/UDP protocol, traffic stays on your VPS, and you keep full control. Use frp when you need to forward MQTT, SSH, game server ports, or any non-HTTP service.
+
+---
+
+
+
+---
+
+## See Also
+
+- [Networking & Infrastructure](networking) — overview
+
+---
+
+# FRRouting — BGP, OSPF & Dynamic Routing
+
+URL: https://docs.shani.dev/doc/servers/networking/frrouting-bgp-ospf-dynamic-routing/
+Updated: 2026-08-28
+
+FRRouting (BGP / OSPF / Dynamic Routing) Purpose: Full-featured open-source routing suite implementing BGP, OSPF, IS-IS, RIP, PIM, and BFD — the same proto…
+
+> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
+
+## FRRouting (BGP / OSPF / Dynamic Routing)
+
+**Purpose:** Full-featured open-source routing suite implementing BGP, OSPF, IS-IS, RIP, PIM, and BFD — the same protocols running on enterprise and ISP routers. On a homelab or small datacenter, FRR is most useful for: advertising your Tailscale/WireGuard subnets into BGP, running BGP between your Shani OS host and a pfSense/OPNsense router, implementing ECMP load-balancing between uplinks, or learning BGP/OSPF for job preparation. FRR runs as a container alongside your network stack — it doesn't require a separate router appliance.
+
+> **Note:** FRR needs `--network host` and `--cap-add NET_ADMIN,NET_RAW,SYS_ADMIN` to manipulate kernel routing tables. These capabilities are available to rootless Podman containers on this system with `--privileged` or explicit `--cap-add`. The kernel routing changes FRR makes are real — they affect the host's routing table.
+
+```yaml
+# ~/frr/compose.yaml
+services:
+  frr:
+    image: frrouting/frr:latest
+    network_mode: host
+    cap_add: [NET_ADMIN, NET_RAW, SYS_ADMIN]
+    volumes:
+      - /home/user/frr/etc:/etc/frr:Z
+    restart: unless-stopped
+```
+
+```bash
+mkdir -p ~/frr/etc
+cd ~/frr && podman-compose up -d
+```
+
+#### Initial FRR config files
+```bash
+# ~/frr/etc/daemons — enable only what you need
+cat > ~/frr/etc/daemons << 'EOF'
+zebra=yes      # core routing daemon — always required
+bgpd=yes       # enable for BGP
+ospfd=yes      # enable for OSPFv2
+ospf6d=no
+ripd=no
+ripngd=no
+isisd=no
+pimd=no
+bfdd=yes       # Bidirectional Forwarding Detection — fast link failure detection
+EOF
+
+# ~/frr/etc/vtysh.conf
+cat > ~/frr/etc/vtysh.conf << 'EOF'
+service integrated-vtysh-config
+EOF
+```
+
+##### Connect to the FRR CLI (vtysh)
+
+```bash
+podman exec -it frr vtysh
+```
+
+#### Example: iBGP between Shani OS host and a pfSense/OPNsense router
+```
+# Inside vtysh:
+
+# Set the router ID (use host's LAN IP)
+configure terminal
+ router bgp 65001
+  bgp router-id 192.168.1.10
+  neighbor 192.168.1.1 remote-as 65001          ! pfSense/OPNsense LAN IP, same AS = iBGP
+  neighbor 192.168.1.1 description pfsense-router
+  !
+  address-family ipv4 unicast
+   network 10.8.0.0/24                           ! advertise WireGuard VPN subnet into BGP
+   network 100.64.0.0/10                         ! advertise Tailscale CGNAT range
+   neighbor 192.168.1.1 activate
+   neighbor 192.168.1.1 soft-reconfiguration inbound
+  exit-address-family
+ !
+ ip route 10.8.0.0/24 wg0                        ! static route so zebra knows the next-hop
+exit
+```
+
+#### Example: BGP with a Hetzner cloud server (eBGP over WireGuard)
+```
+configure terminal
+ router bgp 65001
+  bgp router-id 192.168.1.10
+  neighbor 10.8.0.2 remote-as 65002             ! Hetzner VM, different AS = eBGP
+  neighbor 10.8.0.2 ebgp-multihop 2             ! required when peering over a tunnel
+  neighbor 10.8.0.2 update-source wg0
+  !
+  address-family ipv4 unicast
+   network 192.168.1.0/24                        ! advertise homelab LAN to the cloud
+   neighbor 10.8.0.2 activate
+   neighbor 10.8.0.2 route-map EXPORT out
+  exit-address-family
+ !
+ route-map EXPORT permit 10
+  match ip address prefix-list HOMELAB
+ !
+ ip prefix-list HOMELAB seq 5 permit 192.168.1.0/24
+exit
+```
+
+#### Example: OSPF for automatic route redistribution (all routers learn all subnets)
+```
+configure terminal
+ router ospf
+  ospf router-id 192.168.1.10
+  network 192.168.1.0/24 area 0.0.0.0
+  network 10.8.0.0/24 area 0.0.0.0
+  passive-interface default           ! don't send OSPF hellos on all interfaces
+  no passive-interface eth0           ! only peer on the LAN interface
+  redistribute connected              ! inject directly connected routes
+exit
+```
+
+#### Useful show commands (inside vtysh)
+```
+show ip bgp summary          # peer status, uptime, prefixes received
+show ip bgp                  # full BGP table
+show ip route                # kernel routing table (zebra view)
+show ip route bgp            # only BGP-learned routes
+show ip ospf neighbor        # OSPF adjacency table
+show bfd peers               # BFD session status (sub-second failure detection)
+show running-config          # full current config
+write memory                 # save config to /etc/frr/frr.conf
+```
+
+#### BFD (fast failover in under 1 second)
+```
+configure terminal
+ bfd
+  peer 192.168.1.1
+   detect-multiplier 3
+   receive-interval 300
+   transmit-interval 300
+  !
+ exit
+ !
+ router bgp 65001
+  neighbor 192.168.1.1 bfd       ! attach BFD to the BGP peer
+exit
+```
+
+> **FRR vs a dedicated router VM:** FRR in a container is appropriate for BGP peering, route redistribution, and learning. For a full home router (DHCP, NAT, firewall, PPPoE), use OPNsense or pfSense on a dedicated machine or VM. FRR and OPNsense complement each other — OPNsense handles the internet edge, FRR handles internal routing between segments.
+
+
+
+---
+
+## See Also
+
+- [Networking & Infrastructure](networking) — overview
+
+---
+
+# Gluetun (VPN Client Container)
+
+URL: https://docs.shani.dev/doc/servers/networking/gluetun-vpn-client-container/
+Updated: 2026-08-28
+
+Gluetun (VPN Client Container) Purpose: Route any container's traffic through a commercial VPN provider — without installing a VPN client on the host. Glue…
+
+> **Part of the VPN & Tunnels series:** See [all networking docs](../networking)
+
+## Gluetun (VPN Client Container)
+
+**Purpose:** Route any container's traffic through a commercial VPN provider — without installing a VPN client on the host. Gluetun supports 50+ providers (Mullvad, ProtonVPN, NordVPN, Private Internet Access, ExpressVPN, etc.) and acts as a network gateway container. Other containers join its network namespace via `network_mode: service:gluetun` — their traffic exits through the VPN tunnel transparently.
+
+#### Common use case
+Route qBittorrent through Mullvad so torrent traffic never uses your home IP.
+
+```yaml
+# ~/gluetun/compose.yaml
+services:
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    cap_add: [NET_ADMIN]
+    devices:
+      - /dev/net/tun
+    ports:
+      - "127.0.0.1:8080:8080"   # qBittorrent WebUI exposed via gluetun
+    environment:
+      VPN_SERVICE_PROVIDER: mullvad
+      VPN_TYPE: wireguard
+      WIREGUARD_PRIVATE_KEY: your-mullvad-wireguard-private-key
+      WIREGUARD_ADDRESSES: 10.64.222.21/32
+      SERVER_COUNTRIES: Netherlands
+    volumes:
+      - /home/user/gluetun:/gluetun:Z
+    restart: unless-stopped
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    network_mode: "service:gluetun"   # all qbittorrent traffic goes through gluetun
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      WEBUI_PORT: 8080
+    volumes:
+      - /home/user/qbittorrent:/config:Z
+      - /home/user/downloads:/downloads:Z
+    depends_on: [gluetun]
+    restart: unless-stopped
+```
+
+```bash
+cd ~/gluetun && podman-compose up -d
+```
+
+> When `network_mode: service:gluetun` is set, the dependent container shares gluetun's network — all ports are exposed on the gluetun container, not the app container. The qBittorrent WebUI is reached at `http://localhost:8080` via gluetun's port mapping.
+
+#### Check that traffic is routed through the VPN
+```bash
+podman exec qbittorrent curl -s https://api.ipify.org
+# Should return the VPN exit IP, not your home IP
+```
+
+#### Common operations
+```bash
+# Verify traffic is routed through VPN (should show VPN exit IP)
+podman exec qbittorrent curl -s https://api.ipify.org
+
+# Check Gluetun control server status
+curl http://localhost:8000/v1/openvpn/status 2>/dev/null ||   curl http://localhost:8000/v1/publicip/ip
+
+# View logs to debug connection issues
+podman logs -f gluetun
+
+# Force reconnect (pick a different VPN server)
+podman restart gluetun
+
+# List available servers for your provider (Mullvad example)
+podman exec gluetun cat /gluetun/servers.json | python3 -m json.tool | grep '"city"' | head -20
+```
+
+#### Supported providers include
+Mullvad, ProtonVPN, NordVPN, ExpressVPN, Private Internet Access, Surfshark, Windscribe, IVPN, AzireVPN, and any custom WireGuard/OpenVPN config.
+
+---
+
+
+
+---
+
+## See Also
+
+- [Networking](../networking) — all networking docs
+
+---
+
+# HAProxy
+
+URL: https://docs.shani.dev/doc/servers/networking/haproxy/
+Updated: 2026-08-28
+
+HAProxy (High-Performance Load Balancer) Purpose: The gold-standard TCP and HTTP load balancer. HAProxy has been the backbone of GitHub, Reddit, and Stack …
+
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+
+## HAProxy (High-Performance Load Balancer)
+
+**Purpose:** The gold-standard TCP and HTTP load balancer. HAProxy has been the backbone of GitHub, Reddit, and Stack Overflow for years. Unlike Traefik (label-driven, auto-discovery) or Caddy (config-file, developer-friendly), HAProxy is purpose-built for raw throughput, advanced health checking, and TCP-layer load balancing — useful for load balancing PostgreSQL replicas, MQTT brokers, Redis, or any non-HTTP protocol alongside web traffic.
+
+```yaml
+# ~/haproxy/compose.yaml
+services:
+  haproxy:
+    image: haproxy:3-alpine
+    ports:
+      - 0.0.0.0:80:80
+      - 0.0.0.0:443:443
+      - 127.0.0.1:9000:9000
+    volumes:
+      - /home/user/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro,Z
+      - /home/user/haproxy/certs:/etc/haproxy/certs:ro,Z
+    restart: unless-stopped
+```
+
+```bash
+cd ~/haproxy && podman-compose up -d
+```
+
+##### Example `haproxy.cfg` — HTTP load balancing with health checks
+
+```
+global
+  log stdout format raw local0
+  maxconn 50000
+
+defaults
+  mode http
+  log global
+  option httplog
+  option dontlognull
+  option forwardfor
+  option http-server-close
+  timeout connect 5s
+  timeout client  30s
+  timeout server  30s
+  retries 3
+
+# Stats dashboard
+frontend stats
+  bind *:9000
+  stats enable
+  stats uri /
+  stats refresh 10s
+  stats auth admin:changeme
+  stats hide-version
+
+# HTTPS frontend
+frontend https_in
+  bind *:443 ssl crt /etc/haproxy/certs/combined.pem
+  http-request set-header X-Forwarded-Proto https
+  default_backend app_servers
+
+# Backend with health checks
+backend app_servers
+  balance roundrobin
+  option httpchk GET /health HTTP/1.1\r\nHost:\ app.example.com
+  http-check expect status 200
+  server app1 192.168.1.10:8080 check inter 10s fall 3 rise 2
+  server app2 192.168.1.11:8080 check inter 10s fall 3 rise 2
+  server app3 192.168.1.12:8080 check inter 10s fall 3 rise 2 backup
+```
+
+#### Load balancing algorithms
+```
+balance roundrobin   # Equal distribution (default)
+balance leastconn    # Route to server with fewest active connections
+balance source       # Sticky sessions by client IP hash
+balance uri          # Sticky by URI hash (useful for caches)
+```
+
+#### TCP load balancing for databases and MQTT
+```
+frontend postgres_in
+  mode tcp
+  bind *:5432
+  default_backend postgres_servers
+
+backend postgres_servers
+  mode tcp
+  balance leastconn
+  option tcp-check
+  server pg-primary 192.168.1.20:5432 check
+  server pg-replica 192.168.1.21:5432 check backup
+
+frontend mqtt_in
+  mode tcp
+  bind *:1883
+  default_backend mqtt_brokers
+
+backend mqtt_brokers
+  mode tcp
+  balance leastconn
+  server mqtt1 192.168.1.30:1883 check
+  server mqtt2 192.168.1.31:1883 check
+```
+
+Access the live stats page at `http://localhost:9000` to see connection counts, request rates, error rates, and per-backend health in real time.
+
+## See Also
+
+- [Traefik](traefik.md)
+- [Nginx Proxy Manager](nginx-proxy-manager.md)
+- [Caddy](../networking/caddy.md)
+
+---
+
+# Headscale (Self-Hosted Tailscale Alternative)
+
+URL: https://docs.shani.dev/doc/servers/networking/headscale/
+Updated: 2026-08-28
+
+Purpose: Zero-config mesh VPN built on WireGuard. Tailscale uses managed coordination; Headscale is the fully open-source self-hosted control server — givi…
+
+**Purpose:** Zero-config mesh VPN built on WireGuard. Tailscale uses managed coordination; Headscale is the fully open-source self-hosted control server — giving you the same experience with no third-party dependency.
+
+### Tailscale (Managed)
+
+```bash
+# Tailscale is pre-installed on this system — just run:
+sudo tailscale up
+
+# Enable SSH over Tailscale
+sudo tailscale up --ssh
+
+# Advertise as an exit node
+sudo tailscale up --advertise-exit-node
+
+# Advertise local subnets (share your LAN with other tailnet devices)
+sudo tailscale up --advertise-routes=192.168.1.0/24
+```
+
+Or run as a container:
+```yaml
+# ~/tailscale/compose.yaml
+services:
+  tailscale:
+    image: tailscale/tailscale
+    command: tailscaled --tun=userspace-networking --socks5-server=:1080
+    volumes:
+      - /home/user/tailscale:/var/lib:Z
+    devices:
+      - /dev/net/tun
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    restart: unless-stopped
+```
+
+```bash
+cd ~/tailscale && podman-compose up -d
+```
+
+### Tailscale ACL Policies
+
+By default, all devices in a Tailscale network can reach all other devices. ACL policies (in HuJSON format) let you control exactly which devices can talk to which — essential for separating personal devices from servers, or restricting access to sensitive ports.
+
+Configure ACLs in the Tailscale admin console under **Access Controls**, or for Headscale via the `policy.hujson` config:
+
+```jsonc
+{
+  // Tags are assigned to devices — servers get "tag:server", laptops get "tag:laptop"
+  "tagOwners": {
+    "tag:server": ["autogroup:admin"],
+    "tag:laptop": ["autogroup:admin"]
+  },
+
+  "acls": [
+    // Laptops can SSH to servers
+    {"action": "accept", "src": ["tag:laptop"], "dst": ["tag:server:22"]},
+    // Servers can reach each other on any port (internal service mesh)
+    {"action": "accept", "src": ["tag:server"], "dst": ["tag:server:*"]},
+    // Laptops can reach Grafana dashboard on servers
+    {"action": "accept", "src": ["tag:laptop"], "dst": ["tag:server:3001"]},
+    // All other traffic denied (implicit deny at end of list)
+  ],
+
+  // Tailscale SSH — which users can SSH to which tags
+  "ssh": [
+    {
+      "action": "accept",
+      "src": ["autogroup:admin"],
+      "dst": ["tag:server"],
+      "users": ["autogroup:nonroot"]
+    }
+  ]
+}
+```
+
+```bash
+# Apply policy to Headscale
+headscale policy set -f policy.hujson
+
+# Verify policy was applied
+headscale policy get
+```
+
+### Headscale (Self-Hosted Control Server)
+
+Headscale reimplements Tailscale's coordination server, so any Tailscale-compatible client can connect to it instead of Tailscale's managed service — no third-party dependency, full control over ACLs and DNS.
+
+#### 1. Create config directory and config file
+```bash
+mkdir -p /home/user/headscale/{config,data}
+```
+
+`/home/user/headscale/config/config.yaml`:
+```yaml
+server_url: https://headscale.example.com
+listen_addr: 0.0.0.0:8080
+grpc_listen_addr: 0.0.0.0:9090
+database:
+  type: sqlite3
+  sqlite:
+    path: /var/lib/headscale/db.sqlite
+dns:
+  base_domain: headscale.lan
+  magic_dns: true
+  nameservers:
+    - 1.1.1.1
+    - 8.8.8.8
+```
+
+#### 2. Run the container
+```yaml
+# ~/headscale/compose.yaml
+services:
+  headscale:
+    image: headscale/headscale:latest
+    ports:
+      - 127.0.0.1:8080:8080
+      - 127.0.0.1:9090:9090
+    volumes:
+      - /home/user/headscale/config:/etc/headscale:Z
+      - /home/user/headscale/data:/var/lib/headscale:Z
+    restart: unless-stopped
+```
+
+```bash
+cd ~/headscale && podman-compose up -d
+```
+
+#### 3. Create a user and connect devices
+```bash
+# Create a namespace
+podman exec headscale headscale users create home
+
+# Generate a reusable pre-auth key (valid 30 days)
+podman exec headscale headscale preauthkeys create --user home --reusable --expiration 30d
+
+# Connect any Tailscale-compatible device to your Headscale server
+tailscale up --login-server https://headscale.example.com --authkey <key>
+
+# List connected nodes
+podman exec headscale headscale nodes list
+```
+
+### Headplane (Web UI for Headscale)
+
+```yaml
+# ~/headplane/compose.yaml
+services:
+  headplane:
+    image: ghcr.io/tale/headplane:latest
+    ports:
+      - 127.0.0.1:3001:3000
+    volumes:
+      - /home/user/headscale/config:/etc/headscale:ro,Z
+    restart: unless-stopped
+```
+
+```bash
+cd ~/headplane && podman-compose up -d
+```
+
+#### Common operations
+```bash
+# Create a user (namespace)
+podman exec headscale headscale users create myuser
+
+# List users
+podman exec headscale headscale users list
+
+# Generate a reusable pre-auth key (30 days)
+podman exec headscale headscale preauthkeys create --user myuser --reusable --expiration 30d
+
+# List pre-auth keys
+podman exec headscale headscale preauthkeys list --user myuser
+
+# List all connected nodes
+podman exec headscale headscale nodes list
+
+# Expire (force-disconnect) a node
+podman exec headscale headscale nodes expire --identifier NODE_ID
+
+# Delete a node
+podman exec headscale headscale nodes delete --identifier NODE_ID
+
+# Get debug info for a node
+podman exec headscale headscale nodes --output json list | python3 -m json.tool
+
+# Generate an API key for Headplane
+podman exec headscale headscale apikeys create
+
+# Check server version
+podman exec headscale headscale version
+```
+
+## See Also
+
+- [WireGuard / WG-Easy](./wireguard-easy.md)
+- [NetBird](./netbird.md)
+- [Tailscale](../networking/tailscale.md)
+
+---
+
+# Hysteria 2 (High-Loss Networks)
+
+URL: https://docs.shani.dev/doc/servers/networking/hysteria-2-high-loss-networks/
+Updated: 2026-08-28
+
+Hysteria 2 (High-Loss Networks) Purpose: A QUIC-based proxy and tunnel that performs well in high-latency, high-loss, or censored network environments wher…
+
+> **Part of the VPN & Tunnels series:** See [all networking docs](../networking)
+
+## Hysteria 2 (High-Loss Networks)
+
+**Purpose:** A QUIC-based proxy and tunnel that performs well in high-latency, high-loss, or censored network environments where WireGuard/TCP struggle. Traffic looks like normal HTTP/3 to firewalls.
+
+`/home/user/hysteria/config.yaml`:
+```yaml
+listen: :443
+tls:
+  cert: /etc/hysteria/fullchain.pem
+  key: /etc/hysteria/privkey.pem
+auth:
+  type: password
+  password: "your-strong-password"
+```
+
+```yaml
+# ~/hysteria/compose.yaml
+services:
+  hysteria:
+    image: ghcr.io/apernet/hysteria:latest
+    ports:
+      - 0.0.0.0:443:443/udp
+    volumes:
+      - /home/user/hysteria/config.yaml:/etc/hysteria/config.yaml:ro,Z
+      - /home/user/hysteria/certs:/etc/hysteria:ro,Z
+    command: server -c /etc/hysteria/config.yaml
+    restart: unless-stopped
+```
+
+```bash
+cd ~/hysteria && podman-compose up -d
+```
+
+---
+
+
+
+---
+
+## See Also
+
+- [Networking](../networking) — all networking docs
+
+---
+
+# Kea DHCP
+
+URL: https://docs.shani.dev/doc/servers/networking/kea-dhcp/
+Updated: 2026-08-28
+
+Kea DHCP (Modern DHCP Server) Purpose: ISC Kea is the modern replacement for ISC DHCP (dhcpd). Provides DHCPv4 and DHCPv6 with a REST API, a lease database…
+
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+
+## Kea DHCP (Modern DHCP Server)
+
+**Purpose:** ISC Kea is the modern replacement for ISC DHCP (`dhcpd`). Provides DHCPv4 and DHCPv6 with a REST API, a lease database (PostgreSQL or MySQL), high-availability failover, host reservations, and a web UI via Stork. Run it alongside Technitium or PowerDNS to control both DHCP and DNS from your server, giving you reliable `hostname → IP` mappings for every device on your LAN.
+
+```yaml
+# ~/kea/compose.yaml
+services:
+  kea-dhcp4:
+    image: jonasal/kea-dhcp4:latest
+    network_mode: host          # Must see your LAN broadcast domain
+    volumes:
+      - /home/user/kea/kea-dhcp4.conf:/etc/kea/kea-dhcp4.conf:ro,Z
+      - /home/user/kea/leases:/var/lib/kea:Z
+    restart: unless-stopped
+```
+
+##### Minimal `kea-dhcp4.conf`
+
+```json
+{
+  "Dhcp4": {
+    "interfaces-config": {
+      "interfaces": ["eth0"]
+    },
+    "lease-database": {
+      "type": "memfile",
+      "persist": true,
+      "name": "/var/lib/kea/dhcp4.leases"
+    },
+    "subnet4": [{
+      "id": 1,
+      "subnet": "192.168.1.0/24",
+      "pools": [{ "pool": "192.168.1.100 - 192.168.1.200" }],
+      "option-data": [
+        { "name": "routers",              "data": "192.168.1.1" },
+        { "name": "domain-name-servers",  "data": "192.168.1.10" },
+        { "name": "domain-search",        "data": "home.local" }
+      ],
+      "reservations": [
+        {
+          "hw-address": "aa:bb:cc:dd:ee:ff",
+          "ip-address":  "192.168.1.50",
+          "hostname":    "myserver"
+        }
+      ]
+    }],
+    "loggers": [{
+      "name": "kea-dhcp4",
+      "output_options": [{ "output": "stdout" }],
+      "severity": "INFO"
+    }]
+  }
+}
+```
+
+```bash
+cd ~/kea && podman-compose up -d
+
+# View current leases
+cat /home/user/kea/leases/dhcp4.leases
+
+# Firewall — allow DHCP
+sudo firewall-cmd --add-service=dhcp --permanent && sudo firewall-cmd --reload
+```
+
+> **Kea vs dnsmasq:** dnsmasq (bundled with Pi-hole) is excellent for simple setups. Kea is the right choice when you need HA failover, a REST API, PostgreSQL lease storage, or want to manage DHCP independently of your DNS blocker.
+
+## See Also
+
+- [Technitium DNS Server](technitium.md)
+- [PowerDNS](powerdns.md)
+- [Pi-hole](pihole.md)
+
+---
+
+# LibreNMS
+
+URL: https://docs.shani.dev/doc/servers/networking/librenms/
+Updated: 2026-08-28
+
+LibreNMS (Network Monitoring) Purpose: Full-featured auto-discovering network monitoring system. Discovers routers, switches, servers, APs, and printers vi…
+
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+
+## LibreNMS (Network Monitoring)
+
+**Purpose:** Full-featured auto-discovering network monitoring system. Discovers routers, switches, servers, APs, and printers via SNMP, then monitors CPU, memory, interface traffic, BGP, environmental sensors, and more. Generates alerts, bandwidth graphs, and SLA reports. The self-hosted PRTG/SolarWinds alternative.
+
+```yaml
+# ~/librenms/compose.yml
+services:
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: librenms
+      MYSQL_USER: librenms
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    command: --innodb-file-per-table=1 --lower-case-table-names=0
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  librenms:
+    image: librenms/librenms:latest
+    ports: ["127.0.0.1:8100:8000"]
+    environment:
+      DB_HOST: db
+      DB_NAME: librenms
+      DB_USER: librenms
+      DB_PASSWORD: changeme
+      REDIS_HOST: redis
+      TZ: Asia/Kolkata
+      MEMORY_LIMIT: 256M
+      UPLOAD_MAX_SIZE: 16M
+    volumes:
+      - /home/user/librenms/data:/data:Z
+    depends_on: [db, redis]
+    restart: unless-stopped
+
+  dispatcher:
+    image: librenms/librenms:latest
+    environment:
+      DB_HOST: db
+      DB_NAME: librenms
+      DB_USER: librenms
+      DB_PASSWORD: changeme
+      REDIS_HOST: redis
+      DISPATCHER_NODE_ID: dispatcher1
+      SIDECAR_DISPATCHER: "1"
+    volumes:
+      - /home/user/librenms/data:/data:Z
+    depends_on: [librenms]
+    restart: unless-stopped
+
+volumes:
+  db_data:
+```
+
+```bash
+cd ~/librenms && podman-compose up -d
+```
+
+#### Common operations
+```bash
+# Add a device via CLI
+podman exec librenms lnms device:add 192.168.1.1 --v2c --community public
+
+# Run discovery and polling manually
+podman exec librenms lnms device:poll 192.168.1.1
+
+# Validate the install
+podman exec librenms lnms validate
+
+# View logs
+podman logs -f librenms
+
+# Generate an API token for integrations
+podman exec librenms lnms api-token:add mytoken --user admin
+```
+
+Access at `http://localhost:8100`. Add devices via Devices → Add Device, specifying SNMP community string and version.
+
+**Caddy:**
+```caddyfile
+librenms.home.local { tls internal; reverse_proxy localhost:8100 }
+```
+
+## See Also
+
+- [NetBox](netbox.md)
+- [Ntopng](ntopng.md)
+- [Caddy](../networking/caddy.md)
+
+---
+
+# Nebula (Overlay Mesh Network)
+
+URL: https://docs.shani.dev/doc/servers/networking/nebula-overlay-mesh-network/
+Updated: 2026-08-28
+
+Nebula (Overlay Mesh Network) Purpose: A scalable, decentralised overlay network developed by Slack. Nodes communicate directly using certificate-based PKI…
+
+> **Part of the VPN & Tunnels series:** See [all networking docs](../networking)
+
+## Nebula (Overlay Mesh Network)
+
+**Purpose:** A scalable, decentralised overlay network developed by Slack. Nodes communicate directly using certificate-based PKI. Designed for GitOps-style config management — no web UI.
+
+### 1. Generate Certificates
+
+```bash
+# Generate CA
+nebula-cert ca -name "Home Network CA"
+
+# Generate lighthouse (coordination node) certificate
+nebula-cert sign -name "lighthouse" -ip "192.168.100.1/24"
+
+# Generate client certificate
+nebula-cert sign -name "shani-server" -ip "192.168.100.2/24"
+```
+
+### 2. Lighthouse Config (`config.yml`)
+
+```yaml
+pki:
+  ca: /etc/nebula/ca.crt
+  cert: /etc/nebula/lighthouse.crt
+  key: /etc/nebula/lighthouse.key
+
+static_host_map:
+  "192.168.100.1": ["your-vps-public-ip:4242"]
+
+lighthouse:
+  am_lighthouse: true
+
+listen:
+  host: 0.0.0.0
+  port: 4242
+
+firewall:
+  outbound: [{ port: any, proto: any, host: any }]
+  inbound: [{ port: any, proto: any, host: any }]
+```
+
+### 3. Run Container
+
+```yaml
+# ~/nebula/compose.yaml
+services:
+  nebula:
+    image: slacktechnologiesllc/nebula:latest
+    ports:
+      - 0.0.0.0:4242:4242/udp
+    volumes:
+      - /home/user/nebula:/etc/nebula:Z
+    devices:
+      - /dev/net/tun
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+```
+
+```bash
+cd ~/nebula && podman-compose up -d
+```
+
+**Firewall:** `sudo firewall-cmd --add-port=4242/udp --permanent && sudo firewall-cmd --reload`
+
+> Nebula has no official web UI. Manage configs via Git and distribute with `scp` or Ansible.
+
+---
+
+
+
+---
+
+## See Also
+
+- [Networking](../networking) — all networking docs
+
+---
+
+# NetBird
+
+URL: https://docs.shani.dev/doc/servers/networking/netbird/
+Updated: 2026-08-28
+
+NetBird Purpose: Open-source, peer-to-peer WireGuard mesh VPN platform. The most complete self-hosted alternative to Tailscale — management dashboard, STUN…
+
+> **Part of the VPN & Tunnels series:** See [all networking docs](../networking)
+
+## NetBird
+
+**Purpose:** Open-source, peer-to-peer WireGuard mesh VPN platform. The most complete self-hosted alternative to Tailscale — management dashboard, STUN/TURN relay, and kernel-level WireGuard all run on hardware you control. Supports SSO (OIDC), ACL policies, DNS routing, and split tunnelling. Clients are available for Linux, macOS, Windows, iOS, and Android.
+
+### Architecture
+
+NetBird has three server components:
+- **Management** — API, ACL policy store, device registry
+- **Signal** — WebRTC signalling for peer hole-punching
+- **Relay (Coturn)** — TURN relay for peers behind strict NAT
+
+### Full Self-Hosted Deployment
+
+```bash
+# 1. Get the official compose stack
+curl -sSL https://raw.githubusercontent.com/netbirdio/netbird/main/infrastructure_files/docker-compose.yml \
+  -o ~/netbird/compose.yaml
+curl -sSL https://raw.githubusercontent.com/netbirdio/netbird/main/infrastructure_files/.env.example \
+  -o ~/netbird/.env
+
+# 2. Edit .env — set your domain, OIDC provider, and TURN credentials
+nano ~/netbird/.env
+```
+
+#### Key `.env` variables
+```bash
+NETBIRD_DOMAIN=netbird.example.com
+
+# OIDC provider (e.g., Authentik, Keycloak, Zitadel, or Dex)
+NETBIRD_AUTH_OIDC_CONFIGURATION_ENDPOINT=https://auth.example.com/application/o/netbird/.well-known/openid-configuration
+NETBIRD_AUTH_CLIENT_ID=netbird
+NETBIRD_AUTH_CLIENT_SECRET=changeme
+
+# TURN relay credentials
+NETBIRD_TURN_USER=coturn
+NETBIRD_TURN_PASSWORD=changeme
+```
+
+#### 3. Start all services
+```bash
+cd ~/netbird && podman-compose up -d
+```
+
+#### Services started
+- `management` on port `443` (HTTPS/gRPC)
+- `signal` on port `10000`
+- `coturn` (TURN relay) on port `3478/udp` and `5349/tcp`
+- `dashboard` (React SPA served by Nginx)
+
+**Firewall:**
+```bash
+sudo firewall-cmd --add-port=443/tcp \
+  --add-port=10000/tcp \
+  --add-port=3478/udp \
+  --add-port=5349/tcp \
+  --permanent && sudo firewall-cmd --reload
+```
+
+### Connect a Client
+
+```bash
+# Install the NetBird client
+curl -fsSL https://pkgs.netbird.io/install.sh | sh
+
+# Connect to your self-hosted management server
+netbird up --management-url https://netbird.example.com:443
+
+# Check status
+netbird status
+
+# Show peers
+netbird peers
+
+# Disconnect
+netbird down
+```
+
+### ACL Policies
+
+NetBird lets you define granular access policies per group in the dashboard:
+- Create groups (e.g., `servers`, `laptops`, `phones`)
+- Assign devices to groups
+- Create policies that allow specific traffic (e.g., `laptops` → `servers` on port 22)
+- Block all other inter-peer traffic by default
+
+### DNS Routes
+
+Route private DNS to your server's Pi-hole or AdGuard instance:
+- In the dashboard: DNS → Nameservers → Add
+- Domain: `home.local`, Nameserver: IP of your Pi-hole peer
+- Enable: all peers in the `laptops` group use this nameserver for `.home.local`
+
+### Caddy Configuration
+
+```caddyfile
+netbird.example.com {
+  reverse_proxy localhost:80
+  # gRPC for management API
+  @grpc protocol grpc
+  reverse_proxy @grpc localhost:443 {
+    transport http { versions h2c }
+  }
+}
+```
+
+---
+
+
+
+---
+
+## See Also
+
+- [Networking](../networking) — all networking docs
+
+---
+
+# NetBox
+
+URL: https://docs.shani.dev/doc/servers/networking/netbox/
+Updated: 2026-08-28
+
+NetBox (Network Documentation & IPAM) Purpose: Source of truth for your network infrastructure. Document IP address assignments (IPAM), VLAN configurations…
+
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+
+## NetBox (Network Documentation & IPAM)
+
+**Purpose:** Source of truth for your network infrastructure. Document IP address assignments (IPAM), VLAN configurations, rack layouts, cable connections, device inventory, and circuit topology. NetBox is not a monitoring tool — it's the authoritative record of what you have and how it's connected. Integrates with Ansible, Terraform, and LibreNMS.
+
+```yaml
+# ~/netbox/compose.yml
+services:
+  netbox:
+    image: netboxcommunity/netbox:latest
+    ports: ["127.0.0.1:8101:8080"]
+    environment:
+      DB_HOST: postgres
+      DB_NAME: netbox
+      DB_USER: netbox
+      DB_PASSWORD: changeme
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ""
+      SECRET_KEY: changeme-run-openssl-rand-base64-50
+      ALLOWED_HOSTS: netbox.home.local localhost
+      SUPERUSER_EMAIL: admin@home.local
+      SUPERUSER_PASSWORD: changeme
+    volumes:
+      - /home/user/netbox/media:/opt/netbox/netbox/media:Z
+    depends_on: [postgres, redis]
+    restart: unless-stopped
+
+  netbox-worker:
+    image: netboxcommunity/netbox:latest
+    command: /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py rqworker
+    environment:
+      DB_HOST: postgres
+      DB_NAME: netbox
+      DB_USER: netbox
+      DB_PASSWORD: changeme
+      REDIS_HOST: redis
+      SECRET_KEY: changeme-run-openssl-rand-base64-50
+    depends_on: [postgres, redis]
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: netbox
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: netbox
+    volumes: [pg_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+```
+
+```bash
+cd ~/netbox && podman-compose up -d
+```
+
+Access at `http://localhost:8101`. Start by defining your IP prefixes and VLANs, then populate devices and rack positions.
+
+## See Also
+
+- [LibreNMS](librenms.md)
+- [Caddy](../networking/caddy.md)
+
+---
+
+# Nginx Proxy Manager
+
+URL: https://docs.shani.dev/doc/servers/networking/nginx-proxy-manager/
+Updated: 2026-08-28
+
+Nginx Proxy Manager Purpose: GUI-based reverse proxy with Let's Encrypt integration. If you find Caddy's Caddyfile syntax unfamiliar, NPM offers a click-th…
+
+> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
+
+## Nginx Proxy Manager
+
+**Purpose:** GUI-based reverse proxy with Let's Encrypt integration. If you find Caddy's Caddyfile syntax unfamiliar, NPM offers a click-through interface for creating proxy hosts, redirects, and SSL termination.
+
+```yaml
+# ~/npm/compose.yml
+services:
+  npm:
+    image: jc21/nginx-proxy-manager:latest
+    ports:
+      - "80:80"
+      - "443:443"
+      - "127.0.0.1:81:81"
+    environment:
+      DB_MYSQL_HOST: db
+      DB_MYSQL_PORT: 3306
+      DB_MYSQL_USER: npm
+      DB_MYSQL_PASSWORD: changeme
+      DB_MYSQL_NAME: npm
+    volumes:
+      - /home/user/npm/data:/data:Z
+      - /home/user/npm/letsencrypt:/etc/letsencrypt:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: npm
+      MYSQL_USER: npm
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  db_data:
+```
+
+```bash
+cd ~/npm && podman-compose up -d
+```
+
+Access the admin UI at `http://localhost:81`. Default credentials: `admin@example.com` / `changeme` — change immediately after first login. Add proxy hosts via Dashboard → Proxy Hosts → Add Proxy Host; enable Let's Encrypt in the SSL tab.
+
+---
+
+
+
+---
+
+## See Also
+
+- [Networking & Infrastructure](networking) — overview
+
+---
+
+# Ntopng
+
+URL: https://docs.shani.dev/doc/servers/networking/ntopng/
+Updated: 2026-08-28
+
+Ntopng (Network Traffic Analysis) Purpose: Real-time network traffic monitoring and analysis. Shows active flows, top talkers, protocol breakdown, geo-IP m…
+
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+
+## Ntopng (Network Traffic Analysis)
+
+**Purpose:** Real-time network traffic monitoring and analysis. Shows active flows, top talkers, protocol breakdown, geo-IP mapping, and historical traffic trends. Can integrate with nProbe for deep packet inspection and with pfSense/OPNsense via NetFlow/sFlow export.
+
+```yaml
+# ~/ntopng/compose.yaml
+services:
+  ntopng:
+    image: ntop/ntopng:stable
+    network_mode: host
+    volumes:
+      - /home/user/ntopng/data:/var/lib/ntopng:Z
+    environment:
+      NTOPNG_COMMUNITY: true
+    command: --interface=eth0 --http-port=3000 --data-dir=/var/lib/ntopng --community
+    restart: unless-stopped
+```
+
+```bash
+cd ~/ntopng && podman-compose up -d
+```
+
+> Replace `eth0` with your primary network interface name (`ip link show`). `--network host` is required for ntopng to see actual traffic.
+
+## See Also
+
+- [LibreNMS](librenms.md)
+- [Caddy](../networking/caddy.md)
+
+---
+
+# OpenVPN
+
+URL: https://docs.shani.dev/doc/servers/networking/openvpn/
+Updated: 2026-08-28
+
+OpenVPN Purpose: Legacy, highly configurable VPN standard. Use when you need specific cipher suites, client certificate management, or compatibility with o…
+
+> **Part of the VPN & Tunnels series:** See [all networking docs](../networking)
+
+## OpenVPN
+
+**Purpose:** Legacy, highly configurable VPN standard. Use when you need specific cipher suites, client certificate management, or compatibility with older devices.
+
+```yaml
+# ~/openvpn/compose.yaml
+services:
+  openvpn:
+    image: kylemanna/openvpn
+    ports:
+      - 0.0.0.0:1194:1194/udp
+    volumes:
+      - /home/user/openvpn:/etc/openvpn:Z
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      net.ipv4.ip_forward: 1
+    restart: unless-stopped
+```
+
+```bash
+cd ~/openvpn && podman-compose up -d
+```
+
+---
+
+
+
+---
+
+## See Also
+
+- [Networking](../networking) — all networking docs
+
+---
+
+# Outline VPN
+
+URL: https://docs.shani.dev/doc/servers/networking/outline-vpn/
+Updated: 2026-08-28
+
+Outline VPN Purpose: Shadowsocks-based proxy server by Jigsaw (Google). Designed for ease of deployment and resistance to traffic fingerprinting — traffic …
+
+> **Part of the VPN & Tunnels series:** See [all networking docs](../networking)
+
+## Outline VPN
+
+**Purpose:** Shadowsocks-based proxy server by Jigsaw (Google). Designed for ease of deployment and resistance to traffic fingerprinting — traffic is indistinguishable from regular HTTPS to deep packet inspection. Unlike WireGuard, Outline is proxy-based rather than a full network tunnel, making it suitable for censorship circumvention where WireGuard is blocked. Management is via the Outline Manager desktop app (Linux/macOS/Windows) which generates a one-line `docker run` command and per-user access keys.
+
+```yaml
+# ~/outline/compose.yaml
+# Note: Outline Manager generates an exact run command including ports and secrets.
+# Use its output directly. The compose below is a representative template.
+services:
+  outline:
+    image: quay.io/outline/shadowbox:stable
+    ports:
+      - "0.0.0.0:8080:8080/tcp"
+      - "0.0.0.0:8080:8080/udp"
+      - "0.0.0.0:9090:9090/tcp"    # management API (bind to 127.0.0.1 if behind a proxy)
+    volumes:
+      - /home/user/outline/persisted-state:/root/shadowbox/persisted-state:Z
+    environment:
+      SB_API_PORT: "9090"
+      SB_API_PREFIX: "your-random-prefix"   # generated by Outline Manager
+      SB_CERTIFICATE_FILE: /root/shadowbox/persisted-state/shadowbox-selfsigned.crt
+      SB_PRIVATE_KEY_FILE: /root/shadowbox/persisted-state/shadowbox-selfsigned.key
+    restart: unless-stopped
+```
+
+> **Recommended:** Use the **Outline Manager** desktop app to generate the exact command, copy the `docker run` output and convert it to compose. The Manager handles certificate generation, port selection, and API key management automatically.
+
+**Firewall:** Open the data port (default `8080/tcp` and `8080/udp`) and the management API port on your server.
+
+```bash
+sudo firewall-cmd --add-port=8080/tcp --add-port=8080/udp --permanent
+sudo firewall-cmd --reload
+```
+
+#### Clients
+Distribute per-user access keys (ss:// URIs) generated by the Manager. Users install the Outline Client app on Android, iOS, Windows, macOS, or Linux.
+
+> Outline and Hysteria 2 solve different problems. Outline is optimised for **censorship circumvention** (traffic obfuscation). Hysteria 2 is optimised for **high-loss / high-latency networks** (QUIC transport). Use Outline where WireGuard is fingerprinted and blocked; use Hysteria 2 where packet loss degrades TCP-based protocols.
+
+---
+
+
+
+---
+
+## See Also
+
+- [Networking](../networking) — all networking docs
+
+---
+
+# Pangolin
+
+URL: https://docs.shani.dev/doc/servers/networking/pangolin/
+Updated: 2026-08-28
+
+Purpose: A fully open-source alternative to Cloudflare Tunnel. Expose local services via a public HTTPS URL through an encrypted WireGuard tunnel to a VPS …
+
+**Purpose:** A fully open-source alternative to Cloudflare Tunnel. Expose local services via a public HTTPS URL through an encrypted WireGuard tunnel to a VPS you control. No third-party cloud — you own the entire path. Supports identity-aware access control per resource.
+
+Pangolin has two components:
+- **Pangolin** — the server, runs on a VPS, receives tunnelled traffic and routes it to your services
+- **Newt** — the agent, runs on your Shani OS machine, creates the outbound WireGuard tunnel
+
+### 1. Server Setup (on a VPS)
+
+`/home/user/pangolin/config/config.yml`:
+```yaml
+app:
+  dashboard_url: https://pangolin.yourdomain.com
+  base_domain: yourdomain.com
+  admin_email: admin@yourdomain.com
+  admin_password: changeme
+  log_level: info
+server:
+  external_port: 443
+  internal_port: 8080
+db:
+  encryption_key: "your-32-char-hex-key"
+```
+
+```yaml
+# ~/pangolin/compose.yaml
+services:
+  pangolin:
+    image: fosrl/pangolin:latest
+    ports:
+      - 0.0.0.0:443:443
+      - 0.0.0.0:51820:51820/udp
+    volumes:
+      - /home/user/pangolin/config:/app/config:Z
+      - /home/user/pangolin/data:/app/data:Z
+    restart: unless-stopped
+```
+
+```bash
+cd ~/pangolin && podman-compose up -d
+```
+
+Access the dashboard at `https://pangolin.yourdomain.com`, create a site, and copy the Newt credentials.
+
+#### VPS firewall
+open `443/tcp` and `51820/udp`
+
+### 2. Newt Agent (on this system)
+
+```yaml
+# ~/newt/compose.yaml
+services:
+  newt:
+    image: fosrl/newt:latest
+    environment:
+      PANGOLIN_URL: https://pangolin.yourdomain.com
+      NEWT_ID: <your-newt-id>
+      NEWT_SECRET: <your-newt-secret>
+    restart: unless-stopped
+```
+
+```bash
+cd ~/newt && podman-compose up -d
+```
+
+## See Also
+
+- [WireGuard / WG-Easy](./wireguard-easy.md)
+- [Cloudflared](../networking/cloudflared.md)
+- [NetBird](./netbird.md)
+
+---
+
+# phpIPAM — IP Address Management
+
+URL: https://docs.shani.dev/doc/servers/networking/phpipam/
+Updated: 2026-08-28
+
+phpIPAM (Lightweight IP Address Management) Purpose: Web-based IP address management tool. Track which IPs are assigned, to what device, who requested the …
+
+> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
+
+## phpIPAM (Lightweight IP Address Management)
+
+**Purpose:** Web-based IP address management tool. Track which IPs are assigned, to what device, who requested the allocation, and which subnets are full. phpIPAM is lighter than NetBox for teams who just need clean IPAM without the full network topology and asset management features. Integrates with PowerDNS for automatic PTR record updates when IPs are assigned.
+
+```yaml
+# ~/phpipam/compose.yaml
+services:
+  phpipam-web:
+    image: phpipam/phpipam-www:latest
+    ports:
+      - 127.0.0.1:8200:80
+    environment:
+      TZ: Asia/Kolkata
+      IPAM_DATABASE_HOST: db
+      IPAM_DATABASE_USER: phpipam
+      IPAM_DATABASE_PASS: changeme
+      IPAM_DATABASE_NAME: phpipam
+    volumes:
+      - /home/user/phpipam/logo:/phpipam/css/images/logo:Z
+    depends_on: [db]
+    restart: unless-stopped
+
+  phpipam-cron:
+    image: phpipam/phpipam-cron:latest
+    environment:
+      TZ: Asia/Kolkata
+      IPAM_DATABASE_HOST: db
+      IPAM_DATABASE_USER: phpipam
+      IPAM_DATABASE_PASS: changeme
+      IPAM_DATABASE_NAME: phpipam
+      SCAN_INTERVAL: 1h
+    depends_on: [db]
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: rootchangeme
+      MYSQL_DATABASE: phpipam
+      MYSQL_USER: phpipam
+      MYSQL_PASSWORD: changeme
+    volumes: [db_data:/var/lib/mysql]
+    restart: unless-stopped
+
+volumes:
+  db_data:
+```
+
+```bash
+cd ~/phpipam && podman-compose up -d
+```
+
+Access at `http://localhost:8200`. On first run, select **Automatic database installation** and create the admin account. Then define your subnets and start allocating IPs.
+
+**Caddy:**
+```caddyfile
+ipam.home.local { tls internal; reverse_proxy localhost:8200 }
+```
+
+> **NetBox vs phpIPAM:** Use phpIPAM for pure IPAM (subnets, IPs, reservations). Use NetBox when you also need rack diagrams, cable management, VLAN documentation, and device inventory.
+
+---
+
+
+
+---
+
+## See Also
+
+- [Networking & Infrastructure](networking) — overview
+
+---
+
+# Pi-hole
+
+URL: https://docs.shani.dev/doc/servers/networking/pi-hole/
+Updated: 2026-08-28
+
+Pi-hole Purpose: Network-wide DNS ad and tracker blocker. Runs as your LAN's DNS server and blocks ads, telemetry, and malware domains for every device — p…
+
+## Pi-hole
+
+**Purpose:** Network-wide DNS ad and tracker blocker. Runs as your LAN's DNS server and blocks ads, telemetry, and malware domains for every device — phones, smart TVs, IoT — without installing anything on them.
+
+```yaml
+# ~/pihole/compose.yaml
+services:
+  pihole:
+    image: pihole/pihole:latest
+    ports:
+      - 127.0.0.1:8083:80
+      - 53:53/tcp
+      - 53:53/udp
+    volumes:
+      - /home/user/pihole/etc-pihole:/etc/pihole:Z
+      - /home/user/pihole/etc-dnsmasq.d:/etc/dnsmasq.d:Z
+    environment:
+      TZ: Asia/Kolkata
+      WEBPASSWORD: changeme
+    restart: unless-stopped
+```
+
+```bash
+cd ~/pihole && podman-compose up -d
+```
+
+**Firewall:** (allow DNS from LAN):
+```bash
+sudo firewall-cmd --add-service=dns --permanent && sudo firewall-cmd --reload
+```
+```bash
+# Update gravity (blocklists) manually
+podman exec pihole pihole -g
+
+# View real-time query log
+podman exec pihole pihole -t
+
+# Enable/disable Pi-hole blocking
+podman exec pihole pihole enable
+podman exec pihole pihole disable 300  # disable for 300 seconds
+
+# Add a domain to whitelist
+podman exec pihole pihole -w example.com
+
+# Add a domain to blacklist
+podman exec pihole pihole -b ads.example.com
+
+# Remove from whitelist
+podman exec pihole pihole -w -d example.com
+
+# View stats summary
+podman exec pihole pihole -c
+
+# Flush logs
+podman exec pihole pihole flush
+
+# Restart DNS resolver
+podman exec pihole pihole restartdns
+
+# Show version info
+podman exec pihole pihole version
+```
+
+> Set your router's DHCP DNS option to your server's LAN IP. All devices will automatically use Pi-hole.
+
+**Caddy:**
+```caddyfile
+pihole.home.local { tls internal; reverse_proxy localhost:8083 }
+```
+
+## See Also
+
+- [AdGuard Home](adguard-home.md)
+- [Unbound](unbound.md)
+- [Blocky](blocky.md)
+- [Technitium DNS Server](technitium.md)
+
+---
+
+# Pritunl
+
+URL: https://docs.shani.dev/doc/servers/networking/pritunl/
+Updated: 2026-08-28
+
+Purpose: Enterprise-grade VPN with a modern web UI. Supports WireGuard and OpenVPN, SSO, multi-site routing, and audit logging. Requires MongoDB. 1. MongoD…
+
+**Purpose:** Enterprise-grade VPN with a modern web UI. Supports WireGuard and OpenVPN, SSO, multi-site routing, and audit logging. Requires MongoDB.
+
+### 1. MongoDB Backend
+```yaml
+# ~/pritunl-mongo/compose.yaml
+services:
+  pritunl-mongo:
+    image: mongo:6
+    ports:
+      - 127.0.0.1:27017:27017
+    volumes:
+      - /home/user/pritunl/mongo:/data/db:Z
+    restart: unless-stopped
+```
+
+```bash
+cd ~/pritunl-mongo && podman-compose up -d
+```
+
+### 2. Pritunl Server
+```yaml
+# ~/pritunl/compose.yaml
+services:
+  pritunl:
+    image: linuxserver/pritunl:latest
+    network_mode: host
+    volumes:
+      - /home/user/pritunl/config:/etc/pritunl:Z
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+    restart: unless-stopped
+```
+
+```bash
+cd ~/pritunl && podman-compose up -d
+```
+
+#### Initial setup
+1. Generate setup key: `podman exec pritunl pritunl setup-key`
+2. Access UI: `https://<server-ip>:443`
+3. Set MongoDB URI: `mongodb://127.0.0.1:27017/pritunl`
+4. Create Org → Add Users → Create Server → Attach → Start
+
+**Firewall:** `sudo firewall-cmd --add-port=443/tcp --add-port=51820/udp --add-port=1194/udp --permanent && sudo firewall-cmd --reload`
+
+## See Also
+
+- [WireGuard / WG-Easy](./wireguard-easy.md)
+- [OpenVPN](openvpn.md)
+- [Firezone](./firezone.md)
+
+---
+
+# SearXNG
+
+URL: https://docs.shani.dev/doc/servers/networking/searxng/
+Updated: 2026-08-28
+
+SearXNG Purpose: Privacy-respecting meta-search engine. Aggregates results from Google, Bing, DuckDuckGo, and 70+ other sources without tracking, logging, …
+
+> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
+
+## SearXNG
+
+**Purpose:** Privacy-respecting meta-search engine. Aggregates results from Google, Bing, DuckDuckGo, and 70+ other sources without tracking, logging, or profiling users. Run it on your server and use it as your default browser search engine.
+
+```yaml
+# ~/searxng/compose.yaml
+services:
+  searxng:
+    image: searxng/searxng:latest
+    ports:
+      - 127.0.0.1:8091:8080
+    volumes:
+      - /home/user/searxng/settings:/etc/searxng:Z
+    environment:
+      SEARXNG_BASE_URL: https://search.home.local
+    restart: unless-stopped
+```
+
+```bash
+cd ~/searxng && podman-compose up -d
+```
+
+---
+
+
+
+---
+
+## See Also
+
+- [Networking & Infrastructure](networking) — overview
+
+---
+
+# Squid (Caching Proxy)
+
+URL: https://docs.shani.dev/doc/servers/networking/squid-caching-proxy/
+Updated: 2026-08-28
+
+Squid (Caching Proxy) Purpose: High-performance HTTP/HTTPS caching proxy. Squid caches web content so repeated requests are served from disk rather than th…
+
+> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
+
+## Squid (Caching Proxy)
+
+**Purpose:** High-performance HTTP/HTTPS caching proxy. Squid caches web content so repeated requests are served from disk rather than the internet — saving bandwidth, reducing latency, and enabling content filtering by URL, domain, or MIME type. Useful in homelabs with metered internet connections, for caching container image pulls, or as a transparent proxy for auditing outbound HTTP traffic from containers.
+
+```yaml
+# ~/squid/compose.yaml
+services:
+  squid:
+    image: ubuntu/squid:latest
+    ports:
+      - 127.0.0.1:3128:3128
+    volumes:
+      - /home/user/squid/squid.conf:/etc/squid/squid.conf:ro,Z
+      - /home/user/squid/cache:/var/spool/squid:Z
+      - /home/user/squid/logs:/var/log/squid:Z
+    restart: unless-stopped
+```
+
+##### Minimal `squid.conf`
+
+```
+# Allow LAN clients
+acl localnet src 192.168.0.0/16
+acl localnet src 10.0.0.0/8
+
+# Standard safe ports
+acl SSL_ports port 443
+acl Safe_ports port 80 443 21 70 210 280 488 591 777 1025-65535
+acl CONNECT method CONNECT
+
+http_access deny !Safe_ports
+http_access deny CONNECT !SSL_ports
+http_access allow localnet
+http_access allow localhost
+http_access deny all
+
+http_port 3128
+
+# Cache configuration
+cache_dir ufs /var/spool/squid 10000 16 256   # 10 GB cache
+maximum_object_size 512 MB
+cache_mem 512 MB
+maximum_object_size_in_memory 10 MB
+
+# Access log
+access_log /var/log/squid/access.log squid
+```
+
+```bash
+cd ~/squid && podman-compose up -d
+
+# Initialise the cache directory (first run)
+podman exec squid squid -z
+
+# View access log
+podman exec squid tail -f /var/log/squid/access.log
+
+# Force cache refresh for a URL
+podman exec squid squidclient -m PURGE http://example.com/
+
+# Check cache statistics
+podman exec squid squidclient mgr:info
+```
+
+#### Use Squid as a proxy for container pulls
+```bash
+# Set Podman to pull via Squid
+export https_proxy=http://localhost:3128
+export http_proxy=http://localhost:3128
+podman pull nginx:alpine
+```
+
+**Caddy:**
+```caddyfile
+squid.home.local { tls internal; reverse_proxy localhost:3128 }
+```
+
+---
+
+
+
+---
+
+## See Also
+
+- [Networking & Infrastructure](networking) — overview
+
+---
+
+# Technitium DNS Server
+
+URL: https://docs.shani.dev/doc/servers/networking/technitium/
+Updated: 2026-08-28
+
+Technitium DNS Server Purpose: Full-featured authoritative and recursive DNS server with a clean web UI. Goes further than Pi-hole and AdGuard Home — Techn…
+
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+
+## Technitium DNS Server
+
+**Purpose:** Full-featured authoritative and recursive DNS server with a clean web UI. Goes further than Pi-hole and AdGuard Home — Technitium can host your own DNS zones (split-horizon DNS for `home.local`), act as a DHCP server, supports DNS-over-HTTPS/TLS/QUIC, has advanced conditional forwarding, and includes built-in ad-blocking. The right choice when you need proper DNS zone management alongside ad-blocking.
+
+```yaml
+# ~/technitium-dns/compose.yaml
+services:
+  technitium-dns:
+    image: technitium/dns-server:latest
+    ports:
+      - 53:53/udp
+      - 53:53/tcp
+      - 127.0.0.1:5380:5380
+      - 853:853/tcp
+      - 443:443/tcp
+    volumes:
+      - /home/user/technitium/config:/etc/dns:Z
+    environment:
+      DNS_SERVER_DOMAIN: dns.home.local
+      DNS_SERVER_ADMIN_PASSWORD: changeme
+    restart: unless-stopped
+```
+
+```bash
+cd ~/technitium-dns && podman-compose up -d
+```
+
+Access the web UI at `http://localhost:5380`. Configure zones, forwarders, and blocklists in the admin panel.
+
+> **Pi-hole vs AdGuard vs Technitium:** Use Pi-hole or AdGuard for simple network-wide ad-blocking. Use Technitium when you also need to manage DNS zones for internal services or run DHCP from the same interface.
+
+## See Also
+
+- [Pi-hole](pihole.md)
+- [AdGuard Home](adguard-home.md)
+- [Unbound](unbound.md)
+- [PowerDNS](powerdns.md)
+- [Kea DHCP](kea-dhcp.md)
+
+---
+
+# Traefik
+
+URL: https://docs.shani.dev/doc/servers/networking/traefik/
+Updated: 2026-08-28
+
+Traefik Purpose: Container-native reverse proxy and load balancer. Auto-discovers services by watching Docker/Podman labels — no config file reload needed …
+
+> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
+
+## Traefik
+
+**Purpose:** Container-native reverse proxy and load balancer. Auto-discovers services by watching Docker/Podman labels — no config file reload needed when you start a new container. Supports automatic HTTPS via Let's Encrypt, weighted load balancing, sticky sessions, rate limiting, circuit breakers, and middleware chains. Best for setups where containers come and go frequently and you want routing to update automatically.
+
+```yaml
+# ~/traefik/compose.yml
+services:
+  traefik:
+    image: traefik:v3
+    ports:
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
+      - "127.0.0.1:8080:8080"   # Dashboard
+    command:
+      - --api.dashboard=true
+      - --api.insecure=false
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.file.directory=/config
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.letsencrypt.acme.email=you@example.com
+      - --certificatesresolvers.letsencrypt.acme.storage=/certs/acme.json
+      - --log.level=INFO
+      - --accesslog=true
+    volumes:
+      - /run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+      - /home/user/traefik/config:/config:Z
+      - /home/user/traefik/certs:/certs:Z
+    restart: unless-stopped
+```
+
+```bash
+cd ~/traefik && podman-compose up -d
+```
+
+#### Expose a service via labels (no Caddyfile edit required)
+```yaml
+services:
+  myapp:
+    image: myapp:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.myapp.rule=Host(`app.example.com`)"
+      - "traefik.http.routers.myapp.entrypoints=websecure"
+      - "traefik.http.routers.myapp.tls.certresolver=letsencrypt"
+      - "traefik.http.services.myapp.loadbalancer.server.port=3000"
+```
+
+#### Load balancing and middleware via dynamic config (`/home/user/traefik/config/dynamic.yml`)
+```yaml
+http:
+  middlewares:
+    rate-limit:
+      rateLimit:
+        average: 100
+        burst: 50
+
+    internal-only:
+      ipAllowList:
+        sourceRange:
+          - "192.168.1.0/24"
+          - "100.64.0.0/10"     # Tailscale
+
+  services:
+    myapp-weighted:
+      weighted:
+        services:
+          - name: myapp-v1
+            weight: 90
+          - name: myapp-v2
+            weight: 10           # Canary: 10% to new version
+
+  routers:
+    myapp:
+      rule: Host(`app.example.com`)
+      service: myapp-weighted
+      entryPoints: [websecure]
+      middlewares: [rate-limit]
+      tls:
+        certResolver: letsencrypt
+```
+
+#### Secure the dashboard behind Caddy
+```caddyfile
+traefik.home.local { tls internal; reverse_proxy localhost:8080 }
+```
+
+---
+
+
+
+---
+
+## See Also
+
+- [Networking & Infrastructure](networking) — overview
+
+---
+
+# Unbound
+
+URL: https://docs.shani.dev/doc/servers/networking/unbound/
+Updated: 2026-08-28
+
+Unbound (Recursive DNS Resolver) Purpose: Validating, caching, recursive DNS resolver. Use it upstream of Pi-hole or AdGuard Home for DNSSEC validation and…
+
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+
+## Unbound (Recursive DNS Resolver)
+
+**Purpose:** Validating, caching, recursive DNS resolver. Use it upstream of Pi-hole or AdGuard Home for DNSSEC validation and to eliminate your ISP's DNS from the picture entirely. Queries go directly to root nameservers.
+
+##### Minimal `unbound.conf`
+
+```yaml
+# /home/user/unbound/unbound.conf
+server:
+  interface: 0.0.0.0
+  port: 53
+  do-ip6: no
+  prefetch: yes
+  cache-min-ttl: 60
+  cache-max-ttl: 86400
+  msg-cache-size: 64m
+  rrset-cache-size: 128m
+  access-control: 127.0.0.0/8 allow
+  access-control: 192.168.0.0/16 allow
+
+forward-zone:
+  name: "."
+  forward-addr: 1.1.1.1
+  forward-addr: 9.9.9.9
+```
+
+```yaml
+# ~/unbound/compose.yaml
+services:
+  unbound:
+    image: mvance/unbound
+    ports:
+      - 127.0.0.1:5335:53/tcp
+      - 127.0.0.1:5335:53/udp
+    volumes:
+      - /home/user/unbound/unbound.conf:/opt/unbound/etc/unbound/unbound.conf:ro,Z
+    restart: unless-stopped
+```
+
+```bash
+cd ~/unbound && podman-compose up -d
+```
+
+Verify resolution through the resolver:
+
+```bash
+dig @localhost -p 5335 example.com +short
+```
+
+In Pi-hole: Settings → DNS → Custom upstream DNS → `127.0.0.1#5335`. Disable all other upstream DNS entries.
+
+## See Also
+
+- [Pi-hole](pihole.md)
+- [AdGuard Home](adguard-home.md)
+- [Technitium DNS Server](technitium.md)
+
+---
+
+# WireGuard / WG-Easy
+
+URL: https://docs.shani.dev/doc/servers/networking/wireguard-easy/
+Updated: 2026-08-28
+
+All VPN and tunnel solutions on this system can run fully containerised. Rootless containers handle traffic routing but require specific capabilities (NETA…
+
+> **Portability note:** Compose examples use rootless **Podman** and `host.containers.internal` (the host gateway from a container). When using Docker, replace `podman-compose` with `docker compose` and `host.containers.internal` with `host-gateway` (add `extra_hosts: [host-gateway:host-gateway]` to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.
+
+All VPN and tunnel solutions on this system can run fully containerised. Rootless containers handle traffic routing but require specific capabilities (`NET_ADMIN`, `NET_RAW`), kernel modules (`tun`), and IP forwarding enabled on the host.
+
+---
+
+## Key Concepts
+
+#### WireGuard vs OpenVPN vs IPSec — when interviewers ask
+WireGuard: modern (2015), small codebase (~4000 lines), fast, kernel-level, uses fixed modern crypto (ChaCha20, Curve25519). No backward compatibility negotiation — a feature, not a limitation. OpenVPN: mature (2001), large ecosystem, configurable cipher suites, userspace TLS so slower, supports TCP mode (useful when UDP is blocked). IPSec: the enterprise/router standard, complex to configure, built into most OSes natively.
+
+#### Mesh VPN topology vs hub-and-spoke
+Traditional VPNs are hub-and-spoke — all client traffic flows through a central VPN server. Mesh VPNs (Tailscale, NetBird, Nebula, ZeroTier) connect every peer directly to every other peer using STUN/TURN for NAT traversal. Advantages: lower latency (direct peer-to-peer), no single point of failure, no bandwidth bottleneck at the hub. Tailscale's control plane manages the key exchange; the data plane is direct WireGuard.
+
+#### STUN vs TURN vs ICE
+- **STUN** (Session Traversal Utilities for NAT) — tells a client its public IP and port as seen from the internet. Used for hole-punching.
+- **TURN** (Traversal Using Relays around NAT) — a relay that proxies traffic when direct hole-punching fails (symmetric NAT). More expensive (all traffic flows through the relay).
+- **ICE** (Interactive Connectivity Establishment) — the negotiation protocol that tries STUN first, falls back to TURN. Used by WebRTC and mesh VPNs.
+
+#### Zero-trust network access (ZTNA) vs VPN
+A traditional VPN grants access to the network — once connected, the user can typically reach everything on the network. ZTNA grants access to specific applications or resources, not the network itself. Firezone and Teleport implement ZTNA: you get access to `postgres.internal:5432` not to the entire `10.0.0.0/8` network. Better for the principle of least privilege.
+
+#### Tunnel overhead and MTU
+Every VPN tunnel adds overhead to each packet (headers, encryption padding). WireGuard adds ~60 bytes. This reduces the effective inner MTU below the standard 1500 bytes — if you send a full-size 1500-byte packet through a WireGuard tunnel, the outer packet exceeds the link MTU and gets fragmented or dropped. Solutions: (1) set the WireGuard client MTU to 1420 (`MTU = 1420` in wg0.conf), (2) enable MSS clamping on the server's PostUp iptables rule to automatically tell TCP connections about the reduced MTU.
+
+#### Split tunnel security implications
+With a split tunnel (`AllowedIPs = 192.168.1.0/24`), only traffic to the home LAN goes through the VPN — all other internet traffic goes directly from the client's ISP. This means: (1) DNS queries for non-`.home.local` domains don't use your Pi-hole, (2) your ISP can still see your general browsing, (3) a malicious website can't be blocked by your home DNS. A full tunnel (`AllowedIPs = 0.0.0.0/0`) routes everything through home, but adds latency and uses your home bandwidth. Choose based on the use case.
+
+#### Cloudflare Tunnel vs self-hosted reverse proxy — the trade-off
+Cloudflare Tunnel (cloudflared) exposes a local service to the internet without opening firewall ports or having a public IP. The tunnel connects outbound to Cloudflare's network, which terminates HTTPS for your domain. Trade-offs: you must trust Cloudflare to terminate your TLS (they see plaintext), your availability depends on Cloudflare's uptime, and all traffic passes through their network (latency + bandwidth cost for large transfers). For services that don't need to bypass Cloudflare, Pangolin (self-hosted) or a VPS-based reverse proxy (frp) gives you the same capability without the dependency.
+
+#### NAT traversal and hole-punching
+When two peers are both behind NAT (typical home routers), neither can initiate a direct connection to the other because there's no public IP:port mapping. Hole-punching works by having both peers send UDP packets to each other simultaneously — each packet causes the NAT to create a mapping for the return direction, opening a bidirectional path. STUN servers facilitate this by telling each peer their external address. This fails with symmetric NAT (different external port for each destination), which requires a TURN relay. WireGuard-based mesh VPNs (Tailscale, NetBird) handle all of this automatically.
+
+#### Access control at the VPN layer vs application layer
+A VPN (WireGuard, OpenVPN) controls who can reach the network; the application still controls what authenticated users can do. Zero-Trust tools (Firezone, Teleport) add a third layer: per-application access policies enforced at the gateway — user Alice can SSH to server A but not server B, even though both are on the same VPN subnet. This maps access control to identity (user + device) rather than just network position. Audit logs at the gateway layer (Teleport's session recording) are also available here, not possible with a plain VPN.
+
+#### Protocol obfuscation — when and why
+Standard WireGuard and OpenVPN traffic patterns are fingerprint-able by deep packet inspection (DPI). ISPs and national firewalls (GFW) identify and block them. Obfuscation tools (Xray/V2Ray with VLESS+XTLS-Reality, Hysteria2) make VPN traffic look like normal HTTPS, video streaming, or QUIC traffic. This is relevant for: (1) countries with internet censorship, (2) corporate networks that block non-HTTP outbound, (3) ISPs that throttle VPN traffic. Hysteria2 additionally uses QUIC's congestion control to improve performance on high-latency, high-loss links (satellite, mobile).
+
+#### WireGuard cryptography — what you're actually running
+WireGuard uses Curve25519 for key exchange (ECDH), ChaCha20-Poly1305 for symmetric encryption (authenticated, AEAD), and BLAKE2s for hashing. This is a modern, audited cryptographic stack — significantly simpler than OpenVPN's TLS negotiation (which can be misconfigured to use weak ciphers). Each peer has a 32-byte public key derived from its private key. Handshakes are silent — WireGuard never responds to unauthenticated packets, making it invisible to port scanners.
+
+#### Tailscale vs Headscale — what the control plane actually does
+WireGuard handles data-plane encryption; the control plane distributes public keys, allocates IP addresses, and implements NAT traversal. Tailscale's control plane is managed (tailscale.com servers). Headscale self-hosts the control plane — same WireGuard data plane, but your server handles key distribution and NAT traversal coordination. The trade-off: Headscale means no Tailscale SaaS dependency, but you run the coordination server, and some Tailscale features (MagicDNS via their resolvers, some client apps) may have reduced functionality.
+
+#### Key rotation and peer management at scale
+WireGuard has no built-in PKI — each peer is a static public key. At small scale (10 peers) this is manageable. At medium scale (50+ peers), use Headscale's API or Netbird's management plane to automate key distribution and rotation. Key compromise in WireGuard requires removing the peer's public key from all other peers' `AllowedPeers` lists — in a mesh of 50 nodes, this means 49 config updates. This is why a management plane (Headscale, Netbird, Innernet) is not optional at scale.
+
+#### VPN split tunneling — security implications
+Full tunnel routes all traffic through the VPN — protects DNS queries, prevents local network leakage, but adds latency and routes your ISP's traffic through your home server. Split tunnel routes only specific CIDRs through the VPN — your home LAN is accessible, but public traffic goes direct. Security risk: split tunnel exposes your traffic on the exit network (corporate WiFi, coffee shop) for non-VPN-routed traffic. DNS leak: even with split tunnel, ensure DNS queries for home resources go through the VPN resolver, not the local network's DNS.
+
+---
+
+## Prerequisites
+
+Before running any VPN container, enable IP forwarding and load the TUN module:
+
+```bash
+# Enable IPv4 and IPv6 forwarding
+sudo sysctl -w net.ipv4.ip_forward=1
+sudo sysctl -w net.ipv6.conf.all.forwarding=1
+
+# Make it persistent across reboots
+echo "net.ipv4.ip_forward=1" | sudo tee /etc/sysctl.d/99-ipforward.conf
+echo "net.ipv6.conf.all.forwarding=1" | sudo tee -a /etc/sysctl.d/99-ipforward.conf
+
+# Load the TUN/TAP module (usually auto-loaded on first use)
+sudo modprobe tun
+```
+
+---
+
+## Quick Selection Guide
+
+| Tool | Best For | Complexity | Web UI | Protocol |
+|------|----------|------------|--------|----------|
+| **WG-Easy** | Home/SOHO WireGuard with a clean UI | Low | ✅ | WireGuard |
+| **Tailscale** | Zero-config mesh for personal/team use | Low | ✅ App | WireGuard (managed) |
+| **Headscale + Headplane** | Self-hosted Tailscale control server | Medium | ✅ | WireGuard |
+| **Cloudflared** | Expose services publicly, no port forwarding | Low | ✅ Dashboard | HTTPS/TLS |
+| **Pangolin + Newt** | Self-hosted tunnel server, full data ownership | Medium | ✅ | WireGuard |
+| **NetBird** | Open-source self-hosted Tailscale alternative | Medium | ✅ | WireGuard |
+| **Pritunl** | Enterprise VPN — SSO, multi-site, audit logs | Medium | ✅ | WireGuard / OpenVPN |
+| **Firezone** | Zero-trust access (ZTNA), granular policies | High | ✅ | WireGuard |
+| **Nebula** | Decentralised mesh, cert-based auth, GitOps | Medium | ❌ CLI | Nebula (UDP) |
+| **ZeroTier** | ZeroTier network with self-hosted controller | Medium | ✅ | ZeroTier (UDP) |
+| **Hysteria 2** | High-loss / censored networks (QUIC) | Medium | ⚠️ Experimental | QUIC (HTTP/3) |
+| **OpenVPN** | Legacy compatibility, cert-based auth | Medium | ⚠️ Community | UDP/TCP |
+| **WireGuard Road Warrior** | Manual split-tunnel config for mobile clients | Medium | ❌ CLI | WireGuard |
+| **Outline VPN** | Simple Shadowsocks proxy for censorship resistance | Low | ✅ App | Shadowsocks |
+| **Xray / V2Ray** | Protocol-obfuscating proxy for censored networks | Medium | ❌ CLI | VLESS/VMESS/XTLS |
+
+---
+
+## WireGuard / WG-Easy
+
+**Purpose:** Modern, high-performance VPN with state-of-the-art cryptography. WG-Easy adds a lightweight web UI for managing peers, generating QR codes, and controlling routes — no CLI required.
+
+```yaml
+# ~/wg-easy/compose.yaml
+services:
+  wg-easy:
+    image: ghcr.io/wg-easy/wg-easy
+    ports:
+      - "127.0.0.1:51821:51821"
+      - "0.0.0.0:51820:51820/udp"
+    volumes:
+      - /home/user/wgeasy:/etc/wireguard:Z
+    environment:
+      WG_HOST: vpn.example.com
+      PASSWORD: changeme
+      WG_DEFAULT_ADDRESS: 10.8.0.x
+      WG_DEFAULT_DNS: 1.1.1.1
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      net.ipv4.ip_forward: "1"
+    restart: unless-stopped
+```
+
+```bash
+cd ~/wg-easy && podman-compose up -d
+```
+
+#### Common operations
+```bash
+# View connected peers and their traffic stats
+# Get session cookie first
+SESSION=$(curl -s -c - -X POST http://localhost:51821/api/session \
+  -H 'Content-Type: application/json' \
+  -d '{"password":"changeme"}' | grep -o 'connect.sid=[^;]*')
+# Then use it
+curl http://localhost:51821/api/wireguard/client -H "Cookie: $SESSION"
+
+# View WireGuard interface status on the host
+sudo wg show
+
+# View logs
+podman logs -f wg-easy
+
+# Restart to apply config changes
+podman restart wg-easy
+```
+
+- **Management UI:** `http://localhost:51821` (proxy through Caddy for HTTPS)
+- **Client data:** persisted in `/home/user/wgeasy/`
+- **Firewall:** `sudo firewall-cmd --add-port=51820/udp --permanent && sudo firewall-cmd --reload`
+
+### How WireGuard Works
+
+WireGuard is fundamentally different from older VPN protocols (OpenVPN, IPSec) in both design and implementation.
+
+**Cryptography:** WireGuard uses a fixed, modern cryptographic suite — no negotiation, no cipher selection, no version mismatches:
+- **ChaCha20-Poly1305** — authenticated symmetric encryption (fast on CPUs without AES hardware acceleration)
+- **Curve25519** — elliptic-curve Diffie-Hellman key exchange
+- **BLAKE2s** — fast cryptographic hashing
+- **SipHash** — for routing table lookups
+
+**No handshake at connection time:** WireGuard peers are configured with each other's public keys in advance. The "tunnel" is stateless — there is no session establishment phase. Packets are just encrypted and sent. This makes WireGuard silent when idle (nothing to detect) and extremely fast to reconnect after a network change (roaming between WiFi and mobile data works seamlessly).
+
+**Kernel-space implementation:** WireGuard runs as a kernel module (or via a wireguard-go userspace implementation on unsupported platforms). This means packet processing happens without crossing the user/kernel boundary, giving it significantly better throughput than OpenVPN's userspace TLS stack.
+
+**Compared to OpenVPN:** OpenVPN is a PKI-based TLS VPN running in userspace. It supports dynamic certificate revocation, many cipher suites, and protocol obfuscation — useful in enterprise environments. WireGuard trades that flexibility for simplicity, speed, and a drastically smaller codebase (~4000 lines vs ~100,000+ for OpenVPN).
+
+### Kill Switch
+
+A kill switch ensures that if the VPN tunnel drops, traffic stops rather than falling back to your clearnet IP. Without it, a brief VPN disconnect leaks your real IP.
+
+```bash
+# Add to your WireGuard client config (wg0.conf)
+[Interface]
+PrivateKey = <your-private-key>
+Address = 10.8.0.2/32
+DNS = 10.8.0.1
+
+# Kill switch: block all traffic except through wg0
+PostUp = iptables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT
+PreDown = iptables -D OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT
+
+[Peer]
+...
+```
+
+This iptables rule allows only traffic marked by the WireGuard interface plus local traffic (LAN). All other outbound traffic is rejected at the kernel level. If WireGuard goes down, `PreDown` removes the rule and normal routing resumes.
+
+### Split DNS for VPN Clients
+
+When routing LAN traffic through WireGuard, DNS for `.home.local` domains must resolve to LAN IPs even from a remote client. Configure the WireGuard client to use your home DNS server for `.home.local` queries only:
+
+```ini
+# wg0.conf client config — split DNS
+[Interface]
+DNS = 192.168.1.10          # your home AdGuard Home / Pi-hole IP
+
+[Peer]
+AllowedIPs = 10.8.0.0/24, 192.168.1.0/24   # route LAN traffic through VPN
+# DNS queries for .home.local go to 192.168.1.10, which resolves them correctly
+```
+
+On Linux clients, `systemd-resolved` handles split DNS when `DNS=` is set in the WireGuard interface config. On macOS/Windows, the WireGuard GUI app respects the DNS setting from the config file.
+
+## See Also
+
+- [Tailscale & Headscale](./headscale.md)
+- [Pangolin](./pangolin.md)
+- [NetBird](./netbird.md)
+- [Pritunl](./pritunl.md)
+- [Firezone](./firezone.md)
+- [WireGuard](../networking/wireguard.md)
+- [Cloudflared](../networking/cloudflared.md)
+
+---
+
+# Xray / V2Ray — Protocol-Obfuscating Proxy
+
+URL: https://docs.shani.dev/doc/servers/networking/xray-v2ray-protocol-obfuscating-proxy/
+Updated: 2026-08-28
+
+Xray / V2Ray (Protocol-Obfuscating Proxy) Purpose: A suite of network proxy tools that wrap traffic in protocols designed to evade deep packet inspection —…
+
+> **Part of the VPN & Tunnels series:** See [all networking docs](../networking)
+
+## Xray / V2Ray (Protocol-Obfuscating Proxy)
+
+**Purpose:** A suite of network proxy tools that wrap traffic in protocols designed to evade deep packet inspection — VLESS, VMESS, and XTLS over WebSocket or gRPC, disguised as ordinary HTTPS. Widely used alongside Hysteria 2 for censorship circumvention. Xray is the actively maintained fork of V2Ray with additional protocols (XTLS, VLESS, XHTTP) and better performance.
+
+#### Use case vs WireGuard
+Xray is a proxy, not a VPN — it forwards traffic through an HTTPS tunnel that looks like web traffic. WireGuard is a full network tunnel with a distinct UDP fingerprint. In environments where WireGuard and Shadowsocks are actively blocked, Xray VLESS+XTLS over port 443 is significantly harder to detect.
+
+`/home/user/xray/config.json` (VLESS + XTLS-Reality — the modern recommended config):
+```json
+{
+  "inbounds": [{
+    "port": 443,
+    "protocol": "vless",
+    "settings": {
+      "clients": [{
+        "id": "your-uuid-here",
+        "flow": "xtls-rprx-vision"
+      }],
+      "decryption": "none"
+    },
+    "streamSettings": {
+      "network": "tcp",
+      "security": "reality",
+      "realitySettings": {
+        "dest": "www.google.com:443",
+        "serverNames": ["www.google.com"],
+        "privateKey": "your-reality-private-key",
+        "shortIds": ["your-short-id"]
+      }
+    }
+  }],
+  "outbounds": [{"protocol": "freedom"}]
+}
+```
+
+```yaml
+# ~/xray/compose.yaml
+services:
+  xray:
+    image: ghcr.io/xtls/xray-core:latest
+    ports:
+      - "0.0.0.0:443:443/tcp"
+    volumes:
+      - /home/user/xray/config.json:/etc/xray/config.json:ro,Z
+    command: run -config /etc/xray/config.json
+    restart: unless-stopped
+```
+
+```bash
+cd ~/xray && podman-compose up -d
+```
+
+##### Generate a UUID and Reality keys
+
+```bash
+# Generate a UUID for the client ID
+podman run --rm ghcr.io/xtls/xray-core:latest uuid
+
+# Generate a Reality key pair
+podman run --rm ghcr.io/xtls/xray-core:latest x25519
+```
+
+#### Clients
+[v2rayN](https://github.com/2dust/v2rayN) (Windows), [v2rayNG](https://github.com/2dust/v2rayNG) (Android), [Shadowrocket](https://apps.apple.com/app/shadowrocket/id932747118) (iOS), [Nekoray](https://github.com/MatsuriDayo/nekoray) (Linux/Windows). Share the connection config as a `vless://` URI or QR code.
+
+> **XTLS-Reality** (shown above) is the recommended modern config — it borrows a real TLS certificate fingerprint from a public site (`www.google.com`), making the server indistinguishable from that site even to active probers. Older VMESS+WS configs are simpler but more detectable.
+
+**Firewall:**
+```bash
+sudo firewall-cmd --add-port=443/tcp --permanent && sudo firewall-cmd --reload
+```
+
+
+
+---
+
+## See Also
+
+- [Networking](../networking) — all networking docs
+
+---
+
+# ZeroTier (Self-Hosted Controller)
+
+URL: https://docs.shani.dev/doc/servers/networking/zerotier-self-hosted-controller/
+Updated: 2026-08-28
+
+ZeroTier (Self-Hosted Controller) Purpose: Run a private ZeroTier network controller without using ZeroTier's central cloud servers. Manage virtual network…
+
+> **Part of the VPN & Tunnels series:** See [all networking docs](../networking)
+
+## ZeroTier (Self-Hosted Controller)
+
+**Purpose:** Run a private ZeroTier network controller without using ZeroTier's central cloud servers. Manage virtual networks and peers on your own hardware.
+
+```yaml
+# ~/zerotier-controller/compose.yaml
+services:
+  zerotier-controller:
+    image: mgk/zerotier-controller:latest
+    ports:
+      - 127.0.0.1:9993:9993/udp
+      - 127.0.0.1:3180:3180/tcp
+    volumes:
+      - /home/user/zerotier-controller:/var/lib/ztnetwork:Z
+    restart: unless-stopped
+```
+
+```bash
+cd ~/zerotier-controller && podman-compose up -d
+```
+
+- **Dashboard:** `http://localhost:3180`
+- **Client setup:** `zerotier-cli join <network-id> --controller <your-server-ip>:3180`
+
+---
+
+
+
+---
+
+## See Also
+
+- [Networking](../networking) — all networking docs
+
+---
+
 # OpenStack & Private Cloud
 
 URL: https://docs.shani.dev/doc/servers/openstack/
@@ -48455,7 +48452,7 @@ cd ~/n8n && podman-compose up -d
 n8n.example.com { reverse_proxy localhost:5678 }
 ```
 
-> n8n webhooks require a publicly accessible URL. Use a Cloudflare Tunnel or Pangolin for internet-facing webhooks without opening firewall ports — see [Cloudflared](https://docs.shani.dev/doc/networking/cloudflared) or [Pangolin](https://docs.shani.dev/doc/networking/pangolin) in the Networking wiki.
+> n8n webhooks require a publicly accessible URL. Use a Cloudflare Tunnel or Pangolin for internet-facing webhooks without opening firewall ports — see [Cloudflared](https://docs.shani.dev/doc/networking/cloudflared) or [Pangolin](https://docs.shani.dev/doc/servers/networking/pangolin) in the Networking wiki.
 
 ---
 
@@ -52157,7 +52154,7 @@ cp -a /data/snapshots/home/pre-agent-<timestamp>/path/to/thing /home/path/to/thi
 ## GPU Notes
 
 - **AMD/Intel** — `/dev/dri` passthrough is all the container needs; Vulkan/ROCm layers ship in the image.
-- **NVIDIA** — the NVIDIA Container Toolkit ships pre-installed; add `--gpus all` (or the CDI equivalent) to the container instead of `--device`.
+- **NVIDIA** — the NVIDIA Container Toolkit is **not pre-installed** on the base system. Use **Distrobox** (handles GPU/CDI automatically) or, for raw Podman, add the toolkit to the host and then add `--gpus all` (or the CDI equivalent) to the container instead of `--device`.
 - Model size guidance: 7B-class coder models fit 8 GB VRAM or system RAM; 14B+ wants 16 GB+. CPU-only inference works but autocompletion latency suffers — keep local use to chat/refactor requests rather than keystroke autocomplete if you lack a GPU.
 
 Full container details: [GPU Containers](gpu-containers).
@@ -53575,7 +53572,7 @@ clinfo | grep -i nvidia   # Verify OpenCL platform
 
 ### 2. Container Toolkit and CDI Spec
 
-`nvidia-container-toolkit` **ships pre-installed** in Shanios images — no package install is needed (and the immutable root cannot accept one). Generate the CDI spec:
+`nvidia-container-toolkit` is **not pre-installed** on the base system, and the immutable root cannot accept a `pacman -S` install. For raw rootless Podman you must add it as a system-level change; the reliable, supported path — which needs **no CDI setup at all** — is to run NVIDIA work through **Distrobox**, which injects the host driver and handles CDI automatically. If your workflow requires raw Podman on NVIDIA hardware, first make the toolkit available on the host and generate the CDI spec:
 
 ```bash
 # Generate the CDI specification — required for Podman (especially rootless)
@@ -53806,7 +53803,7 @@ podman exec node1 mpirun --host node1,node2 -np 8 python3 /workspace/benchmark.p
 - **Driver updates:** Running `shani-deploy` updates host drivers and changes propagate to containers automatically — no image rebuilds required.
 - **Rootless containers:** Podman runs rootless by default on Shanios. If a container requires privileged device access (e.g., `/dev/kfd`), ensure your user is in the correct groups rather than using `--privileged`.
 - **Common pitfalls:**
-  - **`podman run` hangs on GPU device mount:** Ensure `nvidia-container-toolkit` is installed (pre-installed on Shanios) and the CDI spec exists at `/etc/cdi/nvidia.yaml`. Regenerate with `sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml` if missing.
+  - **`podman run` hangs on GPU device mount:** `nvidia-container-toolkit` is **not** pre-installed on Shanios — for raw Podman you must add it to the host first (see the Container Toolkit section above) and ensure the CDI spec exists at `/etc/cdi/nvidia.yaml`. Regenerate with `sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml` if missing. If you run into the immutable-root install limit, use Distrobox, which handles CDI automatically.
   - **`torch.cuda.is_available()` returns False after driver update:** Regenerate the CDI spec (`shani-deploy` handles this) and restart the container — NVIDIA container images bind to the driver version at build time.
   - **AMD ROCm `HSA_OVERRIDE_GFX_VERSION` not set:** Always set it based on your GPU generation (see the GPU Containers table). Defaulting to `10.3.0` on RDNA 3 cards will cause runtime errors.
   - **Distrobox GPU not visible:** Distrobox shares host `/dev` nodes by default, but if using `--additional-flags`, ensure the flags include both `--device=/dev/dri` and `--device=/dev/kfd` (for ROCm) or just `--device=/dev/dri` (for CUDA).
@@ -54387,18 +54384,7 @@ SigLevel = Required DatabaseOptional
 Server = https://repo.shani.dev/$arch
 ```
 
-If you need to add it manually:
-
-```bash
-# Install the keyring first
-sudo pacman -S shani-keyring
-
-# Add the repository to /etc/pacman.conf
-echo -e '\n[shani]\nSigLevel = Required DatabaseOptional\nServer = https://repo.shani.dev/$arch' | sudo tee -a /etc/pacman.conf
-
-# Refresh the database
-sudo pacman -Sy
-```
+**No action needed on Shani OS:** the `[shani]` repository is already configured on every install, and the OS root is immutable — host-level `pacman -S` or edits to `/etc/pacman.conf` cannot persist and are not supported. (The manual `pacman` instructions above apply only to **non-ShaniOS** Arch-based systems that want to pull individual Shanios tools — see [Fleet Deployment](../enterprise/fleet.md) for that setup.)
 
 ## Building Packages
 

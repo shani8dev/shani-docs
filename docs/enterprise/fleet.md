@@ -71,7 +71,7 @@ skip_region: yes
 skip_user: yes
 ```
 
-`configure.sh` reads `OSI_USER_AUTOLOGIN` and configures autologin for whichever display manager is present on the image — GDM, SDDM, greetd, LightDM, LXDM, or plain `agetty` on a TTY (`os-installer-config/scripts/configure.sh:505`, `setup_autologin_target`). Combined with `skip_region`/`skip_user`, an OEM image can go from first boot to a logged-in desktop with no first-run wizard at all.
+`configure.sh` reads `OSI_USER_AUTOLOGIN` and configures autologin for whichever display manager is present on the image — GDM, SDDM, greetd, LightDM, LXDM, or plain `agetty` on a TTY (`os-installer-config/scripts/configure.sh:576`, `setup_autologin_target`). Combined with `skip_region`/`skip_user`, an OEM image can go from first boot to a logged-in desktop with no first-run wizard at all.
 
 Because the install/configure scripts only read `OSI_*` environment variables — they have no hard dependency on the GTK front-end — an OEM building a factory-imaging pipeline can call `install.sh`/`configure.sh` directly with those variables pre-set, skipping the interactive UI entirely for mass provisioning. This is scripting the same code path the GUI installer uses, not a separate "headless mode" — there is no bundled kickstart/autoyast-style single-answer-file format.
 

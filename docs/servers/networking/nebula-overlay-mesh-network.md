@@ -1,6 +1,6 @@
 ---
 title: Nebula (Overlay Mesh Network)
-section: Self-Hosted Networking
+section: Self-Hosting & Servers
 updated: 2026-08-28
 ---
 

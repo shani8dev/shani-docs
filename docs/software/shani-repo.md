@@ -30,18 +30,7 @@ SigLevel = Required DatabaseOptional
 Server = https://repo.shani.dev/$arch
 ```
 
-If you need to add it manually:
-
-```bash
-# Install the keyring first
-sudo pacman -S shani-keyring
-
-# Add the repository to /etc/pacman.conf
-echo -e '\n[shani]\nSigLevel = Required DatabaseOptional\nServer = https://repo.shani.dev/$arch' | sudo tee -a /etc/pacman.conf
-
-# Refresh the database
-sudo pacman -Sy
-```
+**No action needed on Shani OS:** the `[shani]` repository is already configured on every install, and the OS root is immutable — host-level `pacman -S` or edits to `/etc/pacman.conf` cannot persist and are not supported. (The manual `pacman` instructions above apply only to **non-ShaniOS** Arch-based systems that want to pull individual Shanios tools — see [Fleet Deployment](../enterprise/fleet.md) for that setup.)
 
 ## Building Packages
 

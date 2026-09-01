@@ -58,7 +58,7 @@ Every daily habit has an equivalent. The names differ; the workflows do not.
 | File Explorer / Finder | Files app — Nautilus (GNOME), Dolphin (KDE Plasma), COSMIC Files (COSMIC) |
 | Microsoft Store / Mac App Store | Flathub via **Warehouse** (pre-installed) |
 | Control Panel / System Settings | Settings app of your edition |
-| Task Manager / Activity Monitor | Mission Center (pre-installed), or `htop` in a terminal |
+| Task Manager / Activity Monitor | Mission Center (pre-installed on the COSMIC edition), or `htop` in a terminal |
 | cmd / PowerShell / Terminal.app | zsh with Starship prompt (pre-configured) |
 | Action Centre / Notification Centre | Desktop notification centre; update prompts arrive via `shani-update` notifications |
 

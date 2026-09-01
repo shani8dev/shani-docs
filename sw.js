@@ -1,5 +1,5 @@
 // sw.js — docs.shani.dev
-const SHELL_CACHE = 'shanidocs-20260831';
+const SHELL_CACHE = 'shanidocs-20260901';
 const DOC_CACHE   = 'shanidocs-docs-v1';
 const SHELL = [
   '/',

@@ -31,7 +31,7 @@ clinfo | grep -i nvidia   # Verify OpenCL platform
 
 ### 2. Container Toolkit and CDI Spec
 
-`nvidia-container-toolkit` **ships pre-installed** in Shanios images — no package install is needed (and the immutable root cannot accept one). Generate the CDI spec:
+`nvidia-container-toolkit` is **not pre-installed** on the base system, and the immutable root cannot accept a `pacman -S` install. For raw rootless Podman you must add it as a system-level change; the reliable, supported path — which needs **no CDI setup at all** — is to run NVIDIA work through **Distrobox**, which injects the host driver and handles CDI automatically. If your workflow requires raw Podman on NVIDIA hardware, first make the toolkit available on the host and generate the CDI spec:
 
 ```bash
 # Generate the CDI specification — required for Podman (especially rootless)
@@ -262,7 +262,7 @@ podman exec node1 mpirun --host node1,node2 -np 8 python3 /workspace/benchmark.p
 - **Driver updates:** Running `shani-deploy` updates host drivers and changes propagate to containers automatically — no image rebuilds required.
 - **Rootless containers:** Podman runs rootless by default on Shanios. If a container requires privileged device access (e.g., `/dev/kfd`), ensure your user is in the correct groups rather than using `--privileged`.
 - **Common pitfalls:**
-  - **`podman run` hangs on GPU device mount:** Ensure `nvidia-container-toolkit` is installed (pre-installed on Shanios) and the CDI spec exists at `/etc/cdi/nvidia.yaml`. Regenerate with `sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml` if missing.
+  - **`podman run` hangs on GPU device mount:** `nvidia-container-toolkit` is **not** pre-installed on Shanios — for raw Podman you must add it to the host first (see the Container Toolkit section above) and ensure the CDI spec exists at `/etc/cdi/nvidia.yaml`. Regenerate with `sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml` if missing. If you run into the immutable-root install limit, use Distrobox, which handles CDI automatically.
   - **`torch.cuda.is_available()` returns False after driver update:** Regenerate the CDI spec (`shani-deploy` handles this) and restart the container — NVIDIA container images bind to the driver version at build time.
   - **AMD ROCm `HSA_OVERRIDE_GFX_VERSION` not set:** Always set it based on your GPU generation (see the GPU Containers table). Defaulting to `10.3.0` on RDNA 3 cards will cause runtime errors.
   - **Distrobox GPU not visible:** Distrobox shares host `/dev` nodes by default, but if using `--additional-flags`, ensure the flags include both `--device=/dev/dri` and `--device=/dev/kfd` (for ROCm) or just `--device=/dev/dri` (for CUDA).

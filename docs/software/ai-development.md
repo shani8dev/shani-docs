@@ -440,7 +440,7 @@ cp -a /data/snapshots/home/pre-agent-<timestamp>/path/to/thing /home/path/to/thi
 ## GPU Notes
 
 - **AMD/Intel** — `/dev/dri` passthrough is all the container needs; Vulkan/ROCm layers ship in the image.
-- **NVIDIA** — the NVIDIA Container Toolkit ships pre-installed; add `--gpus all` (or the CDI equivalent) to the container instead of `--device`.
+- **NVIDIA** — the NVIDIA Container Toolkit is **not pre-installed** on the base system. Use **Distrobox** (handles GPU/CDI automatically) or, for raw Podman, add the toolkit to the host and then add `--gpus all` (or the CDI equivalent) to the container instead of `--device`.
 - Model size guidance: 7B-class coder models fit 8 GB VRAM or system RAM; 14B+ wants 16 GB+. CPU-only inference works but autocompletion latency suffers — keep local use to chat/refactor requests rather than keystroke autocomplete if you lack a GPU.
 
 Full container details: [GPU Containers](gpu-containers).

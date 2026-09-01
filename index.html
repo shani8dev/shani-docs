@@ -291,41 +291,6 @@
   <li><a href="/doc/intro/whats-included/">What's Included</a> — Shanios comes fully equipped with a comprehensive software stack, carefully curated for desktop computing, development, gaming, and professi</li>
 </ul>
 
-<h2>Self-Hosted Networking</h2>
-<ul>
-  <li><a href="/doc/networking/adguard-home/">AdGuard Home</a> — AdGuard Home Purpose: Pi-hole alternative with native DNS-over-HTTPS (DoH) and DNS-over-TLS (DoT) support, a cleaner UI, per-client rules, a</li>
-  <li><a href="/doc/networking/blocky/">Blocky</a> — Blocky (Fast DNS Ad Blocker) Purpose: High-performance DNS proxy written in Go. Blocks ads and trackers via deny-lists (same blocklists as P</li>
-  <li><a href="/doc/networking/ddns-updater-dynamic-dns/">ddns-updater (Dynamic DNS)</a> — ddns-updater (Dynamic DNS) Purpose: Keeps your DNS records updated when your home/server IP changes. Polls your current public IP on a sched</li>
-  <li><a href="/doc/networking/firezone/">Firezone</a> — Purpose: Zero-trust network access (ZTNA) built on WireGuard. Features SSO (OIDC/SAML), granular access policies, device posture checks, and</li>
-  <li><a href="/doc/networking/frp-fast-reverse-proxy/">frp (Fast Reverse Proxy)</a> — frp (Fast Reverse Proxy) Purpose: Expose services running behind NAT or a firewall to the internet via a VPS relay — without needing to open</li>
-  <li><a href="/doc/networking/frrouting-bgp-ospf-dynamic-routing/">FRRouting — BGP, OSPF &amp; Dynamic Routing</a> — FRRouting (BGP / OSPF / Dynamic Routing) Purpose: Full-featured open-source routing suite implementing BGP, OSPF, IS-IS, RIP, PIM, and BFD —</li>
-  <li><a href="/doc/networking/gluetun-vpn-client-container/">Gluetun (VPN Client Container)</a> — Gluetun (VPN Client Container) Purpose: Route any container's traffic through a commercial VPN provider — without installing a VPN client on</li>
-  <li><a href="/doc/networking/haproxy/">HAProxy</a> — HAProxy (High-Performance Load Balancer) Purpose: The gold-standard TCP and HTTP load balancer. HAProxy has been the backbone of GitHub, Red</li>
-  <li><a href="/doc/networking/headscale/">Headscale (Self-Hosted Tailscale Alternative)</a> — Purpose: Zero-config mesh VPN built on WireGuard. Tailscale uses managed coordination; Headscale is the fully open-source self-hosted contro</li>
-  <li><a href="/doc/networking/hysteria-2-high-loss-networks/">Hysteria 2 (High-Loss Networks)</a> — Hysteria 2 (High-Loss Networks) Purpose: A QUIC-based proxy and tunnel that performs well in high-latency, high-loss, or censored network en</li>
-  <li><a href="/doc/networking/kea-dhcp/">Kea DHCP</a> — Kea DHCP (Modern DHCP Server) Purpose: ISC Kea is the modern replacement for ISC DHCP (dhcpd). Provides DHCPv4 and DHCPv6 with a REST API, a</li>
-  <li><a href="/doc/networking/librenms/">LibreNMS</a> — LibreNMS (Network Monitoring) Purpose: Full-featured auto-discovering network monitoring system. Discovers routers, switches, servers, APs, </li>
-  <li><a href="/doc/networking/nebula-overlay-mesh-network/">Nebula (Overlay Mesh Network)</a> — Nebula (Overlay Mesh Network) Purpose: A scalable, decentralised overlay network developed by Slack. Nodes communicate directly using certif</li>
-  <li><a href="/doc/networking/netbird/">NetBird</a> — NetBird Purpose: Open-source, peer-to-peer WireGuard mesh VPN platform. The most complete self-hosted alternative to Tailscale — management </li>
-  <li><a href="/doc/networking/netbox/">NetBox</a> — NetBox (Network Documentation &amp; IPAM) Purpose: Source of truth for your network infrastructure. Document IP address assignments (IPAM), VLAN</li>
-  <li><a href="/doc/networking/nginx-proxy-manager/">Nginx Proxy Manager</a> — Nginx Proxy Manager Purpose: GUI-based reverse proxy with Let's Encrypt integration. If you find Caddy's Caddyfile syntax unfamiliar, NPM of</li>
-  <li><a href="/doc/networking/ntopng/">Ntopng</a> — Ntopng (Network Traffic Analysis) Purpose: Real-time network traffic monitoring and analysis. Shows active flows, top talkers, protocol brea</li>
-  <li><a href="/doc/networking/openvpn/">OpenVPN</a> — OpenVPN Purpose: Legacy, highly configurable VPN standard. Use when you need specific cipher suites, client certificate management, or compa</li>
-  <li><a href="/doc/networking/outline-vpn/">Outline VPN</a> — Outline VPN Purpose: Shadowsocks-based proxy server by Jigsaw (Google). Designed for ease of deployment and resistance to traffic fingerprin</li>
-  <li><a href="/doc/networking/pangolin/">Pangolin</a> — Purpose: A fully open-source alternative to Cloudflare Tunnel. Expose local services via a public HTTPS URL through an encrypted WireGuard t</li>
-  <li><a href="/doc/networking/phpipam/">phpIPAM — IP Address Management</a> — phpIPAM (Lightweight IP Address Management) Purpose: Web-based IP address management tool. Track which IPs are assigned, to what device, who</li>
-  <li><a href="/doc/networking/pi-hole/">Pi-hole</a> — Pi-hole Purpose: Network-wide DNS ad and tracker blocker. Runs as your LAN's DNS server and blocks ads, telemetry, and malware domains for e</li>
-  <li><a href="/doc/networking/pritunl/">Pritunl</a> — Purpose: Enterprise-grade VPN with a modern web UI. Supports WireGuard and OpenVPN, SSO, multi-site routing, and audit logging. Requires Mon</li>
-  <li><a href="/doc/networking/searxng/">SearXNG</a> — SearXNG Purpose: Privacy-respecting meta-search engine. Aggregates results from Google, Bing, DuckDuckGo, and 70+ other sources without trac</li>
-  <li><a href="/doc/networking/squid-caching-proxy/">Squid (Caching Proxy)</a> — Squid (Caching Proxy) Purpose: High-performance HTTP/HTTPS caching proxy. Squid caches web content so repeated requests are served from disk</li>
-  <li><a href="/doc/networking/technitium/">Technitium DNS Server</a> — Technitium DNS Server Purpose: Full-featured authoritative and recursive DNS server with a clean web UI. Goes further than Pi-hole and AdGua</li>
-  <li><a href="/doc/networking/traefik/">Traefik</a> — Traefik Purpose: Container-native reverse proxy and load balancer. Auto-discovers services by watching Docker/Podman labels — no config file</li>
-  <li><a href="/doc/networking/unbound/">Unbound</a> — Unbound (Recursive DNS Resolver) Purpose: Validating, caching, recursive DNS resolver. Use it upstream of Pi-hole or AdGuard Home for DNSSEC</li>
-  <li><a href="/doc/networking/wireguard-easy/">WireGuard / WG-Easy</a> — All VPN and tunnel solutions on this system can run fully containerised. Rootless containers handle traffic routing but require specific cap</li>
-  <li><a href="/doc/networking/xray-v2ray-protocol-obfuscating-proxy/">Xray / V2Ray — Protocol-Obfuscating Proxy</a> — Xray / V2Ray (Protocol-Obfuscating Proxy) Purpose: A suite of network proxy tools that wrap traffic in protocols designed to evade deep pack</li>
-  <li><a href="/doc/networking/zerotier-self-hosted-controller/">ZeroTier (Self-Hosted Controller)</a> — ZeroTier (Self-Hosted Controller) Purpose: Run a private ZeroTier network controller without using ZeroTier's central cloud servers. Manage </li>
-</ul>
-
 <h2>Networking</h2>
 <ul>
   <li><a href="/doc/networking/apache/">Apache HTTP Server</a> — Apache is a full-featured, battle-tested web server. On Shani OS, Caddy is the recommended reverse proxy for self-hosted services due to its</li>
@@ -430,6 +395,37 @@
   <li><a href="/doc/servers/monitoring/logs/">Monitoring — Log Aggregation (ELK, OpenSearch &amp; Vector)</a> — Elasticsearch + ELK Stack (Single-Node) Purpose: Distributed search and analytics engine — the E in the ELK stack (Elasticsearch + Logstash </li>
   <li><a href="/doc/servers/monitoring/prometheus/">Monitoring — Prometheus, Alerting &amp; Long-Term Storage</a> — Key Concepts The three pillars (now four) of observability Metrics — numeric time-series data (CPU %, request rate, error count). Cheap to s</li>
   <li><a href="/doc/servers/monitoring/uptime/">Monitoring — Uptime, Lightweight Dashboards &amp; All-in-One Platforms</a> — Netdata Purpose: Real-time system and container metrics with zero configuration. Auto-discovers running containers, processes, databases, an</li>
+  <li><a href="/doc/servers/networking/adguard-home/">AdGuard Home</a> — AdGuard Home Purpose: Pi-hole alternative with native DNS-over-HTTPS (DoH) and DNS-over-TLS (DoT) support, a cleaner UI, per-client rules, a</li>
+  <li><a href="/doc/servers/networking/blocky/">Blocky</a> — Blocky (Fast DNS Ad Blocker) Purpose: High-performance DNS proxy written in Go. Blocks ads and trackers via deny-lists (same blocklists as P</li>
+  <li><a href="/doc/servers/networking/ddns-updater-dynamic-dns/">ddns-updater (Dynamic DNS)</a> — ddns-updater (Dynamic DNS) Purpose: Keeps your DNS records updated when your home/server IP changes. Polls your current public IP on a sched</li>
+  <li><a href="/doc/servers/networking/firezone/">Firezone</a> — Purpose: Zero-trust network access (ZTNA) built on WireGuard. Features SSO (OIDC/SAML), granular access policies, device posture checks, and</li>
+  <li><a href="/doc/servers/networking/frp-fast-reverse-proxy/">frp (Fast Reverse Proxy)</a> — frp (Fast Reverse Proxy) Purpose: Expose services running behind NAT or a firewall to the internet via a VPS relay — without needing to open</li>
+  <li><a href="/doc/servers/networking/frrouting-bgp-ospf-dynamic-routing/">FRRouting — BGP, OSPF &amp; Dynamic Routing</a> — FRRouting (BGP / OSPF / Dynamic Routing) Purpose: Full-featured open-source routing suite implementing BGP, OSPF, IS-IS, RIP, PIM, and BFD —</li>
+  <li><a href="/doc/servers/networking/gluetun-vpn-client-container/">Gluetun (VPN Client Container)</a> — Gluetun (VPN Client Container) Purpose: Route any container's traffic through a commercial VPN provider — without installing a VPN client on</li>
+  <li><a href="/doc/servers/networking/haproxy/">HAProxy</a> — HAProxy (High-Performance Load Balancer) Purpose: The gold-standard TCP and HTTP load balancer. HAProxy has been the backbone of GitHub, Red</li>
+  <li><a href="/doc/servers/networking/headscale/">Headscale (Self-Hosted Tailscale Alternative)</a> — Purpose: Zero-config mesh VPN built on WireGuard. Tailscale uses managed coordination; Headscale is the fully open-source self-hosted contro</li>
+  <li><a href="/doc/servers/networking/hysteria-2-high-loss-networks/">Hysteria 2 (High-Loss Networks)</a> — Hysteria 2 (High-Loss Networks) Purpose: A QUIC-based proxy and tunnel that performs well in high-latency, high-loss, or censored network en</li>
+  <li><a href="/doc/servers/networking/kea-dhcp/">Kea DHCP</a> — Kea DHCP (Modern DHCP Server) Purpose: ISC Kea is the modern replacement for ISC DHCP (dhcpd). Provides DHCPv4 and DHCPv6 with a REST API, a</li>
+  <li><a href="/doc/servers/networking/librenms/">LibreNMS</a> — LibreNMS (Network Monitoring) Purpose: Full-featured auto-discovering network monitoring system. Discovers routers, switches, servers, APs, </li>
+  <li><a href="/doc/servers/networking/nebula-overlay-mesh-network/">Nebula (Overlay Mesh Network)</a> — Nebula (Overlay Mesh Network) Purpose: A scalable, decentralised overlay network developed by Slack. Nodes communicate directly using certif</li>
+  <li><a href="/doc/servers/networking/netbird/">NetBird</a> — NetBird Purpose: Open-source, peer-to-peer WireGuard mesh VPN platform. The most complete self-hosted alternative to Tailscale — management </li>
+  <li><a href="/doc/servers/networking/netbox/">NetBox</a> — NetBox (Network Documentation &amp; IPAM) Purpose: Source of truth for your network infrastructure. Document IP address assignments (IPAM), VLAN</li>
+  <li><a href="/doc/servers/networking/nginx-proxy-manager/">Nginx Proxy Manager</a> — Nginx Proxy Manager Purpose: GUI-based reverse proxy with Let's Encrypt integration. If you find Caddy's Caddyfile syntax unfamiliar, NPM of</li>
+  <li><a href="/doc/servers/networking/ntopng/">Ntopng</a> — Ntopng (Network Traffic Analysis) Purpose: Real-time network traffic monitoring and analysis. Shows active flows, top talkers, protocol brea</li>
+  <li><a href="/doc/servers/networking/openvpn/">OpenVPN</a> — OpenVPN Purpose: Legacy, highly configurable VPN standard. Use when you need specific cipher suites, client certificate management, or compa</li>
+  <li><a href="/doc/servers/networking/outline-vpn/">Outline VPN</a> — Outline VPN Purpose: Shadowsocks-based proxy server by Jigsaw (Google). Designed for ease of deployment and resistance to traffic fingerprin</li>
+  <li><a href="/doc/servers/networking/pangolin/">Pangolin</a> — Purpose: A fully open-source alternative to Cloudflare Tunnel. Expose local services via a public HTTPS URL through an encrypted WireGuard t</li>
+  <li><a href="/doc/servers/networking/phpipam/">phpIPAM — IP Address Management</a> — phpIPAM (Lightweight IP Address Management) Purpose: Web-based IP address management tool. Track which IPs are assigned, to what device, who</li>
+  <li><a href="/doc/servers/networking/pi-hole/">Pi-hole</a> — Pi-hole Purpose: Network-wide DNS ad and tracker blocker. Runs as your LAN's DNS server and blocks ads, telemetry, and malware domains for e</li>
+  <li><a href="/doc/servers/networking/pritunl/">Pritunl</a> — Purpose: Enterprise-grade VPN with a modern web UI. Supports WireGuard and OpenVPN, SSO, multi-site routing, and audit logging. Requires Mon</li>
+  <li><a href="/doc/servers/networking/searxng/">SearXNG</a> — SearXNG Purpose: Privacy-respecting meta-search engine. Aggregates results from Google, Bing, DuckDuckGo, and 70+ other sources without trac</li>
+  <li><a href="/doc/servers/networking/squid-caching-proxy/">Squid (Caching Proxy)</a> — Squid (Caching Proxy) Purpose: High-performance HTTP/HTTPS caching proxy. Squid caches web content so repeated requests are served from disk</li>
+  <li><a href="/doc/servers/networking/technitium/">Technitium DNS Server</a> — Technitium DNS Server Purpose: Full-featured authoritative and recursive DNS server with a clean web UI. Goes further than Pi-hole and AdGua</li>
+  <li><a href="/doc/servers/networking/traefik/">Traefik</a> — Traefik Purpose: Container-native reverse proxy and load balancer. Auto-discovers services by watching Docker/Podman labels — no config file</li>
+  <li><a href="/doc/servers/networking/unbound/">Unbound</a> — Unbound (Recursive DNS Resolver) Purpose: Validating, caching, recursive DNS resolver. Use it upstream of Pi-hole or AdGuard Home for DNSSEC</li>
+  <li><a href="/doc/servers/networking/wireguard-easy/">WireGuard / WG-Easy</a> — All VPN and tunnel solutions on this system can run fully containerised. Rootless containers handle traffic routing but require specific cap</li>
+  <li><a href="/doc/servers/networking/xray-v2ray-protocol-obfuscating-proxy/">Xray / V2Ray — Protocol-Obfuscating Proxy</a> — Xray / V2Ray (Protocol-Obfuscating Proxy) Purpose: A suite of network proxy tools that wrap traffic in protocols designed to evade deep pack</li>
+  <li><a href="/doc/servers/networking/zerotier-self-hosted-controller/">ZeroTier (Self-Hosted Controller)</a> — ZeroTier (Self-Hosted Controller) Purpose: Run a private ZeroTier network controller without using ZeroTier's central cloud servers. Manage </li>
   <li><a href="/doc/servers/openstack/">OpenStack &amp; Private Cloud</a> — OpenStack &amp; Private Cloud Deploy a full OpenStack cloud on this system — from a minimal all-in-one development setup to a multi-node private</li>
   <li><a href="/doc/servers/productivity/file-sync/">Productivity — File Sync (Nextcloud, Syncthing &amp; More)</a> — Key Concepts Internal Developer Platforms (IDPs) — what they solve Without an IDP, every developer needs to know: how to provision infrastru</li>
   <li><a href="/doc/servers/productivity/knowledge-base/">Productivity — Wikis &amp; Knowledge Bases</a> — Outline (Team Knowledge Base) Purpose: Modern wiki and knowledge base with real-time collaborative editing, a clean Notion-like interface, a</li>

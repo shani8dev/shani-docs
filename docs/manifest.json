@@ -270,16 +270,6 @@
     "keywords": ""
   },
   {
-    "slug": "networking/adguard-home",
-    "title": "AdGuard Home",
-    "section": "Self-Hosted Networking",
-    "description": "AdGuard Home Purpose: Pi-hole alternative with native DNS-over-HTTPS (DoH) and DNS-over-TLS (DoT) support, a cleaner UI, per-client rules, and built-in par…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
     "slug": "networking/apache",
     "title": "Apache HTTP Server",
     "section": "Networking",
@@ -330,16 +320,6 @@
     "keywords": ""
   },
   {
-    "slug": "networking/blocky",
-    "title": "Blocky",
-    "section": "Self-Hosted Networking",
-    "description": "Blocky (Fast DNS Ad Blocker) Purpose: High-performance DNS proxy written in Go. Blocks ads and trackers via deny-lists (same blocklists as Pi-hole), suppor…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
     "slug": "networking/bluetooth",
     "title": "Bluetooth",
     "section": "Networking",
@@ -364,16 +344,6 @@
     "title": "Cloudflared Tunnels",
     "section": "Networking",
     "description": "Cloudflared creates an encrypted, outbound-only tunnel from your Shani OS machine to Cloudflare's global edge network. This lets you expose local services …",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
-    "slug": "networking/ddns-updater-dynamic-dns",
-    "title": "ddns-updater (Dynamic DNS)",
-    "section": "Self-Hosted Networking",
-    "description": "ddns-updater (Dynamic DNS) Purpose: Keeps your DNS records updated when your home/server IP changes. Polls your current public IP on a schedule and updates…",
     "updated": "2026-08-28",
     "order": 999,
     "draft": false,
@@ -430,46 +400,6 @@
     "keywords": ""
   },
   {
-    "slug": "networking/firezone",
-    "title": "Firezone",
-    "section": "Self-Hosted Networking",
-    "description": "Purpose: Zero-trust network access (ZTNA) built on WireGuard. Features SSO (OIDC/SAML), granular access policies, device posture checks, and a unified dash…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
-    "slug": "networking/frp-fast-reverse-proxy",
-    "title": "frp (Fast Reverse Proxy)",
-    "section": "Self-Hosted Networking",
-    "description": "frp (Fast Reverse Proxy) Purpose: Expose services running behind NAT or a firewall to the internet via a VPS relay — without needing to open ports on your …",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
-    "slug": "networking/frrouting-bgp-ospf-dynamic-routing",
-    "title": "FRRouting — BGP, OSPF & Dynamic Routing",
-    "section": "Self-Hosted Networking",
-    "description": "FRRouting (BGP / OSPF / Dynamic Routing) Purpose: Full-featured open-source routing suite implementing BGP, OSPF, IS-IS, RIP, PIM, and BFD — the same proto…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
-    "slug": "networking/gluetun-vpn-client-container",
-    "title": "Gluetun (VPN Client Container)",
-    "section": "Self-Hosted Networking",
-    "description": "Gluetun (VPN Client Container) Purpose: Route any container's traffic through a commercial VPN provider — without installing a VPN client on the host. Glue…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
     "slug": "networking/gpsd",
     "title": "gpsd (GPS Daemon)",
     "section": "Networking",
@@ -480,40 +410,10 @@
     "keywords": ""
   },
   {
-    "slug": "networking/haproxy",
-    "title": "HAProxy",
-    "section": "Self-Hosted Networking",
-    "description": "HAProxy (High-Performance Load Balancer) Purpose: The gold-standard TCP and HTTP load balancer. HAProxy has been the backbone of GitHub, Reddit, and Stack …",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
-    "slug": "networking/headscale",
-    "title": "Headscale (Self-Hosted Tailscale Alternative)",
-    "section": "Self-Hosted Networking",
-    "description": "Purpose: Zero-config mesh VPN built on WireGuard. Tailscale uses managed coordination; Headscale is the fully open-source self-hosted control server — givi…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
     "slug": "networking/how-container-networking-works",
     "title": "How Container Networking Works",
     "section": "Networking",
     "description": "How Container Networking Works Understanding what Podman does under the hood helps debug connectivity issues between containers and the host. When you star…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
-    "slug": "networking/hysteria-2-high-loss-networks",
-    "title": "Hysteria 2 (High-Loss Networks)",
-    "section": "Self-Hosted Networking",
-    "description": "Hysteria 2 (High-Loss Networks) Purpose: A QUIC-based proxy and tunnel that performs well in high-latency, high-loss, or censored network environments wher…",
     "updated": "2026-08-28",
     "order": 999,
     "draft": false,
@@ -550,30 +450,10 @@
     "keywords": ""
   },
   {
-    "slug": "networking/kea-dhcp",
-    "title": "Kea DHCP",
-    "section": "Self-Hosted Networking",
-    "description": "Kea DHCP (Modern DHCP Server) Purpose: ISC Kea is the modern replacement for ISC DHCP (dhcpd). Provides DHCPv4 and DHCPv6 with a REST API, a lease database…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
     "slug": "networking/kerberos",
     "title": "Kerberos",
     "section": "Networking",
     "description": "Kerberos provides strong mutual authentication for client/server applications using secret-key cryptography. It is the standard for enterprise network auth…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
-    "slug": "networking/librenms",
-    "title": "LibreNMS",
-    "section": "Self-Hosted Networking",
-    "description": "LibreNMS (Network Monitoring) Purpose: Full-featured auto-discovering network monitoring system. Discovers routers, switches, servers, APs, and printers vi…",
     "updated": "2026-08-28",
     "order": 999,
     "draft": false,
@@ -594,36 +474,6 @@
     "title": "nbd-server (Network Block Device)",
     "section": "Networking",
     "description": "NBD exports a block device (disk, partition, or image file) over the network. The client side presents it as a local block device (e.g., /dev/nbd0) that ca…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
-    "slug": "networking/nebula-overlay-mesh-network",
-    "title": "Nebula (Overlay Mesh Network)",
-    "section": "Self-Hosted Networking",
-    "description": "Nebula (Overlay Mesh Network) Purpose: A scalable, decentralised overlay network developed by Slack. Nodes communicate directly using certificate-based PKI…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
-    "slug": "networking/netbird",
-    "title": "NetBird",
-    "section": "Self-Hosted Networking",
-    "description": "NetBird Purpose: Open-source, peer-to-peer WireGuard mesh VPN platform. The most complete self-hosted alternative to Tailscale — management dashboard, STUN…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
-    "slug": "networking/netbox",
-    "title": "NetBox",
-    "section": "Self-Hosted Networking",
-    "description": "NetBox (Network Documentation & IPAM) Purpose: Source of truth for your network infrastructure. Document IP address assignments (IPAM), VLAN configurations…",
     "updated": "2026-08-28",
     "order": 999,
     "draft": false,
@@ -670,26 +520,6 @@
     "keywords": ""
   },
   {
-    "slug": "networking/nginx-proxy-manager",
-    "title": "Nginx Proxy Manager",
-    "section": "Self-Hosted Networking",
-    "description": "Nginx Proxy Manager Purpose: GUI-based reverse proxy with Let's Encrypt integration. If you find Caddy's Caddyfile syntax unfamiliar, NPM offers a click-th…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
-    "slug": "networking/ntopng",
-    "title": "Ntopng",
-    "section": "Self-Hosted Networking",
-    "description": "Ntopng (Network Traffic Analysis) Purpose: Real-time network traffic monitoring and analysis. Shows active flows, top talkers, protocol breakdown, geo-IP m…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
     "slug": "networking/openresolv",
     "title": "openresolv (DNS)",
     "section": "Networking",
@@ -710,70 +540,10 @@
     "keywords": ""
   },
   {
-    "slug": "networking/openvpn",
-    "title": "OpenVPN",
-    "section": "Self-Hosted Networking",
-    "description": "OpenVPN Purpose: Legacy, highly configurable VPN standard. Use when you need specific cipher suites, client certificate management, or compatibility with o…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
-    "slug": "networking/outline-vpn",
-    "title": "Outline VPN",
-    "section": "Self-Hosted Networking",
-    "description": "Outline VPN Purpose: Shadowsocks-based proxy server by Jigsaw (Google). Designed for ease of deployment and resistance to traffic fingerprinting — traffic …",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
-    "slug": "networking/pangolin",
-    "title": "Pangolin",
-    "section": "Self-Hosted Networking",
-    "description": "Purpose: A fully open-source alternative to Cloudflare Tunnel. Expose local services via a public HTTPS URL through an encrypted WireGuard tunnel to a VPS …",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
-    "slug": "networking/phpipam",
-    "title": "phpIPAM — IP Address Management",
-    "section": "Self-Hosted Networking",
-    "description": "phpIPAM (Lightweight IP Address Management) Purpose: Web-based IP address management tool. Track which IPs are assigned, to what device, who requested the …",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
-    "slug": "networking/pi-hole",
-    "title": "Pi-hole",
-    "section": "Self-Hosted Networking",
-    "description": "Pi-hole Purpose: Network-wide DNS ad and tracker blocker. Runs as your LAN's DNS server and blocks ads, telemetry, and malware domains for every device — p…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
     "slug": "networking/powerdns",
     "title": "PowerDNS + PowerDNS Admin",
     "section": "Networking",
     "description": "PowerDNS + PowerDNS Admin (Authoritative DNS) Purpose: Authoritative DNS server for your own domains. While Pi-hole, AdGuard, and Technitium handle resolvi…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
-    "slug": "networking/pritunl",
-    "title": "Pritunl",
-    "section": "Self-Hosted Networking",
-    "description": "Purpose: Enterprise-grade VPN with a modern web UI. Supports WireGuard and OpenVPN, SSO, multi-site routing, and audit logging. Requires MongoDB. 1. MongoD…",
     "updated": "2026-08-28",
     "order": 999,
     "draft": false,
@@ -810,16 +580,6 @@
     "keywords": ""
   },
   {
-    "slug": "networking/searxng",
-    "title": "SearXNG",
-    "section": "Self-Hosted Networking",
-    "description": "SearXNG Purpose: Privacy-respecting meta-search engine. Aggregates results from Google, Bing, DuckDuckGo, and 70+ other sources without tracking, logging, …",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
     "slug": "networking/slapd",
     "title": "slapd (OpenLDAP)",
     "section": "Networking",
@@ -834,16 +594,6 @@
     "title": "snmpd (SNMP)",
     "section": "Networking",
     "description": "The Simple Network Management Protocol daemon allows your Shani OS machine to be monitored by external systems such as Zabbix, Nagios, LibreNMS, or PRTG. I…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
-    "slug": "networking/squid-caching-proxy",
-    "title": "Squid (Caching Proxy)",
-    "section": "Self-Hosted Networking",
-    "description": "Squid (Caching Proxy) Purpose: High-performance HTTP/HTTPS caching proxy. Squid caches web content so repeated requests are served from disk rather than th…",
     "updated": "2026-08-28",
     "order": 999,
     "draft": false,
@@ -880,26 +630,6 @@
     "keywords": ""
   },
   {
-    "slug": "networking/technitium",
-    "title": "Technitium DNS Server",
-    "section": "Self-Hosted Networking",
-    "description": "Technitium DNS Server Purpose: Full-featured authoritative and recursive DNS server with a clean web UI. Goes further than Pi-hole and AdGuard Home — Techn…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
-    "slug": "networking/traefik",
-    "title": "Traefik",
-    "section": "Self-Hosted Networking",
-    "description": "Traefik Purpose: Container-native reverse proxy and load balancer. Auto-discovers services by watching Docker/Podman labels — no config file reload needed …",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
     "slug": "networking/troubleshooting",
     "title": "Troubleshooting",
     "section": "Networking",
@@ -910,30 +640,10 @@
     "keywords": ""
   },
   {
-    "slug": "networking/unbound",
-    "title": "Unbound",
-    "section": "Self-Hosted Networking",
-    "description": "Unbound (Recursive DNS Resolver) Purpose: Validating, caching, recursive DNS resolver. Use it upstream of Pi-hole or AdGuard Home for DNSSEC validation and…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
     "slug": "networking/virtual-networking",
     "title": "Virtual Networking",
     "section": "Networking",
     "description": "Linux exposes a rich set of virtual network devices and primitives for building software-defined networks, container networking, VMs, VPN tunnels, and isol…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
-    "slug": "networking/wireguard-easy",
-    "title": "WireGuard / WG-Easy",
-    "section": "Self-Hosted Networking",
-    "description": "All VPN and tunnel solutions on this system can run fully containerised. Rootless containers handle traffic routing but require specific capabilities (NETA…",
     "updated": "2026-08-28",
     "order": 999,
     "draft": false,
@@ -964,26 +674,6 @@
     "title": "Wi-Fi & Wireless Firmware",
     "section": "Networking",
     "description": "Wi-Fi works on first boot. NetworkManager is preinstalled and enabled, and the wireless firmware for common chip families ships inside the image — there is…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
-    "slug": "networking/xray-v2ray-protocol-obfuscating-proxy",
-    "title": "Xray / V2Ray — Protocol-Obfuscating Proxy",
-    "section": "Self-Hosted Networking",
-    "description": "Xray / V2Ray (Protocol-Obfuscating Proxy) Purpose: A suite of network proxy tools that wrap traffic in protocols designed to evade deep packet inspection —…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
-    "slug": "networking/zerotier-self-hosted-controller",
-    "title": "ZeroTier (Self-Hosted Controller)",
-    "section": "Self-Hosted Networking",
-    "description": "ZeroTier (Self-Hosted Controller) Purpose: Run a private ZeroTier network controller without using ZeroTier's central cloud servers. Manage virtual network…",
     "updated": "2026-08-28",
     "order": 999,
     "draft": false,
@@ -1474,6 +1164,316 @@
     "title": "Monitoring — Uptime, Lightweight Dashboards & All-in-One Platforms",
     "section": "Self-Hosting & Servers",
     "description": "Netdata Purpose: Real-time system and container metrics with zero configuration. Auto-discovers running containers, processes, databases, and services. Pro…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/adguard-home",
+    "title": "AdGuard Home",
+    "section": "Self-Hosting & Servers",
+    "description": "AdGuard Home Purpose: Pi-hole alternative with native DNS-over-HTTPS (DoH) and DNS-over-TLS (DoT) support, a cleaner UI, per-client rules, and built-in par…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/blocky",
+    "title": "Blocky",
+    "section": "Self-Hosting & Servers",
+    "description": "Blocky (Fast DNS Ad Blocker) Purpose: High-performance DNS proxy written in Go. Blocks ads and trackers via deny-lists (same blocklists as Pi-hole), suppor…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/ddns-updater-dynamic-dns",
+    "title": "ddns-updater (Dynamic DNS)",
+    "section": "Self-Hosting & Servers",
+    "description": "ddns-updater (Dynamic DNS) Purpose: Keeps your DNS records updated when your home/server IP changes. Polls your current public IP on a schedule and updates…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/firezone",
+    "title": "Firezone",
+    "section": "Self-Hosting & Servers",
+    "description": "Purpose: Zero-trust network access (ZTNA) built on WireGuard. Features SSO (OIDC/SAML), granular access policies, device posture checks, and a unified dash…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/frp-fast-reverse-proxy",
+    "title": "frp (Fast Reverse Proxy)",
+    "section": "Self-Hosting & Servers",
+    "description": "frp (Fast Reverse Proxy) Purpose: Expose services running behind NAT or a firewall to the internet via a VPS relay — without needing to open ports on your …",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/frrouting-bgp-ospf-dynamic-routing",
+    "title": "FRRouting — BGP, OSPF & Dynamic Routing",
+    "section": "Self-Hosting & Servers",
+    "description": "FRRouting (BGP / OSPF / Dynamic Routing) Purpose: Full-featured open-source routing suite implementing BGP, OSPF, IS-IS, RIP, PIM, and BFD — the same proto…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/gluetun-vpn-client-container",
+    "title": "Gluetun (VPN Client Container)",
+    "section": "Self-Hosting & Servers",
+    "description": "Gluetun (VPN Client Container) Purpose: Route any container's traffic through a commercial VPN provider — without installing a VPN client on the host. Glue…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/haproxy",
+    "title": "HAProxy",
+    "section": "Self-Hosting & Servers",
+    "description": "HAProxy (High-Performance Load Balancer) Purpose: The gold-standard TCP and HTTP load balancer. HAProxy has been the backbone of GitHub, Reddit, and Stack …",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/headscale",
+    "title": "Headscale (Self-Hosted Tailscale Alternative)",
+    "section": "Self-Hosting & Servers",
+    "description": "Purpose: Zero-config mesh VPN built on WireGuard. Tailscale uses managed coordination; Headscale is the fully open-source self-hosted control server — givi…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/hysteria-2-high-loss-networks",
+    "title": "Hysteria 2 (High-Loss Networks)",
+    "section": "Self-Hosting & Servers",
+    "description": "Hysteria 2 (High-Loss Networks) Purpose: A QUIC-based proxy and tunnel that performs well in high-latency, high-loss, or censored network environments wher…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/kea-dhcp",
+    "title": "Kea DHCP",
+    "section": "Self-Hosting & Servers",
+    "description": "Kea DHCP (Modern DHCP Server) Purpose: ISC Kea is the modern replacement for ISC DHCP (dhcpd). Provides DHCPv4 and DHCPv6 with a REST API, a lease database…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/librenms",
+    "title": "LibreNMS",
+    "section": "Self-Hosting & Servers",
+    "description": "LibreNMS (Network Monitoring) Purpose: Full-featured auto-discovering network monitoring system. Discovers routers, switches, servers, APs, and printers vi…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/nebula-overlay-mesh-network",
+    "title": "Nebula (Overlay Mesh Network)",
+    "section": "Self-Hosting & Servers",
+    "description": "Nebula (Overlay Mesh Network) Purpose: A scalable, decentralised overlay network developed by Slack. Nodes communicate directly using certificate-based PKI…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/netbird",
+    "title": "NetBird",
+    "section": "Self-Hosting & Servers",
+    "description": "NetBird Purpose: Open-source, peer-to-peer WireGuard mesh VPN platform. The most complete self-hosted alternative to Tailscale — management dashboard, STUN…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/netbox",
+    "title": "NetBox",
+    "section": "Self-Hosting & Servers",
+    "description": "NetBox (Network Documentation & IPAM) Purpose: Source of truth for your network infrastructure. Document IP address assignments (IPAM), VLAN configurations…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/nginx-proxy-manager",
+    "title": "Nginx Proxy Manager",
+    "section": "Self-Hosting & Servers",
+    "description": "Nginx Proxy Manager Purpose: GUI-based reverse proxy with Let's Encrypt integration. If you find Caddy's Caddyfile syntax unfamiliar, NPM offers a click-th…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/ntopng",
+    "title": "Ntopng",
+    "section": "Self-Hosting & Servers",
+    "description": "Ntopng (Network Traffic Analysis) Purpose: Real-time network traffic monitoring and analysis. Shows active flows, top talkers, protocol breakdown, geo-IP m…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/openvpn",
+    "title": "OpenVPN",
+    "section": "Self-Hosting & Servers",
+    "description": "OpenVPN Purpose: Legacy, highly configurable VPN standard. Use when you need specific cipher suites, client certificate management, or compatibility with o…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/outline-vpn",
+    "title": "Outline VPN",
+    "section": "Self-Hosting & Servers",
+    "description": "Outline VPN Purpose: Shadowsocks-based proxy server by Jigsaw (Google). Designed for ease of deployment and resistance to traffic fingerprinting — traffic …",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/pangolin",
+    "title": "Pangolin",
+    "section": "Self-Hosting & Servers",
+    "description": "Purpose: A fully open-source alternative to Cloudflare Tunnel. Expose local services via a public HTTPS URL through an encrypted WireGuard tunnel to a VPS …",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/phpipam",
+    "title": "phpIPAM — IP Address Management",
+    "section": "Self-Hosting & Servers",
+    "description": "phpIPAM (Lightweight IP Address Management) Purpose: Web-based IP address management tool. Track which IPs are assigned, to what device, who requested the …",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/pi-hole",
+    "title": "Pi-hole",
+    "section": "Self-Hosting & Servers",
+    "description": "Pi-hole Purpose: Network-wide DNS ad and tracker blocker. Runs as your LAN's DNS server and blocks ads, telemetry, and malware domains for every device — p…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/pritunl",
+    "title": "Pritunl",
+    "section": "Self-Hosting & Servers",
+    "description": "Purpose: Enterprise-grade VPN with a modern web UI. Supports WireGuard and OpenVPN, SSO, multi-site routing, and audit logging. Requires MongoDB. 1. MongoD…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/searxng",
+    "title": "SearXNG",
+    "section": "Self-Hosting & Servers",
+    "description": "SearXNG Purpose: Privacy-respecting meta-search engine. Aggregates results from Google, Bing, DuckDuckGo, and 70+ other sources without tracking, logging, …",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/squid-caching-proxy",
+    "title": "Squid (Caching Proxy)",
+    "section": "Self-Hosting & Servers",
+    "description": "Squid (Caching Proxy) Purpose: High-performance HTTP/HTTPS caching proxy. Squid caches web content so repeated requests are served from disk rather than th…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/technitium",
+    "title": "Technitium DNS Server",
+    "section": "Self-Hosting & Servers",
+    "description": "Technitium DNS Server Purpose: Full-featured authoritative and recursive DNS server with a clean web UI. Goes further than Pi-hole and AdGuard Home — Techn…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/traefik",
+    "title": "Traefik",
+    "section": "Self-Hosting & Servers",
+    "description": "Traefik Purpose: Container-native reverse proxy and load balancer. Auto-discovers services by watching Docker/Podman labels — no config file reload needed …",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/unbound",
+    "title": "Unbound",
+    "section": "Self-Hosting & Servers",
+    "description": "Unbound (Recursive DNS Resolver) Purpose: Validating, caching, recursive DNS resolver. Use it upstream of Pi-hole or AdGuard Home for DNSSEC validation and…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/wireguard-easy",
+    "title": "WireGuard / WG-Easy",
+    "section": "Self-Hosting & Servers",
+    "description": "All VPN and tunnel solutions on this system can run fully containerised. Rootless containers handle traffic routing but require specific capabilities (NETA…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/xray-v2ray-protocol-obfuscating-proxy",
+    "title": "Xray / V2Ray — Protocol-Obfuscating Proxy",
+    "section": "Self-Hosting & Servers",
+    "description": "Xray / V2Ray (Protocol-Obfuscating Proxy) Purpose: A suite of network proxy tools that wrap traffic in protocols designed to evade deep packet inspection —…",
+    "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "servers/networking/zerotier-self-hosted-controller",
+    "title": "ZeroTier (Self-Hosted Controller)",
+    "section": "Self-Hosting & Servers",
+    "description": "ZeroTier (Self-Hosted Controller) Purpose: Run a private ZeroTier network controller without using ZeroTier's central cloud servers. Manage virtual network…",
     "updated": "2026-08-28",
     "order": 999,
     "draft": false,

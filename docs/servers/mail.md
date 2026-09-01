@@ -613,7 +613,7 @@ cd ~/sogo && podman-compose up -d
 ## Thunderbird / KMail / Evolution
 **Purpose:** Feature-rich desktop clients with PGP, CalDAV, and Exchange/ActiveSync support. Install via Flatpak.
 - **Thunderbird**: `flatpak install flathub org.mozilla.Thunderbird`
-- **KMail**: `flatpak install flathub org.kde.kmail2` (KDE — or pre-installed on Shani OS KDE edition)
+- **KMail**: `flatpak install flathub org.kde.kmail2` (KDE — best paired with the KDE Plasma edition, installed via Flatpak)
 - **Evolution**: `flatpak install flathub org.gnome.Evolution` (GNOME)
 
 ## FairEmail / K-9 Mail
