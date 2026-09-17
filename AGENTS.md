@@ -146,10 +146,11 @@ not how it got that way.
   corrected to `https://blog.shani.dev/post/...` across 20 files.
 - **No LICENSE file (Low, needs a maintainer decision).** No
   `LICENSE`/`COPYING` file anywhere in the repo, and `README.md` doesn't
-  mention one. 11 of 15 repos in this ecosystem have one; the other 4
-  (including this one) don't: `shani-docs`, `shani-install-media`,
-  `shani-website`, `shani-wiki` — one of a real cluster, not a unique
-  outlier. Needs the maintainer to pick a license, not something to guess.
+  mention one. The ecosystem cluster currently lacking one (audit-verified
+  2026-09-17): `shani-chronoa`, `shani-docs`, `shani-wiki`, `shani-website`.
+  (`shani-install-media` gained a GPL-3.0 LICENSE on 2026-09-16 and
+  `shani-settings` on 2026-09-17 — both closed; see master roadmap #31.)
+  Needs the maintainer to pick a license, not something to guess.
 - **CI status.** 1 workflow (`build-manifest.yml`), triggered on pushes
   touching `docs/**.md`/`config-docs.js`. Re-runs `node generate-manifest.js`
   and auto-commits the regenerated `manifest.json`/stubs back to the
@@ -169,11 +170,12 @@ alone.
 
 ## Cross-repo impact — check before calling a fix complete
 
-Brand CSS, `sw.js`, `generate-manifest.js`, and nav JS are **copy-pasted**
-across this repo and its three siblings (`shani-blog`, `shani-website`,
-`shani-wiki`) — there is no shared package. A bug fix in one of these
-shared-shaped files almost certainly exists in the other three copies
-too. Check all four repos before considering the fix complete.
+Brand CSS (`brand-shani.css`), `sw.js`, and `generate-manifest.js` are **copy-pasted**
+between this repo and `shani-blog` only — there is no shared package.
+`shani-website` and `shani-wiki` carry no such shared chrome (audit-verified
+2026-09-17), and nav JS (`nav-docs.js`) is unique to this repo. A bug fix in one
+of these shared-shaped files almost certainly exists in the other copy too.
+Check both repos before considering the fix complete.
 
 ## Where things are documented
 
@@ -227,3 +229,70 @@ The `section` field must match an existing nav section. New files are auto-appen
 - Internal links are relative (`../networking/wireguard`); external cross-site links use full URLs
 - Code blocks always declare a language tag
 - Factual claims about packages/flags should match ground truth in `shani-install-media` (package lists, script `--help` output)
+
+## Garuda Cross-Reference Findings (added 2026-09-17)
+
+Based on a full scan of the garuda clones mapped against shani — **29 repos** (not 34; several user-listed names don't exist — see `../garuda-catalog.md` §Discrepancies). See `../garuda-mapping-analysis.md`, `../deep-analysis.md`, `../shani-catalog.md`, and `../garuda-catalog.md` for full details. garuda-ng (Angular component library) is the most directly comparable repo in terms of the shared-web-code problem this repo faces.
+
+### 🟡 HIGH: CI/CD gap (shared across ALL repos)
+
+1. **Shared CI templates** (estimated 2-3 days, affects ALL repos).
+   - Garuda's `gitlab-ci-commons` provides reusable templates (commitizen, flake-check, pre-commit, tag-to-release). Each repo `include:`s from it.
+   - Shani repos run on GitHub Actions (no `.gitlab-ci.yml` anywhere) — 8 repos (blog, builder, docs, fleet, insights, install-media, pkgbuilds, platform) carry hand-written `.github/workflows/*.yml` with duplicated patterns.
+   - **Action**: Create `shani-ci-commons` (GitHub Actions reusable workflows / composite actions) with templates for lint, test, build, security scan. Each repo references them via `uses: shani8dev/shani-ci-commons/...` instead of copy-pasting.
+   - **Affects**: All 15 shani repos.
+
+### 🟡 HIGH: Dependency management gap
+
+2. **Add automated dependency updates** (estimated 4 hours, affects ALL repos).
+   - Garuda uses `renovate-runner` running hourly against all repos with `renovate.json` files.
+   - Shani repos have no automated dependency updating.
+   - **Action**: Set up Renovate (self-hosted or gitlab.com) with a fleet-wide config. Each repo adds a minimal `renovate.json`.
+
+### 🟢 MEDIUM: Code quality
+
+3. **Conventional commit enforcement** (estimated 2 hours, affects ALL repos).
+   - Every garuda repo has a `[commitizen]` badge; `cz commit` is enforced.
+   - Shani repos have no commit message standardization.
+
+### 🟢 MEDIUM: Shared web components
+
+4. **Shared web component library** (estimated 2-3 days, affects shani-website/docs/blog).
+   - Garuda's `garuda-ng` is an Angular library shared across all web projects (published via pnpm).
+   - Shani web repos share CSS/JS by copy-paste between `shani-docs` and `shani-blog` ONLY (per the correction below — `shani-website`/`shani-wiki` have no shared web files). Structural debt — divergence accumulates silently.
+   - **Action**: Create a lightweight shared component library (even just a CSS token file + a few React/Vue components). Or standardize on a CSS framework.
+   - **Note**: `shani-website` and `shani-wiki` have NO `sw.js`, brand CSS, or nav/content-fetch JS — the shared-shaped files (brand-shani.css, sw.js, generate-manifest.js) exist only in `shani-docs` and `shani-blog` (nav JS `nav-docs.js` is docs-only). Do not expect to share those with all 4 repos.
+
+### 🔍 Re-Scan Findings (2026-09-17)
+
+Re-scanned against `garuda-catalog.md` (29 repos, not 34) and `shani-catalog.md` (16 repos). **Confirmed mapping: `garuda-ng`** (EXISTS in `garuda-clones/` — Angular component library, TypeScript/Angular 22/Nx/pnpm, npm `@garudalinux/core`, themed variants, AnalogJS/Vite docs site, GitHub Actions, `renovate.json`, Git-Cliff, GPL-3.0-or-later). It is the most directly comparable reference for the shared-web-code problem. shani-docs is a **multi-page technical docs site with a `generate-manifest.js` build step** (201 docs across 13 sections).
+
+**New gaps from the garuda side:**
+1. **No content/browser test coverage** — `garuda-ng` has Vitest + Playwright e2e; shani-docs' only CI (`build-manifest.yml`) validates that the generator completes, not content correctness or browser behavior (confirmed in `shani-catalog.md` §13).
+2. **No dependency-update automation** — `garuda-ng` has `renovate.json`; shani-docs has none (and no `renovate.json` anywhere in the 16 shani repos per `shani-catalog.md` global patterns).
+3. **No changelog/contribution docs** — `garuda-ng` has Git-Cliff changelog, CONTRIBUTING.md, CODE_OF_CONDUCT.md; shani-docs has no LICENSE (4-repo cluster), no CONTRIBUTING, no changelog.
+4. **Shared files still copy-pasted** — `brand-shani.css`, `sw.js`, `generate-manifest.js` are copy-pasted between `shani-docs` and `shani-blog` ONLY (nav JS `nav-docs.js` is docs-only; per `shani-catalog.md` §13 and the AGENTS.md correction); `garuda-ng` solves this with a real published npm package (`@garudalinux/core`).
+5. **No deploy pipeline** — `garuda-ng` has GitHub Actions CD to Cloudflare Pages; shani-docs' CSP/robots.txt/sitemap.xml are generated and **deployed** (commit `217a599`, 2026-08-29 — verified live this session: `docs.shani.dev/robots.txt` returns real content, `sitemap.xml` returns the per-page listing, and `curl https://docs.shani.dev/` returns the CSP meta tag). Prior "not deployed" finding is closed.
+
+**Shani advantages:**
+1. **No-build-step static site** — no Angular 22/Nx/pnpm toolchain to maintain; `generate-manifest.js` is the only Node dependency.
+2. **SRI on all CDN resources** (except the deliberate `#prism-theme` runtime-swap exception) + CSP meta tag + `JSON.parse` nav (fixed from `new Function()`) — hardening `garuda-ng`'s docs site doesn't document.
+3. **Content depth** — 201 docs with distinct auto-generated meta descriptions and BreadcrumbList/FAQPage structured data; `garuda-ng`'s docs site is a component showcase, not authored documentation.
+
+**Qt GUI gap note:** not applicable — static docs site; garuda's Qt GUI apps are unrelated.
+
+### 📋 Implementation Roadmap (2026-09-17)
+
+Implementation priorities are per `../IMPLEMENTATION-ROADMAP.md` (master roadmap for the whole shani ecosystem).
+
+1. ~~**Deploy `robots.txt` + `sitemap.xml` (P0, 5 min).**~~ **DONE — closed 2026-09-17.** Both are generated by `generate-manifest.js`, committed in `217a599` (2026-08-29) and pushed. Verified live: `https://docs.shani.dev/robots.txt` serves real content and `/sitemap.xml` the per-page listing (not GitHub Pages' 404).
+
+2. ~~**Deploy CSP meta tags (P1).**~~ **DONE — closed 2026-09-17.** CSP is generated into `index.html`, all 201 doc stubs, and `404.html`, committed in `217a599` (2026-08-29) and pushed. Verified live: `curl https://docs.shani.dev/` returns the CSP meta tag in served HTML.
+
+3. **Add LICENSE (P3, 5 min).** Master-roadmap item #31, not #26 (web-shared-components is #27; #26 is shani-gui welcome content). Match `shani-blog` — the only web sibling that has a LICENSE, and it is **MIT** (audit-verified 2026-09-17), not GPL-3.0 — unless the maintainer decides web repos should follow the OS-side GPL-3.0 standard instead; this repo is one of the 4-repo cluster missing it.
+
+4. **Shared component library for `brand-shani.css`/`sw.js`/`generate-manifest.js` (P3, 2-3 days).** Master-roadmap item #27 (nav JS `nav-docs.js` is unique to this repo, not part of the shared set). These files are copy-pasted between `shani-docs` and `shani-blog` only, and divergence accumulates silently. ADOPT the shared-library PATTERN from garuda-ng — never the Angular code; shani's plain-HTML/CSS approach is the right call for this ecosystem, it just needs a shared package (or git submodule) instead of copy-paste.
+
+5. **CI content validation (P1).** `build-manifest.yml` only checks that the generator completes, not content validity. Add HTML validation of generated stubs, a broken-internal-link check, and a duplicate-title check to the existing workflow (or via `shani-ci-commons` templates, item #7).
+
+6. **Conventional commits + `renovate.json` (P1).** Ecosystem-wide commit convention (item #9) and Renovate (item #8) — `generate-manifest.js` is the only Node dependency, so Renovate scope is small but real.

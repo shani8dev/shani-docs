@@ -58,4 +58,4 @@ No build tooling beyond Node.js is required. `--watch` mode re-runs the generato
 
 - **`new Function()` parsing (High).** `script-docs.js:2073` uses `new Function()` to parse `nav-docs.js` — a tampered nav file would execute as RCE in the user's browser. Use `JSON.parse` instead.
 - **CI status.** 1 CI workflow (`build-manifest.yml`).
-- **Cross-repo.** Brand CSS, `sw.js`, `generate-manifest.js`, and nav JS are copy-pasted across this repo and its three siblings (`shani-blog`, `shani-website`, `shani-wiki`) — there is no shared package. A bug fix in one almost certainly exists in the other three copies too.
+- **Cross-repo.** Brand CSS, `sw.js`, and `generate-manifest.js` are copy-pasted between this repo and `shani-blog` ONLY — there is no shared package (audit-verified 2026-09-17: `shani-website` and `shani-wiki` carry no such shared chrome). A bug fix in one of these shared-shaped files almost certainly exists in the other copy too. Nav JS (`nav-docs.js`) is unique to this repo.

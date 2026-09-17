@@ -672,6 +672,10 @@ inflate the main file back to unreadable length.
   intentional ecosystem-wide choice either way. Not something to
   guess and add — needs the maintainer to pick what license this content
   is actually under.
+  **Update (2026-09-17):** `shani-install-media` gained a GPL-3.0 LICENSE
+  (2026-09-16) and `shani-settings` one (2026-09-17) — cluster is now
+  `shani-chronoa`, `shani-docs`, `shani-wiki`, `shani-website` (4 of 16
+  still missing; see master roadmap #31 and this repo's AGENTS.md).
 - **`new Function()` parsing — FIXED.** `script-docs.js:2073` used
   `new Function('return [' + m[1] + ']')()` to parse `nav-docs.js` content
   fetched live from GitHub — a tampered/compromised nav file would execute
