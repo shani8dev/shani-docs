@@ -442,7 +442,7 @@ function buildStub(doc) {
   const desc          = escHtml(doc.description || SITE_DESC);
   const image         = escHtml(OG_IMAGE);
   const datePublished = doc.updated
-    ? new Date(doc.updated + 'T00:00:00').toISOString()
+    ? new Date(doc.updated + 'T00:00:00Z').toISOString()
     : '';
   const robots = doc.draft
     ? 'noindex'
