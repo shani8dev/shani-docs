@@ -46,6 +46,43 @@ If you haven't seen it work (or fail) for real, it isn't verified.
    a build/generation step that later pulls that content from anywhere
    less trusted turns a `new Function` parse into remote code execution
    in the admin's browser.
+5. **If a page you just edited doesn't reflect your change (or misbehaves
+   in a way that makes no sense given the source), check for a stale
+   service worker before you start debugging application logic** — the
+   same gotcha documented in `shani-blog/AGENTS.md` (`sw.js` is one of the
+   files copy-pasted between these two repos). `sw.js` caches the app
+   shell under a date-stamped `SHELL_CACHE` name (`bumpServiceWorkerCache
+   ('shanidocs')` in `generate-manifest.js` only rotates it once per run),
+   so a browser tab that already registered that stamp's service worker on
+   a given `origin:port` keeps serving whatever `script-docs.js`/
+   `index.html` existed at registration time — invisibly, with no console
+   error — regardless of `{cache:'no-cache'}` on any individual `fetch()`
+   (that only governs the HTTP cache, not the service worker's own `fetch`
+   handler). Check with `(await navigator.serviceWorker.getRegistrations())`
+   in the console; clear with `.unregister()` on each registration plus
+   `caches.delete()` on every `caches.keys()` entry, then hard-reload.
+
+## Required verification for a change
+
+```bash
+# Serve locally and open in a browser; check the console for errors.
+python3 -m http.server 8000
+
+# Regenerate the manifest/stubs after any content or generator change —
+# confirm the output is byte-identical on a second run (deterministic)
+# and that every JSON-LD block still parses:
+node generate-manifest.js
+python3 -c "
+import json, pathlib, re
+for f in pathlib.Path('.').rglob('*.html'):
+    for m in re.findall(r'<script type=\"application/ld\+json\">(.*?)</script>', f.read_text(), re.S):
+        json.loads(m)
+print('all JSON-LD blocks parse')
+"
+
+# If you touched a CDN <script>/<link> tag's integrity= hash:
+openssl dgst -sha384 -binary <file> | openssl base64 -A
+```
 
 ## Audit-verified known issues (confirmed present)
 
