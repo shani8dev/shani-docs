@@ -54,6 +54,23 @@ evidence behind every line below, see `AUDIT-HISTORY.md`.** This section
 is deliberately just the current-state summary — what's true right now,
 not how it got that way.
 
+- **`generate-manifest.js` date parsing was timezone-dependent — FIXED
+  (2026-09-18), and it was LIVE here (unlike `shani-blog`'s matching
+  bug).** Same root cause as `shani-blog/AGENTS.md`'s matching entry
+  (shared-shape file): `new Date(doc.updated + 'T00:00:00')` has no
+  timezone designator, so it's parsed as local time, not UTC. This
+  repo's committed doc stubs had actually been generated on a non-UTC
+  (IST) machine, so all 202 docs' `datePublished`/`dateModified` JSON-LD
+  were off by 5.5 hours from true UTC — e.g. a doc with `updated:
+  2026-08-28` shipped `"datePublished":"2026-08-27T18:30:00.000Z"`
+  (reads as Aug 27 in UTC, a full calendar day off) instead of the
+  correct `2026-08-28T00:00:00.000Z`. This was live, served-to-crawlers
+  structured data on docs.shani.dev, not just a local dev artifact.
+  Fixed `buildStub()`'s one call site to append `Z`; regenerated all 202
+  stubs. Verified: 405 JSON-LD blocks across the corpus parse via a real
+  `python3 json.loads()` sweep (0 errors), every `datePublished`/
+  `dateModified` now UTC-suffixed and correct; the generator's own
+  internal "no drift" nav-consistency check still passes.
 - **Content structure**: 201 docs total. `Self-Hosting & Servers` (75
   files) went through a multi-pass reorganization — six original
   mega-pages (kubernetes/monitoring/devops/devtools/productivity/security)
