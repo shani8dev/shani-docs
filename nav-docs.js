@@ -235,6 +235,7 @@ CONFIG.NAV_TREE = [
       { "title": "LXC and LXD", "slug": "software/lxc-lxd" },
       { "title": "Nix Package Manager", "slug": "software/nix" },
       { "title": "Building & Adding Packages", "slug": "software/shani-pkgbuilds" },
+      { "title": "Shani Platform API", "slug": "software/shani-platform-api" },
       { "title": "Shani Package Repository", "slug": "software/shani-repo" },
       { "title": "Snaps", "slug": "software/snaps" },
       { "title": "systemd-nspawn", "slug": "software/systemd-nspawn" },

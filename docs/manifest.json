@@ -1720,6 +1720,16 @@
     "keywords": ""
   },
   {
+    "slug": "software/shani-platform-api",
+    "title": "Shani Platform API",
+    "section": "Software & Apps",
+    "description": "platform.shani.dev is the unified backend for the Shanios commercial planes: fleet management, billing, licensing, notifications, and the org-scoped fleet …",
+    "updated": "2026-09-18",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
     "slug": "software/shani-repo",
     "title": "Shani Package Repository",
     "section": "Software & Apps",
