@@ -221,6 +221,24 @@ not how it got that way.
   `node generate-manifest.js` locally and read the actual error." Does
   not validate content, only that the generator completes.
 
+## Boundaries
+
+- ✅ **Always**: `JSON.parse` any content the nav/config supplies — never
+  `new Function(...)`/`eval` on it, even content that only comes from this
+  repo's own files today (see rule 4 above).
+- ⚠️ **Ask first**: nothing repo-specific needs escalation beyond the
+  general "ask before pushing" default — this is a static site with no
+  destructive operations of its own.
+- 🚫 **Never**: add an `integrity=` hash back onto `#prism-theme` — it
+  intentionally has none because its `href` swaps between two CDN theme
+  files at runtime and SRI can't cover both; re-adding one silently breaks
+  light-mode code-block styling again (already happened once).
+
+*Maintenance note: this file is well past 300 lines, though most detail is
+already pushed to `AUDIT-HISTORY.md` per this repo's own convention — keep
+new "Audit-verified known issues" entries terse and current-state, not a
+second copy of that narrative.*
+
 ## If you have Superpowers / oh-my-opencode / ultrawork / similar available
 
 If your environment provides Claude Code's **Superpowers** plugin, OpenCode's
