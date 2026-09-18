@@ -221,6 +221,13 @@ not how it got that way.
   `node generate-manifest.js` locally and read the actual error." Does
   not validate content, only that the generator completes.
 
+## Commit discipline
+
+Before composing a commit message, run `git log --oneline -20` (and `git
+log -5 -- <touched paths>` for the files you changed) and match the
+existing style — subject shape, scope prefixes, body detail level —
+rather than writing in a generic format.
+
 ## Boundaries
 
 - ✅ **Always**: `JSON.parse` any content the nav/config supplies — never
