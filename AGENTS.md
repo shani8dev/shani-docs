@@ -209,7 +209,7 @@ not how it got that way.
 - **No LICENSE file (Low, needs a maintainer decision).** No
   `LICENSE`/`COPYING` file anywhere in the repo, and `README.md` doesn't
   mention one. The ecosystem cluster currently lacking one (audit-verified
-  2026-09-17): `shani-chronoa`, `shani-docs`, `shani-wiki`, `shani-website`.
+  2026-09-17): `shani-docs`, `shani-wiki`, `shani-website`.
   (`shani-install-media` gained a GPL-3.0 LICENSE on 2026-09-16 and
   `shani-settings` on 2026-09-17 — both closed; see master roadmap #31.)
   Needs the maintainer to pick a license, not something to guess.
