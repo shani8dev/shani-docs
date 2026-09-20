@@ -56,6 +56,13 @@ No build tooling beyond Node.js is required. `--watch` mode re-runs the generato
 
 ## Audit-verified notes (2026-08-28)
 
-- **`new Function()` parsing (High).** `script-docs.js:2073` uses `new Function()` to parse `nav-docs.js` — a tampered nav file would execute as RCE in the user's browser. Use `JSON.parse` instead.
+- **Security — FIXED.** `new Function()` parsing of `nav-docs.js` in the
+  browser (`script-docs.js`) was replaced with `JSON.parse`. The generator
+  (`generate-manifest.js`) still uses `new Function` on its own trusted local
+  file, documented and split from the browser-side consumer. All CDN resources
+  have verified SRI hashes — **with one deliberate exception**: `#prism-theme`
+  carries no `integrity=` (its `href` swaps between two CDN theme files at
+  runtime and SRI can't cover both — re-adding one silently breaks light-mode
+  code-block styling).
 - **CI status.** 1 CI workflow (`build-manifest.yml`).
 - **Cross-repo.** Brand CSS, `sw.js`, and `generate-manifest.js` are copy-pasted between this repo and `shani-blog` ONLY — there is no shared package (audit-verified 2026-09-17: `shani-website` and `shani-wiki` carry no such shared chrome). A bug fix in one of these shared-shaped files almost certainly exists in the other copy too. Nav JS (`nav-docs.js`) is unique to this repo.
