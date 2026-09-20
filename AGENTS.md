@@ -214,7 +214,8 @@ not how it got that way.
   `shani-settings` on 2026-09-17 — both closed; see master roadmap #31.)
   Needs the maintainer to pick a license, not something to guess.
 - **CI status.** 1 workflow (`build-manifest.yml`), triggered on pushes
-  touching `docs/**.md`/`config-docs.js`. Re-runs `node generate-manifest.js`
+  touching `docs/**.md`/`config-docs.js`/`generate-manifest.js`. Re-runs
+  `node generate-manifest.js`
   and auto-commits the regenerated `manifest.json`/stubs back to the
   branch; a doc edit that makes the generator throw fails the workflow
   before that commit, so a red run here means "run

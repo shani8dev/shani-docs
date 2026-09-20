@@ -6,6 +6,7 @@ on:
     paths:
       - 'docs/**.md'
       - 'config-docs.js'
+      - 'generate-manifest.js'
       - '.github/workflows/build-manifest.yml'
   workflow_dispatch:
 
