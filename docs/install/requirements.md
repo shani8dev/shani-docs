@@ -16,7 +16,7 @@ updated: 2026-08-28
 | Firmware | UEFI (required) | UEFI with TPM 2.0 |
 | Installation Media | 8 GB USB drive | 16 GB USB 3.0 drive |
 
-> **Why 32GB minimum?** Shanios maintains two complete system images (`@blue` and `@green`) for atomic updates. However, Btrfs Copy-on-Write shares unchanged data between them, resulting in only ~18% overhead compared to traditional systems. In practice the installer itself only refuses disks smaller than 28 GB — the lower enforced floor accounts for the real usable capacity of media nominally sold as "32 GB" (partition tables, wear-leveling, etc.), but 32 GB+ is still what we recommend for comfortable headroom.
+> **Why 32GB minimum?** Shanios maintains two complete system images (`@blue` and `@green`) for atomic updates. However, Btrfs Copy-on-Write shares unchanged data between them, resulting in only ~18% overhead compared to traditional systems. In practice the installer itself only refuses disks smaller than 30 GB — the lower enforced floor accounts for the real usable capacity of media nominally sold as "32 GB" (partition tables, wear-leveling, etc.), but 32 GB+ is still what we recommend for comfortable headroom. (It was 28 GB until 2026-09-24; a fresh desktop install on 28 GB left less than the 10 GB an update needs.)
 
 ## Disk Partition Layout
 
@@ -58,7 +58,7 @@ grep -E 'vmx|svm' /proc/cpuinfo | head -1
 free -h | grep Mem
 # Mem:    15Gi   ...
 
-# Check disk size (minimum 28 GB enforced, 32 GB+ recommended)
+# Check disk size (minimum 30 GB enforced, 32 GB+ recommended)
 lsblk -d -o NAME,SIZE | grep -v loop
 # NAME   SIZE
 # nvme0n1  476G
@@ -80,7 +80,7 @@ ls /dev/tpm*
 | `grep vmx` returns nothing | Virtualization disabled in BIOS | Enable VT-x (Intel) or AMD-V (AMD) in BIOS under CPU settings |
 | `/sys/firmware/efi` doesn't exist | System booted in Legacy BIOS/CSM mode | Reboot into BIOS and disable CSM / enable UEFI mode |
 | TPM shows as not available | TPM disabled or set to Intel PTT | Enable TPM 2.0 in BIOS under Security settings |
-| `lsblk` shows disk < 28 GB | Actual usable space too low | Use a larger disk; 32 GB minimum is recommended |
+| `lsblk` shows disk < 30 GB | Actual usable space too low | Use a larger disk; 32 GB minimum is recommended |
 
 ## See Also
 

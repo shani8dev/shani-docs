@@ -52,7 +52,7 @@ Hibernation writes RAM to swap and powers off completely — survives a dead bat
 
 Requirements:
 
-- Swap at least as large as RAM. Shanios creates a swapfile sized to RAM in the dedicated `@swap` Btrfs subvolume (mounted at `/swap`) at install time.
+- Swap at least as large as RAM. Shanios creates a swapfile sized to RAM in the dedicated `@swap` Btrfs subvolume (mounted at `/swap`) at install time — unless that would leave less than 12 GB free for updates; then the swapfile is smaller and hibernation may not work. `ls -la /swap/swapfile` against `free -m` tells you which case you have.
 - `resume=` on the kernel command line. **This is already baked into the image's UKI cmdline at build/deploy time** — there is nothing to configure manually.
 
 Do **not** attempt to add or edit boot arguments yourself: the bootloader editor is disabled by design on Shanios, and any resume setup belongs in the image. If you resized or replaced the swapfile manually, see [Storage](storage) for the correct procedure first.

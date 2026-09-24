@@ -2622,7 +2622,7 @@ Supported fingerprint sensors work at first boot via `fprintd` and `libfprint`. 
 
 **Does it work on a laptop?**
 
-Yes. Hibernation is configured automatically at install (swapfile sized to RAM, correct offset embedded in UKI). TPM2 auto-unlock handles LUKS decryption at resume. `power-profiles-daemon` manages battery/performance profiles.
+Yes. Hibernation is configured automatically at install (swapfile sized to RAM where the disk allows it, correct offset embedded in UKI — on a small disk the swapfile is kept smaller so updates always fit, and hibernation may then not be available). TPM2 auto-unlock handles LUKS decryption at resume. `power-profiles-daemon` manages battery/performance profiles.
 
 ---
 
@@ -2979,7 +2979,7 @@ Hardware Requirements | Component | Minimum | Recommended | |-----------|-------
 | Firmware | UEFI (required) | UEFI with TPM 2.0 |
 | Installation Media | 8 GB USB drive | 16 GB USB 3.0 drive |
 
-> **Why 32GB minimum?** Shanios maintains two complete system images (`@blue` and `@green`) for atomic updates. However, Btrfs Copy-on-Write shares unchanged data between them, resulting in only ~18% overhead compared to traditional systems. In practice the installer itself only refuses disks smaller than 28 GB — the lower enforced floor accounts for the real usable capacity of media nominally sold as "32 GB" (partition tables, wear-leveling, etc.), but 32 GB+ is still what we recommend for comfortable headroom.
+> **Why 32GB minimum?** Shanios maintains two complete system images (`@blue` and `@green`) for atomic updates. However, Btrfs Copy-on-Write shares unchanged data between them, resulting in only ~18% overhead compared to traditional systems. In practice the installer itself only refuses disks smaller than 30 GB — the lower enforced floor accounts for the real usable capacity of media nominally sold as "32 GB" (partition tables, wear-leveling, etc.), but 32 GB+ is still what we recommend for comfortable headroom. (It was 28 GB until 2026-09-24; a fresh desktop install on 28 GB left less than the 10 GB an update needs.)
 
 ## Disk Partition Layout
 
@@ -3021,7 +3021,7 @@ grep -E 'vmx|svm' /proc/cpuinfo | head -1
 free -h | grep Mem
 # Mem:    15Gi   ...
 
-# Check disk size (minimum 28 GB enforced, 32 GB+ recommended)
+# Check disk size (minimum 30 GB enforced, 32 GB+ recommended)
 lsblk -d -o NAME,SIZE | grep -v loop
 # NAME   SIZE
 # nvme0n1  476G
@@ -3043,7 +3043,7 @@ ls /dev/tpm*
 | `grep vmx` returns nothing | Virtualization disabled in BIOS | Enable VT-x (Intel) or AMD-V (AMD) in BIOS under CPU settings |
 | `/sys/firmware/efi` doesn't exist | System booted in Legacy BIOS/CSM mode | Reboot into BIOS and disable CSM / enable UEFI mode |
 | TPM shows as not available | TPM disabled or set to Intel PTT | Enable TPM 2.0 in BIOS under Security settings |
-| `lsblk` shows disk < 28 GB | Actual usable space too low | Use a larger disk; 32 GB minimum is recommended |
+| `lsblk` shows disk < 30 GB | Actual usable space too low | Use a larger disk; 32 GB minimum is recommended |
 
 ## See Also
 
@@ -3118,7 +3118,7 @@ df -h /
 | Disk selection shows no disks | NVMe/RAID not detected; driver missing from initramfs | Check BIOS settings for NVMe/RAID mode; ensure AHCI is selected (not RAID for single disks) |
 | Btrfs error during install | Corrupted filesystem or bad disk | Run `sudo btrfs check /dev/sdX` from live USB, or try a different disk |
 | Secure Boot MokManager prompt doesn't appear on first boot | Firmware skipped MOK enrollment | Reboot and enter firmware settings; look for "Security" → "MOK" or "Secure Boot Key Management" |
-| Installer fails with "insufficient disk space" | Disk nominally 32 GB but below 28 GB usable floor | Use a disk with ≥32 GB total; the 28 GB floor accounts for partition tables and wear-leveling overhead |
+| Installer fails with "insufficient disk space" | Disk nominally 32 GB but below 30 GB usable floor | Use a disk with ≥32 GB total; the 30 GB floor accounts for partition tables and wear-leveling overhead |
 | Wi-Fi doesn't work during install | Wireless firmware not loaded | This is expected — the installer doesn't load Wi-Fi firmware; use wired connection or configure Wi-Fi after first boot |
 | Swap not created | Not enough free space for full-RAM swapfile | System will fall back to zram automatically — this is expected behavior, not an error |
 
@@ -57707,7 +57707,7 @@ Hibernation writes RAM to swap and powers off completely — survives a dead bat
 
 Requirements:
 
-- Swap at least as large as RAM. Shanios creates a swapfile sized to RAM in the dedicated `@swap` Btrfs subvolume (mounted at `/swap`) at install time.
+- Swap at least as large as RAM. Shanios creates a swapfile sized to RAM in the dedicated `@swap` Btrfs subvolume (mounted at `/swap`) at install time — unless that would leave less than 12 GB free for updates; then the swapfile is smaller and hibernation may not work. `ls -la /swap/swapfile` against `free -m` tells you which case you have.
 - `resume=` on the kernel command line. **This is already baked into the image's UKI cmdline at build/deploy time** — there is nothing to configure manually.
 
 Do **not** attempt to add or edit boot arguments yourself: the bootloader editor is disabled by design on Shanios, and any resume setup belongs in the image. If you resized or replaced the swapfile manually, see [Storage](storage) for the correct procedure first.
@@ -58779,7 +58779,7 @@ zramctl                          # show ZRAM devices and compression ratio
 cat /proc/swaps                  # all active swap sources
 ```
 
-Shanios sets up swap at install time: ZRAM plus a swapfile created in the dedicated `@swap` Btrfs subvolume, sized to RAM (skipped automatically if disk space is tight — the system then falls back to zram alone). The root filesystem is read-only, so a `/swapfile` on `/` via `fallocate` is not possible — any extra swapfile must live under `/swap`, which is mounted from `@swap` with `nodatacow` (NOCOW semantics are required for swapfiles on Btrfs).
+Shanios sets up swap at install time: ZRAM plus a swapfile created in the dedicated `@swap` Btrfs subvolume, sized to RAM, but never into the 12 GB kept free for updates: on a disk where a RAM-sized swapfile would leave less, it is made smaller (or skipped below 1 GB), and hibernation — which needs swap at least as large as RAM — may then not be available (zram covers swap on its own when there is no swapfile). The root filesystem is read-only, so a `/swapfile` on `/` via `fallocate` is not possible — any extra swapfile must live under `/swap`, which is mounted from `@swap` with `nodatacow` (NOCOW semantics are required for swapfiles on Btrfs).
 
 To add another swapfile under `/swap`:
 

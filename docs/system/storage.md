@@ -467,7 +467,7 @@ zramctl                          # show ZRAM devices and compression ratio
 cat /proc/swaps                  # all active swap sources
 ```
 
-Shanios sets up swap at install time: ZRAM plus a swapfile created in the dedicated `@swap` Btrfs subvolume, sized to RAM (skipped automatically if disk space is tight — the system then falls back to zram alone). The root filesystem is read-only, so a `/swapfile` on `/` via `fallocate` is not possible — any extra swapfile must live under `/swap`, which is mounted from `@swap` with `nodatacow` (NOCOW semantics are required for swapfiles on Btrfs).
+Shanios sets up swap at install time: ZRAM plus a swapfile created in the dedicated `@swap` Btrfs subvolume, sized to RAM, but never into the 12 GB kept free for updates: on a disk where a RAM-sized swapfile would leave less, it is made smaller (or skipped below 1 GB), and hibernation — which needs swap at least as large as RAM — may then not be available (zram covers swap on its own when there is no swapfile). The root filesystem is read-only, so a `/swapfile` on `/` via `fallocate` is not possible — any extra swapfile must live under `/swap`, which is mounted from `@swap` with `nodatacow` (NOCOW semantics are required for swapfiles on Btrfs).
 
 To add another swapfile under `/swap`:
 

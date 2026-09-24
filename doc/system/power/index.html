@@ -245,7 +245,7 @@ loginctl session-status</code></pre>
 <p>Hibernation writes RAM to swap and powers off completely — survives a dead battery, unlike suspend.</p>
 <p>Requirements:</p>
 <ul>
-<li>Swap at least as large as RAM. Shanios creates a swapfile sized to RAM in the dedicated <code>@swap</code> Btrfs subvolume (mounted at <code>/swap</code>) at install time.</li>
+<li>Swap at least as large as RAM. Shanios creates a swapfile sized to RAM in the dedicated <code>@swap</code> Btrfs subvolume (mounted at <code>/swap</code>) at install time — unless that would leave less than 12 GB free for updates; then the swapfile is smaller and hibernation may not work. <code>ls -la /swap/swapfile</code> against <code>free -m</code> tells you which case you have.</li>
 <li><code>resume=</code> on the kernel command line. <strong>This is already baked into the image's UKI cmdline at build/deploy time</strong> — there is nothing to configure manually.</li>
 </ul>
 <p>Do <strong>not</strong> attempt to add or edit boot arguments yourself: the bootloader editor is disabled by design on Shanios, and any resume setup belongs in the image. If you resized or replaced the swapfile manually, see <a href="storage">Storage</a> for the correct procedure first.</p>

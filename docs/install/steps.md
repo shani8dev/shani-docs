@@ -60,7 +60,7 @@ df -h /
 | Disk selection shows no disks | NVMe/RAID not detected; driver missing from initramfs | Check BIOS settings for NVMe/RAID mode; ensure AHCI is selected (not RAID for single disks) |
 | Btrfs error during install | Corrupted filesystem or bad disk | Run `sudo btrfs check /dev/sdX` from live USB, or try a different disk |
 | Secure Boot MokManager prompt doesn't appear on first boot | Firmware skipped MOK enrollment | Reboot and enter firmware settings; look for "Security" → "MOK" or "Secure Boot Key Management" |
-| Installer fails with "insufficient disk space" | Disk nominally 32 GB but below 28 GB usable floor | Use a disk with ≥32 GB total; the 28 GB floor accounts for partition tables and wear-leveling overhead |
+| Installer fails with "insufficient disk space" | Disk nominally 32 GB but below 30 GB usable floor | Use a disk with ≥32 GB total; the 30 GB floor accounts for partition tables and wear-leveling overhead |
 | Wi-Fi doesn't work during install | Wireless firmware not loaded | This is expected — the installer doesn't load Wi-Fi firmware; use wired connection or configure Wi-Fi after first boot |
 | Swap not created | Not enough free space for full-RAM swapfile | System will fall back to zram automatically — this is expected behavior, not an error |
 

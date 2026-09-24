@@ -196,7 +196,7 @@ Supported fingerprint sensors work at first boot via `fprintd` and `libfprint`. 
 
 **Does it work on a laptop?**
 
-Yes. Hibernation is configured automatically at install (swapfile sized to RAM, correct offset embedded in UKI). TPM2 auto-unlock handles LUKS decryption at resume. `power-profiles-daemon` manages battery/performance profiles.
+Yes. Hibernation is configured automatically at install (swapfile sized to RAM where the disk allows it, correct offset embedded in UKI — on a small disk the swapfile is kept smaller so updates always fit, and hibernation may then not be available). TPM2 auto-unlock handles LUKS decryption at resume. `power-profiles-daemon` manages battery/performance profiles.
 
 ---
 

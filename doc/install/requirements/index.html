@@ -220,7 +220,7 @@
       </div>
       <div class="prose"><h2 id="hardware-requirements">Hardware Requirements</h2>
 <table><thead><tr><th>Component</th><th>Minimum</th><th>Recommended</th></tr></thead><tbody><tr><td>Processor</td><td>x86_64 dual-core with VT-x/AMD-V</td><td>x86_64 quad-core or better</td></tr><tr><td>Memory</td><td>4 GB RAM</td><td>8 GB RAM or more</td></tr><tr><td>Storage</td><td>32 GB (dual-image architecture)</td><td>64 GB or more</td></tr><tr><td>Firmware</td><td>UEFI (required)</td><td>UEFI with TPM 2.0</td></tr><tr><td>Installation Media</td><td>8 GB USB drive</td><td>16 GB USB 3.0 drive</td></tr></tbody></table>
-<blockquote><strong>Why 32GB minimum?</strong> Shanios maintains two complete system images (<code>@blue</code> and <code>@green</code>) for atomic updates. However, Btrfs Copy-on-Write shares unchanged data between them, resulting in only ~18% overhead compared to traditional systems. In practice the installer itself only refuses disks smaller than 28 GB — the lower enforced floor accounts for the real usable capacity of media nominally sold as "32 GB" (partition tables, wear-leveling, etc.), but 32 GB+ is still what we recommend for comfortable headroom.</blockquote>
+<blockquote><strong>Why 32GB minimum?</strong> Shanios maintains two complete system images (<code>@blue</code> and <code>@green</code>) for atomic updates. However, Btrfs Copy-on-Write shares unchanged data between them, resulting in only ~18% overhead compared to traditional systems. In practice the installer itself only refuses disks smaller than 30 GB — the lower enforced floor accounts for the real usable capacity of media nominally sold as "32 GB" (partition tables, wear-leveling, etc.), but 32 GB+ is still what we recommend for comfortable headroom. (It was 28 GB until 2026-09-24; a fresh desktop install on 28 GB left less than the 10 GB an update needs.)</blockquote>
 <h2 id="disk-partition-layout">Disk Partition Layout</h2>
 <p>Shanios uses a simple two-partition layout — there are no separate <code>/home</code>, <code>/var</code>, or swap partitions. All subvolumes live within the single Btrfs partition.</p>
 <table><thead><tr><th>Partition</th><th>Filesystem</th><th>Size</th><th>Purpose</th></tr></thead><tbody><tr><td>EFI System Partition (ESP)</td><td>FAT32</td><td>1 GB</td><td>Bootloader, UKI images — mounted at <code>/boot/efi</code></td></tr><tr><td>Root partition</td><td>Btrfs (or LUKS2 → Btrfs)</td><td>Remainder of disk</td><td>All system subvolumes (<code>@blue</code>, <code>@green</code>, <code>@home</code>, <code>@data</code>, etc.)</td></tr></tbody></table>
@@ -251,7 +251,7 @@ grep -E 'vmx|svm' /proc/cpuinfo | head -1
 free -h | grep Mem
 # Mem:    15Gi   ...
 
-# Check disk size (minimum 28 GB enforced, 32 GB+ recommended)
+# Check disk size (minimum 30 GB enforced, 32 GB+ recommended)
 lsblk -d -o NAME,SIZE | grep -v loop
 # NAME   SIZE
 # nvme0n1  476G
@@ -264,7 +264,7 @@ lsblk -d -o NAME,SIZE | grep -v loop
 ls /dev/tpm*
 # /dev/tpm0  /dev/tpmrm0</code></pre>
 <h2 id="troubleshooting">Troubleshooting</h2>
-<table><thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><td><code>uname -m</code> shows <code>i686</code></td><td>32-bit system</td><td>Shanios does not support 32-bit — install an Arch-based 32-bit distro instead</td></tr><tr><td><code>grep vmx</code> returns nothing</td><td>Virtualization disabled in BIOS</td><td>Enable VT-x (Intel) or AMD-V (AMD) in BIOS under CPU settings</td></tr><tr><td><code>/sys/firmware/efi</code> doesn't exist</td><td>System booted in Legacy BIOS/CSM mode</td><td>Reboot into BIOS and disable CSM / enable UEFI mode</td></tr><tr><td>TPM shows as not available</td><td>TPM disabled or set to Intel PTT</td><td>Enable TPM 2.0 in BIOS under Security settings</td></tr><tr><td><code>lsblk</code> shows disk < 28 GB</td><td>Actual usable space too low</td><td>Use a larger disk; 32 GB minimum is recommended</td></tr></tbody></table>
+<table><thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><td><code>uname -m</code> shows <code>i686</code></td><td>32-bit system</td><td>Shanios does not support 32-bit — install an Arch-based 32-bit distro instead</td></tr><tr><td><code>grep vmx</code> returns nothing</td><td>Virtualization disabled in BIOS</td><td>Enable VT-x (Intel) or AMD-V (AMD) in BIOS under CPU settings</td></tr><tr><td><code>/sys/firmware/efi</code> doesn't exist</td><td>System booted in Legacy BIOS/CSM mode</td><td>Reboot into BIOS and disable CSM / enable UEFI mode</td></tr><tr><td>TPM shows as not available</td><td>TPM disabled or set to Intel PTT</td><td>Enable TPM 2.0 in BIOS under Security settings</td></tr><tr><td><code>lsblk</code> shows disk < 30 GB</td><td>Actual usable space too low</td><td>Use a larger disk; 32 GB minimum is recommended</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="./steps.md">Installation Steps</a> — step-by-step install guide</li>
