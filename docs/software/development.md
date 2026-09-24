@@ -10,7 +10,7 @@ Shanios works as a daily development machine, but the workflow differs from a tr
 
 ## What Is Pre-Installed
 
-Enough to be productive on first boot: git, python3, gcc toolchain basics, zsh/starship/fzf/mcfly, podman + buildah + skopeo, qemu-base/libvirt. Everything else installs into one of the four layers below — never into `/usr`.
+Enough to be productive on first boot: git, python3, gcc toolchain basics, zsh/bash/fish with starship, fzf, mcfly, zoxide, eza, bat, fd, ripgrep and git-delta, podman + buildah + skopeo, qemu-base/libvirt. Everything else installs into one of the four layers below — never into `/usr`.
 
 ## Choosing a Toolchain Strategy
 

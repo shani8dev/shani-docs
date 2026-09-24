@@ -16,12 +16,10 @@ Homebrew is **not pre-installed** on Shanios — use Nix or Distrobox first. Ins
 # Install Homebrew (user-space, no root required)
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# Follow the post-install instructions to add brew to your PATH.
-# For Zsh (default shell on Shanios), add to ~/.zshrc:
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-
-# Reload shell
-source ~/.zshrc
+# No PATH setup needed: Shanios's shell defaults (Zsh, Bash and Fish) pick
+# Homebrew up automatically once /home/linuxbrew/.linuxbrew/bin/brew exists.
+# Skip the installer's "add brew shellenv to your rc file" step and just
+# open a new terminal.
 ```
 
 ## Basic Usage

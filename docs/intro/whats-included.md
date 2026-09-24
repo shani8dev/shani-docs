@@ -98,9 +98,11 @@ Full guide: [Gaming](../software/gaming.md).
 ## Shell Experience
 
 - **Default Shell:** Zsh 5.9 with fish-style syntax highlighting, autosuggestions, and history substring search
-- **Prompt:** Starship — fast cross-shell prompt with git integration
+- **Prompt:** Starship — two-line Saturn prompt with git, toolchain, exit status and timing (Nerd Font glyphs; FiraMono Nerd Font ships)
 - **Smart History:** McFly — neural network command history search
-- **Fuzzy Finder:** FZF — integrated into Zsh for Ctrl+R, Ctrl+T, and Alt+C
+- **Fuzzy Finder:** FZF — Ctrl+T (files) and Alt+C (cd) in Zsh, Bash and Fish; Ctrl+R is McFly
+- **Modern CLI tools:** eza (`ls`), bat (`cat`, coloured `man`), fd, ripgrep, zoxide (`z`), delta (git diffs), tealdeer (`tldr`), fastfetch greeting
+- **Configured for you:** tmux, git, micro (default editor), nano and vim, in the Saturn colours; see [Shell & Environment](../updates/shell.md)
 - **Alternatives:** Bash 5.3 and Fish 4.5 also installed
 
 ## Fonts & Accessibility

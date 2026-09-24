@@ -22,7 +22,7 @@ nix-channel --update
 
 ```bash
 # Install a package into your profile
-nix-env -iA nixpkgs.ripgrep
+nix-env -iA nixpkgs.lazygit
 nix-env -iA nixpkgs.nodejs
 nix-env -iA nixpkgs.python3
 

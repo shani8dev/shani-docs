@@ -1993,8 +1993,8 @@
     "slug": "updates/shell",
     "title": "Shell & Environment",
     "section": "Updates & Config",
-    "description": "Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your home directory and p…",
-    "updated": "2026-08-28",
+    "description": "Shanios ships a fully configured terminal environment: Zsh as the default shell, with Bash and Fish configured the same way, a Starship prompt, fuzzy histo…",
+    "updated": "2026-09-24",
     "order": 999,
     "draft": false,
     "keywords": ""

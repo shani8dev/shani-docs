@@ -7,7 +7,7 @@
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Shell &amp; Environment — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your home directory and p…">
+  <meta name="description" id="meta-desc"     content="Shanios ships a fully configured terminal environment: Zsh as the default shell, with Bash and Fish configured the same way, a Starship prompt, fuzzy histo…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -15,7 +15,7 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Shell &amp; Environment">
-  <meta property="og:description" id="og-desc"    content="Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your home directory and p…">
+  <meta property="og:description" id="og-desc"    content="Shanios ships a fully configured terminal environment: Zsh as the default shell, with Bash and Fish configured the same way, a Starship prompt, fuzzy histo…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/updates/shell/">
   <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
@@ -25,10 +25,10 @@
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Shell &amp; Environment">
-  <meta name="twitter:description" id="tw-desc"  content="Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your home directory and p…">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios ships a fully configured terminal environment: Zsh as the default shell, with Bash and Fish configured the same way, a Starship prompt, fuzzy histo…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Shell & Environment","description":"Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your home directory and p…","url":"https://docs.shani.dev/doc/updates/shell/","datePublished":"2026-08-28T00:00:00.000Z","dateModified":"2026-08-28T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Shell & Environment","description":"Shanios ships a fully configured terminal environment: Zsh as the default shell, with Bash and Fish configured the same way, a Starship prompt, fuzzy histo…","url":"https://docs.shani.dev/doc/updates/shell/","datePublished":"2026-09-24T00:00:00.000Z","dateModified":"2026-09-24T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
   <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Shell & Environment","item":"https://docs.shani.dev/doc/updates/shell/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
@@ -215,129 +215,150 @@
         <h1 class="doc-title">Shell &amp; Environment</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Updates &amp; Config</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-09-24</span>
         </div>
       </div>
-      <div class="prose"><p>Shanios ships a fully configured Zsh environment with modern UX features enabled out of the box. All shell configuration lives in your home directory and persists across every OS update and rollback.</p>
+      <div class="prose"><p>Shanios ships a fully configured terminal environment: Zsh as the default shell, with Bash and Fish configured the same way, a Starship prompt, fuzzy history and file search, modern replacements for <code>ls</code>/<code>cat</code>/<code>find</code>/<code>grep</code>, and matching Saturn colours across the prompt, tmux and editors. Your shell configuration lives in your home directory and persists across every OS update and rollback.</p>
 <h2 id="default-shell-stack">Default Shell Stack</h2>
-<table><thead><tr><th>Tool</th><th>Role</th></tr></thead><tbody><tr><td><strong>Zsh</strong></td><td>Default shell for all users</td></tr><tr><td><strong>Starship</strong></td><td>Cross-shell prompt with git, language runtime, exit-code, and timing info</td></tr><tr><td><strong>McFly</strong></td><td>Neural-network command history search (replaces Ctrl+R)</td></tr><tr><td><strong>FZF</strong></td><td>Fuzzy finder — integrated for Ctrl+T (files) and Alt+C (cd)</td></tr><tr><td><strong>zsh-syntax-highlighting</strong></td><td>Fish-style inline syntax colouring (green = valid, red = invalid)</td></tr><tr><td><strong>zsh-autosuggestions</strong></td><td>Ghost-text suggestions from history; press → or End to accept</td></tr><tr><td><strong>zsh-history-substring-search</strong></td><td>Up/Down arrow searches history by substring, not just prefix</td></tr></tbody></table>
-<p>Bash and Fish are also installed if you prefer them — both ship with a Starship-enabled prompt and McFly history search in their skeleton config (<code>~/.bashrc_shani</code>, <code>~/.config/fish/config.fish</code>), though the Zsh-only plugins above (syntax highlighting, autosuggestions, history-substring-search) are not mirrored there.</p>
+<table><thead><tr><th>Tool</th><th>Role</th></tr></thead><tbody><tr><td><strong>Zsh</strong></td><td>Default login shell for all users</td></tr><tr><td><strong>Starship</strong></td><td>Prompt: user, directory, git, language toolchain, with exit code and duration on the right</td></tr><tr><td><strong>McFly</strong></td><td>Context-aware command history search on <code>Ctrl+R</code> (Zsh, Bash and Fish)</td></tr><tr><td><strong>FZF</strong></td><td>Fuzzy file finder on <code>Ctrl+T</code>, fuzzy <code>cd</code> on <code>Alt+C</code>, with previews</td></tr><tr><td><strong>zoxide</strong></td><td><code>z &lt;part-of-dir&gt;</code> jumps to directories you visit often; <code>zi</code> picks interactively</td></tr><tr><td><strong>eza</strong></td><td><code>ls</code>, <code>ll</code>, <code>la</code>, <code>lt</code> with icons, git status and colours</td></tr><tr><td><strong>bat</strong></td><td><code>cat</code> with syntax highlighting; also colours <code>man</code> pages</td></tr><tr><td><strong>fastfetch</strong></td><td>System summary with the Shanios logo when a terminal opens</td></tr><tr><td><strong>zsh-syntax-highlighting</strong></td><td>Fish-style inline syntax colouring (Zsh only)</td></tr><tr><td><strong>zsh-autosuggestions</strong></td><td>Ghost-text suggestions from history; press → or End to accept (Zsh only)</td></tr><tr><td><strong>zsh-history-substring-search</strong></td><td>Up/Down search history for any part of what you've typed (Zsh only)</td></tr></tbody></table>
+<p>Zsh, Bash and Fish share one set of aliases, key bindings and tool integrations. The shared settings live in <code>/usr/share/shani/shell/common.sh</code> (Zsh and Bash) and <code>/usr/share/shani/shell/shani.fish</code> (Fish). Your own rc files (<code>~/.zshrc</code>, <code>~/.bashrc</code>, <code>~/.config/fish/config.fish</code>) source them, so fixes to the defaults arrive with system updates while your own additions stay yours. To opt out completely, delete the <code>source</code> line from your rc file.</p>
 <h2 id="terminal-emulator">Terminal Emulator</h2>
-<p>The default terminal app differs by edition — both run the same shell stack above.</p>
+<p>The default terminal app differs by edition — all of them run the same shell stack above.</p>
 <ul>
-<li><strong>KDE Plasma:</strong> <strong>Konsole</strong>, pre-installed. <strong>Yakuake</strong> (a drop-down/quake-style variant of Konsole) is also pre-installed — press <code>F12</code> to toggle it from anywhere.</li>
+<li><strong>KDE Plasma:</strong> <strong>Konsole</strong>, pre-installed, with the Saturn colour scheme and a translucent blurred background. It runs your login shell, so <code>chsh</code> applies there too. <strong>FiraMono Nerd Font</strong> is the system fixed-width font, shared by Konsole, Yakuake, Kate and every other KDE app (<em>System Settings → Text & Fonts → Fixed width</em>). <strong>Yakuake</strong>, a drop-down terminal, is also pre-installed: press <code>F12</code> to toggle it from anywhere.</li>
 <li><strong>GNOME:</strong> <strong>GNOME Console</strong>, pre-installed.</li>
 <li><strong>COSMIC:</strong> <strong>COSMIC Terminal</strong>, pre-installed.</li>
 </ul>
-<p>Any terminal emulator you install separately (via Flatpak, Nix, etc.) uses the same Zsh config and prompt — the shell environment isn't tied to a specific terminal app.</p>
+<p>The prompt and <code>ls</code> icons are Nerd Font glyphs. Shanios ships <strong>FiraMono Nerd Font</strong> plus the Nerd Font symbols as a fallback for any monospace font. If you pick a different fixed-width font, choose a <em>Nerd Font</em> variant. Konsole (Qt) can't borrow the prompt's rounded separators from the fallback font.</p>
+<h2 id="welcome-screen-fastfetch">Welcome Screen (fastfetch)</h2>
+<p>Every new terminal starts with a <code>fastfetch</code> summary: the Shanios logo, OS, kernel, package counts (pacman, Flatpak, Snap, Nix, Homebrew, AppImage), desktop and theme, plus hardware, memory and disk usage. It is skipped in terminals smaller than 105×20 (split panes, a short Yakuake), in pipes and in scripts.</p>
+<pre><code class="language-bash">touch ~/.config/shani/no-fastfetch   # turn it off (all shells)
+rm ~/.config/shani/no-fastfetch      # turn it back on
+fastfetch                            # run it any time</code></pre>
+<p>The system-wide layout is <code>/etc/xdg/fastfetch/config.jsonc</code>. To customise it, copy it to <code>~/.config/fastfetch/config.jsonc</code> and edit the copy.</p>
 <h2 id="changing-your-shell">Changing Your Shell</h2>
 <pre><code class="language-bash">chsh -s /bin/bash    # switch to Bash
 chsh -s /bin/fish    # switch to Fish
 chsh -s /bin/zsh     # switch back to Zsh (default)</code></pre>
 <p>Log out and back in for the change to take effect.</p>
 <h2 id="customising-zsh">Customising Zsh</h2>
-<pre><code class="language-bash">nano ~/.zshrc
-source ~/.zshrc   # reload without restarting the shell</code></pre>
+<pre><code class="language-bash">micro ~/.zshrc    # add your own settings at the end, under &quot;Your own additions&quot;
+exec zsh          # reload</code></pre>
+<p>Useful built-in keys:</p>
+<table><thead><tr><th>Key</th><th>Action</th></tr></thead><tbody><tr><td><code>↑</code> / <code>↓</code></td><td>Search history for what you've typed so far (any part of it)</td></tr><tr><td><code>Ctrl+R</code></td><td>McFly history search</td></tr><tr><td><code>Ctrl+T</code> / <code>Alt+C</code></td><td>FZF file picker / fuzzy <code>cd</code></td></tr><tr><td><code>Alt+S</code></td><td>Put <code>sudo</code> in front of the current (or previous) command</td></tr><tr><td><code>Ctrl+Z</code></td><td>On an empty line, bring the suspended job back (<code>fg</code>)</td></tr><tr><td><code>Ctrl+←</code> / <code>Ctrl+→</code></td><td>Move by word</td></tr><tr><td><code>Ctrl+Backspace</code> / <code>Ctrl+Delete</code></td><td>Delete a word</td></tr></tbody></table>
+<p>History holds 50,000 entries with timestamps. It is shared live between open terminals, and commands typed with a leading space stay out of it.</p>
 <h2 id="starship-prompt">Starship Prompt</h2>
-<p>Starship shows by default: current directory (truncated to the repo root), git branch/status, active Python virtualenv, Node.js version (in Node projects), Rust toolchain version (when <code>Cargo.toml</code> is present), exit code of last command (when non-zero), and command duration — the shipped config sets <code>min_time = 1</code> (millisecond), so the duration shows for almost every command, not just long-running ones.</p>
-<pre><code class="language-bash">nano ~/.config/starship.toml
-starship help</code></pre>
+<p>The prompt is a two-line "pill" layout. The left side shows <strong>♄ user</strong>, the directory (truncated at the repo root), and the git branch and status. It also shows the active toolchain for the project you're in: Python, Node, Rust, Go, Java, containers, Nix shells and more. The right side appears only when relevant: how long the last command took (over 2 seconds), its exit status when it failed, background jobs, cached <code>sudo</code>, low battery, and the hostname over SSH. You type on the second line after <code>❯</code>.</p>
+<pre><code class="language-bash">micro ~/.config/starship.toml
+starship explain      # what each part of the current prompt means</code></pre>
 <h2 id="mcfly-history-search">McFly History Search</h2>
-<p>McFly replaces <code>Ctrl+R</code> with a context-aware, exit-code-aware history search that learns from your usage patterns. Everything runs on-device — no data leaves your system.</p>
+<p>McFly replaces <code>Ctrl+R</code> with a context-aware history search that learns which commands you run where. Everything runs on-device — no data leaves your system.</p>
 <pre><code class="language-bash"># Press Ctrl+R to open McFly
-# Type to filter; Enter to select; Ctrl+C to cancel
-
-# McFly database location (grows more useful over time)
-ls ~/.local/share/mcfly/</code></pre>
-<p>Default configuration (set in <code>~/.zshrc</code>, and mirrored in <code>~/.bashrc_shani</code> / <code>~/.config/fish/config.fish</code>):</p>
-<pre><code class="language-bash">MCFLY_FUZZY=true              # fuzzy matching instead of exact substring
-MCFLY_RESULTS=20              # number of results shown
-MCFLY_INTERFACE_VIEW=BOTTOM   # results list anchored to the bottom of the screen
-MCFLY_RESULTS_SORT=LAST_RUN   # most-recently-run commands surface first</code></pre>
-<p>Override any of these in your shell's rc file before the <code>mcfly init</code> line.</p>
+# Type to filter; Enter to run, Tab to edit first; Esc to cancel
+ls ~/.local/share/mcfly/     # the history database</code></pre>
+<p>Shipped settings (in the shared shell files):</p>
+<pre><code class="language-bash">MCFLY_FUZZY=2                 # fuzzy matching
+MCFLY_RESULTS=25              # results shown
+MCFLY_INTERFACE_VIEW=BOTTOM   # results anchored at the bottom
+MCFLY_RESULTS_SORT=LAST_RUN   # most recently run first</code></pre>
+<p>Override any of them by exporting the variable in your rc file <em>before</em> the <code>source</code> line.</p>
 <h2 id="fzf-integration">FZF Integration</h2>
-<p>FZF is integrated into Zsh for three keybindings:</p>
-<table><thead><tr><th>Keybinding</th><th>Action</th></tr></thead><tbody><tr><td><code>Ctrl+R</code></td><td>History search (McFly takes precedence; FZF is fallback)</td></tr><tr><td><code>Ctrl+T</code></td><td>Fuzzy file finder — inserts selected path at cursor</td></tr><tr><td><code>Alt+C</code></td><td>Fuzzy <code>cd</code> — jump to any subdirectory</td></tr></tbody></table>
-<pre><code class="language-bash"># Use fzf in scripts
-ls | fzf
-fzf --preview 'cat {}'
-
-# Select a git branch to checkout
-git branch | fzf | xargs git checkout</code></pre>
+<table><thead><tr><th>Keybinding</th><th>Action</th></tr></thead><tbody><tr><td><code>Ctrl+T</code></td><td>Fuzzy file finder (uses <code>fd</code>, previews with <code>bat</code>) — inserts the path at the cursor</td></tr><tr><td><code>Alt+C</code></td><td>Fuzzy <code>cd</code> into any subdirectory (previews the tree with <code>eza</code>)</td></tr><tr><td><code>**&lt;Tab&gt;</code></td><td>Fuzzy completion in Zsh and Bash, e.g. <code>vim <strong>&lt;Tab&gt;</code>, <code>cd </strong>&lt;Tab&gt;</code>, <code>kill **&lt;Tab&gt;</code></td></tr></tbody></table>
+<p><code>Ctrl+R</code> is McFly in every shell, not FZF.</p>
+<pre><code class="language-bash">git branch | fzf | xargs git checkout   # fzf works in pipelines too</code></pre>
 <h2 id="pre-installed-cli-tools">Pre-Installed CLI Tools</h2>
-<h3 id="file-search-and-navigation">File Search and Navigation</h3>
-<p><code>ripgrep</code> (<code>rg</code>) is present on <strong>KDE Plasma only</strong>, pulled in transitively by KTextEditor's search-in-files feature (<code>ripgrep-all</code> depends on it) — not deliberately curated, and absent on GNOME. <code>fd</code> is <strong>not pre-installed on either edition</strong>. The standard POSIX tools always work:</p>
-<pre><code class="language-bash">grep -r &quot;search term&quot; .    # recursive text search
-find . -name &quot;filename&quot;    # find by name
+<h3 id="aliases-and-helpers">Aliases and helpers</h3>
+<table><thead><tr><th>Command</th><th>Runs</th></tr></thead><tbody><tr><td><code>ls</code> <code>ll</code> <code>la</code> <code>lt</code></td><td>eza: list / long with git status / all / tree (2 levels)</td></tr><tr><td><code>cat</code></td><td><code>bat</code> without paging or decorations (<code>command bat</code> for the full view)</td></tr><tr><td><code>z &lt;dir&gt;</code> / <code>zi</code></td><td>zoxide jump / interactive jump</td></tr><tr><td><code>mkcd &lt;dir&gt;</code></td><td>create a directory and <code>cd</code> into it</td></tr><tr><td><code>backup &lt;file&gt;</code></td><td>timestamped copy (<code>file.bak.20260924-101500</code>)</td></tr><tr><td><code>hw</code></td><td>hardware summary (<code>inxi</code>, serial numbers masked)</td></tr><tr><td><code>jctl</code> / <code>sctl</code></td><td>this boot's errors / failed system and user units</td></tr><tr><td><code>ports</code></td><td>listening ports and the processes behind them</td></tr><tr><td><code>tldr &lt;cmd&gt;</code></td><td>short, example-first help pages (downloaded on first use)</td></tr></tbody></table>
+<p><code>cp</code>, <code>mv</code> and <code>ln</code> ask before overwriting in interactive shells. Aliases never apply inside scripts, so scripts behave normally.</p>
+<h3 id="file-search-and-navigation">File search and navigation</h3>
+<pre><code class="language-bash">rg &quot;search term&quot;           # ripgrep — fast recursive search, respects .gitignore
+fd name                    # fd — fast find by name
 plocate filename           # indexed filename search — see Storage</code></pre>
-<p>For a consistent experience across editions, install both via Nix: <code>nix-env -iA nixpkgs.ripgrep nixpkgs.fd</code>.</p>
-<h3 id="file-viewing">File Viewing</h3>
-<p><code>bat</code> and <code>eza</code> (modern <code>cat</code>/<code>ls</code> alternatives) are also <strong>not pre-installed</strong> — only standard <code>cat</code>/<code>less</code>/<code>ls</code> are. Install via Nix if wanted: <code>nix-env -iA nixpkgs.bat nixpkgs.eza</code>.</p>
-<h3 id="system-monitoring">System Monitoring</h3>
-<pre><code class="language-bash">htop                       # interactive process viewer
-fastfetch                  # system information summary
-ncdu                       # interactive disk usage analyser</code></pre>
-<h3 id="text-processing">Text Processing</h3>
-<pre><code class="language-bash">echo '{&quot;key&quot;: &quot;value&quot;}' | jq .    # jq — JSON processor</code></pre>
-<h3 id="compression">Compression</h3>
-<pre><code class="language-bash">7z a archive.7z file.txt
-tar xzf archive.tar.gz
-unzip archive.zip
-unrar x archive.rar          # extract a RAR archive (extraction only — RAR is proprietary)
-lrzip -o archive.lrz file    # long-range compression, best ratio on large/redundant files
-lzop -o file.lzo file        # fast, low-ratio compression — optimised for speed over size</code></pre>
+<h3 id="system-monitoring">System monitoring</h3>
+<pre><code class="language-bash">htop                       # classic process viewer
+fastfetch                  # system summary
+ncdu                       # interactive disk usage
+df -h                      # mounted filesystems</code></pre>
+<h3 id="text-processing-and-compression">Text processing and compression</h3>
+<pre><code class="language-bash">echo '{&quot;key&quot;: &quot;value&quot;}' | jq .
+7z a archive.7z file.txt
+tar -xvf archive.tar.zst     # tar auto-detects gz/xz/zst/bz2
+unrar x archive.rar          # extraction only — RAR is proprietary</code></pre>
+<h2 id="git">Git</h2>
+<p>System-wide defaults live in <code>/etc/gitconfig</code>; anything in your <code>~/.gitconfig</code> overrides them.</p>
+<ul>
+<li><strong>delta</strong> is the pager: syntax-highlighted diffs with line numbers. Press <code>n</code>/<code>N</code> to jump between files.</li>
+<li>Better merges and diffs: <code>zdiff3</code> conflict style, the histogram diff algorithm, moved-line detection, and <code>rerere</code> to remember conflict resolutions.</li>
+<li>New repositories start on <code>main</code>. <code>git push</code> sets up the upstream branch for you, and <code>fetch</code> prunes deleted branches.</li>
+</ul>
+<table><thead><tr><th>Alias</th><th>Does</th></tr></thead><tbody><tr><td><code>git st</code></td><td>short status with branch</td></tr><tr><td><code>git lg</code></td><td>coloured graph log</td></tr><tr><td><code>git br</code></td><td>branches with upstream and last commit</td></tr><tr><td><code>git amend</code></td><td>amend the last commit, same message</td></tr><tr><td><code>git undo</code></td><td>undo the last commit, keep the changes staged</td></tr><tr><td><code>git unstage &lt;file&gt;</code></td><td>unstage</td></tr><tr><td><code>git wip</code></td><td>commit everything as "WIP"</td></tr><tr><td><code>git aliases</code></td><td>list all aliases</td></tr></tbody></table>
+<p>Set your identity once: <code>git config --global user.name &quot;…&quot;</code> and <code>git config --global user.email &quot;…&quot;</code>.</p>
+<h2 id="tmux">Tmux</h2>
+<p>Tmux is pre-installed and configured system-wide in <code>/etc/tmux.conf</code>, with a Saturn status bar, mouse support, true colour and a 50,000-line history. Put your own settings in <code>~/.config/tmux/tmux.conf</code>; they load after the system file, so they override it.</p>
+<pre><code class="language-text">tmux new -s work              start a named session
+Ctrl+B |    Ctrl+B -          split side-by-side / stacked (in the current directory)
+Alt+←/→/↑/↓                   move between panes (no prefix needed)
+Alt+1 … Alt+9                 switch windows (no prefix needed)
+Ctrl+B h/j/k/l                move between panes, vim-style; H/J/K/L resize
+Ctrl+B [   then v, y          copy mode: select, copy (reaches the desktop clipboard)
+Ctrl+B S                      type into all panes at once (toggle)
+Ctrl+B r                      reload the configuration
+Ctrl+B d                      detach; `tmux attach -t work` to return</code></pre>
+<h2 id="editors">Editors</h2>
+<ul>
+<li><strong>micro</strong> — the default <code>$EDITOR</code>/<code>$VISUAL</code>. Uses the Saturn colour scheme, <code>Ctrl+S</code>/<code>Ctrl+Q</code>/<code>Ctrl+C</code>/<code>Ctrl+V</code> like a desktop editor, and restores the cursor position and undo history when you reopen a file.</li>
+<li><strong>nano</strong> — line numbers, mouse, syntax highlighting for 44 file types, and reopens files where you left off (<code>~/.config/nano/nanorc</code>).</li>
+<li><strong>vim</strong> — Vim's own defaults plus line numbers, mouse and persistent undo (<code>~/.vimrc</code>). <code>&quot;+y</code> copies to the desktop clipboard through the terminal (OSC 52), because Arch's vim has no built-in X/Wayland clipboard.</li>
+</ul>
+<h2 id="other-package-managers-in-the-shell">Other Package Managers in the Shell</h2>
+<p>Shanios's root is read-only, so extra software comes from <a href="../software/nix.md">Nix</a>, <a href="../software/flatpak.md">Flatpak</a>, <a href="../software/snaps.md">Snap</a>, <a href="../software/distrobox.md">Distrobox</a> or, optionally, <a href="../software/homebrew.md">Homebrew</a>. The shared shell files make sure their commands are on your <code>PATH</code> in every terminal, not only in login shells. This matters most for Fish, which never reads <code>/etc/profile.d</code>:</p>
+<ul>
+<li><strong>Nix</strong> — <code>~/.nix-profile/bin</code> (after your first <code>nix-env -i</code>) and the default profile.</li>
+<li><strong>Snap</strong> — <code>/var/lib/snapd/snap/bin</code>.</li>
+<li><strong>Flatpak</strong> — exported app commands in <code>/var/lib/flatpak/exports/bin</code> and <code>~/.local/share/flatpak/exports/bin</code>.</li>
+<li><strong>Homebrew</strong> — picked up automatically once installed, with no <code>brew shellenv</code> line to add.</li>
+<li><strong><code>~/.local/bin</code></strong> — always first on <code>PATH</code>: <code>distrobox-export --bin</code> and tools like OpenCode install here.</li>
+</ul>
+<p><strong>Inside a Distrobox container</strong>, your home directory (and so your rc files) is shared with the host, but <code>/usr</code> is the container's. The rc files fall back to the host's copies under <code>/run/host</code>, so the same aliases, key bindings and Zsh plugins work inside containers. Tools that exist only on the host (Starship, eza, bat…) are skipped unless you install them in the container.</p>
 <h2 id="shell-configuration-files">Shell Configuration Files</h2>
-<pre><code>~/.zshrc                     — Zsh configuration (plugins, aliases, env vars)
-~/.bashrc                    — Bash configuration
-~/.profile                   — login shell config (shared between shells)
-~/.config/starship.toml      — Starship prompt configuration
+<pre><code>~/.zshrc                     — Zsh (options, completion, keys, plugins, your additions)
+~/.bashrc                    — Bash (created from ~/.bashrc_shani at first desktop login)
+~/.config/fish/config.fish   — Fish
+~/.inputrc                   — readline keys for Bash, Python, sqlite and others
+~/.config/starship.toml      — prompt
+~/.config/micro/  ~/.config/nano/nanorc  ~/.vimrc   — editors
+~/.config/bat/  ~/.config/eza/theme.yml  ~/.config/tealdeer/
 ~/.local/share/mcfly/        — McFly history database
-~/.config/environment.d/     — session environment variables (Wayland/X)</code></pre>
-<p>All of these are in <code>@home</code> — never touched by OS updates or rollbacks. The one exception is <code>/etc/environment.d/90-shani.conf</code> (sets the system-wide <code>EDITOR=micro</code> default) — it lives on the read-only root, so overriding it means setting the same variable in <code>~/.config/environment.d/</code> or your shell rc, not editing it in place.</p>
-<h2 id="environment-variables">Environment Variables</h2>
-<p>Shanios sets one system-wide default out of the box: <code>EDITOR=micro</code>, via a drop-in at <code>/etc/environment.d/90-shani.conf</code>. This is read by systemd user sessions (not just login shells), so it applies to <code>sudoedit</code>, <code>visudo</code>, <code>crontab -e</code>, and any tool that shells out with <code>$EDITOR</code> set — override it per-user rather than editing the drop-in directly, since it lives on the read-only root and any local edit would be lost on the next OS update.</p>
-<pre><code class="language-bash"># Shell-specific (Zsh)
-nano ~/.zshrc
-export EDITOR=vim
-export PATH=&quot;$HOME/.local/bin:$PATH&quot;
+~/.config/environment.d/     — session environment variables (Wayland/X)
 
-# Session environment (Wayland/X sessions) — overrides the system-wide default
+/usr/share/shani/shell/      — shared shell defaults (updated with the OS)
+/etc/gitconfig  /etc/tmux.conf  /etc/xdg/fastfetch/config.jsonc   — system defaults</code></pre>
+<p>Everything under <code>~</code> is in <code>@home</code> — never touched by OS updates or rollbacks. The files under <code>/usr</code> and <code>/etc</code> are the system defaults, updated with the OS. Override them from your home directory (<code>~/.gitconfig</code>, <code>~/.config/tmux/tmux.conf</code>, <code>~/.config/fastfetch/</code>) rather than editing them in place.</p>
+<h2 id="environment-variables">Environment Variables</h2>
+<p>Shanios sets these system-wide defaults in <code>/etc/environment.d/90-shani.conf</code>, read by systemd user sessions (not just login shells). They therefore apply to <code>sudoedit</code>, <code>visudo</code>, <code>crontab -e</code>, <code>systemctl edit</code> and anything else that uses <code>$EDITOR</code>:</p>
+<pre><code class="language-bash">EDITOR=micro
+VISUAL=micro
+SYSTEMD_LESS=FRXMK      # systemctl/journalctl pager: colours, no wrapping</code></pre>
+<p>Override per user rather than editing the drop-in, which lives on the read-only root:</p>
+<pre><code class="language-bash"># Session environment (Wayland/X sessions)
 # ~/.config/environment.d/my-vars.conf
 EDITOR=nvim
-MOZ_ENABLE_WAYLAND=1
 
-# System-wide (traditional PAM-read file, separate mechanism from environment.d)
-sudo nano /etc/environment</code></pre>
+# Shell only: in ~/.zshrc
+export EDITOR=vim</code></pre>
 <h2 id="nix-package-manager">Nix Package Manager</h2>
-<p>Nix is pre-installed on the dedicated <code>@nix</code> subvolume. Install CLI tools without root — they survive all OS updates and rollbacks:</p>
-<pre><code class="language-bash"># Add channel (required before first install)
-nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
+<p>Nix is pre-installed on the dedicated <code>@nix</code> subvolume. Install CLI tools without root — they survive all OS updates and rollbacks, and appear on your <code>PATH</code> in every shell:</p>
+<pre><code class="language-bash">nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
 nix-channel --update
 
-# Install packages
-nix-env -iA nixpkgs.ripgrep
-nix-env -iA nixpkgs.bat
 nix-env -iA nixpkgs.lazygit
-nix-env -iA nixpkgs.zoxide
-
-# List installed
-nix-env -q
-
-# Upgrade all
-nix-env -u '*'</code></pre>
-<h2 id="tmux">Tmux</h2>
-<p>Tmux is pre-installed:</p>
-<pre><code class="language-bash">tmux new -s work          # start named session
-Ctrl+B then %             # split vertically (panes side-by-side)
-Ctrl+B then &quot;             # split horizontally (panes stacked)
-Ctrl+B then D             # detach (session keeps running)
-tmux ls                   # list sessions
-tmux attach -t work       # reattach</code></pre>
-<p>Configuration lives in <code>~/.tmux.conf</code>.</p>
+nix-env -q          # list installed
+nix-env -u '*'      # upgrade all</code></pre>
 <h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="config">System Config</a> — /etc overlay, locale, hostname, kernel parameters</li>
 <li><a href="../software/nix.md">Nix Package Manager</a> — Nix details and channel setup</li>
+<li><a href="../software/distrobox.md">Distrobox</a> — containers that share your home and shell config</li>
 <li><a href="../intro/migrating.md">Migrating from Traditional Linux</a> — shell workflow changes</li>
 <li><a href="../intro/whats-included.md">What's Included</a> — complete software stack</li>
 <li><a href="system">System Updates</a> — how updates affect your shell config</li>

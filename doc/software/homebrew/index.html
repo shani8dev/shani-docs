@@ -224,12 +224,10 @@
 <pre><code class="language-bash"># Install Homebrew (user-space, no root required)
 /bin/bash -c &quot;$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)&quot;
 
-# Follow the post-install instructions to add brew to your PATH.
-# For Zsh (default shell on Shanios), add to ~/.zshrc:
-eval &quot;$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)&quot;
-
-# Reload shell
-source ~/.zshrc</code></pre>
+# No PATH setup needed: Shanios's shell defaults (Zsh, Bash and Fish) pick
+# Homebrew up automatically once /home/linuxbrew/.linuxbrew/bin/brew exists.
+# Skip the installer's &quot;add brew shellenv to your rc file&quot; step and just
+# open a new terminal.</code></pre>
 <h2 id="basic-usage">Basic Usage</h2>
 <pre><code class="language-bash"># Search for a package
 brew search keyword

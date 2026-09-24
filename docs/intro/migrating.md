@@ -50,9 +50,9 @@ Search for the Flatpak app ID at [flathub.org](https://flathub.org) or via `flat
 | `sudo apt install nodejs` | `nix-env -iA nixpkgs.nodejs` |
 | `sudo pacman -S python` | `nix-env -iA nixpkgs.python312` |
 | `sudo dnf install rustup` | `nix-env -iA nixpkgs.rustup` |
-| `sudo apt install ripgrep` | `nix-env -iA nixpkgs.ripgrep` |
+| `sudo apt install lazygit` | `nix-env -iA nixpkgs.lazygit` |
 | `sudo pacman -S kubectl` | `nix-env -iA nixpkgs.kubectl` |
-| `brew install bat` | `nix-env -iA nixpkgs.bat` |
+| `brew install helix` | `nix-env -iA nixpkgs.helix` |
 | `sudo apt install golang` | `nix-env -iA nixpkgs.go` |
 | `sudo pacman -S neovim` | `nix-env -iA nixpkgs.neovim` |
 | `sudo pip install` globally | `pip install --user`, or `nix-env -iA nixpkgs.python3Packages.foo`, or Distrobox |

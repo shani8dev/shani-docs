@@ -75,7 +75,8 @@ node generate-manifest.js
 python3 -c "
 import json, pathlib, re
 for f in pathlib.Path('.').rglob('*.html'):
-    for m in re.findall(r'<script type=\"application/ld\+json\">(.*?)</script>', f.read_text(), re.S):
+    # [^>]* : the tags carry id= attributes; an exact '...json\">' match finds 0 blocks and passes vacuously
+    for m in re.findall(r'<script type=\"application/ld\+json\"[^>]*>(.*?)</script>', f.read_text(), re.S):
         json.loads(m)
 print('all JSON-LD blocks parse')
 "
