@@ -68,16 +68,23 @@ function main() {
   }
 
   const pages = indexPages();
-  const files = pageFiles(DOC_DIR);
+  const docFiles = pageFiles(DOC_DIR);
+  // The site root and the 404 are served too, and the root index links every
+  // doc page. Scanning only doc/ would leave the root ungated.
+  const files = [...docFiles, ...['index.html', '404.html']
+    .map((f) => path.join(ROOT, f))
+    .filter((f) => fs.existsSync(f))];
 
-  // Every id in every page, so #fragment links can be resolved across pages.
-  const idsBySlug = new Map();
-  for (const [slug, file] of pages) {
+  // Ids per file: a #fragment link resolves against the page it appears on.
+  const idsByFile = new Map();
+  for (const file of files) {
     const ids = new Set();
-    const html = fs.readFileSync(file, 'utf8');
-    for (const m of html.matchAll(/\sid="([^"]+)"/g)) ids.add(m[1]);
-    idsBySlug.set(slug, ids);
+    for (const m of fs.readFileSync(file, 'utf8').matchAll(/\sid="([^"]+)"/g)) ids.add(m[1]);
+    idsByFile.set(file, ids);
   }
+  // The same ids keyed by slug, so /doc/<slug>/#frag resolves from any page.
+  const idsBySlug = new Map();
+  for (const [slug, file] of pages) idsBySlug.set(slug, idsByFile.get(file));
 
   let checked = 0;
 
@@ -92,9 +99,8 @@ function main() {
 
       if (href.startsWith('#')) {
         // In-page anchor: only meaningful on the page it appears on.
-        const slug = path.relative(DOC_DIR, file).replace(/[\\/]index\.html$/, '').replace(/[\\/]/g, '/');
         checked++;
-        if (!idsBySlug.get(slug).has(href.slice(1))) {
+        if (!idsByFile.get(file).has(href.slice(1))) {
           report(file, text, href, `no element with id="${href.slice(1)}" on this page`);
         }
         continue;
@@ -125,8 +131,8 @@ function main() {
     for (const m of html.matchAll(/href="(\/doc\/[^"]*)"/g)) targets.add(m[1]);
   }
 
-  console.log(`checked ${checked} internal link(s) across ${files.length} pages ` +
-              `(${targets.size} distinct targets, ${pages.size} pages exist)`);
+  console.log(`checked ${checked} internal link(s) across ${files.length} served pages ` +
+              `(${targets.size} distinct targets, ${pages.size} doc pages exist)`);
 
   if (problems.length === 0) {
     console.log('no broken internal links');
