@@ -261,7 +261,7 @@ Changes in upper (@data) survive OS updates — only the lower is replaced.</cod
 <p><code>@data</code> is deliberately left mounted through this process (its upper/work directories must stay live for the overlay), and <code>switch_root</code> carries that mount along into the booted system's <code>/run</code>.</p>
 <p>View overlay modifications:</p>
 <pre><code class="language-bash">ls -la /data/overlay/etc/upper</code></pre>
-<p>The same <code>99shanios</code> dracut module also carries the two hooks that make boot-failure detection possible before systemd ever starts — a pre-mount hook writes <code>/data/boot_hard_failure</code> before the root Btrfs subvolume is mounted, and a pre-pivot hook clears it once mount succeeds. See <a href="./atomic-updates.md#automatic-rollback">Atomic Updates</a> for how that feeds into rollback.</p>
+<p>The same <code>99shanios</code> dracut module also carries the two hooks that make boot-failure detection possible before systemd ever starts — a pre-mount hook writes <code>/data/boot_hard_failure</code> before the root Btrfs subvolume is mounted, and a pre-pivot hook clears it once mount succeeds. See <a href="/doc/concepts/atomic-updates/#automatic-rollback">Atomic Updates</a> for how that feeds into rollback.</p>
 <h2 id="bind-mounted-service-state">Bind-Mounted Service State</h2>
 <p>Because <code>/var</code> is volatile, all service state that must survive reboots is stored in <code>@data</code> and bind-mounted back at boot.</p>
 <p>Key bind mounts from <code>@data/varlib/</code> → <code>/var/lib/</code>:</p>
@@ -271,9 +271,9 @@ Changes in upper (@data) survive OS updates — only the lower is replaced.</cod
 <p>(confirmed against the real fstab template in <code>shani-install-media/image_profiles/shared/overlay/rootfs/etc/fstab</code>)</p>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="immutability">Immutability</a></li>
-<li><a href="../intro/user-config.md">User Configuration</a></li>
-<li><a href="../updates/shell.md">Shell & Environment</a></li>
+<li><a href="/doc/concepts/immutability/">Immutability</a></li>
+<li><a href="/doc/intro/user-config/">User Configuration</a></li>
+<li><a href="/doc/updates/shell/">Shell & Environment</a></li>
 </ul></div>
     </div>
 
@@ -305,6 +305,7 @@ Changes in upper (@data) survive OS updates — only the lower is replaced.</cod
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

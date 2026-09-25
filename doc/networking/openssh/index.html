@@ -373,9 +373,9 @@ ssh -N -f -L 5432:localhost:5432 shanios   # tunnel remote Postgres locally</cod
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>Connection refused</code></td><td>Confirm <code>sshd</code> or <code>sshd.socket</code> is active: <code>systemctl status sshd sshd.socket</code>; check firewall: <code>sudo firewall-cmd --list-ports</code></td></tr><tr><td><code>Permission denied (publickey)</code></td><td>Check permissions: <code>~/.ssh</code> must be <code>700</code> and <code>~/.ssh/authorized_keys</code> must be <code>600</code>; verify the key is actually in <code>authorized_keys</code></td></tr><tr><td><code>Host key verification failed</code></td><td>The server's host key changed — if expected (reinstall), remove the old entry: <code>ssh-keygen -R 192.168.1.100</code></td></tr><tr><td>Slow login (10+ second delay)</td><td><code>UseDNS no</code> should be set in <code>sshd_config</code> — reverse DNS lookup on connect causes the delay</td></tr><tr><td><code>Too many authentication failures</code></td><td>Add <code>IdentitiesOnly yes</code> to <code>~/.ssh/config</code> for that host to prevent the SSH agent from offering all stored keys</td></tr><tr><td>Cannot connect after changing port</td><td>Ensure the new port is open in the firewall and you verified connectivity before closing the existing session</td></tr><tr><td>View server-side logs</td><td><code>journalctl -u sshd -f</code></td></tr><tr><td>View client-side debug output</td><td>Add <code>-v</code> (or <code>-vvv</code> for maximum verbosity) to the <code>ssh</code> command</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="sshfs">SSHFS</a></li>
-<li><a href="fail2ban">Fail2ban</a></li>
-<li><a href="tailscale">Tailscale (avoid exposure)</a></li>
+<li><a href="/doc/networking/sshfs/">SSHFS</a></li>
+<li><a href="/doc/networking/fail2ban/">Fail2ban</a></li>
+<li><a href="/doc/networking/tailscale/">Tailscale (avoid exposure)</a></li>
 </ul></div>
     </div>
 
@@ -407,6 +407,7 @@ ssh -N -f -L 5432:localhost:5432 shanios   # tunnel remote Postgres locally</cod
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

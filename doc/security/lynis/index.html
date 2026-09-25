@@ -219,7 +219,7 @@
         </div>
       </div>
       <div class="prose"><p>Lynis is a security auditing tool that scans a running Linux system and produces a hardening report. It checks hundreds of items: file permissions, installed software, kernel parameters, authentication settings, network configuration, and more — and produces a prioritised list of findings with remediation suggestions. It is pre-installed on Shani OS as a direct dependency of the <code>shani-core</code> package.</p>
-<p>Lynis does not change anything — it only reads and reports. Several of the sysctl, modprobe, and audit hardening decisions documented on the <a href="features">Security Features</a> page exist specifically to address findings this tool reports (e.g. Lynis IDs <code>KRNL-6000</code>, <code>ACCT-9630</code>, <code>STRG-1846</code>, <code>NETW-3200</code>).</p>
+<p>Lynis does not change anything — it only reads and reports. Several of the sysctl, modprobe, and audit hardening decisions documented on the <a href="/doc/security/features/">Security Features</a> page exist specifically to address findings this tool reports (e.g. Lynis IDs <code>KRNL-6000</code>, <code>ACCT-9630</code>, <code>STRG-1846</code>, <code>NETW-3200</code>).</p>
 <p><strong>Lynis audits itself on a schedule by default</strong> — <code>shani-core</code>'s post-install hook runs <code>systemctl enable lynis.timer</code>, so a fresh Shani OS install is already running periodic audits without you setting anything up. Check it with:</p>
 <pre><code class="language-bash">systemctl status lynis.timer
 systemctl list-timers lynis.timer   # shows the exact next run time</code></pre>
@@ -285,7 +285,7 @@ sudo chmod +x /etc/cron.weekly/lynis-audit
 sudo mkdir -p /var/log/lynis</code></pre>
 <hr>
 <h2 id="common-findings-on-shani-os">Common Findings on Shani OS</h2>
-<table><thead><tr><th>Finding</th><th>Typical Suggestion</th></tr></thead><tbody><tr><td><code>umask</code> too permissive</td><td>Set <code>umask 027</code> in <code>/etc/profile</code></td></tr><tr><td>SSH root login enabled</td><td>Set <code>PermitRootLogin no</code> in <code>/etc/ssh/sshd_config</code></td></tr><tr><td>Bootloader editor not password-protected / UKI cmdline mutable</td><td>Not applicable on Shanios — the bootloader editor is disabled and the kernel command line is baked into the signed UKI at build time, so the boot chain cannot be altered from the boot menu (see <a href="features">Security Features</a>)</td></tr><tr><td>Core dumps not restricted</td><td>Add <code>* hard core 0</code> to <code>/etc/security/limits.conf</code></td></tr><tr><td>USB storage not disabled</td><td>Add <code>install usb-storage /bin/false</code> to a modprobe drop-in if USB mass storage is not needed</td></tr><tr><td>Auditd not running</td><td>Enable <code>auditd</code> if compliance logging is required — see the <a href="audit">Audit</a> page</td></tr></tbody></table>
+<table><thead><tr><th>Finding</th><th>Typical Suggestion</th></tr></thead><tbody><tr><td><code>umask</code> too permissive</td><td>Set <code>umask 027</code> in <code>/etc/profile</code></td></tr><tr><td>SSH root login enabled</td><td>Set <code>PermitRootLogin no</code> in <code>/etc/ssh/sshd_config</code></td></tr><tr><td>Bootloader editor not password-protected / UKI cmdline mutable</td><td>Not applicable on Shanios — the bootloader editor is disabled and the kernel command line is baked into the signed UKI at build time, so the boot chain cannot be altered from the boot menu (see <a href="/doc/security/features/">Security Features</a>)</td></tr><tr><td>Core dumps not restricted</td><td>Add <code>* hard core 0</code> to <code>/etc/security/limits.conf</code></td></tr><tr><td>USB storage not disabled</td><td>Add <code>install usb-storage /bin/false</code> to a modprobe drop-in if USB mass storage is not needed</td></tr><tr><td>Auditd not running</td><td>Enable <code>auditd</code> if compliance logging is required — see the <a href="/doc/security/audit/">Audit</a> page</td></tr></tbody></table>
 <hr>
 <h2 id="updating-lynis">Updating Lynis</h2>
 <pre><code class="language-bash"># Check the installed version
@@ -297,9 +297,9 @@ lynis show version</code></pre>
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="features">Security Features</a> — kernel/module hardening decisions made in direct response to Lynis findings</li>
-<li><a href="rkhunter">rkhunter</a> — complementary rootkit scanner; unlike Lynis, not scheduled by default</li>
-<li><a href="../updates/shani-health.md">shani-health Reference</a> — <code>shani-health --security</code> reports the <code>lynis.timer</code> status, last-scan age, hardening index, and warning count</li>
+<li><a href="/doc/security/features/">Security Features</a> — kernel/module hardening decisions made in direct response to Lynis findings</li>
+<li><a href="/doc/security/rkhunter/">rkhunter</a> — complementary rootkit scanner; unlike Lynis, not scheduled by default</li>
+<li><a href="/doc/updates/shani-health/">shani-health Reference</a> — <code>shani-health --security</code> reports the <code>lynis.timer</code> status, last-scan age, hardening index, and warning count</li>
 </ul></div>
     </div>
 
@@ -331,6 +331,7 @@ lynis show version</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

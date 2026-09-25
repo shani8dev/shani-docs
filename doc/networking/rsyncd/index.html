@@ -278,10 +278,10 @@ rsync -avzn /local/dir/ rsync://syncuser@192.168.1.100/backup/</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>Connection refused</code></td><td>Check <code>systemctl status rsyncd</code>; confirm port 873 is open: <code>sudo firewall-cmd --list-all</code></td></tr><tr><td><code>Auth failed</code></td><td>Verify <code>/etc/rsyncd.secrets</code> has mode <code>600</code> (<code>sudo chmod 600 /etc/rsyncd.secrets</code>) and the username in the client command matches <code>auth users</code> in the config</td></tr><tr><td><code>hosts allow</code> blocking your client</td><td>Check the client IP is within the <code>hosts allow</code> range; temporarily remove the restriction for testing</td></tr><tr><td>Files not syncing (no errors)</td><td>Add <code>-v</code> for verbose output; check that the source path ends with <code>/</code> if you want directory <em>contents</em> (not the directory itself)</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="openssh">SSH Server</a> — rsync over SSH for secure transfers</li>
-<li><a href="samba">Samba</a> — SMB/CIFS file sharing</li>
-<li><a href="nfs">NFS</a> — network filesystem sharing</li>
-<li><a href="../system/backup.md">Backup & Restore</a> — restic-based backup</li>
+<li><a href="/doc/networking/openssh/">SSH Server</a> — rsync over SSH for secure transfers</li>
+<li><a href="/doc/networking/samba/">Samba</a> — SMB/CIFS file sharing</li>
+<li><a href="/doc/networking/nfs/">NFS</a> — network filesystem sharing</li>
+<li><a href="/doc/system/backup/">Backup & Restore</a> — restic-based backup</li>
 </ul></div>
     </div>
 
@@ -313,6 +313,7 @@ rsync -avzn /local/dir/ rsync://syncuser@192.168.1.100/backup/</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

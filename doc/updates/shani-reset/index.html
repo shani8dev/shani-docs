@@ -274,7 +274,7 @@ sudo passwd myuser</code></pre>
 <li><code>systemd-tmpfiles</code> recreates <code>/data</code> structure from <code>shanios-data-structure.conf</code></li>
 <li><code>/etc</code> overlay starts fresh from the <code>@blue</code> or <code>@green</code> read-only root</li>
 <li>All services start in their initial state (first-time setup)</li>
-<li><code>shani-update</code> runs automatically and offers to update to the latest version</li>
+<li>The Shani Cassini agent checks for an available update after login; use <strong>Updates & Rollback</strong> to install it</li>
 <li>Desktop first-run wizard guides through locale, timezone, and user account creation</li>
 </ol>
 <hr>
@@ -295,9 +295,9 @@ sudo shani-reset --home</code></pre>
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="config">System Config</a> — editing <code>/etc</code> files and managing the overlay</li>
-<li><a href="../arch/overlay.md">Overlay Filesystem</a> — how the <code>/etc</code> overlay works</li>
-<li><a href="system">System Updates</a> — rolling back an update without a full reset</li>
+<li><a href="/doc/updates/config/">System Config</a> — editing <code>/etc</code> files and managing the overlay</li>
+<li><a href="/doc/arch/overlay/">Overlay Filesystem</a> — how the <code>/etc</code> overlay works</li>
+<li><a href="/doc/updates/system/">System Updates</a> — rolling back an update without a full reset</li>
 </ul></div>
     </div>
 
@@ -329,6 +329,7 @@ sudo shani-reset --home</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

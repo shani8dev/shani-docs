@@ -344,11 +344,11 @@ lxc launch ubuntu:24.04 myvm --vm</code></pre>
 <table><thead><tr><th>Symptom</th><th>Cause & Fix</th></tr></thead><tbody><tr><td><code>/dev/kvm</code> does not exist</td><td>Virtualisation disabled in firmware — enable Intel VT-x / AMD-V (SVM) in BIOS/UEFI, then reboot</td></tr><tr><td><code>virsh</code> fails with <em>Permission denied</em> or asks for root</td><td>User not in <code>kvm</code>/<code>libvirt</code> groups yet — log out and back in after install, or run <code>sudo usermod -aG kvm,libvirt $USER</code> first (groups ship provisioned on Shanios accounts)</td></tr><tr><td><code>error: failed to connect to the hypervisor</code></td><td>Socket not yet started — <code>systemctl start libvirtd.socket</code>, or check <code>systemctl status libvirtd.socket</code> for errors</td></tr><tr><td>VM has no network after creation</td><td>Default NAT network not active — <code>sudo virsh net-start default &amp;&amp; sudo virsh net-autostart default</code></td></tr><tr><td>Flatpak virt-manager shows no system VMs</td><td>The sandboxed GUI may connect to a session instance instead of the system daemon; manage system-defined VMs with <code>virsh</code> from the terminal, or create new VMs inside the Flatpak GUI</td></tr><tr><td>Disk I/O slow inside guests</td><td>Image stored on CoW storage — move it under <code>/var/lib/libvirt/images/</code> (<code>@libvirt</code>, nodatacow) with <code>virsh vol-*</code> or virt-manager's storage settings</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="distrobox">Distrobox</a> — lightweight container-based environments</li>
-<li><a href="lxc-lxd">Linux Containers (LXC/LXD)</a> — system containers</li>
-<li><a href="systemd-nspawn">systemd-nspawn</a> — lightweight container runtime</li>
-<li><a href="gpu-containers">GPU Containers</a> — NVIDIA access in containers</li>
-<li><a href="bottles">Bottles</a> — Wine-based Windows app compatibility</li>
+<li><a href="/doc/software/distrobox/">Distrobox</a> — lightweight container-based environments</li>
+<li><a href="/doc/software/lxc-lxd/">Linux Containers (LXC/LXD)</a> — system containers</li>
+<li><a href="/doc/software/systemd-nspawn/">systemd-nspawn</a> — lightweight container runtime</li>
+<li><a href="/doc/software/gpu-containers/">GPU Containers</a> — NVIDIA access in containers</li>
+<li><a href="/doc/software/bottles/">Bottles</a> — Wine-based Windows app compatibility</li>
 </ul></div>
     </div>
 
@@ -380,6 +380,7 @@ lxc launch ubuntu:24.04 myvm --vm</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

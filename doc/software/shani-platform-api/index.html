@@ -218,7 +218,7 @@
           <span><i class="fa-regular fa-clock"></i> 2026-09-18</span>
         </div>
       </div>
-      <div class="prose"><p><code>platform.shani.dev</code> is the unified backend for the Shanios commercial planes: fleet management, billing, licensing, notifications, and the org-scoped fleet web console. Both fleet agents (<code>shani-fleet</code>, <code>shani-insights</code>) enroll and report through this same backend. This page is the reference for its HTTP surface; the agent-side enrollment flow is covered in the <a href="../enterprise/fleet-monitoring.md">Fleet Monitoring Runbook</a>.</p>
+      <div class="prose"><p><code>platform.shani.dev</code> is the unified backend for the Shanios commercial planes: fleet management, billing, licensing, notifications, and the org-scoped fleet web console. Both fleet agents (<code>shani-fleet</code>, <code>shani-insights</code>) enroll and report through this same backend. This page is the reference for its HTTP surface; the agent-side enrollment flow is covered in the <a href="/doc/enterprise/fleet-monitoring/">Fleet Monitoring Runbook</a>.</p>
 <h2 id="authentication-model">Authentication Model</h2>
 <ul>
 <li><strong>JSON API</strong> (<code>/fleet/<em></code>, <code>/notify/</em></code>, <code>/orgs/*</code>, etc.) uses <code>Authorization: Bearer &lt;JWT&gt;</code> — RS256-signed, with <code>kid</code> rotation and <code>GET /.well-known/jwks.json</code> exposing the current key set.</li>
@@ -256,9 +256,9 @@
 <table><thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead><tbody><tr><td>GET</td><td><code>/.well-known/jwks.json</code></td><td>Current JWK set (JWT key rotation)</td></tr><tr><td>GET</td><td><code>/metrics</code></td><td>Prometheus-style service metrics</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../enterprise/fleet-monitoring.md">Fleet Monitoring Runbook</a> — the agent-side enrollment and reporting flow</li>
-<li><a href="../security/keyring.md">Pacman Keyring & Trust Root</a> — machine identity and signing trust</li>
-<li><a href="shani-repo.md">Shani Package Repository</a> — what ships through <code>repo.shani.dev</code></li>
+<li><a href="/doc/enterprise/fleet-monitoring/">Fleet Monitoring Runbook</a> — the agent-side enrollment and reporting flow</li>
+<li><a href="/doc/security/keyring/">Pacman Keyring & Trust Root</a> — machine identity and signing trust</li>
+<li><a href="/doc/software/shani-repo/">Shani Package Repository</a> — what ships through <code>repo.shani.dev</code></li>
 </ul></div>
     </div>
 
@@ -290,6 +290,7 @@
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

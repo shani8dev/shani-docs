@@ -311,7 +311,7 @@ Ctrl+B d                      detach; `tmux attach -t work` to return</code></pr
 <li><strong>vim</strong> — Vim's own defaults plus line numbers, mouse and persistent undo (<code>~/.vimrc</code>). <code>&quot;+y</code> copies to the desktop clipboard through the terminal (OSC 52), because Arch's vim has no built-in X/Wayland clipboard.</li>
 </ul>
 <h2 id="other-package-managers-in-the-shell">Other Package Managers in the Shell</h2>
-<p>Shanios's root is read-only, so extra software comes from <a href="../software/nix.md">Nix</a>, <a href="../software/flatpak.md">Flatpak</a>, <a href="../software/snaps.md">Snap</a>, <a href="../software/distrobox.md">Distrobox</a> or, optionally, <a href="../software/homebrew.md">Homebrew</a>. The shared shell files make sure their commands are on your <code>PATH</code> in every terminal, not only in login shells. This matters most for Fish, which never reads <code>/etc/profile.d</code>:</p>
+<p>Shanios's root is read-only, so extra software comes from <a href="/doc/software/nix/">Nix</a>, <a href="/doc/software/flatpak/">Flatpak</a>, <a href="/doc/software/snaps/">Snap</a>, <a href="/doc/software/distrobox/">Distrobox</a> or, optionally, <a href="/doc/software/homebrew/">Homebrew</a>. The shared shell files make sure their commands are on your <code>PATH</code> in every terminal, not only in login shells. This matters most for Fish, which never reads <code>/etc/profile.d</code>:</p>
 <ul>
 <li><strong>Nix</strong> — <code>~/.nix-profile/bin</code> (after your first <code>nix-env -i</code>) and the default profile.</li>
 <li><strong>Snap</strong> — <code>/var/lib/snapd/snap/bin</code>.</li>
@@ -356,12 +356,12 @@ nix-env -q          # list installed
 nix-env -u '*'      # upgrade all</code></pre>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="config">System Config</a> — /etc overlay, locale, hostname, kernel parameters</li>
-<li><a href="../software/nix.md">Nix Package Manager</a> — Nix details and channel setup</li>
-<li><a href="../software/distrobox.md">Distrobox</a> — containers that share your home and shell config</li>
-<li><a href="../intro/migrating.md">Migrating from Traditional Linux</a> — shell workflow changes</li>
-<li><a href="../intro/whats-included.md">What's Included</a> — complete software stack</li>
-<li><a href="system">System Updates</a> — how updates affect your shell config</li>
+<li><a href="/doc/updates/config/">System Config</a> — /etc overlay, locale, hostname, kernel parameters</li>
+<li><a href="/doc/software/nix/">Nix Package Manager</a> — Nix details and channel setup</li>
+<li><a href="/doc/software/distrobox/">Distrobox</a> — containers that share your home and shell config</li>
+<li><a href="/doc/intro/migrating/">Migrating from Traditional Linux</a> — shell workflow changes</li>
+<li><a href="/doc/intro/whats-included/">What's Included</a> — complete software stack</li>
+<li><a href="/doc/updates/system/">System Updates</a> — how updates affect your shell config</li>
 </ul></div>
     </div>
 
@@ -393,6 +393,7 @@ nix-env -u '*'      # upgrade all</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

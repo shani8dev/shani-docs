@@ -220,7 +220,7 @@
       </div>
       <div class="prose"><p>Shanios's immutability fundamentally changes how you interact with the system. Understanding this concept is key to using Shanios effectively.</p>
 <h2 id="what-immutable-actually-means-here">What "Immutable" Actually Means Here</h2>
-<p>The root filesystem lives in one of two Btrfs subvolumes, <code>@blue</code> or <code>@green</code>, and whichever one is active is mounted read-only (<code>rootflags=...,ro,...</code> on the kernel cmdline). Both are complete, bootable copies of the OS — there is no single shared <code>/</code> that mutates in place. <code>/usr</code>, <code>/bin</code>, <code>/lib</code>, and the rest of the base system are read-only for the entire life of that slot; the only way they change is a full slot replacement by <a href="./atomic-updates.md"><code>shani-deploy</code></a>, never an in-place write. See <a href="./blue-green.md">Blue-Green Deployment</a> for how the two slots relate, and <a href="./persistence.md">Persistence Strategy</a> for exactly what's writable and where it lives.</p>
+<p>The root filesystem lives in one of two Btrfs subvolumes, <code>@blue</code> or <code>@green</code>, and whichever one is active is mounted read-only (<code>rootflags=...,ro,...</code> on the kernel cmdline). Both are complete, bootable copies of the OS — there is no single shared <code>/</code> that mutates in place. <code>/usr</code>, <code>/bin</code>, <code>/lib</code>, and the rest of the base system are read-only for the entire life of that slot; the only way they change is a full slot replacement by <a href="/doc/concepts/atomic-updates/"><code>shani-deploy</code></a>, never an in-place write. See <a href="/doc/concepts/blue-green/">Blue-Green Deployment</a> for how the two slots relate, and <a href="/doc/concepts/persistence/">Persistence Strategy</a> for exactly what's writable and where it lives.</p>
 <h2 id="what-you-can-do">What You CAN Do</h2>
 <ul>
 <li>✅ Install applications via Flatpak</li>
@@ -273,10 +273,10 @@ df -h /home /data
 # These live in separate writable subvolumes</code></pre>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="./blue-green.md">Blue-Green Deployment</a> — how the two OS slots relate</li>
-<li><a href="./persistence.md">Persistence Strategy</a> — what's writable and where data lives</li>
-<li><a href="./atomic-updates.md">Atomic Updates</a> — how <code>shani-deploy</code> replaces system images</li>
-<li><a href="../intro/migrating.md">Migrating from Traditional Linux</a> — workflow changes to expect</li>
+<li><a href="/doc/concepts/blue-green/">Blue-Green Deployment</a> — how the two OS slots relate</li>
+<li><a href="/doc/concepts/persistence/">Persistence Strategy</a> — what's writable and where data lives</li>
+<li><a href="/doc/concepts/atomic-updates/">Atomic Updates</a> — how <code>shani-deploy</code> replaces system images</li>
+<li><a href="/doc/intro/migrating/">Migrating from Traditional Linux</a> — workflow changes to expect</li>
 </ul></div>
     </div>
 
@@ -308,6 +308,7 @@ df -h /home /data
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

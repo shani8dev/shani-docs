@@ -219,7 +219,7 @@
         </div>
       </div>
       <div class="prose"><p>Shanios is a first-class container platform. The following runtimes are pre-installed and ready to use:</p>
-<table><thead><tr><th>Runtime</th><th>Best for</th><th>Wiki</th></tr></thead><tbody><tr><td><strong>Podman</strong></td><td>OCI containers, services, databases, Docker-compatible workflows</td><td>This page</td></tr><tr><td><strong>Distrobox</strong></td><td>Mutable Linux envs (apt/pacman/yay) with home dir sharing</td><td><a href="distrobox.md">distrobox</a></td></tr><tr><td><strong>LXC / LXD</strong></td><td>Full system containers with init, services, network stack</td><td><a href="lxc-lxd.md">lxc-lxd</a></td></tr><tr><td><strong>systemd-nspawn</strong></td><td>Lightweight full-system containers, no daemon</td><td><a href="systemd-nspawn.md">systemd-nspawn</a></td></tr><tr><td><strong>Apptainer</strong></td><td>HPC/cluster portable containers (SIF format)</td><td><a href="apptainer.md">apptainer</a></td></tr><tr><td><strong>GPU containers</strong></td><td>CUDA / ROCm / oneAPI compute via Distrobox or Podman</td><td><a href="gpu-containers.md">gpu-containers</a></td></tr></tbody></table>
+<table><thead><tr><th>Runtime</th><th>Best for</th><th>Wiki</th></tr></thead><tbody><tr><td><strong>Podman</strong></td><td>OCI containers, services, databases, Docker-compatible workflows</td><td>This page</td></tr><tr><td><strong>Distrobox</strong></td><td>Mutable Linux envs (apt/pacman/yay) with home dir sharing</td><td><a href="/doc/software/distrobox/">distrobox</a></td></tr><tr><td><strong>LXC / LXD</strong></td><td>Full system containers with init, services, network stack</td><td><a href="/doc/software/lxc-lxd/">lxc-lxd</a></td></tr><tr><td><strong>systemd-nspawn</strong></td><td>Lightweight full-system containers, no daemon</td><td><a href="/doc/software/systemd-nspawn/">systemd-nspawn</a></td></tr><tr><td><strong>Apptainer</strong></td><td>HPC/cluster portable containers (SIF format)</td><td><a href="/doc/software/apptainer/">apptainer</a></td></tr><tr><td><strong>GPU containers</strong></td><td>CUDA / ROCm / oneAPI compute via Distrobox or Podman</td><td><a href="/doc/software/gpu-containers/">gpu-containers</a></td></tr></tbody></table>
 <p>Container storage lives in dedicated Btrfs subvolumes, completely independent of the OS slots:</p>
 <table><thead><tr><th>Tool</th><th>Storage Location</th><th>Btrfs Subvolume</th></tr></thead><tbody><tr><td><strong>Podman (user)</strong></td><td><code>~/.local/share/containers/</code></td><td>(in <code>@home</code>)</td></tr><tr><td><strong>Podman (root)</strong></td><td><code>/var/lib/containers/storage/</code></td><td><code>@containers</code></td></tr><tr><td><strong>Distrobox</strong></td><td><code>/var/lib/containers/</code></td><td><code>@containers</code></td></tr><tr><td><strong>LXD</strong></td><td><code>/var/lib/lxd/</code></td><td><code>@lxd</code></td></tr><tr><td><strong>LXC</strong></td><td><code>/var/lib/lxc/</code></td><td><code>@lxc</code></td></tr><tr><td><strong>nspawn</strong></td><td><code>/var/lib/machines/</code></td><td><code>@machines</code></td></tr></tbody></table>
 <p>All subvolumes survive every OS update and atomic rollback untouched.</p>
@@ -321,12 +321,12 @@ sudo compsize /var/lib/containers
 podman system prune -af --volumes</code></pre>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="distrobox">Distrobox</a> — mutable dev environments with host integration</li>
-<li><a href="lxc-lxd">Linux Containers (LXC/LXD)</a> — system containers</li>
-<li><a href="systemd-nspawn">systemd-nspawn</a> — lightweight container runtime</li>
-<li><a href="apptainer">Apptainer</a> — HPC/research container runtime</li>
-<li><a href="gpu-containers">GPU Containers</a> — NVIDIA/AMD access in containers</li>
-<li><a href="../concepts/immutability.md">Immutability</a> — how containers persist on an immutable OS</li>
+<li><a href="/doc/software/distrobox/">Distrobox</a> — mutable dev environments with host integration</li>
+<li><a href="/doc/software/lxc-lxd/">Linux Containers (LXC/LXD)</a> — system containers</li>
+<li><a href="/doc/software/systemd-nspawn/">systemd-nspawn</a> — lightweight container runtime</li>
+<li><a href="/doc/software/apptainer/">Apptainer</a> — HPC/research container runtime</li>
+<li><a href="/doc/software/gpu-containers/">GPU Containers</a> — NVIDIA/AMD access in containers</li>
+<li><a href="/doc/concepts/immutability/">Immutability</a> — how containers persist on an immutable OS</li>
 </ul></div>
     </div>
 
@@ -358,6 +358,7 @@ podman system prune -af --volumes</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

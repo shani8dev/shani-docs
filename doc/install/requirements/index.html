@@ -267,11 +267,11 @@ ls /dev/tpm*
 <table><thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><td><code>uname -m</code> shows <code>i686</code></td><td>32-bit system</td><td>Shanios does not support 32-bit — install an Arch-based 32-bit distro instead</td></tr><tr><td><code>grep vmx</code> returns nothing</td><td>Virtualization disabled in BIOS</td><td>Enable VT-x (Intel) or AMD-V (AMD) in BIOS under CPU settings</td></tr><tr><td><code>/sys/firmware/efi</code> doesn't exist</td><td>System booted in Legacy BIOS/CSM mode</td><td>Reboot into BIOS and disable CSM / enable UEFI mode</td></tr><tr><td>TPM shows as not available</td><td>TPM disabled or set to Intel PTT</td><td>Enable TPM 2.0 in BIOS under Security settings</td></tr><tr><td><code>lsblk</code> shows disk < 30 GB</td><td>Actual usable space too low</td><td>Use a larger disk; 32 GB minimum is recommended</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="./steps.md">Installation Steps</a> — step-by-step install guide</li>
-<li><a href="./first-boot.md">First Boot</a> — post-install configuration</li>
-<li><a href="./pre-install.md">Pre-Install Checklist</a> — what to prepare before starting</li>
-<li><a href="../security/secure-boot.md">Secure Boot</a> — MOK enrollment and firmware setup</li>
-<li><a href="../troubleshooting.md">Troubleshooting</a> — general troubleshooting guide</li>
+<li><a href="/doc/install/steps/">Installation Steps</a> — step-by-step install guide</li>
+<li><a href="/doc/install/first-boot/">First Boot</a> — post-install configuration</li>
+<li><a href="/doc/install/pre-install/">Pre-Install Checklist</a> — what to prepare before starting</li>
+<li><a href="/doc/security/secure-boot/">Secure Boot</a> — MOK enrollment and firmware setup</li>
+<li><a href="/doc/troubleshooting/">Troubleshooting</a> — general troubleshooting guide</li>
 </ul></div>
     </div>
 
@@ -303,6 +303,7 @@ ls /dev/tpm*
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

@@ -353,8 +353,8 @@ sudo systemctl reload cloudflared
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>ERR Failed to dial edge</code></td><td>Check outbound HTTPS connectivity; corporate or ISP firewalls may block Cloudflare edge IPs on port 7844 (the QUIC port) — try <code>cloudflared tunnel run --protocol http2</code></td></tr><tr><td>Tunnel connects but subdomain returns error 1033</td><td>DNS CNAME hasn't propagated, or <code>cloudflared tunnel route dns</code> wasn't run for that hostname — check the Cloudflare DNS dashboard</td></tr><tr><td>Service returns 502 via tunnel</td><td>The local service isn't running or is bound to the wrong port; verify with <code>curl http://localhost:PORT</code> on the server</td></tr><tr><td>WebSocket disconnects</td><td>Add <code>originRequest: { connectTimeout: 30s }</code> to the ingress rule; some apps (Vaultwarden, Home Assistant, Open WebUI) require WebSocket keep-alives</td></tr><tr><td>Tunnel not starting after reboot</td><td><code>sudo systemctl status cloudflared</code>; verify the credentials file path in config.yml points to the actual file and hasn't moved</td></tr><tr><td>High latency to the tunnel</td><td>Cloudflare connects to the nearest edge PoP — check <code>cloudflared tunnel connections</code> to see which regions are being used; opening UDP 7844 enables QUIC (faster than HTTP/2)</td></tr><tr><td>Access policy not triggering</td><td>Ensure the Cloudflare Access application is configured for the exact hostname (no wildcards unless explicitly set); check that the application type is "Self-hosted"</td></tr><tr><td><code>credentials file not found</code> error</td><td>The JSON credentials file path in config.yml must be absolute and match the actual file location; run <code>cloudflared tunnel list</code> to confirm the UUID</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="caddy">Caddy reverse proxy</a></li>
-<li><a href="tailscale">Tailscale mesh VPN</a></li>
+<li><a href="/doc/networking/caddy/">Caddy reverse proxy</a></li>
+<li><a href="/doc/networking/tailscale/">Tailscale mesh VPN</a></li>
 </ul></div>
     </div>
 
@@ -386,6 +386,7 @@ sudo systemctl reload cloudflared
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

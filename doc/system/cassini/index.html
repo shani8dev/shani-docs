@@ -225,14 +225,20 @@
 <h2 id="passwords">Passwords</h2>
 <p>Reading the system state needs no password. Anything that changes the system (an update, a rollback, a channel change, a health check, TPM or Secure Boot changes, a reset) asks for an administrator password first, through the desktop's normal polkit dialog. Updates and rollbacks keep the computer from sleeping until they finish.</p>
 <h2 id="updating-and-going-back">Updating and going back</h2>
-<p><strong>Updates & Rollback</strong> shows the version you run and the newest one on your channel. <strong>Update</strong> installs it into the other system slot; restart when asked. <strong>Roll Back…</strong> switches to the previous system (after a restart) — your files and settings are not affected. See <a href="blue-green">Blue-Green Deployment</a> and <a href="channels">Update Channels</a>.</p>
+<p><strong>Updates & Rollback</strong> shows the version you run and the newest one on your channel. <strong>Update</strong> installs it into the other system slot; restart when asked. <strong>Roll Back…</strong> switches to the previous system (after a restart) — your files and settings are not affected. See <a href="/doc/concepts/blue-green/">Blue-Green Deployment</a> and <a href="/doc/updates/channels/">Update Channels</a>.</p>
+<h2 id="update-and-boot-notifications">Update and Boot Notifications</h2>
+<p>After you log in, the per-user <code>shani-cassini-agent.timer</code> checks the system two minutes later and then every two hours. It runs <code>shani-cassini --agent</code>, which reads <code>shani-deploy --status --check --json</code> and sends a notification when an update is available, a staged update needs a restart, or a boot failure was recorded.</p>
+<p>Choose <strong>Open</strong> in a notification to start Shani Cassini on <strong>Updates & Rollback</strong>. The agent only checks and notifies. Installing an update, changing channels, and rolling back remain actions on that page.</p>
+<p>To inspect the user service:</p>
+<pre><code class="language-bash">systemctl --user status shani-cassini-agent.timer
+journalctl --user -u shani-cassini-agent.service -n 50</code></pre>
 <h2 id="reset">Reset</h2>
-<p><strong>Maintenance → Reset this computer</strong> runs <a href="shani-reset"><code>shani-reset</code></a>: it erases settings, user accounts and service data, keeps both system slots and (unless you choose otherwise) everything in <code>/home</code>, then restarts. You type <code>reset</code> to confirm — and <code>wipe home</code> as well if you chose to erase files.</p>
+<p><strong>Maintenance → Reset this computer</strong> runs <a href="/doc/updates/shani-reset/"><code>shani-reset</code></a>: it erases settings, user accounts and service data, keeps both system slots and (unless you choose otherwise) everything in <code>/home</code>, then restarts. You type <code>reset</code> to confirm — and <code>wipe home</code> as well if you chose to erase files.</p>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="shani-health">shani-health</a></li>
-<li><a href="tpm2">TPM2 Auto-Unlock</a></li>
-<li><a href="backup">Backup</a></li>
+<li><a href="/doc/updates/shani-health/">shani-health</a></li>
+<li><a href="/doc/security/tpm2/">TPM2 Auto-Unlock</a></li>
+<li><a href="/doc/system/backup/">Backup</a></li>
 </ul></div>
     </div>
 
@@ -264,6 +270,7 @@
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

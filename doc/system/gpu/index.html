@@ -295,7 +295,7 @@ sudo shani-deploy</code></pre>
 <ul>
 <li>File an issue at <a href="https://github.com/shani8dev">github.com/shani8dev</a> — requests directly influence what the next image pins.</li>
 <li>Be honest about the limits: a kernel-side driver cannot be updated independently. Distrobox or Nix userspace stacks will not help — the kernel module must match the image kernel exactly.</li>
-<li>CUDA and other compute userspace CAN be layered today via containers — see <a href="../software/gpu-containers.md">GPU Containers</a>.</li>
+<li>CUDA and other compute userspace CAN be layered today via containers — see <a href="/doc/software/gpu-containers/">GPU Containers</a>.</li>
 </ul>
 <p><strong>What does not work, by design:</strong></p>
 <ul>
@@ -311,17 +311,17 @@ sudo shani-deploy</code></pre>
 <h2 id="compute-and-ml">Compute and ML</h2>
 <p>The host ships drivers, not compute toolchains. Heavy stacks stay in containers:</p>
 <ul>
-<li>NVIDIA CUDA, AMD ROCm, Intel oneAPI via containers: <a href="../software/gpu-containers.md">GPU Acceleration & HPC Containers</a></li>
-<li>Dedicate a whole GPU to a VM via VFIO passthrough: <a href="../software/vms.md">Virtual Machines</a></li>
+<li>NVIDIA CUDA, AMD ROCm, Intel oneAPI via containers: <a href="/doc/software/gpu-containers/">GPU Acceleration & HPC Containers</a></li>
+<li>Dedicate a whole GPU to a VM via VFIO passthrough: <a href="/doc/software/vms/">Virtual Machines</a></li>
 </ul>
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="hardware">Hardware</a> — inspecting GPUs, sensors, PCI devices</li>
-<li><a href="kernel-modules">Kernel Modules</a> — module listing, blacklisting, parameters</li>
-<li><a href="../intro/optimizations.md">Optimizations</a> — performance tuning</li>
-<li><a href="../software/gpu-containers.md">GPU Containers</a> — CUDA/ROCm/oneAPI workloads</li>
-<li><a href="../software/vms.md">Virtual Machines</a> — GPU passthrough</li>
+<li><a href="/doc/system/hardware/">Hardware</a> — inspecting GPUs, sensors, PCI devices</li>
+<li><a href="/doc/system/kernel-modules/">Kernel Modules</a> — module listing, blacklisting, parameters</li>
+<li><a href="/doc/intro/optimizations/">Optimizations</a> — performance tuning</li>
+<li><a href="/doc/software/gpu-containers/">GPU Containers</a> — CUDA/ROCm/oneAPI workloads</li>
+<li><a href="/doc/software/vms/">Virtual Machines</a> — GPU passthrough</li>
 <li>Blog: <a href="https://blog.shani.dev/post/gpu-compute-on-shani-os">GPU Compute on Shani OS</a></li>
 <li>Blog: <a href="https://blog.shani.dev/post/shani-os-gaming-deep-dive">Gaming on Shani OS</a></li>
 </ul></div>
@@ -355,6 +355,7 @@ sudo shani-deploy</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

@@ -229,7 +229,7 @@
 <li>You need LXD's image catalog, built-in port forwarding devices, or remote container management</li>
 <li>You want Btrfs-backed container snapshots managed via <code>lxc snapshot</code></li>
 </ul>
-<p><strong>Use systemd-nspawn</strong> when you want the same full-system isolation with less setup — no init wizard, no daemon, no image format. See <a href="systemd-nspawn.md">systemd-nspawn</a>.</p>
+<p><strong>Use systemd-nspawn</strong> when you want the same full-system isolation with less setup — no init wizard, no daemon, no image format. See <a href="/doc/software/systemd-nspawn/">systemd-nspawn</a>.</p>
 <h2 id="setup">Setup</h2>
 <p><code>lxd.socket</code> is socket-activated on Shanios. Your user is automatically added to the <code>lxd</code> group during installation. Initialize LXD on first use:</p>
 <pre><code class="language-bash"># Interactive wizard (choose btrfs as storage backend)
@@ -354,11 +354,11 @@ lxc exec pg16 -- apt install -y postgresql-16
 <p>Both subvolumes are independent of the OS slots and survive all updates and rollbacks.</p>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="containers">Containers</a> — overview of all container runtimes</li>
-<li><a href="systemd-nspawn">systemd-nspawn</a> — lightweight container runtime</li>
-<li><a href="distrobox">Distrobox</a> — mutable dev environments with host integration</li>
-<li><a href="vms">Virtual Machines</a> — QEMU/KVM, virt-manager</li>
-<li><a href="gpu-containers">GPU Containers</a> — NVIDIA/AMD access in containers</li>
+<li><a href="/doc/software/containers/">Containers</a> — overview of all container runtimes</li>
+<li><a href="/doc/software/systemd-nspawn/">systemd-nspawn</a> — lightweight container runtime</li>
+<li><a href="/doc/software/distrobox/">Distrobox</a> — mutable dev environments with host integration</li>
+<li><a href="/doc/software/vms/">Virtual Machines</a> — QEMU/KVM, virt-manager</li>
+<li><a href="/doc/software/gpu-containers/">GPU Containers</a> — NVIDIA/AMD access in containers</li>
 </ul></div>
     </div>
 
@@ -390,6 +390,7 @@ lxc exec pg16 -- apt install -y postgresql-16
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

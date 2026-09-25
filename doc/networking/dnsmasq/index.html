@@ -289,11 +289,11 @@ sudo journalctl -u dnsmasq -f</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>dnsmasq won't start</td><td>Check for syntax errors: <code>sudo dnsmasq --test</code>; inspect <code>journalctl -u dnsmasq</code></td></tr><tr><td>Port 53 already in use</td><td>Another resolver (e.g. <code>systemd-resolved</code>) is running — Shani OS does not use <code>systemd-resolved</code>, so check for stray processes: `ss -ulnp</td><td>grep :53`</td></tr><tr><td>Custom hostnames not resolving</td><td>Confirm dnsmasq is the active resolver (<code>cat /etc/resolv.conf</code> should show <code>127.0.0.1</code>); run <code>dig @127.0.0.1 myhost.home</code> to test directly</td></tr><tr><td>VPN DNS stops working after enabling dnsmasq</td><td>Ensure openresolv integration is set up (<code>name_servers=127.0.0.1</code> in <code>/etc/resolvconf.conf</code>) — dnsmasq receives upstream servers from openresolv and handles split DNS automatically</td></tr><tr><td>DHCP leases not assigned</td><td>Check that no other DHCP server is active on the same subnet (usually your router); verify <code>dhcp-range</code> is uncommented and the interface is correct</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="openresolv">openresolv</a> — DNS configuration manager</li>
-<li><a href="dnscrypt-proxy">DNS over HTTPS (dnscrypt-proxy)</a> — encrypted DNS resolver</li>
-<li><a href="firewalld">Firewall</a> — network security rules</li>
-<li><a href="openssh">SSH Server</a> — remote access</li>
-<li><a href="../servers/networking.md">DNS Server Applications</a> — Pi-hole, AdGuard Home, Unbound, Technitium</li>
+<li><a href="/doc/networking/openresolv/">openresolv</a> — DNS configuration manager</li>
+<li><a href="/doc/networking/dnscrypt-proxy/">DNS over HTTPS (dnscrypt-proxy)</a> — encrypted DNS resolver</li>
+<li><a href="/doc/networking/firewalld/">Firewall</a> — network security rules</li>
+<li><a href="/doc/networking/openssh/">SSH Server</a> — remote access</li>
+<li><a href="/doc/overview/">DNS Server Applications</a> — Pi-hole, AdGuard Home, Unbound, Technitium</li>
 </ul></div>
     </div>
 
@@ -325,6 +325,7 @@ sudo journalctl -u dnsmasq -f</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

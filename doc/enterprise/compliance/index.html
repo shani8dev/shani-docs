@@ -236,7 +236,7 @@
 <hr>
 <h2 id="areas-requiring-admin-action">Areas Requiring Admin Action</h2>
 <p>These controls ship safe defaults but are incomplete without site policy:</p>
-<table><thead><tr><th>Area</th><th>Baseline shipped</th><th>What your site must add</th></tr></thead><tbody><tr><td>Disk encryption</td><td>LUKS2 argon2id offered at install; TPM2 auto-unlock seals the key to PCRs 0 and 7</td><td>Choose encryption at install time; document your key-recovery position (there is no foreign key escrow)</td></tr><tr><td>SSH hardening</td><td>Server profile runs sshd with root login disabled and per-instance host keys; firewalld + fail2ban active</td><td>Site cipher/KMA policy, bastion-host rules, certificate-based auth if required</td></tr><tr><td>Centralised log shipping</td><td>Persistent journald capped locally (128 MB x 2 files) — retention is deliberately small</td><td>Forward to your SIEM: journald forwarding or rsyslog-in-container — see <a href="../system/logging.md">System Logging</a></td></tr><tr><td>User access reviews</td><td>Sudo gated on <code>wheel</code> group membership</td><td>Periodic membership review with joiners/movers/leavers process and sign-off</td></tr><tr><td>Backup verification</td><td>Backup tooling documented (<a href="../servers/backups-sync.md">Backups & Sync</a>)</td><td>Scheduled restore drills with recorded results</td></tr></tbody></table>
+<table><thead><tr><th>Area</th><th>Baseline shipped</th><th>What your site must add</th></tr></thead><tbody><tr><td>Disk encryption</td><td>LUKS2 argon2id offered at install; TPM2 auto-unlock seals the key to PCRs 0 and 7</td><td>Choose encryption at install time; document your key-recovery position (there is no foreign key escrow)</td></tr><tr><td>SSH hardening</td><td>Server profile runs sshd with root login disabled and per-instance host keys; firewalld + fail2ban active</td><td>Site cipher/KMA policy, bastion-host rules, certificate-based auth if required</td></tr><tr><td>Centralised log shipping</td><td>Persistent journald capped locally (128 MB x 2 files) — retention is deliberately small</td><td>Forward to your SIEM: journald forwarding or rsyslog-in-container — see <a href="/doc/system/logging/">System Logging</a></td></tr><tr><td>User access reviews</td><td>Sudo gated on <code>wheel</code> group membership</td><td>Periodic membership review with joiners/movers/leavers process and sign-off</td></tr><tr><td>Backup verification</td><td>Backup tooling documented (<a href="/doc/servers/backups-sync/">Backups & Sync</a>)</td><td>Scheduled restore drills with recorded results</td></tr></tbody></table>
 <hr>
 <h2 id="generating-evidence">Generating Evidence</h2>
 <h3 id="machine-readable-integrity-summary">Machine-readable integrity summary</h3>
@@ -253,13 +253,13 @@ shani-health --verify --json | jq '.checks[] | select(.status == &quot;fail&quot
 0 4 * * * root shani-health --verify --json &gt; /var/local/shani-health.json
 30 4 * * * root shani-health --export-logs /var/local/evidence &gt;/dev/null 2&gt;&amp;1</code></pre>
 <p>Collect <code>/var/local/shani-health.json</code> and the exported log bundles centrally (rsync over Tailscale or SSH) so evidence survives even a compromised or wiped host.</p>
-<p>For ad-hoc auditor requests, <code>--export-logs</code> bundles deploy logs, journal extracts (secrets filtered), boot state, and slot information into a single archive — see <a href="../updates/shani-health.md">shani-health Reference</a>.</p>
+<p>For ad-hoc auditor requests, <code>--export-logs</code> bundles deploy logs, journal extracts (secrets filtered), boot state, and slot information into a single archive — see <a href="/doc/updates/shani-health/">shani-health Reference</a>.</p>
 <p>Suggested recollection cadence:</p>
 <table><thead><tr><th>Evidence</th><th>Cadence</th><th>Trigger to re-collect early</th></tr></thead><tbody><tr><td><code>shani-health --verify --json</code></td><td>Nightly (cron above)</td><td>Any failed deploy or rollback</td></tr><tr><td>Satisfied-by-design command outputs</td><td>Quarterly sample</td><td>New image release on your channel</td></tr><tr><td>Admin-action attestations (reviews, drills)</td><td>Per your policy</td><td>Staff or infrastructure changes</td></tr><tr><td>Exported log bundles</td><td>Monthly pull</td><td>Security incident on any host</td></tr></tbody></table>
 <p>Because every machine on a channel runs an identical verified image, quarterly sampling is defensible in a way it rarely is on mutable distributions: a control verified on one machine holds on all of them until the next slot deployment, and each deployment is itself GPG-gated.</p>
 <hr>
 <h2 id="auditd-baseline">Auditd Baseline</h2>
-<p>The kernel audit subsystem is always active; <code>auditd</code> writes events persistently and ships with a base ruleset covering identity files, privilege escalation, module loading, mounts, deletions, and time changes. Full ruleset contents, customisation guidance (<code>20-*.rules</code> drop-ins), rotation settings, and AppArmor-correlation queries are documented in <a href="../security/audit.md">Audit (auditd)</a>. For review workflows:</p>
+<p>The kernel audit subsystem is always active; <code>auditd</code> writes events persistently and ships with a base ruleset covering identity files, privilege escalation, module loading, mounts, deletions, and time changes. Full ruleset contents, customisation guidance (<code>20-*.rules</code> drop-ins), rotation settings, and AppArmor-correlation queries are documented in <a href="/doc/security/audit/">Audit (auditd)</a>. For review workflows:</p>
 <pre><code class="language-bash">sudo aureport --summary        # overall activity
 sudo aureport --failed         # failed events only
 sudo ausearch -k privilege_escalation --start today</code></pre>
@@ -275,10 +275,10 @@ sudo ausearch -k privilege_escalation --start today</code></pre>
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="fleet">OEM & Fleet Deployment</a> — channels, unattended updates, image signing</li>
-<li><a href="../security/features.md">Security Features</a> — full security model, sysctls, blacklists</li>
-<li><a href="../security/audit.md">Audit (auditd)</a> — shipped ruleset and query patterns</li>
-<li><a href="../updates/shani-health.md">shani-health Reference</a> — <code>--verify</code>, <code>--security</code>, exit codes</li>
+<li><a href="/doc/enterprise/fleet/">OEM & Fleet Deployment</a> — channels, unattended updates, image signing</li>
+<li><a href="/doc/security/features/">Security Features</a> — full security model, sysctls, blacklists</li>
+<li><a href="/doc/security/audit/">Audit (auditd)</a> — shipped ruleset and query patterns</li>
+<li><a href="/doc/updates/shani-health/">shani-health Reference</a> — <code>--verify</code>, <code>--security</code>, exit codes</li>
 </ul></div>
     </div>
 
@@ -310,6 +310,7 @@ sudo ausearch -k privilege_escalation --start today</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

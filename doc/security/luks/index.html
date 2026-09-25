@@ -297,7 +297,7 @@ sudo gen-efi enroll-tpm2
 
 # Verify TPM2 enrollment is present
 sudo cryptsetup luksDump /dev/nvme0n1p2 | grep systemd-tpm2</code></pre>
-<p>See <a href="tpm2">TPM2 Enrollment</a> for full details including PCR policy, PIN options, and troubleshooting.</p>
+<p>See <a href="/doc/security/tpm2/">TPM2 Enrollment</a> for full details including PCR policy, PIN options, and troubleshooting.</p>
 <hr>
 <h2 id="emergency-recovery">Emergency Recovery</h2>
 <p><strong>Forgotten passphrase, no backup key:</strong> the data is unrecoverable. Reinstall and restore from backups.</p>
@@ -317,11 +317,11 @@ sudo gen-efi cleanup-tpm2
 sudo gen-efi enroll-tpm2</code></pre>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="tpm2">TPM2 Enrollment</a> — automatic LUKS unlock setup</li>
-<li><a href="secure-boot">Secure Boot</a> — MOK enrollment and firmware setup</li>
-<li><a href="features">Security Features</a> — full security model overview</li>
-<li><a href="hardware-auth">Hardware Authentication</a> — fingerprint, smart card, YubiKey</li>
-<li><a href="../troubleshooting.md">Emergency USB Recovery</a> — boot from USB and access encrypted data</li>
+<li><a href="/doc/security/tpm2/">TPM2 Enrollment</a> — automatic LUKS unlock setup</li>
+<li><a href="/doc/security/secure-boot/">Secure Boot</a> — MOK enrollment and firmware setup</li>
+<li><a href="/doc/security/features/">Security Features</a> — full security model overview</li>
+<li><a href="/doc/security/hardware-auth/">Hardware Authentication</a> — fingerprint, smart card, YubiKey</li>
+<li><a href="/doc/troubleshooting/">Emergency USB Recovery</a> — boot from USB and access encrypted data</li>
 </ul></div>
     </div>
 
@@ -353,6 +353,7 @@ sudo gen-efi enroll-tpm2</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

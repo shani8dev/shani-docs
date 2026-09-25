@@ -378,11 +378,11 @@ fi</code></pre>
 sudo shani-deploy                     # deploys the already-verified image</code></pre>
 <p>shani-deploy ships a ready-made, opt-in timer for this instead of a hand-rolled unit — disabled by default, enable it explicitly on machines/fleets that want updates pre-staged automatically:</p>
 <pre><code class="language-bash">sudo systemctl enable --now shani-download-only.timer</code></pre>
-<p>It runs 30 minutes after boot and once a day thereafter (randomized by up to 2 hours, to avoid every machine hitting the CDN at once), and is idempotent — if the current image is already cached and verified, it's a no-op. If <code>zsync2</code> is installed and a previous image is still cached, the fetch it triggers is differential (see <a href="../updates/system.md#differential-downloads-zsync2">System Updates → Differential Downloads</a>).</p>
-<p>For managed fleets, disable the <code>shani-update</code> interactive prompt so it does not surface to users:</p>
-<pre><code class="language-bash">sudo rm /etc/xdg/autostart/shani-update.desktop</code></pre>
+<p>It runs 30 minutes after boot and once a day thereafter (randomized by up to 2 hours, to avoid every machine hitting the CDN at once), and is idempotent — if the current image is already cached and verified, it's a no-op. If <code>zsync2</code> is installed and a previous image is still cached, the fetch it triggers is differential (see <a href="/doc/updates/system/#differential-downloads-zsync2">System Updates → Differential Downloads</a>).</p>
+<p>For managed fleets, disable the Shani Cassini user agent if update and boot-state notifications should not surface to users:</p>
+<pre><code class="language-bash">sudo systemctl --global disable shani-cassini-agent.timer</code></pre>
 <h3 id="centralised-update-delivery-what-is-and-isnt-configurable">Centralised Update Delivery — What Is (and Isn't) Configurable</h3>
-<p>Update images are served from Cloudflare R2 (<code>https://downloads.shani.dev</code>) with automatic SourceForge-mirror discovery as fallback, and every image is GPG-verified against the fixed key above. Both the CDN base URL and the signing key are <code>readonly</code> constants baked into <code>shani-deploy.sh</code> and <code>shani-update.sh</code> — <strong>there is currently no config file or flag that points a stock installation at an internal mirror or a private signing key for its ongoing updates.</strong> For air-gapped or bandwidth-controlled fleets, the practical options today are:</p>
+<p>Update images are served from Cloudflare R2 (<code>https://downloads.shani.dev</code>) with automatic SourceForge-mirror discovery as fallback, and every image is GPG-verified against the fixed key above. Both the CDN base URL and the signing key are <code>readonly</code> constants baked into <code>shani-deploy.sh</code>: <strong>there is currently no config file or flag that points a stock installation at an internal mirror or a private signing key for its ongoing updates.</strong> For air-gapped or bandwidth-controlled fleets, the practical options today are:</p>
 <ul>
 <li><code>--download-only</code> on a machine with network access, then distributing the verified image tarball for offline deployment (manual, not automated by the tool)</li>
 <li>Forking <code>shani-deploy</code> to change <code>R2_BASE_URL</code>/<code>GPG_KEY_ID</code> and shipping that build to the fleet instead of the stock tool</li>
@@ -494,7 +494,7 @@ ssh admin@machine-name.tailnet.ts.net 'sudo shani-deploy -r &amp;&amp; sudo rebo
 <p>To keep this page honest about what exists versus what a larger enterprise deployment might expect, the following are <strong>not</strong> currently implemented anywhere in the Shanios codebase, and should not be assumed:</p>
 <ul>
 <li><strong>No centralised fleet dashboard.</strong> There is no web console or MDM-style server for viewing fleet-wide status, pushing configuration, or triggering updates across machines. Fleet coordination today means SSH/Tailscale plus your own scripting (cron + <code>shani-deploy</code> + <code>shani-health --verify</code>), as described above.</li>
-<li><strong>No runtime-configurable private update mirror or signing key.</strong> As covered above, <code>R2_BASE_URL</code> and <code>GPG_KEY_ID</code> are compile-time constants in <code>shani-deploy</code>/<code>shani-update</code>. A private CDN or OEM signing key for <em>ongoing</em> updates requires forking the tool, not a config setting.</li>
+<li><strong>No runtime-configurable private update mirror or signing key.</strong> As covered above, <code>R2_BASE_URL</code> and <code>GPG_KEY_ID</code> are compile-time constants in <code>shani-deploy</code>. A private CDN or OEM signing key for <em>ongoing</em> updates requires forking the tool, not a config setting.</li>
 <li><strong>Only <code>--verify</code> has machine-readable output.</strong> <code>shani-health --verify --json</code> gives a structured pass/fail summary; every other mode (<code>--boot</code>, <code>--security</code>, <code>--storage-info</code>, <code>--network</code>, <code>--hardware</code>, <code>--packages</code>) is still formatted text only.</li>
 <li><strong>No remote push/enrollment mechanism.</strong> Machines pull updates on their own schedule (timer or user-triggered); there's no server-initiated "deploy to these 200 machines now" push.</li>
 </ul>
@@ -502,10 +502,10 @@ ssh admin@machine-name.tailnet.ts.net 'sudo shani-deploy -r &amp;&amp; sudo rebo
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../security/features.md">Security Features</a> — full security model</li>
-<li><a href="../concepts/atomic-updates.md">Atomic Updates</a> — update and rollback pipeline</li>
-<li><a href="../arch/overlay.md">Overlay Filesystem</a> — <code>/etc</code> customisation persistence</li>
-<li><a href="../security/tpm2.md">TPM2 Enrollment</a> — passwordless disk unlock</li>
+<li><a href="/doc/security/features/">Security Features</a> — full security model</li>
+<li><a href="/doc/concepts/atomic-updates/">Atomic Updates</a> — update and rollback pipeline</li>
+<li><a href="/doc/arch/overlay/">Overlay Filesystem</a> — <code>/etc</code> customisation persistence</li>
+<li><a href="/doc/security/tpm2/">TPM2 Enrollment</a> — passwordless disk unlock</li>
 </ul></div>
     </div>
 
@@ -537,6 +537,7 @@ ssh admin@machine-name.tailnet.ts.net 'sudo shani-deploy -r &amp;&amp; sudo rebo
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

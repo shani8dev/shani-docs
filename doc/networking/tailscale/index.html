@@ -390,8 +390,8 @@ sudo tailscale logout</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>tailscaled</code> not starting</td><td><code>sudo systemctl status tailscaled</code>; check <code>journalctl -u tailscaled -f</code> for errors</td></tr><tr><td>Peer hostname not resolving</td><td>Enable MagicDNS in the admin console and run <code>sudo tailscale up --accept-dns=true</code>; verify with <code>tailscale ping hostname</code></td></tr><tr><td>Peer shows as offline but machine is on</td><td>Run <code>tailscale netcheck</code> — may be using a DERP relay; opening UDP 41641 enables direct connections</td></tr><tr><td>Subnet routes not working</td><td>Confirm the route is approved in the admin console; confirm every accepting device ran <code>tailscale up --accept-routes</code>; check IP forwarding with <code>sysctl net.ipv4.ip_forward</code></td></tr><tr><td>Exit node not routing traffic</td><td>Verify IP forwarding is enabled (<code>cat /proc/sys/net/ipv4/ip_forward</code> should show <code>1</code>); confirm exit node is approved in the admin console</td></tr><tr><td>Tailscale SSH: permission denied</td><td>Check ACL rules in the admin console — the default policy allows all, but a custom ACL may be blocking SSH; add an <code>ssh</code> rule for your user/tag</td></tr><tr><td>Re-authentication required after update</td><td>Disable key expiry in the admin console for server machines; Shani OS persists Tailscale state across updates, but an expired key still requires re-auth</td></tr><tr><td><code>tailscale netcheck</code> shows only DERP, no direct</td><td>UDP 41641 may be blocked at your router; add a firewall rule and check router port forwarding settings</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="cloudflared">Cloudflared Tunnels</a></li>
-<li><a href="openssh">OpenSSH hardening</a></li>
+<li><a href="/doc/networking/cloudflared/">Cloudflared Tunnels</a></li>
+<li><a href="/doc/networking/openssh/">OpenSSH hardening</a></li>
 <li><a href="https://blog.shani.dev/post/shani-os-home-server">Home server blog</a></li>
 </ul></div>
     </div>
@@ -424,6 +424,7 @@ sudo tailscale logout</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

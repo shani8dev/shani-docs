@@ -292,8 +292,8 @@ sudo firewall-cmd --reload</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>cgps</code> shows <code>NO FIX</code></td><td>Move outdoors — GPS requires clear sky view; cold start takes up to 90 seconds</td></tr><tr><td>Device not found</td><td>Check <code>ls /dev/ttyUSB*</code>; add your user to the <code>uucp</code> group for non-root access: <code>sudo usermod -aG uucp $USER</code></td></tr><tr><td>gpsd not reading device</td><td>Try running in foreground: <code>sudo gpsd -N -D 5 /dev/ttyUSB0</code> — look for permission or baud rate errors</td></tr><tr><td>ModemManager interfering</td><td>ModemManager probes serial devices and can disrupt GPS. Add a udev rule to ignore it: <code>sudo tee /etc/udev/rules.d/99-gpsd.rules &lt;&lt;&lt; 'ATTRS{idVendor}==&quot;XXXX&quot;, ATTRS{idProduct}==&quot;YYYY&quot;, ENV{ID_MM_DEVICE_IGNORE}=&quot;1&quot;'</code> (replace with your device's IDs from <code>lsusb</code>)</td></tr><tr><td>Multiple clients can't connect</td><td>gpsd handles multiple clients natively — no configuration needed; verify gpsd is running with <code>systemctl status gpsd</code></td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../intro/optimizations.md">Socket-activated services</a></li>
-<li><a href="../system/hardware.md">Hardware info</a></li>
+<li><a href="/doc/intro/optimizations/">Socket-activated services</a></li>
+<li><a href="/doc/system/hardware/">Hardware info</a></li>
 </ul></div>
     </div>
 
@@ -325,6 +325,7 @@ sudo firewall-cmd --reload</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

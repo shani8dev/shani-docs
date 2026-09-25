@@ -570,8 +570,8 @@ komodo.home.local     { tls internal; reverse_proxy localhost:9120 }</code></pre
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Service doesn't start after reboot</td><td>Verify <code>loginctl enable-linger $USER</code> was run; check <code>systemctl --user status &lt;service&gt;</code></td></tr><tr><td><code>podman.sock: no such file</code></td><td>Enable the Podman socket: <code>systemctl --user enable --now podman.socket</code></td></tr><tr><td>Container OOM-killed</td><td>Add resource limits (<code>deploy.resources.limits.memory</code>) or increase host RAM; check <code>podman inspect</code> for current limits</td></tr><tr><td>Auto-update not pulling new images</td><td>Confirm the <code>io.containers.autoupdate=registry</code> label is set; run <code>podman auto-update --dry-run</code> to verify</td></tr><tr><td>Portainer / Komodo / Homepage can't connect to Podman</td><td>Use the literal socket path <code>/run/user/$(id -u)/podman/podman.sock</code>; verify with <code>systemctl --user status podman.socket</code></td></tr><tr><td>Disk full from container images</td><td>Run <code>podman system prune -a</code>; check <code>podman system df</code> for what's using space</td></tr><tr><td>Container keeps restarting</td><td>Check logs with <code>podman logs &lt;container&gt;</code>; look for startup errors or missing environment variables</td></tr><tr><td>Autoheal not restarting unhealthy container</td><td>Verify the health check command exits with code 1 on failure; check autoheal logs with <code>podman logs autoheal</code></td></tr><tr><td>Komodo servers show offline after update</td><td><code>KOMODO_PASSKEY</code> must be identical between core and any periphery agents; a mismatch shows all servers offline with no clear error message</td></tr><tr><td>listmonk or Postal broken after auto-update</td><td>These apps require a DB migration after image updates — run <code>./listmonk --upgrade --yes</code> (listmonk) or <code>postal initialize</code> (Postal) before restarting; always back up the database first</td></tr><tr><td>Diun not sending notifications</td><td>Check the ntfy topic and endpoint in <code>config.yml</code>; run <code>podman logs diun</code> to verify registry polling is working</td></tr><tr><td><code>${UID}</code> not expanding in compose socket path</td><td>Run <code>export UID</code> before <code>podman-compose</code>, or substitute your literal UID (e.g. <code>1000</code>) directly in the path</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="monitoring">Monitoring</a></li>
-<li><a href="productivity">Productivity</a></li>
+<li><a href="/doc/overview/">Monitoring</a></li>
+<li><a href="/doc/overview/">Productivity</a></li>
 </ul></div>
     </div>
 
@@ -603,6 +603,7 @@ komodo.home.local     { tls internal; reverse_proxy localhost:9120 }</code></pre
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

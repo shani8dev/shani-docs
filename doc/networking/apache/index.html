@@ -347,8 +347,8 @@ sudo restorecon -Rv /srv/http/mysite</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>AH00558: Could not reliably determine server's FQDN</code></td><td>Add <code>ServerName localhost</code> to <code>httpd.conf</code> — cosmetic, does not affect operation</td></tr><tr><td>Port 80/443 already in use</td><td>Caddy or another service owns the port — bind Apache to <code>127.0.0.1:8080</code> and proxy through Caddy</td></tr><tr><td><code>403 Forbidden</code> on directory</td><td>Check filesystem permissions and the <code>&lt;Directory&gt;</code> block's <code>Require</code> directive; check SELinux context with <code>ls -Z</code></td></tr><tr><td><code>Permission denied</code> in error log</td><td>Apache (<code>http</code> user) cannot read the file — fix permissions or apply the correct SELinux context</td></tr><tr><td>Reverse proxy returns 503</td><td>Enable the SELinux boolean: <code>sudo setsebool -P httpd_can_network_connect 1</code></td></tr><tr><td>Config changes not taking effect</td><td>Run <code>sudo apachectl configtest</code> to validate, then <code>sudo systemctl reload httpd</code></td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="caddy">Caddy (modern alternative)</a></li>
-<li><a href="firewalld">Firewall rules</a></li>
+<li><a href="/doc/networking/caddy/">Caddy (modern alternative)</a></li>
+<li><a href="/doc/networking/firewalld/">Firewall rules</a></li>
 <li><a href="https://blog.shani.dev/post/shani-os-home-server">Home server blog</a></li>
 </ul></div>
     </div>
@@ -381,6 +381,7 @@ sudo restorecon -Rv /srv/http/mysite</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

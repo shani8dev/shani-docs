@@ -218,7 +218,7 @@
           <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><blockquote><strong>Part of the Networking & Infrastructure series:</strong> See <a href="../networking">all networking docs</a></blockquote>
+      <div class="prose"><blockquote><strong>Part of the Networking & Infrastructure series:</strong> See <a href="/doc/overview/">all networking docs</a></blockquote>
 <h2 id="frrouting-bgp-ospf-dynamic-routing">FRRouting (BGP / OSPF / Dynamic Routing)</h2>
 <p><strong>Purpose:</strong> Full-featured open-source routing suite implementing BGP, OSPF, IS-IS, RIP, PIM, and BFD — the same protocols running on enterprise and ISP routers. On a homelab or small datacenter, FRR is most useful for: advertising your Tailscale/WireGuard subnets into BGP, running BGP between your Shani OS host and a pfSense/OPNsense router, implementing ECMP load-balancing between uplinks, or learning BGP/OSPF for job preparation. FRR runs as a container alongside your network stack — it doesn't require a separate router appliance.</p>
 <blockquote><strong>Note:</strong> FRR needs <code>--network host</code> and <code>--cap-add NET_ADMIN,NET_RAW,SYS_ADMIN</code> to manipulate kernel routing tables. These capabilities are available to rootless Podman containers on this system with <code>--privileged</code> or explicit <code>--cap-add</code>. The kernel routing changes FRR makes are real — they affect the host's routing table.</blockquote>
@@ -327,7 +327,7 @@ exit</code></pre>
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="networking">Networking & Infrastructure</a> — overview</li>
+<li><a href="/doc/overview/">Networking & Infrastructure</a> — overview</li>
 </ul></div>
     </div>
 
@@ -359,6 +359,7 @@ exit</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

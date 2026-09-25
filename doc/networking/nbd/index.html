@@ -289,9 +289,9 @@ sudo systemctl enable --now nbd-connect</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>nbd-client: No such device /dev/nbd0</code></td><td>Load the kernel module: <code>sudo modprobe nbd</code></td></tr><tr><td><code>Connection refused</code> on the client</td><td>Check <code>systemctl status nbd-server</code> on the server; verify the port and firewall with <code>sudo firewall-cmd --list-all</code></td></tr><tr><td>Filesystem errors after disconnect</td><td>Always unmount before disconnecting — <code>umount</code> first, then <code>nbd-client -d</code></td></tr><tr><td>Server crashes on large writes</td><td>Add <code>flush = true</code> and <code>sync = true</code> to the export section in the config</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="openssh">SSH Server</a> — remote access</li>
-<li><a href="wireguard">WireGuard</a> — VPN tunnel for secure NBD access</li>
-<li><a href="../system/backup.md">Backup & Restore</a> — offsite backup strategies</li>
+<li><a href="/doc/networking/openssh/">SSH Server</a> — remote access</li>
+<li><a href="/doc/networking/wireguard/">WireGuard</a> — VPN tunnel for secure NBD access</li>
+<li><a href="/doc/system/backup/">Backup & Restore</a> — offsite backup strategies</li>
 </ul></div>
     </div>
 
@@ -323,6 +323,7 @@ sudo systemctl enable --now nbd-connect</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

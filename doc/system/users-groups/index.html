@@ -219,7 +219,7 @@
         </div>
       </div>
       <div class="prose"><p>User accounts on Shani OS follow standard Linux conventions — accounts are stored in <code>/etc/passwd</code>, <code>/etc/shadow</code>, and <code>/etc/group</code>, which live in the <code>/etc</code> overlay and persist across all OS updates and rollbacks.</p>
-<p>The key difference from a traditional distro is that <strong>you should use <code>adduser</code> (not <code>useradd</code>) for interactive accounts</strong>. The <code>adduser</code> wrapper on Shani OS reads <code>/etc/shani-extra-groups</code> and automatically adds new users to all the groups they need (wheel, video, input, kvm, etc.) in one step. See <a href="../updates/user-setup.md">User Provisioning</a> for the full group reference.</p>
+<p>The key difference from a traditional distro is that <strong>you should use <code>adduser</code> (not <code>useradd</code>) for interactive accounts</strong>. The <code>adduser</code> wrapper on Shani OS reads <code>/etc/shani-extra-groups</code> and automatically adds new users to all the groups they need (wheel, video, input, kvm, etc.) in one step. See <a href="/doc/updates/user-setup/">User Provisioning</a> for the full group reference.</p>
 <hr>
 <h2 id="on-shani-os-adduser-vs-useradd">On Shani OS: adduser vs useradd</h2>
 <table><thead><tr><th>Command</th><th>Use when</th></tr></thead><tbody><tr><td><code>sudo adduser &lt;name&gt;</code></td><td>Creating a human user — reads <code>/etc/shani-extra-groups</code>, sets Zsh shell, prompts for password</td></tr><tr><td><code>sudo useradd</code></td><td>Scripted/service account creation where you need fine-grained control</td></tr></tbody></table>
@@ -327,7 +327,7 @@ sudo chage -d 0 alice
 
 # Set account expiry
 sudo chage -E 2026-12-31 alice</code></pre>
-<p>See <a href="../system/permissions.md">Permissions</a> for the full <code>chage</code> reference.</p>
+<p>See <a href="/doc/system/permissions/">Permissions</a> for the full <code>chage</code> reference.</p>
 <hr>
 <h2 id="groups">Groups</h2>
 <h3 id="creating-and-modifying-groups">Creating and modifying groups</h3>
@@ -454,7 +454,7 @@ sudo loginctl disable-linger alice
 
 # Check linger status
 loginctl show-user alice | grep Linger</code></pre>
-<p>This is required for the <code>backup.timer</code> and any other <code>systemctl --user</code> timer that should fire even when the user is not logged in. See <a href="../system/backup.md">Backup & Recovery</a> for the full example.</p>
+<p>This is required for the <code>backup.timer</code> and any other <code>systemctl --user</code> timer that should fire even when the user is not logged in. See <a href="/doc/system/backup/">Backup & Recovery</a> for the full example.</p>
 <hr>
 <h2 id="etcpasswd-and-etcshadow">/etc/passwd and /etc/shadow</h2>
 <p>These files live in the <code>/etc</code> overlay and are preserved across every OS update. You rarely need to edit them directly — use the commands above. For reference:</p>
@@ -473,11 +473,11 @@ getent group developers</code></pre>
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../updates/user-setup.md">User Provisioning</a> — <code>shani-user-setup</code>, <code>/etc/shani-extra-groups</code>, subuid allocation</li>
-<li><a href="../system/permissions.md">Permissions</a> — <code>chmod</code>, <code>chown</code>, <code>chage</code>, <code>chsh</code>, <code>chpasswd</code></li>
-<li><a href="../updates/config.md">System Config</a> — how <code>/etc</code> overlay preserves account changes across updates</li>
-<li><a href="../updates/shani-reset.md">Factory Reset</a> — what happens to user accounts after a reset</li>
-<li><a href="../updates/shell.md">Shell & Environment</a> — Zsh, Starship, and per-user shell config</li>
+<li><a href="/doc/updates/user-setup/">User Provisioning</a> — <code>shani-user-setup</code>, <code>/etc/shani-extra-groups</code>, subuid allocation</li>
+<li><a href="/doc/system/permissions/">Permissions</a> — <code>chmod</code>, <code>chown</code>, <code>chage</code>, <code>chsh</code>, <code>chpasswd</code></li>
+<li><a href="/doc/updates/config/">System Config</a> — how <code>/etc</code> overlay preserves account changes across updates</li>
+<li><a href="/doc/updates/shani-reset/">Factory Reset</a> — what happens to user accounts after a reset</li>
+<li><a href="/doc/updates/shell/">Shell & Environment</a> — Zsh, Starship, and per-user shell config</li>
 </ul></div>
     </div>
 
@@ -509,6 +509,7 @@ getent group developers</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

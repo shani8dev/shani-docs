@@ -284,7 +284,7 @@ resume_offset=&lt;offset&gt;               # from `btrfs inspect-internal map-sw
 <h2 id="the-99shanios-dracut-module">The 99shanios Dracut Module</h2>
 <p>Shanios ships a custom dracut module at <code>/usr/lib/dracut/modules.d/99shanios/</code> that adds three hooks to the initramfs:</p>
 <table><thead><tr><th>Hook</th><th>Phase</th><th>Priority</th><th>Purpose</th></tr></thead><tbody><tr><td><code>shanios-boot-failure-hook.sh</code></td><td>pre-mount</td><td>90</td><td>Writes <code>/data/boot_hard_failure</code> before root is mounted — persists if root mount fails</td></tr><tr><td><code>shanios-overlay-etc.sh</code></td><td>pre-pivot</td><td>50</td><td>Mounts the <code>/etc</code> OverlayFS before <code>pivot_root</code> so systemd PID 1 sees user config from its first read</td></tr><tr><td><code>shanios-boot-success-clear.sh</code></td><td>pre-pivot</td><td>90</td><td>Clears <code>boot_hard_failure</code> after root mounts successfully</td></tr></tbody></table>
-<p>See <a href="dracut-module">Dracut Initramfs Module</a> for full hook implementation details, mount options, and interaction with boot health services.</p>
+<p>See <a href="/doc/arch/dracut-module/">Dracut Initramfs Module</a> for full hook implementation details, mount options, and interaction with boot health services.</p>
 <h2 id="how-gen-efi-runs-against-the-candidate-slot">How gen-efi Runs Against the Candidate Slot</h2>
 <p><code>shani-deploy</code> never runs <code>gen-efi</code> directly against the live root — the candidate slot's UKI is built inside a chroot of the <em>inactive</em> subvolume so the new kernel/initramfs come from the new slot, not the booted one. <code>prepare_chroot()</code> sets this up with two groups of bind mounts (<code>shani-deploy.sh</code>):</p>
 <table><thead><tr><th>Group</th><th>Dirs</th><th>Mount</th><th>Purpose</th></tr></thead><tbody><tr><td><code>CHROOT_BIND_DIRS</code></td><td><code>/dev /proc /sys /run /tmp</code></td><td><code>mount --rbind</code></td><td>Standard chroot plumbing so <code>dracut</code>, <code>sbsign</code>, <code>mokutil</code>, etc. work normally</td></tr><tr><td><code>CHROOT_STATIC_DIRS</code></td><td><code>data etc var swap</code></td><td><code>mount --bind</code></td><td>Live host state the candidate's <code>gen-efi</code> needs but that shouldn't come from the new slot</td></tr></tbody></table>
@@ -307,7 +307,7 @@ resume_offset=&lt;offset&gt;               # from `btrfs inspect-internal map-sw
 </ol>
 <h3 id="tier-2-application-level-health-systemd-services">Tier 2: Application-level Health (systemd services)</h3>
 <table><thead><tr><th>Service</th><th>When</th><th>What</th></tr></thead><tbody><tr><td><code>mark-boot-in-progress.service</code></td><td><code>local-fs.target</code> (requires <code>data.mount</code>)</td><td><code>rm -f boot-ok boot_failure.acked boot_in_progress</code>, then <code>touch boot_in_progress</code> — hard-fails (blocking the boot) if <code>/data</code> isn't mounted</td></tr><tr><td><code>mark-boot-success.service</code></td><td><code>multi-user.target</code>, requires <code>boot_in_progress</code> to exist</td><td>Writes <code>/data/boot-ok</code>, removes <code>boot_in_progress</code>, and — if the slot that just booted matches the slot recorded in <code>boot_failure</code> — clears <code>boot_failure</code>/<code>boot_failure.acked</code> as stale (the slot clearly recovered)</td></tr><tr><td><code>bless-boot.service</code></td><td><code>multi-user.target</code>, <code>ConditionPathExists=/data/boot-ok</code></td><td>Runs <code>bootctl set-good</code> — stops the boot counter countdown</td></tr><tr><td><code>check-boot-failure.timer</code> / <code>.service</code></td><td><code>OnBootSec=15m</code>, fires once</td><td>If <code>boot_in_progress</code> still exists and <code>boot-ok</code> is absent, writes the <em>previously active</em> slot name into <code>/data/boot_failure</code> (skipped if <code>/data/boot_hard_failure</code> is already present)</td></tr></tbody></table>
-<p>On first login after a fallback, <code>shani-update</code> detects the mismatch between the booted slot and <code>/data/current-slot</code>, then offers rollback.</p>
+<p>After login, the Shani Cassini agent reads this boot state through <code>shani-deploy --status --check --json</code>. If a fallback or recovery failure is recorded, it sends a notification that opens <strong>Updates & Rollback</strong>, where you can manage the rollback.</p>
 <h3 id="boot-marker-files">Boot Marker Files</h3>
 <table><thead><tr><th>File</th><th>Location</th><th>Meaning</th></tr></thead><tbody><tr><td><code>boot_in_progress</code></td><td><code>/data/</code></td><td>Boot started but not yet confirmed successful</td></tr><tr><td><code>boot-ok</code></td><td><code>/data/</code></td><td>System reached <code>multi-user.target</code> successfully</td></tr><tr><td><code>boot_failure</code></td><td><code>/data/</code></td><td>Soft failure: contains the name of the slot that failed to reach <code>multi-user.target</code> and was fallen back from</td></tr><tr><td><code>boot_failure.acked</code></td><td><code>/data/</code></td><td>User acknowledged the failure; rollback was offered</td></tr><tr><td><code>boot_hard_failure</code></td><td><code>/data/</code></td><td>Hard failure: contains the attempted slot name (or <code>unknown</code>); written by the pre-mount dracut hook before root mount is even attempted, cleared by the pre-pivot hook only on success</td></tr></tbody></table>
 <h2 id="luks2-unlock">LUKS2 Unlock</h2>
@@ -345,8 +345,8 @@ systemctl status mark-boot-success.service bless-boot.service check-boot-failure
 shani-health --boot</code></pre>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../security/secure-boot.md">Secure Boot</a></li>
-<li><a href="dracut-module">Dracut Initramfs Module</a></li>
+<li><a href="/doc/security/secure-boot/">Secure Boot</a></li>
+<li><a href="/doc/arch/dracut-module/">Dracut Initramfs Module</a></li>
 <li><a href="https://blog.shani.dev/post/shani-os-architecture-deep-dive">Boot Process blog deep dive</a></li>
 </ul></div>
     </div>
@@ -379,6 +379,7 @@ shani-health --boot</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

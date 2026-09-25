@@ -266,7 +266,7 @@ wpctl status
 
 # Switch default output
 wpctl set-default 52</code></pre>
-<p>Bluetooth audio devices appear in this same list once paired — see <a href="../networking/bluetooth.md">Bluetooth</a> for pairing and codec details.</p>
+<p>Bluetooth audio devices appear in this same list once paired — see <a href="/doc/networking/bluetooth/">Bluetooth</a> for pairing and codec details.</p>
 <h2 id="recording-screen-capture-audio">Recording / Screen Capture Audio</h2>
 <pre><code class="language-bash"># Record from the default microphone
 pw-record ~/recording.wav
@@ -292,9 +292,9 @@ systemctl --user restart pipewire wireplumber</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>No sound at all</td><td><code>systemctl --user restart pipewire pipewire-pulse wireplumber</code>; check <code>wpctl status</code> shows a sink</td></tr><tr><td>Sound distorted/crackling</td><td>Usually a sample-rate mismatch — check `pactl list sinks \</td><td>grep "Sample Spec"<code>; reset config: remove </code>~/.config/pipewire/pipewire.conf.d/*` and restart</td></tr><tr><td>No audio on a new Intel laptop</td><td>SOF firmware may not have loaded — `dmesg \</td><td>grep -i sof<code>; confirm </code>sof-firmware` is present (it's pre-installed) and try a kernel update</td></tr><tr><td>Bluetooth headphones connected but silent</td><td>Confirm the device shows as a sink: `pactl list sinks short \</td><td>grep bluez<code>; set it as default: </code>wpctl set-default <id>`</td></tr><tr><td>App doesn't appear in the volume mixer</td><td>Some apps need <code>pipewire-pulse</code> specifically — confirm it's running; Flatpak apps need <code>--socket=pulseaudio</code> permission (usually granted by default via the portal)</td></tr><tr><td>Mic not detected</td><td><code>wpctl status</code> should list it under Sources; check it's not muted at the hardware level (some laptops have a physical mic-mute key)</td></tr><tr><td>High audio latency (pro-audio use)</td><td>Use <code>pw-top</code> to inspect quantum/latency; JACK apps can request lower latency directly since <code>pipewire-jack</code> provides full JACK API compatibility</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../networking/bluetooth.md">Bluetooth</a> — pairing audio devices, codec support</li>
-<li><a href="hardware">Hardware</a> — general audio hardware detection</li>
-<li><a href="../intro/whats-included.md">What's Included</a> — full audio codec support list</li>
+<li><a href="/doc/networking/bluetooth/">Bluetooth</a> — pairing audio devices, codec support</li>
+<li><a href="/doc/system/hardware/">Hardware</a> — general audio hardware detection</li>
+<li><a href="/doc/intro/whats-included/">What's Included</a> — full audio codec support list</li>
 </ul></div>
     </div>
 
@@ -326,6 +326,7 @@ systemctl --user restart pipewire wireplumber</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

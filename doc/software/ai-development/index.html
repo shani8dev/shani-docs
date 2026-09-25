@@ -345,7 +345,7 @@ aider --model openai/llama-3.3-70b-versatile</code></pre>
 <li><strong>In-loop review</strong> — ask your existing harness: <code>opencode &quot;review my uncommitted diff for race conditions&quot;</code> works today with zero extra setup, and pairs naturally with the Btrfs snapshot safety net before letting an agent touch anything.</li>
 </ul>
 <h2 id="local-models-with-ollama">Local Models with Ollama</h2>
-<p>The <a href="../servers/ai-llms.md">AI & LLMs</a> page documents full self-hosted inference stacks. For a developer workstation, the short path is the Ollama container with your GPU passed through:</p>
+<p>The <a href="/doc/servers/ai-llms/">AI & LLMs</a> page documents full self-hosted inference stacks. For a developer workstation, the short path is the Ollama container with your GPU passed through:</p>
 <pre><code class="language-bash"># AMD / Intel GPUs: device passthrough works out of the box
 podman run -d --name ollama -p 11434:11434 \
   --device /dev/dri \
@@ -434,7 +434,7 @@ podman create --name shani-agent \
 # Start the agent workspace
 podman start -a shani-agent</code></pre>
 <p><strong>Full isolation (multi-tenant / high-value):</strong> Use Firecracker booted via <code>machinectl</code> or Kata Containers <code>virtctl</code>. Both present a complete VM with minimal device exposure — ideal when the agent must touch repository contents, SSH keys, or MCP configs.</p>
-<p><strong>The root filesystem itself needs no manual snapshot at all.</strong> <code>/</code> is always one of the two read-only <code>@blue</code>/<code>@green</code> slots — an agent (or anything else) cannot write to it, and there's nothing to protect there because <a href="../concepts/atomic-updates.md"><code>shani-deploy</code></a> already keeps the inactive slot as an instant rollback target for OS-level changes. What an agent <em>can</em> actually modify is <code>@home</code> — and unlike the root slots, that has no automatic snapshot schedule out of the box. Set one up once via the systemd timer in <a href="../system/backup.md#1-btrfs-snapshots-local-instant-recovery">Backup & Recovery</a>, or take a one-off manual snapshot right before a specific risky run:</p>
+<p><strong>The root filesystem itself needs no manual snapshot at all.</strong> <code>/</code> is always one of the two read-only <code>@blue</code>/<code>@green</code> slots — an agent (or anything else) cannot write to it, and there's nothing to protect there because <a href="/doc/concepts/atomic-updates/"><code>shani-deploy</code></a> already keeps the inactive slot as an instant rollback target for OS-level changes. What an agent <em>can</em> actually modify is <code>@home</code> — and unlike the root slots, that has no automatic snapshot schedule out of the box. Set one up once via the systemd timer in <a href="/doc/system/backup/#1-btrfs-snapshots-local-instant-recovery">Backup & Recovery</a>, or take a one-off manual snapshot right before a specific risky run:</p>
 <pre><code class="language-bash"># Extra snapshot of @home right before a risky agent session (read-only, non-destructive)
 sudo btrfs subvolume snapshot -r /home /data/snapshots/home/pre-agent-$(date +%s)
 
@@ -447,7 +447,7 @@ cp -a /data/snapshots/home/pre-agent-&lt;timestamp&gt;/path/to/thing /home/path/
 <li><strong>NVIDIA</strong> — the NVIDIA Container Toolkit is <strong>not pre-installed</strong> on the base system. Use <strong>Distrobox</strong> (handles GPU/CDI automatically) or, for raw Podman, add the toolkit to the host and then add <code>--gpus all</code> (or the CDI equivalent) to the container instead of <code>--device</code>.</li>
 <li>Model size guidance: 7B-class coder models fit 8 GB VRAM or system RAM; 14B+ wants 16 GB+. CPU-only inference works but autocompletion latency suffers — keep local use to chat/refactor requests rather than keystroke autocomplete if you lack a GPU.</li>
 </ul>
-<p>Full container details: <a href="gpu-containers">GPU Containers</a>.</p>
+<p>Full container details: <a href="/doc/software/gpu-containers/">GPU Containers</a>.</p>
 <h2 id="agent-sandboxing">Agent Sandboxing</h2>
 <p>Running untrusted LLM-generated code requires isolation beyond standard containers. The 2026 consensus: shared-kernel containers (Docker/runc) are insufficient for LLM-generated code — use gVisor at minimum, Firecracker microVMs or Kata Containers for multi-tenant or high-value workloads.</p>
 <table><thead><tr><th>Scenario</th><th>Recommended Isolation</th></tr></thead><tbody><tr><td>Single-user, trusted prompts</td><td>Podman + <code>--security-opt no-new-privileges</code> + seccomp</td></tr><tr><td>LLM-generated code, single-user</td><td>gVisor (<code>runsc</code> runtime) or rootless Podman with gVisor</td></tr><tr><td>Multi-tenant / shared infra</td><td>Firecracker microVM or Kata Containers (KVM)</td></tr><tr><td>GPU workloads</td><td>gVisor (GPU support) or full VM; Firecracker lacks GPU passthrough</td></tr></tbody></table>
@@ -459,7 +459,7 @@ cp -a /data/snapshots/home/pre-agent-&lt;timestamp&gt;/path/to/thing /home/path/
 <li>Persistence: block writes to <code>~/.ssh</code>, <code>~/.config</code>, MCP configs, IDE configs, git hooks</li>
 </ul>
 <p><strong>Prompt injection mitigation:</strong> never feed untrusted external content (emails, web pages, issue bodies) into the same agent context that has tool access. Run tools that touch sensitive data in isolated contexts without sharing that context with external input sources.</p>
-<p>For Shanios desktop users: run agentic workloads inside a Distrobox or Podman container with the restrictions above. The root filesystem needs no extra protection — it's already read-only regardless — but <code>@home</code> has no automatic snapshot schedule out of the box, so either set up the recurring timer in <a href="../system/backup.md">Backup & Recovery</a> or take a manual one (see above) before a specific long autonomous run.</p>
+<p>For Shanios desktop users: run agentic workloads inside a Distrobox or Podman container with the restrictions above. The root filesystem needs no extra protection — it's already read-only regardless — but <code>@home</code> has no automatic snapshot schedule out of the box, so either set up the recurring timer in <a href="/doc/system/backup/">Backup & Recovery</a> or take a manual one (see above) before a specific long autonomous run.</p>
 <h2 id="privacy-posture">Privacy Posture</h2>
 <p>Shanios ships with zero telemetry, but AI assistants are your choice to make:</p>
 <ul>
@@ -471,10 +471,10 @@ cp -a /data/snapshots/home/pre-agent-&lt;timestamp&gt;/path/to/thing /home/path/
 <table><thead><tr><th>Symptom</th><th>Fix</th></tr></thead><tbody><tr><td>Extension can't reach <code>localhost:11434</code> from Flatpak editor</td><td>Flatpak apps share the host network namespace by default; if you restricted it, allow the port: <code>flatpak override --user --share=network org.visualstudio.code</code></td></tr><tr><td>Ollama container ignores GPU</td><td>Check <code>ls -l /dev/dri</code> exists; NVIDIA requires toolkit flags — see GPU Containers page; verify with <code>podman exec ollama nvidia-smi</code> (NVIDIA image variant)</td></tr><tr><td>Very slow completions on CPU</td><td>Drop to a smaller model (3B class) or reserve local models for chat-style requests</td></tr><tr><td><code>ollama pull</code> fails behind proxy</td><td>Pass proxy env into the container (<code>-e HTTPS_PROXY=...</code>)</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="development">Development Environments</a> — toolchain strategy this builds on</li>
-<li><a href="../servers/ai-llms.md">AI & LLMs (self-hosted stacks)</a> — Open WebUI, LiteLLM, Dify, RAG pipelines</li>
-<li><a href="gpu-containers">GPU Containers</a> — CUDA/ROCm/Vulkan container access</li>
-<li><a href="distrobox">Distrobox</a> — running Node/Python CLIs with full distro environments</li>
+<li><a href="/doc/software/development/">Development Environments</a> — toolchain strategy this builds on</li>
+<li><a href="/doc/servers/ai-llms/">AI & LLMs (self-hosted stacks)</a> — Open WebUI, LiteLLM, Dify, RAG pipelines</li>
+<li><a href="/doc/software/gpu-containers/">GPU Containers</a> — CUDA/ROCm/Vulkan container access</li>
+<li><a href="/doc/software/distrobox/">Distrobox</a> — running Node/Python CLIs with full distro environments</li>
 <li><a href="https://kilo.ai">Kilo Code</a> · <a href="https://github.com/earendil-works/pi">Pi</a> · <a href="https://cursor.com">Cursor</a> · <a href="https://devin.ai">Devin Desktop</a> · <a href="https://zed.dev">Zed</a></li>
 <li><a href="https://docs.all-hands.dev">OpenHands</a> · <a href="https://ampcode.com">Amp</a> · <a href="https://www.jetbrains.com/junie">JetBrains Junie</a> · <a href="https://warp.dev">Warp</a> · <a href="https://github.com/KillianLucas/open-interpreter">Open Interpreter</a></li>
 <li><a href="https://blog.shani.dev/post/ai-assisted-development-on-shani-os">AI-assisted development blog</a> — narrative companion to this page</li>
@@ -509,6 +509,7 @@ cp -a /data/snapshots/home/pre-agent-&lt;timestamp&gt;/path/to/thing /home/path/
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

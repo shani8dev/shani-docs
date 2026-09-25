@@ -235,7 +235,7 @@ systemctl status arpwatch@eth0
 journalctl -u arpwatch@eth0 -f</code></pre>
 <hr>
 <h2 id="configuration">Configuration</h2>
-<p>Default behaviour is to send email reports to <code>root</code>. Forward root's mail to a real address via <code>/etc/aliases</code> (see the <a href="exim">Exim</a> page).</p>
+<p>Default behaviour is to send email reports to <code>root</code>. Forward root's mail to a real address via <code>/etc/aliases</code> (see the <a href="/doc/networking/exim/">Exim</a> page).</p>
 <p>The ARP database for each interface is stored at <code>/var/lib/arpwatch/&lt;interface&gt;.dat</code>.</p>
 <h3 id="customise-per-interface-options">Customise Per-Interface Options</h3>
 <p>Create a drop-in override for the interface unit:</p>
@@ -265,12 +265,12 @@ sudo systemctl restart arpwatch@eth0</code></pre>
 journalctl -u arpwatch@eth0 --no-pager | grep -E &quot;new|changed|flip&quot;</code></pre>
 <hr>
 <h2 id="troubleshooting">Troubleshooting</h2>
-<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>No events appearing</td><td>Confirm the correct interface name — run <code>ip link</code> to list interfaces; arpwatch only processes traffic it can see</td></tr><tr><td>Email alerts not arriving</td><td>Ensure Exim (or another MTA) is running and root's mail is forwarded — see the <a href="exim">Exim</a> page</td></tr><tr><td>Too many "new activity" alerts on first run</td><td>Normal — arpwatch builds its database from scratch; alerts settle after all known devices have been seen once</td></tr><tr><td><code>changed ethernet address</code> for a trusted device</td><td>Mobile devices use MAC randomisation by default — disable randomisation for that device on your router/AP, or accept the alerts</td></tr></tbody></table>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>No events appearing</td><td>Confirm the correct interface name — run <code>ip link</code> to list interfaces; arpwatch only processes traffic it can see</td></tr><tr><td>Email alerts not arriving</td><td>Ensure Exim (or another MTA) is running and root's mail is forwarded — see the <a href="/doc/networking/exim/">Exim</a> page</td></tr><tr><td>Too many "new activity" alerts on first run</td><td>Normal — arpwatch builds its database from scratch; alerts settle after all known devices have been seen once</td></tr><tr><td><code>changed ethernet address</code> for a trusted device</td><td>Mobile devices use MAC randomisation by default — disable randomisation for that device on your router/AP, or accept the alerts</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="exim">Exim (Mail Transfer Agent)</a> — email delivery for alerts</li>
-<li><a href="firewalld">Firewall</a> — network security rules</li>
-<li><a href="network-tools">Network Tools</a> — monitoring and diagnostics</li>
+<li><a href="/doc/networking/exim/">Exim (Mail Transfer Agent)</a> — email delivery for alerts</li>
+<li><a href="/doc/networking/firewalld/">Firewall</a> — network security rules</li>
+<li><a href="/doc/networking/network-tools/">Network Tools</a> — monitoring and diagnostics</li>
 </ul></div>
     </div>
 
@@ -302,6 +302,7 @@ journalctl -u arpwatch@eth0 --no-pager | grep -E &quot;new|changed|flip&quot;</c
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

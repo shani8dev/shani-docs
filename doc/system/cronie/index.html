@@ -304,9 +304,9 @@ journalctl -u cronie -n 50</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Job not running</td><td>Check <code>journalctl -u cronie</code> for errors; verify the script is executable (<code>chmod +x</code>); test the command manually as the cron user</td></tr><tr><td>Job runs but does nothing</td><td>Cron has a minimal <code>PATH</code> — use full paths to binaries (e.g., <code>/usr/bin/rsync</code> not <code>rsync</code>), or set <code>PATH=</code> at the top of the crontab</td></tr><tr><td>Output being mailed to root</td><td>Add <code>MAILTO=&quot;&quot;</code> to suppress, or <code>MAILTO=youruser</code> to redirect; ensure Exim is running if you want mail delivery</td></tr><tr><td>Missed jobs after suspend/hibernate</td><td>cron does not catch up missed jobs after sleep — use a systemd timer with <code>Persistent=true</code> instead</td></tr><tr><td>Editing crontab opens wrong editor</td><td>Set <code>VISUAL</code> or <code>EDITOR</code> env variable: <code>export EDITOR=nano</code></td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="backup">Backup & Recovery</a></li>
-<li><a href="../servers/monitoring/prometheus.md">Monitoring wiki</a></li>
-<li><a href="systemd">systemd reference</a></li>
+<li><a href="/doc/system/backup/">Backup & Recovery</a></li>
+<li><a href="/doc/servers/monitoring/prometheus/">Monitoring wiki</a></li>
+<li><a href="/doc/system/systemd/">systemd reference</a></li>
 </ul></div>
     </div>
 
@@ -338,6 +338,7 @@ journalctl -u cronie -n 50</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

@@ -259,7 +259,7 @@ nmcli con show</code></pre>
 <pre><code class="language-bash">iw dev wlan0 get power_save</code></pre>
 <p>Disable it for a specific connection (applies whenever that connection is active):</p>
 <pre><code class="language-bash">nmcli connection modify &quot;MyNetwork&quot; wifi.powersave 2   # 2 = enabled, 3 = disabled</code></pre>
-<p>If you see ping spikes or stuttering on real-time traffic (calls, games) on battery, disabling power save on that connection is the first thing to try. See <a href="../system/power.md">Power Management</a> for related laptop tuning.</p>
+<p>If you see ping spikes or stuttering on real-time traffic (calls, games) on battery, disabling power save on that connection is the first thing to try. See <a href="/doc/system/power/">Power Management</a> for related laptop tuning.</p>
 <h2 id="known-chip-family-notes">Known Chip-Family Notes</h2>
 <p><strong>Broadcom</strong> — many chips work out of the box via the in-kernel <code>brcmfmac</code> or <code>b43</code> drivers. However, some older Broadcom chips require the proprietary <strong>broadcom-wl</strong> driver, which exists only in the AUR and therefore <strong>cannot be host-installed on Shanios' immutable root</strong>. If your chip requires it, file an image-inclusion request at <a href="https://github.com/shani8dev">github.com/shani8dev</a> so a future image can carry it.</p>
 <p><strong>Realtek</strong> — some USB adapters prefer newer kernels with updated <code>rtw88</code>/<code>rtw89</code> support; these arrive automatically via OS updates since the kernel ships per-slot with each deploy.</p>
@@ -286,10 +286,10 @@ journalctl -u NetworkManager -b
 nmcli general status</code></pre>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="networkmanager-vpn">NetworkManager & VPN</a></li>
-<li><a href="network-tools">Network Tools</a></li>
-<li><a href="bluetooth">Bluetooth</a></li>
-<li><a href="ip-addressing">IP Addressing</a></li>
+<li><a href="/doc/networking/networkmanager-vpn/">NetworkManager & VPN</a></li>
+<li><a href="/doc/networking/network-tools/">Network Tools</a></li>
+<li><a href="/doc/networking/bluetooth/">Bluetooth</a></li>
+<li><a href="/doc/networking/ip-addressing/">IP Addressing</a></li>
 <li>Blog: <a href="https://blog.shani.dev/post/shani-os-networking-guide">Shani OS Networking Guide</a></li>
 </ul></div>
     </div>
@@ -322,6 +322,7 @@ nmcli general status</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

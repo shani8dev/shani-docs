@@ -378,9 +378,9 @@ dig @192.168.1.1 nas.home.local</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>named</code> won't start</td><td>Run <code>sudo named-checkconf</code> — syntax errors in <code>named.conf</code> prevent startup; check <code>journalctl -u named</code></td></tr><tr><td>Zone not loading</td><td>Run <code>sudo named-checkzone home.local /var/named/home.local.zone</code> — common causes are missing trailing dots on FQDNs and wrong Serial format</td></tr><tr><td>Zone fails to load silently</td><td>Check ownership (<code>named:named</code>) and mode (<code>640</code>) on <code>/var/named/*.zone</code>; confirm with <code>journalctl -u named</code></td></tr><tr><td>Queries returning <code>SERVFAIL</code></td><td>DNSSEC validation failing — set <code>dnssec-validation no;</code> temporarily to isolate; or ensure <code>dnssec-validation auto;</code> and that upstream resolvers support DNSSEC</td></tr><tr><td>Recursive queries not working from LAN</td><td>Check <code>allow-query</code> and <code>recursion yes</code> are set in <code>options {}</code></td></tr><tr><td>Changes not picked up</td><td>Increment the Serial in the zone file, then run <code>sudo rndc reload home.local</code></td></tr><tr><td>Port 53 conflict with dnsmasq</td><td>Run only one resolver on port 53 — either configure dnsmasq to forward <code>.home.local</code> to BIND on a non-standard port, or replace dnsmasq with BIND entirely</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="dnsmasq">dnsmasq (local DNS)</a></li>
-<li><a href="openresolv">openresolv</a></li>
-<li><a href="ip-addressing">IP addressing & routing</a></li>
+<li><a href="/doc/networking/dnsmasq/">dnsmasq (local DNS)</a></li>
+<li><a href="/doc/networking/openresolv/">openresolv</a></li>
+<li><a href="/doc/networking/ip-addressing/">IP addressing & routing</a></li>
 </ul></div>
     </div>
 
@@ -412,6 +412,7 @@ dig @192.168.1.1 nas.home.local</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

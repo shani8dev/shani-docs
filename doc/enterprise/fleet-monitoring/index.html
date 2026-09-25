@@ -236,7 +236,7 @@ PublishPort=9100:9100
 Restart=on-failure</code></pre>
 <p>Enable with <code>mkdir -p ~/exporters/textfile &amp;&amp; systemctl --user daemon-reload &amp;&amp; systemctl --user start node_exporter.service</code>. firewalld is default-deny inbound, so open 9100 to the scraper subnet only:</p>
 <pre><code class="language-bash">sudo firewall-cmd --permanent --add-rich-rule='rule family=ipv4 source address=10.10.0.0/24 port port=9100 protocol=tcp accept' &amp;&amp; sudo firewall-cmd --reload</code></pre>
-<p>Scrape from a self-hosted Prometheus (deployment patterns in <a href="../servers/monitoring/prometheus.md">Monitoring & Observability</a>):</p>
+<p>Scrape from a self-hosted Prometheus (deployment patterns in <a href="/doc/servers/monitoring/prometheus/">Monitoring & Observability</a>):</p>
 <pre><code class="language-yaml">scrape_configs:
   - job_name: shanios-fleet
     static_configs:
@@ -246,7 +246,7 @@ Restart=on-failure</code></pre>
 <p>Two cron jobs (cronie is enabled by default on the server profile) turn Shanios state into textfile-collector metrics:</p>
 <pre><code class="language-crontab">*/5 * * * * root /usr/local/sbin/shani-textfile-metrics
 0 4 * * *  root shani-health --verify --json &gt; /var/local/shani-health.json</code></pre>
-<p><code>--verify</code> includes a full Btrfs scrub so it runs nightly; cheap state refreshes every five minutes. <code>/var/local/shani-health.json</code> is persistent local state, fine to keep per host and worth shipping off-box as compliance evidence (see <a href="compliance">Compliance & Benchmarks</a>). The metrics script writes atomically (<code>mv</code>), so node_exporter only ever reads complete files:</p>
+<p><code>--verify</code> includes a full Btrfs scrub so it runs nightly; cheap state refreshes every five minutes. <code>/var/local/shani-health.json</code> is persistent local state, fine to keep per host and worth shipping off-box as compliance evidence (see <a href="/doc/enterprise/compliance/">Compliance & Benchmarks</a>). The metrics script writes atomically (<code>mv</code>), so node_exporter only ever reads complete files:</p>
 <pre><code class="language-bash">#!/bin/bash
 # /usr/local/sbin/shani-textfile-metrics — feed the node_exporter textfile collector
 set -euo pipefail
@@ -279,7 +279,7 @@ chmod 644 &quot;$TMP&quot;; mv &quot;$TMP&quot; &quot;$OUT/shani_state.prom&quot
   -v ~/exporters/vector.toml:/etc/vector/vector.toml:ro,Z \
   docker.io/timberio/vector:latest-alpine --config /etc/vector/vector.toml</code></pre>
 <p>The Vector config is a <code>stdin</code> source plus whatever sink you run (Loki, Elasticsearch, S3 archive); wrap the pipeline in a user systemd unit so it restarts and starts at boot.</p>
-<p><strong>Pattern B — rsyslog-in-container:</strong> bind-mount <code>/run/systemd/journal/syslog</code> into an rsyslog container, set <code>ForwardToSyslog=yes</code> via a journald drop-in, and forward centrally from there. Journald persistence and drop-in mechanics are covered in <a href="../system/logging.md">System Logging</a>.</p>
+<p><strong>Pattern B — rsyslog-in-container:</strong> bind-mount <code>/run/systemd/journal/syslog</code> into an rsyslog container, set <code>ForwardToSyslog=yes</code> via a journald drop-in, and forward centrally from there. Journald persistence and drop-in mechanics are covered in <a href="/doc/system/logging/">System Logging</a>.</p>
 <hr>
 <h2 id="grafana-dashboard-sketch">Grafana Dashboard Sketch</h2>
 <p>Suggested panels for a per-fleet view:</p>
@@ -309,7 +309,7 @@ chmod 644 &quot;$TMP&quot;; mv &quot;$TMP&quot; &quot;$OUT/shani_state.prom&quot
 <ol>
 <li>Start with <strong>2–3 canary hosts</strong> running the full stack (node_exporter + cron + textfile + log shipper), kept on <code>latest</code> while the rest of the fleet stays on <code>stable</code>.</li>
 <li>Watch one full weekly update cycle before widening; stagger any <code>shani-deploy --set-channel</code> changes across days rather than flipping groups simultaneously.</li>
-<li>Drive reboots from your maintenance window off the <code>/run/shanios/reboot-needed</code> marker (see <a href="fleet">OEM & Fleet Deployment</a>).</li>
+<li>Drive reboots from your maintenance window off the <code>/run/shanios/reboot-needed</code> marker (see <a href="/doc/enterprise/fleet/">OEM & Fleet Deployment</a>).</li>
 <li>Validate alert paths deliberately — stage an update on one VM and let the pending-reboot alert fire; force a channel mismatch and confirm drift detection — then roll out fleet-wide in batches.</li>
 </ol>
 <hr>
@@ -343,10 +343,10 @@ chmod 644 &quot;$TMP&quot;; mv &quot;$TMP&quot; &quot;$OUT/shani_state.prom&quot
 <table><thead><tr><th>Alert</th><th>Condition</th><th>Severity</th></tr></thead><tbody><tr><td>Offline</td><td>No heartbeat > 15 minutes (default <code>SHANI_FLEET_ONLINE_WINDOW=900</code>)</td><td>Warning</td></tr><tr><td>Verify failed</td><td>OS integrity check failed</td><td>Critical</td></tr><tr><td>Clock skew</td><td>Clock drift > 5 minutes</td><td>Warning</td></tr><tr><td>Reboot stuck</td><td>Reboot pending > 7 days</td><td>Warning</td></tr><tr><td>Channel drift</td><td>Machine on unexpected channel</td><td>Info</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="fleet">OEM & Fleet Deployment</a> — channels, update flow, reboot markers</li>
-<li><a href="../updates/shani-health.md">shani-health Reference</a> — <code>--verify --json</code>, exit codes</li>
-<li><a href="../servers/monitoring/prometheus.md">Monitoring & Observability</a> — self-hosted Prometheus/Grafana/Loki stacks</li>
-<li><a href="../system/cronie.md">cronie</a> — scheduler syntax and system crontabs</li>
+<li><a href="/doc/enterprise/fleet/">OEM & Fleet Deployment</a> — channels, update flow, reboot markers</li>
+<li><a href="/doc/updates/shani-health/">shani-health Reference</a> — <code>--verify --json</code>, exit codes</li>
+<li><a href="/doc/servers/monitoring/prometheus/">Monitoring & Observability</a> — self-hosted Prometheus/Grafana/Loki stacks</li>
+<li><a href="/doc/system/cronie/">cronie</a> — scheduler syntax and system crontabs</li>
 </ul></div>
     </div>
 
@@ -378,6 +378,7 @@ chmod 644 &quot;$TMP&quot;; mv &quot;$TMP&quot; &quot;$OUT/shani_state.prom&quot
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

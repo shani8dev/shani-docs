@@ -265,8 +265,8 @@ sudo systemctl restart avahi-daemon</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>hostname.local</code> not resolving from another machine</td><td>Ensure <code>avahi-daemon</code> is running; check that your firewall allows UDP 5353 (mDNS) — the <code>mdns</code> firewalld service covers this</td></tr><tr><td>Services not appearing in <code>avahi-browse -a</code></td><td>Confirm the remote service publishes via mDNS; some services require explicit Avahi service files</td></tr><tr><td>Name collision (<code>hostname-2.local</code>)</td><td>Two devices share the same hostname — rename one via <code>hostnamectl set-hostname newname</code></td></tr><tr><td>Avahi flooding logs with errors</td><td>Check <code>/etc/nsswitch.conf</code> — <code>mdns4_minimal</code> should appear before <code>dns</code> in the <code>hosts:</code> line</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../system/printing.md">mDNS printing</a></li>
-<li><a href="network-tools">Network tools overview</a></li>
+<li><a href="/doc/system/printing/">mDNS printing</a></li>
+<li><a href="/doc/networking/network-tools/">Network tools overview</a></li>
 </ul></div>
     </div>
 
@@ -298,6 +298,7 @@ sudo systemctl restart avahi-daemon</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

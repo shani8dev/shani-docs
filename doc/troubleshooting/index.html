@@ -225,7 +225,7 @@
 <hr>
 <h2 id="boot-problems">Boot Problems</h2>
 <h3 id="system-wont-boot-automatic-fallback">System Won't Boot — Automatic Fallback</h3>
-<p>If your system fails to reach the login prompt three times after an update, systemd-boot's boot-counting mechanism activates and falls back to the previous slot automatically. On the next successful login, <code>shani-update</code> detects the fallback and offers to clean the failed slot.</p>
+<p>If your system fails to reach the login prompt three times after an update, systemd-boot's boot-counting mechanism activates and falls back to the previous slot automatically. After login, the Shani Cassini agent checks the boot state and sends a notification. Open <strong>Updates & Rollback</strong> to restore the failed slot.</p>
 <p>To check what happened:</p>
 <pre><code class="language-bash"># Which slot are you actually running?
 cat /proc/cmdline | grep -o 'subvol=@[a-z]*'
@@ -376,7 +376,7 @@ flatpak override --user --device=all com.example.App
 # Or use Flatseal (pre-installed) for graphical permission management</code></pre>
 <hr>
 <h2 id="audio-problems">Audio Problems</h2>
-<p>See <a href="system/audio">Audio (PipeWire)</a> for a full guide to the audio stack — the essentials for common failures are below.</p>
+<p>See <a href="/doc/system/audio/">Audio (PipeWire)</a> for a full guide to the audio stack — the essentials for common failures are below.</p>
 <h3 id="no-audio-at-boot">No Audio at Boot</h3>
 <pre><code class="language-bash"># Restart the full PipeWire stack
 systemctl --user restart pipewire pipewire-pulse wireplumber
@@ -404,7 +404,7 @@ cat /proc/asound/cards
 journalctl --user -u wireplumber -n 50</code></pre>
 <hr>
 <h2 id="bluetooth-problems">Bluetooth Problems</h2>
-<p>See <a href="networking/bluetooth">Bluetooth</a> for a full pairing/management guide — the essentials for common failures are below.</p>
+<p>See <a href="/doc/networking/bluetooth/">Bluetooth</a> for a full pairing/management guide — the essentials for common failures are below.</p>
 <h3 id="adapter-not-found">Adapter Not Found</h3>
 <pre><code class="language-bash">hciconfig -a
 rfkill list bluetooth
@@ -438,7 +438,7 @@ sudo gen-efi enroll-tpm2</code></pre>
 <pre><code class="language-bash"># Boot from Shanios USB
 sudo cryptsetup open /dev/nvme0n1p2 shani_root --key-file /path/to/luks-keyfile
 sudo mount -o subvol=@home /dev/mapper/shani_root /mnt/home</code></pre>
-<p>See <a href="security/luks">LUKS Management</a> for full recovery procedures.</p>
+<p>See <a href="/doc/security/luks/">LUKS Management</a> for full recovery procedures.</p>
 <hr>
 <h2 id="display-gpu-problems">Display / GPU Problems</h2>
 <h3 id="nvidia-gpu-not-detected">NVIDIA GPU Not Detected</h3>
@@ -543,7 +543,7 @@ sudo waydroid-helper init</code></pre>
 <pre><code class="language-bash">sudo rm /data/overlay/etc/upper/path/to/file
 # The OS default (lower layer) becomes active again immediately</code></pre>
 <h3 id="revert-all-etc-customisations">Revert All <code>/etc</code> Customisations</h3>
-<p>Don't delete the overlay upper layer by hand — raw <code>rm -rf</code> can leave the overlay work directory in an inconsistent state. Use <code>shani-reset</code> (see <a href="updates/config">System Config</a> and <a href="updates/shani-reset">Factory Reset</a>):</p>
+<p>Don't delete the overlay upper layer by hand — raw <code>rm -rf</code> can leave the overlay work directory in an inconsistent state. Use <code>shani-reset</code> (see <a href="/doc/updates/config/">System Config</a> and <a href="/doc/updates/shani-reset/">Factory Reset</a>):</p>
 <pre><code class="language-bash">sudo shani-reset --dry-run   # preview first
 sudo shani-reset             # wipes persistent system state in /data and reboots</code></pre>
 <hr>
@@ -593,12 +593,12 @@ lspci | grep -E &quot;VGA|Audio|Network&quot;</code></pre>
 <p>Report bugs at <a href="https://github.com/shani8dev/shani-os/issues">github.com/shani8dev/shani-os/issues</a> or ask in the <a href="https://t.me/shani8dev">Telegram community</a>.</p>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="updates/shani-health">System Health Checks</a> — automated health monitoring and diagnostics</li>
-<li><a href="updates/system">System Updates</a> — how updates and rollback work</li>
-<li><a href="updates/config">System Config</a> — managing /etc customisations</li>
-<li><a href="security/features">Security Features</a> — security model and hardening</li>
-<li><a href="concepts/blue-green">Blue-Green Deployment</a> — understanding the two-slot architecture</li>
-<li><a href="install/steps">Installation Steps</a> — installer troubleshooting</li>
+<li><a href="/doc/updates/shani-health/">System Health Checks</a> — automated health monitoring and diagnostics</li>
+<li><a href="/doc/updates/system/">System Updates</a> — how updates and rollback work</li>
+<li><a href="/doc/updates/config/">System Config</a> — managing /etc customisations</li>
+<li><a href="/doc/security/features/">Security Features</a> — security model and hardening</li>
+<li><a href="/doc/concepts/blue-green/">Blue-Green Deployment</a> — understanding the two-slot architecture</li>
+<li><a href="/doc/install/steps/">Installation Steps</a> — installer troubleshooting</li>
 </ul></div>
     </div>
 
@@ -630,6 +630,7 @@ lspci | grep -E &quot;VGA|Audio|Network&quot;</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

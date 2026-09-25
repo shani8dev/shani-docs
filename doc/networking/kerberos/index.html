@@ -302,8 +302,8 @@ ssh youruser@kdc.shanios.local</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>Cannot contact any KDC for realm</code></td><td>Check that <code>krb5kdc</code> is running (<code>systemctl status krb5kdc</code>) and that UDP/TCP 88 is open in the firewall</td></tr><tr><td><code>Clock skew too great</code></td><td>Kerberos requires clocks within 5 minutes — sync with <code>sudo timedatectl set-ntp true</code></td></tr><tr><td><code>Client not found in Kerberos database</code></td><td>The principal does not exist — create it with <code>sudo kadmin.local</code> → <code>addprinc username</code></td></tr><tr><td><code>Decrypt integrity check failed</code></td><td>Wrong password, or the keytab is stale — regenerate with <code>ktadd</code> in <code>kadmin.local</code></td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="openssh">OpenSSH</a></li>
-<li><a href="../security/features.md">Security features</a></li>
+<li><a href="/doc/networking/openssh/">OpenSSH</a></li>
+<li><a href="/doc/security/features/">Security features</a></li>
 </ul></div>
     </div>
 
@@ -335,6 +335,7 @@ ssh youruser@kdc.shanios.local</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

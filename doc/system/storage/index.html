@@ -219,7 +219,7 @@
         </div>
       </div>
       <div class="prose"><p>This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring, and the udisks2 layer used by desktop tools.</p>
-<p>For encrypted volumes see <a href="../security/luks.md">LUKS Management</a>. For Btrfs-specific operations (snapshots, subvolumes, scrub) see <a href="../arch/btrfs.md">Btrfs Deep Dive</a>. For backup strategy see <a href="backup">Backup & Recovery</a>.</p>
+<p>For encrypted volumes see <a href="/doc/security/luks/">LUKS Management</a>. For Btrfs-specific operations (snapshots, subvolumes, scrub) see <a href="/doc/arch/btrfs/">Btrfs Deep Dive</a>. For backup strategy see <a href="/doc/system/backup/">Backup & Recovery</a>.</p>
 <hr>
 <h2 id="inspecting-block-devices">Inspecting Block Devices</h2>
 <pre><code class="language-bash"># List all block devices with sizes and mount points
@@ -398,7 +398,7 @@ sudo mdadm --stop /dev/md0</code></pre>
 <blockquote>As with LVM, this is for additional drives you manage yourself — Shanios's own OS storage uses Btrfs subvolumes, not <code>md</code> RAID.</blockquote>
 <hr>
 <h2 id="automatic-btrfs-maintenance-shani-os-defaults">Automatic Btrfs Maintenance (Shani OS Defaults)</h2>
-<p>Shani OS's root and data volumes are Btrfs, laid out as <code>@blue</code>/<code>@green</code> root subvolumes for atomic updates (see <a href="../arch/btrfs.md">Btrfs Deep Dive</a>). Routine maintenance already runs on its own — you rarely need to invoke <code>btrfs scrub</code>, <code>btrfs balance</code>, or <code>fstrim</code> manually:</p>
+<p>Shani OS's root and data volumes are Btrfs, laid out as <code>@blue</code>/<code>@green</code> root subvolumes for atomic updates (see <a href="/doc/arch/btrfs/">Btrfs Deep Dive</a>). Routine maintenance already runs on its own — you rarely need to invoke <code>btrfs scrub</code>, <code>btrfs balance</code>, or <code>fstrim</code> manually:</p>
 <ul>
 <li><strong>Balance, defrag, scrub, and trim</strong> run via <code>btrfs-balance.timer</code>, <code>btrfs-defrag.timer</code>, <code>btrfs-scrub.timer</code>, and <code>btrfs-trim.timer</code> (from <code>btrfsmaintenance</code>), enabled by default and scheduled weekly at idle I/O priority. Check them with <code>systemctl list-timers 'btrfs-*'</code>.</li>
 <li><strong>bees</strong> runs continuously in the background (<code>beesd@&lt;uuid&gt;.service</code>), deduplicating extents across the <code>@blue</code>/<code>@green</code> root subvolumes and their backup snapshots as they diverge — this is what keeps two nearly-identical OS slots from doubling disk usage.</li>
@@ -571,10 +571,10 @@ sudo swapoff /swap/swapfile</code></pre>
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../arch/btrfs.md">Btrfs Deep Dive</a> — subvolumes, snapshots, send/receive, balance</li>
-<li><a href="../security/luks.md">LUKS Management</a> — encrypted volumes</li>
-<li><a href="backup">Backup & Recovery</a> — restic, rclone, snapshot strategy</li>
-<li><a href="../arch/filesystem.md">Filesystem Structure</a> — Shani OS subvolume layout</li>
+<li><a href="/doc/arch/btrfs/">Btrfs Deep Dive</a> — subvolumes, snapshots, send/receive, balance</li>
+<li><a href="/doc/security/luks/">LUKS Management</a> — encrypted volumes</li>
+<li><a href="/doc/system/backup/">Backup & Recovery</a> — restic, rclone, snapshot strategy</li>
+<li><a href="/doc/arch/filesystem/">Filesystem Structure</a> — Shani OS subvolume layout</li>
 </ul></div>
     </div>
 
@@ -606,6 +606,7 @@ sudo swapoff /swap/swapfile</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

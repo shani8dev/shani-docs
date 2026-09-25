@@ -240,7 +240,7 @@
 <h2 id="habit-translation">Habit Translation</h2>
 <p>Every daily habit has an equivalent. The names differ; the workflows do not.</p>
 <h3 id="everyday-tools">Everyday Tools</h3>
-<table><thead><tr><th>Windows / macOS</th><th>Shanios</th></tr></thead><tbody><tr><td>File Explorer / Finder</td><td>Files app — Nautilus (GNOME), Dolphin (KDE Plasma), COSMIC Files (COSMIC)</td></tr><tr><td>Microsoft Store / Mac App Store</td><td>Flathub via <strong>Warehouse</strong> (pre-installed)</td></tr><tr><td>Control Panel / System Settings</td><td>Settings app of your edition</td></tr><tr><td>Task Manager / Activity Monitor</td><td>Mission Center (pre-installed on the COSMIC edition), or <code>htop</code> in a terminal</td></tr><tr><td>cmd / PowerShell / Terminal.app</td><td>zsh with Starship prompt (pre-configured)</td></tr><tr><td>Action Centre / Notification Centre</td><td>Desktop notification centre; update prompts arrive via <code>shani-update</code> notifications</td></tr></tbody></table>
+<table><thead><tr><th>Windows / macOS</th><th>Shanios</th></tr></thead><tbody><tr><td>File Explorer / Finder</td><td>Files app — Nautilus (GNOME), Dolphin (KDE Plasma), COSMIC Files (COSMIC)</td></tr><tr><td>Microsoft Store / Mac App Store</td><td>Flathub via <strong>Warehouse</strong> (pre-installed)</td></tr><tr><td>Control Panel / System Settings</td><td>Settings app of your edition</td></tr><tr><td>Task Manager / Activity Monitor</td><td>Mission Center (pre-installed on the COSMIC edition), or <code>htop</code> in a terminal</td></tr><tr><td>cmd / PowerShell / Terminal.app</td><td>zsh with Starship prompt (pre-configured)</td></tr><tr><td>Action Centre / Notification Centre</td><td>Desktop notification centre; Shani Cassini sends update and boot-state notifications</td></tr></tbody></table>
 <h3 id="applications">Applications</h3>
 <table><thead><tr><th>Windows / macOS</th><th>Shanios</th></tr></thead><tbody><tr><td><code>.exe</code> installers / <code>.dmg</code> images</td><td>Flatpak first (Warehouse), then AppImage; Bottles runs Windows <code>.exe</code> apps</td></tr><tr><td>MS Office</td><td>OnlyOffice (pre-installed) or LibreOffice (Flathub)</td></tr><tr><td>Photoshop</td><td>GIMP or Krita (Flathub)</td></tr><tr><td>Illustrator</td><td>Inkscape (Flathub)</td></tr><tr><td>Time Machine</td><td>restic or borg (documented), Deja Dup (GNOME edition)</td></tr><tr><td>iCloud Drive</td><td>Nextcloud/self-hosted, or any cloud provider in the browser</td></tr><tr><td>Keychain</td><td>KeePassXC (Flathub); GNOME Keys with Seahorse/Secrets (GNOME edition)</td></tr></tbody></table>
 <h3 id="finding-software">Finding Software</h3>
@@ -249,7 +249,7 @@
 <li>Thunderbird, LibreOffice, GIMP, Inkscape, Krita, KeePassXC, Discord, Spotify, and thousands more are on Flathub, which is pre-configured out of the box.</li>
 <li>For CLI tools, Nix is pre-installed; Homebrew is supported for those arriving from macOS.</li>
 <li>Bottles handles Windows applications that have no Linux equivalent.</li>
-<li>Gaming has its own documented stack — see <a href="../software/gaming.md">Gaming</a>.</li>
+<li>Gaming has its own documented stack — see <a href="/doc/software/gaming/">Gaming</a>.</li>
 </ul>
 <p>Office work needs no setup at all: <strong>OnlyOffice and the Vivaldi browser ship on every edition</strong>, so documents, spreadsheets, presentations, and web browsing work from first boot.</p>
 <h3 id="email-photos-and-media">Email, Photos, and Media</h3>
@@ -272,7 +272,7 @@
 <li>Boot from the USB and follow the guided installer (<code>os-installer</code>). Partitioning is guided by default; full-disk <strong>LUKS2 encryption</strong> is offered as a checkbox — recommended, especially on laptops.</li>
 <li>Reboot, remove the USB, done.</li>
 </ol>
-<p>Full details including troubleshooting bad USB writes: <a href="../install/steps.md">Install Steps</a>.</p>
+<p>Full details including troubleshooting bad USB writes: <a href="/doc/install/steps/">Install Steps</a>.</p>
 <h3 id="post-install-checklist">Post-Install Checklist</h3>
 <ol>
 <li>Run your first update: <code>sudo shani-deploy</code>, reboot when it finishes.</li>
@@ -281,7 +281,7 @@
 <li>Set up Thunderbird with your IMAP details; import your Outlook PST if you have one.</li>
 <li>Install your usual apps from Warehouse.</li>
 <li>Configure a backup: restic or borg for encrypted versioned backups, Deja Dup on GNOME.</li>
-<li>If you enabled LUKS2, enrol TPM2 auto-unlock per <a href="getting-started">Getting Started</a>.</li>
+<li>If you enabled LUKS2, enrol TPM2 auto-unlock per <a href="/doc/intro/getting-started/">Getting Started</a>.</li>
 </ol>
 <h2 id="dual-boot-or-full-replacement">Dual-Boot or Full Replacement</h2>
 <p>Both work. Choose based on honesty about how you will actually use it:</p>
@@ -301,16 +301,16 @@
 </ul>
 <h2 id="getting-help">Getting Help</h2>
 <ul>
-<li><a href="../faq.md">FAQ</a> — common questions from new users</li>
-<li><a href="../troubleshooting.md">Troubleshooting Guide</a> — systematic diagnosis when behaviour seems off</li>
-<li><a href="getting-started">Getting Started</a> — post-install walkthrough</li>
+<li><a href="/doc/faq/">FAQ</a> — common questions from new users</li>
+<li><a href="/doc/troubleshooting/">Troubleshooting Guide</a> — systematic diagnosis when behaviour seems off</li>
+<li><a href="/doc/intro/getting-started/">Getting Started</a> — post-install walkthrough</li>
 </ul>
 <p>Switcher-specific questions (dual-boot, data migration, app equivalents) are covered in the FAQ. For anything else, the troubleshooting guide is the fastest path to an answer.</p>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="getting-started">Getting Started</a> — first steps after installation</li>
-<li><a href="what-is-shanios">What is Shanios?</a> — immutability, atomic updates, rollback</li>
-<li><a href="whats-included">What's Included</a> — the full pre-installed software stack</li>
+<li><a href="/doc/intro/getting-started/">Getting Started</a> — first steps after installation</li>
+<li><a href="/doc/intro/what-is-shanios/">What is Shanios?</a> — immutability, atomic updates, rollback</li>
+<li><a href="/doc/intro/whats-included/">What's Included</a> — the full pre-installed software stack</li>
 <li><a href="https://blog.shani.dev/post/migrating-to-shani-os">Migrating to Shani OS</a> — switching from another Linux distro instead</li>
 <li><a href="https://blog.shani.dev/post/shani-os-getting-started">Shani OS Getting Started</a></li>
 <li><a href="https://blog.shani.dev/post/shani-os-software-ecosystem">Shani OS Software Ecosystem</a> — what to use when</li>
@@ -345,6 +345,7 @@
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

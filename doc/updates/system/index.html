@@ -219,31 +219,25 @@
         </div>
       </div>
       <div class="prose"><p>Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the next reboot. The previous slot is preserved as an instant rollback target.</p>
-<h2 id="automatic-updates">Automatic Updates</h2>
-<p><code>shani-update</code> is the user-facing update manager. It runs automatically via a desktop autostart entry at login (after a 15-second delay) and via a systemd user timer that fires 15 minutes after boot and then every 2 hours.</p>
-<p>On each run, <code>shani-update</code> works through a fixed priority sequence:</p>
-<ol>
-<li><strong>Hard failure detection</strong> — if a dracut pre-mount hook recorded a <code>boot_hard_failure</code> marker (root filesystem failed to mount), offers immediate rollback. This is distinct from a soft fallback-boot and requires manual action.</li>
-<li><strong>Fallback boot detection</strong> — if the last boot failed and the system fell back to the standby slot, offers to roll back the broken slot.</li>
-<li><strong>Reboot-needed check</strong> — if a staged update is waiting, shows a restart dialog.</li>
-<li><strong>Candidate boot check</strong> — if you're running a freshly deployed slot, offers a rollback window.</li>
-<li><strong>Update check</strong> — fetches release metadata and, if a newer version is available, shows an install dialog.</li>
-</ol>
-<p>When the user confirms an update, <code>shani-update</code> detects the available terminal emulator and launches <code>shani-deploy</code> inside it.</p>
-<blockquote><strong>Auto-reboot is opt-in here too.</strong> Once <code>shani-deploy</code> finishes successfully — whether launched unattended by the timer or manually — the new slot is ready to boot into whenever convenient; it does not reboot on its own unless <code>AUTO_REBOOT=yes</code> was set. See <a href="#automatic-reboot-after-deployment">Automatic Reboot After Deployment</a> below.</blockquote>
-<pre><code class="language-bash"># Check timer status
-systemctl --user status shani-update.timer
+<h2 id="updates-and-notifications">Updates and Notifications</h2>
+<p>Shani Cassini is the user-facing update manager. Its <strong>Updates & Rollback</strong> page calls <code>shani-deploy</code> to install updates, change channels, and roll back to the previous system.</p>
+<p>The per-user <code>shani-cassini-agent.timer</code> starts with your desktop session. It runs the agent two minutes later, then every two hours with a small random delay. Each run executes <code>shani-cassini --agent</code> and reads <code>shani-deploy --status --check --json</code>. The agent sends a notification when:</p>
+<ul>
+<li>a boot failure was recorded;</li>
+<li>the current slot is the first boot of a newly deployed system;</li>
+<li>a staged update needs a restart; or</li>
+<li>a newer version is available on the selected channel.</li>
+</ul>
+<p>Choose <strong>Open</strong> in a notification to start Shani Cassini on <strong>Updates & Rollback</strong>. The agent only checks and notifies. It does not install an update or run a rollback itself.</p>
+<blockquote><strong>Auto-reboot is opt-in.</strong> Once <code>shani-deploy</code> finishes successfully, the new slot is ready to boot into whenever convenient. It does not reboot on its own unless <code>AUTO_REBOOT=yes</code> was set. See <a href="#automatic-reboot-after-deployment">Automatic Reboot After Deployment</a> below.</blockquote>
+<pre><code class="language-bash"># Check the per-user timer
+systemctl --user status shani-cassini-agent.timer
 
-# View update manager logs
-cat ~/.cache/shani-update.log
-journalctl -t shani-update -n 50
+# View agent logs
+journalctl --user -u shani-cassini-agent.service -n 50
 
-# Run an immediate interactive check
-shani-update</code></pre>
-<h3 id="shani-update-flags">shani-update Flags</h3>
-<p><code>shani-update</code> is mostly a GUI-driven wrapper, but it also accepts CLI flags that mirror (and, for install/deploy actions, pass through to) <code>shani-deploy</code>:</p>
-<table><thead><tr><th>Flag</th><th>Effect</th></tr></thead><tbody><tr><td><code>--startup</code></td><td>Run the login flow: fallback check → reboot-needed check → candidate check → update check</td></tr><tr><td><code>-r</code>, <code>--rollback</code></td><td>Roll back the inactive slot immediately</td></tr><tr><td><code>-f</code>, <code>--force</code></td><td>Force deploy even if the version matches or there's a slot mismatch</td></tr><tr><td><code>-t</code>, <code>--channel &lt;chan&gt;</code></td><td>Update channel for this run: <code>stable</code> or <code>latest</code></td></tr><tr><td><code>-v</code>, <code>--verbose</code></td><td>Verbose output from <code>shani-deploy</code></td></tr><tr><td><code>-d</code>, <code>--dry-run</code></td><td>Simulate the deployment without changes</td></tr><tr><td><code>-c</code>, <code>--cleanup</code></td><td>Passthrough: <code>shani-deploy --cleanup</code></td></tr><tr><td><code>-o</code>, <code>--optimize</code></td><td>Passthrough: <code>shani-deploy --optimize</code></td></tr><tr><td><code>--download-only</code></td><td>Passthrough: <code>shani-deploy --download-only</code></td></tr><tr><td><code>--set-channel &lt;chan&gt;</code></td><td>Passthrough: <code>shani-deploy --set-channel</code> (persists to <code>/etc/shani-channel</code>)</td></tr><tr><td><code>--skip-self-update</code></td><td>Passthrough on install: <code>shani-deploy --skip-self-update</code></td></tr><tr><td><code>--update-genefi</code></td><td>Passthrough on install: <code>shani-deploy --update-genefi</code></td></tr><tr><td><code>--health [ARGS...]</code></td><td>Forwards remaining arguments to <code>shani-health</code> (e.g. <code>shani-update --health --security</code>) — must be last on the command line</td></tr><tr><td><code>-h</code>, <code>--help</code></td><td>Show usage</td></tr></tbody></table>
-<p>Running <code>shani-update</code> with no flags does the interactive flow: fallback check → reboot-needed check → candidate-boot check → update check, showing a GUI dialog (yad/zenity/kdialog) at whichever step applies, falling back to a desktop notification or console prompt if no GUI toolkit is available.</p>
+# Open the page directly
+shani-cassini --section=updates</code></pre>
 <h2 id="manual-update">Manual Update</h2>
 <pre><code class="language-bash"># Download, verify, and stage the update
 sudo shani-deploy
@@ -290,7 +284,7 @@ systemctl stop shanios-auto-reboot.timer</code></pre>
 <li><strong>Extract</strong> — pipes the verified image into <code>btrfs receive</code></li>
 <li><strong>UKI generation</strong> — runs <code>gen-efi configure &lt;inactive-slot&gt;</code> inside a chroot of the new slot</li>
 <li><strong>Boot entry update</strong> — new slot set as next-boot default with <code>+3-0</code> boot count tries</li>
-<li><strong>Notify</strong> — writes <code>/run/shanios/reboot-needed</code> so <code>shani-update</code> can surface a restart dialog on next login</li>
+<li><strong>Notify</strong> — writes <code>/run/shanios/reboot-needed</code> so the Shani Cassini agent can surface a restart notification on its next run</li>
 <li><strong>Auto-reboot</strong> — opt-in only (<code>AUTO_REBOOT=yes</code>); the new slot is ready immediately and reboot is left to your convenience by default (see <a href="#automatic-reboot-after-deployment">Automatic Reboot After Deployment</a> below)</li>
 </ol>
 <p>Nothing in your running OS is touched at any point.</p>
@@ -331,8 +325,8 @@ sudo shani-deploy --channel-status latest</code></pre>
 <h2 id="boot-counting-and-automatic-fallback">Boot Counting and Automatic Fallback</h2>
 <p>After an update, the new slot is registered in systemd-boot with <code>+3-0</code> boot count tries. If the new slot fails to boot three times, systemd-boot automatically falls back to the previous slot — no user action required.</p>
 <p>Shanios uses two tiers of boot failure detection:</p>
-<table><thead><tr><th>Tier</th><th>Marker</th><th>Trigger</th><th>Action</th></tr></thead><tbody><tr><td>Hard failure</td><td><code>/data/boot_hard_failure</code></td><td>Root filesystem mount failed (dracut pre-mount hook)</td><td>Manual: <code>shani-deploy --rollback</code></td></tr><tr><td>Soft failure</td><td><code>/data/boot_failure</code></td><td>System booted but never reached <code>multi-user.target</code> within 15 minutes</td><td>Automated rollback offered by <code>shani-update</code></td></tr></tbody></table>
-<p>On first login after a fallback, <code>shani-update</code> detects the mismatch and shows a dialog offering to roll back the failed slot.</p>
+<table><thead><tr><th>Tier</th><th>Marker</th><th>Trigger</th><th>Action</th></tr></thead><tbody><tr><td>Hard failure</td><td><code>/data/boot_hard_failure</code></td><td>Root filesystem mount failed (dracut pre-mount hook)</td><td>Manual: <code>shani-deploy --rollback</code></td></tr><tr><td>Soft failure</td><td><code>/data/boot_failure</code></td><td>System booted but never reached <code>multi-user.target</code> within 15 minutes</td><td>Automatic system recovery, with a Shani Cassini agent notification linking to <strong>Updates & Rollback</strong></td></tr></tbody></table>
+<p>After login, the Shani Cassini agent reads the boot state through <code>shani-deploy --status --check --json</code>. If a fallback or recovery failure is recorded, it sends a notification that opens <strong>Updates & Rollback</strong>, where you can manage the rollback.</p>
 <h2 id="storage-management">Storage Management</h2>
 <pre><code class="language-bash"># Remove old backup snapshots and cached downloads
 sudo shani-deploy -c
@@ -363,16 +357,16 @@ systemctl --user status flatpak-update-user.timer</code></pre>
 <pre><code class="language-bash">sudo fwupdmgr refresh
 sudo fwupdmgr get-updates
 sudo fwupdmgr update</code></pre>
-<blockquote>After a firmware update, PCR 0 changes. Re-enroll TPM2 if you are using automatic LUKS unlock: ``<code>bash sudo gen-efi cleanup-tpm2 sudo gen-efi enroll-tpm2 </code>`` See <a href="../security/tpm2.md">TPM2 Enrollment</a>.</blockquote>
+<blockquote>After a firmware update, PCR 0 changes. Re-enroll TPM2 if you are using automatic LUKS unlock: ``<code>bash sudo gen-efi cleanup-tpm2 sudo gen-efi enroll-tpm2 </code>`` See <a href="/doc/security/tpm2/">TPM2 Enrollment</a>.</blockquote>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="shani-health">System Health Checks</a> — automated monitoring and diagnostics</li>
-<li><a href="config">System Config</a> — /etc overlay, locale, hostname, services</li>
-<li><a href="shell">Shell & Environment</a> — Zsh, Starship, Nix, CLI tools</li>
-<li><a href="user-setup">User Provisioning</a> — automatic group and shell setup</li>
-<li><a href="shani-reset">Shani Reset</a> — factory reset of persistent state</li>
-<li><a href="../concepts/blue-green.md">Blue-Green Deployment</a> — the two-slot architecture</li>
-<li><a href="../troubleshooting.md">Troubleshooting</a> — diagnosing update and boot issues</li>
+<li><a href="/doc/updates/shani-health/">System Health Checks</a> — automated monitoring and diagnostics</li>
+<li><a href="/doc/updates/config/">System Config</a> — /etc overlay, locale, hostname, services</li>
+<li><a href="/doc/updates/shell/">Shell & Environment</a> — Zsh, Starship, Nix, CLI tools</li>
+<li><a href="/doc/updates/user-setup/">User Provisioning</a> — automatic group and shell setup</li>
+<li><a href="/doc/updates/shani-reset/">Shani Reset</a> — factory reset of persistent state</li>
+<li><a href="/doc/concepts/blue-green/">Blue-Green Deployment</a> — the two-slot architecture</li>
+<li><a href="/doc/troubleshooting/">Troubleshooting</a> — diagnosing update and boot issues</li>
 </ul></div>
     </div>
 
@@ -404,6 +398,7 @@ sudo fwupdmgr update</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

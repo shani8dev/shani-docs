@@ -218,7 +218,7 @@
           <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><blockquote><strong>Part of the Networking & Infrastructure series:</strong> See <a href="../networking">all networking docs</a></blockquote>
+      <div class="prose"><blockquote><strong>Part of the Networking & Infrastructure series:</strong> See <a href="/doc/overview/">all networking docs</a></blockquote>
 <h2 id="squid-caching-proxy">Squid (Caching Proxy)</h2>
 <p><strong>Purpose:</strong> High-performance HTTP/HTTPS caching proxy. Squid caches web content so repeated requests are served from disk rather than the internet — saving bandwidth, reducing latency, and enabling content filtering by URL, domain, or MIME type. Useful in homelabs with metered internet connections, for caching container image pulls, or as a transparent proxy for auditing outbound HTTP traffic from containers.</p>
 <pre><code class="language-yaml"># ~/squid/compose.yaml
@@ -282,7 +282,7 @@ podman pull nginx:alpine</code></pre>
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="networking">Networking & Infrastructure</a> — overview</li>
+<li><a href="/doc/overview/">Networking & Infrastructure</a> — overview</li>
 </ul></div>
     </div>
 
@@ -314,6 +314,7 @@ podman pull nginx:alpine</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

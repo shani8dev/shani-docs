@@ -225,7 +225,7 @@
 <li><strong>bluez-obex</strong> — OBEX file transfer support (sending/receiving files over Bluetooth)</li>
 <li><strong>bluez-mesh</strong> — Bluetooth Mesh networking support</li>
 <li><strong>bluez-hid2hci</strong> — HID-to-HCI mode switching for some older Bluetooth mice/keyboards that boot in a legacy USB-HID compatibility mode</li>
-<li><strong>bluez-cups</strong> — lets Bluetooth-connected printers register with CUPS (see <a href="../system/printing.md">Printing & Scanning</a>)</li>
+<li><strong>bluez-cups</strong> — lets Bluetooth-connected printers register with CUPS (see <a href="/doc/system/printing/">Printing & Scanning</a>)</li>
 <li><strong>bluez-tools</strong> — additional CLI utilities (<code>bt-adapter</code>, <code>bt-agent</code>, <code>bt-obex</code>)</li>
 </ul>
 <p><code>bluetooth.service</code> is enabled and running from first boot.</p>
@@ -273,7 +273,7 @@ bluetoothctl remove XX:XX:XX:XX:XX:XX
 bluetoothctl power off
 bluetoothctl power on</code></pre>
 <h2 id="audio-devices">Audio Devices</h2>
-<p>Bluetooth headphones/speakers route through PipeWire once paired — see <a href="../system/audio.md">Audio (PipeWire)</a> for switching the default output device and troubleshooting sound quality. Most modern Bluetooth audio codecs (aptX, LDAC, LC3) are supported out of the box via the pre-installed <code>libldac</code>/<code>liblc3</code>/<code>libfreeaptx</code> libraries.</p>
+<p>Bluetooth headphones/speakers route through PipeWire once paired — see <a href="/doc/system/audio/">Audio (PipeWire)</a> for switching the default output device and troubleshooting sound quality. Most modern Bluetooth audio codecs (aptX, LDAC, LC3) are supported out of the box via the pre-installed <code>libldac</code>/<code>liblc3</code>/<code>libfreeaptx</code> libraries.</p>
 <pre><code class="language-bash"># Confirm the Bluetooth device appears as an audio sink
 pactl list sinks short | grep -i bluez
 
@@ -285,12 +285,12 @@ bluetoothctl connect XX:XX:XX:XX:XX:XX
 obexftp -b XX:XX:XX:XX:XX:XX -B 10 -p file.jpg   # requires obexftp, not pre-installed</code></pre>
 <p>Most desktop environments also support drag-and-drop file sending directly from the Bluetooth settings panel once a device is paired and marked as trusted.</p>
 <h2 id="troubleshooting">Troubleshooting</h2>
-<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Adapter not found</td><td><code>rfkill list</code> — check Bluetooth isn't blocked; <code>rfkill unblock bluetooth</code> if it is</td></tr><tr><td>Device won't pair</td><td>Remove any stale pairing first: <code>bluetoothctl remove XX:XX:XX:XX:XX:XX</code>, then retry; make sure the device is in pairing/discoverable mode</td></tr><tr><td>Paired but won't connect</td><td><code>sudo systemctl restart bluetooth</code>; check <code>journalctl -u bluetooth -n 30</code> for the actual error</td></tr><tr><td>Headphones connected but no audio</td><td>See <a href="../system/audio.md">Audio (PipeWire)</a>'s Bluetooth section — usually a default-sink or codec negotiation issue</td></tr><tr><td>Mouse/keyboard connects but doesn't work</td><td>Some older HID devices need <code>bluez-hid2hci</code> mode switching — confirmed pre-installed; try re-pairing after a fresh boot</td></tr><tr><td>Bluetooth works then disappears after suspend</td><td><code>sudo systemctl restart bluetooth</code> after resume; check for a known adapter-specific suspend bug via `dmesg \</td><td>grep -i bluetooth`</td></tr></tbody></table>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Adapter not found</td><td><code>rfkill list</code> — check Bluetooth isn't blocked; <code>rfkill unblock bluetooth</code> if it is</td></tr><tr><td>Device won't pair</td><td>Remove any stale pairing first: <code>bluetoothctl remove XX:XX:XX:XX:XX:XX</code>, then retry; make sure the device is in pairing/discoverable mode</td></tr><tr><td>Paired but won't connect</td><td><code>sudo systemctl restart bluetooth</code>; check <code>journalctl -u bluetooth -n 30</code> for the actual error</td></tr><tr><td>Headphones connected but no audio</td><td>See <a href="/doc/system/audio/">Audio (PipeWire)</a>'s Bluetooth section — usually a default-sink or codec negotiation issue</td></tr><tr><td>Mouse/keyboard connects but doesn't work</td><td>Some older HID devices need <code>bluez-hid2hci</code> mode switching — confirmed pre-installed; try re-pairing after a fresh boot</td></tr><tr><td>Bluetooth works then disappears after suspend</td><td><code>sudo systemctl restart bluetooth</code> after resume; check for a known adapter-specific suspend bug via `dmesg \</td><td>grep -i bluetooth`</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../system/audio.md">Audio (PipeWire)</a> — Bluetooth audio device switching and codec issues</li>
-<li><a href="../system/hardware.md">Hardware</a> — general USB/wireless device detection</li>
-<li><a href="../system/printing.md">Printing & Scanning</a> — Bluetooth-connected printers via <code>bluez-cups</code></li>
+<li><a href="/doc/system/audio/">Audio (PipeWire)</a> — Bluetooth audio device switching and codec issues</li>
+<li><a href="/doc/system/hardware/">Hardware</a> — general USB/wireless device detection</li>
+<li><a href="/doc/system/printing/">Printing & Scanning</a> — Bluetooth-connected printers via <code>bluez-cups</code></li>
 </ul></div>
     </div>
 
@@ -322,6 +322,7 @@ obexftp -b XX:XX:XX:XX:XX:XX -B 10 -p file.jpg   # requires obexftp, not pre-ins
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

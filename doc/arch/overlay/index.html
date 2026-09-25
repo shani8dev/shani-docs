@@ -268,7 +268,7 @@ sudo rm /data/overlay/etc/upper/hostname
 # Or reset the entire overlay (removes ALL your /etc customisations — use with care)
 sudo rm -rf /data/overlay/etc/upper/*
 sudo systemctl reboot</code></pre>
-<p>For a full factory reset that also clears service state, use <a href="../updates/shani-reset.md"><code>shani-reset</code></a> instead.</p>
+<p>For a full factory reset that also clears service state, use <a href="/doc/updates/shani-reset/"><code>shani-reset</code></a> instead.</p>
 <h2 id="checking-overlay-health">Checking Overlay Health</h2>
 <pre><code class="language-bash"># Confirm /etc is mounted as an overlay
 findmnt /etc
@@ -280,7 +280,7 @@ find /data/overlay/etc/upper -mindepth 1 | wc -l
 # Use shani-health for a detailed report
 shani-health --boot   # shows &quot;Immutability → /etc: OK  overlay active, N file(s) modified vs base&quot;</code></pre>
 <h2 id="optional-a-var-overlay-also-exists-disabled-by-default">Optional: A /var Overlay Also Exists (Disabled by Default)</h2>
-<p>The fstab ships a second, commented-out overlay entry for <code>/var</code> at <code>/data/overlay/var/{upper,work}</code>, alongside the <code>/etc</code> one. It is <strong>not active</strong> on a default install — <code>/var</code> is a tmpfs via <code>systemd.volatile=state</code> on the kernel cmdline instead (see <a href="filesystem">Filesystem Structure</a>).</p>
+<p>The fstab ships a second, commented-out overlay entry for <code>/var</code> at <code>/data/overlay/var/{upper,work}</code>, alongside the <code>/etc</code> one. It is <strong>not active</strong> on a default install — <code>/var</code> is a tmpfs via <code>systemd.volatile=state</code> on the kernel cmdline instead (see <a href="/doc/arch/filesystem/">Filesystem Structure</a>).</p>
 <p>The two mechanisms are explicitly mutually exclusive: if you enable the <code>/var</code> overlay fstab line without first removing <code>systemd.volatile=state</code> from <code>/etc/kernel/install_cmdline_&lt;slot&gt;</code> (and regenerating the UKI with <code>gen-efi configure &lt;slot&gt;</code>), the kernel creates <code>/var</code> as an empty tmpfs <em>before</em> fstab mounts run, and the overlay then stacks on top of that empty tmpfs as its lowerdir instead of the real read-only <code>/var</code> from the slot — silently discarding all default <code>/var</code> contents with no error. Enabling this is an advanced, opt-in path (used by some server image profiles); do not flip it on without removing the cmdline parameter first.</p>
 <h2 id="limitations">Limitations</h2>
 <ul>
@@ -291,9 +291,9 @@ shani-health --boot   # shows &quot;Immutability → /etc: OK  overlay active, N
 </ul>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="dracut-module">Dracut Module</a> — how the overlay is mounted at early boot</li>
-<li><a href="../updates/config.md">System Config</a> — editing <code>/etc</code> files and managing the overlay</li>
-<li><a href="../updates/shani-reset.md">Factory Reset</a> — clearing the entire overlay</li>
+<li><a href="/doc/arch/dracut-module/">Dracut Module</a> — how the overlay is mounted at early boot</li>
+<li><a href="/doc/updates/config/">System Config</a> — editing <code>/etc</code> files and managing the overlay</li>
+<li><a href="/doc/updates/shani-reset/">Factory Reset</a> — clearing the entire overlay</li>
 </ul></div>
     </div>
 
@@ -325,6 +325,7 @@ shani-health --boot   # shows &quot;Immutability → /etc: OK  overlay active, N
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

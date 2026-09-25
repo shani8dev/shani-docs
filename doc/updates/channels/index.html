@@ -232,7 +232,7 @@ https://downloads.shani.dev/&lt;edition&gt;/iso-stable.txt</code></pre>
 <p>Each file contains the date of the current release:</p>
 <pre><code>20260518</code></pre>
 <p>When <code>shani-deploy</code> checks for updates, it fetches these pointer files and compares them to the currently installed version.</p>
-<blockquote><strong>Note:</strong> COSMIC, Kiosk, and Server profiles are available as base images (<code>.zst</code> send-streams) only — they do not have signed ISOs on R2. See <a href="../enterprise/cloud-images.md">Cloud Images Beyond AWS</a> for deployment options.</blockquote>
+<blockquote><strong>Note:</strong> COSMIC, Kiosk, and Server profiles are available as base images (<code>.zst</code> send-streams) only — they do not have signed ISOs on R2. See <a href="/doc/enterprise/cloud-images/">Cloud Images Beyond AWS</a> for deployment options.</blockquote>
 <h3 id="promotion-flow">Promotion Flow</h3>
 <ol>
 <li>A new image is built by <code>shani-install-media</code> and uploaded to R2</li>
@@ -269,9 +269,9 @@ sudo shani-deploy --set-channel stable
 sudo shani-deploy --set-channel latest</code></pre>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="system">System Updates</a> — How shani-update works</li>
+<li><a href="/doc/updates/system/">System Updates</a> — How Shani Cassini and shani-deploy manage updates</li>
 <li><a href="https://blog.shani.dev/post/shani-deploy-reference">shani-deploy Reference</a> — Command reference</li>
-<li><a href="../arch/build-pipeline.md">Build Pipeline</a> — How images are produced</li>
+<li><a href="/doc/arch/build-pipeline/">Build Pipeline</a> — How images are produced</li>
 </ul></div>
     </div>
 
@@ -303,6 +303,7 @@ sudo shani-deploy --set-channel latest</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

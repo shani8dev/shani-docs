@@ -309,9 +309,9 @@ sudo quota -su alice</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>Permission denied</code></td><td>Check the client IP is within the allowed range in <code>/etc/exports</code>; also verify Linux filesystem permissions on the export path</td></tr><tr><td><code>Stale file handle</code></td><td>The exported path was deleted or the server restarted while the client had it open — <code>sudo umount -f /mnt/remote</code> and remount</td></tr><tr><td><code>Access denied by server</code></td><td>Check <code>journalctl -u nfs-server</code> on the host for detailed errors</td></tr><tr><td>Mount hangs at boot</td><td>Add <code>_netdev</code> and <code>timeo=14</code> to fstab options; ensure <code>nfs-server</code> is running on the host</td></tr><tr><td><code>showmount</code> fails from client</td><td>Open <code>rpcbind</code> and <code>mountd</code> firewall services on the server in addition to <code>nfs</code></td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="samba">Samba (SMB shares)</a></li>
-<li><a href="sshfs">SSHFS</a></li>
-<li><a href="../system/storage.md">Storage management</a></li>
+<li><a href="/doc/networking/samba/">Samba (SMB shares)</a></li>
+<li><a href="/doc/networking/sshfs/">SSHFS</a></li>
+<li><a href="/doc/system/storage/">Storage management</a></li>
 </ul></div>
     </div>
 
@@ -343,6 +343,7 @@ sudo quota -su alice</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

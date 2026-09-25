@@ -251,7 +251,7 @@ Iteration time:  2000 ms (benchmarked per-machine, not a fixed iteration count)<
 <p>After enabling encryption, enroll TPM2 for passwordless unlock:</p>
 <pre><code class="language-bash">sudo gen-efi enroll-tpm2</code></pre>
 <p>This seals the LUKS key into the TPM2 chip with PCR policy chosen automatically: <strong>PCR 0+7</strong> when Secure Boot is enabled (firmware + Secure Boot certificate state), or <strong>PCR 0 only</strong> when disabled. The disk unlocks silently on your own hardware; if physically moved to another machine or if firmware is tampered with, the TPM withholds the key.</p>
-<p>See <a href="tpm2">TPM2 Enrollment</a> for setup and <a href="luks">LUKS Management</a> for keyslot management.</p>
+<p>See <a href="/doc/security/tpm2/">TPM2 Enrollment</a> for setup and <a href="/doc/security/luks/">LUKS Management</a> for keyslot management.</p>
 <h2 id="secure-boot">Secure Boot</h2>
 <p>Shanios uses Shim for Secure Boot — the same mechanism used by mainstream Linux distributions. The MOK (Machine Owner Key) is baked into the system image at build time — every machine installed from the same signed ISO shares the same key. A fresh keypair is only generated on the spot as a fallback, if keys are missing or invalid on a given image. Every UKI that <code>gen-efi</code> generates is signed with this key.</p>
 <p>The full boot chain:</p>
@@ -260,7 +260,7 @@ Iteration time:  2000 ms (benchmarked per-machine, not a fixed iteration count)<
     → systemd-boot (verifies the UKI via MOK)
       → Unified Kernel Image (kernel + initramfs + cmdline, all signed together)</code></pre>
 <p>The bootloader editor is disabled and the kernel command line is embedded in the UKI at build time — it cannot be modified from the boot menu, preventing attacks that inject <code>init=/bin/bash</code> or <code>single</code> to bypass authentication.</p>
-<p>See <a href="secure-boot">Secure Boot</a> for enrollment.</p>
+<p>See <a href="/doc/security/secure-boot/">Secure Boot</a> for enrollment.</p>
 <h2 id="module-and-protocol-blacklisting">Module and Protocol Blacklisting</h2>
 <p>Several kernel modules and rarely-used network protocols are blacklisted by default, via <code>modprobe.d</code> drop-ins shipped in <code>shani-settings</code>:</p>
 <table><thead><tr><th>Module(s)</th><th>File</th><th>Reason</th></tr></thead><tbody><tr><td><code>mei</code>, <code>mei_me</code></td><td><code>modprobe.d/noime.conf</code></td><td>Intel Management Engine / vPro remote-access interface — disabled by default. This does not remove ME from the hardware (not possible in software), but removes the kernel's interface to it, reducing the attack surface from the OS side.</td></tr><tr><td><code>pcspkr</code></td><td><code>modprobe.d/nobeep.conf</code></td><td>PC speaker blacklisted to stop the console beep; incidentally also removes it as a data-exfiltration side channel</td></tr><tr><td><code>firewire-core</code>, <code>firewire-ohci</code>, <code>firewire-sbp2</code>, <code>firewire-net</code></td><td><code>modprobe.d/blacklist-firewire.conf</code></td><td>FireWire storage/DMA blocked outright (<code>install ... /bin/false</code>) — addresses Lynis <code>STRG-1846</code>, preventing unauthorized memory access via FireWire DMA</td></tr><tr><td><code>dccp</code>, <code>sctp</code>, <code>rds</code>, <code>tipc</code></td><td><code>modprobe.d/disable-unused-protocols.conf</code></td><td>Uncommon network protocols disabled — addresses Lynis <code>NETW-3200</code>, reducing kernel attack surface from protocols the desktop doesn't use</td></tr></tbody></table>
@@ -306,7 +306,7 @@ net.core.bpf_jit_harden = 2         # hardens the BPF JIT against Spectre/info-l
 <li><strong>PC/SC diagnostics</strong> (<code>pcsc_scan</code>) — <code>nix-env -iA nixpkgs.pcsc-tools</code></li>
 <li><strong>TOTP/HOTP two-factor</strong> (<code>oathtool</code>) — <code>nix-env -iA nixpkgs.oath-toolkit</code></li>
 </ul>
-<p>See <a href="hardware-auth">Hardware Authentication</a> for the full breakdown of what ships by default, the exact install commands, and the Distrobox alternative.</p>
+<p>See <a href="/doc/security/hardware-auth/">Hardware Authentication</a> for the full breakdown of what ships by default, the exact install commands, and the Distrobox alternative.</p>
 <h2 id="zero-telemetry">Zero Telemetry</h2>
 <p>No background services report hardware, software usage, or system behaviour to any external server. No identifiers are generated or transmitted. No crash reports are collected.</p>
 <p><code>shani-deploy</code> connects to the CDN to download updates and to the GPG keyserver to verify signatures — standard HTTP downloads that send only what any HTTP client sends. Nothing else leaves the machine.</p>
@@ -337,19 +337,19 @@ sudo fail2ban-client status sshd</code></pre>
 <p>The attack surface is reduced by design, not by configuration.</p>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="tpm2">TPM2 Enrollment</a> — automatic LUKS unlock setup</li>
-<li><a href="luks">LUKS Management</a> — encryption key management and recovery</li>
-<li><a href="secure-boot">Secure Boot</a> — MOK enrollment and firmware setup</li>
-<li><a href="apparmor">AppArmor</a> — mandatory access control profiles</li>
-<li><a href="audit">Audit Framework</a> — auditd rules and log analysis</li>
-<li><a href="fwupd">Firmware Updates (fwupd)</a> — firmware upgrade workflow</li>
-<li><a href="hardware-auth">Hardware Authentication</a> — fingerprint, smart card, YubiKey, NFC</li>
-<li><a href="lynis">Lynis Audit</a> — CIS benchmark scanning and hardening</li>
-<li><a href="keyring">Keyring & Secrets</a> — GNOME Keyring and credential storage</li>
-<li><a href="../security/permissions.md">Permissions & Authorization</a> — Polkit tier system</li>
-<li><a href="../updates/system.md">System Updates</a> — how signed images are deployed</li>
-<li><a href="../servers/security/policies">Security & Identity</a> — Vaultwarden, Authelia, Keycloak, CrowdSec, secrets management</li>
-<li><a href="../troubleshooting.md">Troubleshooting</a> — diagnosing security-related issues</li>
+<li><a href="/doc/security/tpm2/">TPM2 Enrollment</a> — automatic LUKS unlock setup</li>
+<li><a href="/doc/security/luks/">LUKS Management</a> — encryption key management and recovery</li>
+<li><a href="/doc/security/secure-boot/">Secure Boot</a> — MOK enrollment and firmware setup</li>
+<li><a href="/doc/security/apparmor/">AppArmor</a> — mandatory access control profiles</li>
+<li><a href="/doc/security/audit/">Audit Framework</a> — auditd rules and log analysis</li>
+<li><a href="/doc/security/fwupd/">Firmware Updates (fwupd)</a> — firmware upgrade workflow</li>
+<li><a href="/doc/security/hardware-auth/">Hardware Authentication</a> — fingerprint, smart card, YubiKey, NFC</li>
+<li><a href="/doc/security/lynis/">Lynis Audit</a> — CIS benchmark scanning and hardening</li>
+<li><a href="/doc/security/keyring/">Keyring & Secrets</a> — GNOME Keyring and credential storage</li>
+<li><a href="/doc/security/permissions/">Permissions & Authorization</a> — Polkit tier system</li>
+<li><a href="/doc/updates/system/">System Updates</a> — how signed images are deployed</li>
+<li><a href="/doc/servers/security/policies/">Security & Identity</a> — Vaultwarden, Authelia, Keycloak, CrowdSec, secrets management</li>
+<li><a href="/doc/troubleshooting/">Troubleshooting</a> — diagnosing security-related issues</li>
 </ul></div>
     </div>
 
@@ -381,6 +381,7 @@ sudo fail2ban-client status sshd</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

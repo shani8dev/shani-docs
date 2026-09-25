@@ -284,8 +284,8 @@ journalctl -b
 journalctl -k
 journalctl -k | grep -i error
 
-# Filter by syslog identifier (tag)
-journalctl -t shani-update
+# Logs for a per-user service
+journalctl --user -u shani-cassini-agent.service
 
 # Output in JSON (for scripting)
 journalctl -u caddy -n 10 -o json
@@ -417,7 +417,7 @@ OnBootSec=15min
 OnUnitActiveSec=2h</code></pre>
 <hr>
 <h2 id="user-services">User Services</h2>
-<p>User services run under your UID without root. Timer-based user services require linger to fire when you're not logged in (see <a href="users-groups">Users & Groups</a>).</p>
+<p>User services run under your UID without root. Timer-based user services require linger to fire when you're not logged in (see <a href="/doc/system/users-groups/">Users & Groups</a>).</p>
 <pre><code class="language-bash"># Unit files location
 ~/.config/systemd/user/
 
@@ -572,7 +572,7 @@ ExecStart=/opt/myapp/bin/server
 StandardInput=socket</code></pre>
 <pre><code class="language-bash">sudo systemctl enable --now myapp.socket
 # myapp.service starts automatically when a connection arrives</code></pre>
-<p><code>sshd.socket</code> is available as an opt-in alternative on Shani OS for machines that rarely accept SSH connections — the default is the persistent <code>sshd.service</code>. See <a href="../networking/openssh.md">OpenSSH</a>.</p>
+<p><code>sshd.socket</code> is available as an opt-in alternative on Shani OS for machines that rarely accept SSH connections — the default is the persistent <code>sshd.service</code>. See <a href="/doc/networking/openssh/">OpenSSH</a>.</p>
 <hr>
 <h2 id="useful-patterns">Useful Patterns</h2>
 <h3 id="restart-on-failure-with-back-off">Restart on failure with back-off</h3>
@@ -610,11 +610,11 @@ ExecStopPost=/bin/rm -rf /var/run/myapp</code></pre>
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../updates/config.md">System Config</a> — overlay persistence, <code>systemctl edit</code>, sysctl via systemd</li>
-<li><a href="backup">Backup & Recovery</a> — full example of a user timer with <code>loginctl enable-linger</code></li>
-<li><a href="cronie">cronie</a> — cron as an alternative for simple per-user schedules</li>
-<li><a href="process-management">Process Management</a> — <code>systemd-cgls</code>, <code>systemd-cgtop</code>, cgroup resource usage</li>
-<li><a href="../updates/shani-health.md">shani-health</a> — reports on failed units, journal errors, and boot time</li>
+<li><a href="/doc/updates/config/">System Config</a> — overlay persistence, <code>systemctl edit</code>, sysctl via systemd</li>
+<li><a href="/doc/system/backup/">Backup & Recovery</a> — full example of a user timer with <code>loginctl enable-linger</code></li>
+<li><a href="/doc/system/cronie/">cronie</a> — cron as an alternative for simple per-user schedules</li>
+<li><a href="/doc/system/process-management/">Process Management</a> — <code>systemd-cgls</code>, <code>systemd-cgtop</code>, cgroup resource usage</li>
+<li><a href="/doc/updates/shani-health/">shani-health</a> — reports on failed units, journal errors, and boot time</li>
 </ul></div>
     </div>
 
@@ -646,6 +646,7 @@ ExecStopPost=/bin/rm -rf /var/run/myapp</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

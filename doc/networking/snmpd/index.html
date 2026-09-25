@@ -292,8 +292,8 @@ snmpwalk -v2c -c mycommstring localhost .1</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>Timeout: No Response from localhost</code></td><td>Check <code>systemctl status snmpd</code>; confirm it's listening: `ss -ulnp</td><td>grep 161`</td></tr><tr><td><code>No Such Object</code> for an OID</td><td>The MIB or extension for that OID may not be loaded; check that <code>snmpd.conf</code> includes the relevant <code>extend</code> or <code>pass</code> directive</td></tr><tr><td>Remote monitoring host can't reach snmpd</td><td>Check the firewall rule allows the monitoring host's IP; verify with <code>sudo firewall-cmd --list-all</code></td></tr><tr><td><code>authorizationError</code> with SNMPv3</td><td>Auth or privacy password mismatch — recreate the user with <code>net-snmp-create-v3-user</code> after stopping snmpd</td></tr><tr><td>View snmpd logs</td><td><code>journalctl -u snmpd -f</code></td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../servers/monitoring/prometheus">Monitoring stack</a></li>
-<li><a href="network-tools">Network tools</a></li>
+<li><a href="/doc/servers/monitoring/prometheus/">Monitoring stack</a></li>
+<li><a href="/doc/networking/network-tools/">Network tools</a></li>
 </ul></div>
     </div>
 
@@ -325,6 +325,7 @@ snmpwalk -v2c -c mycommstring localhost .1</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

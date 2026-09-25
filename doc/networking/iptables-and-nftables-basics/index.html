@@ -218,7 +218,7 @@
           <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><blockquote><strong>Part of the Networking & Infrastructure series:</strong> See <a href="../networking">all networking docs</a></blockquote>
+      <div class="prose"><blockquote><strong>Part of the Networking & Infrastructure series:</strong> See <a href="/doc/overview/">all networking docs</a></blockquote>
 <h2 id="iptables-and-nftables-basics">iptables and nftables Basics</h2>
 <p>Firewalld (used throughout this wiki) is a high-level interface over <code>nftables</code> on modern Linux. Understanding the underlying layer helps when debugging unexpected traffic behaviour.</p>
 <pre><code class="language-bash"># List all current nft rules (the native tool on modern systems)
@@ -246,7 +246,7 @@ sudo iptables -t raw -D PREROUTING -p tcp --dport 8080 -j TRACE  # remove when d
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="networking">Networking & Infrastructure</a> — overview</li>
+<li><a href="/doc/overview/">Networking & Infrastructure</a> — overview</li>
 </ul></div>
     </div>
 
@@ -278,6 +278,7 @@ sudo iptables -t raw -D PREROUTING -p tcp --dport 8080 -j TRACE  # remove when d
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

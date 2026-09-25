@@ -220,7 +220,7 @@
       </div>
       <div class="prose"><p><code>fwupd</code> is the Linux Vendor Firmware Service client. It downloads firmware updates for BIOS/UEFI, drives, controllers, and other hardware components directly from hardware vendors, verifies them cryptographically, and installs them. Keeping firmware current is a security requirement — firmware vulnerabilities (e.g. Spectre, MDS, firmware-level rootkits) are patched through firmware updates.</p>
 <p><code>fwupd</code> is pre-installed on Shani OS as a direct dependency of the <code>shani-core</code> package, and both <code>fwupd.service</code> and <code>fwupd-refresh.timer</code> are enabled automatically by <code>shani-core</code>'s post-install hook — metadata refresh and update checks are already running on a fresh install, with nothing to turn on.</p>
-<blockquote><strong>Important:</strong> After a firmware update, the TPM2 PCR 0 value changes. If you use TPM2-sealed LUKS, you will need to re-enroll after the firmware update. See <a href="tpm2">TPM2 Enrollment</a>.</blockquote>
+<blockquote><strong>Important:</strong> After a firmware update, the TPM2 PCR 0 value changes. If you use TPM2-sealed LUKS, you will need to re-enroll after the firmware update. See <a href="/doc/security/tpm2/">TPM2 Enrollment</a>.</blockquote>
 <hr>
 <h2 id="checking-for-updates">Checking for Updates</h2>
 <pre><code class="language-bash"># Refresh the firmware metadata from LVFS
@@ -266,10 +266,10 @@ sudo systemctl disable --now fwupd-refresh.timer</code></pre>
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="tpm2">TPM2 Enrollment</a> — re-enrollment required after firmware updates</li>
-<li><a href="secure-boot">Secure Boot</a> — firmware update interaction with Secure Boot</li>
-<li><a href="features">Security Features</a> — security stack overview</li>
-<li><a href="../updates/shani-health.md">shani-health Reference</a> — <code>shani-health --hardware</code> reports <code>fwupd.service</code>/<code>fwupd-refresh.timer</code> status and any pending firmware updates</li>
+<li><a href="/doc/security/tpm2/">TPM2 Enrollment</a> — re-enrollment required after firmware updates</li>
+<li><a href="/doc/security/secure-boot/">Secure Boot</a> — firmware update interaction with Secure Boot</li>
+<li><a href="/doc/security/features/">Security Features</a> — security stack overview</li>
+<li><a href="/doc/updates/shani-health/">shani-health Reference</a> — <code>shani-health --hardware</code> reports <code>fwupd.service</code>/<code>fwupd-refresh.timer</code> status and any pending firmware updates</li>
 </ul></div>
     </div>
 
@@ -301,6 +301,7 @@ sudo systemctl disable --now fwupd-refresh.timer</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

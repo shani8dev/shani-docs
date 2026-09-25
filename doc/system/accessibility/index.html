@@ -251,7 +251,7 @@ brltty -E   # discover devices without starting the daemon</code></pre>
 <pre><code class="language-bash"># Check IBus is running
 ibus-daemon --version
 ibus list-engine    # list all available engines</code></pre>
-<p>For Indic scripts (Devanagari, Bengali, Gujarati, Gurmukhi, Kannada, Malayalam, Oriya, Tamil, Telugu), rendering is handled by pre-configured fontconfig rules and Noto fonts rather than a dedicated IBus engine — see <a href="../intro/whats-included.md">What's Included</a>.</p>
+<p>For Indic scripts (Devanagari, Bengali, Gujarati, Gurmukhi, Kannada, Malayalam, Oriya, Tamil, Telugu), rendering is handled by pre-configured fontconfig rules and Noto fonts rather than a dedicated IBus engine — see <a href="/doc/intro/whats-included/">What's Included</a>.</p>
 <h2 id="other-desktop-accessibility-settings">Other Desktop Accessibility Settings</h2>
 <p>Beyond the tools above, both desktops expose standard accessibility options that don't require any extra packages:</p>
 <ul>
@@ -263,9 +263,9 @@ ibus list-engine    # list all available engines</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Orca doesn't start</td><td>Confirm AT-SPI is enabled: <code>gsettings get org.gnome.desktop.interface toolkit-accessibility</code> (GNOME); should be <code>true</code></td></tr><tr><td>No sound from espeakup</td><td>Check <code>systemctl status espeakup</code>; confirm <code>espeak-ng</code> voices are installed (<code>espeak-ng --voices</code>)</td></tr><tr><td>Braille display not detected</td><td>Check <code>brltty -E</code> output and USB connection; some displays need a specific <code>braille-driver=</code> setting in <code>/etc/brltty.conf</code></td></tr><tr><td>IBus input source doesn't appear</td><td>Confirm the engine package is installed (<code>ibus list-engine</code>); log out and back in after adding a new input source</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../intro/whats-included.md">What's Included</a> — full font and language support list</li>
-<li><a href="hardware">Hardware</a> — general USB device detection</li>
-<li><a href="../intro/user-config.md">User Configuration</a> — per-user settings and provisioning</li>
+<li><a href="/doc/intro/whats-included/">What's Included</a> — full font and language support list</li>
+<li><a href="/doc/system/hardware/">Hardware</a> — general USB device detection</li>
+<li><a href="/doc/intro/user-config/">User Configuration</a> — per-user settings and provisioning</li>
 <li><a href="https://blog.shani.dev/post/shani-os-accessibility">Accessibility on Shani OS</a> — extended walkthrough covering magnification, high contrast, and keyboard accessibility</li>
 <li><a href="https://blog.shani.dev/post/shani-os-indian-language-support">Indian Language Support on Shani OS</a> — Indic script rendering and fonts</li>
 </ul></div>
@@ -299,6 +299,7 @@ ibus list-engine    # list all available engines</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

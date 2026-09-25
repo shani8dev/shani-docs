@@ -274,10 +274,10 @@ sudo firewall-cmd --reload</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Cannot connect (connection refused)</td><td>Check that the server service is running: <code>systemctl --user status plasma-remotedesktop</code> or <code>grdctl status</code>; verify the firewall port is open</td></tr><tr><td>Black screen on connect</td><td>Log out of any active local session first — some RDP implementations cannot share a session that is already displayed on a local monitor</td></tr><tr><td>Poor performance / lag</td><td>Use RDP instead of VNC for LAN connections — RDP is hardware-accelerated; for VNC, enable compression in your viewer</td></tr><tr><td>Windows RDP client shows certificate warning</td><td>This is expected for self-signed certificates — accept and remember the certificate</td></tr><tr><td>krfb prompts "someone is trying to connect" every time</td><td>Disable confirmation in <strong>System Settings → Remote Desktop → Ask for confirmation</strong></td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="openssh">SSH Server</a> — remote access and tunneling</li>
-<li><a href="tailscale">Tailscale</a> — VPN-based remote access</li>
-<li><a href="wireguard">WireGuard</a> — VPN tunnel setup</li>
-<li><a href="firewalld">Firewall</a> — port configuration</li>
+<li><a href="/doc/networking/openssh/">SSH Server</a> — remote access and tunneling</li>
+<li><a href="/doc/networking/tailscale/">Tailscale</a> — VPN-based remote access</li>
+<li><a href="/doc/networking/wireguard/">WireGuard</a> — VPN tunnel setup</li>
+<li><a href="/doc/networking/firewalld/">Firewall</a> — port configuration</li>
 </ul></div>
     </div>
 
@@ -309,6 +309,7 @@ sudo firewall-cmd --reload</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

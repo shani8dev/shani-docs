@@ -300,8 +300,8 @@ sudo tail -f /var/log/exim/mainlog</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Mail stuck in queue</td><td>Run <code>exim -bp</code> to see the queue; <code>sudo exim -qf</code> to force retry; check <code>mainlog</code> for rejection reasons</td></tr><tr><td><code>Authentication failed</code></td><td>Verify credentials in <code>client_send</code>; for Gmail, ensure you are using an App Password not your account password</td></tr><tr><td><code>TLS negotiation failed</code></td><td>Confirm <code>hosts_require_tls = *</code> is set and the upstream SMTP port supports STARTTLS (587) or TLS (465)</td></tr><tr><td>Cron output not being mailed</td><td>Ensure <code>MAILTO</code> is set in the crontab (<code>MAILTO=root</code> or <code>MAILTO=youruser</code>) and Exim is running</td></tr><tr><td>Exim not starting</td><td>Run <code>sudo exim -bV</code> to check config syntax; check <code>journalctl -u exim</code> for errors</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="arpwatch">arpwatch mail alerts</a></li>
-<li><a href="../system/logging.md">Logging</a></li>
+<li><a href="/doc/networking/arpwatch/">arpwatch mail alerts</a></li>
+<li><a href="/doc/system/logging/">Logging</a></li>
 </ul></div>
     </div>
 
@@ -333,6 +333,7 @@ sudo tail -f /var/log/exim/mainlog</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

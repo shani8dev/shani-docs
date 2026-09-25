@@ -232,7 +232,7 @@
 <pre><code class="language-ini">[shani]
 SigLevel = Required DatabaseOptional
 Server = https://repo.shani.dev/$arch</code></pre>
-<p><strong>No action needed on Shani OS:</strong> the <code>[shani]</code> repository is already configured on every install, and the OS root is immutable — host-level <code>pacman -S</code> or edits to <code>/etc/pacman.conf</code> cannot persist and are not supported. (The manual <code>pacman</code> instructions above apply only to <strong>non-ShaniOS</strong> Arch-based systems that want to pull individual Shanios tools — see <a href="../enterprise/fleet.md">Fleet Deployment</a> for that setup.)</p>
+<p><strong>No action needed on Shani OS:</strong> the <code>[shani]</code> repository is already configured on every install, and the OS root is immutable — host-level <code>pacman -S</code> or edits to <code>/etc/pacman.conf</code> cannot persist and are not supported. (The manual <code>pacman</code> instructions above apply only to <strong>non-ShaniOS</strong> Arch-based systems that want to pull individual Shanios tools — see <a href="/doc/enterprise/fleet/">Fleet Deployment</a> for that setup.)</p>
 <h2 id="building-packages">Building Packages</h2>
 <p>Packages are built by the <code>shani-pkgbuilds</code> repo inside a reproducible Docker container. See the <a href="https://github.com/shani8dev/shani-pkgbuilds">shani-pkgbuilds</a> repo for details.</p>
 <h2 id="known-issues">Known Issues</h2>
@@ -241,9 +241,9 @@ Server = https://repo.shani.dev/$arch</code></pre>
 </ul>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../security/keyring.md">Pacman Keyring</a> — Trust root and key verification</li>
-<li><a href="../arch/build-pipeline.md">Build Pipeline</a> — How packages are built</li>
-<li><a href="../updates/system.md">System Updates</a> — How updates are delivered</li>
+<li><a href="/doc/security/keyring/">Pacman Keyring</a> — Trust root and key verification</li>
+<li><a href="/doc/arch/build-pipeline/">Build Pipeline</a> — How packages are built</li>
+<li><a href="/doc/updates/system/">System Updates</a> — How updates are delivered</li>
 </ul></div>
     </div>
 
@@ -275,6 +275,7 @@ Server = https://repo.shani.dev/$arch</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

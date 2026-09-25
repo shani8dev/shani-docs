@@ -218,7 +218,7 @@
           <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><blockquote><strong>Part of the Networking & Infrastructure series:</strong> See <a href="../networking">all networking docs</a></blockquote>
+      <div class="prose"><blockquote><strong>Part of the Networking & Infrastructure series:</strong> See <a href="/doc/overview/">all networking docs</a></blockquote>
 <h2 id="how-container-networking-works">How Container Networking Works</h2>
 <p>Understanding what Podman does under the hood helps debug connectivity issues between containers and the host.</p>
 <h4 id="when-you-start-a-container-with--p-808080">When you start a container with <code>-p 8080:80</code></h4>
@@ -249,7 +249,7 @@ ping $(podman inspect jellyfin --format '{{range .NetworkSettings.Networks}}{{.I
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="networking">Networking & Infrastructure</a> — overview</li>
+<li><a href="/doc/overview/">Networking & Infrastructure</a> — overview</li>
 </ul></div>
     </div>
 
@@ -281,6 +281,7 @@ ping $(podman inspect jellyfin --format '{{range .NetworkSettings.Networks}}{{.I
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

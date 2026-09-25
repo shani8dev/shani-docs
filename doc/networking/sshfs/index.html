@@ -271,10 +271,10 @@ systemctl --user enable --now mnt-remote.mount</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>fuse: bad mount point</code></td><td>Create the mount point first: <code>mkdir -p ~/mnt/remote-projects</code></td></tr><tr><td><code>Transport endpoint is not connected</code> after network drop</td><td>Unmount the stale mount: <code>fusermount -u ~/mnt/remote-projects</code> then remount; use <code>reconnect</code> option to avoid this</td></tr><tr><td>Very slow file listing</td><td>Disable host key DNS lookups in <code>~/.ssh/config</code> with <code>UseDNS no</code>; enable attribute caching with <code>-o cache=yes</code></td></tr><tr><td><code>Permission denied</code></td><td>Confirm SSH key auth works first: <code>ssh user@hostname</code>; check that the remote path exists and is readable by that user</td></tr><tr><td>Mount disappears after suspend/resume</td><td>Use <code>reconnect,ServerAliveInterval=15</code> options; alternatively, use a systemd mount unit with <code>Restart=on-failure</code></td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="openssh">SSH Server</a> — remote access and configuration</li>
-<li><a href="nfs">NFS</a> — network filesystem sharing</li>
-<li><a href="samba">Samba</a> — SMB/CIFS file sharing</li>
-<li><a href="../system/backup.md">Backup & Restore</a> — offsite backup with restic</li>
+<li><a href="/doc/networking/openssh/">SSH Server</a> — remote access and configuration</li>
+<li><a href="/doc/networking/nfs/">NFS</a> — network filesystem sharing</li>
+<li><a href="/doc/networking/samba/">Samba</a> — SMB/CIFS file sharing</li>
+<li><a href="/doc/system/backup/">Backup & Restore</a> — offsite backup with restic</li>
 </ul></div>
     </div>
 
@@ -306,6 +306,7 @@ systemctl --user enable --now mnt-remote.mount</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

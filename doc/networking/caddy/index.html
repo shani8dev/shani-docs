@@ -417,8 +417,8 @@ sudo firewall-cmd --reload</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>permission denied</code> serving files</td><td><code>sudo setfacl -R -m u:caddy:rx /your/path</code>; check SELinux context with <code>ls -Z</code></td></tr><tr><td>Browser shows untrusted cert for <code>.home.local</code></td><td>Trust the Caddy local CA: <code>sudo trust anchor /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt &amp;&amp; sudo update-ca-trust</code></td></tr><tr><td><code>bind: address already in use</code></td><td>Another process owns port 80 or 443 — `sudo ss -tlnp</td><td>grep ':80\</td><td>:443'` to identify it</td></tr><tr><td>Service won't start</td><td>Validate syntax first: <code>caddy validate --config /etc/caddy/Caddyfile</code>; then check logs: <code>journalctl -u caddy -f</code></td></tr><tr><td>Let's Encrypt rate limit hit</td><td>Switch to staging CA: <code>acme_ca https://acme-staging-v02.api.letsencrypt.org/directory</code> while testing</td></tr><tr><td>Reverse proxy returns 502 Bad Gateway</td><td>Confirm the backend is running and bound to the right port: <code>curl -v http://localhost:PORT</code>; for containers use <code>host.containers.internal</code> instead of <code>localhost</code></td></tr><tr><td>Config change not taking effect</td><td>Run <code>sudo systemctl reload caddy</code> — Caddy must be explicitly reloaded to pick up Caddyfile changes</td></tr><tr><td>HTTPS certificate not renewing</td><td>Check <code>journalctl -u caddy</code> for ACME errors; confirm port 80 is reachable from the internet for HTTP-01 challenges</td></tr><tr><td>WebSocket connections dropping</td><td>Add <code>@ws { header Connection <em>Upgrade</em> }</code> matcher and <code>handle @ws { reverse_proxy ... }</code> with explicit WebSocket header passthrough</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="cloudflared">Cloudflared Tunnels</a></li>
-<li><a href="apache">Apache HTTP Server</a></li>
+<li><a href="/doc/networking/cloudflared/">Cloudflared Tunnels</a></li>
+<li><a href="/doc/networking/apache/">Apache HTTP Server</a></li>
 <li><a href="https://blog.shani.dev/post/shani-os-home-server">Home server blog</a></li>
 </ul></div>
     </div>
@@ -451,6 +451,7 @@ sudo firewall-cmd --reload</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

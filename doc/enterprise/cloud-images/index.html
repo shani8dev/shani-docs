@@ -222,7 +222,7 @@
 <h2 id="current-reality">Current Reality</h2>
 <p>There are two distribution paths:</p>
 <ol>
-<li><strong>Official automated pipeline: AWS AMI.</strong> <code>shani-install-media/packer/</code> contains a working Packer template (<code>amazon-ebssurrogate</code> builder) that turns a <code>.zst</code> base image into a bootable AMI — profiles, variables, and the GitHub Actions OIDC workflow are documented in <a href="fleet">OEM & Fleet Deployment</a>. This is the only cloud target with an end-to-end maintained path.</li>
+<li><strong>Official automated pipeline: AWS AMI.</strong> <code>shani-install-media/packer/</code> contains a working Packer template (<code>amazon-ebssurrogate</code> builder) that turns a <code>.zst</code> base image into a bootable AMI — profiles, variables, and the GitHub Actions OIDC workflow are documented in <a href="/doc/enterprise/fleet/">OEM & Fleet Deployment</a>. This is the only cloud target with an end-to-end maintained path.</li>
 </ol>
 <ol>
 <li><strong>Raw artifacts for every profile and release.</strong> The image build publishes each profile's artifacts publicly to Cloudflare R2 and SourceForge mirrors:</li>
@@ -272,7 +272,7 @@ umount /mnt</code></pre>
 virt-install --name shanios-01 --memory 4096 --vcpus 2 \
   --disk path=shanios-server.qcow2 \
   --boot uefi --os-variant archlinux --import --no-console</code></pre>
-<p>UEFI firmware (OVMF) is required — Secure Boot with MOK-enrolled UKIs is part of the boot chain. If your hypervisor cannot enforce Secure Boot, the machine still boots via the MOK-signed UKI path but report boot state accordingly in your own compliance evidence (see <a href="compliance">Compliance & Benchmarks</a>).</p>
+<p>UEFI firmware (OVMF) is required — Secure Boot with MOK-enrolled UKIs is part of the boot chain. If your hypervisor cannot enforce Secure Boot, the machine still boots via the MOK-signed UKI path but report boot state accordingly in your own compliance evidence (see <a href="/doc/enterprise/compliance/">Compliance & Benchmarks</a>).</p>
 <hr>
 <h2 id="azure-gcp">Azure / GCP</h2>
 <p>No official templates exist. The practical approach: copy <code>packer/shanios-ami.pkr.hcl</code>, swap the <code>amazon-ebssurrogate</code> builder block for <a href="https://developer.hashicorp.com/packer/plugins/builders/azure/arm"><code>azure-arm</code></a> or <a href="https://developer.hashicorp.com/packer/plugins/builders/googlecompute"><code>googlecompute</code></a>, and keep the three provisioner scripts (<code>00-bootstrap-shanios.sh</code>, <code>01-configure-aws.sh</code> → rename/adjust its cloud-init bits, <code>02-verify.sh</code>) operating on the attached volume unchanged where possible.</p>
@@ -294,9 +294,9 @@ virt-install --name shanios-01 --memory 4096 --vcpus 2 \
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="fleet">OEM & Fleet Deployment</a> — Packer AMI pipeline, profiles, signing</li>
-<li><a href="../servers/kubernetes/overview.md">Kubernetes</a> — server-profile workloads</li>
-<li><a href="../networking/virtual-networking.md">Virtual Networking</a> — bridges, libvirt, VM networking</li>
+<li><a href="/doc/enterprise/fleet/">OEM & Fleet Deployment</a> — Packer AMI pipeline, profiles, signing</li>
+<li><a href="/doc/servers/kubernetes/overview/">Kubernetes</a> — server-profile workloads</li>
+<li><a href="/doc/networking/virtual-networking/">Virtual Networking</a> — bridges, libvirt, VM networking</li>
 <li>Blog: <a href="https://shani.dev/blog/kubernetes-on-shani-os">Kubernetes on Shani OS</a></li>
 </ul></div>
     </div>
@@ -329,6 +329,7 @@ virt-install --name shanios-01 --memory 4096 --vcpus 2 \
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

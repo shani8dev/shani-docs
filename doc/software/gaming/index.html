@@ -248,19 +248,19 @@ flatpak install flathub com.usebottles.bottles</code></pre>
 <h2 id="proton-windows-game-compatibility">Proton & Windows Game Compatibility</h2>
 <p>Steam's Proton (Wine + DXVK/VKD3D-Vulkan, bundled with Steam) is the primary way to run Windows-only games. Enable it for all titles:</p>
 <pre><code>Steam → Settings → Compatibility → Enable Steam Play for all other titles</code></pre>
-<p>Check <a href="https://www.protondb.com">ProtonDB</a> for per-game compatibility reports before buying a Windows-only title. For non-Steam Windows games and apps, use <strong>Bottles</strong> or <strong>Lutris</strong> instead — see <a href="bottles">Bottles (Windows Compatibility)</a> for a dedicated walkthrough of Wine prefix management outside Steam.</p>
+<p>Check <a href="https://www.protondb.com">ProtonDB</a> for per-game compatibility reports before buying a Windows-only title. For non-Steam Windows games and apps, use <strong>Bottles</strong> or <strong>Lutris</strong> instead — see <a href="/doc/software/bottles/">Bottles (Windows Compatibility)</a> for a dedicated walkthrough of Wine prefix management outside Steam.</p>
 <h2 id="performance-tools">Performance Tools</h2>
 <p><strong>MangoHud</strong> (FPS/frame-time/CPU/GPU overlay) is not pre-installed as a bare system package — on Plasma, <strong>GOverlay</strong> (pre-installed) is a GUI that installs and configures it for you; on GNOME, install MangoHud via Flatpak or Nix if you want it.</p>
 <pre><code class="language-bash"># Check current GPU driver and Vulkan support (both pre-installed via shani-tools-extra)
 vulkaninfo --summary
 glxinfo | grep &quot;OpenGL renderer&quot;</code></pre>
 <h2 id="troubleshooting">Troubleshooting</h2>
-<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Controller not detected</td><td>Check <code>ls /dev/input/js*</code>; unplug/replug; some Bluetooth controllers need pairing first — see <a href="../networking/bluetooth.md">Bluetooth</a></td></tr><tr><td>Game runs but GameMode isn't engaging</td><td>Confirm <code>gamemoded -s</code> shows an active client while the game runs; some games need <code>gamemoderun %command%</code> as a Steam launch option to opt in explicitly</td></tr><tr><td>Poor performance vs. Windows</td><td>Check <code>vulkaninfo --summary</code> confirms the right GPU/driver is in use, especially on hybrid (laptop) graphics — see <a href="../system/hardware.md">Hardware</a> for <code>switcheroo-control</code></td></tr><tr><td>Proton game won't launch</td><td>Try a different Proton version (Steam → game Properties → Compatibility); check <a href="https://www.protondb.com">ProtonDB</a> for known workarounds</td></tr><tr><td>RGB lighting not controllable</td><td>The udev <em>permissions</em> are pre-installed but OpenRGB itself is not — install it via Flatpak</td></tr></tbody></table>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Controller not detected</td><td>Check <code>ls /dev/input/js*</code>; unplug/replug; some Bluetooth controllers need pairing first — see <a href="/doc/networking/bluetooth/">Bluetooth</a></td></tr><tr><td>Game runs but GameMode isn't engaging</td><td>Confirm <code>gamemoded -s</code> shows an active client while the game runs; some games need <code>gamemoderun %command%</code> as a Steam launch option to opt in explicitly</td></tr><tr><td>Poor performance vs. Windows</td><td>Check <code>vulkaninfo --summary</code> confirms the right GPU/driver is in use, especially on hybrid (laptop) graphics — see <a href="/doc/system/hardware/">Hardware</a> for <code>switcheroo-control</code></td></tr><tr><td>Proton game won't launch</td><td>Try a different Proton version (Steam → game Properties → Compatibility); check <a href="https://www.protondb.com">ProtonDB</a> for known workarounds</td></tr><tr><td>RGB lighting not controllable</td><td>The udev <em>permissions</em> are pre-installed but OpenRGB itself is not — install it via Flatpak</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="bottles">Bottles (Windows Compatibility)</a> — detailed Wine prefix management</li>
-<li><a href="../system/hardware.md">Hardware</a> — GPU drivers, hybrid graphics (<code>switcheroo-control</code>)</li>
-<li><a href="../intro/whats-included.md">What's Included</a> — full controller/RGB/wheel hardware list</li>
+<li><a href="/doc/software/bottles/">Bottles (Windows Compatibility)</a> — detailed Wine prefix management</li>
+<li><a href="/doc/system/hardware/">Hardware</a> — GPU drivers, hybrid graphics (<code>switcheroo-control</code>)</li>
+<li><a href="/doc/intro/whats-included/">What's Included</a> — full controller/RGB/wheel hardware list</li>
 </ul></div>
     </div>
 
@@ -292,6 +292,7 @@ glxinfo | grep &quot;OpenGL renderer&quot;</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

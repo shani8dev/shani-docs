@@ -220,8 +220,8 @@
       </div>
       <div class="prose"><p>The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created users: the <code>shani-user-setup.path</code> unit watches the <code>/etc</code> overlay's upper-layer <code>passwd</code> file and the <code>/data/user-setup-needed</code> marker (written by <code>shani-deploy</code> after every OS update and by the first-run wizard on a fresh install), and triggers <code>shani-user-setup.service</code> whenever either changes. That service processes every regular user (UID 1000–59999) on the system, adding any missing required groups and setting the default shell to Zsh (falling back to Bash if Zsh isn't installed) — it is idempotent, so re-running it is always safe.</p>
 <p>This means any user created post-installation — via the desktop first-run wizard, or with <code>useradd</code>/<code>adduser</code> on the command line — gets the same setup automatically, and the same run also re-syncs existing users after an OS update.</p>
-<p>For the full list of groups provisioned to each user, the mechanism that controls them, and how to customise group membership, see <a href="../updates/user-setup.md">User Provisioning</a>.</p>
-<p>For pre-configured firewall rules (KDE Connect, Waydroid, and other system-level rules applied at installation), see <a href="../security/features.md">Security Features</a>.</p>
+<p>For the full list of groups provisioned to each user, the mechanism that controls them, and how to customise group membership, see <a href="/doc/updates/user-setup/">User Provisioning</a>.</p>
+<p>For pre-configured firewall rules (KDE Connect, Waydroid, and other system-level rules applied at installation), see <a href="/doc/security/features/">Security Features</a>.</p>
 <h2 id="creating-users-manually">Creating Users Manually</h2>
 <p>You can create additional users from the command line — they'll automatically receive the correct groups and shell:</p>
 <pre><code class="language-bash"># Add a new user (with home directory and default shell)
@@ -252,13 +252,13 @@ ls /data/user-setup-needed
 <h2 id="parental-controls-gnome">Parental Controls (GNOME)</h2>
 <p><strong>Malcontent</strong> is pre-installed on the GNOME edition, providing per-user app restrictions, content filtering, and screen-time limits. Configure it from Settings → Parental Controls, or the standalone <strong>Parental Controls</strong> app — it must be set up from an administrator account for a standard (non-admin) user account.</p>
 <h2 id="troubleshooting">Troubleshooting</h2>
-<table><thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><td><code>id newuser</code> shows no extra groups</td><td>Provisioning service hasn't run yet</td><td>Run <code>sudo systemctl start shani-user-setup.service</code></td></tr><tr><td>User's shell is <code>/bin/bash</code> instead of Zsh</td><td>Provisioning ran without Zsh available (should not happen — Zsh is pre-installed)</td><td>Re-run <code>sudo systemctl start shani-user-setup.service</code>; if a fresh account somehow lacks provisioning, re-run <code>shani-user-setup</code> or install via Nix: <code>nix-env -iA nixpkgs.zsh</code></td></tr><tr><td><code>groups</code> shows <code>wheel</code> is missing</td><td>User wasn't added to wheel during creation</td><td>Run <code>sudo usermod -aG wheel username</code></td></tr><tr><td>First-run wizard didn't appear</td><td>User already exists or was created outside the wizard</td><td>Re-run with <code>gnome-initial-setup</code> (GNOME) or System Settings → Welcome (KDE)</td></tr><tr><td>Can't sudo despite being in wheel</td><td>Polkit tier may require password; check <code>99-shani.rules</code></td><td>See <a href="../security/permissions.md">Permissions & Authorization</a></td></tr></tbody></table>
+<table><thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><td><code>id newuser</code> shows no extra groups</td><td>Provisioning service hasn't run yet</td><td>Run <code>sudo systemctl start shani-user-setup.service</code></td></tr><tr><td>User's shell is <code>/bin/bash</code> instead of Zsh</td><td>Provisioning ran without Zsh available (should not happen — Zsh is pre-installed)</td><td>Re-run <code>sudo systemctl start shani-user-setup.service</code>; if a fresh account somehow lacks provisioning, re-run <code>shani-user-setup</code> or install via Nix: <code>nix-env -iA nixpkgs.zsh</code></td></tr><tr><td><code>groups</code> shows <code>wheel</code> is missing</td><td>User wasn't added to wheel during creation</td><td>Run <code>sudo usermod -aG wheel username</code></td></tr><tr><td>First-run wizard didn't appear</td><td>User already exists or was created outside the wizard</td><td>Re-run with <code>gnome-initial-setup</code> (GNOME) or System Settings → Welcome (KDE)</td></tr><tr><td>Can't sudo despite being in wheel</td><td>Polkit tier may require password; check <code>99-shani.rules</code></td><td>See <a href="/doc/security/permissions/">Permissions & Authorization</a></td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../updates/user-setup.md">User Provisioning</a> — full list of groups, mechanism, customisation</li>
-<li><a href="../security/features.md">Security Features</a> — firewall rules, Polkit tiers, default hardening</li>
-<li><a href="../intro/whats-included.md">What's Included</a> — pre-installed software stack</li>
-<li><a href="../intro/migrating.md">Migrating from Traditional Linux</a> — workflow changes and user management differences</li>
+<li><a href="/doc/updates/user-setup/">User Provisioning</a> — full list of groups, mechanism, customisation</li>
+<li><a href="/doc/security/features/">Security Features</a> — firewall rules, Polkit tiers, default hardening</li>
+<li><a href="/doc/intro/whats-included/">What's Included</a> — pre-installed software stack</li>
+<li><a href="/doc/intro/migrating/">Migrating from Traditional Linux</a> — workflow changes and user management differences</li>
 </ul></div>
     </div>
 
@@ -290,6 +290,7 @@ ls /data/user-setup-needed
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

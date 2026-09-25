@@ -254,7 +254,7 @@
 <p>Shared packages across all profiles are in <code>image_profiles/shared/</code>.</p>
 <h2 id="docker-environment">Docker Environment</h2>
 <p>All build steps run inside the <code>shrinivasvkumbhar/shani-builder</code> Docker image (built from <code>shani-builder/docker/</code>). The container is privileged because image assembly requires Btrfs operations, loop mounts, and chroot — all of which need host-level access.</p>
-<p>See <a href="../enterprise/fleet.md">Fleet Deployment</a> for how OEMs use this pipeline to build custom images.</p>
+<p>See <a href="/doc/enterprise/fleet/">Fleet Deployment</a> for how OEMs use this pipeline to build custom images.</p>
 <h2 id="cicd">CI/CD</h2>
 <p>Two GitHub Actions workflows in <code>shani-builder</code> automate the pipeline:</p>
 <ul>
@@ -264,10 +264,10 @@
 <p>Both use AWS OIDC for authentication (no long-lived keys).</p>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../enterprise/fleet.md">Fleet Deployment (OEM image building)</a></li>
-<li><a href="../software/shani-repo.md">Package Repo on other distros</a></li>
+<li><a href="/doc/enterprise/fleet/">Fleet Deployment (OEM image building)</a></li>
+<li><a href="/doc/software/shani-repo/">Package Repo on other distros</a></li>
 <li><a href="https://blog.shani.dev/post/shani-os-build-pipeline">Build pipeline blog walkthrough</a></li>
-<li><a href="../security/keyring.md">Keyring & Signing</a></li>
+<li><a href="/doc/security/keyring/">Keyring & Signing</a></li>
 </ul></div>
     </div>
 
@@ -299,6 +299,7 @@
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

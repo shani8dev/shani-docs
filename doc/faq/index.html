@@ -227,7 +227,7 @@
 <p><strong>Does it work on my hardware?</strong></p>
 <p>Shanios runs on any 64-bit x86 CPU (Intel or AMD) with UEFI firmware. 4 GB RAM and 32 GB storage minimum; 8 GB RAM and 64 GB recommended. NVIDIA, AMD, and Intel graphics all work at first boot — no post-install driver setup. ARM (Apple Silicon, Raspberry Pi) is not supported.</p>
 <p><strong>Do I need to disable Secure Boot to install?</strong></p>
-<p>No. Shanios boots signed UKIs, so Secure Boot stays enabled — the installer media is pre-signed with the project MOK key and MOK enrollment is handled automatically by the installer/<code>gen-efi</code> (MokManager appears on first boot to confirm it). See <a href="security/secure-boot">Secure Boot</a>.</p>
+<p>No. Shanios boots signed UKIs, so Secure Boot stays enabled — the installer media is pre-signed with the project MOK key and MOK enrollment is handled automatically by the installer/<code>gen-efi</code> (MokManager appears on first boot to confirm it). See <a href="/doc/security/secure-boot/">Secure Boot</a>.</p>
 <p><strong>Which desktop editions are available?</strong></p>
 <p>Two desktop editions ship today: <strong>GNOME</strong> and <strong>KDE Plasma</strong> — plus a <strong>Kiosk</strong> profile for single-purpose deployments and a headless <strong>Server</strong> profile for cloud/server deployments. A third edition, <strong>COSMIC</strong>, is announced and in development (built as a cloud image rather than desktop install media). GNOME suits most users; KDE Plasma targets gamers and power users with the full gaming stack pre-installed; COSMIC offers System76's Rust-based desktop experience.</p>
 <p><strong>Can I dual boot with Windows?</strong></p>
@@ -275,7 +275,7 @@ nix-env -iA nixpkgs.go</code></pre>
 <p><strong>Can I run Windows applications?</strong></p>
 <p>Yes. Bottles (pre-installed on KDE Plasma; available on Flathub for GNOME) provides a Wine-based compatibility layer. Steam's Proton (pre-installed on KDE Plasma) runs Windows games. Does Homebrew work? Yes, identically to macOS — it installs to <code>/home/linuxbrew/.linuxbrew</code>, completely outside the read-only root, and packages survive every OS update.</p>
 <p><strong>What about Android apps?</strong></p>
-<p>Waydroid runs a full hardware-accelerated Android 11 stack, pre-installed on every edition. Set up with <code>sudo waydroid-helper init</code>. See the <a href="software/waydroid">Android (Waydroid)</a> guide.</p>
+<p>Waydroid runs a full hardware-accelerated Android 11 stack, pre-installed on every edition. Set up with <code>sudo waydroid-helper init</code>. See the <a href="/doc/software/waydroid/">Android (Waydroid)</a> guide.</p>
 <hr>
 <h2 id="updates-rollback">Updates & Rollback</h2>
 <p><strong>How does updating work?</strong></p>
@@ -327,7 +327,7 @@ nix-collect-garbage -d        # remove old Nix generations</code></pre>
 <pre><code class="language-bash">sudo gen-efi enroll-tpm2</code></pre>
 <p>This enables TPM2 auto-unlock — the disk unlocks silently on your hardware and stays locked on any other machine.</p>
 <p><strong>What if I forgot to enable encryption during install?</strong></p>
-<p>You need to reinstall — there is no in-place conversion. Back up your data first with restic, reinstall with encryption enabled, then restore. See <a href="security/luks">LUKS Management</a>.</p>
+<p>You need to reinstall — there is no in-place conversion. Back up your data first with restic, reinstall with encryption enabled, then restore. See <a href="/doc/security/luks/">LUKS Management</a>.</p>
 <p><strong>Does full-disk encryption slow down the system?</strong></p>
 <p>Negligibly. Modern CPUs (Intel Skylake+, AMD Zen+) have AES hardware acceleration (AES-NI). The encryption overhead is typically under 1% of disk throughput.</p>
 <p><strong>What happens to my LUKS key if I update the BIOS firmware?</strong></p>
@@ -355,9 +355,9 @@ sudo gen-efi enroll-tpm2</code></pre>
 <hr>
 <h2 id="security">Security</h2>
 <p><strong>Is the immutable root actually secure?</strong></p>
-<p>Yes, in a meaningful way. The OS root is physically read-only at the kernel VFS layer — not a permission, not a policy. Root processes cannot write persistent backdoors to <code>/usr/bin</code> or any other system path. Malware that gains a root session has that session — it does not have persistence across reboots. Combined with six simultaneous Linux Security Modules active from first boot, the security posture is significantly stronger than a traditional mutable Linux system. See <a href="security/features">Security Features</a>.</p>
+<p>Yes, in a meaningful way. The OS root is physically read-only at the kernel VFS layer — not a permission, not a policy. Root processes cannot write persistent backdoors to <code>/usr/bin</code> or any other system path. Malware that gains a root session has that session — it does not have persistence across reboots. Combined with six simultaneous Linux Security Modules active from first boot, the security posture is significantly stronger than a traditional mutable Linux system. See <a href="/doc/security/features/">Security Features</a>.</p>
 <p><strong>Does Secure Boot actually work?</strong></p>
-<p>Yes. The full boot chain is UEFI firmware → Shim (Microsoft-signed) → systemd-boot (MOK-signed) → Unified Kernel Image (MOK-signed, contains kernel + initramfs + cmdline). The bootloader editor is disabled and the kernel cmdline is embedded in the UKI — it cannot be modified from the boot menu. See <a href="security/secure-boot">Secure Boot</a>.</p>
+<p>Yes. The full boot chain is UEFI firmware → Shim (Microsoft-signed) → systemd-boot (MOK-signed) → Unified Kernel Image (MOK-signed, contains kernel + initramfs + cmdline). The bootloader editor is disabled and the kernel cmdline is embedded in the UKI — it cannot be modified from the boot menu. See <a href="/doc/security/secure-boot/">Secure Boot</a>.</p>
 <hr>
 <h2 id="community-support">Community & Support</h2>
 <p><strong>Where do I report bugs?</strong></p>
@@ -372,12 +372,12 @@ sudo gen-efi enroll-tpm2</code></pre>
 <p>Yes. Source code, build scripts, and documentation are all public at <a href="https://github.com/shani8dev">github.com/shani8dev</a>. Pull requests and issue reports are welcome.</p>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="intro/getting-started">Getting Started</a> — download, verify, install walkthrough</li>
-<li><a href="troubleshooting">Troubleshooting</a> — diagnosing and fixing issues</li>
-<li><a href="security/features">Security Features</a> — full security model overview</li>
-<li><a href="updates/system">System Updates</a> — how updates and rollback work</li>
-<li><a href="intro/migrating">Migrating from Traditional Linux</a> — workflow changes and tips</li>
-<li><a href="intro/whats-included">What's Included</a> — complete software stack</li>
+<li><a href="/doc/intro/getting-started/">Getting Started</a> — download, verify, install walkthrough</li>
+<li><a href="/doc/troubleshooting/">Troubleshooting</a> — diagnosing and fixing issues</li>
+<li><a href="/doc/security/features/">Security Features</a> — full security model overview</li>
+<li><a href="/doc/updates/system/">System Updates</a> — how updates and rollback work</li>
+<li><a href="/doc/intro/migrating/">Migrating from Traditional Linux</a> — workflow changes and tips</li>
+<li><a href="/doc/intro/whats-included/">What's Included</a> — complete software stack</li>
 </ul>
 <h2 id="profiles-editions">Profiles & Editions</h2>
 <p><strong>What is the Kiosk profile?</strong></p>
@@ -385,12 +385,12 @@ sudo gen-efi enroll-tpm2</code></pre>
 <p><strong>What is the Server profile?</strong></p>
 <p>The Server profile is a headless deployment with no desktop environment. It is designed for cloud and server workloads. Boot splash services are masked since there is no display.</p>
 <p><strong>How do release channels work?</strong></p>
-<p>Shanios publishes two channels: <code>latest</code> (every build) and <code>stable</code> (verified releases). See <a href="../updates/channels.md">Release Channels</a> for details.</p>
+<p>Shanios publishes two channels: <code>latest</code> (every build) and <code>stable</code> (verified releases). See <a href="/doc/updates/channels/">Release Channels</a> for details.</p>
 <h2 id="troubleshooting">Troubleshooting</h2>
 <p><strong>How do I check which slot I'm running?</strong></p>
 <pre><code class="language-bash">cat /data/current-slot   # prints: blue  or  green</code></pre>
 <p><strong>How do I check for updates manually?</strong></p>
-<pre><code class="language-bash">shani-update --check</code></pre>
+<pre><code class="language-bash">shani-cassini --section=updates</code></pre>
 <p><strong>How do I view deployment logs?</strong></p>
 <pre><code class="language-bash">journalctl -u shani-deploy --no-pager</code></pre></div>
     </div>
@@ -423,6 +423,7 @@ sudo gen-efi enroll-tpm2</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

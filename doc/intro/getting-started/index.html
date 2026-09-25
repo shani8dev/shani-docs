@@ -276,7 +276,7 @@ sudo dd bs=4M if=signed_shanios-gnome-2026.05.18-x86_64.iso \
 <li><strong>Encryption</strong> — enable LUKS2 if this is a laptop (strongly recommended)</li>
 <li>Install</li>
 </ol>
-<p>Language/region, timezone, and user account creation are deferred to the first-boot Initial Setup wizard (see <a href="../install/steps.md">Installation Steps</a> for the per-edition detail). Installation takes 10–15 minutes. The installer creates all Btrfs subvolumes, extracts the system image, builds both Unified Kernel Images, and registers the UEFI boot entry automatically. Remove the USB drive when prompted and reboot.</p>
+<p>Language/region, timezone, and user account creation are deferred to the first-boot Initial Setup wizard (see <a href="/doc/install/steps/">Installation Steps</a> for the per-edition detail). Installation takes 10–15 minutes. The installer creates all Btrfs subvolumes, extracts the system image, builds both Unified Kernel Images, and registers the UEFI boot entry automatically. Remove the USB drive when prompted and reboot.</p>
 <h2 id="first-boot">First Boot</h2>
 <p>The Plymouth boot screen appears. If you enabled encryption, you will be prompted for your passphrase (or, after enrolling TPM2, it unlocks silently). The Initial Setup wizard runs on first login.</p>
 <p>Confirm your active slot:</p>
@@ -290,7 +290,7 @@ nix-channel --update</code></pre>
 <p>After this, <code>nix-env -i &lt;package&gt;</code> works for any Nixpkgs package. Installed packages live in <code>@nix</code> and survive every OS update.</p>
 <h3 id="2-enroll-tpm2-for-passwordless-disk-unlock-if-luks2-is-enabled">2. Enroll TPM2 for passwordless disk unlock (if LUKS2 is enabled)</h3>
 <pre><code class="language-bash">sudo gen-efi enroll-tpm2</code></pre>
-<p>See <a href="../security/tpm2.md">TPM2 Enrollment</a> for full details.</p>
+<p>See <a href="/doc/security/tpm2/">TPM2 Enrollment</a> for full details.</p>
 <h3 id="3-update-the-system">3. Update the system</h3>
 <pre><code class="language-bash">sudo shani-deploy</code></pre>
 <p>This downloads the latest OS image to the inactive slot, verifies it, builds a new UKI, and sets it as the next-boot default. Reboot when ready. A per-user background timer also checks for new images every 2 hours and prompts you with a dialog before deploying anything — you never have to remember to run <code>shani-deploy</code> yourself, and it never deploys without confirmation. If anything goes wrong after the reboot:</p>
@@ -328,11 +328,11 @@ distrobox enter ubuntu-dev  # full apt inside</code></pre>
 <p><strong>How do I find apps?</strong> <a href="https://flathub.org">Flathub.org</a> has the full Flatpak catalogue. GNOME Software and KDE Discover let you browse from the desktop. For CLI tools, <a href="https://search.nixos.org/packages">search.nixos.org</a> covers the Nix package set.</p>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="what-is-shanios">What is Shanios?</a> — core concepts</li>
-<li><a href="migrating">Migrating from Traditional Linux</a> — workflow mapping table</li>
-<li><a href="whats-included">What's Included</a> — full software stack</li>
-<li><a href="../concepts/atomic-updates.md">Atomic Updates</a> — how <code>shani-deploy</code> works</li>
-<li><a href="../security/tpm2.md">TPM2 Enrollment</a> — passwordless disk unlock</li>
+<li><a href="/doc/intro/what-is-shanios/">What is Shanios?</a> — core concepts</li>
+<li><a href="/doc/intro/migrating/">Migrating from Traditional Linux</a> — workflow mapping table</li>
+<li><a href="/doc/intro/whats-included/">What's Included</a> — full software stack</li>
+<li><a href="/doc/concepts/atomic-updates/">Atomic Updates</a> — how <code>shani-deploy</code> works</li>
+<li><a href="/doc/security/tpm2/">TPM2 Enrollment</a> — passwordless disk unlock</li>
 </ul></div>
     </div>
 
@@ -364,6 +364,7 @@ distrobox enter ubuntu-dev  # full apt inside</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

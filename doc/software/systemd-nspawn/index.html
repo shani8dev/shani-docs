@@ -223,7 +223,7 @@
 <p><code>machinectl</code> is the management tool — it handles pulling images, starting and stopping containers, logging in, and lifecycle management.</p>
 <h2 id="when-to-use-nspawn">When to Use nspawn</h2>
 <table><thead><tr><th></th><th>systemd-nspawn</th><th>LXD</th><th>Distrobox</th><th>Podman</th><th>QEMU/KVM</th></tr></thead><tbody><tr><td>Purpose</td><td>Lightweight system containers</td><td>Full system containers</td><td>Dev/app containers</td><td>OCI app containers</td><td>Full VMs</td></tr><tr><td>Daemon required</td><td>No</td><td>Yes (lxd.socket)</td><td>No</td><td>No (socket-activated)</td><td>Yes</td></tr><tr><td>Full init system</td><td>Yes</td><td>Yes</td><td>No</td><td>No</td><td>Yes</td></tr><tr><td>Startup time</td><td>~1s</td><td>~3s</td><td>~1s</td><td>~0.1s</td><td>~30s</td></tr><tr><td>Isolation</td><td>High</td><td>High</td><td>Low–medium</td><td>Medium</td><td>Full</td></tr></tbody></table>
-<p><strong>Use systemd-nspawn when</strong> you want a full Linux system container with zero setup — no daemon, no image format, no wizard. Pull a tarball, boot it. Best for isolated builds, service sandboxing, and quick system environment tests. For a richer operational layer (image catalog, port forwarding devices, resource limits), use <a href="lxc-lxd.md">LXC/LXD</a>.</p>
+<p><strong>Use systemd-nspawn when</strong> you want a full Linux system container with zero setup — no daemon, no image format, no wizard. Pull a tarball, boot it. Best for isolated builds, service sandboxing, and quick system environment tests. For a richer operational layer (image catalog, port forwarding devices, resource limits), use <a href="/doc/software/lxc-lxd/">LXC/LXD</a>.</p>
 <h2 id="quick-start-arch-linux-container">Quick Start: Arch Linux Container</h2>
 <pre><code class="language-bash"># Pull an Arch Linux base image
 sudo machinectl pull-tar --verify=no \
@@ -365,10 +365,10 @@ sudo machinectl remove arch-test</code></pre>
 <p>The <code>@machines</code> subvolume is independent of both OS slots and survives all updates and rollbacks.</p>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="containers">Containers</a> — overview of all container runtimes</li>
-<li><a href="lxc-lxd">Linux Containers (LXC/LXD)</a> — system containers with networking</li>
-<li><a href="distrobox">Distrobox</a> — mutable dev environments with host integration</li>
-<li><a href="apptainer">Apptainer</a> — HPC/research container runtime</li>
+<li><a href="/doc/software/containers/">Containers</a> — overview of all container runtimes</li>
+<li><a href="/doc/software/lxc-lxd/">Linux Containers (LXC/LXD)</a> — system containers with networking</li>
+<li><a href="/doc/software/distrobox/">Distrobox</a> — mutable dev environments with host integration</li>
+<li><a href="/doc/software/apptainer/">Apptainer</a> — HPC/research container runtime</li>
 </ul></div>
     </div>
 
@@ -400,6 +400,7 @@ sudo machinectl remove arch-test</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

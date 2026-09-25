@@ -260,9 +260,9 @@ id -nG</code></pre>
 <table><thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead><tbody><tr><td>Action requires password unexpectedly</td><td>You're in <code>wheel</code> and this is a Tier 2 action requiring <code>AUTH_ADMIN</code></td><td>Use an admin credential or check if the action is Tier 1-compatible</td></tr><tr><td>Can't format disk, no prompt appears</td><td>You're not in the <code>wheel</code> group</td><td>Add yourself: <code>sudo usermod -aG wheel $USER</code>, then log out and back in</td></tr><tr><td>"Not authorized" error in terminal</td><td>Action is Tier 2 and you lack <code>wheel</code> membership</td><td>Same as above — join <code>wheel</code></td></tr><tr><td>Flatpak install prompts for root password</td><td>Should only prompt for your own password</td><td>Check <code>99-shani.rules</code> is loaded: <code>pkaction --verbose</code></td></tr><tr><td><code>sudo</code> works but Polkit doesn't</td><td>Different auth mechanisms — Polkit uses <code>99-shani.rules</code>, sudo uses <code>sudoers.d/wheel</code></td><td>Both are expected to be independent; sudo bypasses Polkit entirely</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../security/features.md">Security Features</a> — full security model overview</li>
-<li><a href="../security/audit.md">Audit Framework</a> — auditd rules and hardening</li>
-<li><a href="../updates/user-setup.md">User Provisioning</a> — how wheel group membership is managed</li>
+<li><a href="/doc/security/features/">Security Features</a> — full security model overview</li>
+<li><a href="/doc/security/audit/">Audit Framework</a> — auditd rules and hardening</li>
+<li><a href="/doc/updates/user-setup/">User Provisioning</a> — how wheel group membership is managed</li>
 <li><a href="https://github.com/shani8dev/shani-settings"><code>shani-settings</code> repo</a> — source for all rules</li>
 </ul></div>
     </div>
@@ -295,6 +295,7 @@ id -nG</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

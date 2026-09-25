@@ -276,7 +276,7 @@ timedatectl status
 # doesn't touch /etc/vconsole.conf) — useful for a one-off TTY session
 sudo loadkeys dvorak
 sudo loadkeys us   # revert</code></pre>
-<p><code>localectl set-keymap</code> writes the persistent console layout to <code>/etc/vconsole.conf</code>, which <code>gen-efi</code> also reads to set the keyboard layout for the early-boot LUKS passphrase prompt (see <a href="../arch/boot.md">Boot Process</a>) — run <code>sudo gen-efi configure &lt;slot&gt;</code> after changing it if you use disk encryption, so the new layout takes effect before the passphrase prompt too.</p>
+<p><code>localectl set-keymap</code> writes the persistent console layout to <code>/etc/vconsole.conf</code>, which <code>gen-efi</code> also reads to set the keyboard layout for the early-boot LUKS passphrase prompt (see <a href="/doc/arch/boot/">Boot Process</a>) — run <code>sudo gen-efi configure &lt;slot&gt;</code> after changing it if you use disk encryption, so the new layout takes effect before the passphrase prompt too.</p>
 <h2 id="hostname">Hostname</h2>
 <pre><code class="language-bash">sudo hostnamectl set-hostname my-machine
 hostnamectl
@@ -333,7 +333,7 @@ fs.file-max=2097152</code></pre>
 <h2 id="kernel-parameters">Kernel Parameters</h2>
 <p>Permanent kernel parameter changes are embedded in the UKI via <code>gen-efi</code>, not via <code>/etc/default/grub</code>. The generated command line is written to <code>/etc/kernel/install_cmdline_&lt;slot&gt;</code> on each run and cannot be manually pre-edited (it is overwritten) — <code>gen-efi.sh</code> builds it entirely from its own hardcoded logic (<code>root=</code>, <code>rd.luks.*</code>, <code>rd.vconsole.keymap=</code>, <code>resume=</code>). There is currently no user-facing way to add a custom permanent kernel parameter; doing so would require a code change to <code>gen-efi</code> itself.</p>
 <pre><code class="language-bash">sudo gen-efi configure blue   # rebuild UKI for the currently booted slot (e.g. after changing /etc/vconsole.conf)</code></pre>
-<p>See <a href="../security/gen-efi.md">gen-efi Reference</a> for details.</p>
+<p>See <a href="/doc/security/gen-efi/">gen-efi Reference</a> for details.</p>
 <h2 id="network-configuration">Network Configuration</h2>
 <p>NetworkManager handles all network configuration. Wi-Fi passwords, VPN profiles, and static IP configurations persist in <code>/data/varlib/NetworkManager</code> across all updates and rollbacks.</p>
 <pre><code class="language-bash">nmcli connection show
@@ -374,7 +374,7 @@ faillock --user alice
 
 # Manually clear a lockout
 sudo faillock --user alice --reset</code></pre>
-<p>Password complexity requirements (minimum length, character classes) are enforced via <code>pam_pwquality</code>, configured in <code>/etc/security/pwquality.conf</code> — see <a href="../system/permissions.md">Permissions</a> for the <code>pwscore</code>/<code>pwmake</code> tools that check against the same policy.</p>
+<p>Password complexity requirements (minimum length, character classes) are enforced via <code>pam_pwquality</code>, configured in <code>/etc/security/pwquality.conf</code> — see <a href="/doc/system/permissions/">Permissions</a> for the <code>pwscore</code>/<code>pwmake</code> tools that check against the same policy.</p>
 <h3 id="sudo">sudo</h3>
 <pre><code class="language-bash">sudo visudo
 
@@ -393,12 +393,12 @@ cat /etc/desktop-entry-hider/configs/htop.desktop
 <p><strong>To hide an additional app yourself</strong>, add a new file there following the same pattern, then run <code>sudo desktop-entry-hider</code> to apply it immediately (it otherwise only runs on package transactions).</p>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="../arch/overlay.md">OverlayFS Architecture</a> — how the /etc overlay works at the filesystem level</li>
-<li><a href="shell">Shell & Environment</a> — Zsh, Starship, Nix, CLI tools</li>
-<li><a href="user-setup">User Provisioning</a> — automatic group and shell setup</li>
-<li><a href="shani-health">System Health Checks</a> — monitoring and diagnostics</li>
-<li><a href="shani-reset">Shani Reset</a> — factory reset of persistent state</li>
-<li><a href="system">System Updates</a> — how /etc changes survive updates</li>
+<li><a href="/doc/arch/overlay/">OverlayFS Architecture</a> — how the /etc overlay works at the filesystem level</li>
+<li><a href="/doc/updates/shell/">Shell & Environment</a> — Zsh, Starship, Nix, CLI tools</li>
+<li><a href="/doc/updates/user-setup/">User Provisioning</a> — automatic group and shell setup</li>
+<li><a href="/doc/updates/shani-health/">System Health Checks</a> — monitoring and diagnostics</li>
+<li><a href="/doc/updates/shani-reset/">Shani Reset</a> — factory reset of persistent state</li>
+<li><a href="/doc/updates/system/">System Updates</a> — how /etc changes survive updates</li>
 </ul></div>
     </div>
 
@@ -430,6 +430,7 @@ cat /etc/desktop-entry-hider/configs/htop.desktop
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

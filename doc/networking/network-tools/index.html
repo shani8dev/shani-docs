@@ -259,7 +259,7 @@ sudo resolvconf -u              # Force regeneration of resolv.conf</code></pre>
 <hr>
 <h2 id="3-interfaces-routing-hardware">🔌 3. Interfaces, Routing & Hardware</h2>
 <p>Manage network interfaces, drivers, and wireless settings.</p>
-<p><strong><code>ip</code></strong> — Address, route, and neighbour management. For full coverage of CIDR, subnetting, gateways, static routes, and persistent configuration see <a href="ip-addressing">IP Addressing & Routing</a>.</p>
+<p><strong><code>ip</code></strong> — Address, route, and neighbour management. For full coverage of CIDR, subnetting, gateways, static routes, and persistent configuration see <a href="/doc/networking/ip-addressing/">IP Addressing & Routing</a>.</p>
 <pre><code class="language-bash">ip -brief addr show             # Compact IP summary
 ip route get 8.8.8.8            # Which route would be used for a destination
 ip neigh flush dev eth0         # Clear ARP cache for an interface
@@ -377,8 +377,8 @@ sudo nft list chain inet firewalld filter_INPUT # Check INPUT chain</code></pre>
 sudo journalctl -u NetworkManager -k # Kernel logs related to networking</code></pre>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="ip-addressing">IP addressing & routing</a></li>
-<li><a href="virtual-networking">Virtual networking</a></li>
+<li><a href="/doc/networking/ip-addressing/">IP addressing & routing</a></li>
+<li><a href="/doc/networking/virtual-networking/">Virtual networking</a></li>
 <li><a href="https://blog.shani.dev/post/shani-os-networking-guide">Networking guide blog</a></li>
 </ul></div>
     </div>
@@ -411,6 +411,7 @@ sudo journalctl -u NetworkManager -k # Kernel logs related to networking</code><
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

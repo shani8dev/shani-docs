@@ -303,8 +303,8 @@ sudo resolvconf -u</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>resolvectl status</code> shows nothing</td><td>Shani OS uses openresolv, not systemd-resolved — use <code>resolvconf -l</code> and <code>cat /etc/resolv.conf</code> instead</td></tr><tr><td>DNS stops working after VPN disconnects</td><td>Run <code>sudo resolvconf -u</code> to force regeneration; check <code>resolvconf -l</code> to see if stale records remain</td></tr><tr><td>VPN DNS not being used for corporate hostnames</td><td>Check that your VPN config pushes a domain suffix; verify with `resolvconf -l</td><td>grep domain` after connecting</td></tr><tr><td><code>/etc/resolv.conf</code> shows only 127.0.0.1</td><td>This is correct when dnsmasq is set as <code>name_servers=127.0.0.1</code>; check that dnsmasq is running: <code>systemctl status dnsmasq</code></td></tr><tr><td>Tailscale MagicDNS not resolving</td><td>Confirm <code>tailscale0</code> appears in <code>resolvconf -l</code>; ensure <code>--accept-dns=true</code> was passed to <code>tailscale up</code></td></tr><tr><td>DNS slow after switching networks</td><td>Enable dnsmasq as a local cache (<code>name_servers=127.0.0.1</code>) to avoid cold-start latency on every lookup</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="dnsmasq">dnsmasq integration</a></li>
-<li><a href="dnscrypt-proxy">dnscrypt-proxy</a></li>
+<li><a href="/doc/networking/dnsmasq/">dnsmasq integration</a></li>
+<li><a href="/doc/networking/dnscrypt-proxy/">dnscrypt-proxy</a></li>
 </ul></div>
     </div>
 
@@ -336,6 +336,7 @@ sudo resolvconf -u</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

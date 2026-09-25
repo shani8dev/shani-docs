@@ -219,7 +219,7 @@
         </div>
       </div>
       <div class="prose"><p>This page covers IP addressing fundamentals — CIDR notation, subnetting, IPv4 and IPv6 — and practical <code>ip</code> command usage for managing addresses, gateways, and routes on Shani OS. All operations use <code>iproute2</code> which is pre-installed.</p>
-<p>For virtual interfaces (bridges, VLANs, veth pairs) see <a href="virtual-networking">Virtual Networking</a>. For diagnostics and traffic inspection see <a href="network-tools">Network Tools</a>.</p>
+<p>For virtual interfaces (bridges, VLANs, veth pairs) see <a href="/doc/networking/virtual-networking/">Virtual Networking</a>. For diagnostics and traffic inspection see <a href="/doc/networking/network-tools/">Network Tools</a>.</p>
 <hr>
 <h2 id="cidr-notation">CIDR Notation</h2>
 <p><strong>CIDR (Classless Inter-Domain Routing)</strong> notation expresses an IP address and its network mask together:</p>
@@ -544,12 +544,12 @@ watch -n 1 ip route show</code></pre>
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="network-tools">Network Tools</a> — <code>ping</code>, <code>traceroute</code>, <code>ss</code>, <code>tcpdump</code>, diagnostics</li>
-<li><a href="virtual-networking">Virtual Networking</a> — bridges, VLANs, veth pairs, namespaces</li>
-<li><a href="networkmanager-vpn">NetworkManager & VPN</a> — persistent interface configuration</li>
-<li><a href="firewalld">Firewall (firewalld)</a> — nftables rules affecting routing</li>
-<li><a href="wireguard">WireGuard (Manual)</a> — VPN with custom routing tables</li>
-<li><a href="tailscale">Tailscale VPN</a> — mesh VPN using <code>100.64.0.0/10</code> (CGNAT range)</li>
+<li><a href="/doc/networking/network-tools/">Network Tools</a> — <code>ping</code>, <code>traceroute</code>, <code>ss</code>, <code>tcpdump</code>, diagnostics</li>
+<li><a href="/doc/networking/virtual-networking/">Virtual Networking</a> — bridges, VLANs, veth pairs, namespaces</li>
+<li><a href="/doc/networking/networkmanager-vpn/">NetworkManager & VPN</a> — persistent interface configuration</li>
+<li><a href="/doc/networking/firewalld/">Firewall (firewalld)</a> — nftables rules affecting routing</li>
+<li><a href="/doc/networking/wireguard/">WireGuard (Manual)</a> — VPN with custom routing tables</li>
+<li><a href="/doc/networking/tailscale/">Tailscale VPN</a> — mesh VPN using <code>100.64.0.0/10</code> (CGNAT range)</li>
 </ul></div>
     </div>
 
@@ -581,6 +581,7 @@ watch -n 1 ip route show</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

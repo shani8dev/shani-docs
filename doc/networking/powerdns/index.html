@@ -218,7 +218,7 @@
           <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><blockquote><strong>Part of the Networking & Infrastructure series:</strong> See <a href="../networking">all networking docs</a></blockquote>
+      <div class="prose"><blockquote><strong>Part of the Networking & Infrastructure series:</strong> See <a href="/doc/overview/">all networking docs</a></blockquote>
 <h2 id="powerdns-powerdns-admin-authoritative-dns">PowerDNS + PowerDNS Admin (Authoritative DNS)</h2>
 <p><strong>Purpose:</strong> Authoritative DNS server for your own domains. While Pi-hole, AdGuard, and Technitium handle <em>resolving</em> DNS queries for your LAN, PowerDNS <em>answers</em> authoritative queries — it's what you run when you want <code>example.com</code> (or an internal zone like <code>home.local</code>) to be served from your own nameserver. PowerDNS Admin provides a web UI for managing zones and records. Common in homelabs that run their own internal PKI or split-horizon DNS.</p>
 <pre><code class="language-yaml"># ~/powerdns/compose.yaml
@@ -304,7 +304,7 @@ dig @127.0.0.1 -p 5300 myserver.home.local</code></pre>
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="networking">Networking & Infrastructure</a> — overview</li>
+<li><a href="/doc/overview/">Networking & Infrastructure</a> — overview</li>
 </ul></div>
     </div>
 
@@ -336,6 +336,7 @@ dig @127.0.0.1 -p 5300 myserver.home.local</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

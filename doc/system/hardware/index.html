@@ -462,7 +462,7 @@ sudo ethtool -s eth0 wol g       # enable WoL (magic packet)
 sudo ethtool eth0 | grep Wake    # check current setting</code></pre>
 <hr>
 <h2 id="firmware-updates">Firmware Updates</h2>
-<p>Firmware updates for supported devices are managed by <strong>fwupd</strong>. See <a href="../security/fwupd.md">Firmware Updates</a> for full documentation.</p>
+<p>Firmware updates for supported devices are managed by <strong>fwupd</strong>. See <a href="/doc/security/fwupd/">Firmware Updates</a> for full documentation.</p>
 <pre><code class="language-bash"># Quick reference
 sudo fwupdmgr get-devices
 sudo fwupdmgr refresh
@@ -509,15 +509,15 @@ pacman -F /lib/modules/$(uname -r)/kernel/drivers/**/drivername.ko.zst
 udevadm info --query=all --name=/dev/sdb | grep -E &quot;ID_VENDOR|ID_MODEL|DRIVER&quot;</code></pre>
 <hr>
 <h2 id="troubleshooting">Troubleshooting</h2>
-<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Device not detected</td><td>Check `dmesg</td><td>tail -30<code> after plugging in; verify with </code>lspci -k<code> or </code>lsusb`; try a different port</td></tr><tr><td>Wrong driver loaded</td><td>Blacklist the competing module — see <a href="kernel-modules">Kernel Modules</a></td></tr><tr><td><code>sensors</code> shows no data</td><td>Run <code>sudo sensors-detect --auto</code> to detect and load the correct modules</td></tr><tr><td>GPU not accelerating</td><td>Check <code>lspci -k</code> to confirm the right driver is in use; check for firmware errors in <code>dmesg</code></td></tr><tr><td>High CPU temperature</td><td>Check <code>sensors</code>; verify thermal paste is applied; check fan speed; check <code>powerprofilesctl</code></td></tr><tr><td>Battery draining fast</td><td>Install and check <code>powertop</code> (not pre-installed); verify <code>power-saver</code> profile is active</td></tr><tr><td><code>dmidecode</code> returns empty</td><td>System firmware may not populate DMI tables — try <code>inxi -Fz</code> for alternative sources</td></tr></tbody></table>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Device not detected</td><td>Check `dmesg</td><td>tail -30<code> after plugging in; verify with </code>lspci -k<code> or </code>lsusb`; try a different port</td></tr><tr><td>Wrong driver loaded</td><td>Blacklist the competing module — see <a href="/doc/system/kernel-modules/">Kernel Modules</a></td></tr><tr><td><code>sensors</code> shows no data</td><td>Run <code>sudo sensors-detect --auto</code> to detect and load the correct modules</td></tr><tr><td>GPU not accelerating</td><td>Check <code>lspci -k</code> to confirm the right driver is in use; check for firmware errors in <code>dmesg</code></td></tr><tr><td>High CPU temperature</td><td>Check <code>sensors</code>; verify thermal paste is applied; check fan speed; check <code>powerprofilesctl</code></td></tr><tr><td>Battery draining fast</td><td>Install and check <code>powertop</code> (not pre-installed); verify <code>power-saver</code> profile is active</td></tr><tr><td><code>dmidecode</code> returns empty</td><td>System firmware may not populate DMI tables — try <code>inxi -Fz</code> for alternative sources</td></tr></tbody></table>
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="kernel-modules">Kernel Modules</a> — loading drivers, blacklisting, parameters</li>
-<li><a href="storage">Storage</a> — SMART, NVMe, disk health</li>
-<li><a href="../security/fwupd.md">Firmware Updates</a> — fwupd for device firmware</li>
-<li><a href="process-management">Process Management</a> — CPU load, memory usage per process</li>
-<li><a href="systemd">Systemd</a> — <code>CPUQuota=</code>, <code>MemoryMax=</code>, resource limits</li>
+<li><a href="/doc/system/kernel-modules/">Kernel Modules</a> — loading drivers, blacklisting, parameters</li>
+<li><a href="/doc/system/storage/">Storage</a> — SMART, NVMe, disk health</li>
+<li><a href="/doc/security/fwupd/">Firmware Updates</a> — fwupd for device firmware</li>
+<li><a href="/doc/system/process-management/">Process Management</a> — CPU load, memory usage per process</li>
+<li><a href="/doc/system/systemd/">Systemd</a> — <code>CPUQuota=</code>, <code>MemoryMax=</code>, resource limits</li>
 </ul></div>
     </div>
 
@@ -549,6 +549,7 @@ udevadm info --query=all --name=/dev/sdb | grep -E &quot;ID_VENDOR|ID_MODEL|DRIV
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

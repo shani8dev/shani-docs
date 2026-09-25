@@ -294,8 +294,8 @@ mmcli -m 0 --3gpp-ussd-cancel</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Modem not detected (<code>mmcli -L</code> shows nothing)</td><td>Check <code>lsusb</code> or <code>lspci</code> — if the kernel sees the hardware, try <code>sudo modprobe qmi_wwan</code> or <code>cdc_mbim</code></td></tr><tr><td>Modem listed but no connection</td><td>Verify the APN is correct for your carrier; check <code>mmcli -m 0</code> — registration status must show <code>registered</code></td></tr><tr><td>SIM not detected</td><td>Reseat the SIM; check <code>mmcli -m 0</code> for PIN lock status — unlock with <code>mmcli -m 0 --pin=XXXX</code></td></tr><tr><td>Low signal / frequent disconnects</td><td>Run <code>mmcli -m 0 --signal-get</code> to check signal quality; reposition the modem or antenna</td></tr><tr><td>SMS not sending</td><td>Confirm SMS support: `mmcli -m 0</td><td>grep -i sms`; modem must be registered on a network first</td></tr><tr><td>ModemManager interfering with a serial GPS</td><td>Create <code>/etc/udev/rules.d/99-mm-ignore-gps.rules</code> with <code>ATTRS{idVendor}==&quot;XXXX&quot;, ATTRS{idProduct}==&quot;YYYY&quot;, ENV{ID_MM_DEVICE_IGNORE}=&quot;1&quot;</code> (replace XX values from <code>lsusb</code> output)</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="networkmanager-vpn">NetworkManager VPN</a></li>
-<li><a href="network-tools">Network tools</a></li>
+<li><a href="/doc/networking/networkmanager-vpn/">NetworkManager VPN</a></li>
+<li><a href="/doc/networking/network-tools/">Network tools</a></li>
 </ul></div>
     </div>
 
@@ -327,6 +327,7 @@ mmcli -m 0 --3gpp-ussd-cancel</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

@@ -296,7 +296,7 @@ nmcli connection up &quot;client&quot;
 nmcli connection import type wireguard file /etc/wireguard/wg0.conf
 
 nmcli connection up &quot;wg0&quot;</code></pre>
-<p>WireGuard connections can also be created manually in the GUI with no config file. See the <a href="wireguard">WireGuard</a> page for raw peer-to-peer setup without NetworkManager.</p>
+<p>WireGuard connections can also be created manually in the GUI with no config file. See the <a href="/doc/networking/wireguard/">WireGuard</a> page for raw peer-to-peer setup without NetworkManager.</p>
 <h3 id="ikev2-ipsec-strongswan">IKEv2 / IPsec (strongSwan)</h3>
 <pre><code class="language-bash"># Configure via the GUI: Settings → Network → VPN → + → IPsec/IKEv2
 # Or interactively via nmtui</code></pre>
@@ -316,14 +316,14 @@ openconnect --protocol=anyconnect vpn.example.com
 <table><thead><tr><th>Protocol</th><th>Plugin / Tool</th><th>Notes</th></tr></thead><tbody><tr><td>OpenVPN</td><td><code>NetworkManager-openvpn</code></td><td>Most common; import <code>.ovpn</code></td></tr><tr><td>WireGuard</td><td><code>NetworkManager-wireguard</code></td><td>Fast, modern; import <code>.conf</code></td></tr><tr><td>IKEv2 / IPsec</td><td><code>NetworkManager-strongswan</code></td><td>Common in enterprise</td></tr><tr><td>L2TP/IPsec</td><td><code>NetworkManager-l2tp</code></td><td>Legacy enterprise</td></tr><tr><td>PPTP</td><td><code>NetworkManager-pptp</code></td><td>Legacy; avoid if possible</td></tr><tr><td>Cisco AnyConnect</td><td><code>openconnect</code></td><td><code>--protocol=anyconnect</code></td></tr><tr><td>GlobalProtect (Palo Alto)</td><td><code>openconnect</code></td><td><code>--protocol=gp</code></td></tr><tr><td>Pulse/Ivanti Secure</td><td><code>openconnect</code></td><td><code>--protocol=pulse</code></td></tr><tr><td>Fortinet SSL VPN</td><td><code>openfortivpn</code></td><td>Standalone client</td></tr><tr><td>Cisco VPNC</td><td><code>vpnc</code></td><td>Older Cisco IPsec</td></tr><tr><td>SSTP (Microsoft)</td><td><code>NetworkManager-sstp</code></td><td>Via GUI plugin</td></tr></tbody></table>
 <hr>
 <h2 id="dns-split-dns-with-vpns">DNS & Split DNS with VPNs</h2>
-<p>Shani OS uses openresolv to broker DNS across multiple simultaneous connections. When a VPN connects, its DNS servers are automatically registered — split DNS (sending only <code>.corp</code> queries to the VPN) works without any manual <code>/etc/resolv.conf</code> editing. See the <a href="openresolv">openresolv</a> page for details.</p>
+<p>Shani OS uses openresolv to broker DNS across multiple simultaneous connections. When a VPN connects, its DNS servers are automatically registered — split DNS (sending only <code>.corp</code> queries to the VPN) works without any manual <code>/etc/resolv.conf</code> editing. See the <a href="/doc/networking/openresolv/">openresolv</a> page for details.</p>
 <hr>
 <h2 id="troubleshooting">Troubleshooting</h2>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>nmcli device wifi list</code> shows nothing</td><td>Check <code>nmcli radio wifi</code> — if off, run <code>nmcli radio wifi on</code>; also check <code>rfkill list</code> for hardware blocks</td></tr><tr><td>Wi-Fi connects but no internet</td><td>Check DNS: <code>cat /etc/resolv.conf</code>; try <code>ping 1.1.1.1</code> vs <code>ping example.com</code> to distinguish routing vs DNS issues</td></tr><tr><td>VPN connects but traffic doesn't route</td><td>Check active routes: <code>ip route show</code>; the VPN connection may need <code>ipv4.never-default false</code></td></tr><tr><td>OpenVPN import fails</td><td>Ensure the <code>.ovpn</code> file doesn't reference external certificate files — all certs must be inline</td></tr><tr><td>WireGuard connection times out</td><td>Confirm endpoint IP and port are correct; check that your ISP doesn't block UDP on that port</td></tr><tr><td>GUI not showing all VPN protocols</td><td>Some protocols only appear in <code>nmtui</code> or <code>nmcli</code> — all are installed regardless</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="wireguard">WireGuard</a></li>
-<li><a href="openresolv">openresolv split DNS</a></li>
+<li><a href="/doc/networking/wireguard/">WireGuard</a></li>
+<li><a href="/doc/networking/openresolv/">openresolv split DNS</a></li>
 <li><a href="https://blog.shani.dev/post/shani-os-networking-guide">Networking guide blog</a></li>
 </ul></div>
     </div>
@@ -356,6 +356,7 @@ openconnect --protocol=anyconnect vpn.example.com
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

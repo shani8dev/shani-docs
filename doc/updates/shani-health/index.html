@@ -284,7 +284,7 @@ shani-health -h, --help                 # Usage summary</code></pre>
 <li><strong>Network</strong> — NetworkManager, DNS, DHCP, Wi-Fi backend, VPN, internet, resolv.conf, servers (SSH, Samba, NFS, web…)</li>
 <li><strong>Audio & Display</strong> — PipeWire, WirePlumber, rtkit, display manager, XDG portals, Plymouth</li>
 <li><strong>Printing & Scanning</strong> — CUPS, cups-browsed, ipp-usb, SANE</li>
-<li><strong>Package Managers</strong> — Flatpak, Snap, Nix, AppImage, shani-update timer</li>
+<li><strong>Package Managers</strong> — Flatpak, Snap, Nix, AppImage, <code>shani-cassini-agent.timer</code></li>
 <li><strong>Backup Tools</strong> — rclone, restic</li>
 <li><strong>Containers</strong> — Podman, Distrobox, LXD, Docker, Waydroid, nspawn</li>
 <li><strong>Virtualization</strong> — KVM, libvirt daemons, VM inventory, default network, storage pools</li>
@@ -397,9 +397,9 @@ WantedBy=timers.target</code></pre>
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="system">System Updates</a> — how <code>shani-deploy</code> works</li>
-<li><a href="../arch/boot.md">Boot Process</a> — boot chain and health services</li>
-<li><a href="../security/gen-efi.md">gen-efi Reference</a> — UKI generation and signing</li>
+<li><a href="/doc/updates/system/">System Updates</a> — how <code>shani-deploy</code> works</li>
+<li><a href="/doc/arch/boot/">Boot Process</a> — boot chain and health services</li>
+<li><a href="/doc/security/gen-efi/">gen-efi Reference</a> — UKI generation and signing</li>
 </ul></div>
     </div>
 
@@ -431,6 +431,7 @@ WantedBy=timers.target</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

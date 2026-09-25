@@ -335,8 +335,8 @@ sudo wg-quick save wg0</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>wg show</code> shows no handshake (or very old)</td><td>Check that the remote endpoint is reachable: <code>nc -zu &lt;endpoint-ip&gt; 51820</code>; verify the public key on both sides matches</td></tr><tr><td>Handshake OK but no traffic flowing</td><td>Check <code>AllowedIPs</code> — the destination IP must be covered; on the server, confirm IP forwarding is enabled: <code>sysctl net.ipv4.ip_forward</code></td></tr><tr><td>Full-tunnel: internet stops working</td><td>Ensure <code>PostUp</code> masquerade rule is active: <code>sudo firewall-cmd --query-masquerade</code>; check <code>DNS =</code> is set in the client <code>[Interface]</code></td></tr><tr><td>Client behind NAT won't connect</td><td>Set <code>PersistentKeepalive = 25</code> in the client's <code>[Peer]</code> block to keep the NAT hole open</td></tr><tr><td><code>RTNETLINK answers: Operation not supported</code></td><td>The WireGuard kernel module isn't loaded — run <code>sudo modprobe wireguard</code></td></tr><tr><td>Config changes not applied</td><td><code>wg-quick</code> does not hot-reload — bring the interface down and up: <code>sudo wg-quick down wg0 &amp;&amp; sudo wg-quick up wg0</code></td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="networkmanager-vpn">NetworkManager VPN GUI setup</a></li>
-<li><a href="openresolv">openresolv DNS handling</a></li>
+<li><a href="/doc/networking/networkmanager-vpn/">NetworkManager VPN GUI setup</a></li>
+<li><a href="/doc/networking/openresolv/">openresolv DNS handling</a></li>
 <li><a href="https://blog.shani.dev/post/shani-os-networking-guide">Networking guide blog</a></li>
 </ul></div>
     </div>
@@ -369,6 +369,7 @@ sudo wg-quick save wg0</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

@@ -558,9 +558,9 @@ wger.home.local     { tls internal; reverse_proxy localhost:8086 }</code></pre>
 <blockquote>🔒 <strong>Security checklist for health data:</strong> - Use HTTPS for all health services — never plain HTTP - Restrict access to Tailscale or Authelia-protected routes only; health data should never be publicly accessible - Enable audit logging in OpenMRS and OpenEMR — every record access should be logged - Back up health databases daily with Restic to an encrypted offsite destination - Rotate database passwords and service credentials on a schedule</blockquote>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="productivity">Productivity (Mealie)</a></li>
-<li><a href="security">Security baseline</a></li>
-<li><a href="backups-sync">Backups</a></li>
+<li><a href="/doc/overview/">Productivity (Mealie)</a></li>
+<li><a href="/doc/overview/">Security baseline</a></li>
+<li><a href="/doc/servers/backups-sync/">Backups</a></li>
 </ul></div>
     </div>
 
@@ -592,6 +592,7 @@ wger.home.local     { tls internal; reverse_proxy localhost:8086 }</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

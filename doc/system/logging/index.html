@@ -220,7 +220,7 @@
       </div>
       <div class="prose"><p>Shani OS uses <strong>systemd-journald</strong> as its primary logging system. All kernel messages, service output, and system events flow into a single structured binary journal. There are no scattered <code>/var/log/*.log</code> text files to hunt through — <code>journalctl</code> is the single interface for everything.</p>
 <p>This page covers journald configuration, log retention, forwarding to syslog, and persistent log storage across reboots.</p>
-<p>For <code>journalctl</code> usage within service debugging, see <a href="systemd">Systemd</a>.</p>
+<p>For <code>journalctl</code> usage within service debugging, see <a href="/doc/system/systemd/">Systemd</a>.</p>
 <hr>
 <h2 id="how-journald-works">How Journald Works</h2>
 <p>journald collects log entries from:</p>
@@ -347,8 +347,8 @@ journalctl -p warning -b         # warnings and above, current boot
 journalctl --since &quot;2026-04-01&quot; --until &quot;2026-04-02&quot;
 journalctl --since -1h           # last hour
 
-# Filter by syslog identifier (tag set by the application)
-journalctl -t shani-update
+# Filter by service unit
+journalctl --user -u shani-cassini-agent.service
 journalctl -t kernel
 
 # Filter by UID or GID
@@ -444,10 +444,10 @@ journalctl -p err --no-pager</code></pre>
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="systemd">Systemd</a> — service logs, <code>journalctl -u</code>, unit file logging options</li>
-<li><a href="process-management">Process Management</a> — OOM killer events, <code>journalctl -k | grep oom</code></li>
-<li><a href="../updates/shani-health.md">shani-health Reference</a> — automated journal error reporting</li>
-<li><a href="backup">Backup & Recovery</a> — backing up <code>/var/log/journal/</code> if persistent logs are enabled</li>
+<li><a href="/doc/system/systemd/">Systemd</a> — service logs, <code>journalctl -u</code>, unit file logging options</li>
+<li><a href="/doc/system/process-management/">Process Management</a> — OOM killer events, <code>journalctl -k | grep oom</code></li>
+<li><a href="/doc/updates/shani-health/">shani-health Reference</a> — automated journal error reporting</li>
+<li><a href="/doc/system/backup/">Backup & Recovery</a> — backing up <code>/var/log/journal/</code> if persistent logs are enabled</li>
 </ul></div>
     </div>
 
@@ -479,6 +479,7 @@ journalctl -p err --no-pager</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

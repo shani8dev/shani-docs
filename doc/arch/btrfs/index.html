@@ -277,7 +277,7 @@ sudo btrfs send /data/snapshots/home-20250101 | sudo btrfs receive /mnt/backup/
 # Incremental send (only sends the diff)
 sudo btrfs send -p /data/snapshots/home-20250101 /data/snapshots/home-20250201 \
   | sudo btrfs receive /mnt/backup/</code></pre>
-<blockquote><strong>Snapshots are not backups</strong> if they live on the same disk — a disk failure loses both. Use <code>btrfs send</code> to an external drive, or <code>restic</code>/<code>rclone</code> for cloud storage. See <a href="../system/backup.md">Backup & Recovery</a> for a complete backup strategy.</blockquote>
+<blockquote><strong>Snapshots are not backups</strong> if they live on the same disk — a disk failure loses both. Use <code>btrfs send</code> to an external drive, or <code>restic</code>/<code>rclone</code> for cloud storage. See <a href="/doc/system/backup/">Backup & Recovery</a> for a complete backup strategy.</blockquote>
 <h2 id="btrfs-manual-maintenance">Btrfs Manual Maintenance</h2>
 <pre><code class="language-bash"># Disk usage (more accurate than df for Btrfs)
 sudo btrfs filesystem usage /
@@ -344,9 +344,9 @@ systemctl status btrfs-scrub.timer btrfs-balance.timer btrfs-defrag.timer
 systemctl list-timers btrfs-*</code></pre>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="filesystem">Filesystem Structure</a></li>
+<li><a href="/doc/arch/filesystem/">Filesystem Structure</a></li>
 <li><a href="https://blog.shani.dev/post/shani-os-btrfs-snapshots-and-backup">Snapshots & Backup guide</a></li>
-<li><a href="../system/storage.md">Storage Management</a></li>
+<li><a href="/doc/system/storage/">Storage Management</a></li>
 </ul></div>
     </div>
 
@@ -378,6 +378,7 @@ systemctl list-timers btrfs-*</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

@@ -306,7 +306,7 @@ journalctl --user -f | grep -i gsconnect</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Phone not appearing</td><td>Both devices must be on the same subnet; check firewall rules with <code>sudo firewall-cmd --list-all</code> — the <code>kdeconnect</code> service must appear</td></tr><tr><td>Pairing request not showing on phone</td><td>Dismiss and retry — tap the device name on the desktop to re-send the request</td></tr><tr><td>File transfer failing</td><td>Ensure both devices are paired (not just discovered); check available storage on the phone</td></tr><tr><td>Clipboard sync not working</td><td>The plugin must be enabled on both the desktop (KDE Connect settings, or GSConnect's device preferences) and in the phone app</td></tr><tr><td>GSConnect icon missing from top bar (GNOME)</td><td>Open the <strong>Extensions</strong> app and confirm GSConnect is toggled on</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="bluetooth">Bluetooth</a></li>
+<li><a href="/doc/networking/bluetooth/">Bluetooth</a></li>
 <li><a href="https://blog.shani.dev/post/shani-os-kde-connect">KDE Connect blog guide</a></li>
 </ul></div>
     </div>
@@ -339,6 +339,7 @@ journalctl --user -f | grep -i gsconnect</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

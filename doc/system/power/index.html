@@ -248,7 +248,7 @@ loginctl session-status</code></pre>
 <li>Swap at least as large as RAM. Shanios creates a swapfile sized to RAM in the dedicated <code>@swap</code> Btrfs subvolume (mounted at <code>/swap</code>) at install time — unless that would leave less than 12 GB free for updates; then the swapfile is smaller and hibernation may not work. <code>ls -la /swap/swapfile</code> against <code>free -m</code> tells you which case you have.</li>
 <li><code>resume=</code> on the kernel command line. <strong>This is already baked into the image's UKI cmdline at build/deploy time</strong> — there is nothing to configure manually.</li>
 </ul>
-<p>Do <strong>not</strong> attempt to add or edit boot arguments yourself: the bootloader editor is disabled by design on Shanios, and any resume setup belongs in the image. If you resized or replaced the swapfile manually, see <a href="storage">Storage</a> for the correct procedure first.</p>
+<p>Do <strong>not</strong> attempt to add or edit boot arguments yourself: the bootloader editor is disabled by design on Shanios, and any resume setup belongs in the image. If you resized or replaced the swapfile manually, see <a href="/doc/system/storage/">Storage</a> for the correct procedure first.</p>
 <pre><code class="language-bash"># Hibernate
 systemctl hibernate</code></pre>
 <p>Verify a full hibernate/resume cycle works before relying on it — a failed resume falls back to a cold boot with an empty session.</p>
@@ -275,11 +275,11 @@ HandleLidSwitchDocked=ignore               # docked via dock itself</code></pre>
 <pre><code class="language-bash">sudo systemctl restart systemd-logind</code></pre>
 <blockquote>Restarting <code>systemd-logind</code> briefly resets login sessions — running graphical sessions generally survive, but expect a short hiccup and re-authentication prompts.</blockquote>
 <h3 id="wi-fi-power-save">Wi-Fi Power Save</h3>
-<p>NetworkManager manages Wi-Fi power saving per connection via the <code>wifi.powersave</code> property. See <a href="../networking/wireless.md">Wi-Fi & Wireless Firmware</a> for checking and changing it.</p>
+<p>NetworkManager manages Wi-Fi power saving per connection via the <code>wifi.powersave</code> property. See <a href="/doc/networking/wireless/">Wi-Fi & Wireless Firmware</a> for checking and changing it.</p>
 <h3 id="usb-autosuspend">USB Autosuspend</h3>
 <p>USB autosuspend saves power but can misbehave with some input devices (mice/keyboards stuttering or dropping after idle). If a wired input device acts up after a pause, that's autosuspend — check <code>/sys/bus/usb/devices/*/power/control</code> and consider whitelisting the device rather than disabling autosuspend globally.</p>
 <h2 id="troubleshooting">Troubleshooting</h2>
-<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Wakes immediately after suspend</td><td>Commonly a firmware ACPI issue with the active sleep state. Toggle between <code>deep</code> and <code>s2idle</code>: <code>echo deep &gt; /sys/power/mem_sleep</code> (as root), then retry. Persist the choice with a tmpfiles entry (below)</td></tr><tr><td>Suspends fine, black screen on wake</td><td>Usually a GPU driver pairing problem. Confirm you booted the slot matching your latest deployment: <code>cat /data/current-slot</code>; reboot once to settle. If it persists across slots, report the bug with GPU model</td></tr><tr><td>Hibernation writes swap but doesn't resume</td><td>Swap smaller than RAM, or the wrong swap target — see <a href="storage">Storage</a> for swap sizing and the baked-in <code>resume=</code> handling</td></tr><tr><td>Battery drains overnight while suspended</td><td>Check which state you're using: <code>s2idle</code> drains far faster than <code>deep</code> — prefer <code>deep</code> when supported. Also rule out Wake-on-LAN keeping the NIC alive (<code>ethtool</code> — see <a href="../networking/network-tools.md">Network Tools</a>)</td></tr><tr><td>Lid ignored on AC</td><td><code>HandleLidSwitchExternalMemory=ignore</code> is the logind default for external-monitor setups. Change it in <code>/etc/systemd/logind.conf</code> if you want suspend-on-AC</td></tr></tbody></table>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Wakes immediately after suspend</td><td>Commonly a firmware ACPI issue with the active sleep state. Toggle between <code>deep</code> and <code>s2idle</code>: <code>echo deep &gt; /sys/power/mem_sleep</code> (as root), then retry. Persist the choice with a tmpfiles entry (below)</td></tr><tr><td>Suspends fine, black screen on wake</td><td>Usually a GPU driver pairing problem. Confirm you booted the slot matching your latest deployment: <code>cat /data/current-slot</code>; reboot once to settle. If it persists across slots, report the bug with GPU model</td></tr><tr><td>Hibernation writes swap but doesn't resume</td><td>Swap smaller than RAM, or the wrong swap target — see <a href="/doc/system/storage/">Storage</a> for swap sizing and the baked-in <code>resume=</code> handling</td></tr><tr><td>Battery drains overnight while suspended</td><td>Check which state you're using: <code>s2idle</code> drains far faster than <code>deep</code> — prefer <code>deep</code> when supported. Also rule out Wake-on-LAN keeping the NIC alive (<code>ethtool</code> — see <a href="/doc/networking/network-tools/">Network Tools</a>)</td></tr><tr><td>Lid ignored on AC</td><td><code>HandleLidSwitchExternalMemory=ignore</code> is the logind default for external-monitor setups. Change it in <code>/etc/systemd/logind.conf</code> if you want suspend-on-AC</td></tr></tbody></table>
 <p>Persisting a <code>mem_sleep</code> choice across reboots (tmpfiles write it early each boot):</p>
 <pre><code class="language-ini"># /etc/tmpfiles.d/mem-sleep.conf
 w /sys/power/mem_sleep - - - - deep</code></pre>
@@ -288,10 +288,10 @@ w /sys/power/mem_sleep - - - - deep</code></pre>
 journalctl -u systemd-suspend.service -b -1   # previous suspend attempt</code></pre>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="hardware">Hardware</a> — sensors, <code>powertop</code>, thermals</li>
-<li><a href="storage">Storage</a> — swap, <code>@swap</code> subvolume, hibernation prerequisites</li>
-<li><a href="../intro/optimizations.md">Optimizations</a> — system-wide performance and power tuning</li>
-<li><a href="gpu">GPU</a> — driver slots and suspend/resume hangs</li>
+<li><a href="/doc/system/hardware/">Hardware</a> — sensors, <code>powertop</code>, thermals</li>
+<li><a href="/doc/system/storage/">Storage</a> — swap, <code>@swap</code> subvolume, hibernation prerequisites</li>
+<li><a href="/doc/intro/optimizations/">Optimizations</a> — system-wide performance and power tuning</li>
+<li><a href="/doc/system/gpu/">GPU</a> — driver slots and suspend/resume hangs</li>
 <li>Blog: <a href="https://blog.shani.dev/post/shani-os-power-management">Power Management on Shani OS</a></li>
 </ul></div>
     </div>
@@ -324,6 +324,7 @@ journalctl -u systemd-suspend.service -b -1   # previous suspend attempt</code><
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

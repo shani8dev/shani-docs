@@ -328,8 +328,8 @@ password=yourpass</code></pre>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Share not appearing in Windows network browser</td><td>Ensure <code>nmb</code> is running; Windows uses NetBIOS/WSD for discovery — connecting directly by IP (<code>\\192.168.1.100</code>) always works</td></tr><tr><td><code>Permission denied</code> when accessing share</td><td>Check Linux filesystem permissions on the shared path — Samba permissions are layered on top; both must allow access</td></tr><tr><td><code>NT_STATUS_LOGON_FAILURE</code></td><td>Wrong Samba password — reset with <code>sudo smbpasswd youruser</code></td></tr><tr><td><code>mount error(13): Permission denied</code> on Linux</td><td>Add <code>sec=ntlmssp</code> to mount options; verify credentials in <code>.smbcredentials</code></td></tr><tr><td>Config changes not taking effect</td><td>Run <code>testparm</code> to validate, then <code>sudo systemctl restart smb nmb</code></td></tr><tr><td>View logs</td><td><code>journalctl -u smb</code> or <code>/var/log/samba/log.smbd</code></td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="nfs">NFS exports</a></li>
-<li><a href="firewalld">Firewall rules for SMB</a></li>
+<li><a href="/doc/networking/nfs/">NFS exports</a></li>
+<li><a href="/doc/networking/firewalld/">Firewall rules for SMB</a></li>
 </ul></div>
     </div>
 
@@ -361,6 +361,7 @@ password=yourpass</code></pre>
   </script>
   <script src="/config-docs.js"></script>
   <script src="/nav-docs.js"></script>
+  <script src="/doc-links.js"></script>
   <script src="/script-docs.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
