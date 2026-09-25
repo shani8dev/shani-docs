@@ -40,7 +40,7 @@ jobs:
         run: node generate-manifest.js
 
       - name: Unit tests
-        run: node --test tests/
+        run: node --test tests/*.test.js
 
       - name: Broken internal link check
         run: node tests/check-links.js
