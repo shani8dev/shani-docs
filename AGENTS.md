@@ -378,7 +378,7 @@ Implementation priorities are per `../IMPLEMENTATION-ROADMAP.md` (master roadmap
 
 2. ~~**Deploy CSP meta tags (P1).**~~ **DONE — closed 2026-09-17.** CSP is generated into `index.html`, all 201 doc stubs, and `404.html`, committed in `217a599` (2026-08-29) and pushed. Verified live: `curl https://docs.shani.dev/` returns the CSP meta tag in served HTML.
 
-3. **Add LICENSE (P3, 5 min).** Master-roadmap item #31, not #26 (web-shared-components is #27; #26 is shani-gui welcome content). Match `shani-blog` — the only web sibling that has a LICENSE, and it is **MIT** (audit-verified 2026-09-17), not GPL-3.0 — unless the maintainer decides web repos should follow the OS-side GPL-3.0 standard instead; this repo is one of the 4-repo cluster missing it.
+3. **Add LICENSE (P3, 5 min).** Master-roadmap item #31, not #26 (web-shared-components is #27; #26 is shani-cassini welcome content). Match `shani-blog` — the only web sibling that has a LICENSE, and it is **MIT** (audit-verified 2026-09-17), not GPL-3.0 — unless the maintainer decides web repos should follow the OS-side GPL-3.0 standard instead; this repo is one of the 4-repo cluster missing it.
 
 4. **Shared component library for `brand-shani.css`/`sw.js`/`generate-manifest.js` (P3, 2-3 days).** Master-roadmap item #27 (nav JS `nav-docs.js` is unique to this repo, not part of the shared set). These files are copy-pasted between `shani-docs` and `shani-blog` only, and divergence accumulates silently. ADOPT the shared-library PATTERN from garuda-ng — never the Angular code; shani's plain-HTML/CSS approach is the right call for this ecosystem, it just needs a shared package (or git submodule) instead of copy-paste.
 
