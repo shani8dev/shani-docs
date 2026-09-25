@@ -214,7 +214,7 @@ not how it got that way.
   (`shani-install-media` gained a GPL-3.0 LICENSE on 2026-09-16 and
   `shani-settings` on 2026-09-17 — both closed; see master roadmap #31.)
   Needs the maintainer to pick a license, not something to guess.
-- **Dead in-page anchors — FIXED (2026-09-26), 0 of 967 remaining.** The
+- **Dead in-page anchors — FIXED (2026-09-26), 0 of 1172 remaining.** The
   earlier 87-cross-link repair only ever checked page-level targets; nothing
   validated `#fragment` anchors, so 74 dead in-page anchors across 8 pages had
   been serving silently. Two of those pages
@@ -229,7 +229,14 @@ not how it got that way.
   TOC but `#custom-cloud-image-building` in the rendered page. Both TOCs are
   now generated from each page's own headings. `tests/check-links.js` checks
   the *generated* tree (what the site serves), not the Markdown, and runs in
-  CI — do not weaken it to scan only `docs/**.md`.
+  CI — do not weaken it to scan only `docs/**.md`. It covers the site root
+  and `404.html` as well as `doc/**`: the root index is what links all 203
+  doc pages, and an earlier version scanned only `doc/` and therefore left the
+  most-visited page on the site ungated **while still reporting success**.
+  Do not narrow the scanned set back to `doc/` — that regression is silent.
+  Its root coverage was proven rather than assumed: injecting a bad `/doc/`
+  target and a bad `#fragment` into the root index makes the checker exit
+  non-zero and name `index.html` for both.
 - **CI status.** 1 workflow (`build-manifest.yml`), triggered on pushes
   touching `docs/**.md`/`config-docs.js`/`generate-manifest.js`/`doc-links.js`/`tests/**`.
   The `build` job re-runs `node generate-manifest.js`
