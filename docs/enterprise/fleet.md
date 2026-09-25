@@ -210,12 +210,23 @@ sudo shani-deploy -t latest
 
 ### Automated Unattended Updates
 
-For unattended fleet updates, a systemd timer can trigger `shani-deploy` on a schedule:
+`shani-deploy` deliberately ships **no timer that deploys and reboots on its
+own**. The reboot moment is the one thing a fleet has to control, so Shanios
+leaves it to you; a timer that rebooted behind your back would defeat the
+maintenance-window model the rest of this page describes.
+
+What it does ship is a timer that pre-stages the next verified image so the
+download is already finished when your window opens — see
+[Pre-staging Updates](#pre-staging-updates) below.
+
+If you still want the deploy itself on a schedule, drive `shani-deploy` from
+a timer you own. The unit names here are yours to choose; Shanios does not
+provide them:
 
 ```ini
-# /etc/systemd/system/shani-autoupdate.timer
+# /etc/systemd/system/my-fleet-deploy.timer
 [Unit]
-Description=Automatic Shani OS update check
+Description=Scheduled Shanios deploy for this host
 
 [Timer]
 OnCalendar=weekly
@@ -226,9 +237,9 @@ WantedBy=timers.target
 ```
 
 ```ini
-# /etc/systemd/system/shani-autoupdate.service
+# /etc/systemd/system/my-fleet-deploy.service
 [Unit]
-Description=Automatic Shani OS update
+Description=Scheduled Shanios deploy for this host
 
 [Service]
 Type=oneshot
@@ -236,7 +247,7 @@ ExecStart=/usr/local/bin/shani-deploy
 ```
 
 ```bash
-sudo systemctl enable shani-autoupdate.timer
+sudo systemctl enable my-fleet-deploy.timer
 ```
 
 `shani-deploy` takes an `flock`-based lock on `/run/shanios-deploy.lock` before doing anything (`acquire_deploy_lock()`), so if a timer-triggered run overlaps with an admin manually running `shani-deploy` — or a second timer fires before the first finishes — the second invocation exits immediately with "Another shani-deploy is already running" instead of racing the first. This makes scheduled fleet timers safe to layer on top of manual/ad-hoc updates without extra locking of your own.
@@ -254,6 +265,8 @@ fi
 ```
 
 If you instead want `shani-deploy` itself to reboot automatically a fixed delay after staging (e.g. for single-machine, non-fleet use), opt in with `AUTO_REBOOT=yes` (and optionally `AUTO_REBOOT_DELAY=<seconds>`, default 60).
+
+### Pre-staging Updates
 
 `--download-only` splits fetch from deploy — useful for pre-staging an update to many machines over a slow or metered link ahead of the actual maintenance window:
 
