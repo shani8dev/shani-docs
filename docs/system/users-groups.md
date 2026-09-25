@@ -147,6 +147,30 @@ sudo passwd -S alice
 # status: PS=password set, LK=locked, NP=no password
 ```
 
+**By default a Shanios account's password does not expire.** That output is
+the default, not an edge case: `max-days 99999` is roughly 274 years, and
+`inactive-days -1` means an account is never auto-locked for going unused.
+
+The flip side is that no strength policy is enforced either. `shani-core`
+declares `libpwquality` as a dependency, but nothing in the Shanios overlay
+references `pam_pwquality` in a PAM stack, so the library is present and
+inert. If you want complexity or length enforced, wire it up yourself:
+
+```text
+# /etc/pam.d/ — add to the password stack, then verify it is really active
+password    requisite    pam_pwquality.so retry=3 minlen=12
+```
+
+Confirm with `sudo passwd` on a throwaway account — PAM only prompts for the
+new password once `pam_pwquality.so` is in the `password` stack, so a
+missing module fails silently rather than complaining.
+
+The no-expiry default is deliberate. Periodic forced password changes are
+discouraged by current NIST SP 800-63B guidance unless there is evidence of
+compromise, so treat expiry as something to switch on deliberately for a
+managed fleet or a compliance requirement rather than a gap to close — and
+note that doing so does not give you strength checking for free.
+
 ### Password aging with chage
 
 ```bash
