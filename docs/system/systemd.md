@@ -82,8 +82,8 @@ journalctl -b
 journalctl -k
 journalctl -k | grep -i error
 
-# Filter by syslog identifier (tag)
-journalctl -t shani-update
+# Logs for a per-user service
+journalctl --user -u shani-cassini-agent.service
 
 # Output in JSON (for scripting)
 journalctl -u caddy -n 10 -o json

@@ -883,5 +883,5 @@ photoprism.example.com    { reverse_proxy localhost:2342 }
 
 ## See Also
 
-- [Productivity](productivity)
+- [Productivity](../overview)
 - [Storage for media libraries](../system/storage.md)

@@ -113,4 +113,4 @@ Access the live stats page at `http://localhost:9000` to see connection counts, 
 
 - [Traefik](traefik.md)
 - [Nginx Proxy Manager](nginx-proxy-manager.md)
-- [Caddy](../networking/caddy.md)
+- [Caddy](../../networking/caddy.md)

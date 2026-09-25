@@ -4,7 +4,7 @@ section: Self-Hosting & Servers
 updated: 2026-08-28
 ---
 
-> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
+> **Part of the Networking & Infrastructure series:** See [all networking docs](../../overview)
 
 ## phpIPAM (Lightweight IP Address Management)
 
@@ -75,4 +75,4 @@ ipam.home.local { tls internal; reverse_proxy localhost:8200 }
 
 ## See Also
 
-- [Networking & Infrastructure](networking) — overview
+- [Networking & Infrastructure](../../overview) — overview

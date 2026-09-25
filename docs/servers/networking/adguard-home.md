@@ -4,7 +4,7 @@ section: Self-Hosting & Servers
 updated: 2026-08-28
 ---
 
-> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
+> **Part of the Networking & Infrastructure series:** See [all networking docs](../../overview)
 
 ## AdGuard Home
 
@@ -63,4 +63,4 @@ curl -X POST -u admin:changeme http://localhost:3000/control/rewrite/add   -H "C
 
 ## See Also
 
-- [Networking & Infrastructure](networking) — overview
+- [Networking & Infrastructure](../../overview) — overview

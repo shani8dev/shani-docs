@@ -39,8 +39,8 @@ Access the web UI at `http://localhost:5380`. Configure zones, forwarders, and b
 
 ## See Also
 
-- [Pi-hole](pihole.md)
+- Pi-hole
 - [AdGuard Home](adguard-home.md)
 - [Unbound](unbound.md)
-- [PowerDNS](powerdns.md)
+- [PowerDNS](../../networking/powerdns.md)
 - [Kea DHCP](kea-dhcp.md)

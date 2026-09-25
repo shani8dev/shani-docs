@@ -170,8 +170,8 @@ journalctl -p warning -b         # warnings and above, current boot
 journalctl --since "2026-04-01" --until "2026-04-02"
 journalctl --since -1h           # last hour
 
-# Filter by syslog identifier (tag set by the application)
-journalctl -t shani-update
+# Filter by service unit
+journalctl --user -u shani-cassini-agent.service
 journalctl -t kernel
 
 # Filter by UID or GID

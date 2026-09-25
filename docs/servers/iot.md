@@ -569,4 +569,4 @@ podman restart grafana
 ## See Also
 
 - [Home Automation](home-automation)
-- [Databases (time-series)](databases)
+- [Databases (time-series)](../overview)

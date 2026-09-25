@@ -4,7 +4,7 @@ section: Networking
 updated: 2026-08-28
 ---
 
-> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
+> **Part of the Networking & Infrastructure series:** See [all networking docs](../overview)
 
 ## How Container Networking Works
 
@@ -46,4 +46,4 @@ when a container needs to reach a service on the host (e.g., a database not in a
 
 ## See Also
 
-- [Networking & Infrastructure](networking) — overview
+- [Networking & Infrastructure](../overview) — overview

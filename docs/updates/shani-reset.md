@@ -102,7 +102,7 @@ sudo passwd myuser
 1. `systemd-tmpfiles` recreates `/data` structure from `shanios-data-structure.conf`
 2. `/etc` overlay starts fresh from the `@blue` or `@green` read-only root
 3. All services start in their initial state (first-time setup)
-4. `shani-update` runs automatically and offers to update to the latest version
+4. The Shani Cassini agent checks for an available update after login; use **Updates & Rollback** to install it
 5. Desktop first-run wizard guides through locale, timezone, and user account creation
 
 ---

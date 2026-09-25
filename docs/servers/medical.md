@@ -471,6 +471,6 @@ wger.home.local     { tls internal; reverse_proxy localhost:8086 }
 
 ## See Also
 
-- [Productivity (Mealie)](productivity)
-- [Security baseline](security)
+- [Productivity (Mealie)](../overview)
+- [Security baseline](../overview)
 - [Backups](backups-sync)

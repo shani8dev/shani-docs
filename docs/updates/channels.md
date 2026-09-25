@@ -87,6 +87,6 @@ sudo shani-deploy --set-channel latest
 
 ## See Also
 
-- [System Updates](system) — How shani-update works
+- [System Updates](system) — How Shani Cassini and shani-deploy manage updates
 - [shani-deploy Reference](https://blog.shani.dev/post/shani-deploy-reference) — Command reference
 - [Build Pipeline](../arch/build-pipeline.md) — How images are produced

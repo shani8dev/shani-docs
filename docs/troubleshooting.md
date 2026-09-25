@@ -27,7 +27,7 @@ cat /data/current-slot   # prints: blue  or  green
 
 ### System Won't Boot — Automatic Fallback
 
-If your system fails to reach the login prompt three times after an update, systemd-boot's boot-counting mechanism activates and falls back to the previous slot automatically. On the next successful login, `shani-update` detects the fallback and offers to clean the failed slot.
+If your system fails to reach the login prompt three times after an update, systemd-boot's boot-counting mechanism activates and falls back to the previous slot automatically. After login, the Shani Cassini agent checks the boot state and sends a notification. Open **Updates & Rollback** to restore the failed slot.
 
 To check what happened:
 

@@ -4,7 +4,7 @@ section: Self-Hosting & Servers
 updated: 2026-08-28
 ---
 
-> **Part of the VPN & Tunnels series:** See [all networking docs](../networking)
+> **Part of the VPN & Tunnels series:** See [all networking docs](../../overview)
 
 ## ZeroTier (Self-Hosted Controller)
 
@@ -38,4 +38,4 @@ cd ~/zerotier-controller && podman-compose up -d
 
 ## See Also
 
-- [Networking](../networking) — all networking docs
+- [Networking](../../overview) — all networking docs

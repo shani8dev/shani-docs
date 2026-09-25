@@ -4,7 +4,7 @@ section: Self-Hosting & Servers
 updated: 2026-08-28
 ---
 
-> **Part of the VPN & Tunnels series:** See [all networking docs](../networking)
+> **Part of the VPN & Tunnels series:** See [all networking docs](../../overview)
 
 ## Gluetun (VPN Client Container)
 
@@ -88,4 +88,4 @@ Mullvad, ProtonVPN, NordVPN, ExpressVPN, Private Internet Access, Surfshark, Win
 
 ## See Also
 
-- [Networking](../networking) — all networking docs
+- [Networking](../../overview) — all networking docs

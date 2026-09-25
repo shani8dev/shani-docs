@@ -71,4 +71,4 @@ Access at `http://localhost:8101`. Start by defining your IP prefixes and VLANs,
 ## See Also
 
 - [LibreNMS](librenms.md)
-- [Caddy](../networking/caddy.md)
+- [Caddy](../../networking/caddy.md)

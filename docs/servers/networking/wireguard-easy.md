@@ -214,5 +214,5 @@ On Linux clients, `systemd-resolved` handles split DNS when `DNS=` is set in the
 - [NetBird](./netbird.md)
 - [Pritunl](./pritunl.md)
 - [Firezone](./firezone.md)
-- [WireGuard](../networking/wireguard.md)
-- [Cloudflared](../networking/cloudflared.md)
+- [WireGuard](../../networking/wireguard.md)
+- [Cloudflared](../../networking/cloudflared.md)

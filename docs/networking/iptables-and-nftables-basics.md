@@ -4,7 +4,7 @@ section: Networking
 updated: 2026-08-28
 ---
 
-> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
+> **Part of the Networking & Infrastructure series:** See [all networking docs](../overview)
 
 ## iptables and nftables Basics
 
@@ -42,4 +42,4 @@ sudo iptables -t raw -D PREROUTING -p tcp --dport 8080 -j TRACE  # remove when d
 
 ## See Also
 
-- [Networking & Infrastructure](networking) — overview
+- [Networking & Infrastructure](../overview) — overview

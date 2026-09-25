@@ -683,4 +683,4 @@ steps:
 ## See Also
 
 - [Communication (BigBlueButton)](communication)
-- [Databases (Moodle)](databases)
+- [Databases (Moodle)](../overview)

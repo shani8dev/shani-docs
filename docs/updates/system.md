@@ -8,56 +8,31 @@ updated: 2026-08-28
 
 Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the next reboot. The previous slot is preserved as an instant rollback target.
 
-## Automatic Updates
+## Updates and Notifications
 
-`shani-update` is the user-facing update manager. It runs automatically via a desktop autostart entry at login (after a 15-second delay) and via a systemd user timer that fires 15 minutes after boot and then every 2 hours.
+Shani Cassini is the user-facing update manager. Its **Updates & Rollback** page calls `shani-deploy` to install updates, change channels, and roll back to the previous system.
 
-On each run, `shani-update` works through a fixed priority sequence:
+The per-user `shani-cassini-agent.timer` starts with your desktop session. It runs the agent two minutes later, then every two hours with a small random delay. Each run executes `shani-cassini --agent` and reads `shani-deploy --status --check --json`. The agent sends a notification when:
 
-1. **Hard failure detection** — if a dracut pre-mount hook recorded a `boot_hard_failure` marker (root filesystem failed to mount), offers immediate rollback. This is distinct from a soft fallback-boot and requires manual action.
-2. **Fallback boot detection** — if the last boot failed and the system fell back to the standby slot, offers to roll back the broken slot.
-3. **Reboot-needed check** — if a staged update is waiting, shows a restart dialog.
-4. **Candidate boot check** — if you're running a freshly deployed slot, offers a rollback window.
-5. **Update check** — fetches release metadata and, if a newer version is available, shows an install dialog.
+- a boot failure was recorded;
+- the current slot is the first boot of a newly deployed system;
+- a staged update needs a restart; or
+- a newer version is available on the selected channel.
 
-When the user confirms an update, `shani-update` detects the available terminal emulator and launches `shani-deploy` inside it.
+Choose **Open** in a notification to start Shani Cassini on **Updates & Rollback**. The agent only checks and notifies. It does not install an update or run a rollback itself.
 
-> **Auto-reboot is opt-in here too.** Once `shani-deploy` finishes successfully — whether launched unattended by the timer or manually — the new slot is ready to boot into whenever convenient; it does not reboot on its own unless `AUTO_REBOOT=yes` was set. See [Automatic Reboot After Deployment](#automatic-reboot-after-deployment) below.
+> **Auto-reboot is opt-in.** Once `shani-deploy` finishes successfully, the new slot is ready to boot into whenever convenient. It does not reboot on its own unless `AUTO_REBOOT=yes` was set. See [Automatic Reboot After Deployment](#automatic-reboot-after-deployment) below.
 
 ```bash
-# Check timer status
-systemctl --user status shani-update.timer
+# Check the per-user timer
+systemctl --user status shani-cassini-agent.timer
 
-# View update manager logs
-cat ~/.cache/shani-update.log
-journalctl -t shani-update -n 50
+# View agent logs
+journalctl --user -u shani-cassini-agent.service -n 50
 
-# Run an immediate interactive check
-shani-update
+# Open the page directly
+shani-cassini --section=updates
 ```
-
-### shani-update Flags
-
-`shani-update` is mostly a GUI-driven wrapper, but it also accepts CLI flags that mirror (and, for install/deploy actions, pass through to) `shani-deploy`:
-
-| Flag | Effect |
-|------|--------|
-| `--startup` | Run the login flow: fallback check → reboot-needed check → candidate check → update check |
-| `-r`, `--rollback` | Roll back the inactive slot immediately |
-| `-f`, `--force` | Force deploy even if the version matches or there's a slot mismatch |
-| `-t`, `--channel <chan>` | Update channel for this run: `stable` or `latest` |
-| `-v`, `--verbose` | Verbose output from `shani-deploy` |
-| `-d`, `--dry-run` | Simulate the deployment without changes |
-| `-c`, `--cleanup` | Passthrough: `shani-deploy --cleanup` |
-| `-o`, `--optimize` | Passthrough: `shani-deploy --optimize` |
-| `--download-only` | Passthrough: `shani-deploy --download-only` |
-| `--set-channel <chan>` | Passthrough: `shani-deploy --set-channel` (persists to `/etc/shani-channel`) |
-| `--skip-self-update` | Passthrough on install: `shani-deploy --skip-self-update` |
-| `--update-genefi` | Passthrough on install: `shani-deploy --update-genefi` |
-| `--health [ARGS...]` | Forwards remaining arguments to `shani-health` (e.g. `shani-update --health --security`) — must be last on the command line |
-| `-h`, `--help` | Show usage |
-
-Running `shani-update` with no flags does the interactive flow: fallback check → reboot-needed check → candidate-boot check → update check, showing a GUI dialog (yad/zenity/kdialog) at whichever step applies, falling back to a desktop notification or console prompt if no GUI toolkit is available.
 
 ## Manual Update
 
@@ -131,7 +106,7 @@ When enabled, auto-reboot is still skipped entirely in `--dry-run` mode, and is 
 9. **Extract** — pipes the verified image into `btrfs receive`
 10. **UKI generation** — runs `gen-efi configure <inactive-slot>` inside a chroot of the new slot
 11. **Boot entry update** — new slot set as next-boot default with `+3-0` boot count tries
-12. **Notify** — writes `/run/shanios/reboot-needed` so `shani-update` can surface a restart dialog on next login
+12. **Notify** — writes `/run/shanios/reboot-needed` so the Shani Cassini agent can surface a restart notification on its next run
 13. **Auto-reboot** — opt-in only (`AUTO_REBOOT=yes`); the new slot is ready immediately and reboot is left to your convenience by default (see [Automatic Reboot After Deployment](#automatic-reboot-after-deployment) below)
 
 Nothing in your running OS is touched at any point.
@@ -200,9 +175,9 @@ Shanios uses two tiers of boot failure detection:
 | Tier | Marker | Trigger | Action |
 |------|--------|---------|--------|
 | Hard failure | `/data/boot_hard_failure` | Root filesystem mount failed (dracut pre-mount hook) | Manual: `shani-deploy --rollback` |
-| Soft failure | `/data/boot_failure` | System booted but never reached `multi-user.target` within 15 minutes | Automated rollback offered by `shani-update` |
+| Soft failure | `/data/boot_failure` | System booted but never reached `multi-user.target` within 15 minutes | Automatic system recovery, with a Shani Cassini agent notification linking to **Updates & Rollback** |
 
-On first login after a fallback, `shani-update` detects the mismatch and shows a dialog offering to roll back the failed slot.
+After login, the Shani Cassini agent reads the boot state through `shani-deploy --status --check --json`. If a fallback or recovery failure is recorded, it sends a notification that opens **Updates & Rollback**, where you can manage the rollback.
 
 ## Storage Management
 

@@ -1024,5 +1024,5 @@ support.example.com   { reverse_proxy localhost:3300 }
 
 ## See Also
 
-- [Databases (PostgreSQL/Redis)](databases)
+- [Databases (PostgreSQL/Redis)](../overview)
 - [Mail server](mail)

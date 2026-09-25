@@ -271,15 +271,15 @@ sudo systemctl enable --now shani-download-only.timer
 
 It runs 30 minutes after boot and once a day thereafter (randomized by up to 2 hours, to avoid every machine hitting the CDN at once), and is idempotent — if the current image is already cached and verified, it's a no-op. If `zsync2` is installed and a previous image is still cached, the fetch it triggers is differential (see [System Updates → Differential Downloads](../updates/system.md#differential-downloads-zsync2)).
 
-For managed fleets, disable the `shani-update` interactive prompt so it does not surface to users:
+For managed fleets, disable the Shani Cassini user agent if update and boot-state notifications should not surface to users:
 
 ```bash
-sudo rm /etc/xdg/autostart/shani-update.desktop
+sudo systemctl --global disable shani-cassini-agent.timer
 ```
 
 ### Centralised Update Delivery — What Is (and Isn't) Configurable
 
-Update images are served from Cloudflare R2 (`https://downloads.shani.dev`) with automatic SourceForge-mirror discovery as fallback, and every image is GPG-verified against the fixed key above. Both the CDN base URL and the signing key are `readonly` constants baked into `shani-deploy.sh` and `shani-update.sh` — **there is currently no config file or flag that points a stock installation at an internal mirror or a private signing key for its ongoing updates.** For air-gapped or bandwidth-controlled fleets, the practical options today are:
+Update images are served from Cloudflare R2 (`https://downloads.shani.dev`) with automatic SourceForge-mirror discovery as fallback, and every image is GPG-verified against the fixed key above. Both the CDN base URL and the signing key are `readonly` constants baked into `shani-deploy.sh`: **there is currently no config file or flag that points a stock installation at an internal mirror or a private signing key for its ongoing updates.** For air-gapped or bandwidth-controlled fleets, the practical options today are:
 
 - `--download-only` on a machine with network access, then distributing the verified image tarball for offline deployment (manual, not automated by the tool)
 - Forking `shani-deploy` to change `R2_BASE_URL`/`GPG_KEY_ID` and shipping that build to the fleet instead of the stock tool
@@ -448,7 +448,7 @@ LUKS2 keys never leave the device. TPM2 sealing binds to PCRs 0 and 7 — the fi
 To keep this page honest about what exists versus what a larger enterprise deployment might expect, the following are **not** currently implemented anywhere in the Shanios codebase, and should not be assumed:
 
 - **No centralised fleet dashboard.** There is no web console or MDM-style server for viewing fleet-wide status, pushing configuration, or triggering updates across machines. Fleet coordination today means SSH/Tailscale plus your own scripting (cron + `shani-deploy` + `shani-health --verify`), as described above.
-- **No runtime-configurable private update mirror or signing key.** As covered above, `R2_BASE_URL` and `GPG_KEY_ID` are compile-time constants in `shani-deploy`/`shani-update`. A private CDN or OEM signing key for *ongoing* updates requires forking the tool, not a config setting.
+- **No runtime-configurable private update mirror or signing key.** As covered above, `R2_BASE_URL` and `GPG_KEY_ID` are compile-time constants in `shani-deploy`. A private CDN or OEM signing key for *ongoing* updates requires forking the tool, not a config setting.
 - **Only `--verify` has machine-readable output.** `shani-health --verify --json` gives a structured pass/fail summary; every other mode (`--boot`, `--security`, `--storage-info`, `--network`, `--hardware`, `--packages`) is still formatted text only.
 - **No remote push/enrollment mechanism.** Machines pull updates on their own schedule (timer or user-triggered); there's no server-initiated "deploy to these 200 machines now" push.
 

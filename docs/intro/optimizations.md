@@ -62,7 +62,7 @@ Shanios includes extensive performance, gaming, and reliability optimizations ou
 | `beesd` daemon | Continuous background block-level deduplication across all Btrfs subvolumes |
 | `flatpak-update-system.timer` | System Flatpak auto-updates every 12 hours |
 | `flatpak-update-user.timer` | Per-user Flatpak auto-updates every 12 hours |
-| `shani-update.timer` (per-user) | Checks for a new OS image every 2 hours and prompts before deploying |
+| `shani-cassini-agent.timer` (per-user) | Checks update and boot state every 2 hours and opens Shani Cassini for update actions |
 
 All maintenance operations are scheduled during low-usage periods and use minimal system resources.
 
@@ -77,8 +77,11 @@ zramctl
 # Swappiness and page-lock tuning
 sysctl vm.swappiness vm.page_lock_unfairness
 
-# Maintenance timers: when they last ran and what's pending
+# System maintenance timers: when they last ran and what's pending
 systemctl list-timers --all | grep -E 'btrfs|flatpak|shani'
+
+# Per-user Shani Cassini update and boot-state checks
+systemctl --user list-timers --all | grep shani
 
 # bees deduplication status (unit is keyed by filesystem UUID)
 systemctl status 'beesd@*'

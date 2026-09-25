@@ -97,4 +97,4 @@ librenms.home.local { tls internal; reverse_proxy localhost:8100 }
 
 - [NetBox](netbox.md)
 - [Ntopng](ntopng.md)
-- [Caddy](../networking/caddy.md)
+- [Caddy](../../networking/caddy.md)

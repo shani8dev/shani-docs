@@ -59,6 +59,6 @@ In Pi-hole: Settings → DNS → Custom upstream DNS → `127.0.0.1#5335`. Disab
 
 ## See Also
 
-- [Pi-hole](pihole.md)
+- Pi-hole
 - [AdGuard Home](adguard-home.md)
 - [Technitium DNS Server](technitium.md)

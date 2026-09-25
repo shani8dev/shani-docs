@@ -1385,6 +1385,6 @@ podman exec etcd-cluster-etcd1-1 etcdctl \
 
 ## See Also
 
-- [Databases](databases)
-- [Monitoring](monitoring)
-- [Kubernetes](kubernetes)
+- [Databases](../overview)
+- [Monitoring](../overview)
+- [Kubernetes](../overview)

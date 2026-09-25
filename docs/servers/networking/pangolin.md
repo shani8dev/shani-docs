@@ -71,5 +71,5 @@ cd ~/newt && podman-compose up -d
 ## See Also
 
 - [WireGuard / WG-Easy](./wireguard-easy.md)
-- [Cloudflared](../networking/cloudflared.md)
+- [Cloudflared](../../networking/cloudflared.md)
 - [NetBird](./netbird.md)

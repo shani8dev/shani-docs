@@ -335,7 +335,7 @@ cat /data/current-slot   # prints: blue  or  green
 **How do I check for updates manually?**
 
 ```bash
-shani-update --check
+shani-cassini --section=updates
 ```
 
 **How do I view deployment logs?**

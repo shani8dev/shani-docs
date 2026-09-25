@@ -536,5 +536,5 @@ komodo.home.local     { tls internal; reverse_proxy localhost:9120 }
 
 ## See Also
 
-- [Monitoring](monitoring)
-- [Productivity](productivity)
+- [Monitoring](../overview)
+- [Productivity](../overview)

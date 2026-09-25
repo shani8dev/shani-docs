@@ -76,5 +76,5 @@ sudo firewall-cmd --add-service=dhcp --permanent && sudo firewall-cmd --reload
 ## See Also
 
 - [Technitium DNS Server](technitium.md)
-- [PowerDNS](powerdns.md)
-- [Pi-hole](pihole.md)
+- [PowerDNS](../../networking/powerdns.md)
+- Pi-hole

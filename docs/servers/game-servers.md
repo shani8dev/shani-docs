@@ -737,6 +737,6 @@ WantedBy=timers.target
 
 ## See Also
 
-- [VPN & Tunnels](vpn-tunnels)
-- [Monitoring](monitoring)
+- [VPN & Tunnels](../overview)
+- [Monitoring](../overview)
 - [Gaming on Shanios](https://blog.shani.dev/post/shani-os-gaming-deep-dive)

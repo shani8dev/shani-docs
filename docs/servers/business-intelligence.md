@@ -496,5 +496,5 @@ Access at `http://localhost:8500` to complete the setup wizard. Add the tracking
 
 ## See Also
 
-- [Databases](databases)
-- [Monitoring (Grafana)](monitoring)
+- [Databases](../overview)
+- [Monitoring (Grafana)](../overview)

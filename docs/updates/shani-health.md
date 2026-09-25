@@ -82,7 +82,7 @@ The default run covers every component in one pass. Sections include:
 - **Network** — NetworkManager, DNS, DHCP, Wi-Fi backend, VPN, internet, resolv.conf, servers (SSH, Samba, NFS, web…)
 - **Audio & Display** — PipeWire, WirePlumber, rtkit, display manager, XDG portals, Plymouth
 - **Printing & Scanning** — CUPS, cups-browsed, ipp-usb, SANE
-- **Package Managers** — Flatpak, Snap, Nix, AppImage, shani-update timer
+- **Package Managers** — Flatpak, Snap, Nix, AppImage, `shani-cassini-agent.timer`
 - **Backup Tools** — rclone, restic
 - **Containers** — Podman, Distrobox, LXD, Docker, Waydroid, nspawn
 - **Virtualization** — KVM, libvirt daemons, VM inventory, default network, storage pools

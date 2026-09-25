@@ -810,5 +810,5 @@ restic.home.local  { tls internal; reverse_proxy localhost:8000 }
 ## See Also
 
 - [Btrfs snapshots guide](https://blog.shani.dev/post/shani-os-btrfs-snapshots-and-backup)
-- [Monitoring (Healthchecks)](monitoring)
+- [Monitoring (Healthchecks)](../overview)
 - [Storage management](../system/storage.md)

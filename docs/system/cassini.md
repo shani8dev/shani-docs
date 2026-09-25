@@ -48,18 +48,31 @@ sleeping until they finish.
 **Updates & Rollback** shows the version you run and the newest one on your
 channel. **Update** installs it into the other system slot; restart when
 asked. **Roll Back…** switches to the previous system (after a restart) — your
-files and settings are not affected. See [Blue-Green Deployment](blue-green)
-and [Update Channels](channels).
+files and settings are not affected. See [Blue-Green Deployment](../concepts/blue-green)
+and [Update Channels](../updates/channels).
+
+## Update and Boot Notifications
+
+After you log in, the per-user `shani-cassini-agent.timer` checks the system two minutes later and then every two hours. It runs `shani-cassini --agent`, which reads `shani-deploy --status --check --json` and sends a notification when an update is available, a staged update needs a restart, or a boot failure was recorded.
+
+Choose **Open** in a notification to start Shani Cassini on **Updates & Rollback**. The agent only checks and notifies. Installing an update, changing channels, and rolling back remain actions on that page.
+
+To inspect the user service:
+
+```bash
+systemctl --user status shani-cassini-agent.timer
+journalctl --user -u shani-cassini-agent.service -n 50
+```
 
 ## Reset
 
-**Maintenance → Reset this computer** runs [`shani-reset`](shani-reset): it
+**Maintenance → Reset this computer** runs [`shani-reset`](../updates/shani-reset): it
 erases settings, user accounts and service data, keeps both system slots and
 (unless you choose otherwise) everything in `/home`, then restarts. You type
 `reset` to confirm — and `wipe home` as well if you chose to erase files.
 
 ## See Also
 
-- [shani-health](shani-health)
-- [TPM2 Auto-Unlock](tpm2)
+- [shani-health](../updates/shani-health)
+- [TPM2 Auto-Unlock](../security/tpm2)
 - [Backup](backup)

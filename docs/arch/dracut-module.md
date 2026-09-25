@@ -33,7 +33,7 @@ The module is always included in Shanios initramfs builds (`check()` returns 0 u
 
 **Runs:** After LUKS unlock and device discovery, **before** the root Btrfs subvolume is mounted.
 
-**Purpose:** Write a `boot_hard_failure` marker so that if root mount fails, the failure is recorded persistently and `shani-update` can detect it on the next boot.
+**Purpose:** Write a `boot_hard_failure` marker so that if root mount fails, the failure is recorded persistently and reported through `shani-deploy --status --check --json` after the next boot. The Shani Cassini agent uses that status to notify you and open **Updates & Rollback**.
 
 **Why dracut and not a systemd service:** dracut has no "on mount failure" hook. The only reliable pattern is write-before-mount, clear-on-success. If root never mounts, the marker persists. If root mounts successfully, the `shanios-boot-success-clear.sh` hook at pre-pivot removes it.
 
@@ -41,7 +41,7 @@ The module is always included in Shanios initramfs builds (`check()` returns 0 u
 
 1. Locates the Btrfs device by filesystem label (`shani_root`)
 2. Mounts `@data` read-write to a temporary mountpoint (`/run/shanios-data-tmp`)
-3. Reads the attempted slot from `rootflags=subvol=@<slot>` in the kernel cmdline via `getarg rootflags`, validating it is `blue` or `green` (falls back to the sentinel `unknown` otherwise — `shani-update` handles that value gracefully)
+3. Reads the attempted slot from `rootflags=subvol=@<slot>` in the kernel cmdline via `getarg rootflags`, validating it is `blue` or `green`; otherwise it records the sentinel `unknown`, which `shani-deploy --status --check --json` reports to the Shani Cassini agent
 4. Writes the slot name to `/data/boot_hard_failure`, always overwriting any stale marker so it reflects the current attempt
 5. Unmounts `@data` immediately
 

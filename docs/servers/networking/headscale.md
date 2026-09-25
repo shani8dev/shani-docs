@@ -202,4 +202,4 @@ podman exec headscale headscale version
 
 - [WireGuard / WG-Easy](./wireguard-easy.md)
 - [NetBird](./netbird.md)
-- [Tailscale](../networking/tailscale.md)
+- [Tailscale](../../networking/tailscale.md)

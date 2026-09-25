@@ -120,4 +120,4 @@ sudo journalctl -u dnsmasq -f
 - [DNS over HTTPS (dnscrypt-proxy)](dnscrypt-proxy) — encrypted DNS resolver
 - [Firewall](firewalld) — network security rules
 - [SSH Server](openssh) — remote access
-- [DNS Server Applications](../servers/networking.md) — Pi-hole, AdGuard Home, Unbound, Technitium
+- [DNS Server Applications](../overview.md) — Pi-hole, AdGuard Home, Unbound, Technitium

@@ -888,7 +888,7 @@ dify.home.local      { tls internal; reverse_proxy localhost:5002 }
 ## See Also
 
 - [AI-Assisted Development](../software/ai-development.md) — coding agents/harnesses (Claude Code, OpenCode, aider) instead of self-hosted inference servers
-- [Databases (vector stores)](databases)
+- [Databases (vector stores)](../overview)
 - [GPU compute blog](https://blog.shani.dev/post/gpu-compute-on-shani-os)
 - [AI-assisted development blog](https://blog.shani.dev/post/ai-assisted-development-on-shani-os) — narrative walkthrough of the harness/MCP/local-model landscape
 - [GPU Containers](../software/gpu-containers.md)

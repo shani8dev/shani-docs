@@ -4,7 +4,7 @@ section: Self-Hosting & Servers
 updated: 2026-08-28
 ---
 
-> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
+> **Part of the Networking & Infrastructure series:** See [all networking docs](../../overview)
 
 ## Squid (Caching Proxy)
 
@@ -91,4 +91,4 @@ squid.home.local { tls internal; reverse_proxy localhost:3128 }
 
 ## See Also
 
-- [Networking & Infrastructure](networking) — overview
+- [Networking & Infrastructure](../../overview) — overview

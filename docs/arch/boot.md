@@ -147,7 +147,7 @@ Shanios uses systemd-boot's boot-counting mechanism plus its own two-tier failur
 | `bless-boot.service` | `multi-user.target`, `ConditionPathExists=/data/boot-ok` | Runs `bootctl set-good` — stops the boot counter countdown |
 | `check-boot-failure.timer` / `.service` | `OnBootSec=15m`, fires once | If `boot_in_progress` still exists and `boot-ok` is absent, writes the *previously active* slot name into `/data/boot_failure` (skipped if `/data/boot_hard_failure` is already present) |
 
-On first login after a fallback, `shani-update` detects the mismatch between the booted slot and `/data/current-slot`, then offers rollback.
+After login, the Shani Cassini agent reads this boot state through `shani-deploy --status --check --json`. If a fallback or recovery failure is recorded, it sends a notification that opens **Updates & Rollback**, where you can manage the rollback.
 
 ### Boot Marker Files
 

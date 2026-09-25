@@ -64,6 +64,6 @@ ports:
 
 ## See Also
 
-- [Pi-hole](pihole.md)
+- Pi-hole
 - [AdGuard Home](adguard-home.md)
 - [Unbound](unbound.md)

@@ -4,7 +4,7 @@ section: Networking
 updated: 2026-08-28
 ---
 
-> **Part of the Networking & Infrastructure series:** See [all networking docs](../networking)
+> **Part of the Networking & Infrastructure series:** See [all networking docs](../overview)
 
 ## PowerDNS + PowerDNS Admin (Authoritative DNS)
 
@@ -114,4 +114,4 @@ pdnsadmin.home.local { tls internal; reverse_proxy localhost:9191 }
 
 ## See Also
 
-- [Networking & Infrastructure](networking) — overview
+- [Networking & Infrastructure](../overview) — overview

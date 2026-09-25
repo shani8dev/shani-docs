@@ -139,7 +139,7 @@ Lists scrub, Flatpak auto-update, and Shanios maintenance timers with next-fire 
 
 ## See Also
 
-- [System Updates](updates/system) — full `shani-deploy` reference
-- [Health Checks](updates/shani-health) — every `shani-health` flag explained
-- [Factory Reset](updates/shani-reset) — what `shani-reset` wipes and keeps
-- [Secure Boot](security/gen-efi) — full `gen-efi` reference
+- [System Updates](../updates/system) — full `shani-deploy` reference
+- [Health Checks](../updates/shani-health) — every `shani-health` flag explained
+- [Factory Reset](../updates/shani-reset) — what `shani-reset` wipes and keeps
+- [Secure Boot](../security/gen-efi) — full `gen-efi` reference

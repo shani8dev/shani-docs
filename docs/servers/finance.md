@@ -590,5 +590,5 @@ kresus.home.local     { tls internal; reverse_proxy localhost:9876 }
 
 ## See Also
 
-- [Databases](databases)
+- [Databases](../overview)
 - [Backups](backups-sync)

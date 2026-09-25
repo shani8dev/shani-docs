@@ -1227,5 +1227,5 @@ openstack floating ip delete <id>
 
 ## See Also
 
-- [Kubernetes](kubernetes)
+- [Kubernetes](../overview)
 - [Virtual networking](../networking/virtual-networking.md)
