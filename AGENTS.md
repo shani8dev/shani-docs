@@ -214,14 +214,35 @@ not how it got that way.
   (`shani-install-media` gained a GPL-3.0 LICENSE on 2026-09-16 and
   `shani-settings` on 2026-09-17 — both closed; see master roadmap #31.)
   Needs the maintainer to pick a license, not something to guess.
+- **Dead in-page anchors — FIXED (2026-09-26), 0 of 967 remaining.** The
+  earlier 87-cross-link repair only ever checked page-level targets; nothing
+  validated `#fragment` anchors, so 74 dead in-page anchors across 8 pages had
+  been serving silently. Two of those pages
+  (`servers/kubernetes/overview.md`, `servers/devops/ci-cd.md`) carried a
+  hand-written TOC copied from a *different* document — 55/58 and 13/15 of
+  their entries pointed at sections that did not exist in the page (Shanios OS
+  install topics like `Distributions`/`Disk Layout` inside the Kubernetes
+  overview). Root cause of the smaller class: the TOCs were written with a
+  slugger that mapped `&`/em-dash to `--`, while `generate-manifest.js`'s
+  `slugifyH` strips those characters and collapses whitespace, so
+  `Custom & Cloud Image Building` was `#custom--cloud-image-building` in the
+  TOC but `#custom-cloud-image-building` in the rendered page. Both TOCs are
+  now generated from each page's own headings. `tests/check-links.js` checks
+  the *generated* tree (what the site serves), not the Markdown, and runs in
+  CI — do not weaken it to scan only `docs/**.md`.
 - **CI status.** 1 workflow (`build-manifest.yml`), triggered on pushes
-  touching `docs/**.md`/`config-docs.js`/`generate-manifest.js`. Re-runs
-  `node generate-manifest.js`
+  touching `docs/**.md`/`config-docs.js`/`generate-manifest.js`/`doc-links.js`/`tests/**`.
+  The `build` job re-runs `node generate-manifest.js`
   and auto-commits the regenerated `manifest.json`/stubs back to the
   branch; a doc edit that makes the generator throw fails the workflow
   before that commit, so a red run here means "run
-  `node generate-manifest.js` locally and read the actual error." Does
-  not validate content, only that the generator completes.
+  `node generate-manifest.js` locally and read the actual error." A
+  separate `validate` job (2026-09-26) regenerates into its own checkout
+  and runs `node --test tests/` + `node tests/check-links.js`, so link rot
+  now fails CI instead of shipping. It deliberately does *not* assert the
+  committed output is up to date or commit anything itself — `build`
+  auto-commits, so either would race it. No `pull_request` trigger: `build`
+  needs `contents: write`, which fork PRs don't get.
 
 ## Commit discipline
 
@@ -382,6 +403,6 @@ Implementation priorities are per `../IMPLEMENTATION-ROADMAP.md` (master roadmap
 
 4. **Shared component library for `brand-shani.css`/`sw.js`/`generate-manifest.js` (P3, 2-3 days).** Master-roadmap item #27 (nav JS `nav-docs.js` is unique to this repo, not part of the shared set). These files are copy-pasted between `shani-docs` and `shani-blog` only, and divergence accumulates silently. ADOPT the shared-library PATTERN from garuda-ng — never the Angular code; shani's plain-HTML/CSS approach is the right call for this ecosystem, it just needs a shared package (or git submodule) instead of copy-paste.
 
-5. **CI content validation (P1).** `build-manifest.yml` only checks that the generator completes, not content validity. Add HTML validation of generated stubs, a broken-internal-link check, and a duplicate-title check to the existing workflow (or via `shani-ci-commons` templates, item #7).
+5. **CI content validation (P1) — partially done 2026-09-26.** The broken-internal-link check (including in-page `#fragment` anchors) and the existing unit tests now run in CI via the `validate` job. Still open: HTML validation of generated stubs, and a duplicate-title check.
 
 6. **Conventional commits + `renovate.json` (P1).** Ecosystem-wide commit convention (item #9) and Renovate (item #8) — `generate-manifest.js` is the only Node dependency, so Renovate scope is small but real.

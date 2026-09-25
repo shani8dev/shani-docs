@@ -7,6 +7,8 @@ on:
       - 'docs/**.md'
       - 'config-docs.js'
       - 'generate-manifest.js'
+      - 'doc-links.js'
+      - 'tests/**'
       - '.github/workflows/build-manifest.yml'
   workflow_dispatch:
 
@@ -18,6 +20,30 @@ jobs:
     uses: shani8dev/shani-ci-commons/.github/workflows/build.yml@main
     with:
       build-type: manifest
+
+  # `build` only proves the generator completes; nothing validated the content it
+  # emitted. Do not add a "generated output is stale" check or a commit step
+  # here: `build` auto-commits regenerated stubs, so either would race it.
+  validate:
+    name: Content validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Regenerate stubs
+        run: node generate-manifest.js
+
+      - name: Unit tests
+        run: node --test tests/
+
+      - name: Broken internal link check
+        run: node tests/check-links.js
 
   security:
     name: Security
