@@ -376,20 +376,28 @@ shani-health --journal err --since -2h    # Errors in the last 2 hours</code></p
 <table><thead><tr><th>Code</th><th>Meaning</th></tr></thead><tbody><tr><td><code>0</code></td><td>No issues found</td></tr><tr><td><code>1</code></td><td>Issues found (warnings or errors)</td></tr></tbody></table>
 <h3 id="fleet-health-monitoring">Fleet Health Monitoring</h3>
 <pre><code class="language-bash"># Remote check via SSH or Tailscale
-ssh admin@machine-name.tailnet.ts.net 'shani-health --boot'
+ssh admin@machine-name.tailnet.ts.net 'shani-health --boot'</code></pre>
+<p>To automate that on a schedule, run it from a timer you own — Shanios does not ship one. Note the <code>Unit=</code> line in the timer: without it systemd looks for a <em>service</em> named after the timer, and the report never runs.</p>
+<pre><code class="language-ini"># /etc/systemd/system/shani-health-report.service
+[Unit]
+Description=Daily shani-health report
 
-# Automate with a systemd timer
-# /etc/systemd/system/shani-health-report.service
 [Service]
 Type=oneshot
-ExecStart=/bin/bash -c 'shani-health &gt; /var/log/shani-health-$(date +%%Y%%m%%d).txt 2&gt;&amp;1'
+ExecStart=/bin/bash -c 'shani-health &gt; /var/log/shani-health-$(date +%%Y%%m%%d).txt 2&gt;&amp;1'</code></pre>
+<pre><code class="language-ini"># /etc/systemd/system/shani-health-report.timer
+[Unit]
+Description=Run the daily shani-health report
 
-# /etc/systemd/system/shani-health-report.timer
 [Timer]
 OnCalendar=daily
 Persistent=true
+Unit=shani-health-report.service
+
 [Install]
 WantedBy=timers.target</code></pre>
+<pre><code class="language-bash">sudo systemctl enable --now shani-health-report.timer</code></pre>
+<p>The <code>%%</code> in the date format is not a typo: systemd treats <code>%</code> as its own specifier escape, so a literal percent must be doubled inside a unit file.</p>
 <p>For Nagios/Zabbix-style monitoring, the non-zero exit code on any issue makes <code>shani-health</code> usable directly as a check script. For Prometheus/Grafana, wrap the output in a custom exporter that parses the coloured rows.</p>
 <hr>
 <h2 id="relationship-to-other-tools">Relationship to Other Tools</h2>

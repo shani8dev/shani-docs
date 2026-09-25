@@ -61105,20 +61105,42 @@ Safe to attach to bug reports — no private keys or passwords are included.
 ```bash
 # Remote check via SSH or Tailscale
 ssh admin@machine-name.tailnet.ts.net 'shani-health --boot'
+```
 
-# Automate with a systemd timer
+To automate that on a schedule, run it from a timer you own — Shanios does
+not ship one. Note the `Unit=` line in the timer: without it systemd looks
+for a *service* named after the timer, and the report never runs.
+
+```ini
 # /etc/systemd/system/shani-health-report.service
+[Unit]
+Description=Daily shani-health report
+
 [Service]
 Type=oneshot
 ExecStart=/bin/bash -c 'shani-health > /var/log/shani-health-$(date +%%Y%%m%%d).txt 2>&1'
+```
 
+```ini
 # /etc/systemd/system/shani-health-report.timer
+[Unit]
+Description=Run the daily shani-health report
+
 [Timer]
 OnCalendar=daily
 Persistent=true
+Unit=shani-health-report.service
+
 [Install]
 WantedBy=timers.target
 ```
+
+```bash
+sudo systemctl enable --now shani-health-report.timer
+```
+
+The `%%` in the date format is not a typo: systemd treats `%` as its own
+specifier escape, so a literal percent must be doubled inside a unit file.
 
 For Nagios/Zabbix-style monitoring, the non-zero exit code on any issue makes `shani-health` usable directly as a check script. For Prometheus/Grafana, wrap the output in a custom exporter that parses the coloured rows.
 
