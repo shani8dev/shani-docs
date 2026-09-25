@@ -9,6 +9,7 @@ const SHELL = [
   '/style-docs.css',
   '/config-docs.js',
   '/nav-docs.js',
+  '/doc-links.js',
   '/script-docs.js',
   '/manifest.json',
   '/favicon.svg'

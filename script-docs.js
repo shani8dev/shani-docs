@@ -532,7 +532,7 @@ function renderDoc(slug, raw) {
   RecentlyViewed.add(slug);
   const viewCount = ViewCounter.get(slug);
 
-  let html = buildMarkedHtml(body);
+  let html = buildMarkedHtml(body, slug);
 
   const tmpDiv = document.createElement('div');
   tmpDiv.innerHTML = html;
@@ -1229,11 +1229,30 @@ function renderMath(html) {
 }
 
 /**
- * Shared Markdown → sanitized HTML renderer (used by renderDoc + updatePreview).
- * Includes: heading anchors, external link detection, figure captions,
- *           KaTeX math, GitHub-style callouts, media shortcodes.
+ * The shared canonical link resolver (doc-links.js), loaded before this file
+ * in index.html and inherited verbatim by every generated static stub.
+ *
+ * The identity fallback only exists so a missing/failed doc-links.js request
+ * degrades to the pre-fix behaviour (raw href, previous external rule) instead
+ * of throwing inside the renderer; it is never the path taken on a healthy
+ * load, and it deliberately contains no resolver logic of its own.
  */
-function buildMarkedHtml(body) {
+const DocLink = (typeof DocLinks !== 'undefined' && DocLinks) ? DocLinks : {
+  resolveDocHref: (href) => href,
+  isExternalHref: (href) => !!href && !href.startsWith('#') && !href.startsWith('/')
+};
+
+/**
+ * Shared Markdown → sanitized HTML renderer (used by renderDoc + updatePreview).
+ * Includes: heading anchors, canonical doc-link resolution + external link
+ *           detection, figure captions, KaTeX math, GitHub-style callouts,
+ *           media shortcodes.
+ *
+ * `slug` is the CURRENT doc slug. It is required: relative doc links are
+ * authored against the doc's own directory, not the page URL, so without it
+ * every `../`-style link resolved one level too high and 404'd.
+ */
+function buildMarkedHtml(body, slug) {
   if (typeof marked === 'undefined') return `<pre>${esc(body)}</pre>`;
 
   body = _processShortcodes(body);
@@ -1260,15 +1279,20 @@ function buildMarkedHtml(body) {
     return `<h${depth} id="${id}">${text}<a class="heading-anchor" href="#${id}" aria-hidden="true">#</a></h${depth}>\n`;
   };
 
-  // External links open in new tab
+  // Relative doc links are canonicalized to /doc/<slug>/ first, so the
+  // external test below runs on the RESOLVED href — that is what stops a
+  // sibling-page link like `backup` from being treated as external. Only real
+  // external links open in a new tab. The resolver itself lives in
+  // doc-links.js and is shared with the static stub generator.
   renderer.link = (hrefOrToken, title, linkText) => {
     const href = (hrefOrToken && typeof hrefOrToken === 'object') ? hrefOrToken.href  : hrefOrToken;
     const ttl  = (hrefOrToken && typeof hrefOrToken === 'object') ? hrefOrToken.title : title;
     const txt  = (hrefOrToken && typeof hrefOrToken === 'object') ? hrefOrToken.text  : linkText;
-    const isExternal = href && !href.startsWith('#') && !href.startsWith('/');
+    const resolved = DocLink.resolveDocHref(href, slug);
+    const isExternal = DocLink.isExternalHref(resolved);
     const t   = ttl ? ` title="${ttl}"` : '';
     const ext = isExternal ? ' target="_blank" rel="noopener noreferrer"' : '';
-    return `<a href="${href}"${t}${ext}>${txt}</a>`;
+    return `<a href="${resolved}"${t}${ext}>${txt}</a>`;
   };
 
   // Images wrapped in <figure> with optional <figcaption>
@@ -1887,7 +1911,7 @@ const AdminEditor = (() => {
     if (!_monacoEditor) return;
     const { body } = parseFm(_monacoEditor.getValue());
     const title    = document.getElementById('afm-title')?.value || '';
-    const html     = buildMarkedHtml(body); // shared renderer — no duplication
+    const html     = buildMarkedHtml(body, _slug); // shared renderer — no duplication
     const pi       = document.getElementById('admin-preview-inner');
     if (pi) {
       pi.innerHTML = `<h1 class="admin-preview-inner__title">${esc(title)}</h1>${processCallouts(html)}`;

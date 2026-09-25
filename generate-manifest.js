@@ -23,6 +23,13 @@
 const fs   = require('fs');
 const path = require('path');
 
+// The one canonical link resolver, shared with the browser renderer in
+// script-docs.js (loaded there as the DocLinks global from this same file).
+// Relative doc links in the Markdown are authored against the doc's own
+// directory, so the static stub must canonicalize them to /doc/<slug>/ or the
+// prerendered HTML ships the same broken hrefs the client used to render.
+const DocLinks = require('./doc-links.js');
+
 // ── Markdown → HTML (for prerendered stub content) ─────────────────
 // Prefer the real `marked` package (same renderer family the client uses)
 // if it's installed; otherwise fall back to a small dependency-free
@@ -180,12 +187,14 @@ function mdToHtmlFallback(md) {
   return html;
 }
 
-function mdToHtml(md) {
+function mdToHtml(md, slug) {
+  let html;
   if (marked) {
-    try { return typeof marked.parse === 'function' ? marked.parse(md || '') : marked(md || ''); }
-    catch { /* fall through to the built-in converter */ }
+    try { html = typeof marked.parse === 'function' ? marked.parse(md || '') : marked(md || ''); }
+    catch { html = null; /* fall through to the built-in converter */ }
   }
-  return mdToHtmlFallback(md);
+  if (html == null) html = mdToHtmlFallback(md);
+  return DocLinks.canonicalizeHtmlHrefs(html, slug);
 }
 
 // Strip a leading "# Heading" line from the body — the stub always
@@ -490,7 +499,7 @@ function buildStub(doc) {
     })),
   }) : '';
 
-  const bodyHtml = renderCallouts(mdToHtml(stripDuplicateLeadingH1(doc.body || '')));
+  const bodyHtml = renderCallouts(mdToHtml(stripDuplicateLeadingH1(doc.body || ''), doc.slug));
 
   const docContentHtml = `
       <!--
