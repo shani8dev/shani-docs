@@ -14,7 +14,7 @@ updated: 2026-08-28
 
 #### Install k3s without Flannel/kube-proxy first
 
-See [k3s install](#k3s-lightweight-cncf-kubernetes) — `--flannel-backend=none --disable-kube-proxy --disable-network-policy` are required before installing Cilium.
+See [k3s install](#install-k3s-without-flannelkube-proxy-first) — `--flannel-backend=none --disable-kube-proxy --disable-network-policy` are required before installing Cilium.
 
 #### Install Cilium
 

@@ -7,20 +7,21 @@ updated: 2026-08-28
 ## Table of Contents
 
 - [Code Hosting](#code-hosting)
+  - [Gitea / Forgejo](#gitea-forgejo)
+  - [GitLab CE](#gitlab-ce)
 - [CI/CD](#cicd)
-- [Container & Image Tools](#container--image-tools)
-- [Kubernetes & Orchestration](#kubernetes--orchestration)
-- [HA Clusters](#ha-clusters)
-- [Infrastructure as Code](#infrastructure-as-code)
-- [Artifact & Dependency Management](#artifact--dependency-management)
-- [Service Discovery & Orchestration](#service-discovery--orchestration)
-- [Developer Environments & Utilities](#developer-environments--utilities)
-- [Internal Platforms](#internal-platforms)
-- [Hardware & Embedded](#hardware--embedded)
-- [IoT & SCADA Tools](#iot--scada-tools)
-- [Security CLI Tools](#security-cli-tools)
-- [Education & Training Platforms](#education--training-platforms)
-- [Key Concepts](#key-concepts)
+  - [Woodpecker CI](#woodpecker-ci)
+  - [Forgejo Actions Runner](#forgejo-actions-runner)
+  - [Jenkins](#jenkins)
+  - [OpenFeature + Flagd (Feature Flag Management)](#openfeature-flagd-feature-flag-management)
+  - [Score (Platform-Agnostic Workload Spec)](#score-platform-agnostic-workload-spec)
+  - [Dagger (Portable Pipelines as Code)](#dagger-portable-pipelines-as-code)
+  - [GitHub Actions (Cloud CI/CD — github.com)](#github-actions-cloud-cicd-githubcom)
+  - [Dependency Caching in CI](#dependency-caching-in-ci)
+  - [act (Local GitHub Actions Runner)](#act-local-github-actions-runner)
+  - [Renovate Bot](#renovate-bot)
+  - [SonarQube (Code Quality & Security)](#sonarqube-code-quality-security)
+
 
 ---
 

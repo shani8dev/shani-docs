@@ -2052,7 +2052,7 @@ flatpak install myorg com.myorg.InternalApp
 
 Every Shanios release is signed with key `7B927BFFD4A9EAAA8B666B77DE217F3DA8014792`, and `shani-deploy` hardcodes that fingerprint (`GPG_KEY_ID`) plus the CDN endpoint (`R2_BASE_URL="https://downloads.shani.dev"`) as `readonly` constants — there is no runtime flag or config file that repoints a stock `shani-deploy` binary at a different signing key or a private mirror. Machines running the stock tool always verify against, and download from, the public Shanios infrastructure (R2, with SourceForge-mirror auto-discovery as fallback).
 
-An OEM that needs its own signing key does so at the **image-build layer**, not at runtime on deployed machines — see [Custom & Cloud Image Building](#custom--cloud-image-building) below, where the Packer AMI pipeline accepts `PKR_VAR_gpg_public_key` to bake in an organisation's own key at build time. Redirecting the *ongoing* update pipeline (the `shani-deploy` running on already-deployed machines) to a private CDN or a different signing key requires forking `shani-deploy` (GPLv3, source available) and rebuilding the image with the patched constants — this is not a supported runtime configuration surface today.
+An OEM that needs its own signing key does so at the **image-build layer**, not at runtime on deployed machines — see [Custom & Cloud Image Building](#custom-cloud-image-building) below, where the Packer AMI pipeline accepts `PKR_VAR_gpg_public_key` to bake in an organisation's own key at build time. Redirecting the *ongoing* update pipeline (the `shani-deploy` running on already-deployed machines) to a private CDN or a different signing key requires forking `shani-deploy` (GPLv3, source available) and rebuilding the image with the patched constants — this is not a supported runtime configuration surface today.
 
 ---
 
@@ -11014,7 +11014,7 @@ networkctl status          # Verify interfaces came up correctly
 | Interface not forwarding between bridge ports | Check `net.ipv4.ip_forward` (`sysctl net.ipv4.ip_forward`); ensure it is `1` |
 | Bridge member goes `blocking` or `listening` | STP convergence is normal — wait ~30s, or disable STP on the bridge: `sudo ip link set br0 type bridge stp_state 0` |
 | macvlan can't reach host | Expected — macvlan parent and child can't communicate. Use a bridge or a veth pair to the host instead |
-| Namespace has no internet | Add a default route inside the namespace and enable NAT on the host (see [Network Namespaces](#5-network-namespaces--full-isolation)) |
+| Namespace has no internet | Add a default route inside the namespace and enable NAT on the host (see [Network Namespaces](#5-network-namespaces-full-isolation)) |
 | Bond not failing over | Verify `miimon` is non-zero; check that both member NICs are actually `up` |
 | Changes lost after reboot | Create systemd-networkd `.netdev`/`.network` files for persistence |
 | `RTNETLINK answers: File exists` | Interface or route already exists — delete the old one first: `sudo ip link delete <name>` |
@@ -20449,25 +20449,26 @@ podman exec dragonfly redis-cli -p 6379 bgsave
 URL: https://docs.shani.dev/doc/servers/devops/ci-cd/
 Updated: 2026-08-28
 
-Table of Contents Code Hosting CI/CD Container & Image Tools Kubernetes & Orchestration HA Clusters Infrastructure as Code Artifact & Dependency Management…
+Table of Contents Code Hosting - Gitea / Forgejo - GitLab CE CI/CD - Woodpecker CI - Forgejo Actions Runner - Jenkins - OpenFeature + Flagd (Feature Flag M…
 
 ## Table of Contents
 
 - [Code Hosting](#code-hosting)
+  - [Gitea / Forgejo](#gitea-forgejo)
+  - [GitLab CE](#gitlab-ce)
 - [CI/CD](#cicd)
-- [Container & Image Tools](#container--image-tools)
-- [Kubernetes & Orchestration](#kubernetes--orchestration)
-- [HA Clusters](#ha-clusters)
-- [Infrastructure as Code](#infrastructure-as-code)
-- [Artifact & Dependency Management](#artifact--dependency-management)
-- [Service Discovery & Orchestration](#service-discovery--orchestration)
-- [Developer Environments & Utilities](#developer-environments--utilities)
-- [Internal Platforms](#internal-platforms)
-- [Hardware & Embedded](#hardware--embedded)
-- [IoT & SCADA Tools](#iot--scada-tools)
-- [Security CLI Tools](#security-cli-tools)
-- [Education & Training Platforms](#education--training-platforms)
-- [Key Concepts](#key-concepts)
+  - [Woodpecker CI](#woodpecker-ci)
+  - [Forgejo Actions Runner](#forgejo-actions-runner)
+  - [Jenkins](#jenkins)
+  - [OpenFeature + Flagd (Feature Flag Management)](#openfeature-flagd-feature-flag-management)
+  - [Score (Platform-Agnostic Workload Spec)](#score-platform-agnostic-workload-spec)
+  - [Dagger (Portable Pipelines as Code)](#dagger-portable-pipelines-as-code)
+  - [GitHub Actions (Cloud CI/CD — github.com)](#github-actions-cloud-cicd-githubcom)
+  - [Dependency Caching in CI](#dependency-caching-in-ci)
+  - [act (Local GitHub Actions Runner)](#act-local-github-actions-runner)
+  - [Renovate Bot](#renovate-bot)
+  - [SonarQube (Code Quality & Security)](#sonarqube-code-quality-security)
+
 
 ---
 
@@ -28734,7 +28735,7 @@ Networking & Ingress Cilium (eBPF CNI — Primary) Purpose: High-performance CNI
 
 #### Install k3s without Flannel/kube-proxy first
 
-See [k3s install](#k3s-lightweight-cncf-kubernetes) — `--flannel-backend=none --disable-kube-proxy --disable-network-policy` are required before installing Cilium.
+See [k3s install](#install-k3s-without-flannelkube-proxy-first) — `--flannel-backend=none --disable-kube-proxy --disable-network-policy` are required before installing Cilium.
 
 #### Install Cilium
 
@@ -30324,7 +30325,7 @@ helm upgrade kube-prometheus-stack prometheus-community/kube-prometheus-stack \
 
 ---
 
-> **Cost Monitoring** (OpenCost, Kubecost) is covered in [Cost Management & Resource Efficiency](#cost-management--resource-efficiency) — it integrates directly with the Prometheus stack already running here.
+> **Cost Monitoring** (OpenCost, Kubecost) is covered in [Cost Management & Resource Efficiency](operations.md#cost-management-resource-efficiency) — it integrates directly with the Prometheus stack already running here.
 
 ---
 
@@ -31051,7 +31052,7 @@ ETCDCTL_API=3 etcdctl endpoint status --write-out=table ...
 
 ---
 
-> **Application-level backup with Velero** is covered in [Backup & Disaster Recovery](#backup--disaster-recovery). Unlike etcd snapshots (which restore the whole cluster), Velero restores individual namespaces and PVCs — use both strategies together.
+> **Application-level backup with Velero** is covered in [Backup & Disaster Recovery](#backup-disaster-recovery). Unlike etcd snapshots (which restore the whole cluster), Velero restores individual namespaces and PVCs — use both strategies together.
 
 ---
 
@@ -32635,88 +32636,20 @@ dagger run python dagger/main.py
 URL: https://docs.shani.dev/doc/servers/kubernetes/overview/
 Updated: 2026-08-28
 
-Table of Contents Core Concepts & Distributions 1. Key Concepts (Control Plane, Networking, RBAC, Storage, eBPF, GitOps, Namespaces, Labels, Deployments, E…
+Table of Contents Key Concepts Distributions - k3s (Lightweight CNCF Kubernetes) - k0s (Minimal Single Binary) - MicroK8s (Snap — Addon-Driven) - Talos Lin…
 
 ## Table of Contents
 
-**Core Concepts & Distributions**
-1. [Key Concepts](#key-concepts) *(Control Plane, Networking, RBAC, Storage, eBPF, GitOps, Namespaces, Labels, Deployments, Events, and more)*
-2. [Distributions](#distributions)
-3. [Disk Layout & CLI Tools](#disk-layout-cli-tools)
+- [Key Concepts](#key-concepts)
+- [Distributions](#distributions)
+  - [k3s (Lightweight CNCF Kubernetes)](#k3s-lightweight-cncf-kubernetes)
+  - [k0s (Minimal Single Binary)](#k0s-minimal-single-binary)
+  - [MicroK8s (Snap — Addon-Driven)](#microk8s-snap-addon-driven)
+  - [Talos Linux (Immutable Kubernetes OS)](#talos-linux-immutable-kubernetes-os)
+  - [RKE2 (Hardened Production Kubernetes)](#rke2-hardened-production-kubernetes)
+  - [kubeadm (Upstream Reference Install)](#kubeadm-upstream-reference-install)
+- [Disk Layout & CLI Tools](#disk-layout-cli-tools)
 
-**Networking**
-4. [Networking & Ingress](#networking-ingress)
-5. [DNS](#dns)
-6. [NetworkPolicy — Default Deny Patterns](#networkpolicy-default-deny-patterns)
-7. [TLS & Certificate Management](#tls-certificate-management)
-8. [Service Mesh](#service-mesh)
-9. [Gateway API — Advanced Patterns](#gateway-api-advanced-patterns)
-10. [Network Troubleshooting](#network-troubleshooting)
-
-**Storage**
-11. [Storage](#storage)
-12. [NFS & Shared Storage](#nfs-shared-storage)
-13. [MinIO (Self-Hosted S3)](#minio-self-hosted-s3)
-
-**Security**
-14. [Security & Policy](#security-policy) *(includes Resource Quotas & LimitRanges)*
-15. [Secrets Management](#secrets-management)
-16. [Image Supply Chain Security](#image-supply-chain-security)
-17. [SPIFFE/SPIRE — Workload Identity](#spiffespire-workload-identity)
-18. [Cluster Hardening](#cluster-hardening)
-
-**Workloads & Scheduling**
-19. [Workload Patterns](#workload-patterns) *(includes Init Containers, Sidecars, StatefulSets, Jobs, DaemonSets, Affinity, Lifecycle Hooks, and more)*
-20. [Deployment Strategies Deep Dive](#deployment-strategies-deep-dive)
-21. [Autoscaling](#autoscaling) *(includes Cluster Autoscaler, Karpenter, HPA, VPA, KEDA, Goldilocks)*
-22. [GPU & AI/ML Workloads](#gpu-aiml-workloads)
-23. [KubeVirt — VMs in Kubernetes](#kubevirt-vms-in-kubernetes)
-24. [WebAssembly (WASM) Workloads](#webassembly-wasm-workloads)
-
-**GitOps & Delivery**
-25. [GitOps & Continuous Delivery](#gitops-continuous-delivery)
-26. [Advanced GitOps Patterns](#advanced-gitops-patterns)
-27. [Progressive Delivery](#progressive-delivery)
-28. [In-Cluster CI/CD & Build](#in-cluster-cicd-build)
-29. [Local Development & Cluster Intercept](#local-development-cluster-intercept) *(includes minikube, kind)*
-30. [Policy as Code — CI Gates](#policy-as-code-ci-gates)
-31. [Buildpacks & Image Build Strategies](#buildpacks-image-build-strategies)
-32. [Multi-Architecture Builds](#multi-architecture-builds)
-
-**Observability**
-33. [Observability](#observability) *(includes Prometheus AlertManager config, ServiceMonitor/PodMonitor, DORA metrics)*
-34. [Grafana Dashboards as Code](#grafana-dashboards-as-code)
-35. [SLO Management](#slo-management)
-36. [Beyla (eBPF Auto-Instrumentation — No Code Changes)](#beyla-ebpf-auto-instrumentation-no-code-changes)
-37. [Grafana OnCall (On-Call Scheduling & Escalation)](#grafana-oncall-on-call-scheduling-escalation)
-
-**Operations & Reliability**
-38. [Backup & Disaster Recovery](#backup-disaster-recovery)
-39. [etcd Operations & Disaster Recovery](#etcd-operations-disaster-recovery)
-40. [Cost Management & Resource Efficiency](#cost-management-resource-efficiency)
-41. [Cluster Upgrade Strategies](#cluster-upgrade-strategies)
-
-**Platform & Multi-Cluster**
-42. [Platform Engineering](#platform-engineering) *(Crossplane, LitmusChaos, Keptn, Golden Paths, Port)*
-43. [Operator Pattern & Custom Resources](#operator-pattern-custom-resources)
-44. [Cluster API (CAPI)](#cluster-api-capi)
-45. [Multi-Cluster](#multi-cluster)
-46. [Multi-Tenancy & Audit](#multi-tenancy-audit)
-47. [Cluster Management UIs](#cluster-management-uis)
-
-**Tooling Reference**
-52. [Helm — Advanced Usage](#helm-advanced-usage)
-53. [kubectl Power Usage](#kubectl-power-usage)
-54. [Deprecated API Migration](#deprecated-api-migration)
-55. [Daily Operations](#daily-operations)
-56. [Caddy Configuration Reference](#caddy-configuration-reference)
-57. [Zot (Lightweight OCI Registry)](#zot-lightweight-oci-registry)
-58. [Robusta — Kubernetes Operations Platform](#robusta-kubernetes-operations-platform)
-59. [Dagger — Portable CI Engine](#dagger-portable-ci-engine)
-
-**Troubleshooting**
-60. [Troubleshooting](#troubleshooting)
-61. [Troubleshooting — Advanced Debug Flows](#troubleshooting-advanced-debug-flows)
 
 
 ## Key Concepts
@@ -33417,7 +33350,7 @@ These pod-level flags break container isolation in exchange for performance or a
 
 ### k3s (Lightweight CNCF Kubernetes)
 
-**Purpose:** Lightweight, CNCF-certified Kubernetes. Ships with containerd, CoreDNS, and local-path provisioner. Single binary under 70 MB. Install with `--flannel-backend=none --disable-kube-proxy` to use Cilium as the CNI (see [Networking & Ingress](#networking--ingress)).
+**Purpose:** Lightweight, CNCF-certified Kubernetes. Ships with containerd, CoreDNS, and local-path provisioner. Single binary under 70 MB. Install with `--flannel-backend=none --disable-kube-proxy` to use Cilium as the CNI (see [Networking & Ingress](networking.md#networking-ingress)).
 
 #### Single-node install (with Cilium CNI)
 
@@ -45111,7 +45044,7 @@ Deploy a full OpenStack cloud on this system — from a minimal all-in-one devel
 
 > **Install convention:** CLI tools and dev runtimes install via **Nix** (primary) or **Snap** (fallback). GUI apps go via **Flatpak**. Services run as rootless **Podman** containers. On immutable OS distributions the root filesystem is read-only — use Nix, Snap, or Distrobox for user-space tooling.
 
-> ⚠️ **Resource requirements:** OpenStack is a full private cloud stack. Even an all-in-one Devstack node needs at least 8 GB RAM and 50 GB disk. A production multi-node setup needs 16 GB+ per controller node and 8 GB+ per compute node. For lightweight single-node use, [MicroStack](#microstack-snap--all-in-one) is the fastest path.
+> ⚠️ **Resource requirements:** OpenStack is a full private cloud stack. Even an all-in-one Devstack node needs at least 8 GB RAM and 50 GB disk. A production multi-node setup needs 16 GB+ per controller node and 8 GB+ per compute node. For lightweight single-node use, [MicroStack](#microstack-snap-all-in-one) is the fastest path.
 
 ---
 
@@ -45172,7 +45105,7 @@ Neutron's Modular Layer 2 (ML2) plugin separates the type driver (what kind of n
 ## Table of Contents
 
 - [Choosing Your OpenStack Path](#choosing-your-openstack-path)
-- [MicroStack (All-in-One)](#microstack-snap--all-in-one)
+- [MicroStack (All-in-One)](#microstack-snap-all-in-one)
 - [DevStack (Development)](#devstack-development)
 - [Kolla-Ansible (Production)](#kolla-ansible-production)
 - [OpenStack CLI Tools](#openstack-cli-tools)

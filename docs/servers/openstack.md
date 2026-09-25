@@ -12,7 +12,7 @@ Deploy a full OpenStack cloud on this system — from a minimal all-in-one devel
 
 > **Install convention:** CLI tools and dev runtimes install via **Nix** (primary) or **Snap** (fallback). GUI apps go via **Flatpak**. Services run as rootless **Podman** containers. On immutable OS distributions the root filesystem is read-only — use Nix, Snap, or Distrobox for user-space tooling.
 
-> ⚠️ **Resource requirements:** OpenStack is a full private cloud stack. Even an all-in-one Devstack node needs at least 8 GB RAM and 50 GB disk. A production multi-node setup needs 16 GB+ per controller node and 8 GB+ per compute node. For lightweight single-node use, [MicroStack](#microstack-snap--all-in-one) is the fastest path.
+> ⚠️ **Resource requirements:** OpenStack is a full private cloud stack. Even an all-in-one Devstack node needs at least 8 GB RAM and 50 GB disk. A production multi-node setup needs 16 GB+ per controller node and 8 GB+ per compute node. For lightweight single-node use, [MicroStack](#microstack-snap-all-in-one) is the fastest path.
 
 ---
 
@@ -73,7 +73,7 @@ Neutron's Modular Layer 2 (ML2) plugin separates the type driver (what kind of n
 ## Table of Contents
 
 - [Choosing Your OpenStack Path](#choosing-your-openstack-path)
-- [MicroStack (All-in-One)](#microstack-snap--all-in-one)
+- [MicroStack (All-in-One)](#microstack-snap-all-in-one)
 - [DevStack (Development)](#devstack-development)
 - [Kolla-Ansible (Production)](#kolla-ansible-production)
 - [OpenStack CLI Tools](#openstack-cli-tools)

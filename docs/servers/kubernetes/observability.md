@@ -400,7 +400,7 @@ helm upgrade kube-prometheus-stack prometheus-community/kube-prometheus-stack \
 
 ---
 
-> **Cost Monitoring** (OpenCost, Kubecost) is covered in [Cost Management & Resource Efficiency](#cost-management--resource-efficiency) — it integrates directly with the Prometheus stack already running here.
+> **Cost Monitoring** (OpenCost, Kubecost) is covered in [Cost Management & Resource Efficiency](operations.md#cost-management-resource-efficiency) — it integrates directly with the Prometheus stack already running here.
 
 ---
 

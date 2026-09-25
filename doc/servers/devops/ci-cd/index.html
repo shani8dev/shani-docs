@@ -7,7 +7,7 @@
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>DevOps — Code Hosting &amp; CI/CD — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Table of Contents Code Hosting CI/CD Container &amp; Image Tools Kubernetes &amp; Orchestration HA Clusters Infrastructure as Code Artifact &amp; Dependency Management…">
+  <meta name="description" id="meta-desc"     content="Table of Contents Code Hosting - Gitea / Forgejo - GitLab CE CI/CD - Woodpecker CI - Forgejo Actions Runner - Jenkins - OpenFeature + Flagd (Feature Flag M…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -15,7 +15,7 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="DevOps — Code Hosting &amp; CI/CD">
-  <meta property="og:description" id="og-desc"    content="Table of Contents Code Hosting CI/CD Container &amp; Image Tools Kubernetes &amp; Orchestration HA Clusters Infrastructure as Code Artifact &amp; Dependency Management…">
+  <meta property="og:description" id="og-desc"    content="Table of Contents Code Hosting - Gitea / Forgejo - GitLab CE CI/CD - Woodpecker CI - Forgejo Actions Runner - Jenkins - OpenFeature + Flagd (Feature Flag M…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/devops/ci-cd/">
   <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
@@ -25,10 +25,10 @@
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="DevOps — Code Hosting &amp; CI/CD">
-  <meta name="twitter:description" id="tw-desc"  content="Table of Contents Code Hosting CI/CD Container &amp; Image Tools Kubernetes &amp; Orchestration HA Clusters Infrastructure as Code Artifact &amp; Dependency Management…">
+  <meta name="twitter:description" id="tw-desc"  content="Table of Contents Code Hosting - Gitea / Forgejo - GitLab CE CI/CD - Woodpecker CI - Forgejo Actions Runner - Jenkins - OpenFeature + Flagd (Feature Flag M…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"DevOps — Code Hosting & CI/CD","description":"Table of Contents Code Hosting CI/CD Container & Image Tools Kubernetes & Orchestration HA Clusters Infrastructure as Code Artifact & Dependency Management…","url":"https://docs.shani.dev/doc/servers/devops/ci-cd/","datePublished":"2026-08-28T00:00:00.000Z","dateModified":"2026-08-28T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"DevOps — Code Hosting & CI/CD","description":"Table of Contents Code Hosting - Gitea / Forgejo - GitLab CE CI/CD - Woodpecker CI - Forgejo Actions Runner - Jenkins - OpenFeature + Flagd (Feature Flag M…","url":"https://docs.shani.dev/doc/servers/devops/ci-cd/","datePublished":"2026-08-28T00:00:00.000Z","dateModified":"2026-08-28T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
   <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"DevOps — Code Hosting & CI/CD","item":"https://docs.shani.dev/doc/servers/devops/ci-cd/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
@@ -221,20 +221,20 @@
       <div class="prose"><h2 id="table-of-contents">Table of Contents</h2>
 <ul>
 <li><a href="#code-hosting">Code Hosting</a></li>
+<li><a href="#gitea-forgejo">Gitea / Forgejo</a></li>
+<li><a href="#gitlab-ce">GitLab CE</a></li>
 <li><a href="#cicd">CI/CD</a></li>
-<li><a href="#container--image-tools">Container & Image Tools</a></li>
-<li><a href="#kubernetes--orchestration">Kubernetes & Orchestration</a></li>
-<li><a href="#ha-clusters">HA Clusters</a></li>
-<li><a href="#infrastructure-as-code">Infrastructure as Code</a></li>
-<li><a href="#artifact--dependency-management">Artifact & Dependency Management</a></li>
-<li><a href="#service-discovery--orchestration">Service Discovery & Orchestration</a></li>
-<li><a href="#developer-environments--utilities">Developer Environments & Utilities</a></li>
-<li><a href="#internal-platforms">Internal Platforms</a></li>
-<li><a href="#hardware--embedded">Hardware & Embedded</a></li>
-<li><a href="#iot--scada-tools">IoT & SCADA Tools</a></li>
-<li><a href="#security-cli-tools">Security CLI Tools</a></li>
-<li><a href="#education--training-platforms">Education & Training Platforms</a></li>
-<li><a href="#key-concepts">Key Concepts</a></li>
+<li><a href="#woodpecker-ci">Woodpecker CI</a></li>
+<li><a href="#forgejo-actions-runner">Forgejo Actions Runner</a></li>
+<li><a href="#jenkins">Jenkins</a></li>
+<li><a href="#openfeature-flagd-feature-flag-management">OpenFeature + Flagd (Feature Flag Management)</a></li>
+<li><a href="#score-platform-agnostic-workload-spec">Score (Platform-Agnostic Workload Spec)</a></li>
+<li><a href="#dagger-portable-pipelines-as-code">Dagger (Portable Pipelines as Code)</a></li>
+<li><a href="#github-actions-cloud-cicd-githubcom">GitHub Actions (Cloud CI/CD — github.com)</a></li>
+<li><a href="#dependency-caching-in-ci">Dependency Caching in CI</a></li>
+<li><a href="#act-local-github-actions-runner">act (Local GitHub Actions Runner)</a></li>
+<li><a href="#renovate-bot">Renovate Bot</a></li>
+<li><a href="#sonarqube-code-quality-security">SonarQube (Code Quality & Security)</a></li>
 </ul>
 <hr>
 <h2 id="code-hosting">Code Hosting</h2>

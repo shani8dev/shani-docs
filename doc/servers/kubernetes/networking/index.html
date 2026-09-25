@@ -223,7 +223,7 @@
 <p><strong>Purpose:</strong> High-performance CNI built on eBPF. Replaces Flannel, Calico, and kube-proxy in one Helm chart. Enforces NetworkPolicies at the kernel level (no iptables), provides L7 HTTP/gRPC/DNS-aware policy, transparent WireGuard node-to-node encryption, and Hubble for real-time flow observability.</p>
 <blockquote><strong>Why Cilium over Flannel/Calico:</strong> Flannel is L3-only with zero observability. Calico adds BGP but still relies on iptables. Cilium replaces both plus kube-proxy with a single eBPF stack: faster packet processing, L7 policy without sidecars, built-in flow inspection via Hubble, and optional Gateway API support.</blockquote>
 <h4 id="install-k3s-without-flannelkube-proxy-first">Install k3s without Flannel/kube-proxy first</h4>
-<p>See <a href="#k3s-lightweight-cncf-kubernetes">k3s install</a> — <code>--flannel-backend=none --disable-kube-proxy --disable-network-policy</code> are required before installing Cilium.</p>
+<p>See <a href="#install-k3s-without-flannelkube-proxy-first">k3s install</a> — <code>--flannel-backend=none --disable-kube-proxy --disable-network-policy</code> are required before installing Cilium.</p>
 <h4 id="install-cilium">Install Cilium</h4>
 <pre><code class="language-bash">nix-env -iA nixpkgs.cilium-cli nixpkgs.hubble
 

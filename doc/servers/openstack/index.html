@@ -221,7 +221,7 @@
       <div class="prose"><blockquote><strong>Portability note:</strong> Compose examples use rootless <strong>Podman</strong> and <code>host.containers.internal</code> (the host gateway from a container). When using Docker, replace <code>podman-compose</code> with <code>docker compose</code> and <code>host.containers.internal</code> with <code>host-gateway</code> (add <code>extra_hosts: [host-gateway:host-gateway]</code> to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.</blockquote>
 <p>Deploy a full OpenStack cloud on this system — from a minimal all-in-one development setup to a multi-node private cloud with compute, networking, storage, and identity services. All compose files use rootless Podman with <code>:Z</code> volume labels on bind mounts. Named volumes omit <code>:Z</code> — Podman manages their labels automatically.</p>
 <blockquote><strong>Install convention:</strong> CLI tools and dev runtimes install via <strong>Nix</strong> (primary) or <strong>Snap</strong> (fallback). GUI apps go via <strong>Flatpak</strong>. Services run as rootless <strong>Podman</strong> containers. On immutable OS distributions the root filesystem is read-only — use Nix, Snap, or Distrobox for user-space tooling.</blockquote>
-<blockquote>⚠️ <strong>Resource requirements:</strong> OpenStack is a full private cloud stack. Even an all-in-one Devstack node needs at least 8 GB RAM and 50 GB disk. A production multi-node setup needs 16 GB+ per controller node and 8 GB+ per compute node. For lightweight single-node use, <a href="#microstack-snap--all-in-one">MicroStack</a> is the fastest path.</blockquote>
+<blockquote>⚠️ <strong>Resource requirements:</strong> OpenStack is a full private cloud stack. Even an all-in-one Devstack node needs at least 8 GB RAM and 50 GB disk. A production multi-node setup needs 16 GB+ per controller node and 8 GB+ per compute node. For lightweight single-node use, <a href="#microstack-snap-all-in-one">MicroStack</a> is the fastest path.</blockquote>
 <hr>
 <h2 id="key-concepts">Key Concepts</h2>
 <p><strong>OpenStack vs Kubernetes — what's the difference?:</strong> OpenStack manages <em>virtual machines and infrastructure</em> (compute, networking, storage, identity). Kubernetes manages <em>containerised workloads</em>. They're complementary: many production environments run Kubernetes on top of OpenStack VMs (Magnum does this automatically). In cloud provider terms, OpenStack = the IaaS layer (like AWS EC2/VPC/EBS); Kubernetes = the PaaS layer (like EKS/GKE).</p>
@@ -266,7 +266,7 @@
 <h2 id="table-of-contents">Table of Contents</h2>
 <ul>
 <li><a href="#choosing-your-openstack-path">Choosing Your OpenStack Path</a></li>
-<li><a href="#microstack-snap--all-in-one">MicroStack (All-in-One)</a></li>
+<li><a href="#microstack-snap-all-in-one">MicroStack (All-in-One)</a></li>
 <li><a href="#devstack-development">DevStack (Development)</a></li>
 <li><a href="#kolla-ansible-production">Kolla-Ansible (Production)</a></li>
 <li><a href="#openstack-cli-tools">OpenStack CLI Tools</a></li>

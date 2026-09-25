@@ -521,7 +521,7 @@ kubectl annotate deployment myapp \
   --set &quot;grafana.additionalDataSources[0].jsonData.serviceMap.datasourceUid=prometheus&quot;</code></pre>
 <blockquote><strong>Full observability triangle:</strong> With Loki + Tempo + Prometheus connected, Grafana can jump from a trace → that span's logs → service metrics at that timestamp.</blockquote>
 <hr>
-<blockquote><strong>Cost Monitoring</strong> (OpenCost, Kubecost) is covered in <a href="#cost-management--resource-efficiency">Cost Management & Resource Efficiency</a> — it integrates directly with the Prometheus stack already running here.</blockquote>
+<blockquote><strong>Cost Monitoring</strong> (OpenCost, Kubecost) is covered in <a href="/doc/servers/kubernetes/operations/#cost-management-resource-efficiency">Cost Management & Resource Efficiency</a> — it integrates directly with the Prometheus stack already running here.</blockquote>
 <hr>
 <h3 id="thanos-long-term-metrics-storage">Thanos (Long-Term Metrics Storage)</h3>
 <p><strong>Purpose:</strong> Extends Prometheus with unlimited retention, global query view across multiple clusters, and object storage (MinIO/S3) as the backend. The sidecar model means your existing Prometheus doesn't need modification.</p>

@@ -408,7 +408,7 @@ networkctl status          # Verify interfaces came up correctly
 | Interface not forwarding between bridge ports | Check `net.ipv4.ip_forward` (`sysctl net.ipv4.ip_forward`); ensure it is `1` |
 | Bridge member goes `blocking` or `listening` | STP convergence is normal — wait ~30s, or disable STP on the bridge: `sudo ip link set br0 type bridge stp_state 0` |
 | macvlan can't reach host | Expected — macvlan parent and child can't communicate. Use a bridge or a veth pair to the host instead |
-| Namespace has no internet | Add a default route inside the namespace and enable NAT on the host (see [Network Namespaces](#5-network-namespaces--full-isolation)) |
+| Namespace has no internet | Add a default route inside the namespace and enable NAT on the host (see [Network Namespaces](#5-network-namespaces-full-isolation)) |
 | Bond not failing over | Verify `miimon` is non-zero; check that both member NICs are actually `up` |
 | Changes lost after reboot | Create systemd-networkd `.netdev`/`.network` files for persistence |
 | `RTNETLINK answers: File exists` | Interface or route already exists — delete the old one first: `sudo ip link delete <name>` |

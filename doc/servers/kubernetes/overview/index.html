@@ -7,7 +7,7 @@
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Kubernetes Overview — Key Concepts &amp; Distributions — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Table of Contents Core Concepts &amp; Distributions 1. Key Concepts (Control Plane, Networking, RBAC, Storage, eBPF, GitOps, Namespaces, Labels, Deployments, E…">
+  <meta name="description" id="meta-desc"     content="Table of Contents Key Concepts Distributions - k3s (Lightweight CNCF Kubernetes) - k0s (Minimal Single Binary) - MicroK8s (Snap — Addon-Driven) - Talos Lin…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -15,7 +15,7 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Kubernetes Overview — Key Concepts &amp; Distributions">
-  <meta property="og:description" id="og-desc"    content="Table of Contents Core Concepts &amp; Distributions 1. Key Concepts (Control Plane, Networking, RBAC, Storage, eBPF, GitOps, Namespaces, Labels, Deployments, E…">
+  <meta property="og:description" id="og-desc"    content="Table of Contents Key Concepts Distributions - k3s (Lightweight CNCF Kubernetes) - k0s (Minimal Single Binary) - MicroK8s (Snap — Addon-Driven) - Talos Lin…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/servers/kubernetes/overview/">
   <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
@@ -25,10 +25,10 @@
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Kubernetes Overview — Key Concepts &amp; Distributions">
-  <meta name="twitter:description" id="tw-desc"  content="Table of Contents Core Concepts &amp; Distributions 1. Key Concepts (Control Plane, Networking, RBAC, Storage, eBPF, GitOps, Namespaces, Labels, Deployments, E…">
+  <meta name="twitter:description" id="tw-desc"  content="Table of Contents Key Concepts Distributions - k3s (Lightweight CNCF Kubernetes) - k0s (Minimal Single Binary) - MicroK8s (Snap — Addon-Driven) - Talos Lin…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Kubernetes Overview — Key Concepts & Distributions","description":"Table of Contents Core Concepts & Distributions 1. Key Concepts (Control Plane, Networking, RBAC, Storage, eBPF, GitOps, Namespaces, Labels, Deployments, E…","url":"https://docs.shani.dev/doc/servers/kubernetes/overview/","datePublished":"2026-08-28T00:00:00.000Z","dateModified":"2026-08-28T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Kubernetes Overview — Key Concepts & Distributions","description":"Table of Contents Key Concepts Distributions - k3s (Lightweight CNCF Kubernetes) - k0s (Minimal Single Binary) - MicroK8s (Snap — Addon-Driven) - Talos Lin…","url":"https://docs.shani.dev/doc/servers/kubernetes/overview/","datePublished":"2026-08-28T00:00:00.000Z","dateModified":"2026-08-28T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
   <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Kubernetes Overview — Key Concepts & Distributions","item":"https://docs.shani.dev/doc/servers/kubernetes/overview/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
@@ -219,96 +219,17 @@
         </div>
       </div>
       <div class="prose"><h2 id="table-of-contents">Table of Contents</h2>
-<p><strong>Core Concepts & Distributions</strong></p>
-<ol>
-<li><a href="#key-concepts">Key Concepts</a> <em>(Control Plane, Networking, RBAC, Storage, eBPF, GitOps, Namespaces, Labels, Deployments, Events, and more)</em></li>
+<ul>
+<li><a href="#key-concepts">Key Concepts</a></li>
 <li><a href="#distributions">Distributions</a></li>
+<li><a href="#k3s-lightweight-cncf-kubernetes">k3s (Lightweight CNCF Kubernetes)</a></li>
+<li><a href="#k0s-minimal-single-binary">k0s (Minimal Single Binary)</a></li>
+<li><a href="#microk8s-snap-addon-driven">MicroK8s (Snap — Addon-Driven)</a></li>
+<li><a href="#talos-linux-immutable-kubernetes-os">Talos Linux (Immutable Kubernetes OS)</a></li>
+<li><a href="#rke2-hardened-production-kubernetes">RKE2 (Hardened Production Kubernetes)</a></li>
+<li><a href="#kubeadm-upstream-reference-install">kubeadm (Upstream Reference Install)</a></li>
 <li><a href="#disk-layout-cli-tools">Disk Layout & CLI Tools</a></li>
-</ol>
-<p><strong>Networking</strong></p>
-<ol>
-<li><a href="#networking-ingress">Networking & Ingress</a></li>
-<li><a href="#dns">DNS</a></li>
-<li><a href="#networkpolicy-default-deny-patterns">NetworkPolicy — Default Deny Patterns</a></li>
-<li><a href="#tls-certificate-management">TLS & Certificate Management</a></li>
-<li><a href="#service-mesh">Service Mesh</a></li>
-<li><a href="#gateway-api-advanced-patterns">Gateway API — Advanced Patterns</a></li>
-<li><a href="#network-troubleshooting">Network Troubleshooting</a></li>
-</ol>
-<p><strong>Storage</strong></p>
-<ol>
-<li><a href="#storage">Storage</a></li>
-<li><a href="#nfs-shared-storage">NFS & Shared Storage</a></li>
-<li><a href="#minio-self-hosted-s3">MinIO (Self-Hosted S3)</a></li>
-</ol>
-<p><strong>Security</strong></p>
-<ol>
-<li><a href="#security-policy">Security & Policy</a> <em>(includes Resource Quotas & LimitRanges)</em></li>
-<li><a href="#secrets-management">Secrets Management</a></li>
-<li><a href="#image-supply-chain-security">Image Supply Chain Security</a></li>
-<li><a href="#spiffespire-workload-identity">SPIFFE/SPIRE — Workload Identity</a></li>
-<li><a href="#cluster-hardening">Cluster Hardening</a></li>
-</ol>
-<p><strong>Workloads & Scheduling</strong></p>
-<ol>
-<li><a href="#workload-patterns">Workload Patterns</a> <em>(includes Init Containers, Sidecars, StatefulSets, Jobs, DaemonSets, Affinity, Lifecycle Hooks, and more)</em></li>
-<li><a href="#deployment-strategies-deep-dive">Deployment Strategies Deep Dive</a></li>
-<li><a href="#autoscaling">Autoscaling</a> <em>(includes Cluster Autoscaler, Karpenter, HPA, VPA, KEDA, Goldilocks)</em></li>
-<li><a href="#gpu-aiml-workloads">GPU & AI/ML Workloads</a></li>
-<li><a href="#kubevirt-vms-in-kubernetes">KubeVirt — VMs in Kubernetes</a></li>
-<li><a href="#webassembly-wasm-workloads">WebAssembly (WASM) Workloads</a></li>
-</ol>
-<p><strong>GitOps & Delivery</strong></p>
-<ol>
-<li><a href="#gitops-continuous-delivery">GitOps & Continuous Delivery</a></li>
-<li><a href="#advanced-gitops-patterns">Advanced GitOps Patterns</a></li>
-<li><a href="#progressive-delivery">Progressive Delivery</a></li>
-<li><a href="#in-cluster-cicd-build">In-Cluster CI/CD & Build</a></li>
-<li><a href="#local-development-cluster-intercept">Local Development & Cluster Intercept</a> <em>(includes minikube, kind)</em></li>
-<li><a href="#policy-as-code-ci-gates">Policy as Code — CI Gates</a></li>
-<li><a href="#buildpacks-image-build-strategies">Buildpacks & Image Build Strategies</a></li>
-<li><a href="#multi-architecture-builds">Multi-Architecture Builds</a></li>
-</ol>
-<p><strong>Observability</strong></p>
-<ol>
-<li><a href="#observability">Observability</a> <em>(includes Prometheus AlertManager config, ServiceMonitor/PodMonitor, DORA metrics)</em></li>
-<li><a href="#grafana-dashboards-as-code">Grafana Dashboards as Code</a></li>
-<li><a href="#slo-management">SLO Management</a></li>
-<li><a href="#beyla-ebpf-auto-instrumentation-no-code-changes">Beyla (eBPF Auto-Instrumentation — No Code Changes)</a></li>
-<li><a href="#grafana-oncall-on-call-scheduling-escalation">Grafana OnCall (On-Call Scheduling & Escalation)</a></li>
-</ol>
-<p><strong>Operations & Reliability</strong></p>
-<ol>
-<li><a href="#backup-disaster-recovery">Backup & Disaster Recovery</a></li>
-<li><a href="#etcd-operations-disaster-recovery">etcd Operations & Disaster Recovery</a></li>
-<li><a href="#cost-management-resource-efficiency">Cost Management & Resource Efficiency</a></li>
-<li><a href="#cluster-upgrade-strategies">Cluster Upgrade Strategies</a></li>
-</ol>
-<p><strong>Platform & Multi-Cluster</strong></p>
-<ol>
-<li><a href="#platform-engineering">Platform Engineering</a> <em>(Crossplane, LitmusChaos, Keptn, Golden Paths, Port)</em></li>
-<li><a href="#operator-pattern-custom-resources">Operator Pattern & Custom Resources</a></li>
-<li><a href="#cluster-api-capi">Cluster API (CAPI)</a></li>
-<li><a href="#multi-cluster">Multi-Cluster</a></li>
-<li><a href="#multi-tenancy-audit">Multi-Tenancy & Audit</a></li>
-<li><a href="#cluster-management-uis">Cluster Management UIs</a></li>
-</ol>
-<p><strong>Tooling Reference</strong></p>
-<ol>
-<li><a href="#helm-advanced-usage">Helm — Advanced Usage</a></li>
-<li><a href="#kubectl-power-usage">kubectl Power Usage</a></li>
-<li><a href="#deprecated-api-migration">Deprecated API Migration</a></li>
-<li><a href="#daily-operations">Daily Operations</a></li>
-<li><a href="#caddy-configuration-reference">Caddy Configuration Reference</a></li>
-<li><a href="#zot-lightweight-oci-registry">Zot (Lightweight OCI Registry)</a></li>
-<li><a href="#robusta-kubernetes-operations-platform">Robusta — Kubernetes Operations Platform</a></li>
-<li><a href="#dagger-portable-ci-engine">Dagger — Portable CI Engine</a></li>
-</ol>
-<p><strong>Troubleshooting</strong></p>
-<ol>
-<li><a href="#troubleshooting">Troubleshooting</a></li>
-<li><a href="#troubleshooting-advanced-debug-flows">Troubleshooting — Advanced Debug Flows</a></li>
-</ol>
+</ul>
 <h2 id="key-concepts">Key Concepts</h2>
 <h4 id="control-plane-components">Control plane components</h4>
 <table><thead><tr><th>Component</th><th>Role</th></tr></thead><tbody><tr><td><strong>kube-apiserver</strong></td><td>Front door — all kubectl commands hit this. Validates, authenticates, and persists objects to etcd.</td></tr><tr><td><strong>etcd</strong></td><td>Distributed key-value store where all cluster state lives. Losing etcd without a backup = losing the cluster.</td></tr><tr><td><strong>kube-scheduler</strong></td><td>Watches for unscheduled pods; assigns them to nodes based on resources, taints/tolerations, affinity.</td></tr><tr><td><strong>kube-controller-manager</strong></td><td>Runs reconciliation loops: Deployment controller, ReplicaSet controller, Node controller, etc.</td></tr><tr><td><strong>cloud-controller-manager</strong></td><td>Talks to the cloud API to provision LoadBalancers, PersistentVolumes (EBS, GCE PD), etc.</td></tr></tbody></table>
@@ -718,7 +639,7 @@ kubectl get events -A --field-selector type=Warning   # all warnings cluster-wid
 <table><thead><tr><th>Distribution</th><th>Best For</th><th>RAM (min)</th><th>Install via</th><th>Notes</th></tr></thead><tbody><tr><td><strong>k3s</strong></td><td>Single-node homelabs, edge</td><td>512 MB</td><td>curl installer (<code>~/.local/bin</code>)</td><td>Batteries-included, easiest to start</td></tr><tr><td><strong>k0s</strong></td><td>Minimal, air-gapped</td><td>1 GB</td><td>curl installer (<code>~/.local/bin</code>)</td><td>Single binary, no external deps</td></tr><tr><td><strong>MicroK8s</strong></td><td>Quick local cluster, addons</td><td>2 GB</td><td><strong>Snap</strong></td><td>Canonical-maintained; DNS, ingress, registry as addons</td></tr><tr><td><strong>minikube</strong></td><td>Local dev, driver choice</td><td>2 GB</td><td>Nix or <strong>Snap</strong></td><td>Runs via Podman driver</td></tr><tr><td><strong>kind</strong></td><td>Lightweight dev/CI</td><td>2 GB</td><td>Nix</td><td>Runs K8s inside Podman containers</td></tr><tr><td><strong>RKE2</strong></td><td>Hardened, production</td><td>4 GB</td><td>curl installer (<code>~/.local/bin</code>)</td><td>CIS-benchmarked, STIG-ready</td></tr><tr><td><strong>Talos</strong></td><td>Immutable infra, GitOps</td><td>2 GB</td><td>talosctl</td><td>API-only, no SSH, extremely secure</td></tr><tr><td><strong>kubeadm</strong></td><td>Vanilla upstream, CKA study</td><td>2 GB</td><td>Nix</td><td>Full manual setup; deepest understanding</td></tr></tbody></table>
 <hr>
 <h3 id="k3s-lightweight-cncf-kubernetes">k3s (Lightweight CNCF Kubernetes)</h3>
-<p><strong>Purpose:</strong> Lightweight, CNCF-certified Kubernetes. Ships with containerd, CoreDNS, and local-path provisioner. Single binary under 70 MB. Install with <code>--flannel-backend=none --disable-kube-proxy</code> to use Cilium as the CNI (see <a href="#networking--ingress">Networking & Ingress</a>).</p>
+<p><strong>Purpose:</strong> Lightweight, CNCF-certified Kubernetes. Ships with containerd, CoreDNS, and local-path provisioner. Single binary under 70 MB. Install with <code>--flannel-backend=none --disable-kube-proxy</code> to use Cilium as the CNI (see <a href="/doc/servers/kubernetes/networking/#networking-ingress">Networking & Ingress</a>).</p>
 <h4 id="single-node-install-with-cilium-cni">Single-node install (with Cilium CNI)</h4>
 <pre><code class="language-bash">sudo sysctl -w vm.max_map_count=524288
 echo &quot;vm.max_map_count=524288&quot; | sudo tee /etc/sysctl.d/99-k8s.conf

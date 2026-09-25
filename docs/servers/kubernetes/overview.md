@@ -6,84 +6,16 @@ updated: 2026-08-28
 
 ## Table of Contents
 
-**Core Concepts & Distributions**
-1. [Key Concepts](#key-concepts) *(Control Plane, Networking, RBAC, Storage, eBPF, GitOps, Namespaces, Labels, Deployments, Events, and more)*
-2. [Distributions](#distributions)
-3. [Disk Layout & CLI Tools](#disk-layout-cli-tools)
+- [Key Concepts](#key-concepts)
+- [Distributions](#distributions)
+  - [k3s (Lightweight CNCF Kubernetes)](#k3s-lightweight-cncf-kubernetes)
+  - [k0s (Minimal Single Binary)](#k0s-minimal-single-binary)
+  - [MicroK8s (Snap — Addon-Driven)](#microk8s-snap-addon-driven)
+  - [Talos Linux (Immutable Kubernetes OS)](#talos-linux-immutable-kubernetes-os)
+  - [RKE2 (Hardened Production Kubernetes)](#rke2-hardened-production-kubernetes)
+  - [kubeadm (Upstream Reference Install)](#kubeadm-upstream-reference-install)
+- [Disk Layout & CLI Tools](#disk-layout-cli-tools)
 
-**Networking**
-4. [Networking & Ingress](#networking-ingress)
-5. [DNS](#dns)
-6. [NetworkPolicy — Default Deny Patterns](#networkpolicy-default-deny-patterns)
-7. [TLS & Certificate Management](#tls-certificate-management)
-8. [Service Mesh](#service-mesh)
-9. [Gateway API — Advanced Patterns](#gateway-api-advanced-patterns)
-10. [Network Troubleshooting](#network-troubleshooting)
-
-**Storage**
-11. [Storage](#storage)
-12. [NFS & Shared Storage](#nfs-shared-storage)
-13. [MinIO (Self-Hosted S3)](#minio-self-hosted-s3)
-
-**Security**
-14. [Security & Policy](#security-policy) *(includes Resource Quotas & LimitRanges)*
-15. [Secrets Management](#secrets-management)
-16. [Image Supply Chain Security](#image-supply-chain-security)
-17. [SPIFFE/SPIRE — Workload Identity](#spiffespire-workload-identity)
-18. [Cluster Hardening](#cluster-hardening)
-
-**Workloads & Scheduling**
-19. [Workload Patterns](#workload-patterns) *(includes Init Containers, Sidecars, StatefulSets, Jobs, DaemonSets, Affinity, Lifecycle Hooks, and more)*
-20. [Deployment Strategies Deep Dive](#deployment-strategies-deep-dive)
-21. [Autoscaling](#autoscaling) *(includes Cluster Autoscaler, Karpenter, HPA, VPA, KEDA, Goldilocks)*
-22. [GPU & AI/ML Workloads](#gpu-aiml-workloads)
-23. [KubeVirt — VMs in Kubernetes](#kubevirt-vms-in-kubernetes)
-24. [WebAssembly (WASM) Workloads](#webassembly-wasm-workloads)
-
-**GitOps & Delivery**
-25. [GitOps & Continuous Delivery](#gitops-continuous-delivery)
-26. [Advanced GitOps Patterns](#advanced-gitops-patterns)
-27. [Progressive Delivery](#progressive-delivery)
-28. [In-Cluster CI/CD & Build](#in-cluster-cicd-build)
-29. [Local Development & Cluster Intercept](#local-development-cluster-intercept) *(includes minikube, kind)*
-30. [Policy as Code — CI Gates](#policy-as-code-ci-gates)
-31. [Buildpacks & Image Build Strategies](#buildpacks-image-build-strategies)
-32. [Multi-Architecture Builds](#multi-architecture-builds)
-
-**Observability**
-33. [Observability](#observability) *(includes Prometheus AlertManager config, ServiceMonitor/PodMonitor, DORA metrics)*
-34. [Grafana Dashboards as Code](#grafana-dashboards-as-code)
-35. [SLO Management](#slo-management)
-36. [Beyla (eBPF Auto-Instrumentation — No Code Changes)](#beyla-ebpf-auto-instrumentation-no-code-changes)
-37. [Grafana OnCall (On-Call Scheduling & Escalation)](#grafana-oncall-on-call-scheduling-escalation)
-
-**Operations & Reliability**
-38. [Backup & Disaster Recovery](#backup-disaster-recovery)
-39. [etcd Operations & Disaster Recovery](#etcd-operations-disaster-recovery)
-40. [Cost Management & Resource Efficiency](#cost-management-resource-efficiency)
-41. [Cluster Upgrade Strategies](#cluster-upgrade-strategies)
-
-**Platform & Multi-Cluster**
-42. [Platform Engineering](#platform-engineering) *(Crossplane, LitmusChaos, Keptn, Golden Paths, Port)*
-43. [Operator Pattern & Custom Resources](#operator-pattern-custom-resources)
-44. [Cluster API (CAPI)](#cluster-api-capi)
-45. [Multi-Cluster](#multi-cluster)
-46. [Multi-Tenancy & Audit](#multi-tenancy-audit)
-47. [Cluster Management UIs](#cluster-management-uis)
-
-**Tooling Reference**
-52. [Helm — Advanced Usage](#helm-advanced-usage)
-53. [kubectl Power Usage](#kubectl-power-usage)
-54. [Deprecated API Migration](#deprecated-api-migration)
-55. [Daily Operations](#daily-operations)
-56. [Caddy Configuration Reference](#caddy-configuration-reference)
-57. [Zot (Lightweight OCI Registry)](#zot-lightweight-oci-registry)
-58. [Robusta — Kubernetes Operations Platform](#robusta-kubernetes-operations-platform)
-59. [Dagger — Portable CI Engine](#dagger-portable-ci-engine)
-
-**Troubleshooting**
-60. [Troubleshooting](#troubleshooting)
-61. [Troubleshooting — Advanced Debug Flows](#troubleshooting-advanced-debug-flows)
 
 
 ## Key Concepts
@@ -784,7 +716,7 @@ These pod-level flags break container isolation in exchange for performance or a
 
 ### k3s (Lightweight CNCF Kubernetes)
 
-**Purpose:** Lightweight, CNCF-certified Kubernetes. Ships with containerd, CoreDNS, and local-path provisioner. Single binary under 70 MB. Install with `--flannel-backend=none --disable-kube-proxy` to use Cilium as the CNI (see [Networking & Ingress](#networking--ingress)).
+**Purpose:** Lightweight, CNCF-certified Kubernetes. Ships with containerd, CoreDNS, and local-path provisioner. Single binary under 70 MB. Install with `--flannel-backend=none --disable-kube-proxy` to use Cilium as the CNI (see [Networking & Ingress](networking.md#networking-ingress)).
 
 #### Single-node install (with Cilium CNI)
 

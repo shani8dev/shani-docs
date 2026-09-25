@@ -309,7 +309,7 @@ ETCDCTL_API=3 etcdctl endpoint status --write-out=table ...
 
 ---
 
-> **Application-level backup with Velero** is covered in [Backup & Disaster Recovery](#backup--disaster-recovery). Unlike etcd snapshots (which restore the whole cluster), Velero restores individual namespaces and PVCs — use both strategies together.
+> **Application-level backup with Velero** is covered in [Backup & Disaster Recovery](#backup-disaster-recovery). Unlike etcd snapshots (which restore the whole cluster), Velero restores individual namespaces and PVCs — use both strategies together.
 
 ---
 

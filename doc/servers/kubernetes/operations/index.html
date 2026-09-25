@@ -462,7 +462,7 @@ ETCDCTL_API=3 etcdctl defrag \
 ETCDCTL_API=3 etcdctl endpoint status --write-out=table ...</code></pre>
 <blockquote><strong>Production guidance:</strong> Automate backups to off-cluster object storage (MinIO/S3). Test your restore procedure quarterly — an untested backup is not a backup.</blockquote>
 <hr>
-<blockquote><strong>Application-level backup with Velero</strong> is covered in <a href="#backup--disaster-recovery">Backup & Disaster Recovery</a>. Unlike etcd snapshots (which restore the whole cluster), Velero restores individual namespaces and PVCs — use both strategies together.</blockquote>
+<blockquote><strong>Application-level backup with Velero</strong> is covered in <a href="#backup-disaster-recovery">Backup & Disaster Recovery</a>. Unlike etcd snapshots (which restore the whole cluster), Velero restores individual namespaces and PVCs — use both strategies together.</blockquote>
 <hr>
 <h2 id="cost-management-resource-efficiency">Cost Management & Resource Efficiency</h2>
 <p>Running Kubernetes without resource governance leads to wasted infrastructure spend — oversized requests that starve real workloads, idle namespaces consuming quotas, and forgotten development clusters burning cloud credits.</p>
