@@ -238,11 +238,18 @@ not how it got that way.
   before that commit, so a red run here means "run
   `node generate-manifest.js` locally and read the actual error." A
   separate `validate` job (2026-09-26) regenerates into its own checkout
-  and runs `node --test tests/` + `node tests/check-links.js`, so link rot
-  now fails CI instead of shipping. It deliberately does *not* assert the
-  committed output is up to date or commit anything itself — `build`
+  and runs `node --test tests/*.test.js` + `node tests/check-links.js`, so
+  link rot now fails CI instead of shipping. It deliberately does *not* assert
+  the committed output is up to date or commit anything itself — `build`
   auto-commits, so either would race it. No `pull_request` trigger: `build`
   needs `contents: write`, which fork PRs don't get.
+
+  Name the test files explicitly: `node --test tests/` passes on Node 20 but
+  resolves as a module path on Node 22 (the runner's version) and dies with
+  MODULE_NOT_FOUND. Also note generation is deterministic for `doc/**`,
+  `manifest.json` and `nav-docs.js` but **not** for `feed.xml`, whose
+  `lastBuildDate` is wall-clock by design — so a naive "committed output is
+  stale" check would fail on every run.
 
 ## Commit discipline
 
