@@ -500,7 +500,7 @@
   </url>
   <url>
     <loc>https://docs.shani.dev/doc/security/tpm2/</loc>
-    <lastmod>2026-08-28</lastmod>
+    <lastmod>2026-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1089,6 +1089,12 @@
   <url>
     <loc>https://docs.shani.dev/doc/system/backup/</loc>
     <lastmod>2026-08-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://docs.shani.dev/doc/system/cassini/</loc>
+    <lastmod>2026-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

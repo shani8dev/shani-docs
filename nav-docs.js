@@ -251,6 +251,7 @@ CONFIG.NAV_TREE = [
       { "title": "Accessibility", "slug": "system/accessibility" },
       { "title": "Audio (PipeWire)", "slug": "system/audio" },
       { "title": "Backup & Recovery", "slug": "system/backup" },
+      { "title": "Shani Cassini (System Manager)", "slug": "system/cassini" },
       { "title": "Command Cheatsheet", "slug": "system/cheatsheet" },
       { "title": "cronie (Cron Scheduler)", "slug": "system/cronie" },
       { "title": "GPU & Graphics Drivers", "slug": "system/gpu" },

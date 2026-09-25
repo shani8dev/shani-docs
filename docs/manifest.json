@@ -824,7 +824,7 @@
     "title": "TPM2 Enrollment",
     "section": "Security",
     "description": "TPM2 enrollment seals your LUKS2 disk encryption key into your machine's Trusted Platform Module. Once enrolled, the disk unlocks automatically at boot — n…",
-    "updated": "2026-08-28",
+    "updated": "2026-09-25",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -1805,6 +1805,16 @@
     "section": "System",
     "description": "Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User data and container state must be backed up independently to protect against…",
     "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "system/cassini",
+    "title": "Shani Cassini (System Manager)",
+    "section": "System",
+    "description": "Shani Cassini is the Shanios system manager — named after the spacecraft that orbited and watched over Saturn. It is part of the GNOME, KDE Plasma and COSM…",
+    "updated": "2026-09-25",
     "order": 999,
     "draft": false,
     "keywords": ""

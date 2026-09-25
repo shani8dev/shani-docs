@@ -1,7 +1,7 @@
 ---
 title: TPM2 Enrollment
 section: Security
-updated: 2026-08-28
+updated: 2026-09-25
 ---
 
 # TPM2 Enrollment
@@ -42,6 +42,22 @@ You will be prompted for your LUKS passphrase. You can also opt in to a TPM2 PIN
 
 ```bash
 sudo cryptsetup luksConvertKey --pbkdf argon2id /dev/nvme0n1p2
+```
+
+### From the desktop
+
+**Shani Cassini → Encryption → Set up automatic unlock** does the same:
+enter your disk passphrase (and optionally a boot PIN) and it runs
+`gen-efi enroll-tpm2` for you. **Check** shows whether automatic unlock is on;
+**Turn Off…** removes it.
+
+Scripts and other tools can enroll without prompts — the passphrase (and PIN)
+go on standard input, never on the command line:
+
+```bash
+printf '%s\n' "$PASSPHRASE" | sudo gen-efi enroll-tpm2 --stdin
+printf '%s\n%s\n' "$PASSPHRASE" "$PIN" | sudo gen-efi enroll-tpm2 --stdin --with-pin
+sudo gen-efi tpm2-status --json   # encrypted, tpm2_present, tpm2_enrolled, tpm2_slots, tpm2_pin, secure_boot
 ```
 
 ## Verifying Enrollment

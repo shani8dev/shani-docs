@@ -5,8 +5,26 @@
     <link>https://docs.shani.dev/</link>
     <description>Comprehensive technical documentation for Shanios — the immutable Linux OS.</description>
     <language>en-IN</language>
-    <lastBuildDate>Fri, 25 Sep 2026 03:59:22 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 25 Sep 2026 12:32:07 GMT</lastBuildDate>
     <atom:link href="https://docs.shani.dev/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>TPM2 Enrollment</title>
+      <link>https://docs.shani.dev/doc/security/tpm2/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/security/tpm2/</guid>
+      <description>TPM2 enrollment seals your LUKS2 disk encryption key into your machine's Trusted Platform Module. Once enrolled, the disk unlocks automatically at boot — n…</description>
+      <pubDate>Fri, 25 Sep 2026 00:00:00 GMT</pubDate>
+      <category>Security</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
+    <item>
+      <title>Shani Cassini (System Manager)</title>
+      <link>https://docs.shani.dev/doc/system/cassini/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/system/cassini/</guid>
+      <description>Shani Cassini is the Shanios system manager — named after the spacecraft that orbited and watched over Saturn. It is part of the GNOME, KDE Plasma and COSM…</description>
+      <pubDate>Fri, 25 Sep 2026 00:00:00 GMT</pubDate>
+      <category>System</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
     <item>
       <title>Shell &amp; Environment</title>
       <link>https://docs.shani.dev/doc/updates/shell/</link>
@@ -345,24 +363,6 @@
       <link>https://docs.shani.dev/doc/networking/bluetooth/</link>
       <guid isPermaLink="true">https://docs.shani.dev/doc/networking/bluetooth/</guid>
       <description>Shanios pre-installs the full BlueZ stack (shani-bluetooth) and enables the Bluetooth daemon by default on every edition — pairing works out of the box wit…</description>
-      <pubDate>Fri, 28 Aug 2026 00:00:00 GMT</pubDate>
-      <category>Networking</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Caddy</title>
-      <link>https://docs.shani.dev/doc/networking/caddy/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/networking/caddy/</guid>
-      <description>Caddy is a modern web server with automatic HTTPS. It provisions and renews TLS certificates entirely automatically — via Let's Encrypt for public domains …</description>
-      <pubDate>Fri, 28 Aug 2026 00:00:00 GMT</pubDate>
-      <category>Networking</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Cloudflared Tunnels</title>
-      <link>https://docs.shani.dev/doc/networking/cloudflared/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/networking/cloudflared/</guid>
-      <description>Cloudflared creates an encrypted, outbound-only tunnel from your Shani OS machine to Cloudflare's global edge network. This lets you expose local services …</description>
       <pubDate>Fri, 28 Aug 2026 00:00:00 GMT</pubDate>
       <category>Networking</category>
       <author>Shrinivas Kumbhar</author>
