@@ -64,7 +64,7 @@ Shanios keeps the base image small and stable; user-chosen software lives in lay
 |----------|------------------|
 | Update deployed but not yet booted | Previous slot untouched; reboot switches forward |
 | New slot fails to boot | Automatic fallback to previous slot |
-| User wants to undo after booting | `sudo shani-deploy -r` from the kept slot |
+| User wants to undo after booting | `sudo shani-deploy -r`, then reboot into the previous system |
 | Manual choice at power-on | systemd-boot menu lists both slots |
 
 The guarantee is simple: the previous working image is always resident on disk, so rollback never depends on re-downloading anything.

@@ -21,7 +21,7 @@ One-line-per-task reference for daily Shanios operation. Printable. Full detail 
 sudo shani-deploy                          # Deploy the latest verified image
 sudo shani-deploy --dry-run                # Simulate; no changes made
 sudo shani-deploy --download-only          # Fetch + verify image, exit before deploy
-sudo shani-deploy -r                       # Roll back to the inactive slot (run from kept slot)
+sudo shani-deploy -r                       # Back to the previous system (then reboot)
 sudo shani-deploy --verify-existing        # Re-verify an already-downloaded image
 sudo shani-deploy --list-backups           # List stored image backups
 sudo shani-deploy -t latest                # Use 'latest' channel for this run only
@@ -55,7 +55,7 @@ shani-health --clear-boot-failure   # Clear stale boot failure marker
 ## Recovery
 
 ```bash
-sudo shani-deploy -r            # Roll back — boot the slot you want to KEEP first, then run this
+sudo shani-deploy -r            # Roll back to the previous system, then reboot (nothing is deleted)
 sudo shani-reset --dry-run      # Preview what a factory reset would wipe
 sudo shani-reset                # Interactive reset (prompts before any action)
 ```

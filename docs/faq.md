@@ -139,7 +139,7 @@ Or select the **(Candidate)** entry from the boot menu at startup.
 
 **Can I roll back multiple times?**
 
-Yes. Each update creates a timestamped Btrfs snapshot of the slot it replaces. `shani-deploy -r` restores from the most recent snapshot. To go further back, use `btrfs subvolume list /` to find older backup snapshots and restore manually.
+Yes. Run from the updated system, `shani-deploy -r` makes the previous system the default again without deleting anything, so you can switch back and forth. Each update also keeps a timestamped Btrfs snapshot of the slot it replaces; run from the older system (after a fallback), `-r` restores the other slot from the most recent one. To go further back, use `btrfs subvolume list /` to find older backup snapshots and restore manually.
 
 **What if the new OS can't boot at all?**
 

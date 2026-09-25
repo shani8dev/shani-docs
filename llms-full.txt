@@ -2565,7 +2565,7 @@ Or select the **(Candidate)** entry from the boot menu at startup.
 
 **Can I roll back multiple times?**
 
-Yes. Each update creates a timestamped Btrfs snapshot of the slot it replaces. `shani-deploy -r` restores from the most recent snapshot. To go further back, use `btrfs subvolume list /` to find older backup snapshots and restore manually.
+Yes. Run from the updated system, `shani-deploy -r` makes the previous system the default again without deleting anything, so you can switch back and forth. Each update also keeps a timestamped Btrfs snapshot of the slot it replaces; run from the older system (after a fallback), `-r` restores the other slot from the most recent one. To go further back, use `btrfs subvolume list /` to find older backup snapshots and restore manually.
 
 **What if the new OS can't boot at all?**
 
@@ -3202,7 +3202,7 @@ Shanios keeps the base image small and stable; user-chosen software lives in lay
 |----------|------------------|
 | Update deployed but not yet booted | Previous slot untouched; reboot switches forward |
 | New slot fails to boot | Automatic fallback to previous slot |
-| User wants to undo after booting | `sudo shani-deploy -r` from the kept slot |
+| User wants to undo after booting | `sudo shani-deploy -r`, then reboot into the previous system |
 | Manual choice at power-on | systemd-boot menu lists both slots |
 
 The guarantee is simple: the previous working image is always resident on disk, so rollback never depends on re-downloading anything.
@@ -55929,7 +55929,7 @@ One-line-per-task reference for daily Shanios operation. Printable. Full detail 
 sudo shani-deploy                          # Deploy the latest verified image
 sudo shani-deploy --dry-run                # Simulate; no changes made
 sudo shani-deploy --download-only          # Fetch + verify image, exit before deploy
-sudo shani-deploy -r                       # Roll back to the inactive slot (run from kept slot)
+sudo shani-deploy -r                       # Back to the previous system (then reboot)
 sudo shani-deploy --verify-existing        # Re-verify an already-downloaded image
 sudo shani-deploy --list-backups           # List stored image backups
 sudo shani-deploy -t latest                # Use 'latest' channel for this run only
@@ -55963,7 +55963,7 @@ shani-health --clear-boot-failure   # Clear stale boot failure marker
 ## Recovery
 
 ```bash
-sudo shani-deploy -r            # Roll back — boot the slot you want to KEEP first, then run this
+sudo shani-deploy -r            # Roll back to the previous system, then reboot (nothing is deleted)
 sudo shani-reset --dry-run      # Preview what a factory reset would wipe
 sudo shani-reset                # Interactive reset (prompts before any action)
 ```
@@ -61627,7 +61627,7 @@ sudo shani-deploy --download-only
 | Flag | Effect |
 |------|--------|
 | `-h`, `--help` | Show usage |
-| `-r`, `--rollback` | Roll back the non-booted slot (run from the slot you want to keep) |
+| `-r`, `--rollback` | From the updated system: make the previous system the default again (nothing is deleted; reboot to use it). From the older system after a fallback: repair the other slot from its pre-update backup |
 | `-c`, `--cleanup` | Manual cleanup of old backups and cached downloads |
 | `-o`, `--optimize` | Manual Btrfs deduplication (bees handles continuous dedup in the background) |
 | `-t`, `--channel <chan>` | Update channel for this run only: `stable` or `latest` |

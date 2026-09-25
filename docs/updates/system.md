@@ -87,7 +87,7 @@ sudo shani-deploy --download-only
 | Flag | Effect |
 |------|--------|
 | `-h`, `--help` | Show usage |
-| `-r`, `--rollback` | Roll back the non-booted slot (run from the slot you want to keep) |
+| `-r`, `--rollback` | From the updated system: make the previous system the default again (nothing is deleted; reboot to use it). From the older system after a fallback: repair the other slot from its pre-update backup |
 | `-c`, `--cleanup` | Manual cleanup of old backups and cached downloads |
 | `-o`, `--optimize` | Manual Btrfs deduplication (bees handles continuous dedup in the background) |
 | `-t`, `--channel <chan>` | Update channel for this run only: `stable` or `latest` |
