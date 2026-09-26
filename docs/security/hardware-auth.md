@@ -6,7 +6,7 @@ updated: 2026-08-28
 
 # Hardware Authentication
 
-Shan OS ships the hardware authentication *plumbing* out of the box — the readers are detected with no driver download, via packages pulled in by the `shani-peripherals` package. Being detected is not the same as being able to log in, and the difference is per device: **smartcards are detected but cannot log in** — `pcscd` runs and the card is seen, but GDM's and KScreenLocker's smartcard PAM services both load `pam_pkcs11.so`, which no Arch package provides, so that PAM service cannot succeed; **fingerprints can log in on GNOME only** (see [Fingerprint Login](fingerprint-login)); **FIDO2/U2F security keys can log in** — Shanios ships its own `pam.d/system-auth` that adds `pam_u2f`, which the stock stacks never did, so a security key works at any graphical login and for `sudo` without editing PAM by hand. **Kerberos still cannot**, as `pam_krb5` remains unwired. The CLI utilities for YubiKey management, PC/SC diagnostics, and TOTP/HOTP codes are not part of the default image — because Shanios is immutable, they cannot be installed with `pacman` at runtime. Install them via Nix (`nix-env -iA nixpkgs.<pkg>`) or run them inside a Distrobox container — see the callout in each section below.
+Shan OS ships the hardware authentication *plumbing* out of the box — the readers are detected with no driver download, via packages pulled in by the `shani-peripherals` package. Being detected is not the same as being able to log in, and the difference is per device: **smartcards cannot log in** — `pcscd` runs and the card is detected, but the PAM module that would authenticate it, `pam_pkcs11.so`, is in no official Arch repository, so on GNOME (GDM) the smartcard login service hard-fails on a module it cannot load, and on KDE the same module is deliberately disabled by the distro's packaging so the feature is off rather than broken; **fingerprints can log in on GNOME only** (see [Fingerprint Login](fingerprint-login)); **FIDO2/U2F security keys can log in** — Shanios ships its own `pam.d/system-auth` that adds `pam_u2f`, which the stock stacks never did, so a security key works at any graphical login and for `sudo` without editing PAM by hand. **Kerberos still cannot**, as `pam_krb5` remains unwired. The CLI utilities for YubiKey management, PC/SC diagnostics, and TOTP/HOTP codes are not part of the default image — because Shanios is immutable, they cannot be installed with `pacman` at runtime. Install them via Nix (`nix-env -iA nixpkgs.<pkg>`) or run them inside a Distrobox container — see the callout in each section below.
 
 ---
 
@@ -111,7 +111,19 @@ ssh-keygen -t ed25519-sk
 
 ## Smart Card / PIV
 
-**Packages:** `opensc`, `ccid`, `acsccid` — pre-installed via `shani-peripherals`; `pcscd`/`pcsc-lite` come along transitively as a dependency of `opensc`/`ccid`. The `pcsc-tools` diagnostic package (used for `pcsc_scan` below) is **not** part of the default image and cannot be installed on the immutable host with `pacman` — install it via Nix:
+**Packages:** `opensc`, `ccid`, `acsccid` — pre-installed via `shani-peripherals`; `pcscd`/`pcsc-lite` come along
+
+> **Reading and managing certificates from a card works; using a card to log
+> in does not.** Authenticating a PIV card needs the PAM module
+> `pam_pkcs11.so`, and no official Arch repository provides it — it is AUR-only
+> (`pam_pkcs11`, unmaintained, and it installs no default config). GDM's
+> `gdm-smartcard` service loads that module unconditionally, so the smartcard
+> login option cannot succeed; KDE's packaging disables the same line, so the
+> feature is simply absent. If you need card login, install the AUR package
+> *and* set `slot_num` in `/etc/pam_pkcs11/pam_pkcs11.conf` — at its default of
+> `-1` the module returns `PAM_AUTHINFO_UNAVAIL` and login still fails. The
+> commands below are unaffected and work today.
+ transitively as a dependency of `opensc`/`ccid`. The `pcsc-tools` diagnostic package (used for `pcsc_scan` below) is **not** part of the default image and cannot be installed on the immutable host with `pacman` — install it via Nix:
 
 ```bash
 nix-env -iA nixpkgs.pcsc-tools
