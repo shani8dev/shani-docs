@@ -61374,7 +61374,7 @@ Zsh, Bash and Fish share one set of aliases, key bindings and tool integrations.
 
 The default terminal app differs by edition — all of them run the same shell stack above.
 
-- **KDE Plasma:** **Konsole**, pre-installed, with the Saturn colour scheme and a translucent blurred background. It runs your login shell, so `chsh` applies there too. **FiraMono Nerd Font** is the system fixed-width font, shared by Konsole, Yakuake, Kate and every other KDE app (*System Settings → Text & Fonts → Fixed width*). **Yakuake**, a drop-down terminal, is also pre-installed: press `F12` to toggle it from anywhere.
+- **KDE Plasma:** **Konsole**, pre-installed, with the Saturn colour scheme and a translucent blurred background. It launches the shell named by the `shani.profile` terminal profile (`Command=` under `[General]`), which ships as **fish**; change that key to use a different shell in Konsole/Yakuake. Note this is *not* the same as your login shell: `chsh` changes `/etc/passwd`, so it affects Konsole only while the profile inherits `$SHELL`, and a `chsh`-based expectation does not hold now that the shell is pinned. **FiraMono Nerd Font** is the system fixed-width font, shared by Konsole, Yakuake, Kate and every other KDE app (*System Settings → Text & Fonts → Fixed width*). **Yakuake**, a drop-down terminal, is also pre-installed: press `F12` to toggle it from anywhere.
 - **GNOME:** **GNOME Console**, pre-installed.
 - **COSMIC:** **COSMIC Terminal**, pre-installed.
 
@@ -61400,7 +61400,17 @@ chsh -s /bin/fish    # switch to Fish
 chsh -s /bin/zsh     # switch back to Zsh (default)
 ```
 
-Log out and back in for the change to take effect.
+Log out and back in for the change to take effect. This sets your **login
+shell**. On KDE Plasma, Konsole and Yakuake use the shell pinned in the
+`shani.profile` terminal profile instead, so update that profile's `Command=`
+under `[General]` as well if you want them to follow:
+
+```bash
+# ~/.local/share/konsole/shani.profile, [General]
+# Command=/usr/bin/zsh
+kwriteconfig6 --file ~/.local/share/konsole/shani.profile \
+  --group General --key Command /usr/bin/zsh
+```
 
 ## Customising Zsh
 

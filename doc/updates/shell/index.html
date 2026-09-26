@@ -225,7 +225,7 @@
 <h2 id="terminal-emulator">Terminal Emulator</h2>
 <p>The default terminal app differs by edition — all of them run the same shell stack above.</p>
 <ul>
-<li><strong>KDE Plasma:</strong> <strong>Konsole</strong>, pre-installed, with the Saturn colour scheme and a translucent blurred background. It runs your login shell, so <code>chsh</code> applies there too. <strong>FiraMono Nerd Font</strong> is the system fixed-width font, shared by Konsole, Yakuake, Kate and every other KDE app (<em>System Settings → Text & Fonts → Fixed width</em>). <strong>Yakuake</strong>, a drop-down terminal, is also pre-installed: press <code>F12</code> to toggle it from anywhere.</li>
+<li><strong>KDE Plasma:</strong> <strong>Konsole</strong>, pre-installed, with the Saturn colour scheme and a translucent blurred background. It launches the shell named by the <code>shani.profile</code> terminal profile (<code>Command=</code> under <code>[General]</code>), which ships as <strong>fish</strong>; change that key to use a different shell in Konsole/Yakuake. Note this is <em>not</em> the same as your login shell: <code>chsh</code> changes <code>/etc/passwd</code>, so it affects Konsole only while the profile inherits <code>$SHELL</code>, and a <code>chsh</code>-based expectation does not hold now that the shell is pinned. <strong>FiraMono Nerd Font</strong> is the system fixed-width font, shared by Konsole, Yakuake, Kate and every other KDE app (<em>System Settings → Text & Fonts → Fixed width</em>). <strong>Yakuake</strong>, a drop-down terminal, is also pre-installed: press <code>F12</code> to toggle it from anywhere.</li>
 <li><strong>GNOME:</strong> <strong>GNOME Console</strong>, pre-installed.</li>
 <li><strong>COSMIC:</strong> <strong>COSMIC Terminal</strong>, pre-installed.</li>
 </ul>
@@ -240,7 +240,11 @@ fastfetch                            # run it any time</code></pre>
 <pre><code class="language-bash">chsh -s /bin/bash    # switch to Bash
 chsh -s /bin/fish    # switch to Fish
 chsh -s /bin/zsh     # switch back to Zsh (default)</code></pre>
-<p>Log out and back in for the change to take effect.</p>
+<p>Log out and back in for the change to take effect. This sets your <strong>login shell</strong>. On KDE Plasma, Konsole and Yakuake use the shell pinned in the <code>shani.profile</code> terminal profile instead, so update that profile's <code>Command=</code> under <code>[General]</code> as well if you want them to follow:</p>
+<pre><code class="language-bash"># ~/.local/share/konsole/shani.profile, [General]
+# Command=/usr/bin/zsh
+kwriteconfig6 --file ~/.local/share/konsole/shani.profile \
+  --group General --key Command /usr/bin/zsh</code></pre>
 <h2 id="customising-zsh">Customising Zsh</h2>
 <pre><code class="language-bash">micro ~/.zshrc    # add your own settings at the end, under &quot;Your own additions&quot;
 exec zsh          # reload</code></pre>
