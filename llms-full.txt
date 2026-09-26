@@ -2631,7 +2631,7 @@ HTC Vive, Valve Index, and PSVR are supported via SteamVR. udev rules are pre-co
 
 **Does my fingerprint sensor work?**
 
-`fprintd` and `libfprint` are installed on every edition, so supported sensors are detected with no driver download. Whether a fingerprint can *unlock* the machine depends on the edition, because the PAM service comes from the display manager rather than from `fprintd`: **GNOME works at the login screen** (GDM ships `/etc/pam.d/gdm-fingerprint`), **KDE Plasma works at the lock screen only** — SDDM's greeter has no fingerprint support — and COSMIC's greeter ships no PAM service at all. Enroll in **Settings → Users → Fingerprint Login** (GNOME) or **System Settings → Users → Fingerprint** (KDE). Per-edition details and the CLI: [Fingerprint Login](security/fingerprint-login).
+`fprintd` and `libfprint` are installed on every edition, so supported sensors are detected with no driver download. Whether a fingerprint can *unlock* the machine depends on the edition, because the PAM service comes from the login manager rather than from `fprintd`: **GNOME works at the login screen** (GDM ships `/etc/pam.d/gdm-fingerprint`), **KDE Plasma works at the lock screen only** — its login manager is `plasma-login-manager` (`plasmalogin`), whose PAM services never reference `pam_fprintd` — and COSMIC's greeter ships no PAM service at all. Enroll in **Settings → Users → Fingerprint Login** (GNOME) or **System Settings → Users → Fingerprint** (KDE). Per-edition details and the CLI: [Fingerprint Login](security/fingerprint-login).
 
 **Does it work on a laptop?**
 
@@ -12261,10 +12261,15 @@ kwriteconfig6 --file kscreenlockerrc --group Authenticators --key Fingerprint tr
 Enroll graphically in **System Settings → Users → Fingerprint**, or with
 `fprintd-enroll` as above.
 
-**The KDE login screen does not support fingerprints.** SDDM ships
-`/etc/pam.d/sddm`, `sddm-autologin` and `sddm-greeter`, and none of them
-reference `pam_fprintd` — the string does not appear anywhere in the package.
-Enabling the lock screen does not change this; they are separate PAM services.
+**The Plasma login screen does not support fingerprints.** Shanios Plasma logs
+in through Plasma's own login manager, `plasma-login-manager`
+(`/usr/bin/plasmalogin`), **not** SDDM. It ships three PAM services —
+`plasmalogin`, `plasmalogin-autologin` and `plasmalogin-greeter` — and the one
+that does the authentication, `plasmalogin`, is just
+`auth include system-login`. `pam_fprintd` appears in none of them, nor in
+`system-login` or `system-auth`, so there is no path for a finger to be
+accepted. Enabling the lock screen does not change this; they are separate PAM
+services.
 
 ### COSMIC — no login-screen support
 
@@ -12911,7 +12916,7 @@ Shani OS ships with hardware authentication plumbing out of the box — fingerpr
 
 **Package:** `fprintd` (pulls in `libfprint` as a dependency) — pre-installed via `shani-peripherals`
 
-Fingerprints unlock the **lock screen** on every edition, and the **login screen** on GNOME only — KDE's SDDM greeter and the COSMIC greeter have no fingerprint support. `sudo` always prompts for a password, because `/etc/pam.d/sudo` does not reference `pam_fprintd`. The per-edition matrix, how to enable the KDE lock-screen option, and the CLI are in [Fingerprint Login](fingerprint-login).
+Fingerprints unlock the **lock screen** on every edition, and the **login screen** on GNOME only — Plasma's login manager (`plasmalogin`) and the COSMIC greeter have no fingerprint support. `sudo` always prompts for a password, because `/etc/pam.d/sudo` does not reference `pam_fprintd`. The per-edition matrix, how to enable the KDE lock-screen option, and the CLI are in [Fingerprint Login](fingerprint-login).
 
 ```bash
 # Enroll a finger (replace 'right-index-finger' with the finger you want)

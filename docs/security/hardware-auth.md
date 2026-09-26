@@ -14,7 +14,7 @@ Shani OS ships with hardware authentication plumbing out of the box — fingerpr
 
 **Package:** `fprintd` (pulls in `libfprint` as a dependency) — pre-installed via `shani-peripherals`
 
-Fingerprints unlock the **lock screen** on every edition, and the **login screen** on GNOME only — KDE's SDDM greeter and the COSMIC greeter have no fingerprint support. `sudo` always prompts for a password, because `/etc/pam.d/sudo` does not reference `pam_fprintd`. The per-edition matrix, how to enable the KDE lock-screen option, and the CLI are in [Fingerprint Login](fingerprint-login).
+Fingerprints unlock the **lock screen** on every edition, and the **login screen** on GNOME only — Plasma's login manager (`plasmalogin`) and the COSMIC greeter have no fingerprint support. `sudo` always prompts for a password, because `/etc/pam.d/sudo` does not reference `pam_fprintd`. The per-edition matrix, how to enable the KDE lock-screen option, and the CLI are in [Fingerprint Login](fingerprint-login).
 
 ```bash
 # Enroll a finger (replace 'right-index-finger' with the finger you want)

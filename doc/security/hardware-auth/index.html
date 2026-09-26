@@ -222,7 +222,7 @@
 <hr>
 <h2 id="fingerprint-authentication">Fingerprint Authentication</h2>
 <p><strong>Package:</strong> <code>fprintd</code> (pulls in <code>libfprint</code> as a dependency) — pre-installed via <code>shani-peripherals</code></p>
-<p>Fingerprints unlock the <strong>lock screen</strong> on every edition, and the <strong>login screen</strong> on GNOME only — KDE's SDDM greeter and the COSMIC greeter have no fingerprint support. <code>sudo</code> always prompts for a password, because <code>/etc/pam.d/sudo</code> does not reference <code>pam_fprintd</code>. The per-edition matrix, how to enable the KDE lock-screen option, and the CLI are in <a href="/doc/security/fingerprint-login/">Fingerprint Login</a>.</p>
+<p>Fingerprints unlock the <strong>lock screen</strong> on every edition, and the <strong>login screen</strong> on GNOME only — Plasma's login manager (<code>plasmalogin</code>) and the COSMIC greeter have no fingerprint support. <code>sudo</code> always prompts for a password, because <code>/etc/pam.d/sudo</code> does not reference <code>pam_fprintd</code>. The per-edition matrix, how to enable the KDE lock-screen option, and the CLI are in <a href="/doc/security/fingerprint-login/">Fingerprint Login</a>.</p>
 <pre><code class="language-bash"># Enroll a finger (replace 'right-index-finger' with the finger you want)
 fprintd-enroll -f right-index-finger
 

@@ -242,7 +242,7 @@ fprintd-delete &quot;$USER&quot;</code></pre>
 mkdir -p ~/.config
 kwriteconfig6 --file kscreenlockerrc --group Authenticators --key Fingerprint true</code></pre>
 <p>Enroll graphically in <strong>System Settings → Users → Fingerprint</strong>, or with <code>fprintd-enroll</code> as above.</p>
-<p><strong>The KDE login screen does not support fingerprints.</strong> SDDM ships <code>/etc/pam.d/sddm</code>, <code>sddm-autologin</code> and <code>sddm-greeter</code>, and none of them reference <code>pam_fprintd</code> — the string does not appear anywhere in the package. Enabling the lock screen does not change this; they are separate PAM services.</p>
+<p><strong>The Plasma login screen does not support fingerprints.</strong> Shanios Plasma logs in through Plasma's own login manager, <code>plasma-login-manager</code> (<code>/usr/bin/plasmalogin</code>), <strong>not</strong> SDDM. It ships three PAM services — <code>plasmalogin</code>, <code>plasmalogin-autologin</code> and <code>plasmalogin-greeter</code> — and the one that does the authentication, <code>plasmalogin</code>, is just <code>auth include system-login</code>. <code>pam_fprintd</code> appears in none of them, nor in <code>system-login</code> or <code>system-auth</code>, so there is no path for a finger to be accepted. Enabling the lock screen does not change this; they are separate PAM services.</p>
 <h3 id="cosmic-no-login-screen-support">COSMIC — no login-screen support</h3>
 <p><code>cosmic-greeter</code> ships no PAM service of its own, so there is no fingerprint path at the greeter. Fingerprint unlock still works once you are logged in.</p>
 <h2 id="why-sudo-never-accepts-a-fingerprint">Why <code>sudo</code> never accepts a fingerprint</h2>

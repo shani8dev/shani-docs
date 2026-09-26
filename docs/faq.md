@@ -192,7 +192,7 @@ HTC Vive, Valve Index, and PSVR are supported via SteamVR. udev rules are pre-co
 
 **Does my fingerprint sensor work?**
 
-`fprintd` and `libfprint` are installed on every edition, so supported sensors are detected with no driver download. Whether a fingerprint can *unlock* the machine depends on the edition, because the PAM service comes from the display manager rather than from `fprintd`: **GNOME works at the login screen** (GDM ships `/etc/pam.d/gdm-fingerprint`), **KDE Plasma works at the lock screen only** — SDDM's greeter has no fingerprint support — and COSMIC's greeter ships no PAM service at all. Enroll in **Settings → Users → Fingerprint Login** (GNOME) or **System Settings → Users → Fingerprint** (KDE). Per-edition details and the CLI: [Fingerprint Login](security/fingerprint-login).
+`fprintd` and `libfprint` are installed on every edition, so supported sensors are detected with no driver download. Whether a fingerprint can *unlock* the machine depends on the edition, because the PAM service comes from the login manager rather than from `fprintd`: **GNOME works at the login screen** (GDM ships `/etc/pam.d/gdm-fingerprint`), **KDE Plasma works at the lock screen only** — its login manager is `plasma-login-manager` (`plasmalogin`), whose PAM services never reference `pam_fprintd` — and COSMIC's greeter ships no PAM service at all. Enroll in **Settings → Users → Fingerprint Login** (GNOME) or **System Settings → Users → Fingerprint** (KDE). Per-edition details and the CLI: [Fingerprint Login](security/fingerprint-login).
 
 **Does it work on a laptop?**
 

@@ -65,10 +65,15 @@ kwriteconfig6 --file kscreenlockerrc --group Authenticators --key Fingerprint tr
 Enroll graphically in **System Settings → Users → Fingerprint**, or with
 `fprintd-enroll` as above.
 
-**The KDE login screen does not support fingerprints.** SDDM ships
-`/etc/pam.d/sddm`, `sddm-autologin` and `sddm-greeter`, and none of them
-reference `pam_fprintd` — the string does not appear anywhere in the package.
-Enabling the lock screen does not change this; they are separate PAM services.
+**The Plasma login screen does not support fingerprints.** Shanios Plasma logs
+in through Plasma's own login manager, `plasma-login-manager`
+(`/usr/bin/plasmalogin`), **not** SDDM. It ships three PAM services —
+`plasmalogin`, `plasmalogin-autologin` and `plasmalogin-greeter` — and the one
+that does the authentication, `plasmalogin`, is just
+`auth include system-login`. `pam_fprintd` appears in none of them, nor in
+`system-login` or `system-auth`, so there is no path for a finger to be
+accepted. Enabling the lock screen does not change this; they are separate PAM
+services.
 
 ### COSMIC — no login-screen support
 
