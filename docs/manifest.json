@@ -763,7 +763,7 @@
     "slug": "security/hardware-auth",
     "title": "Hardware Authentication",
     "section": "Security",
-    "description": "Shan OS ships the hardware authentication plumbing out of the box — the readers are detected with no driver download, via packages pulled in by the shani-p…",
+    "description": "Fingerprint Authentication Package: fprintd (pulls in libfprint as a dependency) — pre-installed via shani-peripherals Fingerprints unlock the lock screen …",
     "updated": "2026-08-28",
     "order": 999,
     "draft": false,

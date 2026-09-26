@@ -7,7 +7,7 @@
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Hardware Authentication — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Shan OS ships the hardware authentication plumbing out of the box — the readers are detected with no driver download, via packages pulled in by the shani-p…">
+  <meta name="description" id="meta-desc"     content="Fingerprint Authentication Package: fprintd (pulls in libfprint as a dependency) — pre-installed via shani-peripherals Fingerprints unlock the lock screen …">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -15,7 +15,7 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Hardware Authentication">
-  <meta property="og:description" id="og-desc"    content="Shan OS ships the hardware authentication plumbing out of the box — the readers are detected with no driver download, via packages pulled in by the shani-p…">
+  <meta property="og:description" id="og-desc"    content="Fingerprint Authentication Package: fprintd (pulls in libfprint as a dependency) — pre-installed via shani-peripherals Fingerprints unlock the lock screen …">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/security/hardware-auth/">
   <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
@@ -25,10 +25,10 @@
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Hardware Authentication">
-  <meta name="twitter:description" id="tw-desc"  content="Shan OS ships the hardware authentication plumbing out of the box — the readers are detected with no driver download, via packages pulled in by the shani-p…">
+  <meta name="twitter:description" id="tw-desc"  content="Fingerprint Authentication Package: fprintd (pulls in libfprint as a dependency) — pre-installed via shani-peripherals Fingerprints unlock the lock screen …">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Hardware Authentication","description":"Shan OS ships the hardware authentication plumbing out of the box — the readers are detected with no driver download, via packages pulled in by the shani-p…","url":"https://docs.shani.dev/doc/security/hardware-auth/","datePublished":"2026-08-28T00:00:00.000Z","dateModified":"2026-08-28T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Hardware Authentication","description":"Fingerprint Authentication Package: fprintd (pulls in libfprint as a dependency) — pre-installed via shani-peripherals Fingerprints unlock the lock screen …","url":"https://docs.shani.dev/doc/security/hardware-auth/","datePublished":"2026-08-28T00:00:00.000Z","dateModified":"2026-08-28T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
   <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Hardware Authentication","item":"https://docs.shani.dev/doc/security/hardware-auth/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
@@ -218,8 +218,7 @@
           <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><p>Shan OS ships the hardware authentication <em>plumbing</em> out of the box — the readers are detected with no driver download, via packages pulled in by the <code>shani-peripherals</code> package. Being detected is not the same as being able to log in, and the difference is per device: <strong>smartcards cannot log in</strong> — <code>pcscd</code> runs and the card is detected, but the PAM module that would authenticate it, <code>pam_pkcs11.so</code>, is in no official Arch repository, so on GNOME (GDM) the smartcard login service hard-fails on a module it cannot load, and on KDE the same module is deliberately disabled by the distro's packaging so the feature is off rather than broken; <strong>fingerprints can log in on GNOME only</strong> (see <a href="/doc/security/fingerprint-login/">Fingerprint Login</a>); <strong>FIDO2/U2F security keys can log in</strong> — Shanios ships its own <code>pam.d/system-auth</code> that adds <code>pam_u2f</code>, which the stock stacks never did, so a security key works at any graphical login and for <code>sudo</code> without editing PAM by hand. <strong>Kerberos still cannot</strong>, as <code>pam_krb5</code> remains unwired. The CLI utilities for YubiKey management, PC/SC diagnostics, and TOTP/HOTP codes are not part of the default image — because Shanios is immutable, they cannot be installed with <code>pacman</code> at runtime. Install them via Nix (<code>nix-env -iA nixpkgs.&lt;pkg&gt;</code>) or run them inside a Distrobox container — see the callout in each section below.</p>
-<hr>
+      <div class="prose"><hr>
 <h2 id="fingerprint-authentication">Fingerprint Authentication</h2>
 <p><strong>Package:</strong> <code>fprintd</code> (pulls in <code>libfprint</code> as a dependency) — pre-installed via <code>shani-peripherals</code></p>
 <p>Fingerprints unlock the <strong>lock screen</strong> on every edition, and the <strong>login screen</strong> on GNOME only — Plasma's login manager (<code>plasmalogin</code>) and the COSMIC greeter have no fingerprint support. <code>sudo</code> always prompts for a password, because <code>/etc/pam.d/sudo</code> does not reference <code>pam_fprintd</code>. The per-edition matrix, how to enable the KDE lock-screen option, and the CLI are in <a href="/doc/security/fingerprint-login/">Fingerprint Login</a>.</p>
@@ -242,9 +241,7 @@ lsusb | grep -i finger
 fprintd-enroll   # will fail with a clear error if the device is unsupported</code></pre>
 <hr>
 <h2 id="yubikey-and-fido2u2f">YubiKey and FIDO2/U2F</h2>
-<p><strong>Packages:</strong> <code>libfido2</code>, <code>pam-u2f</code> — pre-installed via <code>shani-peripherals</code>. <code>yubikey-manager</code> (the <code>ykman</code> CLI used below) is <strong>not</strong> part of the default image and cannot be installed on the immutable host with <code>pacman</code>. Install it via Nix instead:</p>
-<pre><code class="language-bash">nix-env -iA nixpkgs.yubikey-manager</code></pre>
-<p>These CLI tools can also run inside a Distrobox container if you prefer not to install them on the host.</p>
+<p><strong>Packages:</strong> <code>libfido2</code>, <code>pam-u2f</code> — pre-installed via <code>shani-peripherals</code>. <code>yubikey-manager</code> — all pre-installed via <code>shani-peripherals</code> is pre-installed via <code>shani-peripherals</code>, so <code>oathtool</code> is available with nothing to install. Install it via Nix instead:</p>
 <h3 id="using-a-fido2u2f-key">Using a FIDO2/U2F Key</h3>
 <blockquote>⚠️ <strong>Before editing PAM:</strong> keep an existing root shell open when editing PAM files, and test <code>sudo</code> in a second terminal before logging out. A broken PAM stack can lock you out of <code>sudo</code> and login entirely.</blockquote>
 <pre><code class="language-bash"># 1. Create the U2F key mapping directory
@@ -281,9 +278,7 @@ ssh-keygen -t ed25519-sk</code></pre>
 <h2 id="smart-card-piv">Smart Card / PIV</h2>
 <p><strong>Packages:</strong> <code>opensc</code>, <code>ccid</code>, <code>acsccid</code> — pre-installed via <code>shani-peripherals</code>; <code>pcscd</code>/<code>pcsc-lite</code> come along</p>
 <blockquote><strong>Reading and managing certificates from a card works; using a card to log in does not.</strong> Authenticating a PIV card needs the PAM module <code>pam_pkcs11.so</code>, and no official Arch repository provides it — it is AUR-only (<code>pam_pkcs11</code>, unmaintained, and it installs no default config). GDM's <code>gdm-smartcard</code> service loads that module unconditionally, so the smartcard login option cannot succeed; KDE's packaging disables the same line, so the feature is simply absent. If you need card login, install the AUR package <em>and</em> set <code>slot_num</code> in <code>/etc/pam_pkcs11/pam_pkcs11.conf</code> — at its default of <code>-1</code> the module returns <code>PAM_AUTHINFO_UNAVAIL</code> and login still fails. The commands below are unaffected and work today.</blockquote>
-<p>transitively as a dependency of <code>opensc</code>/<code>ccid</code>. The <code>pcsc-tools</code> diagnostic package (used for <code>pcsc_scan</code> below) is <strong>not</strong> part of the default image and cannot be installed on the immutable host with <code>pacman</code> — install it via Nix:</p>
-<pre><code class="language-bash">nix-env -iA nixpkgs.pcsc-tools</code></pre>
-<p>Or run it inside a Distrobox container.</p>
+<p>transitively as a dependency of <code>opensc</code>/<code>ccid</code>. The <code>pcsc-tools</code> diagnostic package (used for <code>pcsc_scan</code> below) is pre-installed via <code>shani-peripherals</code>, so <code>oathtool</code> is available with nothing to install — install it via Nix:</p>
 <pre><code class="language-bash"># Start the PC/SC daemon
 sudo systemctl enable --now pcscd
 
@@ -311,8 +306,6 @@ pcsc_scan   # shows NFC card when tapped</code></pre>
 <hr>
 <h2 id="totp-hotp-two-factor">TOTP / HOTP (Two-Factor)</h2>
 <p><strong>Package:</strong> <code>oath-toolkit</code> — <strong>not</strong> part of the default image and cannot be installed on the immutable host with <code>pacman</code>. Install it via Nix:</p>
-<pre><code class="language-bash">nix-env -iA nixpkgs.oath-toolkit</code></pre>
-<p>Or run it inside a Distrobox container.</p>
 <p><code>oathtool</code> generates TOTP and HOTP codes from a shared secret, compatible with Google Authenticator, Authy, and any RFC 6238/4226 implementation.</p>
 <pre><code class="language-bash"># Generate a TOTP code from a base32 secret
 oathtool --totp --base32 JBSWY3DPEHPK3PXP

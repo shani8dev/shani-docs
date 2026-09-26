@@ -300,13 +300,8 @@ net.core.bpf_jit_harden = 2         # hardens the BPF JIT against Spectre/info-l
 <li><strong>YubiKey and FIDO2/U2F</strong> — <code>libfido2</code>, <code>pam-u2f</code></li>
 <li><strong>NFC</strong> — <code>libnfc</code>, riding on the same <code>pcscd</code>/<code>pcsc-lite</code> stack as smart cards</li>
 </ul>
-<p>Not part of the default image — and because the host is immutable, they cannot be added with <code>pacman</code> at runtime. Install them via Nix (<code>nix-env -iA nixpkgs.&lt;pkg&gt;</code>) or run them inside a Distrobox container:</p>
-<ul>
-<li><strong>YubiKey Manager</strong> (<code>ykman</code>) — <code>nix-env -iA nixpkgs.yubikey-manager</code></li>
-<li><strong>PC/SC diagnostics</strong> (<code>pcsc_scan</code>) — <code>nix-env -iA nixpkgs.pcsc-tools</code></li>
-<li><strong>TOTP/HOTP two-factor</strong> (<code>oathtool</code>) — <code>nix-env -iA nixpkgs.oath-toolkit</code></li>
-</ul>
-<p>See <a href="/doc/security/hardware-auth/">Hardware Authentication</a> for the full breakdown of what ships by default, the exact install commands, and the Distrobox alternative.</p>
+<p>The user-facing CLIs ship as well — <code>yubikey-manager</code> (<code>ykman</code>), <code>pcsc-tools</code> (<code>pcsc_scan</code>) and <code>oath-toolkit</code> (<code>oathtool</code>) are all in <code>shani-peripherals</code>, so there is nothing to install and no reason to reach for a second package manager on an immutable host.</p>
+<p>See <a href="/doc/security/hardware-auth/">Hardware Authentication</a> for the full breakdown of what ships and the commands.</p>
 <h2 id="zero-telemetry">Zero Telemetry</h2>
 <p>No background services report hardware, software usage, or system behaviour to any external server. No identifiers are generated or transmitted. No crash reports are collected.</p>
 <p><code>shani-deploy</code> connects to the CDN to download updates and to the GPG keyserver to verify signatures — standard HTTP downloads that send only what any HTTP client sends. Nothing else leaves the machine.</p>

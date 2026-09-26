@@ -160,13 +160,13 @@ Pre-installed via the `shani-peripherals` package, working at first boot without
 - **YubiKey and FIDO2/U2F** — `libfido2`, `pam-u2f`
 - **NFC** — `libnfc`, riding on the same `pcscd`/`pcsc-lite` stack as smart cards
 
-Not part of the default image — and because the host is immutable, they cannot be added with `pacman` at runtime. Install them via Nix (`nix-env -iA nixpkgs.<pkg>`) or run them inside a Distrobox container:
 
-- **YubiKey Manager** (`ykman`) — `nix-env -iA nixpkgs.yubikey-manager`
-- **PC/SC diagnostics** (`pcsc_scan`) — `nix-env -iA nixpkgs.pcsc-tools`
-- **TOTP/HOTP two-factor** (`oathtool`) — `nix-env -iA nixpkgs.oath-toolkit`
+The user-facing CLIs ship as well — `yubikey-manager` (`ykman`), `pcsc-tools`
+(`pcsc_scan`) and `oath-toolkit` (`oathtool`) are all in `shani-peripherals`, so
+there is nothing to install and no reason to reach for a second package manager
+on an immutable host.
 
-See [Hardware Authentication](hardware-auth) for the full breakdown of what ships by default, the exact install commands, and the Distrobox alternative.
+See [Hardware Authentication](hardware-auth) for the full breakdown of what ships and the commands.
 
 ## Zero Telemetry
 
