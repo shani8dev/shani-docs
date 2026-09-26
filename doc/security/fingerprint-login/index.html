@@ -6,30 +6,30 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
-<title>Hardware Authentication — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work wit…">
+<title>Fingerprint Login — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="Shanios installs fprintd and libfprint on every edition through the shani-peripherals package, and fprintd is enabled at boot, so supported readers are det…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/security/hardware-auth/">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/security/fingerprint-login/">
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
-  <meta property="og:title"     id="og-title"     content="Hardware Authentication">
-  <meta property="og:description" id="og-desc"    content="Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work wit…">
+  <meta property="og:title"     id="og-title"     content="Fingerprint Login">
+  <meta property="og:description" id="og-desc"    content="Shanios installs fprintd and libfprint on every edition through the shani-peripherals package, and fprintd is enabled at boot, so supported readers are det…">
   <meta property="og:type"      id="og-type"      content="article">
-  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/security/hardware-auth/">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/security/fingerprint-login/">
   <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
-  <meta property="og:image:alt" id="og-image-alt" content="Hardware Authentication">
+  <meta property="og:image:alt" id="og-image-alt" content="Fingerprint Login">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
-  <meta name="twitter:title"       id="tw-title" content="Hardware Authentication">
-  <meta name="twitter:description" id="tw-desc"  content="Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work wit…">
+  <meta name="twitter:title"       id="tw-title" content="Fingerprint Login">
+  <meta name="twitter:description" id="tw-desc"  content="Shanios installs fprintd and libfprint on every edition through the shani-peripherals package, and fprintd is enabled at boot, so supported readers are det…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Hardware Authentication","description":"Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work wit…","url":"https://docs.shani.dev/doc/security/hardware-auth/","datePublished":"2026-08-28T00:00:00.000Z","dateModified":"2026-08-28T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
-  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Hardware Authentication","item":"https://docs.shani.dev/doc/security/hardware-auth/"}]}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Fingerprint Login","description":"Shanios installs fprintd and libfprint on every edition through the shani-peripherals package, and fprintd is enabled at boot, so supported readers are det…","url":"https://docs.shani.dev/doc/security/fingerprint-login/","datePublished":"2026-09-26T00:00:00.000Z","dateModified":"2026-09-26T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Fingerprint Login","item":"https://docs.shani.dev/doc/security/fingerprint-login/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -212,125 +212,65 @@
         semantically correct, not byte-identical to the client render.
       -->
       <div class="doc-header">
-        <h1 class="doc-title">Hardware Authentication</h1>
+        <h1 class="doc-title">Fingerprint Login</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Security</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-09-26</span>
         </div>
       </div>
-      <div class="prose"><p>Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work without a driver download, via packages pulled in by the <code>shani-peripherals</code> package. The CLI utilities for YubiKey management, PC/SC diagnostics, and TOTP/HOTP codes are not part of the default image — because Shanios is immutable, they cannot be installed with <code>pacman</code> at runtime. Install them via Nix (<code>nix-env -iA nixpkgs.&lt;pkg&gt;</code>) or run them inside a Distrobox container — see the callout in each section below.</p>
-<hr>
-<h2 id="fingerprint-authentication">Fingerprint Authentication</h2>
-<p><strong>Package:</strong> <code>fprintd</code> (pulls in <code>libfprint</code> as a dependency) — pre-installed via <code>shani-peripherals</code></p>
-<p>Fingerprints unlock the <strong>lock screen</strong> on every edition, and the <strong>login screen</strong> on GNOME only — KDE's SDDM greeter and the COSMIC greeter have no fingerprint support. <code>sudo</code> always prompts for a password, because <code>/etc/pam.d/sudo</code> does not reference <code>pam_fprintd</code>. The per-edition matrix, how to enable the KDE lock-screen option, and the CLI are in <a href="/doc/security/fingerprint-login/">Fingerprint Login</a>.</p>
-<pre><code class="language-bash"># Enroll a finger (replace 'right-index-finger' with the finger you want)
-fprintd-enroll -f right-index-finger
+      <div class="prose"><p>Shanios installs <code>fprintd</code> and <code>libfprint</code> on every edition through the <code>shani-peripherals</code> package, and <code>fprintd</code> is enabled at boot, so supported readers are detected without installing anything. <strong>Whether a fingerprint can actually unlock your machine depends on the edition</strong>, and it is worth being precise about why: PAM services are shipped by the <em>display manager</em>, not by <code>fprintd</code>. <code>fprintd</code> only provides the module (<code>pam_fprintd.so</code>) and the daemon; something has to reference the module in a PAM stack.</p>
+<p>libpam searches both <code>/etc/pam.d</code> <strong>and</strong> <code>/usr/lib/pam.d</code>, so a PAM service shipped inside a package's payload works without being copied into <code>/etc</code>.</p>
+<h2 id="what-works-per-edition">What works, per edition</h2>
+<table><thead><tr><th>Edition</th><th>Login screen</th><th>Lock screen</th><th><code>sudo</code></th></tr></thead><tbody><tr><td>GNOME</td><td><strong>Yes</strong></td><td>Yes</td><td>No</td></tr><tr><td>KDE Plasma</td><td><strong>No</strong></td><td>Yes, when enabled</td><td>No</td></tr><tr><td>COSMIC</td><td><strong>No</strong></td><td>Yes</td><td>No</td></tr></tbody></table>
+<h3 id="gnome-works-out-of-the-box">GNOME — works out of the box</h3>
+<p>The <code>gdm</code> package ships <code>/etc/pam.d/gdm-fingerprint</code>, whose auth stack contains <code>pam_fprintd.so</code>. GDM offers that service once you have enrolled a finger, and falls back to <code>gdm-password</code> for the password prompt, so a failed or absent finger never locks you out.</p>
+<pre><code class="language-bash"># Enroll (run as your normal user; polkit will ask for your password)
+fprintd-enroll
 
-# List enrolled fingers
+# What is enrolled
 fprintd-list &quot;$USER&quot;
 
-# Test a fingerprint
+# Prove the sensor and the match work
 fprintd-verify
 
-# Delete enrolled fingers
+# Remove enrollments
 fprintd-delete &quot;$USER&quot;</code></pre>
-<p>Enrollment via GUI: <strong>System Settings → Users → Fingerprint Login</strong> (KDE) or <strong>Settings → Users</strong> (GNOME).</p>
-<h3 id="supported-hardware">Supported Hardware</h3>
-<p>Any fingerprint reader with a libfprint driver is supported. Check compatibility:</p>
-<pre><code class="language-bash"># Is your device recognised?
-lsusb | grep -i finger
-fprintd-enroll   # will fail with a clear error if the device is unsupported</code></pre>
-<hr>
-<h2 id="yubikey-and-fido2u2f">YubiKey and FIDO2/U2F</h2>
-<p><strong>Packages:</strong> <code>libfido2</code>, <code>pam-u2f</code> — pre-installed via <code>shani-peripherals</code>. <code>yubikey-manager</code> (the <code>ykman</code> CLI used below) is <strong>not</strong> part of the default image and cannot be installed on the immutable host with <code>pacman</code>. Install it via Nix instead:</p>
-<pre><code class="language-bash">nix-env -iA nixpkgs.yubikey-manager</code></pre>
-<p>These CLI tools can also run inside a Distrobox container if you prefer not to install them on the host.</p>
-<h3 id="setting-up-pam-u2f-sudo-login">Setting Up PAM U2F (sudo / login)</h3>
-<blockquote>⚠️ <strong>Before editing PAM:</strong> keep an existing root shell open when editing PAM files, and test <code>sudo</code> in a second terminal before logging out. A broken PAM stack can lock you out of <code>sudo</code> and login entirely.</blockquote>
-<pre><code class="language-bash"># 1. Create the U2F key mapping directory
-mkdir -p ~/.config/Yubico
-
-# 2. Register your YubiKey (touch the key when it blinks)
-pamu2fcfg &gt; ~/.config/Yubico/u2f_keys
-
-# If you have a second key for backup, append it
-pamu2fcfg -n &gt;&gt; ~/.config/Yubico/u2f_keys</code></pre>
-<p>Edit <code>/etc/pam.d/sudo</code> to require the YubiKey in addition to the password:</p>
-<pre><code>auth required pam_u2f.so</code></pre>
-<p>Or to allow either password or YubiKey:</p>
-<pre><code>auth sufficient pam_u2f.so</code></pre>
-<h3 id="yubikey-manager">YubiKey Manager</h3>
-<pre><code class="language-bash"># Show YubiKey info
-ykman info
-
-# List configured applications
-ykman list
-
-# Configure FIDO2 PIN
-ykman fido access change-pin
-
-# Reset FIDO2 application (clears all credentials)
-ykman fido reset</code></pre>
-<h3 id="fido2-for-ssh">FIDO2 for SSH</h3>
-<pre><code class="language-bash"># Generate a FIDO2-backed SSH key (resident key stored on the YubiKey)
-ssh-keygen -t ed25519-sk -O resident -O application=ssh:myserver
-
-# Non-resident (key file required alongside the token)
-ssh-keygen -t ed25519-sk</code></pre>
-<hr>
-<h2 id="smart-card-piv">Smart Card / PIV</h2>
-<p><strong>Packages:</strong> <code>opensc</code>, <code>ccid</code>, <code>acsccid</code> — pre-installed via <code>shani-peripherals</code>; <code>pcscd</code>/<code>pcsc-lite</code> come along transitively as a dependency of <code>opensc</code>/<code>ccid</code>. The <code>pcsc-tools</code> diagnostic package (used for <code>pcsc_scan</code> below) is <strong>not</strong> part of the default image and cannot be installed on the immutable host with <code>pacman</code> — install it via Nix:</p>
-<pre><code class="language-bash">nix-env -iA nixpkgs.pcsc-tools</code></pre>
-<p>Or run it inside a Distrobox container.</p>
-<pre><code class="language-bash"># Start the PC/SC daemon
-sudo systemctl enable --now pcscd
-
-# List connected smart cards
-pcsc_scan
-
-# Show card info via OpenSC
-opensc-tool --list-readers
-opensc-tool --list-algorithms
-
-# List certificates on a PIV card
-pkcs11-tool --module /usr/lib/opensc-pkcs11.so --list-certificates</code></pre>
-<h3 id="ssh-with-smart-card">SSH with Smart Card</h3>
-<pre><code class="language-bash"># List keys visible via PKCS#11
-ssh-keygen -D /usr/lib/opensc-pkcs11.so -e
-
-# Use the card for SSH authentication
-ssh -I /usr/lib/opensc-pkcs11.so user@host</code></pre>
-<hr>
-<h2 id="nfc-authentication">NFC Authentication</h2>
-<p><strong>Packages:</strong> <code>libnfc</code>, pre-installed via <code>shani-peripherals</code>; NFC access rides on the same <code>pcscd</code>/<code>pcsc-lite</code> stack pulled in for smart cards above</p>
-<p>NFC tokens are accessed via the PC/SC stack. Once <code>pcscd</code> is running, NFC cards compatible with pcsc-lite are accessible in the same way as contact smart cards:</p>
-<pre><code class="language-bash">sudo systemctl enable --now pcscd
-pcsc_scan   # shows NFC card when tapped</code></pre>
-<hr>
-<h2 id="totp-hotp-two-factor">TOTP / HOTP (Two-Factor)</h2>
-<p><strong>Package:</strong> <code>oath-toolkit</code> — <strong>not</strong> part of the default image and cannot be installed on the immutable host with <code>pacman</code>. Install it via Nix:</p>
-<pre><code class="language-bash">nix-env -iA nixpkgs.oath-toolkit</code></pre>
-<p>Or run it inside a Distrobox container.</p>
-<p><code>oathtool</code> generates TOTP and HOTP codes from a shared secret, compatible with Google Authenticator, Authy, and any RFC 6238/4226 implementation.</p>
-<pre><code class="language-bash"># Generate a TOTP code from a base32 secret
-oathtool --totp --base32 JBSWY3DPEHPK3PXP
-
-# Generate a HOTP code (counter-based)
-oathtool --hotp --base32 JBSWY3DPEHPK3PXP 0
-
-# Verify a TOTP code
-oathtool --totp --base32 -w 1 JBSWY3DPEHPK3PXP 123456</code></pre>
-<hr>
-<h2 id="troubleshooting">Troubleshooting</h2>
-<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>fprintd-enroll</code> says no device found</td><td>Check <code>lsusb</code> for the reader; the sensor may not have a libfprint driver</td></tr><tr><td>YubiKey not detected</td><td>Check <code>lsusb</code>; <code>ykman list</code>; ensure <code>pcscd</code> is running for PIV/OTP modes</td></tr><tr><td>Smart card not detected</td><td><code>sudo systemctl status pcscd</code>; run <code>pcsc_scan</code> with card inserted</td></tr><tr><td>PAM U2F not prompting for key</td><td>Check <code>/etc/pam.d/</code> config; verify <code>~/.config/Yubico/u2f_keys</code> exists and is correct</td></tr><tr><td>SSH FIDO2 key says "unsupported"</td><td>Ensure the server has <code>PubkeyAuthOptions verify-required</code> removed or set correctly for sk keys</td></tr></tbody></table>
-<hr>
-<h2 id="see-also">See Also</h2>
+<p>The same operations are available graphically in <strong>Settings → Users → Fingerprint Login</strong>.</p>
+<h3 id="kde-plasma-the-lock-screen-only-and-it-is-opt-in">KDE Plasma — the lock screen only, and it is opt-in</h3>
+<p><code>kscreenlocker</code> ships <code>/usr/lib/pam.d/kde-fingerprint</code> with <code>pam_fprintd.so</code> in its auth stack, so the lock screen can use a fingerprint. It is not offered by default: kscreenlocker reads an <code>Authenticators/Fingerprint</code> key from <code>~/.config/kscreenlockerrc</code> and only presents the option when that is enabled.</p>
+<pre><code class="language-bash"># Enable the lock-screen fingerprint option for your user
+mkdir -p ~/.config
+kwriteconfig6 --file kscreenlockerrc --group Authenticators --key Fingerprint true</code></pre>
+<p>Enroll graphically in <strong>System Settings → Users → Fingerprint</strong>, or with <code>fprintd-enroll</code> as above.</p>
+<p><strong>The KDE login screen does not support fingerprints.</strong> SDDM ships <code>/etc/pam.d/sddm</code>, <code>sddm-autologin</code> and <code>sddm-greeter</code>, and none of them reference <code>pam_fprintd</code> — the string does not appear anywhere in the package. Enabling the lock screen does not change this; they are separate PAM services.</p>
+<h3 id="cosmic-no-login-screen-support">COSMIC — no login-screen support</h3>
+<p><code>cosmic-greeter</code> ships no PAM service of its own, so there is no fingerprint path at the greeter. Fingerprint unlock still works once you are logged in.</p>
+<h2 id="why-sudo-never-accepts-a-fingerprint">Why <code>sudo</code> never accepts a fingerprint</h2>
+<p><code>sudo</code> is its own PAM service. <code>/etc/pam.d/sudo</code> pulls in <code>system-auth</code> for the auth stack, and <code>system-auth</code> does not reference <code>pam_fprintd</code>:</p>
+<pre><code>auth       include                      system-auth</code></pre>
+<p>So even with fingerprints enrolled, <code>sudo</code> prompts for a password. Enabling it means adding <code>auth sufficient pam_fprintd.so</code> to a stack that <code>sudo</code> actually uses — this is a deliberate policy choice, not a missing package, so it is not enabled by default.</p>
+<h2 id="why-a-missing-fingerprint-module-fails-silently">Why a missing fingerprint module fails silently</h2>
+<p>This matters when reading PAM logs. With no reader attached, <code>pam_fprintd.so</code> returns <code>PAM_AUTHINFO_UNAVAIL</code> (9). What happens next depends entirely on the control flag:</p>
 <ul>
-<li><a href="/doc/security/features/">Security Features</a> — full list of supported authentication methods</li>
-<li><a href="/doc/security/luks/">LUKS Management</a> — using a keyfile for disk unlock</li>
-<li><a href="/doc/security/tpm2/">TPM2 Enrollment</a> — TPM-based disk unlock</li>
-<li><a href="/doc/updates/shani-health/">shani-health Reference</a> — <code>shani-health --security</code> reports fprintd enrollment, pam-u2f configuration, and pcscd status per user</li>
-</ul></div>
+<li><code>auth sufficient pam_fprintd.so</code> — the failure is <strong>ignored</strong> and the stack</li>
+<p>continues to the next module, so the password prompt still appears.</p>
+<li><code>auth required pam_fprintd.so</code> — the stack <strong>fails</strong>.</li>
+</ul>
+<p>Both behaviours were confirmed against <code>pam_fprintd.so</code> 1.7.2 with no sensor present. It is why a <code>sufficient</code> line is the safe way to add fingerprint support to a stack that already has a working fallback, and why shipping it as <code>required</code> without a password fallback would lock users out.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<pre><code class="language-bash"># Is a reader detected at all? (an empty list means no supported sensor)
+fprintd-list &quot;$USER&quot;
+
+# Is the daemon actually running?
+systemctl status fprintd
+
+# What does the sensor enumerate as?
+lsusb | grep -i -E 'finger|goodix|synaptic|valuestree'
+
+# What do the PAM stacks currently say?
+grep -r pam_fprintd /etc/pam.d/ /usr/lib/pam.d/</code></pre>
+<p>If your reader is a laptop embedded sensor bound to the wrong kernel driver, <code>libfprint</code> ships <code>/usr/lib/udev/rules.d/70-libfprint-2.rules</code> to correct the SPI driver binding; confirm the rule is present before suspecting hardware.</p>
+<p>See also: <a href="/doc/security/hardware-auth/">Hardware Authentication</a>, which covers FIDO2/U2F keys, smart cards and NFC tokens.</p></div>
     </div>
 
   </main>

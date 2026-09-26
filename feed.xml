@@ -5,8 +5,17 @@
     <link>https://docs.shani.dev/</link>
     <description>Comprehensive technical documentation for Shanios — the immutable Linux OS.</description>
     <language>en-IN</language>
-    <lastBuildDate>Fri, 25 Sep 2026 20:29:27 GMT</lastBuildDate>
+    <lastBuildDate>Sat, 26 Sep 2026 05:37:00 GMT</lastBuildDate>
     <atom:link href="https://docs.shani.dev/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Fingerprint Login</title>
+      <link>https://docs.shani.dev/doc/security/fingerprint-login/</link>
+      <guid isPermaLink="true">https://docs.shani.dev/doc/security/fingerprint-login/</guid>
+      <description>Shanios installs fprintd and libfprint on every edition through the shani-peripherals package, and fprintd is enabled at boot, so supported readers are det…</description>
+      <pubDate>Sat, 26 Sep 2026 00:00:00 GMT</pubDate>
+      <category>Security</category>
+      <author>Shrinivas Kumbhar</author>
+    </item>
     <item>
       <title>TPM2 Enrollment</title>
       <link>https://docs.shani.dev/doc/security/tpm2/</link>
@@ -354,15 +363,6 @@
       <link>https://docs.shani.dev/doc/networking/bind/</link>
       <guid isPermaLink="true">https://docs.shani.dev/doc/networking/bind/</guid>
       <description>BIND (named) is the most widely deployed DNS server. On Shani OS it is pre-installed and provides two distinct functions that are often combined but can be…</description>
-      <pubDate>Fri, 28 Aug 2026 00:00:00 GMT</pubDate>
-      <category>Networking</category>
-      <author>Shrinivas Kumbhar</author>
-    </item>
-    <item>
-      <title>Bluetooth</title>
-      <link>https://docs.shani.dev/doc/networking/bluetooth/</link>
-      <guid isPermaLink="true">https://docs.shani.dev/doc/networking/bluetooth/</guid>
-      <description>Shanios pre-installs the full BlueZ stack (shani-bluetooth) and enables the Bluetooth daemon by default on every edition — pairing works out of the box wit…</description>
       <pubDate>Fri, 28 Aug 2026 00:00:00 GMT</pubDate>
       <category>Networking</category>
       <author>Shrinivas Kumbhar</author>

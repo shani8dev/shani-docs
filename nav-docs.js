@@ -121,6 +121,7 @@ CONFIG.NAV_TREE = [
       { "title": "AppArmor (Mandatory Access Control)", "slug": "security/apparmor" },
       { "title": "Audit (auditd)", "slug": "security/audit" },
       { "title": "Security Features", "slug": "security/features" },
+      { "title": "Fingerprint Login", "slug": "security/fingerprint-login" },
       { "title": "Firmware Updates (fwupd)", "slug": "security/fwupd" },
       { "title": "gen-efi Reference", "slug": "security/gen-efi" },
       { "title": "Directory Encryption (gocryptfs)", "slug": "security/gocryptfs" },

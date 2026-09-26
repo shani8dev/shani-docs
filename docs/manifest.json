@@ -720,6 +720,16 @@
     "keywords": ""
   },
   {
+    "slug": "security/fingerprint-login",
+    "title": "Fingerprint Login",
+    "section": "Security",
+    "description": "Shanios installs fprintd and libfprint on every edition through the shani-peripherals package, and fprintd is enabled at boot, so supported readers are det…",
+    "updated": "2026-09-26",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
     "slug": "security/fwupd",
     "title": "Firmware Updates (fwupd)",
     "section": "Security",

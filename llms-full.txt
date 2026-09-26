@@ -2631,7 +2631,7 @@ HTC Vive, Valve Index, and PSVR are supported via SteamVR. udev rules are pre-co
 
 **Does my fingerprint sensor work?**
 
-Supported fingerprint sensors work at first boot via `fprintd` and `libfprint`. GDM (GNOME) and SDDM (KDE) both support fingerprint authentication at the login screen. Enroll via Settings → Users → Fingerprint Login.
+`fprintd` and `libfprint` are installed on every edition, so supported sensors are detected with no driver download. Whether a fingerprint can *unlock* the machine depends on the edition, because the PAM service comes from the display manager rather than from `fprintd`: **GNOME works at the login screen** (GDM ships `/etc/pam.d/gdm-fingerprint`), **KDE Plasma works at the lock screen only** — SDDM's greeter has no fingerprint support — and COSMIC's greeter ships no PAM service at all. Enroll in **Settings → Users → Fingerprint Login** (GNOME) or **System Settings → Users → Fingerprint** (KDE). Per-edition details and the CLI: [Fingerprint Login](security/fingerprint-login).
 
 **Does it work on a laptop?**
 
@@ -12193,6 +12193,138 @@ The attack surface is reduced by design, not by configuration.
 
 ---
 
+# Fingerprint Login
+
+URL: https://docs.shani.dev/doc/security/fingerprint-login/
+Updated: 2026-09-26
+
+Shanios installs fprintd and libfprint on every edition through the shani-peripherals package, and fprintd is enabled at boot, so supported readers are det…
+
+# Fingerprint Login
+
+Shanios installs `fprintd` and `libfprint` on every edition through the
+`shani-peripherals` package, and `fprintd` is enabled at boot, so supported
+readers are detected without installing anything. **Whether a fingerprint can
+actually unlock your machine depends on the edition**, and it is worth being
+precise about why: PAM services are shipped by the *display manager*, not by
+`fprintd`. `fprintd` only provides the module (`pam_fprintd.so`) and the
+daemon; something has to reference the module in a PAM stack.
+
+libpam searches both `/etc/pam.d` **and** `/usr/lib/pam.d`, so a PAM service
+shipped inside a package's payload works without being copied into `/etc`.
+
+## What works, per edition
+
+| Edition | Login screen | Lock screen | `sudo` |
+| --- | --- | --- | --- |
+| GNOME | **Yes** | Yes | No |
+| KDE Plasma | **No** | Yes, when enabled | No |
+| COSMIC | **No** | Yes | No |
+
+### GNOME — works out of the box
+
+The `gdm` package ships `/etc/pam.d/gdm-fingerprint`, whose auth stack
+contains `pam_fprintd.so`. GDM offers that service once you have enrolled a
+finger, and falls back to `gdm-password` for the password prompt, so a failed
+or absent finger never locks you out.
+
+```bash
+# Enroll (run as your normal user; polkit will ask for your password)
+fprintd-enroll
+
+# What is enrolled
+fprintd-list "$USER"
+
+# Prove the sensor and the match work
+fprintd-verify
+
+# Remove enrollments
+fprintd-delete "$USER"
+```
+
+The same operations are available graphically in **Settings → Users →
+Fingerprint Login**.
+
+### KDE Plasma — the lock screen only, and it is opt-in
+
+`kscreenlocker` ships `/usr/lib/pam.d/kde-fingerprint` with `pam_fprintd.so`
+in its auth stack, so the lock screen can use a fingerprint. It is not offered
+by default: kscreenlocker reads an `Authenticators/Fingerprint` key from
+`~/.config/kscreenlockerrc` and only presents the option when that is enabled.
+
+```bash
+# Enable the lock-screen fingerprint option for your user
+mkdir -p ~/.config
+kwriteconfig6 --file kscreenlockerrc --group Authenticators --key Fingerprint true
+```
+
+Enroll graphically in **System Settings → Users → Fingerprint**, or with
+`fprintd-enroll` as above.
+
+**The KDE login screen does not support fingerprints.** SDDM ships
+`/etc/pam.d/sddm`, `sddm-autologin` and `sddm-greeter`, and none of them
+reference `pam_fprintd` — the string does not appear anywhere in the package.
+Enabling the lock screen does not change this; they are separate PAM services.
+
+### COSMIC — no login-screen support
+
+`cosmic-greeter` ships no PAM service of its own, so there is no fingerprint
+path at the greeter. Fingerprint unlock still works once you are logged in.
+
+## Why `sudo` never accepts a fingerprint
+
+`sudo` is its own PAM service. `/etc/pam.d/sudo` pulls in `system-auth` for the
+auth stack, and `system-auth` does not reference `pam_fprintd`:
+
+```
+auth       include                      system-auth
+```
+
+So even with fingerprints enrolled, `sudo` prompts for a password. Enabling it
+means adding `auth sufficient pam_fprintd.so` to a stack that `sudo` actually
+uses — this is a deliberate policy choice, not a missing package, so it is not
+enabled by default.
+
+## Why a missing fingerprint module fails silently
+
+This matters when reading PAM logs. With no reader attached,
+`pam_fprintd.so` returns `PAM_AUTHINFO_UNAVAIL` (9). What happens next depends
+entirely on the control flag:
+
+- `auth sufficient pam_fprintd.so` — the failure is **ignored** and the stack
+  continues to the next module, so the password prompt still appears.
+- `auth required pam_fprintd.so` — the stack **fails**.
+
+Both behaviours were confirmed against `pam_fprintd.so` 1.7.2 with no sensor
+present. It is why a `sufficient` line is the safe way to add fingerprint
+support to a stack that already has a working fallback, and why shipping it as
+`required` without a password fallback would lock users out.
+
+## Troubleshooting
+
+```bash
+# Is a reader detected at all? (an empty list means no supported sensor)
+fprintd-list "$USER"
+
+# Is the daemon actually running?
+systemctl status fprintd
+
+# What does the sensor enumerate as?
+lsusb | grep -i -E 'finger|goodix|synaptic|valuestree'
+
+# What do the PAM stacks currently say?
+grep -r pam_fprintd /etc/pam.d/ /usr/lib/pam.d/
+```
+
+If your reader is a laptop embedded sensor bound to the wrong kernel driver,
+`libfprint` ships `/usr/lib/udev/rules.d/70-libfprint-2.rules` to correct the
+SPI driver binding; confirm the rule is present before suspecting hardware.
+
+See also: [Hardware Authentication](hardware-auth), which covers FIDO2/U2F
+keys, smart cards and NFC tokens.
+
+---
+
 # Firmware Updates (fwupd)
 
 URL: https://docs.shani.dev/doc/security/fwupd/
@@ -12779,7 +12911,7 @@ Shani OS ships with hardware authentication plumbing out of the box — fingerpr
 
 **Package:** `fprintd` (pulls in `libfprint` as a dependency) — pre-installed via `shani-peripherals`
 
-Fingerprints can be used to unlock the login screen, sudo prompts, and the lock screen.
+Fingerprints unlock the **lock screen** on every edition, and the **login screen** on GNOME only — KDE's SDDM greeter and the COSMIC greeter have no fingerprint support. `sudo` always prompts for a password, because `/etc/pam.d/sudo` does not reference `pam_fprintd`. The per-edition matrix, how to enable the KDE lock-screen option, and the CLI are in [Fingerprint Login](fingerprint-login).
 
 ```bash
 # Enroll a finger (replace 'right-index-finger' with the finger you want)
