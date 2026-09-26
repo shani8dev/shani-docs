@@ -763,7 +763,7 @@
     "slug": "security/hardware-auth",
     "title": "Hardware Authentication",
     "section": "Security",
-    "description": "Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work wit…",
+    "description": "Shan OS ships the hardware authentication plumbing out of the box — the readers are detected with no driver download, via packages pulled in by the shani-p…",
     "updated": "2026-08-28",
     "order": 999,
     "draft": false,

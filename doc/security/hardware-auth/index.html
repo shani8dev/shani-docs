@@ -7,7 +7,7 @@
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Hardware Authentication — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work wit…">
+  <meta name="description" id="meta-desc"     content="Shan OS ships the hardware authentication plumbing out of the box — the readers are detected with no driver download, via packages pulled in by the shani-p…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -15,7 +15,7 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Hardware Authentication">
-  <meta property="og:description" id="og-desc"    content="Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work wit…">
+  <meta property="og:description" id="og-desc"    content="Shan OS ships the hardware authentication plumbing out of the box — the readers are detected with no driver download, via packages pulled in by the shani-p…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/security/hardware-auth/">
   <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
@@ -25,10 +25,10 @@
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Hardware Authentication">
-  <meta name="twitter:description" id="tw-desc"  content="Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work wit…">
+  <meta name="twitter:description" id="tw-desc"  content="Shan OS ships the hardware authentication plumbing out of the box — the readers are detected with no driver download, via packages pulled in by the shani-p…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Hardware Authentication","description":"Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work wit…","url":"https://docs.shani.dev/doc/security/hardware-auth/","datePublished":"2026-08-28T00:00:00.000Z","dateModified":"2026-08-28T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Hardware Authentication","description":"Shan OS ships the hardware authentication plumbing out of the box — the readers are detected with no driver download, via packages pulled in by the shani-p…","url":"https://docs.shani.dev/doc/security/hardware-auth/","datePublished":"2026-08-28T00:00:00.000Z","dateModified":"2026-08-28T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
   <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Hardware Authentication","item":"https://docs.shani.dev/doc/security/hardware-auth/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
@@ -218,7 +218,7 @@
           <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><p>Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work without a driver download, via packages pulled in by the <code>shani-peripherals</code> package. The CLI utilities for YubiKey management, PC/SC diagnostics, and TOTP/HOTP codes are not part of the default image — because Shanios is immutable, they cannot be installed with <code>pacman</code> at runtime. Install them via Nix (<code>nix-env -iA nixpkgs.&lt;pkg&gt;</code>) or run them inside a Distrobox container — see the callout in each section below.</p>
+      <div class="prose"><p>Shan OS ships the hardware authentication <em>plumbing</em> out of the box — the readers are detected with no driver download, via packages pulled in by the <code>shani-peripherals</code> package. Being detected is not the same as being able to log in, and the difference is per device: <strong>smartcards (PIV) can log in</strong> (<code>gdm</code> and <code>kscreenlocker</code> ship PAM services that use them), <strong>fingerprints can log in on GNOME only</strong> (see <a href="/doc/security/fingerprint-login/">Fingerprint Login</a>), and <strong>FIDO2/U2F security keys and Kerberos cannot log in yet</strong> — <code>pam_u2f</code> and <code>pam_krb5</code> are installed but no PAM stack on any edition references them, so the steps in each section are still required. The CLI utilities for YubiKey management, PC/SC diagnostics, and TOTP/HOTP codes are not part of the default image — because Shanios is immutable, they cannot be installed with <code>pacman</code> at runtime. Install them via Nix (<code>nix-env -iA nixpkgs.&lt;pkg&gt;</code>) or run them inside a Distrobox container — see the callout in each section below.</p>
 <hr>
 <h2 id="fingerprint-authentication">Fingerprint Authentication</h2>
 <p><strong>Package:</strong> <code>fprintd</code> (pulls in <code>libfprint</code> as a dependency) — pre-installed via <code>shani-peripherals</code></p>

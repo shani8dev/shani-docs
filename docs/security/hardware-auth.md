@@ -6,7 +6,7 @@ updated: 2026-08-28
 
 # Hardware Authentication
 
-Shani OS ships with hardware authentication plumbing out of the box — fingerprint readers, FIDO2/U2F tokens, smart cards (PIV), and NFC tokens all work without a driver download, via packages pulled in by the `shani-peripherals` package. The CLI utilities for YubiKey management, PC/SC diagnostics, and TOTP/HOTP codes are not part of the default image — because Shanios is immutable, they cannot be installed with `pacman` at runtime. Install them via Nix (`nix-env -iA nixpkgs.<pkg>`) or run them inside a Distrobox container — see the callout in each section below.
+Shan OS ships the hardware authentication *plumbing* out of the box — the readers are detected with no driver download, via packages pulled in by the `shani-peripherals` package. Being detected is not the same as being able to log in, and the difference is per device: **smartcards (PIV) can log in** (`gdm` and `kscreenlocker` ship PAM services that use them), **fingerprints can log in on GNOME only** (see [Fingerprint Login](fingerprint-login)), and **FIDO2/U2F security keys and Kerberos cannot log in yet** — `pam_u2f` and `pam_krb5` are installed but no PAM stack on any edition references them, so the steps in each section are still required. The CLI utilities for YubiKey management, PC/SC diagnostics, and TOTP/HOTP codes are not part of the default image — because Shanios is immutable, they cannot be installed with `pacman` at runtime. Install them via Nix (`nix-env -iA nixpkgs.<pkg>`) or run them inside a Distrobox container — see the callout in each section below.
 
 ---
 
