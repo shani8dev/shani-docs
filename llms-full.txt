@@ -12908,7 +12908,7 @@ Shan OS ships the hardware authentication plumbing out of the box — the reader
 
 # Hardware Authentication
 
-Shan OS ships the hardware authentication *plumbing* out of the box — the readers are detected with no driver download, via packages pulled in by the `shani-peripherals` package. Being detected is not the same as being able to log in, and the difference is per device: **smartcards (PIV) can log in** (`gdm` and `kscreenlocker` ship PAM services that use them), **fingerprints can log in on GNOME only** (see [Fingerprint Login](fingerprint-login)), and **FIDO2/U2F security keys and Kerberos cannot log in yet** — `pam_u2f` and `pam_krb5` are installed but no PAM stack on any edition references them, so the steps in each section are still required. The CLI utilities for YubiKey management, PC/SC diagnostics, and TOTP/HOTP codes are not part of the default image — because Shanios is immutable, they cannot be installed with `pacman` at runtime. Install them via Nix (`nix-env -iA nixpkgs.<pkg>`) or run them inside a Distrobox container — see the callout in each section below.
+Shan OS ships the hardware authentication *plumbing* out of the box — the readers are detected with no driver download, via packages pulled in by the `shani-peripherals` package. Being detected is not the same as being able to log in, and the difference is per device: **smartcards (PIV) can log in** (`gdm` and `kscreenlocker` ship PAM services that use them), **fingerprints can log in on GNOME only** (see [Fingerprint Login](fingerprint-login)), and **FIDO2/U2F security keys can log in** — Shanios ships its own `pam.d/system-auth` that adds `pam_u2f`, which the stock stacks never did, so a security key works at any graphical login and for `sudo` without editing PAM by hand. **Kerberos still cannot**, as `pam_krb5` remains unwired. The CLI utilities for YubiKey management, PC/SC diagnostics, and TOTP/HOTP codes are not part of the default image — because Shanios is immutable, they cannot be installed with `pacman` at runtime. Install them via Nix (`nix-env -iA nixpkgs.<pkg>`) or run them inside a Distrobox container — see the callout in each section below.
 
 ---
 
@@ -12956,7 +12956,7 @@ nix-env -iA nixpkgs.yubikey-manager
 
 These CLI tools can also run inside a Distrobox container if you prefer not to install them on the host.
 
-### Setting Up PAM U2F (sudo / login)
+### Using a FIDO2/U2F Key
 
 > ⚠️ **Before editing PAM:** keep an existing root shell open when editing PAM files, and test `sudo` in a second terminal before logging out. A broken PAM stack can lock you out of `sudo` and login entirely.
 
