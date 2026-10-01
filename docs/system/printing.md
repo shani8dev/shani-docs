@@ -81,7 +81,7 @@ New users are automatically added to the `cups`, `lp`, and `scanner` groups at c
 |-------|----------|
 | Printer not discovered | Confirm it's on the same network/subnet; check `cups-browsed` is running (`systemctl status cups-browsed`); check the CUPS web UI at `localhost:631` |
 | USB printer not detected | Check `lsusb`; confirm `ipp-usb.service` is running for AirPrint-capable USB printers |
-| Wrong or missing driver | Check the CUPS web UI's driver search — the Foomatic/Gutenprint databases cover most non-vendor-specific printers; some vendor drivers (e.g. Epson) are not pre-installed and must be added manually |
+| Wrong or missing driver | Check the CUPS web UI's driver search — the Foomatic/Gutenprint databases cover most non-vendor-specific printers; Epson ESC/P and ESC/P2 **are** pre-installed (`epson-inkjet-printer-escpr`/`-escpr2` in `shani-printer`); other vendors' drivers may not be and must be added manually |
 | Print jobs stuck in queue | `cupsenable <printer>` if paused; check `journalctl -u cups` for filter errors |
 | Scanner not detected | Run `scanimage -L`; for network scanners, confirm `sane-airscan` supports the device's protocol (eSCL/AirScan or WSD) |
 | Can't manage printers without a password prompt every time | This is expected — `cups-pk-helper` gates printer administration via Polkit; see [Permissions & Authorization](../security/permissions.md) |

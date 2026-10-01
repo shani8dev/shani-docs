@@ -418,7 +418,7 @@ sudo mount -a
 # Verify a specific entry
 sudo mount /mnt/backup</code></pre>
 <blockquote>💡 Always use UUID (<code>blkid</code>) rather than device names like <code>/dev/sda1</code> — device names shift when you add or remove drives.</blockquote>
-<p>Some Shani OS paths are made persistent via bind mounts instead of fstab entries — e.g. <code>/var/lib/samba/usershare</code> is bind-mounted from <code>/data/varlib/samba</code> (on the <code>@data</code> subvolume), so Samba usershare state survives blue/green slot switches without a manual fstab line.</p>
+<p>Some Shani OS paths are made persistent via bind mounts instead of fstab entries — e.g. <code>/var/lib/samba</code> is bind-mounted from <code>/data/varlib/samba</code> (the <code>usershare</code> directory itself is created inside it by <code>sambashare.conf</code> via tmpfiles, not by the mount) (on the <code>@data</code> subvolume), so Samba usershare state survives blue/green slot switches without a manual fstab line.</p>
 <hr>
 <h2 id="disk-usage">Disk Usage</h2>
 <pre><code class="language-bash"># Free space on all mounted filesystems

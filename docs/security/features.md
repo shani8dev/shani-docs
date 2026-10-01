@@ -23,7 +23,7 @@ Shanios implements defence-in-depth security across every layer — from firmwar
 
 ## Immutability as a Security Primitive
 
-The root filesystem is mounted read-only at the VFS layer — enforced by the kernel, not by DAC/MAC policy. A process running as root cannot write to `/usr/bin`, `/lib`, `/etc/systemd/system`, or any other system path.
+The root filesystem is mounted read-only at the VFS layer — enforced by the kernel, not by DAC/MAC policy. A process running as root cannot write to `/usr/bin` or `/lib`. `/etc` is the exception: it is a writable OverlayFS (see below), so root *can* write there — `gen-efi` writes `/etc/kernel/install_cmdline_<slot>` and `/etc/crypttab` on every deploy.
 
 Most persistent malware works by writing a backdoor to a system path that survives reboot. On Shanios, there is nowhere to write it. The system that passed build-time GPG verification is the system that runs — byte for byte — until the next deliberate `shani-deploy` update. An attacker who compromises a running session has a session, not persistence.
 

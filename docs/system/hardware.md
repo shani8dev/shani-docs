@@ -184,7 +184,7 @@ intel_gpu_top                   # requires intel-gpu-tools (not pre-installed)
 
 # Switcheroo (multi-GPU / hybrid graphics)
 switcherooctl list
-switcherooctl switch             # switch active GPU
+switcherooctl list               # the GPUs, with the DRI_PRIME each answers to
 ```
 
 ---

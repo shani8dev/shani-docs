@@ -1893,7 +1893,7 @@
     "slug": "system/permissions",
     "title": "ch* Commands (chmod, chown, chattr, ACLs)",
     "section": "System",
-    "description": "The ch* family covers the core \"change\" utilities — tools that modify permissions, ownership, file attributes, and user account properties. All are pre-ins…",
+    "description": "The ch family covers the core \"change\" utilities — tools that modify permissions, ownership, file attributes, and user account properties. All are pre-inst…",
     "updated": "2026-08-28",
     "order": 999,
     "draft": false,

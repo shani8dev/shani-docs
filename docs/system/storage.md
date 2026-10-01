@@ -288,7 +288,7 @@ sudo mount /mnt/backup
 
 > 💡 Always use UUID (`blkid`) rather than device names like `/dev/sda1` — device names shift when you add or remove drives.
 
-Some Shani OS paths are made persistent via bind mounts instead of fstab entries — e.g. `/var/lib/samba/usershare` is bind-mounted from `/data/varlib/samba` (on the `@data` subvolume), so Samba usershare state survives blue/green slot switches without a manual fstab line.
+Some Shani OS paths are made persistent via bind mounts instead of fstab entries — e.g. `/var/lib/samba` is bind-mounted from `/data/varlib/samba` (the `usershare` directory itself is created inside it by `sambashare.conf` via tmpfiles, not by the mount) (on the `@data` subvolume), so Samba usershare state survives blue/green slot switches without a manual fstab line.
 
 ---
 

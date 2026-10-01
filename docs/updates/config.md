@@ -245,7 +245,7 @@ faillock --user alice
 sudo faillock --user alice --reset
 ```
 
-Password complexity requirements (minimum length, character classes) are enforced via `pam_pwquality`, configured in `/etc/security/pwquality.conf` — see [Permissions](../system/permissions.md) for the `pwscore`/`pwmake` tools that check against the same policy.
+Password complexity is configured in `/etc/security/pwquality.conf` but **not enforced**: `pam_pwquality.so` ships as a library and is deliberately not wired into `/etc/pam.d/system-auth`, so nothing checks a password when it is set. The `pwscore`/`pwmake` tools rate against that policy — see [Permissions](../system/permissions.md) for the `pwscore`/`pwmake` tools that check against the same policy.
 
 ### sudo
 

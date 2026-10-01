@@ -246,7 +246,7 @@ sudo systemctl restart systemd-journald
 journalctl --disk-usage
 ls /var/log/journal/</code></pre>
 <p>Once <code>/var/log/journal/</code> exists, journald automatically writes there instead of <code>/run/log/journal/</code>. Logs survive reboots and you can query previous boots with <code>journalctl -b -1</code>, <code>-b -2</code>, etc.</p>
-<blockquote>💡 On Shani OS, <code>/var/log/journal/</code> persists across OS updates because <code>/var</code> is a separate data partition. You do not need to re-enable persistent logging after an update.</blockquote>
+<blockquote>💡 On Shani OS, <code>/var/log/journal/</code> persists across OS updates because a <strong>dedicated <code>@log</code> Btrfs subvolume</strong> is mounted over the tmpfs at that path. (<code>/var</code> itself is tmpfs, cleared every reboot — so this is the exception, not the rule.) You do not need to re-enable persistent logging after an update.</blockquote>
 <hr>
 <h2 id="journald-configuration">journald Configuration</h2>
 <p>The main config file is <code>/etc/systemd/journald.conf</code>. Changes here are captured by the <code>/etc</code> overlay.</p>

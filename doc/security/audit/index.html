@@ -313,7 +313,7 @@ sudo auditctl -l
 # Delete all runtime rules
 sudo auditctl -D</code></pre>
 <h3 id="persistent-rules">Persistent Rules</h3>
-<blockquote>⚠️ <strong><code>shani-health</code> counts the wrong directory.</strong> It reports packaged rule files by looking in <code>/usr/lib/audit/rules.d/</code>, but <code>shani-settings</code> ships <code>10-shani-base.rules</code> to <strong><code>/etc/audit/rules.d/</code></strong>. So its "N packaged rule file(s)" count reads 0 on a Shanios machine that does have one. Read the rules from <code>/etc/audit/rules.d/</code> when you want the truth; Cassini's Audit page reads the correct path.</blockquote>
+<blockquote>⚠️ <strong><code>shani-health</code> counts the wrong directory.</strong> It reports packaged rule files by looking in <code>/usr/lib/audit/rules.d/</code>, but <code>shani-settings</code> ships <code>10-shani-base.rules</code> to <strong><code>/etc/audit/rules.d/</code></strong>. So its "N packaged rule file(s)" count reads 0 on a Shanios machine that does have one. Read the rules from <code>/etc/audit/rules.d/</code> when you want the truth. Cassini's Audit page does not read a rules path at all — it reports auditd's own state via <code>systemctl</code> and searches events via <code>ausearch</code>, deliberately, so a second parser of the rules cannot start disagreeing with whoever wrote them.</blockquote>
 <p>Create a separate file in <code>/etc/audit/rules.d/</code> — use a numeric prefix after <code>10-</code> (e.g. <code>20-</code>) so it loads after, and doesn't collide with, the shipped <code>10-shani-base.rules</code>:</p>
 <p>Identity files, sudoers, and privilege escalation are already watched by <code>10-shani-base.rules</code> (above) — add rules for things it doesn't cover, such as SSH config or a specific user's activity:</p>
 <pre><code class="language-bash">sudo tee /etc/audit/rules.d/20-shani-custom.rules &lt;&lt; 'EOF'
@@ -330,7 +330,7 @@ sudo augenrules --load</code></pre>
 <h2 id="log-rotation">Log Rotation</h2>
 <pre><code class="language-bash"># /etc/audit/auditd.conf — key settings
 num_logs = 5          # number of rotated log files to keep
-max_log_file = 50     # MB per log file before rotation
+max_log_file = 8      # MB per log file before rotation (the shipped value)
 max_log_file_action = ROTATE</code></pre>
 <p>After changing <code>auditd.conf</code>:</p>
 <pre><code class="language-bash">sudo systemctl restart auditd</code></pre>
@@ -348,7 +348,7 @@ sudo grep &quot;apparmor.*DENIED&quot; /var/log/audit/audit.log</code></pre>
 <ul>
 <li><a href="/doc/security/apparmor/">AppArmor</a> — LSM whose denials appear in the audit log</li>
 <li><a href="/doc/security/features/">Security Features</a> — IMA/EVM also uses kernel audit infrastructure</li>
-<li><a href="/doc/updates/shani-health/">shani-health Reference</a> — <code>shani-health --security</code> reports whether auditd is running and how many rule files are loaded</li>
+<li><a href="/doc/updates/shani-health/">shani-health Reference</a> — <code>shani-health</code> reports whether auditd is running and how many rule files are loaded. Note the <strong>mode</strong>: the auditd row comes from <code>_section_monitoring</code>, which <code>--security</code> does not call — use plain <code>shani-health</code> or <code>--packages</code>, or you will see no auditd row at all</li>
 </ul></div>
     </div>
 

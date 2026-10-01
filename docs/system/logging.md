@@ -45,7 +45,7 @@ ls /var/log/journal/
 
 Once `/var/log/journal/` exists, journald automatically writes there instead of `/run/log/journal/`. Logs survive reboots and you can query previous boots with `journalctl -b -1`, `-b -2`, etc.
 
-> 💡 On Shani OS, `/var/log/journal/` persists across OS updates because `/var` is a separate data partition. You do not need to re-enable persistent logging after an update.
+> 💡 On Shani OS, `/var/log/journal/` persists across OS updates because a **dedicated `@log` Btrfs subvolume** is mounted over the tmpfs at that path. (`/var` itself is tmpfs, cleared every reboot — so this is the exception, not the rule.) You do not need to re-enable persistent logging after an update.
 
 ---
 

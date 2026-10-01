@@ -8,7 +8,11 @@ updated: 2026-08-28
 
 User accounts on Shani OS follow standard Linux conventions — accounts are stored in `/etc/passwd`, `/etc/shadow`, and `/etc/group`, which live in the `/etc` overlay and persist across all OS updates and rollbacks.
 
-The key difference from a traditional distro is that **you should use `adduser` (not `useradd`) for interactive accounts**. The `adduser` wrapper on Shani OS reads `/etc/shani-extra-groups` and automatically adds new users to all the groups they need (wheel, video, input, kvm, etc.) in one step. See [User Provisioning](../updates/user-setup.md) for the full group reference.
+The key difference from a traditional distro is that **you should use `adduser` (not `useradd`) for interactive accounts**. The `adduser` wrapper on Shani OS reads `/etc/shani-extra-groups` and adds a new user to all the groups in it — `sys, cups, lp, scanner, realtime, input, video, kvm, libvirt, lxd, nixbld, sambashare` — in one step.
+
+> ⚠️ **`wheel` is deliberately *not* in that list**, so `sudo adduser alice` gives you an account with **no sudo**. `wheel` is installer-specific and left out on purpose: `shani-user-setup` must not hand sudo to users created after install. Add it yourself with `sudo usermod -aG wheel alice`.
+
+> ⚠️ **The wrapper does not prompt for a password either** — it is a thin argument merger onto `useradd`. The Zsh shell comes from `SHELL=/bin/zsh` in `/etc/default/useradd`, not from the wrapper. So set one with `sudo passwd alice` afterwards, or the account has no password at all.
 
 ---
 
@@ -16,11 +20,11 @@ The key difference from a traditional distro is that **you should use `adduser` 
 
 | Command | Use when |
 |---------|----------|
-| `sudo adduser <name>` | Creating a human user — reads `/etc/shani-extra-groups`, sets Zsh shell, prompts for password |
+| `sudo adduser <name>` | Creating a human user — reads `/etc/shani-extra-groups`, gets the Zsh shell from `/etc/default/useradd`. **Adds no `wheel` and sets no password** — do both by hand |
 | `sudo useradd` | Scripted/service account creation where you need fine-grained control |
 
 ```bash
-# Preferred: creates account, sets groups, prompts for password interactively
+# Preferred: creates the account and sets its groups. No password, no wheel - see the warnings above
 sudo adduser alice
 
 # After adding, trigger shani-user-setup to provision Flatpak/Nix/subuid ranges
@@ -35,7 +39,7 @@ sudo touch /data/user-setup-needed
 
 ```bash
 sudo adduser alice
-# Prompts for password and GECOS info
+# GECOS info only - the wrapper never sets a password
 # Automatically adds to groups from /etc/shani-extra-groups
 ```
 

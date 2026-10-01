@@ -130,7 +130,7 @@ sudo auditctl -D
 
 ### Persistent Rules
 
-> ⚠️ **`shani-health` counts the wrong directory.** It reports packaged rule files by looking in `/usr/lib/audit/rules.d/`, but `shani-settings` ships `10-shani-base.rules` to **`/etc/audit/rules.d/`**. So its "N packaged rule file(s)" count reads 0 on a Shanios machine that does have one. Read the rules from `/etc/audit/rules.d/` when you want the truth; Cassini's Audit page reads the correct path.
+> ⚠️ **`shani-health` counts the wrong directory.** It reports packaged rule files by looking in `/usr/lib/audit/rules.d/`, but `shani-settings` ships `10-shani-base.rules` to **`/etc/audit/rules.d/`**. So its "N packaged rule file(s)" count reads 0 on a Shanios machine that does have one. Read the rules from `/etc/audit/rules.d/` when you want the truth. Cassini's Audit page does not read a rules path at all — it reports auditd's own state via `systemctl` and searches events via `ausearch`, deliberately, so a second parser of the rules cannot start disagreeing with whoever wrote them.
 
 Create a separate file in `/etc/audit/rules.d/` — use a numeric prefix after `10-` (e.g. `20-`) so it loads after, and doesn't collide with, the shipped `10-shani-base.rules`:
 
@@ -156,7 +156,7 @@ sudo augenrules --load
 ```bash
 # /etc/audit/auditd.conf — key settings
 num_logs = 5          # number of rotated log files to keep
-max_log_file = 50     # MB per log file before rotation
+max_log_file = 8      # MB per log file before rotation (the shipped value)
 max_log_file_action = ROTATE
 ```
 
@@ -195,4 +195,4 @@ sudo grep "apparmor.*DENIED" /var/log/audit/audit.log
 
 - [AppArmor](apparmor) — LSM whose denials appear in the audit log
 - [Security Features](features) — IMA/EVM also uses kernel audit infrastructure
-- [shani-health Reference](../updates/shani-health.md) — `shani-health --security` reports whether auditd is running and how many rule files are loaded
+- [shani-health Reference](../updates/shani-health.md) — `shani-health` reports whether auditd is running and how many rule files are loaded. Note the **mode**: the auditd row comes from `_section_monitoring`, which `--security` does not call — use plain `shani-health` or `--packages`, or you will see no auditd row at all

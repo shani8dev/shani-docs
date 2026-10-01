@@ -43,7 +43,7 @@ shani-health --network          # NetworkManager, DNS, VPN, firewall
 shani-health --hardware         # CPU, GPU, disk, SMART, battery, firmware
 shani-health --packages         # Flatpak, Nix, containers, virtualisation
 shani-health --verify           # Deep integrity check (Btrfs scrub)
-shani-health --verify --json    # Machine-readable output (only with --verify)
+shani-health --verify --json    # Machine-readable output (--json works with most modes, not just --verify)
 shani-health --journal err      # Journal errors and above
 shani-health --history 20       # Last 20 deploy/rollback events
 shani-health --storage-info     # Btrfs subvolume sizes, compression, snapshots
@@ -60,7 +60,7 @@ sudo shani-reset --dry-run      # Preview what a factory reset would wipe
 sudo shani-reset                # Interactive reset (prompts before any action)
 ```
 
-Boot-failure fallback is automatic: if the freshly deployed slot fails to boot, the bootloader falls back to the previous slot on its own. You can also pick the previous slot manually at power-on via the systemd-boot menu.
+Boot-failure fallback is automatic, but **it is not the bootloader doing it**: `shani-auto-rollback.timer` fires 1 and 16 minutes after boot and calls `shani-deploy --rollback`, driven by the `boot_in_progress`/`boot_failure` marker pair that `mark-boot-success.service` and `check-boot-failure.service` maintain. You can also pick the previous slot manually at power-on via the systemd-boot menu.
 
 ```text
 power on -> systemd-boot menu -> select previous slot -> boot -> sudo shani-deploy -r

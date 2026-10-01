@@ -246,14 +246,15 @@ pkcheck --action-id org.freedesktop.packagekit.package-install --process $ --ena
 groups
 id -nG</code></pre>
 <h3 id="verifying-tier-assignments">Verifying Tier Assignments</h3>
-<table><thead><tr><th>Action</th><th>Tier</th><th>Auth Required</th></tr></thead><tbody><tr><td>Install Flatpak app</td><td>1</td><td><code>AUTH_SELF</code> (your password)</td></tr><tr><td>Mount removable media</td><td>1</td><td>Passwordless</td></tr><tr><td>Install Snap package</td><td>1</td><td><code>AUTH_SELF</code> (your password)</td></tr><tr><td>Firmware update via fwupd</td><td>1</td><td><code>AUTH_SELF</code> (your password)</td></tr><tr><td>Format a disk</td><td>2</td><td><code>AUTH_ADMIN</code> (admin credential)</td></tr><tr><td>Change hostname</td><td>2</td><td><code>AUTH_SELF</code> but requires <code>wheel</code></td></tr><tr><td>Reinstall kernel/initramfs</td><td>2</td><td><code>AUTH_ADMIN</code></td></tr></tbody></table>
+<table><thead><tr><th>Action</th><th>Tier</th><th>Auth Required</th></tr></thead><tbody><tr><td>Install Flatpak app</td><td>1</td><td><code>AUTH_SELF</code> (your password)</td></tr><tr><td>Mount removable media</td><td>1</td><td>Passwordless</td></tr><tr><td>Install Snap package</td><td>1</td><td><code>AUTH_SELF</code> (your password)</td></tr><tr><td>Firmware update via fwupd</td><td>1</td><td><code>AUTH_SELF</code> (your password)</td></tr><tr><td>Format a disk</td><td>2</td><td><code>AUTH_SELF</code> (own password) — you must also be in <code>wheel</code></td></tr><tr><td>Change hostname</td><td>2</td><td><code>AUTH_SELF</code> but requires <code>wheel</code></td></tr><tr><td>Reinstall a package (incl. kernel/initramfs)</td><td>2</td><td><code>AUTH_SELF</code>, and <strong>no <code>wheel</code> required</strong> — the PackageKit rule lets any local user install packages</td></tr></tbody></table>
 <h2 id="how-it-works-at-runtime">How It Works at Runtime</h2>
 <p>When you click "Install" in GNOME Software or KDE Discover:</p>
 <ol>
 <li>The package manager requests a Polkit authorization check</li>
 <li>Polkit evaluates <code>99-shani.rules</code> based on the action ID</li>
 <li>If Tier 1: prompt appears asking for <strong>your</strong> password — success grants access</li>
-<li>If Tier 2 + you're in <code>wheel</code>: prompt appears asking for <strong>admin</strong> credential</li>
+<li>If Tier 2 + you're in <code>wheel</code>: prompt appears asking for <strong>your own password</strong></li>
+<p>(<code>AUTH_SELF</code>). Only three rules in the file ask for an admin credential: <code>shani-reset</code>, secure-erase, and user administration.</p>
 <li>If Tier 2 + you're NOT in <code>wheel</code>: access is denied — no prompt appears</li>
 </ol>
 <h2 id="troubleshooting">Troubleshooting</h2>

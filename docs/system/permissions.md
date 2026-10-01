@@ -183,7 +183,9 @@ sudo chage -l alice
 
 ### Password Strength — pwscore / pwmake
 
-`libpwquality` (pre-installed) checks passwords against the same complexity policy PAM enforces at password-change time (`/etc/security/pwquality.conf`) — useful for testing a password before setting it, or generating a random one that already passes.
+`libpwquality` (pre-installed) scores a password against `/etc/security/pwquality.conf` — useful for testing one before setting it, or generating a random one that already passes.
+
+**That policy is not actually enforced.** `pam_pwquality.so` is present as a library and is deliberately **not** wired into `/etc/pam.d/system-auth`, so nothing checks a password when it is set; these tools rate against a policy that does not apply. See [Permissions](../security/permissions.md) for why (there is no `/etc/pam.d/password` on Arch, and `system-auth` carries all four stacks with no `@include` hook).
 
 ```bash
 # Score a password against the configured policy (0-100, or an error if it fails)

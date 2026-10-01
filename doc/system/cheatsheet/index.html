@@ -242,7 +242,7 @@ shani-health --network          # NetworkManager, DNS, VPN, firewall
 shani-health --hardware         # CPU, GPU, disk, SMART, battery, firmware
 shani-health --packages         # Flatpak, Nix, containers, virtualisation
 shani-health --verify           # Deep integrity check (Btrfs scrub)
-shani-health --verify --json    # Machine-readable output (only with --verify)
+shani-health --verify --json    # Machine-readable output (--json works with most modes, not just --verify)
 shani-health --journal err      # Journal errors and above
 shani-health --history 20       # Last 20 deploy/rollback events
 shani-health --storage-info     # Btrfs subvolume sizes, compression, snapshots
@@ -253,7 +253,7 @@ shani-health --clear-boot-failure   # Clear stale boot failure marker</code></pr
 <pre><code class="language-bash">sudo shani-deploy -r            # Roll back to the previous system, then reboot (nothing is deleted)
 sudo shani-reset --dry-run      # Preview what a factory reset would wipe
 sudo shani-reset                # Interactive reset (prompts before any action)</code></pre>
-<p>Boot-failure fallback is automatic: if the freshly deployed slot fails to boot, the bootloader falls back to the previous slot on its own. You can also pick the previous slot manually at power-on via the systemd-boot menu.</p>
+<p>Boot-failure fallback is automatic, but <strong>it is not the bootloader doing it</strong>: <code>shani-auto-rollback.timer</code> fires 1 and 16 minutes after boot and calls <code>shani-deploy --rollback</code>, driven by the <code>boot_in_progress</code>/<code>boot_failure</code> marker pair that <code>mark-boot-success.service</code> and <code>check-boot-failure.service</code> maintain. You can also pick the previous slot manually at power-on via the systemd-boot menu.</p>
 <pre><code class="language-text">power on -&gt; systemd-boot menu -&gt; select previous slot -&gt; boot -&gt; sudo shani-deploy -r</code></pre>
 <h2 id="secure-boot-tpm2">Secure Boot / TPM2</h2>
 <pre><code class="language-bash">sudo gen-efi configure blue     # Build + sign UKI for the @blue slot (must match booted slot)

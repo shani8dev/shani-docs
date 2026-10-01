@@ -374,7 +374,7 @@ faillock --user alice
 
 # Manually clear a lockout
 sudo faillock --user alice --reset</code></pre>
-<p>Password complexity requirements (minimum length, character classes) are enforced via <code>pam_pwquality</code>, configured in <code>/etc/security/pwquality.conf</code> — see <a href="/doc/system/permissions/">Permissions</a> for the <code>pwscore</code>/<code>pwmake</code> tools that check against the same policy.</p>
+<p>Password complexity is configured in <code>/etc/security/pwquality.conf</code> but <strong>not enforced</strong>: <code>pam_pwquality.so</code> ships as a library and is deliberately not wired into <code>/etc/pam.d/system-auth</code>, so nothing checks a password when it is set. The <code>pwscore</code>/<code>pwmake</code> tools rate against that policy — see <a href="/doc/system/permissions/">Permissions</a> for the <code>pwscore</code>/<code>pwmake</code> tools that check against the same policy.</p>
 <h3 id="sudo">sudo</h3>
 <pre><code class="language-bash">sudo visudo
 

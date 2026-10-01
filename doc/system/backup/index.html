@@ -219,7 +219,7 @@
         </div>
       </div>
       <div class="prose"><p>Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. <strong>User data and container state must be backed up independently</strong> to protect against drive failure, accidental deletion, or corruption.</p>
-<p>The recommended backup stack is <strong>restic</strong> (encrypted, incremental, deduplicated) combined with <strong>rclone</strong> (cloud storage transport). Both are pre-installed. restic configuration persists in <code>/data/varlib/restic</code> and rclone configuration in <code>/data/varlib/rclone</code> — both survive OS updates.</p>
+<p>The recommended backup stack is <strong>restic</strong> (encrypted, incremental, deduplicated) combined with <strong>rclone</strong> (cloud storage transport). Both are pre-installed. restic's state persists in <code>/data/varlib/restic</code> and rclone's in <code>/data/varlib/rclone</code> — but those hold <strong>program state, not configuration</strong>: your restic config lives in <code>~/.config/restic</code> and rclone's in <code>~/.config/rclone</code> — both survive OS updates.</p>
 <p><strong>GUI alternative:</strong> if you'd rather not use the terminal, <strong>Deja Dup</strong> (pre-installed on GNOME) and <strong>KBackup</strong> (pre-installed on KDE Plasma) both provide simple scheduled backups to a local folder, external drive, or cloud storage through a graphical wizard. They're less flexible than restic/rclone (no client-side dedup, more limited destination support) but require no configuration file editing.</p>
 <hr>
 <h2 id="snapshots-vs-backups-the-critical-distinction">Snapshots vs Backups: The Critical Distinction</h2>

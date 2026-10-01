@@ -58,9 +58,9 @@ id -nG
 | Mount removable media | 1 | Passwordless |
 | Install Snap package | 1 | `AUTH_SELF` (your password) |
 | Firmware update via fwupd | 1 | `AUTH_SELF` (your password) |
-| Format a disk | 2 | `AUTH_ADMIN` (admin credential) |
+| Format a disk | 2 | `AUTH_SELF` (own password) — you must also be in `wheel` |
 | Change hostname | 2 | `AUTH_SELF` but requires `wheel` |
-| Reinstall kernel/initramfs | 2 | `AUTH_ADMIN` |
+| Reinstall a package (incl. kernel/initramfs) | 2 | `AUTH_SELF`, and **no `wheel` required** — the PackageKit rule lets any local user install packages |
 
 ## How It Works at Runtime
 
@@ -69,7 +69,9 @@ When you click "Install" in GNOME Software or KDE Discover:
 1. The package manager requests a Polkit authorization check
 2. Polkit evaluates `99-shani.rules` based on the action ID
 3. If Tier 1: prompt appears asking for **your** password — success grants access
-4. If Tier 2 + you're in `wheel`: prompt appears asking for **admin** credential
+4. If Tier 2 + you're in `wheel`: prompt appears asking for **your own password**
+   (`AUTH_SELF`). Only three rules in the file ask for an admin credential:
+   `shani-reset`, secure-erase, and user administration.
 5. If Tier 2 + you're NOT in `wheel`: access is denied — no prompt appears
 
 ## Troubleshooting

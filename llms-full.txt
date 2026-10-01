@@ -11913,7 +11913,7 @@ sudo auditctl -D
 
 ### Persistent Rules
 
-> ⚠️ **`shani-health` counts the wrong directory.** It reports packaged rule files by looking in `/usr/lib/audit/rules.d/`, but `shani-settings` ships `10-shani-base.rules` to **`/etc/audit/rules.d/`**. So its "N packaged rule file(s)" count reads 0 on a Shanios machine that does have one. Read the rules from `/etc/audit/rules.d/` when you want the truth; Cassini's Audit page reads the correct path.
+> ⚠️ **`shani-health` counts the wrong directory.** It reports packaged rule files by looking in `/usr/lib/audit/rules.d/`, but `shani-settings` ships `10-shani-base.rules` to **`/etc/audit/rules.d/`**. So its "N packaged rule file(s)" count reads 0 on a Shanios machine that does have one. Read the rules from `/etc/audit/rules.d/` when you want the truth. Cassini's Audit page does not read a rules path at all — it reports auditd's own state via `systemctl` and searches events via `ausearch`, deliberately, so a second parser of the rules cannot start disagreeing with whoever wrote them.
 
 Create a separate file in `/etc/audit/rules.d/` — use a numeric prefix after `10-` (e.g. `20-`) so it loads after, and doesn't collide with, the shipped `10-shani-base.rules`:
 
@@ -11939,7 +11939,7 @@ sudo augenrules --load
 ```bash
 # /etc/audit/auditd.conf — key settings
 num_logs = 5          # number of rotated log files to keep
-max_log_file = 50     # MB per log file before rotation
+max_log_file = 8      # MB per log file before rotation (the shipped value)
 max_log_file_action = ROTATE
 ```
 
@@ -11978,7 +11978,7 @@ sudo grep "apparmor.*DENIED" /var/log/audit/audit.log
 
 - [AppArmor](apparmor) — LSM whose denials appear in the audit log
 - [Security Features](features) — IMA/EVM also uses kernel audit infrastructure
-- [shani-health Reference](../updates/shani-health.md) — `shani-health --security` reports whether auditd is running and how many rule files are loaded
+- [shani-health Reference](../updates/shani-health.md) — `shani-health` reports whether auditd is running and how many rule files are loaded. Note the **mode**: the auditd row comes from `_section_monitoring`, which `--security` does not call — use plain `shani-health` or `--packages`, or you will see no auditd row at all
 
 ---
 
@@ -12008,7 +12008,7 @@ Shanios implements defence-in-depth security across every layer — from firmwar
 
 ## Immutability as a Security Primitive
 
-The root filesystem is mounted read-only at the VFS layer — enforced by the kernel, not by DAC/MAC policy. A process running as root cannot write to `/usr/bin`, `/lib`, `/etc/systemd/system`, or any other system path.
+The root filesystem is mounted read-only at the VFS layer — enforced by the kernel, not by DAC/MAC policy. A process running as root cannot write to `/usr/bin` or `/lib`. `/etc` is the exception: it is a writable OverlayFS (see below), so root *can* write there — `gen-efi` writes `/etc/kernel/install_cmdline_<slot>` and `/etc/crypttab` on every deploy.
 
 Most persistent malware works by writing a backdoor to a system path that survives reboot. On Shanios, there is nowhere to write it. The system that passed build-time GPG verification is the system that runs — byte for byte — until the next deliberate `shani-deploy` update. An attacker who compromises a running session has a session, not persistence.
 
@@ -13623,9 +13623,9 @@ id -nG
 | Mount removable media | 1 | Passwordless |
 | Install Snap package | 1 | `AUTH_SELF` (your password) |
 | Firmware update via fwupd | 1 | `AUTH_SELF` (your password) |
-| Format a disk | 2 | `AUTH_ADMIN` (admin credential) |
+| Format a disk | 2 | `AUTH_SELF` (own password) — you must also be in `wheel` |
 | Change hostname | 2 | `AUTH_SELF` but requires `wheel` |
-| Reinstall kernel/initramfs | 2 | `AUTH_ADMIN` |
+| Reinstall a package (incl. kernel/initramfs) | 2 | `AUTH_SELF`, and **no `wheel` required** — the PackageKit rule lets any local user install packages |
 
 ## How It Works at Runtime
 
@@ -13634,7 +13634,9 @@ When you click "Install" in GNOME Software or KDE Discover:
 1. The package manager requests a Polkit authorization check
 2. Polkit evaluates `99-shani.rules` based on the action ID
 3. If Tier 1: prompt appears asking for **your** password — success grants access
-4. If Tier 2 + you're in `wheel`: prompt appears asking for **admin** credential
+4. If Tier 2 + you're in `wheel`: prompt appears asking for **your own password**
+   (`AUTH_SELF`). Only three rules in the file ask for an admin credential:
+   `shani-reset`, secure-erase, and user administration.
 5. If Tier 2 + you're NOT in `wheel`: access is denied — no prompt appears
 
 ## Troubleshooting
@@ -55689,7 +55691,7 @@ Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. User 
 
 Shanios protects the OS layer via atomic updates and Btrfs slot snapshots. **User data and container state must be backed up independently** to protect against drive failure, accidental deletion, or corruption.
 
-The recommended backup stack is **restic** (encrypted, incremental, deduplicated) combined with **rclone** (cloud storage transport). Both are pre-installed. restic configuration persists in `/data/varlib/restic` and rclone configuration in `/data/varlib/rclone` — both survive OS updates.
+The recommended backup stack is **restic** (encrypted, incremental, deduplicated) combined with **rclone** (cloud storage transport). Both are pre-installed. restic's state persists in `/data/varlib/restic` and rclone's in `/data/varlib/rclone` — but those hold **program state, not configuration**: your restic config lives in `~/.config/restic` and rclone's in `~/.config/rclone` — both survive OS updates.
 
 **GUI alternative:** if you'd rather not use the terminal, **Deja Dup** (pre-installed on GNOME) and **KBackup** (pre-installed on KDE Plasma) both provide simple scheduled backups to a local folder, external drive, or cloud storage through a graphical wizard. They're less flexible than restic/rclone (no client-side dedup, more limited destination support) but require no configuration file editing.
 
@@ -56214,7 +56216,7 @@ shani-health --network          # NetworkManager, DNS, VPN, firewall
 shani-health --hardware         # CPU, GPU, disk, SMART, battery, firmware
 shani-health --packages         # Flatpak, Nix, containers, virtualisation
 shani-health --verify           # Deep integrity check (Btrfs scrub)
-shani-health --verify --json    # Machine-readable output (only with --verify)
+shani-health --verify --json    # Machine-readable output (--json works with most modes, not just --verify)
 shani-health --journal err      # Journal errors and above
 shani-health --history 20       # Last 20 deploy/rollback events
 shani-health --storage-info     # Btrfs subvolume sizes, compression, snapshots
@@ -56231,7 +56233,7 @@ sudo shani-reset --dry-run      # Preview what a factory reset would wipe
 sudo shani-reset                # Interactive reset (prompts before any action)
 ```
 
-Boot-failure fallback is automatic: if the freshly deployed slot fails to boot, the bootloader falls back to the previous slot on its own. You can also pick the previous slot manually at power-on via the systemd-boot menu.
+Boot-failure fallback is automatic, but **it is not the bootloader doing it**: `shani-auto-rollback.timer` fires 1 and 16 minutes after boot and calls `shani-deploy --rollback`, driven by the `boot_in_progress`/`boot_failure` marker pair that `mark-boot-success.service` and `check-boot-failure.service` maintain. You can also pick the previous slot manually at power-on via the systemd-boot menu.
 
 ```text
 power on -> systemd-boot menu -> select previous slot -> boot -> sudo shani-deploy -r
@@ -56910,7 +56912,7 @@ intel_gpu_top                   # requires intel-gpu-tools (not pre-installed)
 
 # Switcheroo (multi-GPU / hybrid graphics)
 switcherooctl list
-switcherooctl switch             # switch active GPU
+switcherooctl list               # the GPUs, with the DRI_PRIME each answers to
 ```
 
 ---
@@ -57410,7 +57412,7 @@ ls /var/log/journal/
 
 Once `/var/log/journal/` exists, journald automatically writes there instead of `/run/log/journal/`. Logs survive reboots and you can query previous boots with `journalctl -b -1`, `-b -2`, etc.
 
-> 💡 On Shani OS, `/var/log/journal/` persists across OS updates because `/var` is a separate data partition. You do not need to re-enable persistent logging after an update.
+> 💡 On Shani OS, `/var/log/journal/` persists across OS updates because a **dedicated `@log` Btrfs subvolume** is mounted over the tmpfs at that path. (`/var` itself is tmpfs, cleared every reboot — so this is the exception, not the rule.) You do not need to re-enable persistent logging after an update.
 
 ---
 
@@ -57708,7 +57710,7 @@ journalctl -p err --no-pager
 URL: https://docs.shani.dev/doc/system/permissions/
 Updated: 2026-08-28
 
-The ch* family covers the core "change" utilities — tools that modify permissions, ownership, file attributes, and user account properties. All are pre-ins…
+The ch family covers the core "change" utilities — tools that modify permissions, ownership, file attributes, and user account properties. All are pre-inst…
 
 # ch* Commands
 
@@ -57889,7 +57891,9 @@ sudo chage -l alice
 
 ### Password Strength — pwscore / pwmake
 
-`libpwquality` (pre-installed) checks passwords against the same complexity policy PAM enforces at password-change time (`/etc/security/pwquality.conf`) — useful for testing a password before setting it, or generating a random one that already passes.
+`libpwquality` (pre-installed) scores a password against `/etc/security/pwquality.conf` — useful for testing one before setting it, or generating a random one that already passes.
+
+**That policy is not actually enforced.** `pam_pwquality.so` is present as a library and is deliberately **not** wired into `/etc/pam.d/system-auth`, so nothing checks a password when it is set; these tools rate against a policy that does not apply. See [Permissions](../security/permissions.md) for why (there is no `/etc/pam.d/password` on Arch, and `system-auth` carries all four stacks with no `@include` hook).
 
 ```bash
 # Score a password against the configured policy (0-100, or an error if it fails)
@@ -58214,7 +58218,7 @@ New users are automatically added to the `cups`, `lp`, and `scanner` groups at c
 |-------|----------|
 | Printer not discovered | Confirm it's on the same network/subnet; check `cups-browsed` is running (`systemctl status cups-browsed`); check the CUPS web UI at `localhost:631` |
 | USB printer not detected | Check `lsusb`; confirm `ipp-usb.service` is running for AirPrint-capable USB printers |
-| Wrong or missing driver | Check the CUPS web UI's driver search — the Foomatic/Gutenprint databases cover most non-vendor-specific printers; some vendor drivers (e.g. Epson) are not pre-installed and must be added manually |
+| Wrong or missing driver | Check the CUPS web UI's driver search — the Foomatic/Gutenprint databases cover most non-vendor-specific printers; Epson ESC/P and ESC/P2 **are** pre-installed (`epson-inkjet-printer-escpr`/`-escpr2` in `shani-printer`); other vendors' drivers may not be and must be added manually |
 | Print jobs stuck in queue | `cupsenable <printer>` if paused; check `journalctl -u cups` for filter errors |
 | Scanner not detected | Run `scanimage -L`; for network scanners, confirm `sane-airscan` supports the device's protocol (eSCL/AirScan or WSD) |
 | Can't manage printers without a password prompt every time | This is expected — `cups-pk-helper` gates printer administration via Polkit; see [Permissions & Authorization](../security/permissions.md) |
@@ -58932,7 +58936,7 @@ sudo mount /mnt/backup
 
 > 💡 Always use UUID (`blkid`) rather than device names like `/dev/sda1` — device names shift when you add or remove drives.
 
-Some Shani OS paths are made persistent via bind mounts instead of fstab entries — e.g. `/var/lib/samba/usershare` is bind-mounted from `/data/varlib/samba` (on the `@data` subvolume), so Samba usershare state survives blue/green slot switches without a manual fstab line.
+Some Shani OS paths are made persistent via bind mounts instead of fstab entries — e.g. `/var/lib/samba` is bind-mounted from `/data/varlib/samba` (the `usershare` directory itself is created inside it by `sambashare.conf` via tmpfiles, not by the mount) (on the `@data` subvolume), so Samba usershare state survives blue/green slot switches without a manual fstab line.
 
 ---
 
@@ -59749,7 +59753,11 @@ User accounts on Shani OS follow standard Linux conventions — accounts are sto
 
 User accounts on Shani OS follow standard Linux conventions — accounts are stored in `/etc/passwd`, `/etc/shadow`, and `/etc/group`, which live in the `/etc` overlay and persist across all OS updates and rollbacks.
 
-The key difference from a traditional distro is that **you should use `adduser` (not `useradd`) for interactive accounts**. The `adduser` wrapper on Shani OS reads `/etc/shani-extra-groups` and automatically adds new users to all the groups they need (wheel, video, input, kvm, etc.) in one step. See [User Provisioning](../updates/user-setup.md) for the full group reference.
+The key difference from a traditional distro is that **you should use `adduser` (not `useradd`) for interactive accounts**. The `adduser` wrapper on Shani OS reads `/etc/shani-extra-groups` and adds a new user to all the groups in it — `sys, cups, lp, scanner, realtime, input, video, kvm, libvirt, lxd, nixbld, sambashare` — in one step.
+
+> ⚠️ **`wheel` is deliberately *not* in that list**, so `sudo adduser alice` gives you an account with **no sudo**. `wheel` is installer-specific and left out on purpose: `shani-user-setup` must not hand sudo to users created after install. Add it yourself with `sudo usermod -aG wheel alice`.
+
+> ⚠️ **The wrapper does not prompt for a password either** — it is a thin argument merger onto `useradd`. The Zsh shell comes from `SHELL=/bin/zsh` in `/etc/default/useradd`, not from the wrapper. So set one with `sudo passwd alice` afterwards, or the account has no password at all.
 
 ---
 
@@ -59757,11 +59765,11 @@ The key difference from a traditional distro is that **you should use `adduser` 
 
 | Command | Use when |
 |---------|----------|
-| `sudo adduser <name>` | Creating a human user — reads `/etc/shani-extra-groups`, sets Zsh shell, prompts for password |
+| `sudo adduser <name>` | Creating a human user — reads `/etc/shani-extra-groups`, gets the Zsh shell from `/etc/default/useradd`. **Adds no `wheel` and sets no password** — do both by hand |
 | `sudo useradd` | Scripted/service account creation where you need fine-grained control |
 
 ```bash
-# Preferred: creates account, sets groups, prompts for password interactively
+# Preferred: creates the account and sets its groups. No password, no wheel - see the warnings above
 sudo adduser alice
 
 # After adding, trigger shani-user-setup to provision Flatpak/Nix/subuid ranges
@@ -59776,7 +59784,7 @@ sudo touch /data/user-setup-needed
 
 ```bash
 sudo adduser alice
-# Prompts for password and GECOS info
+# GECOS info only - the wrapper never sets a password
 # Automatically adds to groups from /etc/shani-extra-groups
 ```
 
@@ -61142,7 +61150,7 @@ faillock --user alice
 sudo faillock --user alice --reset
 ```
 
-Password complexity requirements (minimum length, character classes) are enforced via `pam_pwquality`, configured in `/etc/security/pwquality.conf` — see [Permissions](../system/permissions.md) for the `pwscore`/`pwmake` tools that check against the same policy.
+Password complexity is configured in `/etc/security/pwquality.conf` but **not enforced**: `pam_pwquality.so` ships as a library and is deliberately not wired into `/etc/pam.d/system-auth`, so nothing checks a password when it is set. The `pwscore`/`pwmake` tools rate against that policy — see [Permissions](../system/permissions.md) for the `pwscore`/`pwmake` tools that check against the same policy.
 
 ### sudo
 
