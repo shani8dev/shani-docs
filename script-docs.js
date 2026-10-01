@@ -532,7 +532,12 @@ function renderDoc(slug, raw) {
   RecentlyViewed.add(slug);
   const viewCount = ViewCounter.get(slug);
 
-  let html = buildMarkedHtml(body, slug);
+  // The doc header below renders its own <h1 class="doc-title">: drop the
+  // body's leading "# Heading", exactly as generate-manifest.js's
+  // stripDuplicateLeadingH1 does for the prerendered stub. The stub had one
+  // h1 and the hydrated page two (shani-testbed `web` headings check,
+  // 2026-10-01).
+  let html = buildMarkedHtml(stripDuplicateLeadingH1(body), slug);
 
   const tmpDiv = document.createElement('div');
   tmpDiv.innerHTML = html;
@@ -582,10 +587,10 @@ function renderDoc(slug, raw) {
   content.innerHTML = `
     <div class="doc-header">
       <nav class="doc-breadcrumb" aria-label="Breadcrumb">
-        <a href="#"><i class="fa-solid fa-house" style="font-size:0.7rem"></i></a>
+        <a href="/" aria-label="Docs home" onclick="event.preventDefault();navigate('')"><i class="fa-solid fa-house" style="font-size:0.7rem" aria-hidden="true"></i></a>
         ${breadcrumb.map(b => `<i class="fa-solid fa-chevron-right" style="font-size:0.55rem;color:var(--color-border)"></i><a href="/doc/${esc(b.slug)}/" onclick="event.preventDefault();navigate('${esc(b.slug)}')">${esc(b.title)}</a>`).join('')}
         <i class="fa-solid fa-chevron-right" style="font-size:0.55rem;color:var(--color-border)"></i>
-        <span>${esc(title)}</span>
+        <span aria-current="page">${esc(title)}</span>
       </nav>
       <h1 class="doc-title">${_freshBadge}${esc(title)}</h1>
       <div class="doc-meta">
@@ -889,10 +894,13 @@ const PRISM_LIGHT = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/
 function initTheme() {
   const btn  = $('#theme-btn');
   const icon = $('#theme-icon');
-  const apply = t => {
+  // persist only a choice the visitor MADE: storing the theme on every load
+  // (what this did until 2026-10-01) turned the first visit's OS setting
+  // into a "saved choice", so a later OS light/dark switch was ignored
+  const apply = (t, persist = true) => {
     document.documentElement.setAttribute('data-theme', t);
     State.theme = t;
-    Storage.set(key('theme'), t);
+    if (persist) Storage.set(key('theme'), t);
     // Moon = shown in dark mode (click to go light); Sun = shown in light mode (click to go dark)
     if (icon) icon.className = t === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
     const prism = $('#prism-theme');
@@ -910,8 +918,12 @@ function initTheme() {
     // Re-apply Monaco editor theme if editor is open
     if (typeof AdminEditor !== 'undefined') AdminEditor._applyMonacoTheme(t);
   };
-  apply(State.theme);
+  apply(State.theme, false);
   btn?.addEventListener('click', () => apply(State.theme === 'dark' ? 'light' : 'dark'));
+  // and follow the OS while no choice is saved
+  matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', e => {
+    if (!Storage.get(key('theme'))) apply(e.matches ? 'dark' : 'light', false);
+  });
 }
 
 // ── Mobile Sidebar Swipe ────────────────────────────────────────
@@ -1252,6 +1264,16 @@ const DocLink = (typeof DocLinks !== 'undefined' && DocLinks) ? DocLinks : {
  * authored against the doc's own directory, not the page URL, so without it
  * every `../`-style link resolved one level too high and 404'd.
  */
+// Mirror of generate-manifest.js's function of the same name - keep them identical.
+function stripDuplicateLeadingH1(body) {
+  const text = String(body || '');
+  const leadMatch = text.match(/^\s*((?:>.*\n?)+\n*)/);
+  const lead = leadMatch ? leadMatch[0] : '';
+  const rest = text.slice(lead.length);
+  const m = rest.match(/^\s*#\s+.+?\s*\n([\s\S]*)$/);
+  return m ? lead + m[1] : body;
+}
+
 function buildMarkedHtml(body, slug) {
   if (typeof marked === 'undefined') return `<pre>${esc(body)}</pre>`;
 
@@ -2547,10 +2569,10 @@ const AdminEditor = (() => {
         <!-- Breadcrumb preserved -->
         <div class="doc-header" style="border-bottom:1px solid var(--color-border);padding-bottom:.65rem;margin-bottom:0">
           <nav class="doc-breadcrumb" aria-label="Breadcrumb">
-            <a href="#"><i class="fa-solid fa-house" style="font-size:0.7rem"></i></a>
+            <a href="/" aria-label="Docs home" onclick="event.preventDefault();navigate('')"><i class="fa-solid fa-house" style="font-size:0.7rem" aria-hidden="true"></i></a>
         ${breadcrumb.map(b => `<i class="fa-solid fa-chevron-right" style="font-size:0.55rem;color:var(--color-border)"></i><a href="/doc/${esc(b.slug)}/" onclick="event.preventDefault();navigate('${esc(b.slug)}')">${esc(b.title)}</a>`).join('')}
             <i class="fa-solid fa-chevron-right" style="font-size:0.55rem;color:var(--color-border)"></i>
-            <span>${esc(title)}</span>
+            <span aria-current="page">${esc(title)}</span>
           </nav>
         </div>
 

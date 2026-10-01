@@ -259,10 +259,35 @@ prime-run blender
 # Equivalent without prime-run:
 __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia &lt;app&gt;</code></pre>
 <p>GNOME integration via <code>switcheroo-control</code> (pre-installed): right-click any app icon and choose <strong>Launch using dedicated GPU</strong>.</p>
+<p><code>switcherooctl</code> is the same mechanism from a terminal, and is useful when the right-click menu is not there:</p>
+<pre><code class="language-bash">switcherooctl list                          # the GPUs, with DRI_PRIME each answers to
+switcherooctl launch -g 1 blender            # run this on GPU 1 (the discrete one)
+switcherooctl launch glxgears                # no -g: the first non-default GPU</code></pre>
+<p>It is also what <strong>Shani Cassini's Graphics page</strong> reads, over D-Bus rather than by parsing this output: <code>net.hadess.SwitcherooControl</code> on the system bus exposes <code>HasDualGpu</code>, <code>NumGPUs</code> and a per-GPU <code>Name</code> / <code>DRI_PRIME</code> / <code>Default</code> set. That page reports it and does not offer a switch, because the service implements <strong>no call that changes anything</strong> — <code>SetDefault</code> and <code>ListDevices</code> do not exist, and <code>switcherooctl list</code> is a pretty-printer over the same properties. Per-app selection is the whole of what is available.</p>
 <p>Check which GPU rendered something:</p>
 <pre><code class="language-bash"># While the app runs — processes using the NVIDIA GPU appear here
 nvidia-smi</code></pre>
 <p>If an app appears in <code>nvidia-smi</code>, it used the dGPU. No entry means it ran on the iGPU.</p>
+<h3 id="is-the-dgpu-awake-right-now">Is the dGPU awake right now?</h3>
+<p><code>nvidia-smi</code> tells you what is using the card. The kernel tells you whether the card is powered at all, which is the question when a laptop runs warm:</p>
+<pre><code class="language-bash">cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status   # active | suspended
+cat /sys/bus/pci/devices/0000:01:00.0/power/control          # auto | on</code></pre>
+<p><code>active</code> means something is holding the card awake. <strong>That is not necessarily your workload</strong> — a temperature monitor polling <code>nvidia-smi</code> is enough to keep it awake on its own, which is why a background sensor can quietly cost you battery life with nothing visibly running. <code>control</code> says whether the kernel is even allowed to power it down; <code>on</code> disables that, so a card set to <code>on</code> will never reach <code>suspended</code>.</p>
+<p>List every GPU's state at once:</p>
+<pre><code class="language-bash">for d in /sys/bus/pci/devices/*/power; do
+  printf '%-40s %s\n' &quot;$(basename &quot;$(dirname &quot;$d&quot;)&quot;)&quot; &quot;$(cat &quot;$d/runtime_status&quot;)&quot;
+done</code></pre>
+<p>Shani Cassini's Graphics page reads exactly this per card and shows it next to the driver, so <code>power active</code> or <code>power suspended</code> appears on each GPU row.</p>
+<hr>
+<h2 id="external-gpus-egpu">External GPUs (eGPU)</h2>
+<p>A Thunderbolt/USB4 eGPU works as a normal second device — no special setup on Shanios, and it shows up in the same <code>lspci</code> and Cassini output as a built-in card. Two things are worth knowing before buying one:</p>
+<ul>
+<li><strong>Hot-unplug is not supported.</strong> Pulling the cable while it is in use hangs or</li>
+<p>freezes the machine. Shut down, or at minimum switch to the internal GPU and unmount what is using it, before unplugging.</p>
+<li><strong>Check the port's wiring.</strong> Offload only reaches displays wired directly to</li>
+<p>the dGPU. On a laptop whose HDMI/DP ports go through the iGPU, an eGPU's own ports are the ones that get the dGPU's adapters.</p>
+</ul>
+<p>A GPU with no driver bound still appears in Cassini's Graphics list with an empty driver — that is what a present-but-unusable card looks like from underneath, and it is deliberately not hidden.</p>
 <hr>
 <h2 id="wayland-notes">Wayland Notes</h2>
 <p>Wayland is the default session on every Shanios edition.</p>
@@ -305,7 +330,7 @@ sudo shani-deploy</code></pre>
 <p>These are not limitations to work around; they are the mechanism that keeps your GPU stack coherent.</p>
 <hr>
 <h2 id="troubleshooting">Troubleshooting</h2>
-<table><thead><tr><th>Issue</th><th>Fix</th></tr></thead><tbody><tr><td>Black screen on boot</td><td>Reboot and pick the previous slot in the systemd-boot menu — cmdline is immutable, so do not try <code>nomodeset</code>; the previous slot boots the known-good kernel+driver pair</td></tr><tr><td><code>nvidia-smi</code> fails after an update</td><td>Check which slot actually booted: <code>cat /data/current-slot</code>; if it differs from expectation, reboot and select the intended slot, or run <code>sudo shani-deploy --rollback</code></td></tr><tr><td>External monitor blank</td><td>Try another port/cable; confirm USB-C alt-mode support; check `journalctl -b \</td><td>grep -i drm`</td></tr><tr><td>Hybrid laptop app ignores dGPU</td><td>Prefix with <code>prime-run</code> or use the env-var method above; confirm with <code>nvidia-smi</code> while running</td></tr><tr><td>Suspend/resume GPU hang</td><td>Kernel and driver versions are already matched pairs in each slot; capture logs (`journalctl -b -1 \</td><td>grep -iE 'nvidia\</td><td>amdgpu\</td><td>i915'`) and report the bug</td></tr><tr><td>Everything renders on CPU (llvmpipe)</td><td><code>lspci -k</code> shows no "Kernel driver in use" for your GPU — file an issue with full <code>lspci -nnk</code> output</td></tr></tbody></table>
+<table><thead><tr><th>Issue</th><th>Fix</th></tr></thead><tbody><tr><td>Black screen on boot</td><td>Reboot and pick the previous slot in the systemd-boot menu — cmdline is immutable, so do not try <code>nomodeset</code>; the previous slot boots the known-good kernel+driver pair</td></tr><tr><td><code>nvidia-smi</code> fails after an update</td><td>Check which slot actually booted: <code>cat /data/current-slot</code>; if it differs from expectation, reboot and select the intended slot, or run <code>sudo shani-deploy --rollback</code></td></tr><tr><td>External monitor blank</td><td>Try another port/cable; confirm USB-C alt-mode support; check `journalctl -b \</td><td>grep -i drm`</td></tr><tr><td>Hybrid laptop app ignores dGPU</td><td>Prefix with <code>prime-run</code> or use the env-var method above; confirm with <code>nvidia-smi</code> while running</td></tr><tr><td>Laptop runs warm with nothing visibly running</td><td>Check <code>runtime_status</code> above — a temperature monitor polling <code>nvidia-smi</code> holds the dGPU awake on its own</td></tr><tr><td>eGPU hangs when unplugged</td><td>Expected; hot-unplug is unsupported. Shut down first</td></tr><tr><td>Second GPU has no driver in Cassini</td><td>Shown with an empty driver, which means present but unbound — <code>lspci -k</code> shows no <code>Kernel driver in use:</code> for it</td></tr><tr><td>Suspend/resume GPU hang</td><td>Kernel and driver versions are already matched pairs in each slot; capture logs (`journalctl -b -1 \</td><td>grep -iE 'nvidia\</td><td>amdgpu\</td><td>i915'`) and report the bug</td></tr><tr><td>Everything renders on CPU (llvmpipe)</td><td><code>lspci -k</code> shows no "Kernel driver in use" for your GPU — file an issue with full <code>lspci -nnk</code> output</td></tr></tbody></table>
 <p>When filing bugs, include: <code>uname -r</code>, <code>cat /data/current-slot</code>, <code>lspci -nnk | grep -A3 VGA</code>, and relevant journal output.</p>
 <hr>
 <h2 id="compute-and-ml">Compute and ML</h2>

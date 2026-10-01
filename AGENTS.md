@@ -52,6 +52,49 @@ correct." It is verified by observing the actual behavior of the real
 thing in the real environment — built, served, deployed, signed, running.
 If you haven't seen it work (or fail) for real, it isn't verified.
 
+## Test harness: shani-testbed (use it - and improve it, never invent around it)
+
+The ecosystem's real test harness is the sibling repo **`../shani-testbed`**
+(read its `README.md` and `AGENTS.md`). It installs a real ShaniOS image with
+the real installer, boots its slots (`systemd-nspawn`, and UEFI + TPM VMs),
+runs real deploys and rollbacks, drives GUI apps through their accessibility
+tree, and checks web pages in a real headless browser. Every command runs from
+`../shani-install-media`, which provides the builder container:
+
+```bash
+cd ../shani-install-media
+./run_in_container.sh build.sh test <command> ...   # `... test help` lists them all
+```
+
+**If the check you need does not exist, add it to shani-testbed - do not invent
+around it.** A one-off script in this repo, a scratchpad, or a heredoc piped
+into a container is lost when the session ends, and the next agent re-derives
+it. Extend the harness instead (see "Extend the harness" in its AGENTS.md):
+
+- an in-slot check -> `shani-testbed/slot-tests/<name>.sh` (`# slot-test-mode: boot`,
+  prints `RESULT <name> PASS|FAIL|SKIP` lines), run by `slot-test <slot> <name>`;
+- a GUI interaction or assertion -> an `app` action in `lib/app.sh`, or a walk
+  through a real app as `app-scripts/<app>.actions`;
+- a web check -> `lib/web_client.py`;
+- a new way to boot, drive or observe -> a command or option in `lib/`;
+
+each with a negative control (a check that cannot fail is not a check), its
+self-test (`tests/run-app-actions.sh`, `tests/run-web-client.sh`, ...), and the
+`usage` + README updated. One harness run at a time: disk-touching commands
+take `disk/.testbed.lock` and a second run is refused. Plain nspawn boots see
+the image's whole `/var`; real boots have an empty tmpfs `/var`
+(`systemd.volatile=state`) - use `slot-test --volatile`, or a real UEFI boot
+with `iso-install --boot-only --console-exec=CMD`, for anything touching `/var`.
+
+### What to run for this repo
+
+- `web --site=/opt/shani-docs --offline --crawl=20 --budget-cls=0.1` plus the
+  `--allow-host` values in `.github/workflows/web-check.yml` (what CI runs).
+  Without the container:
+  `python3 ../shani-testbed/lib/web_serve.py . 8700 &` then
+  `python3 ../shani-testbed/lib/web_client.py --url=http://127.0.0.1:8700/ --offline --crawl=20`.
+- A new web check belongs in `shani-testbed/lib/web_client.py`, not here.
+
 ## Rule: open it and actually check, don't just read the diff
 
 1. Serve the repo locally (`python3 -m http.server 8000` from the repo
@@ -118,6 +161,42 @@ openssl dgst -sha384 -binary <file> | openssl base64 -A
 ```
 
 ## Audit-verified known issues (confirmed present)
+
+- **Home page rendered as bare, unstyled HTML in production - FIXED
+  (2026-10-01).** `generate-manifest.js`'s `prerenderHome()` replaced the
+  `<div class="content__inner" id="doc-content">` placeholder itself with the
+  crawler listing, so the root page had no `#doc-content`, every
+  `script-docs.js` renderer (they all start with `$('#doc-content')`) did
+  nothing, and docs.shani.dev/ showed the raw `<h1>/<ul>` list since
+  2026-08-29 (seen live). The block now lives INSIDE the wrapper, and
+  `HOME_BLOCK_RE` restores either form, so one regeneration repairs an old
+  index.html. Found by shani-testbed's `web` screenshots; verified: home
+  renders (title "Technical Documentation"), node --test 25/25, 0 broken links.
+- **Phone layout cut off the second card column - FIXED.** At <= 480px the
+  home grid was `1fr 1fr`; a 1fr track never shrinks below its content's
+  min-content width, the cards' nowrap line made both columns wider than a
+  390px screen, and `.content`'s `overflow-x: hidden` clipped the second one
+  out of reach. `repeat(2, minmax(0, 1fr))` + `.wiki-home__card { min-width: 0 }`.
+- **Light-mode code colours failed WCAG contrast - FIXED.** Stock prism.css
+  (white-background colours) on the beige `#f0ede9` code background:
+  parameters 1.96:1, strings 2.94:1, functions 3.43:1, comments 3.47:1.
+  Overridden in style-docs.css, each >= 5.2:1; prism-tomorrow (dark) already
+  clears 6.6:1.
+- **The OS dark-mode setting was ignored after the first visit - FIXED.**
+  `initTheme()` stored the theme on every load, turning the first visit's OS
+  preference into a "saved choice". It now persists only a click, and follows
+  `prefers-color-scheme` changes while nothing is saved.
+- **Breadcrumbs: icon-only home link without a name, no `aria-current` -
+  FIXED** (`aria-label="Docs home"`, `aria-current="page"`, both renderers).
+- **Two `<h1>` on every doc page - FIXED.** The stub stripped the body's
+  leading `# Heading` (`stripDuplicateLeadingH1`) but the client renderer did
+  not; it now applies the same function (keep the two copies identical).
+- **Top-bar `॥ श्री ॥` link: 16px tall, 3.42:1 - FIXED** (>= 24px target,
+  full-strength accent, 5.4:1). The same link in shani-blog: see its AGENTS.md.
+- **Real-browser CI: `.github/workflows/web-check.yml`** (shani-ci-commons,
+  shani-testbed `lib/web_client.py` + `lib/web_features.py`). Run it locally:
+  `python3 ../shani-testbed/lib/web_serve.py . 8700 &` then
+  `python3 ../shani-testbed/lib/web_client.py --url=http://127.0.0.1:8700/ --offline --crawl=20 --allow-host=...`.
 
 **For the full narrative, verification methodology, and before/after
 evidence behind every line below, see `AUDIT-HISTORY.md`.** This section

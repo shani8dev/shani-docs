@@ -313,6 +313,16 @@ const WIKI_URL        = getConfig('WIKI_URL',        'https://docs.shani.dev');
 const DOC_CONTENT_PLACEHOLDER = '<div class="content__inner" id="doc-content" role="article"></div>';
 const HOME_MARKER_START = '<!--PRERENDERED-DOCS-START-->';
 const HOME_MARKER_END   = '<!--PRERENDERED-DOCS-END-->';
+// The prerendered home block, INCLUDING the #doc-content wrapper it lives in.
+// Until 2026-10-01 the block REPLACED the wrapper: the root page then had no
+// #doc-content at all, so script-docs.js (every renderer starts with
+// $('#doc-content')) rendered nothing and docs.shani.dev's home page showed
+// this crawler list as bare, unstyled HTML - since 2026-08-29. The optional
+// groups also match a previous run's unwrapped block, so one regeneration
+// repairs an index.html written by the old code.
+const HOME_BLOCK_RE = new RegExp(
+  `(?:<div class="content__inner" id="doc-content" role="article">\\s*)?` +
+  `${HOME_MARKER_START}[\\s\\S]*?${HOME_MARKER_END}(?:\\s*</div>)?`);
 const SITE_TITLE      = getConfig('SITE_TITLE',      'Shanios Docs');
 const SITE_DESC       = getConfig('SITE_DESCRIPTION','Technical documentation for Shanios.');
 const AUTHOR          = getConfig('AUTHOR_NAME',     'Shrinivas Kumbhar');
@@ -557,7 +567,7 @@ function buildStub(doc) {
     // Strip the prerendered-home block so doc stubs never inherit it
     // (prerenderHome runs last, but a previous run's markers may persist).
     buildStub._indexHtml = fs.readFileSync(indexPath, 'utf8')
-      .replace(new RegExp(`${HOME_MARKER_START}[\\s\\S]*?${HOME_MARKER_END}`), DOC_CONTENT_PLACEHOLDER);
+      .replace(HOME_BLOCK_RE, DOC_CONTENT_PLACEHOLDER);
   }
 
   let html = buildStub._indexHtml;
@@ -968,15 +978,15 @@ function prerenderHome() {
   let html = fs.readFileSync(indexPath, 'utf8');
 
   // Idempotent: restore placeholder from any previous injection first.
-  const prev = new RegExp(`${HOME_MARKER_START}[\\s\\S]*?${HOME_MARKER_END}`);
-  if (prev.test(html)) {
-    html = html.replace(prev, DOC_CONTENT_PLACEHOLDER);
+  if (HOME_BLOCK_RE.test(html)) {
+    html = html.replace(HOME_BLOCK_RE, DOC_CONTENT_PLACEHOLDER);
   }
   if (!html.includes(DOC_CONTENT_PLACEHOLDER)) return;
 
   html = html.replace(
     DOC_CONTENT_PLACEHOLDER,
-    `${HOME_MARKER_START}${buildStaticDocsHomeHtml()}${HOME_MARKER_END}`
+    DOC_CONTENT_PLACEHOLDER.replace('</div>',
+      `${HOME_MARKER_START}${buildStaticDocsHomeHtml()}${HOME_MARKER_END}</div>`)
   );
   fs.writeFileSync(indexPath, html);
   console.log('✓ index.html homepage prerendered (static docs tree)');

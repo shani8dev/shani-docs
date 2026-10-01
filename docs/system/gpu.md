@@ -76,6 +76,23 @@ __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia <app>
 
 GNOME integration via `switcheroo-control` (pre-installed): right-click any app icon and choose **Launch using dedicated GPU**.
 
+`switcherooctl` is the same mechanism from a terminal, and is useful when the
+right-click menu is not there:
+
+```bash
+switcherooctl list                          # the GPUs, with DRI_PRIME each answers to
+switcherooctl launch -g 1 blender            # run this on GPU 1 (the discrete one)
+switcherooctl launch glxgears                # no -g: the first non-default GPU
+```
+
+It is also what **Shani Cassini's Graphics page** reads, over D-Bus rather than
+by parsing this output: `net.hadess.SwitcherooControl` on the system bus exposes
+`HasDualGpu`, `NumGPUs` and a per-GPU `Name` / `DRI_PRIME` / `Default` set. That
+page reports it and does not offer a switch, because the service implements **no
+call that changes anything** — `SetDefault` and `ListDevices` do not exist, and
+`switcherooctl list` is a pretty-printer over the same properties. Per-app
+selection is the whole of what is available.
+
 Check which GPU rendered something:
 
 ```bash
@@ -84,6 +101,53 @@ nvidia-smi
 ```
 
 If an app appears in `nvidia-smi`, it used the dGPU. No entry means it ran on the iGPU.
+
+### Is the dGPU awake right now?
+
+`nvidia-smi` tells you what is using the card. The kernel tells you whether the
+card is powered at all, which is the question when a laptop runs warm:
+
+```bash
+cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status   # active | suspended
+cat /sys/bus/pci/devices/0000:01:00.0/power/control          # auto | on
+```
+
+`active` means something is holding the card awake. **That is not necessarily
+your workload** — a temperature monitor polling `nvidia-smi` is enough to keep
+it awake on its own, which is why a background sensor can quietly cost you
+battery life with nothing visibly running. `control` says whether the kernel is
+even allowed to power it down; `on` disables that, so a card set to `on` will
+never reach `suspended`.
+
+List every GPU's state at once:
+
+```bash
+for d in /sys/bus/pci/devices/*/power; do
+  printf '%-40s %s\n' "$(basename "$(dirname "$d")")" "$(cat "$d/runtime_status")"
+done
+```
+
+Shani Cassini's Graphics page reads exactly this per card and shows it next to
+the driver, so `power active` or `power suspended` appears on each GPU row.
+
+---
+
+## External GPUs (eGPU)
+
+A Thunderbolt/USB4 eGPU works as a normal second device — no special setup on
+Shanios, and it shows up in the same `lspci` and Cassini output as a built-in
+card. Two things are worth knowing before buying one:
+
+- **Hot-unplug is not supported.** Pulling the cable while it is in use hangs or
+  freezes the machine. Shut down, or at minimum switch to the internal GPU and
+  unmount what is using it, before unplugging.
+- **Check the port's wiring.** Offload only reaches displays wired directly to
+  the dGPU. On a laptop whose HDMI/DP ports go through the iGPU, an eGPU's own
+  ports are the ones that get the dGPU's adapters.
+
+A GPU with no driver bound still appears in Cassini's Graphics list with an
+empty driver — that is what a present-but-unusable card looks like from
+underneath, and it is deliberately not hidden.
 
 ---
 
@@ -148,6 +212,9 @@ These are not limitations to work around; they are the mechanism that keeps your
 | `nvidia-smi` fails after an update | Check which slot actually booted: `cat /data/current-slot`; if it differs from expectation, reboot and select the intended slot, or run `sudo shani-deploy --rollback` |
 | External monitor blank | Try another port/cable; confirm USB-C alt-mode support; check `journalctl -b \| grep -i drm` |
 | Hybrid laptop app ignores dGPU | Prefix with `prime-run` or use the env-var method above; confirm with `nvidia-smi` while running |
+| Laptop runs warm with nothing visibly running | Check `runtime_status` above — a temperature monitor polling `nvidia-smi` holds the dGPU awake on its own |
+| eGPU hangs when unplugged | Expected; hot-unplug is unsupported. Shut down first |
+| Second GPU has no driver in Cassini | Shown with an empty driver, which means present but unbound — `lspci -k` shows no `Kernel driver in use:` for it |
 | Suspend/resume GPU hang | Kernel and driver versions are already matched pairs in each slot; capture logs (`journalctl -b -1 \| grep -iE 'nvidia\|amdgpu\|i915'`) and report the bug |
 | Everything renders on CPU (llvmpipe) | `lspci -k` shows no "Kernel driver in use" for your GPU — file an issue with full `lspci -nnk` output |
 
