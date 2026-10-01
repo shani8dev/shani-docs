@@ -224,7 +224,7 @@
 <li><strong>Recursive / caching resolver</strong> — forwards queries upstream and caches results locally.</li>
 </ul>
 <p>For simple local DNS and DHCP on a homelab, <strong>dnsmasq</strong> is lighter and easier to configure. Use BIND when you need a full authoritative zone with proper SOA/NS records, zone transfers to secondary servers, DNSSEC signing, or split-horizon DNS.</p>
-<p><code>named</code> state and zone files persist in <code>/var/named</code>, bind-mounted from <code>/data/varlib/named</code>, and survive OS updates.</p>
+<p><code>named</code> state and zone files persist in <code>/var/named</code>, <strong>not</strong> bind-mounted on this image — <code>/etc/fstab</code> has no entry for it, so zone files written to <code>/var/named</code> are ephemeral and lost on reboot or slot switch. Persist them yourself (see Persistence).</p>
 <hr>
 <h2 id="enable">Enable</h2>
 <pre><code class="language-bash">sudo systemctl enable --now named

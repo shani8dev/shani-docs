@@ -218,7 +218,7 @@
           <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><p>Samba provides file and print sharing using the SMB/CIFS protocol, making your Shani OS machine appear as a Windows-compatible network share. It is pre-installed, and its runtime state (locks, caches, <code>tdbsam</code> database) is bind-mounted from <code>/data/varlib/samba</code>, ensuring it persists across OS updates.</p>
+      <div class="prose"><p>Samba provides file and print sharing using the SMB/CIFS protocol, making your Shani OS machine appear as a Windows-compatible network share. It is pre-installed, and its caches and <code>tdbsam</code> database are bind-mounted from <code>/data/varlib/samba</code>, and its lock state from <code>/data/varspool/samba</code>, ensuring it persists across OS updates.</p>
 <blockquote><strong>Prefer NFS</strong> for Linux-to-Linux sharing. Use Samba when you need Windows or macOS compatibility.</blockquote>
 <hr>
 <h2 id="server-setup">Server Setup</h2>
@@ -252,12 +252,12 @@
     usershare path = /var/lib/samba/usershare
     usershare max shares = 100
     usershare owner only = yes
-    usershare allow guests = yes
+    usershare allow guests = no     # shipped default; `yes` exposes the folder to unauthenticated clients
 
 [homes]
     comment = Home Directories
     browseable = no
-    read only = yes
+    read only = no
     create mask = 0700
     directory mask = 0700
     valid users = %S
@@ -330,7 +330,7 @@ password=yourpass</code></pre>
 <p>Finder → Go → Connect to Server: <code>smb://192.168.1.100/SharedFiles</code></p>
 <hr>
 <h2 id="troubleshooting">Troubleshooting</h2>
-<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Share not appearing in Windows network browser</td><td>Ensure <code>nmb</code> is running; Windows uses NetBIOS/WSD for discovery — connecting directly by IP (<code>\\192.168.1.100</code>) always works</td></tr><tr><td><code>Permission denied</code> when accessing share</td><td>Check Linux filesystem permissions on the shared path — Samba permissions are layered on top; both must allow access</td></tr><tr><td><code>NT_STATUS_LOGON_FAILURE</code></td><td>Wrong Samba password — reset with <code>sudo smbpasswd youruser</code></td></tr><tr><td><code>mount error(13): Permission denied</code> on Linux</td><td>Add <code>sec=ntlmssp</code> to mount options; verify credentials in <code>.smbcredentials</code></td></tr><tr><td>Config changes not taking effect</td><td>Run <code>testparm</code> to validate, then <code>sudo systemctl restart smb nmb</code></td></tr><tr><td>View logs</td><td><code>journalctl -u smb</code> or <code>/var/log/samba/log.smbd</code></td></tr></tbody></table>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Share not appearing in Windows network browser</td><td>Ensure <code>nmb</code> is running; Windows uses NetBIOS/WSD for discovery — connecting directly by IP (<code>\\192.168.1.100</code>) always works</td></tr><tr><td><code>Permission denied</code> when accessing share</td><td>Check Linux filesystem permissions on the shared path — Samba permissions are layered on top; both must allow access</td></tr><tr><td><code>NT_STATUS_LOGON_FAILURE</code></td><td>Wrong Samba password — reset with <code>sudo smbpasswd youruser</code></td></tr><tr><td><code>mount error(13): Permission denied</code> on Linux</td><td>Add <code>sec=ntlmssp</code> to mount options; verify credentials in <code>.smbcredentials</code></td></tr><tr><td>Config changes not taking effect</td><td>Run <code>testparm</code> to validate, then <code>sudo systemctl restart smb nmb</code></td></tr><tr><td>View logs</td><td><code>journalctl -u smb</code> or <code>/var/log/samba/&lt;netbios-name&gt;.log</code> (the shipped <code>smb.conf</code> sets <code>log file = /var/log/samba/%m.log</code>; <code>log.smbd</code> only appears if <code>log level</code> is raised above 0)</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="/doc/networking/nfs/">NFS exports</a></li>

@@ -86,7 +86,7 @@ sudo firewall-cmd --reload
 
 ### Persistence
 
-Kerberos database files are stored in `/var/lib/kerberos/krb5kdc` and bind-mounted from `/data/varlib/kerberos` — they persist across OS updates and rollbacks.
+Kerberos database files are stored in `/var/lib/kerberos/krb5kdc` and **not** bind-mounted on this image — there is no `/data/varlib/kerberos` entry in `fstab`, so the KDC database is rebuilt after a reboot or slot switch.
 
 ---
 

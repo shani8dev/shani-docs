@@ -91,7 +91,10 @@ For machines that rarely accept SSH connections, use socket activation instead o
 sudo systemctl disable --now sshd
 
 # Enable socket activation instead
-sudo systemctl enable --now sshd.socket
+# NOTE: there is NO sshd.socket in openssh 10.5. The package ships only
+# sshd.service, sshd@.service and sshdgenkeys.service. Do not disable
+# sshd.service expecting a socket to take over - nothing will.
+# sudo systemctl enable --now sshd
 ```
 
 ### 3. Open the Firewall

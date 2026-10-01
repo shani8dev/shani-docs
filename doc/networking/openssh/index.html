@@ -278,7 +278,10 @@ sudo systemctl restart sshd</code></pre>
 sudo systemctl disable --now sshd
 
 # Enable socket activation instead
-sudo systemctl enable --now sshd.socket</code></pre>
+# NOTE: there is NO sshd.socket in openssh 10.5. The package ships only
+# sshd.service, sshd@.service and sshdgenkeys.service. Do not disable
+# sshd.service expecting a socket to take over - nothing will.
+# sudo systemctl enable --now sshd</code></pre>
 <h3 id="3-open-the-firewall">3. Open the Firewall</h3>
 <pre><code class="language-bash"># Custom port (adjust 2222 to your chosen port)
 sudo firewall-cmd --add-port=2222/tcp --permanent

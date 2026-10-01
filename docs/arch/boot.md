@@ -136,7 +136,7 @@ Shanios uses systemd-boot's boot-counting mechanism plus its own two-tier failur
 1. **`+3-0`** — set on the new slot's EFI entry at deploy time (3 tries left, 0 done)
 2. On each failed boot, the firmware decrements the tries-left counter
 3. At `0`, systemd-boot falls back to the `(Candidate)` entry — before the OS even starts
-4. Once `bless-boot.service` runs successfully, the entry file is renamed `+3-0` → `+3-3` (tries-left == tries-done), which stops the countdown for good
+> ⚠️ **The `+3-0` → `+3-3` rename does not happen on systemd 259+.** Verified under a real UEFI boot: systemd-boot never renames a `+tries_left-tries_done` entry or sets `LoaderBootCountPath`, so `systemd-bless-boot` reports "Not booted with boot counting in effect" and the automatic hard-failure fallback is **not** in place. See [Shani AGENTS] — treat "three tries then fallback" as not currently guaranteed.
 
 ### Tier 2: Application-level Health (systemd services)
 
@@ -144,7 +144,7 @@ Shanios uses systemd-boot's boot-counting mechanism plus its own two-tier failur
 |---------|------|------|
 | `mark-boot-in-progress.service` | `local-fs.target` (requires `data.mount`) | `rm -f boot-ok boot_failure.acked boot_in_progress`, then `touch boot_in_progress` — hard-fails (blocking the boot) if `/data` isn't mounted |
 | `mark-boot-success.service` | `multi-user.target`, requires `boot_in_progress` to exist | Writes `/data/boot-ok`, removes `boot_in_progress`, and — if the slot that just booted matches the slot recorded in `boot_failure` — clears `boot_failure`/`boot_failure.acked` as stale (the slot clearly recovered) |
-| `bless-boot.service` | `multi-user.target`, `ConditionPathExists=/data/boot-ok` | Runs `bootctl set-good` — stops the boot counter countdown |
+| `bless-boot.service` | `multi-user.target`, `ConditionPathExists=/data/boot-ok` | Runs `systemd-bless-boot good` — stops the boot counter countdown |
 | `check-boot-failure.timer` / `.service` | `OnBootSec=15m`, fires once | If `boot_in_progress` still exists and `boot-ok` is absent, writes the *previously active* slot name into `/data/boot_failure` (skipped if `/data/boot_hard_failure` is already present) |
 
 After login, the Shani Cassini agent reads this boot state through `shani-deploy --status --check --json`. If a fallback or recovery failure is recorded, it sends a notification that opens **Updates & Rollback**, where you can manage the rollback.

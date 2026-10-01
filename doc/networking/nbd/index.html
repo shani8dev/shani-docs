@@ -238,7 +238,7 @@
 <p>Multiple export sections (<code>[disk1]</code>, <code>[disk2]</code>, …) can be defined in the same file, each on a different port.</p>
 <h3 id="enable-firewall">Enable & Firewall</h3>
 <pre><code class="language-bash"># Enable the NBD server
-sudo systemctl enable --now nbd-server
+sudo systemctl enable --now nbd      # the unit is nbd.service; there is no nbd-server.service
 
 # Open the port in the firewall (restrict to your LAN — NBD has no built-in auth)
 sudo firewall-cmd --add-rich-rule='rule family=&quot;ipv4&quot; source address=&quot;192.168.1.0/24&quot; port port=&quot;10809&quot; protocol=&quot;tcp&quot; accept' --permanent
@@ -286,7 +286,7 @@ WantedBy=multi-user.target</code></pre>
 sudo systemctl enable --now nbd-connect</code></pre>
 <hr>
 <h2 id="troubleshooting">Troubleshooting</h2>
-<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>nbd-client: No such device /dev/nbd0</code></td><td>Load the kernel module: <code>sudo modprobe nbd</code></td></tr><tr><td><code>Connection refused</code> on the client</td><td>Check <code>systemctl status nbd-server</code> on the server; verify the port and firewall with <code>sudo firewall-cmd --list-all</code></td></tr><tr><td>Filesystem errors after disconnect</td><td>Always unmount before disconnecting — <code>umount</code> first, then <code>nbd-client -d</code></td></tr><tr><td>Server crashes on large writes</td><td>Add <code>flush = true</code> and <code>sync = true</code> to the export section in the config</td></tr></tbody></table>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>nbd-client: No such device /dev/nbd0</code></td><td>Load the kernel module: <code>sudo modprobe nbd</code></td></tr><tr><td><code>Connection refused</code> on the client</td><td>Check <code>systemctl status nbd</code> on the server; verify the port and firewall with <code>sudo firewall-cmd --list-all</code></td></tr><tr><td>Filesystem errors after disconnect</td><td>Always unmount before disconnecting — <code>umount</code> first, then <code>nbd-client -d</code></td></tr><tr><td>Server crashes on large writes</td><td>Add <code>flush = true</code> and <code>sync = true</code> to the export section in the config</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="/doc/networking/openssh/">SSH Server</a> — remote access</li>

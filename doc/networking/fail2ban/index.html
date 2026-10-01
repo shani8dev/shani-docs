@@ -7,7 +7,7 @@
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
 <title>Fail2ban (Brute-Force Protection) — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs via firewalld. It integrates with firewalld automatical…">
+  <meta name="description" id="meta-desc"     content="fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs by writing firewall rules. ⚠️ The backend is iptables-m…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -15,7 +15,7 @@
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
   <meta property="og:title"     id="og-title"     content="Fail2ban (Brute-Force Protection)">
-  <meta property="og:description" id="og-desc"    content="fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs via firewalld. It integrates with firewalld automatical…">
+  <meta property="og:description" id="og-desc"    content="fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs by writing firewall rules. ⚠️ The backend is iptables-m…">
   <meta property="og:type"      id="og-type"      content="article">
   <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/networking/fail2ban/">
   <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
@@ -25,10 +25,10 @@
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
   <meta name="twitter:title"       id="tw-title" content="Fail2ban (Brute-Force Protection)">
-  <meta name="twitter:description" id="tw-desc"  content="fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs via firewalld. It integrates with firewalld automatical…">
+  <meta name="twitter:description" id="tw-desc"  content="fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs by writing firewall rules. ⚠️ The backend is iptables-m…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Fail2ban (Brute-Force Protection)","description":"fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs via firewalld. It integrates with firewalld automatical…","url":"https://docs.shani.dev/doc/networking/fail2ban/","datePublished":"2026-08-28T00:00:00.000Z","dateModified":"2026-08-28T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Fail2ban (Brute-Force Protection)","description":"fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs by writing firewall rules. ⚠️ The backend is iptables-m…","url":"https://docs.shani.dev/doc/networking/fail2ban/","datePublished":"2026-08-28T00:00:00.000Z","dateModified":"2026-08-28T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
   <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Fail2ban (Brute-Force Protection)","item":"https://docs.shani.dev/doc/networking/fail2ban/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
@@ -218,7 +218,8 @@
           <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><p>fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs via firewalld. It integrates with firewalld automatically on Shani OS — no extra backend configuration is required.</p>
+      <div class="prose"><p>fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs by writing firewall rules.</p>
+<blockquote>⚠️ <strong>The backend is <code>iptables-multiport</code>, not firewalld.</strong> Arch's <code>paths-arch.conf</code> sets <code>banaction = iptables-multiport</code>, and that is what is in effect unless you change it yourself. So fail2ban does <strong>not</strong> coordinate with firewalld here, and the two are separate mechanisms: the <code>ssh</code> service you add to a firewalld zone and the rules fail2ban drops are unrelated. If you want them unified, set <code>banaction = firewallcmd-rich-rules</code> in a <code>jail.local</code> and reload.</blockquote>
 <p><strong>Active from first boot.</strong> <code>shani-network</code> enables it unconditionally at install time alongside firewalld — no setup needed to get baseline protection, though tuning the jails below is still recommended for any public-facing service.</p>
 <hr>
 <h2 id="status-tuning">Status & Tuning</h2>
@@ -242,7 +243,8 @@ sudo fail2ban-client set sshd unbanip 1.2.3.4
 sudo fail2ban-client banned
 
 # View the raw firewalld rules fail2ban has added
-sudo firewall-cmd --direct --get-all-rules</code></pre>
+# fail2ban's bans are plain iptables rules here, not firewalld rules:
+sudo iptables -L -n | grep -i f2b</code></pre>
 <hr>
 <h2 id="configuration">Configuration</h2>
 <p>fail2ban ships with a default <code>/etc/fail2ban/jail.conf</code>. <strong>Never edit this file directly</strong> — it is overwritten on package updates. Instead, create overrides in <code>/etc/fail2ban/jail.d/</code>.</p>
@@ -305,7 +307,7 @@ ignoreip = 127.0.0.1/8 ::1 192.168.1.0/24 100.64.0.0/10</code></pre>
 <p><code>100.64.0.0/10</code> covers the entire Tailscale CGNAT address range.</p>
 <hr>
 <h2 id="troubleshooting">Troubleshooting</h2>
-<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>fail2ban won't start</td><td>Check <code>journalctl -u fail2ban</code> for syntax errors; validate with <code>sudo fail2ban-client -t</code></td></tr><tr><td>Banned yourself</td><td>Unban with <code>sudo fail2ban-client set sshd unbanip YOUR_IP</code>; add your IP to <code>ignoreip</code></td></tr><tr><td>IPs not being banned</td><td>Confirm the jail is enabled (<code>sudo fail2ban-client status</code>); verify the log path in the jail config exists and is being written to</td></tr><tr><td>firewalld not blocking banned IPs</td><td>Ensure fail2ban is using the firewalld backend: check <code>/etc/fail2ban/jail.conf</code> for <code>banaction = firewallcmd-rich-rules</code></td></tr><tr><td>Caddy jail never triggers</td><td>Confirm Caddy is writing JSON logs to <code>logpath</code>; test the regex: <code>sudo fail2ban-regex /var/log/caddy/access.log /etc/fail2ban/filter.d/caddy.conf</code></td></tr></tbody></table>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>fail2ban won't start</td><td>Check <code>journalctl -u fail2ban</code> for syntax errors; validate with <code>sudo fail2ban-client -t</code></td></tr><tr><td>Banned yourself</td><td>Unban with <code>sudo fail2ban-client set sshd unbanip YOUR_IP</code>; add your IP to <code>ignoreip</code></td></tr><tr><td>IPs not being banned</td><td>Confirm the jail is enabled (<code>sudo fail2ban-client status</code>); verify the log path in the jail config exists and is being written to</td></tr><tr><td>bans are not taking effect</td><td>The shipped backend is <code>banaction = iptables-multiport</code> in <code>/etc/fail2ban/paths-arch.conf</code>, <strong>not</strong> a firewalld action — so <code>firewall-cmd</code> will never show these bans. Check `sudo iptables -L -n</td><td>grep -i f2b<code>, or switch the backend to </code>firewallcmd-rich-rules<code> in </code>/etc/fail2ban/jail.d/*.local`</td></tr><tr><td>Caddy jail never triggers</td><td>Confirm Caddy is writing JSON logs to <code>logpath</code>; test the regex: <code>sudo fail2ban-regex /var/log/caddy/access.log /etc/fail2ban/filter.d/caddy.conf</code></td></tr></tbody></table>
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>

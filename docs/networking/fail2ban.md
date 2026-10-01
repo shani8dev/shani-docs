@@ -6,7 +6,9 @@ updated: 2026-08-28
 
 # Fail2ban — Brute-Force Protection
 
-fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs via firewalld. It integrates with firewalld automatically on Shani OS — no extra backend configuration is required.
+fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs by writing firewall rules.
+
+> ⚠️ **The backend is `iptables-multiport`, not firewalld.** Arch's `paths-arch.conf` sets `banaction = iptables-multiport`, and that is what is in effect unless you change it yourself. So fail2ban does **not** coordinate with firewalld here, and the two are separate mechanisms: the `ssh` service you add to a firewalld zone and the rules fail2ban drops are unrelated. If you want them unified, set `banaction = firewallcmd-rich-rules` in a `jail.local` and reload.
 
 **Active from first boot.** `shani-network` enables it unconditionally at install time alongside firewalld — no setup needed to get baseline protection, though tuning the jails below is still recommended for any public-facing service.
 
@@ -40,7 +42,8 @@ sudo fail2ban-client set sshd unbanip 1.2.3.4
 sudo fail2ban-client banned
 
 # View the raw firewalld rules fail2ban has added
-sudo firewall-cmd --direct --get-all-rules
+# fail2ban's bans are plain iptables rules here, not firewalld rules:
+sudo iptables -L -n | grep -i f2b
 ```
 
 ---
@@ -159,7 +162,7 @@ ignoreip = 127.0.0.1/8 ::1 192.168.1.0/24 100.64.0.0/10
 | fail2ban won't start | Check `journalctl -u fail2ban` for syntax errors; validate with `sudo fail2ban-client -t` |
 | Banned yourself | Unban with `sudo fail2ban-client set sshd unbanip YOUR_IP`; add your IP to `ignoreip` |
 | IPs not being banned | Confirm the jail is enabled (`sudo fail2ban-client status`); verify the log path in the jail config exists and is being written to |
-| firewalld not blocking banned IPs | Ensure fail2ban is using the firewalld backend: check `/etc/fail2ban/jail.conf` for `banaction = firewallcmd-rich-rules` |
+| bans are not taking effect | The shipped backend is `banaction = iptables-multiport` in `/etc/fail2ban/paths-arch.conf`, **not** a firewalld action — so `firewall-cmd` will never show these bans. Check `sudo iptables -L -n | grep -i f2b`, or switch the backend to `firewallcmd-rich-rules` in `/etc/fail2ban/jail.d/*.local` |
 | Caddy jail never triggers | Confirm Caddy is writing JSON logs to `logpath`; test the regex: `sudo fail2ban-regex /var/log/caddy/access.log /etc/fail2ban/filter.d/caddy.conf` |
 
 ---

@@ -295,7 +295,7 @@
 <li>*<em>Subvolumes under <code>/var/</em></code>** (<code>@log</code>, <code>@cache</code>, and all container/virtualisation subvolumes) — additionally carry <code>x-systemd.after=var.mount,x-systemd.requires=var.mount</code> since <code>/var</code> itself is a tmpfs that must exist first</li>
 <li><strong>VM disk subvolumes</strong> (<code>@libvirt</code>, <code>@qemu</code>) and <code>@swap</code> — use <code>nodatacow,nospace_cache</code> (required for correctness and performance)</li>
 <li><strong>All other Btrfs subvolumes</strong> — use <code>noatime,compress=zstd,space_cache=v2,autodefrag</code></li>
-<li><strong>All bind mounts</strong> — use <code>bind,nofail,x-systemd.after=var.mount,x-systemd.requires-mounts-for=/data</code></li>
+<li><strong>All bind mounts</strong> — use `<code>bind,nofail,x-systemd.after=var.mount,x-systemd.after=data.mount,x-systemd.before=local-fs.target</code>`</li>
 </ul>
 <h3 id="why-noatime">Why noatime?</h3>
 <p>Writing an access timestamp on every file read would generate massive write traffic on a busy system. All subvolumes use <code>noatime</code> to prevent this — reducing SSD wear, improving battery life, and eliminating pointless write amplification.</p>

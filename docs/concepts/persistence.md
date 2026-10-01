@@ -44,7 +44,7 @@ All of the subvolumes above are mounted at the Btrfs top level, independent of w
 `systemd.volatile=state` kernel parameter mounts a tmpfs over `/var`:
 
 - `/var` (tmpfs)
-- `/tmp` (tmpfs — fstab entry)
+- `/tmp` (tmpfs — from systemd's own `tmp.mount`, not an fstab entry)
 - `/run` (tmpfs)
 - `/dev /proc /sys` (virtual filesystems)
 

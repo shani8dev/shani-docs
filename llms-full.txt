@@ -146,7 +146,7 @@ Shanios uses systemd-boot's boot-counting mechanism plus its own two-tier failur
 1. **`+3-0`** — set on the new slot's EFI entry at deploy time (3 tries left, 0 done)
 2. On each failed boot, the firmware decrements the tries-left counter
 3. At `0`, systemd-boot falls back to the `(Candidate)` entry — before the OS even starts
-4. Once `bless-boot.service` runs successfully, the entry file is renamed `+3-0` → `+3-3` (tries-left == tries-done), which stops the countdown for good
+> ⚠️ **The `+3-0` → `+3-3` rename does not happen on systemd 259+.** Verified under a real UEFI boot: systemd-boot never renames a `+tries_left-tries_done` entry or sets `LoaderBootCountPath`, so `systemd-bless-boot` reports "Not booted with boot counting in effect" and the automatic hard-failure fallback is **not** in place. See [Shani AGENTS] — treat "three tries then fallback" as not currently guaranteed.
 
 ### Tier 2: Application-level Health (systemd services)
 
@@ -154,7 +154,7 @@ Shanios uses systemd-boot's boot-counting mechanism plus its own two-tier failur
 |---------|------|------|
 | `mark-boot-in-progress.service` | `local-fs.target` (requires `data.mount`) | `rm -f boot-ok boot_failure.acked boot_in_progress`, then `touch boot_in_progress` — hard-fails (blocking the boot) if `/data` isn't mounted |
 | `mark-boot-success.service` | `multi-user.target`, requires `boot_in_progress` to exist | Writes `/data/boot-ok`, removes `boot_in_progress`, and — if the slot that just booted matches the slot recorded in `boot_failure` — clears `boot_failure`/`boot_failure.acked` as stale (the slot clearly recovered) |
-| `bless-boot.service` | `multi-user.target`, `ConditionPathExists=/data/boot-ok` | Runs `bootctl set-good` — stops the boot counter countdown |
+| `bless-boot.service` | `multi-user.target`, `ConditionPathExists=/data/boot-ok` | Runs `systemd-bless-boot good` — stops the boot counter countdown |
 | `check-boot-failure.timer` / `.service` | `OnBootSec=15m`, fires once | If `boot_in_progress` still exists and `boot-ok` is absent, writes the *previously active* slot name into `/data/boot_failure` (skipped if `/data/boot_hard_failure` is already present) |
 
 After login, the Shani Cassini agent reads this boot state through `shani-deploy --status --check --json`. If a fallback or recovery failure is recorded, it sends a notification that opens **Updates & Rollback**, where you can manage the rollback.
@@ -457,7 +457,7 @@ build.sh <command> -p <profile>
 
 ### 1. Base Image (`build-base-image.sh`)
 
-The core stage. Creates a Btrfs subvolume, pacstraps the package list from `image_profiles/<profile>/package-list.txt`, applies the shared overlay (base configs, systemd units), then runs the profile-specific customization script:
+The core stage. Creates a Btrfs subvolume, pacstraps the package list from `image_profiles/<profile>/Packages-{Base,Desktop,Extras}`, applies the shared overlay (base configs, systemd units), then runs the profile-specific customization script:
 
 - `gnome-customization.sh` — enables GNOME services, installs GNOME-specific Flatpaks
 - `plasma-customization.sh` — enables KDE services, Kvantum theme override
@@ -485,7 +485,7 @@ Signs the ISO with `sbsign` for Secure Boot, generates `.sha256` and `.asc` file
 
 ### 6. Upload (`upload.sh`)
 
-Pushes artifacts to SourceForge (primary download) and Cloudflare R2 (build cache and CDN). Uses `rclone` for R2 and `lftp` for SourceForge.
+Pushes artifacts to SourceForge (primary download) and Cloudflare R2 (build cache and CDN). Uses `rclone` for R2 and `rsync`/`sftp` over SSH for SourceForge (there is no `lftp` in the upload script).
 
 ## Image Profiles
 
@@ -499,7 +499,7 @@ Each profile has its own directory under `image_profiles/`:
 | `kiosk` | `image_profiles/kiosk/` | Cage + labwc (Firefox) | 17 packages |
 | `server` | `image_profiles/server/` | None (headless) | 170 explicit packages |
 
-> **Note:** The "25 meta-packages" for gnome/plasma/cosmic are defined in `image_profiles/<profile>/package-list.txt`. Each meta-package (e.g., `shani-core`, `shani-desktop-gnome`) pulls in many transitive dependencies via `shani-pkgbuilds` PKGBUILDs and `.install` scripts, resulting in hundreds of total packages installed on the final image.
+> **Note:** The "25 meta-packages" for gnome/plasma/cosmic are defined in `image_profiles/<profile>/Packages-{Base,Desktop,Extras}`. Each meta-package (e.g., `shani-core`, `shani-desktop-gnome`) pulls in many transitive dependencies via `shani-pkgbuilds` PKGBUILDs and `.install` scripts, resulting in hundreds of total packages installed on the final image.
 
 Shared packages across all profiles are in `image_profiles/shared/`.
 
@@ -652,7 +652,7 @@ Boot attempt
        │       if the booted slot matches the slot recorded there (stale recovery)
        │
        ├─ bless-boot.service (after mark-boot-success)
-       │    └─ bootctl set-good (stops boot counter)
+       │    └─ systemd-bless-boot good (stops boot counter)
        │
        └─ check-boot-failure.timer (OnBootSec=15m)
             └─ if boot_in_progress && ! boot-ok → writes /data/boot_failure
@@ -875,7 +875,7 @@ Because `/var` is volatile (tmpfs via `systemd.volatile=state`), critical servic
 - **Subvolumes under `/var/*`** (`@log`, `@cache`, and all container/virtualisation subvolumes) — additionally carry `x-systemd.after=var.mount,x-systemd.requires=var.mount` since `/var` itself is a tmpfs that must exist first
 - **VM disk subvolumes** (`@libvirt`, `@qemu`) and `@swap` — use `nodatacow,nospace_cache` (required for correctness and performance)
 - **All other Btrfs subvolumes** — use `noatime,compress=zstd,space_cache=v2,autodefrag`
-- **All bind mounts** — use `bind,nofail,x-systemd.after=var.mount,x-systemd.requires-mounts-for=/data`
+- **All bind mounts** — use ``bind,nofail,x-systemd.after=var.mount,x-systemd.after=data.mount,x-systemd.before=local-fs.target``
 
 ### Why noatime?
 
@@ -1113,7 +1113,7 @@ The kernel cmdline embedded in the UKI is regenerated from the live disk state �
 
 The new entry gets a `+3-0` suffix: 3 tries allowed, 0 done. Each failed boot attempt decrements the tries-left counter. If it reaches zero, systemd-boot automatically falls back to the previous slot's UKI.
 
-If the new slot boots successfully, `bless-boot` calls `bootctl set-good`, stopping the countdown. The slot becomes the permanent default.
+If the new slot boots successfully, `bless-boot` calls `systemd-bless-boot good`, stopping the countdown. The slot becomes the permanent default.
 
 ## Before / After
 
@@ -1134,7 +1134,7 @@ If the new slot boots successfully, `bless-boot` calls `bootctl set-good`, stopp
 
 Rollback actually happens in two stages — one automatic at the bootloader level, one confirmed by you at the login screen.
 
-**Stage 1 — systemd-boot falls back on its own.** Every boot of the newly updated slot counts against its `+3-0` tries. `bless-boot` only calls `bootctl set-good` (clearing the counter) after `mark-boot-success` has confirmed `multi-user.target` was reached and written `/data/boot-ok`. So any boot that crashes, hangs, or never reaches a working session — including a hard failure where the Btrfs root itself fails to mount, caught by a dracut hook that writes `/data/boot_hard_failure` before the mount is even attempted — leaves the counter un-cleared. After three such attempts, systemd-boot automatically boots the fallback slot's `.conf` entry instead. This part requires no user interaction and no login: you land on the previous, working system.
+**Stage 1 — systemd-boot falls back on its own.** Every boot of the newly updated slot counts against its `+3-0` tries. `bless-boot` only calls `systemd-bless-boot good` (clearing the counter) after `mark-boot-success` has confirmed `multi-user.target` was reached and written `/data/boot-ok`. So any boot that crashes, hangs, or never reaches a working session — including a hard failure where the Btrfs root itself fails to mount, caught by a dracut hook that writes `/data/boot_hard_failure` before the mount is even attempted — leaves the counter un-cleared. After three such attempts, systemd-boot automatically boots the fallback slot's `.conf` entry instead. This part requires no user interaction and no login: you land on the previous, working system.
 
 **Stage 2 — the actual data rollback stays under your control.** systemd-boot switching slots only changes which UKI boots next; it does not touch Btrfs subvolume contents, so a failed candidate slot can still be broken. After login, the Shani Cassini agent reads the mismatch between the booted slot and `/data/current-slot`, or the `boot_hard_failure` marker, through `shani-deploy --status --check --json`. It notifies you and opens **Updates & Rollback** when you choose **Open**. Rolling back from that page runs `shani-deploy --rollback`, which restores the failed slot from its pre-deploy safety snapshot (see step 2 above) and rewrites both boot entries with no tries needed, since both slots are now known-good. No data on `@home`, `@data`, or any other persistent subvolume is touched by any of this. See [Persistence Strategy](./persistence.md).
 
@@ -1142,7 +1142,7 @@ The boot health pipeline behind stage 1:
 
 - `mark-boot-in-progress` — clears prior markers and plants `/data/boot_in_progress` at boot start
 - `mark-boot-success` — writes `/data/boot-ok` once `multi-user.target` is reached
-- `bless-boot` — calls `bootctl set-good` once `/data/boot-ok` exists, stopping the boot-count decrement
+- `bless-boot` — calls `systemd-bless-boot good` once `/data/boot-ok` exists, stopping the boot-count decrement
 - `check-boot-failure` (15-minute timer) — if `/data/boot_in_progress` is still present and `/data/boot-ok` never appeared, records the slot in `/data/boot_failure`
 - a dracut pre-mount hook writes `/data/boot_hard_failure` unconditionally before the root Btrfs mount is attempted, and a pre-pivot hook clears it on success — this catches failures too early for the above systemd units to ever run
 
@@ -1386,7 +1386,7 @@ All of the subvolumes above are mounted at the Btrfs top level, independent of w
 `systemd.volatile=state` kernel parameter mounts a tmpfs over `/var`:
 
 - `/var` (tmpfs)
-- `/tmp` (tmpfs — fstab entry)
+- `/tmp` (tmpfs — from systemd's own `tmp.mount`, not an fstab entry)
 - `/run` (tmpfs)
 - `/dev /proc /sys` (virtual filesystems)
 
@@ -2008,7 +2008,7 @@ welcome_page:
 
 disk:
   partition_ok: no
-  min_size: 28                   # minimum target size in GB
+  min_size: 30                   # minimum target size in GB
 
 disk_encryption:
   offered: yes
@@ -2060,7 +2060,7 @@ An OEM that needs its own signing key does so at the **image-build layer**, not 
 
 ## Custom & Cloud Image Building
 
-[shani-install-media](https://github.com/shani8dev/shani-install-media) builds the actual OS images and ISOs from four profiles, each with its own `package-list.txt` under `image_profiles/<profile>/`:
+[shani-install-media](https://github.com/shani8dev/shani-install-media) builds the actual OS images and ISOs from four profiles, each with its own `Packages-Base` / `Packages-Desktop` / `Packages-Extras` under `image_profiles/<profile>/`:
 
 | Profile | Desktop | Notes |
 |---|---|---|
@@ -2071,14 +2071,14 @@ An OEM that needs its own signing key does so at the **image-build layer**, not 
 
 ### The Server Profile
 
-`image_profiles/server/package-list.txt` is explicitly built for headless/cloud deployment — its header states the meta-package policy: it deliberately excludes `shani-core`, `shani-network`, and `shani-desktop-*` (which would pull in NetworkManager, Waydroid, snapd-for-desktop, and GUI stacks) and instead installs `shani-tools-network` plus an explicit package list. Concretely, the server profile differs from the desktop profiles in:
+`image_profiles/server/Packages-Base` is explicitly built for headless/cloud deployment — its header states the meta-package policy: it deliberately excludes `shani-core`, `shani-network`, and `shani-desktop-*` (which would pull in NetworkManager, Waydroid, snapd-for-desktop, and GUI stacks) and instead installs `shani-tools-network` plus an explicit package list. Concretely, the server profile differs from the desktop profiles in:
 
 - **Networking:** `systemd-networkd`/`systemd-resolved` instead of NetworkManager (`etc/systemd/network/20-cloud-dhcp.network`)
-- **Cloud integration:** `cloud-init`, `amazon-ssm-agent`, `amazon-ec2-utils` — configured for AWS EC2 out of the box
+- **Cloud integration:** `cloud-init` — configured for cloud boots out of the box. **`amazon-ssm-agent` and `amazon-ec2-utils` are deliberately NOT shipped** (ssm-agent is AUR-only, ec2-utils is not packaged anywhere) and listing them made every server build fail with "target not found"
 - **Serial console:** `serial-getty@ttyS0.service` enabled for EC2-style serial access, kernel cmdline set via `etc/kernel/install_cmdline`
 - **Security baseline enabled by default:** `sshd`, `firewalld`, `fail2ban`, `apparmor`, `auditd`, `fwupd`, `cronie` (`server-customization.sh` enables each)
 - **Containers, not desktop apps:** `podman`, `buildah`, `skopeo`, `distrobox`, `podman-compose`
-- **GUI dependencies disabled:** `server-customization.sh` masks the `shani-deploy-notify` GUI dialog service so `yad` never tries to open a display on a headless box
+- **GUI dependencies disabled:** the server profile's **overlay** masks `shani-deploy-notify.service` (a `/dev/null` symlink in `etc/systemd/system/`) so the GUI dialog service never opens a display on a headless box — that masking is done by the overlay, not by `server-customization.sh`
 - **Optional-until-configured services disabled:** `tailscaled`, `cloudflared`, and `caddy` are installed but disabled until an admin configures them
 
 The bundled cloud-init datasource config (`etc/cloud/cloud.cfg.d/10-shanios-aws.cfg`) targets AWS EC2 specifically: IMDSv2 is enforced (`strict_id: true`), SSH host keys are regenerated per-instance (`ssh_deletekeys`/`ssh_genkeytypes`) so cloned AMI instances don't share host keys, root SSH login is disabled, and the default `shanios` user is created with passwordless sudo and cloud-init-managed key injection — comparable to what AL2023/RHEL9/Ubuntu cloud images do.
@@ -2364,7 +2364,7 @@ shani-health --journal err
 shani-health --export-logs /var/tmp/diag
 ```
 
-Most modes (`--boot`, `--security`, `--storage-info`, `--network`, `--hardware`, `--packages`) print a formatted, human-readable report only — scraping structured data out of them for a monitoring dashboard means parsing text.
+Every mode prints a formatted human-readable report; adding `--json`, `--nagios` or `--prometheus` switches it to structured output (`--security --json`, `--boot --nagios`, `--info --prometheus` all work) — scraping structured data out of them for a monitoring dashboard means parsing text.
 
 `--verify` is the one built for fleet automation: it runs UKI signature checks, a Btrfs scrub of both slots, slot-marker consistency, boot-entry consistency, and immutability checks, then **returns a real exit code** — `0` if everything passed, `1` if it found any issue — plus, with `--json`, a structured summary of exactly which check(s) failed:
 
@@ -2404,7 +2404,7 @@ Shanios's default security configuration is designed to pass enterprise security
 - TPM2 auto-unlock — disk locked against physical removal to another machine
 - Secure Boot via Shim + MOK-signed UKIs — bootloader editor disabled
 - Signed OS images — SHA256 + GPG verified before every deployment
-- Intel ME kernel modules blacklisted by default
+- Intel ME kernel modules **not** blacklisted by default — only `pcspkr` is; add `blacklist mei_me` in `/etc/modprobe.d/` if you want it closed
 - firewalld active from first boot — default-deny inbound
 - fail2ban active — automated banning of repeated authentication failures
 - Zero telemetry — no usage data, crash reports, or analytics
@@ -2419,7 +2419,7 @@ To keep this page honest about what exists versus what a larger enterprise deplo
 
 - **No centralised fleet dashboard.** There is no web console or MDM-style server for viewing fleet-wide status, pushing configuration, or triggering updates across machines. Fleet coordination today means SSH/Tailscale plus your own scripting (cron + `shani-deploy` + `shani-health --verify`), as described above.
 - **No runtime-configurable private update mirror or signing key.** As covered above, `R2_BASE_URL` and `GPG_KEY_ID` are compile-time constants in `shani-deploy`. A private CDN or OEM signing key for *ongoing* updates requires forking the tool, not a config setting.
-- **Only `--verify` has machine-readable output.** `shani-health --verify --json` gives a structured pass/fail summary; every other mode (`--boot`, `--security`, `--storage-info`, `--network`, `--hardware`, `--packages`) is still formatted text only.
+- **Machine-readable output is available for most modes**, not only `--verify`. `shani-health --verify --json` gives a structured pass/fail summary; every other mode (`--boot`, `--security`, `--storage-info`, `--network`, `--hardware`, `--packages`) accept the same flags.
 - **No remote push/enrollment mechanism.** Machines pull updates on their own schedule (timer or user-triggered); there's no server-initiated "deploy to these 200 machines now" push.
 
 If your organisation needs one of these, [contact the project](https://shani.dev#enterprise) — enterprise/OEM engagement is exactly the context in which contributing this kind of tooling upstream is on the table.
@@ -3103,7 +3103,7 @@ All of the following is completed by the installer (`install.sh` + `configure.sh
 - All Btrfs subvolumes are created: `@root`, `@home`, `@data`, `@nix`, `@cache`, `@log`, `@flatpak`, `@snapd`, `@waydroid`, `@containers`, `@machines`, `@lxc`, `@lxd`, `@libvirt`, `@qemu`, `@swap`
 - The system image is extracted into `shanios_base`, snapshotted to `@blue` (read-only), then snapshotted again to `@green`. The active slot is written to `/data/current-slot` (`blue`)
 - The Flatpak store is extracted and snapshotted into `@flatpak`. If Snap seed was included on the ISO, it is extracted into `@snapd`
-- The swapfile is created in `@swap` using `btrfs filesystem mkswapfile` sized to match RAM. If there isn't enough free disk space for a full-RAM swapfile, this step is skipped entirely and the system falls back to zram for swap
+- The swapfile is created in `@swap` using `btrfs filesystem mkswapfile`, sized to match RAM where the disk allows. If free space is short it is **made smaller** rather than dropped — never below 1 GiB, and always leaving a 12 GiB reserve for updates — and only below that floor is the step skipped and the system falls back to zram for swap
 - Keyboard layout is always configured via `chroot`; locale, timezone, user account, and autologin are configured the same way, unless deferred to the first-boot wizard (see step 4 above)
 - Secure Boot: the MOK signing key is normally already baked into the system image at build time — the installer just verifies the keypair and re-signs the bootloader/kernel with it. Keys are only generated fresh on the spot if they're missing or invalid, which is a fallback path, not the common case. Either way, both UKIs (`shanios-blue.efi`, `shanios-green.efi`) are built using `dracut --force --uefi` and signed with the MOK key, and MOK enrollment is staged automatically so you just confirm it in MokManager on first boot (see [First Boot](./first-boot.md))
 - `/etc/crypttab` is generated with the LUKS UUID and `none` key field if encryption was chosen
@@ -3139,7 +3139,8 @@ df -h /
 | Secure Boot MokManager prompt doesn't appear on first boot | Firmware skipped MOK enrollment | Reboot and enter firmware settings; look for "Security" → "MOK" or "Secure Boot Key Management" |
 | Installer fails with "insufficient disk space" | Disk nominally 32 GB but below 30 GB usable floor | Use a disk with ≥32 GB total; the 30 GB floor accounts for partition tables and wear-leveling overhead |
 | Wi-Fi doesn't work during install | Wireless firmware not loaded | This is expected — the installer doesn't load Wi-Fi firmware; use wired connection or configure Wi-Fi after first boot |
-| Swap not created | Not enough free space for full-RAM swapfile | System will fall back to zram automatically — this is expected behavior, not an error |
+| Swap much smaller than RAM | Free space short of a full-RAM swapfile | Expected: it is sized down (min 1 GiB, minus a 12 GiB update reserve). **Hibernation needs swap >= RAM**, so it may be unavailable — `hibernation needs swap >= RAM and may not be available` is printed when that happens |
+| Swap not created at all | Free space below the floor (1 GiB after the 12 GiB reserve) | Nothing is created and the system runs on zram alone — expected, not an error |
 
 ## See Also
 
@@ -3949,7 +3950,7 @@ Everything below applies to every edition — **GNOME** and **KDE Plasma** today
 | KDE Plasma | Dolphin | KDE apps | OnlyOffice |
 | COSMIC *(announced)* | COSMIC Files | COSMIC apps | Warehouse |
 
-Pick an edition based on desktop taste — all include the same core: Vivaldi, OnlyOffice, Warehouse, Mission Center, IBus input, Nix, and the `shani-deploy` update system.
+Pick an edition based on desktop taste — all include the same core: Vivaldi, OnlyOffice, Warehouse, IBus input, Nix (Mission Center ships on **COSMIC only**), and the `shani-deploy` update system.
 
 ## Before You Leave Windows or macOS
 
@@ -4112,7 +4113,7 @@ The primary user is automatically configured with appropriate permissions during
 
 # User Configuration
 
-The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created users: the `shani-user-setup.path` unit watches the `/etc` overlay's upper-layer `passwd` file and the `/data/user-setup-needed` marker (written by `shani-deploy` after every OS update and by the first-run wizard on a fresh install), and triggers `shani-user-setup.service` whenever either changes. That service processes every regular user (UID 1000–59999) on the system, adding any missing required groups and setting the default shell to Zsh (falling back to Bash if Zsh isn't installed) — it is idempotent, so re-running it is always safe.
+The primary user is automatically configured with appropriate permissions during installation. Shanios also watches for newly created users: the `shani-user-setup.path` unit watches the `/etc` overlay's upper-layer `passwd` file and the `/data/user-setup-needed` marker (written by `shani-deploy` after every OS update and by the first-run wizard on a fresh install), and triggers `shani-user-setup.service` whenever either changes.leaving the user's chosen shell alone (it replaces the shell only if its binary is missing, so a user who ran `chsh` keeps it)
 
 This means any user created post-installation — via the desktop first-run wizard, or with `useradd`/`adduser` on the command line — gets the same setup automatically, and the same run also re-syncs existing users after an OS update.
 
@@ -4436,7 +4437,7 @@ journalctl -u httpd -f
 
 ## Configuration
 
-The main config file is `/etc/httpd/conf/httpd.conf`. Site-specific configs belong in `/etc/httpd/conf.d/` — any `.conf` file placed there is automatically included.
+The main config file is `/etc/httpd/conf/httpd.conf`. Site-specific configs belong in `/etc/httpd/conf/conf.d/` — any `.conf` file placed there is automatically included.
 
 ### Listen on a Non-Standard Port (Caddy Proxy Mode)
 
@@ -4458,7 +4459,7 @@ app.example.com {
 ### Virtual Hosts
 
 ```apache
-# /etc/httpd/conf.d/mysite.conf
+# /etc/httpd/conf/conf.d/mysite.conf
 
 <VirtualHost *:8080>
     ServerName mysite.example.com
@@ -4480,7 +4481,7 @@ app.example.com {
 When Apache serves traffic directly (no Caddy in front), terminate TLS itself. Requires `mod_ssl` — uncomment `LoadModule ssl_module modules/mod_ssl.so` and restart:
 
 ```apache
-# /etc/httpd/conf.d/mysite-ssl.conf
+# /etc/httpd/conf/conf.d/mysite-ssl.conf
 
 <VirtualHost *:443>
     ServerName mysite.example.com
@@ -5009,7 +5010,7 @@ BIND (`named`) is the most widely deployed DNS server. On Shani OS it is pre-ins
 
 For simple local DNS and DHCP on a homelab, **dnsmasq** is lighter and easier to configure. Use BIND when you need a full authoritative zone with proper SOA/NS records, zone transfers to secondary servers, DNSSEC signing, or split-horizon DNS.
 
-`named` state and zone files persist in `/var/named`, bind-mounted from `/data/varlib/named`, and survive OS updates.
+`named` state and zone files persist in `/var/named`, **not** bind-mounted on this image — `/etc/fstab` has no entry for it, so zone files written to `/var/named` are ephemeral and lost on reboot or slot switch. Persist them yourself (see Persistence).
 
 ---
 
@@ -6370,11 +6371,13 @@ sudo tail -f /var/log/exim/mainlog
 URL: https://docs.shani.dev/doc/networking/fail2ban/
 Updated: 2026-08-28
 
-fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs via firewalld. It integrates with firewalld automatical…
+fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs by writing firewall rules. ⚠️ The backend is iptables-m…
 
 # Fail2ban — Brute-Force Protection
 
-fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs via firewalld. It integrates with firewalld automatically on Shani OS — no extra backend configuration is required.
+fail2ban monitors log files for repeated authentication failures and temporarily bans offending IPs by writing firewall rules.
+
+> ⚠️ **The backend is `iptables-multiport`, not firewalld.** Arch's `paths-arch.conf` sets `banaction = iptables-multiport`, and that is what is in effect unless you change it yourself. So fail2ban does **not** coordinate with firewalld here, and the two are separate mechanisms: the `ssh` service you add to a firewalld zone and the rules fail2ban drops are unrelated. If you want them unified, set `banaction = firewallcmd-rich-rules` in a `jail.local` and reload.
 
 **Active from first boot.** `shani-network` enables it unconditionally at install time alongside firewalld — no setup needed to get baseline protection, though tuning the jails below is still recommended for any public-facing service.
 
@@ -6408,7 +6411,8 @@ sudo fail2ban-client set sshd unbanip 1.2.3.4
 sudo fail2ban-client banned
 
 # View the raw firewalld rules fail2ban has added
-sudo firewall-cmd --direct --get-all-rules
+# fail2ban's bans are plain iptables rules here, not firewalld rules:
+sudo iptables -L -n | grep -i f2b
 ```
 
 ---
@@ -6527,7 +6531,7 @@ ignoreip = 127.0.0.1/8 ::1 192.168.1.0/24 100.64.0.0/10
 | fail2ban won't start | Check `journalctl -u fail2ban` for syntax errors; validate with `sudo fail2ban-client -t` |
 | Banned yourself | Unban with `sudo fail2ban-client set sshd unbanip YOUR_IP`; add your IP to `ignoreip` |
 | IPs not being banned | Confirm the jail is enabled (`sudo fail2ban-client status`); verify the log path in the jail config exists and is being written to |
-| firewalld not blocking banned IPs | Ensure fail2ban is using the firewalld backend: check `/etc/fail2ban/jail.conf` for `banaction = firewallcmd-rich-rules` |
+| bans are not taking effect | The shipped backend is `banaction = iptables-multiport` in `/etc/fail2ban/paths-arch.conf`, **not** a firewalld action — so `firewall-cmd` will never show these bans. Check `sudo iptables -L -n | grep -i f2b`, or switch the backend to `firewallcmd-rich-rules` in `/etc/fail2ban/jail.d/*.local` |
 | Caddy jail never triggers | Confirm Caddy is writing JSON logs to `logpath`; test the regex: `sudo fail2ban-regex /var/log/caddy/access.log /etc/fail2ban/filter.d/caddy.conf` |
 
 ---
@@ -7759,7 +7763,7 @@ sudo firewall-cmd --reload
 
 ### Persistence
 
-Kerberos database files are stored in `/var/lib/kerberos/krb5kdc` and bind-mounted from `/data/varlib/kerberos` — they persist across OS updates and rollbacks.
+Kerberos database files are stored in `/var/lib/kerberos/krb5kdc` and **not** bind-mounted on this image — there is no `/data/varlib/kerberos` entry in `fstab`, so the KDC database is rebuilt after a reboot or slot switch.
 
 ---
 
@@ -8001,7 +8005,7 @@ Multiple export sections (`[disk1]`, `[disk2]`, …) can be defined in the same 
 
 ```bash
 # Enable the NBD server
-sudo systemctl enable --now nbd-server
+sudo systemctl enable --now nbd      # the unit is nbd.service; there is no nbd-server.service
 
 # Open the port in the firewall (restrict to your LAN — NBD has no built-in auth)
 sudo firewall-cmd --add-rich-rule='rule family="ipv4" source address="192.168.1.0/24" port port="10809" protocol="tcp" accept' --permanent
@@ -8072,7 +8076,7 @@ sudo systemctl enable --now nbd-connect
 | Issue | Solution |
 |-------|----------|
 | `nbd-client: No such device /dev/nbd0` | Load the kernel module: `sudo modprobe nbd` |
-| `Connection refused` on the client | Check `systemctl status nbd-server` on the server; verify the port and firewall with `sudo firewall-cmd --list-all` |
+| `Connection refused` on the client | Check `systemctl status nbd` on the server; verify the port and firewall with `sudo firewall-cmd --list-all` |
 | Filesystem errors after disconnect | Always unmount before disconnecting — `umount` first, then `nbd-client -d` |
 | Server crashes on large writes | Add `flush = true` and `sync = true` to the export section in the config |
 
@@ -8166,7 +8170,8 @@ Shanios includes a comprehensive suite of networking utilities for diagnostics, 
 |---------|----------------|---------|
 | `iproute2` | `ip`, `ss` | Modern interface, routing, & socket management |
 | `iputils` | `ping`, `arping` | Basic reachability & MAC discovery |
-| `inetutils` | `traceroute`, `ftp`, `telnet` | Legacy path tracing & protocol clients |
+| `traceroute` | `traceroute` | Own package, **not** inetutils |
+| `inetutils` | `ftp`, `telnet` | Legacy path tracing & protocol clients |
 | `net-tools` | `ifconfig`, `netstat`, `arp`, `route` | Legacy network configuration |
 | `bind` | `dig`, `host`, `nslookup` | DNS query & resolution tools |
 | `wireless_tools` | `iwconfig`, `iwlist`, `iwspy` | Legacy wireless diagnostics |
@@ -8732,7 +8737,7 @@ showmount -e localhost
 ### 4. Firewall
 
 ```bash
-sudo firewall-cmd --add-service=nfs --add-service=rpcbind --add-service=mountd --permanent
+sudo firewall-cmd --add-service=nfs --add-service=rpc-bind --add-service=mountd --permanent
 sudo firewall-cmd --reload
 ```
 
@@ -8838,7 +8843,7 @@ NFS clients do not enforce quotas locally — writes that exceed a quota are rej
 | `Stale file handle` | The exported path was deleted or the server restarted while the client had it open — `sudo umount -f /mnt/remote` and remount |
 | `Access denied by server` | Check `journalctl -u nfs-server` on the host for detailed errors |
 | Mount hangs at boot | Add `_netdev` and `timeo=14` to fstab options; ensure `nfs-server` is running on the host |
-| `showmount` fails from client | Open `rpcbind` and `mountd` firewall services on the server in addition to `nfs` |
+| `showmount` fails from client | Open the `rpc-bind` and `mountd` firewall services on the server in addition to `nfs` |
 
 ## See Also
 
@@ -9094,7 +9099,10 @@ For machines that rarely accept SSH connections, use socket activation instead o
 sudo systemctl disable --now sshd
 
 # Enable socket activation instead
-sudo systemctl enable --now sshd.socket
+# NOTE: there is NO sshd.socket in openssh 10.5. The package ships only
+# sshd.service, sshd@.service and sshdgenkeys.service. Do not disable
+# sshd.service expecting a socket to take over - nothing will.
+# sudo systemctl enable --now sshd
 ```
 
 ### 3. Open the Firewall
@@ -9512,7 +9520,7 @@ The rsync daemon exposes file modules over the rsync:// protocol for fast, effic
 
 The rsync daemon exposes file modules over the `rsync://` protocol for fast, efficient network file synchronisation and backups. Unlike SSH-based rsync, rsyncd runs as a standalone service — useful for automated, password-protected transfers without requiring SSH access.
 
-rsyncd is pre-installed on Shani OS. Lock and state files persist in `/data/varlib/rsync` across OS updates.
+rsyncd is pre-installed on Shani OS. there is **no** `/data/varlib/rsync` bind mount on this image, so lock and state files do not survive an update.
 
 > ⚠️ **Unencrypted:** `rsync://` daemon mode sends the data *and* the auth secret unencrypted on port 873. Restrict it to trusted LANs only — off-LAN, tunnel over WireGuard or use rsync-over-SSH instead.
 
@@ -9622,7 +9630,7 @@ Samba provides file and print sharing using the SMB/CIFS protocol, making your S
 
 # Samba — SMB/CIFS (Windows / macOS / Linux)
 
-Samba provides file and print sharing using the SMB/CIFS protocol, making your Shani OS machine appear as a Windows-compatible network share. It is pre-installed, and its runtime state (locks, caches, `tdbsam` database) is bind-mounted from `/data/varlib/samba`, ensuring it persists across OS updates.
+Samba provides file and print sharing using the SMB/CIFS protocol, making your Shani OS machine appear as a Windows-compatible network share. It is pre-installed, and its caches and `tdbsam` database are bind-mounted from `/data/varlib/samba`, and its lock state from `/data/varspool/samba`, ensuring it persists across OS updates.
 
 > **Prefer NFS** for Linux-to-Linux sharing. Use Samba when you need Windows or macOS compatibility.
 
@@ -9668,12 +9676,12 @@ sudo systemctl enable --now smb nmb
     usershare path = /var/lib/samba/usershare
     usershare max shares = 100
     usershare owner only = yes
-    usershare allow guests = yes
+    usershare allow guests = no     # shipped default; `yes` exposes the folder to unauthenticated clients
 
 [homes]
     comment = Home Directories
     browseable = no
-    read only = yes
+    read only = no
     create mask = 0700
     directory mask = 0700
     valid users = %S
@@ -9810,7 +9818,7 @@ Finder → Go → Connect to Server: `smb://192.168.1.100/SharedFiles`
 | `NT_STATUS_LOGON_FAILURE` | Wrong Samba password — reset with `sudo smbpasswd youruser` |
 | `mount error(13): Permission denied` on Linux | Add `sec=ntlmssp` to mount options; verify credentials in `.smbcredentials` |
 | Config changes not taking effect | Run `testparm` to validate, then `sudo systemctl restart smb nmb` |
-| View logs | `journalctl -u smb` or `/var/log/samba/log.smbd` |
+| View logs | `journalctl -u smb` or `/var/log/samba/<netbios-name>.log` (the shipped `smb.conf` sets `log file = /var/log/samba/%m.log`; `log.smbd` only appears if `log level` is raised above 0) |
 
 ## See Also
 
@@ -9830,7 +9838,7 @@ OpenLDAP is an open-source implementation of the Lightweight Directory Access Pr
 
 OpenLDAP is an open-source implementation of the Lightweight Directory Access Protocol (LDAP), used for centralised authentication and directory services. It is pre-installed on Shani OS.
 
-Database files persist in `/var/lib/openldap/openldap-data`, bind-mounted from `/data/varlib/openldap`, and survive OS updates.
+Database files persist in `/var/lib/openldap/openldap-data`, **not** bind-mounted on this image — there is no `/data/varlib/openldap` entry in `fstab`, so the database is rebuilt after a reboot or slot switch.
 
 ---
 
@@ -11569,7 +11577,7 @@ At the time of writing, the current stable release is **2026.05.18**: GNOME edit
 - **Immutability:** The root filesystem is read-only at runtime. Neither accidental commands nor malware can corrupt the OS — it always boots to a known-good state. Even a process running as root cannot modify core system files during a live session.
 - **Atomic updates via blue-green deployment:** Two complete system images (`@blue` and `@green`) are maintained at all times. Updates are written to the inactive image; you boot into it only when it's ready. The previous image remains as an instant rollback target. If the new copy can't boot at all, systemd-boot detects the failure and reverts automatically.
 - **Selective persistence:** Your data, configuration, Flatpak apps, containers, and service credentials all live in separate Btrfs subvolumes that survive every update and rollback untouched.
-- **Defence-in-depth security:** Six Linux Security Modules run simultaneously (`lsm=landlock,lockdown,yama,integrity,apparmor,bpf`), LUKS2 argon2id encryption, TPM2 auto-unlock, Secure Boot, Intel ME kernel modules blacklisted by default, and every OS image SHA256+GPG verified before deployment.
+- **Defence-in-depth security:** Six Linux Security Modules run simultaneously (`lsm=landlock,lockdown,yama,integrity,apparmor,bpf`), LUKS2 argon2id encryption, TPM2 auto-unlock, Secure Boot, Intel ME kernel modules **not** blacklisted by default (`mei`/`mei_me` load unless you blacklist them) and every OS image SHA256+GPG verified before deployment.
 - **Zero telemetry:** No usage data, crash reports, analytics, or tracking of any kind — ever.
 
 Built in India 🇮🇳 by [Shrinivas Vishnu Kumbhar](https://github.com/Shrinivasvkumbhar). Indian-language support (Devanagari, Tamil, Telugu, and more) is a first-class feature.
@@ -60263,7 +60271,7 @@ ls /data/boot_failure /data/boot_hard_failure 2>/dev/null
 journalctl -b 0 -p err --no-pager | head -40
 
 # Check the startup check output
-journalctl -b -1 -u startup-check.service
+journalctl -b -1 -u mark-boot-in-progress.service -u bless-boot.service -u check-boot-failure.service
 ```
 
 To restore the failed slot and try again:
@@ -62256,7 +62264,7 @@ shani-user-setup automatically provisions every regular user (UID 1000–59999) 
 For each interactive user account on the system, `shani-user-setup`:
 
 1. **Groups** — adds the user to all groups listed in `/etc/shani-extra-groups`, skipping any that don't exist
-2. **Default shell** — sets the shell to Zsh (falling back to Bash if Zsh isn't installed), only if the current shell differs
+2. **Default shell** — new installs start on Zsh (`useradd -s /bin/zsh`). Provisioning replaces the shell **only if its binary no longer exists** (e.g. gone after a slot switch); a shell the user chose with `chsh` is left alone
 3. **Flatpak remote** — adds the `flathub` remote for the user if not already present
 4. **Nix channel** — adds the `nixpkgs-unstable` channel if no channel named `nixpkgs` exists (never overwrites an existing nixpkgs channel)
 5. **subuid/subgid ranges** — allocates 65,536 sub-UIDs and sub-GIDs for rootless Podman/LXC/LXD if not already assigned
@@ -62277,7 +62285,7 @@ The list of groups added to every user is read from a single file:
 Format: one comma-separated line, no spaces.
 
 ```
-wheel,video,input,audio,kvm,storage,network,realtime,scanner,lp,cups,libvirt,lxd
+sys,cups,lp,scanner,realtime,input,video,kvm,libvirt,lxd,nixbld,sambashare
 ```
 
 ### Group Reference
@@ -62315,7 +62323,7 @@ sudo FORCE_SETUP=1 shani-user-setup
 
 ## Triggering
 
-`shani-user-setup.path` watches three things, and running the service is rate-limited to at most 3 triggers per 60 seconds:
+`shani-user-setup.path` watches three things, and running the service is rate-limited to at most 20 triggers per 60 seconds (`TriggerLimitBurst=20`; it was raised from 3 because a burst of 3 left the unit failed and later users got no setup until reboot):
 
 1. `/data/overlay/etc/upper/passwd` created or changed — fires the moment a new user is added (via `useradd`/`adduser`, which copy-up `/etc/passwd` into the overlay), without needing any marker file
 2. `/etc/skel` modified — belt-and-suspenders coverage for a slot switch that changes skel contents

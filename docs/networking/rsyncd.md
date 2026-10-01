@@ -8,7 +8,7 @@ updated: 2026-08-28
 
 The rsync daemon exposes file modules over the `rsync://` protocol for fast, efficient network file synchronisation and backups. Unlike SSH-based rsync, rsyncd runs as a standalone service — useful for automated, password-protected transfers without requiring SSH access.
 
-rsyncd is pre-installed on Shani OS. Lock and state files persist in `/data/varlib/rsync` across OS updates.
+rsyncd is pre-installed on Shani OS. there is **no** `/data/varlib/rsync` bind mount on this image, so lock and state files do not survive an update.
 
 > ⚠️ **Unencrypted:** `rsync://` daemon mode sends the data *and* the auth secret unencrypted on port 873. Restrict it to trusted LANs only — off-LAN, tunnel over WireGuard or use rsync-over-SSH instead.
 

@@ -240,7 +240,7 @@ ls /data/boot_failure /data/boot_hard_failure 2&gt;/dev/null
 journalctl -b 0 -p err --no-pager | head -40
 
 # Check the startup check output
-journalctl -b -1 -u startup-check.service</code></pre>
+journalctl -b -1 -u mark-boot-in-progress.service -u bless-boot.service -u check-boot-failure.service</code></pre>
 <p>To restore the failed slot and try again:</p>
 <pre><code class="language-bash">sudo shani-deploy -r
 sudo reboot</code></pre>

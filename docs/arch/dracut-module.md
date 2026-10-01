@@ -122,7 +122,7 @@ Boot attempt
        │       if the booted slot matches the slot recorded there (stale recovery)
        │
        ├─ bless-boot.service (after mark-boot-success)
-       │    └─ bootctl set-good (stops boot counter)
+       │    └─ systemd-bless-boot good (stops boot counter)
        │
        └─ check-boot-failure.timer (OnBootSec=15m)
             └─ if boot_in_progress && ! boot-ok → writes /data/boot_failure

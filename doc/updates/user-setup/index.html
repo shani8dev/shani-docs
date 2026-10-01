@@ -224,7 +224,7 @@
 <p>For each interactive user account on the system, <code>shani-user-setup</code>:</p>
 <ol>
 <li><strong>Groups</strong> — adds the user to all groups listed in <code>/etc/shani-extra-groups</code>, skipping any that don't exist</li>
-<li><strong>Default shell</strong> — sets the shell to Zsh (falling back to Bash if Zsh isn't installed), only if the current shell differs</li>
+<li><strong>Default shell</strong> — new installs start on Zsh (<code>useradd -s /bin/zsh</code>). Provisioning replaces the shell <strong>only if its binary no longer exists</strong> (e.g. gone after a slot switch); a shell the user chose with <code>chsh</code> is left alone</li>
 <li><strong>Flatpak remote</strong> — adds the <code>flathub</code> remote for the user if not already present</li>
 <li><strong>Nix channel</strong> — adds the <code>nixpkgs-unstable</code> channel if no channel named <code>nixpkgs</code> exists (never overwrites an existing nixpkgs channel)</li>
 <li><strong>subuid/subgid ranges</strong> — allocates 65,536 sub-UIDs and sub-GIDs for rootless Podman/LXC/LXD if not already assigned</li>
@@ -236,7 +236,7 @@
 <p>The list of groups added to every user is read from a single file:</p>
 <pre><code>/etc/shani-extra-groups</code></pre>
 <p>Format: one comma-separated line, no spaces.</p>
-<pre><code>wheel,video,input,audio,kvm,storage,network,realtime,scanner,lp,cups,libvirt,lxd</code></pre>
+<pre><code>sys,cups,lp,scanner,realtime,input,video,kvm,libvirt,lxd,nixbld,sambashare</code></pre>
 <h3 id="group-reference">Group Reference</h3>
 <table><thead><tr><th>Group</th><th>Purpose</th></tr></thead><tbody><tr><td><code>wheel</code></td><td>Sudo privileges for system administration</td></tr><tr><td><code>input</code></td><td>Direct input device access (keyboards, mice, controllers)</td></tr><tr><td><code>realtime</code></td><td>Real-time scheduling, HPET/RTC access for audio production and low-latency gaming</td></tr><tr><td><code>video</code></td><td>GPU and video hardware access</td></tr><tr><td><code>sys</code></td><td>Hardware monitoring and sensor access</td></tr><tr><td><code>cups</code>, <code>lp</code></td><td>Printer management and job submission</td></tr><tr><td><code>scanner</code></td><td>Scanner device access</td></tr><tr><td><code>nixbld</code></td><td>Nix build users group — required for the Nix package manager daemon</td></tr><tr><td><code>lxc</code>, <code>lxd</code></td><td>LXC/LXD container management without root</td></tr><tr><td><code>kvm</code></td><td>Virtual machine management (KVM hardware access)</td></tr><tr><td><code>libvirt</code></td><td>libvirt VM management via <code>virsh</code> and virt-manager</td></tr></tbody></table>
 <p>This file is the <strong>single source of truth</strong> shared between <code>shani-user-setup</code> and the <code>adduser</code>/<code>useradd</code> wrappers. Editing it ensures that all future users (and any re-provisioning runs) get the same groups.</p>
@@ -251,7 +251,7 @@ sudo nano /etc/shani-extra-groups
 sudo FORCE_SETUP=1 shani-user-setup</code></pre>
 <hr>
 <h2 id="triggering">Triggering</h2>
-<p><code>shani-user-setup.path</code> watches three things, and running the service is rate-limited to at most 3 triggers per 60 seconds:</p>
+<p><code>shani-user-setup.path</code> watches three things, and running the service is rate-limited to at most 20 triggers per 60 seconds (<code>TriggerLimitBurst=20</code>; it was raised from 3 because a burst of 3 left the unit failed and later users got no setup until reboot):</p>
 <ol>
 <li><code>/data/overlay/etc/upper/passwd</code> created or changed — fires the moment a new user is added (via <code>useradd</code>/<code>adduser</code>, which copy-up <code>/etc/passwd</code> into the overlay), without needing any marker file</li>
 <li><code>/etc/skel</code> modified — belt-and-suspenders coverage for a slot switch that changes skel contents</li>

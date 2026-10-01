@@ -268,7 +268,7 @@ sudo firewall-cmd --add-port=749/tcp --permanent                     # kadmin (a
 sudo firewall-cmd --add-port=464/tcp --add-port=464/udp --permanent  # kpasswd (password change)
 sudo firewall-cmd --reload</code></pre>
 <h3 id="persistence">Persistence</h3>
-<p>Kerberos database files are stored in <code>/var/lib/kerberos/krb5kdc</code> and bind-mounted from <code>/data/varlib/kerberos</code> — they persist across OS updates and rollbacks.</p>
+<p>Kerberos database files are stored in <code>/var/lib/kerberos/krb5kdc</code> and <strong>not</strong> bind-mounted on this image — there is no <code>/data/varlib/kerberos</code> entry in <code>fstab</code>, so the KDC database is rebuilt after a reboot or slot switch.</p>
 <hr>
 <h2 id="client-usage">Client Usage</h2>
 <h3 id="obtain-a-ticket">Obtain a Ticket</h3>

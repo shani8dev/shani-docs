@@ -236,7 +236,7 @@
 <p><code>systemd.volatile=state</code> kernel parameter mounts a tmpfs over <code>/var</code>:</p>
 <ul>
 <li><code>/var</code> (tmpfs)</li>
-<li><code>/tmp</code> (tmpfs — fstab entry)</li>
+<li><code>/tmp</code> (tmpfs — from systemd's own <code>tmp.mount</code>, not an fstab entry)</li>
 <li><code>/run</code> (tmpfs)</li>
 <li><code>/dev /proc /sys</code> (virtual filesystems)</li>
 </ul>

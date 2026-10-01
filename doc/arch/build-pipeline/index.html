@@ -228,7 +228,7 @@
 <table><thead><tr><th>Command</th><th>Pipeline</th></tr></thead><tbody><tr><td><code>all</code></td><td>image → release latest → upload image</td></tr><tr><td><code>full</code></td><td>image → flatpak → snap → iso → repack → release latest → upload all</td></tr><tr><td><code>iso-only</code></td><td>Download from R2 → build ISO → repack → upload iso</td></tr><tr><td><code>publish</code></td><td>release → upload (for promoting pre-released artifacts)</td></tr></tbody></table>
 <h2 id="build-stages">Build Stages</h2>
 <h3 id="1-base-image-build-base-imagesh">1. Base Image (<code>build-base-image.sh</code>)</h3>
-<p>The core stage. Creates a Btrfs subvolume, pacstraps the package list from <code>image_profiles/&lt;profile&gt;/package-list.txt</code>, applies the shared overlay (base configs, systemd units), then runs the profile-specific customization script:</p>
+<p>The core stage. Creates a Btrfs subvolume, pacstraps the package list from <code>image_profiles/&lt;profile&gt;/Packages-{Base,Desktop,Extras}</code>, applies the shared overlay (base configs, systemd units), then runs the profile-specific customization script:</p>
 <ul>
 <li><code>gnome-customization.sh</code> — enables GNOME services, installs GNOME-specific Flatpaks</li>
 <li><code>plasma-customization.sh</code> — enables KDE services, Kvantum theme override</li>
@@ -246,11 +246,11 @@
 <h3 id="5-repack-repack-isosh">5. Repack (<code>repack-iso.sh</code>)</h3>
 <p>Signs the ISO with <code>sbsign</code> for Secure Boot, generates <code>.sha256</code> and <code>.asc</code> files, and creates a BitTorrent file for distribution.</p>
 <h3 id="6-upload-uploadsh">6. Upload (<code>upload.sh</code>)</h3>
-<p>Pushes artifacts to SourceForge (primary download) and Cloudflare R2 (build cache and CDN). Uses <code>rclone</code> for R2 and <code>lftp</code> for SourceForge.</p>
+<p>Pushes artifacts to SourceForge (primary download) and Cloudflare R2 (build cache and CDN). Uses <code>rclone</code> for R2 and <code>rsync</code>/<code>sftp</code> over SSH for SourceForge (there is no <code>lftp</code> in the upload script).</p>
 <h2 id="image-profiles">Image Profiles</h2>
 <p>Each profile has its own directory under <code>image_profiles/</code>:</p>
 <table><thead><tr><th>Profile</th><th>Directory</th><th>Desktop</th><th>Package count</th></tr></thead><tbody><tr><td><code>gnome</code></td><td><code>image_profiles/gnome/</code></td><td>GNOME</td><td>25 meta-packages + Flatpaks</td></tr><tr><td><code>plasma</code></td><td><code>image_profiles/plasma/</code></td><td>KDE Plasma</td><td>25 meta-packages + Flatpaks</td></tr><tr><td><code>cosmic</code></td><td><code>image_profiles/cosmic/</code></td><td>COSMIC</td><td>25 meta-packages + Flatpaks</td></tr><tr><td><code>kiosk</code></td><td><code>image_profiles/kiosk/</code></td><td>Cage + labwc (Firefox)</td><td>17 packages</td></tr><tr><td><code>server</code></td><td><code>image_profiles/server/</code></td><td>None (headless)</td><td>170 explicit packages</td></tr></tbody></table>
-<blockquote><strong>Note:</strong> The "25 meta-packages" for gnome/plasma/cosmic are defined in <code>image_profiles/&lt;profile&gt;/package-list.txt</code>. Each meta-package (e.g., <code>shani-core</code>, <code>shani-desktop-gnome</code>) pulls in many transitive dependencies via <code>shani-pkgbuilds</code> PKGBUILDs and <code>.install</code> scripts, resulting in hundreds of total packages installed on the final image.</blockquote>
+<blockquote><strong>Note:</strong> The "25 meta-packages" for gnome/plasma/cosmic are defined in <code>image_profiles/&lt;profile&gt;/Packages-{Base,Desktop,Extras}</code>. Each meta-package (e.g., <code>shani-core</code>, <code>shani-desktop-gnome</code>) pulls in many transitive dependencies via <code>shani-pkgbuilds</code> PKGBUILDs and <code>.install</code> scripts, resulting in hundreds of total packages installed on the final image.</blockquote>
 <p>Shared packages across all profiles are in <code>image_profiles/shared/</code>.</p>
 <h2 id="docker-environment">Docker Environment</h2>
 <p>All build steps run inside the <code>shrinivasvkumbhar/shani-builder</code> Docker image (built from <code>shani-builder/docker/</code>). The container is privileged because image assembly requires Btrfs operations, loop mounts, and chroot — all of which need host-level access.</p>

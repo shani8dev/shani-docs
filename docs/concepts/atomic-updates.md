@@ -72,7 +72,7 @@ The kernel cmdline embedded in the UKI is regenerated from the live disk state �
 
 The new entry gets a `+3-0` suffix: 3 tries allowed, 0 done. Each failed boot attempt decrements the tries-left counter. If it reaches zero, systemd-boot automatically falls back to the previous slot's UKI.
 
-If the new slot boots successfully, `bless-boot` calls `bootctl set-good`, stopping the countdown. The slot becomes the permanent default.
+If the new slot boots successfully, `bless-boot` calls `systemd-bless-boot good`, stopping the countdown. The slot becomes the permanent default.
 
 ## Before / After
 
@@ -93,7 +93,7 @@ If the new slot boots successfully, `bless-boot` calls `bootctl set-good`, stopp
 
 Rollback actually happens in two stages — one automatic at the bootloader level, one confirmed by you at the login screen.
 
-**Stage 1 — systemd-boot falls back on its own.** Every boot of the newly updated slot counts against its `+3-0` tries. `bless-boot` only calls `bootctl set-good` (clearing the counter) after `mark-boot-success` has confirmed `multi-user.target` was reached and written `/data/boot-ok`. So any boot that crashes, hangs, or never reaches a working session — including a hard failure where the Btrfs root itself fails to mount, caught by a dracut hook that writes `/data/boot_hard_failure` before the mount is even attempted — leaves the counter un-cleared. After three such attempts, systemd-boot automatically boots the fallback slot's `.conf` entry instead. This part requires no user interaction and no login: you land on the previous, working system.
+**Stage 1 — systemd-boot falls back on its own.** Every boot of the newly updated slot counts against its `+3-0` tries. `bless-boot` only calls `systemd-bless-boot good` (clearing the counter) after `mark-boot-success` has confirmed `multi-user.target` was reached and written `/data/boot-ok`. So any boot that crashes, hangs, or never reaches a working session — including a hard failure where the Btrfs root itself fails to mount, caught by a dracut hook that writes `/data/boot_hard_failure` before the mount is even attempted — leaves the counter un-cleared. After three such attempts, systemd-boot automatically boots the fallback slot's `.conf` entry instead. This part requires no user interaction and no login: you land on the previous, working system.
 
 **Stage 2 — the actual data rollback stays under your control.** systemd-boot switching slots only changes which UKI boots next; it does not touch Btrfs subvolume contents, so a failed candidate slot can still be broken. After login, the Shani Cassini agent reads the mismatch between the booted slot and `/data/current-slot`, or the `boot_hard_failure` marker, through `shani-deploy --status --check --json`. It notifies you and opens **Updates & Rollback** when you choose **Open**. Rolling back from that page runs `shani-deploy --rollback`, which restores the failed slot from its pre-deploy safety snapshot (see step 2 above) and rewrites both boot entries with no tries needed, since both slots are now known-good. No data on `@home`, `@data`, or any other persistent subvolume is touched by any of this. See [Persistence Strategy](./persistence.md).
 
@@ -101,7 +101,7 @@ The boot health pipeline behind stage 1:
 
 - `mark-boot-in-progress` — clears prior markers and plants `/data/boot_in_progress` at boot start
 - `mark-boot-success` — writes `/data/boot-ok` once `multi-user.target` is reached
-- `bless-boot` — calls `bootctl set-good` once `/data/boot-ok` exists, stopping the boot-count decrement
+- `bless-boot` — calls `systemd-bless-boot good` once `/data/boot-ok` exists, stopping the boot-count decrement
 - `check-boot-failure` (15-minute timer) — if `/data/boot_in_progress` is still present and `/data/boot-ok` never appeared, records the slot in `/data/boot_failure`
 - a dracut pre-mount hook writes `/data/boot_hard_failure` unconditionally before the root Btrfs mount is attempted, and a pre-pivot hook clears it on success — this catches failures too early for the above systemd units to ever run
 

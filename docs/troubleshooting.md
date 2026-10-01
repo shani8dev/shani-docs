@@ -45,7 +45,7 @@ ls /data/boot_failure /data/boot_hard_failure 2>/dev/null
 journalctl -b 0 -p err --no-pager | head -40
 
 # Check the startup check output
-journalctl -b -1 -u startup-check.service
+journalctl -b -1 -u mark-boot-in-progress.service -u bless-boot.service -u check-boot-failure.service
 ```
 
 To restore the failed slot and try again:

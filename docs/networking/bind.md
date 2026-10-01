@@ -13,7 +13,7 @@ BIND (`named`) is the most widely deployed DNS server. On Shani OS it is pre-ins
 
 For simple local DNS and DHCP on a homelab, **dnsmasq** is lighter and easier to configure. Use BIND when you need a full authoritative zone with proper SOA/NS records, zone transfers to secondary servers, DNSSEC signing, or split-horizon DNS.
 
-`named` state and zone files persist in `/var/named`, bind-mounted from `/data/varlib/named`, and survive OS updates.
+`named` state and zone files persist in `/var/named`, **not** bind-mounted on this image — `/etc/fstab` has no entry for it, so zone files written to `/var/named` are ephemeral and lost on reboot or slot switch. Persist them yourself (see Persistence).
 
 ---
 

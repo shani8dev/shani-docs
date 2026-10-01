@@ -8,7 +8,7 @@ updated: 2026-08-28
 
 OpenLDAP is an open-source implementation of the Lightweight Directory Access Protocol (LDAP), used for centralised authentication and directory services. It is pre-installed on Shani OS.
 
-Database files persist in `/var/lib/openldap/openldap-data`, bind-mounted from `/data/varlib/openldap`, and survive OS updates.
+Database files persist in `/var/lib/openldap/openldap-data`, **not** bind-mounted on this image — there is no `/data/varlib/openldap` entry in `fstab`, so the database is rebuilt after a reboot or slot switch.
 
 ---
 

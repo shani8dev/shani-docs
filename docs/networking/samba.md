@@ -6,7 +6,7 @@ updated: 2026-08-28
 
 # Samba — SMB/CIFS (Windows / macOS / Linux)
 
-Samba provides file and print sharing using the SMB/CIFS protocol, making your Shani OS machine appear as a Windows-compatible network share. It is pre-installed, and its runtime state (locks, caches, `tdbsam` database) is bind-mounted from `/data/varlib/samba`, ensuring it persists across OS updates.
+Samba provides file and print sharing using the SMB/CIFS protocol, making your Shani OS machine appear as a Windows-compatible network share. It is pre-installed, and its caches and `tdbsam` database are bind-mounted from `/data/varlib/samba`, and its lock state from `/data/varspool/samba`, ensuring it persists across OS updates.
 
 > **Prefer NFS** for Linux-to-Linux sharing. Use Samba when you need Windows or macOS compatibility.
 
@@ -52,12 +52,12 @@ sudo systemctl enable --now smb nmb
     usershare path = /var/lib/samba/usershare
     usershare max shares = 100
     usershare owner only = yes
-    usershare allow guests = yes
+    usershare allow guests = no     # shipped default; `yes` exposes the folder to unauthenticated clients
 
 [homes]
     comment = Home Directories
     browseable = no
-    read only = yes
+    read only = no
     create mask = 0700
     directory mask = 0700
     valid users = %S
@@ -194,7 +194,7 @@ Finder → Go → Connect to Server: `smb://192.168.1.100/SharedFiles`
 | `NT_STATUS_LOGON_FAILURE` | Wrong Samba password — reset with `sudo smbpasswd youruser` |
 | `mount error(13): Permission denied` on Linux | Add `sec=ntlmssp` to mount options; verify credentials in `.smbcredentials` |
 | Config changes not taking effect | Run `testparm` to validate, then `sudo systemctl restart smb nmb` |
-| View logs | `journalctl -u smb` or `/var/log/samba/log.smbd` |
+| View logs | `journalctl -u smb` or `/var/log/samba/<netbios-name>.log` (the shipped `smb.conf` sets `log file = /var/log/samba/%m.log`; `log.smbd` only appears if `log level` is raised above 0) |
 
 ## See Also
 

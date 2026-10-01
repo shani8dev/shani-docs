@@ -51,7 +51,7 @@ welcome_page:
 
 disk:
   partition_ok: no
-  min_size: 28                   # minimum target size in GB
+  min_size: 30                   # minimum target size in GB
 
 disk_encryption:
   offered: yes
@@ -103,7 +103,7 @@ An OEM that needs its own signing key does so at the **image-build layer**, not 
 
 ## Custom & Cloud Image Building
 
-[shani-install-media](https://github.com/shani8dev/shani-install-media) builds the actual OS images and ISOs from four profiles, each with its own `package-list.txt` under `image_profiles/<profile>/`:
+[shani-install-media](https://github.com/shani8dev/shani-install-media) builds the actual OS images and ISOs from four profiles, each with its own `Packages-Base` / `Packages-Desktop` / `Packages-Extras` under `image_profiles/<profile>/`:
 
 | Profile | Desktop | Notes |
 |---|---|---|
@@ -114,14 +114,14 @@ An OEM that needs its own signing key does so at the **image-build layer**, not 
 
 ### The Server Profile
 
-`image_profiles/server/package-list.txt` is explicitly built for headless/cloud deployment — its header states the meta-package policy: it deliberately excludes `shani-core`, `shani-network`, and `shani-desktop-*` (which would pull in NetworkManager, Waydroid, snapd-for-desktop, and GUI stacks) and instead installs `shani-tools-network` plus an explicit package list. Concretely, the server profile differs from the desktop profiles in:
+`image_profiles/server/Packages-Base` is explicitly built for headless/cloud deployment — its header states the meta-package policy: it deliberately excludes `shani-core`, `shani-network`, and `shani-desktop-*` (which would pull in NetworkManager, Waydroid, snapd-for-desktop, and GUI stacks) and instead installs `shani-tools-network` plus an explicit package list. Concretely, the server profile differs from the desktop profiles in:
 
 - **Networking:** `systemd-networkd`/`systemd-resolved` instead of NetworkManager (`etc/systemd/network/20-cloud-dhcp.network`)
-- **Cloud integration:** `cloud-init`, `amazon-ssm-agent`, `amazon-ec2-utils` — configured for AWS EC2 out of the box
+- **Cloud integration:** `cloud-init` — configured for cloud boots out of the box. **`amazon-ssm-agent` and `amazon-ec2-utils` are deliberately NOT shipped** (ssm-agent is AUR-only, ec2-utils is not packaged anywhere) and listing them made every server build fail with "target not found"
 - **Serial console:** `serial-getty@ttyS0.service` enabled for EC2-style serial access, kernel cmdline set via `etc/kernel/install_cmdline`
 - **Security baseline enabled by default:** `sshd`, `firewalld`, `fail2ban`, `apparmor`, `auditd`, `fwupd`, `cronie` (`server-customization.sh` enables each)
 - **Containers, not desktop apps:** `podman`, `buildah`, `skopeo`, `distrobox`, `podman-compose`
-- **GUI dependencies disabled:** `server-customization.sh` masks the `shani-deploy-notify` GUI dialog service so `yad` never tries to open a display on a headless box
+- **GUI dependencies disabled:** the server profile's **overlay** masks `shani-deploy-notify.service` (a `/dev/null` symlink in `etc/systemd/system/`) so the GUI dialog service never opens a display on a headless box — that masking is done by the overlay, not by `server-customization.sh`
 - **Optional-until-configured services disabled:** `tailscaled`, `cloudflared`, and `caddy` are installed but disabled until an admin configures them
 
 The bundled cloud-init datasource config (`etc/cloud/cloud.cfg.d/10-shanios-aws.cfg`) targets AWS EC2 specifically: IMDSv2 is enforced (`strict_id: true`), SSH host keys are regenerated per-instance (`ssh_deletekeys`/`ssh_genkeytypes`) so cloned AMI instances don't share host keys, root SSH login is disabled, and the default `shanios` user is created with passwordless sudo and cloud-init-managed key injection — comparable to what AL2023/RHEL9/Ubuntu cloud images do.
@@ -407,7 +407,7 @@ shani-health --journal err
 shani-health --export-logs /var/tmp/diag
 ```
 
-Most modes (`--boot`, `--security`, `--storage-info`, `--network`, `--hardware`, `--packages`) print a formatted, human-readable report only — scraping structured data out of them for a monitoring dashboard means parsing text.
+Every mode prints a formatted human-readable report; adding `--json`, `--nagios` or `--prometheus` switches it to structured output (`--security --json`, `--boot --nagios`, `--info --prometheus` all work) — scraping structured data out of them for a monitoring dashboard means parsing text.
 
 `--verify` is the one built for fleet automation: it runs UKI signature checks, a Btrfs scrub of both slots, slot-marker consistency, boot-entry consistency, and immutability checks, then **returns a real exit code** — `0` if everything passed, `1` if it found any issue — plus, with `--json`, a structured summary of exactly which check(s) failed:
 
@@ -447,7 +447,7 @@ Shanios's default security configuration is designed to pass enterprise security
 - TPM2 auto-unlock — disk locked against physical removal to another machine
 - Secure Boot via Shim + MOK-signed UKIs — bootloader editor disabled
 - Signed OS images — SHA256 + GPG verified before every deployment
-- Intel ME kernel modules blacklisted by default
+- Intel ME kernel modules **not** blacklisted by default — only `pcspkr` is; add `blacklist mei_me` in `/etc/modprobe.d/` if you want it closed
 - firewalld active from first boot — default-deny inbound
 - fail2ban active — automated banning of repeated authentication failures
 - Zero telemetry — no usage data, crash reports, or analytics
@@ -462,7 +462,7 @@ To keep this page honest about what exists versus what a larger enterprise deplo
 
 - **No centralised fleet dashboard.** There is no web console or MDM-style server for viewing fleet-wide status, pushing configuration, or triggering updates across machines. Fleet coordination today means SSH/Tailscale plus your own scripting (cron + `shani-deploy` + `shani-health --verify`), as described above.
 - **No runtime-configurable private update mirror or signing key.** As covered above, `R2_BASE_URL` and `GPG_KEY_ID` are compile-time constants in `shani-deploy`. A private CDN or OEM signing key for *ongoing* updates requires forking the tool, not a config setting.
-- **Only `--verify` has machine-readable output.** `shani-health --verify --json` gives a structured pass/fail summary; every other mode (`--boot`, `--security`, `--storage-info`, `--network`, `--hardware`, `--packages`) is still formatted text only.
+- **Machine-readable output is available for most modes**, not only `--verify`. `shani-health --verify --json` gives a structured pass/fail summary; every other mode (`--boot`, `--security`, `--storage-info`, `--network`, `--hardware`, `--packages`) accept the same flags.
 - **No remote push/enrollment mechanism.** Machines pull updates on their own schedule (timer or user-triggered); there's no server-initiated "deploy to these 200 machines now" push.
 
 If your organisation needs one of these, [contact the project](https://shani.dev#enterprise) — enterprise/OEM engagement is exactly the context in which contributing this kind of tooling upstream is on the table.

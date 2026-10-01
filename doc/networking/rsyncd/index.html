@@ -219,7 +219,7 @@
         </div>
       </div>
       <div class="prose"><p>The rsync daemon exposes file modules over the <code>rsync://</code> protocol for fast, efficient network file synchronisation and backups. Unlike SSH-based rsync, rsyncd runs as a standalone service — useful for automated, password-protected transfers without requiring SSH access.</p>
-<p>rsyncd is pre-installed on Shani OS. Lock and state files persist in <code>/data/varlib/rsync</code> across OS updates.</p>
+<p>rsyncd is pre-installed on Shani OS. there is <strong>no</strong> <code>/data/varlib/rsync</code> bind mount on this image, so lock and state files do not survive an update.</p>
 <blockquote>⚠️ <strong>Unencrypted:</strong> <code>rsync://</code> daemon mode sends the data <em>and</em> the auth secret unencrypted on port 873. Restrict it to trusted LANs only — off-LAN, tunnel over WireGuard or use rsync-over-SSH instead.</blockquote>
 <hr>
 <h2 id="server-setup">Server Setup</h2>

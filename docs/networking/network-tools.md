@@ -13,7 +13,8 @@ Shanios includes a comprehensive suite of networking utilities for diagnostics, 
 |---------|----------------|---------|
 | `iproute2` | `ip`, `ss` | Modern interface, routing, & socket management |
 | `iputils` | `ping`, `arping` | Basic reachability & MAC discovery |
-| `inetutils` | `traceroute`, `ftp`, `telnet` | Legacy path tracing & protocol clients |
+| `traceroute` | `traceroute` | Own package, **not** inetutils |
+| `inetutils` | `ftp`, `telnet` | Legacy path tracing & protocol clients |
 | `net-tools` | `ifconfig`, `netstat`, `arp`, `route` | Legacy network configuration |
 | `bind` | `dig`, `host`, `nslookup` | DNS query & resolution tools |
 | `wireless_tools` | `iwconfig`, `iwlist`, `iwspy` | Legacy wireless diagnostics |

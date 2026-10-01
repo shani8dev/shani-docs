@@ -26,7 +26,7 @@ All of the following is completed by the installer (`install.sh` + `configure.sh
 - All Btrfs subvolumes are created: `@root`, `@home`, `@data`, `@nix`, `@cache`, `@log`, `@flatpak`, `@snapd`, `@waydroid`, `@containers`, `@machines`, `@lxc`, `@lxd`, `@libvirt`, `@qemu`, `@swap`
 - The system image is extracted into `shanios_base`, snapshotted to `@blue` (read-only), then snapshotted again to `@green`. The active slot is written to `/data/current-slot` (`blue`)
 - The Flatpak store is extracted and snapshotted into `@flatpak`. If Snap seed was included on the ISO, it is extracted into `@snapd`
-- The swapfile is created in `@swap` using `btrfs filesystem mkswapfile` sized to match RAM. If there isn't enough free disk space for a full-RAM swapfile, this step is skipped entirely and the system falls back to zram for swap
+- The swapfile is created in `@swap` using `btrfs filesystem mkswapfile`, sized to match RAM where the disk allows. If free space is short it is **made smaller** rather than dropped — never below 1 GiB, and always leaving a 12 GiB reserve for updates — and only below that floor is the step skipped and the system falls back to zram for swap
 - Keyboard layout is always configured via `chroot`; locale, timezone, user account, and autologin are configured the same way, unless deferred to the first-boot wizard (see step 4 above)
 - Secure Boot: the MOK signing key is normally already baked into the system image at build time — the installer just verifies the keypair and re-signs the bootloader/kernel with it. Keys are only generated fresh on the spot if they're missing or invalid, which is a fallback path, not the common case. Either way, both UKIs (`shanios-blue.efi`, `shanios-green.efi`) are built using `dracut --force --uefi` and signed with the MOK key, and MOK enrollment is staged automatically so you just confirm it in MokManager on first boot (see [First Boot](./first-boot.md))
 - `/etc/crypttab` is generated with the LUKS UUID and `none` key field if encryption was chosen
@@ -62,7 +62,8 @@ df -h /
 | Secure Boot MokManager prompt doesn't appear on first boot | Firmware skipped MOK enrollment | Reboot and enter firmware settings; look for "Security" → "MOK" or "Secure Boot Key Management" |
 | Installer fails with "insufficient disk space" | Disk nominally 32 GB but below 30 GB usable floor | Use a disk with ≥32 GB total; the 30 GB floor accounts for partition tables and wear-leveling overhead |
 | Wi-Fi doesn't work during install | Wireless firmware not loaded | This is expected — the installer doesn't load Wi-Fi firmware; use wired connection or configure Wi-Fi after first boot |
-| Swap not created | Not enough free space for full-RAM swapfile | System will fall back to zram automatically — this is expected behavior, not an error |
+| Swap much smaller than RAM | Free space short of a full-RAM swapfile | Expected: it is sized down (min 1 GiB, minus a 12 GiB update reserve). **Hibernation needs swap >= RAM**, so it may be unavailable — `hibernation needs swap >= RAM and may not be available` is printed when that happens |
+| Swap not created at all | Free space below the floor (1 GiB after the 12 GiB reserve) | Nothing is created and the system runs on zram alone — expected, not an error |
 
 ## See Also
 

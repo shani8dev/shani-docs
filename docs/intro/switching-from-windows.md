@@ -18,7 +18,7 @@ Everything below applies to every edition — **GNOME** and **KDE Plasma** today
 | KDE Plasma | Dolphin | KDE apps | OnlyOffice |
 | COSMIC *(announced)* | COSMIC Files | COSMIC apps | Warehouse |
 
-Pick an edition based on desktop taste — all include the same core: Vivaldi, OnlyOffice, Warehouse, Mission Center, IBus input, Nix, and the `shani-deploy` update system.
+Pick an edition based on desktop taste — all include the same core: Vivaldi, OnlyOffice, Warehouse, IBus input, Nix (Mission Center ships on **COSMIC only**), and the `shani-deploy` update system.
 
 ## Before You Leave Windows or macOS
 

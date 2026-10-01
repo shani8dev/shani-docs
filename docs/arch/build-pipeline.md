@@ -44,7 +44,7 @@ build.sh <command> -p <profile>
 
 ### 1. Base Image (`build-base-image.sh`)
 
-The core stage. Creates a Btrfs subvolume, pacstraps the package list from `image_profiles/<profile>/package-list.txt`, applies the shared overlay (base configs, systemd units), then runs the profile-specific customization script:
+The core stage. Creates a Btrfs subvolume, pacstraps the package list from `image_profiles/<profile>/Packages-{Base,Desktop,Extras}`, applies the shared overlay (base configs, systemd units), then runs the profile-specific customization script:
 
 - `gnome-customization.sh` — enables GNOME services, installs GNOME-specific Flatpaks
 - `plasma-customization.sh` — enables KDE services, Kvantum theme override
@@ -72,7 +72,7 @@ Signs the ISO with `sbsign` for Secure Boot, generates `.sha256` and `.asc` file
 
 ### 6. Upload (`upload.sh`)
 
-Pushes artifacts to SourceForge (primary download) and Cloudflare R2 (build cache and CDN). Uses `rclone` for R2 and `lftp` for SourceForge.
+Pushes artifacts to SourceForge (primary download) and Cloudflare R2 (build cache and CDN). Uses `rclone` for R2 and `rsync`/`sftp` over SSH for SourceForge (there is no `lftp` in the upload script).
 
 ## Image Profiles
 
@@ -86,7 +86,7 @@ Each profile has its own directory under `image_profiles/`:
 | `kiosk` | `image_profiles/kiosk/` | Cage + labwc (Firefox) | 17 packages |
 | `server` | `image_profiles/server/` | None (headless) | 170 explicit packages |
 
-> **Note:** The "25 meta-packages" for gnome/plasma/cosmic are defined in `image_profiles/<profile>/package-list.txt`. Each meta-package (e.g., `shani-core`, `shani-desktop-gnome`) pulls in many transitive dependencies via `shani-pkgbuilds` PKGBUILDs and `.install` scripts, resulting in hundreds of total packages installed on the final image.
+> **Note:** The "25 meta-packages" for gnome/plasma/cosmic are defined in `image_profiles/<profile>/Packages-{Base,Desktop,Extras}`. Each meta-package (e.g., `shani-core`, `shani-desktop-gnome`) pulls in many transitive dependencies via `shani-pkgbuilds` PKGBUILDs and `.install` scripts, resulting in hundreds of total packages installed on the final image.
 
 Shared packages across all profiles are in `image_profiles/shared/`.
 

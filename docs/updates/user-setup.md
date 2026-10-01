@@ -15,7 +15,7 @@ updated: 2026-08-28
 For each interactive user account on the system, `shani-user-setup`:
 
 1. **Groups** — adds the user to all groups listed in `/etc/shani-extra-groups`, skipping any that don't exist
-2. **Default shell** — sets the shell to Zsh (falling back to Bash if Zsh isn't installed), only if the current shell differs
+2. **Default shell** — new installs start on Zsh (`useradd -s /bin/zsh`). Provisioning replaces the shell **only if its binary no longer exists** (e.g. gone after a slot switch); a shell the user chose with `chsh` is left alone
 3. **Flatpak remote** — adds the `flathub` remote for the user if not already present
 4. **Nix channel** — adds the `nixpkgs-unstable` channel if no channel named `nixpkgs` exists (never overwrites an existing nixpkgs channel)
 5. **subuid/subgid ranges** — allocates 65,536 sub-UIDs and sub-GIDs for rootless Podman/LXC/LXD if not already assigned
@@ -36,7 +36,7 @@ The list of groups added to every user is read from a single file:
 Format: one comma-separated line, no spaces.
 
 ```
-wheel,video,input,audio,kvm,storage,network,realtime,scanner,lp,cups,libvirt,lxd
+sys,cups,lp,scanner,realtime,input,video,kvm,libvirt,lxd,nixbld,sambashare
 ```
 
 ### Group Reference
@@ -74,7 +74,7 @@ sudo FORCE_SETUP=1 shani-user-setup
 
 ## Triggering
 
-`shani-user-setup.path` watches three things, and running the service is rate-limited to at most 3 triggers per 60 seconds:
+`shani-user-setup.path` watches three things, and running the service is rate-limited to at most 20 triggers per 60 seconds (`TriggerLimitBurst=20`; it was raised from 3 because a burst of 3 left the unit failed and later users got no setup until reboot):
 
 1. `/data/overlay/etc/upper/passwd` created or changed — fires the moment a new user is added (via `useradd`/`adduser`, which copy-up `/etc/passwd` into the overlay), without needing any marker file
 2. `/etc/skel` modified — belt-and-suspenders coverage for a slot switch that changes skel contents

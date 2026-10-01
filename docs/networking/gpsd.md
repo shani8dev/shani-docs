@@ -8,7 +8,7 @@ updated: 2026-08-28
 
 gpsd is a service daemon that reads data from GPS/GNSS receivers and makes it available to multiple clients over a local socket. Applications such as Chrony (NTP), navigation software, and location-aware tools query gpsd rather than the device directly, allowing multiple programs to share a single GPS receiver simultaneously.
 
-gpsd is pre-installed on Shani OS. **Not active by default** — enable it when a GPS receiver is connected.
+gpsd is pre-installed on Shani OS and `shani-peripherals` **enables `gpsd.socket` at install time**. The socket is what matters here: gpsd starts on demand when a client connects, so "not running" is the normal state until something asks it for a fix.
 
 ---
 

@@ -171,7 +171,7 @@ Because `/var` is volatile (tmpfs via `systemd.volatile=state`), critical servic
 - **Subvolumes under `/var/*`** (`@log`, `@cache`, and all container/virtualisation subvolumes) — additionally carry `x-systemd.after=var.mount,x-systemd.requires=var.mount` since `/var` itself is a tmpfs that must exist first
 - **VM disk subvolumes** (`@libvirt`, `@qemu`) and `@swap` — use `nodatacow,nospace_cache` (required for correctness and performance)
 - **All other Btrfs subvolumes** — use `noatime,compress=zstd,space_cache=v2,autodefrag`
-- **All bind mounts** — use `bind,nofail,x-systemd.after=var.mount,x-systemd.requires-mounts-for=/data`
+- **All bind mounts** — use ``bind,nofail,x-systemd.after=var.mount,x-systemd.after=data.mount,x-systemd.before=local-fs.target``
 
 ### Why noatime?
 

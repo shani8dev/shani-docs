@@ -61,7 +61,7 @@ showmount -e localhost
 ### 4. Firewall
 
 ```bash
-sudo firewall-cmd --add-service=nfs --add-service=rpcbind --add-service=mountd --permanent
+sudo firewall-cmd --add-service=nfs --add-service=rpc-bind --add-service=mountd --permanent
 sudo firewall-cmd --reload
 ```
 
@@ -167,7 +167,7 @@ NFS clients do not enforce quotas locally — writes that exceed a quota are rej
 | `Stale file handle` | The exported path was deleted or the server restarted while the client had it open — `sudo umount -f /mnt/remote` and remount |
 | `Access denied by server` | Check `journalctl -u nfs-server` on the host for detailed errors |
 | Mount hangs at boot | Add `_netdev` and `timeo=14` to fstab options; ensure `nfs-server` is running on the host |
-| `showmount` fails from client | Open `rpcbind` and `mountd` firewall services on the server in addition to `nfs` |
+| `showmount` fails from client | Open the `rpc-bind` and `mountd` firewall services on the server in addition to `nfs` |
 
 ## See Also
 

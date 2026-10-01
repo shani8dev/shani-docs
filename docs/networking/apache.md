@@ -6,7 +6,7 @@ updated: 2026-08-28
 
 # Apache HTTP Server
 
-Apache is a full-featured, battle-tested web server. On Shani OS, Caddy is the recommended reverse proxy for self-hosted services due to its automatic HTTPS and simpler configuration — but Apache is pre-installed for workloads that specifically need it: `.htaccess`-based access control, `mod_rewrite` rules inherited from existing deployments, PHP via `mod_php`, or applications that ship Apache-specific configuration.
+Apache is a full-featured, battle-tested web server. On Shani OS, Caddy is the recommended reverse proxy for self-hosted services due to its automatic HTTPS and simpler configuration — but Apache is only present on the **GNOME** edition — it arrives as a dependency of `gnome-user-share`, so on plasma/cosmic/kiosk/gamescope `systemctl enable --now httpd` fails with "Unit httpd.service does not exist": `.htaccess`-based access control, `mod_rewrite` rules inherited from existing deployments, PHP via `mod_php`, or applications that ship Apache-specific configuration.
 
 Both can coexist by binding Apache to a non-standard port and proxying through Caddy.
 
@@ -35,7 +35,7 @@ journalctl -u httpd -f
 
 ## Configuration
 
-The main config file is `/etc/httpd/conf/httpd.conf`. Site-specific configs belong in `/etc/httpd/conf.d/` — any `.conf` file placed there is automatically included.
+The main config file is `/etc/httpd/conf/httpd.conf`. Site-specific configs belong in `/etc/httpd/conf/conf.d/` — any `.conf` file placed there is automatically included.
 
 ### Listen on a Non-Standard Port (Caddy Proxy Mode)
 
@@ -57,7 +57,7 @@ app.example.com {
 ### Virtual Hosts
 
 ```apache
-# /etc/httpd/conf.d/mysite.conf
+# /etc/httpd/conf/conf.d/mysite.conf
 
 <VirtualHost *:8080>
     ServerName mysite.example.com
@@ -79,7 +79,7 @@ app.example.com {
 When Apache serves traffic directly (no Caddy in front), terminate TLS itself. Requires `mod_ssl` — uncomment `LoadModule ssl_module modules/mod_ssl.so` and restart:
 
 ```apache
-# /etc/httpd/conf.d/mysite-ssl.conf
+# /etc/httpd/conf/conf.d/mysite-ssl.conf
 
 <VirtualHost *:443>
     ServerName mysite.example.com
