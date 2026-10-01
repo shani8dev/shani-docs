@@ -253,6 +253,7 @@ ls /dev/fuse
 # Creates: squashfs-root/</code></pre>
 <h2 id="appimageupdate-cli">AppImageUpdate (CLI)</h2>
 <pre><code class="language-bash"># Check for updates (if AppImage supports it)
+# appimageupdatetool is NOT in the image; use your AppImage's own updater
 appimageupdatetool MyApp.AppImage
 
 # Apply update in-place
@@ -261,6 +262,7 @@ appimageupdatetool --overwrite MyApp.AppImage</code></pre>
 <p>AppImages and their data live entirely in your home directory — they are unaffected by OS updates and rollbacks. No special handling is needed.</p>
 <h2 id="sandboxing">Sandboxing</h2>
 <p>Unlike Flatpak, AppImages are <strong>not sandboxed</strong> by default. They run with the same permissions as your user. For untrusted AppImages, consider running them inside a Distrobox container.</p>
+<blockquote>⚠️ <strong>Not in the image:</strong> <code>appimageupdatetool</code> is not in the image. Commands below that use appimageupdatetool will not run as written.</blockquote>
 <h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="/doc/software/flatpak/">Flatpak</a> — sandboxed app store</li>

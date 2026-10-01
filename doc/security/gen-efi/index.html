@@ -385,6 +385,7 @@ sudo ukify inspect /boot/efi/EFI/shanios/shanios-blue.efi
 sudo objcopy -O binary --only-section=.cmdline \
     /boot/efi/EFI/shanios/shanios-blue.efi /dev/stdout | strings</code></pre>
 <hr>
+<blockquote>⚠️ <strong>Not in the image:</strong> <code>ukify</code> is not in the image. Commands below that use ukify will not run as written.</blockquote>
 <h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="/doc/security/secure-boot/">Secure Boot</a> — enrolling keys and enabling Secure Boot</li>

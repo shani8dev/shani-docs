@@ -283,6 +283,8 @@ Where everything lives, and what it survives:
 
 Config in `@home` and `/etc` survives updates and rollbacks. Container storage persists across updates. Nothing under `/usr` survives anything — it is replaced wholesale by every `shani-deploy`, which is exactly why toolchains live outside it.
 
+> ⚠️ **Not in the image:** `pip`, `nvm`, `fnm`, `uv`, `poetry`, `pnpm`, `apt` and `virt-install` are not in the image - use a Distrobox container for language toolchains. Commands below that use pip|nvm|fnm|uv|poetry|pnpm|apt|virt-install will not run as written.
+
 ## See Also
 
 - [Distrobox](distrobox) — full mutable distro environments

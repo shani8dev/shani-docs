@@ -469,6 +469,7 @@ cp -a /data/snapshots/home/pre-agent-&lt;timestamp&gt;/path/to/thing /home/path/
 </ul>
 <h2 id="troubleshooting">Troubleshooting</h2>
 <table><thead><tr><th>Symptom</th><th>Fix</th></tr></thead><tbody><tr><td>Extension can't reach <code>localhost:11434</code> from Flatpak editor</td><td>Flatpak apps share the host network namespace by default; if you restricted it, allow the port: <code>flatpak override --user --share=network org.visualstudio.code</code></td></tr><tr><td>Ollama container ignores GPU</td><td>Check <code>ls -l /dev/dri</code> exists; NVIDIA requires toolkit flags — see GPU Containers page; verify with <code>podman exec ollama nvidia-smi</code> (NVIDIA image variant)</td></tr><tr><td>Very slow completions on CPU</td><td>Drop to a smaller model (3B class) or reserve local models for chat-style requests</td></tr><tr><td><code>ollama pull</code> fails behind proxy</td><td>Pass proxy env into the container (<code>-e HTTPS_PROXY=...</code>)</td></tr></tbody></table>
+<blockquote>⚠️ <strong>Not in the image:</strong> <code>aider</code>, <code>npm</code>, <code>hf</code> and a host <code>ollama</code> are not in the image (an <code>ollama</code> <em>container</em> is shown separately). Commands below that use aider|npm|hf|ollama will not run as written.</blockquote>
 <h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="/doc/software/development/">Development Environments</a> — toolchain strategy this builds on</li>

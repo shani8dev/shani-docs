@@ -68,6 +68,7 @@ ls /dev/fuse
 
 ```bash
 # Check for updates (if AppImage supports it)
+# appimageupdatetool is NOT in the image; use your AppImage's own updater
 appimageupdatetool MyApp.AppImage
 
 # Apply update in-place
@@ -81,6 +82,8 @@ AppImages and their data live entirely in your home directory — they are unaff
 ## Sandboxing
 
 Unlike Flatpak, AppImages are **not sandboxed** by default. They run with the same permissions as your user. For untrusted AppImages, consider running them inside a Distrobox container.
+
+> ⚠️ **Not in the image:** `appimageupdatetool` is not in the image. Commands below that use appimageupdatetool will not run as written.
 
 ## See Also
 

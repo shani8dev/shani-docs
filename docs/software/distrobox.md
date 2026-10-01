@@ -121,6 +121,8 @@ host-spawn systemctl --user restart pipewire
 - For AUR packages, use the `arch` container — `yay` and `paru` work inside it
 - Container data (installed packages) lives in Podman storage (`@containers`), not your home directory — reinstalling a container resets its installed packages, but not your home files
 
+> ⚠️ **Not in the image:** `apt`/`pip` here run inside the container, not on the host. Commands below that use apt|pip will not run as written.
+
 ## See Also
 
 - [Containers](containers) — overview of all container runtimes

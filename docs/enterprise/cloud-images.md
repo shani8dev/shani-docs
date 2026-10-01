@@ -127,6 +127,8 @@ The server profile is built for exactly this usage: headless, `systemd-networkd`
 
 ---
 
+> ⚠️ **Not in the image:** libvirt's `virt-install` is not in the image. Commands below that use virt-install will not run as written.
+
 ## See Also
 
 - [OEM & Fleet Deployment](fleet) — Packer AMI pipeline, profiles, signing

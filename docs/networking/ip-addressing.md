@@ -145,7 +145,7 @@ Every IPv6-capable interface automatically generates a **link-local address** in
 
 ```bash
 ip -6 addr show          # fe80::... addresses are link-local
-ping6 fe80::1%eth0       # must specify the interface with %iface for link-local
+ping -6 fe80::1%eth0     # ping6 was merged into `ping -6`; still needs %iface for link-local
 ```
 
 ---

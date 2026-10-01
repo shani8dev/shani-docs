@@ -1586,6 +1586,8 @@ The server profile is built for exactly this usage: headless, `systemd-networkd`
 
 ---
 
+> ⚠️ **Not in the image:** libvirt's `virt-install` is not in the image. Commands below that use virt-install will not run as written.
+
 ## See Also
 
 - [OEM & Fleet Deployment](fleet) — Packer AMI pipeline, profiles, signing
@@ -2424,6 +2426,8 @@ If your organisation needs one of these, [contact the project](https://shani.dev
 
 ---
 
+> ⚠️ **Not in the image:** `mail` is not in the image. Commands below that use mail will not run as written.
+
 ## See Also
 
 - [Security Features](../security/features.md) — full security model
@@ -2739,6 +2743,8 @@ Enterprise and OEM enquiries: [shani.dev — Enterprise & Vendors](https://shani
 **Can I contribute?**
 
 Yes. Source code, build scripts, and documentation are all public at [github.com/shani8dev](https://github.com/shani8dev). Pull requests and issue reports are welcome.
+
+> ⚠️ **Not in the image:** `dpkg` and `yay` are not in the image - Arch uses pacman. Commands below that use dpkg|yay will not run as written.
 
 ## See Also
 
@@ -6848,6 +6854,8 @@ A GPS receiver provides highly accurate time via the PPS (Pulse Per Second) sign
 
 ```bash
 # /etc/chrony.conf — add these lines
+# `refclock`/`# chronyc is not in the image (chrony is not shipped)
+chronyc` are not in the image - chrony is not shipped, only gpsd
 refclock SHM 0 offset 0.5 delay 0.2 refid GPS
 refclock SOCK /var/run/chrony.ttyUSB0.sock refid PPS
 ```
@@ -6884,6 +6892,8 @@ sudo firewall-cmd --reload
 | gpsd not reading device | Try running in foreground: `sudo gpsd -N -D 5 /dev/ttyUSB0` — look for permission or baud rate errors |
 | ModemManager interfering | ModemManager probes serial devices and can disrupt GPS. Add a udev rule to ignore it: `sudo tee /etc/udev/rules.d/99-gpsd.rules <<< 'ATTRS{idVendor}=="XXXX", ATTRS{idProduct}=="YYYY", ENV{ID_MM_DEVICE_IGNORE}="1"'` (replace with your device's IDs from `lsusb`) |
 | Multiple clients can't connect | gpsd handles multiple clients natively — no configuration needed; verify gpsd is running with `systemctl status gpsd` |
+
+> ⚠️ **Not in the image:** `chronyc`/`refclock` (chrony) are not in the image; only gpsd ships. Commands below that use chronyc|refclock will not run as written.
 
 ## See Also
 
@@ -7093,7 +7103,7 @@ Every IPv6-capable interface automatically generates a **link-local address** in
 
 ```bash
 ip -6 addr show          # fe80::... addresses are link-local
-ping6 fe80::1%eth0       # must specify the interface with %iface for link-local
+ping -6 fe80::1%eth0     # ping6 was merged into `ping -6`; still needs %iface for link-local
 ```
 
 ---
@@ -8165,7 +8175,8 @@ Shanios includes a comprehensive suite of networking utilities for diagnostics, 
 | `openldap` | `ldapsearch` | LDAP directory queries |
 | `iproute2` | `ip` (includes `netns`) | Network namespace isolation |
 
-> 💡 **Installable Tools**: `speedtest-cli` and `fast` are available via `pipx`.
+> 💡 **Installable Tools**: `# speedtest-cli is NOT in the image; there is no bandwidth test tool as shipped
+speedtest-cli` and `fast` are available via `pipx`.
 > ```bash
 > pipx install speedtest-cli fast-cli
 > ```
@@ -8179,7 +8190,7 @@ Test reachability, latency, and route paths to external hosts.
 ```bash
 ping -c 4 host                  # Basic reachability
 ping -s 1400 -c 4 host          # Large packet (MTU test)
-ping6 -c 4 ipv6.google.com      # IPv6 connectivity
+ping -6 -c 4 ipv6.google.com    # IPv6 connectivity (ping6 is now `ping -6`)
 ```
 
 **`arping`** — Layer 2 reachability (LAN only).
@@ -8450,6 +8461,8 @@ sudo journalctl -u sshd -f      # Follow SSH logs
 sudo journalctl -u NetworkManager -k # Kernel logs related to networking
 ```
 
+
+> ⚠️ **Not in the image:** `speedtest-cli` is not in the image. Commands below that use speedtest-cli will not run as written.
 
 ## See Also
 
@@ -9384,6 +9397,8 @@ Connect to Windows machines or any RDP-capable server:
 
 ```bash
 # Basic RDP connection
+# NOTE: `xfreerdp` is NOT in the image (no freerdp package). Use a client
+# from the guest, or install one in a Distrobox container.
 xfreerdp /v:192.168.1.100 /u:username /p:password /dynamic-resolution /gfx /rfx
 
 # Full-screen, multi-monitor
@@ -9399,6 +9414,7 @@ xfreerdp /v:localhost /u:username
 Any VNC viewer can connect to a VNC server:
 
 ```bash
+# `vncviewer` is not in the image either - see the note above
 vncviewer hostname:5900
 ```
 
@@ -9473,6 +9489,8 @@ sudo firewall-cmd --reload
 | Poor performance / lag | Use RDP instead of VNC for LAN connections — RDP is hardware-accelerated; for VNC, enable compression in your viewer |
 | Windows RDP client shows certificate warning | This is expected for self-signed certificates — accept and remember the certificate |
 | krfb prompts "someone is trying to connect" every time | Disable confirmation in **System Settings → Remote Desktop → Ask for confirmation** |
+
+> ⚠️ **Not in the image:** `xfreerdp` and `vncviewer` are not in the image. Commands below that use xfreerdp|vncviewer will not run as written.
 
 ## See Also
 
@@ -11689,7 +11707,8 @@ sudo apparmor_parser -r /etc/apparmor.d/usr.bin.firefox
 sudo aa-disable /usr/bin/firefox
 
 # Re-enable a disabled profile
-sudo aa-enable /usr/bin/firefox
+sudo # NOTE: `aa-enable` (apparmor-utils) is NOT in the image; `aa-status` is
+aa-enable /usr/bin/firefox
 ```
 
 ---
@@ -11771,6 +11790,8 @@ This tells you: `myapp` tried to read `/etc/passwd` and was denied. To allow it,
 | Want to test a profile change safely | Switch to complain mode first (`aa-complain`), test, check logs, then enforce (`aa-enforce`) once the profile is working correctly |
 
 ---
+
+> ⚠️ **Not in the image:** `aa-enable` (apparmor-utils) is not in the image; `aa-status` is. Commands below that use aa-enable will not run as written.
 
 ## See Also
 
@@ -12762,6 +12783,8 @@ sudo objcopy -O binary --only-section=.cmdline \
 ```
 
 ---
+
+> ⚠️ **Not in the image:** `ukify` is not in the image. Commands below that use ukify will not run as written.
 
 ## See Also
 
@@ -52334,6 +52357,8 @@ Shanios ships with zero telemetry, but AI assistants are your choice to make:
 | Very slow completions on CPU | Drop to a smaller model (3B class) or reserve local models for chat-style requests |
 | `ollama pull` fails behind proxy | Pass proxy env into the container (`-e HTTPS_PROXY=...`) |
 
+> ⚠️ **Not in the image:** `aider`, `npm`, `hf` and a host `ollama` are not in the image (an `ollama` *container* is shown separately). Commands below that use aider|npm|hf|ollama will not run as written.
+
 ## See Also
 
 - [Development Environments](development) — toolchain strategy this builds on
@@ -52417,6 +52442,7 @@ ls /dev/fuse
 
 ```bash
 # Check for updates (if AppImage supports it)
+# appimageupdatetool is NOT in the image; use your AppImage's own updater
 appimageupdatetool MyApp.AppImage
 
 # Apply update in-place
@@ -52430,6 +52456,8 @@ AppImages and their data live entirely in your home directory — they are unaff
 ## Sandboxing
 
 Unlike Flatpak, AppImages are **not sandboxed** by default. They run with the same permissions as your user. For untrusted AppImages, consider running them inside a Distrobox container.
+
+> ⚠️ **Not in the image:** `appimageupdatetool` is not in the image. Commands below that use appimageupdatetool will not run as written.
 
 ## See Also
 
@@ -52713,6 +52741,8 @@ export APPTAINER_CACHEDIR=/scratch/$USER/apptainer-cache
 - **Keep the `.def` in version control.** The `.sif` is a build artefact; the `.def` is the source.
 - **Test locally before submitting to cluster.** Run on a small dataset locally first.
 - **Use `--bind` explicitly for data directories.** Don't rely on automatic home binding for large datasets.
+
+> ⚠️ **Not in the image:** `mpirun` is not in the image - openmpi is not shipped. Commands below that use mpirun will not run as written.
 
 ## See Also
 
@@ -53304,6 +53334,8 @@ Where everything lives, and what it survives:
 
 Config in `@home` and `/etc` survives updates and rollbacks. Container storage persists across updates. Nothing under `/usr` survives anything — it is replaced wholesale by every `shani-deploy`, which is exactly why toolchains live outside it.
 
+> ⚠️ **Not in the image:** `pip`, `nvm`, `fnm`, `uv`, `poetry`, `pnpm`, `apt` and `virt-install` are not in the image - use a Distrobox container for language toolchains. Commands below that use pip|nvm|fnm|uv|poetry|pnpm|apt|virt-install will not run as written.
+
 ## See Also
 
 - [Distrobox](distrobox) — full mutable distro environments
@@ -53438,6 +53470,8 @@ host-spawn systemctl --user restart pipewire
 - Install heavy build dependencies in Distrobox rather than Nix to keep the Nix store clean
 - For AUR packages, use the `arch` container — `yay` and `paru` work inside it
 - Container data (installed packages) lives in Podman storage (`@containers`), not your home directory — reinstalling a container resets its installed packages, but not your home files
+
+> ⚠️ **Not in the image:** `apt`/`pip` here run inside the container, not on the host. Commands below that use apt|pip will not run as written.
 
 ## See Also
 

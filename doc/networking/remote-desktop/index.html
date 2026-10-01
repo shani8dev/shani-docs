@@ -224,6 +224,8 @@
 <h3 id="freerdp-rdp-client">FreeRDP (RDP Client)</h3>
 <p>Connect to Windows machines or any RDP-capable server:</p>
 <pre><code class="language-bash"># Basic RDP connection
+# NOTE: `xfreerdp` is NOT in the image (no freerdp package). Use a client
+# from the guest, or install one in a Distrobox container.
 xfreerdp /v:192.168.1.100 /u:username /p:password /dynamic-resolution /gfx /rfx
 
 # Full-screen, multi-monitor
@@ -234,7 +236,8 @@ ssh -L 3389:192.168.1.100:3389 jumphost &amp;
 xfreerdp /v:localhost /u:username</code></pre>
 <h3 id="vnc-client">VNC Client</h3>
 <p>Any VNC viewer can connect to a VNC server:</p>
-<pre><code class="language-bash">vncviewer hostname:5900</code></pre>
+<pre><code class="language-bash"># `vncviewer` is not in the image either - see the note above
+vncviewer hostname:5900</code></pre>
 <hr>
 <h2 id="server-share-your-desktop">Server — Share Your Desktop</h2>
 <h3 id="kde-edition-krdp-rdp-server">KDE Edition: kRDP (RDP Server)</h3>
@@ -272,6 +275,7 @@ sudo firewall-cmd --reload</code></pre>
 <hr>
 <h2 id="troubleshooting">Troubleshooting</h2>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Cannot connect (connection refused)</td><td>Check that the server service is running: <code>systemctl --user status plasma-remotedesktop</code> or <code>grdctl status</code>; verify the firewall port is open</td></tr><tr><td>Black screen on connect</td><td>Log out of any active local session first — some RDP implementations cannot share a session that is already displayed on a local monitor</td></tr><tr><td>Poor performance / lag</td><td>Use RDP instead of VNC for LAN connections — RDP is hardware-accelerated; for VNC, enable compression in your viewer</td></tr><tr><td>Windows RDP client shows certificate warning</td><td>This is expected for self-signed certificates — accept and remember the certificate</td></tr><tr><td>krfb prompts "someone is trying to connect" every time</td><td>Disable confirmation in <strong>System Settings → Remote Desktop → Ask for confirmation</strong></td></tr></tbody></table>
+<blockquote>⚠️ <strong>Not in the image:</strong> <code>xfreerdp</code> and <code>vncviewer</code> are not in the image. Commands below that use xfreerdp|vncviewer will not run as written.</blockquote>
 <h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="/doc/networking/openssh/">SSH Server</a> — remote access and tunneling</li>

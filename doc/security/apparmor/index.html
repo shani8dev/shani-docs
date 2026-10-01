@@ -252,7 +252,8 @@ sudo apparmor_parser -r /etc/apparmor.d/usr.bin.firefox
 sudo aa-disable /usr/bin/firefox
 
 # Re-enable a disabled profile
-sudo aa-enable /usr/bin/firefox</code></pre>
+sudo # NOTE: `aa-enable` (apparmor-utils) is NOT in the image; `aa-status` is
+aa-enable /usr/bin/firefox</code></pre>
 <hr>
 <h2 id="profile-files">Profile Files</h2>
 <p>Profiles are stored in <code>/etc/apparmor.d/</code>. Each file corresponds to a confined binary.</p>
@@ -296,6 +297,7 @@ name=&quot;/etc/passwd&quot; pid=1234 comm=&quot;myapp&quot; requested_mask=&quo
 <h2 id="troubleshooting">Troubleshooting</h2>
 <table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Application crashes or behaves oddly</td><td>Check for AppArmor denials: `journalctl -k</td><td>grep "apparmor.*denied"<code>; put the profile in complain mode temporarily: </code>sudo aa-complain /path/to/binary`</td></tr><tr><td>Profile reload fails</td><td>Check syntax: <code>sudo apparmor_parser -p /etc/apparmor.d/profile-name</code>; fix errors and reload</td></tr><tr><td><code>aa-status</code> shows no profiles</td><td>AppArmor is loaded but no profiles are installed — install application packages that ship profiles, or write your own</td></tr><tr><td>Denial for a path that should be allowed</td><td>Edit the profile to add the required rule, then reload: <code>sudo apparmor_parser -r /etc/apparmor.d/profile</code></td></tr><tr><td>Want to test a profile change safely</td><td>Switch to complain mode first (<code>aa-complain</code>), test, check logs, then enforce (<code>aa-enforce</code>) once the profile is working correctly</td></tr></tbody></table>
 <hr>
+<blockquote>⚠️ <strong>Not in the image:</strong> <code>aa-enable</code> (apparmor-utils) is not in the image; <code>aa-status</code> is. Commands below that use aa-enable will not run as written.</blockquote>
 <h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="/doc/security/audit/">Audit (auditd)</a> — AppArmor denials are logged to the audit trail when <code>auditd</code> is running</li>

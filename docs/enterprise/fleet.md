@@ -469,6 +469,8 @@ If your organisation needs one of these, [contact the project](https://shani.dev
 
 ---
 
+> ⚠️ **Not in the image:** `mail` is not in the image. Commands below that use mail will not run as written.
+
 ## See Also
 
 - [Security Features](../security/features.md) — full security model

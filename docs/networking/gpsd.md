@@ -103,6 +103,8 @@ A GPS receiver provides highly accurate time via the PPS (Pulse Per Second) sign
 
 ```bash
 # /etc/chrony.conf — add these lines
+# `refclock`/`# chronyc is not in the image (chrony is not shipped)
+chronyc` are not in the image - chrony is not shipped, only gpsd
 refclock SHM 0 offset 0.5 delay 0.2 refid GPS
 refclock SOCK /var/run/chrony.ttyUSB0.sock refid PPS
 ```
@@ -139,6 +141,8 @@ sudo firewall-cmd --reload
 | gpsd not reading device | Try running in foreground: `sudo gpsd -N -D 5 /dev/ttyUSB0` — look for permission or baud rate errors |
 | ModemManager interfering | ModemManager probes serial devices and can disrupt GPS. Add a udev rule to ignore it: `sudo tee /etc/udev/rules.d/99-gpsd.rules <<< 'ATTRS{idVendor}=="XXXX", ATTRS{idProduct}=="YYYY", ENV{ID_MM_DEVICE_IGNORE}="1"'` (replace with your device's IDs from `lsusb`) |
 | Multiple clients can't connect | gpsd handles multiple clients natively — no configuration needed; verify gpsd is running with `systemctl status gpsd` |
+
+> ⚠️ **Not in the image:** `chronyc`/`refclock` (chrony) are not in the image; only gpsd ships. Commands below that use chronyc|refclock will not run as written.
 
 ## See Also
 

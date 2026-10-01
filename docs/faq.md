@@ -301,6 +301,8 @@ Enterprise and OEM enquiries: [shani.dev — Enterprise & Vendors](https://shani
 
 Yes. Source code, build scripts, and documentation are all public at [github.com/shani8dev](https://github.com/shani8dev). Pull requests and issue reports are welcome.
 
+> ⚠️ **Not in the image:** `dpkg` and `yay` are not in the image - Arch uses pacman. Commands below that use dpkg|yay will not run as written.
+
 ## See Also
 
 - [Getting Started](intro/getting-started) — download, verify, install walkthrough

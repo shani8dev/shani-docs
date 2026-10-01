@@ -22,7 +22,8 @@ Shanios includes a comprehensive suite of networking utilities for diagnostics, 
 | `openldap` | `ldapsearch` | LDAP directory queries |
 | `iproute2` | `ip` (includes `netns`) | Network namespace isolation |
 
-> 💡 **Installable Tools**: `speedtest-cli` and `fast` are available via `pipx`.
+> 💡 **Installable Tools**: `# speedtest-cli is NOT in the image; there is no bandwidth test tool as shipped
+speedtest-cli` and `fast` are available via `pipx`.
 > ```bash
 > pipx install speedtest-cli fast-cli
 > ```
@@ -36,7 +37,7 @@ Test reachability, latency, and route paths to external hosts.
 ```bash
 ping -c 4 host                  # Basic reachability
 ping -s 1400 -c 4 host          # Large packet (MTU test)
-ping6 -c 4 ipv6.google.com      # IPv6 connectivity
+ping -6 -c 4 ipv6.google.com    # IPv6 connectivity (ping6 is now `ping -6`)
 ```
 
 **`arping`** — Layer 2 reachability (LAN only).
@@ -307,6 +308,8 @@ sudo journalctl -u sshd -f      # Follow SSH logs
 sudo journalctl -u NetworkManager -k # Kernel logs related to networking
 ```
 
+
+> ⚠️ **Not in the image:** `speedtest-cli` is not in the image. Commands below that use speedtest-cli will not run as written.
 
 ## See Also
 

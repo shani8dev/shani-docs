@@ -221,14 +221,16 @@
       <div class="prose"><p>Shanios includes a comprehensive suite of networking utilities for diagnostics, monitoring, security, and file transfer. All tools listed here are pre-installed unless noted otherwise.</p>
 <h2 id="package-reference">📦 Package Reference</h2>
 <table><thead><tr><th>Package</th><th>Tools Included</th><th>Purpose</th></tr></thead><tbody><tr><td><code>iproute2</code></td><td><code>ip</code>, <code>ss</code></td><td>Modern interface, routing, & socket management</td></tr><tr><td><code>iputils</code></td><td><code>ping</code>, <code>arping</code></td><td>Basic reachability & MAC discovery</td></tr><tr><td><code>inetutils</code></td><td><code>traceroute</code>, <code>ftp</code>, <code>telnet</code></td><td>Legacy path tracing & protocol clients</td></tr><tr><td><code>net-tools</code></td><td><code>ifconfig</code>, <code>netstat</code>, <code>arp</code>, <code>route</code></td><td>Legacy network configuration</td></tr><tr><td><code>bind</code></td><td><code>dig</code>, <code>host</code>, <code>nslookup</code></td><td>DNS query & resolution tools</td></tr><tr><td><code>wireless_tools</code></td><td><code>iwconfig</code>, <code>iwlist</code>, <code>iwspy</code></td><td>Legacy wireless diagnostics</td></tr><tr><td><code>wpa_supplicant</code></td><td><code>wpa_cli</code>, <code>wpa_passphrase</code></td><td>WPA authentication management</td></tr><tr><td><code>net-snmp</code></td><td><code>snmpwalk</code>, <code>snmpget</code></td><td>SNMP network device monitoring</td></tr><tr><td><code>openldap</code></td><td><code>ldapsearch</code></td><td>LDAP directory queries</td></tr><tr><td><code>iproute2</code></td><td><code>ip</code> (includes <code>netns</code>)</td><td>Network namespace isolation</td></tr></tbody></table>
-<blockquote>💡 <strong>Installable Tools</strong>: <code>speedtest-cli</code> and <code>fast</code> are available via <code>pipx</code>. ``<code>bash pipx install speedtest-cli fast-cli </code>``</blockquote>
+<blockquote>💡 <strong>Installable Tools</strong>: `# speedtest-cli is NOT in the image; there is no bandwidth test tool as shipped</blockquote>
+<p>speedtest-cli<code> and </code>fast<code> are available via </code>pipx`.</p>
+<blockquote>``<code>bash pipx install speedtest-cli fast-cli </code>``</blockquote>
 <hr>
 <h2 id="1-connectivity-path-tracing">🌐 1. Connectivity & Path Tracing</h2>
 <p>Test reachability, latency, and route paths to external hosts.</p>
 <p><strong><code>ping</code></strong> — ICMP reachability & latency.</p>
 <pre><code class="language-bash">ping -c 4 host                  # Basic reachability
 ping -s 1400 -c 4 host          # Large packet (MTU test)
-ping6 -c 4 ipv6.google.com      # IPv6 connectivity</code></pre>
+ping -6 -c 4 ipv6.google.com    # IPv6 connectivity (ping6 is now `ping -6`)</code></pre>
 <p><strong><code>arping</code></strong> — Layer 2 reachability (LAN only).</p>
 <pre><code class="language-bash">sudo arping -I eth0 host        # Verify host is alive at L2
 sudo arping -c 3 192.168.1.50   # Discover MAC address of IP</code></pre>
@@ -375,6 +377,7 @@ sudo nft list chain inet firewalld filter_INPUT # Check INPUT chain</code></pre>
 <p><strong><code>journalctl</code></strong> — Service logs.</p>
 <pre><code class="language-bash">sudo journalctl -u sshd -f      # Follow SSH logs
 sudo journalctl -u NetworkManager -k # Kernel logs related to networking</code></pre>
+<blockquote>⚠️ <strong>Not in the image:</strong> <code>speedtest-cli</code> is not in the image. Commands below that use speedtest-cli will not run as written.</blockquote>
 <h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="/doc/networking/ip-addressing/">IP addressing & routing</a></li>

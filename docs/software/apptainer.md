@@ -271,6 +271,8 @@ export APPTAINER_CACHEDIR=/scratch/$USER/apptainer-cache
 - **Test locally before submitting to cluster.** Run on a small dataset locally first.
 - **Use `--bind` explicitly for data directories.** Don't rely on automatic home binding for large datasets.
 
+> ⚠️ **Not in the image:** `mpirun` is not in the image - openmpi is not shipped. Commands below that use mpirun will not run as written.
+
 ## See Also
 
 - [Containers](containers) — overview of all container runtimes

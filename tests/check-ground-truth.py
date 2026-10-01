@@ -514,8 +514,25 @@ def check_commands(advisory: list[str]) -> int:
         return 0
     hits = 0
     for md in sorted(DOCS.rglob("*.md")):
+        # **`docs/servers/` is out of scope, and this is most of the reason
+        # the count was 1348.** Those pages document self-hosted applications
+        # the reader runs *in a container* — kubectl (454), helm (149),
+        # openstack (87) and so on — so their CLIs are correctly absent from
+        # the host image. Checking them measured the wrong thing: 454 findings
+        # about `kubectl` were 454 statements that the docs describe container
+        # workloads, which is what the section is for. Only the remaining ~150
+        # are about commands aimed at the host.
+        if md.is_relative_to(DOCS / "servers"):
+            continue
         text = md.read_text()
         rel = md.relative_to(REPO)
+        # A page-level note naming the tools it does not ship covers the whole
+        # page. One note per page beats forty inline comments, and it is where
+        # a reader actually looks before copying a command.
+        page_note = " ".join(
+            line for line in text.splitlines()
+            if re.search(r"not in the image|not shipped|no .* in the image",
+                         line, re.I))
         # `finditer`, not `find`: a page with several bash blocks needs each
         # block's own offset. Using `text.index(block)` gave every block after
         # the first the first block's line numbers, so the findings pointed at
@@ -538,6 +555,12 @@ def check_commands(advisory: list[str]) -> int:
             # end it. Without this, a note above the first command excused only
             # that one and the check reported the other eight.
             block_note = ""
+            # `# Inside bluetoothctl:` marks an interactive shell, and the lines
+            # under it are that tool's *subcommands* - `power on`, `addprinc`.
+            # The docs mark this explicitly, so it is decidable rather than a
+            # guess, and it accounts for most of what was left after
+            # docs/servers/ went out of scope.
+            inside = ""
             heredoc = None
             for raw in block.splitlines():
                 line_no += 1
@@ -564,6 +587,12 @@ def check_commands(advisory: list[str]) -> int:
                     disclosures += " " + cmd
                     if not block_note:
                         block_note = disclosures
+                    im = re.search(r"#\s*inside\s+`?([A-Za-z0-9._-]+)`?\s*:?",
+                                   cmd, re.I)
+                    if im:
+                        inside = im.group(1)
+                    elif re.match(r"^#\s*(exit|quit)\b", cmd, re.I):
+                        inside = ""
                     continue
                 # A continuation of the previous command is not a command: a
                 # wrapped `restic forget --keep-daily ...` has a line that
@@ -577,8 +606,12 @@ def check_commands(advisory: list[str]) -> int:
                         cmd = cmd[len(prefix):].strip()
                 word = cmd.split()[0] if cmd.split() else ""
                 skip = (
+                    bool(inside)          # a subcommand of an interactive tool
+                    or
                     not COMMAND_WORD.match(word)
-                    or re.match(r"^[A-Za-z][\w.]*=", cmd)   # an ini key
+                    # an ini key, with or without spaces around `=`:
+                    # `max_log_file = 8` in audit.md's auditd.conf block
+                    or re.match(r"^[A-Za-z][\w.]*\s*=", cmd)
                     or word in SHELL_WORDS
                     or word in OUR_TOOLS
                     or word in CONFIG_KEYWORDS
@@ -593,7 +626,7 @@ def check_commands(advisory: list[str]) -> int:
                     # intel-gpu-tools (not pre-installed)` tells the reader
                     # exactly that, and the disclosure is often several comment
                     # lines long, so the whole run above it counts.
-                    nearby = f"{block_note} {disclosures} {cmd}"
+                    nearby = f"{page_note} {block_note} {disclosures} {cmd}"
                     disclosed = re.search(
                         r"not pre-?installed|is not installed|"
                         r"not available|not in the image|not shipped|"

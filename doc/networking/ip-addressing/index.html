@@ -275,7 +275,7 @@
 <h3 id="link-local-addresses">Link-Local Addresses</h3>
 <p>Every IPv6-capable interface automatically generates a <strong>link-local address</strong> in the <code>fe80::/10</code> range derived from the MAC address (EUI-64) or a random value. Link-local addresses are only valid on their local segment and are never routed. They are always present even if no global IPv6 address is configured.</p>
 <pre><code class="language-bash">ip -6 addr show          # fe80::... addresses are link-local
-ping6 fe80::1%eth0       # must specify the interface with %iface for link-local</code></pre>
+ping -6 fe80::1%eth0     # ping6 was merged into `ping -6`; still needs %iface for link-local</code></pre>
 <hr>
 <h2 id="managing-addresses-with-ip">Managing Addresses with <code>ip</code></h2>
 <h3 id="viewing-addresses">Viewing Addresses</h3>

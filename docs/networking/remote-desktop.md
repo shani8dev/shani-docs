@@ -18,6 +18,8 @@ Connect to Windows machines or any RDP-capable server:
 
 ```bash
 # Basic RDP connection
+# NOTE: `xfreerdp` is NOT in the image (no freerdp package). Use a client
+# from the guest, or install one in a Distrobox container.
 xfreerdp /v:192.168.1.100 /u:username /p:password /dynamic-resolution /gfx /rfx
 
 # Full-screen, multi-monitor
@@ -33,6 +35,7 @@ xfreerdp /v:localhost /u:username
 Any VNC viewer can connect to a VNC server:
 
 ```bash
+# `vncviewer` is not in the image either - see the note above
 vncviewer hostname:5900
 ```
 
@@ -107,6 +110,8 @@ sudo firewall-cmd --reload
 | Poor performance / lag | Use RDP instead of VNC for LAN connections — RDP is hardware-accelerated; for VNC, enable compression in your viewer |
 | Windows RDP client shows certificate warning | This is expected for self-signed certificates — accept and remember the certificate |
 | krfb prompts "someone is trying to connect" every time | Disable confirmation in **System Settings → Remote Desktop → Ask for confirmation** |
+
+> ⚠️ **Not in the image:** `xfreerdp` and `vncviewer` are not in the image. Commands below that use xfreerdp|vncviewer will not run as written.
 
 ## See Also
 

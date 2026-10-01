@@ -55,7 +55,8 @@ sudo apparmor_parser -r /etc/apparmor.d/usr.bin.firefox
 sudo aa-disable /usr/bin/firefox
 
 # Re-enable a disabled profile
-sudo aa-enable /usr/bin/firefox
+sudo # NOTE: `aa-enable` (apparmor-utils) is NOT in the image; `aa-status` is
+aa-enable /usr/bin/firefox
 ```
 
 ---
@@ -137,6 +138,8 @@ This tells you: `myapp` tried to read `/etc/passwd` and was denied. To allow it,
 | Want to test a profile change safely | Switch to complain mode first (`aa-complain`), test, check logs, then enforce (`aa-enforce`) once the profile is working correctly |
 
 ---
+
+> ⚠️ **Not in the image:** `aa-enable` (apparmor-utils) is not in the image; `aa-status` is. Commands below that use aa-enable will not run as written.
 
 ## See Also
 

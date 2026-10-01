@@ -306,6 +306,8 @@ sudo objcopy -O binary --only-section=.cmdline \
 
 ---
 
+> ⚠️ **Not in the image:** `ukify` is not in the image. Commands below that use ukify will not run as written.
+
 ## See Also
 
 - [Secure Boot](secure-boot) — enrolling keys and enabling Secure Boot

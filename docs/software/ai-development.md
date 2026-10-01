@@ -483,6 +483,8 @@ Shanios ships with zero telemetry, but AI assistants are your choice to make:
 | Very slow completions on CPU | Drop to a smaller model (3B class) or reserve local models for chat-style requests |
 | `ollama pull` fails behind proxy | Pass proxy env into the container (`-e HTTPS_PROXY=...`) |
 
+> ⚠️ **Not in the image:** `aider`, `npm`, `hf` and a host `ollama` are not in the image (an `ollama` *container* is shown separately). Commands below that use aider|npm|hf|ollama will not run as written.
+
 ## See Also
 
 - [Development Environments](development) — toolchain strategy this builds on
