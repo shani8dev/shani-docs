@@ -198,11 +198,25 @@ with `iso-install --boot-only --console-exec=CMD`, for anything touching `/var`.
   opening backtick of `` `pam_pkcs11` `` so the token stopped matching. Four
   controls now pin both directions.
 
+  A sixth check, **`shani-*` units**, is scoped to that prefix on purpose. A
+  wider "every unit named must be ours" version produced only false positives and
+  was narrowed twice: a third-party unit is invisible here (the workspace shows
+  units *our* packages carry, so `sshd.service` looks unknown — until you list
+  `openssh-10.5p1-1` from the pacman cache and find it ships `sshd.service`,
+  which is how we know `config.md`'s `systemctl enable --now sshd` is correct);
+  a page teaching unit authoring names units the reader is to create; and a
+  unit's name need not match its package's. What is precise is a doc claiming a
+  **Shanios** unit that does not exist: we enumerate those exactly and there is
+  no legitimate exception. A doc that *writes out* the unit first
+  (`shani-health-report.timer`, shown in full before the `systemctl enable`
+  that acts on it) is exempt, and an injected `shani-nonexistent-thing.timer`
+  is still caught.
+
   One deliberate non-check remains, so nobody reads a green run as more than it
   is: **prose claims about behaviour** are not verified. This proves a command
-  exists and a package is shipped; it does not prove the command does what the
-  doc says it does. An empty `shani-revoked`, or a package that is genuinely
-  absent, still needs a human.
+  exists, a package is shipped and a `shani-*` unit is real; it does not prove
+  the command does what the doc says it does. An empty `shani-revoked`, or a
+  package that is genuinely absent, still needs a human.
 
 ## Required verification for a change
 

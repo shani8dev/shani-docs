@@ -388,6 +388,98 @@ def check_package_claims(bad: list[str]) -> int:
     return hits
 
 
+def shipped_units() -> set[str]:
+    """Every unit file any repo in the workspace carries."""
+    found = set()
+    for repo in WORKSPACE.iterdir():
+        if not repo.is_dir() or repo.name.startswith('.'):
+            continue
+        for f in repo.rglob("*"):
+            if f.suffix in (".service", ".timer", ".socket", ".path") \
+                    and ".git" not in f.parts:
+                found.add(f.name)
+    return found
+
+
+def enabled_units() -> set[str]:
+    """Every unit an install-time script turns on."""
+    found = set()
+    roots = list(WORKSPACE.glob("shani-pkgbuilds/*/*.install"))
+    roots += list((WORKSPACE / "shani-settings").rglob("*.sh"))
+    roots += list((WORKSPACE / "shani-install-media" /
+                   "image_profiles").rglob("*.sh"))
+    for f in roots:
+        try:
+            text = f.read_text()
+        except OSError:
+            continue
+        for m in re.finditer(
+                r"systemctl (?:--user )?enable(?: --now)?\s+([A-Za-z0-9_.@-]+)",
+                text):
+            found.add(m.group(1))
+    return found
+
+
+def check_units(bad: list[str]) -> int:
+    """A `shani-*` unit the docs name must actually exist.
+
+    Scoped deliberately, after a wider version produced only false positives.
+    Checking every unit name cannot work here: a third-party unit is invisible
+    (the workspace shows units *our* packages carry, so `sshd.service` looks
+    unknown until you list openssh from the pacman cache - which is how we know
+    `config.md`'s `systemctl enable --now sshd` is correct), a page teaching
+    unit authoring names units the reader is to create, and a unit's name need
+    not match its package's (`openssh` -> `sshd.service`).
+
+    What *is* precise is the class this catches: a doc claiming a Shanios unit
+    that does not exist. Those names are ours, we enumerate them exactly, and
+    there is no legitimate exception - so a wrong one is a real bug and a right
+    one is silent.
+    """
+    ours = shipped_units() | enabled_units()
+    # Units we ship under names that are not `shani-*`, so they are recognised
+    # as ours when a doc names them.
+    ours_prefixes = ("shani-", "mark-boot-", "bless-boot", "check-boot-failure",
+                     "beesd-setup")
+    if not ours:
+        return 0
+    pattern = re.compile(
+        r"systemctl\s+(?:--user\s+)?(?:enable|start)"
+        r"(?:\s+-{1,2}[\w-]+)*\s+"
+        r"([A-Za-z0-9_.-]+(?:@[A-Za-z0-9_.-]*)?(?:\.(?:service|timer|socket|path))?)")
+    hits = 0
+    for md in sorted(DOCS.rglob("*.md")):
+        text = md.read_text()
+        rel = md.relative_to(REPO)
+        for line_no, line in enumerate(text.splitlines(), 1):
+            m = pattern.search(line)
+            if not m:
+                continue
+            unit = m.group(1)
+            if not unit.startswith(ours_prefixes):
+                continue
+            if unit in ours:
+                continue
+            # A template instance of one we ship: `shani-boot-safety-failed@x`.
+            if "@" in unit and unit.split("@")[0] + "@" in {
+                    u.split("@")[0] + "@" for u in ours if "@" in u}:
+                continue
+            # A doc that *writes out* the unit a few lines up is teaching the
+            # reader to create one, not claiming we ship it -
+            # `shani-health-report.timer` in shani-health.md is shown in full,
+            # with `Unit=shani-health-report.service` and `[Install]`, before
+            # the `systemctl enable` that acts on it.
+            stem = unit.split(".")[0]
+            if re.search(rf"Unit=\s*{re.escape(stem)}\b", text) and \
+                    "[Unit]" in text and "[Install]" in text:
+                continue
+            fail(bad, f"{rel}:{line_no}",
+                 f"names `{unit}`, which no repo ships and no install script "
+                 f"enables")
+            hits += 1
+    return hits
+
+
 def check_paths(bad: list[str]) -> list[str]:
     """Every shipped-path a doc names as ours must exist in the overlay.
 
@@ -442,12 +534,13 @@ def main() -> int:
     n_subs = check_genefi_subcommands(bad)
     n_sl = check_selinux(bad)
     n_pkg = check_package_claims(bad)
+    n_unit = check_units(bad)
     carried = check_paths(bad)
 
     print(f"ground truth: {n_scripts} scripts, {n_subs} gen-efi subcommands, "
           f"{len(carried)} files carried by shani-settings, "
           f"{n_sl} SELinux occurrences outside comparison.md, "
-          f"{n_pkg} wrong 'not shipped' claims")
+          f"{n_pkg} wrong 'not shipped' claims, {n_unit} unbacked units")
 
     if bad:
         print(f"\n{len(bad)} claim(s) contradict the repos:\n")
