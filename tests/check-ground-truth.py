@@ -253,6 +253,141 @@ def check_selinux(bad: list[str]) -> int:
     return hits
 
 
+PKGBUILDS = WORKSPACE / "shani-pkgbuilds"
+PROFILES = WORKSPACE / "shani-install-media" / "image_profiles"
+
+# Phrases that tell a user a package is NOT in the image. Each one is a dead
+# end - "AUR-only" on an immutable host means there is no way to get it at all,
+# and "install via Nix" means a second package manager. So this direction is
+# worth checking and the positive direction is not: "pre-installed on KDE Plasma"
+# is profile-specific, and a checker that flagged it would be wrong constantly.
+ABSENT_PHRASES = (
+    r"AUR[- ]only", r"not part of the default image",
+    r"cannot be installed", r"can not be installed",
+    r"not pre-?installed", r"is not installed",
+    r"install (?:it |them )?via Nix", r"Install \w+ via Nix",
+    r"only in the AUR",
+    # NOT "nothing to install" / "nothing needs installing": those assert the
+    # package IS present, which is the opposite of this list's meaning, and
+    # including them made every such correction read as a claim of absence.
+)
+# A package name as the docs write one: lowercase, may contain . _ + -
+PKG_TOKEN = re.compile(r"`([a-z0-9][a-z0-9._+-]{1,40})`")
+# Words that appear in backticks in these sentences and are not packages.
+NOT_PACKAGES = frozenset({
+    "sh", "bash", "zsh", "nix", "nix-env", "nixpkgs", "pacman", "sudo", "apt",
+    "apt-get", "dnf", "yay", "flatpak", "pip", "pip3", "python", "cargo",
+    "brew", "apk", "snap", "systemctl", "journalctl", "dmesg", "lsmod",
+    "modprobe", "sysctl", "uname", "lspci", "lsusb", "ip", "ping",
+})
+
+
+def available_packages() -> set[str] | None:
+    """Every package the image can have: our PKGBUILDs' deps plus profile lists.
+
+    Two sources because they answer different halves. A package is in the image
+    either because one of our PKGBUILDs depends on it, or because an image
+    profile installs it directly. Reading only the PKGBUILDs would call
+    NetworkManager absent; reading only the profiles would call `pam_pkcs11`
+    absent, which is a transitive dep nobody lists.
+
+    This is a *lower bound* on what is installed - it cannot see what a base
+    image or another repo's dependency pulls in - so a package missing from this
+    set is "not known to be shipped", never "definitely absent". That is why the
+    check below only reports a doc claiming absence for a package this set says
+    IS available, which is the direction that cannot be a false alarm.
+    """
+    if not PKGBUILDS.is_dir() or not PROFILES.is_dir():
+        return None
+    avail: set[str] = set()
+    for pk in sorted(PKGBUILDS.glob("*/PKGBUILD")):
+        text = pk.read_text()
+        for block in re.finditer(
+                r"^_?(?:depends|makedepends|checkdepends)\s*=\s*\((.*?)^\s*\)",
+                text, re.S | re.M):
+            for tok in re.findall(r"(?m)^\s+([A-Za-z0-9][A-Za-z0-9._+-]*)",
+                                  block.group(1)):
+                avail.add(tok)
+    for f in sorted(PROFILES.glob("*/Packages-*")):
+        for line in f.read_text().splitlines():
+            line = line.split("#")[0].strip()
+            if line:
+                avail.add(line)
+    return avail or None
+
+
+def check_package_claims(bad: list[str]) -> int:
+    """A doc must not tell a user to go install something the image ships.
+
+    Only the negative direction is checked, because only that one produces a
+    dead end: "pam_pkcs11 ... it is AUR-only" on an immutable host tells a user
+    to install a second package manager for a package already in their image,
+    and it was wrong. The positive direction ("pre-installed on KDE Plasma") is
+    profile-specific and would be a false alarm constantly.
+    """
+    avail = available_packages()
+    if avail is None:
+        return 0
+    pattern = re.compile("|".join(ABSENT_PHRASES), re.I)
+    hits = 0
+    for md in sorted(DOCS.rglob("*.md")):
+        if md.name == "comparison.md":
+            continue
+        text = md.read_text()
+        rel = md.relative_to(REPO)
+        for line_no, line in enumerate(text.splitlines(), 1):
+            if not pattern.search(line):
+                continue
+            # A correction states the opposite on the same line: "pam_pkcs11
+            # itself **is** in the image ... nothing needs installing".
+            if re.search(r"\bis\b[^.]*in the image|\bare\b[^.]*pre-?installed|"
+                         r"is a dependency of|nothing needs installing|"
+                         r"nothing to install|earlier version of this|"
+                         r"used to say|no longer", line, re.I):
+                continue
+            # Scope to the sentence holding the phrase. A table row or a long
+            # sentence routinely names several packages of which the claim is
+            # about one, and checking all of them reported the wrong ones.
+            sentence = line
+            m = pattern.search(line)
+            if m:
+                start = max(line.rfind(". ", 0, m.start()),
+                            line.rfind("| ", 0, m.start()),
+                            line.rfind("; ", 0, m.start()))
+                # `start + 2` when there is no delimiter is `1`, which silently
+                # ate the first character - and when that character is the
+                # opening backtick of `pam_pkcs11`, the token no longer matched
+                # and the one real finding in the corpus went unreported.
+                begin = start + 2 if start != -1 else 0
+                end = line.find(". ", m.end())
+                sentence = line[begin:end if end != -1 else len(line)]
+            for name in PKG_TOKEN.findall(sentence):
+                if name in NOT_PACKAGES:
+                    continue
+                # A package genuinely absent from every PKGBUILD and every
+                # profile makes the doc RIGHT, not wrong - `powertop`,
+                # `nvidia-container-toolkit` and `qrencode` are all really not
+                # shipped, and telling a user to install them is correct. Only
+                # the opposite is a finding. (This condition was inverted on
+                # the first run, which reported six correct docs and missed the
+                # one real bug.)
+                # A doc may name a PAM module or a library rather than the
+                # package: `pam_pkcs11.so` is shipped as `pam_pkcs11`. Checking
+                # the token verbatim missed the one real finding in the corpus.
+                bare = re.sub(r"\.(so|\d+|h)$", "", name)
+                if name not in avail and bare not in avail:
+                    continue
+                # version pins and globs
+                if re.search(r"[<>=]", name):
+                    continue
+                bad.append(
+                    f"{rel}:{line_no}: says `{name}` is not in the image, but "
+                    f"it is a dependency of a shani-pkgbuilds PKGBUILD or is "
+                    f"listed by an image profile")
+                hits += 1
+    return hits
+
+
 def check_paths(bad: list[str]) -> list[str]:
     """Every shipped-path a doc names as ours must exist in the overlay.
 
@@ -306,11 +441,13 @@ def main() -> int:
     n_scripts = check_flags(bad)
     n_subs = check_genefi_subcommands(bad)
     n_sl = check_selinux(bad)
+    n_pkg = check_package_claims(bad)
     carried = check_paths(bad)
 
     print(f"ground truth: {n_scripts} scripts, {n_subs} gen-efi subcommands, "
           f"{len(carried)} files carried by shani-settings, "
-          f"{n_sl} SELinux occurrences outside comparison.md")
+          f"{n_sl} SELinux occurrences outside comparison.md, "
+          f"{n_pkg} wrong 'not shipped' claims")
 
     if bad:
         print(f"\n{len(bad)} claim(s) contradict the repos:\n")

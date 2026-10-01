@@ -110,14 +110,17 @@ ssh-keygen -t ed25519-sk
 
 > **Reading and managing certificates from a card works; using a card to log
 > in does not.** Authenticating a PIV card needs the PAM module
-> `pam_pkcs11.so`, and no official Arch repository provides it — it is AUR-only
-> (`pam_pkcs11`, unmaintained, and it installs no default config). GDM's
-> `gdm-smartcard` service loads that module unconditionally, so the smartcard
-> login option cannot succeed; KDE's packaging disables the same line, so the
-> feature is simply absent. If you need card login, install the AUR package
-> *and* set `slot_num` in `/etc/pam_pkcs11/pam_pkcs11.conf` — at its default of
-> `-1` the module returns `PAM_AUTHINFO_UNAVAIL` and login still fails. The
-> commands below are unaffected and work today.
+> `pam_pkcs11.so`. **`pam_pkcs11` is already in the image** — it is a dependency
+> of `shani-peripherals`, so there is nothing to install and no AUR step (an
+> earlier version of this note said it was AUR-only, and that was wrong twice
+> over: it is shipped, and the real blocker is below). What stops it is
+> configuration, not availability. GDM's `gdm-smartcard` service loads that
+> module unconditionally, so the smartcard login option cannot succeed; KDE's
+> packaging disables the same line, so the feature is simply absent. To make
+> card login work you must also set `slot_num` in
+> `/etc/pam_pkcs11/pam_pkcs11.conf` — at its default of `-1` the module returns
+> `PAM_AUTHINFO_UNAVAIL` and login still fails, which looks identical to the
+> module being absent. The commands below are unaffected and work today.
 
 `pam_pkcs11` itself **is** in the image, as a dependency of `shani-peripherals`, so nothing needs installing; `pcsc_scan` comes with `pcsc-tools`, also pre-installed via `shani-peripherals`.
 
