@@ -173,11 +173,36 @@ with `iso-install --boot-only --console-exec=CMD`, for anything touching `/var`.
     `journald.conf.d/00-journal-size.conf`, which it does carry;
   - "a directory reference is satisfied by the directory" swallowed any
     concrete missing filename under an existing directory.
-  Two deliberate non-checks, so nobody reads a green run as more than it is:
-  **prose claims about behaviour** are not verified (this proves a command
-  exists, not that it does what the doc says), and **package availability** is
-  not parsed — the profile `Packages-*` lists are that authority, and an
-  empty `shani-revoked` or a missing `pam_pkcs11` needs a human.
+  A fifth check was added the same day, **package availability**, because it is
+  the class that had already produced three wrong docs: `hardware-auth.md`
+  claimed `pam_pkcs11` was AUR-only, `oath-toolkit` was "not part of the default
+  image", and `yubikey-manager` had a duplicated clause pointing at Nix — all
+  three are `depends` of `shani-peripherals`. "Available" is the union of every
+  PKGBUILD's `depends`/`makedepends`/`checkdepends` and every image profile's
+  `Packages-{Base,Desktop,Extras}` — 541 names — because either source alone is
+  wrong: PKGBUILDS alone would call NetworkManager absent, profiles alone would
+  call `pam_pkcs11` absent as a transitive dep nobody lists.
+  **Only the negative direction is checked** — a doc claiming a package is NOT
+  shipped when it is. That is the direction that produces a dead end, because
+  "AUR-only" on an immutable host means there is no way to get it at all. The
+  positive direction ("pre-installed on KDE Plasma") is profile-specific and
+  would be a constant false alarm.
+  **That inversion was in the code first.** The first version reported six
+  *correct* docs — `powertop`, `nvidia-container-toolkit`, `brcmfmac`, `b43`,
+  `power-saver`, `shani-user-setup` are all genuinely not shipped — and missed
+  the one real bug, because the condition skipped exactly the case it was
+  written for. Two more extractor bugs: `nothing to install` sat in the
+  absence-phrase list when it asserts the **opposite**, which made every
+  correction read as a claim; and the sentence scoping used `line[start + 2]`,
+  which is `line[1:]` when there is no preceding delimiter, silently eating the
+  opening backtick of `` `pam_pkcs11` `` so the token stopped matching. Four
+  controls now pin both directions.
+
+  One deliberate non-check remains, so nobody reads a green run as more than it
+  is: **prose claims about behaviour** are not verified. This proves a command
+  exists and a package is shipped; it does not prove the command does what the
+  doc says it does. An empty `shani-revoked`, or a package that is genuinely
+  absent, still needs a human.
 
 ## Required verification for a change
 
