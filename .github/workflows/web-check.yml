@@ -1,0 +1,24 @@
+name: Web check
+
+# Real-browser checks of this site as GitHub Pages serves it (shared workflow:
+# shani-ci-commons web-check.yml - exceptions, console errors, failed loads,
+# Chrome issues, CSP, egress, a11y names, overflow, LCP/CLS, crawl, offline.
+# allow-hosts is what the pages are MEANT to contact, measured 2026-10-01; a
+# new third-party host is a finding, not something to append here unreviewed.
+on:
+  push:
+    branches: [main]
+    paths: ['**.html', '**.css', '**.js', 'docs/**', '.github/workflows/web-check.yml']
+  pull_request:
+    paths: ['**.html', '**.css', '**.js', 'docs/**', '.github/workflows/web-check.yml']
+  workflow_dispatch: {}
+
+jobs:
+  web:
+    uses: shani8dev/shani-ci-commons/.github/workflows/web-check.yml@main
+    with:
+      allow-hosts: "cdn.jsdelivr.net,cdnjs.cloudflare.com,fonts.googleapis.com,fonts.gstatic.com,shani.dev"
+      offline: true
+      crawl: 20
+      budget-cls: 0.1
+      ignore: ""
