@@ -620,7 +620,7 @@ When reporting a bug, include:
 ```bash
 cat /etc/shani-version
 cat /data/current-slot
-shani-deploy --version
+shani-deploy --status --json | grep -o '"profile":"[^"]*"'
 shani-health --verify --json   # --json output requires --verify
 journalctl -b 0 -p err --no-pager | tail -30
 lspci | grep -E "VGA|Audio|Network"

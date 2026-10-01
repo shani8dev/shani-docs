@@ -283,7 +283,7 @@ Yes. The full boot chain is UEFI firmware → Shim (Microsoft-signed) → system
 
 **Where do I report bugs?**
 
-[github.com/shani8dev/shani-os/issues](https://github.com/shani8dev/shani-os/issues) — include the output of `uname -r`, `cat /data/current-slot`, `shani-deploy --version`, and relevant `journalctl` logs.
+[github.com/shani8dev/shani-os/issues](https://github.com/shani8dev/shani-os/issues) — include the output of `uname -r`, `cat /etc/shani-version`, `cat /data/current-slot`, and relevant `journalctl` logs. (`shani-deploy` has no `--version`; the version is in `/etc/shani-version`, and `shani-deploy --status --json` reports it too.)
 
 **Where do I ask questions?**
 

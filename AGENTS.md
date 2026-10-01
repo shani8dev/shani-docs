@@ -137,6 +137,48 @@ with `iso-install --boot-only --console-exec=CMD`, for anything touching `/var`.
    in the console; clear with `.unregister()` on each registration plus
    `caches.delete()` on every `caches.keys()` entry, then hard-reload.
 
+- **`tests/check-ground-truth.py` — the docs name flags, subcommands and
+  shipped paths that live in the sibling repos, and only those repos can say
+  whether they exist (2026-10-01).** Written because four defects of exactly
+  that shape had already shipped and each was found by hand rather than by any
+  check: `troubleshooting.md` walked a user through a wrong-slot recovery with
+  `sudo shani-deploy --repair-boot` (no such option, in neither the script nor
+  its `--help`); `faq.md` and `troubleshooting.md` both told bug reporters to
+  run `shani-deploy --version` (also not an option); `keyring.md` carried a live
+  "this must be fixed for the trust root to function" note about a keyring that
+  has always been correct; and three networking pages had `semanage`,
+  `setsebool` and `restorecon` on an AppArmor-only OS.
+  It checks four things: every `--flag` the docs attribute to `shani-deploy`,
+  `shani-health` or `shani-reset`; every `gen-efi` subcommand; every
+  `/usr/lib/{systemd,modprobe.d,sysctl.d,tmpfiles.d}` path the docs call ours
+  against what `shani-settings` actually carries; and any SELinux tool outside
+  `comparison.md` (whose SELinux mentions correctly describe Fedora).
+  **It SKIPs rather than passing when the siblings are absent**, because a check
+  that passes because it examined nothing is the failure this file exists to
+  prevent — `build-manifest.yml`'s `validate` job therefore checks out
+  `shani-deploy` and `shani-settings` before running it. Run it locally with
+  `python3 tests/check-ground-truth.py`.
+  **Eight injected false claims were run against it and all eight fail it**;
+  five of the eight were only caught after fixing a bug the checker itself had,
+  which is the reason to distrust a clean first run:
+  - the long-option token regex rejected every long option, because a long
+    option's *second* character is also `-`;
+  - `shani-deploy`'s usage header is a **comment block**, so `-r, --rollback`
+    and three siblings never matched — and it reported `--rollback`,
+    `--cleanup`, `--optimize` and `--dry-run` as non-existent in 21 places;
+  - `gen-efi` has **two** `case "${1:-}" in` blocks and only the second
+    dispatches; taking the first reported all seven real subcommands as absent;
+  - `shani-settings` paths were collected relative, so nothing matched the
+    docs' absolute paths and the check could only ever fail — including on
+    `journald.conf.d/00-journal-size.conf`, which it does carry;
+  - "a directory reference is satisfied by the directory" swallowed any
+    concrete missing filename under an existing directory.
+  Two deliberate non-checks, so nobody reads a green run as more than it is:
+  **prose claims about behaviour** are not verified (this proves a command
+  exists, not that it does what the doc says), and **package availability** is
+  not parsed — the profile `Packages-*` lists are that authority, and an
+  empty `shani-revoked` or a missing `pam_pkcs11` needs a human.
+
 ## Required verification for a change
 
 ```bash

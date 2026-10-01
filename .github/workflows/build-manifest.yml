@@ -45,6 +45,24 @@ jobs:
       - name: Broken internal link check
         run: node tests/check-links.js
 
+      # The docs name flags, subcommands and shipped paths that live in the
+      # sibling repos. Checkout them so tests/check-ground-truth.py can read the
+      # other side of every claim; it SKIPs (rather than passing vacuously) when
+      # they are absent, which is why this is a separate step from the rest.
+      - name: Checkout shani-deploy and shani-settings
+        uses: actions/checkout@v4
+        with:
+          repository: shani8dev/shani-deploy
+          path: shani-deploy
+      - name: Checkout shani-settings
+        uses: actions/checkout@v4
+        with:
+          repository: shani8dev/shani-settings
+          path: shani-settings
+
+      - name: Ground-truth check (flags, subcommands, shipped paths)
+        run: python3 tests/check-ground-truth.py
+
   security:
     name: Security
     uses: shani8dev/shani-ci-commons/.github/workflows/security.yml@main
