@@ -56,17 +56,18 @@ read-only: they show what the tool says and change nothing.
 
 | Page | What it reports | Under the hood |
 |------|-----------------|----------------|
-| **Cron** | The machine's own scheduled jobs — `crontab -l` shows only your own | reads `/etc/cron.d` and `/etc/cron.{hourly,daily,weekly,monthly}` |
+| **Cron** | The machine's own scheduled jobs — `crontab -l` shows only your own | reads `/etc/crontab`, `/etc/cron.d` and `/etc/cron.{hourly,daily,weekly,monthly}` |
 | **AppArmor** | The confinement profiles loaded, and which are enforcing rather than complaining | `aa-status` (needs your password, so it runs when you press the button) |
 | **Kernel Modules** | Every loaded module, its dependencies, and each parameter's current value | `/proc/modules`, `/sys/module` |
 | **Firmware** | The hardware firmware installed, and what LVFS is offering | `fwupdmgr get-devices --json`, `get-updates --json` |
 | **Graphics** | Graphics hardware, the driver bound to each, whether each card is powered, the render nodes, and hybrid-graphics state | `lspci -k`, `/sys/bus/pci/devices/*/power/runtime_status`, `/dev/dri/render*`, `switcheroo-control` |
 | **Audio** | The PipeWire graph: devices, outputs, inputs, which is default, which programs are connected | `wpctl status` |
-| **Journal** | Every boot still on disk, and a search across their entries | `journalctl` |
+| **Journal** | Every boot still on disk, a search across their entries, whether logs survive a reboot, and the cap actually in force | `journalctl`, `/var/log/journal`, `/usr/lib/systemd/journald.conf.d/` |
 
 Three of these are worth knowing about because the answer is not where you
 would look. **Cron** cannot use `crontab -l` — that only ever means the calling
-user's table, and no tool lists the system crontabs. **Graphics** reports the
+user's table, and no tool lists the system crontabs — including `/etc/crontab`
+itself, whose lines carry an extra username field. **Graphics** reports the
 `DRI_PRIME` value that addresses each GPU and whether that card is currently
 awake, neither of which either settings app shows; it does **not** switch the
 session default, because `switcheroo-control` is a read-only property service
@@ -74,6 +75,8 @@ with no call that changes anything, so per-app selection is
 `switcherooctl launch -g N APP` or `prime-run`, named on the page. A GPU with no
 driver bound is listed with an empty driver rather than hidden — that is what
 "present but unusable" looks like from underneath.
+
+**Encryption** reads `gen-efi pcrlock-status --json` behind the same Check button, which answers the one question the page could previously only reason about: whether the TPM key is pinned to fixed PCR values (it is — gen-efi enrols with `--tpm2-pcrs`, the policy `systemd-cryptenroll` calls brittle) or bound to a policy hash. A firmware update strands a pinned key, and the page now says so from the machine rather than by inference.
 
 **Firmware** deliberately installs nothing, and says why — a firmware update
 changes the machine's TPM2 PCR 0 and invalidates a disk set up for automatic

@@ -249,10 +249,10 @@ sudo reboot</code></pre>
 <ol>
 <li>Press <code>Space</code> or <code>Enter</code> at the systemd-boot splash screen to bring up the boot menu.</li>
 <li>Select the correct slot and boot.</li>
-<li>Repair the boot entry from the running system:</li>
+<li>Check which slot the bootloader will actually use:</li>
 </ol>
-<pre><code class="language-bash">cat /data/current-slot
-sudo shani-deploy --repair-boot</code></pre>
+<pre><code class="language-bash">cat /data/current-slot</code></pre>
+<blockquote>⚠️ There is no <code>shani-deploy --repair-boot</code>. An earlier version of this page told you to run it, and the flag does not exist in <code>shani-deploy.sh</code> or in its <code>--help</code> — following it gives <code>unrecognized option</code>. To change which slot boots next, use <code>sudo shani-deploy --rollback</code>, which makes the previous system the default and deletes nothing.</blockquote>
 <h3 id="black-screen-after-update-gpu-nvidia">Black Screen After Update (GPU / NVIDIA)</h3>
 <p>A black screen after a kernel or driver update usually means the NVIDIA module failed to load, or Secure Boot is rejecting the new UKI.</p>
 <pre><code class="language-bash"># Switch to a TTY (Ctrl+Alt+F2 or F3) and log in

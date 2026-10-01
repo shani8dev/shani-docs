@@ -108,7 +108,7 @@ Several kernel modules and rarely-used network protocols are blacklisted by defa
 
 | Module(s) | File | Reason |
 |-----------|------|--------|
-| `mei`, `mei_me` | `modprobe.d/noime.conf` | Intel Management Engine / vPro remote-access interface — disabled by default. This does not remove ME from the hardware (not possible in software), but removes the kernel's interface to it, reducing the attack surface from the OS side. |
+| `mei`, `mei_me` | **nothing — not blacklisted** | Intel Management Engine / vPro remote-access interface. The kernel interface is **not** disabled out of the box (an earlier version of this table claimed a `noime.conf` shipped; it does not). `shani-health` flags it if loaded; add `blacklist mei_me` to `/etc/modprobe.d/shani-blacklist.conf`. This does not remove ME from the hardware (not possible in software), but removes the kernel's interface to it, reducing the attack surface from the OS side. |
 | `pcspkr` | `modprobe.d/nobeep.conf` | PC speaker blacklisted to stop the console beep; incidentally also removes it as a data-exfiltration side channel |
 | `firewire-core`, `firewire-ohci`, `firewire-sbp2`, `firewire-net` | `modprobe.d/blacklist-firewire.conf` | FireWire storage/DMA blocked outright (`install ... /bin/false`) — addresses Lynis `STRG-1846`, preventing unauthorized memory access via FireWire DMA |
 | `dccp`, `sctp`, `rds`, `tipc` | `modprobe.d/disable-unused-protocols.conf` | Uncommon network protocols disabled — addresses Lynis `NETW-3200`, reducing kernel attack surface from protocols the desktop doesn't use |

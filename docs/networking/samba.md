@@ -123,19 +123,28 @@ sudo firewall-cmd --add-service=samba --permanent
 sudo firewall-cmd --reload
 ```
 
-### 6. SELinux Contexts
+### 6. File Permissions
 
-Shani OS enforces SELinux. Custom shares need the `samba_share_t` context:
+> ⚠️ **Shanios does not use SELinux.** These commands come from the upstream documentation and will fail here — `semanage`, `setsebool`, `restorecon` and `ls -Z` are not installed, and Shanios enforces **AppArmor** (`lsm=landlock,lockdown,yama,integrity,apparmor,bpf`; see [AppArmor](../security/apparmor.md) and Cassini's LSM page). What actually governs a daemon's file access on Shanios is ordinary Unix ownership and permissions — fix those (`setfacl`, `chown`, `chmod`) and nothing SELinux-shaped. AppArmor profiles ship for third-party software; the image ships none of its own.
+
+So for a custom share, make it readable by the `samba` user:
 
 ```bash
-sudo semanage fcontext -a -t samba_share_t "/srv/share(/.*)?"
-sudo restorecon -Rv /srv/share
+sudo chown -R samba:samba /srv/share
+sudo chmod -R 0755 /srv/share          # or 0770 with group write
+testparm -s | grep -A2 '\[srv\]'
 ```
 
-For the `[homes]` share, enable the boolean instead:
+`testparm` is the authority here, exactly as `sshd -t` is for Remote Access: it is the same parser `smbd` uses, so a share it accepts is a share the daemon will load.
+
+For the `[homes]` share there is no boolean to enable — the upstream SELinux
+step does not apply. What matters is that the user's home directory is readable
+and not over-mounted:
 
 ```bash
-sudo setsebool -P samba_enable_home_dirs on
+getent passwd alice          # is alice a real user on this machine?
+namei -l /home/alice         # walk the path, checking each hop
+testparm -s | grep -A4 '\[homes\]'
 ```
 
 ---

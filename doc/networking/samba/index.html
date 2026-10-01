@@ -301,12 +301,17 @@ sudo smbpasswd -e youruser</code></pre>
 <h3 id="5-firewall">5. Firewall</h3>
 <pre><code class="language-bash">sudo firewall-cmd --add-service=samba --permanent
 sudo firewall-cmd --reload</code></pre>
-<h3 id="6-selinux-contexts">6. SELinux Contexts</h3>
-<p>Shani OS enforces SELinux. Custom shares need the <code>samba_share_t</code> context:</p>
-<pre><code class="language-bash">sudo semanage fcontext -a -t samba_share_t &quot;/srv/share(/.*)?&quot;
-sudo restorecon -Rv /srv/share</code></pre>
-<p>For the <code>[homes]</code> share, enable the boolean instead:</p>
-<pre><code class="language-bash">sudo setsebool -P samba_enable_home_dirs on</code></pre>
+<h3 id="6-file-permissions">6. File Permissions</h3>
+<blockquote>⚠️ <strong>Shanios does not use SELinux.</strong> These commands come from the upstream documentation and will fail here — <code>semanage</code>, <code>setsebool</code>, <code>restorecon</code> and <code>ls -Z</code> are not installed, and Shanios enforces <strong>AppArmor</strong> (<code>lsm=landlock,lockdown,yama,integrity,apparmor,bpf</code>; see <a href="/doc/security/apparmor/">AppArmor</a> and Cassini's LSM page). What actually governs a daemon's file access on Shanios is ordinary Unix ownership and permissions — fix those (<code>setfacl</code>, <code>chown</code>, <code>chmod</code>) and nothing SELinux-shaped. AppArmor profiles ship for third-party software; the image ships none of its own.</blockquote>
+<p>So for a custom share, make it readable by the <code>samba</code> user:</p>
+<pre><code class="language-bash">sudo chown -R samba:samba /srv/share
+sudo chmod -R 0755 /srv/share          # or 0770 with group write
+testparm -s | grep -A2 '\[srv\]'</code></pre>
+<p><code>testparm</code> is the authority here, exactly as <code>sshd -t</code> is for Remote Access: it is the same parser <code>smbd</code> uses, so a share it accepts is a share the daemon will load.</p>
+<p>For the <code>[homes]</code> share there is no boolean to enable — the upstream SELinux step does not apply. What matters is that the user's home directory is readable and not over-mounted:</p>
+<pre><code class="language-bash">getent passwd alice          # is alice a real user on this machine?
+namei -l /home/alice         # walk the path, checking each hop
+testparm -s | grep -A4 '\[homes\]'</code></pre>
 <hr>
 <h2 id="client-usage">Client Usage</h2>
 <h3 id="linux">Linux</h3>

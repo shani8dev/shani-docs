@@ -277,14 +277,14 @@ sudo setfacl -R -m u:caddy:rx /home/user/www
 getfacl /home/user/www
 ```
 
-For SELinux contexts (Shani OS uses SELinux by default):
+For file permissions (Shanios does **not** use SELinux — see [AppArmor](../security/apparmor.md)):
 
 ```bash
-# Check the current context
-ls -Z /home/user/www
+# Check that the caddy user can actually read it
+sudo -u caddy test -r /home/user/www/index.html && echo readable
 
-# Relabel if needed
-sudo restorecon -Rv /home/user/www
+# Fix it with ordinary permissions
+sudo chown -R caddy:caddy /home/user/www
 ```
 
 ---
@@ -306,7 +306,7 @@ For internal-only Caddy serving `.home.local` addresses over Tailscale or the LA
 
 | Issue | Solution |
 |-------|----------|
-| `permission denied` serving files | `sudo setfacl -R -m u:caddy:rx /your/path`; check SELinux context with `ls -Z` |
+| `permission denied` serving files | `sudo setfacl -R -m u:caddy:rx /your/path`; check ownership and permissions with `ls -l` — Shanios has no SELinux contexts |
 | Browser shows untrusted cert for `.home.local` | Trust the Caddy local CA: `sudo trust anchor /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt && sudo update-ca-trust` |
 | `bind: address already in use` | Another process owns port 80 or 443 — `sudo ss -tlnp | grep ':80\|:443'` to identify it |
 | Service won't start | Validate syntax first: `caddy validate --config /etc/caddy/Caddyfile`; then check logs: `journalctl -u caddy -f` |

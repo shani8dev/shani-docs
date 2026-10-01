@@ -61,12 +61,17 @@ After an update, the bootloader entry may not have updated correctly.
 
 1. Press `Space` or `Enter` at the systemd-boot splash screen to bring up the boot menu.
 2. Select the correct slot and boot.
-3. Repair the boot entry from the running system:
+3. Check which slot the bootloader will actually use:
 
 ```bash
 cat /data/current-slot
-sudo shani-deploy --repair-boot
 ```
+
+> ⚠️ There is no `shani-deploy --repair-boot`. An earlier version of this page
+> told you to run it, and the flag does not exist in `shani-deploy.sh` or in its
+> `--help` — following it gives `unrecognized option`. To change which slot boots
+> next, use `sudo shani-deploy --rollback`, which makes the previous system the
+> default and deletes nothing.
 
 ### Black Screen After Update (GPU / NVIDIA)
 

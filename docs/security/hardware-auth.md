@@ -45,7 +45,7 @@ fprintd-enroll   # will fail with a clear error if the device is unsupported
 
 ## YubiKey and FIDO2/U2F
 
-**Packages:** `libfido2`, `pam-u2f` — pre-installed via `shani-peripherals`. `yubikey-manager` — all pre-installed via `shani-peripherals` is pre-installed via `shani-peripherals`, so `oathtool` is available with nothing to install. Install it via Nix instead:
+**Packages:** `libfido2`, `pam-u2f` — pre-installed via `shani-peripherals`. `yubikey-manager`, `pcsc-tools` and `oath-toolkit` are **also** pre-installed, all via `shani-peripherals`, so `oathtool` is available with nothing to install and there is no Nix step.
 
 
 
@@ -118,7 +118,8 @@ ssh-keygen -t ed25519-sk
 > *and* set `slot_num` in `/etc/pam_pkcs11/pam_pkcs11.conf` — at its default of
 > `-1` the module returns `PAM_AUTHINFO_UNAVAIL` and login still fails. The
 > commands below are unaffected and work today.
- transitively as a dependency of `opensc`/`ccid`. The `pcsc-tools` diagnostic package (used for `pcsc_scan` below) is pre-installed via `shani-peripherals`, so `oathtool` is available with nothing to install — install it via Nix:
+
+`pam_pkcs11` itself **is** in the image, as a dependency of `shani-peripherals`, so nothing needs installing; `pcsc_scan` comes with `pcsc-tools`, also pre-installed via `shani-peripherals`.
 
 
 
@@ -164,7 +165,7 @@ pcsc_scan   # shows NFC card when tapped
 
 ## TOTP / HOTP (Two-Factor)
 
-**Package:** `oath-toolkit` — **not** part of the default image and cannot be installed on the immutable host with `pacman`. Install it via Nix:
+**Package:** `oath-toolkit` — **pre-installed via `shani-peripherals`**, so `oathtool` is available with nothing to install. (An earlier version of this page said it was absent and pointed at Nix; it is a dependency of `shani-peripherals`.)
 
 
 

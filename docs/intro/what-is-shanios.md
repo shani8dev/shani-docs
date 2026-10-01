@@ -14,7 +14,7 @@ Shanios is an immutable Linux distribution that brings enterprise DevOps practic
 - **Blue-Green Deployment:** Two complete system images (`@blue` and `@green`) are maintained. While one is active, updates are written to the other. On reboot you switch to the updated image. The previous one is kept as a one-command rollback target.
 - **Atomic Updates:** Updates are all-or-nothing. The running system is never touched during an update. If something goes wrong, boot failure is detected automatically and the system rolls back — your work is never interrupted.
 - **Selective Persistence:** User data, configuration changes (`/etc` overlay), Flatpak apps, containers, VMs, and service credentials all live in dedicated Btrfs subvolumes that survive every update and rollback, always.
-- **Defence-in-Depth Security:** Six Linux Security Modules run simultaneously (`lsm=landlock,lockdown,yama,integrity,apparmor,bpf`), LUKS2 argon2id full-disk encryption, TPM2 auto-unlock, Secure Boot with MOK, Intel ME kernel modules (`mei`, `mei_me`) blacklisted by default, and every OS image is SHA256+GPG verified before deployment.
+- **Defence-in-Depth Security:** Six Linux Security Modules run simultaneously (`lsm=landlock,lockdown,yama,integrity,apparmor,bpf`), LUKS2 argon2id full-disk encryption, TPM2 auto-unlock, Secure Boot with MOK, the `pcspkr` PC-speaker module blacklisted (`mei`/`mei_me` are **not** blacklisted by default — see [Kernel Modules](../system/kernel-modules.md)), and every OS image is SHA256+GPG verified before deployment.
 - **Zero Telemetry:** No usage data, crash reports, analytics, or tracking of any kind — ever. The entire codebase is public on GitHub; every claim is independently verifiable.
 
 ## Traditional vs Immutable OS

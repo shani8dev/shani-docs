@@ -1749,7 +1749,7 @@ A practical checklist for any new self-hosted service before exposing it:
 **Container security:**
 - [ ] Container runs as non-root (check with `podman inspect --format '{{.Config.User}}'`)
 - [ ] No `privileged: true` unless absolutely necessary
-- [ ] Volumes mounted `:Z` for SELinux labelling
+- [ ] Volumes mounted `:Z` for SELinux labelling — **skip on Shanios**, which has no SELinux; podman needs no label there. (`:Z` is harmless but pointless; it exists for SELinux hosts like Fedora.)
 - [ ] No `host.docker.sock` mounted unless the service explicitly needs container access
 
 **Monitoring:**

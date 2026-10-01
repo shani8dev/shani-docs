@@ -400,12 +400,12 @@ sudo setfacl -R -m u:caddy:rx /home/user/www
 
 # Verify
 getfacl /home/user/www</code></pre>
-<p>For SELinux contexts (Shani OS uses SELinux by default):</p>
-<pre><code class="language-bash"># Check the current context
-ls -Z /home/user/www
+<p>For file permissions (Shanios does <strong>not</strong> use SELinux — see <a href="/doc/security/apparmor/">AppArmor</a>):</p>
+<pre><code class="language-bash"># Check that the caddy user can actually read it
+sudo -u caddy test -r /home/user/www/index.html &amp;&amp; echo readable
 
-# Relabel if needed
-sudo restorecon -Rv /home/user/www</code></pre>
+# Fix it with ordinary permissions
+sudo chown -R caddy:caddy /home/user/www</code></pre>
 <hr>
 <h2 id="firewall">Firewall</h2>
 <p>Open ports 80 and 443 if Caddy is serving public traffic. Let's Encrypt requires port 80 to be reachable for HTTP-01 challenges:</p>
@@ -414,7 +414,7 @@ sudo firewall-cmd --reload</code></pre>
 <p>For internal-only Caddy serving <code>.home.local</code> addresses over Tailscale or the LAN, no firewall changes are needed — ports 80 and 443 do not need to be open to the internet.</p>
 <hr>
 <h2 id="troubleshooting">Troubleshooting</h2>
-<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>permission denied</code> serving files</td><td><code>sudo setfacl -R -m u:caddy:rx /your/path</code>; check SELinux context with <code>ls -Z</code></td></tr><tr><td>Browser shows untrusted cert for <code>.home.local</code></td><td>Trust the Caddy local CA: <code>sudo trust anchor /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt &amp;&amp; sudo update-ca-trust</code></td></tr><tr><td><code>bind: address already in use</code></td><td>Another process owns port 80 or 443 — `sudo ss -tlnp</td><td>grep ':80\</td><td>:443'` to identify it</td></tr><tr><td>Service won't start</td><td>Validate syntax first: <code>caddy validate --config /etc/caddy/Caddyfile</code>; then check logs: <code>journalctl -u caddy -f</code></td></tr><tr><td>Let's Encrypt rate limit hit</td><td>Switch to staging CA: <code>acme_ca https://acme-staging-v02.api.letsencrypt.org/directory</code> while testing</td></tr><tr><td>Reverse proxy returns 502 Bad Gateway</td><td>Confirm the backend is running and bound to the right port: <code>curl -v http://localhost:PORT</code>; for containers use <code>host.containers.internal</code> instead of <code>localhost</code></td></tr><tr><td>Config change not taking effect</td><td>Run <code>sudo systemctl reload caddy</code> — Caddy must be explicitly reloaded to pick up Caddyfile changes</td></tr><tr><td>HTTPS certificate not renewing</td><td>Check <code>journalctl -u caddy</code> for ACME errors; confirm port 80 is reachable from the internet for HTTP-01 challenges</td></tr><tr><td>WebSocket connections dropping</td><td>Add <code>@ws { header Connection <em>Upgrade</em> }</code> matcher and <code>handle @ws { reverse_proxy ... }</code> with explicit WebSocket header passthrough</td></tr></tbody></table>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>permission denied</code> serving files</td><td><code>sudo setfacl -R -m u:caddy:rx /your/path</code>; check ownership and permissions with <code>ls -l</code> — Shanios has no SELinux contexts</td></tr><tr><td>Browser shows untrusted cert for <code>.home.local</code></td><td>Trust the Caddy local CA: <code>sudo trust anchor /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt &amp;&amp; sudo update-ca-trust</code></td></tr><tr><td><code>bind: address already in use</code></td><td>Another process owns port 80 or 443 — `sudo ss -tlnp</td><td>grep ':80\</td><td>:443'` to identify it</td></tr><tr><td>Service won't start</td><td>Validate syntax first: <code>caddy validate --config /etc/caddy/Caddyfile</code>; then check logs: <code>journalctl -u caddy -f</code></td></tr><tr><td>Let's Encrypt rate limit hit</td><td>Switch to staging CA: <code>acme_ca https://acme-staging-v02.api.letsencrypt.org/directory</code> while testing</td></tr><tr><td>Reverse proxy returns 502 Bad Gateway</td><td>Confirm the backend is running and bound to the right port: <code>curl -v http://localhost:PORT</code>; for containers use <code>host.containers.internal</code> instead of <code>localhost</code></td></tr><tr><td>Config change not taking effect</td><td>Run <code>sudo systemctl reload caddy</code> — Caddy must be explicitly reloaded to pick up Caddyfile changes</td></tr><tr><td>HTTPS certificate not renewing</td><td>Check <code>journalctl -u caddy</code> for ACME errors; confirm port 80 is reachable from the internet for HTTP-01 challenges</td></tr><tr><td>WebSocket connections dropping</td><td>Add <code>@ws { header Connection <em>Upgrade</em> }</code> matcher and <code>handle @ws { reverse_proxy ... }</code> with explicit WebSocket header passthrough</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="/doc/networking/cloudflared/">Cloudflared Tunnels</a></li>

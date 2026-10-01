@@ -241,7 +241,7 @@ lsusb | grep -i finger
 fprintd-enroll   # will fail with a clear error if the device is unsupported</code></pre>
 <hr>
 <h2 id="yubikey-and-fido2u2f">YubiKey and FIDO2/U2F</h2>
-<p><strong>Packages:</strong> <code>libfido2</code>, <code>pam-u2f</code> — pre-installed via <code>shani-peripherals</code>. <code>yubikey-manager</code> — all pre-installed via <code>shani-peripherals</code> is pre-installed via <code>shani-peripherals</code>, so <code>oathtool</code> is available with nothing to install. Install it via Nix instead:</p>
+<p><strong>Packages:</strong> <code>libfido2</code>, <code>pam-u2f</code> — pre-installed via <code>shani-peripherals</code>. <code>yubikey-manager</code>, <code>pcsc-tools</code> and <code>oath-toolkit</code> are <strong>also</strong> pre-installed, all via <code>shani-peripherals</code>, so <code>oathtool</code> is available with nothing to install and there is no Nix step.</p>
 <h3 id="using-a-fido2u2f-key">Using a FIDO2/U2F Key</h3>
 <blockquote>⚠️ <strong>Before editing PAM:</strong> keep an existing root shell open when editing PAM files, and test <code>sudo</code> in a second terminal before logging out. A broken PAM stack can lock you out of <code>sudo</code> and login entirely.</blockquote>
 <pre><code class="language-bash"># 1. Create the U2F key mapping directory
@@ -278,7 +278,7 @@ ssh-keygen -t ed25519-sk</code></pre>
 <h2 id="smart-card-piv">Smart Card / PIV</h2>
 <p><strong>Packages:</strong> <code>opensc</code>, <code>ccid</code>, <code>acsccid</code> — pre-installed via <code>shani-peripherals</code>; <code>pcscd</code>/<code>pcsc-lite</code> come along</p>
 <blockquote><strong>Reading and managing certificates from a card works; using a card to log in does not.</strong> Authenticating a PIV card needs the PAM module <code>pam_pkcs11.so</code>, and no official Arch repository provides it — it is AUR-only (<code>pam_pkcs11</code>, unmaintained, and it installs no default config). GDM's <code>gdm-smartcard</code> service loads that module unconditionally, so the smartcard login option cannot succeed; KDE's packaging disables the same line, so the feature is simply absent. If you need card login, install the AUR package <em>and</em> set <code>slot_num</code> in <code>/etc/pam_pkcs11/pam_pkcs11.conf</code> — at its default of <code>-1</code> the module returns <code>PAM_AUTHINFO_UNAVAIL</code> and login still fails. The commands below are unaffected and work today.</blockquote>
-<p>transitively as a dependency of <code>opensc</code>/<code>ccid</code>. The <code>pcsc-tools</code> diagnostic package (used for <code>pcsc_scan</code> below) is pre-installed via <code>shani-peripherals</code>, so <code>oathtool</code> is available with nothing to install — install it via Nix:</p>
+<p><code>pam_pkcs11</code> itself <strong>is</strong> in the image, as a dependency of <code>shani-peripherals</code>, so nothing needs installing; <code>pcsc_scan</code> comes with <code>pcsc-tools</code>, also pre-installed via <code>shani-peripherals</code>.</p>
 <pre><code class="language-bash"># Start the PC/SC daemon
 sudo systemctl enable --now pcscd
 
@@ -305,7 +305,7 @@ ssh -I /usr/lib/opensc-pkcs11.so user@host</code></pre>
 pcsc_scan   # shows NFC card when tapped</code></pre>
 <hr>
 <h2 id="totp-hotp-two-factor">TOTP / HOTP (Two-Factor)</h2>
-<p><strong>Package:</strong> <code>oath-toolkit</code> — <strong>not</strong> part of the default image and cannot be installed on the immutable host with <code>pacman</code>. Install it via Nix:</p>
+<p><strong>Package:</strong> <code>oath-toolkit</code> — <strong>pre-installed via <code>shani-peripherals</code></strong>, so <code>oathtool</code> is available with nothing to install. (An earlier version of this page said it was absent and pointed at Nix; it is a dependency of <code>shani-peripherals</code>.)</p>
 <p><code>oathtool</code> generates TOTP and HOTP codes from a shared secret, compatible with Google Authenticator, Authy, and any RFC 6238/4226 implementation.</p>
 <pre><code class="language-bash"># Generate a TOTP code from a base32 secret
 oathtool --totp --base32 JBSWY3DPEHPK3PXP

@@ -181,22 +181,27 @@ sudo firewall-cmd --reload
 
 ---
 
-## Permissions & SELinux
+## Permissions
 
-Apache runs as the `http` user. Shani OS uses SELinux by default — files served by Apache must carry the correct context:
+Apache runs as the `http` user, so the files it serves must be readable by that user.
+
+> ⚠️ **Shanios does not use SELinux.** These commands come from the upstream documentation and will fail here — `semanage`, `setsebool`, `restorecon` and `ls -Z` are not installed, and Shanios enforces **AppArmor** (`lsm=landlock,lockdown,yama,integrity,apparmor,bpf`; see [AppArmor](../security/apparmor.md) and Cassini's LSM page). What actually governs a daemon's file access on Shanios is ordinary Unix ownership and permissions — fix those (`setfacl`, `chown`, `chmod`) and nothing SELinux-shaped. AppArmor profiles ship for third-party software; the image ships none of its own.
+
+
 
 ```bash
-# Apply the correct context to a new document root
-sudo chcon -Rt httpd_sys_content_t /srv/http/mysite
-
-# Or let restorecon derive it from policy
-sudo restorecon -Rv /srv/http/mysite
+# Apache serves as the `http` user, so that user must be able to read the tree
+sudo chown -R http:http /srv/http/mysite
+sudo chmod -R 0755 /srv/http/mysite
+namei -l /srv/http/mysite/index.html
 ```
 
-If Apache needs to connect to a backend (reverse proxy mode), enable the relevant boolean:
+If Apache needs to connect to a backend (reverse proxy mode) there is no boolean
+to enable. Check the two ordinary things instead:
 
 ```bash
-sudo setsebool -P httpd_can_network_connect 1
+systemctl is-active httpd
+curl -sI http://127.0.0.1:9000/ | head -1     # is the backend up at all?
 ```
 
 ---
@@ -207,9 +212,9 @@ sudo setsebool -P httpd_can_network_connect 1
 |-------|----------|
 | `AH00558: Could not reliably determine server's FQDN` | Add `ServerName localhost` to `httpd.conf` — cosmetic, does not affect operation |
 | Port 80/443 already in use | Caddy or another service owns the port — bind Apache to `127.0.0.1:8080` and proxy through Caddy |
-| `403 Forbidden` on directory | Check filesystem permissions and the `<Directory>` block's `Require` directive; check SELinux context with `ls -Z` |
-| `Permission denied` in error log | Apache (`http` user) cannot read the file — fix permissions or apply the correct SELinux context |
-| Reverse proxy returns 503 | Enable the SELinux boolean: `sudo setsebool -P httpd_can_network_connect 1` |
+| `403 Forbidden` on directory | Check filesystem permissions and the `<Directory>` block's `Require` directive; check ownership and permissions (`ls -l`) — there is no SELinux context on Shanios |
+| `Permission denied` in error log | Apache (`http` user) cannot read the file — fix ownership and permissions (`namei -l <path>`) |
+| Reverse proxy returns 503 | Shanios has no SELinux booleans. Check the proxy target is reachable and that `http` can reach it |
 | Config changes not taking effect | Run `sudo apachectl configtest` to validate, then `sudo systemctl reload httpd` |
 
 ## See Also

@@ -289,7 +289,7 @@ sbverify --cert /etc/secureboot/keys/MOK.crt /boot/efi/EFI/shanios/shanios-green
 </ul>
 <p><strong>MokManager asks for a password:</strong></p>
 <ul>
-<li>The enrollment password is not a fixed value — it is generated and displayed by the <code>gen-efi</code> configure/enroll flow when it stages enrollment. Use the password <code>shanios</code> printed at that point; if you no longer have it, re-run <code>sudo gen-efi enroll-mok</code> to stage a fresh enrollment.</li>
+<li>The enrollment password is <strong><code>shanios</code></strong>, and it is a fixed value, not a generated one: <code>gen-efi.sh</code> runs <code>mokutil --generate-hash=shanios</code> when it stages the enrollment and logs "confirm with password 'shanios' in MokManager on first boot". An earlier version of this line said it was not fixed and then named <code>shanios</code> in the same sentence. Use <code>shanios</code>; if you missed the reboot, re-run <code>sudo gen-efi enroll-mok</code> to stage it again. <strong>Shani Cassini names this password for you</strong> after you press "Stage MOK Enrollment".</li>
 </ul>
 <p><strong>TPM2 fails after Secure Boot change:</strong></p>
 <ul>

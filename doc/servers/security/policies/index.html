@@ -1499,7 +1499,7 @@ cosign verify --key cosign.pub \
 <ul>
 <li><input type="checkbox" disabled> Container runs as non-root (check with <code>podman inspect --format '{{.Config.User}}'</code>)</li>
 <li><input type="checkbox" disabled> No <code>privileged: true</code> unless absolutely necessary</li>
-<li><input type="checkbox" disabled> Volumes mounted <code>:Z</code> for SELinux labelling</li>
+<li><input type="checkbox" disabled> Volumes mounted <code>:Z</code> for SELinux labelling — <strong>skip on Shanios</strong>, which has no SELinux; podman needs no label there. (<code>:Z</code> is harmless but pointless; it exists for SELinux hosts like Fedora.)</li>
 <li><input type="checkbox" disabled> No <code>host.docker.sock</code> mounted unless the service explicitly needs container access</li>
 </ul>
 <p><strong>Monitoring:</strong></p>

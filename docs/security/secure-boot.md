@@ -107,7 +107,7 @@ sudo gen-efi enroll-mok
 - Disable Secure Boot, run `sudo gen-efi configure blue`, re-enroll with `sudo gen-efi enroll-mok`, and retry
 
 **MokManager asks for a password:**
-- The enrollment password is not a fixed value — it is generated and displayed by the `gen-efi` configure/enroll flow when it stages enrollment. Use the password `shanios` printed at that point; if you no longer have it, re-run `sudo gen-efi enroll-mok` to stage a fresh enrollment.
+- The enrollment password is **`shanios`**, and it is a fixed value, not a generated one: `gen-efi.sh` runs `mokutil --generate-hash=shanios` when it stages the enrollment and logs "confirm with password 'shanios' in MokManager on first boot". An earlier version of this line said it was not fixed and then named `shanios` in the same sentence. Use `shanios`; if you missed the reboot, re-run `sudo gen-efi enroll-mok` to stage it again. **Shani Cassini names this password for you** after you press "Stage MOK Enrollment".
 
 **TPM2 fails after Secure Boot change:**
 - When you change Secure Boot settings, PCR 7 changes — re-enroll TPM2:

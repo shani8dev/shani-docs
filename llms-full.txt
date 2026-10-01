@@ -4198,7 +4198,7 @@ Shanios is an immutable Linux distribution that brings enterprise DevOps practic
 - **Blue-Green Deployment:** Two complete system images (`@blue` and `@green`) are maintained. While one is active, updates are written to the other. On reboot you switch to the updated image. The previous one is kept as a one-command rollback target.
 - **Atomic Updates:** Updates are all-or-nothing. The running system is never touched during an update. If something goes wrong, boot failure is detected automatically and the system rolls back — your work is never interrupted.
 - **Selective Persistence:** User data, configuration changes (`/etc` overlay), Flatpak apps, containers, VMs, and service credentials all live in dedicated Btrfs subvolumes that survive every update and rollback, always.
-- **Defence-in-Depth Security:** Six Linux Security Modules run simultaneously (`lsm=landlock,lockdown,yama,integrity,apparmor,bpf`), LUKS2 argon2id full-disk encryption, TPM2 auto-unlock, Secure Boot with MOK, Intel ME kernel modules (`mei`, `mei_me`) blacklisted by default, and every OS image is SHA256+GPG verified before deployment.
+- **Defence-in-Depth Security:** Six Linux Security Modules run simultaneously (`lsm=landlock,lockdown,yama,integrity,apparmor,bpf`), LUKS2 argon2id full-disk encryption, TPM2 auto-unlock, Secure Boot with MOK, the `pcspkr` PC-speaker module blacklisted (`mei`/`mei_me` are **not** blacklisted by default — see [Kernel Modules](../system/kernel-modules.md)), and every OS image is SHA256+GPG verified before deployment.
 - **Zero Telemetry:** No usage data, crash reports, analytics, or tracking of any kind — ever. The entire codebase is public on GitHub; every claim is independently verifiable.
 
 ## Traditional vs Immutable OS
@@ -4576,22 +4576,27 @@ sudo firewall-cmd --reload
 
 ---
 
-## Permissions & SELinux
+## Permissions
 
-Apache runs as the `http` user. Shani OS uses SELinux by default — files served by Apache must carry the correct context:
+Apache runs as the `http` user, so the files it serves must be readable by that user.
+
+> ⚠️ **Shanios does not use SELinux.** These commands come from the upstream documentation and will fail here — `semanage`, `setsebool`, `restorecon` and `ls -Z` are not installed, and Shanios enforces **AppArmor** (`lsm=landlock,lockdown,yama,integrity,apparmor,bpf`; see [AppArmor](../security/apparmor.md) and Cassini's LSM page). What actually governs a daemon's file access on Shanios is ordinary Unix ownership and permissions — fix those (`setfacl`, `chown`, `chmod`) and nothing SELinux-shaped. AppArmor profiles ship for third-party software; the image ships none of its own.
+
+
 
 ```bash
-# Apply the correct context to a new document root
-sudo chcon -Rt httpd_sys_content_t /srv/http/mysite
-
-# Or let restorecon derive it from policy
-sudo restorecon -Rv /srv/http/mysite
+# Apache serves as the `http` user, so that user must be able to read the tree
+sudo chown -R http:http /srv/http/mysite
+sudo chmod -R 0755 /srv/http/mysite
+namei -l /srv/http/mysite/index.html
 ```
 
-If Apache needs to connect to a backend (reverse proxy mode), enable the relevant boolean:
+If Apache needs to connect to a backend (reverse proxy mode) there is no boolean
+to enable. Check the two ordinary things instead:
 
 ```bash
-sudo setsebool -P httpd_can_network_connect 1
+systemctl is-active httpd
+curl -sI http://127.0.0.1:9000/ | head -1     # is the backend up at all?
 ```
 
 ---
@@ -4602,9 +4607,9 @@ sudo setsebool -P httpd_can_network_connect 1
 |-------|----------|
 | `AH00558: Could not reliably determine server's FQDN` | Add `ServerName localhost` to `httpd.conf` — cosmetic, does not affect operation |
 | Port 80/443 already in use | Caddy or another service owns the port — bind Apache to `127.0.0.1:8080` and proxy through Caddy |
-| `403 Forbidden` on directory | Check filesystem permissions and the `<Directory>` block's `Require` directive; check SELinux context with `ls -Z` |
-| `Permission denied` in error log | Apache (`http` user) cannot read the file — fix permissions or apply the correct SELinux context |
-| Reverse proxy returns 503 | Enable the SELinux boolean: `sudo setsebool -P httpd_can_network_connect 1` |
+| `403 Forbidden` on directory | Check filesystem permissions and the `<Directory>` block's `Require` directive; check ownership and permissions (`ls -l`) — there is no SELinux context on Shanios |
+| `Permission denied` in error log | Apache (`http` user) cannot read the file — fix ownership and permissions (`namei -l <path>`) |
+| Reverse proxy returns 503 | Shanios has no SELinux booleans. Check the proxy target is reachable and that `http` can reach it |
 | Config changes not taking effect | Run `sudo apachectl configtest` to validate, then `sudo systemctl reload httpd` |
 
 ## See Also
@@ -5621,14 +5626,14 @@ sudo setfacl -R -m u:caddy:rx /home/user/www
 getfacl /home/user/www
 ```
 
-For SELinux contexts (Shani OS uses SELinux by default):
+For file permissions (Shanios does **not** use SELinux — see [AppArmor](../security/apparmor.md)):
 
 ```bash
-# Check the current context
-ls -Z /home/user/www
+# Check that the caddy user can actually read it
+sudo -u caddy test -r /home/user/www/index.html && echo readable
 
-# Relabel if needed
-sudo restorecon -Rv /home/user/www
+# Fix it with ordinary permissions
+sudo chown -R caddy:caddy /home/user/www
 ```
 
 ---
@@ -5650,7 +5655,7 @@ For internal-only Caddy serving `.home.local` addresses over Tailscale or the LA
 
 | Issue | Solution |
 |-------|----------|
-| `permission denied` serving files | `sudo setfacl -R -m u:caddy:rx /your/path`; check SELinux context with `ls -Z` |
+| `permission denied` serving files | `sudo setfacl -R -m u:caddy:rx /your/path`; check ownership and permissions with `ls -l` — Shanios has no SELinux contexts |
 | Browser shows untrusted cert for `.home.local` | Trust the Caddy local CA: `sudo trust anchor /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt && sudo update-ca-trust` |
 | `bind: address already in use` | Another process owns port 80 or 443 — `sudo ss -tlnp | grep ':80\|:443'` to identify it |
 | Service won't start | Validate syntax first: `caddy validate --config /etc/caddy/Caddyfile`; then check logs: `journalctl -u caddy -f` |
@@ -9716,19 +9721,28 @@ sudo firewall-cmd --add-service=samba --permanent
 sudo firewall-cmd --reload
 ```
 
-### 6. SELinux Contexts
+### 6. File Permissions
 
-Shani OS enforces SELinux. Custom shares need the `samba_share_t` context:
+> ⚠️ **Shanios does not use SELinux.** These commands come from the upstream documentation and will fail here — `semanage`, `setsebool`, `restorecon` and `ls -Z` are not installed, and Shanios enforces **AppArmor** (`lsm=landlock,lockdown,yama,integrity,apparmor,bpf`; see [AppArmor](../security/apparmor.md) and Cassini's LSM page). What actually governs a daemon's file access on Shanios is ordinary Unix ownership and permissions — fix those (`setfacl`, `chown`, `chmod`) and nothing SELinux-shaped. AppArmor profiles ship for third-party software; the image ships none of its own.
+
+So for a custom share, make it readable by the `samba` user:
 
 ```bash
-sudo semanage fcontext -a -t samba_share_t "/srv/share(/.*)?"
-sudo restorecon -Rv /srv/share
+sudo chown -R samba:samba /srv/share
+sudo chmod -R 0755 /srv/share          # or 0770 with group write
+testparm -s | grep -A2 '\[srv\]'
 ```
 
-For the `[homes]` share, enable the boolean instead:
+`testparm` is the authority here, exactly as `sshd -t` is for Remote Access: it is the same parser `smbd` uses, so a share it accepts is a share the daemon will load.
+
+For the `[homes]` share there is no boolean to enable — the upstream SELinux
+step does not apply. What matters is that the user's home directory is readable
+and not over-mounted:
 
 ```bash
-sudo setsebool -P samba_enable_home_dirs on
+getent passwd alice          # is alice a real user on this machine?
+namei -l /home/alice         # walk the path, checking each hop
+testparm -s | grep -A4 '\[homes\]'
 ```
 
 ---
@@ -12077,7 +12091,7 @@ Several kernel modules and rarely-used network protocols are blacklisted by defa
 
 | Module(s) | File | Reason |
 |-----------|------|--------|
-| `mei`, `mei_me` | `modprobe.d/noime.conf` | Intel Management Engine / vPro remote-access interface — disabled by default. This does not remove ME from the hardware (not possible in software), but removes the kernel's interface to it, reducing the attack surface from the OS side. |
+| `mei`, `mei_me` | **nothing — not blacklisted** | Intel Management Engine / vPro remote-access interface. The kernel interface is **not** disabled out of the box (an earlier version of this table claimed a `noime.conf` shipped; it does not). `shani-health` flags it if loaded; add `blacklist mei_me` to `/etc/modprobe.d/shani-blacklist.conf`. This does not remove ME from the hardware (not possible in software), but removes the kernel's interface to it, reducing the attack surface from the OS side. |
 | `pcspkr` | `modprobe.d/nobeep.conf` | PC speaker blacklisted to stop the console beep; incidentally also removes it as a data-exfiltration side channel |
 | `firewire-core`, `firewire-ohci`, `firewire-sbp2`, `firewire-net` | `modprobe.d/blacklist-firewire.conf` | FireWire storage/DMA blocked outright (`install ... /bin/false`) — addresses Lynis `STRG-1846`, preventing unauthorized memory access via FireWire DMA |
 | `dccp`, `sctp`, `rds`, `tipc` | `modprobe.d/disable-unused-protocols.conf` | Uncommon network protocols disabled — addresses Lynis `NETW-3200`, reducing kernel attack surface from protocols the desktop doesn't use |
@@ -12947,7 +12961,7 @@ fprintd-enroll   # will fail with a clear error if the device is unsupported
 
 ## YubiKey and FIDO2/U2F
 
-**Packages:** `libfido2`, `pam-u2f` — pre-installed via `shani-peripherals`. `yubikey-manager` — all pre-installed via `shani-peripherals` is pre-installed via `shani-peripherals`, so `oathtool` is available with nothing to install. Install it via Nix instead:
+**Packages:** `libfido2`, `pam-u2f` — pre-installed via `shani-peripherals`. `yubikey-manager`, `pcsc-tools` and `oath-toolkit` are **also** pre-installed, all via `shani-peripherals`, so `oathtool` is available with nothing to install and there is no Nix step.
 
 
 
@@ -13020,7 +13034,8 @@ ssh-keygen -t ed25519-sk
 > *and* set `slot_num` in `/etc/pam_pkcs11/pam_pkcs11.conf` — at its default of
 > `-1` the module returns `PAM_AUTHINFO_UNAVAIL` and login still fails. The
 > commands below are unaffected and work today.
- transitively as a dependency of `opensc`/`ccid`. The `pcsc-tools` diagnostic package (used for `pcsc_scan` below) is pre-installed via `shani-peripherals`, so `oathtool` is available with nothing to install — install it via Nix:
+
+`pam_pkcs11` itself **is** in the image, as a dependency of `shani-peripherals`, so nothing needs installing; `pcsc_scan` comes with `pcsc-tools`, also pre-installed via `shani-peripherals`.
 
 
 
@@ -13066,7 +13081,7 @@ pcsc_scan   # shows NFC card when tapped
 
 ## TOTP / HOTP (Two-Factor)
 
-**Package:** `oath-toolkit` — **not** part of the default image and cannot be installed on the immutable host with `pacman`. Install it via Nix:
+**Package:** `oath-toolkit` — **pre-installed via `shani-peripherals`**, so `oathtool` is available with nothing to install. (An earlier version of this page said it was absent and pointed at Nix; it is a dependency of `shani-peripherals`.)
 
 
 
@@ -13896,7 +13911,7 @@ sudo gen-efi enroll-mok
 - Disable Secure Boot, run `sudo gen-efi configure blue`, re-enroll with `sudo gen-efi enroll-mok`, and retry
 
 **MokManager asks for a password:**
-- The enrollment password is not a fixed value — it is generated and displayed by the `gen-efi` configure/enroll flow when it stages enrollment. Use the password `shanios` printed at that point; if you no longer have it, re-run `sudo gen-efi enroll-mok` to stage a fresh enrollment.
+- The enrollment password is **`shanios`**, and it is a fixed value, not a generated one: `gen-efi.sh` runs `mokutil --generate-hash=shanios` when it stages the enrollment and logs "confirm with password 'shanios' in MokManager on first boot". An earlier version of this line said it was not fixed and then named `shanios` in the same sentence. Use `shanios`; if you missed the reboot, re-run `sudo gen-efi enroll-mok` to stage it again. **Shani Cassini names this password for you** after you press "Stage MOK Enrollment".
 
 **TPM2 fails after Secure Boot change:**
 - When you change Secure Boot settings, PCR 7 changes — re-enroll TPM2:
@@ -51678,7 +51693,7 @@ A practical checklist for any new self-hosted service before exposing it:
 **Container security:**
 - [ ] Container runs as non-root (check with `podman inspect --format '{{.Config.User}}'`)
 - [ ] No `privileged: true` unless absolutely necessary
-- [ ] Volumes mounted `:Z` for SELinux labelling
+- [ ] Volumes mounted `:Z` for SELinux labelling — **skip on Shanios**, which has no SELinux; podman needs no label there. (`:Z` is harmless but pointless; it exists for SELinux hosts like Fedora.)
 - [ ] No `host.docker.sock` mounted unless the service explicitly needs container access
 
 **Monitoring:**
@@ -56065,17 +56080,18 @@ read-only: they show what the tool says and change nothing.
 
 | Page | What it reports | Under the hood |
 |------|-----------------|----------------|
-| **Cron** | The machine's own scheduled jobs — `crontab -l` shows only your own | reads `/etc/cron.d` and `/etc/cron.{hourly,daily,weekly,monthly}` |
+| **Cron** | The machine's own scheduled jobs — `crontab -l` shows only your own | reads `/etc/crontab`, `/etc/cron.d` and `/etc/cron.{hourly,daily,weekly,monthly}` |
 | **AppArmor** | The confinement profiles loaded, and which are enforcing rather than complaining | `aa-status` (needs your password, so it runs when you press the button) |
 | **Kernel Modules** | Every loaded module, its dependencies, and each parameter's current value | `/proc/modules`, `/sys/module` |
 | **Firmware** | The hardware firmware installed, and what LVFS is offering | `fwupdmgr get-devices --json`, `get-updates --json` |
 | **Graphics** | Graphics hardware, the driver bound to each, whether each card is powered, the render nodes, and hybrid-graphics state | `lspci -k`, `/sys/bus/pci/devices/*/power/runtime_status`, `/dev/dri/render*`, `switcheroo-control` |
 | **Audio** | The PipeWire graph: devices, outputs, inputs, which is default, which programs are connected | `wpctl status` |
-| **Journal** | Every boot still on disk, and a search across their entries | `journalctl` |
+| **Journal** | Every boot still on disk, a search across their entries, whether logs survive a reboot, and the cap actually in force | `journalctl`, `/var/log/journal`, `/usr/lib/systemd/journald.conf.d/` |
 
 Three of these are worth knowing about because the answer is not where you
 would look. **Cron** cannot use `crontab -l` — that only ever means the calling
-user's table, and no tool lists the system crontabs. **Graphics** reports the
+user's table, and no tool lists the system crontabs — including `/etc/crontab`
+itself, whose lines carry an extra username field. **Graphics** reports the
 `DRI_PRIME` value that addresses each GPU and whether that card is currently
 awake, neither of which either settings app shows; it does **not** switch the
 session default, because `switcheroo-control` is a read-only property service
@@ -56083,6 +56099,8 @@ with no call that changes anything, so per-app selection is
 `switcherooctl launch -g N APP` or `prime-run`, named on the page. A GPU with no
 driver bound is listed with an empty driver rather than hidden — that is what
 "present but unusable" looks like from underneath.
+
+**Encryption** reads `gen-efi pcrlock-status --json` behind the same Check button, which answers the one question the page could previously only reason about: whether the TPM key is pinned to fixed PCR values (it is — gen-efi enrols with `--tpm2-pcrs`, the policy `systemd-cryptenroll` calls brittle) or bound to a policy hash. A firmware update strands a pinned key, and the page now says so from the machine rather than by inference.
 
 **Firmware** deliberately installs nothing, and says why — a firmware update
 changes the machine's TPM2 PCR 0 and invalidates a disk set up for automatic
@@ -57220,7 +57238,9 @@ The `install <module> /bin/false` directive is stronger — it replaces the modu
 cat /etc/modprobe.d/*.conf | grep blacklist
 ```
 
-> 💡 Shani OS ships several blacklists by default in `/usr/lib/modprobe.d/`: `blacklist-firewire.conf` blocks `firewire-core`/`firewire-ohci`/`firewire-sbp2`/`firewire-net` (no firewire hardware is expected, and it closes off a DMA attack vector), `nobeep.conf` blacklists `pcspkr` to silence the PC speaker, `noime.conf` blacklists `mei`/`mei_me` (Intel vPro/AMT remote management), and `disable-unused-protocols.conf` disables the `dccp`, `sctp`, `rds`, and `tipc` network protocols via `install <module> /bin/false` to shrink the network attack surface. Run `cat /usr/lib/modprobe.d/*.conf` to see them; if you need to re-enable one on your own install, add the corresponding override in `/etc/modprobe.d/` (part of the persistent overlay described above).
+> 💡 Shani OS ships several blacklists by default in `/usr/lib/modprobe.d/`: `blacklist-firewire.conf` blocks `firewire-core`/`firewire-ohci`/`firewire-sbp2`/`firewire-net` (no firewire hardware is expected, and it closes off a DMA attack vector), `nobeep.conf` blacklists `pcspkr` to silence the PC speaker, and `disable-unused-protocols.conf` disables the `dccp`, `sctp`, `rds`, and `tipc` network protocols via `install <module> /bin/false` to shrink the network attack surface.
+
+> ⚠️ **`mei`/`mei_me` are not blacklisted by default, despite what older versions of this page said.** No `noime.conf` ships — `/usr/lib/modprobe.d/` contains exactly `blacklist-firewire.conf`, `nobeep.conf` and `disable-unused-protocols.conf`, and nothing else in the image installs one. `shani-health` checks at runtime and tells you to add `blacklist mei` yourself if the module is loaded. Check for yourself with `lsmod | grep -w mei_me`; to close it, `echo 'blacklist mei_me' | sudo tee /etc/modprobe.d/shani-blacklist.conf` (this does not remove ME from the hardware, only the kernel's interface to it). Run `cat /usr/lib/modprobe.d/*.conf` to see them; if you need to re-enable one on your own install, add the corresponding override in `/etc/modprobe.d/` (part of the persistent overlay described above).
 
 ---
 
@@ -60180,12 +60200,17 @@ After an update, the bootloader entry may not have updated correctly.
 
 1. Press `Space` or `Enter` at the systemd-boot splash screen to bring up the boot menu.
 2. Select the correct slot and boot.
-3. Repair the boot entry from the running system:
+3. Check which slot the bootloader will actually use:
 
 ```bash
 cat /data/current-slot
-sudo shani-deploy --repair-boot
 ```
+
+> ⚠️ There is no `shani-deploy --repair-boot`. An earlier version of this page
+> told you to run it, and the flag does not exist in `shani-deploy.sh` or in its
+> `--help` — following it gives `unrecognized option`. To change which slot boots
+> next, use `sudo shani-deploy --rollback`, which makes the previous system the
+> default and deletes nothing.
 
 ### Black Screen After Update (GPU / NVIDIA)
 
