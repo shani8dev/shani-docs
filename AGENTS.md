@@ -228,16 +228,41 @@ with `iso-install --boot-only --console-exec=CMD`, for anything touching `/var`.
   because util-linux 2.42 renamed it `lastlog2`, and `hciconfig` is gone from
   bluez in favour of `bluetoothctl`.
 
-  A seventh check, **every command's first word must be a package**, was built on
-  top of it and then **demoted to advisory**, which is the part worth knowing:
-  it reported **1348** findings, almost all subcommands (`bluetoothctl power on`
-  written across lines starts with `power`; `kadmin.local addprinc` is a bare
-  subcommand). Six were real. A line-based scan cannot tell a command from a
-  subcommand in a corpus this shape, so gating on it would have buried the six.
-  It now reports and continues; the index is what you query. Fixes it prompted
-  and that were real: `lastlog`→`lastlog2`, `hciconfig`→`bluetoothctl`, and
-  explicit "not in the image" notes on `hdparm`, `gdisk`, `kvm-ok`, `brew`, `pip`,
-  `nvm`, `host-spawn`, `module`, `mpirun`, `debootstrap` and `nvidia-ctk`.
+  A seventh check, **every command's first word must be a package**, is built on
+  top of it. It is **advisory, not a gate**, and the route from 1348 findings to
+  zero is the part worth keeping — each step was a *scoping* error, not a parser
+  fix, meaning the check had been measuring something other than what it claimed:
+
+  - **1348 → 65: `docs/servers/` was out of scope all along.** Those pages
+    document self-hosted apps the reader runs *in a container*; `kubectl` alone
+    was 454 findings and `helm` 149. Their CLIs are correctly absent from the host
+    image, so 454 of those were statements that the docs describe container
+    workloads — which is what the section is for.
+  - **65 → 46: `# Inside bluetoothctl:` marks an interactive shell.** The lines
+    beneath it are that tool's *subcommands* — `power on`, `addprinc`, `scan on`,
+    `refclock`. The docs mark this explicitly, so it is decidable rather than a
+    guess.
+  - **46 → 36: an ini key with spaces around `=`.** `max_log_file = 8` in
+    audit.md's auditd.conf block; the pattern only allowed `key=`.
+  - **36 → 0: one page-level note beats forty inline comments.** Fourteen pages
+    now carry a single "**Not in the image:** …" line naming what they do not
+    ship, and the check honours a page-level disclosure exactly as it honours one
+    inside a code block. A reader looks for that once.
+
+  Two controls, because three of those four steps could have quietly gutted the
+  check: an **undisclosed** absent tool is still reported, and a disclosed one
+  stays silent. **If this check ever goes quiet, suspect the scope before
+  suspecting the corpus.**
+
+  Real fixes it prompted: `ping6` → `ping -6` (iputils merged it) and
+  `aa-enable` → not shipped (apparmor-utils is absent, though `aa-status` is),
+  joining the earlier `lastlog` → `lastlog2` and `hciconfig` → `bluetoothctl` —
+  **four commands the docs told users to run that would fail outright.** The
+  rest are now honestly disclosed: `xfreerdp`, `vncviewer`, `speedtest-cli`,
+  `chronyc`/`refclock`, `appimageupdatetool`, `ukify`, `virt-install`, `mpirun`,
+  `mail`, `dpkg`, `yay`, `apt`, `pip`, `npm`, `pnpm`, `poetry`, `uv`, `nvm`,
+  `fnm`, `aider`, `hf` and a host `ollama` (the container image is shown
+  separately and is fine).
 
   One deliberate non-check remains, so nobody reads a green run as more than it
   is: **prose claims about behaviour** are not verified. This proves a command
