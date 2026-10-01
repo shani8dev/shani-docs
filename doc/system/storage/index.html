@@ -240,7 +240,8 @@ blkid
 sudo blkid /dev/sda1
 
 # Detailed hardware info for a disk
-sudo hdparm -I /dev/sda          # ATA drives
+# hdparm is not in the image (smartctl covers ATA); use smartctl -i
+sudo smartctl -i /dev/sda
 sudo nvme id-ctrl /dev/nvme0     # NVMe drives
 
 # Show disk serial, firmware, and transport
@@ -252,7 +253,8 @@ sudo smartctl -i /dev/sda</code></pre>
 <p>Common fdisk commands inside the prompt:</p>
 <table><thead><tr><th>Key</th><th>Action</th></tr></thead><tbody><tr><td><code>p</code></td><td>Print current partition table</td></tr><tr><td><code>n</code></td><td>New partition</td></tr><tr><td><code>d</code></td><td>Delete partition</td></tr><tr><td><code>t</code></td><td>Change partition type</td></tr><tr><td><code>g</code></td><td>Create new GPT table</td></tr><tr><td><code>o</code></td><td>Create new MBR table</td></tr><tr><td><code>w</code></td><td>Write and exit</td></tr><tr><td><code>q</code></td><td>Quit without saving</td></tr></tbody></table>
 <h3 id="gdisk-gpt-only-partitioner">gdisk — GPT-only Partitioner</h3>
-<pre><code class="language-bash">sudo gdisk /dev/sda</code></pre>
+<pre><code class="language-bash"># gdisk is not in the image; parted is
+sudo parted /dev/sda print</code></pre>
 <h3 id="parted-scriptable-partitioner">parted — Scriptable Partitioner</h3>
 <pre><code class="language-bash"># Print partition table
 sudo parted /dev/sda print

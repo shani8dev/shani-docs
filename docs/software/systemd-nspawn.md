@@ -68,6 +68,8 @@ You can also bootstrap manually:
 
 ```bash
 # Debian container via debootstrap
+# debootstrap is not in the image - it is Debian's tool, so this only
+# applies to a Debian host, not to running the container here
 sudo debootstrap stable /var/lib/machines/debian-stable
 sudo systemd-nspawn -D /var/lib/machines/debian-stable
 

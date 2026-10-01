@@ -70,7 +70,8 @@ virsh vol-create-as default myvm.qcow2 40G --format qcow2
 ```bash
 # Check KVM is available
 ls /dev/kvm
-kvm-ok   # or: grep -c vmx /proc/cpuinfo  (Intel) / grep -c svm /proc/cpuinfo  (AMD)
+# kvm-ok is not in the image; the /proc checks are the portable way
+grep -c vmx /proc/cpuinfo  # Intel; use svm for AMD
 
 # Quick VM from an ISO (2 CPU cores, 2 GB RAM)
 qemu-system-x86_64 \

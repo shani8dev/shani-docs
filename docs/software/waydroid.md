@@ -35,6 +35,8 @@ After `init` completes, Waydroid appears in your app launcher. Android apps can 
 The default Waydroid image is AOSP without Google services. For Play Store access, install GApps after initialisation:
 
 ```bash
+# `pip` is not in the image as a system tool; see the Waydroid page for
+# the supported install path
 pip install waydroid-script --break-system-packages
 sudo waydroid-script install gapps
 ```

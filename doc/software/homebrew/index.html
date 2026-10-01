@@ -229,7 +229,9 @@
 # Skip the installer's &quot;add brew shellenv to your rc file&quot; step and just
 # open a new terminal.</code></pre>
 <h2 id="basic-usage">Basic Usage</h2>
-<pre><code class="language-bash"># Search for a package
+<pre><code class="language-bash"># NOTE: `brew` is NOT in the image. It is an optional per-user install (see
+# above) - until it exists, every command below is &quot;command not found&quot;.
+# Search for a package
 brew search keyword
 
 # Install a package

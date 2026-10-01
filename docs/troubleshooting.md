@@ -318,7 +318,8 @@ See [Bluetooth](networking/bluetooth) for a full pairing/management guide — th
 ### Adapter Not Found
 
 ```bash
-hciconfig -a
+# hciconfig was removed from bluez; bluetoothctl is the interface now
+bluetoothctl show
 rfkill list bluetooth
 
 # Unblock if soft-blocked

@@ -406,7 +406,8 @@ journalctl --user -u wireplumber -n 50</code></pre>
 <h2 id="bluetooth-problems">Bluetooth Problems</h2>
 <p>See <a href="/doc/networking/bluetooth/">Bluetooth</a> for a full pairing/management guide — the essentials for common failures are below.</p>
 <h3 id="adapter-not-found">Adapter Not Found</h3>
-<pre><code class="language-bash">hciconfig -a
+<pre><code class="language-bash"># hciconfig was removed from bluez; bluetoothctl is the interface now
+bluetoothctl show
 rfkill list bluetooth
 
 # Unblock if soft-blocked

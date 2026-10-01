@@ -25,6 +25,8 @@ Homebrew is **not pre-installed** on Shanios — use Nix or Distrobox first. Ins
 ## Basic Usage
 
 ```bash
+# NOTE: `brew` is NOT in the image. It is an optional per-user install (see
+# above) - until it exists, every command below is "command not found".
 # Search for a package
 brew search keyword
 

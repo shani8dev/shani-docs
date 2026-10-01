@@ -440,9 +440,11 @@ last reboot            # reboot history
 sudo lastb
 sudo lastb -n 20
 
-# Last login time per user
-lastlog
-lastlog -u alice
+# Last login time per user.
+# NOTE: util-linux 2.42 replaced `lastlog` with `lastlog2`; there is no
+# `lastlog` binary in the image any more.
+lastlog2
+lastlog2 -u alice
 
 # List all user accounts (UID &gt;= 1000 = human users)
 getent passwd | awk -F: '$3 &gt;= 1000 {print $1, $3, $6, $7}'

@@ -35,10 +35,12 @@ clinfo | grep -i nvidia   # Verify OpenCL platform
 
 ```bash
 # Generate the CDI specification — required for Podman (especially rootless)
+# `nvidia-ctk` comes from nvidia-container-toolkit, which is NOT in the image
+# and cannot be added to an immutable root - see the note below
 sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
 
 # Verify devices were detected
-nvidia-ctk cdi list
+# nvidia-ctk cdi list
 # Expected output: nvidia.com/gpu=0, nvidia.com/gpu=all, etc.
 ```
 
@@ -59,6 +61,7 @@ podman run --rm \
 ### 4. Install PyTorch (CUDA 12.1)
 
 ```bash
+# `pip` is not on the host - this runs inside the container
 pip install torch torchvision torchaudio \
   --index-url https://download.pytorch.org/whl/cu121
 ```
@@ -146,6 +149,7 @@ distrobox create --name cuda-dev \
 distrobox enter cuda-dev
 
 # Inside the container:
+# `pip` is not on the host - this runs inside the container
 pip install torch --index-url https://download.pytorch.org/whl/cu121
 ```
 
@@ -159,6 +163,7 @@ distrobox create --name rocm-dev \
 distrobox enter rocm-dev
 
 # Inside the container:
+# `pip` is not on the host - this runs inside the container
 pip install torch --index-url https://download.pytorch.org/whl/rocm6.0
 ```
 
@@ -218,8 +223,10 @@ apptainer exec --rocm /scratch/$USER/research.sif python3 train.py
 Most clusters run `mpirun` on the host and bind-mount the MPI libraries into the container. Your container's MPI version should match the host's.
 
 ```bash
+# `module` is a cluster tool (environment-modules); not in the image
 module load openmpi
 
+# `mpirun` is not in the image - openmpi is not shipped
 mpirun -np 32 \
   apptainer exec --nv \
   --bind /usr/lib/openmpi:/usr/lib/openmpi \

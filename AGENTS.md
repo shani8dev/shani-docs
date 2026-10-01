@@ -212,6 +212,33 @@ with `iso-install --boot-only --console-exec=CMD`, for anything touching `/var`.
   that acts on it) is exempt, and an injected `shani-nonexistent-thing.timer`
   is still caught.
 
+  **`tests/bin-index.tsv` + `tests/build-binindex.py` — which package provides
+  each binary (2026-10-01, and this is the answer to the mistake above).**
+  Three passes concluded `zramctl` was not in the image because `zram-tools` is
+  in no PKGBUILD and no profile. That proves only that it is not a *listed
+  dependency* — `util-linux` provides `/usr/bin/zramctl` and arrives by another
+  route. Two agents and I reported it absent, and I wrote the "correction" into
+  three pages before someone checked the actual tarball. The build cache settles
+  it: `util-linux-2.42.2` contains `usr/bin/zramctl`.
+
+  The generator walks the 2268 cached packages once (8-way parallel) and writes
+  4512 binaries → `bin-index.tsv` (207K, sorted, so its diff is the reviewable
+  record of what moved). **Use this to answer "is X in the image" — never a
+  dependency list.** It found the good ones too: `lastlog` does not exist
+  because util-linux 2.42 renamed it `lastlog2`, and `hciconfig` is gone from
+  bluez in favour of `bluetoothctl`.
+
+  A seventh check, **every command's first word must be a package**, was built on
+  top of it and then **demoted to advisory**, which is the part worth knowing:
+  it reported **1348** findings, almost all subcommands (`bluetoothctl power on`
+  written across lines starts with `power`; `kadmin.local addprinc` is a bare
+  subcommand). Six were real. A line-based scan cannot tell a command from a
+  subcommand in a corpus this shape, so gating on it would have buried the six.
+  It now reports and continues; the index is what you query. Fixes it prompted
+  and that were real: `lastlog`→`lastlog2`, `hciconfig`→`bluetoothctl`, and
+  explicit "not in the image" notes on `hdparm`, `gdisk`, `kvm-ok`, `brew`, `pip`,
+  `nvm`, `host-spawn`, `module`, `mpirun`, `debootstrap` and `nvidia-ctk`.
+
   One deliberate non-check remains, so nobody reads a green run as more than it
   is: **prose claims about behaviour** are not verified. This proves a command
   exists, a package is shipped and a `shani-*` unit is real; it does not prove

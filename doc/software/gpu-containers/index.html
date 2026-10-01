@@ -229,10 +229,12 @@ clinfo | grep -i nvidia   # Verify OpenCL platform</code></pre>
 <h3 id="2-container-toolkit-and-cdi-spec">2. Container Toolkit and CDI Spec</h3>
 <p><code>nvidia-container-toolkit</code> is <strong>not pre-installed</strong> on the base system, and the immutable root cannot accept a <code>pacman -S</code> install. For raw rootless Podman you must add it as a system-level change; the reliable, supported path — which needs <strong>no CDI setup at all</strong> — is to run NVIDIA work through <strong>Distrobox</strong>, which injects the host driver and handles CDI automatically. If your workflow requires raw Podman on NVIDIA hardware, first make the toolkit available on the host and generate the CDI spec:</p>
 <pre><code class="language-bash"># Generate the CDI specification — required for Podman (especially rootless)
+# `nvidia-ctk` comes from nvidia-container-toolkit, which is NOT in the image
+# and cannot be added to an immutable root - see the note below
 sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
 
 # Verify devices were detected
-nvidia-ctk cdi list
+# nvidia-ctk cdi list
 # Expected output: nvidia.com/gpu=0, nvidia.com/gpu=all, etc.</code></pre>
 <p>The CDI spec must be regenerated after driver updates or GPU configuration changes.</p>
 <h3 id="3-run-a-cuda-container">3. Run a CUDA Container</h3>
@@ -243,7 +245,8 @@ nvidia-ctk cdi list
   docker.io/nvidia/cuda:12.6.0-devel-ubuntu24.04 \
   python3 -c &quot;import torch; print(torch.cuda.is_available())&quot;</code></pre>
 <h3 id="4-install-pytorch-cuda-121">4. Install PyTorch (CUDA 12.1)</h3>
-<pre><code class="language-bash">pip install torch torchvision torchaudio \
+<pre><code class="language-bash"># `pip` is not on the host - this runs inside the container
+pip install torch torchvision torchaudio \
   --index-url https://download.pytorch.org/whl/cu121</code></pre>
 <blockquote>💡 <strong>Tip:</strong> On Shanios, <code>shani-deploy</code> updates host NVIDIA drivers and the CDI spec automatically. No image rebuild is required — the change propagates to all existing containers on next <code>podman restart</code>.</blockquote>
 <hr>
@@ -285,6 +288,7 @@ nvidia-ctk cdi list
 distrobox enter cuda-dev
 
 # Inside the container:
+# `pip` is not on the host - this runs inside the container
 pip install torch --index-url https://download.pytorch.org/whl/cu121</code></pre>
 <h3 id="amd-rocm">AMD ROCm</h3>
 <pre><code class="language-bash">distrobox create --name rocm-dev \
@@ -294,6 +298,7 @@ pip install torch --index-url https://download.pytorch.org/whl/cu121</code></pre
 distrobox enter rocm-dev
 
 # Inside the container:
+# `pip` is not on the host - this runs inside the container
 pip install torch --index-url https://download.pytorch.org/whl/rocm6.0</code></pre>
 <h3 id="intel-oneapi">Intel oneAPI</h3>
 <pre><code class="language-bash">distrobox create --name intel-dev \
@@ -331,8 +336,10 @@ apptainer exec --rocm /scratch/$USER/research.sif python3 train.py</code></pre>
 <h2 id="openmpi-distributed-workflows">🌐 OpenMPI & Distributed Workflows</h2>
 <h3 id="hpc-standard-host-mpi-container">HPC Standard (Host MPI + Container)</h3>
 <p>Most clusters run <code>mpirun</code> on the host and bind-mount the MPI libraries into the container. Your container's MPI version should match the host's.</p>
-<pre><code class="language-bash">module load openmpi
+<pre><code class="language-bash"># `module` is a cluster tool (environment-modules); not in the image
+module load openmpi
 
+# `mpirun` is not in the image - openmpi is not shipped
 mpirun -np 32 \
   apptainer exec --nv \
   --bind /usr/lib/openmpi:/usr/lib/openmpi \

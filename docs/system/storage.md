@@ -33,7 +33,8 @@ blkid
 sudo blkid /dev/sda1
 
 # Detailed hardware info for a disk
-sudo hdparm -I /dev/sda          # ATA drives
+# hdparm is not in the image (smartctl covers ATA); use smartctl -i
+sudo smartctl -i /dev/sda
 sudo nvme id-ctrl /dev/nvme0     # NVMe drives
 
 # Show disk serial, firmware, and transport
@@ -66,7 +67,8 @@ Common fdisk commands inside the prompt:
 ### gdisk — GPT-only Partitioner
 
 ```bash
-sudo gdisk /dev/sda
+# gdisk is not in the image; parted is
+sudo parted /dev/sda print
 ```
 
 ### parted — Scriptable Partitioner

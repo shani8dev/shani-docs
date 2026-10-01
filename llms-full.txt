@@ -53409,7 +53409,8 @@ python3 -m venv ~/venvs/myproject
 source ~/venvs/myproject/bin/activate
 pip install django numpy pandas
 
-# Node.js via nvm inside Fedora
+# Node.js via nvm inside Fedora.
+# `nvm` and `node` are not on the host - this is all inside the container.
 distrobox enter fedora
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 source ~/.bashrc
@@ -53427,7 +53428,8 @@ Inside a Distrobox container:
 - `host-spawn <command>` runs a command on the host from inside the container
 
 ```bash
-# From inside a container — run something on the host
+# From inside a container - run something on the host.
+# `host-spawn` is a distrobox tool and is not on the host's PATH here.
 host-spawn flatpak run org.gimp.GIMP
 host-spawn systemctl --user restart pipewire
 ```
@@ -53713,10 +53715,12 @@ clinfo | grep -i nvidia   # Verify OpenCL platform
 
 ```bash
 # Generate the CDI specification — required for Podman (especially rootless)
+# `nvidia-ctk` comes from nvidia-container-toolkit, which is NOT in the image
+# and cannot be added to an immutable root - see the note below
 sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
 
 # Verify devices were detected
-nvidia-ctk cdi list
+# nvidia-ctk cdi list
 # Expected output: nvidia.com/gpu=0, nvidia.com/gpu=all, etc.
 ```
 
@@ -53737,6 +53741,7 @@ podman run --rm \
 ### 4. Install PyTorch (CUDA 12.1)
 
 ```bash
+# `pip` is not on the host - this runs inside the container
 pip install torch torchvision torchaudio \
   --index-url https://download.pytorch.org/whl/cu121
 ```
@@ -53824,6 +53829,7 @@ distrobox create --name cuda-dev \
 distrobox enter cuda-dev
 
 # Inside the container:
+# `pip` is not on the host - this runs inside the container
 pip install torch --index-url https://download.pytorch.org/whl/cu121
 ```
 
@@ -53837,6 +53843,7 @@ distrobox create --name rocm-dev \
 distrobox enter rocm-dev
 
 # Inside the container:
+# `pip` is not on the host - this runs inside the container
 pip install torch --index-url https://download.pytorch.org/whl/rocm6.0
 ```
 
@@ -53896,8 +53903,10 @@ apptainer exec --rocm /scratch/$USER/research.sif python3 train.py
 Most clusters run `mpirun` on the host and bind-mount the MPI libraries into the container. Your container's MPI version should match the host's.
 
 ```bash
+# `module` is a cluster tool (environment-modules); not in the image
 module load openmpi
 
+# `mpirun` is not in the image - openmpi is not shipped
 mpirun -np 32 \
   apptainer exec --nv \
   --bind /usr/lib/openmpi:/usr/lib/openmpi \
@@ -53986,6 +53995,8 @@ Homebrew is **not pre-installed** on Shanios — use Nix or Distrobox first. Ins
 ## Basic Usage
 
 ```bash
+# NOTE: `brew` is NOT in the image. It is an optional per-user install (see
+# above) - until it exists, every command below is "command not found".
 # Search for a package
 brew search keyword
 
@@ -54920,6 +54931,8 @@ You can also bootstrap manually:
 
 ```bash
 # Debian container via debootstrap
+# debootstrap is not in the image - it is Debian's tool, so this only
+# applies to a Debian host, not to running the container here
 sudo debootstrap stable /var/lib/machines/debian-stable
 sudo systemd-nspawn -D /var/lib/machines/debian-stable
 
@@ -55152,7 +55165,8 @@ virsh vol-create-as default myvm.qcow2 40G --format qcow2
 ```bash
 # Check KVM is available
 ls /dev/kvm
-kvm-ok   # or: grep -c vmx /proc/cpuinfo  (Intel) / grep -c svm /proc/cpuinfo  (AMD)
+# kvm-ok is not in the image; the /proc checks are the portable way
+grep -c vmx /proc/cpuinfo  # Intel; use svm for AMD
 
 # Quick VM from an ISO (2 CPU cores, 2 GB RAM)
 qemu-system-x86_64 \
@@ -55309,6 +55323,8 @@ After `init` completes, Waydroid appears in your app launcher. Android apps can 
 The default Waydroid image is AOSP without Google services. For Play Store access, install GApps after initialisation:
 
 ```bash
+# `pip` is not in the image as a system tool; see the Waydroid page for
+# the supported install path
 pip install waydroid-script --break-system-packages
 sudo waydroid-script install gapps
 ```
@@ -58681,7 +58697,8 @@ blkid
 sudo blkid /dev/sda1
 
 # Detailed hardware info for a disk
-sudo hdparm -I /dev/sda          # ATA drives
+# hdparm is not in the image (smartctl covers ATA); use smartctl -i
+sudo smartctl -i /dev/sda
 sudo nvme id-ctrl /dev/nvme0     # NVMe drives
 
 # Show disk serial, firmware, and transport
@@ -58714,7 +58731,8 @@ Common fdisk commands inside the prompt:
 ### gdisk — GPT-only Partitioner
 
 ```bash
-sudo gdisk /dev/sda
+# gdisk is not in the image; parted is
+sudo parted /dev/sda print
 ```
 
 ### parted — Scriptable Partitioner
@@ -60079,9 +60097,11 @@ last reboot            # reboot history
 sudo lastb
 sudo lastb -n 20
 
-# Last login time per user
-lastlog
-lastlog -u alice
+# Last login time per user.
+# NOTE: util-linux 2.42 replaced `lastlog` with `lastlog2`; there is no
+# `lastlog` binary in the image any more.
+lastlog2
+lastlog2 -u alice
 
 # List all user accounts (UID >= 1000 = human users)
 getent passwd | awk -F: '$3 >= 1000 {print $1, $3, $6, $7}'
@@ -60482,7 +60502,8 @@ See [Bluetooth](networking/bluetooth) for a full pairing/management guide — th
 ### Adapter Not Found
 
 ```bash
-hciconfig -a
+# hciconfig was removed from bluez; bluetoothctl is the interface now
+bluetoothctl show
 rfkill list bluetooth
 
 # Unblock if soft-blocked

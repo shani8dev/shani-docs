@@ -91,7 +91,8 @@ python3 -m venv ~/venvs/myproject
 source ~/venvs/myproject/bin/activate
 pip install django numpy pandas
 
-# Node.js via nvm inside Fedora
+# Node.js via nvm inside Fedora.
+# `nvm` and `node` are not on the host - this is all inside the container.
 distrobox enter fedora
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 source ~/.bashrc
@@ -109,7 +110,8 @@ Inside a Distrobox container:
 - `host-spawn <command>` runs a command on the host from inside the container
 
 ```bash
-# From inside a container — run something on the host
+# From inside a container - run something on the host.
+# `host-spawn` is a distrobox tool and is not on the host's PATH here.
 host-spawn flatpak run org.gimp.GIMP
 host-spawn systemctl --user restart pipewire
 ```

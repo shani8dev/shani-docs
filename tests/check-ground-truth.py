@@ -420,6 +420,194 @@ def enabled_units() -> set[str]:
     return found
 
 
+BININDEX = REPO / "tests" / "bin-index.tsv"
+
+# Shell syntax and builtins, which are not files anywhere. Also the words that
+# lead a pipeline without being the command being run.
+SHELL_WORDS = frozenset({
+    "sudo", "doas", "env", "command", "builtin", "exec", "eval", "time",
+    "if", "then", "else", "elif", "fi", "for", "while", "until", "do", "done",
+    "case", "esac", "function", "in", "return", "exit", "set", "unset",
+    "shift", "trap", "source", ".", ":", "!", "[", "]]", "[[", "true", "false",
+    "test", "read", "printf", "echo", "cd", "pwd", "which", "type", "hash",
+    "export", "local", "declare", "readonly", "alias", "unalias", "wait",
+    "jobs", "bg", "fg", "disown", "umask", "ulimit", "times", "help",
+    "let", "getopts", "mapfile", "readarray", "caller", "pushd", "popd",
+    "dirs", "suspend", "logout", "history", "bind", "complete", "enable",
+    "fc", "hash", "type", "ulimit", "wait", "kill", "nice", "nohup", "trap",
+})
+# Our own programs, installed from shani-pkgbuilds and so not in the cache.
+OUR_TOOLS = frozenset({
+    "shani-deploy", "shani-health", "shani-reset", "gen-efi", "shani-fleet-agent",
+    "shani-cassini", "shani-backup", "shani-chronoa", "adduser", "orin",
+    "shani-user-setup", "shani-deploy-notify", "btrfs-scrub", "btrfs-balance",
+})
+
+
+def binindex() -> set[str] | None:
+    if not BININDEX.exists():
+        return None
+    found = set()
+    for line in BININDEX.read_text().splitlines():
+        if line.startswith("#") or "\t" not in line:
+            continue
+        found.add(line.split("\t", 1)[0])
+    return found or None
+
+
+# A command word: lowercase-ish, no assignment, no punctuation that marks an
+# ini key, a path, a shell operator or a keystroke. `[Service]`, `Restart=always`,
+# `Ctrl+B`, `~/.config/...` and `VER="${DATE:0:4}..."` all fail this, which is the
+# point - the first version of this check reported all five as missing tools.
+COMMAND_WORD = re.compile(r"^[a-z][a-z0-9._+-]{1,30}$")
+# Words that are module names, modprobe.d directives or unit-file keys rather
+# than tools. `blacklist`, `install` and the like appear as bare words in the
+# config examples this corpus is full of.
+CONFIG_KEYWORDS = frozenset({
+    "blacklist", "install", "options", "alias", "remove", "softdep",
+    "kvm", "kvm_intel", "kvm_amd", "vhost_net", "vhost_vsock", "kvm_hv",
+    "options", "defaults", "conf", "log", "logind", "swap", "cpu",
+})
+
+
+def binindex() -> set[str] | None:
+    if not BININDEX.exists():
+        return None
+    found = set()
+    for line in BININDEX.read_text().splitlines():
+        if line.startswith("#") or "\t" not in line:
+            continue
+        found.add(line.split("\t", 1)[0])
+    return found or None
+
+
+def check_commands(advisory: list[str]) -> int:
+    r"""ADVISORY ONLY - reports, never fails. See the docstring.
+
+    Every tool the docs tell a user to run must exist in the image.
+
+    **This is the check whose absence produced three wrong corrections.** The
+    rule we got wrong was "no PKGBUILD depends on it and no profile lists it",
+    which proves a package is not a *listed dependency* - not that nothing
+    provides the binary. `zramctl` looked absent that way and is provided by
+    util-linux. The build-cache index answers the actual question, and
+    `tests/build-binindex.py` regenerates it from the cache.
+
+    Scoped to the first word of a command inside a ```bash block. Prose is
+    skipped (it is mostly prose) and lines that are comments, ini keys, section
+    headers, assignments, paths, heredoc bodies and shell operators are not
+    commands at all.
+
+    **Why this is advisory and not a gate.** A line-based scan cannot tell a
+    whole command from a subcommand, and this corpus is full of the latter:
+    `bluetoothctl power on` written across lines starts with `power`, and
+    `kadmin.local addprinc` starts with a bare subcommand. That produced 1348
+    findings of which perhaps a dozen were real - so the check found six genuine
+    problems (notably `lastlog`, which util-linux 2.42 renamed to `lastlog2`)
+    and then drowned them. A gate that cries wolf 1348 times is a gate nobody
+    reads, so this reports and continues; **the index beside it
+    (`tests/bin-index.tsv`) is the part to query** when you want to know whether
+    a tool exists, and it is exact.
+    """
+    tools = binindex()
+    if tools is None:
+        return 0
+    hits = 0
+    for md in sorted(DOCS.rglob("*.md")):
+        text = md.read_text()
+        rel = md.relative_to(REPO)
+        # `finditer`, not `find`: a page with several bash blocks needs each
+        # block's own offset. Using `text.index(block)` gave every block after
+        # the first the first block's line numbers, so the findings pointed at
+        # unrelated lines - `smartctl` and `nvme` are in the cache, and the
+        # report was naming them.
+        for bm in re.finditer(r"```bash\n(.*?)```", text, re.S):
+            block = bm.group(1)
+            # +1: `bm.start()` is the fence itself, so count("\n") gives the
+            # line the fence is on, and the first line of content is the next.
+            line_no = text[:bm.start()].count("\n") + 1
+            previous_continued = False
+            # The whole run of comment lines above a command, not just the
+            # last one: a note is often two or three lines long ("debootstrap
+            # is not in the image - it is Debian's tool, so this only / applies
+            # to a Debian host"), and looking at one line reported a command
+            # the reader had been told about directly above.
+            disclosures = ""
+            # A comment run at the *top* of a block is a note about the whole
+            # block, so it applies to every command in it - blank lines do not
+            # end it. Without this, a note above the first command excused only
+            # that one and the check reported the other eight.
+            block_note = ""
+            heredoc = None
+            for raw in block.splitlines():
+                line_no += 1
+                cmd = raw.strip()
+                # Between `cat > file << 'EOF'` and the terminator the lines
+                # are the *content of a config file*, not commands -
+                # `context.properties = {` in audio.md's samplerate example.
+                if heredoc is not None:
+                    if cmd == heredoc:
+                        heredoc = None
+                    continue
+                m = re.search(r"<<-?\s*['\"]?([A-Za-z_][A-Za-z0-9_]*)['\"]?\s*$", cmd)
+                if m:
+                    heredoc = m.group(1)
+                    previous_continued = False
+                    continue
+                if not cmd:
+                    previous_continued = False
+                    if block_note:
+                        disclosures = block_note
+                    continue
+                if cmd.startswith("#"):
+                    previous_continued = False
+                    disclosures += " " + cmd
+                    if not block_note:
+                        block_note = disclosures
+                    continue
+                # A continuation of the previous command is not a command: a
+                # wrapped `restic forget --keep-daily ...` has a line that
+                # begins `log`, which is not a tool being run.
+                if previous_continued:
+                    previous_continued = cmd.endswith("\\")
+                    continue
+                previous_continued = cmd.endswith("\\")
+                for prefix in ("sudo ", "doas ", "env ", "time "):
+                    if cmd.startswith(prefix):
+                        cmd = cmd[len(prefix):].strip()
+                word = cmd.split()[0] if cmd.split() else ""
+                skip = (
+                    not COMMAND_WORD.match(word)
+                    or re.match(r"^[A-Za-z][\w.]*=", cmd)   # an ini key
+                    or word in SHELL_WORDS
+                    or word in OUR_TOOLS
+                    or word in CONFIG_KEYWORDS
+                    or word in tools
+                    or word.endswith((".sh", ".py"))
+                    or re.search(r"(script|command|example|placeholder|todo)$",
+                                 word)
+                )
+                if not skip:
+                    # A command whose surrounding comments say it is not
+                    # shipped is not a defect: `intel_gpu_top  # requires
+                    # intel-gpu-tools (not pre-installed)` tells the reader
+                    # exactly that, and the disclosure is often several comment
+                    # lines long, so the whole run above it counts.
+                    nearby = f"{block_note} {disclosures} {cmd}"
+                    disclosed = re.search(
+                        r"not pre-?installed|is not installed|"
+                        r"not available|not in the image|not shipped|"
+                        r"not on the host|container-side|runs inside|"
+                        r"inside the container|in the container|"
+                        r"requires? `?" + re.escape(word), nearby, re.I)
+                    if not disclosed:
+                        advisory.append(
+                            f"{rel}:{line_no}: `{word}` is not in the build "
+                            f"cache")
+                        hits += 1
+    return hits
+
+
 def check_units(bad: list[str]) -> int:
     """A `shani-*` unit the docs name must actually exist.
 
@@ -530,18 +718,31 @@ def main() -> int:
         return 0
 
     bad: list[str] = []
+    advisory: list[str] = []
     n_scripts = check_flags(bad)
     n_subs = check_genefi_subcommands(bad)
     n_sl = check_selinux(bad)
     n_pkg = check_package_claims(bad)
     n_unit = check_units(bad)
+    n_cmd = check_commands(advisory)
     carried = check_paths(bad)
 
     print(f"ground truth: {n_scripts} scripts, {n_subs} gen-efi subcommands, "
           f"{len(carried)} files carried by shani-settings, "
           f"{n_sl} SELinux occurrences outside comparison.md, "
-          f"{n_pkg} wrong 'not shipped' claims, {n_unit} unbacked units")
+          f"{n_pkg} wrong 'not shipped' claims, {n_unit} unbacked units, "
+          f"{n_cmd} unrunnable commands")
 
+    if advisory:
+        print(f"\n{n_cmd} command(s) whose first word is not a package in the "
+              f"build cache - ADVISORY, not a failure:")
+        print("  Most are subcommands (`bluetoothctl power on` written across")
+        print("  lines, `kadmin.local addprinc`) or container-side tools, which")
+        print("  this line-based scan cannot tell apart. The ones it did find")
+        print("  real are fixed; the rest need a human. First 40:")
+        for a in advisory[:40]:
+            print(f"  ~ {a}")
+        print(f"  ... and {len(advisory) - 40} more")
     if bad:
         print(f"\n{len(bad)} claim(s) contradict the repos:\n")
         for b in bad:
@@ -549,6 +750,7 @@ def main() -> int:
         return 1
     print("every shani-deploy/health/reset flag, gen-efi subcommand, SELinux "
           "reference and shipped path the docs name exists")
+    print("(the command scan above is advisory - see its docstring)")
     return 0
 
 

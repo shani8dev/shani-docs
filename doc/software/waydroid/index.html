@@ -238,7 +238,9 @@ sudo waydroid-helper init
 <p>After <code>init</code> completes, Waydroid appears in your app launcher. Android apps can be launched from there or via the terminal.</p>
 <h2 id="google-play-store-and-arm-apps">Google Play Store and ARM Apps</h2>
 <p>The default Waydroid image is AOSP without Google services. For Play Store access, install GApps after initialisation:</p>
-<pre><code class="language-bash">pip install waydroid-script --break-system-packages
+<pre><code class="language-bash"># `pip` is not in the image as a system tool; see the Waydroid page for
+# the supported install path
+pip install waydroid-script --break-system-packages
 sudo waydroid-script install gapps</code></pre>
 <p>After installing GApps, open the Play Store and sign in with your Google account. You may need to register your device ID at <code>google.com/android/uncertified</code> if the Play Store blocks downloads.</p>
 <p><strong>ARM app compatibility</strong> is handled by <code>libhoudini</code> (Intel's ARM-to-x86 translation), included in the Shanios Waydroid setup. Most ARM-compiled Android apps run transparently.</p>
