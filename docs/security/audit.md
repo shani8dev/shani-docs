@@ -130,6 +130,8 @@ sudo auditctl -D
 
 ### Persistent Rules
 
+> ⚠️ **`shani-health` counts the wrong directory.** It reports packaged rule files by looking in `/usr/lib/audit/rules.d/`, but `shani-settings` ships `10-shani-base.rules` to **`/etc/audit/rules.d/`**. So its "N packaged rule file(s)" count reads 0 on a Shanios machine that does have one. Read the rules from `/etc/audit/rules.d/` when you want the truth; Cassini's Audit page reads the correct path.
+
 Create a separate file in `/etc/audit/rules.d/` — use a numeric prefix after `10-` (e.g. `20-`) so it loads after, and doesn't collide with, the shipped `10-shani-base.rules`:
 
 Identity files, sudoers, and privilege escalation are already watched by `10-shani-base.rules` (above) — add rules for things it doesn't cover, such as SSH config or a specific user's activity:

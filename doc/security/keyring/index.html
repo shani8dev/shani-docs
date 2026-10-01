@@ -241,8 +241,12 @@ ls -la /usr/share/pacman/keyrings/shani.*
 sudo pacman-key --list-keys | grep shani</code></pre>
 <h2 id="known-issues">Known Issues</h2>
 <ul>
-<li><strong>Invalid GPG header.</strong> <code>shani.gpg</code> currently has header <code>-----shrinivas-----</code> instead of the standard <code>-----BEGIN PGP PUBLIC KEY BLOCK-----</code>. This prevents <code>gpg</code>/<code>pacman-key</code> from parsing the keyring, which can cause clean installs to fail. This must be fixed for the trust root to function.</li>
-<li><strong>Single non-expiring key.</strong> No rotation path exists. Revocation doesn't propagate to already-installed systems.</li>
+<li><del><strong>Invalid GPG header.</strong></del> <strong>Fixed.</strong> This entry used to say <code>shani.gpg</code></li>
+<p>carried the header <code>-----shrinivas-----</code> instead of the standard one, and that this "must be fixed for the trust root to function". It is not the case any more: the built <code>shani-keyring-20241020-5-any.pkg.tar.zst</code> carries <code>-----BEGIN PGP PUBLIC KEY BLOCK-----</code>, and <code>shani-trusted</code> names <code>7B927BFFD4A9EAAA8B666B77DE217F3DA8014792</code>, which <code>pacman-key --populate shani</code> consumes via the package's scriptlet.</p>
+</ul>
+<p><strong>Do not re-add <code>gpg --list-keys</code> as the check.</strong> <code>shani.gpg</code> is a <strong>keybox</strong> (<code>kbx</code>), not a legacy OpenPGP keyring, so plain <code>gpg --keyring shani.gpg --list-keys</code> answers <code>invalid packet (ctb=2d)</code> <strong>and is entirely correct</strong> — it is pacman-key's own keybox reader that reads the format. Reading that error as a broken trust root is the wrong conclusion from a working keyring.</p>
+<ul>
+<li><strong>Single non-expiring key.</strong> No rotation path exists. Revocation doesn't propagate to already-installed systems. <code>shani-revoked</code> is genuinely empty (0 bytes), so there is currently nothing to revoke <em>into</em> — worth knowing before treating an empty revocation list as a gap.</li>
 </ul>
 <h2 id="see-also">See Also</h2>
 <ul>

@@ -53,8 +53,20 @@ sudo pacman-key --list-keys | grep shani
 
 ## Known Issues
 
-- **Invalid GPG header.** `shani.gpg` currently has header `-----shrinivas-----` instead of the standard `-----BEGIN PGP PUBLIC KEY BLOCK-----`. This prevents `gpg`/`pacman-key` from parsing the keyring, which can cause clean installs to fail. This must be fixed for the trust root to function.
-- **Single non-expiring key.** No rotation path exists. Revocation doesn't propagate to already-installed systems.
+- ~~**Invalid GPG header.**~~ **Fixed.** This entry used to say `shani.gpg`
+  carried the header `-----shrinivas-----` instead of the standard one, and that
+  this "must be fixed for the trust root to function". It is not the case any
+  more: the built `shani-keyring-20241020-5-any.pkg.tar.zst` carries
+  `-----BEGIN PGP PUBLIC KEY BLOCK-----`, and `shani-trusted` names
+  `7B927BFFD4A9EAAA8B666B77DE217F3DA8014792`, which `pacman-key --populate
+  shani` consumes via the package's scriptlet.
+
+  **Do not re-add `gpg --list-keys` as the check.** `shani.gpg` is a **keybox**
+  (`kbx`), not a legacy OpenPGP keyring, so plain `gpg --keyring shani.gpg
+  --list-keys` answers `invalid packet (ctb=2d)` **and is entirely correct** —
+  it is pacman-key's own keybox reader that reads the format. Reading that error
+  as a broken trust root is the wrong conclusion from a working keyring.
+- **Single non-expiring key.** No rotation path exists. Revocation doesn't propagate to already-installed systems. `shani-revoked` is genuinely empty (0 bytes), so there is currently nothing to revoke *into* — worth knowing before treating an empty revocation list as a gap.
 
 ## See Also
 

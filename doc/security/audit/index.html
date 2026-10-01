@@ -313,6 +313,7 @@ sudo auditctl -l
 # Delete all runtime rules
 sudo auditctl -D</code></pre>
 <h3 id="persistent-rules">Persistent Rules</h3>
+<blockquote>⚠️ <strong><code>shani-health</code> counts the wrong directory.</strong> It reports packaged rule files by looking in <code>/usr/lib/audit/rules.d/</code>, but <code>shani-settings</code> ships <code>10-shani-base.rules</code> to <strong><code>/etc/audit/rules.d/</code></strong>. So its "N packaged rule file(s)" count reads 0 on a Shanios machine that does have one. Read the rules from <code>/etc/audit/rules.d/</code> when you want the truth; Cassini's Audit page reads the correct path.</blockquote>
 <p>Create a separate file in <code>/etc/audit/rules.d/</code> — use a numeric prefix after <code>10-</code> (e.g. <code>20-</code>) so it loads after, and doesn't collide with, the shipped <code>10-shani-base.rules</code>:</p>
 <p>Identity files, sudoers, and privilege escalation are already watched by <code>10-shani-base.rules</code> (above) — add rules for things it doesn't cover, such as SSH config or a specific user's activity:</p>
 <pre><code class="language-bash">sudo tee /etc/audit/rules.d/20-shani-custom.rules &lt;&lt; 'EOF'
