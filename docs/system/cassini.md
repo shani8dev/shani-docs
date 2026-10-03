@@ -14,7 +14,7 @@ every page is backed by `shani-deploy`, `shani-health`, `gen-efi` or systemd
 itself, so what you see is what the command line would tell you.
 
 Open a page directly with `shani-cassini --section=<name>` (for example
-`--section=updates`), where the name is one of the 41 page ids in
+`--section=updates`), where the name is one of the 42 page ids in
 `notebook.py`'s `SECTIONS`:
 
 | Group | Page ids |
@@ -45,7 +45,7 @@ The same is available over D-Bus as
 | **Chronoa** | The assistant's engines and main switches; opens Chronoa | `org.shani.chronoa` settings |
 | **Fleet** | Enrollment status, and enrolling or removing this device (only when the fleet agent is installed) | `shani-fleet-agent status`, `enroll`, `uninstall --yes` |
 
-That table is a summary. Cassini has **41 pages**; these are the ones that do
+That table is a summary. Cassini has **42 pages**; these are the ones that do
 something you would go looking for. The rest are grouped here because they
 report rather than act.
 
@@ -63,6 +63,7 @@ read-only: they show what the tool says and change nothing.
 | **Graphics** | Graphics hardware, the driver bound to each, whether each card is powered, the render nodes, and hybrid-graphics state | `lspci -k`, `/sys/bus/pci/devices/*/power/runtime_status`, `/dev/dri/render*`, `switcheroo-control` |
 | **Audio** | The PipeWire graph: devices, outputs, inputs, which is default, which programs are connected | `wpctl status` |
 | **Journal** | Every boot still on disk, a search across their entries, whether logs survive a reboot, and the cap actually in force | `journalctl`, `/var/log/journal`, `/usr/lib/systemd/journald.conf.d/` |
+| **DNS** | Which of the four installed resolvers actually answers, whether `resolv.conf` is a stub symlink or a plain file, and whether the global `DNS=` is set | `/etc/resolv.conf`, `/etc/systemd/resolved.conf` and its drop-ins, `systemctl is-active` |
 | **UPS** | Whether a UPS is configured, whether the daemon is running, and what apcupsd itself reports | `/etc/apcupsd/apcupsd.conf`, `systemctl is-active apcupsd`, `apcaccess status` |
 | **Outbound Mail** | Whether mail this machine sends will leave it: the relay setup, and anything stuck in the queue | `exim -bP transports`, `exim -bp` |
 
