@@ -219,7 +219,7 @@
         </div>
       </div>
       <div class="prose"><p>arpwatch monitors Ethernet ARP traffic and maintains a database of IP-to-MAC address mappings. It sends an email alert (via the local MTA) when a new device appears on the network, when a known device changes its MAC address, or when an IP address flips between two MAC addresses — all indicators of network changes that may warrant attention (new devices, DHCP lease changes, or potential ARP spoofing).</p>
-<p>arpwatch is pre-installed on Shani OS. <strong>Not active by default.</strong></p>
+<p>arpwatch is pre-installed on Shani OS and <code>shani-tools-network</code> <strong>enables <code>arpwatch@eth0.service</code> at install time</strong> (it is in every profile's <code>Packages-Base</code>). Note the shipped template hardcodes interface <code>%i</code>, so on a machine whose primary NIC is <code>enp<em></code>/<code>wlp</em></code> rather than <code>eth0</code> that pre-enabled unit cannot bind — check <code>systemctl status arpwatch@eth0</code> before assuming it works.</p>
 <hr>
 <h2 id="enable">Enable</h2>
 <pre><code class="language-bash"># Enable monitoring on your primary LAN interface (replace eth0 with yours)

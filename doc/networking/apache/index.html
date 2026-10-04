@@ -218,7 +218,7 @@
           <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><p>Apache is a full-featured, battle-tested web server. On Shani OS, Caddy is the recommended reverse proxy for self-hosted services due to its automatic HTTPS and simpler configuration — but Apache is pre-installed for workloads that specifically need it: <code>.htaccess</code>-based access control, <code>mod_rewrite</code> rules inherited from existing deployments, PHP via <code>mod_php</code>, or applications that ship Apache-specific configuration.</p>
+      <div class="prose"><p>Apache is a full-featured, battle-tested web server. On Shani OS, Caddy is the recommended reverse proxy for self-hosted services due to its automatic HTTPS and simpler configuration — but Apache is only present on the <strong>GNOME</strong> edition — it arrives as a dependency of <code>gnome-user-share</code>, so on plasma/cosmic/kiosk/gamescope <code>systemctl enable --now httpd</code> fails with "Unit httpd.service does not exist": <code>.htaccess</code>-based access control, <code>mod_rewrite</code> rules inherited from existing deployments, PHP via <code>mod_php</code>, or applications that ship Apache-specific configuration.</p>
 <p>Both can coexist by binding Apache to a non-standard port and proxying through Caddy.</p>
 <hr>
 <h2 id="service-management">Service Management</h2>

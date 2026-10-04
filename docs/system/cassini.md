@@ -45,7 +45,7 @@ The same is available over D-Bus as
 | **Chronoa** | The assistant's engines and main switches; opens Chronoa | `org.shani.chronoa` settings |
 | **Fleet** | Enrollment status, and enrolling or removing this device (only when the fleet agent is installed) | `shani-fleet-agent status`, `enroll`, `uninstall --yes` |
 
-That table is a summary. Cassini has **42 pages**; these are the ones that do
+That table is a summary. Cassini has **52 pages**; these are the ones that do
 something you would go looking for. The rest are grouped here because they
 report rather than act.
 
@@ -66,6 +66,18 @@ read-only: they show what the tool says and change nothing.
 | **DNS** | Which of the four installed resolvers actually answers, whether `resolv.conf` is a stub symlink or a plain file, and whether the global `DNS=` is set | `/etc/resolv.conf`, `/etc/systemd/resolved.conf` and its drop-ins, `systemctl is-active` |
 | **UPS** | Whether a UPS is configured, whether the daemon is running, and what apcupsd itself reports | `/etc/apcupsd/apcupsd.conf`, `systemctl is-active apcupsd`, `apcaccess status` |
 | **Outbound Mail** | Whether mail this machine sends will leave it: the relay setup, and anything stuck in the queue | `exim -bP transports`, `exim -bp` |
+| **Inbound Access** | Which sharing services are installed, which are enabled, and what they are bound to — and the rule that nothing here may change your network | `ss -tulpn`, `systemctl is-enabled` |
+| **Disk Health** | Whether smartd is scheduled and what its scan settings are, plus the overall health of each disk | `smartd.conf`, `smartctl -H` |
+| **Btrfs** | Scrub and balance timers, and the result of the last run of each | `btrfs scrub status`, `btrfs balance status`, `systemctl` timers |
+| **Software RAID** | Arrays and their members, their state and sync progress. Note the `Personalities :` line lists kernel drivers, not arrays — it is not a count | `/proc/mdstat` |
+| **TOTP Tokens** | Whether oathtool is installed, whether a PAM stack actually uses it, and the stored accounts. Unlocking is `pam_oath`; **Shanios has none of it installed** | `/var/lib/oath/users.oath`, `/etc/pam.d` |
+| **Boot Entries** | What the firmware will boot, and which slot is really in charge — EFI order is decided at install time and is *not* rewritten per slot | `efibootmgr -v` |
+| **Acceleration** | Whether KVM is usable: CPU virtualisation flags, the `kvm` module, and IOMMU groups. Refuses any firmware change it cannot verify — on this machine all 154 EFI variables are protected and the CPU exposes no `vmx`, so enabling KVM through NVRAM is not offered | `/proc/cpuinfo`, `/sys/kernel/iommu_groups`, `efivarfs` |
+| **Password Policy** | What `pam_pwquality` is set to. **Shanios installs it but does not wire it into any PAM stack**, so this shows the configuration, not live enforcement | `/etc/security/pwquality.conf` |
+| **Userspace Encryption** | fscrypt, gocryptfs and ecryptfs, per file and per mountpoint. **fscrypt cannot work on Shanios:** the kernel requires it on a filesystem with encryption support, and btrfs does not provide it | `/etc/fstab`, `/proc/filesystems` |
+| **App Versions** | The installed and available version of each Shanios component, and whether a newer one is already sitting in the cache | `pacman -Q`, `pacman -Si` |
+| **Printers** | Queues, jobs and scan hardware. Read-only: the daemon is socket-activated and usually not running. **KDE Plasma 6.7 has no printer panel at all** | `lpstat`, `/etc/cups` |
+| **Camera** | Capture devices, their formats and controls. Read-only: neither the PipeWire nor the legacy V4L stack runs as a service | `v4l2-ctl`, `pw-cli` |
 
 Three of these are worth knowing about because the answer is not where you
 would look. **Cron** cannot use `crontab -l` — that only ever means the calling
