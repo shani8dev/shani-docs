@@ -45,7 +45,7 @@ The same is available over D-Bus as
 | **Chronoa** | The assistant's engines and main switches; opens Chronoa | `org.shani.chronoa` settings |
 | **Fleet** | Enrollment status, and enrolling or removing this device (only when the fleet agent is installed) | `shani-fleet-agent status`, `enroll`, `uninstall --yes` |
 
-That table is a summary. Cassini has **52 pages**; these are the ones that do
+That table is a summary. Cassini has **60 pages**; these are the ones that do
 something you would go looking for. The rest are grouped here because they
 report rather than act.
 
@@ -78,6 +78,14 @@ read-only: they show what the tool says and change nothing.
 | **App Versions** | The installed and available version of each Shanios component, and whether a newer one is already sitting in the cache | `pacman -Q`, `pacman -Si` |
 | **Printers** | Queues, jobs and scan hardware. Read-only: the daemon is socket-activated and usually not running. **KDE Plasma 6.7 has no printer panel at all** | `lpstat`, `/etc/cups` |
 | **Camera** | Capture devices, their formats and controls. Read-only: neither the PipeWire nor the legacy V4L stack runs as a service | `v4l2-ctl`, `pw-cli` |
+| **SMB** | The shares `testparm` validates, the passdb accounts, and what holds ports 445 and 139. **`testparm -s` hides defaults and does not list usershares** — `map to guest` and friends are in the shipped file and absent from the dump | `testparm -s`, `pdbedit -L -v` |
+| **Service Discovery** | mDNS and DNS-SD state. The **socket** is the switch: the service is D-Bus activated and never needs enabling | `systemctl is-enabled avahi-daemon.socket`, `ss -ulpn` |
+| **Compression** | What each btrfs filesystem is set to compress, and what `compsize` measures is already compressed. **Needs root and refuses outright, so it never asks for a password.** `compsize` is a separate package from btrfsprogs | `compsize -b -x`, `findmnt` |
+| **irqbalance** | Whether the daemon runs, and where the kernel has pinned each interrupt. A single-CPU `smp_affinity_list` is a driver default, **not** evidence irqbalance ran | `smp_affinity_list`, `irqbalance.env` |
+| **ananicy-cpp** | The priority daemon: unit state, its privilege set, and the rules it loads. `/etc/ananicy.d` ships **empty**, so zero rules is a real state, not a fault | `ananicy-cpp`, `/etc/ananicy.d/` |
+| **Kernel Lockdown** | Whether the kernel offers lockdown, what mode is in force, and what the boot requested. **sbctl itself reports no lockdown state**, and Shanios's Secure Boot system of record is gen-efi/mokutil, not sbctl | `/sys/kernel/security/lockdown` |
+| **TPM2 Boot Unlock** | The second factor offered **at boot**. Available in the repos but **not installed by Shanios**, and it ships **no PAM module** — so this is boot unlock, not login 2FA | `tpm2-totp`, `dracut/modules.d/70tpm2-totp` |
+| **Privileges** | The **system's** polkit rules and admin groups — not Cassini's own, which installs none. `.pkla` is dead upstream; every real rule here is JavaScript from a package under `/usr/share`. Present-but-unreadable is reported apart from empty | `/usr/share/polkit-1/rules.d`, `pkaction --version` |
 
 Three of these are worth knowing about because the answer is not where you
 would look. **Cron** cannot use `crontab -l` — that only ever means the calling
