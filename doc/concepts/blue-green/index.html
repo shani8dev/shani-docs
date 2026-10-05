@@ -107,8 +107,20 @@
   <a class="skip-link" href="#main-content">Skip to content</a>
 
   <noscript>
-    <div style="text-align:center;padding:4rem 2rem;font-family:sans-serif">
-      <strong>JavaScript is required to view this wiki.</strong>
+    <!-- With scripting off, only script-docs.js ever adds .hidden to
+         #page-loader, and without it that fixed/inset:0/z-index:9999 box
+         covers the entire page - hiding the pre-rendered docs beneath it.
+         CSP allows inline styles, so hiding it here is what makes the
+         already-rendered content readable without JS.
+         Same bug and same fix as shani-blog's index.html; that copy also
+         resets visibility on the following siblings because its content
+         starts visibility:hidden. This site's does not, so it is not
+         needed here - keep the two in step if either loader changes. -->
+    <style>#page-loader { display: none !important; }</style>
+    <div style="text-align:center;padding:1.5rem 2rem;font-family:sans-serif">
+      <strong>JavaScript is off.</strong> The full text of every page is below
+      and the links between pages work, but the sidebar navigation, search and
+      in-page routing need scripting.
     </div>
   </noscript>
 
