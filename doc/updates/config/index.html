@@ -269,7 +269,7 @@ sudo shani-reset --dry-run
 
 # Keep previously downloaded OS images
 sudo shani-reset --keep-downloads</code></pre>
-<h2 id="locale-timezone">Locale & Timezone</h2>
+<h2 id="locale-timezone">Locale &amp; Timezone</h2>
 <p><code>glibc-locales</code> is pre-installed with every locale glibc supports already generated — unlike vanilla Arch, <code>localectl set-locale</code> works immediately with no <code>locale-gen</code> step first.</p>
 <pre><code class="language-bash">sudo localectl set-locale LANG=en_IN.UTF-8
 sudo localectl set-keymap us
@@ -367,7 +367,7 @@ sudo timedatectl set-ntp true
 
 # Manually set date/time (only takes effect while NTP sync is off)
 sudo timedatectl set-time '2026-08-21 14:30:00'</code></pre>
-<h2 id="pam-sudo">PAM & sudo</h2>
+<h2 id="pam-sudo">PAM &amp; sudo</h2>
 <p>PAM (Pluggable Authentication Modules) configuration lives in <code>/etc/pam.d/</code> — one file per service (<code>login</code>, <code>sudo</code>, <code>sshd</code>, <code>system-login</code>, etc.), all captured by the <code>/etc</code> overlay. Shanios ships stock Arch PAM defaults — account lockout after repeated failed logins is <strong>not</strong> enabled out of the box and must be configured manually if you want it:</p>
 <pre><code class="language-bash"># Add faillock to the login stack (edit both auth and account sections)
 sudo nano /etc/pam.d/system-login
@@ -406,7 +406,7 @@ cat /etc/desktop-entry-hider/configs/htop.desktop
 <h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="/doc/arch/overlay/">OverlayFS Architecture</a> — how the /etc overlay works at the filesystem level</li>
-<li><a href="/doc/updates/shell/">Shell & Environment</a> — Zsh, Starship, Nix, CLI tools</li>
+<li><a href="/doc/updates/shell/">Shell &amp; Environment</a> — Zsh, Starship, Nix, CLI tools</li>
 <li><a href="/doc/updates/user-setup/">User Provisioning</a> — automatic group and shell setup</li>
 <li><a href="/doc/updates/shani-health/">System Health Checks</a> — monitoring and diagnostics</li>
 <li><a href="/doc/updates/shani-reset/">Shani Reset</a> — factory reset of persistent state</li>

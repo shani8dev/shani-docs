@@ -444,9 +444,9 @@ services:
 volumes:
   pg_data:</code></pre>
 <pre><code class="language-bash">cd ~/medplum &amp;&amp; podman-compose up -d</code></pre>
-<p>Health check: <code>curl localhost:8103/healthz</code> returns <code>{&quot;status&quot;:&quot;ok&quot;}</code> once the server is up.</p>
+<p>Health check: <code>curl localhost:8103/healthz</code> returns <code>{"status":"ok"}</code> once the server is up.</p>
 <hr>
-<h2 id="tandoor-recipe-nutrition-tracking">Tandoor (Recipe & Nutrition Tracking)</h2>
+<h2 id="tandoor-recipe-nutrition-tracking">Tandoor (Recipe &amp; Nutrition Tracking)</h2>
 <p><strong>Purpose:</strong> Self-hosted recipe manager with ingredient-level nutritional data, meal planning, and shopping list generation. Useful for health-focused users who want to log macros and nutrition against specific recipes. See also <a href="https://docs.shani.dev/doc/servers/productivity/utilities#mealie-recipe-manager">Mealie in the Productivity wiki</a> for a lighter-weight recipe manager without the nutrition tracking focus.</p>
 <pre><code class="language-yaml"># ~/tandoor/compose.yml
 services:

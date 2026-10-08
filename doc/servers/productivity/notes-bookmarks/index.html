@@ -376,7 +376,7 @@ services:
 volumes:
   meili_data:</code></pre>
 <pre><code class="language-bash">cd ~/hoarder &amp;&amp; podman-compose up -d</code></pre>
-<p>Access at <code>http://localhost:3055</code>. Create an account (signups are disabled after the first — set <code>DISABLE_SIGNUPS: &quot;false&quot;</code> to allow more users). Save bookmarks via the web UI, browser extension, or mobile share sheet.</p>
+<p>Access at <code>http://localhost:3055</code>. Create an account (signups are disabled after the first — set <code>DISABLE_SIGNUPS: "false"</code> to allow more users). Save bookmarks via the web UI, browser extension, or mobile share sheet.</p>
 <blockquote>Pull the <code>llava</code> multimodal model for screenshot understanding: <code>podman exec ollama ollama pull llava</code>. Without it, Hoarder still summarises text content using the text model.</blockquote>
 <p><strong>Caddy:</strong></p>
 <pre><code class="language-caddyfile">hoarder.home.local { tls internal; reverse_proxy localhost:3055 }</code></pre>

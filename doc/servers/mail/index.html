@@ -267,14 +267,14 @@
 cd ~/mailcow-dockerized
 ./generate_config.sh   # writes mailcow.conf — set your mail FQDN and timezone when prompted
 podman-compose up -d</code></pre>
-<p>Access the admin UI and SOGo webmail at <code>https://&lt;your-mail-fqdn&gt;</code> (port <code>443</code>). Retrieve the DKIM public key from the UI (<strong>Configuration → Configuration & Details → ARC/DKIM key</strong>) or read it from <code>data/conf/dkim/dkim.key</code>, then publish it as the <code>dkim._domainkey</code> TXT record.</p>
+<p>Access the admin UI and SOGo webmail at <code>https://&lt;your-mail-fqdn&gt;</code> (port <code>443</code>). Retrieve the DKIM public key from the UI (<strong>Configuration → Configuration &amp; Details → ARC/DKIM key</strong>) or read it from <code>data/conf/dkim/dkim.key</code>, then publish it as the <code>dkim._domainkey</code> TXT record.</p>
 <p>Ports: <code>25</code>, <code>465/587</code>, <code>143/993</code>, <code>80/443</code>.</p>
 <p><strong>Firewall:</strong></p>
 <pre><code class="language-bash">sudo firewall-cmd --add-service=smtp --add-service=smtps \
   --add-service=imap --add-service=imaps \
   --add-service=http --add-service=https --permanent
 sudo firewall-cmd --reload</code></pre>
-<h2 id="mailu-lightweight-modular">Mailu (Lightweight & Modular)</h2>
+<h2 id="mailu-lightweight-modular">Mailu (Lightweight &amp; Modular)</h2>
 <p><strong>Purpose:</strong> Modular, Alpine-based stack with Roundcube/SnappyMail, easy to deploy via compose.</p>
 <pre><code class="language-yaml">services:
   front:
@@ -366,7 +366,7 @@ podman exec stalwart stalwart-cli queue list
 # Flush the mail queue
 podman exec stalwart stalwart-cli queue flush</code></pre>
 <hr>
-<h2 id="dns-deliverability">DNS & Deliverability</h2>
+<h2 id="dns-deliverability">DNS &amp; Deliverability</h2>
 <h3 id="record-reference">Record Reference</h3>
 <table><thead><tr><th>Record</th><th>Purpose</th><th>Example</th></tr></thead><tbody><tr><td><code>MX</code></td><td>Routes inbound email</td><td><code>10 mail.example.com.</code></td></tr><tr><td><code>PTR</code></td><td>ISP maps IP → hostname</td><td>Set via VPS/ISP panel</td></tr><tr><td><code>SPF</code></td><td>Authorizes sending IPs</td><td><code>v=spf1 mx ip4:203.0.113.50 -all</code></td></tr><tr><td><code>DKIM</code></td><td>Cryptographic outbound signature</td><td>Generated via admin UI</td></tr><tr><td><code>DMARC</code></td><td>Policy for failed auth</td><td><code>v=DMARC1; p=reject; rua=mailto:dmarc@example.com</code></td></tr></tbody></table>
 <h3 id="what-these-actually-do-industry-context">What these actually do (industry context)</h3>
@@ -418,8 +418,8 @@ journalctl -u postfix | grep ABC123DEF456</code></pre>
 <pre><code class="language-bash">restic backup /home/user/mailcow /home/user/mailu /home/user/stalwart</code></pre>
 <p>For Stalwart specifically, <code>/home/user/stalwart</code> contains the embedded RocksDB store, config, and DKIM keys — this single path is sufficient for a full restore.</p>
 <hr>
-<h2 id="mailing-lists-newsletters-aliases">Mailing Lists, Newsletters & Aliases</h2>
-<h2 id="listmonk-newsletter-mailing-lists">listmonk (Newsletter & Mailing Lists)</h2>
+<h2 id="mailing-lists-newsletters-aliases">Mailing Lists, Newsletters &amp; Aliases</h2>
+<h2 id="listmonk-newsletter-mailing-lists">listmonk (Newsletter &amp; Mailing Lists)</h2>
 <p><strong>Purpose:</strong> High-performance self-hosted newsletter and mailing list manager. Send campaign and transactional emails, manage subscribers, run automated sequences, and track opens/clicks — all from a clean web UI. A self-hosted Mailchimp/ConvertKit alternative that handles millions of emails with a tiny resource footprint.</p>
 <pre><code class="language-yaml"># ~/listmonk/compose.yaml
 services:
@@ -629,7 +629,7 @@ services:
 volumes:
   pg_data:</code></pre>
 <pre><code class="language-bash">cd ~/roundcube &amp;&amp; podman-compose up -d</code></pre>
-<h2 id="snappymail-sogo">SnappyMail & SOGo</h2>
+<h2 id="snappymail-sogo">SnappyMail &amp; SOGo</h2>
 <p><strong>Purpose:</strong> SnappyMail is a modern lightweight webmail fork. SOGo is a groupware server with CalDAV, CardDAV, and ActiveSync support — they serve different purposes and should be deployed separately.</p>
 <pre><code class="language-yaml"># ~/snappymail/compose.yaml
 services:
@@ -665,7 +665,7 @@ cd ~/sogo &amp;&amp; podman-compose up -d</code></pre>
 <li><strong>FairEmail</strong>: F-Droid or Play Store</li>
 <li><strong>K-9</strong>: F-Droid or Play Store</li>
 </ul>
-<h2 id="configuration-security-tips">Configuration & Security Tips</h2>
+<h2 id="configuration-security-tips">Configuration &amp; Security Tips</h2>
 <ul>
 <li>Always use IMAPS (<code>993</code>) and SMTPS (<code>465</code>/<code>587</code> with STARTTLS). Never allow plaintext on port 143/25 from clients.</li>
 <li>Disable plaintext auth. Use App Passwords if 2FA is enabled on the account.</li>

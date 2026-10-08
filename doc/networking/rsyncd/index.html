@@ -263,7 +263,7 @@ pid file = /var/run/rsyncd.pid
 <p>Create <code>/etc/rsyncd.secrets</code> with <code>username:password</code> pairs:</p>
 <pre><code class="language-bash">echo &quot;syncuser:StrongPassword123&quot; | sudo tee /etc/rsyncd.secrets
 sudo chmod 600 /etc/rsyncd.secrets</code></pre>
-<h3 id="enable-firewall">Enable & Firewall</h3>
+<h3 id="enable-firewall">Enable &amp; Firewall</h3>
 <pre><code class="language-bash"># Enable the service
 sudo systemctl enable --now rsyncd
 
@@ -293,7 +293,7 @@ rsync -avzn /local/dir/ rsync://syncuser@192.168.1.100/backup/</code></pre>
 <li><a href="/doc/networking/openssh/">SSH Server</a> — rsync over SSH for secure transfers</li>
 <li><a href="/doc/networking/samba/">Samba</a> — SMB/CIFS file sharing</li>
 <li><a href="/doc/networking/nfs/">NFS</a> — network filesystem sharing</li>
-<li><a href="/doc/system/backup/">Backup & Restore</a> — restic-based backup</li>
+<li><a href="/doc/system/backup/">Backup &amp; Restore</a> — restic-based backup</li>
 </ul></div>
     </div>
 

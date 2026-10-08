@@ -452,7 +452,7 @@ services:
       - /home/user/matter-server/data:/data:Z
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/matter-server &amp;&amp; podman-compose up -d</code></pre>
-<p>In Home Assistant: Settings → Devices & Services → Add Integration → Matter (BETA). Point it at <code>ws://localhost:5580/ws</code>.</p>
+<p>In Home Assistant: Settings → Devices &amp; Services → Add Integration → Matter (BETA). Point it at <code>ws://localhost:5580/ws</code>.</p>
 <blockquote>You need a Thread border router to use Thread devices. Apple HomePod mini, Google Nest Hub, or a dedicated USB Thread dongle all work.</blockquote>
 <hr>
 <h2 id="frigate">Frigate</h2>
@@ -557,9 +557,9 @@ services:
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/zwave-js-ui &amp;&amp; podman-compose up -d</code></pre>
 <blockquote>Find your Z-Wave stick: <code>ls /dev/ttyUSB*</code> after plugging it in (may be <code>ttyUSB0</code> or <code>ttyACM0</code> depending on the model).</blockquote>
-<p>In Home Assistant: Settings → Devices & Services → Add Integration → Z-Wave JS → use WebSocket URL <code>ws://host.containers.internal:3003</code>.</p>
+<p>In Home Assistant: Settings → Devices &amp; Services → Add Integration → Z-Wave JS → use WebSocket URL <code>ws://host.containers.internal:3003</code>.</p>
 <hr>
-<h2 id="scrypted-camera-hub-nvr">Scrypted (Camera Hub & NVR)</h2>
+<h2 id="scrypted-camera-hub-nvr">Scrypted (Camera Hub &amp; NVR)</h2>
 <p><strong>Purpose:</strong> Camera management and NVR platform with a focus on HomeKit Secure Video integration. Supports 40+ camera brands, transcodes streams to HomeKit format, and integrates with Google Home, Alexa, Home Assistant, and Frigate. If you want your RTSP cameras to appear natively in Apple Home or Google Home, Scrypted is the bridge.</p>
 <pre><code class="language-yaml"># ~/scrypted/compose.yaml
 services:
@@ -714,7 +714,7 @@ podman exec mosquitto mosquitto_pub -u user -P password \
 <h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="/doc/servers/iot/">IoT data infrastructure</a></li>
-<li><a href="/doc/overview/">VPN & Tunnels</a></li>
+<li><a href="/doc/overview/">VPN &amp; Tunnels</a></li>
 </ul></div>
     </div>
 

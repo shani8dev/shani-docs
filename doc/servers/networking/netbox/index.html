@@ -231,7 +231,7 @@
         </div>
       </div>
       <div class="prose"><blockquote><strong>Portability note:</strong> Compose examples use rootless <strong>Podman</strong> and <code>host.containers.internal</code> (the host gateway from a container). When using Docker, replace <code>podman-compose</code> with <code>docker compose</code> and <code>host.containers.internal</code> with <code>host-gateway</code> (add <code>extra_hosts: [host-gateway:host-gateway]</code> to the service). All concepts, architecture patterns, and CLI commands are container-runtime-agnostic.</blockquote>
-<h2 id="netbox-network-documentation-ipam">NetBox (Network Documentation & IPAM)</h2>
+<h2 id="netbox-network-documentation-ipam">NetBox (Network Documentation &amp; IPAM)</h2>
 <p><strong>Purpose:</strong> Source of truth for your network infrastructure. Document IP address assignments (IPAM), VLAN configurations, rack layouts, cable connections, device inventory, and circuit topology. NetBox is not a monitoring tool — it's the authoritative record of what you have and how it's connected. Integrates with Ansible, Terraform, and LibreNMS.</p>
 <pre><code class="language-yaml"># ~/netbox/compose.yml
 services:

@@ -233,7 +233,7 @@
       </div>
       <div class="prose"><p>Answers to the most common questions about Shanios — software installation, updates, hardware, security, and the immutable architecture in plain terms.</p>
 <hr>
-<h2 id="installation-requirements">Installation & Requirements</h2>
+<h2 id="installation-requirements">Installation &amp; Requirements</h2>
 <p><strong>Does Shanios require UEFI?</strong></p>
 <p>Yes. Legacy/CSM BIOS boot is not supported. Most PCs made after 2012 have UEFI. If you see options like Secure Boot and UEFI boot mode in your firmware settings, you're fine.</p>
 <p><strong>Does it work on my hardware?</strong></p>
@@ -247,7 +247,7 @@
 <p><strong>Can I install it on a VM to try it out?</strong></p>
 <p>Yes. Shanios includes guest tools for QEMU/KVM, VirtualBox, and VMware that activate automatically. Give the VM at least 4 GB RAM and 40 GB disk.</p>
 <hr>
-<h2 id="software-packages">Software & Packages</h2>
+<h2 id="software-packages">Software &amp; Packages</h2>
 <p><strong>Can I use <code>pacman -S</code> to install packages?</strong></p>
 <p>No — and you don't need to. The OS root is physically read-only; <code>pacman</code> writes to <code>/usr</code>, which the kernel refuses at runtime. More importantly, anything installed to the OS root would be overwritten on the next update. Use the right layer for each type of software:</p>
 <ul>
@@ -289,7 +289,7 @@ nix-env -iA nixpkgs.go</code></pre>
 <p><strong>What about Android apps?</strong></p>
 <p>Waydroid runs a full hardware-accelerated Android 11 stack, pre-installed on every edition. Set up with <code>sudo waydroid-helper init</code>. See the <a href="/doc/software/waydroid/">Android (Waydroid)</a> guide.</p>
 <hr>
-<h2 id="updates-rollback">Updates & Rollback</h2>
+<h2 id="updates-rollback">Updates &amp; Rollback</h2>
 <p><strong>How does updating work?</strong></p>
 <pre><code class="language-bash">sudo shani-deploy</code></pre>
 <p>Running plain <code>shani-deploy</code> deploys the latest available OS image. It downloads a new OS image, verifies SHA256 + GPG signature, snapshots the inactive slot, extracts the new image, generates a signed UKI, and updates the bootloader. Your running system is never touched. Reboot when ready.</p>
@@ -317,7 +317,7 @@ flatpak uninstall --unused    # remove unused Flatpak runtimes (can reclaim seve
 podman system prune -af       # remove unused container images
 nix-collect-garbage -d        # remove old Nix generations</code></pre>
 <hr>
-<h2 id="hardware-gaming">Hardware & Gaming</h2>
+<h2 id="hardware-gaming">Hardware &amp; Gaming</h2>
 <p><strong>Does NVIDIA work?</strong></p>
 <p>Yes. The <code>nvidia-open</code> driver is pre-installed and configured on the KDE Plasma edition. On the GNOME edition, the driver is available and configured during installation. <code>nvidia-smi</code> and all standard NVIDIA tools work. Secure Boot is supported via MOK-signed kernel modules. On Optimus laptops, use <code>prime-run application-name</code> to run on the discrete GPU.</p>
 <p><strong>Does gaming work without the KDE Plasma edition?</strong></p>
@@ -333,7 +333,7 @@ nix-collect-garbage -d        # remove old Nix generations</code></pre>
 <p><strong>Does it work on a laptop?</strong></p>
 <p>Yes. Hibernation is configured automatically at install (swapfile sized to RAM where the disk allows it, correct offset embedded in UKI — on a small disk the swapfile is kept smaller so updates always fit, and hibernation may then not be available). TPM2 auto-unlock handles LUKS decryption at resume. <code>power-profiles-daemon</code> manages battery/performance profiles.</p>
 <hr>
-<h2 id="storage-encryption">Storage & Encryption</h2>
+<h2 id="storage-encryption">Storage &amp; Encryption</h2>
 <p><strong>Should I enable LUKS2 encryption?</strong></p>
 <p>Yes, especially for laptops and portable devices. Enable it in the installer (one checkbox), then run:</p>
 <pre><code class="language-bash">sudo gen-efi enroll-tpm2</code></pre>
@@ -359,7 +359,7 @@ sudo gen-efi enroll-tpm2</code></pre>
 <p><strong>Will iCloud/OneDrive/Google Drive work?</strong></p>
 <p>Google Drive is accessible in the GNOME file manager (Nautilus) via <code>gvfs-google</code>. OneDrive via <code>gvfs-onedrive</code>. For KDE, <code>rclone</code> provides access to all three plus 70+ other providers.</p>
 <hr>
-<h2 id="privacy-telemetry">Privacy & Telemetry</h2>
+<h2 id="privacy-telemetry">Privacy &amp; Telemetry</h2>
 <p><strong>Does Shanios collect any data?</strong></p>
 <p>No. Zero telemetry means zero. No usage data, no hardware reports, no crash reports, no analytics, no identifiers. <code>shani-deploy</code> connects to download servers to fetch images (standard HTTP — your IP, nothing else).</p>
 <p><strong>How can I verify there is no telemetry?</strong></p>
@@ -371,7 +371,7 @@ sudo gen-efi enroll-tpm2</code></pre>
 <p><strong>Does Secure Boot actually work?</strong></p>
 <p>Yes. The full boot chain is UEFI firmware → Shim (Microsoft-signed) → systemd-boot (MOK-signed) → Unified Kernel Image (MOK-signed, contains kernel + initramfs + cmdline). The bootloader editor is disabled and the kernel cmdline is embedded in the UKI — it cannot be modified from the boot menu. See <a href="/doc/security/secure-boot/">Secure Boot</a>.</p>
 <hr>
-<h2 id="community-support">Community & Support</h2>
+<h2 id="community-support">Community &amp; Support</h2>
 <p><strong>Where do I report bugs?</strong></p>
 <p><a href="https://github.com/shani8dev/shani-os/issues">github.com/shani8dev/shani-os/issues</a> — include the output of <code>uname -r</code>, <code>cat /etc/shani-version</code>, <code>cat /data/current-slot</code>, and relevant <code>journalctl</code> logs. (<code>shani-deploy</code> has no <code>--version</code>; the version is in <code>/etc/shani-version</code>, and <code>shani-deploy --status --json</code> reports it too.)</p>
 <p><strong>Where do I ask questions?</strong></p>
@@ -379,7 +379,7 @@ sudo gen-efi enroll-tpm2</code></pre>
 <p><strong>Is Shanios free?</strong></p>
 <p>Yes, fully free and open source. No accounts, no subscriptions, no paid tiers.</p>
 <p><strong>Is there a commercial support option?</strong></p>
-<p>Enterprise and OEM enquiries: <a href="https://shani.dev#enterprise">shani.dev — Enterprise & Vendors</a>.</p>
+<p>Enterprise and OEM enquiries: <a href="https://shani.dev#enterprise">shani.dev — Enterprise &amp; Vendors</a>.</p>
 <p><strong>Can I contribute?</strong></p>
 <p>Yes. Source code, build scripts, and documentation are all public at <a href="https://github.com/shani8dev">github.com/shani8dev</a>. Pull requests and issue reports are welcome.</p>
 <blockquote>⚠️ <strong>Not in the image:</strong> <code>dpkg</code> and <code>yay</code> are not in the image - Arch uses pacman. Commands below that use dpkg|yay will not run as written.</blockquote>
@@ -392,7 +392,7 @@ sudo gen-efi enroll-tpm2</code></pre>
 <li><a href="/doc/intro/migrating/">Migrating from Traditional Linux</a> — workflow changes and tips</li>
 <li><a href="/doc/intro/whats-included/">What's Included</a> — complete software stack</li>
 </ul>
-<h2 id="profiles-editions">Profiles & Editions</h2>
+<h2 id="profiles-editions">Profiles &amp; Editions</h2>
 <p><strong>What is the Kiosk profile?</strong></p>
 <p>The Kiosk profile is a single-purpose deployment designed for digital signage, kiosks, and locked-down environments. It runs a full-screen Firefox instance inside a Cage/LabWC Wayland session with no desktop environment. The kiosk user's home directory is a tmpfs mount, so nothing survives reboot.</p>
 <p><strong>What is the Server profile?</strong></p>

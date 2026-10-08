@@ -300,7 +300,7 @@ systemctl --user status myapp.service</code></pre>
 systemctl --user start podman.socket
 export DOCKER_HOST=unix:///run/user/$UID/podman/podman.sock</code></pre>
 <hr>
-<h2 id="buildah-skopeo">Buildah & Skopeo</h2>
+<h2 id="buildah-skopeo">Buildah &amp; Skopeo</h2>
 <p><strong>Buildah</strong> builds OCI images without a daemon:</p>
 <pre><code class="language-bash"># Build from a Dockerfile/Containerfile
 buildah bud -t myimage:latest .

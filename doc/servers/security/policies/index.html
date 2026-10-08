@@ -230,7 +230,7 @@
           <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><h2 id="syft-grype-sbom-vulnerability-scanning">Syft + Grype (SBOM & Vulnerability Scanning)</h2>
+      <div class="prose"><h2 id="syft-grype-sbom-vulnerability-scanning">Syft + Grype (SBOM &amp; Vulnerability Scanning)</h2>
 <p><strong>Purpose:</strong> Syft generates a Software Bill of Materials (SBOM) — a complete inventory of every package, library, and binary in a container image or directory. Grype scans that SBOM against vulnerability databases (NVD, GitHub Advisory, OSV) to find known CVEs. The two-step Syft → Grype workflow is preferred when you want to store SBOMs as artefacts and scan them separately, or feed them to Dependency-Track for continuous monitoring.</p>
 <pre><code class="language-bash"># Install via Nix
 nix-env -iA nixpkgs.syft nixpkgs.grype</code></pre>
@@ -355,7 +355,7 @@ podman exec fail2ban fail2ban-client set caddy-auth unbanip 1.2.3.4
 podman exec fail2ban fail2ban-regex /var/log/caddy/access.log caddy-auth</code></pre>
 <blockquote>Fail2ban complements CrowdSec — CrowdSec uses community threat intelligence, Fail2ban reacts to your own logs. Run both for defence in depth.</blockquote>
 <hr>
-<h2 id="trivy-container-code-security-scanner">Trivy (Container & Code Security Scanner)</h2>
+<h2 id="trivy-container-code-security-scanner">Trivy (Container &amp; Code Security Scanner)</h2>
 <p><strong>Purpose:</strong> Comprehensive vulnerability scanner for container images, filesystems, Git repositories, and Kubernetes manifests. Detects known CVEs in OS packages, language libraries (pip, npm, go, cargo), misconfigurations (Dockerfile, Terraform, Helm), and secrets accidentally committed to code. Run it in CI/CD pipelines to gate deployments on security findings.</p>
 <pre><code class="language-bash"># Pull and run Trivy as a one-shot scanner (no persistent container needed)
 podman run --rm \
@@ -889,7 +889,7 @@ volumes:
 <p><strong>Caddy:</strong></p>
 <pre><code class="language-caddyfile">defectdojo.home.local { tls internal; reverse_proxy localhost:8081 }</code></pre>
 <hr>
-<h2 id="osquery-host-security-monitoring-query-language">osquery (Host Security Monitoring & Query Language)</h2>
+<h2 id="osquery-host-security-monitoring-query-language">osquery (Host Security Monitoring &amp; Query Language)</h2>
 <p><strong>Purpose:</strong> Treats your OS as a relational database — query processes, network connections, users, kernel modules, cron jobs, loaded kernel extensions, open files, and hardware state using plain SQL. Used by security teams for threat hunting, compliance auditing, and incident response. Feeds into Wazuh, Elastic SIEM, and Splunk for centralised host visibility.</p>
 <pre><code class="language-bash"># Install osquery via Nix (installs osqueryi + osqueryd)
 nix-env -iA nixpkgs.osquery
@@ -1033,7 +1033,7 @@ volumes:
 # Initialise Fleet DB
 podman-compose run --rm fleet fleet prepare db --config /etc/fleet/fleet.yml</code></pre>
 <hr>
-<h2 id="nuclei-fast-vulnerability-exposure-scanner">Nuclei (Fast Vulnerability & Exposure Scanner)</h2>
+<h2 id="nuclei-fast-vulnerability-exposure-scanner">Nuclei (Fast Vulnerability &amp; Exposure Scanner)</h2>
 <p><strong>Purpose:</strong> Template-based vulnerability scanner — runs 9,000+ community-maintained YAML templates against HTTP/HTTPS targets, detecting misconfigurations, CVEs, exposed panels, default credentials, path traversal, SSRF, CORS misconfig, and hundreds of other issues. Faster and more scriptable than OWASP ZAP for specific CVE checks and exposure detection. Feed results into Defect Dojo.</p>
 <pre><code class="language-bash"># Install via Nix
 nix-env -iA nixpkgs.nuclei
@@ -1307,7 +1307,7 @@ defectdojo.home.local { tls internal; reverse_proxy localhost:8081 }</code></pre
 <hr>
 <h2 id="owasp-top-10-quick-reference">OWASP Top 10 Quick Reference</h2>
 <p>The OWASP Top 10 is the standard framework for web application security risk. Understanding what each category means helps you configure your scanning tools (ZAP, Semgrep, Trivy) with appropriate scope:</p>
-<table><thead><tr><th>#</th><th>Category</th><th>What it means</th><th>How to address</th></tr></thead><tbody><tr><td>A01</td><td><strong>Broken Access Control</strong></td><td>Users can act outside their intended permissions (IDOR, privilege escalation)</td><td>Enforce role-based access; deny by default; test all endpoints</td></tr><tr><td>A02</td><td><strong>Cryptographic Failures</strong></td><td>Sensitive data exposed due to weak/missing encryption</td><td>TLS everywhere; use modern cipher suites; never MD5/SHA1 for passwords</td></tr><tr><td>A03</td><td><strong>Injection</strong></td><td>Untrusted data interpreted as code (SQL, LDAP, command injection)</td><td>Parameterised queries; input validation; Semgrep SAST rules</td></tr><tr><td>A04</td><td><strong>Insecure Design</strong></td><td>Missing security controls at the design level</td><td>Threat modelling before building; security requirements in design docs</td></tr><tr><td>A05</td><td><strong>Security Misconfiguration</strong></td><td>Default credentials, unnecessary services, verbose error messages</td><td>Hardened defaults; remove unused services; ZAP scanner</td></tr><tr><td>A06</td><td><strong>Vulnerable Components</strong></td><td>Outdated libraries with known CVEs</td><td>Trivy scanning; Renovate for dependency updates; Dependabot</td></tr><tr><td>A07</td><td><strong>Auth & Session Failures</strong></td><td>Weak passwords, missing MFA, session fixation</td><td>Authelia/Authentik; strong session cookies; MFA everywhere</td></tr><tr><td>A08</td><td><strong>Software & Data Integrity</strong></td><td>Untrusted updates, CI/CD pipeline compromise</td><td>SLSA provenance; cosign image signing; Kyverno verification</td></tr><tr><td>A09</td><td><strong>Logging & Monitoring Failures</strong></td><td>Attacks go undetected due to insufficient logging</td><td>Audit logging; Graylog/OpenSearch; Grafana alerts on anomalies</td></tr><tr><td>A10</td><td><strong>Server-Side Request Forgery</strong></td><td>Server fetches attacker-controlled URLs, bypassing firewalls</td><td>Validate and restrict outbound URLs; network egress controls</td></tr></tbody></table>
+<table><thead><tr><th>#</th><th>Category</th><th>What it means</th><th>How to address</th></tr></thead><tbody><tr><td>A01</td><td><strong>Broken Access Control</strong></td><td>Users can act outside their intended permissions (IDOR, privilege escalation)</td><td>Enforce role-based access; deny by default; test all endpoints</td></tr><tr><td>A02</td><td><strong>Cryptographic Failures</strong></td><td>Sensitive data exposed due to weak/missing encryption</td><td>TLS everywhere; use modern cipher suites; never MD5/SHA1 for passwords</td></tr><tr><td>A03</td><td><strong>Injection</strong></td><td>Untrusted data interpreted as code (SQL, LDAP, command injection)</td><td>Parameterised queries; input validation; Semgrep SAST rules</td></tr><tr><td>A04</td><td><strong>Insecure Design</strong></td><td>Missing security controls at the design level</td><td>Threat modelling before building; security requirements in design docs</td></tr><tr><td>A05</td><td><strong>Security Misconfiguration</strong></td><td>Default credentials, unnecessary services, verbose error messages</td><td>Hardened defaults; remove unused services; ZAP scanner</td></tr><tr><td>A06</td><td><strong>Vulnerable Components</strong></td><td>Outdated libraries with known CVEs</td><td>Trivy scanning; Renovate for dependency updates; Dependabot</td></tr><tr><td>A07</td><td><strong>Auth &amp; Session Failures</strong></td><td>Weak passwords, missing MFA, session fixation</td><td>Authelia/Authentik; strong session cookies; MFA everywhere</td></tr><tr><td>A08</td><td><strong>Software &amp; Data Integrity</strong></td><td>Untrusted updates, CI/CD pipeline compromise</td><td>SLSA provenance; cosign image signing; Kyverno verification</td></tr><tr><td>A09</td><td><strong>Logging &amp; Monitoring Failures</strong></td><td>Attacks go undetected due to insufficient logging</td><td>Audit logging; Graylog/OpenSearch; Grafana alerts on anomalies</td></tr><tr><td>A10</td><td><strong>Server-Side Request Forgery</strong></td><td>Server fetches attacker-controlled URLs, bypassing firewalls</td><td>Validate and restrict outbound URLs; network egress controls</td></tr></tbody></table>
 <p>ZAP (below) tests for A01, A02, A03, A05, A07, A10. Semgrep covers A03, A05, A08. Trivy covers A06.</p>
 <hr>
 <h2 id="mtls-mutual-tls-with-caddy">mTLS (Mutual TLS) with Caddy</h2>
@@ -1386,7 +1386,7 @@ kubectl label namespace myapp \
 <li><strong>Volume mount</strong> — Kubernetes updates the mounted file automatically within 60–90 seconds (kubelet sync period). The application must watch the file for changes or be restarted.</li>
 <li><strong>Environment variable</strong> — environment variables are set at pod startup. The pod must be restarted to see the new value: <code>kubectl rollout restart deployment/myapp</code></li>
 <li><strong>Reloader</strong> — use <a href="https://github.com/stakater/Reloader">Reloader</a> to automatically restart pods when their referenced Secret changes:</li>
-<p>``<code>yaml # Add annotation to your Deployment annotations: reloader.stakater.com/auto: &quot;true&quot; </code>``</p>
+<p>``<code>yaml # Add annotation to your Deployment annotations: reloader.stakater.com/auto: "true" </code>``</p>
 </ul>
 <p>The full flow from rotate to running with new value takes: ESO sync interval + Kubernetes propagation delay + pod restart time. Reduce <code>refreshInterval</code> on high-sensitivity secrets.</p>
 <hr>

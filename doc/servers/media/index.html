@@ -494,7 +494,7 @@ services:
 <pre><code class="language-bash">cd ~/pinchflat &amp;&amp; podman-compose up -d</code></pre>
 <p>Access at <code>http://localhost:8945</code>.</p>
 <hr>
-<h2 id="kavita-comics-manga-ebooks">Kavita (Comics, Manga & eBooks)</h2>
+<h2 id="kavita-comics-manga-ebooks">Kavita (Comics, Manga &amp; eBooks)</h2>
 <p><strong>Purpose:</strong> Digital library server for comics, manga, and e-books. Supports CBZ, CBR, PDF, EPUB, and more. Web reader, reading progress sync, and OPDS support for mobile apps.</p>
 <pre><code class="language-yaml"># ~/kavita/compose.yaml
 services:
@@ -682,7 +682,7 @@ services:
 <pre><code class="language-bash">cd ~/stash &amp;&amp; podman-compose up -d</code></pre>
 <p>Access at <code>http://localhost:9999</code>. Add your video directories under Settings → Libraries, run a scan, and Stash builds a browsable library with thumbnail generation and metadata scraping.</p>
 <hr>
-<h2 id="komga-comics-manga-server">Komga (Comics & Manga Server)</h2>
+<h2 id="komga-comics-manga-server">Komga (Comics &amp; Manga Server)</h2>
 <p><strong>Purpose:</strong> A polished, OPDS-compatible comics and manga server. Reads CBZ, CBR, PDF, and EPUB files; generates cover thumbnails; tracks read progress per user; and supports series/collections metadata. A more actively developed alternative to Kavita with a cleaner library management UI and better metadata editing.</p>
 <pre><code class="language-yaml"># ~/komga/compose.yaml
 services:
@@ -762,7 +762,7 @@ services:
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/lidarr &amp;&amp; podman-compose up -d</code></pre>
 <p>Access at <code>http://localhost:8686</code>. Configure your music root folder, connect Prowlarr as the indexer manager, and add qBittorrent as the download client. Lidarr discovers albums via MusicBrainz and automatically imports organised files into your Navidrome or other music server library.</p>
-<blockquote>*<em>Full </em>arr stack:** Prowlarr (indexers) → Sonarr (TV) + Radarr (movies) + Lidarr (music) + Readarr (books) → qBittorrent (downloads) → Jellyfin / Navidrome (playback).</blockquote>
+<blockquote><strong>Full *arr stack:</strong> Prowlarr (indexers) → Sonarr (TV) + Radarr (movies) + Lidarr (music) + Readarr (books) → qBittorrent (downloads) → Jellyfin / Navidrome (playback).</blockquote>
 <hr>
 <h2 id="kometa-plexjellyfin-metadata-manager">Kometa (Plex/Jellyfin Metadata Manager)</h2>
 <p><strong>Purpose:</strong> Automated metadata management for Plex and Jellyfin libraries — creates and updates collections (e.g., "Christoper Nolan Films", "Oscar Winners", "Top Rated on IMDB"), overlays (4K/HDR badges, ratings, awards), playlists, and library sorting. Runs on a schedule and keeps your media library rich and organised without manual effort. Formerly known as Plex Meta Manager.</p>

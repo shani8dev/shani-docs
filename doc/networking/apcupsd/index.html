@@ -267,7 +267,7 @@ NISPORT 3551</code></pre>
 <p>After editing:</p>
 <pre><code class="language-bash">sudo systemctl restart apcupsd</code></pre>
 <hr>
-<h2 id="status-monitoring">Status & Monitoring</h2>
+<h2 id="status-monitoring">Status &amp; Monitoring</h2>
 <pre><code class="language-bash"># Live UPS status (battery level, load, runtime estimate, events)
 apcaccess status
 
@@ -290,7 +290,7 @@ apctest</code></pre>
 echo &quot;Power failure at $(date)&quot; | mail -s &quot;UPS: On Battery&quot; root</code></pre>
 <p>Make scripts executable:</p>
 <pre><code class="language-bash">sudo chmod +x /etc/apcupsd/onbattery</code></pre>
-<blockquote>The <code>mail</code> example above requires <code>mailx</code> to be installed and configured. To log events to the journal instead: <code>logger -t apcupsd &quot;on battery&quot;</code></blockquote>
+<blockquote>The <code>mail</code> example above requires <code>mailx</code> to be installed and configured. To log events to the journal instead: <code>logger -t apcupsd "on battery"</code></blockquote>
 <hr>
 <h2 id="network-status-server">Network Status Server</h2>
 <p>apcupsd includes a small status server (NIS) on port 3551. Query a remote apcupsd instance from another machine:</p>

@@ -631,7 +631,7 @@
   },
   {
     "slug": "networking/troubleshooting",
-    "title": "Troubleshooting",
+    "title": "Networking — Troubleshooting",
     "section": "Networking",
     "description": "Troubleshooting | Issue | Solution | |-------|----------| | TUN/TAP device not found | Run sudo modprobe tun on the host | | Clients can't route traffic | …",
     "updated": "2026-08-28",

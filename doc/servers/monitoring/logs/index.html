@@ -378,7 +378,7 @@ curl http://localhost:9200/logs-000001/_ilm/explain?pretty</code></pre>
   }
 }'</code></pre>
 <hr>
-<h2 id="beats-lightweight-log-metric-shippers">Beats — Lightweight Log & Metric Shippers</h2>
+<h2 id="beats-lightweight-log-metric-shippers">Beats — Lightweight Log &amp; Metric Shippers</h2>
 <p><strong>Purpose:</strong> Single-purpose, lightweight agents (Go binaries, no JVM) that run on monitored hosts and ship data to Logstash or Elasticsearch directly.</p>
 <table><thead><tr><th>Beat</th><th>Ships</th><th>Use Case</th></tr></thead><tbody><tr><td><strong>Filebeat</strong></td><td>Log files</td><td>Application logs, access logs, syslog</td></tr><tr><td><strong>Metricbeat</strong></td><td>System metrics</td><td>CPU, memory, disk, container stats</td></tr><tr><td><strong>Packetbeat</strong></td><td>Network traffic</td><td>HTTP, DNS, MySQL, Redis protocol analysis</td></tr><tr><td><strong>Auditbeat</strong></td><td>Audit events</td><td>File integrity monitoring, <code>auditd</code> events</td></tr><tr><td><strong>Heartbeat</strong></td><td>Uptime</td><td>Active monitoring, HTTP/TCP/ICMP checks</td></tr><tr><td><strong>Winlogbeat</strong></td><td>Windows Event Log</td><td>Windows security and application logs</td></tr></tbody></table>
 <h4 id="filebeat-ship-log-files-to-logstash">Filebeat — ship log files to Logstash</h4>
@@ -478,7 +478,7 @@ echo &quot;vm.max_map_count=262144&quot; | sudo tee /etc/sysctl.d/99-elasticsear
 cd ~/opensearch &amp;&amp; podman-compose up -d</code></pre>
 <hr>
 <h2 id="fluent-bit-lightweight-log-forwarder">Fluent Bit (Lightweight Log Forwarder)</h2>
-<p><strong>Purpose:</strong> Ultra-lightweight (< 1 MB binary, ~1 MB RAM at idle) log and metrics forwarder written in C. The modern replacement for Fluentd in resource-constrained environments. Collects from files, syslog, systemd journal, Docker, and container runtimes; then ships to Elasticsearch, OpenSearch, Loki, ClickHouse, S3, Kafka, and 40+ other outputs.</p>
+<p><strong>Purpose:</strong> Ultra-lightweight (&lt; 1 MB binary, ~1 MB RAM at idle) log and metrics forwarder written in C. The modern replacement for Fluentd in resource-constrained environments. Collects from files, syslog, systemd journal, Docker, and container runtimes; then ships to Elasticsearch, OpenSearch, Loki, ClickHouse, S3, Kafka, and 40+ other outputs.</p>
 <pre><code class="language-yaml"># ~/fluent-bit/compose.yaml
 services:
   fluent-bit:
@@ -550,7 +550,7 @@ curl http://localhost:2020/api/v1/metrics | python3 -m json.tool
 podman exec fluent-bit fluent-bit --config /fluent-bit/etc/fluent-bit.conf --dry-run</code></pre>
 <blockquote><strong>Fluent Bit vs Logstash vs Filebeat:</strong> Use Fluent Bit for a tiny-footprint forwarder (perfect for every container/host to a central aggregator). Use Filebeat when you're in the Elastic ecosystem. Use Logstash for heavy-duty filtering, complex Grok patterns, or multiple conditional outputs.</blockquote>
 <hr>
-<h2 id="vectordev-high-performance-log-metric-pipeline">Vector.dev (High-Performance Log & Metric Pipeline)</h2>
+<h2 id="vectordev-high-performance-log-metric-pipeline">Vector.dev (High-Performance Log &amp; Metric Pipeline)</h2>
 <p><strong>Purpose:</strong> Rust-based observability data pipeline. Collects logs, metrics, and traces; transforms them with a powerful built-in VRL (Vector Remap Language) scripting layer; and routes to any backend. Significantly higher throughput than Logstash or Fluent Bit on multi-core hardware, with end-to-end acknowledgements and disk-backed buffering. A single Vector instance can replace Filebeat + Logstash, or Promtail + Grafana Alloy, in many setups.</p>
 <pre><code class="language-yaml"># ~/vector/compose.yaml
 services:
@@ -649,7 +649,7 @@ podman exec vector vector validate /etc/vector/vector.yaml
 podman run --rm -it timberio/vector:latest-alpine vector vrl</code></pre>
 <blockquote><strong>Vector vs Fluent Bit vs Logstash:</strong> Vector has the highest throughput and most expressive transformation language (VRL). Fluent Bit has the smallest footprint for edge/sidecar deployments. Logstash has the richest plugin ecosystem and best Kibana integration. For a new homelab log pipeline shipping to both Elasticsearch and Loki, Vector is the best starting point.</blockquote>
 <hr>
-<h2 id="graylog-log-management-siem-lite">Graylog (Log Management & SIEM-Lite)</h2>
+<h2 id="graylog-log-management-siem-lite">Graylog (Log Management &amp; SIEM-Lite)</h2>
 <p><strong>Purpose:</strong> Centralised log management platform. Where Loki stores logs as compressed streams and queries them with LogQL, Graylog parses, indexes, and makes logs fully searchable via OpenSearch — every field in every message is indexed, so you can query <code>http_status:500 AND source:caddy</code> across millions of events in milliseconds. Use Graylog when you need structured, searchable log analysis; use Loki+Grafana when you want lightweight log storage alongside metrics.</p>
 <pre><code class="language-yaml"># ~/graylog/compose.yaml
 services:

@@ -252,7 +252,7 @@ pkaction --action-id org.freedesktop.packagekit.package-install --verbose
 pkaction | head -20
 
 # Check your Polkit result for a specific action
-pkcheck --action-id org.freedesktop.packagekit.package-install --process $ --enable-internal-agent
+pkcheck --action-id org.freedesktop.packagekit.package-install --process $$ --enable-internal-agent
 
 # Check which groups you belong to (relevant for Tier 2)
 groups

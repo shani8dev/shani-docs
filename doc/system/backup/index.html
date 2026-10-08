@@ -240,7 +240,7 @@
 <blockquote>You need both. Snapshots for quick local recovery; off-device backups for disaster recovery.</blockquote>
 <hr>
 <h2 id="what-to-back-up">What to Back Up</h2>
-<table><thead><tr><th>Path</th><th>Subvolume</th><th>Priority</th><th>Notes</th></tr></thead><tbody><tr><td><code>/home</code></td><td><code>@home</code></td><td>🔴 Critical</td><td>User files, configs, SSH/GPG keys</td></tr><tr><td><code>/var/lib/containers</code></td><td><code>@containers</code></td><td>🟠 High</td><td>Podman/Distrobox images, volumes, layers</td></tr><tr><td><code>/var/lib/waydroid</code></td><td><code>@waydroid</code></td><td>🟠 High</td><td>Android apps, data, system image</td></tr><tr><td><code>/var/lib/lxd</code></td><td><code>@lxd</code></td><td>🟠 High</td><td>LXD system containers</td></tr><tr><td><code>/var/lib/flatpak</code></td><td><code>@flatpak</code></td><td>🟡 Medium</td><td>Flatpak runtimes & apps (re-installable)</td></tr></tbody></table>
+<table><thead><tr><th>Path</th><th>Subvolume</th><th>Priority</th><th>Notes</th></tr></thead><tbody><tr><td><code>/home</code></td><td><code>@home</code></td><td>🔴 Critical</td><td>User files, configs, SSH/GPG keys</td></tr><tr><td><code>/var/lib/containers</code></td><td><code>@containers</code></td><td>🟠 High</td><td>Podman/Distrobox images, volumes, layers</td></tr><tr><td><code>/var/lib/waydroid</code></td><td><code>@waydroid</code></td><td>🟠 High</td><td>Android apps, data, system image</td></tr><tr><td><code>/var/lib/lxd</code></td><td><code>@lxd</code></td><td>🟠 High</td><td>LXD system containers</td></tr><tr><td><code>/var/lib/flatpak</code></td><td><code>@flatpak</code></td><td>🟡 Medium</td><td>Flatpak runtimes &amp; apps (re-installable)</td></tr></tbody></table>
 <p>The OS itself does not need to be backed up — <code>shani-deploy</code> downloads a fresh verified image when needed, and the previous slot is always available for rollback.</p>
 <p>Before every update, <code>shani-deploy</code> also takes its own Btrfs backup snapshot of the candidate slot (e.g. <code>@blue_backup_&lt;timestamp&gt;</code>) so it can automatically roll back if the new slot fails to boot. These update-time snapshots are pruned automatically after a successful deployment, or on demand with <code>sudo shani-deploy -c</code> (cleanup of old backup snapshots and stale downloads). This is insurance for the update mechanism itself — it is <strong>not</strong> a substitute for backing up <code>/home</code> and container data as described below.</p>
 <blockquote>⚠️ <strong>Btrfs snapshots are not backups.</strong> The rollback snapshots created by <code>shani-deploy</code> reside on the same physical drive. A drive failure destroys both the live data and all snapshots simultaneously.</blockquote>
@@ -459,7 +459,7 @@ journalctl --user -u backup.service -f</code></pre>
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="/doc/servers/backups-sync/">Backups & Sync</a> — self-hosted backup servers (Restic, Borgmatic, Duplicati)</li>
+<li><a href="/doc/servers/backups-sync/">Backups &amp; Sync</a> — self-hosted backup servers (Restic, Borgmatic, Duplicati)</li>
 <li><a href="/doc/arch/btrfs/">Btrfs Deep Dive</a> — snapshots, send/receive, maintenance</li>
 <li><a href="/doc/arch/filesystem/">Filesystem Structure</a> — subvolume layout</li>
 <li><a href="/doc/concepts/atomic-updates/">Atomic Updates</a> — OS update and rollback</li>

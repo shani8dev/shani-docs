@@ -277,7 +277,7 @@ Changes in upper (@data) survive OS updates — only the lower is replaced.</cod
 <h2 id="bind-mounted-service-state">Bind-Mounted Service State</h2>
 <p>Because <code>/var</code> is volatile, all service state that must survive reboots is stored in <code>@data</code> and bind-mounted back at boot.</p>
 <p>Key bind mounts from <code>@data/varlib/</code> → <code>/var/lib/</code>:</p>
-<table><thead><tr><th>Category</th><th>Examples</th></tr></thead><tbody><tr><td>System Core</td><td><code>dbus</code>, <code>systemd</code>, <code>fontconfig</code></td></tr><tr><td>Networking</td><td><code>NetworkManager</code>, <code>bluetooth</code>, <code>firewalld</code></td></tr><tr><td>File Sharing</td><td><code>samba</code>, <code>nfs</code></td></tr><tr><td>Remote Access & VPN</td><td><code>caddy</code>, <code>tailscale</code>, <code>cloudflared</code>, <code>geoclue</code></td></tr><tr><td>Display Manager</td><td><code>gdm</code>, <code>sddm</code>, <code>colord</code></td></tr><tr><td>Audio & Peripherals</td><td><code>pipewire</code>, <code>cups</code>, <code>sane</code>, <code>upower</code></td></tr><tr><td>Auth & Security</td><td><code>fprint</code>, <code>AccountsService</code>, <code>boltd</code>, <code>sshd</code>, <code>tpm2-tss</code></td></tr><tr><td>Spool</td><td><code>cron</code>, <code>at</code>, <code>cups</code> print queue, <code>postfix</code></td></tr></tbody></table>
+<table><thead><tr><th>Category</th><th>Examples</th></tr></thead><tbody><tr><td>System Core</td><td><code>dbus</code>, <code>systemd</code>, <code>fontconfig</code></td></tr><tr><td>Networking</td><td><code>NetworkManager</code>, <code>bluetooth</code>, <code>firewalld</code></td></tr><tr><td>File Sharing</td><td><code>samba</code>, <code>nfs</code></td></tr><tr><td>Remote Access &amp; VPN</td><td><code>caddy</code>, <code>tailscale</code>, <code>cloudflared</code>, <code>geoclue</code></td></tr><tr><td>Display Manager</td><td><code>gdm</code>, <code>sddm</code>, <code>colord</code></td></tr><tr><td>Audio &amp; Peripherals</td><td><code>pipewire</code>, <code>cups</code>, <code>sane</code>, <code>upower</code></td></tr><tr><td>Auth &amp; Security</td><td><code>fprint</code>, <code>AccountsService</code>, <code>boltd</code>, <code>sshd</code>, <code>tpm2-tss</code></td></tr><tr><td>Spool</td><td><code>cron</code>, <code>at</code>, <code>cups</code> print queue, <code>postfix</code></td></tr></tbody></table>
 <p>All bind mounts use:</p>
 <pre><code>bind,nofail,x-systemd.after=var.mount,x-systemd.requires-mounts-for=/data</code></pre>
 <p>(confirmed against the real fstab template in <code>shani-install-media/image_profiles/shared/overlay/rootfs/etc/fstab</code>)</p>
@@ -285,7 +285,7 @@ Changes in upper (@data) survive OS updates — only the lower is replaced.</cod
 <ul>
 <li><a href="/doc/concepts/immutability/">Immutability</a></li>
 <li><a href="/doc/intro/user-config/">User Configuration</a></li>
-<li><a href="/doc/updates/shell/">Shell & Environment</a></li>
+<li><a href="/doc/updates/shell/">Shell &amp; Environment</a></li>
 </ul></div>
     </div>
 

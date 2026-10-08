@@ -230,7 +230,7 @@
           <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><h2 id="networking-ingress">Networking & Ingress</h2>
+      <div class="prose"><h2 id="networking-ingress">Networking &amp; Ingress</h2>
 <h3 id="cilium-ebpf-cni-primary">Cilium (eBPF CNI — Primary)</h3>
 <p><strong>Purpose:</strong> High-performance CNI built on eBPF. Replaces Flannel, Calico, and kube-proxy in one Helm chart. Enforces NetworkPolicies at the kernel level (no iptables), provides L7 HTTP/gRPC/DNS-aware policy, transparent WireGuard node-to-node encryption, and Hubble for real-time flow observability.</p>
 <blockquote><strong>Why Cilium over Flannel/Calico:</strong> Flannel is L3-only with zero observability. Calico adds BGP but still relies on iptables. Cilium replaces both plus kube-proxy with a single eBPF stack: faster packet processing, L7 policy without sidecars, built-in flow inspection via Hubble, and optional Gateway API support.</blockquote>
@@ -835,7 +835,7 @@ helm upgrade nginx-gateway-fabric \
   oci://ghcr.io/nginx/charts/nginx-gateway-fabric \
   --version 2.4.3 --namespace nginx-gateway -f ~/k8s/ngf-values.yaml</code></pre>
 <hr>
-<h2 id="tls-certificate-management">TLS & Certificate Management</h2>
+<h2 id="tls-certificate-management">TLS &amp; Certificate Management</h2>
 <h3 id="cert-manager-automatic-tls">cert-manager (Automatic TLS)</h3>
 <pre><code class="language-bash">helm repo add cert-manager https://charts.jetstack.io
 helm upgrade --install cert-manager cert-manager/cert-manager \
@@ -1002,7 +1002,7 @@ spec:
 <p><strong>Caddy:</strong> <code>linkerd.home.local { tls internal; reverse_proxy localhost:50750 }</code></p>
 <hr>
 <h2 id="gateway-api-advanced-patterns">Gateway API — Advanced Patterns</h2>
-<h3 id="header-based-routing-traffic-mirroring">Header-Based Routing & Traffic Mirroring</h3>
+<h3 id="header-based-routing-traffic-mirroring">Header-Based Routing &amp; Traffic Mirroring</h3>
 <pre><code class="language-yaml"># Route by header — canary for specific users
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute

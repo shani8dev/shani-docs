@@ -232,7 +232,7 @@
       </div>
       <div class="prose"><p>Shanios updates are atomic — the running system is never modified. Updates are written to the inactive slot, verified, and activated on the next reboot. The previous slot is preserved as an instant rollback target.</p>
 <h2 id="updates-and-notifications">Updates and Notifications</h2>
-<p>Shani Cassini is the user-facing update manager. Its <strong>Updates & Rollback</strong> page calls <code>shani-deploy</code> to install updates, change channels, and roll back to the previous system.</p>
+<p>Shani Cassini is the user-facing update manager. Its <strong>Updates &amp; Rollback</strong> page calls <code>shani-deploy</code> to install updates, change channels, and roll back to the previous system.</p>
 <p>The per-user <code>shani-cassini-agent.timer</code> starts with your desktop session. It runs the agent two minutes later, then every two hours with a small random delay. Each run executes <code>shani-cassini --agent</code> and reads <code>shani-deploy --status --check --json</code>. The agent sends a notification when:</p>
 <ul>
 <li>a boot failure was recorded;</li>
@@ -240,7 +240,7 @@
 <li>a staged update needs a restart; or</li>
 <li>a newer version is available on the selected channel.</li>
 </ul>
-<p>Choose <strong>Open</strong> in a notification to start Shani Cassini on <strong>Updates & Rollback</strong>. The agent only checks and notifies. It does not install an update or run a rollback itself.</p>
+<p>Choose <strong>Open</strong> in a notification to start Shani Cassini on <strong>Updates &amp; Rollback</strong>. The agent only checks and notifies. It does not install an update or run a rollback itself.</p>
 <blockquote><strong>Auto-reboot is opt-in.</strong> Once <code>shani-deploy</code> finishes successfully, the new slot is ready to boot into whenever convenient. It does not reboot on its own unless <code>AUTO_REBOOT=yes</code> was set. See <a href="#automatic-reboot-after-deployment">Automatic Reboot After Deployment</a> below.</blockquote>
 <pre><code class="language-bash"># Check the per-user timer
 systemctl --user status shani-cassini-agent.timer
@@ -337,8 +337,8 @@ sudo shani-deploy --channel-status latest</code></pre>
 <h2 id="boot-counting-and-automatic-fallback">Boot Counting and Automatic Fallback</h2>
 <p>After an update, the new slot is registered in systemd-boot with <code>+3-0</code> boot count tries. If the new slot fails to boot three times, systemd-boot automatically falls back to the previous slot — no user action required.</p>
 <p>Shanios uses two tiers of boot failure detection:</p>
-<table><thead><tr><th>Tier</th><th>Marker</th><th>Trigger</th><th>Action</th></tr></thead><tbody><tr><td>Hard failure</td><td><code>/data/boot_hard_failure</code></td><td>Root filesystem mount failed (dracut pre-mount hook)</td><td>Manual: <code>shani-deploy --rollback</code></td></tr><tr><td>Soft failure</td><td><code>/data/boot_failure</code></td><td>System booted but never reached <code>multi-user.target</code> within 15 minutes</td><td>Automatic system recovery, with a Shani Cassini agent notification linking to <strong>Updates & Rollback</strong></td></tr></tbody></table>
-<p>After login, the Shani Cassini agent reads the boot state through <code>shani-deploy --status --check --json</code>. If a fallback or recovery failure is recorded, it sends a notification that opens <strong>Updates & Rollback</strong>, where you can manage the rollback.</p>
+<table><thead><tr><th>Tier</th><th>Marker</th><th>Trigger</th><th>Action</th></tr></thead><tbody><tr><td>Hard failure</td><td><code>/data/boot_hard_failure</code></td><td>Root filesystem mount failed (dracut pre-mount hook)</td><td>Manual: <code>shani-deploy --rollback</code></td></tr><tr><td>Soft failure</td><td><code>/data/boot_failure</code></td><td>System booted but never reached <code>multi-user.target</code> within 15 minutes</td><td>Automatic system recovery, with a Shani Cassini agent notification linking to <strong>Updates &amp; Rollback</strong></td></tr></tbody></table>
+<p>After login, the Shani Cassini agent reads the boot state through <code>shani-deploy --status --check --json</code>. If a fallback or recovery failure is recorded, it sends a notification that opens <strong>Updates &amp; Rollback</strong>, where you can manage the rollback.</p>
 <h2 id="storage-management">Storage Management</h2>
 <pre><code class="language-bash"># Remove old backup snapshots and cached downloads
 sudo shani-deploy -c
@@ -374,7 +374,7 @@ sudo fwupdmgr update</code></pre>
 <ul>
 <li><a href="/doc/updates/shani-health/">System Health Checks</a> — automated monitoring and diagnostics</li>
 <li><a href="/doc/updates/config/">System Config</a> — /etc overlay, locale, hostname, services</li>
-<li><a href="/doc/updates/shell/">Shell & Environment</a> — Zsh, Starship, Nix, CLI tools</li>
+<li><a href="/doc/updates/shell/">Shell &amp; Environment</a> — Zsh, Starship, Nix, CLI tools</li>
 <li><a href="/doc/updates/user-setup/">User Provisioning</a> — automatic group and shell setup</li>
 <li><a href="/doc/updates/shani-reset/">Shani Reset</a> — factory reset of persistent state</li>
 <li><a href="/doc/concepts/blue-green/">Blue-Green Deployment</a> — the two-slot architecture</li>

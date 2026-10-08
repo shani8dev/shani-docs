@@ -417,7 +417,7 @@ sudo systemctl start backup.service
 # Watch output
 journalctl -u backup.service -f</code></pre>
 <h3 id="calendar-expression-syntax">Calendar expression syntax</h3>
-<table><thead><tr><th>Expression</th><th>Meaning</th></tr></thead><tbody><tr><td><code>daily</code></td><td>Every day at midnight</td></tr><tr><td><code>weekly</code></td><td>Every Monday at midnight</td></tr><tr><td><code>monthly</code></td><td>First day of each month at midnight</td></tr><tr><td><code>hourly</code></td><td>Every hour</td></tr><tr><td><code><em>-</em>-* 03:00:00</code></td><td>Every day at 3 AM</td></tr><tr><td><code>Mon <em>-</em>-* 09:00:00</code></td><td>Every Monday at 9 AM</td></tr><tr><td><code><em>-</em>-1 00:00:00</code></td><td>First of every month at midnight</td></tr><tr><td><code>*:0/15</code></td><td>Every 15 minutes</td></tr><tr><td><code>2026-04-25 14:30:00</code></td><td>Once at a specific date and time</td></tr></tbody></table>
+<table><thead><tr><th>Expression</th><th>Meaning</th></tr></thead><tbody><tr><td><code>daily</code></td><td>Every day at midnight</td></tr><tr><td><code>weekly</code></td><td>Every Monday at midnight</td></tr><tr><td><code>monthly</code></td><td>First day of each month at midnight</td></tr><tr><td><code>hourly</code></td><td>Every hour</td></tr><tr><td><code>*-*-* 03:00:00</code></td><td>Every day at 3 AM</td></tr><tr><td><code>Mon *-*-* 09:00:00</code></td><td>Every Monday at 9 AM</td></tr><tr><td><code>*-*-1 00:00:00</code></td><td>First of every month at midnight</td></tr><tr><td><code>*:0/15</code></td><td>Every 15 minutes</td></tr><tr><td><code>2026-04-25 14:30:00</code></td><td>Once at a specific date and time</td></tr></tbody></table>
 <pre><code class="language-bash"># Validate and preview a calendar expression
 systemd-analyze calendar &quot;Mon *-*-* 09:00:00&quot;
 systemd-analyze calendar daily</code></pre>
@@ -429,7 +429,7 @@ OnBootSec=15min
 OnUnitActiveSec=2h</code></pre>
 <hr>
 <h2 id="user-services">User Services</h2>
-<p>User services run under your UID without root. Timer-based user services require linger to fire when you're not logged in (see <a href="/doc/system/users-groups/">Users & Groups</a>).</p>
+<p>User services run under your UID without root. Timer-based user services require linger to fire when you're not logged in (see <a href="/doc/system/users-groups/">Users &amp; Groups</a>).</p>
 <pre><code class="language-bash"># Unit files location
 ~/.config/systemd/user/
 
@@ -623,7 +623,7 @@ ExecStopPost=/bin/rm -rf /var/run/myapp</code></pre>
 <h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="/doc/updates/config/">System Config</a> — overlay persistence, <code>systemctl edit</code>, sysctl via systemd</li>
-<li><a href="/doc/system/backup/">Backup & Recovery</a> — full example of a user timer with <code>loginctl enable-linger</code></li>
+<li><a href="/doc/system/backup/">Backup &amp; Recovery</a> — full example of a user timer with <code>loginctl enable-linger</code></li>
 <li><a href="/doc/system/cronie/">cronie</a> — cron as an alternative for simple per-user schedules</li>
 <li><a href="/doc/system/process-management/">Process Management</a> — <code>systemd-cgls</code>, <code>systemd-cgtop</code>, cgroup resource usage</li>
 <li><a href="/doc/updates/shani-health/">shani-health</a> — reports on failed units, journal errors, and boot time</li>

@@ -231,7 +231,7 @@
         </div>
       </div>
       <div class="prose"><p>Shanios includes extensive performance, gaming, and reliability optimizations out of the box, eliminating the need for manual tweaking. These enterprise-grade optimizations are pre-configured and active from first boot.</p>
-<h2 id="memory-storage-management">Memory & Storage Management</h2>
+<h2 id="memory-storage-management">Memory &amp; Storage Management</h2>
 <ul>
 <li><strong>ZRAM Compression:</strong> Automatic RAM compression using the zstd algorithm provides improved memory efficiency without requiring swap partitions.</li>
 <li><strong>Optimized Swappiness:</strong> Tuned to 133 — encourages the kernel to use compressed ZRAM swap before evicting clean page cache, maintaining system responsiveness under memory pressure.</li>
@@ -239,7 +239,7 @@
 <li><strong>Continuous Block-Level Deduplication:</strong> <code>beesd</code> runs as a background daemon, deduplicating identical data blocks across all Btrfs subvolumes to reduce disk usage.</li>
 <li><strong>Optimized Page Lock Unfairness:</strong> Set to 1 to reduce lock contention and improve multi-threaded application performance, particularly for databases and high-concurrency workloads.</li>
 </ul>
-<h2 id="gaming-performance">Gaming & Performance</h2>
+<h2 id="gaming-performance">Gaming &amp; Performance</h2>
 <h3 id="game-controller-hardware">Game Controller Hardware</h3>
 <ul>
 <li><strong>game-devices-udev:</strong> Comprehensive udev rules for 8BitDo, PlayStation (DualShock 3/4, DualSense, DualSense Edge), Xbox (360, One, Series), Nintendo Switch Pro, Joy-Cons, GameCube adapter, VR equipment, and more</li>
@@ -256,16 +256,16 @@
 <li><strong>GameMode Integration:</strong> GameMode daemon enabled globally — auto-applies CPU governor, I/O priority, and GPU performance levels when games launch</li>
 <li><strong>High-Precision Timers:</strong> HPET and RTC frequencies increased to 3072 Hz for superior timing accuracy</li>
 </ul>
-<h2 id="process-management-responsiveness">Process Management & Responsiveness</h2>
+<h2 id="process-management-responsiveness">Process Management &amp; Responsiveness</h2>
 <ul>
 <li><strong>Ananicy-cpp:</strong> Automatic process priority management with game-aware rules — background tasks are deprioritized when games or media are active</li>
 <li><strong>systemd-oomd:</strong> System-wide OOM daemon enabled by default to prevent system freezes</li>
 <li><strong>IRQBalance:</strong> Optimizes interrupt distribution across CPU cores</li>
 <li><strong>Haveged:</strong> Hardware entropy daemon enabled by default, keeping <code>/dev/random</code> well-seeded for cryptographic operations without stalling on low-entropy hardware</li>
-<li><strong>Increased File & Process Limits:</strong> Default limits raised to 1,048,576 for open files (NOFILE) and processes (NPROC)</li>
+<li><strong>Increased File &amp; Process Limits:</strong> Default limits raised to 1,048,576 for open files (NOFILE) and processes (NPROC)</li>
 <li><strong>Fast Shutdown:</strong> Reduced timeout values (10s stop, 10s abort) — services that fail to stop gracefully are automatically killed</li>
 </ul>
-<h2 id="boot-system-efficiency">Boot & System Efficiency</h2>
+<h2 id="boot-system-efficiency">Boot &amp; System Efficiency</h2>
 <ul>
 <li><strong>Plymouth (BGRT Theme):</strong> Smooth graphical boot experience showing manufacturer's logo</li>
 <li><strong>Journal Size Limit:</strong> systemd journal capped at 128 MB across at most 2 rotated files, to prevent excessive disk usage</li>

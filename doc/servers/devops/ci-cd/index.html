@@ -246,13 +246,13 @@
 <li><a href="#dependency-caching-in-ci">Dependency Caching in CI</a></li>
 <li><a href="#act-local-github-actions-runner">act (Local GitHub Actions Runner)</a></li>
 <li><a href="#renovate-bot">Renovate Bot</a></li>
-<li><a href="#sonarqube-code-quality-security">SonarQube (Code Quality & Security)</a></li>
+<li><a href="#sonarqube-code-quality-security">SonarQube (Code Quality &amp; Security)</a></li>
 </ul>
 <hr>
 <h2 id="code-hosting">Code Hosting</h2>
 <blockquote>Full setup, compose files, and common operations for code hosting tools live in the <a href="https://docs.shani.dev/doc/servers/devtools">Developer Tools wiki</a>. This section covers DevOps integration patterns.</blockquote>
 <h3 id="gitea-forgejo">Gitea / Forgejo</h3>
-<p>For compose files, CLI operations, SSH setup, and Gitea Classroom patterns, see the <a href="https://docs.shani.dev/doc/servers/devtools#gitea--forgejo">Developer Tools wiki → Gitea & Forgejo</a>.</p>
+<p>For compose files, CLI operations, SSH setup, and Gitea Classroom patterns, see the <a href="https://docs.shani.dev/doc/servers/devtools#gitea--forgejo">Developer Tools wiki → Gitea &amp; Forgejo</a>.</p>
 <p>Configure SSH clients to use <code>Port 2222</code> for <code>git.home.local</code>.</p>
 <h3 id="gitlab-ce">GitLab CE</h3>
 <p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#gitlab-ce">Developer Tools wiki → GitLab CE</a>.</p>
@@ -730,7 +730,7 @@ systemctl --user enable --now renovate.timer</code></pre>
   &quot;automerge&quot;: false
 }</code></pre>
 <hr>
-<h3 id="sonarqube-code-quality-security">SonarQube (Code Quality & Security)</h3>
+<h3 id="sonarqube-code-quality-security">SonarQube (Code Quality &amp; Security)</h3>
 <p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#sonarqube-code-quality--security">Developer Tools wiki → SonarQube</a>.</p>
 <blockquote>Requires <code>vm.max_map_count=524288</code> and <code>fs.file-max=131072</code> on the host. Set persistently: ``<code>bash echo 'vm.max_map_count=524288' | sudo tee -a /etc/sysctl.d/sonar.conf sudo sysctl -p /etc/sysctl.d/sonar.conf </code>``</blockquote>
 <hr></div>

@@ -230,7 +230,7 @@
           <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><h2 id="gitops-continuous-delivery">GitOps & Continuous Delivery</h2>
+      <div class="prose"><h2 id="gitops-continuous-delivery">GitOps &amp; Continuous Delivery</h2>
 <h3 id="gitops-end-to-end-workflow">GitOps end-to-end workflow</h3>
 <pre><code>Developer pushes to feature branch
   → CI runs tests (Woodpecker / Forgejo Actions)
@@ -678,7 +678,7 @@ spec:
           prune: true
           selfHeal: true</code></pre>
 <hr>
-<h3 id="flux-helmrelease-kustomization">Flux HelmRelease & Kustomization</h3>
+<h3 id="flux-helmrelease-kustomization">Flux HelmRelease &amp; Kustomization</h3>
 <p><strong>Purpose:</strong> Flux's native CRDs for managing Helm releases and Kustomize overlays declaratively in Git — the Flux equivalent of ArgoCD Applications.</p>
 <pre><code class="language-yaml"># ~/k8s-gitops/clusters/homelab/monitoring/kustomization.yaml (Flux Kustomization)
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -797,7 +797,7 @@ kubectl argo rollouts promote myapp
 kubectl argo rollouts abort myapp
 kubectl argo rollouts undo myapp</code></pre>
 <hr>
-<h2 id="in-cluster-cicd-build">In-Cluster CI/CD & Build</h2>
+<h2 id="in-cluster-cicd-build">In-Cluster CI/CD &amp; Build</h2>
 <h3 id="forgejo-self-hosted-git">Forgejo (Self-Hosted Git)</h3>
 <p><strong>Purpose:</strong> Lightweight, self-hosted Git service — the forge this entire GitOps stack pushes to and pulls from. Forgejo is a community fork of Gitea. Stores repositories, issues, wikis, and CI configuration.</p>
 <pre><code class="language-bash">helm repo add forgejo https://codeberg.org/forgejo-contrib/forgejo-helm
@@ -1004,7 +1004,7 @@ spec:
                 path: config.json
       restartPolicy: Never</code></pre>
 <hr>
-<h3 id="argo-workflows-data-ml-pipelines">Argo Workflows (Data & ML Pipelines)</h3>
+<h3 id="argo-workflows-data-ml-pipelines">Argo Workflows (Data &amp; ML Pipelines)</h3>
 <pre><code class="language-bash">kubectl create namespace argo
 kubectl apply -n argo \
   -f https://github.com/argoproj/argo-workflows/releases/latest/download/install.yaml
@@ -1041,7 +1041,7 @@ spec:
         command: [sh, -c]
         args: [&quot;{{inputs.parameters.cmd}}&quot;]</code></pre>
 <hr>
-<h2 id="local-development-cluster-intercept">Local Development & Cluster Intercept</h2>
+<h2 id="local-development-cluster-intercept">Local Development &amp; Cluster Intercept</h2>
 <p>A major pain point in microservices development: "how do I test my local code against real cluster services?" These tools solve it differently — each has trade-offs.</p>
 <table><thead><tr><th>Tool</th><th>Approach</th><th>Best For</th></tr></thead><tbody><tr><td><strong>mirrord</strong></td><td>Intercepts traffic at the kernel level; your local process runs as if it's inside the cluster</td><td>Single service dev with full cluster context</td></tr><tr><td><strong>Telepresence</strong></td><td>Replaces a cluster pod with a local proxy; routes traffic bidirectionally</td><td>Replacing a specific deployment during dev</td></tr><tr><td><strong>Tilt</strong></td><td>Watches files, rebuilds/redeploys on save; dev cluster orchestration</td><td>Full inner loop automation</td></tr><tr><td><strong>Skaffold</strong></td><td>Build → push → deploy pipeline on file change</td><td>CI-like local flow; GKE-native</td></tr><tr><td><strong>ko</strong></td><td>Build Go container images without Dockerfiles; OCI-native</td><td>Go services with minimal build friction</td></tr></tbody></table>
 <hr>
@@ -1300,7 +1300,7 @@ steps:
       - kubeconform -strict -summary k8s/
       - helm template myapp ./chart -f values.yaml | kubeconform -strict -</code></pre>
 <hr>
-<h2 id="buildpacks-image-build-strategies">Buildpacks & Image Build Strategies</h2>
+<h2 id="buildpacks-image-build-strategies">Buildpacks &amp; Image Build Strategies</h2>
 <p>A comparison of in-cluster and local image build strategies:</p>
 <table><thead><tr><th>Tool</th><th>Approach</th><th>Image size</th><th>Requires Docker</th><th>SBOM</th><th>Best for</th></tr></thead><tbody><tr><td><strong>Docker/Podman</strong></td><td>Dockerfile</td><td>Varies</td><td>Yes/No</td><td>Manual</td><td>General purpose</td></tr><tr><td><strong>Kaniko</strong></td><td>Dockerfile, no daemon</td><td>Varies</td><td>No</td><td>Manual</td><td>In-cluster CI</td></tr><tr><td><strong>ko</strong></td><td>Go source → OCI</td><td>Minimal</td><td>No</td><td>Auto</td><td>Go controllers/operators</td></tr><tr><td><strong>Buildpacks (pack)</strong></td><td>Source → image, no Dockerfile</td><td>Optimized</td><td>Yes (or buildpackd)</td><td>Auto</td><td>App developers; PaaS-style</td></tr><tr><td><strong>Buildah</strong></td><td>Dockerfile, rootless</td><td>Varies</td><td>No</td><td>Manual</td><td>Rootless environments</td></tr><tr><td><strong>Buildkit</strong></td><td>Dockerfile, cache mounts</td><td>Varies</td><td>No (standalone)</td><td>Manual</td><td>Advanced Dockerfile features</td></tr></tbody></table>
 <h3 id="cloud-native-buildpacks-pack-cli">Cloud Native Buildpacks (pack CLI)</h3>

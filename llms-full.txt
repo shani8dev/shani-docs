@@ -10610,7 +10610,7 @@ WireGuard uses UDP specifically because the VPN layer handles its own reliabilit
 
 ---
 
-# Troubleshooting
+# Networking — Troubleshooting
 
 URL: https://docs.shani.dev/doc/networking/troubleshooting/
 Updated: 2026-08-28

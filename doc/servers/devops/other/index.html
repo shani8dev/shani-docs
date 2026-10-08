@@ -916,7 +916,7 @@ cloud-init schema --config-file ~/cloud-init/base-server.yaml</code></pre>
 <h3 id="chef-puppet">Chef / Puppet</h3>
 <blockquote><strong>Note:</strong> Chef and Puppet use persistent agents installed on managed hosts — incompatible with Shani OS's immutable, read-only root. Use <strong>Ansible</strong> (agentless, SSH + Python) for configuration management on this system. Chef/Puppet are listed here for awareness when working in enterprise environments that already use them; on this system, Ansible with AWX is the supported path.</blockquote>
 <hr>
-<h2 id="artifact-dependency-management">Artifact & Dependency Management</h2>
+<h2 id="artifact-dependency-management">Artifact &amp; Dependency Management</h2>
 <h3 id="jfrog-artifactory-oss">JFrog Artifactory OSS</h3>
 <p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#jfrog-artifactory-oss-universal-artifact-repository">Developer Tools wiki → JFrog Artifactory OSS</a>.</p>
 <pre><code class="language-bash"># Push a Docker image
@@ -937,8 +937,8 @@ podman tag myapp:latest localhost:8092/myapp:latest
 podman push localhost:8092/myapp:latest</code></pre>
 <blockquote>⚠️ Nexus requires at least 4 GB RAM. Set <code>-Xms2703m -Xmx2703m</code> via <code>INSTALL4J_ADD_VM_PARAMS</code> to cap memory.</blockquote>
 <hr>
-<h2 id="service-discovery-orchestration">Service Discovery & Orchestration</h2>
-<h3 id="consul-service-discovery-service-mesh">Consul (Service Discovery & Service Mesh)</h3>
+<h2 id="service-discovery-orchestration">Service Discovery &amp; Orchestration</h2>
+<h3 id="consul-service-discovery-service-mesh">Consul (Service Discovery &amp; Service Mesh)</h3>
 <p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#consul-service-discovery--service-mesh">Developer Tools wiki → Consul</a>.</p>
 <pre><code class="language-bash"># Install Consul CLI — Nix
 nix-env -iA nixpkgs.consul
@@ -985,14 +985,14 @@ nomad job scale nginx web 3</code></pre>
   }
 }</code></pre>
 <hr>
-<h2 id="developer-environments-utilities">Developer Environments & Utilities</h2>
+<h2 id="developer-environments-utilities">Developer Environments &amp; Utilities</h2>
 <h3 id="code-server-vs-code-in-browser">code-server (VS Code in Browser)</h3>
 <p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#code-server">Developer Tools wiki → code-server</a>.</p>
 <hr>
 <h3 id="coder-cloud-development-environments">Coder (Cloud Development Environments)</h3>
 <p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#gitpod--coder-cloud-development-environments">Developer Tools wiki → Coder</a>.</p>
 <hr>
-<h3 id="windmill-workflow-script-automation">Windmill (Workflow & Script Automation)</h3>
+<h3 id="windmill-workflow-script-automation">Windmill (Workflow &amp; Script Automation)</h3>
 <p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#windmill-workflow--script-automation">Developer Tools wiki → Windmill</a>.</p>
 <hr>
 <h3 id="web-analytics-plausible-umami-matomo">Web Analytics (Plausible, Umami, Matomo)</h3>
@@ -1005,7 +1005,7 @@ nomad job scale nginx web 3</code></pre>
 <blockquote>Backstage is most valuable once you have 5+ services. Start small — register services with <code>catalog-info.yaml</code> files in their repos, then add plugins incrementally.</blockquote>
 <hr>
 <h2 id="security-cli-tools">Security CLI Tools</h2>
-<blockquote>Security tooling (osquery, Nuclei, SOPS, Semgrep, Trivy) is covered in the <a href="https://docs.shani.dev/doc/servers/security/policies">Security & Identity wiki</a>. This section covers only the DevOps integration points where security tools gate CI pipelines.</blockquote>
+<blockquote>Security tooling (osquery, Nuclei, SOPS, Semgrep, Trivy) is covered in the <a href="https://docs.shani.dev/doc/servers/security/policies">Security &amp; Identity wiki</a>. This section covers only the DevOps integration points where security tools gate CI pipelines.</blockquote>
 <hr>
 <blockquote><strong>Education platforms</strong> (Open edX/Tutor) are documented in the <a href="https://docs.shani.dev/doc/servers/education">Developer Tools wiki</a>.</blockquote>
 <h2 id="key-concepts">Key Concepts</h2>
@@ -1282,13 +1282,13 @@ remove_toxic(&quot;postgres&quot;, &quot;db_slow&quot;)</code></pre>
 <blockquote>Pair Toxiproxy with your Prometheus + Alertmanager stack: inject a fault, verify the correct alert fires within the expected <code>for:</code> duration, then check that it resolves when you remove the toxic. This validates your alert thresholds are calibrated to actual failure modes rather than theoretical ones.</blockquote>
 <hr>
 <hr>
-<h2 id="container-image-tools">Container & Image Tools</h2>
+<h2 id="container-image-tools">Container &amp; Image Tools</h2>
 <h3 id="private-container-registry">Private Container Registry</h3>
 <p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#private-container-registry">Developer Tools wiki → Private Container Registry</a>.</p>
 <pre><code class="language-bash"># Tag and push
 podman tag myimage localhost:5000/myimage:latest
 podman push localhost:5000/myimage:latest</code></pre>
-<p>Add <code>unqualified-search-registries = [&quot;localhost:5000&quot;]</code> to <code>/etc/containers/registries.conf</code> to allow unverified pushes in development.</p>
+<p>Add <code>unqualified-search-registries = ["localhost:5000"]</code> to <code>/etc/containers/registries.conf</code> to allow unverified pushes in development.</p>
 <hr>
 <h3 id="harbor-enterprise-container-registry">Harbor (Enterprise Container Registry)</h3>
 <p>For compose file (official installer) and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#harbor-enterprise-container-registry">Developer Tools wiki → Harbor</a>.</p>
@@ -1310,7 +1310,7 @@ steps:
         from_secret: harbor_password
       tags: [latest, &quot;${CI_COMMIT_SHA}&quot;]</code></pre>
 <hr>
-<h3 id="buildah-skopeo-oci-image-tools">Buildah & Skopeo (OCI Image Tools)</h3>
+<h3 id="buildah-skopeo-oci-image-tools">Buildah &amp; Skopeo (OCI Image Tools)</h3>
 <p><strong>Purpose:</strong> Buildah builds OCI images without a daemon and without root — perfect for rootless CI. Skopeo inspects, copies, and signs images across registries without pulling them fully.</p>
 <pre><code class="language-bash"># Install via Nix (primary)
 nix-env -iA nixpkgs.buildah nixpkgs.skopeo</code></pre>
@@ -1346,8 +1346,8 @@ skopeo sync --src docker --dest dir nginx:alpine /tmp/mirror/</code></pre>
 <h3 id="mailpit-email-testing">Mailpit (Email Testing)</h3>
 <p>For compose file and setup, see the <a href="https://docs.shani.dev/doc/servers/devtools#mailpit-email-testing">Developer Tools wiki → Mailpit</a>.</p>
 <hr>
-<h2 id="kubernetes-orchestration">Kubernetes & Orchestration</h2>
-<p>For all Kubernetes distributions (k3s, k0s, MicroK8s, RKE2, Talos), cluster management, GitOps tooling, ingress, storage, and platform engineering tools, see the <a href="https://docs.shani.dev/doc/servers/kubernetes/overview">Kubernetes & Container Orchestration wiki</a>.</p>
+<h2 id="kubernetes-orchestration">Kubernetes &amp; Orchestration</h2>
+<p>For all Kubernetes distributions (k3s, k0s, MicroK8s, RKE2, Talos), cluster management, GitOps tooling, ingress, storage, and platform engineering tools, see the <a href="https://docs.shani.dev/doc/servers/kubernetes/overview">Kubernetes &amp; Container Orchestration wiki</a>.</p>
 <hr>
 <h2 id="ha-clusters">HA Clusters</h2>
 <p>All HA cluster compose files (PostgreSQL/Patroni, Redis Sentinel, Valkey Cluster, MongoDB, Kafka, Cassandra, ScyllaDB, RabbitMQ, Elasticsearch, OpenSearch, VictoriaMetrics, etcd) are in the dedicated <a href="https://docs.shani.dev/doc/servers/clusters">Clusters wiki</a>.</p>
@@ -1355,7 +1355,7 @@ skopeo sync --src docker --dest dir nginx:alpine /tmp/mirror/</code></pre>
 <table><thead><tr><th>Service</th><th>Strategy</th><th>Compose Path</th><th>Tolerates Node Loss</th></tr></thead><tbody><tr><td>PostgreSQL</td><td>Patroni + etcd + HAProxy</td><td><code>~/patroni/</code></td><td>1 of 2</td></tr><tr><td>Redis / Valkey</td><td>Sentinel (3 sentinels + replicas)</td><td><code>~/redis-sentinel/</code></td><td>1 of 3</td></tr><tr><td>Redis / Valkey</td><td>Native Cluster (6 nodes, 3+3)</td><td><code>~/valkey-cluster/</code></td><td>1 per shard</td></tr><tr><td>MongoDB</td><td>Replica Set (3 nodes)</td><td><code>~/mongodb-rs/</code></td><td>1 of 3</td></tr><tr><td>Kafka</td><td>KRaft (3 nodes)</td><td><code>~/kafka-cluster/</code></td><td>1 of 3</td></tr><tr><td>Cassandra</td><td>Ring (3 nodes, RF=3)</td><td><code>~/cassandra-cluster/</code></td><td>1 of 3</td></tr><tr><td>ScyllaDB</td><td>Ring (3 nodes, RF=3)</td><td><code>~/scylladb-cluster/</code></td><td>1 of 3</td></tr><tr><td>RabbitMQ</td><td>Cluster + Quorum Queues</td><td><code>~/rabbitmq-cluster/</code></td><td>1 of 3</td></tr><tr><td>Elasticsearch</td><td>3-node master/data</td><td><code>~/elk-cluster/</code></td><td>1 of 3</td></tr><tr><td>OpenSearch</td><td>3-node cluster manager</td><td><code>~/opensearch-cluster/</code></td><td>1 of 3</td></tr><tr><td>VictoriaMetrics</td><td>vminsert/vmselect/vmstorage</td><td><code>~/victoriametrics-cluster/</code></td><td>1 of 2 storage</td></tr><tr><td>etcd</td><td>3-node Raft</td><td><code>~/etcd-cluster/</code></td><td>1 of 3</td></tr></tbody></table>
 <hr>
 <hr>
-<h2 id="nginx-apache-httpd">Nginx & Apache HTTPD</h2>
+<h2 id="nginx-apache-httpd">Nginx &amp; Apache HTTPD</h2>
 <p><strong>Purpose:</strong> High-performance web servers and reverse proxies. Nginx excels at static content and proxying; Apache provides <code>.htaccess</code> support. Use these when you need full server-level config, not just a reverse proxy.</p>
 <pre><code class="language-yaml"># ~/nginx/compose.yaml
 services:

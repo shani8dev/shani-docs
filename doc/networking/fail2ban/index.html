@@ -234,7 +234,7 @@
 <blockquote>⚠️ <strong>The backend is <code>iptables-multiport</code>, not firewalld.</strong> Arch's <code>paths-arch.conf</code> sets <code>banaction = iptables-multiport</code>, and that is what is in effect unless you change it yourself. So fail2ban does <strong>not</strong> coordinate with firewalld here, and the two are separate mechanisms: the <code>ssh</code> service you add to a firewalld zone and the rules fail2ban drops are unrelated. If you want them unified, set <code>banaction = firewallcmd-rich-rules</code> in a <code>jail.local</code> and reload.</blockquote>
 <p><strong>Active from first boot.</strong> <code>shani-network</code> enables it unconditionally at install time alongside firewalld — no setup needed to get baseline protection, though tuning the jails below is still recommended for any public-facing service.</p>
 <hr>
-<h2 id="status-tuning">Status & Tuning</h2>
+<h2 id="status-tuning">Status &amp; Tuning</h2>
 <pre><code class="language-bash"># Overall status — shows all active jails and ban counts
 sudo fail2ban-client status
 

@@ -337,7 +337,7 @@ kubectl get volumesnapshotcontent   # cluster-scoped backing object</code></pre>
 kubectl describe sc longhorn               # see parameters and provisioner
 kubectl get pvc -A | grep -v Bound         # find unbound PVCs (problem indicator)</code></pre>
 <hr>
-<h2 id="nfs-shared-storage">NFS & Shared Storage</h2>
+<h2 id="nfs-shared-storage">NFS &amp; Shared Storage</h2>
 <h3 id="nfs-subdir-external-provisioner">NFS Subdir External Provisioner</h3>
 <p><strong>Purpose:</strong> Dynamically provision PVCs backed by an NFS server — the simplest way to get <code>ReadWriteMany</code> access mode in a homelab without Rook-Ceph.</p>
 <pre><code class="language-bash">helm repo add nfs-subdir-external-provisioner \

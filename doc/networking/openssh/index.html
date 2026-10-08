@@ -365,7 +365,7 @@ scp -P 2222 -r ~/myproject youruser@shanios:~/
 rsync -avz -e &quot;ssh -p 2222&quot; ~/myproject youruser@shanios:~/</code></pre>
 <p>For mounting a remote directory as a local filesystem over SSH, see the <a href="https://docs.shani.dev/doc/networking/sshfs">SSHFS wiki page</a>.</p>
 <hr>
-<h2 id="port-forwarding-tunnels">Port Forwarding & Tunnels</h2>
+<h2 id="port-forwarding-tunnels">Port Forwarding &amp; Tunnels</h2>
 <pre><code class="language-bash"># Local forwarding: access a remote service on your local machine
 # (reach the server's Jellyfin at localhost:8096)
 ssh -L 8096:localhost:8096 shanios

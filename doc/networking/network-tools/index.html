@@ -232,14 +232,14 @@
       </div>
       <div class="prose"><p>Shanios includes a comprehensive suite of networking utilities for diagnostics, monitoring, security, and file transfer. All tools listed here are pre-installed unless noted otherwise.</p>
 <h2 id="package-reference">📦 Package Reference</h2>
-<table><thead><tr><th>Package</th><th>Tools Included</th><th>Purpose</th></tr></thead><tbody><tr><td><code>iproute2</code></td><td><code>ip</code>, <code>ss</code></td><td>Modern interface, routing, & socket management</td></tr><tr><td><code>iputils</code></td><td><code>ping</code>, <code>arping</code></td><td>Basic reachability & MAC discovery</td></tr><tr><td><code>traceroute</code></td><td><code>traceroute</code></td><td>Own package, <strong>not</strong> inetutils</td></tr><tr><td><code>inetutils</code></td><td><code>ftp</code>, <code>telnet</code></td><td>Legacy path tracing & protocol clients</td></tr><tr><td><code>net-tools</code></td><td><code>ifconfig</code>, <code>netstat</code>, <code>arp</code>, <code>route</code></td><td>Legacy network configuration</td></tr><tr><td><code>bind</code></td><td><code>dig</code>, <code>host</code>, <code>nslookup</code></td><td>DNS query & resolution tools</td></tr><tr><td><code>wireless_tools</code></td><td><code>iwconfig</code>, <code>iwlist</code>, <code>iwspy</code></td><td>Legacy wireless diagnostics</td></tr><tr><td><code>wpa_supplicant</code></td><td><code>wpa_cli</code>, <code>wpa_passphrase</code></td><td>WPA authentication management</td></tr><tr><td><code>net-snmp</code></td><td><code>snmpwalk</code>, <code>snmpget</code></td><td>SNMP network device monitoring</td></tr><tr><td><code>openldap</code></td><td><code>ldapsearch</code></td><td>LDAP directory queries</td></tr><tr><td><code>iproute2</code></td><td><code>ip</code> (includes <code>netns</code>)</td><td>Network namespace isolation</td></tr></tbody></table>
+<table><thead><tr><th>Package</th><th>Tools Included</th><th>Purpose</th></tr></thead><tbody><tr><td><code>iproute2</code></td><td><code>ip</code>, <code>ss</code></td><td>Modern interface, routing, &amp; socket management</td></tr><tr><td><code>iputils</code></td><td><code>ping</code>, <code>arping</code></td><td>Basic reachability &amp; MAC discovery</td></tr><tr><td><code>traceroute</code></td><td><code>traceroute</code></td><td>Own package, <strong>not</strong> inetutils</td></tr><tr><td><code>inetutils</code></td><td><code>ftp</code>, <code>telnet</code></td><td>Legacy path tracing &amp; protocol clients</td></tr><tr><td><code>net-tools</code></td><td><code>ifconfig</code>, <code>netstat</code>, <code>arp</code>, <code>route</code></td><td>Legacy network configuration</td></tr><tr><td><code>bind</code></td><td><code>dig</code>, <code>host</code>, <code>nslookup</code></td><td>DNS query &amp; resolution tools</td></tr><tr><td><code>wireless_tools</code></td><td><code>iwconfig</code>, <code>iwlist</code>, <code>iwspy</code></td><td>Legacy wireless diagnostics</td></tr><tr><td><code>wpa_supplicant</code></td><td><code>wpa_cli</code>, <code>wpa_passphrase</code></td><td>WPA authentication management</td></tr><tr><td><code>net-snmp</code></td><td><code>snmpwalk</code>, <code>snmpget</code></td><td>SNMP network device monitoring</td></tr><tr><td><code>openldap</code></td><td><code>ldapsearch</code></td><td>LDAP directory queries</td></tr><tr><td><code>iproute2</code></td><td><code>ip</code> (includes <code>netns</code>)</td><td>Network namespace isolation</td></tr></tbody></table>
 <blockquote>💡 <strong>Installable Tools</strong>: `# speedtest-cli is NOT in the image; there is no bandwidth test tool as shipped</blockquote>
 <p>speedtest-cli<code> and </code>fast<code> are available via </code>pipx`.</p>
 <blockquote>``<code>bash pipx install speedtest-cli fast-cli </code>``</blockquote>
 <hr>
-<h2 id="1-connectivity-path-tracing">🌐 1. Connectivity & Path Tracing</h2>
+<h2 id="1-connectivity-path-tracing">🌐 1. Connectivity &amp; Path Tracing</h2>
 <p>Test reachability, latency, and route paths to external hosts.</p>
-<p><strong><code>ping</code></strong> — ICMP reachability & latency.</p>
+<p><strong><code>ping</code></strong> — ICMP reachability &amp; latency.</p>
 <pre><code class="language-bash">ping -c 4 host                  # Basic reachability
 ping -s 1400 -c 4 host          # Large packet (MTU test)
 ping -6 -c 4 ipv6.google.com    # IPv6 connectivity (ping6 is now `ping -6`)</code></pre>
@@ -249,14 +249,14 @@ sudo arping -c 3 192.168.1.50   # Discover MAC address of IP</code></pre>
 <p><strong><code>traceroute</code></strong> — Trace network path hop-by-hop.</p>
 <pre><code class="language-bash">traceroute host                 # Standard ICMP traceroute
 traceroute -T -p 443 host       # TCP traceroute (bypasses ICMP blocks)</code></pre>
-<p><strong><code>mtr</code></strong> — Live traceroute with packet loss & latency stats.</p>
+<p><strong><code>mtr</code></strong> — Live traceroute with packet loss &amp; latency stats.</p>
 <pre><code class="language-bash">mtr host                        # Interactive TUI
 mtr --report --report-cycles 20 host # Non-interactive report</code></pre>
 <p><strong><code>speedtest-cli</code></strong> — Internet speed test (requires <code>pipx</code>).</p>
 <pre><code class="language-bash">speedtest-cli --simple          # Ping, Download, Upload output
 speedtest-cli --server 1234     # Use specific server ID</code></pre>
 <hr>
-<h2 id="2-dns-name-resolution">🔍 2. DNS & Name Resolution</h2>
+<h2 id="2-dns-name-resolution">🔍 2. DNS &amp; Name Resolution</h2>
 <p>Query DNS servers and manage local resolution.</p>
 <p><strong><code>dig</code></strong> — Comprehensive DNS queries.</p>
 <pre><code class="language-bash">dig host +short                 # Clean IP output
@@ -271,9 +271,9 @@ nslookup host 8.8.8.8           # Query via Google DNS</code></pre>
 <pre><code class="language-bash">resolvconf -l                   # List registered nameservers
 sudo resolvconf -u              # Force regeneration of resolv.conf</code></pre>
 <hr>
-<h2 id="3-interfaces-routing-hardware">🔌 3. Interfaces, Routing & Hardware</h2>
+<h2 id="3-interfaces-routing-hardware">🔌 3. Interfaces, Routing &amp; Hardware</h2>
 <p>Manage network interfaces, drivers, and wireless settings.</p>
-<p><strong><code>ip</code></strong> — Address, route, and neighbour management. For full coverage of CIDR, subnetting, gateways, static routes, and persistent configuration see <a href="/doc/networking/ip-addressing/">IP Addressing & Routing</a>.</p>
+<p><strong><code>ip</code></strong> — Address, route, and neighbour management. For full coverage of CIDR, subnetting, gateways, static routes, and persistent configuration see <a href="/doc/networking/ip-addressing/">IP Addressing &amp; Routing</a>.</p>
 <pre><code class="language-bash">ip -brief addr show             # Compact IP summary
 ip route get 8.8.8.8            # Which route would be used for a destination
 ip neigh flush dev eth0         # Clear ARP cache for an interface
@@ -298,7 +298,7 @@ wpa_passphrase &quot;SSID&quot; &quot;PASS&quot;    # Generate config block</cod
 <pre><code class="language-bash">sudo ip netns add testns        # Create namespace
 sudo ip netns exec testns ping 1.1.1.1 # Test inside namespace</code></pre>
 <hr>
-<h2 id="4-sockets-ports-processes">🚪 4. Sockets, Ports & Processes</h2>
+<h2 id="4-sockets-ports-processes">🚪 4. Sockets, Ports &amp; Processes</h2>
 <p>Identify listening services and open connections.</p>
 <p><strong><code>ss</code></strong> — Socket statistics (modern replacement for netstat).</p>
 <pre><code class="language-bash">ss -tlnp                        # TCP listening with PID/Process
@@ -308,11 +308,11 @@ ss -tnp state established       # Active connections only</code></pre>
 <pre><code class="language-bash">netstat -tlnp                   # Listening TCP (same as ss -tlnp)
 netstat -s                      # Protocol error counters
 netstat -r                      # Routing table</code></pre>
-<p><strong><code>lsof</code></strong> — List open files & network connections.</p>
+<p><strong><code>lsof</code></strong> — List open files &amp; network connections.</p>
 <pre><code class="language-bash">lsof -i :80                     # What is using port 80?
 lsof -i TCP -n -P               # All TCP connections (no DNS)</code></pre>
 <hr>
-<h2 id="5-capture-analysis-scanning">📡 5. Capture, Analysis & Scanning</h2>
+<h2 id="5-capture-analysis-scanning">📡 5. Capture, Analysis &amp; Scanning</h2>
 <p>Deep inspection of network traffic and services.</p>
 <p><strong><code>tcpdump</code></strong> — Live packet capture.</p>
 <pre><code class="language-bash">sudo tcpdump -i any -n          # Capture all traffic (no DNS)
@@ -321,12 +321,12 @@ sudo tcpdump -i any -w cap.pcap # Save to file for Wireshark</code></pre>
 <p><strong><code>ngrep</code></strong> — Grep over network traffic.</p>
 <pre><code class="language-bash">sudo ngrep -d any -q &quot;GET\|POST&quot; port 80 # Match HTTP methods
 sudo ngrep -d any -qi &quot;password&quot;        # Find plaintext credentials</code></pre>
-<p><strong><code>nmap</code></strong> — Network discovery & port scanning.</p>
+<p><strong><code>nmap</code></strong> — Network discovery &amp; port scanning.</p>
 <pre><code class="language-bash">nmap -sn 192.168.1.0/24         # Ping sweep (find live hosts)
 nmap -sV host                   # Service version detection
 nmap -A host                    # Aggressive: OS, version, scripts, trace
 sudo nmap -sU -p 53 host        # UDP scan (DNS, etc.)</code></pre>
-<p><strong><code>whois</code></strong> — Domain & IP registration info.</p>
+<p><strong><code>whois</code></strong> — Domain &amp; IP registration info.</p>
 <pre><code class="language-bash">whois domain.com                # Domain details
 whois 8.8.8.8                   # IP/ASN info</code></pre>
 <p><strong><code>snmpwalk</code></strong> — SNMP device monitoring.</p>
@@ -336,7 +336,7 @@ snmpget -v2c -c public 192.168.1.1 sysDescr.0 # Get description</code></pre>
 <pre><code class="language-bash">ldapsearch -x -H ldap://server -b &quot;dc=com&quot; # Anonymous query
 ldapsearch -x -D &quot;cn=admin&quot; -W -b &quot;dc=com&quot; # Authenticated bind</code></pre>
 <hr>
-<h2 id="6-transfer-relay-protocols">📥 6. Transfer, Relay & Protocols</h2>
+<h2 id="6-transfer-relay-protocols">📥 6. Transfer, Relay &amp; Protocols</h2>
 <p>Download files, test protocols, and create relays.</p>
 <p><strong><code>curl</code></strong> — Advanced HTTP testing.</p>
 <pre><code class="language-bash">curl -vI host                   # Verbose headers only
@@ -355,14 +355,14 @@ aria2c &quot;magnet:?xt=urn:btih:...&quot; # Download torrent</code></pre>
 <p><strong><code>zsync</code></strong> — Delta updates (used by <code>shani-deploy</code>).</p>
 <pre><code class="language-bash">zsync url/file.zsync            # Download only changed blocks
 zsync -i existing.iso url/file.zsync # Update existing file</code></pre>
-<p><strong><code>nc</code> (netcat) / <code>socat</code></strong> — Relays & port testing.</p>
+<p><strong><code>nc</code> (netcat) / <code>socat</code></strong> — Relays &amp; port testing.</p>
 <pre><code class="language-bash">nc -zv host 22                  # Test if port is open
 socat TCP-LISTEN:8080,fork TCP:target:80 # Simple port forward</code></pre>
 <p><strong><code>inetutils</code></strong> — Legacy clients.</p>
 <pre><code class="language-bash">telnet host 25                  # Test SMTP handshake
 ftp host                        # Legacy FTP client</code></pre>
 <hr>
-<h2 id="7-bandwidth-monitoring">📊 7. Bandwidth & Monitoring</h2>
+<h2 id="7-bandwidth-monitoring">📊 7. Bandwidth &amp; Monitoring</h2>
 <p>Measure throughput and monitor traffic in real-time.</p>
 <p><strong><code>iperf3</code></strong> — Bandwidth throughput testing.</p>
 <pre><code class="language-bash">iperf3 -s                       # Run server mode
@@ -372,14 +372,14 @@ iperf3 -c host -u -b 100M       # UDP test at 100Mbps</code></pre>
 <pre><code class="language-bash">sudo nethogs eth0               # &quot;Top&quot; for network usage</code></pre>
 <p><strong><code>iftop</code></strong> — Per-connection bandwidth.</p>
 <pre><code class="language-bash">sudo iftop -i eth0 -n           # Interactive flow view (no DNS)</code></pre>
-<p><strong><code>bandwhich</code></strong> — Process & connection bandwidth TUI.</p>
+<p><strong><code>bandwhich</code></strong> — Process &amp; connection bandwidth TUI.</p>
 <pre><code class="language-bash">sudo bandwhich                  # Live bandwidth breakdown</code></pre>
 <p><strong><code>vnstat</code></strong> — Persistent bandwidth statistics.</p>
 <pre><code class="language-bash">vnstat -d                       # Daily breakdown
 vnstat -h                       # Hourly breakdown
 vnstat --live                   # Live traffic rate</code></pre>
 <hr>
-<h2 id="8-security-certificates">🔐 8. Security & Certificates</h2>
+<h2 id="8-security-certificates">🔐 8. Security &amp; Certificates</h2>
 <p><strong><code>openssl</code></strong> — TLS/SSL inspection.</p>
 <pre><code class="language-bash">openssl s_client -connect host:443 -tls1_3 # Test TLS 1.3 support
 openssl x509 -in cert.pem -noout -dates   # Check certificate expiry</code></pre>
@@ -392,7 +392,7 @@ sudo journalctl -u NetworkManager -k # Kernel logs related to networking</code><
 <blockquote>⚠️ <strong>Not in the image:</strong> <code>speedtest-cli</code> is not in the image. Commands below that use speedtest-cli will not run as written.</blockquote>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="/doc/networking/ip-addressing/">IP addressing & routing</a></li>
+<li><a href="/doc/networking/ip-addressing/">IP addressing &amp; routing</a></li>
 <li><a href="/doc/networking/virtual-networking/">Virtual networking</a></li>
 <li><a href="https://blog.shani.dev/post/shani-os-networking-guide">Networking guide blog</a></li>
 </ul></div>

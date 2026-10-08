@@ -237,7 +237,7 @@
 <hr>
 <h2 id="boot-problems">Boot Problems</h2>
 <h3 id="system-wont-boot-automatic-fallback">System Won't Boot — Automatic Fallback</h3>
-<p>If your system fails to reach the login prompt three times after an update, systemd-boot's boot-counting mechanism activates and falls back to the previous slot automatically. After login, the Shani Cassini agent checks the boot state and sends a notification. Open <strong>Updates & Rollback</strong> to restore the failed slot.</p>
+<p>If your system fails to reach the login prompt three times after an update, systemd-boot's boot-counting mechanism activates and falls back to the previous slot automatically. After login, the Shani Cassini agent checks the boot state and sends a notification. Open <strong>Updates &amp; Rollback</strong> to restore the failed slot.</p>
 <p>To check what happened:</p>
 <pre><code class="language-bash"># Which slot are you actually running?
 cat /proc/cmdline | grep -o 'subvol=@[a-z]*'

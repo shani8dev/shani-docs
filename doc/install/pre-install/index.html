@@ -239,7 +239,7 @@
 <li><strong>Set SATA Mode to AHCI</strong> — Ensures optimal disk performance and compatibility.</li>
 <li><strong>Enable Virtualization</strong> — Enable Intel VT-x or AMD-V for container support.</li>
 </ol>
-<h2 id="downloading-verifying-the-iso">Downloading & Verifying the ISO</h2>
+<h2 id="downloading-verifying-the-iso">Downloading &amp; Verifying the ISO</h2>
 <p>Download the Shanios ISO from <a href="https://shani.dev">shani.dev</a> (primary, served from Cloudflare R2). SourceForge mirrors the base images and past releases.</p>
 <ul>
 <li><strong>GNOME Edition</strong> (2026.05.18, ~5.4 GB):</li>
@@ -261,7 +261,7 @@ gpg --keyserver keys.openpgp.org --recv-keys 7B927BFFD4A9EAAA8B666B77DE217F3DA80
 
 # 3. Verify GPG signature
 gpg --verify signed_shanios-gnome-2026.05.18-x86_64.iso.asc signed_shanios-gnome-2026.05.18-x86_64.iso</code></pre>
-<p>SHA256 expected output: <code>signed_shanios-gnome-2026.05.18-x86_64.iso: OK</code>. GPG should report <code>Good signature from &quot;Shani OS&quot;</code>. Any other result means the download is corrupt or tampered — delete it and re-download.</p>
+<p>SHA256 expected output: <code>signed_shanios-gnome-2026.05.18-x86_64.iso: OK</code>. GPG should report <code>Good signature from "Shani OS"</code>. Any other result means the download is corrupt or tampered — delete it and re-download.</p>
 <h3 id="windows-powershell-verify-sha256">Windows (PowerShell) — Verify SHA256</h3>
 <pre><code class="language-powershell">Get-FileHash signed_shanios-gnome-2026.05.18-x86_64.iso -Algorithm SHA256</code></pre>
 <p>Compare the output hash against the contents of the downloaded <code>.sha256</code> file — they must match exactly.</p>

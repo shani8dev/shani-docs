@@ -481,6 +481,59 @@ not how it got that way.
   Its root coverage was proven rather than assumed: injecting a bad `/doc/`
   target and a bad `#fragment` into the root index makes the checker exit
   non-zero and name `index.html` for both.
+- **The generated tree was not valid HTML — FIXED (2026-10-05), and two CI
+  checks that were listed as "still open" now exist.** The `validate` job
+  checked links and the generator checked nav drift, but nothing looked at
+  whether the emitted HTML parsed. It carried **45 html5lib parse errors and
+  68 NUL bytes across 3 pages**, live on docs.shani.dev, in three classes:
+  - **32 literal `\x00BLOCKnn\x00` code-block placeholders** in
+    `doc/servers/kubernetes/security/index.html` (1 each in `operations` and
+    `workloads`). The converter substitutes a `\u0000BLOCK${i}\u0000` marker
+    per fenced block, and `html.replace(string, ...)` replaces only the
+    **first** match. A marker can legitimately occur twice — `workloads.md`
+    has `matches: "^(.*)_total$"` and `as: "${1}_per_second"` on consecutive
+    lines, which close two fences into consecutive blocks — so the second
+    was substituted early and the later pass found nothing. NUL bytes are
+    invalid HTML **and invisible to grep**, which is why this survived the
+    link checker and the unit tests. Now a global regex, plus a `throw` if
+    any marker survives: verified by running the generator with the old
+    substitution, which fails loudly and exits 1.
+  - **Bare `&` and `<` in prose** reached the page unescaped (25 table rows:
+    `users & groups`, `shows disk < 30 GB` — the parser reads `< 30 GB…` as a
+    tag). `escText` now runs over the whole line before any inline rule, and
+    leaves existing entities alone so `2>&1` in a shell line is untouched.
+  - **Emphasis mis-nesting across a code span**: `**Subvolumes under
+    `/var/*`**` became `<li>*<em>Subvolumes under <code>/var/</code>**`, and
+    `` `enp*`/`wlp*` `` became `<code>enp<em></code>/<code>wlp</em></code>`.
+    `inline()` now lifts code spans out as **index** placeholders, runs
+    emphasis over the joined string, and releases them last — so emphasis
+    never sees code content, and a `**…**` spanning a code span still
+    matches. **Three orderings were each tried and each shipped something
+    wrong** (code-first let `*` pair across spans; per-segment emphasis broke
+    bold spanning a code span; content placeholders with `\u0000` delimiters
+    made the release regex span delimiters and shipped 5502 NUL bytes). The
+    shape is load-bearing; read the comment before "simplifying" it.
+    Measured after: **0 parse errors, 0 control characters, 7924 `<code>`
+    elements, 0 empty `<strong>`/`<em>`**, and `node --test` 25/25, 0 broken
+    links, 410 JSON-LD blocks parse, `doc/` byte-identical on a rerun.
+  - **Duplicate `<title>` — FIXED.** `doc/troubleshooting/` and
+    `doc/networking/troubleshooting/` both shipped
+    `Troubleshooting — Shanios Docs`. The networking one is now
+    `Networking — Troubleshooting`, matching the `Parent — Page` convention
+    the other nested pages use (`Kubernetes — Storage`, etc.).
+  - **`tests/check-html.py` (new) gates all of the above** in the `validate`
+    job: html5lib parse errors, stray control characters, duplicate titles
+    (excluding `404.html`, which is not in any sitemap and legitimately
+    shares the site title), and untitled pages. **Both of its failure modes
+    were proven**: an injected `\x00BLOCK66\x00` and a duplicated title each
+    make it exit 1, and `doc/` was restored byte-identical afterwards.
+    The generator's own duplicate-title warning already fired on this and was
+    being read past; the check turns that warning into a gate.
+  - **Not fixed here, pre-existing:** 36 pages still contain a stray
+  backtick. A `|` inside a code span splits the table row it sits in
+  (`journalctl -b | grep -i drm`), so the cell boundary lands mid-code.
+  Measured 51 pages before this change, so the escaping fix reduced it, but
+  the table splitter still needs to respect code spans.
 - **CI status.** 1 workflow (`build-manifest.yml`), triggered on pushes
   touching `docs/**.md`/`config-docs.js`/`generate-manifest.js`/`doc-links.js`/`tests/**`.
   The `build` job re-runs `node generate-manifest.js`

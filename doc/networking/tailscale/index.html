@@ -234,7 +234,7 @@
 <p>Tailscale is pre-installed on Shani OS. State is persisted at <code>/data/varlib/tailscale</code> and survives all OS updates and rollbacks — <strong>you stay authenticated across reboots, updates, and rollbacks without ever re-running <code>tailscale up</code></strong>.</p>
 <p><strong>Inactive until you authenticate.</strong></p>
 <hr>
-<h2 id="enable-authenticate">Enable & Authenticate</h2>
+<h2 id="enable-authenticate">Enable &amp; Authenticate</h2>
 <pre><code class="language-bash"># 1. Enable and start the daemon
 sudo systemctl enable --now tailscaled
 
@@ -267,7 +267,7 @@ sudo tailscale up --accept-dns=true
 sudo tailscale up --ssh --accept-routes --accept-dns=true</code></pre>
 <blockquote><strong>Tip:</strong> Run <code>tailscale up</code> again any time you want to change flags — it applies the new configuration without dropping existing connections.</blockquote>
 <hr>
-<h2 id="status-diagnostics">Status & Diagnostics</h2>
+<h2 id="status-diagnostics">Status &amp; Diagnostics</h2>
 <pre><code class="language-bash"># Show your tailnet, peers, their IPs, and connection status
 tailscale status
 
@@ -354,7 +354,7 @@ sudo tailscale up --exit-node=shani-server --exit-node-allow-lan-access=true
 # Disable the exit node when back on a trusted network
 sudo tailscale up --exit-node=</code></pre>
 <hr>
-<h2 id="key-expiry-persistence">Key Expiry & Persistence</h2>
+<h2 id="key-expiry-persistence">Key Expiry &amp; Persistence</h2>
 <p>By default, Tailscale device keys expire every 180 days and require re-authentication. For a server you want running indefinitely:</p>
 <ol>
 <li>Open the <a href="https://login.tailscale.com/admin/machines">Tailscale admin console</a></li>
@@ -388,7 +388,7 @@ sudo tailscale up --exit-node=</code></pre>
 sudo firewall-cmd --reload</code></pre>
 <p>Tailscale's <code>tailscale0</code> interface is automatically placed in the <code>trusted</code> firewalld zone on Shani OS — traffic from your tailnet peers is already treated as trusted without additional rules.</p>
 <hr>
-<h2 id="disconnect-re-authenticate">Disconnect & Re-authenticate</h2>
+<h2 id="disconnect-re-authenticate">Disconnect &amp; Re-authenticate</h2>
 <pre><code class="language-bash"># Temporarily disconnect (keeps auth state — reconnects immediately with 'tailscale up')
 sudo tailscale down
 

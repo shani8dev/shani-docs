@@ -247,7 +247,7 @@
 <hr>
 <h2 id="hook-shanios-boot-failure-hooksh-pre-mount-90">Hook: shanios-boot-failure-hook.sh (pre-mount 90)</h2>
 <p><strong>Runs:</strong> After LUKS unlock and device discovery, <strong>before</strong> the root Btrfs subvolume is mounted.</p>
-<p><strong>Purpose:</strong> Write a <code>boot_hard_failure</code> marker so that if root mount fails, the failure is recorded persistently and reported through <code>shani-deploy --status --check --json</code> after the next boot. The Shani Cassini agent uses that status to notify you and open <strong>Updates & Rollback</strong>.</p>
+<p><strong>Purpose:</strong> Write a <code>boot_hard_failure</code> marker so that if root mount fails, the failure is recorded persistently and reported through <code>shani-deploy --status --check --json</code> after the next boot. The Shani Cassini agent uses that status to notify you and open <strong>Updates &amp; Rollback</strong>.</p>
 <p><strong>Why dracut and not a systemd service:</strong> dracut has no "on mount failure" hook. The only reliable pattern is write-before-mount, clear-on-success. If root never mounts, the marker persists. If root mounts successfully, the <code>shanios-boot-success-clear.sh</code> hook at pre-pivot removes it.</p>
 <p><strong>What it does:</strong></p>
 <ol>

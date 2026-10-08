@@ -276,7 +276,7 @@ reboot → @blue active…</code></pre>
 <li><strong>shanios-green (Candidate):</strong> Standby system, will be booted after next update</li>
 </ul>
 <p>After each deployment, <code>shani-deploy</code> rewrites both boot entries. The newly updated slot is labelled <strong>(Active)</strong> with <code>+3-0</code> boot-count tries and set as the <code>loader.conf</code> default; the currently running slot is relabelled <strong>(Candidate)</strong> as the stable fallback.</p>
-<p>Note the two rollback mechanisms operate at different levels: systemd-boot's boot counting only decides <em>which slot boots next</em> and never touches subvolume contents. Restoring a failed candidate slot's data from its pre-deploy safety snapshot is a separate <code>shani-deploy --rollback</code> operation. After a fallback boot, the Shani Cassini agent notifies you and links to <strong>Updates & Rollback</strong>, where you can run that operation. See <a href="/doc/concepts/atomic-updates/#automatic-rollback">Atomic Updates</a> for the full sequence.</p>
+<p>Note the two rollback mechanisms operate at different levels: systemd-boot's boot counting only decides <em>which slot boots next</em> and never touches subvolume contents. Restoring a failed candidate slot's data from its pre-deploy safety snapshot is a separate <code>shani-deploy --rollback</code> operation. After a fallback boot, the Shani Cassini agent notifies you and links to <strong>Updates &amp; Rollback</strong>, where you can run that operation. See <a href="/doc/concepts/atomic-updates/#automatic-rollback">Atomic Updates</a> for the full sequence.</p>
 <h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="/doc/concepts/atomic-updates/">Atomic Updates</a></li>

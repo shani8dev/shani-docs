@@ -271,7 +271,7 @@ shani-health -h, --help                 # Usage summary</code></pre>
 <h3 id="full-report-default---info">Full Report (default / <code>--info</code>)</h3>
 <p>The default run covers every component in one pass. Sections include:</p>
 <ul>
-<li><strong>OS & Slots</strong> — version, profile, channel, uptime, hostname, locale, timezone, machine-id, and the current/expected/candidate slot state</li>
+<li><strong>OS &amp; Slots</strong> — version, profile, channel, uptime, hostname, locale, timezone, machine-id, and the current/expected/candidate slot state</li>
 <li><strong>Boot Health</strong> — boot chain services, dracut 99shanios module, failure markers, cmdline slot consistency</li>
 <li><strong>Boot Entries</strong> — ESP space, EFI files (shim + mmx64 + sd-boot), UKI presence and signature validity, keymap, boot default</li>
 <li><strong>Deployment</strong> — reboot-needed, deployment_pending, installed version, cmdline files, rollback backups</li>
@@ -285,7 +285,7 @@ shani-health -h, --help                 # Usage summary</code></pre>
 <li><strong>Security Services</strong> — AppArmor, firewall, polkit, fail2ban, FIDO2/libfido2, pcscd, fprintd</li>
 <li><strong>Security Tools</strong> — lynis hardening index, rkhunter scan history</li>
 <li><strong>Kerberos</strong> — realm and KDC reachability from <code>/etc/krb5.conf</code> (only shown if <code>kinit</code> is installed)</li>
-<li><strong>Users & Access</strong> — login users, passwords, wheel group, UID-0 accounts, NOPASSWD sudo, home permissions, SSH key permissions, GnuPG permissions</li>
+<li><strong>Users &amp; Access</strong> — login users, passwords, wheel group, UID-0 accounts, NOPASSWD sudo, home permissions, SSH key permissions, GnuPG permissions</li>
 <li><strong>Groups</strong> — system groups (kvm, video, input, realtime…), group membership from <code>/etc/shani-extra-groups</code></li>
 <li><strong>Hardware</strong> — CPU model/flags/microcode, RAM, GPU, virtualization, IOMMU, temperatures, Bluetooth, peripherals</li>
 <li><strong>Disk</strong> — device model, SMART health, SSD wear, disk temperature, partition table, swap/hibernate</li>
@@ -294,8 +294,8 @@ shani-health -h, --help                 # Usage summary</code></pre>
 <li><strong>Firmware</strong> — CPU microcode, fwupd, pending firmware updates</li>
 <li><strong>Performance</strong> — power-profiles-daemon, irqbalance, ananicy-cpp, gamemode, THP</li>
 <li><strong>Network</strong> — NetworkManager, DNS, DHCP, Wi-Fi backend, VPN, internet, resolv.conf, servers (SSH, Samba, NFS, web…)</li>
-<li><strong>Audio & Display</strong> — PipeWire, WirePlumber, rtkit, display manager, XDG portals, Plymouth</li>
-<li><strong>Printing & Scanning</strong> — CUPS, cups-browsed, ipp-usb, SANE</li>
+<li><strong>Audio &amp; Display</strong> — PipeWire, WirePlumber, rtkit, display manager, XDG portals, Plymouth</li>
+<li><strong>Printing &amp; Scanning</strong> — CUPS, cups-browsed, ipp-usb, SANE</li>
 <li><strong>Package Managers</strong> — Flatpak, Snap, Nix, AppImage, <code>shani-cassini-agent.timer</code></li>
 <li><strong>Backup Tools</strong> — rclone, restic</li>
 <li><strong>Containers</strong> — Podman, Distrobox, LXD, Docker, Waydroid, nspawn</li>
@@ -309,7 +309,7 @@ shani-health -h, --help                 # Usage summary</code></pre>
 <h3 id="boot-report---boot">Boot Report (<code>--boot</code>)</h3>
 <p>A focused view of the boot chain and deployment state. Covers OS/Slots, Boot Health, Boot Entries, Deployment, Update Tools, Data State, and Secure Boot. Use this after an update or when debugging boot issues.</p>
 <h3 id="security-report---security">Security Report (<code>--security</code>)</h3>
-<p>Covers Secure Boot, Kernel Security, Encryption, TPM2, Security Services, Security Tools, Kerberos, Users & Access, and Groups. Useful for security audits and hardening checks.</p>
+<p>Covers Secure Boot, Kernel Security, Encryption, TPM2, Security Services, Security Tools, Kerberos, Users &amp; Access, and Groups. Useful for security audits and hardening checks.</p>
 <h3 id="hardware-report---hardware">Hardware Report (<code>--hardware</code>)</h3>
 <p>Covers Hardware, Disk, Battery, Storage, and Firmware. Use when checking for disk health, temperatures, or firmware updates.</p>
 <h3 id="network-report---network">Network Report (<code>--network</code>)</h3>
@@ -328,7 +328,7 @@ shani-health -h, --help                 # Usage summary</code></pre>
 <ul>
 <li>Filesystem free space and block group profiles</li>
 <li>Per-subvolume sizes with compression ratios (uses <code>compsize</code> if installed)</li>
-<li>Backup snapshot ages (warns if >30 days old)</li>
+<li>Backup snapshot ages (warns if &gt;30 days old)</li>
 <li>Application storage: Flatpak, Snap, Nix, Podman, LXD, Waydroid, home directories</li>
 <li>Snapshot summary with creation dates</li>
 <li>Reclaim hints: duperemove, bees status, stale snapshots</li>

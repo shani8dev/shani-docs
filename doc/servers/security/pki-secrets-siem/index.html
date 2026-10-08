@@ -469,7 +469,7 @@ podman exec openbao bao kv get secret/myapp</code></pre>
 <p><strong>Caddy:</strong></p>
 <pre><code class="language-caddyfile">vault.home.local { tls internal; reverse_proxy localhost:8200 }</code></pre>
 <hr>
-<h2 id="wazuh-siem-threat-detection">Wazuh (SIEM & Threat Detection)</h2>
+<h2 id="wazuh-siem-threat-detection">Wazuh (SIEM &amp; Threat Detection)</h2>
 <p><strong>Purpose:</strong> Open-source Security Information and Event Management (SIEM) platform. Wazuh agents run on every server, collecting logs, monitoring file integrity, detecting rootkits, and scanning for vulnerabilities. The Wazuh server correlates events, applies detection rules, and generates alerts. OpenSearch and a Kibana-style dashboard visualise everything. A full-stack SOC-in-a-box for self-hosters who take security seriously.</p>
 <pre><code class="language-yaml"># ~/wazuh/compose.yml — use the official single-node compose
 # wget https://packages.wazuh.com/4.x/docker/single-node.tar.gz

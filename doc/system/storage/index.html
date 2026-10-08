@@ -231,7 +231,7 @@
         </div>
       </div>
       <div class="prose"><p>This page covers raw disk and block-device management on Shani OS: inspecting drives, partitioning, filesystem operations, SMART health monitoring, and the udisks2 layer used by desktop tools.</p>
-<p>For encrypted volumes see <a href="/doc/security/luks/">LUKS Management</a>. For Btrfs-specific operations (snapshots, subvolumes, scrub) see <a href="/doc/arch/btrfs/">Btrfs Deep Dive</a>. For backup strategy see <a href="/doc/system/backup/">Backup & Recovery</a>.</p>
+<p>For encrypted volumes see <a href="/doc/security/luks/">LUKS Management</a>. For Btrfs-specific operations (snapshots, subvolumes, scrub) see <a href="/doc/arch/btrfs/">Btrfs Deep Dive</a>. For backup strategy see <a href="/doc/system/backup/">Backup &amp; Recovery</a>.</p>
 <hr>
 <h2 id="inspecting-block-devices">Inspecting Block Devices</h2>
 <pre><code class="language-bash"># List all block devices with sizes and mount points
@@ -260,7 +260,7 @@ sudo nvme id-ctrl /dev/nvme0     # NVMe drives
 sudo smartctl -i /dev/sda</code></pre>
 <hr>
 <h2 id="partitioning">Partitioning</h2>
-<h3 id="fdisk-interactive-partitioner-mbr-gpt">fdisk — Interactive Partitioner (MBR & GPT)</h3>
+<h3 id="fdisk-interactive-partitioner-mbr-gpt">fdisk — Interactive Partitioner (MBR &amp; GPT)</h3>
 <pre><code class="language-bash">sudo fdisk /dev/sda</code></pre>
 <p>Common fdisk commands inside the prompt:</p>
 <table><thead><tr><th>Key</th><th>Action</th></tr></thead><tbody><tr><td><code>p</code></td><td>Print current partition table</td></tr><tr><td><code>n</code></td><td>New partition</td></tr><tr><td><code>d</code></td><td>Delete partition</td></tr><tr><td><code>t</code></td><td>Change partition type</td></tr><tr><td><code>g</code></td><td>Create new GPT table</td></tr><tr><td><code>o</code></td><td>Create new MBR table</td></tr><tr><td><code>w</code></td><td>Write and exit</td></tr><tr><td><code>q</code></td><td>Quit without saving</td></tr></tbody></table>
@@ -416,7 +416,7 @@ sudo mdadm --stop /dev/md0</code></pre>
 <ul>
 <li><strong>Balance, defrag, scrub, and trim</strong> run via <code>btrfs-balance.timer</code>, <code>btrfs-defrag.timer</code>, <code>btrfs-scrub.timer</code>, and <code>btrfs-trim.timer</code> (from <code>btrfsmaintenance</code>), enabled by default and scheduled weekly at idle I/O priority. Check them with <code>systemctl list-timers 'btrfs-*'</code>.</li>
 <li><strong>bees</strong> runs continuously in the background (<code>beesd@&lt;uuid&gt;.service</code>), deduplicating extents across the <code>@blue</code>/<code>@green</code> root subvolumes and their backup snapshots as they diverge — this is what keeps two nearly-identical OS slots from doubling disk usage.</li>
-<li><strong><code>sudo shani-deploy --optimize</code></strong> runs a deeper, one-shot <code>duperemove</code> pass across <code>@blue</code>, <code>@green</code>, and any <code><em>_backup_</em></code> subvolumes. Use it to reclaim space beyond what continuous bees dedup catches; it's skipped automatically if a deployment is pending.</li>
+<li><strong><code>sudo shani-deploy --optimize</code></strong> runs a deeper, one-shot <code>duperemove</code> pass across <code>@blue</code>, <code>@green</code>, and any <code>*_backup_*</code> subvolumes. Use it to reclaim space beyond what continuous bees dedup catches; it's skipped automatically if a deployment is pending.</li>
 </ul>
 <p>Running <code>btrfs scrub start /</code> or <code>btrfs balance start /</code> manually (as shown below) is still useful for an on-demand check, but is not required for routine upkeep.</p>
 <hr>
@@ -587,7 +587,7 @@ sudo swapoff /swap/swapfile</code></pre>
 <ul>
 <li><a href="/doc/arch/btrfs/">Btrfs Deep Dive</a> — subvolumes, snapshots, send/receive, balance</li>
 <li><a href="/doc/security/luks/">LUKS Management</a> — encrypted volumes</li>
-<li><a href="/doc/system/backup/">Backup & Recovery</a> — restic, rclone, snapshot strategy</li>
+<li><a href="/doc/system/backup/">Backup &amp; Recovery</a> — restic, rclone, snapshot strategy</li>
 <li><a href="/doc/arch/filesystem/">Filesystem Structure</a> — Shani OS subvolume layout</li>
 </ul></div>
     </div>

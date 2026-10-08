@@ -254,7 +254,7 @@
 <li><strong>Secure Boot:</strong> MOK enrollment is staged automatically during install, whether or not Secure Boot was enabled at the time. On this first boot, firmware/shim detects the pending request and launches <strong>MokManager</strong> for you — select <strong>Enroll MOK</strong>, confirm with the password when prompted, and reboot. If Secure Boot wasn't already on in firmware, enable it now that the key is enrolled. See the <a href="/doc/security/secure-boot/">Secure Boot section</a>.</li>
 <li><strong>Check current slot:</strong> Run <code>cat /data/current-slot</code> to confirm whether you booted into <code>@blue</code> or <code>@green</code>.</li>
 </ul>
-<h2 id="oem-fleet-deployment">OEM & Fleet Deployment</h2>
+<h2 id="oem-fleet-deployment">OEM &amp; Fleet Deployment</h2>
 <p>Shanios is designed for OEM and fleet use. Every machine imaging from the same signed ISO will boot into an identical, verified state. The Initial Setup wizard runs on first user login per machine, so user-specific personalisation is captured without requiring per-device pre-configuration.</p>
 <ul>
 <li>Rollback never requires reimaging — the previous OS slot is always in the boot menu</li>

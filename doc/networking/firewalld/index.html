@@ -234,7 +234,7 @@
 <p>Pre-configured zones for KDE Connect, GSConnect, Waydroid, and Tailscale are included out of the box.</p>
 <table><thead><tr><th>Zone</th><th>Default assignment</th><th>Policy</th></tr></thead><tbody><tr><td><code>public</code></td><td>All physical NICs</td><td>Deny inbound, allow outbound</td></tr><tr><td><code>trusted</code></td><td><code>waydroid0</code></td><td>Accept all</td></tr></tbody></table>
 <hr>
-<h2 id="status-inspection">Status & Inspection</h2>
+<h2 id="status-inspection">Status &amp; Inspection</h2>
 <pre><code class="language-bash"># Confirm firewall is running
 sudo firewall-cmd --state
 
@@ -253,7 +253,7 @@ sudo firewall-cmd --get-zone-of-interface=eth0
 # Show the default zone
 sudo firewall-cmd --get-default-zone</code></pre>
 <hr>
-<h2 id="opening-services-ports">Opening Services & Ports</h2>
+<h2 id="opening-services-ports">Opening Services &amp; Ports</h2>
 <p>The <code>--permanent</code> flag writes the rule to disk so it survives reboots. Always follow with <code>--reload</code> to apply immediately to the running firewall.</p>
 <pre><code class="language-bash"># Allow a named service (uses built-in service definitions)
 sudo firewall-cmd --add-service=http --permanent

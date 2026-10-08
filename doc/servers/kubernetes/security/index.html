@@ -230,7 +230,7 @@
           <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><h2 id="security-policy">Security & Policy</h2>
+      <div class="prose"><h2 id="security-policy">Security &amp; Policy</h2>
 <h3 id="kubernetes-rbac">Kubernetes RBAC</h3>
 <pre><code class="language-yaml"># Namespace-scoped read-only Role
 apiVersion: rbac.authorization.k8s.io/v1
@@ -318,7 +318,7 @@ kubectl create rolebinding myuser-edit \
 
 # Dry-run — preview what would fail before enforcing
 kubectl label namespace myapp pod-security.kubernetes.io/enforce=restricted --dry-run=server</code></pre>
-<h3 id="resource-quotas-limitranges">Resource Quotas & LimitRanges</h3>
+<h3 id="resource-quotas-limitranges">Resource Quotas &amp; LimitRanges</h3>
 <pre><code class="language-yaml">apiVersion: v1
 kind: ResourceQuota
 metadata:
@@ -610,7 +610,7 @@ git add k8s/secrets/myapp-secrets.enc.yaml  # safe to commit
 sops k8s/secrets/myapp-secrets.enc.yaml     # opens in $EDITOR, re-encrypts on save
 
 # Encrypt specific values only (leave structure readable in Git)
-sops --encrypt --encrypted-regex '^(data|stringData)
+sops --encrypt --encrypted-regex '^(data|stringData)$' k8s/secrets/myapp-secrets.yaml</code></pre>
 <h4 id="flux-sops-integration">Flux SOPS Integration</h4>
 <p>Flux has native SOPS decryption — no sidecar, no webhook.</p>
 <pre><code class="language-bash"># Create the age key as a cluster secret (done once — not committed to Git)
@@ -803,7 +803,7 @@ spec:
                       &lt;your-cosign-public-key&gt;
                       -----END PUBLIC KEY-----</code></pre>
 <hr>
-<h3 id="trivy-vulnerability-iac-scanning">Trivy (Vulnerability & IaC Scanning)</h3>
+<h3 id="trivy-vulnerability-iac-scanning">Trivy (Vulnerability &amp; IaC Scanning)</h3>
 <p><strong>Purpose:</strong> CNCF-graduated all-in-one scanner for container images, Helm charts, Kubernetes manifests, Terraform/OpenTofu, and running clusters. Also generates SBOMs.</p>
 <pre><code class="language-bash">nix-env -iA nixpkgs.trivy
 
@@ -1013,91 +1013,6 @@ kube-apiserver-arg:
 kubectl create clusterrolebinding dev-team-view \
   --clusterrole=view \
   --group=dev-team   # must match the 'groups' claim from OIDC provider</code></pre>
-<hr> k8s/secrets/myapp-secrets.yaml</code></pre>
-<h4 id="flux-sops-integration">Flux SOPS Integration</h4>
-<p>Flux has native SOPS decryption — no sidecar, no webhook.</p>
- BLOCK19 
- BLOCK20 
- BLOCK21 
-<blockquote><strong>SOPS vs Sealed Secrets vs ESO:</strong> - <strong>SOPS</strong>: file-level encryption; works with any GitOps tool; no cluster dependency for decryption setup (key is a static secret); best for Flux + age - <strong>Sealed Secrets</strong>: asymmetric encryption tied to the cluster controller; simple for <code>kubectl apply</code> workflows; controller must exist to decrypt - <strong>ESO</strong>: pulls live secrets from an external store; best when secrets rotate frequently or must be audited</blockquote>
-<hr>
-<h3 id="helm-secrets-sops-for-helm-values">helm-secrets (SOPS for Helm values)</h3>
-<p><strong>Purpose:</strong> Helm plugin that decrypts SOPS-encrypted values files on the fly — so you can store sensitive <code>values-prod.yaml</code> encrypted in Git and pass them directly to <code>helm upgrade</code>.</p>
- BLOCK22 
- BLOCK23 
-<blockquote><code>helm-secrets</code> uses the <code>secrets://</code> URI prefix so helmfile knows to decrypt before passing to Helm.</blockquote>
-<hr>
-<h3 id="external-secrets-operator-eso">External Secrets Operator (ESO)</h3>
-<p><strong>Purpose:</strong> Sync secrets from OpenBao, Infisical, HashiCorp Vault, AWS Secrets Manager, GCP Secret Manager, or Azure Key Vault into native Kubernetes <code>Secret</code> objects.</p>
- BLOCK24 
-<h4 id="connect-to-openbao">Connect to OpenBao</h4>
- BLOCK25 
- BLOCK26 
-<h4 id="connect-to-infisical">Connect to Infisical</h4>
- BLOCK27 
-<h4 id="pull-a-secret-from-openbao">Pull a secret from OpenBao</h4>
- BLOCK28 
- BLOCK29 
-<blockquote><strong>Pattern:</strong> Store all secrets in OpenBao or Infisical. Reference via <code>ExternalSecret</code> CRDs. Never put plaintext values in Kubernetes YAML — even in private Git repos.</blockquote>
-<hr>
-<h2 id="image-supply-chain-security">Image Supply Chain Security</h2>
-<h3 id="harbor-self-hosted-oci-registry">Harbor (Self-Hosted OCI Registry)</h3>
-<p><strong>Purpose:</strong> CNCF-graduated container registry with built-in Trivy scanning, image signing, RBAC, robot accounts, and replication. Preferred over plain Gitea/Forgejo package registry for production.</p>
- BLOCK30 
-<p>Enable Trivy scanning in Harbor UI: <strong>Administration → Interrogation Services → Enable</strong>. Harbor scans every image on push automatically.</p>
- BLOCK31 
-<p><strong>Caddy:</strong> <code>harbor.home.local { tls internal; reverse_proxy harbor-core.harbor.svc.cluster.local:80 { header_up Host {host} } }</code></p>
-<hr>
-<h3 id="cosign-container-image-signing">Cosign (Container Image Signing)</h3>
-<p><strong>Purpose:</strong> Cryptographically sign container images. Signatures stored in the OCI registry alongside the image. Pair with Kyverno to enforce only signed images run in production.</p>
- BLOCK32 
- BLOCK33 
-<h4 id="enforce-signed-images-with-kyverno">Enforce signed images with Kyverno</h4>
- BLOCK34 
-<hr>
-<h3 id="trivy-vulnerability-iac-scanning">Trivy (Vulnerability & IaC Scanning)</h3>
-<p><strong>Purpose:</strong> CNCF-graduated all-in-one scanner for container images, Helm charts, Kubernetes manifests, Terraform/OpenTofu, and running clusters. Also generates SBOMs.</p>
- BLOCK35 
-<h4 id="trivy-operator-continuous-in-cluster-scanning">Trivy Operator (continuous in-cluster scanning)</h4>
- BLOCK36 
-<hr>
-<h2 id="spiffespire-workload-identity">SPIFFE/SPIRE — Workload Identity</h2>
-<p><strong>Purpose:</strong> SPIFFE (Secure Production Identity Framework for Everyone) is the CNCF standard for workload identity. SPIRE is the reference implementation. Every pod gets a cryptographically verifiable X.509 SVID (SPIFFE Verifiable Identity Document) — even across clusters and clouds. This is the foundation for zero-trust between services.</p>
-<blockquote><strong>Why SPIFFE over Kubernetes ServiceAccounts?</strong> ServiceAccount tokens are Kubernetes-scoped and rotate on a fixed schedule. SPIFFE SVIDs are short-lived (minutes), automatically rotated, and can federate across clusters, VMs, and clouds — enabling mTLS between services that don't share a Kubernetes cluster.</blockquote>
- BLOCK37 
- BLOCK38 
- BLOCK39 
-<blockquote><strong>Cilium + SPIFFE:</strong> Cilium's mTLS uses WireGuard at the node level. SPIFFE/SPIRE adds per-workload identity for zero-trust that survives pod migration and multi-cluster federation.</blockquote>
-<hr>
-<h2 id="cluster-hardening">Cluster Hardening</h2>
-<h3 id="descheduler">Descheduler</h3>
-<p><strong>Purpose:</strong> The Kubernetes scheduler places pods at creation time but never moves them. The Descheduler runs periodically and evicts pods that violate scheduling policies — pods on overloaded nodes, topology spread violations, expired affinities — triggering the scheduler to re-place them more optimally.</p>
- BLOCK40 
- BLOCK41 
-<hr>
-<h3 id="cis-kubernetes-benchmark-kube-bench">CIS Kubernetes Benchmark — kube-bench</h3>
-<p><strong>Purpose:</strong> Run the CIS Kubernetes Benchmark against your cluster to find misconfigurations: insecure API server flags, missing audit logging, overly permissive RBAC, unencrypted etcd, and more. Essential before declaring a cluster "production-ready".</p>
- BLOCK42 
- BLOCK43 
-<hr>
-<h3 id="production-cluster-hardening-checklist">Production Cluster Hardening Checklist</h3>
-<table><thead><tr><th>Area</th><th>Check</th><th>Tool</th></tr></thead><tbody><tr><td><strong>API Server</strong></td><td>Audit logging enabled</td><td>k3s config / kubeadm</td></tr><tr><td><strong>API Server</strong></td><td>Anonymous auth disabled</td><td><code>--anonymous-auth=false</code></td></tr><tr><td><strong>RBAC</strong></td><td>No <code>cluster-admin</code> granted to workloads</td><td><code>kubectl auth can-i --list</code></td></tr><tr><td><strong>RBAC</strong></td><td>CI/CD uses minimal ServiceAccount</td><td>Dedicated Role per namespace</td></tr><tr><td><strong>Pods</strong></td><td><code>restricted</code> PSA on all namespaces</td><td><code>pod-security.kubernetes.io/enforce=restricted</code></td></tr><tr><td><strong>Pods</strong></td><td><code>runAsNonRoot: true</code> on all containers</td><td>Kyverno policy</td></tr><tr><td><strong>Pods</strong></td><td><code>readOnlyRootFilesystem: true</code></td><td>SecurityContext</td></tr><tr><td><strong>Pods</strong></td><td>Resource limits set on all containers</td><td>Kyverno policy</td></tr><tr><td><strong>Pods</strong></td><td>No <code>hostNetwork</code>, <code>hostPID</code>, <code>hostIPC</code></td><td>Kyverno policy</td></tr><tr><td><strong>Images</strong></td><td>No <code>:latest</code> tags in production</td><td>conftest / Kyverno</td></tr><tr><td><strong>Images</strong></td><td>All images signed (Cosign)</td><td>Kyverno <code>verifyImages</code></td></tr><tr><td><strong>Images</strong></td><td>Continuous vulnerability scanning</td><td>Trivy Operator</td></tr><tr><td><strong>Network</strong></td><td>Default-deny NetworkPolicy in every namespace</td><td>Kyverno generate</td></tr><tr><td><strong>Network</strong></td><td>mTLS between services</td><td>Linkerd / Cilium WireGuard</td></tr><tr><td><strong>Secrets</strong></td><td>No plaintext secrets in Git</td><td>Sealed Secrets / ESO</td></tr><tr><td><strong>Secrets</strong></td><td>Secrets mounted as volumes, not env vars</td><td>Kyverno policy</td></tr><tr><td><strong>Runtime</strong></td><td>Falco detecting shell exec / file writes</td><td>Falco DaemonSet</td></tr><tr><td><strong>etcd</strong></td><td>Encrypted at rest</td><td><code>--encryption-provider-config</code></td></tr><tr><td><strong>Nodes</strong></td><td>CIS benchmark passing</td><td>kube-bench</td></tr><tr><td><strong>Nodes</strong></td><td>Node Problem Detector deployed</td><td>DaemonSet</td></tr><tr><td><strong>Backups</strong></td><td>Velero scheduled daily</td><td>Velero Schedule CRD</td></tr><tr><td><strong>Backups</strong></td><td>etcd snapshots to off-cluster storage</td><td>k3s etcd-snapshot + restic</td></tr></tbody></table>
-<hr>
-<h3 id="kubelet-eviction-thresholds">Kubelet Eviction Thresholds</h3>
-<p>The kubelet monitors node resources and evicts pods when thresholds are crossed. <strong>Soft</strong> eviction gives pods a grace period; <strong>hard</strong> eviction is immediate.</p>
- BLOCK44 
- BLOCK45 
-<blockquote><strong>Rule of thumb for homelab:</strong> Set hard <code>memory.available&lt;200Mi</code> and <code>nodefs.available&lt;5%</code>. Without eviction thresholds, nodes can OOM-kill the kubelet itself, making the node permanently unresponsive.</blockquote>
-<hr>
-<h3 id="kubeconfig-management">kubeconfig Management</h3>
-<p>Manage multiple clusters — merge configs, switch contexts, and set up OIDC authentication.</p>
- BLOCK46 
-<h4 id="oidc-authentication-sso-for-kubectl">OIDC Authentication (SSO for kubectl)</h4>
-<p>Integrate with Dex, Keycloak, or any OIDC provider so team members authenticate with their SSO credentials instead of shared kubeconfig certs.</p>
- BLOCK47 
- BLOCK48 
- BLOCK49 
- BLOCK50 
 <hr></div>
     </div>
 

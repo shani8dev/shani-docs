@@ -251,7 +251,7 @@
 /var/backups          192.168.1.5(rw,sync,no_subtree_check,no_root_squash)</code></pre>
 <p><strong>Common export options:</strong></p>
 <table><thead><tr><th>Option</th><th>Effect</th></tr></thead><tbody><tr><td><code>rw</code></td><td>Read/write access (default: <code>ro</code>)</td></tr><tr><td><code>sync</code></td><td>Wait for writes to commit to disk before replying (safer, slightly slower)</td></tr><tr><td><code>no_subtree_check</code></td><td>Improves performance when exporting a subdirectory; recommended</td></tr><tr><td><code>root_squash</code></td><td><strong>(Default)</strong> Maps remote root UID to <code>nfsnobody</code> — prevents privilege escalation</td></tr><tr><td><code>no_root_squash</code></td><td>⚠️ Allows remote root to act as root on the share. Use only on trusted hosts</td></tr></tbody></table>
-<h3 id="3-apply-verify">3. Apply & Verify</h3>
+<h3 id="3-apply-verify">3. Apply &amp; Verify</h3>
 <pre><code class="language-bash"># Re-read /etc/exports without restarting the server
 sudo exportfs -arv
 

@@ -533,7 +533,7 @@ kubectl annotate deployment myapp \
   --set &quot;grafana.additionalDataSources[0].jsonData.serviceMap.datasourceUid=prometheus&quot;</code></pre>
 <blockquote><strong>Full observability triangle:</strong> With Loki + Tempo + Prometheus connected, Grafana can jump from a trace → that span's logs → service metrics at that timestamp.</blockquote>
 <hr>
-<blockquote><strong>Cost Monitoring</strong> (OpenCost, Kubecost) is covered in <a href="/doc/servers/kubernetes/operations/#cost-management-resource-efficiency">Cost Management & Resource Efficiency</a> — it integrates directly with the Prometheus stack already running here.</blockquote>
+<blockquote><strong>Cost Monitoring</strong> (OpenCost, Kubecost) is covered in <a href="/doc/servers/kubernetes/operations/#cost-management-resource-efficiency">Cost Management &amp; Resource Efficiency</a> — it integrates directly with the Prometheus stack already running here.</blockquote>
 <hr>
 <h3 id="thanos-long-term-metrics-storage">Thanos (Long-Term Metrics Storage)</h3>
 <p><strong>Purpose:</strong> Extends Prometheus with unlimited retention, global query view across multiple clusters, and object storage (MinIO/S3) as the backend. The sidecar model means your existing Prometheus doesn't need modification.</p>
@@ -601,7 +601,7 @@ kubectl -n monitoring logs -l app.kubernetes.io/name=thanos-compactor -f
 kubectl -n monitoring port-forward svc/thanos-query-frontend 9090:9090</code></pre>
 <hr>
 <h3 id="dora-metrics">DORA Metrics</h3>
-<table><thead><tr><th>Metric</th><th>What it measures</th><th>Elite benchmark</th></tr></thead><tbody><tr><td><strong>Deployment Frequency</strong></td><td>How often code ships to production</td><td>Multiple per day</td></tr><tr><td><strong>Lead Time for Changes</strong></td><td>Commit to production</td><td>< 1 hour</td></tr><tr><td><strong>Change Failure Rate</strong></td><td>% of deployments causing incidents</td><td>0–5%</td></tr><tr><td><strong>Time to Restore (MTTR)</strong></td><td>Recovery time from failure</td><td>< 1 hour</td></tr></tbody></table>
+<table><thead><tr><th>Metric</th><th>What it measures</th><th>Elite benchmark</th></tr></thead><tbody><tr><td><strong>Deployment Frequency</strong></td><td>How often code ships to production</td><td>Multiple per day</td></tr><tr><td><strong>Lead Time for Changes</strong></td><td>Commit to production</td><td>&lt; 1 hour</td></tr><tr><td><strong>Change Failure Rate</strong></td><td>% of deployments causing incidents</td><td>0–5%</td></tr><tr><td><strong>Time to Restore (MTTR)</strong></td><td>Recovery time from failure</td><td>&lt; 1 hour</td></tr></tbody></table>
 <h4 id="prometheus-recording-rules">Prometheus recording rules</h4>
 <pre><code class="language-yaml">groups:
   - name: dora_metrics
@@ -747,7 +747,7 @@ spec:
         - duration: 30d
           isRolling: true</code></pre>
 <hr>
-<h3 id="pyrra-slo-dashboards-alerting">Pyrra (SLO Dashboards & Alerting)</h3>
+<h3 id="pyrra-slo-dashboards-alerting">Pyrra (SLO Dashboards &amp; Alerting)</h3>
 <p><strong>Purpose:</strong> Takes SLO definitions (as CRDs or Prometheus recording rules) and generates multi-burn-rate alerts and Grafana dashboards automatically. The fastest way to get SLO-based alerting running.</p>
 <pre><code class="language-bash">helm repo add pyrra https://pyrra-dev.github.io/pyrra/helm-charts
 helm upgrade --install pyrra pyrra/pyrra \
@@ -834,7 +834,7 @@ kubectl -n beyla logs -l app.kubernetes.io/name=beyla -f
 # RED Metrics (HTTP):    19419
 # RED Metrics (gRPC):    19420
 # Network Map:           19421</code></pre>
-<h3 id="grafana-oncall-on-call-scheduling-escalation">Grafana OnCall (On-Call Scheduling & Escalation)</h3>
+<h3 id="grafana-oncall-on-call-scheduling-escalation">Grafana OnCall (On-Call Scheduling &amp; Escalation)</h3>
 <p><strong>Purpose:</strong> Integrates with Grafana alerts to provide on-call schedules, escalation chains, and incident management. Self-hosted option available; SaaS tier is free for small teams.</p>
 <pre><code class="language-bash">helm repo add grafana https://grafana.github.io/helm-charts
 helm upgrade --install oncall grafana/oncall \
@@ -845,7 +845,7 @@ helm upgrade --install oncall grafana/oncall \
   --set rabbitmq.enabled=true</code></pre>
 <pre><code class="language-bash">kubectl -n oncall port-forward svc/oncall-engine 8080:8080</code></pre>
 <p><strong>Caddy:</strong> <code>oncall.home.local { tls internal; reverse_proxy localhost:8080 }</code></p>
-<p>Configure in Grafana UI: <strong>Alerts & IRM → OnCall → Connect</strong>.</p>
+<p>Configure in Grafana UI: <strong>Alerts &amp; IRM → OnCall → Connect</strong>.</p>
 <hr></div>
     </div>
 

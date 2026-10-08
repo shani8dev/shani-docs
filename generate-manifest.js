@@ -44,14 +44,84 @@ function mdToHtmlFallback(md) {
   let src = String(md || '').replace(/\r\n/g, '\n');
 
 
-  const inline = s => s
-    .replace(/`([^`]+)`/g, (_, c) => `<code>${escXml(c)}</code>`)
-    .replace(/!\[([^\]]*)\]\(([^)\s]+)[^)]*\)/g, (_, a, u) => `<img src="${escXml(u)}" alt="${escXml(a)}" loading="lazy">`)
-    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-    .replace(/~~([^~]+)~~/g, '<del>$1</del>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, t, u) => `<a href="${escXml(u)}">${t}</a>`);
+  // Escape the PLAIN TEXT of a line before any inline markup is applied.
+  // Without this a bare `&` or `<` in prose reaches the served HTML verbatim:
+  // `users & groups` produced 5 `expected-named-entity` errors and
+  // `disk < 30 GB` produced an `expected-tag-name` error (the parser reads
+  // `< 30 GB ...` as a tag), across 25 rows of real table content. Code
+  // spans and link/image URLs are escaped separately below, and this runs
+  // first so those substitutions still see their own delimiters.
+  //
+  // Existing entities are preserved rather than double-escaped: `2>&1` in a
+  // shell snippet is prose here, but a source that really writes `&amp;`
+  // must not become `&amp;amp;` (which would render literally).
+  const escText = t => t
+    .replace(/&(?![#\w]+;)/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 
+// Render inline markup in two passes, because a single ordered chain of
+  // .replace() calls gets markdown-in-markdown wrong in two ways that both
+  // reach the served page:
+  //
+  // 1. Emphasis delimiters were matched AFTER code spans were substituted, so
+  //    the `**Subvolumes under `/var/*`**` in filesystem.md turned the
+  //    `/var/*` asterisk into an early italic close and left the `**` as a
+  //    bogus bold open (13 adoption-agency parse errors across the corpus).
+  // 2. `~~` was applied before the code-span rule, so a code span whose
+  //    content ended up being `~~` (process-management.md renders a `D`
+  //    state code span) stranded the code placeholder and shipped a literal
+  //    NUL byte into the page.
+  //
+  // So: hold code spans out as whole segments first — their contents may
+  // contain anything, so no inline rule may ever see them — escape the plain
+  // text between them, then apply emphasis/strike/link rules to what is
+  // left. The \u0000 delimiters are escape sequences here, never raw NUL
+  // bytes in this source, and escText does not touch them.
+
+  // Inline markdown, in three steps. Code spans are lifted out first so the
+  // emphasis rules never see a code span's contents, and put back last.
+  //
+  // Each ordering tried before shipped something wrong, so this shape is
+  // load-bearing:
+  //  - code substituted before emphasis: a `*` inside a code span matched a
+  //    `*` in the text beside it, and arpwatch.md rendered
+  //    `<code>enp<em></code>/<code>wlp</em></code>`;
+  //  - emphasis applied per text segment: a `**...**` spanning a code span
+  //    could not match at all, so filesystem.md's
+  //    **Subvolumes under `/var/*`** rendered as
+  //    `<em></em>Subvolumes under <code>/var/*</code><em></em>` (149 sites);
+  //  - the code's own text between NUL delimiters: the release regex spanned
+  //    from one span's opening delimiter to the next span's closing one and
+  //    shipped 5502 NUL bytes into the pages.
+  //
+  // An INDEX placeholder avoids all three: emphasis sees no code content, a
+  // placeholder holds no `*` so bold can still span it, and the release matches
+  // only the exact token that was emitted.
+  const inline = s => {
+    const str = String(s);
+    const codes = [];
+    // escText runs on the WHOLE line first, not just on code spans: a bare
+    // `&` or `<` in ordinary prose used to reach the served HTML verbatim,
+    // which is what produced the `expected-named-entity` and
+    // `expected-tag-name` parse errors (`users & groups`,
+    // `shows disk < 30 GB`). escText leaves the escaped form of anything that
+    // is already an entity alone, so `2>&1` in a shell line does not become
+    // `2&gt;&amp;1`.
+    const lifted = escText(str).replace(/`([^`]+)`/g, (_, c) => {
+      // escaped exactly once, here; escXml is not applied again on release
+      codes.push(c);
+      return `\u0000${codes.length - 1}\u0000`;
+    });
+
+    return lifted
+      .replace(/\*\*([\s\S]*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*([\s\S]*?)\*/g, '<em>$1</em>')
+      .replace(/~~([\s\S]*?)~~/g, '<del>$1</del>')
+      .replace(/!\[([^\]]*)\]\(([^)\s]+)[^)]*\)/g, (_, a, u) => `<img src="${escXml(u)}" alt="${escXml(a)}" loading="lazy">`)
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, t, u) => `<a href="${escXml(u)}">${t}</a>`)
+      .replace(/\u0000(\d+)\u0000/g, (_, n) => `<code>${codes[Number(n)]}</code>`);
+  };
   const lines = src.split('\n');
   const slugifyH = t => t.toLowerCase().replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'-');
   let inQuoteFence = false, qfLang = '', qfBuf = [];
@@ -183,7 +253,43 @@ function mdToHtmlFallback(md) {
   flushAll();
 
   let html = out.join('\n');
-  blocks.forEach((b, i) => { html = html.replace(`\u0000BLOCK${i}\u0000`, b); });
+  // Substitute with a GLOBAL regex, not a string needle: `String.replace`
+  // with a string pattern replaces only the FIRST match, and a marker can
+  // legitimately appear more than once in one document. `workloads.md` has
+  // `matches: "^(.*)_total$"` and `as: "${1}_per_second"` on consecutive
+  // lines, which close two fences into BLOCK37 and BLOCK38 whose blocks each
+  // end with the other's marker still unconsumed - the leftover is then
+  // substituted early and the later pass finds nothing to replace, shipping a
+  // literal `\u0000BLOCKnn\u0000` (NUL bytes: invalid HTML, and invisible to
+  // grep) into 3 served pages. That is exactly what happened: 32 markers in
+  // `servers/kubernetes/security`, 1 each in `operations` and `workloads`.
+  // The `leftover` throw is the backstop - a leaked marker must never reach
+  // a served page, and a generator that silently emits one cannot be fixed
+  // by reading the diff.
+  {
+    // The pattern must carry the index as a BACKREFERENCE. A bare
+    // /\u0000BLOCK(\d+)\u0000/g matches EVERY marker regardless of which
+    // block it names, so substituting block 0 rewrote every marker on the
+    // page with block 0's content - doc/arch/boot rendered five copies of the
+    // same 830-char tree diagram and lost the other four code blocks
+    // entirely. Per-index is also the only correct reading of the original
+    // `replace(`\u0000BLOCK${i}\u0000`, b)`, which is what this replaced.
+    for (let i = 0; i < blocks.length; i++) {
+      const MARK = new RegExp('\\u0000BLOCK' + i + '\\u0000', 'g');
+      // A FUNCTION, not a string: a string replacement is a pattern, so a code
+      // block containing `$&`, "$`", "$'", "$$" or `$1` (shell text does this
+      // constantly) re-inserts the marker it was meant to replace.
+      html = html.replace(MARK, () => blocks[i]);
+    }
+    const MARK = /\u0000BLOCK(\d+)\u0000/g;
+    const leftover = html.match(MARK);
+    if (leftover) {
+      throw new Error(
+        `mdToHtmlFallback: ${leftover.length} unresolved code-block marker(s) ` +
+        `(${[...new Set(leftover)].slice(0, 5).join(', ')}) - the placeholder ` +
+        'substitution pass did not consume every marker');
+    }
+  }
   return html;
 }
 
@@ -603,9 +709,15 @@ function buildStub(doc) {
   // ── Prerender doc content ────────────────────────────────────────
   // (DOC_CONTENT_PLACEHOLDER defined at module scope)
   if (html.includes(DOC_CONTENT_PLACEHOLDER)) {
+    // A FUNCTION, not a string: `String.replace` treats `$&`, "$`", "$'", "$$"
+    // and `$1` in a string replacement as syntax. Doc bodies are full of shell
+    // snippets containing `$'`, and splicing one truncated the page mid-<code>
+    // (servers/kubernetes/security lost everything after
+    // `--encrypted-regex '^(data|stringData)`), which the HTML check reports
+    // as `end-tag-too-early`.
     html = html.replace(
       DOC_CONTENT_PLACEHOLDER,
-      `<div class="content__inner" id="doc-content" role="article">${docContentHtml}\n    </div>`
+      () => `<div class="content__inner" id="doc-content" role="article">${docContentHtml}\n    </div>`
     );
   } else {
     console.warn(`  ⚠  buildStub: #doc-content placeholder not found for "${doc.slug}" — stub will ship with empty content.`);

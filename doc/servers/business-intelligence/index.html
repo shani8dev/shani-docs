@@ -421,8 +421,8 @@ SELECT date_trunc('month', created_at) AS month,
 FROM orders
 WHERE created_at &gt;= NOW() - INTERVAL '12 months'
 GROUP BY 1 ORDER BY 1</code></pre>
-<p><LineChart data={orders_by_month} x=month y=revenue title="Monthly Revenue" /></p>
-<p>Total orders last 12 months: <strong><Value data={orders_by_month} column=orders fmt=num0 agg=sum /></strong></p>
+<p>&lt;LineChart data={orders_by_month} x=month y=revenue title="Monthly Revenue" /&gt;</p>
+<p>Total orders last 12 months: <strong>&lt;Value data={orders_by_month} column=orders fmt=num0 agg=sum /&gt;</strong></p>
 <pre><code>
 ---
 

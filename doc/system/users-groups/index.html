@@ -232,7 +232,7 @@
       </div>
       <div class="prose"><p>User accounts on Shani OS follow standard Linux conventions — accounts are stored in <code>/etc/passwd</code>, <code>/etc/shadow</code>, and <code>/etc/group</code>, which live in the <code>/etc</code> overlay and persist across all OS updates and rollbacks.</p>
 <p>The key difference from a traditional distro is that <strong>you should use <code>adduser</code> (not <code>useradd</code>) for interactive accounts</strong>. The <code>adduser</code> wrapper on Shani OS reads <code>/etc/shani-extra-groups</code> and adds a new user to all the groups in it — <code>sys, cups, lp, scanner, realtime, input, video, kvm, libvirt, lxd, nixbld, sambashare</code> — in one step.</p>
-<blockquote>⚠️ *<em><code>wheel</code> is deliberately </em>not<em> in that list<strong>, so <code>sudo adduser alice</code> gives you an account with </strong>no sudo</em>*. <code>wheel</code> is installer-specific and left out on purpose: <code>shani-user-setup</code> must not hand sudo to users created after install. Add it yourself with <code>sudo usermod -aG wheel alice</code>.</blockquote>
+<blockquote>⚠️ <strong><code>wheel</code> is deliberately <em>not</em> in that list</strong>, so <code>sudo adduser alice</code> gives you an account with <strong>no sudo</strong>. <code>wheel</code> is installer-specific and left out on purpose: <code>shani-user-setup</code> must not hand sudo to users created after install. Add it yourself with <code>sudo usermod -aG wheel alice</code>.</blockquote>
 <blockquote>⚠️ <strong>The wrapper does not prompt for a password either</strong> — it is a thin argument merger onto <code>useradd</code>. The Zsh shell comes from <code>SHELL=/bin/zsh</code> in <code>/etc/default/useradd</code>, not from the wrapper. So set one with <code>sudo passwd alice</code> afterwards, or the account has no password at all.</blockquote>
 <hr>
 <h2 id="on-shani-os-adduser-vs-useradd">On Shani OS: adduser vs useradd</h2>
@@ -394,7 +394,7 @@ id alice | grep -w wheel</code></pre>
 <p><code>shani-settings</code> maintains a <code>sambashare</code> group automatically on install/upgrade: it creates the group if missing, adds every account in the normal UID range with a real login shell to it, and <code>chgrp</code>s <code>/var/lib/samba/usershare</code> to the group. This is what lets an interactive user create SMB usershares (via <code>net usershare</code> or a file manager's "Share" option) without any manual <code>usermod</code>. A user created <em>after</em> that point still needs adding by hand:</p>
 <pre><code class="language-bash">sudo usermod -aG sambashare alice</code></pre>
 <hr>
-<h2 id="sudo-privileges">sudo & Privileges</h2>
+<h2 id="sudo-privileges">sudo &amp; Privileges</h2>
 <p>On Shani OS, <code>wheel</code> group members have full sudo access — granted not by <code>/etc/sudoers</code> itself but by a shipped drop-in at <code>/etc/sudoers.d/wheel</code> (<code>%wheel ALL=(ALL:ALL) ALL</code>). Both <code>/etc/sudoers</code> and <code>/etc/sudoers.d/</code> are captured by the <code>/etc</code> overlay, so edits (always via <code>visudo</code>) persist across updates.</p>
 <pre><code class="language-bash"># Edit sudoers safely (validates syntax before saving — never edit /etc/sudoers directly)
 sudo visudo
@@ -476,7 +476,7 @@ sudo loginctl disable-linger alice
 
 # Check linger status
 loginctl show-user alice | grep Linger</code></pre>
-<p>This is required for the <code>backup.timer</code> and any other <code>systemctl --user</code> timer that should fire even when the user is not logged in. See <a href="/doc/system/backup/">Backup & Recovery</a> for the full example.</p>
+<p>This is required for the <code>backup.timer</code> and any other <code>systemctl --user</code> timer that should fire even when the user is not logged in. See <a href="/doc/system/backup/">Backup &amp; Recovery</a> for the full example.</p>
 <hr>
 <h2 id="etcpasswd-and-etcshadow">/etc/passwd and /etc/shadow</h2>
 <p>These files live in the <code>/etc</code> overlay and are preserved across every OS update. You rarely need to edit them directly — use the commands above. For reference:</p>
@@ -499,7 +499,7 @@ getent group developers</code></pre>
 <li><a href="/doc/system/permissions/">Permissions</a> — <code>chmod</code>, <code>chown</code>, <code>chage</code>, <code>chsh</code>, <code>chpasswd</code></li>
 <li><a href="/doc/updates/config/">System Config</a> — how <code>/etc</code> overlay preserves account changes across updates</li>
 <li><a href="/doc/updates/shani-reset/">Factory Reset</a> — what happens to user accounts after a reset</li>
-<li><a href="/doc/updates/shell/">Shell & Environment</a> — Zsh, Starship, and per-user shell config</li>
+<li><a href="/doc/updates/shell/">Shell &amp; Environment</a> — Zsh, Starship, and per-user shell config</li>
 </ul></div>
     </div>
 

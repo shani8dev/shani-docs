@@ -417,7 +417,7 @@ services:
     environment:
       BACKEND: backend:8000
       SOCKETIO: websocket:9000
-      FRAPPE_SITE_NAME_HEADER: $host
+      FRAPPE_SITE_NAME_HEADER: $$host
     volumes: [sites:/home/frappe/frappe-bench/sites]
     restart: unless-stopped
 
@@ -650,7 +650,7 @@ h5p.home.local         { tls internal; reverse_proxy localhost:8100 }</code></pr
 <blockquote>💡 <strong>Tip:</strong> For Moodle and Canvas, enable Redis as a caching backend (set under <code>config.php</code> → <code>$CFG-&gt;cache_*</code>) to significantly improve page load times and handle more concurrent users.</blockquote>
 <table><thead><tr><th>Issue</th><th>Fix</th></tr></thead><tbody><tr><td>H5P content type missing</td><td>Download content types from the H5P Hub inside the editor — libraries must be installed before content of that type can be created</td></tr><tr><td>H5P iframe not loading</td><td>Ensure <code>H5P_EDITOR_DOMAIN</code> matches the domain used in the iframe src; check CSP headers aren't blocking the embed</td></tr></tbody></table>
 <hr>
-<h2 id="education-training">Education & Training</h2>
+<h2 id="education-training">Education &amp; Training</h2>
 <h2 id="open-edx-tutor">Open edX (Tutor)</h2>
 <p><strong>Purpose:</strong> The platform powering edX.org and hundreds of MOOCs. Full MOOC toolkit: video courses, peer-graded assignments, timed exams, discussion forums, certificates, and XBlocks for custom content types. <strong>Tutor</strong> is the recommended way to deploy it — a Docker-based wrapper that makes the famously complex edX deployment manageable.</p>
 <pre><code class="language-bash"># Install Tutor
@@ -672,7 +672,7 @@ tutor local do importdemocourse</code></pre>
 <pre><code class="language-caddyfile">lms.example.com { reverse_proxy localhost:80 }
 studio.example.com { reverse_proxy localhost:80 }</code></pre>
 <hr>
-<h2 id="gitea-classroom-teaching-learning">Gitea Classroom (Teaching & Learning)</h2>
+<h2 id="gitea-classroom-teaching-learning">Gitea Classroom (Teaching &amp; Learning)</h2>
 <p><strong>Purpose:</strong> Gitea's built-in Classroom feature (modelled after GitHub Classroom) lets instructors create assignment repositories, fork them per student, set deadlines, and review submissions. Pairs with Woodpecker CI for automatic grading pipelines.</p>
 <pre><code class="language-bash"># Enable in Site Administration → Gitea Configuration
 # Navigate to: /admin/self-check → enable classroom features

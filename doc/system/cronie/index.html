@@ -242,7 +242,7 @@
 # │ │ │ │ │
 # * * * * *  command to run</code></pre>
 <p>Common schedule examples:</p>
-<table><thead><tr><th>Schedule</th><th>Meaning</th></tr></thead><tbody><tr><td><code><em> </em> <em> </em> *</code></td><td>Every minute</td></tr><tr><td><code>0 <em> </em> <em> </em></code></td><td>Every hour (on the hour)</td></tr><tr><td><code>0 3 <em> </em> *</code></td><td>Daily at 03:00</td></tr><tr><td><code>0 3 <em> </em> 0</code></td><td>Every Sunday at 03:00</td></tr><tr><td><code>0 3 1 <em> </em></code></td><td>First of every month at 03:00</td></tr><tr><td><code><em>/15 </em> <em> </em> *</code></td><td>Every 15 minutes</td></tr><tr><td><code>0 9-17 <em> </em> 1-5</code></td><td>Every hour from 9 to 17, Mon–Fri</td></tr></tbody></table>
+<table><thead><tr><th>Schedule</th><th>Meaning</th></tr></thead><tbody><tr><td><code>* * * * *</code></td><td>Every minute</td></tr><tr><td><code>0 * * * *</code></td><td>Every hour (on the hour)</td></tr><tr><td><code>0 3 * * *</code></td><td>Daily at 03:00</td></tr><tr><td><code>0 3 * * 0</code></td><td>Every Sunday at 03:00</td></tr><tr><td><code>0 3 1 * *</code></td><td>First of every month at 03:00</td></tr><tr><td><code>*/15 * * * *</code></td><td>Every 15 minutes</td></tr><tr><td><code>0 9-17 * * 1-5</code></td><td>Every hour from 9 to 17, Mon–Fri</td></tr></tbody></table>
 <hr>
 <h2 id="user-crontabs">User Crontabs</h2>
 <pre><code class="language-bash"># Edit your own crontab
@@ -271,7 +271,7 @@ MAILTO=&quot;&quot;
 
 # Clear temp files every Sunday at midnight
 0 0 * * 0 find /tmp -user $USER -mtime +7 -delete</code></pre>
-<blockquote><strong>Tip:</strong> Redirect both stdout and stderr to a log file with <code>&gt;&gt; /path/to/log 2&gt;&amp;1</code>. Without redirection, cron mails output to the local user — set <code>MAILTO=&quot;&quot;</code> to suppress mail silently.</blockquote>
+<blockquote><strong>Tip:</strong> Redirect both stdout and stderr to a log file with <code>&gt;&gt; /path/to/log 2&gt;&amp;1</code>. Without redirection, cron mails output to the local user — set <code>MAILTO=""</code> to suppress mail silently.</blockquote>
 <hr>
 <h2 id="system-crontabs">System Crontabs</h2>
 <p>System-wide cron jobs are placed directly in <code>/etc/crontab</code> or as files in these directories (no crontab editing required — just drop a script in the right directory):</p>
@@ -310,13 +310,13 @@ journalctl -u cronie -n 50</code></pre>
 <li>The schedule is simple and the one-liner format is sufficient</li>
 <li>You are adapting an existing cron-based script</li>
 </ul>
-<p>See the <a href="https://docs.shani.dev/doc/system/backup">Backup & Recovery page</a> for an example of a systemd user timer running a restic backup.</p>
+<p>See the <a href="https://docs.shani.dev/doc/system/backup">Backup &amp; Recovery page</a> for an example of a systemd user timer running a restic backup.</p>
 <hr>
 <h2 id="troubleshooting">Troubleshooting</h2>
-<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Job not running</td><td>Check <code>journalctl -u cronie</code> for errors; verify the script is executable (<code>chmod +x</code>); test the command manually as the cron user</td></tr><tr><td>Job runs but does nothing</td><td>Cron has a minimal <code>PATH</code> — use full paths to binaries (e.g., <code>/usr/bin/rsync</code> not <code>rsync</code>), or set <code>PATH=</code> at the top of the crontab</td></tr><tr><td>Output being mailed to root</td><td>Add <code>MAILTO=&quot;&quot;</code> to suppress, or <code>MAILTO=youruser</code> to redirect; ensure Exim is running if you want mail delivery</td></tr><tr><td>Missed jobs after suspend/hibernate</td><td>cron does not catch up missed jobs after sleep — use a systemd timer with <code>Persistent=true</code> instead</td></tr><tr><td>Editing crontab opens wrong editor</td><td>Set <code>VISUAL</code> or <code>EDITOR</code> env variable: <code>export EDITOR=nano</code></td></tr></tbody></table>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Job not running</td><td>Check <code>journalctl -u cronie</code> for errors; verify the script is executable (<code>chmod +x</code>); test the command manually as the cron user</td></tr><tr><td>Job runs but does nothing</td><td>Cron has a minimal <code>PATH</code> — use full paths to binaries (e.g., <code>/usr/bin/rsync</code> not <code>rsync</code>), or set <code>PATH=</code> at the top of the crontab</td></tr><tr><td>Output being mailed to root</td><td>Add <code>MAILTO=""</code> to suppress, or <code>MAILTO=youruser</code> to redirect; ensure Exim is running if you want mail delivery</td></tr><tr><td>Missed jobs after suspend/hibernate</td><td>cron does not catch up missed jobs after sleep — use a systemd timer with <code>Persistent=true</code> instead</td></tr><tr><td>Editing crontab opens wrong editor</td><td>Set <code>VISUAL</code> or <code>EDITOR</code> env variable: <code>export EDITOR=nano</code></td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
-<li><a href="/doc/system/backup/">Backup & Recovery</a></li>
+<li><a href="/doc/system/backup/">Backup &amp; Recovery</a></li>
 <li><a href="/doc/servers/monitoring/prometheus/">Monitoring wiki</a></li>
 <li><a href="/doc/system/systemd/">systemd reference</a></li>
 </ul></div>

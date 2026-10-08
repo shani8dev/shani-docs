@@ -230,8 +230,8 @@
           <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
         </div>
       </div>
-      <div class="prose"><h2 id="backup-disaster-recovery">Backup & Disaster Recovery</h2>
-<h3 id="velero-cluster-backup-restore">Velero (Cluster Backup & Restore)</h3>
+      <div class="prose"><h2 id="backup-disaster-recovery">Backup &amp; Disaster Recovery</h2>
+<h3 id="velero-cluster-backup-restore">Velero (Cluster Backup &amp; Restore)</h3>
 <pre><code class="language-bash">nix-env -iA nixpkgs.velero
 
 cat &gt; ~/velero-credentials &lt;&lt; 'EOF'
@@ -386,7 +386,7 @@ export B2_ACCOUNT_KEY=&lt;app-key&gt;
 restic -r b2:my-bucket:k8s-backups init
 restic -r b2:my-bucket:k8s-backups backup ~/.kube ~/k8s</code></pre>
 <hr>
-<h2 id="etcd-operations-disaster-recovery">etcd Operations & Disaster Recovery</h2>
+<h2 id="etcd-operations-disaster-recovery">etcd Operations &amp; Disaster Recovery</h2>
 <p>etcd is the sole persistent state store for Kubernetes. Losing etcd without a backup means losing the entire cluster configuration — all Deployments, Secrets, ConfigMaps, CRDs, and RBAC rules. Back it up regularly.</p>
 <h3 id="k3s-etcd-snapshots">k3s etcd Snapshots</h3>
 <p>k3s uses an embedded etcd (or SQLite for single-node) and handles snapshots natively.</p>
@@ -406,7 +406,7 @@ sudo systemctl stop k3s
 sudo k3s server --cluster-reset --cluster-reset-restore-path=/var/lib/rancher/k3s/server/db/snapshots/homelab-20260427-0600
 sudo systemctl start k3s</code></pre>
 <hr>
-<h3 id="kubeadm-vanilla-etcd-backup-restore">kubeadm / Vanilla etcd Backup & Restore</h3>
+<h3 id="kubeadm-vanilla-etcd-backup-restore">kubeadm / Vanilla etcd Backup &amp; Restore</h3>
 <p>For clusters not using k3s (kubeadm, RKE2, k0s), use <code>etcdctl</code> directly. etcd runs as a static pod on the control plane node(s).</p>
 <pre><code class="language-bash"># Install etcdctl (version must match your etcd version)
 ETCD_VER=v3.5.12
@@ -445,7 +445,7 @@ sudo mv /etc/kubernetes/manifests.bak /etc/kubernetes/manifests
 # 5. Restart kubelet
 sudo systemctl restart kubelet</code></pre>
 <hr>
-<h3 id="etcd-health-defragmentation">etcd Health & Defragmentation</h3>
+<h3 id="etcd-health-defragmentation">etcd Health &amp; Defragmentation</h3>
 <p>etcd accumulates historical revisions and can grow unbounded. Compact and defragment periodically.</p>
 <pre><code class="language-bash"># Check etcd cluster health
 ETCDCTL_API=3 etcdctl endpoint health \
@@ -474,9 +474,9 @@ ETCDCTL_API=3 etcdctl defrag \
 ETCDCTL_API=3 etcdctl endpoint status --write-out=table ...</code></pre>
 <blockquote><strong>Production guidance:</strong> Automate backups to off-cluster object storage (MinIO/S3). Test your restore procedure quarterly — an untested backup is not a backup.</blockquote>
 <hr>
-<blockquote><strong>Application-level backup with Velero</strong> is covered in <a href="#backup-disaster-recovery">Backup & Disaster Recovery</a>. Unlike etcd snapshots (which restore the whole cluster), Velero restores individual namespaces and PVCs — use both strategies together.</blockquote>
+<blockquote><strong>Application-level backup with Velero</strong> is covered in <a href="#backup-disaster-recovery">Backup &amp; Disaster Recovery</a>. Unlike etcd snapshots (which restore the whole cluster), Velero restores individual namespaces and PVCs — use both strategies together.</blockquote>
 <hr>
-<h2 id="cost-management-resource-efficiency">Cost Management & Resource Efficiency</h2>
+<h2 id="cost-management-resource-efficiency">Cost Management &amp; Resource Efficiency</h2>
 <p>Running Kubernetes without resource governance leads to wasted infrastructure spend — oversized requests that starve real workloads, idle namespaces consuming quotas, and forgotten development clusters burning cloud credits.</p>
 <h3 id="kubecost-cost-visibility">Kubecost (Cost Visibility)</h3>
 <p><strong>Purpose:</strong> Real-time cost allocation by namespace, deployment, label, and team. Shows cost per pod, identifies wasted spend, and provides right-sizing recommendations.</p>
@@ -769,7 +769,7 @@ helm install port-k8s-exporter port-labs/port-k8s-exporter \
   --set secret.secrets.portClientId=&quot;YOUR_CLIENT_ID&quot; \
   --set secret.secrets.portClientSecret=&quot;YOUR_CLIENT_SECRET&quot;</code></pre>
 <hr>
-<h2 id="operator-pattern-custom-resources">Operator Pattern & Custom Resources</h2>
+<h2 id="operator-pattern-custom-resources">Operator Pattern &amp; Custom Resources</h2>
 <h3 id="understanding-operators">Understanding Operators</h3>
 <p><strong>Purpose:</strong> A Kubernetes Operator extends the API with custom resources (CRDs) and implements a control loop that reconciles desired state. An operator for PostgreSQL would watch <code>PostgreSQLCluster</code> CRDs and provision/manage actual database pods. Everything in this stack — Cilium, ArgoCD, Longhorn, cert-manager — is implemented as operators.</p>
 <h4 id="operator-maturity-levels-operatorhub-model">Operator maturity levels (OperatorHub model)</h4>
@@ -965,7 +965,7 @@ EOF
 
 # From cluster2: curl http://myapp.myapp.svc.clusterset.local</code></pre>
 <hr>
-<h2 id="multi-tenancy-audit">Multi-Tenancy & Audit</h2>
+<h2 id="multi-tenancy-audit">Multi-Tenancy &amp; Audit</h2>
 <h3 id="vcluster-virtual-kubernetes-clusters">vCluster (Virtual Kubernetes Clusters)</h3>
 <p><strong>Purpose:</strong> Fully isolated virtual Kubernetes clusters inside a single physical cluster. Each vCluster has its own API server and etcd but runs as pods on the host. Tenants get cluster-admin on their vCluster without any access to the host.</p>
 <pre><code class="language-bash">curl -L -o ~/.local/bin/vcluster \
@@ -1179,7 +1179,7 @@ helm registry login ghcr.io --username myuser --password &lt;token&gt;</code></p
       &quot;required&quot;: [&quot;repository&quot;, &quot;tag&quot;],
       &quot;properties&quot;: {
         &quot;repository&quot;: { &quot;type&quot;: &quot;string&quot; },
-        &quot;tag&quot;: { &quot;type&quot;: &quot;string&quot;, &quot;pattern&quot;: &quot;^v[0-9]+\\.[0-9]+\\.[0-9]+ BLOCK66 quot; }
+        &quot;tag&quot;: { &quot;type&quot;: &quot;string&quot;, &quot;pattern&quot;: &quot;^v[0-9]+\\.[0-9]+\\.[0-9]+$&quot; }
       }
     },
     &quot;replicaCount&quot;: { &quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 1, &quot;maximum&quot;: 50 },
@@ -1198,7 +1198,7 @@ helm test myapp -n myapp
 helm uninstall myapp -n myapp</code></pre>
 <hr>
 <h2 id="kubectl-power-usage">kubectl Power Usage</h2>
-<h3 id="output-formatting-filtering">Output Formatting & Filtering</h3>
+<h3 id="output-formatting-filtering">Output Formatting &amp; Filtering</h3>
 <pre><code class="language-bash"># JSONPath — extract specific fields
 kubectl get pods -n myapp -o jsonpath='{.items[*].metadata.name}'
 kubectl get pod myapp-xyz -o jsonpath='{.status.containerStatuses[0].restartCount}'
@@ -1231,7 +1231,7 @@ kubectl api-resources --verbs=list --namespaced -o name | \
 
 # Watch with custom columns
 kubectl get pods -w -o custom-columns='NAME:.metadata.name,STATUS:.status.phase'</code></pre>
-<h3 id="kubectl-explain-discovery">kubectl Explain & Discovery</h3>
+<h3 id="kubectl-explain-discovery">kubectl Explain &amp; Discovery</h3>
 <pre><code class="language-bash"># Explain any field, including nested
 kubectl explain pod.spec.containers.securityContext
 kubectl explain deployment.spec.strategy
@@ -1404,7 +1404,7 @@ kubectl get pods -n myapp -w
 kubectl drain &lt;node-name&gt; --ignore-daemonsets --delete-emptydir-data
 kubectl uncordon &lt;node-name&gt;
 kubectl delete pods --all -n myapp</code></pre>
-<h3 id="api-server-cluster-health-checks">API Server & Cluster Health Checks</h3>
+<h3 id="api-server-cluster-health-checks">API Server &amp; Cluster Health Checks</h3>
 <pre><code class="language-bash"># API server liveness / readiness / startup endpoints
 # Access via kubectl proxy or directly from a node
 kubectl get --raw /healthz          # overall health (ok = healthy)

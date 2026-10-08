@@ -272,7 +272,7 @@
 <h4 id="certificate-lifecycle-management">Certificate lifecycle management</h4>
 <p>Certificates expire. Expired certificates cause outages. step-ca and cert-manager automate issuance and renewal — but you still need to understand the concepts. A CA (Certificate Authority) signs certificates with its private key. Clients trust certificates signed by CAs in their trust store. Short-lived certificates (24h–7 days, used by Teleport and service meshes) are more secure than long-lived ones (1 year) because there's less window for a compromised cert to be misused. Intermediate CAs (step-ca creates one automatically) limit blast radius if the root key is compromised.</p>
 <h4 id="siem-soc-and-log-correlation">SIEM, SOC, and log correlation</h4>
-<p>A SIEM (Security Information and Event Management system — Wazuh, Elastic SIEM) collects logs from all sources, normalises them, and applies correlation rules to detect attack patterns. A single failed SSH login is noise; 1000 failed logins from one IP in 10 seconds is a brute-force attempt. SIEM rules encode this logic. A SOC (Security Operations Centre) is the team that watches the SIEM. For self-hosters: Wazuh agents on every host, log forwarding from containers, and alerting to a notification channel gives you >80% of enterprise SOC capability.</p>
+<p>A SIEM (Security Information and Event Management system — Wazuh, Elastic SIEM) collects logs from all sources, normalises them, and applies correlation rules to detect attack patterns. A single failed SSH login is noise; 1000 failed logins from one IP in 10 seconds is a brute-force attempt. SIEM rules encode this logic. A SOC (Security Operations Centre) is the team that watches the SIEM. For self-hosters: Wazuh agents on every host, log forwarding from containers, and alerting to a notification channel gives you &gt;80% of enterprise SOC capability.</p>
 <h4 id="container-and-kubernetes-hardening-checklist">Container and Kubernetes hardening checklist</h4>
 <p>The most common misconfigurations, in order of frequency: (1) running as root (<code>runAsNonRoot: true</code> fixes this), (2) <code>hostPID: true</code> / <code>hostNetwork: true</code> (gives container access to host namespaces — almost never needed), (3) <code>privileged: true</code> (full host access — equivalent to root on the node), (4) no seccomp profile (allows all ~300+ syscalls — use <code>RuntimeDefault</code>), (5) writable root filesystem (<code>readOnlyRootFilesystem: true</code> limits malware persistence), (6) no resource limits (a compromised container can consume all host resources).</p>
 <h4 id="vulnerability-management-workflow">Vulnerability management workflow</h4>
@@ -408,7 +408,7 @@ volumes:
 <p>Access at <code>http://localhost:9000/if/flow/initial-setup/</code> to create the admin account.</p>
 <hr>
 <h2 id="keycloak">Keycloak</h2>
-<p><strong>Purpose:</strong> Enterprise-grade Identity & Access Management. OIDC, SAML 2.0, LDAP federation, fine-grained authorisation, and a comprehensive admin UI. The right choice for complex IAM requirements or when integrating with enterprise directory services.</p>
+<p><strong>Purpose:</strong> Enterprise-grade Identity &amp; Access Management. OIDC, SAML 2.0, LDAP federation, fine-grained authorisation, and a comprehensive admin UI. The right choice for complex IAM requirements or when integrating with enterprise directory services.</p>
 <pre><code class="language-yaml"># ~/keycloak/compose.yml
 services:
   db:

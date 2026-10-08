@@ -337,7 +337,7 @@ services:
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/open-webui &amp;&amp; podman-compose up -d</code></pre>
 <blockquote>Use <code>host.containers.internal</code> (not <code>localhost</code>) when Open WebUI needs to reach Ollama running in another container.</blockquote>
-<blockquote><strong>RAG & vector search:</strong> Open WebUI's RAG pipeline uses its built-in ChromaDB by default. For production RAG workloads, connect an external vector database — see <a href="https://docs.shani.dev/doc/servers/databases/other#qdrant-vector-database">Qdrant and Weaviate in the Databases wiki</a>.</blockquote>
+<blockquote><strong>RAG &amp; vector search:</strong> Open WebUI's RAG pipeline uses its built-in ChromaDB by default. For production RAG workloads, connect an external vector database — see <a href="https://docs.shani.dev/doc/servers/databases/other#qdrant-vector-database">Qdrant and Weaviate in the Databases wiki</a>.</blockquote>
 <p>Access at <code>http://localhost:3000</code>. Proxy through Caddy for HTTPS: <code>webui.home.local { tls internal; reverse_proxy localhost:3000 }</code>.</p>
 <h5 id="connect-to-external-apis">Connect to external APIs</h5>
 <p>(Anthropic, OpenAI, Groq) alongside local models by adding connections under Settings → Connections. You can mix local Ollama models with cloud APIs in the same interface.</p>
@@ -476,7 +476,7 @@ services:
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/anythingllm &amp;&amp; podman-compose up -d</code></pre>
 <p>Access at <code>http://localhost:3001</code>. Create workspaces, upload documents, and start querying. Connect to any LLM provider in Settings → LLM Preference.</p>
-<blockquote><strong>vs Open WebUI:</strong> Use AnythingLLM when your primary use case is document Q&A across teams. Use Open WebUI when you want a chat-first interface with light RAG and broader model management.</blockquote>
+<blockquote><strong>vs Open WebUI:</strong> Use AnythingLLM when your primary use case is document Q&amp;A across teams. Use Open WebUI when you want a chat-first interface with light RAG and broader model management.</blockquote>
 <hr>
 <h2 id="litellm-multi-provider-llm-proxy">LiteLLM (Multi-Provider LLM Proxy)</h2>
 <p><strong>Purpose:</strong> A unified OpenAI-compatible proxy that sits in front of 100+ LLM providers — Ollama, Anthropic, OpenAI, Groq, Mistral, Bedrock, Azure, and more. Route requests to different models based on model name, load-balance across providers, set per-key spend limits, and get unified logging and cost tracking. Any tool that speaks the OpenAI API (Open WebUI, AnythingLLM, Cursor, Continue.dev) can use LiteLLM as a single endpoint.</p>
@@ -621,10 +621,10 @@ services:
       FLOWISE_SECRETKEY_OVERWRITE: changeme-run-openssl-rand-hex-32
     restart: unless-stopped</code></pre>
 <pre><code class="language-bash">cd ~/flowise &amp;&amp; podman-compose up -d</code></pre>
-<p>Access at <code>http://localhost:3003</code>. Build chains by dragging components onto the canvas — connect an Ollama LLM node, a Qdrant vector store, a PDF loader, and a conversational memory node to create a document Q&A chatbot in minutes.</p>
+<p>Access at <code>http://localhost:3003</code>. Build chains by dragging components onto the canvas — connect an Ollama LLM node, a Qdrant vector store, a PDF loader, and a conversational memory node to create a document Q&amp;A chatbot in minutes.</p>
 <blockquote><strong>vs AnythingLLM:</strong> Flowise gives you full control over the pipeline architecture via the visual editor. AnythingLLM is better when you just want to upload documents and chat.</blockquote>
 <hr>
-<h2 id="langfuse-llm-observability-tracing">Langfuse (LLM Observability & Tracing)</h2>
+<h2 id="langfuse-llm-observability-tracing">Langfuse (LLM Observability &amp; Tracing)</h2>
 <p><strong>Purpose:</strong> Open-source observability platform for LLM applications. Traces every prompt, completion, token count, latency, and cost across your entire AI stack — Ollama, LiteLLM, OpenAI, Flowise, and AnythingLLM all support Langfuse callbacks. Essential for debugging RAG pipelines and monitoring production AI workloads.</p>
 <pre><code class="language-yaml"># ~/langfuse/compose.yml
 services:
@@ -653,7 +653,7 @@ volumes:
 <pre><code class="language-bash">cd ~/langfuse &amp;&amp; podman-compose up -d</code></pre>
 <p>Access at <code>http://localhost:3004</code>. Create a project, copy the public/secret key pair, and add them to LiteLLM's <code>config.yaml</code> (<code>LANGFUSE_PUBLIC_KEY</code>, <code>LANGFUSE_SECRET_KEY</code>) to start seeing traces immediately.</p>
 <hr>
-<h2 id="open-webui-pipelines-tool-use-custom-functions">Open WebUI Pipelines (Tool Use & Custom Functions)</h2>
+<h2 id="open-webui-pipelines-tool-use-custom-functions">Open WebUI Pipelines (Tool Use &amp; Custom Functions)</h2>
 <p><strong>Purpose:</strong> Open WebUI Pipelines is a plugin server that extends Open WebUI with custom Python functions — rate limiting, content filtering, model routing, tool use (web search, calculators, code execution), and integration with external APIs. Pipelines run server-side as a sidecar to Open WebUI.</p>
 <pre><code class="language-yaml"># ~/pipelines/compose.yaml
 services:

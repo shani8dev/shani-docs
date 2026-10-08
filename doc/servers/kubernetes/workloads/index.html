@@ -371,7 +371,7 @@ spec:
 <pre><code class="language-bash">kubectl create job --from=cronjob/daily-report manual-$(date +%s) -n myapp
 kubectl patch cronjob daily-report -n myapp -p '{&quot;spec&quot;:{&quot;suspend&quot;:true}}'
 kubectl get jobs -n myapp --sort-by='.metadata.creationTimestamp'</code></pre>
-<table><thead><tr><th>Schedule</th><th>Meaning</th></tr></thead><tbody><tr><td><code>0 <em> </em> <em> </em></code></td><td>Every hour</td></tr><tr><td><code><em>/15 </em> <em> </em> *</code></td><td>Every 15 minutes</td></tr><tr><td><code>0 2 <em> </em> *</code></td><td>Daily at 2 AM</td></tr><tr><td><code>0 2 <em> </em> 0</code></td><td>Weekly, Sunday 2 AM</td></tr><tr><td><code>0 2 1 <em> </em></code></td><td>Monthly, 1st at 2 AM</td></tr><tr><td><code>@hourly</code></td><td>Shorthand for <code>0 <em> </em> <em> </em></code></td></tr></tbody></table>
+<table><thead><tr><th>Schedule</th><th>Meaning</th></tr></thead><tbody><tr><td><code>0 * * * *</code></td><td>Every hour</td></tr><tr><td><code>*/15 * * * *</code></td><td>Every 15 minutes</td></tr><tr><td><code>0 2 * * *</code></td><td>Daily at 2 AM</td></tr><tr><td><code>0 2 * * 0</code></td><td>Weekly, Sunday 2 AM</td></tr><tr><td><code>0 2 1 * *</code></td><td>Monthly, 1st at 2 AM</td></tr><tr><td><code>@hourly</code></td><td>Shorthand for <code>0 * * * *</code></td></tr></tbody></table>
 <hr>
 <h3 id="init-containers">Init Containers</h3>
 <p>Init containers run to completion <strong>before</strong> any app containers start. They share volumes with app containers but run sequentially in order. Common uses: database migration, waiting for dependencies, pre-populating config from Vault, downloading ML models.</p>
@@ -470,7 +470,7 @@ spec:
       volumeMounts:
         - name: log-volume
           mountPath: /app/logs</code></pre>
-<blockquote><strong>Without native sidecars (< 1.29):</strong> Use a regular container with a <code>preStop</code> lifecycle hook that polls for a shared file written by the main container upon exit.</blockquote>
+<blockquote><strong>Without native sidecars (&lt; 1.29):</strong> Use a regular container with a <code>preStop</code> lifecycle hook that polls for a shared file written by the main container upon exit.</blockquote>
 <hr>
 <h3 id="istio-sidecar-injection-vs-cilium">Istio Sidecar Injection vs Cilium</h3>
 <p>If you're using <strong>Cilium</strong> as your CNI (this stack), you do <strong>not</strong> need Istio's Envoy sidecar for L7 visibility, mTLS, or traffic shaping — Cilium provides all of this at the eBPF layer without sidecars. Adding Istio on top of Cilium is redundant and increases pod overhead (~50 MB per pod).</p>
@@ -532,7 +532,7 @@ kubectl get pdb -n myapp
 kubectl describe pdb myapp-pdb -n myapp</code></pre>
 <p>PDBs only protect against <strong>voluntary</strong> disruptions (drains, upgrades) — not node crashes.</p>
 <hr>
-<h3 id="pod-affinity-anti-affinity">Pod Affinity & Anti-Affinity</h3>
+<h3 id="pod-affinity-anti-affinity">Pod Affinity &amp; Anti-Affinity</h3>
 <p><strong>Purpose:</strong> Co-locate pods with related services (affinity) or spread replicas so no two land on the same node/zone (anti-affinity).</p>
 <pre><code class="language-yaml">spec:
   affinity:
@@ -570,7 +570,7 @@ kubectl label node k3s-node2 disktype=hdd zone=b
 kubectl get nodes --show-labels
 kubectl describe node k3s-node1 | grep Labels -A 20</code></pre>
 <hr>
-<h3 id="lifecycle-hooks-graceful-shutdown">Lifecycle Hooks & Graceful Shutdown</h3>
+<h3 id="lifecycle-hooks-graceful-shutdown">Lifecycle Hooks &amp; Graceful Shutdown</h3>
 <p><strong>Purpose:</strong> <code>postStart</code> runs immediately after container start (useful for warming caches). <code>preStop</code> runs before the container receives SIGTERM — use it for graceful draining. <code>terminationGracePeriodSeconds</code> controls how long Kubernetes waits before sending SIGKILL.</p>
 <pre><code class="language-yaml">spec:
   terminationGracePeriodSeconds: 60   # default 30 — increase for slow-shutdown apps
@@ -601,7 +601,7 @@ spec:
         value: &quot;1&quot;
   # Note: unsafe sysctls require kubelet --allowed-unsafe-sysctls flag</code></pre>
 <hr>
-<h3 id="projected-volumes-downward-api">Projected Volumes & Downward API</h3>
+<h3 id="projected-volumes-downward-api">Projected Volumes &amp; Downward API</h3>
 <p><strong>Purpose:</strong> Inject cluster metadata — pod name, namespace, node name, resource limits — into the container without hardcoding. Projected volumes combine multiple sources (ServiceAccount tokens, ConfigMaps, Secrets, DownwardAPI) into one mount.</p>
 <pre><code class="language-yaml">spec:
   containers:
@@ -732,7 +732,7 @@ kubectl rollout status daemonset/log-shipper -n monitoring
 kubectl rollout history daemonset/log-shipper -n monitoring
 kubectl rollout undo daemonset/log-shipper -n monitoring</code></pre>
 <hr>
-<h3 id="imagepullsecrets-private-registry-auth">ImagePullSecrets & Private Registry Auth</h3>
+<h3 id="imagepullsecrets-private-registry-auth">ImagePullSecrets &amp; Private Registry Auth</h3>
 <p><strong>Purpose:</strong> Pull images from private registries (Harbor, Gitea, GHCR, ECR). Create a <code>docker-registry</code> Secret and reference it in the Pod spec or ServiceAccount.</p>
 <pre><code class="language-bash"># Create a registry credential secret
 kubectl create secret docker-registry regcred \
@@ -917,7 +917,7 @@ rules:
           namespace: { resource: namespace }
           pod: { resource: pod }
       name:
-        matches: &quot;^(.*)_total BLOCK37 quot;
+        matches: &quot;^(.*)_total$&quot;
         as: &quot;${1}_per_second&quot;
       metricsQuery: 'rate(&lt;&lt;.Series&gt;&gt;{&lt;&lt;.LabelMatchers&gt;&gt;}[2m])'</code></pre>
 <pre><code class="language-yaml"># HPA using the custom metric
@@ -1047,7 +1047,7 @@ kubectl label namespace myapp goldilocks.fairwinds.com/enabled=true
 kubectl -n goldilocks port-forward svc/goldilocks-dashboard 8080:80</code></pre>
 <blockquote>VPA is in recommendation mode only — it does not change pods automatically. Safe to run in production. Let it collect a few hours of real traffic before trusting its suggestions.  <strong>VPA + HPA:</strong> Never run both scaling on the same metric (CPU/memory). Safe combination: HPA on custom/external metrics (KEDA) + VPA for right-sizing requests.</blockquote>
 <hr>
-<h2 id="gpu-aiml-workloads">GPU & AI/ML Workloads</h2>
+<h2 id="gpu-aiml-workloads">GPU &amp; AI/ML Workloads</h2>
 <p>Running GPU-accelerated workloads on Kubernetes requires exposing GPU resources to pods via a device plugin. The NVIDIA GPU Operator automates driver installation, the device plugin, and monitoring. Node Feature Discovery (NFD) labels nodes with hardware capabilities so the scheduler can target GPU nodes correctly.</p>
 <h3 id="node-feature-discovery-nfd">Node Feature Discovery (NFD)</h3>
 <p><strong>Purpose:</strong> Automatically labels nodes with detected hardware features (CPU flags, PCIe devices, kernel features). Required by the GPU Operator and useful for any workload targeting specific hardware.</p>
@@ -1295,7 +1295,7 @@ spec:
             requests: { memory: 32Mi, cpu: 100m }
             limits: { memory: 64Mi, cpu: 200m }</code></pre>
 <h3 id="spinkube-fermyon-spin-on-kubernetes">SpinKube (Fermyon Spin on Kubernetes)</h3>
-<p><strong>Purpose:</strong> Run Fermyon Spin WASM applications natively in Kubernetes. Spin applications start in <1ms, scale to zero instantly, and use the same Kubernetes primitives.</p>
+<p><strong>Purpose:</strong> Run Fermyon Spin WASM applications natively in Kubernetes. Spin applications start in &lt;1ms, scale to zero instantly, and use the same Kubernetes primitives.</p>
 <pre><code class="language-bash">helm repo add spinoperator https://spinoperator.fermyon.dev
 helm install spin-operator spinoperator/spin-operator \
   --namespace spin-operator --create-namespace \

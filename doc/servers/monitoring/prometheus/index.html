@@ -241,7 +241,7 @@
 <h4 id="pull-vs-push-model-for-metrics">Pull vs push model for metrics</h4>
 <p>Prometheus uses a <em>pull</em> model — it scrapes <code>/metrics</code> endpoints on a schedule. This means you know what's being scraped and can see scrape errors in Prometheus itself. <em>Push</em> model (Pushgateway, InfluxDB's Telegraf) is used for short-lived jobs. Most interviewers will ask why Prometheus scrapes rather than having apps push to it: better target discovery, single place to detect unreachable targets, less firewall complexity.</p>
 <h4 id="cardinality-and-why-it-matters">Cardinality and why it matters</h4>
-<p>Cardinality is the number of unique label combinations for a metric. <code>http_requests_total{method=&quot;GET&quot;, path=&quot;/api/users/123&quot;}</code> where <code>path</code> contains user IDs creates millions of unique series. High cardinality is the number-one cause of Prometheus memory exhaustion. Always bound labels to a small, known set of values (<code>path=&quot;/api/users/:id&quot;</code> not the literal ID).</p>
+<p>Cardinality is the number of unique label combinations for a metric. <code>http_requests_total{method="GET", path="/api/users/123"}</code> where <code>path</code> contains user IDs creates millions of unique series. High cardinality is the number-one cause of Prometheus memory exhaustion. Always bound labels to a small, known set of values (<code>path="/api/users/:id"</code> not the literal ID).</p>
 <h4 id="rate-vs-irate-vs-increase">Rate vs irate vs increase</h4>
 <ul>
 <li><code>rate(metric[5m])</code> — per-second average rate over the last 5 minutes. Smooth, good for dashboards.</li>
@@ -251,7 +251,7 @@
 <h4 id="alert-fatigue">Alert fatigue</h4>
 <p>The condition where too many noisy/low-priority alerts cause on-call engineers to start ignoring pages. Symptoms: alerts that resolve themselves, alerts that require no action, duplicate alerts for the same underlying cause. Fix: alert only on symptoms (high error rate) not causes (CPU high), use inhibition rules, tune <code>for:</code> duration so brief spikes don't fire, use Karma dashboard for triage.</p>
 <h4 id="multiwindow-multi-burn-rate-alerts">Multiwindow, multi-burn-rate alerts</h4>
-<p>For SLO alerts, a single threshold alert (error rate > 1%) fires too often for minor blips and too slowly for catastrophic failures. The recommended pattern from the Google SRE book uses two windows: a fast window (e.g., 1h) catches rapid burns, a slow window (e.g., 6h) catches slow burns. Pyrra generates these automatically from SLO definitions.</p>
+<p>For SLO alerts, a single threshold alert (error rate &gt; 1%) fires too often for minor blips and too slowly for catastrophic failures. The recommended pattern from the Google SRE book uses two windows: a fast window (e.g., 1h) catches rapid burns, a slow window (e.g., 6h) catches slow burns. Pyrra generates these automatically from SLO definitions.</p>
 <h4 id="opentelemetry-sdk-instrumentation">OpenTelemetry SDK instrumentation</h4>
 <p>Auto-instrumentation (via agents) adds traces and metrics to your app with zero code changes for common frameworks (Django, Express, Spring). Manual instrumentation wraps specific code sections in spans. The SDK exports to an OTel Collector, which fans out to Tempo (traces), Prometheus (metrics), and Loki (logs) — one SDK call, multiple backends.</p>
 <h4 id="log-levels-and-when-to-use-them">Log levels and when to use them</h4>
@@ -263,7 +263,7 @@
 <li><code>FATAL/CRITICAL</code> — service cannot continue; immediate page</li>
 </ul>
 <h4 id="structured-logging-json-vs-unstructured">Structured logging (JSON) vs unstructured</h4>
-<p>Structured logs (<code>{&quot;level&quot;:&quot;error&quot;,&quot;msg&quot;:&quot;DB timeout&quot;,&quot;user_id&quot;:42,&quot;latency_ms&quot;:5000}</code>) are parseable by Loki, Graylog, and other tools without Grok patterns. Unstructured logs (<code>ERROR: DB timeout for user 42 after 5000ms</code>) require regex extraction, which is brittle. Always use structured logging in production services.</p>
+<p>Structured logs (<code>{"level":"error","msg":"DB timeout","user_id":42,"latency_ms":5000}</code>) are parseable by Loki, Graylog, and other tools without Grok patterns. Unstructured logs (<code>ERROR: DB timeout for user 42 after 5000ms</code>) require regex extraction, which is brittle. Always use structured logging in production services.</p>
 <h4 id="understanding-grafana-variables-and-templating">Understanding Grafana variables and templating</h4>
 <p>Dashboard variables let one dashboard serve multiple services (<code>$service</code>), environments (<code>$environment</code>), or time ranges. They're backed by Prometheus label queries. A variable <code>$namespace</code> with query <code>label_values(kube_pod_info, namespace)</code> gives a dropdown of all Kubernetes namespaces. This is a core Grafana skill for platform teams building shared observability tooling.</p>
 <h4 id="distributed-tracing-spans-traces-and-why-they-matter">Distributed tracing — spans, traces, and why they matter</h4>
@@ -596,7 +596,7 @@ inhibit_rules:
     equal: [instance]</code></pre>
 <hr>
 <hr>
-<h2 id="thanos-prometheus-long-term-storage-ha-federation">Thanos (Prometheus Long-Term Storage, HA & Federation)</h2>
+<h2 id="thanos-prometheus-long-term-storage-ha-federation">Thanos (Prometheus Long-Term Storage, HA &amp; Federation)</h2>
 <p><strong>Purpose:</strong> Thanos extends Prometheus to solve its three main production limitations: <strong>retention</strong> (Prometheus stores data locally; Thanos uploads blocks to object storage — MinIO, S3, GCS — for unlimited retention), <strong>high availability</strong> (Thanos Querier deduplicates data from multiple Prometheus replicas, so you can run 2+ Prometheus instances with identical configs), and <strong>federation</strong> (Thanos Query Frontend federates across multiple Prometheus clusters — query all environments from a single Grafana datasource). The standard choice for production Prometheus at scale.</p>
 <h4 id="architecture-overview">Architecture overview</h4>
 <pre><code>Prometheus ──► Thanos Sidecar ──► Object Store (MinIO)

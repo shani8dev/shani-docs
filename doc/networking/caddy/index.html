@@ -239,7 +239,7 @@
 <p>When managed via systemd, Caddy runs as the <code>caddy</code> system user and loads a system-wide config:</p>
 <ul>
 <li><strong>Config file:</strong> <code>/etc/caddy/Caddyfile</code></li>
-<li><strong>Certificates & data:</strong> <code>/var/lib/caddy/.local/share/caddy/</code></li>
+<li><strong>Certificates &amp; data:</strong> <code>/var/lib/caddy/.local/share/caddy/</code></li>
 </ul>
 <p>On Shani OS, <code>/etc</code> is managed atomically — your Caddyfile persists across OS updates and rollbacks.</p>
 <pre><code class="language-bash">sudo systemctl enable --now caddy</code></pre>
@@ -306,7 +306,7 @@ grafana.home.local    { tls internal; reverse_proxy localhost:3001 }</code></pre
         health_interval 10s
     }
 }</code></pre>
-<h3 id="basic-auth-security-headers">Basic Auth & Security Headers</h3>
+<h3 id="basic-auth-security-headers">Basic Auth &amp; Security Headers</h3>
 <pre><code class="language-caddyfile"># Generate the bcrypt hash first:
 #   caddy hash-password --plaintext &quot;yourpassword&quot;
 
@@ -359,14 +359,14 @@ example.com {
     reverse_proxy 192.168.1.50:80
 }</code></pre>
 <hr>
-<h2 id="tls-certificates">TLS & Certificates</h2>
+<h2 id="tls-certificates">TLS &amp; Certificates</h2>
 <table><thead><tr><th>Domain type</th><th>Configuration</th><th>How it works</th></tr></thead><tbody><tr><td>Public (<code>example.com</code>)</td><td>No <code>tls</code> directive needed</td><td>Caddy auto-provisions via Let's Encrypt ACME (HTTP-01 or TLS-ALPN-01)</td></tr><tr><td>Private (<code>.home.local</code>, <code>.lan</code>, <code>.internal</code>)</td><td><code>tls internal</code></td><td>Caddy issues certificates from its own local CA</td></tr><tr><td>Custom cert</td><td><code>tls /path/cert.pem /path/key.pem</code></td><td>Your own certificate</td></tr><tr><td>Let's Encrypt staging (testing)</td><td><code>acme_ca https://acme-staging-v02.api.letsencrypt.org/directory</code></td><td>Avoids rate limits while testing</td></tr></tbody></table>
 <h3 id="trust-the-internal-ca">Trust the Internal CA</h3>
 <p>Run this once on the Shani OS machine so that browsers and command-line tools trust the local CA for all <code>*.home.local</code> domains:</p>
 <pre><code class="language-bash">sudo trust anchor \
   /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt
 sudo update-ca-trust</code></pre>
-<p>To trust it on other devices (phones, other laptops), export the certificate and install it in each device's trust store. On Android: Settings → Security → Install from storage. On iOS: Settings → General → VPN & Device Management.</p>
+<p>To trust it on other devices (phones, other laptops), export the certificate and install it in each device's trust store. On Android: Settings → Security → Install from storage. On iOS: Settings → General → VPN &amp; Device Management.</p>
 <h3 id="wildcard-certificates-dns-01-challenge">Wildcard Certificates (DNS-01 Challenge)</h3>
 <p>For a wildcard cert (<code>*.home.local</code>) that works across all subdomains, use the DNS-01 challenge with your DNS provider's plugin. This avoids needing port 80 open:</p>
 <pre><code class="language-caddyfile">{
@@ -405,7 +405,7 @@ vaultwarden.home.local {
 <p>When exposing services via Cloudflare Tunnel, you do <strong>not</strong> need a Caddyfile entry — Cloudflare handles TLS termination at the edge. Caddy is still the right choice for internal <code>.home.local</code> access on Tailscale, and for any services accessed directly on the LAN.</p>
 <p>Use both together: Caddy serves internal traffic; Cloudflared exposes selected services publicly. See the <a href="https://docs.shani.dev/doc/networking/cloudflared">Cloudflared wiki page</a>.</p>
 <hr>
-<h2 id="permissions-file-serving">Permissions & File Serving</h2>
+<h2 id="permissions-file-serving">Permissions &amp; File Serving</h2>
 <p>Caddy runs as the <code>caddy</code> system user with restricted privileges. If it needs to read files from your home directory, grant access with ACLs rather than changing ownership:</p>
 <pre><code class="language-bash"># Grant recursive read + execute to the caddy user
 sudo setfacl -R -m u:caddy:rx /home/user/www
@@ -426,7 +426,7 @@ sudo firewall-cmd --reload</code></pre>
 <p>For internal-only Caddy serving <code>.home.local</code> addresses over Tailscale or the LAN, no firewall changes are needed — ports 80 and 443 do not need to be open to the internet.</p>
 <hr>
 <h2 id="troubleshooting">Troubleshooting</h2>
-<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>permission denied</code> serving files</td><td><code>sudo setfacl -R -m u:caddy:rx /your/path</code>; check ownership and permissions with <code>ls -l</code> — Shanios has no SELinux contexts</td></tr><tr><td>Browser shows untrusted cert for <code>.home.local</code></td><td>Trust the Caddy local CA: <code>sudo trust anchor /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt &amp;&amp; sudo update-ca-trust</code></td></tr><tr><td><code>bind: address already in use</code></td><td>Another process owns port 80 or 443 — `sudo ss -tlnp</td><td>grep ':80\</td><td>:443'` to identify it</td></tr><tr><td>Service won't start</td><td>Validate syntax first: <code>caddy validate --config /etc/caddy/Caddyfile</code>; then check logs: <code>journalctl -u caddy -f</code></td></tr><tr><td>Let's Encrypt rate limit hit</td><td>Switch to staging CA: <code>acme_ca https://acme-staging-v02.api.letsencrypt.org/directory</code> while testing</td></tr><tr><td>Reverse proxy returns 502 Bad Gateway</td><td>Confirm the backend is running and bound to the right port: <code>curl -v http://localhost:PORT</code>; for containers use <code>host.containers.internal</code> instead of <code>localhost</code></td></tr><tr><td>Config change not taking effect</td><td>Run <code>sudo systemctl reload caddy</code> — Caddy must be explicitly reloaded to pick up Caddyfile changes</td></tr><tr><td>HTTPS certificate not renewing</td><td>Check <code>journalctl -u caddy</code> for ACME errors; confirm port 80 is reachable from the internet for HTTP-01 challenges</td></tr><tr><td>WebSocket connections dropping</td><td>Add <code>@ws { header Connection <em>Upgrade</em> }</code> matcher and <code>handle @ws { reverse_proxy ... }</code> with explicit WebSocket header passthrough</td></tr></tbody></table>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>permission denied</code> serving files</td><td><code>sudo setfacl -R -m u:caddy:rx /your/path</code>; check ownership and permissions with <code>ls -l</code> — Shanios has no SELinux contexts</td></tr><tr><td>Browser shows untrusted cert for <code>.home.local</code></td><td>Trust the Caddy local CA: <code>sudo trust anchor /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt &amp;&amp; sudo update-ca-trust</code></td></tr><tr><td><code>bind: address already in use</code></td><td>Another process owns port 80 or 443 — `sudo ss -tlnp</td><td>grep ':80\</td><td>:443'` to identify it</td></tr><tr><td>Service won't start</td><td>Validate syntax first: <code>caddy validate --config /etc/caddy/Caddyfile</code>; then check logs: <code>journalctl -u caddy -f</code></td></tr><tr><td>Let's Encrypt rate limit hit</td><td>Switch to staging CA: <code>acme_ca https://acme-staging-v02.api.letsencrypt.org/directory</code> while testing</td></tr><tr><td>Reverse proxy returns 502 Bad Gateway</td><td>Confirm the backend is running and bound to the right port: <code>curl -v http://localhost:PORT</code>; for containers use <code>host.containers.internal</code> instead of <code>localhost</code></td></tr><tr><td>Config change not taking effect</td><td>Run <code>sudo systemctl reload caddy</code> — Caddy must be explicitly reloaded to pick up Caddyfile changes</td></tr><tr><td>HTTPS certificate not renewing</td><td>Check <code>journalctl -u caddy</code> for ACME errors; confirm port 80 is reachable from the internet for HTTP-01 challenges</td></tr><tr><td>WebSocket connections dropping</td><td>Add <code>@ws { header Connection *Upgrade* }</code> matcher and <code>handle @ws { reverse_proxy ... }</code> with explicit WebSocket header passthrough</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="/doc/networking/cloudflared/">Cloudflared Tunnels</a></li>

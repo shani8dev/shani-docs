@@ -268,7 +268,7 @@ systemctl --user status flatpak-update-user.timer
 
 # Disable auto-updates (not recommended)
 sudo systemctl disable flatpak-update-system.timer</code></pre>
-<h2 id="permissions-sandboxing">Permissions & Sandboxing</h2>
+<h2 id="permissions-sandboxing">Permissions &amp; Sandboxing</h2>
 <p>Flatpak apps run in a sandbox. Use <strong>Flatseal</strong> (pre-installed) to manage permissions via GUI — it shows every permission for every installed app and lets you grant or revoke filesystem, network, device, and portal access per-app. Use the CLI for scripted overrides:</p>
 <pre><code class="language-bash"># View permissions for an app
 flatpak info --show-permissions org.gimp.GIMP

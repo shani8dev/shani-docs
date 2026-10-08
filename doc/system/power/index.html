@@ -264,7 +264,7 @@ loginctl session-status</code></pre>
 <pre><code class="language-bash"># Hibernate
 systemctl hibernate</code></pre>
 <p>Verify a full hibernate/resume cycle works before relying on it — a failed resume falls back to a cold boot with an empty session.</p>
-<h2 id="battery-reporting">Battery & Reporting</h2>
+<h2 id="battery-reporting">Battery &amp; Reporting</h2>
 <pre><code class="language-bash"># Full battery report: capacity, health, vendor, cycle count where exposed
 upower -i $(upower -e | grep BAT)
 
@@ -287,7 +287,7 @@ HandleLidSwitchDocked=ignore               # docked via dock itself</code></pre>
 <pre><code class="language-bash">sudo systemctl restart systemd-logind</code></pre>
 <blockquote>Restarting <code>systemd-logind</code> briefly resets login sessions — running graphical sessions generally survive, but expect a short hiccup and re-authentication prompts.</blockquote>
 <h3 id="wi-fi-power-save">Wi-Fi Power Save</h3>
-<p>NetworkManager manages Wi-Fi power saving per connection via the <code>wifi.powersave</code> property. See <a href="/doc/networking/wireless/">Wi-Fi & Wireless Firmware</a> for checking and changing it.</p>
+<p>NetworkManager manages Wi-Fi power saving per connection via the <code>wifi.powersave</code> property. See <a href="/doc/networking/wireless/">Wi-Fi &amp; Wireless Firmware</a> for checking and changing it.</p>
 <h3 id="usb-autosuspend">USB Autosuspend</h3>
 <p>USB autosuspend saves power but can misbehave with some input devices (mice/keyboards stuttering or dropping after idle). If a wired input device acts up after a pause, that's autosuspend — check <code>/sys/bus/usb/devices/*/power/control</code> and consider whitelisting the device rather than disabling autosuspend globally.</p>
 <h2 id="troubleshooting">Troubleshooting</h2>

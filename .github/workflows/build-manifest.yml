@@ -45,6 +45,25 @@ jobs:
       - name: Broken internal link check
         run: node tests/check-links.js
 
+      # Well-formedness of the GENERATED pages: html5lib parse errors, stray
+      # control characters (the `\x00BLOCKnn\x00` placeholder leak), duplicate
+      # titles, and pages with no title. Added 2026-10-05: the committed tree
+      # carried 45 parse errors and 68 NUL bytes across 3 pages, all live on
+      # docs.shani.dev, and neither the generator nor check-links.js looked at
+      # whether the emitted HTML was valid. Needs html5lib, which is not in
+      # this job's Node-only setup, so it is installed explicitly rather than
+      # assumed.
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install html5lib
+        run: python3 -m pip install --quiet html5lib
+
+      - name: HTML validation and duplicate-title check
+        run: python3 tests/check-html.py
+
       # The docs name flags, subcommands and shipped paths that live in the
       # sibling repos. Checkout them so tests/check-ground-truth.py can read the
       # other side of every claim; it SKIPs (rather than passing vacuously) when

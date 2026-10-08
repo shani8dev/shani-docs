@@ -240,7 +240,7 @@
 <li><a href="#talos-linux-immutable-kubernetes-os">Talos Linux (Immutable Kubernetes OS)</a></li>
 <li><a href="#rke2-hardened-production-kubernetes">RKE2 (Hardened Production Kubernetes)</a></li>
 <li><a href="#kubeadm-upstream-reference-install">kubeadm (Upstream Reference Install)</a></li>
-<li><a href="#disk-layout-cli-tools">Disk Layout & CLI Tools</a></li>
+<li><a href="#disk-layout-cli-tools">Disk Layout &amp; CLI Tools</a></li>
 </ul>
 <h2 id="key-concepts">Key Concepts</h2>
 <h4 id="control-plane-components">Control plane components</h4>
@@ -376,14 +376,14 @@ nslookup postgres-0.postgres.data.svc.cluster.local</code></pre>
 <table><thead><tr><th>QoS Class</th><th>Condition</th><th>Eviction priority</th></tr></thead><tbody><tr><td><code>Guaranteed</code></td><td>Every container has <code>requests == limits</code> for CPU <strong>and</strong> memory</td><td>Last evicted</td></tr><tr><td><code>Burstable</code></td><td>At least one container has a request or limit set</td><td>Middle</td></tr><tr><td><code>BestEffort</code></td><td>No requests or limits set on any container</td><td>First evicted</td></tr></tbody></table>
 <pre><code class="language-bash">kubectl get pod myapp-xyz -n myapp -o jsonpath='{.status.qosClass}'</code></pre>
 <blockquote><strong>Rule of thumb:</strong> Production services should be <code>Guaranteed</code> (avoids OOMKill surprises) or <code>Burstable</code> with memory limits set. <code>BestEffort</code> is only appropriate for non-critical batch jobs.</blockquote>
-<h4 id="ownerreferences-garbage-collection">OwnerReferences & Garbage Collection</h4>
+<h4 id="ownerreferences-garbage-collection">OwnerReferences &amp; Garbage Collection</h4>
 <p>Every object created by a controller carries an <code>ownerReferences</code> field pointing back to its parent. When the parent is deleted, the garbage collector cascades deletion to all owned objects (unless <code>--cascade=orphan</code> is used).</p>
 <pre><code class="language-bash"># See who owns a ReplicaSet
 kubectl get replicaset myapp-abc123 -n myapp -o jsonpath='{.metadata.ownerReferences}'
 
 # Delete a Deployment but keep its pods (orphan)
 kubectl delete deployment myapp -n myapp --cascade=orphan</code></pre>
-<h4 id="resourceversion-optimistic-concurrency">ResourceVersion & Optimistic Concurrency</h4>
+<h4 id="resourceversion-optimistic-concurrency">ResourceVersion &amp; Optimistic Concurrency</h4>
 <p>Every Kubernetes object has a <code>resourceVersion</code> field that changes on every write. The API server uses it for <strong>optimistic concurrency</strong> — if you <code>PUT</code> an object with a stale <code>resourceVersion</code>, the request is rejected with <code>409 Conflict</code>. This prevents lost updates when two controllers modify the same object simultaneously.</p>
 <pre><code class="language-bash">kubectl get deployment myapp -n myapp -o jsonpath='{.metadata.resourceVersion}'</code></pre>
 <h4 id="rbac-fundamentals">RBAC fundamentals</h4>
@@ -513,7 +513,7 @@ config:
 kubectl get pods -n monitoring -l app.kubernetes.io/name=opentelemetry-collector
 kubectl logs -n monitoring -l app.kubernetes.io/name=opentelemetry-collector -f</code></pre>
 <h4 id="dora-metrics">DORA metrics</h4>
-<p>Four metrics measure software delivery performance: <strong>Deployment Frequency</strong>, <strong>Lead Time for Changes</strong> (commit to production), <strong>Change Failure Rate</strong> (% of deployments causing incidents), and <strong>Time to Restore</strong> (MTTR). Elite teams: multiple deploys/day, <1h lead time, <5% failure rate, <1h recovery. These predict team health — low deployment frequency predicts burnout; high failure rate predicts firefighting culture.</p>
+<p>Four metrics measure software delivery performance: <strong>Deployment Frequency</strong>, <strong>Lead Time for Changes</strong> (commit to production), <strong>Change Failure Rate</strong> (% of deployments causing incidents), and <strong>Time to Restore</strong> (MTTR). Elite teams: multiple deploys/day, &lt;1h lead time, &lt;5% failure rate, &lt;1h recovery. These predict team health — low deployment frequency predicts burnout; high failure rate predicts firefighting culture.</p>
 <h4 id="finalizers">Finalizers</h4>
 <p>Finalizers are keys stored in <code>metadata.finalizers</code> that block deletion of an object until removed. When you <code>kubectl delete</code> an object with finalizers, Kubernetes marks it <code>Terminating</code> but doesn't remove it — it waits for a controller to do cleanup work and remove the finalizer. Common example: a PVC with a finalizer that prevents deletion while a pod is still using it.</p>
 <pre><code class="language-bash"># See finalizers on a resource
@@ -521,7 +521,7 @@ kubectl get pvc myapp-data -n myapp -o jsonpath='{.metadata.finalizers}'
 
 # Remove a stuck finalizer manually (use with caution — bypasses cleanup)
 kubectl patch pvc myapp-data -n myapp --type=json   -p='[{&quot;op&quot;:&quot;remove&quot;,&quot;path&quot;:&quot;/metadata/finalizers/0&quot;}]'</code></pre>
-<h4 id="field-managers-server-side-apply-ssa">Field Managers & Server-Side Apply (SSA)</h4>
+<h4 id="field-managers-server-side-apply-ssa">Field Managers &amp; Server-Side Apply (SSA)</h4>
 <p>Server-Side Apply (SSA) moves field ownership tracking to the API server. Each tool (kubectl, ArgoCD, Helm) is a named <strong>field manager</strong> that "owns" the fields it sets. Conflicts arise when two managers try to own the same field.</p>
 <pre><code class="language-bash"># Check who owns which fields
 kubectl get deployment myapp -n myapp   -o jsonpath='{.metadata.managedFields}' | jq .
@@ -534,7 +534,7 @@ kubectl apply --server-side --force-conflicts -f deployment.yaml
 
 # Set a custom field manager name (important when multiple tools manage the same object)
 kubectl apply --server-side --field-manager=argocd -f deployment.yaml</code></pre>
-<h4 id="lease-leader-election">Lease & Leader Election</h4>
+<h4 id="lease-leader-election">Lease &amp; Leader Election</h4>
 <p>Kubernetes controllers use <code>Lease</code> objects in the <code>kube-node-lease</code> namespace for leader election — ensuring only one replica of a controller is active at a time. Node heartbeats are also tracked via Leases.</p>
 <pre><code class="language-bash"># View node heartbeat leases
 kubectl get lease -n kube-node-lease
@@ -589,7 +589,7 @@ kubectl get pods -A                                       # all namespaces
 kubectl get pods -n kube-system                          # specific namespace</code></pre>
 <blockquote><strong>Production pattern:</strong> One namespace per application/service. Use <code>ResourceQuota</code> and <code>LimitRange</code> to cap what each namespace can consume.</blockquote>
 <hr>
-<h4 id="labels-selectors">Labels & Selectors</h4>
+<h4 id="labels-selectors">Labels &amp; Selectors</h4>
 <p>Labels are <code>key: value</code> pairs attached to any Kubernetes object. They are the <strong>primary mechanism</strong> Kubernetes uses to group and target objects — Services use them to find pods, Deployments use them to own ReplicaSets, NetworkPolicies use them to apply rules, and node affinity uses node labels.</p>
 <pre><code class="language-yaml">metadata:
   labels:
@@ -620,7 +620,7 @@ kubectl get pods --show-labels</code></pre>
     link/runbook: &quot;https://wiki.home.local/runbooks/myapp&quot;</code></pre>
 <blockquote>Values can be any string including JSON. Unlike labels, annotations are not indexed — don't use them as selectors.</blockquote>
 <hr>
-<h4 id="deployments-replicasets">Deployments & ReplicaSets</h4>
+<h4 id="deployments-replicasets">Deployments &amp; ReplicaSets</h4>
 <p>A <strong>Deployment</strong> manages the desired state of a stateless application. You declare <code>replicas: 3</code> and <code>image: myapp:v2</code>, and the Deployment controller creates a <strong>ReplicaSet</strong> to maintain that count. On update, the Deployment creates a new ReplicaSet and scales it up while scaling the old one down — this is the rolling update.</p>
 <pre><code>Deployment
   └── ReplicaSet (v2 — active)       3/3 pods
@@ -651,7 +651,7 @@ kubectl get events -A --field-selector type=Warning   # all warnings cluster-wid
 <table><thead><tr><th>Distribution</th><th>Best For</th><th>RAM (min)</th><th>Install via</th><th>Notes</th></tr></thead><tbody><tr><td><strong>k3s</strong></td><td>Single-node homelabs, edge</td><td>512 MB</td><td>curl installer (<code>~/.local/bin</code>)</td><td>Batteries-included, easiest to start</td></tr><tr><td><strong>k0s</strong></td><td>Minimal, air-gapped</td><td>1 GB</td><td>curl installer (<code>~/.local/bin</code>)</td><td>Single binary, no external deps</td></tr><tr><td><strong>MicroK8s</strong></td><td>Quick local cluster, addons</td><td>2 GB</td><td><strong>Snap</strong></td><td>Canonical-maintained; DNS, ingress, registry as addons</td></tr><tr><td><strong>minikube</strong></td><td>Local dev, driver choice</td><td>2 GB</td><td>Nix or <strong>Snap</strong></td><td>Runs via Podman driver</td></tr><tr><td><strong>kind</strong></td><td>Lightweight dev/CI</td><td>2 GB</td><td>Nix</td><td>Runs K8s inside Podman containers</td></tr><tr><td><strong>RKE2</strong></td><td>Hardened, production</td><td>4 GB</td><td>curl installer (<code>~/.local/bin</code>)</td><td>CIS-benchmarked, STIG-ready</td></tr><tr><td><strong>Talos</strong></td><td>Immutable infra, GitOps</td><td>2 GB</td><td>talosctl</td><td>API-only, no SSH, extremely secure</td></tr><tr><td><strong>kubeadm</strong></td><td>Vanilla upstream, CKA study</td><td>2 GB</td><td>Nix</td><td>Full manual setup; deepest understanding</td></tr></tbody></table>
 <hr>
 <h3 id="k3s-lightweight-cncf-kubernetes">k3s (Lightweight CNCF Kubernetes)</h3>
-<p><strong>Purpose:</strong> Lightweight, CNCF-certified Kubernetes. Ships with containerd, CoreDNS, and local-path provisioner. Single binary under 70 MB. Install with <code>--flannel-backend=none --disable-kube-proxy</code> to use Cilium as the CNI (see <a href="/doc/servers/kubernetes/networking/#networking-ingress">Networking & Ingress</a>).</p>
+<p><strong>Purpose:</strong> Lightweight, CNCF-certified Kubernetes. Ships with containerd, CoreDNS, and local-path provisioner. Single binary under 70 MB. Install with <code>--flannel-backend=none --disable-kube-proxy</code> to use Cilium as the CNI (see <a href="/doc/servers/kubernetes/networking/#networking-ingress">Networking &amp; Ingress</a>).</p>
 <h4 id="single-node-install-with-cilium-cni">Single-node install (with Cilium CNI)</h4>
 <pre><code class="language-bash">sudo sysctl -w vm.max_map_count=524288
 echo &quot;vm.max_map_count=524288&quot; | sudo tee /etc/sysctl.d/99-k8s.conf
@@ -797,7 +797,7 @@ sudo kubeadm join &lt;control-plane-ip&gt;:6443 \
   --discovery-token-ca-cert-hash sha256:&lt;hash&gt; \
   --cri-socket=unix:///run/containerd/containerd.sock</code></pre>
 <hr>
-<h2 id="disk-layout-cli-tools">Disk Layout & CLI Tools</h2>
+<h2 id="disk-layout-cli-tools">Disk Layout &amp; CLI Tools</h2>
 <pre><code>/var/lib/rancher/k3s/    ← k3s data, etcd snapshots
 /var/lib/k0s/            ← k0s data
 ~/.kube/config           ← kubeconfig (in @home, survives OS updates)

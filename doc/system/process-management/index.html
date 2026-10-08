@@ -278,7 +278,7 @@ htop -p 1234,5678</code></pre>
 <table><thead><tr><th>Key</th><th>Action</th></tr></thead><tbody><tr><td><code>F6</code></td><td>Sort by column</td></tr><tr><td><code>F4</code></td><td>Filter by name</td></tr><tr><td><code>F9</code></td><td>Send signal to selected process</td></tr><tr><td><code>t</code></td><td>Toggle tree view</td></tr><tr><td><code>H</code></td><td>Toggle user threads</td></tr><tr><td><code>K</code></td><td>Toggle kernel threads</td></tr><tr><td><code>Space</code></td><td>Tag a process (for batch operations)</td></tr></tbody></table>
 <p><strong>btop</strong> is a more visual alternative (graphs for CPU/memory/network/disk per-core and over time) — pre-installed on the server/cloud image profile only, not the GNOME/Plasma/COSMIC desktop editions.</p>
 <hr>
-<h2 id="signals-killing-processes">Signals & Killing Processes</h2>
+<h2 id="signals-killing-processes">Signals &amp; Killing Processes</h2>
 <h3 id="kill-killall-pkill">kill / killall / pkill</h3>
 <pre><code class="language-bash"># Send SIGTERM (15) — graceful shutdown request
 kill 1234
@@ -306,7 +306,7 @@ sudo loginctl kill-user alice</code></pre>
 <pre><code class="language-bash"># List all signal names and numbers
 kill -l</code></pre>
 <hr>
-<h2 id="priority-scheduling">Priority & Scheduling</h2>
+<h2 id="priority-scheduling">Priority &amp; Scheduling</h2>
 <h3 id="nice-renice-cpu-priority">nice / renice — CPU priority</h3>
 <p>Priority ranges from -20 (highest) to +19 (lowest). Default is 0. Only root can set negative (higher priority) values.</p>
 <pre><code class="language-bash"># Start a process with low priority (nice value 10)
@@ -335,7 +335,7 @@ ionice -p 1234
 # Change I/O priority of a running process
 sudo ionice -c 3 -p 1234</code></pre>
 <hr>
-<h2 id="background-jobs-job-control">Background Jobs & Job Control</h2>
+<h2 id="background-jobs-job-control">Background Jobs &amp; Job Control</h2>
 <pre><code class="language-bash"># Run a command in the background
 long-running-command &amp;
 
@@ -396,7 +396,7 @@ cat /proc/meminfo       # memory usage
 cat /proc/loadavg       # 1/5/15-minute load averages, running/total threads, last PID
 cat /proc/uptime        # seconds since boot</code></pre>
 <hr>
-<h2 id="lsof-open-files-sockets">lsof — Open Files & Sockets</h2>
+<h2 id="lsof-open-files-sockets">lsof — Open Files &amp; Sockets</h2>
 <p><code>lsof</code> lists all open files, including network sockets, pipes, and device files.</p>
 <pre><code class="language-bash"># All open files (large output)
 sudo lsof
@@ -468,7 +468,7 @@ systemctl status caddy
 # Which service owns a PID?
 systemctl status 1234</code></pre>
 <hr>
-<h2 id="memory-resource-usage">Memory & Resource Usage</h2>
+<h2 id="memory-resource-usage">Memory &amp; Resource Usage</h2>
 <pre><code class="language-bash"># Memory overview
 free -h
 
@@ -510,12 +510,12 @@ cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq</code></pre>
 <hr>
 <h2 id="troubleshooting">Troubleshooting</h2>
-<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Process won't die with <code>kill -9</code></td><td>The process is in an uninterruptible sleep (D state) — usually waiting on I/O. Check <code>ps aux</code> for <code>D</code> state; may need to wait for I/O to complete or reboot</td></tr><tr><td><code>kill: Operation not permitted</code></td><td>You don't own the process — use <code>sudo kill</code></td></tr><tr><td>High load but low CPU usage</td><td>Check I/O wait: <code>top</code> → look at <code>%wa</code> in the CPU line; <code>iostat -x 1</code> for disk I/O</td></tr><tr><td>Process keeps respawning after kill</td><td>It's managed by systemd — use <code>sudo systemctl stop &lt;service&gt;</code> instead</td></tr><tr><td>Can't find which process owns a port</td><td>`sudo ss -tlnp</td><td>grep :PORT<code> or </code>sudo lsof -i :PORT`</td></tr><tr><td><code>strace</code> shows permission denied</td><td>Run with <code>sudo</code>; or check <code>/proc/sys/kernel/yama/ptrace_scope</code> (0 = unrestricted, 1 = parent only)</td></tr><tr><td>Process using too much memory</td><td>Check `cat /proc/<PID>/status</td><td>grep VmRSS<code>; consider setting memory limits in the service unit with </code>MemoryMax=`</td></tr></tbody></table>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Process won't die with <code>kill -9</code></td><td>The process is in an uninterruptible sleep (D state) — usually waiting on I/O. Check <code>ps aux</code> for <code>D</code> state; may need to wait for I/O to complete or reboot</td></tr><tr><td><code>kill: Operation not permitted</code></td><td>You don't own the process — use <code>sudo kill</code></td></tr><tr><td>High load but low CPU usage</td><td>Check I/O wait: <code>top</code> → look at <code>%wa</code> in the CPU line; <code>iostat -x 1</code> for disk I/O</td></tr><tr><td>Process keeps respawning after kill</td><td>It's managed by systemd — use <code>sudo systemctl stop &lt;service&gt;</code> instead</td></tr><tr><td>Can't find which process owns a port</td><td>`sudo ss -tlnp</td><td>grep :PORT<code> or </code>sudo lsof -i :PORT`</td></tr><tr><td><code>strace</code> shows permission denied</td><td>Run with <code>sudo</code>; or check <code>/proc/sys/kernel/yama/ptrace_scope</code> (0 = unrestricted, 1 = parent only)</td></tr><tr><td>Process using too much memory</td><td>Check `cat /proc/&lt;PID&gt;/status</td><td>grep VmRSS<code>; consider setting memory limits in the service unit with </code>MemoryMax=`</td></tr></tbody></table>
 <hr>
 <h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="/doc/system/systemd/">Systemd</a> — service management, unit files, resource limits with <code>MemoryMax=</code> and <code>CPUQuota=</code></li>
-<li><a href="/doc/updates/shell/">Shell & Environment</a> — <code>htop</code>, <code>ncdu</code>, and other pre-installed monitoring tools</li>
+<li><a href="/doc/updates/shell/">Shell &amp; Environment</a> — <code>htop</code>, <code>ncdu</code>, and other pre-installed monitoring tools</li>
 <li><a href="/doc/updates/shani-health/">shani-health</a> — default report includes CPU load, memory, OOM events, and zombie processes</li>
 </ul></div>
     </div>

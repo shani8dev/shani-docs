@@ -233,7 +233,7 @@
       <div class="prose"><p>ModemManager is pre-installed on Shani OS and integrates with NetworkManager to provide first-class support for USB and PCIe mobile broadband modems and SIM cards. It manages LTE/5G data connections, signal monitoring, and SMS.</p>
 <p>When you plug in a supported modem, NetworkManager automatically detects it and creates a Mobile Broadband connection. You can configure the APN and connect entirely from <strong>Settings → Network → Mobile Broadband</strong> without touching the terminal.</p>
 <hr>
-<h2 id="modem-detection-status">Modem Detection & Status</h2>
+<h2 id="modem-detection-status">Modem Detection &amp; Status</h2>
 <pre><code class="language-bash"># List all detected modems
 mmcli -L
 
@@ -251,7 +251,7 @@ mmcli -m 0 --sim 0
 mmcli -m 0 --list-bearers
 mmcli -b 0</code></pre>
 <hr>
-<h2 id="connecting-disconnecting">Connecting & Disconnecting</h2>
+<h2 id="connecting-disconnecting">Connecting &amp; Disconnecting</h2>
 <p>NetworkManager handles connections automatically once you configure an APN. Use these commands for scripting or troubleshooting:</p>
 <pre><code class="language-bash"># List all saved connections (your modem connection appears here)
 nmcli connection show
@@ -303,7 +303,7 @@ mmcli -m 0 --3gpp-ussd-initiate=&quot;*123#&quot;
 mmcli -m 0 --3gpp-ussd-cancel</code></pre>
 <hr>
 <h2 id="troubleshooting">Troubleshooting</h2>
-<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Modem not detected (<code>mmcli -L</code> shows nothing)</td><td>Check <code>lsusb</code> or <code>lspci</code> — if the kernel sees the hardware, try <code>sudo modprobe qmi_wwan</code> or <code>cdc_mbim</code></td></tr><tr><td>Modem listed but no connection</td><td>Verify the APN is correct for your carrier; check <code>mmcli -m 0</code> — registration status must show <code>registered</code></td></tr><tr><td>SIM not detected</td><td>Reseat the SIM; check <code>mmcli -m 0</code> for PIN lock status — unlock with <code>mmcli -m 0 --pin=XXXX</code></td></tr><tr><td>Low signal / frequent disconnects</td><td>Run <code>mmcli -m 0 --signal-get</code> to check signal quality; reposition the modem or antenna</td></tr><tr><td>SMS not sending</td><td>Confirm SMS support: `mmcli -m 0</td><td>grep -i sms`; modem must be registered on a network first</td></tr><tr><td>ModemManager interfering with a serial GPS</td><td>Create <code>/etc/udev/rules.d/99-mm-ignore-gps.rules</code> with <code>ATTRS{idVendor}==&quot;XXXX&quot;, ATTRS{idProduct}==&quot;YYYY&quot;, ENV{ID_MM_DEVICE_IGNORE}=&quot;1&quot;</code> (replace XX values from <code>lsusb</code> output)</td></tr></tbody></table>
+<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td>Modem not detected (<code>mmcli -L</code> shows nothing)</td><td>Check <code>lsusb</code> or <code>lspci</code> — if the kernel sees the hardware, try <code>sudo modprobe qmi_wwan</code> or <code>cdc_mbim</code></td></tr><tr><td>Modem listed but no connection</td><td>Verify the APN is correct for your carrier; check <code>mmcli -m 0</code> — registration status must show <code>registered</code></td></tr><tr><td>SIM not detected</td><td>Reseat the SIM; check <code>mmcli -m 0</code> for PIN lock status — unlock with <code>mmcli -m 0 --pin=XXXX</code></td></tr><tr><td>Low signal / frequent disconnects</td><td>Run <code>mmcli -m 0 --signal-get</code> to check signal quality; reposition the modem or antenna</td></tr><tr><td>SMS not sending</td><td>Confirm SMS support: `mmcli -m 0</td><td>grep -i sms`; modem must be registered on a network first</td></tr><tr><td>ModemManager interfering with a serial GPS</td><td>Create <code>/etc/udev/rules.d/99-mm-ignore-gps.rules</code> with <code>ATTRS{idVendor}=="XXXX", ATTRS{idProduct}=="YYYY", ENV{ID_MM_DEVICE_IGNORE}="1"</code> (replace XX values from <code>lsusb</code> output)</td></tr></tbody></table>
 <h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="/doc/networking/networkmanager-vpn/">NetworkManager VPN</a></li>

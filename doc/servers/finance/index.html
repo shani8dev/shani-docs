@@ -237,7 +237,7 @@
 <h4 id="double-entry-bookkeeping-the-foundation">Double-entry bookkeeping — the foundation</h4>
 <p>Every financial transaction involves at least two entries: a debit to one account and a credit to another of equal value. The books always balance: Assets = Liabilities + Equity. In Firefly III and hledger, every transaction explicitly moves money between accounts. This model makes inconsistency impossible — you cannot spend money without a source account, and income must credit somewhere. Contrast with single-entry systems (a simple spreadsheet of income and expenses) which can't catch errors or produce a balance sheet. Any role in fintech, accounting software, or financial data engineering requires understanding this model.</p>
 <h4 id="chart-of-accounts-and-financial-reporting">Chart of accounts and financial reporting</h4>
-<p>A chart of accounts (COA) is the complete list of an entity's financial accounts, organised by type: Assets (cash, accounts receivable, inventory), Liabilities (accounts payable, loans), Equity (owner's equity, retained earnings), Income (sales, service revenue), and Expenses (rent, payroll, COGS). A balance sheet shows Assets vs Liabilities + Equity at a point in time. A profit and loss (P&L) statement shows Income vs Expenses over a period. A cash flow statement shows actual cash movements. These three statements are the output of any accounting system — knowing what they contain and how they relate is baseline financial literacy for any engineer working in fintech.</p>
+<p>A chart of accounts (COA) is the complete list of an entity's financial accounts, organised by type: Assets (cash, accounts receivable, inventory), Liabilities (accounts payable, loans), Equity (owner's equity, retained earnings), Income (sales, service revenue), and Expenses (rent, payroll, COGS). A balance sheet shows Assets vs Liabilities + Equity at a point in time. A profit and loss (P&amp;L) statement shows Income vs Expenses over a period. A cash flow statement shows actual cash movements. These three statements are the output of any accounting system — knowing what they contain and how they relate is baseline financial literacy for any engineer working in fintech.</p>
 <h4 id="open-banking-and-bank-data-apis">Open banking and bank data APIs</h4>
 <p>PSD2 (EU) and equivalent regulations require banks to expose customer data via APIs to authorised third parties. The standard is OpenBanking UK (for UK banks) or Berlin Group NextGenPSD2 (for EU banks). Kresus uses Woob (previously weboob) to scrape bank data where APIs aren't available — a fragile but practical approach. Production open banking integrations use providers like TrueLayer, Plaid (US), or Salt Edge to normalise the bank API surface. Understanding that Plaid is a data aggregator (not a bank) and that its underlying data comes from screen-scraping or direct API connections depending on the institution is relevant for any fintech infrastructure role.</p>
 <h4 id="cryptocurrency-node-operation-utxo-vs-account-model">Cryptocurrency node operation — UTXO vs account model</h4>
@@ -389,9 +389,9 @@ curl -X POST http://localhost:3333/api/v1/admin/gather/max   -H &quot;Authorizat
 
 # Export portfolio data
 curl http://localhost:3333/api/v1/export   -H &quot;Authorization: Bearer YOUR_API_KEY&quot; -o portfolio-export.json</code></pre>
-<p>Access at <code>http://localhost:3333</code>. Add activities (buy/sell transactions) and Ghostfolio calculates current value, cost basis, P&L, and charts portfolio performance over time.</p>
+<p>Access at <code>http://localhost:3333</code>. Add activities (buy/sell transactions) and Ghostfolio calculates current value, cost basis, P&amp;L, and charts portfolio performance over time.</p>
 <hr>
-<h2 id="invoice-ninja-invoicing-billing">Invoice Ninja (Invoicing & Billing)</h2>
+<h2 id="invoice-ninja-invoicing-billing">Invoice Ninja (Invoicing &amp; Billing)</h2>
 <p><strong>Purpose:</strong> Full-featured invoicing, quotes, expenses, time tracking, and client management. Generates professional PDF invoices, accepts online payments (Stripe, PayPal, GoCardless), and handles recurring invoices. Essential for freelancers and small businesses who want to own their billing data.</p>
 <pre><code class="language-yaml"># ~/invoiceninja/compose.yml
 services:
@@ -438,7 +438,7 @@ volumes:
 </ol>
 <p><em>PayPal:</em></p>
 <ol>
-<li>Create a PayPal Business account and go to <a href="https://developer.paypal.com">developer.paypal.com</a>. Under <strong>Apps & Credentials</strong> create a new app and copy the <strong>Client ID</strong> and <strong>Client Secret</strong>.</li>
+<li>Create a PayPal Business account and go to <a href="https://developer.paypal.com">developer.paypal.com</a>. Under <strong>Apps &amp; Credentials</strong> create a new app and copy the <strong>Client ID</strong> and <strong>Client Secret</strong>.</li>
 <li>In Invoice Ninja → Settings → Payment Gateways → Add Gateway → select <strong>PayPal Express Checkout</strong>.</li>
 <li>Paste Client ID and Secret. Toggle Live mode (off for sandbox testing, on for production).</li>
 </ol>
@@ -589,7 +589,7 @@ services:
 <pre><code class="language-caddyfile">paisa.home.local { tls internal; reverse_proxy localhost:7500 }</code></pre>
 <hr>
 <h2 id="choosing-the-right-tool">Choosing the Right Tool</h2>
-<table><thead><tr><th>Use Case</th><th>Recommended Tool</th></tr></thead><tbody><tr><td>Personal finance / household budgeting (double-entry)</td><td>Firefly III</td></tr><tr><td>Zero-based envelope budgeting (YNAB-style)</td><td>Actual Budget</td></tr><tr><td>Investment portfolio & wealth tracking</td><td>Ghostfolio</td></tr><tr><td>Freelancer invoicing & billing</td><td>Invoice Ninja</td></tr><tr><td>Full business accounting & ERP</td><td>ERPNext</td></tr><tr><td>Programmer / power-user ledger</td><td>hledger / Beancount</td></tr><tr><td>Indian bank imports & INR-native tracking</td><td>Paisa</td></tr><tr><td>European bank auto-import via open banking</td><td>Kresus</td></tr><tr><td>Bitcoin sovereignty</td><td>Bitcoin Core + LND + ThunderHub</td></tr><tr><td>Crypto portfolio + tax reports</td><td>Rotki</td></tr></tbody></table>
+<table><thead><tr><th>Use Case</th><th>Recommended Tool</th></tr></thead><tbody><tr><td>Personal finance / household budgeting (double-entry)</td><td>Firefly III</td></tr><tr><td>Zero-based envelope budgeting (YNAB-style)</td><td>Actual Budget</td></tr><tr><td>Investment portfolio &amp; wealth tracking</td><td>Ghostfolio</td></tr><tr><td>Freelancer invoicing &amp; billing</td><td>Invoice Ninja</td></tr><tr><td>Full business accounting &amp; ERP</td><td>ERPNext</td></tr><tr><td>Programmer / power-user ledger</td><td>hledger / Beancount</td></tr><tr><td>Indian bank imports &amp; INR-native tracking</td><td>Paisa</td></tr><tr><td>European bank auto-import via open banking</td><td>Kresus</td></tr><tr><td>Bitcoin sovereignty</td><td>Bitcoin Core + LND + ThunderHub</td></tr><tr><td>Crypto portfolio + tax reports</td><td>Rotki</td></tr></tbody></table>
 <hr>
 <h2 id="kresus-open-banking-personal-finance">Kresus (Open Banking Personal Finance)</h2>
 <p><strong>Purpose:</strong> Self-hosted personal finance manager with automatic bank import via open banking connectors (Woob). Kresus connects directly to hundreds of European banks and financial institutions, imports transactions automatically, and helps you categorise, budget, and analyse spending — no manual CSV exports required. A strong complement to Firefly III for users who want automatic bank synchronisation.</p>

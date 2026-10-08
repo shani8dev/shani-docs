@@ -322,7 +322,7 @@ distrobox enter intel-dev
 # Inside the container:
 clinfo | grep -i intel</code></pre>
 <hr>
-<h2 id="apptainer-hpc-cluster-ready">🧬 Apptainer (HPC & Cluster Ready)</h2>
+<h2 id="apptainer-hpc-cluster-ready">🧬 Apptainer (HPC &amp; Cluster Ready)</h2>
 <p>Apptainer is pre-installed on Shanios and produces <code>.sif</code> files — the standard portable image format for HPC clusters. Unlike Docker or Podman, Apptainer runs rootless by default, which is required on most clusters.</p>
 <h3 id="basic-usage">Basic Usage</h3>
 <pre><code class="language-bash"># Pull an image from Docker Hub
@@ -345,7 +345,7 @@ apptainer exec --nv /scratch/$USER/research.sif python3 train.py
 # AMD workload
 apptainer exec --rocm /scratch/$USER/research.sif python3 train.py</code></pre>
 <hr>
-<h2 id="openmpi-distributed-workflows">🌐 OpenMPI & Distributed Workflows</h2>
+<h2 id="openmpi-distributed-workflows">🌐 OpenMPI &amp; Distributed Workflows</h2>
 <h3 id="hpc-standard-host-mpi-container">HPC Standard (Host MPI + Container)</h3>
 <p>Most clusters run <code>mpirun</code> on the host and bind-mount the MPI libraries into the container. Your container's MPI version should match the host's.</p>
 <pre><code class="language-bash"># `module` is a cluster tool (environment-modules); not in the image
@@ -368,8 +368,8 @@ podman run -d --pod mpi-cluster --name node2 nvidia/openmpi:4.1 sleep infinity
 # Run the distributed job
 podman exec node1 mpirun --host node1,node2 -np 8 python3 /workspace/benchmark.py</code></pre>
 <hr>
-<h2 id="ai-inference-serving">🤖 AI Inference & Serving</h2>
-<table><thead><tr><th>Workload</th><th>Runtime</th><th>Command</th></tr></thead><tbody><tr><td><strong>vLLM</strong></td><td>NVIDIA</td><td><code>podman run -d -p 127.0.0.1:8000:8000 --device nvidia.com/gpu=all -v models:/models vllm/vllm-openai:latest --model Qwen/Qwen3-32B --tensor-parallel-size 1</code></td></tr><tr><td><strong>LLaMA.cpp</strong></td><td>AMD ROCm</td><td><code>podman run --rm --device /dev/kfd --device /dev/dri --group-add video,render ghcr.io/ggerganov/llama.cpp:full-rocm -m /model.gguf -ngl 80 -p &quot;Hello&quot;</code></td></tr><tr><td><strong>Ollama</strong></td><td>NVIDIA</td><td><code>podman run -d -p 127.0.0.1:11434:11434 --device nvidia.com/gpu=all -e NVIDIA_VISIBLE_DEVICES=all -v ollama:/root/.ollama ollama/ollama</code></td></tr></tbody></table>
+<h2 id="ai-inference-serving">🤖 AI Inference &amp; Serving</h2>
+<table><thead><tr><th>Workload</th><th>Runtime</th><th>Command</th></tr></thead><tbody><tr><td><strong>vLLM</strong></td><td>NVIDIA</td><td><code>podman run -d -p 127.0.0.1:8000:8000 --device nvidia.com/gpu=all -v models:/models vllm/vllm-openai:latest --model Qwen/Qwen3-32B --tensor-parallel-size 1</code></td></tr><tr><td><strong>LLaMA.cpp</strong></td><td>AMD ROCm</td><td><code>podman run --rm --device /dev/kfd --device /dev/dri --group-add video,render ghcr.io/ggerganov/llama.cpp:full-rocm -m /model.gguf -ngl 80 -p "Hello"</code></td></tr><tr><td><strong>Ollama</strong></td><td>NVIDIA</td><td><code>podman run -d -p 127.0.0.1:11434:11434 --device nvidia.com/gpu=all -e NVIDIA_VISIBLE_DEVICES=all -v ollama:/root/.ollama ollama/ollama</code></td></tr></tbody></table>
 <blockquote><strong>Tip:</strong> All server endpoints above bind to <code>127.0.0.1</code> by default for security. Change to <code>0.0.0.0</code> only if you need LAN access and understand the exposure.</blockquote>
 <hr>
 <h2 id="notes">📝 Notes</h2>
@@ -390,8 +390,8 @@ podman exec node1 mpirun --host node1,node2 -np 8 python3 /workspace/benchmark.p
 <li><a href="/doc/software/containers/">Containers</a> — overview of all container runtimes</li>
 <li><a href="/doc/software/distrobox/">Distrobox</a> — mutable dev environments with host integration</li>
 <li><a href="/doc/software/lxc-lxd/">Linux Containers (LXC/LXD)</a> — system containers</li>
-<li><a href="/doc/system/hardware/">Hardware & Graphics</a> — GPU driver stack</li>
-<li><a href="/doc/servers/ai-llms/">AI & Machine Learning</a> — model serving with GPU access</li>
+<li><a href="/doc/system/hardware/">Hardware &amp; Graphics</a> — GPU driver stack</li>
+<li><a href="/doc/servers/ai-llms/">AI &amp; Machine Learning</a> — model serving with GPU access</li>
 </ul></div>
     </div>
 
