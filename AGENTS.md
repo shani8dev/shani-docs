@@ -31,7 +31,7 @@ the rest.
 
 **Background reference — skippable, pure survey material:**
 - `Where things are documented`
-- `Content map (all 201 docs)`
+- `Content map (all 204 docs)`
 - `Garuda Cross-Reference Findings (added 2026-09-17)`
 
 Full per-bug methodology is in `AUDIT-HISTORY.md`. **Grep it for the subsystem you are changing**, then read
@@ -353,7 +353,7 @@ not how it got that way.
   `python3 json.loads()` sweep (0 errors), every `datePublished`/
   `dateModified` now UTC-suffixed and correct; the generator's own
   internal "no drift" nav-consistency check still passes.
-- **Content structure**: 201 docs total. `Self-Hosting & Servers` (75
+- **Content structure**: 204 docs total. `Self-Hosting & Servers` (75
   files) went through a multi-pass reorganization — six original
   mega-pages (kubernetes/monitoring/devops/devtools/productivity/security)
   were split by actual function, mislabeled splits were re-fixed, content
@@ -362,7 +362,11 @@ not how it got that way.
   monitoring/platforms + devops/containers + security/vaultwarden merged
   into siblings). Zero broken internal links and zero content loss,
   verified repo-wide as of the last pass.
-- **Duplicate `<h1>` — FIXED, 0 of 201 pages remaining** (was 40).
+- **Duplicate `<h1>` — FIXED, 0 of 206 pages remaining** (was 40). **Re-measured
+  2026-10-10** over the current corpus, not carried forward from the 201-page
+  pass: 0 of 206, and the count is the generator's own (`nav-docs.js
+  regenerated (14 sections, 204 pages)`), with `check-links.js` independently
+  reporting "206 served pages … 204 doc pages exist".
   `stripDuplicateLeadingH1()` in `generate-manifest.js` now unconditionally
   strips a genuinely-leading body H1 (handles a leading blockquote note
   first, preserving it) rather than only stripping on an exact title
@@ -370,18 +374,27 @@ not how it got that way.
   body H1 redundant regardless of wording.
 - **SEO/meta-content bugs — FIXED, verified against the regenerated
   201-doc corpus.** `autoExcerpt()` no longer glues the H1 title onto the
-  first paragraph (was 198/201 pages), no longer deletes inline-code or
+  first paragraph (was 198/201 pages — the denominator of that pass), no longer deletes inline-code or
   link *content* when stripping markup (was silently scrubbing real
   keywords/paths), and no longer produces 12 pages sharing one
-  boilerplate description. Result: 201/201 pages now have distinct,
-  accurate meta descriptions. Meta `keywords` is still empty on all 201
-  pages — the frontmatter→tag plumbing works, but no file has ever set a
-  `keywords:` field; that's a content-authoring gap, not a code bug
+  boilerplate description. Result: 205/205 pages that carry a description
+  have distinct, **Re-measured 2026-10-10** over the 206-page corpus: the
+  404 page carries no `meta description` by design, and the other 205 are all
+  distinct. The original 201/201 was 201 docs with no 404 accounted for.
+  accurate meta descriptions. Meta `keywords` is still empty on all 204
+  pages (**re-measured 2026-10-10**: 204 of 204 doc stubs carry an empty
+  `keywords` meta tag; only `404.html` has none) — the frontmatter→tag
+  plumbing works, but no file has ever set a
+  `keywords:` field (**also re-measured**: 0 of 204 docs mention it in
+  frontmatter); that's a content-authoring gap, not a code bug
   (Google has ignored meta keywords for ranking since ~2009 — low
   priority if it's ever addressed).
 - **Structured data — added, verified valid (0 JSON parse errors across
-  403 blocks).** `BreadcrumbList` on all 201 pages (2-level: Home → page,
+  403 blocks).** `BreadcrumbList` on all 204 doc pages (2-level: Home → page,
   not 3-level, since section groupings have no landing page to link to).
+  **Re-measured 2026-10-10:** 204 of the 204 doc pages carry it — the home
+  page and `404.html` are the only two of the 206 without, and neither has a
+  parent to name.
   `FAQPage` on `docs/faq.md` only (48 mechanically-extracted, hand-verified
   Q&A pairs). Homepage sitelinks searchbox (`WebSite`/`SearchAction`) is
   real and functional — `?q=` on the root URL actually triggers the
@@ -398,7 +411,7 @@ not how it got that way.
   bug just root-caused and fixed). This matches the sibling
   `shani-blog`'s `#prism-theme`, which was already correct. All other CDN
   `<script>`/`<link>` resources keep their byte-verified SRI hashes. CSP
-  added to `index.html`, all 201 doc stubs, and `404.html`
+  added to `index.html`, all 204 doc stubs, and `404.html` (**re-measured 2026-10-10**: 204 of 204 stubs, plus both)
   (`default-src 'self'` + explicit CDN/API allowances).
 - **Prism light-mode rendering — FIXED.** Prior to this the `#prism-theme`
   `<link>` pinned `integrity="sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A"`
@@ -408,7 +421,7 @@ not how it got that way.
   rejected it — code blocks rendered unstyled (single monochrome text color)
   in light mode, with a `Failed to find a valid digest...` console error.
   Fixed by removing the `integrity` from the `#prism-theme` link in
-  `index.html` and all 201 generated stubs, and simplifying `initTheme()` in
+  `index.html` and all 204 generated stubs, and simplifying `initTheme()` in
   `script-docs.js` to swap only `href` (plus `crossorigin="anonymous"`), the
   same scheme the blog already used. `generate-manifest.js`'s `buildStub()`
   inherits the head from root `index.html`, so regeneration keeps the fixed
@@ -439,7 +452,8 @@ not how it got that way.
   slashes and a trailing `/index.html`, so `/doc/<slug>/` and
   `/doc/<slug>/index.html` resolve identically. Verified live: full
   203-page corpus sweep (201 docs + home + 404) reports **0 pages with
-  issues** after the fix (was 201). `cleanSlug()` is the shared normalizer;
+  issues** after the fix (was 201). **Re-run 2026-10-10 as a 206-page corpus
+  (204 docs + home + 404): still 0 pages with issues.** `cleanSlug()` is the shared normalizer;
   do not revert the `index.html` strip when "simplifying" the function.
 - **AI docs — refreshed.** `ai-llms.md`, `ai-development.md`, and
   `gpu-containers.md` used 2024-era example models (`llama3.2`,
@@ -529,6 +543,31 @@ not how it got that way.
     make it exit 1, and `doc/` was restored byte-identical afterwards.
     The generator's own duplicate-title warning already fired on this and was
     being read past; the check turns that warning into a gate.
+  - **`tests/check-html.py` gained the corpus invariants this file had been
+    asserting as prose (2026-10-10), and three of the five were vacuous first
+    time.** The AGENTS.md claims above - duplicate `<h1>` is 0, descriptions
+    are distinct, BreadcrumbList is on every doc page, CSP is on every page -
+    were all re-measured and all still hold, but none had a check behind it,
+    which is exactly how the "201 pages" figure rotted into 204. They are now
+    gates in the script CI already runs, so the numbers cannot drift again
+    without a red line. **Two bugs in the first draft were found by running the
+    controls, not by reading them:**
+    - `no_csp` compared `pages()`'s **absolute** paths against the **relative**
+      ones collected in the loop, so it reported all **206** pages as missing
+      CSP on a corpus where none was.
+    - `indexable` excluded pages by `os.path.basename(f) == "index.html"` -
+      and **every doc stub is `doc/<slug>/index.html`**, so it discarded all
+      **204** and left the description and breadcrumb checks inspecting an
+      empty set. They then printed "0 problems" from nothing to check. It now
+      matches on the full relative path and **asserts the set is non-empty**,
+      so a layout change fails loudly instead of passing silently.
+    `keywords` is deliberately *not* gated: this file records the empty meta
+    as a content-authoring gap, and gating a content gap would make the check
+    the nuisance that gets disabled - the failure its own comment warns about.
+    **All five controls were run** (injected second `<h1>`, two stubs sharing
+    a description, a stripped description, a stripped BreadcrumbList, a
+    stripped CSP), each fails the script, and `doc/` was restored
+    byte-identical after every one.
   - **Not fixed here, pre-existing:** 36 pages still contain a stray
   backtick. A `|` inside a code span splits the table row it sits in
   (`journalctl -b | grep -i drm`), so the cell boundary lands mid-code.
@@ -606,7 +645,7 @@ conflate the two when deciding where a change belongs. `AUDIT-HISTORY.md`
 has the full narrative behind every entry in "Audit-verified known issues"
 above.
 
-## Content map (all 201 docs)
+## Content map (all 204 docs)
 
 ### Sections and page counts
 
@@ -686,7 +725,7 @@ Based on a full scan of the garuda clones mapped against shani — **29 repos** 
 
 ### 🔍 Re-Scan Findings (2026-09-17)
 
-Re-scanned against `garuda-catalog.md` (29 repos, not 34) and `shani-catalog.md` (16 repos). **Confirmed mapping: `garuda-ng`** (EXISTS in `garuda-clones/` — Angular component library, TypeScript/Angular 22/Nx/pnpm, npm `@garudalinux/core`, themed variants, AnalogJS/Vite docs site, GitHub Actions, `renovate.json`, Git-Cliff, GPL-3.0-or-later). It is the most directly comparable reference for the shared-web-code problem. shani-docs is a **multi-page technical docs site with a `generate-manifest.js` build step** (201 docs across 13 sections).
+Re-scanned against `garuda-catalog.md` (29 repos, not 34) and `shani-catalog.md` (16 repos). **Confirmed mapping: `garuda-ng`** (EXISTS in `garuda-clones/` — Angular component library, TypeScript/Angular 22/Nx/pnpm, npm `@garudalinux/core`, themed variants, AnalogJS/Vite docs site, GitHub Actions, `renovate.json`, Git-Cliff, GPL-3.0-or-later). It is the most directly comparable reference for the shared-web-code problem. shani-docs is a **multi-page technical docs site with a `generate-manifest.js` build step** (204 docs across 14 sections).
 
 **New gaps from the garuda side:**
 1. **No content/browser test coverage** — `garuda-ng` has Vitest + Playwright e2e; shani-docs' only CI (`build-manifest.yml`) validates that the generator completes, not content correctness or browser behavior (confirmed in `shani-catalog.md` §13).
@@ -698,7 +737,7 @@ Re-scanned against `garuda-catalog.md` (29 repos, not 34) and `shani-catalog.md`
 **Shani advantages:**
 1. **No-build-step static site** — no Angular 22/Nx/pnpm toolchain to maintain; `generate-manifest.js` is the only Node dependency.
 2. **SRI on all CDN resources** (except the deliberate `#prism-theme` runtime-swap exception) + CSP meta tag + `JSON.parse` nav (fixed from `new Function()`) — hardening `garuda-ng`'s docs site doesn't document.
-3. **Content depth** — 201 docs with distinct auto-generated meta descriptions and BreadcrumbList/FAQPage structured data; `garuda-ng`'s docs site is a component showcase, not authored documentation.
+3. **Content depth** — 204 docs with distinct auto-generated meta descriptions and BreadcrumbList/FAQPage structured data; `garuda-ng`'s docs site is a component showcase, not authored documentation.
 
 **Qt GUI gap note:** not applicable — static docs site; garuda's Qt GUI apps are unrelated.
 
@@ -708,7 +747,7 @@ Implementation priorities are per `../IMPLEMENTATION-ROADMAP.md` (master roadmap
 
 1. ~~**Deploy `robots.txt` + `sitemap.xml` (P0, 5 min).**~~ **DONE — closed 2026-09-17.** Both are generated by `generate-manifest.js`, committed in `217a599` (2026-08-29) and pushed. Verified live: `https://docs.shani.dev/robots.txt` serves real content and `/sitemap.xml` the per-page listing (not GitHub Pages' 404).
 
-2. ~~**Deploy CSP meta tags (P1).**~~ **DONE — closed 2026-09-17.** CSP is generated into `index.html`, all 201 doc stubs, and `404.html`, committed in `217a599` (2026-08-29) and pushed. Verified live: `curl https://docs.shani.dev/` returns the CSP meta tag in served HTML.
+2. ~~**Deploy CSP meta tags (P1).**~~ **DONE — closed 2026-09-17.** CSP is generated into `index.html`, all 204 doc stubs, and `404.html`, committed in `217a599` (2026-08-29) and pushed. Verified live: `curl https://docs.shani.dev/` returns the CSP meta tag in served HTML.
 
 3. **Add LICENSE (P3, 5 min).** Master-roadmap item #31, not #26 (web-shared-components is #27; #26 is shani-cassini welcome content). Match `shani-blog` — the only web sibling that has a LICENSE, and it is **MIT** (audit-verified 2026-09-17), not GPL-3.0 — unless the maintainer decides web repos should follow the OS-side GPL-3.0 standard instead; this repo is one of the 4-repo cluster missing it.
 
