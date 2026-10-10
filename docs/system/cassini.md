@@ -64,7 +64,7 @@ read-only: they show what the tool says and change nothing.
 | **Audio** | The PipeWire graph: devices, outputs, inputs, which is default, which programs are connected | `wpctl status` |
 | **Journal** | Every boot still on disk, a search across their entries, whether logs survive a reboot, and the cap actually in force | `journalctl`, `/var/log/journal`, `/usr/lib/systemd/journald.conf.d/` |
 | **DNS** | Which of the four installed resolvers actually answers, whether `resolv.conf` is a stub symlink or a plain file, and whether the global `DNS=` is set | `/etc/resolv.conf`, `/etc/systemd/resolved.conf` and its drop-ins, `systemctl is-active` |
-| **UPS** | Whether a UPS is configured, whether the daemon is running, and what apcupsd itself reports | `/etc/apcupsd/apcupsd.conf`, `systemctl is-active apcupsd`, `apcaccess status` |
+| **UPS** | Whether a UPS is monitored, whether the daemon is running, and the shutdown policy | `/etc/nut/upsmon.conf` (editable — MINSUPPLIES, SHUTDOWNCMD, POWERDOWNFLAG, DEADTIME, POLLFREQ, FINALDELAY), `systemctl is-active nut-monitor.service`, `upsc <name>@localhost` |
 | **Outbound Mail** | Whether mail this machine sends will leave it: the relay setup, and anything stuck in the queue | `exim -bP transports`, `exim -bp` |
 | **Inbound Access** | Which sharing services are installed, which are enabled, and what they are bound to — and the rule that nothing here may change your network | `ss -tulpn`, `systemctl is-enabled` |
 | **Disk Health** | Whether smartd is scheduled and what its scan settings are, plus the overall health of each disk | `smartd.conf`, `smartctl -H` |

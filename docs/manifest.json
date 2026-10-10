@@ -280,16 +280,6 @@
     "keywords": ""
   },
   {
-    "slug": "networking/apcupsd",
-    "title": "apcupsd (UPS Daemon)",
-    "section": "Networking",
-    "description": "apcupsd monitors APC Uninterruptible Power Supplies and triggers a graceful system shutdown when battery runs low. It is pre-installed on Shani OS. Connect…",
-    "updated": "2026-08-28",
-    "order": 999,
-    "draft": false,
-    "keywords": ""
-  },
-  {
     "slug": "networking/arpwatch",
     "title": "arpwatch (ARP Monitor)",
     "section": "Networking",
@@ -515,6 +505,16 @@
     "section": "Networking",
     "description": "Native Linux file sharing at near-local disk speeds. Best for Linux-to-Linux sharing on a trusted LAN. NFS state is bind-mounted from /data/varlib/nfs and …",
     "updated": "2026-08-28",
+    "order": 999,
+    "draft": false,
+    "keywords": ""
+  },
+  {
+    "slug": "networking/nut",
+    "title": "NUT (Network UPS Tools)",
+    "section": "Networking",
+    "description": "NUT monitors uninterruptible power supplies, power distribution units, automatic transfer switches and solar controllers, and triggers a graceful system sh…",
+    "updated": "2026-10-10",
     "order": 999,
     "draft": false,
     "keywords": ""

@@ -71,7 +71,6 @@ CONFIG.NAV_TREE = [
     "icon": "fa-solid fa-folder",
     "children": [
       { "title": "Apache HTTP Server", "slug": "networking/apache" },
-      { "title": "apcupsd (UPS Daemon)", "slug": "networking/apcupsd" },
       { "title": "arpwatch (ARP Monitor)", "slug": "networking/arpwatch" },
       { "title": "Avahi (mDNS)", "slug": "networking/avahi" },
       { "title": "BIND (Authoritative DNS)", "slug": "networking/bind" },
@@ -95,6 +94,7 @@ CONFIG.NAV_TREE = [
       { "title": "Network Tools", "slug": "networking/network-tools" },
       { "title": "NetworkManager & VPN", "slug": "networking/networkmanager-vpn" },
       { "title": "NFS File Sharing", "slug": "networking/nfs" },
+      { "title": "NUT (Network UPS Tools)", "slug": "networking/nut" },
       { "title": "openresolv (DNS)", "slug": "networking/openresolv" },
       { "title": "OpenSSH", "slug": "networking/openssh" },
       { "title": "PowerDNS", "slug": "networking/powerdns" },

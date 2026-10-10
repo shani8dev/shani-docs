@@ -6,30 +6,30 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' https://shani.dev data:; connect-src 'self' https://api.github.com https://raw.githubusercontent.com">
 
   <!-- ═══ SEO ══════════════════════════════════════════════════════════ -->
-<title>apcupsd (UPS Daemon) — Shanios Docs</title>
-  <meta name="description" id="meta-desc"     content="apcupsd monitors APC Uninterruptible Power Supplies and triggers a graceful system shutdown when battery runs low. It is pre-installed on Shani OS. Connect…">
+<title>NUT (Network UPS Tools) — Shanios Docs</title>
+  <meta name="description" id="meta-desc"     content="NUT monitors uninterruptible power supplies, power distribution units, automatic transfer switches and solar controllers, and triggers a graceful system sh…">
   <meta name="keywords"    id="meta-keywords" content="">
   <meta name="author"      content="Shrinivas Kumbhar">
   <meta name="robots"      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/networking/apcupsd/">
+  <link rel="canonical"    id="canonical-url" href="https://docs.shani.dev/doc/networking/nut/">
 
   <meta property="og:site_name" id="og-site-name" content="Shanios Docs">
-  <meta property="og:title"     id="og-title"     content="apcupsd (UPS Daemon)">
-  <meta property="og:description" id="og-desc"    content="apcupsd monitors APC Uninterruptible Power Supplies and triggers a graceful system shutdown when battery runs low. It is pre-installed on Shani OS. Connect…">
+  <meta property="og:title"     id="og-title"     content="NUT (Network UPS Tools)">
+  <meta property="og:description" id="og-desc"    content="NUT monitors uninterruptible power supplies, power distribution units, automatic transfer switches and solar controllers, and triggers a graceful system sh…">
   <meta property="og:type"      id="og-type"      content="article">
-  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/networking/apcupsd/">
+  <meta property="og:url"       id="og-url"       content="https://docs.shani.dev/doc/networking/nut/">
   <meta property="og:image"     id="og-image"     content="https://shani.dev/assets/images/gnome-screenshot.jpg">
-  <meta property="og:image:alt" id="og-image-alt" content="apcupsd (UPS Daemon)">
+  <meta property="og:image:alt" id="og-image-alt" content="NUT (Network UPS Tools)">
   <meta property="og:locale"    content="en_IN">
 
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        id="tw-site"  content="@shani8dev">
-  <meta name="twitter:title"       id="tw-title" content="apcupsd (UPS Daemon)">
-  <meta name="twitter:description" id="tw-desc"  content="apcupsd monitors APC Uninterruptible Power Supplies and triggers a graceful system shutdown when battery runs low. It is pre-installed on Shani OS. Connect…">
+  <meta name="twitter:title"       id="tw-title" content="NUT (Network UPS Tools)">
+  <meta name="twitter:description" id="tw-desc"  content="NUT monitors uninterruptible power supplies, power distribution units, automatic transfer switches and solar controllers, and triggers a graceful system sh…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"apcupsd (UPS Daemon)","description":"apcupsd monitors APC Uninterruptible Power Supplies and triggers a graceful system shutdown when battery runs low. It is pre-installed on Shani OS. Connect…","url":"https://docs.shani.dev/doc/networking/apcupsd/","datePublished":"2026-08-28T00:00:00.000Z","dateModified":"2026-08-28T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
-  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"apcupsd (UPS Daemon)","item":"https://docs.shani.dev/doc/networking/apcupsd/"}]}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"NUT (Network UPS Tools)","description":"NUT monitors uninterruptible power supplies, power distribution units, automatic transfer switches and solar controllers, and triggers a graceful system sh…","url":"https://docs.shani.dev/doc/networking/nut/","datePublished":"2026-10-10T00:00:00.000Z","dateModified":"2026-10-10T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"NUT (Network UPS Tools)","item":"https://docs.shani.dev/doc/networking/nut/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
 
@@ -224,92 +224,55 @@
         semantically correct, not byte-identical to the client render.
       -->
       <div class="doc-header">
-        <h1 class="doc-title">apcupsd (UPS Daemon)</h1>
+        <h1 class="doc-title">NUT (Network UPS Tools)</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Networking</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-10-10</span>
         </div>
       </div>
-      <div class="prose"><p>apcupsd monitors APC Uninterruptible Power Supplies and triggers a graceful system shutdown when battery runs low. It is pre-installed on Shani OS. Connect your APC UPS via USB — most models are detected automatically with no additional drivers.</p>
-<p><strong>Not active by default.</strong> Enable it only if a UPS is connected.</p>
+      <div class="prose"><p>NUT monitors uninterruptible power supplies, power distribution units, automatic transfer switches and solar controllers, and triggers a graceful system shutdown when the battery runs out. It is pre-installed on Shani OS.</p>
+<p><strong>About the change (2026-10-10):</strong> this page used to describe <code>apcupsd</code>, which ShaniOS shipped before. apcupsd has had no upstream release since 3.14.14 (2016/2017) — Arch still ships that version, repackaged nine times with the code unmoved. NUT is at 2.8.5, its data model is published as <strong>IETF RFC 9271</strong>, it covers 170+ manufacturers over serial, USB, SNMP and IPMI, and it ships an <code>apcupsd-ups</code> driver that still reaches apcupsd-controlled hardware, so nothing that worked before is lost.</p>
+<p><strong>Active by default, with nothing to monitor yet.</strong> ShaniOS starts the NUT stack on a fresh install — <code>MODE=standalone</code> with <code>ALLOW_NO_DEVICE=true</code> — so a UPS you plug in later is picked up without you enabling anything. Until then it reports that no device is configured, which is the honest answer rather than a fault.</p>
 <hr>
-<h2 id="enable">Enable</h2>
-<pre><code class="language-bash">sudo systemctl enable --now apcupsd
-
-systemctl status apcupsd</code></pre>
+<h2 id="find-your-ups">Find your UPS</h2>
+<pre><code class="language-bash">sudo nut-scanner -U</code></pre>
+<p>This discovers USB, serial, SNMP, NetXML and IPMI devices and prints a complete, ready-to-paste section naming the driver and port your hardware actually needs. That is the step to do first: which protocol a UPS speaks is a fact about the device, and a wrong value fails as a driver that exits silently rather than as an error you can see.</p>
+<p>Copy the section it prints into <code>/etc/nut/ups.conf</code>:</p>
+<pre><code class="language-ini">[myups]
+    driver = usbhid-ups
+    port = auto
+    desc = &quot;local UPS&quot;</code></pre>
+<p>Then restart the stack:</p>
+<pre><code class="language-bash">sudo systemctl restart nut-server.service nut-monitor.service</code></pre>
 <hr>
-<h2 id="configuration">Configuration</h2>
-<p>Edit <code>/etc/apcupsd/apcupsd.conf</code>:</p>
-<pre><code class="language-bash"># UPS name (label only — for log messages)
-UPSNAME myups
-
-# Communication device — USB is most common for desktop APC units
-UPSCABLE usb
-UPSTYPE usb
-DEVICE                    # leave blank for USB; apcupsd auto-detects
-
-# Shutdown thresholds
-BATTERYLEVEL 10           # shut down when battery drops to 10%
-MINUTES 5                 # or when &lt; 5 minutes runtime remains
-
-# How long to wait on battery before shutdown (0 = immediate)
-TIMEOUT 0
-
-# Where to write the status file
-STATFILE /var/log/apcupsd.status
-
-# Event scripts directory
-SCRIPTDIR /etc/apcupsd
-
-# Network Information Server — allows remote status queries
-NISIP 127.0.0.1           # 0.0.0.0 to allow LAN access
-NISPORT 3551</code></pre>
-<p>After editing:</p>
-<pre><code class="language-bash">sudo systemctl restart apcupsd</code></pre>
+<h2 id="what-happens-when-the-power-goes">What happens when the power goes</h2>
+<p><code>/etc/nut/upsmon.conf</code> holds the policy. This is a <strong>directive</strong> file — <code>KEY value</code> per line, no <code>=</code> and no sections — which is a different shape from the INI-like <code>ups.conf</code> and <code>upsd.users</code> beside it.</p>
+<pre><code class="language-ini">MONITOR myups@localhost 1 monuser &lt;password&gt; master
+MINSUPPLIES 1
+SHUTDOWNCMD &quot;/sbin/shutdown -h +0&quot;
+POWERDOWNFLAG /etc/killpower
+DEADTIME 15
+POLLFREQ 5
+POLLFREQALERT 5
+FINALDELAY 0</code></pre>
+<table><thead><tr><th>Key</th><th>What it does</th></tr></thead><tbody><tr><td><code>MONITOR</code></td><td>which UPS to watch. The form is `system powervalue user password (master\</td><td>secondary)`. Five values after the key — a short line is a syntax error to upsmon and the UPS is never monitored.</td></tr><tr><td><code>MINSUPPLIES</code></td><td>how many supplies must be on battery before shutdown starts. <code>0</code> is accepted and can then never fire.</td></tr><tr><td><code>SHUTDOWNCMD</code></td><td>the command that brings the machine down. Quote it: unquoted, only its first word is a command and the rest become arguments nothing reads.</td></tr><tr><td><code>POWERDOWNFLAG</code></td><td>the flag file telling the driver to cut UPS power once the machine is down.</td></tr><tr><td><code>DEADTIME</code></td><td>seconds of no answer before the UPS counts as gone. When it fires, upsmon treats that as on-battery, because an unreachable UPS is indistinguishable from a dead one.</td></tr><tr><td><code>POLLFREQ</code> / <code>POLLFREQALERT</code></td><td>seconds between checks on mains and on battery. The battery value is the more useful one to lower.</td></tr><tr><td><code>FINALDELAY</code></td><td>seconds between running <code>SHUTDOWNCMD</code> and upsmon exiting.</td></tr></tbody></table>
+<p><strong>There is no battery-percentage shutdown threshold.</strong> This is the one thing apcupsd had that NUT does not, and it is worth knowing before you look for it: upsmon responds to the UPS <em>hardware's own</em> low-battery signal, so you cannot set "shut down at 15%". Getting a charge- or runtime-based trigger instead needs <code>dummy-ups</code> with overridden <code>battery.charge</code>/<code>battery.runtime</code> values plus <code>upssched</code>, which is a deliberate advanced setup rather than a default.</p>
+<h3 id="setting-the-policy-from-the-window">Setting the policy from the window</h3>
+<p>ShaniOS' <strong>Cassini</strong> settings manager has a UPS page that edits exactly these keys, checks each one before it is written, and tells you a restart is needed — apcupsd and NUT both read their configuration once at startup.</p>
 <hr>
-<h2 id="status-monitoring">Status &amp; Monitoring</h2>
-<pre><code class="language-bash"># Live UPS status (battery level, load, runtime estimate, events)
-apcaccess status
-
-# Watch status continuously
-watch -n 5 apcaccess status
-
-# View event log (power failures, battery tests, shutdowns)
-sudo tail -f /var/log/apcupsd.events
-
-# Run a battery self-test
-apctest</code></pre>
-<p>Key fields in <code>apcaccess status</code>:</p>
-<table><thead><tr><th>Field</th><th>Meaning</th></tr></thead><tbody><tr><td><code>STATUS</code></td><td><code>ONLINE</code>, <code>ONBATT</code>, <code>LOWBATT</code></td></tr><tr><td><code>BCHARGE</code></td><td>Battery charge percentage</td></tr><tr><td><code>TIMELEFT</code></td><td>Estimated runtime on battery</td></tr><tr><td><code>LOADPCT</code></td><td>Load on the UPS as percentage of capacity</td></tr><tr><td><code>LINEV</code></td><td>Input mains voltage</td></tr><tr><td><code>BATTV</code></td><td>Battery voltage</td></tr></tbody></table>
+<h2 id="status">Status</h2>
+<pre><code class="language-bash">upsc myups@localhost              # everything NUT reports, as it reports it
+systemctl status nut-monitor.service</code></pre>
+<p>Key fields in <code>upsc</code> output:</p>
+<table><thead><tr><th>Field</th><th>Meaning</th></tr></thead><tbody><tr><td><code>ups.status</code></td><td><code>OL</code> on line, <code>OB</code> on battery, <code>LB</code> low battery</td></tr><tr><td><code>battery.charge</code></td><td>charge as a percentage</td></tr><tr><td><code>battery.runtime</code></td><td>estimated remaining runtime in seconds</td></tr><tr><td><code>ups.load</code></td><td>load on the UPS</td></tr><tr><td><code>input.voltage</code></td><td>mains voltage</td></tr><tr><td><code>battery.voltage</code></td><td>battery voltage</td></tr></tbody></table>
 <hr>
-<h2 id="event-scripts">Event Scripts</h2>
-<p>apcupsd runs scripts from <code>/etc/apcupsd/</code> when power events occur. The key events and their script names:</p>
-<table><thead><tr><th>Event</th><th>Script</th><th>Triggered when</th></tr></thead><tbody><tr><td>Power failure</td><td><code>onbattery</code></td><td>Mains power lost</td></tr><tr><td>Power restored</td><td><code>offbattery</code></td><td>Mains power returns</td></tr><tr><td>Low battery</td><td><code>doshutdown</code></td><td>Battery/runtime threshold reached</td></tr><tr><td>Battery test done</td><td><code>endapctest</code></td><td>Self-test completes</td></tr></tbody></table>
-<p>Edit <code>/etc/apcupsd/onbattery</code> to send a notification when power fails:</p>
-<pre><code class="language-bash">#!/bin/sh
-echo &quot;Power failure at $(date)&quot; | mail -s &quot;UPS: On Battery&quot; root</code></pre>
-<p>Make scripts executable:</p>
-<pre><code class="language-bash">sudo chmod +x /etc/apcupsd/onbattery</code></pre>
-<blockquote>The <code>mail</code> example above requires <code>mailx</code> to be installed and configured. To log events to the journal instead: <code>logger -t apcupsd "on battery"</code></blockquote>
+<h2 id="files-and-who-owns-them">Files and who owns them</h2>
+<table><thead><tr><th>File</th><th>What it holds</th><th>Edit it?</th></tr></thead><tbody><tr><td><code>/etc/nut/ups.conf</code></td><td>the device — driver, port, <code>desc</code></td><td>yes, or let <code>nut-scanner -U</code> write it</td></tr><tr><td><code>/etc/nut/upsmon.conf</code></td><td>the shutdown policy</td><td>yes</td></tr><tr><td><code>/etc/nut/upsd.conf</code></td><td>where the data server listens. ShaniOS ships it bound to <code>127.0.0.1</code> only.</td><td>only with care — see below</td></tr><tr><td><code>/etc/nut/upsd.users</code></td><td>the monitor credential</td><td><strong>no</strong> — see below</td></tr><tr><td><code>/etc/nut/nut.conf</code></td><td>which NUT layers run. ShaniOS ships <code>MODE=standalone</code>.</td><td>no</td></tr></tbody></table>
+<p><strong><code>upsd.users</code> is not editable and is not shown.</strong> It holds the credential that can issue a forced shutdown of the UPS. ShaniOS generates it once per install in its packaging hook, rather than shipping a fleet-wide value that would be one password able to power down every machine's UPS.</p>
+<p><strong><code>upsd.conf</code> ships bound to loopback only</strong>, and the same reasoning applies: the monitor user can force a power-down, so reachable network plus a guessable password is a remote power-off primitive. NUT's own calls that mode <code>netserver</code> and notes it "is opened to the network [so] a special care should be applied to security concerns". If a second machine ever needs to monitor this UPS, that is a deliberate change, not a <code>LISTEN</code> widened for convenience.</p>
 <hr>
-<h2 id="network-status-server">Network Status Server</h2>
-<p>apcupsd includes a small status server (NIS) on port 3551. Query a remote apcupsd instance from another machine:</p>
-<pre><code class="language-bash"># Query local daemon
-apcaccess status localhost
-
-# Query a remote machine (must have NISIP 0.0.0.0 in config)
-apcaccess status 192.168.1.10:3551</code></pre>
-<p>Open the firewall if you need LAN access to the status server:</p>
-<pre><code class="language-bash">sudo firewall-cmd --add-port=3551/tcp --permanent
-sudo firewall-cmd --reload</code></pre>
-<hr>
-<h2 id="troubleshooting">Troubleshooting</h2>
-<table><thead><tr><th>Issue</th><th>Solution</th></tr></thead><tbody><tr><td><code>apcupsd</code> won't start</td><td>Check <code>journalctl -u apcupsd</code>; common cause is wrong <code>UPSCABLE</code>/<code>UPSTYPE</code> — use <code>usb</code> for USB-connected APC units</td></tr><tr><td><code>apcaccess</code> returns <code>NETWORK ERROR</code></td><td>Daemon isn't running or NIS is disabled — check <code>systemctl status apcupsd</code></td></tr><tr><td>UPS not detected</td><td>Run <code>lsusb</code> to confirm the UPS appears; APC USB devices use the standard HID UPS class — no extra driver needed</td></tr><tr><td>Shutdown not triggering on low battery</td><td>Check <code>BATTERYLEVEL</code> and <code>MINUTES</code> thresholds in the config; test with <code>apctest</code> → option 7 (simulate power failure)</td></tr><tr><td><code>STATFLAG</code> shows <code>0x060000</code> (communication lost)</td><td>Cable issue or wrong port — unplug/replug USB; check <code>DEVICE</code> is blank for USB</td></tr></tbody></table>
-<h2 id="see-also">See Also</h2>
-<ul>
-<li><a href="https://blog.shani.dev/post/shani-os-home-server">UPS monitoring in practice</a></li>
-<li><a href="/doc/system/cronie/">systemd timers</a></li>
-</ul></div>
+<h2 id="multi-machine-monitoring">Multi-machine monitoring</h2>
+<p>ShaniOS runs NUT in <code>standalone</code> mode — one UPS, one machine. NUT also supports <code>netserver</code> (share this UPS with other machines) and <code>netclient</code> (watch a UPS somewhere else). Both are documented in <code>nut.conf</code> and both are opt-in, because the first opens a network service and the second depends on one.</p></div>
     </div>
 
   </main>
