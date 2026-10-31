@@ -69,6 +69,7 @@ The cmdline is always regenerated from scratch — it cannot be manually pre-edi
 - `root=`, `rootflags=` — device and Btrfs subvolume for the slot
 - `systemd.volatile=state` — volatile `/var`
 - `lsm=landlock,lockdown,yama,integrity,apparmor,bpf` — LSM stack
+- `lockdown=confidentiality` — kernel lockdown mode (added 2026-11-01)
 - `rd.luks.*` — LUKS device and TPM2 auto-unlock hint (encrypted systems)
 - `rd.vconsole.keymap=` — keyboard layout from `/etc/vconsole.conf`
 - `resume=`, `resume_offset=` — hibernation parameters (when swapfile exists)

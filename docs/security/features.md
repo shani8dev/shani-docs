@@ -31,11 +31,19 @@ The `/etc` OverlayFS and the `@data` subvolume are writable, but they are user-v
 
 ## Linux Security Modules
 
-Six LSMs run simultaneously, loaded in order:
+Six LSMs run simultaneously, loaded in order, and the kernel is put in
+**confidentiality** lockdown mode:
 
 ```
 lsm=landlock,lockdown,yama,integrity,apparmor,bpf
+lockdown=confidentiality
 ```
+
+`lockdown=confidentiality` blocks `/dev/mem`, kexec, debugfs and other
+paths a compromised root could use to bypass the other LSMs. Verified to
+boot cleanly on the tested hardware; if you hit a driver or feature that
+needs one of those paths (e.g. some NVIDIA/kexec/hibernation setups), drop
+the token and reboot.
 
 Most Linux distributions enable one or two LSMs. Shanios enables all six simultaneously — each layer providing independent protection that remains in effect even if another is bypassed.
 
@@ -44,7 +52,7 @@ Most Linux distributions enable one or two LSMs. Shanios enables all six simulta
 | **Landlock** | Unprivileged sandboxing — applications can restrict their own filesystem access without requiring root to write a policy. Works bottom-up, complementing AppArmor's top-down enforcement. |
 | **Lockdown** | Prevents kernel tampering from userspace (e.g. `/dev/mem` access, loading unsigned modules, PCI BAR access). Blocks a compromised root process from escaping other LSMs via low-level hardware access. |
 | **Yama** | Restricts `ptrace` scope — a process can only be ptraced by its own children or explicitly permitted processes, blocking process injection and credential theft attacks. |
-| **Integrity (IMA/EVM)** | Measures file integrity at runtime. IMA records cryptographic hashes of executed files. EVM protects file metadata (ownership, permissions, xattrs) using HMAC. Provides a runtime audit trail and detects tampered files in writable filesystem areas. |
+| **Integrity (IMA/EVM)** | Listed in the LSM stack, but **no IMA/EVM policy is shipped**, so it currently provides no runtime measurement or enforcement. It is retained in the stack for future use (e.g. file-integrity auditing of `/etc` and `/var`); enabling it would require an IMA policy and EVM key setup. |
 | **AppArmor** | Per-process capability profiles enforced by the kernel. System daemons and Snap packages are confined. Custom profiles loaded at boot. |
 | **BPF** | Restricts BPF program loading to privileged users. Container runtimes (Podman, LXC) use BPF LSM hooks for container isolation. Enables custom eBPF security policies for decisions that cannot be expressed as static AppArmor profiles. |
 

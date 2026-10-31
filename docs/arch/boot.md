@@ -84,7 +84,7 @@ Key parameters embedded in each UKI:
 quiet splash                         # suppress kernel messages; show Plymouth
 systemd.volatile=state               # /var is tmpfs; bind-mounts restore service state
 ro                                   # read-only root
-lsm=landlock,lockdown,yama,integrity,apparmor,bpf
+lsm=landlock,lockdown,yama,integrity,apparmor,bpf lockdown=confidentiality
 rootfstype=btrfs
 rootflags=subvol=@blue,ro,noatime,compress=zstd,space_cache=v2,autodefrag
 rd.luks.uuid=<uuid>                  # LUKS container UUID (encrypted systems only)
