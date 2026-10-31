@@ -42,6 +42,30 @@ Before every update, `shani-deploy` also takes its own Btrfs backup snapshot of 
 
 ---
 
+## Automated Home Snapshots (shani-backup)
+
+ShaniOS ships `shani-backup` (enabled by default on GNOME, Plasma, Niri, and Cosmic
+profiles), which takes a **daily read-only snapshot of every home** under
+`/home/.snapshots/` with 14-day retention, per-user ACLs, and automatic
+space-aware pruning (retention drops to 2 when free space falls below 15 %).
+Off-disk copies go to restic on a separate timer. Before every update,
+`shani-deploy` also asks `shani-backup home predeploy --keep 2` for a fresh
+same-minute snapshot, so an update always has a same-minute undo of `/home`.
+
+These are taken by the system as root — no per-user setup is needed. Opt out
+with `home_snapshot=no` in `/etc/shani/shani.conf` (or `--no-home-snapshot`
+for one run).
+
+Manage them with:
+- `shani-backup home list` / `shani-backup home create` / `shani-backup home delete`
+- The **Backup** page in Shani Cassini (GUI)
+- Chronoa senses/skills (`snapshot_status`)
+
+Manual snapshots (below) are still useful for one-off experiments, but the
+automated stack above is the recommended baseline.
+
+---
+
 ## 1. Btrfs Snapshots (Local, Instant Recovery)
 
 Btrfs snapshots are near-instantaneous and use minimal space — only files that change after the snapshot consume new space.
