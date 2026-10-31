@@ -173,7 +173,7 @@ Shanios runs Btrfs maintenance automatically via systemd timers — no manual in
 |-------|--------|
 | `btrfs-scrub.timer` | Monthly scrubbing to detect and repair data corruption |
 | `btrfs-balance.timer` | Periodic filesystem balancing for optimal performance |
-| `btrfs-defrag.timer` | Automatic defragmentation on fragmented files |
+| `btrfs-defrag.timer` | Disabled by default — periodic defragmentation breaks reflinks/dedup and adds SSD wear; run `btrfs filesystem defragment` manually if needed |
 | `btrfs-trim.timer` | Regular TRIM operations for SSD optimisation |
 | `beesd` daemon | Continuous background block-level deduplication across all Btrfs subvolumes |
 
