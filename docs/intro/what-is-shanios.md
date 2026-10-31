@@ -31,7 +31,7 @@ Shanios is an immutable Linux distribution that brings enterprise DevOps practic
 
 - ❌ A bad update can leave the system unbootable
 - ❌ Dependency conflicts corrupt shared libraries
-- ❌ Rollback requires manual snapshot discipline
+- ❌ Rollback requires manual snapshot discipline (Shanios automates `/home` snapshots via `shani-backup` — daily + pre-deploy)
 - ❌ System state drifts from original install
 - ❌ Any exploited process can modify `/usr /bin`
 - ❌ No cryptographic verification of the boot chain
@@ -42,8 +42,7 @@ Shanios is an immutable Linux distribution that brings enterprise DevOps practic
 - ✅ Instant rollback — previous slot always on disk
 - ✅ Verified boot chain — SHA256 + GPG + Secure Boot
 - ✅ No system drift — root replaced wholesale each update
-- ✅ IMA/EVM runtime integrity measurement active
-- ✅ Six LSMs active simultaneously (AppArmor, Landlock…)
+- ✅ Six LSMs active simultaneously (AppArmor, Landlock, …); IMA/EVM listed but no policy shipped — runtime measurement not yet enabled
 
 ## Project Structure
 

@@ -426,7 +426,7 @@ podman start -a shani-agent
 
 **Full isolation (multi-tenant / high-value):** Use Firecracker booted via `machinectl` or Kata Containers `virtctl`. Both present a complete VM with minimal device exposure — ideal when the agent must touch repository contents, SSH keys, or MCP configs.
 
-**The root filesystem itself needs no manual snapshot at all.** `/` is always one of the two read-only `@blue`/`@green` slots — an agent (or anything else) cannot write to it, and there's nothing to protect there because [`shani-deploy`](../concepts/atomic-updates.md) already keeps the inactive slot as an instant rollback target for OS-level changes. What an agent *can* actually modify is `@home` — and unlike the root slots, that has no automatic snapshot schedule out of the box. Set one up once via the systemd timer in [Backup & Recovery](../system/backup.md#1-btrfs-snapshots-local-instant-recovery), or take a one-off manual snapshot right before a specific risky run:
+**The root filesystem itself needs no manual snapshot at all.** `/` is always one of the two read-only `@blue`/`@green` slots — an agent (or anything else) cannot write to it, and there's nothing to protect there because [`shani-deploy`](../concepts/atomic-updates.md) already keeps the inactive slot as an instant rollback target for OS-level changes. What an agent *can* actually modify is `@home` — but `shani-backup` (enabled by default on GNOME, Plasma, Niri, and Cosmic profiles) already takes a daily read-only snapshot of every home under `/home/.snapshots/` with 14-day retention, plus a same-minute snapshot before every update. A manual one-off right before a specific risky run is still a good idea, but the baseline is already covered:
 
 ```bash
 # Extra snapshot of @home right before a risky agent session (read-only, non-destructive)
@@ -464,7 +464,7 @@ Running untrusted LLM-generated code requires isolation beyond standard containe
 
 **Prompt injection mitigation:** never feed untrusted external content (emails, web pages, issue bodies) into the same agent context that has tool access. Run tools that touch sensitive data in isolated contexts without sharing that context with external input sources.
 
-For Shanios desktop users: run agentic workloads inside a Distrobox or Podman container with the restrictions above. The root filesystem needs no extra protection — it's already read-only regardless — but `@home` has no automatic snapshot schedule out of the box, so either set up the recurring timer in [Backup & Recovery](../system/backup.md) or take a manual one (see above) before a specific long autonomous run.
+For Shanios desktop users: run agentic workloads inside a Distrobox or Podman container with the restrictions above. The root filesystem needs no extra protection — it's already read-only regardless — but `@home` is already covered by `shani-backup`'s daily + pre-deploy snapshots (see [Backup & Recovery](../system/backup.md)); a manual one-off before a long autonomous run is still cheap insurance.
 
 ## Privacy Posture
 

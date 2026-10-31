@@ -261,7 +261,7 @@ sudo mdadm --stop /dev/md0
 
 Shani OS's root and data volumes are Btrfs, laid out as `@blue`/`@green` root subvolumes for atomic updates (see [Btrfs Deep Dive](../arch/btrfs.md)). Routine maintenance already runs on its own — you rarely need to invoke `btrfs scrub`, `btrfs balance`, or `fstrim` manually:
 
-- **Balance, defrag, scrub, and trim** run via `btrfs-balance.timer`, `btrfs-defrag.timer`, `btrfs-scrub.timer`, and `btrfs-trim.timer` (from `btrfsmaintenance`), enabled by default and scheduled weekly at idle I/O priority. Check them with `systemctl list-timers 'btrfs-*'`.
+- **Balance, scrub, and trim** run via `btrfs-balance.timer`, `btrfs-scrub.timer`, and `btrfs-trim.timer` (from `btrfsmaintenance`), enabled by default. `btrfs-defrag.timer` is **disabled by default** — periodic defragmentation breaks Btrfs reflinks/deduplication and adds SSD wear; run `btrfs filesystem defragment` manually if needed. Check them with `systemctl list-timers 'btrfs-*'`.
 - **bees** runs continuously in the background (`beesd@<uuid>.service`), deduplicating extents across the `@blue`/`@green` root subvolumes and their backup snapshots as they diverge — this is what keeps two nearly-identical OS slots from doubling disk usage.
 - **`sudo shani-deploy --optimize`** runs a deeper, one-shot `duperemove` pass across `@blue`, `@green`, and any `*_backup_*` subvolumes. Use it to reclaim space beyond what continuous bees dedup catches; it's skipped automatically if a deployment is pending.
 
