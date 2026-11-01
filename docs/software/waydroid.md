@@ -156,12 +156,13 @@ No manual firewall configuration is needed.
 # Re-initialise Waydroid if something goes wrong
 sudo waydroid-helper init --force
 
-# Check for missing kernel modules
-sudo modprobe binder_linux
-sudo modprobe ashmem_linux   # older kernels only; not needed on 6.x+
+# Binder is provided by the rust_binder module built into the Arch `linux` kernel,
+# so no `modprobe` is needed on Shanios. If /dev/binder is missing, the module
+# may not have loaded — force it and re-check:
+sudo modprobe binder_linux 2>/dev/null || true
 
 # Verify binder is available
-ls /dev/binder /dev/anbox-binder 2>/dev/null || echo "binder not found"
+ls /dev/binder /dev/binderfs 2>/dev/null || echo "binder not found"
 
 # Full reset (removes all Android data and apps)
 sudo waydroid init -f

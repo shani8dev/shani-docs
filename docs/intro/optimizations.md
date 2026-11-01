@@ -12,7 +12,7 @@ Shanios includes extensive performance, gaming, and reliability optimizations ou
 
 - **ZRAM Compression:** Automatic RAM compression using the zstd algorithm provides improved memory efficiency without requiring swap partitions.
 - **Optimized Swappiness:** Tuned to 133 — encourages the kernel to use compressed ZRAM swap before evicting clean page cache, maintaining system responsiveness under memory pressure.
-- **Btrfs Maintenance:** Automated filesystem maintenance runs in the background — periodic scrubbing for data integrity, balance operations, and defragmentation. Scheduled to minimize impact on system usage.
+- **Btrfs Maintenance:** Automated filesystem maintenance runs in the background — periodic scrubbing for data integrity and balance operations. Defragmentation is **disabled by default** (periodic defrag breaks Btrfs reflinks/deduplication and adds SSD wear); run `btrfs filesystem defragment` manually if needed. Scheduled to minimize impact on system usage.
 - **Continuous Block-Level Deduplication:** `beesd` runs as a background daemon, deduplicating identical data blocks across all Btrfs subvolumes to reduce disk usage.
 - **Optimized Page Lock Unfairness:** Set to 1 to reduce lock contention and improve multi-threaded application performance, particularly for databases and high-concurrency workloads.
 
@@ -29,6 +29,7 @@ Shanios includes extensive performance, gaming, and reliability optimizations ou
 - **Game Compatibility Kernel Parameters:** Increased PID limit (65535), expanded memory map areas (2147483642), enhanced inotify limits
 - **Network Optimization:** TCP FIN timeout reduced to 5 seconds (Valve SteamOS optimization) — prevents "address already in use" errors in multiplayer games
 - **CPU Scheduler Tuning:** CFS bandwidth slice: 3000μs; base slice: 3ms; autogroup scheduling enabled
+- **sched-ext:** `scx_loader` runs with `--auto` and defaults to the `scx_lavd` scheduler (configured in `/etc/scx_loader.toml`); schedulers ship in `shani-core`
 - **MGLRU (Multi-Gen LRU):** Enabled with aggressive settings for intelligent memory reclaim
 - **Transparent Hugepage:** Set to `madvise` for selective large page usage
 - **GameMode Integration:** GameMode daemon enabled globally — auto-applies CPU governor, I/O priority, and GPU performance levels when games launch
@@ -57,7 +58,7 @@ Shanios includes extensive performance, gaming, and reliability optimizations ou
 |-------|--------|
 | `btrfs-scrub.timer` | Monthly scrubbing to detect and repair data corruption |
 | `btrfs-balance.timer` | Periodic filesystem balancing for optimal performance |
-| `btrfs-defrag.timer` | Automatic defragmentation on fragmented files |
+| `btrfs-defrag.timer` | Disabled by default — periodic defragmentation breaks reflinks/dedup and adds SSD wear; run `btrfs filesystem defragment` manually if needed |
 | `btrfs-trim.timer` | Regular TRIM operations for SSD optimisation |
 | `beesd` daemon | Continuous background block-level deduplication across all Btrfs subvolumes |
 | `flatpak-update-system.timer` | System Flatpak auto-updates every 12 hours |

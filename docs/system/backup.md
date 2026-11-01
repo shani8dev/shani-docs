@@ -364,7 +364,7 @@ The self-hosted option is **Healthchecks** — see the [Monitoring wiki](https:/
 
 ## The Complete Strategy
 
-**Layer 1 — Daily Btrfs snapshots** of `@home` to `/data/snapshots/home/`, via the systemd timer you set up above (not automatic out of the box — see "Automating Daily Snapshots"). Fast local recovery from accidental deletion once it's running.
+**Layer 1 — Daily Btrfs snapshots** of `@home` under `/home/.snapshots/`, taken automatically by `shani-backup` (enabled by default on GNOME, Plasma, Niri, and Cosmic profiles) with 14-day retention, plus a same-minute snapshot before every update. Fast local recovery from accidental deletion or a bad update — no manual timer setup needed. The manual timer in "Automating Daily Snapshots" above is only for one-off or custom snapshot locations.
 
 **Layer 2 — Daily/weekly restic backups** to an external drive or NAS. Off-disk, encrypted, versioned protection against hardware failure.
 

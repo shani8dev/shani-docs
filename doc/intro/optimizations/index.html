@@ -235,7 +235,7 @@
 <ul>
 <li><strong>ZRAM Compression:</strong> Automatic RAM compression using the zstd algorithm provides improved memory efficiency without requiring swap partitions.</li>
 <li><strong>Optimized Swappiness:</strong> Tuned to 133 — encourages the kernel to use compressed ZRAM swap before evicting clean page cache, maintaining system responsiveness under memory pressure.</li>
-<li><strong>Btrfs Maintenance:</strong> Automated filesystem maintenance runs in the background — periodic scrubbing for data integrity, balance operations, and defragmentation. Scheduled to minimize impact on system usage.</li>
+<li><strong>Btrfs Maintenance:</strong> Automated filesystem maintenance runs in the background — periodic scrubbing for data integrity and balance operations. Defragmentation is <strong>disabled by default</strong> (periodic defrag breaks Btrfs reflinks/deduplication and adds SSD wear); run <code>btrfs filesystem defragment</code> manually if needed. Scheduled to minimize impact on system usage.</li>
 <li><strong>Continuous Block-Level Deduplication:</strong> <code>beesd</code> runs as a background daemon, deduplicating identical data blocks across all Btrfs subvolumes to reduce disk usage.</li>
 <li><strong>Optimized Page Lock Unfairness:</strong> Set to 1 to reduce lock contention and improve multi-threaded application performance, particularly for databases and high-concurrency workloads.</li>
 </ul>
@@ -251,6 +251,7 @@
 <li><strong>Game Compatibility Kernel Parameters:</strong> Increased PID limit (65535), expanded memory map areas (2147483642), enhanced inotify limits</li>
 <li><strong>Network Optimization:</strong> TCP FIN timeout reduced to 5 seconds (Valve SteamOS optimization) — prevents "address already in use" errors in multiplayer games</li>
 <li><strong>CPU Scheduler Tuning:</strong> CFS bandwidth slice: 3000μs; base slice: 3ms; autogroup scheduling enabled</li>
+<li><strong>sched-ext:</strong> <code>scx_loader</code> runs with <code>--auto</code> and defaults to the <code>scx_lavd</code> scheduler (configured in <code>/etc/scx_loader.toml</code>); schedulers ship in <code>shani-core</code></li>
 <li><strong>MGLRU (Multi-Gen LRU):</strong> Enabled with aggressive settings for intelligent memory reclaim</li>
 <li><strong>Transparent Hugepage:</strong> Set to <code>madvise</code> for selective large page usage</li>
 <li><strong>GameMode Integration:</strong> GameMode daemon enabled globally — auto-applies CPU governor, I/O priority, and GPU performance levels when games launch</li>
@@ -274,7 +275,7 @@
 <li><strong>Socket Activation:</strong> Many services start on-demand — pcscd, lircd, gpsd, cups, avahi-daemon, saned</li>
 </ul>
 <h2 id="automated-maintenance-systemd-timers">Automated Maintenance (Systemd Timers)</h2>
-<table><thead><tr><th>Timer</th><th>Action</th></tr></thead><tbody><tr><td><code>btrfs-scrub.timer</code></td><td>Monthly scrubbing to detect and repair data corruption</td></tr><tr><td><code>btrfs-balance.timer</code></td><td>Periodic filesystem balancing for optimal performance</td></tr><tr><td><code>btrfs-defrag.timer</code></td><td>Automatic defragmentation on fragmented files</td></tr><tr><td><code>btrfs-trim.timer</code></td><td>Regular TRIM operations for SSD optimisation</td></tr><tr><td><code>beesd</code> daemon</td><td>Continuous background block-level deduplication across all Btrfs subvolumes</td></tr><tr><td><code>flatpak-update-system.timer</code></td><td>System Flatpak auto-updates every 12 hours</td></tr><tr><td><code>flatpak-update-user.timer</code></td><td>Per-user Flatpak auto-updates every 12 hours</td></tr><tr><td><code>shani-cassini-agent.timer</code> (per-user)</td><td>Checks update and boot state every 2 hours and opens Shani Cassini for update actions</td></tr></tbody></table>
+<table><thead><tr><th>Timer</th><th>Action</th></tr></thead><tbody><tr><td><code>btrfs-scrub.timer</code></td><td>Monthly scrubbing to detect and repair data corruption</td></tr><tr><td><code>btrfs-balance.timer</code></td><td>Periodic filesystem balancing for optimal performance</td></tr><tr><td><code>btrfs-defrag.timer</code></td><td>Disabled by default — periodic defragmentation breaks reflinks/dedup and adds SSD wear; run <code>btrfs filesystem defragment</code> manually if needed</td></tr><tr><td><code>btrfs-trim.timer</code></td><td>Regular TRIM operations for SSD optimisation</td></tr><tr><td><code>beesd</code> daemon</td><td>Continuous background block-level deduplication across all Btrfs subvolumes</td></tr><tr><td><code>flatpak-update-system.timer</code></td><td>System Flatpak auto-updates every 12 hours</td></tr><tr><td><code>flatpak-update-user.timer</code></td><td>Per-user Flatpak auto-updates every 12 hours</td></tr><tr><td><code>shani-cassini-agent.timer</code> (per-user)</td><td>Checks update and boot state every 2 hours and opens Shani Cassini for update actions</td></tr></tbody></table>
 <p>All maintenance operations are scheduled during low-usage periods and use minimal system resources.</p>
 <h3 id="verifying-the-optimizations">Verifying the Optimizations</h3>
 <p>Everything above is observable on a running system:</p>

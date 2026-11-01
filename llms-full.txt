@@ -94,7 +94,7 @@ Key parameters embedded in each UKI:
 quiet splash                         # suppress kernel messages; show Plymouth
 systemd.volatile=state               # /var is tmpfs; bind-mounts restore service state
 ro                                   # read-only root
-lsm=landlock,lockdown,yama,integrity,apparmor,bpf
+lsm=landlock,lockdown,yama,integrity,apparmor,bpf lockdown=confidentiality
 rootfstype=btrfs
 rootflags=subvol=@blue,ro,noatime,compress=zstd,space_cache=v2,autodefrag
 rd.luks.uuid=<uuid>                  # LUKS container UUID (encrypted systems only)
@@ -392,7 +392,7 @@ Shanios runs Btrfs maintenance automatically via systemd timers — no manual in
 |-------|--------|
 | `btrfs-scrub.timer` | Monthly scrubbing to detect and repair data corruption |
 | `btrfs-balance.timer` | Periodic filesystem balancing for optimal performance |
-| `btrfs-defrag.timer` | Automatic defragmentation on fragmented files |
+| `btrfs-defrag.timer` | Disabled by default — periodic defragmentation breaks reflinks/dedup and adds SSD wear; run `btrfs filesystem defragment` manually if needed |
 | `btrfs-trim.timer` | Regular TRIM operations for SSD optimisation |
 | `beesd` daemon | Continuous background block-level deduplication across all Btrfs subvolumes |
 
@@ -1632,7 +1632,7 @@ Every row below holds on a stock installation with no additional hardening.
 
 | Benchmark area | Shanios default | Evidence command |
 |---|---|---|
-| Filesystem integrity (CIS Arch Linux benchmark — filesystem area) | `/usr` mounted read-only, even for root; IMA/EVM active in the LSM stack | `findmnt /` ; `cat /sys/kernel/security/ima/active` |
+| Filesystem integrity (CIS Arch Linux benchmark — filesystem area) | `/usr` mounted read-only, even for root; IMA/EVM listed in the LSM stack (no policy shipped, runtime measurement not enabled) | `findmnt /` ; `cat /sys/kernel/security/ima/active` (empty unless a policy is loaded) |
 | Boot chain (boot area) | Shim + MOK-signed UKIs under Secure Boot; kernel cmdline embedded in the UKI, boot menu editor disabled | `bootctl status` ; `shani-health --security` |
 | Package provenance (package management area) | All OS packages from the GPG-signed `[shani]` repo or baked into the signed image; no third-party repos added at runtime | `pacman -Q` (inventory) ; `shani-health --verify` (deep integrity) |
 | Malware persistence surface (system hardening area) | Root cannot write to system paths at runtime; binaries are replaced only wholesale via verified deploys | `findmnt /` (ro) ; `shani-health --verify` (immutability checks) |
@@ -2398,7 +2398,7 @@ ssh admin@machine-name.tailnet.ts.net 'sudo shani-deploy -r && sudo reboot'
 
 Shanios's default security configuration is designed to pass enterprise security audits without additional hardening steps:
 
-- Six simultaneous Linux Security Modules (AppArmor, Landlock, Lockdown, Yama, IMA/EVM, BPF LSM)
+- Six simultaneous Linux Security Modules (AppArmor, Landlock, Lockdown, Yama, IMA/EVM listed with no policy shipped, BPF LSM)
 - Immutable root filesystem — even root cannot write to system paths at runtime
 - LUKS2 argon2id full-disk encryption (opt-in at install)
 - TPM2 auto-unlock — disk locked against physical removal to another machine
@@ -3830,7 +3830,7 @@ Shanios includes extensive performance, gaming, and reliability optimizations ou
 
 - **ZRAM Compression:** Automatic RAM compression using the zstd algorithm provides improved memory efficiency without requiring swap partitions.
 - **Optimized Swappiness:** Tuned to 133 — encourages the kernel to use compressed ZRAM swap before evicting clean page cache, maintaining system responsiveness under memory pressure.
-- **Btrfs Maintenance:** Automated filesystem maintenance runs in the background — periodic scrubbing for data integrity, balance operations, and defragmentation. Scheduled to minimize impact on system usage.
+- **Btrfs Maintenance:** Automated filesystem maintenance runs in the background — periodic scrubbing for data integrity and balance operations. Defragmentation is **disabled by default** (periodic defrag breaks Btrfs reflinks/deduplication and adds SSD wear); run `btrfs filesystem defragment` manually if needed. Scheduled to minimize impact on system usage.
 - **Continuous Block-Level Deduplication:** `beesd` runs as a background daemon, deduplicating identical data blocks across all Btrfs subvolumes to reduce disk usage.
 - **Optimized Page Lock Unfairness:** Set to 1 to reduce lock contention and improve multi-threaded application performance, particularly for databases and high-concurrency workloads.
 
@@ -3847,6 +3847,7 @@ Shanios includes extensive performance, gaming, and reliability optimizations ou
 - **Game Compatibility Kernel Parameters:** Increased PID limit (65535), expanded memory map areas (2147483642), enhanced inotify limits
 - **Network Optimization:** TCP FIN timeout reduced to 5 seconds (Valve SteamOS optimization) — prevents "address already in use" errors in multiplayer games
 - **CPU Scheduler Tuning:** CFS bandwidth slice: 3000μs; base slice: 3ms; autogroup scheduling enabled
+- **sched-ext:** `scx_loader` runs with `--auto` and defaults to the `scx_lavd` scheduler (configured in `/etc/scx_loader.toml`); schedulers ship in `shani-core`
 - **MGLRU (Multi-Gen LRU):** Enabled with aggressive settings for intelligent memory reclaim
 - **Transparent Hugepage:** Set to `madvise` for selective large page usage
 - **GameMode Integration:** GameMode daemon enabled globally — auto-applies CPU governor, I/O priority, and GPU performance levels when games launch
@@ -3875,7 +3876,7 @@ Shanios includes extensive performance, gaming, and reliability optimizations ou
 |-------|--------|
 | `btrfs-scrub.timer` | Monthly scrubbing to detect and repair data corruption |
 | `btrfs-balance.timer` | Periodic filesystem balancing for optimal performance |
-| `btrfs-defrag.timer` | Automatic defragmentation on fragmented files |
+| `btrfs-defrag.timer` | Disabled by default — periodic defragmentation breaks reflinks/dedup and adds SSD wear; run `btrfs filesystem defragment` manually if needed |
 | `btrfs-trim.timer` | Regular TRIM operations for SSD optimisation |
 | `beesd` daemon | Continuous background block-level deduplication across all Btrfs subvolumes |
 | `flatpak-update-system.timer` | System Flatpak auto-updates every 12 hours |
@@ -4205,7 +4206,7 @@ Shanios is an immutable Linux distribution that brings enterprise DevOps practic
 - **Blue-Green Deployment:** Two complete system images (`@blue` and `@green`) are maintained. While one is active, updates are written to the other. On reboot you switch to the updated image. The previous one is kept as a one-command rollback target.
 - **Atomic Updates:** Updates are all-or-nothing. The running system is never touched during an update. If something goes wrong, boot failure is detected automatically and the system rolls back — your work is never interrupted.
 - **Selective Persistence:** User data, configuration changes (`/etc` overlay), Flatpak apps, containers, VMs, and service credentials all live in dedicated Btrfs subvolumes that survive every update and rollback, always.
-- **Defence-in-Depth Security:** Six Linux Security Modules run simultaneously (`lsm=landlock,lockdown,yama,integrity,apparmor,bpf`), LUKS2 argon2id full-disk encryption, TPM2 auto-unlock, Secure Boot with MOK, the `pcspkr` PC-speaker module blacklisted (`mei`/`mei_me` are **not** blacklisted by default — see [Kernel Modules](../system/kernel-modules.md)), and every OS image is SHA256+GPG verified before deployment.
+- **Defence-in-Depth Security:** Six Linux Security Modules run simultaneously (`lsm=landlock,lockdown,yama,integrity,apparmor,bpf`) in confidentiality lockdown mode (`lockdown=confidentiality`), LUKS2 argon2id full-disk encryption, TPM2 auto-unlock, Secure Boot with MOK, the `pcspkr` PC-speaker module blacklisted (`mei`/`mei_me` are **not** blacklisted by default — see [Kernel Modules](../system/kernel-modules.md)), and every OS image is SHA256+GPG verified before deployment.
 - **Zero Telemetry:** No usage data, crash reports, analytics, or tracking of any kind — ever. The entire codebase is public on GitHub; every claim is independently verifiable.
 
 ## Traditional vs Immutable OS
@@ -4222,7 +4223,7 @@ Shanios is an immutable Linux distribution that brings enterprise DevOps practic
 
 - ❌ A bad update can leave the system unbootable
 - ❌ Dependency conflicts corrupt shared libraries
-- ❌ Rollback requires manual snapshot discipline
+- ❌ Rollback requires manual snapshot discipline (Shanios automates `/home` snapshots via `shani-backup` — daily + pre-deploy)
 - ❌ System state drifts from original install
 - ❌ Any exploited process can modify `/usr /bin`
 - ❌ No cryptographic verification of the boot chain
@@ -4233,8 +4234,7 @@ Shanios is an immutable Linux distribution that brings enterprise DevOps practic
 - ✅ Instant rollback — previous slot always on disk
 - ✅ Verified boot chain — SHA256 + GPG + Secure Boot
 - ✅ No system drift — root replaced wholesale each update
-- ✅ IMA/EVM runtime integrity measurement active
-- ✅ Six LSMs active simultaneously (AppArmor, Landlock…)
+- ✅ Six LSMs active simultaneously (AppArmor, Landlock, …); IMA/EVM listed but no policy shipped — runtime measurement not yet enabled
 
 ## Project Structure
 
@@ -11570,7 +11570,7 @@ At the time of writing, the current stable release is **2026.05.18**: GNOME edit
 - **Immutability:** The root filesystem is read-only at runtime. Neither accidental commands nor malware can corrupt the OS — it always boots to a known-good state. Even a process running as root cannot modify core system files during a live session.
 - **Atomic updates via blue-green deployment:** Two complete system images (`@blue` and `@green`) are maintained at all times. Updates are written to the inactive image; you boot into it only when it's ready. The previous image remains as an instant rollback target. If the new copy can't boot at all, systemd-boot detects the failure and reverts automatically.
 - **Selective persistence:** Your data, configuration, Flatpak apps, containers, and service credentials all live in separate Btrfs subvolumes that survive every update and rollback untouched.
-- **Defence-in-depth security:** Six Linux Security Modules run simultaneously (`lsm=landlock,lockdown,yama,integrity,apparmor,bpf`), LUKS2 argon2id encryption, TPM2 auto-unlock, Secure Boot, Intel ME kernel modules **not** blacklisted by default (`mei`/`mei_me` load unless you blacklist them) and every OS image SHA256+GPG verified before deployment.
+- **Defence-in-depth security:** Six Linux Security Modules run simultaneously (`lsm=landlock,lockdown,yama,integrity,apparmor,bpf`) in confidentiality lockdown mode (`lockdown=confidentiality`), LUKS2 argon2id encryption, TPM2 auto-unlock, Secure Boot, Intel ME kernel modules **not** blacklisted by default (`mei`/`mei_me` load unless you blacklist them) and every OS image SHA256+GPG verified before deployment.
 - **Zero telemetry:** No usage data, crash reports, analytics, or tracking of any kind — ever.
 
 Built in India 🇮🇳 by [Shrinivas Vishnu Kumbhar](https://github.com/Shrinivasvkumbhar). Indian-language support (Devanagari, Tamil, Telugu, and more) is a first-class feature.
@@ -12022,8 +12022,8 @@ Shanios implements defence-in-depth security across every layer — from firmwar
 | Firmware | Secure Boot (MOK), TPM 2.0 | Optional (recommended) |
 | Bootloader | systemd-boot, signed UKIs | Always active |
 | Full-disk encryption | LUKS2 argon2id | Optional (recommended) |
-| Kernel LSMs | Landlock, Lockdown, Yama, Integrity, AppArmor, BPF | Always active |
-| Runtime integrity | IMA/EVM | Always active |
+| Kernel LSMs | Landlock, Lockdown, Yama, Integrity (IMA/EVM, no policy shipped), AppArmor, BPF | Always active |
+| Runtime integrity | IMA/EVM | Listed in LSM stack; no policy shipped (runtime measurement not enabled) |
 | Firewall | firewalld | Always active |
 | Intrusion prevention | fail2ban | Always active |
 | Hardware key support | FIDO2/U2F, smart cards, fingerprint | Ready, configure as needed |
@@ -12038,11 +12038,19 @@ The `/etc` OverlayFS and the `@data` subvolume are writable, but they are user-v
 
 ## Linux Security Modules
 
-Six LSMs run simultaneously, loaded in order:
+Six LSMs run simultaneously, loaded in order, and the kernel is put in
+**confidentiality** lockdown mode:
 
 ```
 lsm=landlock,lockdown,yama,integrity,apparmor,bpf
+lockdown=confidentiality
 ```
+
+`lockdown=confidentiality` blocks `/dev/mem`, kexec, debugfs and other
+paths a compromised root could use to bypass the other LSMs. Verified to
+boot cleanly on the tested hardware; if you hit a driver or feature that
+needs one of those paths (e.g. some NVIDIA/kexec/hibernation setups), drop
+the token and reboot.
 
 Most Linux distributions enable one or two LSMs. Shanios enables all six simultaneously — each layer providing independent protection that remains in effect even if another is bypassed.
 
@@ -12051,7 +12059,7 @@ Most Linux distributions enable one or two LSMs. Shanios enables all six simulta
 | **Landlock** | Unprivileged sandboxing — applications can restrict their own filesystem access without requiring root to write a policy. Works bottom-up, complementing AppArmor's top-down enforcement. |
 | **Lockdown** | Prevents kernel tampering from userspace (e.g. `/dev/mem` access, loading unsigned modules, PCI BAR access). Blocks a compromised root process from escaping other LSMs via low-level hardware access. |
 | **Yama** | Restricts `ptrace` scope — a process can only be ptraced by its own children or explicitly permitted processes, blocking process injection and credential theft attacks. |
-| **Integrity (IMA/EVM)** | Measures file integrity at runtime. IMA records cryptographic hashes of executed files. EVM protects file metadata (ownership, permissions, xattrs) using HMAC. Provides a runtime audit trail and detects tampered files in writable filesystem areas. |
+| **Integrity (IMA/EVM)** | Listed in the LSM stack, but **no IMA/EVM policy is shipped**, so it currently provides no runtime measurement or enforcement. It is retained in the stack for future use (e.g. file-integrity auditing of `/etc` and `/var`); enabling it would require an IMA policy and EVM key setup. |
 | **AppArmor** | Per-process capability profiles enforced by the kernel. System daemons and Snap packages are confined. Custom profiles loaded at boot. |
 | **BPF** | Restricts BPF program loading to privileged users. Container runtimes (Podman, LXC) use BPF LSM hooks for container isolation. Enables custom eBPF security policies for decisions that cannot be expressed as static AppArmor profiles. |
 
@@ -12189,7 +12197,7 @@ The entire codebase is public at [github.com/shani8dev](https://github.com/shani
 # AppArmor status
 sudo aa-status
 
-# IMA measurement log
+# IMA measurement log (empty unless an IMA policy has been loaded — none is shipped by default)
 sudo cat /sys/kernel/security/ima/ascii_runtime_measurements | head -20
 
 # firewalld active rules
@@ -12548,6 +12556,7 @@ The cmdline is always regenerated from scratch — it cannot be manually pre-edi
 - `root=`, `rootflags=` — device and Btrfs subvolume for the slot
 - `systemd.volatile=state` — volatile `/var`
 - `lsm=landlock,lockdown,yama,integrity,apparmor,bpf` — LSM stack
+- `lockdown=confidentiality` — kernel lockdown mode (added 2026-11-01)
 - `rd.luks.*` — LUKS device and TPM2 auto-unlock hint (encrypted systems)
 - `rd.vconsole.keymap=` — keyboard layout from `/etc/vconsole.conf`
 - `resume=`, `resume_offset=` — hibernation parameters (when swapfile exists)
@@ -52301,7 +52310,7 @@ podman start -a shani-agent
 
 **Full isolation (multi-tenant / high-value):** Use Firecracker booted via `machinectl` or Kata Containers `virtctl`. Both present a complete VM with minimal device exposure — ideal when the agent must touch repository contents, SSH keys, or MCP configs.
 
-**The root filesystem itself needs no manual snapshot at all.** `/` is always one of the two read-only `@blue`/`@green` slots — an agent (or anything else) cannot write to it, and there's nothing to protect there because [`shani-deploy`](../concepts/atomic-updates.md) already keeps the inactive slot as an instant rollback target for OS-level changes. What an agent *can* actually modify is `@home` — and unlike the root slots, that has no automatic snapshot schedule out of the box. Set one up once via the systemd timer in [Backup & Recovery](../system/backup.md#1-btrfs-snapshots-local-instant-recovery), or take a one-off manual snapshot right before a specific risky run:
+**The root filesystem itself needs no manual snapshot at all.** `/` is always one of the two read-only `@blue`/`@green` slots — an agent (or anything else) cannot write to it, and there's nothing to protect there because [`shani-deploy`](../concepts/atomic-updates.md) already keeps the inactive slot as an instant rollback target for OS-level changes. What an agent *can* actually modify is `@home` — but `shani-backup` (enabled by default on GNOME, Plasma, Niri, and Cosmic profiles) already takes a daily read-only snapshot of every home under `/home/.snapshots/` with 14-day retention, plus a same-minute snapshot before every update. A manual one-off right before a specific risky run is still a good idea, but the baseline is already covered:
 
 ```bash
 # Extra snapshot of @home right before a risky agent session (read-only, non-destructive)
@@ -52339,7 +52348,7 @@ Running untrusted LLM-generated code requires isolation beyond standard containe
 
 **Prompt injection mitigation:** never feed untrusted external content (emails, web pages, issue bodies) into the same agent context that has tool access. Run tools that touch sensitive data in isolated contexts without sharing that context with external input sources.
 
-For Shanios desktop users: run agentic workloads inside a Distrobox or Podman container with the restrictions above. The root filesystem needs no extra protection — it's already read-only regardless — but `@home` has no automatic snapshot schedule out of the box, so either set up the recurring timer in [Backup & Recovery](../system/backup.md) or take a manual one (see above) before a specific long autonomous run.
+For Shanios desktop users: run agentic workloads inside a Distrobox or Podman container with the restrictions above. The root filesystem needs no extra protection — it's already read-only regardless — but `@home` is already covered by `shani-backup`'s daily + pre-deploy snapshots (see [Backup & Recovery](../system/backup.md)); a manual one-off before a long autonomous run is still cheap insurance.
 
 ## Privacy Posture
 
@@ -55479,12 +55488,13 @@ No manual firewall configuration is needed.
 # Re-initialise Waydroid if something goes wrong
 sudo waydroid-helper init --force
 
-# Check for missing kernel modules
-sudo modprobe binder_linux
-sudo modprobe ashmem_linux   # older kernels only; not needed on 6.x+
+# Binder is provided by the rust_binder module built into the Arch `linux` kernel,
+# so no `modprobe` is needed on Shanios. If /dev/binder is missing, the module
+# may not have loaded — force it and re-check:
+sudo modprobe binder_linux 2>/dev/null || true
 
 # Verify binder is available
-ls /dev/binder /dev/anbox-binder 2>/dev/null || echo "binder not found"
+ls /dev/binder /dev/binderfs 2>/dev/null || echo "binder not found"
 
 # Full reset (removes all Android data and apps)
 sudo waydroid init -f
@@ -55773,6 +55783,30 @@ The OS itself does not need to be backed up — `shani-deploy` downloads a fresh
 Before every update, `shani-deploy` also takes its own Btrfs backup snapshot of the candidate slot (e.g. `@blue_backup_<timestamp>`) so it can automatically roll back if the new slot fails to boot. These update-time snapshots are pruned automatically after a successful deployment, or on demand with `sudo shani-deploy -c` (cleanup of old backup snapshots and stale downloads). This is insurance for the update mechanism itself — it is **not** a substitute for backing up `/home` and container data as described below.
 
 > ⚠️ **Btrfs snapshots are not backups.** The rollback snapshots created by `shani-deploy` reside on the same physical drive. A drive failure destroys both the live data and all snapshots simultaneously.
+
+---
+
+## Automated Home Snapshots (shani-backup)
+
+ShaniOS ships `shani-backup` (enabled by default on GNOME, Plasma, Niri, and Cosmic
+profiles), which takes a **daily read-only snapshot of every home** under
+`/home/.snapshots/` with 14-day retention, per-user ACLs, and automatic
+space-aware pruning (retention drops to 2 when free space falls below 15 %).
+Off-disk copies go to restic on a separate timer. Before every update,
+`shani-deploy` also asks `shani-backup home predeploy --keep 2` for a fresh
+same-minute snapshot, so an update always has a same-minute undo of `/home`.
+
+These are taken by the system as root — no per-user setup is needed. Opt out
+with `home_snapshot=no` in `/etc/shani/shani.conf` (or `--no-home-snapshot`
+for one run).
+
+Manage them with:
+- `shani-backup home list` / `shani-backup home create` / `shani-backup home delete`
+- The **Backup** page in Shani Cassini (GUI)
+- Chronoa senses/skills (`snapshot_status`)
+
+Manual snapshots (below) are still useful for one-off experiments, but the
+automated stack above is the recommended baseline.
 
 ---
 
@@ -56074,7 +56108,7 @@ The self-hosted option is **Healthchecks** — see the [Monitoring wiki](https:/
 
 ## The Complete Strategy
 
-**Layer 1 — Daily Btrfs snapshots** of `@home` to `/data/snapshots/home/`, via the systemd timer you set up above (not automatic out of the box — see "Automating Daily Snapshots"). Fast local recovery from accidental deletion once it's running.
+**Layer 1 — Daily Btrfs snapshots** of `@home` under `/home/.snapshots/`, taken automatically by `shani-backup` (enabled by default on GNOME, Plasma, Niri, and Cosmic profiles) with 14-day retention, plus a same-minute snapshot before every update. Fast local recovery from accidental deletion or a bad update — no manual timer setup needed. The manual timer in "Automating Daily Snapshots" above is only for one-off or custom snapshot locations.
 
 **Layer 2 — Daily/weekly restic backups** to an external drive or NAS. Off-disk, encrypted, versioned protection against hardware failure.
 
@@ -58983,7 +59017,7 @@ sudo mdadm --stop /dev/md0
 
 Shani OS's root and data volumes are Btrfs, laid out as `@blue`/`@green` root subvolumes for atomic updates (see [Btrfs Deep Dive](../arch/btrfs.md)). Routine maintenance already runs on its own — you rarely need to invoke `btrfs scrub`, `btrfs balance`, or `fstrim` manually:
 
-- **Balance, defrag, scrub, and trim** run via `btrfs-balance.timer`, `btrfs-defrag.timer`, `btrfs-scrub.timer`, and `btrfs-trim.timer` (from `btrfsmaintenance`), enabled by default and scheduled weekly at idle I/O priority. Check them with `systemctl list-timers 'btrfs-*'`.
+- **Balance, scrub, and trim** run via `btrfs-balance.timer`, `btrfs-scrub.timer`, and `btrfs-trim.timer` (from `btrfsmaintenance`), enabled by default. `btrfs-defrag.timer` is **disabled by default** — periodic defragmentation breaks Btrfs reflinks/deduplication and adds SSD wear; run `btrfs filesystem defragment` manually if needed. Check them with `systemctl list-timers 'btrfs-*'`.
 - **bees** runs continuously in the background (`beesd@<uuid>.service`), deduplicating extents across the `@blue`/`@green` root subvolumes and their backup snapshots as they diverge — this is what keeps two nearly-identical OS slots from doubling disk usage.
 - **`sudo shani-deploy --optimize`** runs a deeper, one-shot `duperemove` pass across `@blue`, `@green`, and any `*_backup_*` subvolumes. Use it to reclaim space beyond what continuous bees dedup catches; it's skipped automatically if a deployment is pending.
 

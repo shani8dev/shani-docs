@@ -492,7 +492,7 @@ ssh admin@machine-name.tailnet.ts.net 'sudo shani-deploy -r &amp;&amp; sudo rebo
 <h2 id="security-posture-for-enterprise-compliance">Security Posture for Enterprise Compliance</h2>
 <p>Shanios's default security configuration is designed to pass enterprise security audits without additional hardening steps:</p>
 <ul>
-<li>Six simultaneous Linux Security Modules (AppArmor, Landlock, Lockdown, Yama, IMA/EVM, BPF LSM)</li>
+<li>Six simultaneous Linux Security Modules (AppArmor, Landlock, Lockdown, Yama, IMA/EVM listed with no policy shipped, BPF LSM)</li>
 <li>Immutable root filesystem — even root cannot write to system paths at runtime</li>
 <li>LUKS2 argon2id full-disk encryption (opt-in at install)</li>
 <li>TPM2 auto-unlock — disk locked against physical removal to another machine</li>

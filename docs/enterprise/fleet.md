@@ -441,7 +441,7 @@ ssh admin@machine-name.tailnet.ts.net 'sudo shani-deploy -r && sudo reboot'
 
 Shanios's default security configuration is designed to pass enterprise security audits without additional hardening steps:
 
-- Six simultaneous Linux Security Modules (AppArmor, Landlock, Lockdown, Yama, IMA/EVM, BPF LSM)
+- Six simultaneous Linux Security Modules (AppArmor, Landlock, Lockdown, Yama, IMA/EVM listed with no policy shipped, BPF LSM)
 - Immutable root filesystem — even root cannot write to system paths at runtime
 - LUKS2 argon2id full-disk encryption (opt-in at install)
 - TPM2 auto-unlock — disk locked against physical removal to another machine

@@ -32,7 +32,7 @@ Every row below holds on a stock installation with no additional hardening.
 
 | Benchmark area | Shanios default | Evidence command |
 |---|---|---|
-| Filesystem integrity (CIS Arch Linux benchmark — filesystem area) | `/usr` mounted read-only, even for root; IMA/EVM active in the LSM stack | `findmnt /` ; `cat /sys/kernel/security/ima/active` |
+| Filesystem integrity (CIS Arch Linux benchmark — filesystem area) | `/usr` mounted read-only, even for root; IMA/EVM listed in the LSM stack (no policy shipped, runtime measurement not enabled) | `findmnt /` ; `cat /sys/kernel/security/ima/active` (empty unless a policy is loaded) |
 | Boot chain (boot area) | Shim + MOK-signed UKIs under Secure Boot; kernel cmdline embedded in the UKI, boot menu editor disabled | `bootctl status` ; `shani-health --security` |
 | Package provenance (package management area) | All OS packages from the GPG-signed `[shani]` repo or baked into the signed image; no third-party repos added at runtime | `pacman -Q` (inventory) ; `shani-health --verify` (deep integrity) |
 | Malware persistence surface (system hardening area) | Root cannot write to system paths at runtime; binaries are replaced only wholesale via verified deploys | `findmnt /` (ro) ; `shani-health --verify` (immutability checks) |

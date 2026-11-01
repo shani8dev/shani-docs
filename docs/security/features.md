@@ -15,8 +15,8 @@ Shanios implements defence-in-depth security across every layer — from firmwar
 | Firmware | Secure Boot (MOK), TPM 2.0 | Optional (recommended) |
 | Bootloader | systemd-boot, signed UKIs | Always active |
 | Full-disk encryption | LUKS2 argon2id | Optional (recommended) |
-| Kernel LSMs | Landlock, Lockdown, Yama, Integrity, AppArmor, BPF | Always active |
-| Runtime integrity | IMA/EVM | Always active |
+| Kernel LSMs | Landlock, Lockdown, Yama, Integrity (IMA/EVM, no policy shipped), AppArmor, BPF | Always active |
+| Runtime integrity | IMA/EVM | Listed in LSM stack; no policy shipped (runtime measurement not enabled) |
 | Firewall | firewalld | Always active |
 | Intrusion prevention | fail2ban | Always active |
 | Hardware key support | FIDO2/U2F, smart cards, fingerprint | Ready, configure as needed |
@@ -190,7 +190,7 @@ The entire codebase is public at [github.com/shani8dev](https://github.com/shani
 # AppArmor status
 sudo aa-status
 
-# IMA measurement log
+# IMA measurement log (empty unless an IMA policy has been loaded — none is shipped by default)
 sudo cat /sys/kernel/security/ima/ascii_runtime_measurements | head -20
 
 # firewalld active rules

@@ -237,7 +237,7 @@
 <li><strong>Blue-Green Deployment:</strong> Two complete system images (<code>@blue</code> and <code>@green</code>) are maintained. While one is active, updates are written to the other. On reboot you switch to the updated image. The previous one is kept as a one-command rollback target.</li>
 <li><strong>Atomic Updates:</strong> Updates are all-or-nothing. The running system is never touched during an update. If something goes wrong, boot failure is detected automatically and the system rolls back — your work is never interrupted.</li>
 <li><strong>Selective Persistence:</strong> User data, configuration changes (<code>/etc</code> overlay), Flatpak apps, containers, VMs, and service credentials all live in dedicated Btrfs subvolumes that survive every update and rollback, always.</li>
-<li><strong>Defence-in-Depth Security:</strong> Six Linux Security Modules run simultaneously (<code>lsm=landlock,lockdown,yama,integrity,apparmor,bpf</code>), LUKS2 argon2id full-disk encryption, TPM2 auto-unlock, Secure Boot with MOK, the <code>pcspkr</code> PC-speaker module blacklisted (<code>mei</code>/<code>mei_me</code> are <strong>not</strong> blacklisted by default — see <a href="/doc/system/kernel-modules/">Kernel Modules</a>), and every OS image is SHA256+GPG verified before deployment.</li>
+<li><strong>Defence-in-Depth Security:</strong> Six Linux Security Modules run simultaneously (<code>lsm=landlock,lockdown,yama,integrity,apparmor,bpf</code>) in confidentiality lockdown mode (<code>lockdown=confidentiality</code>), LUKS2 argon2id full-disk encryption, TPM2 auto-unlock, Secure Boot with MOK, the <code>pcspkr</code> PC-speaker module blacklisted (<code>mei</code>/<code>mei_me</code> are <strong>not</strong> blacklisted by default — see <a href="/doc/system/kernel-modules/">Kernel Modules</a>), and every OS image is SHA256+GPG verified before deployment.</li>
 <li><strong>Zero Telemetry:</strong> No usage data, crash reports, analytics, or tracking of any kind — ever. The entire codebase is public on GitHub; every claim is independently verifiable.</li>
 </ul>
 <h2 id="traditional-vs-immutable-os">Traditional vs Immutable OS</h2>
@@ -246,7 +246,7 @@
 <ul>
 <li>❌ A bad update can leave the system unbootable</li>
 <li>❌ Dependency conflicts corrupt shared libraries</li>
-<li>❌ Rollback requires manual snapshot discipline</li>
+<li>❌ Rollback requires manual snapshot discipline (Shanios automates <code>/home</code> snapshots via <code>shani-backup</code> — daily + pre-deploy)</li>
 <li>❌ System state drifts from original install</li>
 <li>❌ Any exploited process can modify <code>/usr /bin</code></li>
 <li>❌ No cryptographic verification of the boot chain</li>
@@ -257,8 +257,7 @@
 <li>✅ Instant rollback — previous slot always on disk</li>
 <li>✅ Verified boot chain — SHA256 + GPG + Secure Boot</li>
 <li>✅ No system drift — root replaced wholesale each update</li>
-<li>✅ IMA/EVM runtime integrity measurement active</li>
-<li>✅ Six LSMs active simultaneously (AppArmor, Landlock…)</li>
+<li>✅ Six LSMs active simultaneously (AppArmor, Landlock, …); IMA/EVM listed but no policy shipped — runtime measurement not yet enabled</li>
 </ul>
 <h2 id="project-structure">Project Structure</h2>
 <p>Shanios is built across 15 repositories, each with a specific responsibility:</p>

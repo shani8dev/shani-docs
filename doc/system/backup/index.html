@@ -245,6 +245,17 @@
 <p>Before every update, <code>shani-deploy</code> also takes its own Btrfs backup snapshot of the candidate slot (e.g. <code>@blue_backup_&lt;timestamp&gt;</code>) so it can automatically roll back if the new slot fails to boot. These update-time snapshots are pruned automatically after a successful deployment, or on demand with <code>sudo shani-deploy -c</code> (cleanup of old backup snapshots and stale downloads). This is insurance for the update mechanism itself — it is <strong>not</strong> a substitute for backing up <code>/home</code> and container data as described below.</p>
 <blockquote>⚠️ <strong>Btrfs snapshots are not backups.</strong> The rollback snapshots created by <code>shani-deploy</code> reside on the same physical drive. A drive failure destroys both the live data and all snapshots simultaneously.</blockquote>
 <hr>
+<h2 id="automated-home-snapshots-shani-backup">Automated Home Snapshots (shani-backup)</h2>
+<p>ShaniOS ships <code>shani-backup</code> (enabled by default on GNOME, Plasma, Niri, and Cosmic profiles), which takes a <strong>daily read-only snapshot of every home</strong> under <code>/home/.snapshots/</code> with 14-day retention, per-user ACLs, and automatic space-aware pruning (retention drops to 2 when free space falls below 15 %). Off-disk copies go to restic on a separate timer. Before every update, <code>shani-deploy</code> also asks <code>shani-backup home predeploy --keep 2</code> for a fresh same-minute snapshot, so an update always has a same-minute undo of <code>/home</code>.</p>
+<p>These are taken by the system as root — no per-user setup is needed. Opt out with <code>home_snapshot=no</code> in <code>/etc/shani/shani.conf</code> (or <code>--no-home-snapshot</code> for one run).</p>
+<p>Manage them with:</p>
+<ul>
+<li><code>shani-backup home list</code> / <code>shani-backup home create</code> / <code>shani-backup home delete</code></li>
+<li>The <strong>Backup</strong> page in Shani Cassini (GUI)</li>
+<li>Chronoa senses/skills (<code>snapshot_status</code>)</li>
+</ul>
+<p>Manual snapshots (below) are still useful for one-off experiments, but the automated stack above is the recommended baseline.</p>
+<hr>
 <h2 id="1-btrfs-snapshots-local-instant-recovery">1. Btrfs Snapshots (Local, Instant Recovery)</h2>
 <p>Btrfs snapshots are near-instantaneous and use minimal space — only files that change after the snapshot consume new space.</p>
 <h3 id="taking-a-snapshot">Taking a Snapshot</h3>
@@ -453,7 +464,7 @@ journalctl --user -u backup.service -f</code></pre>
 </ol>
 <hr>
 <h2 id="the-complete-strategy">The Complete Strategy</h2>
-<p><strong>Layer 1 — Daily Btrfs snapshots</strong> of <code>@home</code> to <code>/data/snapshots/home/</code>, via the systemd timer you set up above (not automatic out of the box — see "Automating Daily Snapshots"). Fast local recovery from accidental deletion once it's running.</p>
+<p><strong>Layer 1 — Daily Btrfs snapshots</strong> of <code>@home</code> under <code>/home/.snapshots/</code>, taken automatically by <code>shani-backup</code> (enabled by default on GNOME, Plasma, Niri, and Cosmic profiles) with 14-day retention, plus a same-minute snapshot before every update. Fast local recovery from accidental deletion or a bad update — no manual timer setup needed. The manual timer in "Automating Daily Snapshots" above is only for one-off or custom snapshot locations.</p>
 <p><strong>Layer 2 — Daily/weekly restic backups</strong> to an external drive or NAS. Off-disk, encrypted, versioned protection against hardware failure.</p>
 <p><strong>Layer 3 — Cloud sync via rclone (or restic over rclone)</strong> to Google Drive, S3, Backblaze, etc. Off-site protection against fire, theft, or local disaster.</p>
 <hr>
