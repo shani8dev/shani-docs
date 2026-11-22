@@ -26,7 +26,7 @@ This page positions Shanios honestly against the other mainstream options, inclu
 |---|---|---|---|---|---|
 | **Base distro** | Arch Linux | Fedora | openSUSE Tumbleweed | Independent (nixpkgs) | Debian |
 | **Update unit** | Full image, blue-green slot deploy (`shani-deploy`) | ostree deployment (rpm-ostree / Fedora Atomic) | Transactional update + btrfs snapshot (snapper) | Nix generation (not image-based) | ABRoot A/B partition |
-| **Desktop options** | GNOME + KDE Plasma (shipping); COSMIC (announced) + Server profile | GNOME-first; KDE via Kinoite spin | Aeon = GNOME desktop flavour; Kalpa = KDE; MicroOS = headless-first | Any desktop, declared in configuration | GNOME-first (KDE experimental) |
+| **Desktop options** | GNOME + KDE Plasma + COSMIC (shipping); Server profile | GNOME-first; KDE via Kinoite spin | Aeon = GNOME desktop flavour; Kalpa = KDE; MicroOS = headless-first | Any desktop, declared in configuration | GNOME-first (KDE experimental) |
 | **Extra package layers** | Flatpak primary + Nix + Distrobox/Podman + AppImage | Flatpak + toolbox containers; rpm-ostree layering discouraged | Flatpak + Distrobox/container workflows | Everything through nixpkgs; overlays and pins | Flatpak + `apx` container package manager |
 | **Rollback model** | Instant slot switch (previous image always on disk) + automatic boot-failure fallback | Previous ostree deployment selectable at boot | snapper rollback to pre-update snapshot | Roll back to any prior generation at boot | Switch to inactive A/B partition at boot |
 | **Config management** | `/etc` writable overlay persists across updates; system tree immutable | `/etc` persisted per-deployment; `/usr` read-only | `/etc` on overlay; snapshotted alongside transactions | Entire system state declared in config files | `/etc` managed through ABRoot transactions |
@@ -109,7 +109,7 @@ Every distribution below does something better than Shanios does today. If that 
 ## Where Shanios Differs
 
 - **Arch freshness as a base** — current kernels, drivers, and desktop stacks without manual maintenance; freshness arrives through full-image deploys, not incremental package churn on a live system.
-- **Multiple desktop editions from one pipeline** — GNOME and KDE Plasma ship through the same signed-image process today, with COSMIC built by the identical pipeline for its upcoming release, plus a headless Server profile. Most projects treat non-default desktops as secondary spins.
+- **Multiple desktop editions from one pipeline** — GNOME and KDE Plasma ship through the same signed-image process today, with COSMIC built by the identical pipeline and shipping today, plus a headless Server profile. Most projects treat non-default desktops as secondary spins.
 - **Security defaults out of the box** — six Linux Security Modules active simultaneously (AppArmor among them), LUKS2 argon2id full-disk encryption, TPM2 auto-unlock, Secure Boot with signed UKIs, and GPG+SHA256 verification of every image. Installed state, not post-install hardening.
 - **Automatic boot-failure fallback** — a slot that fails to boot hands control back to the previous one without user intervention.
 - **Zero telemetry** — no usage data, analytics, or crash reporting of any kind, ever. The codebase is public; every claim is verifiable.

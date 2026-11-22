@@ -114,7 +114,7 @@ Waydroid runs a full hardware-accelerated Android 11 stack, pre-installed on eve
 
 **What apps does Shani Shell include?**
 
-A full set of its own: Files, Text Editor, Document Viewer, Image Viewer, Calendar, Tasks, Notes, Contacts, Mail, Feeds, Maps, Photos, Media Player, Camera, Voice Recorder, Translator, Disks, Terminal, Backup, Models, Studio, Settings, and more. Open them from the launcher or with `shani app <name>`. They tile and float like any other window and can be pinned to the dock.
+A full set of its own: Files, Text Editor, Document Viewer, Image Viewer, Calendar, Tasks, Notes, Contacts, Mail, Feeds, Maps, Photos, Media Player, Camera, Voice Recorder, Translate, Disks, Terminal, Backup, Models, Studio, Settings, and more. Open them from the launcher or with `shani app <name>`. They tile and float like any other window and can be pinned to the dock.
 
 **What do the newer apps do?**
 

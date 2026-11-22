@@ -204,6 +204,25 @@ sudo gen-efi configure green   # or blue
 
 ## Application Problems
 
+### A shell app says a tool is missing
+
+The shell's own apps use a few command-line tools behind the scenes. If one
+is absent, the app says which one. Install it with `pacman`; most are optional
+dependencies of `shani-shell`.
+
+| App / feature | Tool it needs | Symptom when missing |
+|---|---|---|
+| Disks — SMART health and self-tests | `smartmontools` (`smartctl`) | "smartctl is not installed" |
+| Terminal — serial-port connections | `picocom` | "picocom is not installed" |
+| Translate — local translation | `llama-server` on `127.0.0.1:8765` | "The local model is not running" |
+| Global menu in the bar | `at-spi2-core` | "AT-SPI is not installed" |
+| Notes — sync to a cloud folder | `rclone` | "rclone is not installed" |
+| Weather / Night Light — automatic location | GeoClue2 (or `gpsd` with a GPS fix) | "Location unavailable" |
+| Scrolling screenshot, Lens OCR | `grim`, `slop`, `ydotool`, `tesseract`, `zbar` | names the missing tool in a notification |
+
+`shani app doctor` (`bin/shani-doctor.py`) checks the core shell tools; run it
+first if several apps misbehave at once.
+
 ### Can't Install a Package with `pacman`
 
 This is by design — the OS root is read-only. Use the appropriate layer:

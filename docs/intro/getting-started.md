@@ -14,7 +14,7 @@ A complete walkthrough: choose your edition, download and verify the ISO, instal
 
 **KDE Plasma Edition** (~7.6 GB) is the right choice for gamers and power users. The complete gaming stack (Steam, Proton, Heroic Games Launcher, Lutris, MangoHud) is pre-installed and configured. Fully customisable desktop. Full KDE productivity suite including Okular, Kate, and Gwenview. virt-manager for virtual machines.
 
-**COSMIC Edition** (announced, in development) brings System76's Rust-based COSMIC desktop — a tiling-first workflow with the COSMIC app suite — on the same immutable core. Watch [shani.dev](https://shani.dev) for its release.
+**COSMIC Edition** brings System76's Rust-based COSMIC desktop — a tiling-first workflow with the COSMIC app suite — on the same immutable core.
 
 If you are unsure, start with GNOME. You can always install KDE apps on GNOME or switch editions later.
 

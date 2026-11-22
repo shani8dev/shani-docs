@@ -28,7 +28,7 @@
   <meta name="twitter:description" id="tw-desc"  content="Comprehensive guide to the immutable Linux OS with atomic updates. Welcome to the Shanios technical documentation. This wiki provides comprehensive informa…">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Overview","description":"Comprehensive guide to the immutable Linux OS with atomic updates. Welcome to the Shanios technical documentation. This wiki provides comprehensive informa…","url":"https://docs.shani.dev/doc/overview/","datePublished":"2026-08-28T00:00:00.000Z","dateModified":"2026-08-28T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Overview","description":"Comprehensive guide to the immutable Linux OS with atomic updates. Welcome to the Shanios technical documentation. This wiki provides comprehensive informa…","url":"https://docs.shani.dev/doc/overview/","datePublished":"2026-11-22T00:00:00.000Z","dateModified":"2026-11-22T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
   <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Overview","item":"https://docs.shani.dev/doc/overview/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
@@ -227,7 +227,7 @@
         <h1 class="doc-title">Overview</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Overview</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-11-22</span>
         </div>
       </div>
       <div class="prose"><p>Comprehensive guide to the immutable Linux OS with atomic updates.</p>
@@ -257,6 +257,46 @@
 <li><a href="/doc/troubleshooting/">Troubleshooting</a> — common issues and solutions</li>
 <li><a href="/doc/faq/">FAQ</a> — frequently asked questions</li>
 </ul>
+<h2 id="the-shani-desktop">The Shani Desktop</h2>
+<p><strong>Shani Shell</strong> is the ShaniOS desktop, built on <a href="https://github.com/YaLTeR/niri">niri</a> and <a href="https://quickshell.org">Quickshell</a>. It ships its own apps — open any of them from the launcher or with <code>shani app &lt;name&gt;</code>. They tile and float like any other window, appear in Alt+Tab, and can be pinned to the dock.</p>
+<h3 id="built-in-apps">Built-in apps</h3>
+<p>Alongside everyday apps (Files, Text Editor, Calendar, Notes, Mail, Photos, Maps, Media Player and more), the shell includes:</p>
+<ul>
+<li><strong>Contacts</strong> — an address book whose vCard files are the same ones Shani Link reads on your phone; sync them with whatever you already use (vdirsyncer, Nextcloud, iCloud, Dropbox).</li>
+<li><strong>Disks</strong> — see every disk and its SMART health, and erase, format, encrypt, or write an install stick. Destructive actions ask twice and need administrator approval.</li>
+<li><strong>Models</strong> — download AI models that run on your machine (Ollama, llama.cpp), see what fits in your RAM, and connect cloud providers (OpenAI, Anthropic, Google Gemini, Groq, OpenRouter; Mistral via OpenRouter) with keys kept in Passwords and Keys.</li>
+<li><strong>Studio</strong> — describe an app and have Chronoa generate a QML app you can open, run, or delete.</li>
+<li><strong>Terminal</strong> — an SSH connection manager: saved hosts, keys, tunnels, snippets, and connection testing.</li>
+<li><strong>Backup</strong> — a timeline of snapshots to restore your home from, in whole or just the paths you pick.</li>
+<li><strong>Mail</strong> — an IMAP mail reader with folders, a message list, reading, and composing.</li>
+<li><strong>Feeds</strong> — an RSS/Atom reader with subscriptions, unread counts, and OPML import.</li>
+<li><strong>Firewall</strong> (in Settings) — firewalld zones, services, and ports, with rich rules for the zone you are using.</li>
+</ul>
+<h3 id="things-worth-knowing-you-can-do">Things worth knowing you can do</h3>
+<ul>
+<li><strong>Notes</strong> have checklists, attachments (an image on the clipboard becomes a file beside the note), and locked notes sealed with gpg. They live in <code>Documents/Notes</code> and can be mirrored to a mounted cloud folder (Nextcloud, Dropbox, a network drive).</li>
+<li><strong>Calendar</strong> has day and year views, time zones, invitations, and natural-language entry — type "lunch Friday at noon".</li>
+<li><strong>Text Editor</strong> has multiple cursors, column selection, snippets (type a trigger, press Tab), and TextMate grammars for syntax colouring.</li>
+<li><strong>Document Viewer</strong> annotates PDFs with seven tools — pen, highlight, line, arrow, box, blur, and text — and can merge, split, and export pages.</li>
+<li><strong>Clipboard</strong> has one-click transforms (plain text, UPPERCASE, lowercase, Title Case, trim) and optional encrypted history.</li>
+<li><strong>Screenshots</strong> can be pinned in a window above your work, captured as one tall scrolling image, and annotated natively.</li>
+<li><strong>Global menu</strong> — the focused app's menu bar appears in the top bar, macOS-style, read over D-Bus and AT-SPI.</li>
+<li><strong>Windows</strong> — hold the bar's maximize/zoom button for a layout palette, snap windows to screen edges, and see everything at once in the workspace map and ribbon. Hovering a dock tile or a file path shows a preview without opening it.</li>
+<li><strong>Setup</strong> — first-run setup offers to turn Chronoa on or leave it off.</li>
+<li><strong>Privacy</strong> — locked notes and clipboard history are encrypted at rest, and Passwords and Keys keeps passkey references (metadata, not the credentials themselves) alongside your GPG keys.</li>
+</ul>
+<h3 id="recent-refinements">Recent refinements</h3>
+<ul>
+<li><strong>Text Editor</strong> — undo/redo, bookmarks, regex search, go-to-line, session restore.</li>
+<li><strong>Notes</strong> — trash and restore, version history, formatting toolbar, tags, <code>@due()</code> dates.</li>
+<li><strong>Calendar</strong> — repeat rules, per-event alarms and time zones, a quick-add field, <code>.ics</code> import.</li>
+<li><strong>Contacts</strong> — repeatable phone/email rows, call/mail/map actions, QR sharing.</li>
+<li><strong>Mail &amp; Feeds</strong> — Cc/Bcc, saved attachments, flags and message source; feed tags, search, saved articles and auto-discovery.</li>
+<li><strong>Viewer</strong> — PDF bookmarks, clickable links, attachments and an annotations list.</li>
+<li><strong>Media &amp; capture</strong> — chapters, go-to-time and A→B loop; camera timer, shutter sound and format choice; recorder formats/export; trimmer segments; multiple saved weather locations.</li>
+<li><strong>System</strong> — SSH <code>-R</code>/<code>-D</code> tunnels, disk SMART self-tests and benchmark, per-process details and renice, ODRS ratings in Software, grouped notifications and a tray overflow drawer.</li>
+</ul>
+<p>See the <a href="https://github.com/shani8dev/shani-shell">Shani Shell repository</a> for the full feature list.</p>
 <h2 id="current-release">Current Release</h2>
 <p><strong>Stable:</strong> 2026.05.18 · <strong>Channels:</strong> latest, stable</p>
 <p>All images are SHA256 checksummed and GPG-signed. Verify downloads using the signatures at <a href="https://downloads.shani.dev">downloads.shani.dev</a>.</p>

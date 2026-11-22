@@ -231,7 +231,8 @@
         </div>
       </div>
       <div class="prose"><p>arpwatch monitors Ethernet ARP traffic and maintains a database of IP-to-MAC address mappings. It sends an email alert (via the local MTA) when a new device appears on the network, when a known device changes its MAC address, or when an IP address flips between two MAC addresses — all indicators of network changes that may warrant attention (new devices, DHCP lease changes, or potential ARP spoofing).</p>
-<p>arpwatch is pre-installed on Shani OS and <code>shani-tools-network</code> <strong>enables <code>arpwatch@eth0.service</code> at install time</strong> (it is in every profile's <code>Packages-Base</code>). Note the shipped template hardcodes interface <code>%i</code>, so on a machine whose primary NIC is <code>enp*</code>/<code>wlp*</code> rather than <code>eth0</code> that pre-enabled unit cannot bind — check <code>systemctl status arpwatch@eth0</code> before assuming it works.</p>
+<p>arpwatch is pre-installed on Shani OS (in every profile's <code>Packages-Base</code>), but <strong>it is not enabled</strong>: Arch ships only the <code>arpwatch@.service</code> template, so the interface is the instance name, and that is a property of the machine, not of the host the image was built on. Enable it for the interface you actually want to watch — usually the one carrying the default route:</p>
+<pre><code class="language-bash">sudo systemctl enable --now arpwatch@$(ip route show default | awk '{print $5}')</code></pre>
 <hr>
 <h2 id="enable">Enable</h2>
 <pre><code class="language-bash"># Enable monitoring on your primary LAN interface (replace eth0 with yours)

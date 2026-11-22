@@ -78,6 +78,17 @@ Alongside everyday apps (Files, Text Editor, Calendar, Notes, Mail, Photos, Maps
 - **Setup** — first-run setup offers to turn Chronoa on or leave it off.
 - **Privacy** — locked notes and clipboard history are encrypted at rest, and Passwords and Keys keeps passkey references (metadata, not the credentials themselves) alongside your GPG keys.
 
+### Recent refinements
+
+- **Text Editor** — undo/redo, bookmarks, regex search, go-to-line, session restore.
+- **Notes** — trash and restore, version history, formatting toolbar, tags, `@due()` dates.
+- **Calendar** — repeat rules, per-event alarms and time zones, a quick-add field, `.ics` import.
+- **Contacts** — repeatable phone/email rows, call/mail/map actions, QR sharing.
+- **Mail & Feeds** — Cc/Bcc, saved attachments, flags and message source; feed tags, search, saved articles and auto-discovery.
+- **Viewer** — PDF bookmarks, clickable links, attachments and an annotations list.
+- **Media & capture** — chapters, go-to-time and A→B loop; camera timer, shutter sound and format choice; recorder formats/export; trimmer segments; multiple saved weather locations.
+- **System** — SSH `-R`/`-D` tunnels, disk SMART self-tests and benchmark, per-process details and renice, ODRS ratings in Software, grouped notifications and a tray overflow drawer.
+
 See the [Shani Shell repository](https://github.com/shani8dev/shani-shell) for the full feature list.
 
 ## Current Release

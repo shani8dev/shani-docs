@@ -144,7 +144,7 @@
     "title": "FAQ",
     "section": "FAQ",
     "description": "Answers to the most common questions about Shanios — software installation, updates, hardware, security, and the immutable architecture in plain terms. Ins…",
-    "updated": "2026-08-28",
+    "updated": "2026-11-22",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -684,7 +684,7 @@
     "title": "Overview",
     "section": "Overview",
     "description": "Comprehensive guide to the immutable Linux OS with atomic updates. Welcome to the Shanios technical documentation. This wiki provides comprehensive informa…",
-    "updated": "2026-08-28",
+    "updated": "2026-11-22",
     "order": 999,
     "draft": false,
     "keywords": ""
@@ -1964,7 +1964,7 @@
     "title": "Troubleshooting",
     "section": "Troubleshooting",
     "description": "The most important thing to know about troubleshooting Shanios is that the worst case is almost always \"rollback and reboot.\" The architecture is built to …",
-    "updated": "2026-08-28",
+    "updated": "2026-11-22",
     "order": 999,
     "draft": false,
     "keywords": ""

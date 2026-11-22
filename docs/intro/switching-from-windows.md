@@ -10,13 +10,13 @@ This guide is for anyone leaving Windows or macOS for Shanios — whether you ar
 
 The single biggest difference: Shanios is immutable. The operating system is a verified, read-only image. Nothing you do day to day — installing apps, changing settings, clicking the wrong thing — can break it. Updates apply atomically and roll back with one command (`sudo shani-deploy -r`). If a truly fresh start is ever needed, `shani-reset` returns the system to factory state while leaving your personal files untouched.
 
-Everything below applies to every edition — **GNOME** and **KDE Plasma** today, with the announced **COSMIC** edition to follow. Where an app differs by edition (the file manager, mainly), the difference is noted.
+Everything below applies to every edition — **GNOME**, **KDE Plasma** and **COSMIC**. Where an app differs by edition (the file manager, mainly), the difference is noted.
 
 | Edition | File manager | Bundled apps | Pre-installed everywhere |
 |---|---|---|---|
 | GNOME | Files (Nautilus) | GNOME apps, Deja Dup | Vivaldi browser |
 | KDE Plasma | Dolphin | KDE apps | OnlyOffice |
-| COSMIC *(announced)* | COSMIC Files | COSMIC apps | Warehouse |
+| COSMIC | COSMIC Files | COSMIC apps | Warehouse |
 
 Pick an edition based on desktop taste — all include the same core: Vivaldi, OnlyOffice, Warehouse, IBus input, Nix (Mission Center ships on **COSMIC only**), and the `shani-deploy` update system.
 

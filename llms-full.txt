@@ -2443,7 +2443,7 @@ If your organisation needs one of these, [contact the project](https://shani.dev
 # FAQ
 
 URL: https://docs.shani.dev/doc/faq/
-Updated: 2026-08-28
+Updated: 2026-11-22
 
 Answers to the most common questions about Shanios — software installation, updates, hardware, security, and the immutable architecture in plain terms. Ins…
 
@@ -2469,7 +2469,7 @@ No. Shanios boots signed UKIs, so Secure Boot stays enabled — the installer me
 
 **Which desktop editions are available?**
 
-Two desktop editions ship today: **GNOME** and **KDE Plasma** — plus a **Kiosk** profile for single-purpose deployments and a headless **Server** profile for cloud/server deployments. A third edition, **COSMIC**, is announced and in development (built as a cloud image rather than desktop install media). GNOME suits most users; KDE Plasma targets gamers and power users with the full gaming stack pre-installed; COSMIC offers System76's Rust-based desktop experience.
+Three desktop editions ship today: **GNOME**, **KDE Plasma**, and **COSMIC** — plus a **Kiosk** profile for single-purpose deployments and a headless **Server** profile for cloud/server deployments. The **niri** profile is the Shani Shell desktop. GNOME suits most users; KDE Plasma targets gamers and power users with the full gaming stack pre-installed; COSMIC offers System76's Rust-based desktop experience.
 
 **Can I dual boot with Windows?**
 
@@ -2550,6 +2550,52 @@ Yes. Bottles (pre-installed on KDE Plasma; available on Flathub for GNOME) provi
 **What about Android apps?**
 
 Waydroid runs a full hardware-accelerated Android 11 stack, pre-installed on every edition. Set up with `sudo waydroid-helper init`. See the [Android (Waydroid)](software/waydroid) guide.
+
+---
+
+## Desktop & Apps
+
+**What apps does Shani Shell include?**
+
+A full set of its own: Files, Text Editor, Document Viewer, Image Viewer, Calendar, Tasks, Notes, Contacts, Mail, Feeds, Maps, Photos, Media Player, Camera, Voice Recorder, Translate, Disks, Terminal, Backup, Models, Studio, Settings, and more. Open them from the launcher or with `shani app <name>`. They tile and float like any other window and can be pinned to the dock.
+
+**What do the newer apps do?**
+
+- **Disks** shows every disk and its SMART health, and lets you erase, format, encrypt, or write an install stick (with confirmation and administrator approval).
+- **Terminal** is an SSH connection manager — saved hosts, keys, tunnels, snippets, and connection testing.
+- **Backup** shows a timeline of snapshots so you can restore your whole home or just selected paths.
+- **Models** downloads AI models that run locally and connects cloud providers (keys stay in Passwords and Keys).
+- **Studio** generates a small QML app from a description using Chronoa.
+- **Mail** is an IMAP reader; **Feeds** is an RSS/Atom reader; **Contacts** shares its vCard files with Shani Link on your phone.
+- **Firewall** lives in Settings — firewalld zones, services, ports, and rich rules.
+
+**Are locked notes and clipboard history really encrypted?**
+
+Yes. A locked note is stored on disk as gpg ciphertext; only the decrypted text appears in the app. Clipboard history can optionally be encrypted at rest too. Both need `gpg` installed — see [Troubleshooting](troubleshooting).
+
+**Can I sync my notes to the cloud?**
+
+Yes. Notes live in `Documents/Notes`. In the Notes sidebar you can choose a mounted cloud folder (Nextcloud, Dropbox, a network drive) to mirror them to; nothing is deleted from either side.
+
+**Can I annotate PDFs or change them?**
+
+Yes. The Document Viewer has seven native annotation tools (pen, highlight, line, arrow, box, blur, text), saves the marked-up copy beside the original, and can merge, split, and export PDF pages.
+
+**Can I enter calendar events in plain English?**
+
+Yes. Type something like "lunch Friday at noon" into the new-event title and the Calendar parses the date and time. It also has day and year views, per-event time zones, and invitations (including `.ics` files and email).
+
+**Does the desktop have a macOS-style menu bar?**
+
+Yes — the focused app's menus appear at the top of the screen, read over D-Bus and AT-SPI. Availability depends on the app and the session (see [Troubleshooting](troubleshooting)).
+
+**How do I arrange windows and see all my workspaces?**
+
+Hold the maximize/zoom button in the bar for a window-layout palette; windows also snap to screen edges. The bar has a proportional workspace map and ribbon so you can see and jump between everything. Hovering a dock tile or a file path previews it without opening anything.
+
+**Can I get an old version of a file back?**
+
+Yes. **Backup** shows a timeline of your snapshots and can restore your whole home or selected paths. Note that a restore overwrites files that have changed since the snapshot.
 
 ---
 
@@ -3184,7 +3230,7 @@ This page positions Shanios honestly against the other mainstream options, inclu
 |---|---|---|---|---|---|
 | **Base distro** | Arch Linux | Fedora | openSUSE Tumbleweed | Independent (nixpkgs) | Debian |
 | **Update unit** | Full image, blue-green slot deploy (`shani-deploy`) | ostree deployment (rpm-ostree / Fedora Atomic) | Transactional update + btrfs snapshot (snapper) | Nix generation (not image-based) | ABRoot A/B partition |
-| **Desktop options** | GNOME + KDE Plasma (shipping); COSMIC (announced) + Server profile | GNOME-first; KDE via Kinoite spin | Aeon = GNOME desktop flavour; Kalpa = KDE; MicroOS = headless-first | Any desktop, declared in configuration | GNOME-first (KDE experimental) |
+| **Desktop options** | GNOME + KDE Plasma + COSMIC (shipping); Server profile | GNOME-first; KDE via Kinoite spin | Aeon = GNOME desktop flavour; Kalpa = KDE; MicroOS = headless-first | Any desktop, declared in configuration | GNOME-first (KDE experimental) |
 | **Extra package layers** | Flatpak primary + Nix + Distrobox/Podman + AppImage | Flatpak + toolbox containers; rpm-ostree layering discouraged | Flatpak + Distrobox/container workflows | Everything through nixpkgs; overlays and pins | Flatpak + `apx` container package manager |
 | **Rollback model** | Instant slot switch (previous image always on disk) + automatic boot-failure fallback | Previous ostree deployment selectable at boot | snapper rollback to pre-update snapshot | Roll back to any prior generation at boot | Switch to inactive A/B partition at boot |
 | **Config management** | `/etc` writable overlay persists across updates; system tree immutable | `/etc` persisted per-deployment; `/usr` read-only | `/etc` on overlay; snapshotted alongside transactions | Entire system state declared in config files | `/etc` managed through ABRoot transactions |
@@ -3267,7 +3313,7 @@ Every distribution below does something better than Shanios does today. If that 
 ## Where Shanios Differs
 
 - **Arch freshness as a base** — current kernels, drivers, and desktop stacks without manual maintenance; freshness arrives through full-image deploys, not incremental package churn on a live system.
-- **Multiple desktop editions from one pipeline** — GNOME and KDE Plasma ship through the same signed-image process today, with COSMIC built by the identical pipeline for its upcoming release, plus a headless Server profile. Most projects treat non-default desktops as secondary spins.
+- **Multiple desktop editions from one pipeline** — GNOME and KDE Plasma ship through the same signed-image process today, with COSMIC built by the identical pipeline and shipping today, plus a headless Server profile. Most projects treat non-default desktops as secondary spins.
 - **Security defaults out of the box** — six Linux Security Modules active simultaneously (AppArmor among them), LUKS2 argon2id full-disk encryption, TPM2 auto-unlock, Secure Boot with signed UKIs, and GPG+SHA256 verification of every image. Installed state, not post-install hardening.
 - **Automatic boot-failure fallback** — a slot that fails to boot hands control back to the previous one without user intervention.
 - **Zero telemetry** — no usage data, analytics, or crash reporting of any kind, ever. The codebase is public; every claim is verifiable.
@@ -3327,7 +3373,7 @@ A complete walkthrough: choose your edition, download and verify the ISO, instal
 
 **KDE Plasma Edition** (~7.6 GB) is the right choice for gamers and power users. The complete gaming stack (Steam, Proton, Heroic Games Launcher, Lutris, MangoHud) is pre-installed and configured. Fully customisable desktop. Full KDE productivity suite including Okular, Kate, and Gwenview. virt-manager for virtual machines.
 
-**COSMIC Edition** (announced, in development) brings System76's Rust-based COSMIC desktop — a tiling-first workflow with the COSMIC app suite — on the same immutable core. Watch [shani.dev](https://shani.dev) for its release.
+**COSMIC Edition** brings System76's Rust-based COSMIC desktop — a tiling-first workflow with the COSMIC app suite — on the same immutable core.
 
 If you are unsure, start with GNOME. You can always install KDE apps on GNOME or switch editions later.
 
@@ -3943,13 +3989,13 @@ This guide is for anyone leaving Windows or macOS for Shanios — whether you ar
 
 The single biggest difference: Shanios is immutable. The operating system is a verified, read-only image. Nothing you do day to day — installing apps, changing settings, clicking the wrong thing — can break it. Updates apply atomically and roll back with one command (`sudo shani-deploy -r`). If a truly fresh start is ever needed, `shani-reset` returns the system to factory state while leaving your personal files untouched.
 
-Everything below applies to every edition — **GNOME** and **KDE Plasma** today, with the announced **COSMIC** edition to follow. Where an app differs by edition (the file manager, mainly), the difference is noted.
+Everything below applies to every edition — **GNOME**, **KDE Plasma** and **COSMIC**. Where an app differs by edition (the file manager, mainly), the difference is noted.
 
 | Edition | File manager | Bundled apps | Pre-installed everywhere |
 |---|---|---|---|
 | GNOME | Files (Nautilus) | GNOME apps, Deja Dup | Vivaldi browser |
 | KDE Plasma | Dolphin | KDE apps | OnlyOffice |
-| COSMIC *(announced)* | COSMIC Files | COSMIC apps | Warehouse |
+| COSMIC | COSMIC Files | COSMIC apps | Warehouse |
 
 Pick an edition based on desktop taste — all include the same core: Vivaldi, OnlyOffice, Warehouse, IBus input, Nix (Mission Center ships on **COSMIC only**), and the `shani-deploy` update system.
 
@@ -4198,7 +4244,7 @@ Shanios is an immutable Linux distribution that brings enterprise DevOps practic
 
 # What is Shanios?
 
-Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs filesystem, it provides atomic updates, instant rollback, and system integrity by design. It ships in two desktop editions today — **GNOME** and **KDE Plasma** — with a third, **COSMIC**, announced and in development, a **Kiosk** profile for single-purpose deployments, plus a headless **Server** profile. It works out of the box with no post-install tweaking required.
+Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs filesystem, it provides atomic updates, instant rollback, and system integrity by design. It ships in three desktop editions today — **GNOME**, **KDE Plasma**, and **COSMIC** — plus a **Kiosk** profile for single-purpose deployments, plus a headless **Server** profile. It works out of the box with no post-install tweaking required.
 
 ## Core Pillars
 
@@ -4638,7 +4684,11 @@ arpwatch monitors Ethernet ARP traffic and maintains a database of IP-to-MAC add
 
 arpwatch monitors Ethernet ARP traffic and maintains a database of IP-to-MAC address mappings. It sends an email alert (via the local MTA) when a new device appears on the network, when a known device changes its MAC address, or when an IP address flips between two MAC addresses — all indicators of network changes that may warrant attention (new devices, DHCP lease changes, or potential ARP spoofing).
 
-arpwatch is pre-installed on Shani OS and `shani-tools-network` **enables `arpwatch@eth0.service` at install time** (it is in every profile's `Packages-Base`). Note the shipped template hardcodes interface `%i`, so on a machine whose primary NIC is `enp*`/`wlp*` rather than `eth0` that pre-enabled unit cannot bind — check `systemctl status arpwatch@eth0` before assuming it works.
+arpwatch is pre-installed on Shani OS (in every profile's `Packages-Base`), but **it is not enabled**: Arch ships only the `arpwatch@.service` template, so the interface is the instance name, and that is a property of the machine, not of the host the image was built on. Enable it for the interface you actually want to watch — usually the one carrying the default route:
+
+```bash
+sudo systemctl enable --now arpwatch@$(ip route show default | awk '{print $5}')
+```
 
 ---
 
@@ -11551,7 +11601,7 @@ nmcli general status
 # Overview
 
 URL: https://docs.shani.dev/doc/overview/
-Updated: 2026-08-28
+Updated: 2026-11-22
 
 Comprehensive guide to the immutable Linux OS with atomic updates. Welcome to the Shanios technical documentation. This wiki provides comprehensive informa…
 
@@ -11597,6 +11647,50 @@ Built in India 🇮🇳 by [Shrinivas Vishnu Kumbhar](https://github.com/Shriniv
 - [Security Features](security/features) — full security model
 - [Troubleshooting](troubleshooting) — common issues and solutions
 - [FAQ](faq) — frequently asked questions
+
+## The Shani Desktop
+
+**Shani Shell** is the ShaniOS desktop, built on [niri](https://github.com/YaLTeR/niri) and [Quickshell](https://quickshell.org). It ships its own apps — open any of them from the launcher or with `shani app <name>`. They tile and float like any other window, appear in Alt+Tab, and can be pinned to the dock.
+
+### Built-in apps
+
+Alongside everyday apps (Files, Text Editor, Calendar, Notes, Mail, Photos, Maps, Media Player and more), the shell includes:
+
+- **Contacts** — an address book whose vCard files are the same ones Shani Link reads on your phone; sync them with whatever you already use (vdirsyncer, Nextcloud, iCloud, Dropbox).
+- **Disks** — see every disk and its SMART health, and erase, format, encrypt, or write an install stick. Destructive actions ask twice and need administrator approval.
+- **Models** — download AI models that run on your machine (Ollama, llama.cpp), see what fits in your RAM, and connect cloud providers (OpenAI, Anthropic, Google Gemini, Groq, OpenRouter; Mistral via OpenRouter) with keys kept in Passwords and Keys.
+- **Studio** — describe an app and have Chronoa generate a QML app you can open, run, or delete.
+- **Terminal** — an SSH connection manager: saved hosts, keys, tunnels, snippets, and connection testing.
+- **Backup** — a timeline of snapshots to restore your home from, in whole or just the paths you pick.
+- **Mail** — an IMAP mail reader with folders, a message list, reading, and composing.
+- **Feeds** — an RSS/Atom reader with subscriptions, unread counts, and OPML import.
+- **Firewall** (in Settings) — firewalld zones, services, and ports, with rich rules for the zone you are using.
+
+### Things worth knowing you can do
+
+- **Notes** have checklists, attachments (an image on the clipboard becomes a file beside the note), and locked notes sealed with gpg. They live in `Documents/Notes` and can be mirrored to a mounted cloud folder (Nextcloud, Dropbox, a network drive).
+- **Calendar** has day and year views, time zones, invitations, and natural-language entry — type "lunch Friday at noon".
+- **Text Editor** has multiple cursors, column selection, snippets (type a trigger, press Tab), and TextMate grammars for syntax colouring.
+- **Document Viewer** annotates PDFs with seven tools — pen, highlight, line, arrow, box, blur, and text — and can merge, split, and export pages.
+- **Clipboard** has one-click transforms (plain text, UPPERCASE, lowercase, Title Case, trim) and optional encrypted history.
+- **Screenshots** can be pinned in a window above your work, captured as one tall scrolling image, and annotated natively.
+- **Global menu** — the focused app's menu bar appears in the top bar, macOS-style, read over D-Bus and AT-SPI.
+- **Windows** — hold the bar's maximize/zoom button for a layout palette, snap windows to screen edges, and see everything at once in the workspace map and ribbon. Hovering a dock tile or a file path shows a preview without opening it.
+- **Setup** — first-run setup offers to turn Chronoa on or leave it off.
+- **Privacy** — locked notes and clipboard history are encrypted at rest, and Passwords and Keys keeps passkey references (metadata, not the credentials themselves) alongside your GPG keys.
+
+### Recent refinements
+
+- **Text Editor** — undo/redo, bookmarks, regex search, go-to-line, session restore.
+- **Notes** — trash and restore, version history, formatting toolbar, tags, `@due()` dates.
+- **Calendar** — repeat rules, per-event alarms and time zones, a quick-add field, `.ics` import.
+- **Contacts** — repeatable phone/email rows, call/mail/map actions, QR sharing.
+- **Mail & Feeds** — Cc/Bcc, saved attachments, flags and message source; feed tags, search, saved articles and auto-discovery.
+- **Viewer** — PDF bookmarks, clickable links, attachments and an annotations list.
+- **Media & capture** — chapters, go-to-time and A→B loop; camera timer, shutter sound and format choice; recorder formats/export; trimmer segments; multiple saved weather locations.
+- **System** — SSH `-R`/`-D` tunnels, disk SMART self-tests and benchmark, per-process details and renice, ODRS ratings in Software, grouped notifications and a tray overflow drawer.
+
+See the [Shani Shell repository](https://github.com/shani8dev/shani-shell) for the full feature list.
 
 ## Current Release
 
@@ -60276,7 +60370,7 @@ getent group developers
 # Troubleshooting
 
 URL: https://docs.shani.dev/doc/troubleshooting/
-Updated: 2026-08-28
+Updated: 2026-11-22
 
 The most important thing to know about troubleshooting Shanios is that the worst case is almost always "rollback and reboot." The architecture is built to …
 
@@ -60480,6 +60574,25 @@ sudo gen-efi configure green   # or blue
 
 ## Application Problems
 
+### A shell app says a tool is missing
+
+The shell's own apps use a few command-line tools behind the scenes. If one
+is absent, the app says which one. Install it with `pacman`; most are optional
+dependencies of `shani-shell`.
+
+| App / feature | Tool it needs | Symptom when missing |
+|---|---|---|
+| Disks — SMART health and self-tests | `smartmontools` (`smartctl`) | "smartctl is not installed" |
+| Terminal — serial-port connections | `picocom` | "picocom is not installed" |
+| Translate — local translation | `llama-server` on `127.0.0.1:8765` | "The local model is not running" |
+| Global menu in the bar | `at-spi2-core` | "AT-SPI is not installed" |
+| Notes — sync to a cloud folder | `rclone` | "rclone is not installed" |
+| Weather / Night Light — automatic location | GeoClue2 (or `gpsd` with a GPS fix) | "Location unavailable" |
+| Scrolling screenshot, Lens OCR | `grim`, `slop`, `ydotool`, `tesseract`, `zbar` | names the missing tool in a notification |
+
+`shani app doctor` (`bin/shani-doctor.py`) checks the core shell tools; run it
+first if several apps misbehave at once.
+
 ### Can't Install a Package with `pacman`
 
 This is by design — the OS root is read-only. Use the appropriate layer:
@@ -60540,6 +60653,49 @@ flatpak mask --remove com.example.App
 flatpak override --user --device=all com.example.App
 # Or use Flatseal (pre-installed) for graphical permission management
 ```
+
+### Locked Notes Won't Unlock
+
+Locked notes are real gpg ciphertext, not just hidden text. Unlocking needs the `gpg` command and the note's passphrase; the plaintext exists only in memory while the note is open.
+
+If you see **"Locked notes need gpg, which is not installed"**, `gpg` is missing from this environment (for example on a minimal or repaired image). Install `gnupg` through the normal layer for CLI tools, then reopen the note:
+
+```bash
+nix-env -iA nixpkgs.gnupg
+# or install gnupg inside a Distrobox
+```
+
+There is no recovery without the passphrase — a lost passphrase means a lost note, by design.
+
+### Global Menu Missing or Empty for an App
+
+The menu bar at the top of the screen is read from the focused window over AT-SPI, plus D-Bus menus where the app publishes them. What you see depends on the app:
+
+- **GTK 3, Qt, and XWayland** apps usually expose their menu bar.
+- **GTK 4** apps often expose an empty menu until a menu is opened; some (Firefox among them) need the appmenu protocol that niri does not yet support.
+- When an app exposes no menu at all, the shell falls back to its desktop actions (for example *New Window*).
+
+This is a limit of what the app publishes to the desktop, not a fault in the shell — on Wayland, an app that publishes nothing has no global menu. The window menu (right-click a title bar / the window button in the bar) still works.
+
+### PDF Annotation or Conversion Fails
+
+Native PDF annotation needs **PyMuPDF**, or failing that **Ghostscript** (`gs`) plus poppler's `pdfseparate` and `pdfunite`. If neither is available, saving an annotation reports:
+
+```
+needs PyMuPDF or Ghostscript + poppler (pdfseparate, pdfunite)
+```
+
+Install one of those sets (Nix or Distrobox) and try again. Other document formats have their own converters: DjVu needs `ddjvu`, PostScript/EPS needs Ghostscript, and non-PDF formats are converted through PyMuPDF.
+
+### Notes Sync Has No Cloud Folder to Use
+
+Notes sync mirrors `Documents/Notes` to a folder you choose in the Notes sidebar. The folder must **already be mounted locally** — a Nextcloud or Dropbox client's folder, an `rclone` mount, or a network share. If nothing usable appears in the picker, mount the cloud storage first, then choose it.
+
+Sync copies **one way**, from `Documents/Notes` to the chosen cloud folder, and deletes nothing on either side. It does not encrypt the notes for you — lock individual notes with gpg if you want the files in the cloud folder encrypted.
+
+### Scrolling Screenshot Capture Fails
+
+Scrolling capture stitches several screenshots into one tall image and needs `grim`, `slop`, `ydotool`, and Pillow (`PIL`). If those are missing, the capture fails with a notification naming them. Install them (Nix or Distrobox) and retry.
 
 ---
 

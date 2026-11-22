@@ -28,7 +28,7 @@
   <meta name="twitter:description" id="tw-desc"  content="The most important thing to know about troubleshooting Shanios is that the worst case is almost always &quot;rollback and reboot.&quot; The architecture is built to …">
   <meta name="twitter:image"       id="tw-image" content="https://shani.dev/assets/images/gnome-screenshot.jpg">
 
-  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Troubleshooting","description":"The most important thing to know about troubleshooting Shanios is that the worst case is almost always \"rollback and reboot.\" The architecture is built to …","url":"https://docs.shani.dev/doc/troubleshooting/","datePublished":"2026-08-28T00:00:00.000Z","dateModified":"2026-08-28T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
+  <script type="application/ld+json" id="ld-doc">{"@context":"https://schema.org","@type":"TechArticle","headline":"Troubleshooting","description":"The most important thing to know about troubleshooting Shanios is that the worst case is almost always \"rollback and reboot.\" The architecture is built to …","url":"https://docs.shani.dev/doc/troubleshooting/","datePublished":"2026-11-22T00:00:00.000Z","dateModified":"2026-11-22T00:00:00.000Z","author":{"@type":"Person","name":"Shrinivas Kumbhar"},"publisher":{"@type":"Organization","name":"Shanios Docs","logo":{"@type":"ImageObject","url":"https://shani.dev/assets/images/logo.svg"}},"image":"https://shani.dev/assets/images/gnome-screenshot.jpg","isPartOf":{"@type":"WebSite","name":"Shanios Docs","url":"https://docs.shani.dev"}}</script>
   <script type="application/ld+json" id="ld-breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Shanios Docs","item":"https://docs.shani.dev/"},{"@type":"ListItem","position":2,"name":"Troubleshooting","item":"https://docs.shani.dev/doc/troubleshooting/"}]}</script>
 
   <link rel="alternate" type="application/rss+xml" title="Shanios Docs Feed" href="/feed.xml">
@@ -227,7 +227,7 @@
         <h1 class="doc-title">Troubleshooting</h1>
         <div class="doc-meta">
           <span class="doc-meta__badge">Troubleshooting</span>
-          <span><i class="fa-regular fa-clock"></i> 2026-08-28</span>
+          <span><i class="fa-regular fa-clock"></i> 2026-11-22</span>
         </div>
       </div>
       <div class="prose"><p>The most important thing to know about troubleshooting Shanios is that the worst case is almost always <strong>"rollback and reboot."</strong> The architecture is built to make recovery fast, reliable, and non-destructive.</p>
@@ -347,6 +347,10 @@ ls /boot/efi/EFI/shanios/
 sudo gen-efi configure green   # or blue</code></pre>
 <hr>
 <h2 id="application-problems">Application Problems</h2>
+<h3 id="a-shell-app-says-a-tool-is-missing">A shell app says a tool is missing</h3>
+<p>The shell's own apps use a few command-line tools behind the scenes. If one is absent, the app says which one. Install it with <code>pacman</code>; most are optional dependencies of <code>shani-shell</code>.</p>
+<table><thead><tr><th>App / feature</th><th>Tool it needs</th><th>Symptom when missing</th></tr></thead><tbody><tr><td>Disks — SMART health and self-tests</td><td><code>smartmontools</code> (<code>smartctl</code>)</td><td>"smartctl is not installed"</td></tr><tr><td>Terminal — serial-port connections</td><td><code>picocom</code></td><td>"picocom is not installed"</td></tr><tr><td>Translate — local translation</td><td><code>llama-server</code> on <code>127.0.0.1:8765</code></td><td>"The local model is not running"</td></tr><tr><td>Global menu in the bar</td><td><code>at-spi2-core</code></td><td>"AT-SPI is not installed"</td></tr><tr><td>Notes — sync to a cloud folder</td><td><code>rclone</code></td><td>"rclone is not installed"</td></tr><tr><td>Weather / Night Light — automatic location</td><td>GeoClue2 (or <code>gpsd</code> with a GPS fix)</td><td>"Location unavailable"</td></tr><tr><td>Scrolling screenshot, Lens OCR</td><td><code>grim</code>, <code>slop</code>, <code>ydotool</code>, <code>tesseract</code>, <code>zbar</code></td><td>names the missing tool in a notification</td></tr></tbody></table>
+<p><code>shani app doctor</code> (<code>bin/shani-doctor.py</code>) checks the core shell tools; run it first if several apps misbehave at once.</p>
 <h3 id="cant-install-a-package-with-pacman">Can't Install a Package with <code>pacman</code></h3>
 <p>This is by design — the OS root is read-only. Use the appropriate layer:</p>
 <pre><code class="language-bash"># GUI apps → Flatpak
@@ -386,6 +390,29 @@ flatpak mask --remove com.example.App</code></pre>
 <pre><code class="language-bash"># Grant microphone permission
 flatpak override --user --device=all com.example.App
 # Or use Flatseal (pre-installed) for graphical permission management</code></pre>
+<h3 id="locked-notes-wont-unlock">Locked Notes Won't Unlock</h3>
+<p>Locked notes are real gpg ciphertext, not just hidden text. Unlocking needs the <code>gpg</code> command and the note's passphrase; the plaintext exists only in memory while the note is open.</p>
+<p>If you see <strong>"Locked notes need gpg, which is not installed"</strong>, <code>gpg</code> is missing from this environment (for example on a minimal or repaired image). Install <code>gnupg</code> through the normal layer for CLI tools, then reopen the note:</p>
+<pre><code class="language-bash">nix-env -iA nixpkgs.gnupg
+# or install gnupg inside a Distrobox</code></pre>
+<p>There is no recovery without the passphrase — a lost passphrase means a lost note, by design.</p>
+<h3 id="global-menu-missing-or-empty-for-an-app">Global Menu Missing or Empty for an App</h3>
+<p>The menu bar at the top of the screen is read from the focused window over AT-SPI, plus D-Bus menus where the app publishes them. What you see depends on the app:</p>
+<ul>
+<li><strong>GTK 3, Qt, and XWayland</strong> apps usually expose their menu bar.</li>
+<li><strong>GTK 4</strong> apps often expose an empty menu until a menu is opened; some (Firefox among them) need the appmenu protocol that niri does not yet support.</li>
+<li>When an app exposes no menu at all, the shell falls back to its desktop actions (for example <em>New Window</em>).</li>
+</ul>
+<p>This is a limit of what the app publishes to the desktop, not a fault in the shell — on Wayland, an app that publishes nothing has no global menu. The window menu (right-click a title bar / the window button in the bar) still works.</p>
+<h3 id="pdf-annotation-or-conversion-fails">PDF Annotation or Conversion Fails</h3>
+<p>Native PDF annotation needs <strong>PyMuPDF</strong>, or failing that <strong>Ghostscript</strong> (<code>gs</code>) plus poppler's <code>pdfseparate</code> and <code>pdfunite</code>. If neither is available, saving an annotation reports:</p>
+<pre><code>needs PyMuPDF or Ghostscript + poppler (pdfseparate, pdfunite)</code></pre>
+<p>Install one of those sets (Nix or Distrobox) and try again. Other document formats have their own converters: DjVu needs <code>ddjvu</code>, PostScript/EPS needs Ghostscript, and non-PDF formats are converted through PyMuPDF.</p>
+<h3 id="notes-sync-has-no-cloud-folder-to-use">Notes Sync Has No Cloud Folder to Use</h3>
+<p>Notes sync mirrors <code>Documents/Notes</code> to a folder you choose in the Notes sidebar. The folder must <strong>already be mounted locally</strong> — a Nextcloud or Dropbox client's folder, an <code>rclone</code> mount, or a network share. If nothing usable appears in the picker, mount the cloud storage first, then choose it.</p>
+<p>Sync copies <strong>one way</strong>, from <code>Documents/Notes</code> to the chosen cloud folder, and deletes nothing on either side. It does not encrypt the notes for you — lock individual notes with gpg if you want the files in the cloud folder encrypted.</p>
+<h3 id="scrolling-screenshot-capture-fails">Scrolling Screenshot Capture Fails</h3>
+<p>Scrolling capture stitches several screenshots into one tall image and needs <code>grim</code>, <code>slop</code>, <code>ydotool</code>, and Pillow (<code>PIL</code>). If those are missing, the capture fails with a notification naming them. Install them (Nix or Distrobox) and retry.</p>
 <hr>
 <h2 id="audio-problems">Audio Problems</h2>
 <p>See <a href="/doc/system/audio/">Audio (PipeWire)</a> for a full guide to the audio stack — the essentials for common failures are below.</p>

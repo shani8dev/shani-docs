@@ -6,7 +6,7 @@ updated: 2026-08-28
 
 # What is Shanios?
 
-Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs filesystem, it provides atomic updates, instant rollback, and system integrity by design. It ships in two desktop editions today — **GNOME** and **KDE Plasma** — with a third, **COSMIC**, announced and in development, a **Kiosk** profile for single-purpose deployments, plus a headless **Server** profile. It works out of the box with no post-install tweaking required.
+Shanios is an immutable Linux distribution that brings enterprise DevOps practices to desktop computing. Built on Arch Linux with Btrfs filesystem, it provides atomic updates, instant rollback, and system integrity by design. It ships in three desktop editions today — **GNOME**, **KDE Plasma**, and **COSMIC** — plus a **Kiosk** profile for single-purpose deployments, plus a headless **Server** profile. It works out of the box with no post-install tweaking required.
 
 ## Core Pillars
 
