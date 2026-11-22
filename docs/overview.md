@@ -1,7 +1,7 @@
 ---
 title: Overview
 section: Overview
-updated: 2026-08-28
+updated: 2026-11-22
 ---
 
 # Shanios Technical Documentation
@@ -46,6 +46,39 @@ Built in India 🇮🇳 by [Shrinivas Vishnu Kumbhar](https://github.com/Shriniv
 - [Security Features](security/features) — full security model
 - [Troubleshooting](troubleshooting) — common issues and solutions
 - [FAQ](faq) — frequently asked questions
+
+## The Shani Desktop
+
+**Shani Shell** is the ShaniOS desktop, built on [niri](https://github.com/YaLTeR/niri) and [Quickshell](https://quickshell.org). It ships its own apps — open any of them from the launcher or with `shani app <name>`. They tile and float like any other window, appear in Alt+Tab, and can be pinned to the dock.
+
+### Built-in apps
+
+Alongside everyday apps (Files, Text Editor, Calendar, Notes, Mail, Photos, Maps, Media Player and more), the shell includes:
+
+- **Contacts** — an address book whose vCard files are the same ones Shani Link reads on your phone; sync them with whatever you already use (vdirsyncer, Nextcloud, iCloud, Dropbox).
+- **Disks** — see every disk and its SMART health, and erase, format, encrypt, or write an install stick. Destructive actions ask twice and need administrator approval.
+- **Models** — download AI models that run on your machine (Ollama, llama.cpp), see what fits in your RAM, and connect cloud providers (OpenAI, Anthropic, Mistral) with keys kept in Passwords and Keys.
+- **Studio** — describe an app and have Chronoa generate a QML app you can open, run, or delete.
+- **Terminal** — an SSH connection manager: saved hosts, keys, tunnels, snippets, and connection testing.
+- **Backup** — a timeline of snapshots to restore your home from, in whole or just the paths you pick.
+- **Mail** — an IMAP mail reader with folders, a message list, reading, and composing.
+- **Feeds** — an RSS/Atom reader with subscriptions, unread counts, and OPML import.
+- **Firewall** (in Settings) — firewalld zones, services, and ports, with rich rules for the zone you are using.
+
+### Things worth knowing you can do
+
+- **Notes** have checklists, attachments (an image on the clipboard becomes a file beside the note), and locked notes sealed with gpg. They live in `Documents/Notes` and can be mirrored to a mounted cloud folder (Nextcloud, Dropbox, a network drive).
+- **Calendar** has day and year views, time zones, invitations, and natural-language entry — type "lunch Friday at noon".
+- **Text Editor** has multiple cursors, column selection, snippets (type a trigger, press Tab), and TextMate grammars for syntax colouring.
+- **Document Viewer** annotates PDFs with seven tools — pen, highlight, line, arrow, box, blur, and text — and can merge, split, and export pages.
+- **Clipboard** has one-click transforms (plain text, UPPERCASE, lowercase, Title Case, trim) and optional encrypted history.
+- **Screenshots** can be pinned in a window above your work, captured as one tall scrolling image, and annotated natively.
+- **Global menu** — the focused app's menu bar appears in the top bar, macOS-style, read over D-Bus and AT-SPI.
+- **Windows** — hold the bar's maximize/zoom button for a layout palette, snap windows to screen edges, and see everything at once in the workspace map and ribbon. Hovering a dock tile or a file path shows a preview without opening it.
+- **Setup** — first-run setup offers to turn Chronoa on or leave it off.
+- **Privacy** — locked notes and clipboard history are encrypted at rest, and Passwords and Keys keeps passkey references (metadata, not the credentials themselves) alongside your GPG keys.
+
+See the [Shani Shell repository](https://github.com/shani8dev/shani-shell) for the full feature list.
 
 ## Current Release
 

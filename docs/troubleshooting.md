@@ -1,7 +1,7 @@
 ---
 title: Troubleshooting
 section: Troubleshooting
-updated: 2026-08-28
+updated: 2026-11-22
 ---
 
 # Troubleshooting Guide
@@ -264,6 +264,49 @@ flatpak mask --remove com.example.App
 flatpak override --user --device=all com.example.App
 # Or use Flatseal (pre-installed) for graphical permission management
 ```
+
+### Locked Notes Won't Unlock
+
+Locked notes are real gpg ciphertext, not just hidden text. Unlocking needs the `gpg` command and the note's passphrase; the plaintext exists only in memory while the note is open.
+
+If you see **"Locked notes need gpg, which is not installed"**, `gpg` is missing from this environment (for example on a minimal or repaired image). Install `gnupg` through the normal layer for CLI tools, then reopen the note:
+
+```bash
+nix-env -iA nixpkgs.gnupg
+# or install gnupg inside a Distrobox
+```
+
+There is no recovery without the passphrase — a lost passphrase means a lost note, by design.
+
+### Global Menu Missing or Empty for an App
+
+The menu bar at the top of the screen is read from the focused window over AT-SPI, plus D-Bus menus where the app publishes them. What you see depends on the app:
+
+- **GTK 3, Qt, and XWayland** apps usually expose their menu bar.
+- **GTK 4** apps often expose an empty menu until a menu is opened; some (Firefox among them) need the appmenu protocol that niri does not yet support.
+- When an app exposes no menu at all, the shell falls back to its desktop actions (for example *New Window*).
+
+This is a limit of what the app publishes to the desktop, not a fault in the shell — on Wayland, an app that publishes nothing has no global menu. The window menu (right-click a title bar / the window button in the bar) still works.
+
+### PDF Annotation or Conversion Fails
+
+Native PDF annotation needs **PyMuPDF**, or failing that **Ghostscript** (`gs`) plus poppler's `pdfseparate` and `pdfunite`. If neither is available, saving an annotation reports:
+
+```
+needs PyMuPDF or Ghostscript + poppler (pdfseparate, pdfunite)
+```
+
+Install one of those sets (Nix or Distrobox) and try again. Other document formats have their own converters: DjVu needs `ddjvu`, PostScript/EPS needs Ghostscript, and non-PDF formats are converted through PyMuPDF.
+
+### Notes Sync Has No Cloud Folder to Use
+
+Notes sync mirrors `Documents/Notes` to a folder you choose in the Notes sidebar. The folder must **already be mounted locally** — a Nextcloud or Dropbox client's folder, an `rclone` mount, or a network share. If nothing usable appears in the picker, mount the cloud storage first, then choose it.
+
+Sync copies in both directions and deletes nothing from either side. It does not encrypt the notes for you — lock individual notes with gpg if you want the files in the cloud folder encrypted.
+
+### Scrolling Screenshot Capture Fails
+
+Scrolling capture stitches several screenshots into one tall image and needs `grim`, `slop`, `ydotool`, and Pillow (`PIL`). If those are missing, the capture fails with a notification naming them. Install them (Nix or Distrobox) and retry.
 
 ---
 

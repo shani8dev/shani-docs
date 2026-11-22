@@ -1,7 +1,7 @@
 ---
 title: FAQ
 section: FAQ
-updated: 2026-08-28
+updated: 2026-11-22
 ---
 
 # Frequently Asked Questions
@@ -107,6 +107,52 @@ Yes. Bottles (pre-installed on KDE Plasma; available on Flathub for GNOME) provi
 **What about Android apps?**
 
 Waydroid runs a full hardware-accelerated Android 11 stack, pre-installed on every edition. Set up with `sudo waydroid-helper init`. See the [Android (Waydroid)](software/waydroid) guide.
+
+---
+
+## Desktop & Apps
+
+**What apps does Shani Shell include?**
+
+A full set of its own: Files, Text Editor, Document Viewer, Image Viewer, Calendar, Tasks, Notes, Contacts, Mail, Feeds, Maps, Photos, Media Player, Camera, Voice Recorder, Translator, Disks, Terminal, Backup, Models, Studio, Settings, and more. Open them from the launcher or with `shani app <name>`. They tile and float like any other window and can be pinned to the dock.
+
+**What do the newer apps do?**
+
+- **Disks** shows every disk and its SMART health, and lets you erase, format, encrypt, or write an install stick (with confirmation and administrator approval).
+- **Terminal** is an SSH connection manager — saved hosts, keys, tunnels, snippets, and connection testing.
+- **Backup** shows a timeline of snapshots so you can restore your whole home or just selected paths.
+- **Models** downloads AI models that run locally and connects cloud providers (keys stay in Passwords and Keys).
+- **Studio** generates a small QML app from a description using Chronoa.
+- **Mail** is an IMAP reader; **Feeds** is an RSS/Atom reader; **Contacts** shares its vCard files with Shani Link on your phone.
+- **Firewall** lives in Settings — firewalld zones, services, ports, and rich rules.
+
+**Are locked notes and clipboard history really encrypted?**
+
+Yes. A locked note is stored on disk as gpg ciphertext; only the decrypted text appears in the app. Clipboard history can optionally be encrypted at rest too. Both need `gpg` installed — see [Troubleshooting](troubleshooting).
+
+**Can I sync my notes to the cloud?**
+
+Yes. Notes live in `Documents/Notes`. In the Notes sidebar you can choose a mounted cloud folder (Nextcloud, Dropbox, a network drive) to mirror them to; nothing is deleted from either side.
+
+**Can I annotate PDFs or change them?**
+
+Yes. The Document Viewer has seven native annotation tools (pen, highlight, line, arrow, box, blur, text), saves the marked-up copy beside the original, and can merge, split, and export PDF pages.
+
+**Can I enter calendar events in plain English?**
+
+Yes. Type something like "lunch Friday at noon" into the new-event title and the Calendar parses the date and time. It also has day and year views, per-event time zones, and invitations (including `.ics` files and email).
+
+**Does the desktop have a macOS-style menu bar?**
+
+Yes — the focused app's menus appear at the top of the screen, read over D-Bus and AT-SPI. Availability depends on the app and the session (see [Troubleshooting](troubleshooting)).
+
+**How do I arrange windows and see all my workspaces?**
+
+Hold the maximize/zoom button in the bar for a window-layout palette; windows also snap to screen edges. The bar has a proportional workspace map and ribbon so you can see and jump between everything. Hovering a dock tile or a file path previews it without opening anything.
+
+**Can I get an old version of a file back?**
+
+Yes. **Backup** shows a timeline of your snapshots and can restore your whole home or selected paths. Note that a restore overwrites files that have changed since the snapshot.
 
 ---
 
