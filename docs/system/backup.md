@@ -92,6 +92,10 @@ cp /data/snapshots/home/home-20260427-1430/Documents/important.pdf ~/Documents/
 
 **Restoring the entire home directory** (boot from the other slot or a live USB):
 
+> ⚠️ **This deletes every file currently in your home directory.** Before you
+> start, copy anything you still need somewhere else. This cannot be undone.
+> Restoring an individual file (above) is safer and is usually what you want.
+
 ```bash
 sudo btrfs subvolume delete /home
 sudo btrfs subvolume snapshot /data/snapshots/home/home-20260427-1430 /home

@@ -270,6 +270,7 @@ sudo btrfs subvolume snapshot /home /data/snapshots/home/home-writable-$(date +%
 <p><strong>Restoring a specific file:</strong></p>
 <pre><code class="language-bash">cp /data/snapshots/home/home-20260427-1430/Documents/important.pdf ~/Documents/</code></pre>
 <p><strong>Restoring the entire home directory</strong> (boot from the other slot or a live USB):</p>
+<blockquote>⚠️ <strong>This deletes every file currently in your home directory.</strong> Before you start, copy anything you still need somewhere else. This cannot be undone. Restoring an individual file (above) is safer and is usually what you want.</blockquote>
 <pre><code class="language-bash">sudo btrfs subvolume delete /home
 sudo btrfs subvolume snapshot /data/snapshots/home/home-20260427-1430 /home</code></pre>
 <h3 id="deleting-old-snapshots">Deleting Old Snapshots</h3>

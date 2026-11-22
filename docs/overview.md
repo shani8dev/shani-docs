@@ -117,6 +117,17 @@ All images are SHA256 checksummed and GPG-signed. Verify downloads using the sig
 | [shani-wiki](https://github.com/shani8dev/shani-wiki) | Technical wiki |
 | [shani-blog](https://github.com/shani8dev/shani-blog) | Engineering blog |
 
+## Common tasks
+
+New here? Start with these:
+
+- **[Install an app](software/flatpak)** — open the **Software** app and search; that is the normal way. The terminal commands on that page are optional.
+- **[Print a document](system/printing)** — Settings → Printers → Add Printer.
+- **[Back up your files](system/backup)** — set up a backup drive in the Backup app.
+- **[Share files with other computers](networking/samba)** or **[connect to Wi-Fi](networking/wireless)**.
+- **[Set up email](servers/mail)** — the Mail app talks to your provider; **[send and receive texts](networking/kdeconnect)** with Shani Link.
+- **[Something went wrong](troubleshooting)** — start with the golden rule at the top of that page.
+
 ## How to Use This Wiki
 
 | Section | What you'll find |
