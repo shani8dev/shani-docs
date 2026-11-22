@@ -57,7 +57,7 @@ Alongside everyday apps (Files, Text Editor, Calendar, Notes, Mail, Photos, Maps
 
 - **Contacts** — an address book whose vCard files are the same ones Shani Link reads on your phone; sync them with whatever you already use (vdirsyncer, Nextcloud, iCloud, Dropbox).
 - **Disks** — see every disk and its SMART health, and erase, format, encrypt, or write an install stick. Destructive actions ask twice and need administrator approval.
-- **Models** — download AI models that run on your machine (Ollama, llama.cpp), see what fits in your RAM, and connect cloud providers (OpenAI, Anthropic, Mistral) with keys kept in Passwords and Keys.
+- **Models** — download AI models that run on your machine (Ollama, llama.cpp), see what fits in your RAM, and connect cloud providers (OpenAI, Anthropic, Google Gemini, Groq, OpenRouter; Mistral via OpenRouter) with keys kept in Passwords and Keys.
 - **Studio** — describe an app and have Chronoa generate a QML app you can open, run, or delete.
 - **Terminal** — an SSH connection manager: saved hosts, keys, tunnels, snippets, and connection testing.
 - **Backup** — a timeline of snapshots to restore your home from, in whole or just the paths you pick.

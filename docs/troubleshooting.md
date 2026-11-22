@@ -302,7 +302,7 @@ Install one of those sets (Nix or Distrobox) and try again. Other document forma
 
 Notes sync mirrors `Documents/Notes` to a folder you choose in the Notes sidebar. The folder must **already be mounted locally** — a Nextcloud or Dropbox client's folder, an `rclone` mount, or a network share. If nothing usable appears in the picker, mount the cloud storage first, then choose it.
 
-Sync copies in both directions and deletes nothing from either side. It does not encrypt the notes for you — lock individual notes with gpg if you want the files in the cloud folder encrypted.
+Sync copies **one way**, from `Documents/Notes` to the chosen cloud folder, and deletes nothing on either side. It does not encrypt the notes for you — lock individual notes with gpg if you want the files in the cloud folder encrypted.
 
 ### Scrolling Screenshot Capture Fails
 

@@ -22,7 +22,6 @@ renders them as HTML. The trust model is simple:
 
 ## Known Limitations
 
-- **`new Function()` parsing.** `script-docs.js:2073` uses `new Function()` to parse `nav-docs.js` as code. A tampered nav file would execute as RCE in the user's browser. Use `JSON.parse` instead.
 - **No server-side input validation.** All content is trusted at render time. A compromised build/generation step that injects malicious Markdown would execute in every visitor's browser.
 
 ## Reporting a Vulnerability

@@ -26,7 +26,7 @@ No. Shanios boots signed UKIs, so Secure Boot stays enabled — the installer me
 
 **Which desktop editions are available?**
 
-Two desktop editions ship today: **GNOME** and **KDE Plasma** — plus a **Kiosk** profile for single-purpose deployments and a headless **Server** profile for cloud/server deployments. A third edition, **COSMIC**, is announced and in development (built as a cloud image rather than desktop install media). GNOME suits most users; KDE Plasma targets gamers and power users with the full gaming stack pre-installed; COSMIC offers System76's Rust-based desktop experience.
+Three desktop editions ship today: **GNOME**, **KDE Plasma**, and **COSMIC** — plus a **Kiosk** profile for single-purpose deployments and a headless **Server** profile for cloud/server deployments. The **niri** profile is the Shani Shell desktop. GNOME suits most users; KDE Plasma targets gamers and power users with the full gaming stack pre-installed; COSMIC offers System76's Rust-based desktop experience.
 
 **Can I dual boot with Windows?**
 

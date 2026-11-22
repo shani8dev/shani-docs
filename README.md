@@ -50,11 +50,11 @@ No build tooling beyond Node.js is required. `--watch` mode re-runs the generato
 ## Conventions
 
 - Every page ends with a `## See Also` section linking related docs and blog posts
-- Internal links are relative (`../networking/wireguard`); external cross-site links use full URLs (`https://shani.dev/post/...`)
+- Internal links are relative (`../networking/wireguard`); external cross-site links use full URLs (`https://blog.shani.dev/post/...`)
 - Code blocks always declare a language tag
 - Factual claims about packages/flags should match ground truth in [shani-install-media](https://github.com/shani8dev/shani-install-media) (package lists, script `--help` output)
 
-## Audit-verified notes (2026-08-28)
+## Audit-verified notes
 
 - **Security — FIXED.** `new Function()` parsing of `nav-docs.js` in the
   browser (`script-docs.js`) was replaced with `JSON.parse`. The generator
