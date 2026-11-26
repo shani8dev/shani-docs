@@ -761,6 +761,6 @@ Implementation priorities are per `../IMPLEMENTATION-ROADMAP.md` (master roadmap
 
 One implementation per capability, logic out of UI code, every UI and the
 assistant built on the same services: the plan is `../shani-shell/docs/SHARED-ARCHITECTURE.md`, and this
-repo's part is `docs/SHARED-PLAN.md`. Read both before changing a backend, a
+repo's part is `SHARED-PLAN.md` (kept out of `docs/`, which the site publishes). Read both before changing a backend, a
 CLI, a device engine or a settings page, and do as much of this repo's part
 as your task allows.
