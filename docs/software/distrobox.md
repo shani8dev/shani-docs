@@ -8,7 +8,7 @@ updated: 2026-08-28
 
 Distrobox is the recommended way to run software that requires traditional package managers on Shanios. It creates a full mutable Linux container (Ubuntu, Fedora, Arch, etc.) with seamless desktop integration — your home directory, display, audio, GPU, and USB devices are all available inside. Container data lives in the `@containers` Btrfs subvolume and survives every OS update and rollback untouched.
 
-**BoxBuddy** (pre-installed on both GNOME and KDE editions) provides a graphical interface for creating and managing Distrobox containers without the terminal — open it from your application launcher.
+**BoxBuddy** (pre-installed on the GNOME, KDE Plasma and COSMIC editions) provides a graphical interface for creating and managing Distrobox containers without the terminal — open it from your application launcher. On the niri edition the shell's **Containers** app creates, opens, upgrades and removes toolboxes and puts their apps in your launcher.
 
 ## Creating a Container
 

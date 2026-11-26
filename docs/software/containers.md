@@ -36,7 +36,7 @@ All subvolumes survive every OS update and atomic rollback untouched.
 
 Podman is the default daemonless, rootless container runtime. Its CLI is identical to Docker's. `podman.socket` is socket-activated at boot. The `podman-docker` drop-in is pre-installed — existing `docker` commands work without modification.
 
-**Pods** (pre-installed on every edition) provides a graphical interface for managing containers, images, volumes, and networks.
+**Pods** (pre-installed on the GNOME, KDE Plasma and COSMIC editions) provides a graphical interface for managing containers, images, volumes, and networks. On the niri edition the shell's own **Containers** app does this job, alongside your Distrobox toolboxes.
 
 ### Basic Commands
 
