@@ -756,3 +756,11 @@ Implementation priorities are per `../IMPLEMENTATION-ROADMAP.md` (master roadmap
 5. **CI content validation (P1) — partially done 2026-09-26.** The broken-internal-link check (including in-page `#fragment` anchors) and the existing unit tests now run in CI via the `validate` job. Still open: HTML validation of generated stubs, and a duplicate-title check.
 
 6. **Conventional commits + `renovate.json` (P1).** Ecosystem-wide commit convention (item #9) and Renovate (item #8) — `generate-manifest.js` is the only Node dependency, so Renovate scope is small but real.
+
+## Shared architecture (all repos)
+
+One implementation per capability, logic out of UI code, every UI and the
+assistant built on the same services: the plan is `../shani-shell/docs/SHARED-ARCHITECTURE.md`, and this
+repo's part is `docs/SHARED-PLAN.md`. Read both before changing a backend, a
+CLI, a device engine or a settings page, and do as much of this repo's part
+as your task allows.
